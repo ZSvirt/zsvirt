@@ -203,7 +203,7 @@ public interface KVMConstant {
     String KVM_HOST_SKIP_PING_NO_FAILURE_EXTENSIONS = "kvm.host.skip.ping.no.failure.extensions";
 
     String MEMORY_LOCATOR_NAME = "locator";
-    String PHSICAL_DEVICE_STATUS_NAME = "status";
+    String PHYSICAL_DEVICE_STATUS_NAME = "status";
     String PHYSICAL_DEVICE_STATE_NAME = "state";
     String PHYSICAL_DEVICE_DISK_UUIDS = "diskUuids";
     String CPU_NAME = "cpuName";

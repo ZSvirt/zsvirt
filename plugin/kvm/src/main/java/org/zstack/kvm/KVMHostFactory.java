@@ -377,7 +377,7 @@ public class KVMHostFactory extends AbstractService implements HypervisorFactory
         HostCanonicalEvents.HostPhysicalGpuStatusAbnormalData cdata = new HostCanonicalEvents.HostPhysicalGpuStatusAbnormalData();
         cdata.setHostUuid(cmd.getHost());
         cdata.setPcideviceAddress(cmd.getAdditionalProperties().get(KVMConstant.PCI_DEVICE_ADDRESS).toString());
-        cdata.setStatus(cmd.getAdditionalProperties().get(KVMConstant.PHSICAL_DEVICE_STATUS_NAME).toString());
+        cdata.setStatus(cmd.getAdditionalProperties().get(KVMConstant.PHYSICAL_DEVICE_STATUS_NAME).toString());
         evf.fire(HostCanonicalEvents.HOST_PHYSICAL_GPU_STATUS_ABNORMAL, cdata);
     }
 

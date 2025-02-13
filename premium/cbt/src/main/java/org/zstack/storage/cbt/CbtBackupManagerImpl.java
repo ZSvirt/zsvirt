@@ -115,6 +115,8 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
             handle((EnableCbtTaskOnHostMsg) msg);
         } else if (msg instanceof DeleteCbtTaskMsg) {
             handle((DeleteCbtTaskMsg) msg);
+        } else if (msg instanceof UnexportNbdVolumesMsg) {
+            handle((UnexportNbdVolumesMsg) msg);
         } else {
             bus.dealWithUnknownMessage(msg);
         }
@@ -195,34 +197,18 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
                     return;
                 }
 
-                String hostUuid = getVmHostUuid(msg.getVmInstanceUuid());
-                if (hostUuid == null) {
-                    evt.setError(operr("host not found for VM: %s", msg.getVmInstanceUuid()));
-                    bus.publish(evt);
-                    chain.next();
-                    return;
-                }
-
-                runInCbtHostOperationQueue(hostUuid, msg, String.format("unexport-nbd-volumes-on-host-%s", hostUuid), new CbtHostOperation() {
+                UnexportNbdVolumesMsg umsg = new UnexportNbdVolumesMsg();
+                umsg.setVmInstanceUuid(msg.getVmInstanceUuid());
+                umsg.setVolumeUuids(msg.getVolumeUuids());
+                bus.makeLocalServiceId(umsg, CbtBackupConstant.SERVICE_ID);
+                bus.send(umsg, new CloudBusCallBack(umsg) {
                     @Override
-                    public void run(SyncTaskChain hostChain) {
-                        CbtBackupHypervisorBackend backend = getCbtBackend(msg.getVmInstanceUuid());
-                        backend.unexportNbdVolumesForRecovery(msg.getVmInstanceUuid(), msg.getVolumeUuids(), new Completion(msg, hostChain) {
-                            @Override
-                            public void success() {
-                                bus.publish(evt);
-                                hostChain.next();
-                                chain.next();
-                            }
-
-                            @Override
-                            public void fail(ErrorCode errorCode) {
-                                evt.setError(errorCode);
-                                bus.publish(evt);
-                                hostChain.next();
-                                chain.next();
-                            }
-                        });
+                    public void run(MessageReply reply) {
+                        if (!reply.isSuccess()) {
+                            evt.setError(reply.getError());
+                        }
+                        bus.publish(evt);
+                        chain.next();
                     }
                 });
             }
@@ -230,6 +216,37 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
             @Override
             public String getName() {
                 return String.format("prepare-volumes-for-cbt-recovery-task");
+            }
+        });
+    }
+
+    private void handle(final UnexportNbdVolumesMsg msg) {
+        final UnexportNbdVolumesReply reply = new UnexportNbdVolumesReply();
+        String hostUuid = getVmHostUuid(msg.getVmInstanceUuid());
+        if (hostUuid == null) {
+            reply.setError(operr("host not found for VM: %s", msg.getVmInstanceUuid()));
+            bus.reply(msg, reply);
+            return;
+        }
+
+        runInCbtHostOperationQueue(hostUuid, msg, String.format("unexport-nbd-volumes-on-host-%s", hostUuid), new CbtHostOperation() {
+            @Override
+            public void run(SyncTaskChain hostChain) {
+                CbtBackupHypervisorBackend backend = getCbtBackend(msg.getVmInstanceUuid());
+                backend.unexportNbdVolumesForRecovery(msg.getVmInstanceUuid(), msg.getVolumeUuids(), new Completion(msg, hostChain) {
+                    @Override
+                    public void success() {
+                        bus.reply(msg, reply);
+                        hostChain.next();
+                    }
+
+                    @Override
+                    public void fail(ErrorCode errorCode) {
+                        reply.setError(errorCode);
+                        bus.reply(msg, reply);
+                        hostChain.next();
+                    }
+                });
             }
         });
     }

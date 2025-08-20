@@ -1641,14 +1641,12 @@ public class KVMHost extends HostBase implements Host {
     }
 
     private void handle(CompareCpuFunctionOnHostMsg msg) {
-        CompareCpuFunctionOnHostReply reply = new CompareCpuFunctionOnHostReply();
-
         thdf.singleFlightSubmit(new SingleFlightTask(msg)
                 .setSyncSignature(String.format("compare-host-%s-cpu-function-xml-on-host-%s", msg.getSrcHostUuid(), msg.getDstHostUuid()))
-                .run((com) -> compareCpuFunctionOnHost(msg, new ReturnValueCompletion<CompareCpuFunctionOnHostReply>(com) {
+                .run((com) -> compareCpuFunctionOnHost(msg, new ReturnValueCompletion<VmCompareCpuFunctionResponse>(com) {
                     @Override
-                    public void success(CompareCpuFunctionOnHostReply returnValue) {
-                        com.success(returnValue);
+                    public void success(VmCompareCpuFunctionResponse resp) {
+                        com.success(resp);
                     }
 
                     @Override
@@ -1657,14 +1655,20 @@ public class KVMHost extends HostBase implements Host {
                     }
                 }))
                 .done(((result) -> {
+                    CompareCpuFunctionOnHostReply reply = new CompareCpuFunctionOnHostReply();
                     if (!result.isSuccess()) {
                         reply.setError(result.getErrorCode());
+                        bus.reply(msg, reply);
+                        return;
                     }
+                    VmCompareCpuFunctionResponse resp = (VmCompareCpuFunctionResponse)result.getResult();
+                    reply.setMatch(resp.isMatch());
+                    reply.setCompareError(resp.getCompareError());
                     bus.reply(msg, reply);
                 })));
     }
 
-    private void compareCpuFunctionOnHost(final CompareCpuFunctionOnHostMsg msg, ReturnValueCompletion<CompareCpuFunctionOnHostReply> completion) {
+    private void compareCpuFunctionOnHost(final CompareCpuFunctionOnHostMsg msg, ReturnValueCompletion<VmCompareCpuFunctionResponse> completion) {
         VmCompareCpuFunctionCmd cmd = new VmCompareCpuFunctionCmd();
         cmd.setCpuXml(msg.getCpuXml());
         restf.asyncJsonPost(compareCpuFunctionPath, cmd, new JsonAsyncRESTCallback<VmCompareCpuFunctionResponse>(completion) {
@@ -1674,7 +1678,7 @@ public class KVMHost extends HostBase implements Host {
                     completion.fail(operr(ret.getError()));
                     return;
                 }
-                completion.success(new CompareCpuFunctionOnHostReply());
+                completion.success(ret);
             }
 
             @Override

@@ -273,7 +273,7 @@ public class PrometheusStaticConfigManagerImpl implements PrometheusStaticConfig
 
     @Override
     public void nodeJoin(ManagementNodeInventory inv) {
-        createConfigManagedByUs();
+        reconcileStaticConfig();
     }
 
     private void createConfigManagedByUs() {
@@ -286,22 +286,41 @@ public class PrometheusStaticConfigManagerImpl implements PrometheusStaticConfig
         createConfigForHostsManagedByUs();
     }
 
+    // Reconcile static config against the current hash ring:
+    // write configs that are now managed by us, then drop configs that no longer are.
+    // Called from every hash-ring-changing lifecycle hook so write and cleanup stay
+    // symmetric. See ZSTAC-84974 / TIC-5687.
+    //
+    // Cleanup runs in finally so a partial failure in createConfigManagedByUs
+    // (chown / full disk / json serialization) cannot leave stale not-managed-by-us
+    // files behind. The original write throwable propagates per Java try/finally
+    // semantics.
+    private void reconcileStaticConfig() {
+        try {
+            createConfigManagedByUs();
+        } finally {
+            cleanupStaticConfigNotManagedByUs();
+        }
+    }
+
     @Override
     public void nodeLeft(ManagementNodeInventory inv) {
-        createConfigManagedByUs();
+        reconcileStaticConfig();
     }
 
     @Override
     public void iAmDead(ManagementNodeInventory inv) {
+        // intentionally no-op: the dying node has no chance to reconcile its own files.
     }
 
     @Override
     public void iJoin(ManagementNodeInventory inv) {
+        reconcileStaticConfig();
     }
 
     @Override
     public void managementNodeReady() {
-        cleanupStaticConfigNotManagedByUs();
+        reconcileStaticConfig();
     }
 
     private void cleanupStaticConfigNotManagedByUs() {

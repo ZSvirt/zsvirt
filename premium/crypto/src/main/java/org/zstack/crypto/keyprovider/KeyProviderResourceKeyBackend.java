@@ -15,6 +15,8 @@ import org.zstack.header.keyprovider.KeyProviderVO;
 import org.zstack.header.keyprovider.KeyProviderVO_;
 import org.zstack.header.tpm.entity.TpmVO;
 import org.zstack.header.vm.additions.VmHostBackupFileVO;
+import org.zstack.header.vo.ResourceVO;
+import org.zstack.header.vo.ResourceVO_;
 import org.zstack.utils.Utils;
 import org.zstack.utils.logging.CLogger;
 
@@ -243,17 +245,42 @@ public class KeyProviderResourceKeyBackend implements TpmEncryptedResourceKeyBac
     @Override
     public void backupEncryptedResourceKey(BackupEncryptedResourceKeyContent context) {
         EncryptedResourceKeyRefVO src = Q.New(EncryptedResourceKeyRefVO.class)
-                .eq(EncryptedResourceKeyRefVO_.resourceUuid, context.srcTpmUuid)
+                .eq(EncryptedResourceKeyRefVO_.resourceUuid, context.srcResourceUuid)
                 .find();
         if (src == null) {
-            logger.debug(String.format("No encrypted resource key found for tpm[uuid:%s], skip backup to VmHostBackupFile[uuid:%s]",
-                    context.srcTpmUuid, context.dstVmHostBackupFileUuid));
+            logger.debug(String.format("No encrypted resource key found for source resource[uuid:%s], skip backup to resource[uuid:%s]",
+                    context.srcResourceUuid, context.dstResourceUuid));
+            return;
+        }
+
+        String resourceType = Q.New(ResourceVO.class)
+                .select(ResourceVO_.resourceType)
+                .eq(ResourceVO_.uuid, context.dstResourceUuid)
+                .findValue();
+        if (resourceType == null) {
+            throw operr("failed to find resource[uuid: %s]", context.dstResourceUuid).toException();
+        }
+
+        EncryptedResourceKeyRefVO exists = Q.New(EncryptedResourceKeyRefVO.class)
+                .eq(EncryptedResourceKeyRefVO_.resourceUuid, context.dstResourceUuid)
+                .find();
+        if (exists != null) {
+            SQL.New(EncryptedResourceKeyRefVO.class)
+                    .eq(EncryptedResourceKeyRefVO_.resourceUuid, context.dstResourceUuid)
+                    .eq(EncryptedResourceKeyRefVO_.resourceType, resourceType)
+                    .set(EncryptedResourceKeyRefVO_.providerUuid, src.getProviderUuid())
+                    .set(EncryptedResourceKeyRefVO_.providerName, src.getProviderName())
+                    .set(EncryptedResourceKeyRefVO_.keyVersion, src.getKeyVersion())
+                    .set(EncryptedResourceKeyRefVO_.kekRef, src.getKekRef())
+                    .set(EncryptedResourceKeyRefVO_.wrappedDek, src.getWrappedDek())
+                    .set(EncryptedResourceKeyRefVO_.algorithm, src.getAlgorithm())
+                    .update();
             return;
         }
 
         EncryptedResourceKeyRefVO backup = new EncryptedResourceKeyRefVO();
-        backup.setResourceType(VmHostBackupFileVO.class.getSimpleName());
-        backup.setResourceUuid(context.dstVmHostBackupFileUuid);
+        backup.setResourceType(resourceType);
+        backup.setResourceUuid(context.dstResourceUuid);
         backup.setProviderUuid(src.getProviderUuid());
         backup.setProviderName(src.getProviderName());
         backup.setKeyVersion(src.getKeyVersion());

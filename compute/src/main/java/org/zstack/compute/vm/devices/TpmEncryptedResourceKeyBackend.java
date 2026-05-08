@@ -79,8 +79,8 @@ public interface TpmEncryptedResourceKeyBackend {
     void cloneEncryptedResourceKey(CloneEncryptedResourceKeyContext context, Completion completion);
 
     static class BackupEncryptedResourceKeyContent {
-        public String srcTpmUuid;
-        public String dstVmHostBackupFileUuid;
+        public String srcResourceUuid;
+        public String dstResourceUuid;
     }
 
     /**

@@ -72,8 +72,8 @@ public class TpmStateVmHostBackupFileBase extends AbstractVmHostBackupFileBase {
                 keyProviderName, self.getUuid(), tpmUuid, from.getVmInstanceUuid()));
 
         final BackupEncryptedResourceKeyContent context = new BackupEncryptedResourceKeyContent();
-        context.srcTpmUuid = tpmUuid;
-        context.dstVmHostBackupFileUuid = self.getUuid();
+        context.srcResourceUuid = tpmUuid;
+        context.dstResourceUuid = self.getUuid();
         resourceKeyBackend.backupEncryptedResourceKey(context);
     }
 

@@ -62,6 +62,8 @@ import org.zstack.kvm.KVMAgentCommands;
 import org.zstack.kvm.KvmCommandSender;
 import org.zstack.kvm.KvmResponseWrapper;
 import org.zstack.kvm.efi.KvmSecureBootExtensions;
+import org.zstack.header.tpm.message.BackupVmTpmMsg;
+import org.zstack.header.tpm.message.BackupVmTpmReply;
 import org.zstack.kvm.tpm.message.CloneVmTpmMsg;
 import org.zstack.kvm.tpm.message.CloneVmTpmReply;
 import org.zstack.resourceconfig.ResourceConfig;
@@ -78,6 +80,7 @@ import java.util.Map;
 import java.util.Set;
 
 import static org.zstack.compute.vm.VmGlobalConfig.RESET_TPM_AFTER_VM_CLONE;
+import static org.zstack.compute.vm.devices.TpmEncryptedResourceKeyBackend.BackupEncryptedResourceKeyContent;
 import static org.zstack.core.Platform.err;
 import static org.zstack.core.Platform.operr;
 import static org.zstack.header.errorcode.SysErrors.NOT_SUPPORTED;
@@ -144,6 +147,8 @@ public class KvmTpmManager extends AbstractService {
             handle((TpmDeletionMsg) msg);
         } else if (msg instanceof CloneVmTpmMsg) {
             handle((CloneVmTpmMsg) msg);
+        } else if (msg instanceof BackupVmTpmMsg) {
+            handle((BackupVmTpmMsg) msg);
         } else if (msg instanceof ResetVmTpmMsg) {
             handle((ResetVmTpmMsg) msg);
         } else {
@@ -612,6 +617,14 @@ public class KvmTpmManager extends AbstractService {
             bus.reply(msg, reply);
         })
         .start();
+    }
+
+    private void handle(BackupVmTpmMsg msg) {
+        BackupEncryptedResourceKeyContent content = new BackupEncryptedResourceKeyContent();
+        content.srcResourceUuid = msg.getSrcResourceUuid();
+        content.dstResourceUuid = msg.getDstResourceUuid();
+        tpmKeyBackend.backupEncryptedResourceKey(content);
+        bus.reply(msg, new BackupVmTpmReply());
     }
 
     static class ResetVmTpmContext {

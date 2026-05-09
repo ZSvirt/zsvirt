@@ -30,6 +30,9 @@ public enum KeyProviderErrors {
     // +   210X: TPM attached error
     TPM_RELATED_ERROR(2000),
     TPM_ALREADY_ATTACHED_KEY_PROVIDER(2101),
+
+    // 22XX: Volume + KMS related error
+    VOLUME_ALREADY_ATTACHED_KEY_PROVIDER(2201),
     ;
 
     private static final EnumSet<KeyProviderErrors> KMIP_CONNECTED_STATUSES = EnumSet.of(

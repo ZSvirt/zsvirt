@@ -4,6 +4,7 @@ import org.zstack.header.host.HostInventory;
 import org.zstack.header.message.NeedReplyMessage;
 import org.zstack.header.message.ReplayableMessage;
 import org.zstack.header.volume.VolumeInventory;
+import org.zstack.header.volume.VolumeLuksAgentSpec;
 
 public class InstantiateVolumeOnPrimaryStorageMsg extends NeedReplyMessage implements PrimaryStorageMessage, ReplayableMessage {
     private HostInventory destHost;
@@ -11,6 +12,7 @@ public class InstantiateVolumeOnPrimaryStorageMsg extends NeedReplyMessage imple
     private String primaryStorageUuid;
     private boolean skipIfExisting;
     private String allocatedInstallUrl;
+    private VolumeLuksAgentSpec volumeLuksAgentSpec;
 
     public String getAllocatedInstallUrl() {
         return allocatedInstallUrl;
@@ -51,6 +53,14 @@ public class InstantiateVolumeOnPrimaryStorageMsg extends NeedReplyMessage imple
 
     public void setSkipIfExisting(boolean skipIfExisting) {
         this.skipIfExisting = skipIfExisting;
+    }
+
+    public VolumeLuksAgentSpec getVolumeLuksAgentSpec() {
+        return volumeLuksAgentSpec;
+    }
+
+    public void setVolumeLuksAgentSpec(VolumeLuksAgentSpec volumeLuksAgentSpec) {
+        this.volumeLuksAgentSpec = volumeLuksAgentSpec;
     }
 
     @Override

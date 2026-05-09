@@ -27,6 +27,7 @@ public class DiskAO {
     private String sourceUuid;
     private List<String> systemTags;
     private String name;
+    private Boolean encrypted;
 
     public DiskAO withImage(String imageUuid) {
         this.templateUuid = imageUuid;
@@ -139,6 +140,14 @@ public class DiskAO {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public Boolean getEncrypted() {
+        return encrypted;
+    }
+
+    public void setEncrypted(Boolean encrypted) {
+        this.encrypted = encrypted;
     }
 
     public static DiskAO rootDisk() {

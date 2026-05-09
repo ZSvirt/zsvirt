@@ -15,6 +15,7 @@ public class CreateTemporaryRootVolumeTemplateFromVolumeSnapshotMsg extends Need
     private boolean system;
     private SessionInventory session;
     private boolean virtio = true;
+    private Boolean encrypted;
 
     @Override
     public void setSnapshotUuid(String snapshotUuid) {
@@ -79,6 +80,15 @@ public class CreateTemporaryRootVolumeTemplateFromVolumeSnapshotMsg extends Need
     public void setSystem(boolean system) {
         this.system = system;
     }
+
+    public Boolean getEncrypted() {
+        return encrypted;
+    }
+
+    public void setEncrypted(Boolean encrypted) {
+        this.encrypted = encrypted;
+    }
+
     @Override
 
     public SessionInventory getSession() {

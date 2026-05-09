@@ -20,7 +20,8 @@ public class APIGetTrashOnPrimaryStorageMsg extends APISyncCallMessage implement
     private String resourceUuid;
     @APIParam(required = false)
     private String resourceType;
-    @APIParam(required = false, validValues = {"MigrateVolume", "MigrateVolumeSnapshot", "RevertVolume", "VolumeSnapshot"})
+    @APIParam(required = false, validValues = {"MigrateVolume", "MigrateVolumeSnapshot", "ConvertVolumeEncryption",
+            "ConvertVolumeSnapshotEncryption", "RevertVolume", "VolumeSnapshot", "ReimageVolume"})
     private String trashType;
 
     public String getUuid() {

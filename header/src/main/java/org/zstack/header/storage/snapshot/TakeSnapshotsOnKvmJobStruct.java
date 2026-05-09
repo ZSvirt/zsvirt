@@ -13,6 +13,7 @@ public class TakeSnapshotsOnKvmJobStruct implements Serializable {
     private String previousInstallPath;
     private String newVolumeInstallPath;
     private String snapshotUuid;
+    private String encryptedDek;
     private boolean memory;
     private boolean live;
     private boolean full = false;
@@ -71,6 +72,14 @@ public class TakeSnapshotsOnKvmJobStruct implements Serializable {
 
     public void setSnapshotUuid(String snapshotUuid) {
         this.snapshotUuid = snapshotUuid;
+    }
+
+    public String getEncryptedDek() {
+        return encryptedDek;
+    }
+
+    public void setEncryptedDek(String encryptedDek) {
+        this.encryptedDek = encryptedDek;
     }
 
     public boolean isLive() {

@@ -16,6 +16,7 @@ import org.zstack.header.message.MessageReply;
 import org.zstack.header.storage.snapshot.VolumeSnapshotVO;
 import org.zstack.header.vm.APICreateVmInstanceFromVolumeSnapshotGroupMsg;
 import org.zstack.header.volume.*;
+import org.zstack.storage.encrypt.SnapshotGroupRevertVolumeEncryptionHelper;
 
 import java.util.*;
 
@@ -48,6 +49,7 @@ public class CreateDataVolumeFromVolumeSnapshotGroupFlow implements Flow {
             cmsg.setSession(msg.getSession());
             cmsg.setVolumeSnapshotUuid(snap.getUuid());
             cmsg.setSystemTags(msg.getDataVolumeSystemTags(snap.getUuid()));
+            new SnapshotGroupRevertVolumeEncryptionHelper().setupDataVolumeFromApi(msg, snap, cmsg);
             bus.makeLocalServiceId(cmsg, VolumeConstant.SERVICE_ID);
             bus.send(cmsg, new CloudBusCallBack(compl) {
                 @Override

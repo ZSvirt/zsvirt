@@ -17,6 +17,7 @@ import org.zstack.header.errorcode.OperationFailureException;
 import org.zstack.storage.migration.primary.VolumeMigrationAO;
 import org.zstack.header.host.HostConstant;
 import org.zstack.header.message.MessageReply;
+import org.zstack.header.storage.migration.KvmBlockLiveMigrationExtensionPoint;
 import org.zstack.header.vm.VmInstanceInventory;
 import org.zstack.header.volume.VolumeStatus;
 import org.zstack.header.volume.VolumeVO;
@@ -28,6 +29,7 @@ import org.zstack.utils.logging.CLogger;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -154,15 +156,51 @@ public class KvmBlockLiveMigrationWorkFlow implements KvmLiveMigrationWorkFlowTe
 
             @Override
             public void run(FlowTrigger trigger, Map data) {
+                KVMHostInventory inv = KVMHostInventory.valueOf(dbf.findByUuid(paramIn.getDstHostInventory().getUuid(), KVMHostVO.class));
+
+                KVMHostAsyncHttpCallMsg hmsg = new KVMHostAsyncHttpCallMsg();
+                Map<String, VolumeTO> migrateDisksMap = KvmStorageLiveMigrationFlowChain.getMigrateDiskTOList(inv, paramIn.getVolumeMappingDict(), paramIn.getVolumesToMigrate(), paramIn.getInitializedVolumes());
+                Map<String, String> targetVolumeLuksSecrets = new HashMap<>();
+                for (KvmBlockLiveMigrationExtensionPoint ext : pluginRgty.getExtensionList(KvmBlockLiveMigrationExtensionPoint.class)) {
+                    ErrorCode err;
+                    try {
+                        err = ext.beforeBlockLiveMigration(
+                                paramIn.getDstHostInventory(),
+                                paramIn.getVmInstanceInventory(),
+                                paramIn.getVolumesToMigrate(),
+                                paramIn.getVolumeMappingDict(),
+                                targetVolumeLuksSecrets);
+                    } catch (Exception e) {
+                        trigger.fail(operr("failed to run block live migration extension[%s] for vm[uuid:%s]: %s",
+                                ext.getClass().getName(), paramIn.getVmInstanceInventory().getUuid(), e.getMessage()));
+                        return;
+                    }
+                    if (err != null) {
+                        trigger.fail(err);
+                        return;
+                    }
+                }
+                for (VolumeVO sourceVolume : paramIn.getVolumesToMigrate()) {
+                    String targetVolumeUuid = paramIn.getVolumeMappingDict().get(sourceVolume.getUuid());
+                    String luksSecretUuid = targetVolumeLuksSecrets.get(targetVolumeUuid);
+                    if (luksSecretUuid == null) {
+                        continue;
+                    }
+
+                    VolumeTO targetVolume = migrateDisksMap.get(sourceVolume.getInstallPath());
+                    if (targetVolume == null) {
+                        trigger.fail(operr("missing live migration temporary volume TO for encrypted source volume[uuid:%s]",
+                                sourceVolume.getUuid()));
+                        return;
+                    }
+                    targetVolume.setLuksSecretUuid(luksSecretUuid);
+                }
+
                 SQL.New(VolumeVO.class)
                         .in(VolumeVO_.uuid, paramIn.getVolumesToMigrate().stream().map(VolumeVO::getUuid).collect(Collectors.toList()))
                         .set(VolumeVO_.status, VolumeStatus.Migrating)
                         .update();
 
-                KVMHostInventory inv = KVMHostInventory.valueOf(dbf.findByUuid(paramIn.getDstHostInventory().getUuid(), KVMHostVO.class));
-
-                KVMHostAsyncHttpCallMsg hmsg = new KVMHostAsyncHttpCallMsg();
-                Map migrateDisksMap = KvmStorageLiveMigrationFlowChain.getMigrateDiskTOList(inv, paramIn.getVolumeMappingDict(), paramIn.getVolumesToMigrate(), paramIn.getInitializedVolumes());
                 VmBlockLiveMigrationCmd cmd = buildLiveMigrationCommand(paramIn.getVmInstanceInventory(), migrateDisksMap);
                 cmd.setReload(paramIn.getJobContext().isMigrateStarted());
                 cmd.setBandwidth(paramIn.getTotalBandwidth());

@@ -2,6 +2,7 @@ package org.zstack.storage.primary.sharedblock;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.zstack.compute.vm.ImageBackupStorageSelector;
@@ -38,6 +39,7 @@ import org.zstack.header.host.*;
 import org.zstack.header.image.ImageBackupStorageRefInventory;
 import org.zstack.header.image.ImageConstant;
 import org.zstack.header.image.ImageInventory;
+import org.zstack.header.keyprovider.EncryptedResourceKeyManager;
 import org.zstack.header.message.Message;
 import org.zstack.header.message.MessageReply;
 import org.zstack.header.storage.backup.*;
@@ -51,6 +53,9 @@ import org.zstack.kvm.*;
 import org.zstack.mevoco.ShareableVolumeVmInstanceRefVO;
 import org.zstack.mevoco.ShareableVolumeVmInstanceRefVO_;
 import org.zstack.resourceconfig.ResourceConfigFacade;
+import org.zstack.storage.encrypt.VolumeEncryptedResourceKeyBackend;
+import org.zstack.storage.encrypt.VolumeEncryptedSecretHelper;
+import org.zstack.storage.encrypt.VolumeSnapshotEncryptionHelper;
 import org.zstack.storage.migration.VolumeMigrateExtensionPoint;
 import org.zstack.storage.primary.*;
 import org.zstack.storage.volume.VolumeErrors;
@@ -98,6 +103,12 @@ public class SharedBlockKvmBackend extends SharedBlockHypervisorBackend implemen
     private ResourceConfigFacade rcf;
     @Autowired
     private ApiTimeoutManager timeoutMgr;
+    @Autowired
+    private VolumeSnapshotEncryptionHelper snapshotEncryptionHelper;
+    @Autowired
+    private VolumeEncryptedResourceKeyBackend volumeEncryptedResourceKeyBackend;
+    @Autowired
+    private VolumeEncryptedSecretHelper volumeEncryptedSecretHelper;
 
     private static ResourceConfigFacade srcf;
     private static final long MAX_ACTIVATE_VOLUME_GC_INTERVAL_IN_SEC = 600;
@@ -623,13 +634,18 @@ public class SharedBlockKvmBackend extends SharedBlockHypervisorBackend implemen
         });
     }
 
-    private void createEmptyVolumeByInstallPath(String installPath, Long size, String volumeUuid, String hostUuid, Completion completion) {
+    private void createEmptyVolumeByInstallPath(String installPath, Long size, String volumeUuid, String hostUuid,
+                                                String encryptedDek, Completion completion) {
         final SharedBlockKvmCommands.CreateEmptyVolumeCmd cmd = new SharedBlockKvmCommands.CreateEmptyVolumeCmd();
         cmd.installPath = installPath;
         cmd.name = installPath;
         cmd.size = size;
         cmd.volumeUuid = volumeUuid;
+        cmd.volumeFormat = VolumeConstant.VOLUME_FORMAT_QCOW2;
         cmd.vgUuid = getPrimaryStorageUuidByInstallPath(installPath);
+        if (StringUtils.isNotBlank(encryptedDek)) {
+            cmd.encryptedDek = encryptedDek;
+        }
 
         new Do(hostUuid).go(SharedBlockKvmCommands.CREATE_EMPTY_VOLUME_PATH, cmd, new ReturnValueCompletion<SharedBlockKvmCommands.AgentRsp>(completion) {
             @Override
@@ -672,6 +688,9 @@ public class SharedBlockKvmBackend extends SharedBlockHypervisorBackend implemen
         cmd.volumeFormat = getDataVolumeFormat(volume);
         if (!CollectionUtils.isEmpty(systemTags) && systemTags.contains(VolumeSystemTags.NO_ZERO_FILLED_VOLUME.getTagFormat())) {
             cmd.zeroFilled = false;
+        }
+        if (Boolean.TRUE.equals(volume.getEncrypted())) {
+            cmd.encryptedDek = prepareVolumeEncryptedDek(hostUuid, volume, true);
         }
 
         if (!CollectionUtils.isEmpty(msg.getSystemTags())) {
@@ -765,6 +784,9 @@ public class SharedBlockKvmBackend extends SharedBlockHypervisorBackend implemen
                         if (image.getSize() < volume.getSize()) {
                             cmd.virtualSize = volume.getSize();
                         }
+                        if (Boolean.TRUE.equals(volume.getEncrypted())) {
+                            cmd.encryptedDek = prepareVolumeEncryptedDek(hostUuid, volume, true);
+                        }
 
                         if (!CollectionUtils.isEmpty(msg.getSystemTags())) {
                             String matchedTag = CollectionUtils.findOneOrNull(msg.getSystemTags(), THIN_PROVISIONING_INITIALIZE_SIZE_TAG::isMatch);
@@ -815,6 +837,146 @@ public class SharedBlockKvmBackend extends SharedBlockHypervisorBackend implemen
                         completion.fail(errCode);
                     }
                 });
+            }
+        }).start();
+    }
+
+    @Override
+    void handle(EncryptVolumeBitsOnPrimaryStorageMsg msg,
+                ReturnValueCompletion<EncryptVolumeBitsOnPrimaryStorageReply> completion) {
+        thdf.chainSubmit(new ChainTask(completion) {
+            @Override
+            public String getSyncSignature() {
+                return String.format("volume-sync-signature-%s", msg.getVolumeUuid());
+            }
+
+            @Override
+            public void run(SyncTaskChain chain) {
+                SharedBlockKvmCommands.EncryptVolumeBitsCmd cmd = new SharedBlockKvmCommands.EncryptVolumeBitsCmd();
+                cmd.installPath = msg.getInstallPath();
+                cmd.encryptLuksSecretMaterialFilePath = msg.getEncryptLuksSecretMaterialFilePath();
+                cmd.vgUuid = self.getUuid();
+                cmd.hostUuid = msg.getHostUuid();
+                new Do(msg.getHostUuid()).go(SharedBlockKvmCommands.ENCRYPT_VOLUME_BITS_PATH, cmd,
+                        SharedBlockKvmCommands.AgentRsp.class,
+                        new ReturnValueCompletion<SharedBlockKvmCommands.AgentRsp>(chain) {
+                    @Override
+                    public void success(SharedBlockKvmCommands.AgentRsp rsp) {
+                        completion.success(new EncryptVolumeBitsOnPrimaryStorageReply());
+                        chain.next();
+                    }
+
+                    @Override
+                    public void fail(ErrorCode errorCode) {
+                        completion.fail(operr("failed to encrypt volume[uuid:%s] bits at path[%s] on host[uuid:%s]: %s",
+                                msg.getVolumeUuid(), msg.getInstallPath(), msg.getHostUuid(), errorCode));
+                        chain.next();
+                    }
+                });
+            }
+
+            @Override
+            public String getName() {
+                return getSyncSignature();
+            }
+        });
+    }
+
+    @Override
+    void handle(ConvertVolumeEncryptionOnPrimaryStorageMsg msg, String hostUuid,
+                ReturnValueCompletion<ConvertVolumeEncryptionOnPrimaryStorageReply> completion) {
+        SharedBlockKvmCommands.ConvertVolumeEncryptionCmd cmd = new SharedBlockKvmCommands.ConvertVolumeEncryptionCmd();
+        cmd.volumeUuid = msg.getVolume().getUuid();
+        cmd.targetEncrypted = msg.isTargetEncrypted();
+        cmd.items = msg.getItems();
+        cmd.vgUuid = self.getUuid();
+        cmd.hostUuid = hostUuid;
+        boolean needSecret = Boolean.TRUE.equals(msg.getVolume().getEncrypted()) || msg.isTargetEncrypted();
+        cmd.encryptedDek = prepareVolumeEncryptedDek(hostUuid, msg.getVolume(), needSecret);
+
+        FlowChain chain = FlowChainBuilder.newSimpleFlowChain();
+        chain.setName(String.format("convert-volume-%s-encryption-on-sharedblock", msg.getVolume().getUuid()));
+        chain.then(new NoRollbackFlow() {
+            String __name__ = "deactivate-conversion-source-paths-on-all-connected-hosts";
+
+            @Override
+            public void run(FlowTrigger trigger, Map data) {
+                List<String> sourceInstallPaths = cmd.items.stream()
+                        .map(ConvertVolumeEncryptionOnPrimaryStorageMsg.VolumeEncryptionConversionItem::getSourceInstallPath)
+                        .filter(StringUtils::isNotBlank)
+                        .distinct()
+                        .collect(Collectors.toList());
+                if (sourceInstallPaths.isEmpty()) {
+                    trigger.next();
+                    return;
+                }
+
+                List<HostInventory> hosts = sharedBlockGroupFactory.getConnectedHostsForOperation(msg.getPrimaryStorageUuid());
+                if (hosts == null || hosts.isEmpty()) {
+                    trigger.next();
+                    return;
+                }
+
+                ErrorCodeList errList = new ErrorCodeList();
+                new While<>(hosts).step((hostInv, completion1) -> {
+                    bulkActiveVolumes(sourceInstallPaths, msg.getPrimaryStorageUuid(), hostInv.getUuid(),
+                            LvmlockdLockingType.NULL, true, false, new Completion(completion1) {
+                                @Override
+                                public void success() {
+                                    completion1.done();
+                                }
+
+                                @Override
+                                public void fail(ErrorCode errorCode) {
+                                    errList.getCauses().add(errorCode);
+                                    completion1.done();
+                                }
+                            });
+                }, 5).run(new WhileDoneCompletion(trigger) {
+                    @Override
+                    public void done(ErrorCodeList errorCodeList) {
+                        if (!errList.getCauses().isEmpty()) {
+                            trigger.fail(operr("deactivate volume encryption conversion source paths on all connected hosts failed, because %s",
+                                    errList.getCauses()));
+                            return;
+                        }
+
+                        trigger.next();
+                    }
+                });
+            }
+        }).then(new NoRollbackFlow() {
+            String __name__ = "convert-volume-encryption";
+
+            @Override
+            public void run(FlowTrigger trigger, Map data) {
+                new Do(hostUuid, msg.getPrimaryStorageUuid()).go(SharedBlockKvmCommands.CONVERT_VOLUME_ENCRYPTION_PATH, cmd,
+                        SharedBlockKvmCommands.ConvertVolumeEncryptionRsp.class,
+                        new ReturnValueCompletion<SharedBlockKvmCommands.ConvertVolumeEncryptionRsp>(trigger) {
+                            @Override
+                            public void success(SharedBlockKvmCommands.ConvertVolumeEncryptionRsp rsp) {
+                                data.put("actualSizes", rsp.actualSizes);
+                                trigger.next();
+                            }
+
+                            @Override
+                            public void fail(ErrorCode errorCode) {
+                                trigger.fail(operr("failed to convert volume[uuid:%s] encryption on shared block host[uuid:%s]: %s",
+                                        msg.getVolume().getUuid(), hostUuid, errorCode));
+                            }
+                        });
+            }
+        }).done(new FlowDoneHandler(completion) {
+            @Override
+            public void handle(Map data) {
+                ConvertVolumeEncryptionOnPrimaryStorageReply reply = new ConvertVolumeEncryptionOnPrimaryStorageReply();
+                reply.setActualSizes((Map<String, Long>) data.get("actualSizes"));
+                completion.success(reply);
+            }
+        }).error(new FlowErrorHandler(completion) {
+            @Override
+            public void handle(ErrorCode errCode, Map data) {
+                completion.fail(errCode);
             }
         }).start();
     }
@@ -1222,8 +1384,29 @@ public class SharedBlockKvmBackend extends SharedBlockHypervisorBackend implemen
         cmd.snapshotInstallPath = sp.getPrimaryStorageInstallPath();
         cmd.volumeUuid = msg.getVolume().getUuid();
         cmd.installPath = String.format("%s%s/%s", SharedBlockConstants.SHARED_BLOCK_INSTALL_PATH_SCHEME, msg.getPrimaryStorageUuid(), getUuid());
+        Do revert;
+        if (Boolean.TRUE.equals(msg.getVolume().getEncrypted())) {
+            List<HostInventory> hosts = primaryStorageFactory.getConnectedHostsForOperation(getSelfInventory(), msg.getVolume());
+            if (hosts.isEmpty()) {
+                completion.fail(operr("cannot find any connected host to revert encrypted volume[uuid:%s] on shared block primary storage[uuid:%s]",
+                        msg.getVolume().getUuid(), msg.getPrimaryStorageUuid()));
+                return;
+            }
+            String hostUuid = hosts.get(0).getUuid();
+            String secretMaterialFilePath = prepareVolumeSecretMaterialPath(hostUuid, msg.getVolume());
+            if (StringUtils.isBlank(secretMaterialFilePath)) {
+                completion.fail(operr("cannot prepare LUKS secret for encrypted volume[uuid:%s] revert on host[uuid:%s]",
+                        msg.getVolume().getUuid(), hostUuid));
+                return;
+            }
+            cmd.encryptLuksSecretMaterialFilePath = secretMaterialFilePath;
+            revert = new Do(hostUuid, msg.getPrimaryStorageUuid());
+        } else {
+            revert = new Do(msg.getVolume());
+        }
 
-        new Do(msg.getVolume()).go(REVERT_VOLUME_FROM_SNAPSHOT_PATH, cmd, RevertVolumeFromSnapshotRsp.class, new ReturnValueCompletion<RevertVolumeFromSnapshotRsp>(completion) {
+        final Do revertRunner = revert;
+        revertRunner.go(REVERT_VOLUME_FROM_SNAPSHOT_PATH, cmd, RevertVolumeFromSnapshotRsp.class, new ReturnValueCompletion<RevertVolumeFromSnapshotRsp>(completion) {
             @Override
             public void success(RevertVolumeFromSnapshotRsp rsp) {
                 RevertVolumeFromSnapshotOnPrimaryStorageReply reply = new RevertVolumeFromSnapshotOnPrimaryStorageReply();
@@ -1245,8 +1428,39 @@ public class SharedBlockKvmBackend extends SharedBlockHypervisorBackend implemen
         cmd.snapshotInstallPath = makeCachedImageInstallUrlFromImageUuidForTemplate(msg.getVolume().getRootImageUuid());
         cmd.volumeUuid = msg.getVolume().getUuid();
         cmd.installPath = String.format("%s%s/%s", SharedBlockConstants.SHARED_BLOCK_INSTALL_PATH_SCHEME, msg.getPrimaryStorageUuid(), getUuid());
+        Do reinit;
+        if (Boolean.TRUE.equals(msg.getVolume().getEncrypted())) {
+            List<HostInventory> hosts = primaryStorageFactory.getConnectedHostsForOperation(getSelfInventory(), msg.getVolume());
+            if (hosts.isEmpty()) {
+                completion.fail(operr("cannot find any connected host to reimage encrypted volume[uuid:%s] on shared block primary storage[uuid:%s]",
+                        msg.getVolume().getUuid(), msg.getPrimaryStorageUuid()));
+                return;
+            }
+            String hostUuid = msg.getHostUuid();
+            boolean hostAvailable = false;
+            for (HostInventory host : hosts) {
+                if (host.getUuid().equals(hostUuid)) {
+                    hostAvailable = true;
+                    break;
+                }
+            }
+            if (StringUtils.isBlank(hostUuid) || !hostAvailable) {
+                hostUuid = hosts.get(0).getUuid();
+            }
+            String secretMaterialFilePath = prepareVolumeSecretMaterialPath(hostUuid, msg.getVolume());
+            if (StringUtils.isBlank(secretMaterialFilePath)) {
+                completion.fail(operr("cannot prepare LUKS secret for encrypted volume[uuid:%s] reimage on host[uuid:%s]",
+                        msg.getVolume().getUuid(), hostUuid));
+                return;
+            }
+            cmd.encryptLuksSecretMaterialFilePath = secretMaterialFilePath;
+            reinit = new Do(hostUuid, msg.getPrimaryStorageUuid());
+        } else {
+            reinit = new Do(msg.getVolume());
+        }
 
-        new Do(msg.getVolume()).go(SharedBlockKvmCommands.REVERT_VOLUME_FROM_SNAPSHOT_PATH, cmd, RevertVolumeFromSnapshotRsp.class, new ReturnValueCompletion<RevertVolumeFromSnapshotRsp>(completion) {
+        final Do reinitRunner = reinit;
+        reinitRunner.go(SharedBlockKvmCommands.REVERT_VOLUME_FROM_SNAPSHOT_PATH, cmd, RevertVolumeFromSnapshotRsp.class, new ReturnValueCompletion<RevertVolumeFromSnapshotRsp>(completion) {
             @Override
             public void success(RevertVolumeFromSnapshotRsp rsp) {
                 ReInitRootVolumeFromTemplateOnPrimaryStorageReply reply = new ReInitRootVolumeFromTemplateOnPrimaryStorageReply();
@@ -1283,7 +1497,15 @@ public class SharedBlockKvmBackend extends SharedBlockHypervisorBackend implemen
             cmd.virtualSize = volumeVO.getSize();
         }
 
-        new Do(VolumeInventory.valueOf(volumeVO)).go(CREATE_DATA_VOLUME_WITH_BACKING_PATH, cmd, CreateDataVolumeWithBackingRsp.class, new ReturnValueCompletion<CreateDataVolumeWithBackingRsp>(completion) {
+        VolumeInventory volume = VolumeInventory.valueOf(volumeVO);
+        Do createVolume = new Do(volume);
+        if (volumeVO.isEncrypted()) {
+            String hostUuid = primaryStorageFactory.getConnectedHostsForOperation(getSelfInventory(), volume).get(0).getUuid();
+            cmd.encryptedDek = prepareVolumeEncryptedDek(hostUuid, volume, true);
+            createVolume = new Do(hostUuid);
+        }
+
+        createVolume.go(CREATE_DATA_VOLUME_WITH_BACKING_PATH, cmd, CreateDataVolumeWithBackingRsp.class, new ReturnValueCompletion<CreateDataVolumeWithBackingRsp>(completion) {
             @Override
             public void success(CreateDataVolumeWithBackingRsp rsp) {
                 CreateVolumeFromVolumeSnapshotOnPrimaryStorageReply reply = new CreateVolumeFromVolumeSnapshotOnPrimaryStorageReply();
@@ -1311,7 +1533,20 @@ public class SharedBlockKvmBackend extends SharedBlockHypervisorBackend implemen
 
         VolumeVO volumeVO = Q.New(VolumeVO.class).eq(VolumeVO_.uuid, msg.getVolumeUuid()).find();
 
-        new Do(VolumeInventory.valueOf(volumeVO)).go(MERGE_SNAPSHOT_PATH, cmd, SharedBlockKvmCommands.MergeSnapshotRsp.class, new ReturnValueCompletion<SharedBlockKvmCommands.MergeSnapshotRsp>(completion) {
+        VolumeInventory volume = VolumeInventory.valueOf(volumeVO);
+        Do mergeSnapshot = new Do(volume);
+        if (volumeVO.isEncrypted()) {
+            String hostUuid = primaryStorageFactory.getConnectedHostsForOperation(getSelfInventory(), volume).get(0).getUuid();
+            String secretMaterialFilePath = prepareRequiredVolumeSecretMaterialPath(
+                    hostUuid, volume, completion, "create from snapshot");
+            if (secretMaterialFilePath == null) {
+                return;
+            }
+            cmd.encryptLuksSecretMaterialFilePath = secretMaterialFilePath;
+            mergeSnapshot = new Do(hostUuid);
+        }
+
+        mergeSnapshot.go(MERGE_SNAPSHOT_PATH, cmd, SharedBlockKvmCommands.MergeSnapshotRsp.class, new ReturnValueCompletion<SharedBlockKvmCommands.MergeSnapshotRsp>(completion) {
             @Override
             public void success(SharedBlockKvmCommands.MergeSnapshotRsp rsp) {
                 CreateVolumeFromVolumeSnapshotOnPrimaryStorageReply reply = new CreateVolumeFromVolumeSnapshotOnPrimaryStorageReply();
@@ -1326,6 +1561,37 @@ public class SharedBlockKvmBackend extends SharedBlockHypervisorBackend implemen
                 completion.fail(errorCode);
             }
         });
+    }
+
+    protected String prepareVolumeSecretMaterialPath(String hostUuid, VolumeInventory volume) {
+        if (volume == null || !Boolean.TRUE.equals(volume.getEncrypted()) || StringUtils.isBlank(hostUuid)) {
+            return null;
+        }
+
+        return volumeEncryptedSecretHelper.prepareLuksSecretMaterialFileOnHost(hostUuid, volume.getUuid());
+    }
+
+    private String prepareRequiredVolumeSecretMaterialPath(String hostUuid, VolumeInventory volume, ReturnValueCompletion<?> completion, String action) {
+        String secretMaterialFilePath;
+        try {
+            secretMaterialFilePath = prepareVolumeSecretMaterialPath(hostUuid, volume);
+        } catch (OperationFailureException e) {
+            completion.fail(e.getErrorCode());
+            return null;
+        }
+        if (StringUtils.isBlank(secretMaterialFilePath)) {
+            completion.fail(operr("cannot prepare LUKS secret for encrypted volume[uuid:%s] %s on host[uuid:%s]",
+                    volume.getUuid(), action, hostUuid));
+            return null;
+        }
+        return secretMaterialFilePath;
+    }
+
+    private String prepareVolumeEncryptedDek(String hostUuid, VolumeInventory volume, boolean required) {
+        if (volume == null || !required || StringUtils.isBlank(hostUuid)) {
+            return null;
+        }
+        return volumeEncryptedSecretHelper.prepareLuksEnvelopeDekOnHost(hostUuid, volume.getUuid());
     }
 
     @Override
@@ -1363,6 +1629,11 @@ public class SharedBlockKvmBackend extends SharedBlockHypervisorBackend implemen
         final MergeVolumeSnapshotOnPrimaryStorageReply reply = new MergeVolumeSnapshotOnPrimaryStorageReply();
 
         if (offline) {
+            String offlineHostUuid = null;
+            if (Boolean.TRUE.equals(volume.getEncrypted())) {
+                offlineHostUuid = primaryStorageFactory.getConnectedHostsForOperation(getSelfInventory(), volume).get(0).getUuid();
+            }
+            String finalOfflineHostUuid = offlineHostUuid;
             FlowChain chain = FlowChainBuilder.newSimpleFlowChain();
             chain.setName(String.format("offline-merge-volume-snapshot-%s-on-sharedblock", finalSrcUuid));
             chain.then(new NoRollbackFlow() {
@@ -1414,8 +1685,10 @@ public class SharedBlockKvmBackend extends SharedBlockHypervisorBackend implemen
                     cmd.destPath = volume.getInstallPath();
                     cmd.vgUuid = volume.getPrimaryStorageUuid();
                     cmd.volumeUuid = volume.getUuid();
+                    cmd.encryptedDek = prepareVolumeEncryptedDek(finalOfflineHostUuid, volume, Boolean.TRUE.equals(volume.getEncrypted()));
 
-                    new Do(volume).go(SharedBlockKvmCommands.OFFLINE_MERGE_SNAPSHOT_PATH, cmd, new ReturnValueCompletion<SharedBlockKvmCommands.AgentRsp>(completion) {
+                    Do offlineMerge = StringUtils.isNotBlank(finalOfflineHostUuid) ? new Do(finalOfflineHostUuid, cmd.vgUuid) : new Do(volume);
+                    offlineMerge.go(SharedBlockKvmCommands.OFFLINE_MERGE_SNAPSHOT_PATH, cmd, new ReturnValueCompletion<SharedBlockKvmCommands.AgentRsp>(completion) {
                         @Override
                         public void success(SharedBlockKvmCommands.AgentRsp returnValue) {
                             trigger.next();
@@ -1746,6 +2019,30 @@ public class SharedBlockKvmBackend extends SharedBlockHypervisorBackend implemen
                 cache.volumeResourceInstallPath = msg.getVolumeSnapshot().getPrimaryStorageInstallPath();
                 cache.image = msg.getImageInventory();
                 cache.primaryStorageInstallPath = makeCachedImageInstallUrl(msg.getImageInventory());
+                String hostUuid = primaryStorageFactory.getConnectedHostsForOperation(getSelfInventory(), volume).get(0).getUuid();
+                boolean encrypted = Boolean.TRUE.equals(msg.getEncrypted());
+                VolumeLuksAgentSpec luksSpec;
+                try {
+                    luksSpec = snapshotEncryptionHelper.prepareTemporarySnapshotImageSecretMaterial(
+                            hostUuid,
+                            msg.getVolumeSnapshot().getUuid(),
+                            msg.getImageInventory().getUuid(),
+                            msg.getEncrypted());
+                } catch (OperationFailureException e) {
+                    completion.fail(e.getErrorCode());
+                    chain.next();
+                    return;
+                }
+                if (encrypted && (luksSpec == null || !luksSpec.isComplete())) {
+                    completion.fail(operr("cannot prepare LUKS secret for encrypted temporary snapshot image[uuid:%s] from snapshot[uuid:%s] on host[uuid:%s]",
+                            msg.getImageInventory().getUuid(), msg.getVolumeSnapshot().getUuid(), hostUuid));
+                    chain.next();
+                    return;
+                }
+                if (luksSpec != null && luksSpec.isComplete()) {
+                    cache.encryptLuksSecretMaterialFilePath = luksSpec.getEncryptLuksSecretMaterialFilePath();
+                    cache.hostUuid = hostUuid;
+                }
                 cache.download(new ReturnValueCompletion<ImageCacheInventory>(completion) {
                     @Override
                     public void success(ImageCacheInventory inv) {
@@ -2879,6 +3176,8 @@ public class SharedBlockKvmBackend extends SharedBlockHypervisorBackend implemen
         String backupStorageInstallPath;
         VolumeInventory volume;
         String volumeResourceInstallPath;
+        String encryptLuksSecretMaterialFilePath;
+        String hostUuid;
 
         void download(final ReturnValueCompletion<ImageCacheInventory> completion) {
             DebugUtils.Assert(image != null, "image cannot be null");
@@ -2962,7 +3261,11 @@ public class SharedBlockKvmBackend extends SharedBlockHypervisorBackend implemen
                                     CreateImageCacheFromVolumeCmd cmd = new CreateImageCacheFromVolumeCmd();
                                     cmd.volumePath = volumeResourceInstallPath;
                                     cmd.installPath = primaryStorageInstallPath;
-                                    new Do(volume).go(SharedBlockKvmCommands.CREATE_IMAGE_CACHE_FROM_VOLUME_PATH, cmd, CreateImageCacheFromVolumeRsp.class, new ReturnValueCompletion<CreateImageCacheFromVolumeRsp>(trigger) {
+                                    if (StringUtils.isNotBlank(encryptLuksSecretMaterialFilePath)) {
+                                        cmd.encryptLuksSecretMaterialFilePath = encryptLuksSecretMaterialFilePath;
+                                    }
+                                    Do createImageCache = StringUtils.isNotBlank(hostUuid) ? new Do(hostUuid) : new Do(volume);
+                                    createImageCache.go(SharedBlockKvmCommands.CREATE_IMAGE_CACHE_FROM_VOLUME_PATH, cmd, CreateImageCacheFromVolumeRsp.class, new ReturnValueCompletion<CreateImageCacheFromVolumeRsp>(trigger) {
                                         @Override
                                         public void success(CreateImageCacheFromVolumeRsp rsp) {
                                             actualSize = rsp.actualSize;
@@ -4613,6 +4916,8 @@ public class SharedBlockKvmBackend extends SharedBlockHypervisorBackend implemen
                 scmd.size = msg.getVolume().getSize();
                 scmd.volumeUuid = cmd.getVolumeUuid();
                 scmd.vgUuid = msg.getVolume().getPrimaryStorageUuid();
+                scmd.volumeFormat = VolumeConstant.VOLUME_FORMAT_QCOW2;
+                scmd.encryptedDek = cmd.getEncryptedDek();
 
                 new Do(msg.getHostUuid()).go(SharedBlockKvmCommands.CREATE_EMPTY_VOLUME_PATH, scmd, new ReturnValueCompletion<SharedBlockKvmCommands.AgentRsp>(trigger) {
                     @Override
@@ -4656,6 +4961,8 @@ public class SharedBlockKvmBackend extends SharedBlockHypervisorBackend implemen
                 scmd.size = msg.getVolume().getSize();
                 scmd.volumeUuid = cmd.getNewVolumeUuid();
                 scmd.vgUuid = msg.getVolume().getPrimaryStorageUuid();
+                scmd.volumeFormat = VolumeConstant.VOLUME_FORMAT_QCOW2;
+                scmd.encryptedDek = cmd.getEncryptedDek();
                 if (cmd.isOnline()) {
                     scmd.backingFile = cmd.getVolumeInstallPath();
                 }
@@ -4947,6 +5254,7 @@ public class SharedBlockKvmBackend extends SharedBlockHypervisorBackend implemen
         cmd.hostUuid = struct.getVmHostUuid() == null ? hosts.get(0).getUuid() : struct.getVmHostUuid();
         cmd.live = struct.isVmRunning();
         cmd.volumeUuid = volumeVO.getUuid();
+        cmd.encrypted = volumeVO.isEncrypted();
         httpCall(RESIZE_VOLUME_PATH, cmd.hostUuid, cmd, SharedBlockKvmCommands.ResizeVolumeRsp.class, new ReturnValueCompletion<SharedBlockKvmCommands.ResizeVolumeRsp>(completion) {
             @Override
             public void success(SharedBlockKvmCommands.ResizeVolumeRsp rsp) {
@@ -5731,9 +6039,29 @@ public class SharedBlockKvmBackend extends SharedBlockHypervisorBackend implemen
                             volumeSize = Q.New(VolumeVO.class).select(VolumeVO_.size).eq(VolumeVO_.uuid, job.getVolumeUuid()).findValue();
                         }
 
+                        String hostUuid = vmVolumesStruct.vmInstanceVO.getHostUuid();
+                        boolean encrypted = Boolean.TRUE.equals(job.getVolumeSnapshotStruct().getCurrent().getEncrypted());
+                        String encryptedDek = null;
+                        if (encrypted) {
+                            try {
+                                encryptedDek = volumeEncryptedSecretHelper.prepareLuksEnvelopeDekOnHost(hostUuid, job.getVolumeUuid());
+                            } catch (OperationFailureException e) {
+                                errList1.getCauses().add(e.getErrorCode());
+                                whileCompletion1.done();
+                                return;
+                            }
+                            if (StringUtils.isBlank(encryptedDek)) {
+                                errList1.getCauses().add(operr("cannot prepare LUKS encryptedDek for encrypted snapshot[uuid:%s] volume[uuid:%s] on host[uuid:%s]",
+                                        job.getVolumeSnapshotStruct().getCurrent().getUuid(), job.getVolumeUuid(), hostUuid));
+                                whileCompletion1.done();
+                                return;
+                            }
+                        }
                         createEmptyVolumeByInstallPath(installPath, volumeSize,
                                 job.getVolumeSnapshotStruct().getCurrent().getUuid(),
-                                vmVolumesStruct.vmInstanceVO.getHostUuid(), new Completion(whileCompletion1) {
+                                hostUuid,
+                                encryptedDek,
+                                new Completion(whileCompletion1) {
                             @Override
                             public void success() {
                                 vmVolumesStruct.createdLvInstallPaths.add(installPath);
@@ -6302,7 +6630,10 @@ public class SharedBlockKvmBackend extends SharedBlockHypervisorBackend implemen
                         cmd.topChildrenInstallPathInDb = convertInstallPathsToAbsolute(msg.getSrcChildrenInstallPathInDb());
                         cmd.vgUuid = volume.getPrimaryStorageUuid();
                         cmd.volumeUuid = volume.getUuid();
-                        new Do(volume).go(SharedBlockKvmCommands.OFFLINE_COMMIT_SNAPSHOT_PATH, cmd, OfflineCommitSnapshotRsp.class, new ReturnValueCompletion<OfflineCommitSnapshotRsp>(completion) {
+                        cmd.encryptedDek = prepareVolumeEncryptedDek(hostUuid, volume, Boolean.TRUE.equals(volume.getEncrypted()));
+                        Do offlineCommit = Boolean.TRUE.equals(volume.getEncrypted()) ?
+                                new Do(hostUuid, volume.getPrimaryStorageUuid()) : new Do(volume);
+                        offlineCommit.go(SharedBlockKvmCommands.OFFLINE_COMMIT_SNAPSHOT_PATH, cmd, OfflineCommitSnapshotRsp.class, new ReturnValueCompletion<OfflineCommitSnapshotRsp>(completion) {
                             @Override
                             public void success(OfflineCommitSnapshotRsp returnValue) {
                                 reply.setSize(returnValue.getActualSize());
@@ -6452,6 +6783,7 @@ public class SharedBlockKvmBackend extends SharedBlockHypervisorBackend implemen
                         cmd.vgUuid = volume.getPrimaryStorageUuid();
                         cmd.volumeUuid = volume.getUuid();
                         cmd.fullRebase = cmd.srcPath == null;
+                        cmd.encryptedDek = prepareVolumeEncryptedDek(hostUuid, volume, Boolean.TRUE.equals(volume.getEncrypted()));
                         new Do(hostUuid, cmd.vgUuid).go(OFFLINE_MERGE_SNAPSHOT_PATH, cmd, OfflineMergeSnapshotRsp.class, new ReturnValueCompletion<OfflineMergeSnapshotRsp>(completion) {
                             @Override
                             public void success(OfflineMergeSnapshotRsp returnValue) {

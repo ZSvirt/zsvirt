@@ -13,6 +13,7 @@ import org.zstack.header.tag.SystemTagVO;
 import org.zstack.header.tag.SystemTagVO_;
 import org.zstack.header.vm.*;
 import org.zstack.kvm.tpm.SnapshotGroupRevertTpmHelper;
+import org.zstack.storage.encrypt.SnapshotGroupRevertVolumeEncryptionHelper;
 
 import java.util.List;
 import java.util.Map;
@@ -59,6 +60,8 @@ public class CreateVmFromTemplateFlow extends NoRollbackFlow {
         }
 
         if (spec.getApiMsg() instanceof APICreateVmInstanceFromVolumeSnapshotGroupMsg) {
+            new SnapshotGroupRevertVolumeEncryptionHelper().setupRootVolumeFromApi(
+                    (APICreateVmInstanceFromVolumeSnapshotGroupMsg) spec.getApiMsg(), cmsg);
             new SnapshotGroupRevertTpmHelper().setupFromApi(
                     (APICreateVmInstanceFromVolumeSnapshotGroupMsg) spec.getApiMsg(), cmsg);
         }

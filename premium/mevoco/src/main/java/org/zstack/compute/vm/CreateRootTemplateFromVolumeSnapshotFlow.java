@@ -27,6 +27,7 @@ import org.zstack.header.vm.NewVmInstanceMessage2;
 import org.zstack.header.volume.VolumeType;
 import org.zstack.header.volume.VolumeVO;
 import org.zstack.header.volume.VolumeVO_;
+import org.zstack.storage.encrypt.VolumeEncryptedResourceKeyBackend;
 import org.zstack.utils.Utils;
 import org.zstack.utils.logging.CLogger;
 
@@ -44,6 +45,8 @@ public class CreateRootTemplateFromVolumeSnapshotFlow implements Flow {
 
     @Autowired
     private CloudBus bus;
+    @Autowired
+    private VolumeEncryptedResourceKeyBackend volumeEncryptedResourceKeyBackend;
 
     @Override
     public void run(FlowTrigger trigger, Map data) {
@@ -65,7 +68,7 @@ public class CreateRootTemplateFromVolumeSnapshotFlow implements Flow {
         };
 
         if (spec.getRootVolumeImage().isTemporary()) {
-            createTemporaryRootTemplate(spec, snapshotUuid, session, completion);
+            createTemporaryRootTemplate(spec, snapshotUuid, session, shouldEncryptRootTemplate(spec, snapshotUuid), completion);
         } else {
             createRootTemplate(spec, snapshotUuid, session, completion);
         }
@@ -119,9 +122,11 @@ public class CreateRootTemplateFromVolumeSnapshotFlow implements Flow {
         });
     }
 
-    private void createTemporaryRootTemplate(CreateVmFromVolumeResourceSpec spec, String snapshotUuid, SessionInventory session, Completion completion) {
+    private void createTemporaryRootTemplate(CreateVmFromVolumeResourceSpec spec, String snapshotUuid, SessionInventory session,
+                                             boolean encrypted, Completion completion) {
         CreateTemporaryRootVolumeTemplateFromVolumeSnapshotMsg cmsg = new CreateTemporaryRootVolumeTemplateFromVolumeSnapshotMsg();
         cmsg.setSnapshotUuid(snapshotUuid);
+        cmsg.setEncrypted(encrypted);
         cmsg.setSession(session);
         bus.makeLocalServiceId(cmsg, ImageConstant.SERVICE_ID);
         bus.send(cmsg, new CloudBusCallBack(completion) {
@@ -155,6 +160,27 @@ public class CreateRootTemplateFromVolumeSnapshotFlow implements Flow {
         return null;
     }
 
+    private boolean shouldEncryptRootTemplate(CreateVmFromVolumeResourceSpec spec, String snapshotUuid) {
+        if (spec.getApiMsg() instanceof APICreateVmInstanceFromVolumeSnapshotGroupMsg) {
+            APICreateVmInstanceFromVolumeSnapshotGroupMsg msg =
+                    (APICreateVmInstanceFromVolumeSnapshotGroupMsg) spec.getApiMsg();
+            if (msg.getVolumeSnapshotEncryptions() != null) {
+                for (APICreateVmInstanceFromVolumeSnapshotGroupMsg.VolumeSnapshotEncryption encryption :
+                        msg.getVolumeSnapshotEncryptions()) {
+                    if (snapshotUuid.equals(encryption.getVolumeSnapshotUuid())) {
+                        return Boolean.TRUE.equals(encryption.getEncrypted());
+                    }
+                }
+            }
+        }
+
+        Boolean snapshotEncrypted = Q.New(VolumeSnapshotVO.class)
+                .select(VolumeSnapshotVO_.encrypted)
+                .eq(VolumeSnapshotVO_.uuid, snapshotUuid)
+                .findValue();
+        return Boolean.TRUE.equals(snapshotEncrypted);
+    }
+
     @Override
     public void rollback(FlowRollback trigger, Map data) {
         CreateVmFromVolumeResourceSpec spec = (CreateVmFromVolumeResourceSpec) data.get(PremiumVmInstanceConstant.VM_INSTANCE_FROM_VOLUME_SPEC);
@@ -170,6 +196,9 @@ public class CreateRootTemplateFromVolumeSnapshotFlow implements Flow {
         bus.send(msg, new CloudBusCallBack(trigger) {
             @Override
             public void run(MessageReply reply) {
+                if (reply.isSuccess() && spec.getRootVolumeImage().isTemporary()) {
+                    volumeEncryptedResourceKeyBackend.detachKeyProviderFromTemporarySnapshotImage(msg.getImageUuid());
+                }
                 trigger.rollback();
             }
         });

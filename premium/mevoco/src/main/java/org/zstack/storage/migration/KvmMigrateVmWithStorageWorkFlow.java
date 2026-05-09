@@ -24,6 +24,7 @@ import org.zstack.header.errorcode.ErrorCodeList;
 import org.zstack.header.host.HostConstant;
 import org.zstack.header.host.MigrateVmOnHypervisorMsg;
 import org.zstack.header.message.MessageReply;
+import org.zstack.header.storage.migration.KvmMigrateVmWithStorageExtensionPoint;
 import org.zstack.header.vm.*;
 import org.zstack.header.volume.VolumeAO;
 import org.zstack.header.volume.VolumeStatus;
@@ -261,6 +262,25 @@ public class KvmMigrateVmWithStorageWorkFlow implements KvmLiveMigrationWorkFlow
                 mmsg.setVmInventory(paramIn.getVmInstanceInventory());
                 mmsg.setStorageMigrationPolicy(MigrateVmOnHypervisorMsg.StorageMigrationPolicy.FullCopy);
                 mmsg.setBandwidth((long) Math.ceil((double) paramIn.getTotalBandwidth() / paramIn.getVolumesToMigrate().size()));
+                for (KvmMigrateVmWithStorageExtensionPoint ext : pluginRgty.getExtensionList(KvmMigrateVmWithStorageExtensionPoint.class)) {
+                    ErrorCode err;
+                    try {
+                        err = ext.beforeMigrateVmWithStorage(
+                                paramIn.getDstHostInventory(),
+                                paramIn.getVmInstanceInventory(),
+                                paramIn.getVolumesToMigrate(),
+                                paramIn.getVolumeMappingDict(),
+                                mmsg);
+                    } catch (Exception e) {
+                        trigger.fail(operr("failed to run migrate VM with storage extension[%s] for vm[uuid:%s]: %s",
+                                ext.getClass().getName(), paramIn.getVmInstanceInventory().getUuid(), e.getMessage()));
+                        return;
+                    }
+                    if (err != null) {
+                        trigger.fail(err);
+                        return;
+                    }
+                }
                 bus.makeTargetServiceIdByResourceUuid(mmsg, HostConstant.SERVICE_ID, mmsg.getHostUuid());
                 bus.send(mmsg, new CloudBusCallBack(trigger) {
                     @Override

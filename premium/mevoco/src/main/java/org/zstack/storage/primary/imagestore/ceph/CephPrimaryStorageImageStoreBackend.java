@@ -693,6 +693,32 @@ public class CephPrimaryStorageImageStoreBackend extends CephPrimaryStorageBase 
         } else {
             final ResizeVolumeOnPrimaryStorageReply reply = new ResizeVolumeOnPrimaryStorageReply();
             final VolumeInventory volume = msg.getVolume();
+            if (Boolean.TRUE.equals(volume.getEncrypted())) {
+                if (msg.isForce()) {
+                    reply.setError(operr("force resize is not supported for encrypted volume[uuid:%s] on ceph primary storage[uuid:%s]",
+                            volume.getUuid(), msg.getPrimaryStorageUuid()));
+                    bus.reply(msg, reply);
+                    return;
+                }
+                resizeEncryptedRbdVolumeOnKvmHost(volume, msg.getSize(), new ReturnValueCompletion<KVMHostLuksRsp>(msg) {
+                    @Override
+                    public void success(KVMHostLuksRsp returnValue) {
+                        logger.debug(String.format("successfully resize the encrypted volume[uuid:%s] to %d", volume.getUuid(), msg.getSize()));
+                        volume.setSize(msg.getSize());
+                        reply.setVolume(volume);
+                        bus.reply(msg, reply);
+                    }
+
+                    @Override
+                    public void fail(ErrorCode errorCode) {
+                        logger.error(String.format("fail to resize encrypted volume[uuid:%s] to %d", volume.getUuid(), msg.getSize()));
+                        reply.setError(errorCode);
+                        bus.reply(msg, reply);
+                    }
+                });
+                return;
+            }
+
             ResizeVolumeCmd cmd = new ResizeVolumeCmd();
             cmd.setInstallPath(volume.getInstallPath());
             cmd.setSize(msg.getSize());

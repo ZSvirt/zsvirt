@@ -103,6 +103,7 @@ public class LocalStorageImageStoreKvmBackend extends LocalStorageKvmBackend {
         private String installPath;
         private long size;
         private boolean force;
+        private String encryptLuksSecretMaterialFilePath;
 
         public String getInstallPath() {
             return installPath;
@@ -126,6 +127,14 @@ public class LocalStorageImageStoreKvmBackend extends LocalStorageKvmBackend {
 
         public void setForce(boolean force) {
             this.force = force;
+        }
+
+        public String getEncryptLuksSecretMaterialFilePath() {
+            return encryptLuksSecretMaterialFilePath;
+        }
+
+        public void setEncryptLuksSecretMaterialFilePath(String encryptLuksSecretMaterialFilePath) {
+            this.encryptLuksSecretMaterialFilePath = encryptLuksSecretMaterialFilePath;
         }
     }
 
@@ -233,6 +242,7 @@ public class LocalStorageImageStoreKvmBackend extends LocalStorageKvmBackend {
                 cmd.setInstallPath(volume.getInstallPath());
                 cmd.setSize(msg.getSize());
                 cmd.setForce(msg.isForce());
+                cmd.setEncryptLuksSecretMaterialFilePath(prepareVolumeSecretMaterialPath(hostUuid, volume));
 
                 httpCall(RESIZE_VOLUME_PATH, hostUuid, cmd, ResizeVolumeRsp.class, new ReturnValueCompletion<ResizeVolumeRsp>(trigger) {
                     @Override

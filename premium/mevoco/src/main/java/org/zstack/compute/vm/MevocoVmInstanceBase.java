@@ -638,16 +638,23 @@ public class MevocoVmInstanceBase extends VmInstanceBase {
         imageSpec.setInventory(ImageInventory.valueOf(dbf.findByUuid(msg.getImageUuid(), ImageVO.class)));
         vmSpec.setImageSpec(imageSpec);
 
+        VolumeVO rootVolumeVO = Q.New(VolumeVO.class)
+                .eq(VolumeVO_.uuid, vmSpec.getVmInventory().getRootVolumeUuid())
+                .find();
+        if (rootVolumeVO != null && rootVolumeVO.isEncrypted()) {
+            if (vmSpec.getRootDisk() == null) {
+                vmSpec.setRootDisk(DiskAO.rootDisk());
+            }
+            vmSpec.getRootDisk().setEncrypted(true);
+        }
+
         // discard these info in vmSpec
         vmSpec.setVolumeSpecs(new ArrayList<>());
         vmSpec.setDestDataVolumes(Collections.emptyList());
         vmSpec.setDestHost(null);
 
         // use the same primary storage as before changing
-        String psUuid = Q.New(VolumeVO.class)
-                .select(VolumeVO_.primaryStorageUuid)
-                .eq(VolumeVO_.uuid, vmSpec.getVmInventory().getRootVolumeUuid())
-                .findValue();
+        String psUuid = rootVolumeVO == null ? null : rootVolumeVO.getPrimaryStorageUuid();
         vmSpec.setRequiredPrimaryStorageUuidForRootVolume(psUuid);
 
         // if root volume on LocalStorage, then allocate last host again
@@ -1162,6 +1169,11 @@ public class MevocoVmInstanceBase extends VmInstanceBase {
                             csmsg.setArchitecture(vivo.getArchitecture());
                             csmsg.setVirtio(VmExtraInfoGetter.New(vivo.getUuid()).isVirtio());
                             csmsg.setGuestOsType(vivo.getGuestOsType());
+                            if (csmsg instanceof CreateTemporaryRootVolumeTemplateFromVolumeSnapshotMsg) {
+                                DiskAO diskAO = msg.getDiskAOsByVolumeUuid().get(snap.getVolumeUuid());
+                                ((CreateTemporaryRootVolumeTemplateFromVolumeSnapshotMsg) csmsg)
+                                        .setEncrypted(diskAO == null ? null : diskAO.getEncrypted());
+                            }
                             cmsg = csmsg;
                         } else {
                             CreateDataVolumeTemplateFromVolumeSnapshotMsg csmsg = new CreateDataVolumeTemplateFromVolumeSnapshotMsg();
@@ -1270,6 +1282,7 @@ public class MevocoVmInstanceBase extends VmInstanceBase {
                         cvmsg.setPlatform(msg.getPlatform());
                         cvmsg.setGuestOsType(msg.getGuestOsType());
                         cvmsg.setArchitecture(msg.getArchitecture());
+                        cvmsg.setVmEncryption(msg.getVmEncryption() != null ? msg.getVmEncryption() : vivo.isVmEncryption());
                         cvmsg.setVirtio(cvmsg.hasSystemTag(VmSystemTags.VIRTIO::isMatch));
 
                         if (!cvmsg.hasSystemTag(VmSystemTags.CREATE_VM_CD_ROM_LIST::isMatch)) {
@@ -1639,6 +1652,7 @@ public class MevocoVmInstanceBase extends VmInstanceBase {
                                     spec.snapshot.getVolumeUuid()));
                             cmsg.setVolumeSnapshotUuid(spec.snapshot.getUuid());
                             cmsg.setSystemTags(diskAO != null ? diskAO.getSystemTags() : null);
+                            cmsg.setEncrypted(diskAO == null ? null : diskAO.getEncrypted());
                             cmsg.addSystemTag(VolumeSystemTags.FAST_CREATE.getTagFormat());
                             cmsg.setSession(msg.getSession());
                             if (diskAO != null && diskAO.getSize() != 0) {
@@ -1658,6 +1672,7 @@ public class MevocoVmInstanceBase extends VmInstanceBase {
                                 cmsg.setSystemTags(diskAO.getSystemTags() != null ? diskAO.getSystemTags() : null);
                                 cmsg.setPrimaryStorageUuid(diskAO.getPrimaryStorageUuid() != null ?
                                         diskAO.getPrimaryStorageUuid() : originVol.getPrimaryStorageUuid());
+                                cmsg.setEncrypted(diskAO.getEncrypted());
                             }
                             return cmsg;
                         }

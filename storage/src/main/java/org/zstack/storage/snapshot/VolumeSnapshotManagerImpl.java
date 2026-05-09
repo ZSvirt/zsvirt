@@ -737,6 +737,7 @@ public class VolumeSnapshotManagerImpl extends AbstractService implements
         vo.setDescription(msg.getDescription());
         vo.setVolumeUuid(msg.getVolumeUuid());
         vo.setFormat(vol.getFormat());
+        vo.setEncrypted(vol.isEncrypted());
         vo.setState(VolumeSnapshotState.Enabled);
         vo.setStatus(VolumeSnapshotStatus.Creating);
         vo.setVolumeType(vol.getType().toString());
@@ -991,6 +992,9 @@ public class VolumeSnapshotManagerImpl extends AbstractService implements
                         markSnapshotTreeCompleted(snapshot);
                         if (volumeNewInstallPath != null) {
                             vol.setInstallPath(volumeNewInstallPath);
+                            if (Boolean.TRUE.equals(snapshot.getEncrypted())) {
+                                vol.setEncrypted(true);
+                            }
                             dbf.update(vol);
                         }
 
@@ -1000,6 +1004,7 @@ public class VolumeSnapshotManagerImpl extends AbstractService implements
                         svo.setPrimaryStorageInstallPath(snapshot.getPrimaryStorageInstallPath());
                         svo.setStatus(VolumeSnapshotStatus.Ready);
                         svo.setSize(snapshot.getSize());
+                        svo.setEncrypted(Boolean.TRUE.equals(snapshot.getEncrypted()));
                         if (snapshot.getFormat() != null) {
                             svo.setFormat(snapshot.getFormat());
                         }

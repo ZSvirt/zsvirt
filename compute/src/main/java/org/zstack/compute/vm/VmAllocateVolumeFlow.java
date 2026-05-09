@@ -118,6 +118,8 @@ public class VmAllocateVolumeFlow implements Flow {
                 if (disk != null && !isEmpty(disk.getSystemTags())) {
                     tags.addAll(disk.getSystemTags());
                 }
+                Boolean volEnc = disk != null && Boolean.TRUE.equals(disk.getEncrypted());
+                msg.setEncrypted(volEnc);
             } else if (vspec.isData()) {
                 DiskAO disk = isEmpty(spec.getDataDisks()) ? null :
                         spec.getDataDisks().size() > dataVolumeIndex ? spec.getDataDisks().get(dataVolumeIndex) : null;
@@ -139,6 +141,7 @@ public class VmAllocateVolumeFlow implements Flow {
                 if (disk != null && !isEmpty(disk.getSystemTags())) {
                     tags.addAll(disk.getSystemTags());
                 }
+                msg.setEncrypted(disk != null && Boolean.TRUE.equals(disk.getEncrypted()));
 
                 dataVolumeIndex++;
             } else {

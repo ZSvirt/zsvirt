@@ -242,6 +242,7 @@ public class ImageManagerImpl extends AbstractService implements ImageManager, M
                 cmsg.setImageUuid(vo.getUuid());
                 cmsg.setVolumeUuid(volumeUuid);
                 cmsg.setTreeUuid(treeUuid);
+                cmsg.setEncrypted(msg.getEncrypted());
                 cmsg.setSystemTags(msg.getSystemTags());
                 String resourceUuid = volumeUuid != null ? volumeUuid : treeUuid;
                 bus.makeTargetServiceIdByResourceUuid(cmsg, VolumeSnapshotConstant.SERVICE_ID, resourceUuid);

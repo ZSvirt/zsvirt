@@ -350,6 +350,12 @@ class KVMSimulator implements Simulator {
             return rsp
         }
 
+        spec.simulator(KVMConstant.KVM_WRITE_SECRET_MATERIAL_FILE_PATH) {
+            def rsp = new SecretHostEnsureLuksSecretFileResponse()
+            rsp.secFilePath = "/var/lib/zstack/luks/test.key"
+            return rsp
+        }
+
         spec.simulator(KVMConstant.KVM_ENSURE_SECRET_PATH) { HttpEntity<String> e ->
             String hostUuid = e.getHeaders().getFirst(Constants.AGENT_HTTP_HEADER_RESOURCE_UUID)
             SecretHostDefineCmd cmd = JSONObjectUtil.toObject(e.body, SecretHostDefineCmd.class)

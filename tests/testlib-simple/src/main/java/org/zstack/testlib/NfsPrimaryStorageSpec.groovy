@@ -153,6 +153,14 @@ class NfsPrimaryStorageSpec extends PrimaryStorageSpec {
                 return new NfsPrimaryStorageKVMBackendCommands.CreateEmptyVolumeResponse()
             }
 
+            simulator(NfsPrimaryStorageKVMBackend.ENCRYPT_VOLUME_BITS_PATH) {
+                return new NfsPrimaryStorageKVMBackendCommands.EncryptVolumeBitsRsp()
+            }
+
+            simulator(NfsPrimaryStorageKVMBackend.CONVERT_VOLUME_ENCRYPTION_PATH) {
+                return new NfsPrimaryStorageKVMBackendCommands.ConvertVolumeEncryptionRsp()
+            }
+
             VFS.vfsHook(NfsPrimaryStorageKVMBackend.CREATE_EMPTY_VOLUME_PATH, xspec) { rsp, HttpEntity<String> e, EnvSpec spec ->
                 def cmd = JSONObjectUtil.toObject(e.body, NfsPrimaryStorageKVMBackendCommands.CreateEmptyVolumeCmd.class)
                 VFS vfs = vfs(cmd, spec)

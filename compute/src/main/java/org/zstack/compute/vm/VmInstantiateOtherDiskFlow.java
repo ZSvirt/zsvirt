@@ -86,6 +86,7 @@ public class VmInstantiateOtherDiskFlow implements Flow {
                 } else if (isAttachDataVolume()) {
                     VolumeVO volume = Q.New(VolumeVO.class).eq(VolumeVO_.uuid, diskAO.getSourceUuid()).find();
                     volumeInventory = VolumeInventory.valueOf(volume);
+                    setupEncryptExistingVolumeFlow();
                     setupAttachVolumeFlows();
                 } else if (diskAO.getSourceUuid() != null && diskAO.getSourceType() != null) {
                     setupAttachOtherDiskFlows();
@@ -180,6 +181,7 @@ public class VmInstantiateOtherDiskFlow implements Flow {
                         msg.setDiskOfferingUuid(diskAO.getDiskOfferingUuid());
                         msg.setPrimaryStorageUuid(allocatedPrimaryStorageUuid);
                         msg.setDescription(String.format("vm-%s-data-volume", vmUuid));
+                        msg.setEncrypted(Boolean.TRUE.equals(diskAO.getEncrypted()));
                         bus.makeLocalServiceId(msg, VolumeConstant.SERVICE_ID);
                         bus.send(msg, new CloudBusCallBack(innerTrigger) {
                             @Override
@@ -328,6 +330,7 @@ public class VmInstantiateOtherDiskFlow implements Flow {
                         } else {
                             cmsg.setPrimaryStorageUuid(allocatedPrimaryStorageUuid[0]);
                         }
+                        cmsg.setEncrypted(Boolean.TRUE.equals(diskAO.getEncrypted()));
 
                         bus.makeLocalServiceId(cmsg, VolumeConstant.SERVICE_ID);
                         bus.send(cmsg, new CloudBusCallBack(innerTrigger) {
@@ -396,6 +399,56 @@ public class VmInstantiateOtherDiskFlow implements Flow {
                                 if (!reply.isSuccess()) {
                                     innerTrigger.fail(reply.getError());
                                     return;
+                                }
+                                innerTrigger.next();
+                            }
+                        });
+                    }
+                });
+            }
+
+            /**
+             * When the caller requested an encrypted data volume (DiskAO.encrypted=true) but the
+             * existing source volume is not yet encrypted, transition the source bits to LUKS
+             * in place before attaching. Delegates to {@code EncryptVolumeMsg} so the actual
+             * key/secret/PS-conversion logic lives in {@code VolumeBase} (shared with the
+             * create-data-volume-from-template flow).
+             *
+             * <p>Skipped when:
+             * <ul>
+             *   <li>{@code DiskAO.encrypted} is false/null, or</li>
+             *   <li>the source volume is already encrypted (no-op transition).</li>
+             * </ul>
+             */
+            private void setupEncryptExistingVolumeFlow() {
+                if (!Boolean.TRUE.equals(diskAO.getEncrypted())) {
+                    return;
+                }
+                if (volumeInventory != null && Boolean.TRUE.equals(volumeInventory.getEncrypted())) {
+                    return;
+                }
+                flow(new NoRollbackFlow() {
+                    String __name__ = String.format("encrypt-existing-data-volume-%s-in-place",
+                            diskAO.getSourceUuid());
+
+                    @Override
+                    public void run(final FlowTrigger innerTrigger, Map data) {
+                        EncryptVolumeMsg emsg = new EncryptVolumeMsg();
+                        emsg.setVolumeUuid(volumeInventory.getUuid());
+                        emsg.setHostUuid(hostUuid);
+                        emsg.setPurpose("attach-existing-disk-as-encrypted-data-volume");
+                        bus.makeTargetServiceIdByResourceUuid(emsg, VolumeConstant.SERVICE_ID,
+                                volumeInventory.getUuid());
+                        bus.send(emsg, new CloudBusCallBack(innerTrigger) {
+                            @Override
+                            public void run(MessageReply reply) {
+                                if (!reply.isSuccess()) {
+                                    innerTrigger.fail(reply.getError());
+                                    return;
+                                }
+                                EncryptVolumeReply er = reply.castReply();
+                                if (er.getInventory() != null) {
+                                    volumeInventory = er.getInventory();
                                 }
                                 innerTrigger.next();
                             }

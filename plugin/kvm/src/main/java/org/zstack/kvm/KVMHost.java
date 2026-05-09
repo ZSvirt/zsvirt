@@ -55,6 +55,8 @@ import org.zstack.header.host.*;
 import org.zstack.header.host.MigrateVmOnHypervisorMsg.StorageMigrationPolicy;
 import org.zstack.header.secret.SecretHostDefineMsg;
 import org.zstack.header.secret.SecretHostDefineReply;
+import org.zstack.header.secret.SecretHostEnsureLuksSecretFileMsg;
+import org.zstack.header.secret.SecretHostEnsureLuksSecretFileReply;
 import org.zstack.header.secret.SecretHostDeleteMsg;
 import org.zstack.header.secret.SecretHostDeleteReply;
 import org.zstack.header.secret.SecretHostGetMsg;
@@ -772,6 +774,8 @@ public class KVMHost extends HostBase implements Host {
             handle((SecretHostGetMsg) msg);
         } else if (msg instanceof ResolveVtpmLibvirtSecretOnHypervisorMsg) {
             handle((ResolveVtpmLibvirtSecretOnHypervisorMsg) msg);
+        } else if (msg instanceof SecretHostEnsureLuksSecretFileMsg) {
+            handle((SecretHostEnsureLuksSecretFileMsg) msg);
         } else if (msg instanceof SecretHostDefineMsg) {
             handle((SecretHostDefineMsg) msg);
         } else if (msg instanceof SecretHostDeleteMsg) {
@@ -3221,8 +3225,14 @@ public class KVMHost extends HostBase implements Host {
                                 protected void scripts() {
                                     s.diskMigrationMap.forEach((oldVolumeInstallPath, newVolumeUuid) -> {
                                         VolumeVO vo = findByUuid(newVolumeUuid, VolumeVO.class);
-                                        diskMigrationMap.put(oldVolumeInstallPath,
-                                                VolumeTO.valueOf(VolumeInventory.valueOf(vo), (KVMHostInventory) getSelfInventory()));
+                                        VolumeTO vto = VolumeTO.valueOf(VolumeInventory.valueOf(vo), (KVMHostInventory) getSelfInventory());
+                                        if (s.volumeLuksSecrets != null) {
+                                            String secretUuid = s.volumeLuksSecrets.get(vo.getUuid());
+                                            if (secretUuid != null) {
+                                                vto.setLuksSecretUuid(secretUuid);
+                                            }
+                                        }
+                                        diskMigrationMap.put(oldVolumeInstallPath, vto);
                                     });
                                 }
                             }.execute();
@@ -3378,6 +3388,7 @@ public class KVMHost extends HostBase implements Host {
         String srcHostMnIp;
         String srcHostUuid;
         Map<String, String> diskMigrationMap;
+        Map<String, String> volumeLuksSecrets;
         boolean reload;
         long bandwidth;
     }
@@ -3392,6 +3403,7 @@ public class KVMHost extends HostBase implements Host {
         s.strategy = msg.getStrategy();
         s.downTime = msg.getDownTime();
         s.diskMigrationMap = msg.getDiskMigrationMap();
+        s.volumeLuksSecrets = msg.getVolumeLuksSecrets();
         s.reload = msg.isReload();
         s.bandwidth = msg.getBandwidth();
 
@@ -4510,6 +4522,15 @@ public class KVMHost extends HostBase implements Host {
             cmd.setVmCpuModel(vmCpuMode);
         }
 
+        // Key must match VolumeEncryptedStartExtension.EXT_DATA_KEY in the storage module.
+        // Inlined here to avoid a kvm -> storage compile-time dep (kvm builds before storage).
+        @SuppressWarnings("unchecked")
+        Map<String, String> volLuksSecrets = spec.getExtensionData(
+                "VolumeLuksSecrets", Map.class);
+        if (volLuksSecrets != null && volLuksSecrets.containsKey(rootVolume.getResourceUuid())) {
+            rootVolume.setLuksSecretUuid(volLuksSecrets.get(rootVolume.getResourceUuid()));
+        }
+
         cmd.setRootVolume(rootVolume);
         cmd.setUseBootMenu(VmGlobalConfig.VM_BOOT_MENU.value(Boolean.class));
 
@@ -4526,6 +4547,9 @@ public class KVMHost extends HostBase implements Host {
             // except for platform = Other, always use virtio driver for data volume
             // set bug https://github.com/zxwing/premium/issues/1050
             v.setUseVirtio(!ImagePlatform.Other.toString().equals(platform));
+            if (volLuksSecrets != null && volLuksSecrets.containsKey(v.getResourceUuid())) {
+                v.setLuksSecretUuid(volLuksSecrets.get(v.getResourceUuid()));
+            }
             dataVolumes.add(v);
         }
         dataVolumes.sort(Comparator.comparing(VolumeTO::getDeviceId));
@@ -5423,22 +5447,27 @@ public class KVMHost extends HostBase implements Host {
         });
     }
 
-    private void handle(SecretHostDefineMsg msg) {
-        SecretHostDefineReply reply = new SecretHostDefineReply();
-        if (org.apache.commons.lang.StringUtils.isBlank(msg.getDekBase64())) {
+    private void handle(SecretHostEnsureLuksSecretFileMsg msg) {
+        SecretHostEnsureLuksSecretFileReply reply = new SecretHostEnsureLuksSecretFileReply();
+        if (StringUtils.isBlank(msg.getDekBase64())) {
             reply.setError(operr("dekBase64 is required"));
             bus.reply(msg, reply);
             return;
         }
-        if (StringUtils.isBlank(msg.getVmUuid()) || StringUtils.isBlank(msg.getPurpose()) ||
-                msg.getKeyVersion() == null || StringUtils.isBlank(msg.getUsageInstance())) {
-            reply.setError(operr("vmUuid, purpose, keyVersion and usageInstance are required for ensure secret"));
+        if (StringUtils.isBlank(msg.getHostUuid())) {
+            reply.setError(operr("hostUuid is required for LUKS secret material file on hypervisor"));
             bus.reply(msg, reply);
             return;
         }
         String hostUuid = getSelf().getUuid();
+        if (!StringUtils.equals(hostUuid, msg.getHostUuid())) {
+            reply.setError(operr("hostUuid mismatch for LUKS secret material file, routed host[uuid:%s], message host[uuid:%s]",
+                    hostUuid, msg.getHostUuid()));
+            bus.reply(msg, reply);
+            return;
+        }
         HostKeyIdentityVO identity = HostKeyIdentityHelper.getHostKeyIdentity(dbf, hostUuid);
-        String pubKey = identity != null ? org.apache.commons.lang.StringUtils.trimToNull(identity.getPublicKey()) : null;
+        String pubKey = identity != null ? StringUtils.trimToNull(identity.getPublicKey()) : null;
         Boolean verifyOk = identity != null ? identity.getVerified() : null;
         if (pubKey == null) {
             reply.setError(operr("no public key for host, connect/reconnect did not sync key"));
@@ -5459,7 +5488,130 @@ public class KVMHost extends HostBase implements Host {
         }
         byte[] dekRaw;
         try {
-            dekRaw = java.util.Base64.getDecoder().decode(msg.getDekBase64().trim());
+            dekRaw = Base64.getDecoder().decode(msg.getDekBase64().trim());
+        } catch (IllegalArgumentException e) {
+            reply.setError(operr("invalid dekBase64: %s", e.getMessage()));
+            bus.reply(msg, reply);
+            return;
+        }
+        if (dekRaw == null || dekRaw.length == 0) {
+            reply.setError(operr("dekBase64 decoded to empty"));
+            bus.reply(msg, reply);
+            return;
+        }
+        if (dekRaw.length > KVMConstant.MAX_DEK_BYTES) {
+            reply.setError(operr("dekBase64 decoded payload is too large"));
+            bus.reply(msg, reply);
+            return;
+        }
+        byte[] pubKeyBytes;
+        try {
+            pubKeyBytes = Base64.getDecoder().decode(pubKey);
+        } catch (IllegalArgumentException e) {
+            reply.setError(operr("invalid host public key in DB: %s", e.getMessage()));
+            bus.reply(msg, reply);
+            return;
+        }
+        if (pubKeyBytes == null || pubKeyBytes.length != 32) {
+            reply.setError(operr("host public key must be 32 bytes (X25519)"));
+            bus.reply(msg, reply);
+            return;
+        }
+        List<HostSecretEnvelopeCryptoExtensionPoint> sealers = pluginRegistry.getExtensionList(HostSecretEnvelopeCryptoExtensionPoint.class);
+        if (sealers == null || sealers.isEmpty()) {
+            reply.setError(operr("host secret envelope sealer not available (premium crypto module required)"));
+            bus.reply(msg, reply);
+            return;
+        }
+        byte[] envelope;
+        try {
+            envelope = sealers.get(0).seal(pubKeyBytes, dekRaw);
+        } catch (Exception e) {
+            reply.setError(operr("HPKE seal failed: %s", e.getMessage()));
+            bus.reply(msg, reply);
+            return;
+        }
+        String envelopeDekBase64 = Base64.getEncoder().encodeToString(envelope);
+        KVMAgentCommands.SecretHostEnsureLuksSecretFileCmd cmd = new KVMAgentCommands.SecretHostEnsureLuksSecretFileCmd();
+        cmd.setEncryptedDek(envelopeDekBase64);
+
+        KVMHostAsyncHttpCallMsg kmsg = new KVMHostAsyncHttpCallMsg();
+        kmsg.setCommand(cmd);
+        kmsg.setPath(KVMConstant.KVM_WRITE_SECRET_MATERIAL_FILE_PATH);
+        kmsg.setHostUuid(hostUuid);
+        kmsg.setTimeout(TimeUnit.SECONDS.toMillis(KVMConstant.ENVELOPE_KEY_HTTP_TIMEOUT_SEC));
+        bus.makeTargetServiceIdByResourceUuid(kmsg, HostConstant.SERVICE_ID, hostUuid);
+        bus.send(kmsg, new CloudBusCallBack(msg) {
+            @Override
+            public void run(MessageReply r) {
+                if (!r.isSuccess()) {
+                    reply.setError(r.getError());
+                    bus.reply(msg, reply);
+                    return;
+                }
+                KVMHostAsyncHttpCallReply kreply = r.castReply();
+                KVMAgentCommands.SecretHostEnsureLuksSecretFileResponse rsp =
+                        kreply.toResponse(KVMAgentCommands.SecretHostEnsureLuksSecretFileResponse.class);
+                if (rsp != null && rsp.isSuccess() && StringUtils.isNotBlank(rsp.getSecFilePath())) {
+                    reply.setSecFilePath(rsp.getSecFilePath());
+                } else if (rsp != null && rsp.isSuccess()) {
+                    reply.setError(operr("prepare LUKS secret channel succeeded but secFilePath is empty"));
+                } else {
+                    reply.setError(buildSecretAgentError(rsp, "prepare LUKS secret channel failed"));
+                }
+                bus.reply(msg, reply);
+            }
+        });
+    }
+
+    private void handle(SecretHostDefineMsg msg) {
+        SecretHostDefineReply reply = new SecretHostDefineReply();
+        if (StringUtils.isBlank(msg.getDekBase64())) {
+            reply.setError(operr("dekBase64 is required"));
+            bus.reply(msg, reply);
+            return;
+        }
+        if (StringUtils.isBlank(msg.getVmUuid()) || StringUtils.isBlank(msg.getPurpose()) ||
+                msg.getKeyVersion() == null || StringUtils.isBlank(msg.getUsageInstance())) {
+            reply.setError(operr("vmUuid, purpose, keyVersion and usageInstance are required for ensure secret"));
+            bus.reply(msg, reply);
+            return;
+        }
+        if (StringUtils.isBlank(msg.getHostUuid())) {
+            reply.setError(operr("hostUuid is required for ensure secret on hypervisor"));
+            bus.reply(msg, reply);
+            return;
+        }
+        String hostUuid = getSelf().getUuid();
+        if (!StringUtils.equals(hostUuid, msg.getHostUuid())) {
+            reply.setError(operr("hostUuid mismatch for ensure secret, routed host[uuid:%s], message host[uuid:%s]",
+                    hostUuid, msg.getHostUuid()));
+            bus.reply(msg, reply);
+            return;
+        }
+        HostKeyIdentityVO identity = HostKeyIdentityHelper.getHostKeyIdentity(dbf, hostUuid);
+        String pubKey = identity != null ? StringUtils.trimToNull(identity.getPublicKey()) : null;
+        Boolean verifyOk = identity != null ? identity.getVerified() : null;
+        if (pubKey == null) {
+            reply.setError(operr("no public key for host, connect/reconnect did not sync key"));
+            bus.reply(msg, reply);
+            return;
+        }
+        String storedFingerprint = StringUtils.trimToNull(identity.getFingerprint());
+        String computed = HostKeyIdentityHelper.fingerprintFromPublicKey(pubKey);
+        if (storedFingerprint == null || !StringUtils.equals(storedFingerprint, computed)) {
+            reply.setError(operr("host public key fingerprint mismatch, key may be corrupted or tampered"));
+            bus.reply(msg, reply);
+            return;
+        }
+        if (!Boolean.TRUE.equals(verifyOk)) {
+            reply.setError(operr("host secret key verify not ok, not synced"));
+            bus.reply(msg, reply);
+            return;
+        }
+        byte[] dekRaw;
+        try {
+            dekRaw = Base64.getDecoder().decode(msg.getDekBase64().trim());
         } catch (IllegalArgumentException e) {
             reply.setError(operr("invalid dekBase64: %s", e.getMessage()));
             bus.reply(msg, reply);
@@ -5479,7 +5631,7 @@ public class KVMHost extends HostBase implements Host {
 
         byte[] pubKeyBytes;
         try {
-            pubKeyBytes = java.util.Base64.getDecoder().decode(pubKey);
+            pubKeyBytes = Base64.getDecoder().decode(pubKey);
         } catch (IllegalArgumentException e) {
             reply.setError(operr("invalid host public key in DB: %s", e.getMessage()));
             bus.reply(msg, reply);
@@ -5490,7 +5642,7 @@ public class KVMHost extends HostBase implements Host {
             bus.reply(msg, reply);
             return;
         }
-        java.util.List<HostSecretEnvelopeCryptoExtensionPoint> sealers = pluginRegistry.getExtensionList(HostSecretEnvelopeCryptoExtensionPoint.class);
+        List<HostSecretEnvelopeCryptoExtensionPoint> sealers = pluginRegistry.getExtensionList(HostSecretEnvelopeCryptoExtensionPoint.class);
         if (sealers == null || sealers.isEmpty()) {
             reply.setError(operr("host secret envelope sealer not available (premium crypto module required)"));
             bus.reply(msg, reply);
@@ -5504,7 +5656,7 @@ public class KVMHost extends HostBase implements Host {
             bus.reply(msg, reply);
             return;
         }
-        String envelopeDekBase64 = java.util.Base64.getEncoder().encodeToString(envelope);
+        String envelopeDekBase64 = Base64.getEncoder().encodeToString(envelope);
         String url = buildUrl(KVMConstant.KVM_ENSURE_SECRET_PATH);
         KVMAgentCommands.SecretHostDefineCmd cmd = new KVMAgentCommands.SecretHostDefineCmd();
         cmd.setEncryptedDek(envelopeDekBase64);
@@ -5515,7 +5667,7 @@ public class KVMHost extends HostBase implements Host {
         cmd.setDescription(msg.getDescription() != null ? msg.getDescription() : "");
         cmd.setUsageInstance(msg.getUsageInstance());
         Map<String, String> headers = new HashMap<>();
-        headers.put(Constants.AGENT_HTTP_HEADER_RESOURCE_UUID, getSelf().getUuid());
+        headers.put(Constants.AGENT_HTTP_HEADER_RESOURCE_UUID, hostUuid);
         Http<KVMAgentCommands.SecretHostDefineResponse> http = new Http<>(url, cmd, KVMAgentCommands.SecretHostDefineResponse.class);
         http.runBeforeAsyncJsonPostExts(headers);
         restf.asyncJsonPost(url, http.commandStr, headers, new JsonAsyncRESTCallback<KVMAgentCommands.SecretHostDefineResponse>(msg, reply) {

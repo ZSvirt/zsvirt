@@ -38,6 +38,7 @@ import org.zstack.header.image.ImageConstant.ImageMediaType;
 import org.zstack.header.image.ImageInventory;
 import org.zstack.header.image.ImageStatus;
 import org.zstack.header.image.ImageVO;
+import org.zstack.header.log.NoLogging;
 import org.zstack.header.message.Message;
 import org.zstack.header.message.MessageReply;
 import org.zstack.header.rest.RESTFacade;
@@ -55,6 +56,8 @@ import org.zstack.header.vm.metadata.UpdateVmInstanceMetadataOnPrimaryStorageRep
 import org.zstack.header.volume.*;
 import org.zstack.identity.AccountManager;
 import org.zstack.kvm.*;
+import org.zstack.storage.encrypt.VolumeEncryptedSecretHelper;
+import org.zstack.storage.encrypt.VolumeSnapshotEncryptionHelper;
 import org.zstack.storage.primary.*;
 import org.zstack.storage.primary.local.LocalStorageKvmMigrateVmFlow.CopyBitsFromRemoteCmd;
 import org.zstack.storage.primary.local.MigrateBitsStruct.ResourceInfo;
@@ -68,6 +71,7 @@ import org.zstack.utils.path.PathUtil;
 
 import javax.persistence.Tuple;
 import java.io.File;
+import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -89,8 +93,12 @@ public class LocalStorageKvmBackend extends LocalStorageHypervisorBackend {
     private RESTFacade restf;
     @Autowired
     private PluginRegistry pluginRgty;
+    @Autowired
+    private VolumeSnapshotEncryptionHelper snapshotEncryptionHelper;
+    @Autowired
+    private VolumeEncryptedSecretHelper volumeEncryptedSecretHelper;
 
-    public static class AgentCommand extends KVMAgentCommands.PrimaryStorageCommand {
+    public static class AgentCommand extends KVMAgentCommands.PrimaryStorageCommand implements Serializable {
         public String uuid;
         public String storagePath;
     }
@@ -197,7 +205,7 @@ public class LocalStorageKvmBackend extends LocalStorageHypervisorBackend {
         }
     }
 
-    public static class CreateEmptyVolumeCmd extends AgentCommand {
+    public static class CreateEmptyVolumeCmd extends AgentCommand implements Serializable {
         private String installUrl;
         private long size;
         private String accountUuid;
@@ -205,6 +213,8 @@ public class LocalStorageKvmBackend extends LocalStorageHypervisorBackend {
         private String volumeUuid;
         private String backingFile;
         private String volumeFormat;
+        @NoLogging
+        private String encryptedDek;
 
         public String getBackingFile() {
             return backingFile;
@@ -220,6 +230,14 @@ public class LocalStorageKvmBackend extends LocalStorageHypervisorBackend {
 
         public void setVolumeFormat(String volumeFormat) {
             this.volumeFormat = volumeFormat;
+        }
+
+        public String getEncryptedDek() {
+            return encryptedDek;
+        }
+
+        public void setEncryptedDek(String encryptedDek) {
+            this.encryptedDek = encryptedDek;
         }
 
         public String getInstallUrl() {
@@ -268,6 +286,26 @@ public class LocalStorageKvmBackend extends LocalStorageHypervisorBackend {
         public Long size;
     }
 
+    public static class EncryptVolumeBitsCmd extends AgentCommand {
+        public String installPath;
+        public String encryptLuksSecretMaterialFilePath;
+    }
+
+    public static class EncryptVolumeBitsRsp extends AgentResponse {
+    }
+
+    public static class ConvertVolumeEncryptionCmd extends AgentCommand implements Serializable {
+        public String volumeUuid;
+        public boolean targetEncrypted;
+        public List<ConvertVolumeEncryptionOnPrimaryStorageMsg.VolumeEncryptionConversionItem> items;
+        @NoLogging
+        public String encryptedDek;
+    }
+
+    public static class ConvertVolumeEncryptionRsp extends AgentResponse {
+        public Map<String, Long> actualSizes;
+    }
+
     public static class GetPhysicalCapacityCmd extends AgentCommand {
         private String hostUuid;
 
@@ -285,6 +323,16 @@ public class LocalStorageKvmBackend extends LocalStorageHypervisorBackend {
         private String installUrl;
         private String volumeUuid;
         private long virtualSize;
+        @NoLogging
+        private String encryptedDek;
+
+        public String getEncryptedDek() {
+            return encryptedDek;
+        }
+
+        public void setEncryptedDek(String encryptedDek) {
+            this.encryptedDek = encryptedDek;
+        }
 
         public String getTemplatePathInCache() {
             return templatePathInCache;
@@ -329,6 +377,8 @@ public class LocalStorageKvmBackend extends LocalStorageHypervisorBackend {
         public String installPath;
         public String volumeUuid;
         public long virtualSize;
+        @NoLogging
+        public String encryptedDek;
     }
 
     public static class CreateVolumeWithBackingRsp extends AgentResponse {
@@ -420,6 +470,7 @@ public class LocalStorageKvmBackend extends LocalStorageHypervisorBackend {
     public static class CreateTemplateFromVolumeCmd extends AgentCommand implements HasThreadContext{
         private String installPath;
         private String volumePath;
+        private String encryptLuksSecretMaterialFilePath;
 
         public String getInstallPath() {
             return installPath;
@@ -435,6 +486,14 @@ public class LocalStorageKvmBackend extends LocalStorageHypervisorBackend {
 
         public void setVolumePath(String rootVolumePath) {
             this.volumePath = rootVolumePath;
+        }
+
+        public String getEncryptLuksSecretMaterialFilePath() {
+            return encryptLuksSecretMaterialFilePath;
+        }
+
+        public void setEncryptLuksSecretMaterialFilePath(String encryptLuksSecretMaterialFilePath) {
+            this.encryptLuksSecretMaterialFilePath = encryptLuksSecretMaterialFilePath;
         }
     }
 
@@ -494,6 +553,7 @@ public class LocalStorageKvmBackend extends LocalStorageHypervisorBackend {
 
     public static class RevertVolumeFromSnapshotCmd extends AgentCommand {
         private String snapshotInstallPath;
+        private String encryptLuksSecretMaterialFilePath;
 
         public String getSnapshotInstallPath() {
             return snapshotInstallPath;
@@ -502,11 +562,20 @@ public class LocalStorageKvmBackend extends LocalStorageHypervisorBackend {
         public void setSnapshotInstallPath(String snapshotInstallPath) {
             this.snapshotInstallPath = snapshotInstallPath;
         }
+
+        public String getEncryptLuksSecretMaterialFilePath() {
+            return encryptLuksSecretMaterialFilePath;
+        }
+
+        public void setEncryptLuksSecretMaterialFilePath(String encryptLuksSecretMaterialFilePath) {
+            this.encryptLuksSecretMaterialFilePath = encryptLuksSecretMaterialFilePath;
+        }
     }
 
     public static class ReinitImageCmd extends AgentCommand {
         private String imagePath;
         private String volumePath;
+        private String encryptLuksSecretMaterialFilePath;
 
         public String getImagePath() {
             return imagePath;
@@ -522,6 +591,14 @@ public class LocalStorageKvmBackend extends LocalStorageHypervisorBackend {
 
         public void setVolumePath(String volumePath) {
             this.volumePath = volumePath;
+        }
+
+        public String getEncryptLuksSecretMaterialFilePath() {
+            return encryptLuksSecretMaterialFilePath;
+        }
+
+        public void setEncryptLuksSecretMaterialFilePath(String encryptLuksSecretMaterialFilePath) {
+            this.encryptLuksSecretMaterialFilePath = encryptLuksSecretMaterialFilePath;
         }
     }
 
@@ -566,6 +643,7 @@ public class LocalStorageKvmBackend extends LocalStorageHypervisorBackend {
         private String volumeUuid;
         private String snapshotInstallPath;
         private String workspaceInstallPath;
+        private String encryptLuksSecretMaterialFilePath;
 
         public String getVolumeUuid() {
             return volumeUuid;
@@ -589,6 +667,14 @@ public class LocalStorageKvmBackend extends LocalStorageHypervisorBackend {
 
         public void setWorkspaceInstallPath(String workspaceInstallPath) {
             this.workspaceInstallPath = workspaceInstallPath;
+        }
+
+        public String getEncryptLuksSecretMaterialFilePath() {
+            return encryptLuksSecretMaterialFilePath;
+        }
+
+        public void setEncryptLuksSecretMaterialFilePath(String encryptLuksSecretMaterialFilePath) {
+            this.encryptLuksSecretMaterialFilePath = encryptLuksSecretMaterialFilePath;
         }
     }
 
@@ -668,6 +754,7 @@ public class LocalStorageKvmBackend extends LocalStorageHypervisorBackend {
         private String srcPath;
         private String destPath;
         private boolean fullRebase;
+        private String encryptedDek;
 
         public boolean isFullRebase() {
             return fullRebase;
@@ -692,6 +779,14 @@ public class LocalStorageKvmBackend extends LocalStorageHypervisorBackend {
         public void setDestPath(String destPath) {
             this.destPath = destPath;
         }
+
+        public String getEncryptedDek() {
+            return encryptedDek;
+        }
+
+        public void setEncryptedDek(String encryptedDek) {
+            this.encryptedDek = encryptedDek;
+        }
     }
 
     public static class OfflineMergeSnapshotRsp extends AgentResponse {
@@ -710,6 +805,7 @@ public class LocalStorageKvmBackend extends LocalStorageHypervisorBackend {
         public String top;
         public String base;
         public List<String> topChildrenInstallPathInDb = new ArrayList<>();
+        public String encryptedDek;
     }
 
     public static class OfflineCommitSnapshotRsp extends AgentResponse {
@@ -1009,6 +1105,8 @@ public class LocalStorageKvmBackend extends LocalStorageHypervisorBackend {
     public static final String CLEANUP_VM_METADATA_PATH = "/localstorage/vm/metadata/cleanup";
     public static final String CLEANUP_ALL_VM_METADATA_PATH = "/localstorage/vm/metadata/cleanupall";
     public static final String PREFIX_REBASE_BACKING_FILES_PATH = "/localstorage/snapshot/prefixrebasebackingfiles";
+    public static final String ENCRYPT_VOLUME_BITS_PATH = "/localstorage/volume/encryptinplace";
+    public static final String CONVERT_VOLUME_ENCRYPTION_PATH = "/localstorage/volume/convertencryption";
 
     public LocalStorageKvmBackend() {
     }
@@ -1321,7 +1419,7 @@ public class LocalStorageKvmBackend extends LocalStorageHypervisorBackend {
     }
 
     private void createEmptyVolume(InstantiateVolumeOnPrimaryStorageMsg msg, ReturnValueCompletion<InstantiateVolumeOnPrimaryStorageReply> completion) {
-        createEmptyVolume(msg.getVolume(), msg.getDestHost().getUuid(), new ReturnValueCompletion<VolumeStats>(completion) {
+        createEmptyVolume(msg.getVolume(), msg.getDestHost().getUuid(), msg.getVolumeLuksAgentSpec(), new ReturnValueCompletion<VolumeStats>(completion) {
             @Override
             public void success(VolumeStats returnValue) {
                 InstantiateVolumeOnPrimaryStorageReply r = new InstantiateVolumeOnPrimaryStorageReply();
@@ -1344,11 +1442,11 @@ public class LocalStorageKvmBackend extends LocalStorageHypervisorBackend {
         });
     }
 
-    public void createEmptyVolume(final VolumeInventory volume, final String hostUuid, final ReturnValueCompletion<VolumeStats> completion) {
-        createEmptyVolumeWithBackingFile(volume, hostUuid, null, completion);
+    public void createEmptyVolume(final VolumeInventory volume, final String hostUuid, final VolumeLuksAgentSpec volumeLuksAgentSpec, final ReturnValueCompletion<VolumeStats> completion) {
+        createEmptyVolumeWithBackingFile(volume, hostUuid, null, volumeLuksAgentSpec, completion);
     }
 
-    public void createEmptyVolumeWithBackingFile(final VolumeInventory volume, final String hostUuid, final String backingFile, final ReturnValueCompletion<VolumeStats> completion) {
+    public void createEmptyVolumeWithBackingFile(final VolumeInventory volume, final String hostUuid, final String backingFile, final VolumeLuksAgentSpec volumeLuksAgentSpec, final ReturnValueCompletion<VolumeStats> completion) {
         final CreateEmptyVolumeCmd cmd = new CreateEmptyVolumeCmd();
         cmd.setAccountUuid(acntMgr.getOwnerAccountUuidOfResource(volume.getUuid()));
         if (volume.getInstallPath() != null && !volume.getInstallPath().equals("")) {
@@ -1370,6 +1468,9 @@ public class LocalStorageKvmBackend extends LocalStorageHypervisorBackend {
         cmd.setSize(volume.getSize());
         cmd.setVolumeUuid(volume.getUuid());
         cmd.setBackingFile(backingFile);
+        if (Boolean.TRUE.equals(volume.getEncrypted())) {
+            cmd.setEncryptedDek(prepareVolumeEncryptedDek(hostUuid, volume, true));
+        }
 
         httpCall(CREATE_EMPTY_VOLUME_PATH, hostUuid, cmd, CreateEmptyVolumeRsp.class, new ReturnValueCompletion<CreateEmptyVolumeRsp>(completion) {
             @Override
@@ -1408,6 +1509,7 @@ public class LocalStorageKvmBackend extends LocalStorageHypervisorBackend {
         String hostUuid;
         String primaryStorageInstallPath;
         String backupStorageInstallPath;
+        String encryptLuksSecretMaterialFilePath;
 
         void download(final ReturnValueCompletion<ImageCacheInventory> completion) {
             DebugUtils.Assert(image != null, "image cannot be null");
@@ -1500,6 +1602,9 @@ public class LocalStorageKvmBackend extends LocalStorageHypervisorBackend {
                                     CreateTemplateFromVolumeCmd cmd = new CreateTemplateFromVolumeCmd();
                                     cmd.setInstallPath(primaryStorageInstallPath);
                                     cmd.setVolumePath(volumeResourceInstallPath);
+                                    if (StringUtils.isNotBlank(encryptLuksSecretMaterialFilePath)) {
+                                        cmd.setEncryptLuksSecretMaterialFilePath(encryptLuksSecretMaterialFilePath);
+                                    }
 
                                     httpCall(CREATE_TEMPLATE_FROM_VOLUME, hostUuid, cmd, false,
                                             CreateTemplateFromVolumeRsp.class,
@@ -1719,7 +1824,7 @@ public class LocalStorageKvmBackend extends LocalStorageHypervisorBackend {
         final ImageInventory image = ispec.getInventory();
 
         if (!ImageMediaType.RootVolumeTemplate.toString().equals(image.getMediaType())) {
-            createEmptyVolume(msg.getVolume(), msg.getDestHost().getUuid(), new ReturnValueCompletion<VolumeStats>(completion) {
+            createEmptyVolume(msg.getVolume(), msg.getDestHost().getUuid(), msg.getVolumeLuksAgentSpec(), new ReturnValueCompletion<VolumeStats>(completion) {
                 @Override
                 public void success(VolumeStats returnValue) {
                     InstantiateVolumeOnPrimaryStorageReply r = new InstantiateVolumeOnPrimaryStorageReply();
@@ -1788,6 +1893,10 @@ public class LocalStorageKvmBackend extends LocalStorageHypervisorBackend {
                         cmd.setVolumeUuid(volume.getUuid());
                         if (image.getSize() < volume.getSize()) {
                             cmd.setVirtualSize(volume.getSize());
+                        }
+
+                        if (Boolean.TRUE.equals(volume.getEncrypted())) {
+                            cmd.setEncryptedDek(prepareVolumeEncryptedDek(hostUuid, volume, true));
                         }
 
                         httpCall(CREATE_VOLUME_FROM_CACHE_PATH, hostUuid, cmd, CreateVolumeFromCacheRsp.class, new ReturnValueCompletion<CreateVolumeFromCacheRsp>(trigger) {
@@ -2143,6 +2252,10 @@ public class LocalStorageKvmBackend extends LocalStorageHypervisorBackend {
         VolumeSnapshotInventory sp = msg.getSnapshot();
         RevertVolumeFromSnapshotCmd cmd = new RevertVolumeFromSnapshotCmd();
         cmd.setSnapshotInstallPath(sp.getPrimaryStorageInstallPath());
+        if (Boolean.TRUE.equals(msg.getVolume().getEncrypted())) {
+            cmd.setEncryptLuksSecretMaterialFilePath(
+                    volumeEncryptedSecretHelper.prepareLuksSecretMaterialFileOnHost(hostUuid, msg.getVolume().getUuid()));
+        }
 
         httpCall(REVERT_SNAPSHOT_PATH, hostUuid, cmd, RevertVolumeFromSnapshotRsp.class, new ReturnValueCompletion<RevertVolumeFromSnapshotRsp>(completion) {
             @Override
@@ -2182,6 +2295,15 @@ public class LocalStorageKvmBackend extends LocalStorageHypervisorBackend {
                 }
                 cmd.imagePath = makeCachedImageInstallUrlFromImageUuidForTemplate(msg.getVolume().getRootImageUuid());
                 cmd.volumePath = makeRootVolumeInstallUrl(msg.getVolume());
+                if (Boolean.TRUE.equals(msg.getVolume().getEncrypted())) {
+                    String secretMaterialFilePath = prepareVolumeSecretMaterialPath(hostUuid, msg.getVolume());
+                    if (StringUtils.isBlank(secretMaterialFilePath)) {
+                        completion.fail(operr("cannot prepare LUKS secret for encrypted volume[uuid:%s] reimage on host[uuid:%s]",
+                                msg.getVolume().getUuid(), hostUuid));
+                        return;
+                    }
+                    cmd.setEncryptLuksSecretMaterialFilePath(secretMaterialFilePath);
+                }
 
                 httpCall(REINIT_IMAGE_PATH, hostUuid, cmd, ReinitImageRsp.class, new ReturnValueCompletion<ReinitImageRsp>(completion) {
                     @Override
@@ -2258,6 +2380,11 @@ public class LocalStorageKvmBackend extends LocalStorageHypervisorBackend {
         cmd.setVolumeUuid(sp.getVolumeUuid());
         cmd.setSnapshotInstallPath(sp.getPrimaryStorageInstallPath());
         cmd.setWorkspaceInstallPath(installPath);
+        Boolean encrypted = Q.New(VolumeVO.class).eq(VolumeVO_.uuid, volumeUuid).select(VolumeVO_.encrypted).findValue();
+        if (Boolean.TRUE.equals(encrypted)) {
+            cmd.setEncryptLuksSecretMaterialFilePath(
+                    volumeEncryptedSecretHelper.prepareLuksSecretMaterialFileOnHost(hostUuid, volumeUuid));
+        }
 
         httpCall(MERGE_SNAPSHOT_PATH, hostUuid, cmd, MergeSnapshotRsp.class, new ReturnValueCompletion<MergeSnapshotRsp>(completion) {
             @Override
@@ -2283,6 +2410,11 @@ public class LocalStorageKvmBackend extends LocalStorageHypervisorBackend {
         cmd.volumeUuid = volumeUuid;
         cmd.installPath = installPath;
         cmd.templatePathInCache = sp.getPrimaryStorageInstallPath();
+        Boolean encrypted = Q.New(VolumeVO.class).eq(VolumeVO_.uuid, volumeUuid).select(VolumeVO_.encrypted).findValue();
+        if (Boolean.TRUE.equals(encrypted)) {
+            VolumeVO volumeVO = Q.New(VolumeVO.class).eq(VolumeVO_.uuid, volumeUuid).find();
+            cmd.encryptedDek = prepareVolumeEncryptedDek(hostUuid, VolumeInventory.valueOf(volumeVO), true);
+        }
 
         Long volumeSize = Q.New(VolumeVO.class).eq(VolumeVO_.uuid, volumeUuid).select(VolumeVO_.size).findValue();
         if (volumeSize != null && volumeSize != 0) {
@@ -2337,6 +2469,7 @@ public class LocalStorageKvmBackend extends LocalStorageHypervisorBackend {
             cmd.setFullRebase(fullRebase);
             cmd.setSrcPath(sp.getPrimaryStorageInstallPath());
             cmd.setDestPath(volume.getInstallPath());
+            cmd.setEncryptedDek(prepareVolumeEncryptedDek(hostUuid, volume, Boolean.TRUE.equals(volume.getEncrypted())));
 
             httpCall(OFFLINE_MERGE_PATH, hostUuid, cmd, OfflineMergeSnapshotRsp.class, new ReturnValueCompletion<OfflineMergeSnapshotRsp>(completion) {
                 @Override
@@ -2371,7 +2504,7 @@ public class LocalStorageKvmBackend extends LocalStorageHypervisorBackend {
 
     @Override
     void handle(LocalStorageCreateEmptyVolumeMsg msg, final ReturnValueCompletion<LocalStorageCreateEmptyVolumeReply> completion) {
-        createEmptyVolumeWithBackingFile(msg.getVolume(), msg.getHostUuid(), msg.getBackingFile(), new ReturnValueCompletion<VolumeStats>(completion) {
+        createEmptyVolumeWithBackingFile(msg.getVolume(), msg.getHostUuid(), msg.getBackingFile(), msg.getVolumeLuksAgentSpec(), new ReturnValueCompletion<VolumeStats>(completion) {
             @Override
             public void success(VolumeStats returnValue) {
                 LocalStorageCreateEmptyVolumeReply reply = new LocalStorageCreateEmptyVolumeReply();
@@ -3429,6 +3562,14 @@ public class LocalStorageKvmBackend extends LocalStorageHypervisorBackend {
         cache.hostUuid = ref.getHostUuid();
         cache.image = msg.getImageInventory();
         cache.volumeResourceInstallPath = msg.getVolumeSnapshot().getPrimaryStorageInstallPath();
+        VolumeLuksAgentSpec luksSpec = snapshotEncryptionHelper.prepareTemporarySnapshotImageSecretMaterial(
+                ref.getHostUuid(),
+                msg.getVolumeSnapshot().getUuid(),
+                msg.getImageInventory().getUuid(),
+                msg.getEncrypted());
+        if (luksSpec != null && luksSpec.isComplete()) {
+            cache.encryptLuksSecretMaterialFilePath = luksSpec.getEncryptLuksSecretMaterialFilePath();
+        }
         cache.download(new ReturnValueCompletion<ImageCacheInventory>(completion) {
             @Override
             public void success(ImageCacheInventory inv) {
@@ -3833,6 +3974,14 @@ public class LocalStorageKvmBackend extends LocalStorageHypervisorBackend {
         return String.format("%s/%s-initialized-file", self.getMountPath(), self.getUuid());
     }
 
+    protected String prepareVolumeSecretMaterialPath(String hostUuid, VolumeInventory volume) {
+        if (volume == null || !Boolean.TRUE.equals(volume.getEncrypted())) {
+            return null;
+        }
+
+        return volumeEncryptedSecretHelper.prepareLuksSecretMaterialFileOnHost(hostUuid, volume.getUuid());
+    }
+
     @Override
     void handle(CommitVolumeSnapshotOnPrimaryStorageMsg msg, String hostUuid, final ReturnValueCompletion<CommitVolumeSnapshotOnPrimaryStorageReply> completion) {
         CommitVolumeSnapshotOnPrimaryStorageReply reply = new CommitVolumeSnapshotOnPrimaryStorageReply();
@@ -3840,6 +3989,7 @@ public class LocalStorageKvmBackend extends LocalStorageHypervisorBackend {
         cmd.top = msg.getSrcSnapshot().getPrimaryStorageInstallPath();
         cmd.base = msg.getDstSnapshot().getPrimaryStorageInstallPath();
         cmd.topChildrenInstallPathInDb = msg.getSrcChildrenInstallPathInDb();
+        cmd.encryptedDek = prepareVolumeEncryptedDek(hostUuid, msg.getVolume(), Boolean.TRUE.equals(msg.getVolume().getEncrypted()));
         httpCall(OFFLINE_COMMIT_PATH, hostUuid, cmd, OfflineCommitSnapshotRsp.class, new ReturnValueCompletion<OfflineCommitSnapshotRsp>(completion) {
             @Override
             public void success(OfflineCommitSnapshotRsp returnValue) {
@@ -3862,6 +4012,7 @@ public class LocalStorageKvmBackend extends LocalStorageHypervisorBackend {
         cmd.srcPath = msg.getSrcSnapshotParentPath();
         cmd.destPath = msg.getDstSnapshot().getPrimaryStorageInstallPath();
         cmd.fullRebase = cmd.srcPath == null;
+        cmd.setEncryptedDek(prepareVolumeEncryptedDek(hostUuid, msg.getVolume(), Boolean.TRUE.equals(msg.getVolume().getEncrypted())));
         httpCall(OFFLINE_MERGE_PATH, hostUuid, cmd, OfflineMergeSnapshotRsp.class, new ReturnValueCompletion<OfflineMergeSnapshotRsp>(completion) {
             @Override
             public void success(OfflineMergeSnapshotRsp rsp) {
@@ -4010,5 +4161,58 @@ public class LocalStorageKvmBackend extends LocalStorageHypervisorBackend {
                 completion.fail(errorCode);
             }
         });
+    }
+
+    @Override
+    void handle(EncryptVolumeBitsOnPrimaryStorageMsg msg, ReturnValueCompletion<EncryptVolumeBitsOnPrimaryStorageReply> completion) {
+        EncryptVolumeBitsCmd cmd = new EncryptVolumeBitsCmd();
+        cmd.installPath = msg.getInstallPath();
+        cmd.encryptLuksSecretMaterialFilePath = msg.getEncryptLuksSecretMaterialFilePath();
+
+        httpCall(ENCRYPT_VOLUME_BITS_PATH, msg.getHostUuid(), cmd, EncryptVolumeBitsRsp.class, new ReturnValueCompletion<EncryptVolumeBitsRsp>(completion) {
+            @Override
+            public void success(EncryptVolumeBitsRsp rsp) {
+                completion.success(new EncryptVolumeBitsOnPrimaryStorageReply());
+            }
+
+            @Override
+            public void fail(ErrorCode errorCode) {
+                completion.fail(operr("failed to encrypt volume[uuid:%s] bits at path[%s] on host[uuid:%s]",
+                        msg.getVolumeUuid(), msg.getInstallPath(), msg.getHostUuid()).withCause(errorCode));
+            }
+        });
+    }
+
+    @Override
+    void handle(ConvertVolumeEncryptionOnPrimaryStorageMsg msg, String hostUuid, ReturnValueCompletion<ConvertVolumeEncryptionOnPrimaryStorageReply> completion) {
+        ConvertVolumeEncryptionCmd cmd = new ConvertVolumeEncryptionCmd();
+        cmd.volumeUuid = msg.getVolume().getUuid();
+        cmd.targetEncrypted = msg.isTargetEncrypted();
+        cmd.items = msg.getItems();
+        boolean needSecret = Boolean.TRUE.equals(msg.getVolume().getEncrypted()) || msg.isTargetEncrypted();
+        cmd.encryptedDek = prepareVolumeEncryptedDek(hostUuid, msg.getVolume(), needSecret);
+
+        httpCall(CONVERT_VOLUME_ENCRYPTION_PATH, hostUuid, cmd, ConvertVolumeEncryptionRsp.class,
+                new ReturnValueCompletion<ConvertVolumeEncryptionRsp>(completion) {
+                    @Override
+                    public void success(ConvertVolumeEncryptionRsp rsp) {
+                        ConvertVolumeEncryptionOnPrimaryStorageReply reply = new ConvertVolumeEncryptionOnPrimaryStorageReply();
+                        reply.setActualSizes(rsp.actualSizes);
+                        completion.success(reply);
+                    }
+
+                    @Override
+                    public void fail(ErrorCode errorCode) {
+                        completion.fail(operr("failed to convert volume[uuid:%s] encryption on local storage host[uuid:%s]: %s",
+                                msg.getVolume().getUuid(), hostUuid, errorCode));
+                    }
+                });
+    }
+
+    private String prepareVolumeEncryptedDek(String hostUuid, VolumeInventory volume, boolean required) {
+        if (!required) {
+            return null;
+        }
+        return volumeEncryptedSecretHelper.prepareLuksEnvelopeDekOnHost(hostUuid, volume.getUuid());
     }
 }

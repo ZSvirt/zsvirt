@@ -54,6 +54,8 @@ public interface NfsPrimaryStorageBackend {
 
     void handle(PrimaryStorageInventory inv, GetVolumeSnapshotEncryptedOnPrimaryStorageMsg msg, ReturnValueCompletion<GetVolumeSnapshotEncryptedOnPrimaryStorageReply> completion);
 
+    void handle(PrimaryStorageInventory inv, ConvertVolumeEncryptionOnPrimaryStorageMsg msg, ReturnValueCompletion<ConvertVolumeEncryptionOnPrimaryStorageReply> completion);
+
     void getPhysicalCapacity(PrimaryStorageInventory inv, ReturnValueCompletion<PhysicalCapacityUsage> completion);
 
     void checkIsBitsExisting(PrimaryStorageInventory inv, String installPath, ReturnValueCompletion<Boolean> completion);
@@ -64,7 +66,8 @@ public interface NfsPrimaryStorageBackend {
 
     void createMemoryVolume(PrimaryStorageInventory pinv, VolumeInventory volume, ReturnValueCompletion<String> completion);
 
-    void instantiateVolume(PrimaryStorageInventory pinv, HostInventory hostInventory, VolumeInventory volume, ReturnValueCompletion<VolumeInventory> complete);
+    void instantiateVolume(PrimaryStorageInventory pinv, HostInventory hostInventory, VolumeInventory volume,
+                           ReturnValueCompletion<VolumeInventory> complete);
 
     void deleteImageCache(ImageCacheInventory imageCache);
 
@@ -77,9 +80,15 @@ public interface NfsPrimaryStorageBackend {
 
     void resetRootVolumeFromImage(VolumeInventory vol, HostInventory host, ReturnValueCompletion<String> completion);
 
-    void createVolumeFromImageCache(PrimaryStorageInventory primaryStorage, ImageInventory image, ImageCacheInventory imageCache, VolumeInventory volume, ReturnValueCompletion<VolumeStats> completion);
+    void createVolumeFromImageCache(PrimaryStorageInventory primaryStorage, ImageInventory image, ImageCacheInventory imageCache,
+                                    VolumeInventory volume, HostInventory selectedHost,
+                                    ReturnValueCompletion<VolumeStats> completion);
 
-    void createImageCacheFromVolumeResource(PrimaryStorageInventory primaryStorage, String volumeResourceInstallPath, ImageInventory image, ReturnValueCompletion<BitsInfo> completion);
+    void handle(EncryptVolumeBitsOnPrimaryStorageMsg msg, ReturnValueCompletion<EncryptVolumeBitsOnPrimaryStorageReply> completion);
+
+    void createImageCacheFromVolumeResource(PrimaryStorageInventory primaryStorage, String volumeResourceInstallPath,
+                                            ImageInventory image, String snapshotUuid, Boolean encrypted,
+                                            ReturnValueCompletion<BitsInfo> completion);
 
     void createTemplateFromVolume(PrimaryStorageInventory primaryStorage, VolumeInventory volume, ImageInventory image, ReturnValueCompletion<BitsInfo> completion);
 

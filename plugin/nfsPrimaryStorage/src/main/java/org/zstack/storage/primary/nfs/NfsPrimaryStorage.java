@@ -139,9 +139,61 @@ public class NfsPrimaryStorage extends PrimaryStorageBase {
             handle((RebaseVolumeBackingFileOnPrimaryStorageMsg) msg);
         } else if (msg instanceof CleanupAllVmMetadataOnPrimaryStorageMsg) {
             handle((CleanupAllVmMetadataOnPrimaryStorageMsg) msg);
+        } else if (msg instanceof EncryptVolumeBitsOnPrimaryStorageMsg) {
+            handle((EncryptVolumeBitsOnPrimaryStorageMsg) msg);
+        } else if (msg instanceof ConvertVolumeEncryptionOnPrimaryStorageMsg) {
+            handle((ConvertVolumeEncryptionOnPrimaryStorageMsg) msg);
         } else {
             super.handleLocalMessage(msg);
         }
+    }
+
+    protected void handle(ConvertVolumeEncryptionOnPrimaryStorageMsg msg) {
+        ConvertVolumeEncryptionOnPrimaryStorageReply reply = new ConvertVolumeEncryptionOnPrimaryStorageReply();
+        NfsPrimaryStorageBackend backend = getUsableBackend();
+        if (backend == null) {
+            reply.setError(operr("the NFS primary storage[uuid:%s, name:%s] cannot find any usable host to change volume[uuid:%s] encryption",
+                    self.getUuid(), self.getName(), msg.getVolume().getUuid()));
+            bus.reply(msg, reply);
+            return;
+        }
+
+        backend.handle(getSelfInventory(), msg, new ReturnValueCompletion<ConvertVolumeEncryptionOnPrimaryStorageReply>(msg) {
+            @Override
+            public void success(ConvertVolumeEncryptionOnPrimaryStorageReply returnValue) {
+                bus.reply(msg, returnValue);
+            }
+
+            @Override
+            public void fail(ErrorCode errorCode) {
+                reply.setError(errorCode);
+                bus.reply(msg, reply);
+            }
+        });
+    }
+
+    private void handle(EncryptVolumeBitsOnPrimaryStorageMsg msg) {
+        NfsPrimaryStorageBackend backend = getUsableBackend();
+        if (backend == null) {
+            EncryptVolumeBitsOnPrimaryStorageReply reply = new EncryptVolumeBitsOnPrimaryStorageReply();
+            reply.setError(operr("the NFS primary storage[uuid:%s, name:%s] cannot find any usable host to" +
+                            " encrypt volume[uuid:%s] bits", self.getUuid(), self.getName(), msg.getVolumeUuid()));
+            bus.reply(msg, reply);
+            return;
+        }
+        backend.handle(msg, new ReturnValueCompletion<EncryptVolumeBitsOnPrimaryStorageReply>(msg) {
+            @Override
+            public void success(EncryptVolumeBitsOnPrimaryStorageReply reply) {
+                bus.reply(msg, reply);
+            }
+
+            @Override
+            public void fail(ErrorCode errorCode) {
+                EncryptVolumeBitsOnPrimaryStorageReply reply = new EncryptVolumeBitsOnPrimaryStorageReply();
+                reply.setError(errorCode);
+                bus.reply(msg, reply);
+            }
+        });
     }
 
     protected void updateMountPoint(String newUrl, Completion completion) {
@@ -815,7 +867,7 @@ public class NfsPrimaryStorage extends PrimaryStorageBase {
                         @Override
                         public void run(final FlowTrigger trigger, Map data) {
                             NfsPrimaryStorageBackend backend = factory.getHypervisorBackend(nfsMgr.findHypervisorTypeByImageFormatAndPrimaryStorageUuid(image.getFormat(), self.getUuid()));
-                            backend.createVolumeFromImageCache(primaryStorage, image, imageCache, volume, new ReturnValueCompletion<VolumeStats>(trigger) {
+                            backend.createVolumeFromImageCache(primaryStorage, image, imageCache, volume, msg.getDestHost(), new ReturnValueCompletion<VolumeStats>(trigger) {
                                 @Override
                                 public void success(VolumeStats returnValue) {
                                     volumeInstallPath = returnValue.getInstallPath();
@@ -1040,6 +1092,8 @@ public class NfsPrimaryStorage extends PrimaryStorageBase {
         job.setPrimaryStorage(getSelfInventory());
         job.setImage(spec);
         job.setVolumeResourceInstallPath(msg.getVolumeSnapshot().getPrimaryStorageInstallPath());
+        job.setVolumeSnapshotUuid(msg.getVolumeSnapshot().getUuid());
+        job.setEncrypted(msg.getEncrypted());
 
         jobf.execute(NfsPrimaryStorageKvmHelper.makeDownloadImageJobName(msg.getImageInventory(), job.getPrimaryStorage()),
                 NfsPrimaryStorageKvmHelper.makeJobOwnerName(job.getPrimaryStorage()), job,

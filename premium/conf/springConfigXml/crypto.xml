@@ -24,6 +24,9 @@
     <bean id="KeyProviderResourceKeyBackend" class="org.zstack.crypto.keyprovider.KeyProviderResourceKeyBackend" primary="true">
     </bean>
 
+    <bean id="KeyProviderResourceKeyBackendVolume" class="org.zstack.crypto.keyprovider.KeyProviderResourceKeyBackendVolume" primary="true">
+    </bean>
+
     <bean id="EncryptedResourceKeyManager" class="org.zstack.crypto.keyprovider.EncryptedResourceKeyManagerImpl" primary="true">
     </bean>
 
@@ -42,6 +45,18 @@
     <bean id="KeyProviderTpmAutoCompleter" class="org.zstack.crypto.keyprovider.KeyProviderTpmAutoCompleter">
         <zstack:plugin>
             <zstack:extension interface="org.zstack.header.apimediator.GlobalApiMessageInterceptor"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="KeyProviderAvailabilityApiInterceptor" class="org.zstack.crypto.keyprovider.KeyProviderAvailabilityApiInterceptor">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.apimediator.GlobalApiMessageInterceptor"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="EncryptionInventoryReplyMarshaller" class="org.zstack.crypto.keyprovider.EncryptionInventoryReplyMarshaller">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.core.cloudbus.MarshalReplyMessageExtensionPoint"/>
         </zstack:plugin>
     </bean>
 

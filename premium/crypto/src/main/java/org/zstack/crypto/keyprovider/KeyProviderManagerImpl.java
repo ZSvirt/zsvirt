@@ -423,12 +423,28 @@ public class KeyProviderManagerImpl extends AbstractService implements KeyProvid
             if (type == KeyProviderType.KMS) {
                 if (kmsHealthTracker == null) {
                     reply.setError(operr("kms health tracker is not available"));
+                } else if (msg.isRealtime()) {
+                    KmsHealthTracker.HealthCheckResult result =
+                            kmsHealthTracker.checkHealthNow(msg.getProviderUuid());
+                    reply.setAvailable(result.isAvailable());
+                    reply.setConnected(result.isConnected());
+                    reply.setTrustState(result.getTrustState() == null ? null : result.getTrustState().toString());
+                    reply.setActiveIdentityUuid(result.getActiveIdentityUuid());
+                    reply.setStatusCode(result.getStatusCode());
+                    reply.setStatusMessage(result.getStatusMessage());
                 } else {
                     kmsHealthTracker.triggerHealthCheck(msg.getProviderUuid());
                 }
             } else if (type == KeyProviderType.NKP) {
                 if (nkpHealthTracker == null) {
                     reply.setError(operr("nkp health tracker is not available"));
+                } else if (msg.isRealtime()) {
+                    NkpHealthTracker.HealthCheckResult result =
+                            nkpHealthTracker.checkHealthNow(msg.getProviderUuid());
+                    reply.setAvailable(result.isAvailable());
+                    reply.setConnected(result.isConnected());
+                    reply.setStatusCode(result.getStatusCode());
+                    reply.setStatusMessage(result.getStatusMessage());
                 } else {
                     nkpHealthTracker.triggerHealthCheck(msg.getProviderUuid());
                 }

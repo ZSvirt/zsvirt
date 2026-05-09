@@ -135,4 +135,10 @@ doc {
 		type "String"
 		since "zsv 3.17.13"
 	}
+	field {
+		name "encrypted"
+		desc ""
+		type "Boolean"
+		since "zsv 5.0.0"
+	}
 }

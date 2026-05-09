@@ -230,6 +230,24 @@ doc {
 					optional true
 					since "zsv 5.0.0"
 				}
+				column {
+					name "volumeSnapshotEncryptions"
+					enclosedIn "params"
+					desc "快照是否加密配置，键值为快照UUID，值为是否加密"
+					location "body"
+					type "List"
+					optional true
+					since "1.0.1, zsv_5.1.0"
+				}
+				column {
+					name "vmEncryption"
+					enclosedIn "params"
+					desc "虚拟机是否加密"
+					location "body"
+					type "Boolean"
+					optional true
+					since "1.0.1, zsv_5.1.0"
+				}
 			}
 		}
 

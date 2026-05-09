@@ -29,6 +29,12 @@ import org.zstack.header.storage.snapshot.DeleteVolumeSnapshotMsg;
 import org.zstack.header.storage.snapshot.VolumeSnapshotConstant;
 import org.zstack.header.storage.snapshot.VolumeSnapshotVO;
 import org.zstack.header.storage.snapshot.group.*;
+import org.zstack.header.tpm.entity.TpmVO;
+import org.zstack.header.tpm.entity.TpmVO_;
+import org.zstack.header.tpm.message.AddTpmMsg;
+import org.zstack.header.tpm.message.AddTpmReply;
+import org.zstack.header.tpm.message.RestoreVmTpmMsg;
+import org.zstack.header.tpm.message.TpmDeletionMsg;
 import org.zstack.header.vm.additions.RestoreVmHostFileMsg;
 import org.zstack.header.vm.RestoreVmInstanceMsg;
 import org.zstack.header.vm.VmInstanceConstant;
@@ -39,6 +45,7 @@ import org.zstack.header.volume.VolumeType;
 import org.zstack.header.volume.VolumeVO;
 import org.zstack.header.volume.VolumeVO_;
 import org.zstack.storage.snapshot.VolumeSnapshotGlobalConfig;
+import org.zstack.storage.snapshot.VolumeSnapshotGroupSystemTags;
 import org.zstack.utils.DebugUtils;
 import org.zstack.utils.TimeUtils;
 import org.zstack.utils.Utils;
@@ -47,6 +54,7 @@ import org.zstack.utils.logging.CLogger;
 import java.util.*;
 
 import static org.zstack.core.Platform.operr;
+import static org.zstack.header.tpm.TpmConstants.SERVICE_ID;
 import static org.zstack.storage.snapshot.VolumeSnapshotMessageRouter.getResourceIdToRouteMsg;
 
 /**
@@ -396,6 +404,73 @@ public class VolumeSnapshotGroupBase implements VolumeSnapshotGroup {
                     context.newGroup.setAccountUuid(msg.getSession().getAccountUuid());
                     dbf.persist(context.newGroup);
                     trigger.next();
+                })
+                .build())
+            .then(Flow.of("restore-tpm")
+                .handle(trigger -> {
+                    boolean snapshotGroupHasTpm = VolumeSnapshotGroupSystemTags.WITH_TPM.hasTag(msg.getUuid());
+
+                    String tpmUuid = Q.New(TpmVO.class)
+                            .eq(TpmVO_.vmInstanceUuid, vmUuid)
+                            .select(TpmVO_.uuid)
+                            .findValue();
+
+                    if (snapshotGroupHasTpm && tpmUuid == null) {
+                        AddTpmMsg addTpmMsg = new AddTpmMsg();
+                        addTpmMsg.setResourceUuidKeyFrom(msg.getUuid());
+                        addTpmMsg.setVmInstanceUuid(vmUuid);
+                        addTpmMsg.setTpmUuid(Platform.getUuid());
+                        bus.makeTargetServiceIdByResourceUuid(addTpmMsg, SERVICE_ID, addTpmMsg.getTpmUuid());
+                        bus.send(addTpmMsg, new CloudBusCallBack(msg) {
+                            @Override
+                            public void run(MessageReply reply) {
+                                if (reply.isSuccess()) {
+                                    logger.debug(String.format("create Tpm[uuid:%s] for VM[uuid:%s]",
+                                            addTpmMsg.getTpmUuid(), addTpmMsg.getVmInstanceUuid()));
+                                    trigger.next();
+                                } else {
+                                    trigger.fail(reply.getError());
+                                }
+                            }
+                        });
+                    } else if (snapshotGroupHasTpm) {
+                        RestoreVmTpmMsg restoreMsg = new RestoreVmTpmMsg();
+                        restoreMsg.setSrcResourceUuid(msg.getUuid());
+                        restoreMsg.setDstResourceUuid(tpmUuid);
+                        bus.makeTargetServiceIdByResourceUuid(restoreMsg, SERVICE_ID, tpmUuid);
+                        bus.send(restoreMsg, new CloudBusCallBack(msg) {
+                            @Override
+                            public void run(MessageReply reply) {
+                                if (reply.isSuccess()) {
+                                    logger.debug(String.format("restore Tpm[uuid:%s] for VM[uuid:%s] for snapshotGroup[uuid:%s]",
+                                            tpmUuid, vmUuid, msg.getUuid()));
+                                    trigger.next();
+                                } else {
+                                    trigger.fail(reply.getError());
+                                }
+                            }
+                        });
+                    } else if (tpmUuid != null) {
+                        TpmDeletionMsg deletionMsg = new TpmDeletionMsg();
+                        deletionMsg.setTpmUuid(tpmUuid);
+                        deletionMsg.setVmInstanceUuid(vmUuid);
+                        deletionMsg.setForceDelete(true);
+                        bus.makeTargetServiceIdByResourceUuid(deletionMsg, SERVICE_ID, deletionMsg.getTpmUuid());
+                        bus.send(deletionMsg, new CloudBusCallBack(trigger) {
+                            @Override
+                            public void run(MessageReply reply) {
+                                if (reply.isSuccess()) {
+                                    logger.debug(String.format("deleted Tpm[uuid:%s] from VM[uuid:%s]",
+                                            deletionMsg.getTpmUuid(), deletionMsg.getVmInstanceUuid()));
+                                    trigger.next();
+                                } else {
+                                    trigger.fail(reply.getError());
+                                }
+                            }
+                        });
+                    } else {
+                        trigger.next();
+                    }
                 })
                 .build())
             .then(Flow.of("restore-vm-host-file")

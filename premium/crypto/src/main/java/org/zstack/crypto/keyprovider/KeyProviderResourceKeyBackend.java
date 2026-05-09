@@ -2,6 +2,7 @@ package org.zstack.crypto.keyprovider;
 
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.zstack.compute.vm.devices.TpmEncryptedResourceKeyBackend;
 import org.zstack.core.db.DatabaseFacade;
 import org.zstack.core.db.Q;
@@ -243,7 +244,8 @@ public class KeyProviderResourceKeyBackend implements TpmEncryptedResourceKeyBac
     }
 
     @Override
-    public void backupEncryptedResourceKey(BackupEncryptedResourceKeyContent context) {
+    @Transactional
+    public void backupEncryptedResourceKey(BackupEncryptedResourceKeyContext context) {
         EncryptedResourceKeyRefVO src = Q.New(EncryptedResourceKeyRefVO.class)
                 .eq(EncryptedResourceKeyRefVO_.resourceUuid, context.srcResourceUuid)
                 .find();
@@ -259,6 +261,59 @@ public class KeyProviderResourceKeyBackend implements TpmEncryptedResourceKeyBac
                 .findValue();
         if (resourceType == null) {
             throw operr("failed to find resource[uuid: %s]", context.dstResourceUuid).toException();
+        }
+
+        EncryptedResourceKeyRefVO exists = Q.New(EncryptedResourceKeyRefVO.class)
+                .eq(EncryptedResourceKeyRefVO_.resourceUuid, context.dstResourceUuid)
+                .find();
+        if (exists != null) {
+            SQL.New(EncryptedResourceKeyRefVO.class)
+                    .eq(EncryptedResourceKeyRefVO_.resourceUuid, context.dstResourceUuid)
+                    .eq(EncryptedResourceKeyRefVO_.resourceType, resourceType)
+                    .set(EncryptedResourceKeyRefVO_.providerUuid, src.getProviderUuid())
+                    .set(EncryptedResourceKeyRefVO_.providerName, src.getProviderName())
+                    .set(EncryptedResourceKeyRefVO_.keyVersion, src.getKeyVersion())
+                    .set(EncryptedResourceKeyRefVO_.kekRef, src.getKekRef())
+                    .set(EncryptedResourceKeyRefVO_.wrappedDek, src.getWrappedDek())
+                    .set(EncryptedResourceKeyRefVO_.algorithm, src.getAlgorithm())
+                    .update();
+            return;
+        }
+
+        EncryptedResourceKeyRefVO backup = new EncryptedResourceKeyRefVO();
+        backup.setResourceType(resourceType);
+        backup.setResourceUuid(context.dstResourceUuid);
+        backup.setProviderUuid(src.getProviderUuid());
+        backup.setProviderName(src.getProviderName());
+        backup.setKeyVersion(src.getKeyVersion());
+        backup.setKekRef(src.getKekRef());
+        backup.setWrappedDek(src.getWrappedDek());
+        backup.setAlgorithm(src.getAlgorithm());
+        backup.setCreateDate(timeHelper.getCurrentTimestamp());
+        backup.setLastOpDate(backup.getCreateDate());
+        databaseFacade.persist(backup);
+    }
+
+    @Override
+    public void restoreEncryptedResourceKey(RestoreEncryptedResourceKeyContext context) {
+        String resourceType = Q.New(ResourceVO.class)
+                .select(ResourceVO_.resourceType)
+                .eq(ResourceVO_.uuid, context.dstResourceUuid)
+                .findValue();
+        if (resourceType == null) {
+            throw operr("failed to find resource[uuid: %s]", context.dstResourceUuid).toException();
+        }
+
+        EncryptedResourceKeyRefVO src = Q.New(EncryptedResourceKeyRefVO.class)
+                .eq(EncryptedResourceKeyRefVO_.resourceUuid, context.srcResourceUuid)
+                .find();
+        if (src == null) {
+            logger.debug(String.format("No encrypted resource key found for source resource[uuid:%s], delete resource key for resource[uuid:%s]",
+                    context.srcResourceUuid, context.dstResourceUuid));
+            SQL.New(EncryptedResourceKeyRefVO.class)
+                    .eq(EncryptedResourceKeyRefVO_.resourceUuid, context.dstResourceUuid)
+                    .delete();
+            return;
         }
 
         EncryptedResourceKeyRefVO exists = Q.New(EncryptedResourceKeyRefVO.class)

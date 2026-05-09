@@ -56,6 +56,7 @@ import org.zstack.header.tpm.message.BackupVmTpmMsg;
 import org.zstack.storage.primary.EstimateVolumeTemplateSizeOnPrimaryStorageMsg;
 import org.zstack.storage.primary.EstimateVolumeTemplateSizeOnPrimaryStorageReply;
 import org.zstack.storage.primary.PrimaryStorageGlobalConfig;
+import org.zstack.storage.snapshot.VolumeSnapshotGroupSystemTags;
 import org.zstack.storage.snapshot.group.VolumeSnapshotGroupOperationValidator;
 import org.zstack.storage.snapshot.reference.VolumeSnapshotReferenceUtils;
 import org.zstack.tag.SystemTagCreator;
@@ -73,6 +74,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import static org.zstack.core.Platform.*;
+import static org.zstack.storage.snapshot.VolumeSnapshotGroupSystemTags.VOLUME_SNAPSHOT_GROUP_CREATED_BY_SYSTEM;
 import static org.zstack.storage.volume.VolumeSystemTags.VOLUME_PROVISIONING_STRATEGY;
 import static org.zstack.storage.volume.VolumeSystemTags.VOLUME_PROVISIONING_STRATEGY_TOKEN;
 import static org.zstack.utils.CollectionDSL.*;
@@ -3237,6 +3239,10 @@ public class VolumeBase extends AbstractVolume implements Volume {
                         trigger.next();
                         return;
                     }
+
+                    tagMgr.createInherentSystemTag(resourceUuid,
+                            VolumeSnapshotGroupSystemTags.WITH_TPM.getTagFormat(),
+                            VolumeSnapshotGroupVO.class.getSimpleName());
 
                     BackupVmTpmMsg backupMsg = new BackupVmTpmMsg();
                     backupMsg.setSrcResourceUuid(tpmUuid);

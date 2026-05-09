@@ -62,9 +62,16 @@ public class DummyTpmEncryptedResourceKeyBackend implements TpmEncryptedResource
     }
 
     @Override
-    public void backupEncryptedResourceKey(BackupEncryptedResourceKeyContent context) {
+    public void backupEncryptedResourceKey(BackupEncryptedResourceKeyContext context) {
         // do nothing
         logger.debug("ignore backup encrypted resource key request for src resource: "
+                + context.srcResourceUuid + " -> dest resource: " + context.dstResourceUuid);
+    }
+
+    @Override
+    public void restoreEncryptedResourceKey(RestoreEncryptedResourceKeyContext context) {
+        // do nothing
+        logger.debug("ignore restore encrypted resource key request for src resource: "
                 + context.srcResourceUuid + " -> dest resource: " + context.dstResourceUuid);
     }
 

@@ -78,15 +78,23 @@ public interface TpmEncryptedResourceKeyBackend {
      */
     void cloneEncryptedResourceKey(CloneEncryptedResourceKeyContext context, Completion completion);
 
-    static class BackupEncryptedResourceKeyContent {
+    static class BackupEncryptedResourceKeyContext {
         public String srcResourceUuid;
         public String dstResourceUuid;
     }
 
     /**
-     * Copy the encryption resource key from the source TPM to {@link org.zstack.header.vm.additions.VmHostBackupFileVO}.
+     * Copy the encryption resource key from the source TPM to {@link org.zstack.header.vm.additions.VmHostBackupFileVO}
+     * or other resources.
      */
-    void backupEncryptedResourceKey(BackupEncryptedResourceKeyContent context);
+    void backupEncryptedResourceKey(BackupEncryptedResourceKeyContext context);
+
+    static class RestoreEncryptedResourceKeyContext {
+        public String srcResourceUuid;
+        public String dstResourceUuid;
+    }
+
+    void restoreEncryptedResourceKey(RestoreEncryptedResourceKeyContext context);
 
     void cleanEncryptedResourceKey(String vmHostBackupFileUuid);
 }

@@ -2,5 +2,5 @@ package org.zstack.header.tpm.message;
 
 import org.zstack.header.message.MessageReply;
 
-public class BackupVmTpmReply extends MessageReply {
+public class BackupTpmEncryptionKeyReply extends MessageReply {
 }

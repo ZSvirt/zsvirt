@@ -2,7 +2,7 @@ package org.zstack.header.tpm.message;
 
 import org.zstack.header.message.NeedReplyMessage;
 
-public class BackupVmTpmMsg extends NeedReplyMessage {
+public class BackupTpmEncryptionKeyMsg extends NeedReplyMessage {
     private String srcResourceUuid;
     private String dstResourceUuid;
 

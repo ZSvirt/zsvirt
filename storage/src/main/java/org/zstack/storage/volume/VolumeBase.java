@@ -52,7 +52,7 @@ import org.zstack.header.volume.*;
 import org.zstack.header.volume.VolumeConstant.Capability;
 import org.zstack.header.volume.VolumeDeletionPolicyManager.VolumeDeletionPolicy;
 import org.zstack.identity.AccountManager;
-import org.zstack.header.tpm.message.BackupVmTpmMsg;
+import org.zstack.header.tpm.message.BackupTpmEncryptionKeyMsg;
 import org.zstack.storage.primary.EstimateVolumeTemplateSizeOnPrimaryStorageMsg;
 import org.zstack.storage.primary.EstimateVolumeTemplateSizeOnPrimaryStorageReply;
 import org.zstack.storage.primary.PrimaryStorageGlobalConfig;
@@ -74,7 +74,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import static org.zstack.core.Platform.*;
-import static org.zstack.storage.snapshot.VolumeSnapshotGroupSystemTags.VOLUME_SNAPSHOT_GROUP_CREATED_BY_SYSTEM;
 import static org.zstack.storage.volume.VolumeSystemTags.VOLUME_PROVISIONING_STRATEGY;
 import static org.zstack.storage.volume.VolumeSystemTags.VOLUME_PROVISIONING_STRATEGY_TOKEN;
 import static org.zstack.utils.CollectionDSL.*;
@@ -3244,7 +3243,7 @@ public class VolumeBase extends AbstractVolume implements Volume {
                             VolumeSnapshotGroupSystemTags.WITH_TPM.getTagFormat(),
                             VolumeSnapshotGroupVO.class.getSimpleName());
 
-                    BackupVmTpmMsg backupMsg = new BackupVmTpmMsg();
+                    BackupTpmEncryptionKeyMsg backupMsg = new BackupTpmEncryptionKeyMsg();
                     backupMsg.setSrcResourceUuid(tpmUuid);
                     backupMsg.setDstResourceUuid(resourceUuid);
                     bus.makeLocalServiceId(backupMsg, TpmConstants.SERVICE_ID);

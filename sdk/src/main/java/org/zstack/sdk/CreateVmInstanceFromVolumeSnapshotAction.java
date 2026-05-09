@@ -79,6 +79,9 @@ public class CreateVmInstanceFromVolumeSnapshotAction extends AbstractAction {
     @Param(required = false, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
     public java.util.List rootVolumeSystemTags;
 
+    @Param(required = false, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
+    public java.lang.Boolean vmEncryption;
+
     @Param(required = false)
     public java.lang.String resourceUuid;
 

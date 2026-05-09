@@ -164,4 +164,12 @@ public class VolumeTO extends org.zstack.sdk.BaseVirtualDeviceTO {
         return this.controllerIndex;
     }
 
+    public java.lang.String luksSecretUuid;
+    public void setLuksSecretUuid(java.lang.String luksSecretUuid) {
+        this.luksSecretUuid = luksSecretUuid;
+    }
+    public java.lang.String getLuksSecretUuid() {
+        return this.luksSecretUuid;
+    }
+
 }

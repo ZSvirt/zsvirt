@@ -25,6 +25,7 @@ public class VolumeSnapshotAO_ extends ResourceVO_ {
     public static volatile SingularAttribute<VolumeSnapshotAO, Boolean> fullSnapshot;
     public static volatile SingularAttribute<VolumeSnapshotAO, Integer> distance;
     public static volatile SingularAttribute<VolumeSnapshotAO, Long> size;
+    public static volatile SingularAttribute<VolumeSnapshotAO, Boolean> encrypted;
     public static volatile SingularAttribute<VolumeSnapshotAO, VolumeSnapshotState> state;
     public static volatile SingularAttribute<VolumeSnapshotAO, VolumeSnapshotStatus> status;
     public static volatile SingularAttribute<VolumeSnapshotAO, Timestamp> createDate;

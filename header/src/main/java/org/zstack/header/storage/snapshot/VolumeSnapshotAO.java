@@ -60,6 +60,9 @@ public class VolumeSnapshotAO extends ResourceVO implements ShadowEntity {
     private boolean fullSnapshot;
 
     @Column
+    private boolean encrypted;
+
+    @Column
     private String volumeType;
 
     @Column
@@ -182,6 +185,14 @@ public class VolumeSnapshotAO extends ResourceVO implements ShadowEntity {
 
     public void setFullSnapshot(boolean fullSnapshot) {
         this.fullSnapshot = fullSnapshot;
+    }
+
+    public boolean isEncrypted() {
+        return encrypted;
+    }
+
+    public void setEncrypted(boolean encrypted) {
+        this.encrypted = encrypted;
     }
 
     public String getPrimaryStorageUuid() {

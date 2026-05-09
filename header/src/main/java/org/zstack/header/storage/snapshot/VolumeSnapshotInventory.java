@@ -126,6 +126,8 @@ public class VolumeSnapshotInventory {
      */
     private Long size;
 
+    private Boolean encrypted;
+
     private int distance;
     /**
      * @desc - Enabled: ok for operations
@@ -186,6 +188,7 @@ public class VolumeSnapshotInventory {
         inv.setLatest(vo.isLatest());
         inv.setSize(vo.getSize());
         inv.setVolumeType(vo.getVolumeType());
+        inv.setEncrypted(vo.isEncrypted());
         inv.setTreeUuid(vo.getTreeUuid());
         inv.setBackupStorageRefs(VolumeSnapshotBackupStorageRefInventory.valueOf(vo.getBackupStorageRefs()));
         if (vo.getGroupRef() != null) {
@@ -375,6 +378,14 @@ public class VolumeSnapshotInventory {
 
     public void setLatest(boolean latest) {
         this.latest = latest;
+    }
+
+    public Boolean getEncrypted() {
+        return encrypted;
+    }
+
+    public void setEncrypted(Boolean encrypted) {
+        this.encrypted = encrypted;
     }
 
     public String getGroupUuid() {

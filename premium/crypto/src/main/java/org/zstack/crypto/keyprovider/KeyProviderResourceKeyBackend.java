@@ -14,6 +14,7 @@ import org.zstack.header.keyprovider.EncryptedResourceKeyRefVO_;
 import org.zstack.header.keyprovider.KeyProviderGlobalConfig;
 import org.zstack.header.keyprovider.KeyProviderVO;
 import org.zstack.header.keyprovider.KeyProviderVO_;
+import org.zstack.header.tpm.entity.TpmKeyBackupVO;
 import org.zstack.header.tpm.entity.TpmVO;
 import org.zstack.header.vm.additions.VmHostBackupFileVO;
 import org.zstack.header.vo.ResourceVO;
@@ -352,6 +353,14 @@ public class KeyProviderResourceKeyBackend implements TpmEncryptedResourceKeyBac
         SQL.New(EncryptedResourceKeyRefVO.class)
                 .eq(EncryptedResourceKeyRefVO_.resourceType, VmHostBackupFileVO.class.getSimpleName())
                 .eq(EncryptedResourceKeyRefVO_.resourceUuid, vmHostBackupFileUuid)
+                .delete();
+    }
+
+    @Override
+    public void cleanTpmKeyBackupEncryptedResourceKey(String tpmKeyBackupUuid) {
+        SQL.New(EncryptedResourceKeyRefVO.class)
+                .eq(EncryptedResourceKeyRefVO_.resourceType, TpmKeyBackupVO.class.getSimpleName())
+                .eq(EncryptedResourceKeyRefVO_.resourceUuid, tpmKeyBackupUuid)
                 .delete();
     }
 }

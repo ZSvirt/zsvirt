@@ -93,6 +93,7 @@ import java.util.stream.Collectors;
 import static java.util.Arrays.asList;
 import static org.zstack.core.Platform.*;
 import static org.zstack.utils.CollectionDSL.*;
+import static org.zstack.utils.CollectionUtils.toMap;
 
 public class VmInstanceManagerImpl extends AbstractService implements
         VmInstanceManager,
@@ -2404,60 +2405,73 @@ public class VmInstanceManagerImpl extends AbstractService implements
 
                     String sql;
                     Long imgSize;
-                    ImageConstant.ImageMediaType imgType = null;
+                    ImageMediaType imgType = null;
                     if (msg.getImageUuid() != null) {
-                        sql = "select img.size, img.mediaType" +
-                                " from ImageVO img" +
-                                " where img.uuid = :iuuid";
-                        TypedQuery<Tuple> iq = dbf.getEntityManager().createQuery(sql, Tuple.class);
-                        iq.setParameter("iuuid", msg.getImageUuid());
-                        Tuple it = iq.getSingleResult();
+                        Tuple it = Q.New(ImageVO.class)
+                                .eq(ImageVO_.uuid, msg.getImageUuid())
+                                .select(ImageVO_.size, ImageVO_.mediaType)
+                                .findTuple();
                         imgSize = it.get(0, Long.class);
-                        imgType = it.get(1, ImageConstant.ImageMediaType.class);
+                        imgType = it.get(1, ImageMediaType.class);
                     } else {
                         imgSize = 0L;
                     }
 
                     List<String> diskOfferingUuids = new ArrayList<>();
+                    // data volumes
                     if (msg.getDataDiskOfferingUuids() != null && !msg.getDataDiskOfferingUuids().isEmpty()) {
                         diskOfferingUuids.addAll(msg.getDataDiskOfferingUuids());
                     }
-                    if (imgType == ImageConstant.ImageMediaType.RootVolumeTemplate) {
-                        allVolumeSizeAsked += imgSize;
-                    } else if (imgType == ImageConstant.ImageMediaType.ISO) {
-                        if (msg.getRootDiskOfferingUuid() != null) {
-                            diskOfferingUuids.add(msg.getRootDiskOfferingUuid());
-                        } else if (msg.getRootDiskSize() != null) {
-                            allVolumeSizeAsked += msg.getRootDiskSize();
-                        } else {
-                            throw new ApiMessageInterceptionException(argerr("rootDiskOfferingUuid cannot be null when image mediaType is ISO"));
+                    if (!CollectionUtils.isEmpty(msg.getDiskAOs())) {
+                        for (DiskAO disk : msg.getDiskAOs()) {
+                            if (disk.isBoot()) {
+                                continue;
+                            }
+
+                            if (disk.getSize() > 0) {
+                                allVolumeSizeAsked += disk.getSize();
+                            } else if (disk.getDiskOfferingUuid() != null) {
+                                diskOfferingUuids.add(disk.getDiskOfferingUuid());
+                            }
+                            // TODO: image / template / other types for data volumes
                         }
-                    } else {
-                        if (msg.getRootDiskOfferingUuid() != null) {
-                            diskOfferingUuids.add(msg.getRootDiskOfferingUuid());
-                        } else if (msg.getRootDiskSize() != null) {
-                            allVolumeSizeAsked += msg.getRootDiskSize();
+                    }
+
+                    // root volume
+                    if (imgType == ImageMediaType.RootVolumeTemplate) {
+                        allVolumeSizeAsked += imgSize;
+                    } else FIND_PARAMS: {
+                        String diskOfferingUuid = VmInstanceUtils.findRootDiskOfferingUuid(msg);
+                        if (diskOfferingUuid != null) {
+                            diskOfferingUuids.add(diskOfferingUuid);
+                            break FIND_PARAMS;
+                        }
+
+                        Long diskSize = VmInstanceUtils.findRootDiskSize(msg);
+                        if (diskSize != null) {
+                            allVolumeSizeAsked += diskSize;
+                            break FIND_PARAMS;
+                        }
+
+                        if (imgType == ImageMediaType.ISO) {
+                            throw new ApiMessageInterceptionException(argerr("rootDiskOfferingUuid cannot be null when image mediaType is ISO"));
                         } else {
                             throw new ApiMessageInterceptionException(argerr("rootDiskOfferingUuid cannot be null when create vm without image"));
                         }
                     }
 
-                    HashMap<String, Long> diskOfferingCountMap = new HashMap<>();
                     if (!diskOfferingUuids.isEmpty()) {
+                        Set<String> diskOfferingSet = new HashSet<>(diskOfferingUuids);
+                        List<Tuple> tuples = Q.New(DiskOfferingVO.class)
+                                .in(DiskOfferingVO_.uuid, diskOfferingSet)
+                                .select(DiskOfferingVO_.uuid, DiskOfferingVO_.diskSize)
+                                .listTuple();
+                        Map<String, Long> diskSizeMap =
+                                toMap(tuples, it -> it.get(0, String.class), it -> it.get(1, Long.class));
+
                         for (String diskOfferingUuid : diskOfferingUuids) {
-                            if (diskOfferingCountMap.containsKey(diskOfferingUuid)) {
-                                diskOfferingCountMap.put(diskOfferingUuid, diskOfferingCountMap.get(diskOfferingUuid) + 1);
-                            } else {
-                                diskOfferingCountMap.put(diskOfferingUuid, 1L);
-                            }
-                        }
-                        for (String diskOfferingUuid : diskOfferingCountMap.keySet()) {
-                            sql = "select diskSize from DiskOfferingVO where uuid = :uuid";
-                            TypedQuery<Long> dq = dbf.getEntityManager().createQuery(sql, Long.class);
-                            dq.setParameter("uuid", diskOfferingUuid);
-                            Long dsize = dq.getSingleResult();
-                            dsize = dsize == null ? 0 : dsize;
-                            allVolumeSizeAsked += dsize * diskOfferingCountMap.get(diskOfferingUuid);
+                            Long size = diskSizeMap.get(diskOfferingUuid);
+                            allVolumeSizeAsked += (size == null ? 0 : size);
                         }
                     }
 
@@ -2480,10 +2494,10 @@ public class VmInstanceManagerImpl extends AbstractService implements
                         return msg.getDiskSize();
                     }
 
-                    String sql = "select diskSize from DiskOfferingVO where uuid = :uuid ";
-                    TypedQuery<Long> dq = dbf.getEntityManager().createQuery(sql, Long.class);
-                    dq.setParameter("uuid", msg.getDiskOfferingUuid());
-                    Long dsize = dq.getSingleResult();
+                    Long dsize = Q.New(DiskOfferingVO.class)
+                            .eq(DiskOfferingVO_.uuid, msg.getDiskOfferingUuid())
+                            .select(DiskOfferingVO_.diskSize)
+                            .findValue();
                     dsize = dsize == null ? 0 : dsize;
                     return dsize;
                 })

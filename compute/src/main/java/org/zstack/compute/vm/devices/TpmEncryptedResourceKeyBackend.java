@@ -97,4 +97,9 @@ public interface TpmEncryptedResourceKeyBackend {
     void restoreEncryptedResourceKey(RestoreEncryptedResourceKeyContext context);
 
     void cleanEncryptedResourceKey(String vmHostBackupFileUuid);
+
+    /**
+     * Remove encryption key material stored for a {@link org.zstack.header.tpm.entity.TpmKeyBackupVO}.
+     */
+    void cleanTpmKeyBackupEncryptedResourceKey(String tpmKeyBackupUuid);
 }

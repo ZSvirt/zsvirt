@@ -4,16 +4,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.zstack.compute.vm.VmGlobalConfig;
 import org.zstack.compute.vm.devices.TpmEncryptedResourceKeyBackend;
 import org.zstack.compute.vm.devices.VmTpmManager;
+import org.zstack.core.Platform;
 import org.zstack.core.asyncbatch.While;
 import org.zstack.core.cloudbus.CloudBus;
 import org.zstack.core.cloudbus.CloudBusCallBack;
 import org.zstack.core.cloudbus.MessageSafe;
+import org.zstack.core.db.DatabaseFacade;
 import org.zstack.core.db.Q;
 import org.zstack.core.db.SQL;
 import org.zstack.core.db.SQLBatch;
 import org.zstack.core.thread.ChainTask;
 import org.zstack.core.thread.SyncTaskChain;
 import org.zstack.core.thread.ThreadFacade;
+import org.zstack.core.timeout.TimeHelper;
 import org.zstack.core.workflow.SimpleFlowChain;
 import org.zstack.header.AbstractService;
 import org.zstack.header.core.Completion;
@@ -36,10 +39,13 @@ import org.zstack.header.tpm.api.APIRemoveTpmMsg;
 import org.zstack.header.tpm.api.APIUpdateTpmMsg;
 import org.zstack.header.tpm.entity.TpmCapabilityView;
 import org.zstack.header.tpm.entity.TpmInventory;
+import org.zstack.header.tpm.entity.TpmKeyBackupVO;
 import org.zstack.header.tpm.entity.TpmVO;
 import org.zstack.header.tpm.entity.TpmVO_;
 import org.zstack.header.tpm.message.AddTpmMsg;
 import org.zstack.header.tpm.message.AddTpmReply;
+import org.zstack.header.tpm.message.DeleteTpmKeyBackupMsg;
+import org.zstack.header.tpm.message.DeleteTpmKeyBackupReply;
 import org.zstack.header.tpm.message.RestoreTpmEncryptionKeyMsg;
 import org.zstack.header.tpm.message.RestoreTpmEncryptionKeyReply;
 import org.zstack.header.tpm.message.TpmDeletionMsg;
@@ -74,6 +80,7 @@ import org.zstack.utils.CollectionUtils;
 import org.zstack.utils.Utils;
 import org.zstack.utils.logging.CLogger;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.HashMap;
@@ -113,6 +120,10 @@ public class KvmTpmManager extends AbstractService {
     private EncryptedResourceKeyManager resourceKeyManager;
     @Autowired
     private KvmSecureBootExtensions secureBootExtensions;
+    @Autowired
+    private DatabaseFacade databaseFacade;
+    @Autowired
+    private TimeHelper timeHelper;
 
     @Override
     public boolean start() {
@@ -153,6 +164,8 @@ public class KvmTpmManager extends AbstractService {
             handle((BackupTpmEncryptionKeyMsg) msg);
         } else if (msg instanceof RestoreTpmEncryptionKeyMsg) {
             handle((RestoreTpmEncryptionKeyMsg) msg);
+        } else if (msg instanceof DeleteTpmKeyBackupMsg) {
+            handle((DeleteTpmKeyBackupMsg) msg);
         } else if (msg instanceof ResetVmTpmMsg) {
             handle((ResetVmTpmMsg) msg);
         } else {
@@ -648,11 +661,47 @@ public class KvmTpmManager extends AbstractService {
     }
 
     private void handle(RestoreTpmEncryptionKeyMsg msg) {
-        RestoreEncryptedResourceKeyContext content = new RestoreEncryptedResourceKeyContext();
-        content.srcResourceUuid = msg.getSrcResourceUuid();
-        content.dstResourceUuid = msg.getDstResourceUuid();
-        tpmKeyBackend.restoreEncryptedResourceKey(content);
-        bus.reply(msg, new RestoreTpmEncryptionKeyReply());
+        RestoreTpmEncryptionKeyReply reply = new RestoreTpmEncryptionKeyReply();
+        String tpmKeyBackupUuid = null;
+        try {
+            if (msg.isBackupCurrentKey()
+                    && msg.getDstResourceUuid() != null
+                    && tpmKeyBackend.checkTpmKeyProviderAttached(msg.getDstResourceUuid())) {
+                tpmKeyBackupUuid = Platform.getUuid();
+                TpmKeyBackupVO backupVo = new TpmKeyBackupVO();
+                backupVo.setUuid(tpmKeyBackupUuid);
+                Timestamp now = new Timestamp(timeHelper.getCurrentTimeMillis());
+                backupVo.setCreateDate(now);
+                backupVo.setLastOpDate(now);
+                databaseFacade.persist(backupVo);
+                BackupEncryptedResourceKeyContext backupCtx = new BackupEncryptedResourceKeyContext();
+                backupCtx.srcResourceUuid = msg.getDstResourceUuid();
+                backupCtx.dstResourceUuid = tpmKeyBackupUuid;
+                tpmKeyBackend.backupEncryptedResourceKey(backupCtx);
+                reply.setTpmKeyBackupUuid(tpmKeyBackupUuid);
+            }
+
+            RestoreEncryptedResourceKeyContext content = new RestoreEncryptedResourceKeyContext();
+            content.srcResourceUuid = msg.getSrcResourceUuid();
+            content.dstResourceUuid = msg.getDstResourceUuid();
+            tpmKeyBackend.restoreEncryptedResourceKey(content);
+            bus.reply(msg, reply);
+        } catch (Exception t) {
+            if (tpmKeyBackupUuid != null) {
+                tpmKeyBackend.cleanTpmKeyBackupEncryptedResourceKey(tpmKeyBackupUuid);
+                databaseFacade.removeByPrimaryKey(tpmKeyBackupUuid, TpmKeyBackupVO.class);
+            }
+            throw t;
+        }
+    }
+
+    private void handle(DeleteTpmKeyBackupMsg msg) {
+        DeleteTpmKeyBackupReply reply = new DeleteTpmKeyBackupReply();
+        if (msg.getTpmKeyBackupUuid() != null) {
+            tpmKeyBackend.cleanTpmKeyBackupEncryptedResourceKey(msg.getTpmKeyBackupUuid());
+            databaseFacade.removeByPrimaryKey(msg.getTpmKeyBackupUuid(), TpmKeyBackupVO.class);
+        }
+        bus.reply(msg, reply);
     }
 
     static class ResetVmTpmContext {

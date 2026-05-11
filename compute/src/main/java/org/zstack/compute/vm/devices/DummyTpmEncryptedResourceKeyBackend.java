@@ -80,4 +80,9 @@ public class DummyTpmEncryptedResourceKeyBackend implements TpmEncryptedResource
         // do nothing
         logger.debug("ignore cleanup encrypted resource key request for VmHostBackupFileVO: " + vmHostBackupFileUuid);
     }
+
+    @Override
+    public void cleanTpmKeyBackupEncryptedResourceKey(String tpmKeyBackupUuid) {
+        logger.debug("ignore cleanup encrypted resource key request for TpmKeyBackupVO: " + tpmKeyBackupUuid);
+    }
 }

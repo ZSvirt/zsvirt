@@ -16,7 +16,6 @@ import org.zstack.core.componentloader.PluginRegistry;
 import org.zstack.core.config.GlobalConfigException;
 import org.zstack.core.config.GlobalConfigValidatorExtensionPoint;
 import org.zstack.core.db.*;
-import org.zstack.core.db.SimpleQuery.Op;
 import org.zstack.core.thread.ChainTask;
 import org.zstack.core.thread.SyncTaskChain;
 import org.zstack.core.thread.ThreadFacade;
@@ -296,10 +295,10 @@ public class VirtualRouterManagerImpl extends AbstractService implements Virtual
                 List<String> neededService = l3Network.getNetworkServiceTypesFromProvider(new Callable<String>() {
                     @Override
                     public String call() {
-                        SimpleQuery<NetworkServiceProviderVO> q = dbf.createQuery(NetworkServiceProviderVO.class);
-                        q.select(NetworkServiceProviderVO_.uuid);
-                        q.add(NetworkServiceProviderVO_.type, Op.EQ, msg.getProviderType());
-                        return q.findValue();
+                        return Q.New(NetworkServiceProviderVO.class)
+                                .select(NetworkServiceProviderVO_.uuid)
+                                .eq(NetworkServiceProviderVO_.type, msg.getProviderType())
+                                .findValue();
                     }
                 }.call());
 
@@ -839,9 +838,9 @@ public class VirtualRouterManagerImpl extends AbstractService implements Virtual
     public void prepareDbInitialValue() {
         prepareDbInitialValueForPublicVip();
 
-        SimpleQuery<NetworkServiceProviderVO> query = dbf.createQuery(NetworkServiceProviderVO.class);
-        query.add(NetworkServiceProviderVO_.type, Op.EQ, VIRTUAL_ROUTER_PROVIDER_TYPE);
-        NetworkServiceProviderVO rpvo = query.find();
+        NetworkServiceProviderVO rpvo = Q.New(NetworkServiceProviderVO.class)
+                .eq(NetworkServiceProviderVO_.type, VIRTUAL_ROUTER_PROVIDER_TYPE)
+                .find();
         if (rpvo != null) {
             virtualRouterProvider = NetworkServiceProviderInventory.valueOf(rpvo);
             return;
@@ -882,9 +881,9 @@ public class VirtualRouterManagerImpl extends AbstractService implements Virtual
     }
     
     private NetworkServiceProviderVO getRouterVO() {
-        SimpleQuery<NetworkServiceProviderVO> query = dbf.createQuery(NetworkServiceProviderVO.class);
-        query.add(NetworkServiceProviderVO_.type, Op.EQ, VIRTUAL_ROUTER_PROVIDER_TYPE);
-        return query.find();
+        return Q.New(NetworkServiceProviderVO.class)
+                .eq(NetworkServiceProviderVO_.type, VIRTUAL_ROUTER_PROVIDER_TYPE)
+                .find();
     }
 
     @Override
@@ -1049,11 +1048,11 @@ public class VirtualRouterManagerImpl extends AbstractService implements Virtual
         if (l3Uuid == null) {
             return false;
         }
-        SimpleQuery<NetworkServiceL3NetworkRefVO> q = dbf.createQuery(NetworkServiceL3NetworkRefVO.class);
-        q.add(NetworkServiceL3NetworkRefVO_.l3NetworkUuid, Op.EQ, l3Uuid);
-        q.add(NetworkServiceL3NetworkRefVO_.networkServiceType, Op.EQ, nsType);
         // no need to specify provider type, L3 networks identified by candidates are served by virtual router or vyos
-        return q.isExists();
+        return Q.New(NetworkServiceL3NetworkRefVO.class)
+                .eq(NetworkServiceL3NetworkRefVO_.l3NetworkUuid, l3Uuid)
+                .eq(NetworkServiceL3NetworkRefVO_.networkServiceType, nsType)
+                .isExists();
     }
 
     @Override
@@ -1061,11 +1060,11 @@ public class VirtualRouterManagerImpl extends AbstractService implements Virtual
         if (l3Uuids == null || l3Uuids.isEmpty()) {
             return false;
         }
-        SimpleQuery<NetworkServiceL3NetworkRefVO> q = dbf.createQuery(NetworkServiceL3NetworkRefVO.class);
-        q.add(NetworkServiceL3NetworkRefVO_.l3NetworkUuid, Op.IN, l3Uuids);
-        q.add(NetworkServiceL3NetworkRefVO_.networkServiceType, Op.EQ, nsType);
         // no need to specify provider type, L3 networks identified by candidates are served by virtual router or vyos
-        return q.isExists();
+        return Q.New(NetworkServiceL3NetworkRefVO.class)
+                .in(NetworkServiceL3NetworkRefVO_.l3NetworkUuid, l3Uuids)
+                .eq(NetworkServiceL3NetworkRefVO_.networkServiceType, nsType)
+                .isExists();
     }
 
     private void acquireVirtualRouterVmInternal(VirtualRouterStruct struct,  final ReturnValueCompletion<VirtualRouterVmInventory> completion) {
@@ -1489,9 +1488,9 @@ public class VirtualRouterManagerImpl extends AbstractService implements Virtual
         boolean portForwarding = false;
         boolean eip = false;
 
-        SimpleQuery<NetworkServiceL3NetworkRefVO> q = dbf.createQuery(NetworkServiceL3NetworkRefVO.class);
-        q.add(NetworkServiceL3NetworkRefVO_.l3NetworkUuid, Op.EQ, msg.getL3NetworkUuid());
-        List<NetworkServiceL3NetworkRefVO> refs = q.list();
+        List<NetworkServiceL3NetworkRefVO> refs = Q.New(NetworkServiceL3NetworkRefVO.class)
+                .eq(NetworkServiceL3NetworkRefVO_.l3NetworkUuid, msg.getL3NetworkUuid())
+                .list();
         for (NetworkServiceL3NetworkRefVO ref : refs) {
             if (ref.getNetworkServiceType().equals(NetworkServiceType.SNAT.toString())) {
                 snat = true;

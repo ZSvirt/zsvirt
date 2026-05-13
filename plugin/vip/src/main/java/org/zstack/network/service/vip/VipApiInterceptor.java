@@ -1,12 +1,8 @@
 package org.zstack.network.service.vip;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.zstack.core.cloudbus.CloudBus;
 import org.zstack.core.db.DatabaseFacade;
 import org.zstack.core.db.Q;
-import org.zstack.core.db.SimpleQuery;
-import org.zstack.core.db.SimpleQuery.Op;
-import org.zstack.core.errorcode.ErrorFacade;
 import org.zstack.header.apimediator.GlobalApiMessageInterceptor;
 import org.zstack.header.apimediator.ApiMessageInterceptionException;
 import org.zstack.header.apimediator.ApiMessageInterceptor;
@@ -15,20 +11,16 @@ import org.zstack.header.apimediator.StopRoutingException;
 import org.zstack.header.errorcode.SysErrors;
 import org.zstack.header.message.APIMessage;
 import org.zstack.header.network.l3.*;
-import org.zstack.header.vm.APIAttachL3NetworkToVmMsg;
 import org.zstack.utils.network.IPv6Constants;
 import org.zstack.utils.network.IPv6NetworkUtils;
 import org.zstack.utils.network.NetworkUtils;
 import static org.zstack.core.Platform.argerr;
 import static org.zstack.core.Platform.operr;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.zstack.identity.AccountManager;
 import org.zstack.header.identity.AccountConstant;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 /**
@@ -36,11 +28,7 @@ import java.util.stream.Collectors;
 @InterceptorForService("vip")
 public class VipApiInterceptor implements ApiMessageInterceptor, GlobalApiMessageInterceptor {
     @Autowired
-    private ErrorFacade errf;
-    @Autowired
     private DatabaseFacade dbf;
-    @Autowired
-    private CloudBus bus;
     @Autowired
     private VipManager vipMgr;
     @Autowired
@@ -129,10 +117,11 @@ public class VipApiInterceptor implements ApiMessageInterceptor, GlobalApiMessag
                 throw new ApiMessageInterceptionException(argerr("requiredIp[%s] is not in valid IPv4 mediaType", msg.getRequiredIp()));
             }
 
-            SimpleQuery<VipVO> q = dbf.createQuery(VipVO.class);
-            q.add(VipVO_.ip, Op.EQ, msg.getRequiredIp());
-            q.add(VipVO_.l3NetworkUuid, Op.EQ, msg.getL3NetworkUuid());
-            if (q.isExists()) {
+            boolean exists = Q.New(VipVO.class)
+                    .eq(VipVO_.ip, msg.getRequiredIp())
+                    .eq(VipVO_.l3NetworkUuid, msg.getL3NetworkUuid())
+                    .isExists();
+            if (exists) {
                 throw new ApiMessageInterceptionException(operr("there is already a vip[%s] on l3Network[uuid:%s]", msg.getRequiredIp(), msg.getL3NetworkUuid()));
             }
 

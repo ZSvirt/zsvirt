@@ -14,8 +14,6 @@ import org.zstack.core.componentloader.PluginRegistry;
 import org.zstack.core.db.Q;
 import org.zstack.core.db.SQL;
 import org.zstack.core.db.SQLBatch;
-import org.zstack.core.db.SimpleQuery;
-import org.zstack.core.db.SimpleQuery.Op;
 import org.zstack.core.thread.*;
 import org.zstack.core.trash.StorageTrash;
 import org.zstack.core.workflow.FlowChainBuilder;
@@ -1626,10 +1624,10 @@ public class CephPrimaryStorageBase extends PrimaryStorageBase {
         public void checkParam() {
             super.checkParam();
 
-            SimpleQuery<CephBackupStorageVO> q = dbf.createQuery(CephBackupStorageVO.class);
-            q.select(CephBackupStorageVO_.fsid);
-            q.add(CephBackupStorageVO_.uuid, Op.EQ, backupStorage.getUuid());
-            String bsFsid = q.findValue();
+            String bsFsid = Q.New(CephBackupStorageVO.class)
+                    .select(CephBackupStorageVO_.fsid)
+                    .eq(CephBackupStorageVO_.uuid, backupStorage.getUuid())
+                    .findValue();
             if (!getSelf().getFsid().equals(bsFsid)) {
                 throw new OperationFailureException(operr(
                         "the backup storage[uuid:%s, name:%s, fsid:%s] is not in the same ceph cluster" +
@@ -2457,10 +2455,10 @@ public class CephPrimaryStorageBase extends PrimaryStorageBase {
                                     return;
                                 } else {
                                     logger.debug("image not found, remove vo and re-download");
-                                    SimpleQuery<ImageCacheVO> q = dbf.createQuery(ImageCacheVO.class);
-                                    q.add(ImageCacheVO_.primaryStorageUuid, Op.EQ, self.getUuid());
-                                    q.add(ImageCacheVO_.imageUuid, Op.EQ, image.getInventory().getUuid());
-                                    ImageCacheVO cvo = q.find();
+                                    ImageCacheVO cvo = Q.New(ImageCacheVO.class)
+                                            .eq(ImageCacheVO_.primaryStorageUuid, self.getUuid())
+                                            .eq(ImageCacheVO_.imageUuid, image.getInventory().getUuid())
+                                            .find();
 
                                     IncreasePrimaryStorageCapacityMsg imsg = new IncreasePrimaryStorageCapacityMsg();
                                     imsg.setDiskSize(cvo.getSize());
@@ -3659,10 +3657,10 @@ public class CephPrimaryStorageBase extends PrimaryStorageBase {
                                 // check if there is another ceph setup having the same fsid
                                 String fsId = set.iterator().next();
 
-                                SimpleQuery<CephPrimaryStorageVO> q = dbf.createQuery(CephPrimaryStorageVO.class);
-                                q.add(CephPrimaryStorageVO_.fsid, Op.EQ, fsId);
-                                q.add(CephPrimaryStorageVO_.uuid, Op.NOT_EQ, self.getUuid());
-                                CephPrimaryStorageVO otherCeph = q.find();
+                                CephPrimaryStorageVO otherCeph = Q.New(CephPrimaryStorageVO.class)
+                                        .eq(CephPrimaryStorageVO_.fsid, fsId)
+                                        .notEq(CephPrimaryStorageVO_.uuid, self.getUuid())
+                                        .find();
                                 if (otherCeph != null) {
                                     throw new OperationFailureException(
                                             operr("there is another CEPH primary storage[name:%s, uuid:%s] with the same" +
@@ -4144,9 +4142,9 @@ public class CephPrimaryStorageBase extends PrimaryStorageBase {
     private void handle(APIRemoveMonFromCephPrimaryStorageMsg msg) {
         APIRemoveMonFromCephPrimaryStorageEvent evt = new APIRemoveMonFromCephPrimaryStorageEvent(msg.getId());
 
-        SimpleQuery<CephPrimaryStorageMonVO> q = dbf.createQuery(CephPrimaryStorageMonVO.class);
-        q.add(CephPrimaryStorageMonVO_.hostname, Op.IN, msg.getMonHostnames());
-        List<CephPrimaryStorageMonVO> vos = q.list();
+        List<CephPrimaryStorageMonVO> vos = Q.New(CephPrimaryStorageMonVO.class)
+                .in(CephPrimaryStorageMonVO_.hostname, msg.getMonHostnames())
+                .list();
 
         dbf.removeCollection(vos, CephPrimaryStorageMonVO.class);
         evt.setInventory(CephPrimaryStorageInventory.valueOf(dbf.reload(getSelf())));
@@ -5383,10 +5381,10 @@ public class CephPrimaryStorageBase extends PrimaryStorageBase {
         final TakeSnapshotReply reply = new TakeSnapshotReply();
 
         final VolumeSnapshotInventory sp = msg.getStruct().getCurrent();
-        SimpleQuery<VolumeVO> q = dbf.createQuery(VolumeVO.class);
-        q.select(VolumeVO_.installPath);
-        q.add(VolumeVO_.uuid, Op.EQ, sp.getVolumeUuid());
-        String volumePath = q.findValue();
+        String volumePath = Q.New(VolumeVO.class)
+                .select(VolumeVO_.installPath)
+                .eq(VolumeVO_.uuid, sp.getVolumeUuid())
+                .findValue();
 
         final String spPath = String.format("%s@%s", volumePath, sp.getUuid());
         CreateSnapshotCmd cmd = new CreateSnapshotCmd();
@@ -5420,10 +5418,10 @@ public class CephPrimaryStorageBase extends PrimaryStorageBase {
 
     @Override
     public void attachHook(String clusterUuid, Completion completion) {
-        SimpleQuery<ClusterVO> q = dbf.createQuery(ClusterVO.class);
-        q.select(ClusterVO_.hypervisorType);
-        q.add(ClusterVO_.uuid, Op.EQ, clusterUuid);
-        String hvType = q.findValue();
+        String hvType = Q.New(ClusterVO.class)
+                .select(ClusterVO_.hypervisorType)
+                .eq(ClusterVO_.uuid, clusterUuid)
+                .findValue();
 
         FlowChain chain = FlowChainBuilder.newSimpleFlowChain();
         if (KVMConstant.KVM_HYPERVISOR_TYPE.equals(hvType)) {
@@ -5526,11 +5524,11 @@ public class CephPrimaryStorageBase extends PrimaryStorageBase {
 
             @Override
             public void run(FlowTrigger trigger, Map data) {
-                SimpleQuery<HostVO> q = dbf.createQuery(HostVO.class);
-                q.select(HostVO_.uuid);
-                q.add(HostVO_.clusterUuid, Op.EQ, clusterUuid);
-                q.add(HostVO_.status, Op.EQ, HostStatus.Connected);
-                List<String> hostUuids = q.listValue();
+                List<String> hostUuids = Q.New(HostVO.class)
+                        .select(HostVO_.uuid)
+                        .eq(HostVO_.clusterUuid, clusterUuid)
+                        .eq(HostVO_.status, HostStatus.Connected)
+                        .listValues();
                 if (hostUuids.isEmpty()) {
                     trigger.next();
                     return;

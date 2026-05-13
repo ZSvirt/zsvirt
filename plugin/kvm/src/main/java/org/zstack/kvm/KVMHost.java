@@ -34,8 +34,6 @@ import org.zstack.core.componentloader.PluginRegistry;
 import org.zstack.core.db.Q;
 import org.zstack.core.db.SQL;
 import org.zstack.core.db.SQLBatch;
-import org.zstack.core.db.SimpleQuery;
-import org.zstack.core.db.SimpleQuery.Op;
 import org.zstack.core.thread.*;
 import org.zstack.core.timeout.ApiTimeoutManager;
 import org.zstack.core.workflow.FlowChainBuilder;
@@ -2804,10 +2802,10 @@ public class KVMHost extends HostBase implements Host {
         VolumeInventory volume = msg.getTo();
 
         if (volume.getVmInstanceUuid() != null) {
-            SimpleQuery<VmInstanceVO> q = dbf.createQuery(VmInstanceVO.class);
-            q.select(VmInstanceVO_.state);
-            q.add(VmInstanceVO_.uuid, Op.EQ, volume.getVmInstanceUuid());
-            VmInstanceState state = q.findValue();
+            VmInstanceState state = Q.New(VmInstanceVO.class)
+                    .select(VmInstanceVO_.state)
+                    .eq(VmInstanceVO_.uuid, volume.getVmInstanceUuid())
+                    .findValue();
             if (state != VmInstanceState.Stopped && state != VmInstanceState.Running && state != VmInstanceState.Paused && state != VmInstanceState.Destroyed) {
                 throw new OperationFailureException(operr("cannot do volume snapshot merge when vm[uuid:%s] is in state of %s." +
                                 " The operation is only allowed when vm is Running or Stopped", volume.getUuid(), state));
@@ -2906,10 +2904,10 @@ public class KVMHost extends HostBase implements Host {
 
         CheckSnapshotCmd cmd = new CheckSnapshotCmd();
         if (msg.getVmUuid() != null) {
-            SimpleQuery<VmInstanceVO> q = dbf.createQuery(VmInstanceVO.class);
-            q.select(VmInstanceVO_.state);
-            q.add(VmInstanceVO_.uuid, SimpleQuery.Op.EQ, msg.getVmUuid());
-            VmInstanceState vmState = q.findValue();
+            VmInstanceState vmState = Q.New(VmInstanceVO.class)
+                    .select(VmInstanceVO_.state)
+                    .eq(VmInstanceVO_.uuid, msg.getVmUuid())
+                    .findValue();
             if (vmState != VmInstanceState.Running && vmState != VmInstanceState.Stopped && vmState != VmInstanceState.Paused) {
                 throw new OperationFailureException(operr("vm[uuid:%s] is not Running or Stopped, current state[%s]", msg.getVmUuid(), vmState));
             }
@@ -3023,10 +3021,10 @@ public class KVMHost extends HostBase implements Host {
         TakeSnapshotCmd cmd = new TakeSnapshotCmd();
 
         if (msg.getVmUuid() != null) {
-            SimpleQuery<VmInstanceVO> q = dbf.createQuery(VmInstanceVO.class);
-            q.select(VmInstanceVO_.state);
-            q.add(VmInstanceVO_.uuid, SimpleQuery.Op.EQ, msg.getVmUuid());
-            VmInstanceState vmState = q.findValue();
+            VmInstanceState vmState = Q.New(VmInstanceVO.class)
+                    .select(VmInstanceVO_.state)
+                    .eq(VmInstanceVO_.uuid, msg.getVmUuid())
+                    .findValue();
             if (vmState != VmInstanceState.Running && vmState != VmInstanceState.Stopped && vmState != VmInstanceState.Paused) {
                 throw new OperationFailureException(operr("vm[uuid:%s] is not Running or Stopped, current state[%s]", msg.getVmUuid(), vmState));
             }
@@ -3143,10 +3141,10 @@ public class KVMHost extends HostBase implements Host {
         srcHostMnIp = s.srcHostMnIp;
         srcHostUuid = s.srcHostUuid;
 
-        SimpleQuery<VmInstanceVO> q = dbf.createQuery(VmInstanceVO.class);
-        q.select(VmInstanceVO_.internalId);
-        q.add(VmInstanceVO_.uuid, Op.EQ, vmUuid);
-        final Long vmInternalId = q.findValue();
+        final Long vmInternalId = Q.New(VmInstanceVO.class)
+                .select(VmInstanceVO_.internalId)
+                .eq(VmInstanceVO_.uuid, vmUuid)
+                .findValue();
 
         List<VmNicVO> nics = Q.New(VmNicVO.class).eq(VmNicVO_.vmInstanceUuid, s.vmUuid).list();
         List<NicTO> nicTos = VmNicInventory.valueOf(nics).stream().map(this::completeNicInfo).collect(Collectors.toList());

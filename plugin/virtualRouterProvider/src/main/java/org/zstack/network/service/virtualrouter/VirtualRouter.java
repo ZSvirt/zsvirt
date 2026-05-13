@@ -11,8 +11,6 @@ import org.zstack.core.asyncbatch.While;
 import org.zstack.core.cloudbus.CloudBusCallBack;
 import org.zstack.core.db.Q;
 import org.zstack.core.db.SQL;
-import org.zstack.core.db.SimpleQuery;
-import org.zstack.core.db.SimpleQuery.Op;
 import org.zstack.core.retry.Retry;
 import org.zstack.core.retry.RetryCondition;
 import org.zstack.core.thread.ChainTask;
@@ -481,9 +479,9 @@ public class VirtualRouter extends ApplianceVmBase {
         chain.getData().put(Params.managementNicIp.toString(), vr.getManagementNic().getIp());
         chain.getData().put(Params.applianceVmUuid.toString(), self.getUuid());
 
-        SimpleQuery<ApplianceVmFirewallRuleVO> q = dbf.createQuery(ApplianceVmFirewallRuleVO.class);
-        q.add(ApplianceVmFirewallRuleVO_.applianceVmUuid, Op.EQ, getSelf().getUuid());
-        List<ApplianceVmFirewallRuleVO> vos = q.list();
+        List<ApplianceVmFirewallRuleVO> vos = Q.New(ApplianceVmFirewallRuleVO.class)
+                .eq(ApplianceVmFirewallRuleVO_.applianceVmUuid, getSelf().getUuid())
+                .list();
         List<ApplianceVmFirewallRuleInventory> rules = ApplianceVmFirewallRuleInventory.valueOf(vos);
         chain.getData().put(ApplianceVmConstant.Params.applianceVmFirewallRules.toString(), rules);
         chain.done(new FlowDoneHandler(completion) {
@@ -866,9 +864,9 @@ public class VirtualRouter extends ApplianceVmBase {
         chain.getData().put(Params.managementNicIp.toString(), vr.getManagementNic().getIp());
         chain.getData().put(Params.applianceVmUuid.toString(), self.getUuid());
 
-        SimpleQuery<ApplianceVmFirewallRuleVO> q = dbf.createQuery(ApplianceVmFirewallRuleVO.class);
-        q.add(ApplianceVmFirewallRuleVO_.applianceVmUuid, Op.EQ, getSelf().getUuid());
-        List<ApplianceVmFirewallRuleVO> vos = q.list();
+        List<ApplianceVmFirewallRuleVO> vos = Q.New(ApplianceVmFirewallRuleVO.class)
+                .eq(ApplianceVmFirewallRuleVO_.applianceVmUuid, getSelf().getUuid())
+                .list();
         List<ApplianceVmFirewallRuleInventory> rules = ApplianceVmFirewallRuleInventory.valueOf(vos);
         chain.getData().put(ApplianceVmConstant.Params.applianceVmFirewallRules.toString(), rules);
         chain.insert(new Flow() {

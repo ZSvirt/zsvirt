@@ -353,10 +353,10 @@ public class Session implements Component {
             private void removeMemorySessionsAccordingToDB(Map tokens, Object data) {
                 IdentityCanonicalEvents.AccountDeletedData d = (IdentityCanonicalEvents.AccountDeletedData) data;
 
-                SimpleQuery<SessionVO> q = dbf.createQuery(SessionVO.class);
-                q.select(SessionVO_.uuid);
-                q.add(SessionVO_.accountUuid, SimpleQuery.Op.EQ, d.getAccountUuid());
-                List<String> suuids = q.listValue();
+                List<String> suuids = Q.New(SessionVO.class)
+                        .select(SessionVO_.uuid)
+                        .eq(SessionVO_.accountUuid, d.getAccountUuid())
+                        .listValues();
 
                 for (String uuid : suuids) {
                     logout(uuid);

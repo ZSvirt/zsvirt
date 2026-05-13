@@ -9,7 +9,7 @@ import org.zstack.core.cloudbus.CloudBusEventListener;
 import org.zstack.core.cloudbus.EventSubscriberReceipt;
 import org.zstack.core.db.DatabaseFacade;
 import org.zstack.core.db.GLock;
-import org.zstack.core.db.SimpleQuery;
+import org.zstack.core.db.Q;
 import org.zstack.core.errorcode.ErrorFacade;
 import org.zstack.core.thread.AsyncThread;
 import org.zstack.header.Component;
@@ -99,27 +99,26 @@ public class JobQueueFacadeImpl2 implements JobQueueFacade, CloudBusEventListene
     }
 
     private void restartQueue(JobQueueVO qvo, String mgmtId) {
-        SimpleQuery<JobQueueEntryVO> q = dbf.createQuery(JobQueueEntryVO.class);
-        q.select(JobQueueEntryVO_.id, JobQueueEntryVO_.name);
-        q.add(JobQueueEntryVO_.jobQueueId, SimpleQuery.Op.EQ, qvo.getId());
-        q.add(JobQueueEntryVO_.issuerManagementNodeId, SimpleQuery.Op.NULL);
-        List<Tuple> ts = q.listTuple();
+        List<Tuple> ts = Q.New(JobQueueEntryVO.class)
+                .select(JobQueueEntryVO_.id, JobQueueEntryVO_.name)
+                .eq(JobQueueEntryVO_.jobQueueId, qvo.getId())
+                .isNull(JobQueueEntryVO_.issuerManagementNodeId)
+                .listTuple();
         for (Tuple t : ts) {
             logger.debug(String.format("[Job Removed]: job[id:%s, name:%s] because its issuer management node[id:%s] became available", t.get(0), t.get(1), mgmtId));
             dbf.removeByPrimaryKey((Long) t.get(0), JobQueueEntryVO.class);
         }
 
-        q = dbf.createQuery(JobQueueEntryVO.class);
-        q.add(JobQueueEntryVO_.state, SimpleQuery.Op.IN, JobState.Pending, JobState.Processing);
-        q.add(JobQueueEntryVO_.jobQueueId, SimpleQuery.Op.EQ, qvo.getId());
-        q.orderBy(JobQueueEntryVO_.id, SimpleQuery.Od.ASC);
-        long count = q.count();
-        if (count == 0) {
+        List<JobQueueEntryVO> es = Q.New(JobQueueEntryVO.class)
+                .in(JobQueueEntryVO_.state, Arrays.asList(JobState.Pending, JobState.Processing))
+                .eq(JobQueueEntryVO_.jobQueueId, qvo.getId())
+                .orderByAsc(JobQueueEntryVO_.id)
+                .list();
+        if (es.isEmpty()) {
             logger.debug(String.format("[JobQueue Removed]: id:%s, no Pending or Processing job remaining in this queue, remove it", qvo.getId()));
             return;
         }
 
-        List<JobQueueEntryVO> es = q.list();
         for (JobQueueEntryVO e : es) {
             if (e.getState() == JobState.Processing && !e.isRestartable()) {
                 dbf.remove(e);
@@ -145,9 +144,9 @@ public class JobQueueFacadeImpl2 implements JobQueueFacade, CloudBusEventListene
         try {
             logger.debug(String.format("management node[id:%s] starts taking over jobs of left management node[%s]",
                     Platform.getManagementServerId(), mgmtId));
-            SimpleQuery<JobQueueVO> qq = dbf.createQuery(JobQueueVO.class);
-            qq.add(JobQueueVO_.workerManagementNodeId, SimpleQuery.Op.NULL);
-            List<JobQueueVO> queues = qq.list();
+            List<JobQueueVO> queues = Q.New(JobQueueVO.class)
+                    .isNull(JobQueueVO_.workerManagementNodeId)
+                    .list();
 
             logger.debug(String.format("[Orphan Queue found]: management node is going to take over %s orphan queues", queues.size()));
             for (JobQueueVO queue : queues) {
@@ -261,12 +260,12 @@ public class JobQueueFacadeImpl2 implements JobQueueFacade, CloudBusEventListene
             }
 
             private JobQueueEntryVO findJob(JobQueueVO qvo) {
-                SimpleQuery<JobQueueEntryVO> q = dbf.createQuery(JobQueueEntryVO.class);
-                q.add(JobQueueEntryVO_.state, SimpleQuery.Op.EQ, JobState.Pending);
-                q.add(JobQueueEntryVO_.jobQueueId, SimpleQuery.Op.EQ, qvo.getId());
-                q.setLimit(1);
-                q.orderBy(JobQueueEntryVO_.id, SimpleQuery.Od.ASC);
-                return q.find();
+                return Q.New(JobQueueEntryVO.class)
+                        .eq(JobQueueEntryVO_.state, JobState.Pending)
+                        .eq(JobQueueEntryVO_.jobQueueId, qvo.getId())
+                        .limit(1)
+                        .orderByAsc(JobQueueEntryVO_.id)
+                        .find();
             }
 
             private Bucket takeJob(final JobQueueVO qvo) {

@@ -8,8 +8,6 @@ import org.zstack.core.asyncbatch.While;
 import org.zstack.core.cloudbus.CloudBus;
 import org.zstack.core.db.DatabaseFacade;
 import org.zstack.core.db.Q;
-import org.zstack.core.db.SimpleQuery;
-import org.zstack.core.db.SimpleQuery.Op;
 import org.zstack.core.workflow.FlowChainBuilder;
 import org.zstack.header.AbstractService;
 import org.zstack.header.baremetal.pxeserver.BaremetalPxeServerStatus;
@@ -794,42 +792,46 @@ public class ZOpsManagerImpl extends AbstractService implements ZOpsManager {
     }
 
     private List<HostBaseInfo> getCephPrimaryStorageMons() {
-        SimpleQuery<CephPrimaryStorageMonVO> q = dbf.createQuery(CephPrimaryStorageMonVO.class);
-        q.select(CephPrimaryStorageMonVO_.hostname, CephPrimaryStorageMonVO_.sshPort);
-        q.add(CephPrimaryStorageMonVO_.status, Op.EQ, MonStatus.Connected);
-        return getHostBaseInfos(q, HostType.CephPrimaryStorageMon);
+        List<Tuple> lst = Q.New(CephPrimaryStorageMonVO.class)
+                .select(CephPrimaryStorageMonVO_.hostname, CephPrimaryStorageMonVO_.sshPort)
+                .eq(CephPrimaryStorageMonVO_.status, MonStatus.Connected)
+                .listTuple();
+        return getHostBaseInfos(lst, HostType.CephPrimaryStorageMon);
     }
 
     private List<HostBaseInfo> getCephBackupStorageMons() {
-        SimpleQuery<CephBackupStorageMonVO> q = dbf.createQuery(CephBackupStorageMonVO.class);
-        q.select(CephBackupStorageMonVO_.hostname, CephBackupStorageMonVO_.sshPort);
-        q.add(CephPrimaryStorageMonVO_.status, Op.EQ, MonStatus.Connected);
-        return getHostBaseInfos(q, HostType.CephBackupStorageMon);
+        List<Tuple> lst = Q.New(CephBackupStorageMonVO.class)
+                .select(CephBackupStorageMonVO_.hostname, CephBackupStorageMonVO_.sshPort)
+                .eq(CephBackupStorageMonVO_.status, MonStatus.Connected)
+                .listTuple();
+        return getHostBaseInfos(lst, HostType.CephBackupStorageMon);
     }
 
     private List<HostBaseInfo> getSftpBackupStorage() {
-        SimpleQuery<SftpBackupStorageVO> q = dbf.createQuery(SftpBackupStorageVO.class);
-        q.select(SftpBackupStorageVO_.hostname, SftpBackupStorageVO_.sshPort);
-        q.add(SftpBackupStorageVO_.status, Op.EQ, BackupStorageStatus.Connected);
-        return getHostBaseInfos(q, HostType.SftpBackupStorage);
+        List<Tuple> lst = Q.New(SftpBackupStorageVO.class)
+                .select(SftpBackupStorageVO_.hostname, SftpBackupStorageVO_.sshPort)
+                .eq(SftpBackupStorageVO_.status, BackupStorageStatus.Connected)
+                .listTuple();
+        return getHostBaseInfos(lst, HostType.SftpBackupStorage);
     }
 
     private List<HostBaseInfo> getImageStoreBackupStorage() {
-        SimpleQuery<ImageStoreBackupStorageVO> q = dbf.createQuery(ImageStoreBackupStorageVO.class);
-        q.select(ImageStoreBackupStorageVO_.hostname, ImageStoreBackupStorageVO_.sshPort);
-        q.add(ImageStoreBackupStorageVO_.status, Op.EQ, BackupStorageStatus.Connected);
-        return getHostBaseInfos(q, HostType.ImageStoreBackupStorage);
+        List<Tuple> lst = Q.New(ImageStoreBackupStorageVO.class)
+                .select(ImageStoreBackupStorageVO_.hostname, ImageStoreBackupStorageVO_.sshPort)
+                .eq(ImageStoreBackupStorageVO_.status, BackupStorageStatus.Connected)
+                .listTuple();
+        return getHostBaseInfos(lst, HostType.ImageStoreBackupStorage);
     }
 
     private List<HostBaseInfo> getBaremetalPxeServer() {
-        SimpleQuery<BaremetalPxeServerVO> q = dbf.createQuery(BaremetalPxeServerVO.class);
-        q.select(BaremetalPxeServerVO_.hostname, BaremetalPxeServerVO_.sshPort);
-        q.add(ImageStoreBackupStorageVO_.status, Op.EQ, BaremetalPxeServerStatus.Connected);
-        return getHostBaseInfos(q, HostType.BarementalPxeServer);
+        List<Tuple> lst = Q.New(BaremetalPxeServerVO.class)
+                .select(BaremetalPxeServerVO_.hostname, BaremetalPxeServerVO_.sshPort)
+                .eq(ImageStoreBackupStorageVO_.status, BaremetalPxeServerStatus.Connected)
+                .listTuple();
+        return getHostBaseInfos(lst, HostType.BarementalPxeServer);
     }
 
-    private List<HostBaseInfo> getHostBaseInfos(SimpleQuery q, HostType type) {
-        List<Tuple> lst = q.listTuple();
+    private List<HostBaseInfo> getHostBaseInfos(List<Tuple> lst, HostType type) {
         List<HostBaseInfo> hostInfoList = new ArrayList<>();
         for (Tuple t : lst) {
             HostBaseInfo hostInfo = new HostBaseInfo();

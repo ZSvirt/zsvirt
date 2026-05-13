@@ -7,8 +7,7 @@ import org.zstack.core.cascade.CascadeConstant;
 import org.zstack.core.cloudbus.CloudBus;
 import org.zstack.core.cloudbus.CloudBusListCallBack;
 import org.zstack.core.db.DatabaseFacade;
-import org.zstack.core.db.SimpleQuery;
-import org.zstack.core.db.SimpleQuery.Op;
+import org.zstack.core.db.Q;
 import org.zstack.header.core.Completion;
 import org.zstack.header.identity.AccountInventory;
 import org.zstack.header.identity.AccountVO;
@@ -116,18 +115,16 @@ public class VipCascadeExtension extends AbstractAsyncCascadeExtension {
                 return null;
             }
 
-            SimpleQuery<VipVO> q = dbf.createQuery(VipVO.class);
-            q.add(VipVO_.l3NetworkUuid, Op.IN, l3Uuids);
-            List<VipVO> vipVOs = q.list();
-
+            List<VipVO> vipVOs = Q.New(VipVO.class)
+                    .in(VipVO_.l3NetworkUuid, l3Uuids)
+                    .list();
             return VipInventory.valueOf(vipVOs);
         } else if (IpRangeVO.class.getSimpleName().equals(action.getParentIssuer())) {
             List<String> iprUuids = CollectionUtils.transform(action.getParentIssuerContext(), IpRangeInventory::getUuid);
 
-            SimpleQuery<VipVO> q = dbf.createQuery(VipVO.class);
-            q.add(VipVO_.ipRangeUuid, Op.IN, iprUuids);
-            List<VipVO> vipVOs = q.list();
-
+            List<VipVO> vipVOs = Q.New(VipVO.class)
+                    .in(VipVO_.ipRangeUuid, iprUuids)
+                    .list();
             return VipInventory.valueOf(vipVOs);
         } else if (VipVO.class.getSimpleName().equals(action.getParentIssuer())) {
             return action.getParentIssuerContext();

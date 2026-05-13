@@ -420,11 +420,11 @@ public class AlarmManagerImpl extends AbstractService implements AlarmManager, M
         int times = (int) (amount / qun) + (amount % qun != 0 ? 1 : 0);
         int start = 0;
         for (int i = 0; i < times; i++) {
-            SimpleQuery<AlarmVO> q = dbf.createQuery(AlarmVO.class);
-            q.select(AlarmVO_.uuid);
-            q.setLimit(qun);
-            q.setStart(start);
-            List<String> uuids = q.listValue();
+            List<String> uuids = Q.New(AlarmVO.class)
+                    .select(AlarmVO_.uuid)
+                    .limit(qun)
+                    .start(start)
+                    .listValues();
             for (String uuid : uuids) {
                 if (!destinationMaker.isManagedByUs(uuid)) {
                     continue;

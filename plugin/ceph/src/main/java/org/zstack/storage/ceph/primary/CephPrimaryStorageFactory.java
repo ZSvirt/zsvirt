@@ -23,8 +23,6 @@ import org.zstack.core.componentloader.PluginRegistry;
 import org.zstack.core.db.DatabaseFacade;
 import org.zstack.core.db.Q;
 import org.zstack.core.db.SQLBatch;
-import org.zstack.core.db.SimpleQuery;
-import org.zstack.core.db.SimpleQuery.Op;
 import org.zstack.core.errorcode.ErrorFacade;
 import org.zstack.core.thread.ThreadFacade;
 import org.zstack.core.trash.StorageTrash;
@@ -388,10 +386,10 @@ public class CephPrimaryStorageFactory implements PrimaryStorageFactory, CephCap
             return to;
         }
 
-        SimpleQuery<CephPrimaryStorageMonVO> q = dbf.createQuery(CephPrimaryStorageMonVO.class);
-        q.select(CephPrimaryStorageMonVO_.monAddr, CephPrimaryStorageMonVO_.monPort, CephPrimaryStorageMonVO_.status);
-        q.add(CephPrimaryStorageMonVO_.primaryStorageUuid, Op.EQ, vol.getPrimaryStorageUuid());
-        List<Tuple> ts = q.listTuple();
+        List<Tuple> ts = Q.New(CephPrimaryStorageMonVO.class)
+                .select(CephPrimaryStorageMonVO_.monAddr, CephPrimaryStorageMonVO_.monPort, CephPrimaryStorageMonVO_.status)
+                .eq(CephPrimaryStorageMonVO_.primaryStorageUuid, vol.getPrimaryStorageUuid())
+                .listTuple();
 
         if (ts.isEmpty() || ts.stream().noneMatch(t -> t.get(2, MonStatus.class) == MonStatus.Connected)) {
             throw new OperationFailureException(operr(

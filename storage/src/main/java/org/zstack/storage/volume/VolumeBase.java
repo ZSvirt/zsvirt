@@ -13,7 +13,6 @@ import org.zstack.core.cloudbus.CloudBusCallBack;
 import org.zstack.core.cloudbus.CloudBusListCallBack;
 import org.zstack.core.componentloader.PluginRegistry;
 import org.zstack.core.db.*;
-import org.zstack.core.db.SimpleQuery.Op;
 import org.zstack.core.defer.Defer;
 import org.zstack.core.defer.Deferred;
 import org.zstack.core.trash.StorageTrash;
@@ -526,10 +525,10 @@ public class VolumeBase extends AbstractVolume implements Volume {
 
                     @Override
                     public void run(FlowTrigger trigger, Map data) {
-                        SimpleQuery<PrimaryStorageVO> q = dbf.createQuery(PrimaryStorageVO.class);
-                        q.select(PrimaryStorageVO_.type);
-                        q.add(PrimaryStorageVO_.uuid, Op.EQ, msg.getPrimaryStorageUuid());
-                        String psType = q.findValue();
+                        String psType = Q.New(PrimaryStorageVO.class)
+                                .select(PrimaryStorageVO_.type)
+                                .eq(PrimaryStorageVO_.uuid, msg.getPrimaryStorageUuid())
+                                .findValue();
 
                         InstantiateDataVolumeOnCreationExtensionPoint ext = pluginRgty.getExtensionFromMap(psType, InstantiateDataVolumeOnCreationExtensionPoint.class);
                         if (ext != null) {
@@ -2195,10 +2194,10 @@ public class VolumeBase extends AbstractVolume implements Volume {
     }
 
     private void getPrimaryStorageCapacities(Map<String, Object> ret) {
-        SimpleQuery<PrimaryStorageVO> q = dbf.createQuery(PrimaryStorageVO.class);
-        q.select(PrimaryStorageVO_.type);
-        q.add(PrimaryStorageVO_.uuid, Op.EQ, self.getPrimaryStorageUuid());
-        String type = q.findValue();
+        String type = Q.New(PrimaryStorageVO.class)
+                .select(PrimaryStorageVO_.type)
+                .eq(PrimaryStorageVO_.uuid, self.getPrimaryStorageUuid())
+                .findValue();
 
         PrimaryStorageType psType = PrimaryStorageType.valueOf(type);
         ret.put(Capability.MigrationInCurrentPrimaryStorage.toString(), psType.isSupportVolumeMigrationInCurrentPrimaryStorage());
@@ -2511,10 +2510,10 @@ public class VolumeBase extends AbstractVolume implements Volume {
     }
 
     private boolean volumeIsAttached(final String volumeUuid) {
-        SimpleQuery<VolumeVO> q = dbf.createQuery(VolumeVO.class);
-        q.select(VolumeVO_.vmInstanceUuid);
-        q.add(VolumeVO_.uuid, Op.EQ, volumeUuid);
-        return q.findValue() != null;
+        return Q.New(VolumeVO.class)
+                .eq(VolumeVO_.uuid, volumeUuid)
+                .notNull(VolumeVO_.vmInstanceUuid)
+                .isExists();
     }
 
     private void handle(APIGetDataVolumeAttachableVmMsg msg) {

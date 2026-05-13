@@ -12,8 +12,6 @@ import org.zstack.core.componentloader.PluginRegistry;
 import org.zstack.core.db.DatabaseFacade;
 import org.zstack.core.db.Q;
 import org.zstack.core.db.SQL;
-import org.zstack.core.db.SimpleQuery;
-import org.zstack.core.db.SimpleQuery.Op;
 import org.zstack.core.workflow.FlowChainBuilder;
 import org.zstack.core.workflow.ShareFlow;
 import org.zstack.header.acl.AccessControlListEntryVO;
@@ -2233,11 +2231,12 @@ public class VirtualRouterLoadBalancerBackend extends AbstractVirtualRouterBacke
 
             Map<String, List<String>> systemTags = new HashMap<>();
             for (LoadBalancerListenerVO l : listenerVOS) {
-                SimpleQuery<SystemTagVO> q  = dbf.createQuery(SystemTagVO.class);
-                q.select(SystemTagVO_.tag);
-                q.add(SystemTagVO_.resourceUuid, Op.EQ, l.getUuid());
-                q.add(SystemTagVO_.resourceType, Op.EQ, LoadBalancerListenerVO.class.getSimpleName());
-                systemTags.put(l.getUuid(), q.listValue());
+                List<String> list = Q.New(SystemTagVO.class)
+                        .select(SystemTagVO_.tag)
+                        .eq(SystemTagVO_.resourceUuid, l.getUuid())
+                        .eq(SystemTagVO_.resourceType, LoadBalancerListenerVO.class.getSimpleName())
+                        .listValues();
+                systemTags.put(l.getUuid(), list);
             }
 
             struct.setListeners(LoadBalancerListenerInventory.valueOf(e.getValue()));

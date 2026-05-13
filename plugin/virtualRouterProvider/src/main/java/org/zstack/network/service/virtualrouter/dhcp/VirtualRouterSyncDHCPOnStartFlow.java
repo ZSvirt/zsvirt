@@ -9,8 +9,6 @@ import org.zstack.core.cloudbus.CloudBus;
 import org.zstack.core.cloudbus.CloudBusCallBack;
 import org.zstack.core.db.DatabaseFacade;
 import org.zstack.core.db.Q;
-import org.zstack.core.db.SimpleQuery;
-import org.zstack.core.db.SimpleQuery.Op;
 import org.zstack.core.errorcode.ErrorFacade;
 import org.zstack.core.timeout.ApiTimeoutManager;
 import org.zstack.header.core.workflow.Flow;
@@ -43,12 +41,12 @@ import static org.zstack.core.Platform.operr;
 
 @Configurable(preConstruction = true, autowire = Autowire.BY_TYPE)
 public class VirtualRouterSyncDHCPOnStartFlow implements Flow {
-	private static final CLogger logger = Utils.getLogger(VirtualRouterSyncDHCPOnStartFlow.class);
-	
-	@Autowired
-	private DatabaseFacade dbf;
-	@Autowired
-	private VirtualRouterManager vrMgr;
+    private static final CLogger logger = Utils.getLogger(VirtualRouterSyncDHCPOnStartFlow.class);
+    
+    @Autowired
+    private DatabaseFacade dbf;
+    @Autowired
+    private VirtualRouterManager vrMgr;
     @Autowired
     private ErrorFacade errf;
     @Autowired
@@ -56,12 +54,12 @@ public class VirtualRouterSyncDHCPOnStartFlow implements Flow {
     @Autowired
     private ApiTimeoutManager apiTimeoutManager;
 
-	private List<String> getDns(String l3NetworkUuid) {
-		SimpleQuery<L3NetworkDnsVO> q = dbf.createQuery(L3NetworkDnsVO.class);
-		q.select(L3NetworkDnsVO_.dns);
-		q.add(L3NetworkDnsVO_.l3NetworkUuid, Op.EQ, l3NetworkUuid);
-		return q.listValue();
-	}
+    private List<String> getDns(String l3NetworkUuid) {
+        return Q.New(L3NetworkDnsVO.class)
+                .select(L3NetworkDnsVO_.dns)
+                .eq(L3NetworkDnsVO_.l3NetworkUuid, l3NetworkUuid)
+                .listValues();
+    }
 
     private boolean hasSnatService(L3NetworkInventory l3nw) {
         for (NetworkServiceL3NetworkRefInventory ref : l3nw.getNetworkServices()) {
@@ -73,11 +71,11 @@ public class VirtualRouterSyncDHCPOnStartFlow implements Flow {
         return false;
     }
 
-	@Transactional(readOnly = true)
-	private List<DhcpInfo> getUserVmNicsOnNetwork(VirtualRouterVmInventory vr, String l3NetworkUuid) {
-		String sql = "select vm.uuid, vm.defaultL3NetworkUuid, nic.uuid, l3.dnsDomain, nic.l3NetworkUuid from VmNicVO nic, VmInstanceVO vm, L3NetworkVO l3 where l3.uuid = vm.defaultL3NetworkUuid and vm.state = (:vmState) and nic.vmInstanceUuid = vm.uuid and vm.type = :vmType and nic.l3NetworkUuid = :l3uuid";
-		TypedQuery<Tuple> q = dbf.getEntityManager().createQuery(sql, Tuple.class);
-		q.setParameter("l3uuid", l3NetworkUuid);
+    @Transactional(readOnly = true)
+    private List<DhcpInfo> getUserVmNicsOnNetwork(VirtualRouterVmInventory vr, String l3NetworkUuid) {
+        String sql = "select vm.uuid, vm.defaultL3NetworkUuid, nic.uuid, l3.dnsDomain, nic.l3NetworkUuid from VmNicVO nic, VmInstanceVO vm, L3NetworkVO l3 where l3.uuid = vm.defaultL3NetworkUuid and vm.state = (:vmState) and nic.vmInstanceUuid = vm.uuid and vm.type = :vmType and nic.l3NetworkUuid = :l3uuid";
+        TypedQuery<Tuple> q = dbf.getEntityManager().createQuery(sql, Tuple.class);
+        q.setParameter("l3uuid", l3NetworkUuid);
         q.setParameter("vmType", VmInstanceConstant.USER_VM_TYPE);
         q.setParameter("vmState", VmInstanceState.Running);
         List<Tuple> ts = q.getResultList();
@@ -85,13 +83,13 @@ public class VirtualRouterSyncDHCPOnStartFlow implements Flow {
         L3NetworkVO l3vo = dbf.getEntityManager().find(L3NetworkVO.class, l3NetworkUuid);
         L3NetworkInventory l3inv = L3NetworkInventory.valueOf(l3vo);
 
-		List<DhcpInfo> infos = new ArrayList<DhcpInfo>(ts.size());
-		if (vr.getGuestNicByL3NetworkUuid(l3NetworkUuid) == null) {
-		    return infos;
+        List<DhcpInfo> infos = new ArrayList<DhcpInfo>(ts.size());
+        if (vr.getGuestNicByL3NetworkUuid(l3NetworkUuid) == null) {
+            return infos;
         }
 
         Map<String, List<VmNicVO>> defaultNicMap = new HashMap<>();
-		List<String> defaultNicUuids = new ArrayList<>();
+        List<String> defaultNicUuids = new ArrayList<>();
         for (Tuple t : ts) {
             String defaultL3Uuid = t.get(1, String.class);
             String nicUuid = t.get(2, String.class);
@@ -113,19 +111,19 @@ public class VirtualRouterSyncDHCPOnStartFlow implements Flow {
             }
         }
 
-		for (Tuple t : ts) {
-			String vmUuid = t.get(0, String.class);
+        for (Tuple t : ts) {
+            String vmUuid = t.get(0, String.class);
             String defaultL3Uuid = t.get(1, String.class);
-			String nicUuid = t.get(2, String.class);
+            String nicUuid = t.get(2, String.class);
             String defaultL3DnsDomain = t.get(3, String.class);
-			
-			VmNicVO nic = dbf.getEntityManager().find(VmNicVO.class, nicUuid);
-			DhcpInfo info  = new DhcpInfo();
-			info.setGateway(nic.getGateway());
-			info.setIp(nic.getIp());
-			info.setMac(nic.getMac());
+            
+            VmNicVO nic = dbf.getEntityManager().find(VmNicVO.class, nicUuid);
+            DhcpInfo info  = new DhcpInfo();
+            info.setGateway(nic.getGateway());
+            info.setIp(nic.getIp());
+            info.setMac(nic.getMac());
             info.setVrNicMac(vr.getGuestNicByL3NetworkUuid(l3NetworkUuid).getMac());
-			info.setNetmask(nic.getNetmask());
+            info.setNetmask(nic.getNetmask());
             if (l3NetworkUuid.equals(defaultL3Uuid)) {
                 if (defaultNicMap.get(nic.getVmInstanceUuid()) != null && defaultNicMap.get(nic.getVmInstanceUuid()).size() > 1) {
                     info.setDefaultL3Network(nic.equals(VmNicVO.findTheEarliestOne(defaultNicMap.get(nic.getVmInstanceUuid()))));
@@ -153,11 +151,11 @@ public class VirtualRouterSyncDHCPOnStartFlow implements Flow {
                 info.setDns(getDns(l3NetworkUuid));
             }
 
-			infos.add(info);
-		}
-		return infos;
-	}
-	
+            infos.add(info);
+        }
+        return infos;
+    }
+    
     @Override
     public void run(final FlowTrigger chain, Map data) {
         final VirtualRouterVmInventory vr = (VirtualRouterVmInventory) data.get(VirtualRouterConstant.Param.VR.toString());

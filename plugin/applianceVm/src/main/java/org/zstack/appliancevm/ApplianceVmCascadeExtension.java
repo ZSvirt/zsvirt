@@ -12,8 +12,6 @@ import org.zstack.core.cloudbus.CloudBusListCallBack;
 import org.zstack.core.componentloader.PluginRegistry;
 import org.zstack.core.db.DatabaseFacade;
 import org.zstack.core.db.Q;
-import org.zstack.core.db.SimpleQuery;
-import org.zstack.core.db.SimpleQuery.Op;
 import org.zstack.core.thread.ChainTask;
 import org.zstack.core.thread.SyncTaskChain;
 import org.zstack.core.thread.ThreadFacade;
@@ -51,7 +49,10 @@ import javax.persistence.TypedQuery;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import static org.zstack.utils.CollectionUtils.toMap;
 
 /**
  */
@@ -158,10 +159,10 @@ public class ApplianceVmCascadeExtension extends AbstractAsyncCascadeExtension {
     private void migrateOrStopVmOnClusterDetach(final List<VmInstanceVO> toMigrate,
                                                 List<String> clusterUuids,
                                                 final Completion completion) {
-        SimpleQuery<HostVO> q = dbf.createQuery(HostVO.class);
-        q.select(HostVO_.uuid);
-        q.add(HostVO_.clusterUuid, Op.IN, clusterUuids);
-        final List<String> avoidHostUuids = q.listValue();
+        final List<String> avoidHostUuids = Q.New(HostVO.class)
+                .select(HostVO_.uuid)
+                .in(HostVO_.clusterUuid, clusterUuids)
+                .listValues();
         final List<VmInstanceVO> toDelete = new ArrayList<>();
 
         FlowChain chain = FlowChainBuilder.newShareFlowChain();
@@ -492,10 +493,10 @@ public class ApplianceVmCascadeExtension extends AbstractAsyncCascadeExtension {
                     if (action.getRootIssuer().equals(ClusterVO.class.getSimpleName())) {
                         List<ClusterInventory> clusters = action.getRootIssuerContext();
                         List<String> clusterUuids = CollectionUtils.transformAndRemoveNull(clusters, ClusterInventory::getUuid);
-                        SimpleQuery<HostVO> q = dbf.createQuery(HostVO.class);
-                        q.select(HostVO_.uuid);
-                        q.add(HostVO_.clusterUuid, Op.IN, clusterUuids);
-                        avoidHostUuids = q.listValue();
+                        avoidHostUuids = Q.New(HostVO.class)
+                                .select(HostVO_.uuid)
+                                .in(HostVO_.clusterUuid, clusterUuids)
+                                .listValues();
                     }
                     final List<String> finalAvoidHostUuids = avoidHostUuids;
 
@@ -662,29 +663,26 @@ public class ApplianceVmCascadeExtension extends AbstractAsyncCascadeExtension {
             List<HostInventory> hosts = action.getParentIssuerContext();
             List<String> huuids = CollectionUtils.transformAndRemoveNull(hosts, HostInventory::getUuid);
 
-            Map<String, ApplianceVmVO> vmvos = new HashMap<String, ApplianceVmVO>();
-            SimpleQuery<ApplianceVmVO> q = dbf.createQuery(ApplianceVmVO.class);
-            q.add(ApplianceVmVO_.hostUuid, Op.IN, huuids);
-            List<ApplianceVmVO> lst = q.list();
-            for (ApplianceVmVO vo : lst) {
-                vmvos.put(vo.getUuid(), vo);
-            }
+            List<ApplianceVmVO> lst = Q.New(ApplianceVmVO.class)
+                    .in(ApplianceVmVO_.hostUuid, huuids)
+                    .list();
+            Map<String, ApplianceVmVO> vmvos = toMap(lst, ApplianceVmVO::getUuid, Function.identity());
 
             if (ClusterVO.class.getSimpleName().equals(action.getRootIssuer())) {
                 List<ClusterInventory> clusters = action.getRootIssuerContext();
                 List<String> clusterUuids = CollectionUtils.transformAndRemoveNull(clusters, ClusterInventory::getUuid);
-                q = dbf.createQuery(ApplianceVmVO.class);
-                q.add(ApplianceVmVO_.clusterUuid, Op.IN, clusterUuids);
-                lst = q.list();
+                lst = Q.New(ApplianceVmVO.class)
+                        .in(ApplianceVmVO_.clusterUuid, clusterUuids)
+                        .list();
                 for (ApplianceVmVO vo : lst) {
                     vmvos.put(vo.getUuid(), vo);
                 }
             } else if (ZoneVO.class.getSimpleName().equals(action.getRootIssuer())) {
                 List<ZoneInventory> zones = action.getRootIssuerContext();
                 List<String> zoneUuids = CollectionUtils.transformAndRemoveNull(zones, ZoneInventory::getUuid);
-                q = dbf.createQuery(ApplianceVmVO.class);
-                q.add(ApplianceVmVO_.zoneUuid, Op.IN, zoneUuids);
-                lst = q.list();
+                lst = Q.New(ApplianceVmVO.class)
+                        .in(ApplianceVmVO_.zoneUuid, zoneUuids)
+                        .list();
                 for (ApplianceVmVO vo : lst) {
                     vmvos.put(vo.getUuid(), vo);
                 }

@@ -7,6 +7,7 @@ import org.zstack.core.Platform;
 import org.zstack.core.cloudbus.*;
 import org.zstack.core.componentloader.PluginRegistry;
 import org.zstack.core.db.DatabaseFacade;
+import org.zstack.core.db.Q;
 import org.zstack.core.db.SimpleQuery;
 import org.zstack.core.db.SimpleQuery.Op;
 import org.zstack.core.thread.ChainTask;
@@ -320,10 +321,10 @@ public class KvmVmSyncPingTask extends VmTracer implements KVMPingAgentNoFailure
                     public void run(final SyncTaskChain chain) {
                         VmInstanceState state = KvmVmState.valueOf(cmd.vmState).toVmInstanceState();
 
-                        SimpleQuery<VmInstanceVO> q = dbf.createQuery(VmInstanceVO.class);
-                        q.select(VmInstanceVO_.state);
-                        q.add(VmInstanceVO_.uuid, Op.EQ, cmd.vmUuid);
-                        VmInstanceState stateInDb = q.findValue();
+                        VmInstanceState stateInDb = Q.New(VmInstanceVO.class)
+                                .select(VmInstanceVO_.state)
+                                .eq(VmInstanceVO_.uuid, cmd.vmUuid)
+                                .findValue();
                         if (stateInDb == null) {
                             logger.warn(String.format("an anonymous VM[uuid:%s, state:%s] is detected on the host[uuid:%s]", cmd.vmUuid, state, cmd.hostUuid));
                             chain.next();

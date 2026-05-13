@@ -9,19 +9,16 @@ import org.zstack.core.cloudbus.CloudBusCallBack;
 import org.zstack.core.db.DatabaseFacade;
 import org.zstack.core.db.Q;
 import org.zstack.core.db.SQLBatchWithReturn;
-import org.zstack.core.db.SimpleQuery;
 import org.zstack.header.Component;
 import org.zstack.header.core.FutureCompletion;
 import org.zstack.header.core.WhileDoneCompletion;
 import org.zstack.header.core.ReturnValueCompletion;
-import org.zstack.header.errorcode.ErrorCode;
 import org.zstack.header.errorcode.ErrorCodeList;
 import org.zstack.header.errorcode.OperationFailureException;
 import org.zstack.header.host.HostInventory;
 import org.zstack.header.host.HostStatus;
 import org.zstack.header.host.HostVO;
 import org.zstack.header.host.HostVO_;
-import org.zstack.header.identity.AccountInventory;
 import org.zstack.header.identity.AccountVO;
 import org.zstack.header.message.MessageReply;
 import org.zstack.header.network.l2.*;
@@ -40,9 +37,7 @@ import org.zstack.network.l2.vxlan.vxlanNetworkPool.VxlanNetworkPoolConstant;
 import org.zstack.network.service.NetworkServiceGlobalConfig;
 import org.zstack.query.QueryFacade;
 import org.zstack.resourceconfig.ResourceConfigFacade;
-import org.zstack.utils.CollectionUtils;
 import org.zstack.utils.Utils;
-import org.zstack.utils.function.Function;
 import org.zstack.utils.gson.JSONObjectUtil;
 import org.zstack.utils.logging.CLogger;
 
@@ -106,9 +101,9 @@ public class VxlanNetworkFactory implements L2NetworkFactory, Component, VmInsta
                 }
                 dbf.getEntityManager().persist(vo);
 
-                SimpleQuery<L2NetworkClusterRefVO> q = dbf.createQuery(L2NetworkClusterRefVO.class);
-                q.add(L2NetworkClusterRefVO_.l2NetworkUuid, SimpleQuery.Op.EQ, amsg.getPoolUuid());
-                final List<L2NetworkClusterRefVO> refs = q.list();
+                final List<L2NetworkClusterRefVO> refs = Q.New(L2NetworkClusterRefVO.class)
+                        .eq(L2NetworkClusterRefVO_.l2NetworkUuid, amsg.getPoolUuid())
+                        .list();
                 for (L2NetworkClusterRefVO ref : refs) {
                     L2NetworkClusterRefVO rvo = new L2NetworkClusterRefVO();
                     rvo.setClusterUuid(ref.getClusterUuid());

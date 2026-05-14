@@ -1,7 +1,6 @@
 package org.zstack.compute.vm;
 
 import com.google.gson.JsonSyntaxException;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,6 +45,7 @@ import org.zstack.header.volume.*;
 import org.zstack.network.l2.L2NetworkHostUtils;
 import org.zstack.resourceconfig.ResourceConfigFacade;
 import org.zstack.tag.SystemTagUtils;
+import org.zstack.utils.CollectionUtils;
 import org.zstack.utils.Utils;
 import org.zstack.utils.gson.JSONObjectUtil;
 import org.zstack.utils.logging.CLogger;
@@ -1019,16 +1019,30 @@ public class VmInstanceApiInterceptor implements ApiMessageInterceptor {
     }
 
     private void validateRootDiskOffering(ImageMediaType imgFormat, APICreateVmInstanceMsg msg) throws ApiMessageInterceptionException {
-        if (imgFormat == ImageMediaType.ISO) {
-            if (msg.getRootDiskOfferingUuid() == null) {
-                if (msg.getRootDiskSize() == null) {
-                    throw new ApiMessageInterceptionException(argerr("image mediaType is ISO but missing root disk settings"));
-                }
+        if (imgFormat != ImageMediaType.ISO) {
+            return;
+        }
 
-                if (msg.getRootDiskSize() <= 0) {
-                    throw new ApiMessageInterceptionException(operr("Unexpected root disk settings")
-                            .withException("DiskAO[0].size is mandatory when image format is ISO"));
-                }
+        DiskAO rootDiskAO = isEmpty(msg.getDiskAOs()) ? null : findOneOrNull(msg.getDiskAOs(), DiskAO::isBoot);
+        String rootDiskOffering = rootDiskAO == null ? msg.getRootDiskOfferingUuid() : rootDiskAO.getDiskOfferingUuid();
+        if (rootDiskOffering == null) {
+            long size = rootDiskAO == null ?
+                    (msg.getRootDiskSize() == null ? 0L : msg.getRootDiskSize()) : rootDiskAO.getSize();
+            if (size <= 0) {
+                throw new ApiMessageInterceptionException(operr("Unexpected root disk settings")
+                        .withException("rootDiskAO.size is mandatory when image format is ISO"));
+            }
+
+            // for compatibility
+            msg.setRootDiskSize(size);
+            if (rootDiskAO != null) {
+                rootDiskAO.setSize(size);
+            }
+        } else {
+            // for compatibility
+            msg.setRootDiskOfferingUuid(rootDiskOffering);
+            if (rootDiskAO != null) {
+                rootDiskAO.setDiskOfferingUuid(rootDiskOffering);
             }
         }
     }
@@ -1069,7 +1083,7 @@ public class VmInstanceApiInterceptor implements ApiMessageInterceptor {
         String platform = msg.getPlatform(), guestOsType = msg.getGuestOsType(), architecture = msg.getArchitecture();
         long rootDiskSize = msg.getRootDiskSize() != null ? msg.getRootDiskSize() : 0L;
 
-        if (CollectionUtils.isNotEmpty(msg.getDiskAOs())) {
+        if (!CollectionUtils.isEmpty(msg.getDiskAOs())) {
             DiskAO rootDiskAO = isEmpty(msg.getDiskAOs()) ? null : findOneOrNull(msg.getDiskAOs(), DiskAO::isBoot);
             if (rootDiskAO == null) {
                 throw new ApiMessageInterceptionException(argerr("missing root disk"));
@@ -1081,7 +1095,7 @@ public class VmInstanceApiInterceptor implements ApiMessageInterceptor {
             rootDiskSize = rootDiskSize == 0L ? rootDiskAO.getSize() : rootDiskSize;
             msg.setRootDiskSize(rootDiskSize);
 
-            if (!virtIOTagExists && CollectionUtils.isNotEmpty(rootDiskAO.getSystemTags())) {
+            if (!virtIOTagExists && !CollectionUtils.isEmpty(rootDiskAO.getSystemTags())) {
                 // "driver::virtio" is tag for VmInstanceVO (not for VolumeVO)
                 virtIOTagExists = rootDiskAO.getSystemTags().remove(VmSystemTags.VIRTIO.getTagFormat());
             }

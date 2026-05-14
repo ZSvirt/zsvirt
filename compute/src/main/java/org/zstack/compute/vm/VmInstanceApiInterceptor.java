@@ -1084,25 +1084,11 @@ public class VmInstanceApiInterceptor implements ApiMessageInterceptor {
         long rootDiskSize = msg.getRootDiskSize() != null ? msg.getRootDiskSize() : 0L;
 
         if (!CollectionUtils.isEmpty(msg.getDiskAOs())) {
-            DiskAO rootDiskAO = isEmpty(msg.getDiskAOs()) ? null : findOneOrNull(msg.getDiskAOs(), DiskAO::isBoot);
-            if (rootDiskAO == null) {
-                throw new ApiMessageInterceptionException(argerr("missing root disk"));
-            }
-
-            platform = platform == null ? rootDiskAO.getPlatform() : platform;
-            guestOsType = guestOsType == null ? rootDiskAO.getGuestOsType() : guestOsType;
-            architecture = architecture == null ? rootDiskAO.getArchitecture() : architecture;
-            rootDiskSize = rootDiskSize == 0L ? rootDiskAO.getSize() : rootDiskSize;
-            msg.setRootDiskSize(rootDiskSize);
-
-            if (!virtIOTagExists && !CollectionUtils.isEmpty(rootDiskAO.getSystemTags())) {
+            DiskAO rootDiskAO = findOneOrNull(msg.getDiskAOs(), DiskAO::isBoot);
+            if (rootDiskAO != null && !virtIOTagExists && !CollectionUtils.isEmpty(rootDiskAO.getSystemTags())) {
                 // "driver::virtio" is tag for VmInstanceVO (not for VolumeVO)
                 virtIOTagExists = rootDiskAO.getSystemTags().remove(VmSystemTags.VIRTIO.getTagFormat());
             }
-
-            // root disk must be the first
-            msg.getDiskAOs().remove(rootDiskAO);
-            msg.getDiskAOs().add(0, rootDiskAO);
         }
 
         if (virtIOTagExists && msg.getVirtio() == Boolean.FALSE) {

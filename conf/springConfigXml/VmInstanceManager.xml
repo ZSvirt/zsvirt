@@ -188,6 +188,12 @@
         </zstack:plugin>
     </bean>
 
+    <bean id="VmInstanceAutoCompleter" class="org.zstack.compute.vm.VmInstanceAutoCompleter">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.apimediator.GlobalApiMessageInterceptor" />
+        </zstack:plugin>
+    </bean>
+
     <bean id="VmCascadeExtension" class="org.zstack.compute.vm.VmCascadeExtension">
         <zstack:plugin>
             <zstack:extension interface="org.zstack.core.cascade.CascadeExtensionPoint" />

@@ -16,7 +16,6 @@ import org.zstack.utils.CollectionUtils;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 import static java.util.Objects.requireNonNull;
@@ -43,9 +42,6 @@ public class VmInstanceUtils {
         cmsg.setArchitecture(msg.getArchitecture());
         cmsg.setStrategy(msg.getStrategy());
         cmsg.setDevicesSpec(msg.getDevicesSpec());
-        if (!CollectionUtils.isEmpty(msg.getDataDiskOfferingUuids()) || !CollectionUtils.isEmpty(msg.getDataDiskSizes())) {
-            cmsg.setPrimaryStorageUuidForDataVolume(getPSUuidForDataVolume(msg.getSystemTags()));
-        }
         if (msg.getVirtio() == null) {
             cmsg.setVirtio(false);
         } else {
@@ -83,31 +79,6 @@ public class VmInstanceUtils {
             bootDisk.setArchitecture(msg.getArchitecture());
         }
 
-        // dataDiskOfferingUuids + dataDiskSizes -> deprecatedDataVolumeSpecs
-        int expectDataVolumeCount =
-                (msg.getDataDiskOfferingUuids() == null ? 0 : msg.getDataDiskOfferingUuids().size()) +
-                (msg.getDataDiskSizes() == null ? 0 : msg.getDataDiskSizes().size());
-        List<DiskAO> deprecatedDataVolumeSpecs = new ArrayList<>();
-        for (int i = 0; i < expectDataVolumeCount; i++) {
-            deprecatedDataVolumeSpecs.add(DiskAO.nonRootDisk());
-        }
-
-        int index = 0;
-        if (!isEmpty(msg.getDataDiskOfferingUuids())) {
-            for (String dataDiskOfferingUuid : msg.getDataDiskOfferingUuids()) {
-                deprecatedDataVolumeSpecs.get(index).setDiskOfferingUuid(dataDiskOfferingUuid);
-                index++;
-            }
-        }
-        if (!isEmpty(msg.getDataDiskSizes())) {
-            for (Long dataDiskSize : msg.getDataDiskSizes()) {
-                deprecatedDataVolumeSpecs.get(index).setSize(dataDiskSize);
-                index++;
-            }
-        }
-
-        cmsg.setDeprecatedDataVolumeSpecs(deprecatedDataVolumeSpecs);
-
         if (!isEmpty(msg.getSystemTags())) {
             for (Iterator<String> it = msg.getSystemTags().iterator(); it.hasNext();) {
                 String tag = it.next();
@@ -119,7 +90,6 @@ public class VmInstanceUtils {
                     if (cmsg.getDataDisks() != null) {
                         cmsg.getDataDisks().forEach(diskAO -> diskAO.setPrimaryStorageUuid(psUuid));
                     }
-                    cmsg.getDeprecatedDataVolumeSpecs().forEach(diskAO -> diskAO.setPrimaryStorageUuid(psUuid));
                     it.remove();
                 }
             }

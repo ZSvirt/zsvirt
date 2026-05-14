@@ -74,7 +74,7 @@ class VmDiskSpec extends Spec {
     }
 
     @SpecMethod
-    void diskUsePrimaryStorage(String name) {
+    void usePrimaryStorage(String name) {
         preCreate {
             addDependency(name, PrimaryStorageSpec.class)
         }

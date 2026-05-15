@@ -5,6 +5,7 @@ import org.zstack.core.defer.Deferred;
 import org.zstack.header.core.ExceptionSafe;
 import org.zstack.header.errorcode.ErrorCode;
 import org.zstack.header.vm.*;
+import org.zstack.header.vm.extension.VmInstancePreStartExtensionPoint;
 import org.zstack.header.vm.hooks.*;
 
 import java.util.ArrayList;
@@ -16,6 +17,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class VmInstanceHookManagerImpl implements VmInstanceHookManager, VmInstanceStartExtensionPoint,
+        VmInstancePreStartExtensionPoint,
         VmInstanceStopExtensionPoint, VmInstanceRebootExtensionPoint, VmInstanceDestroyExtensionPoint, VmInstanceStartNewCreatedVmExtensionPoint {
 
     class StartVmState {
@@ -293,7 +295,7 @@ public class VmInstanceHookManagerImpl implements VmInstanceHookManager, VmInsta
 
     @Override
     @Deferred
-    public String preStartVm(VmInstanceInventory inv) {
+    public ErrorCode preStartVm(VmInstanceInventory inv) {
         List<StartVmState> states;
         synchronized (vmStartHookSuppliers) {
             if (vmStartHookSuppliers.isEmpty()) {

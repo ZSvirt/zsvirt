@@ -350,11 +350,6 @@ public class VmVfNicKvmBackend implements VmVfNicHypervisorBackend, VmInstanceSt
     }
 
     @Override
-    public String preStartVm(VmInstanceInventory inv) {
-        return null;
-    }
-
-    @Override
     public void beforeStartVm(VmInstanceInventory inv) {
 
     }

@@ -186,8 +186,8 @@ class MaintenancePSCase extends SubCase{
             }
         }) {
             assert delegate.code == "VM.1001"
-            // failed to start VM: VmInstanceStartExtensionPoint[PrimaryStorageManagerImpl] refuses to start vm[uuid:9374c3196f96420489ec5bcef6ed2b02]
-            assert delegate.details.contains("PrimaryStorageManagerImpl")
+            // failed to start VM: preStartVm returned an ErrorCode (e.g. from PrimaryStorageManagerImpl)
+            assert delegate.details.contains("primary storage is in a state of maintenance")
         }
     }
 

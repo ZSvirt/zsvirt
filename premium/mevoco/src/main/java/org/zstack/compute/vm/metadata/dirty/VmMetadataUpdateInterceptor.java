@@ -505,11 +505,6 @@ public class VmMetadataUpdateInterceptor implements Component, ManagementNodeRea
     // ---- VmInstanceStartExtensionPoint ----
 
     @Override
-    public String preStartVm(VmInstanceInventory inv) {
-        return null;
-    }
-
-    @Override
     public void beforeStartVm(VmInstanceInventory inv) {
     }
 

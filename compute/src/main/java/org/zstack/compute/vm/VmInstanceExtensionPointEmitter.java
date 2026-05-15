@@ -14,6 +14,7 @@ import org.zstack.header.errorcode.ErrorCode;
 import org.zstack.header.errorcode.ErrorCodeList;
 import org.zstack.header.vm.*;
 import org.zstack.header.vm.VmInstanceConstant.VmOperation;
+import org.zstack.header.vm.extension.VmInstancePreStartExtensionPoint;
 import org.zstack.header.volume.VolumeInventory;
 import org.zstack.utils.CollectionUtils;
 import org.zstack.utils.Utils;
@@ -23,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static org.zstack.core.Platform.multiErr;
 import static org.zstack.core.Platform.operr;
 
 public class VmInstanceExtensionPointEmitter implements Component {
@@ -41,6 +43,7 @@ public class VmInstanceExtensionPointEmitter implements Component {
     private List<VmInstanceRebootExtensionPoint> rebootVmExtensions;
     private List<VmInstanceDestroyExtensionPoint> destroyVmExtensions;
     private List<VmInstanceStartExtensionPoint> startVmExtensions;
+    private List<VmInstancePreStartExtensionPoint> preStartVmExtensions;
     private List<VmInstanceMigrateExtensionPoint> migrateVmExtensions;
     private List<VmAttachVolumeExtensionPoint> attachVolumeExtensions;
     private List<VmDetachVolumeExtensionPoint> detachVolumeExtensions;
@@ -212,20 +215,24 @@ public class VmInstanceExtensionPointEmitter implements Component {
     }
 
     public ErrorCode preStartVm(VmInstanceInventory inv) {
-        for (VmInstanceStartExtensionPoint ext : startVmExtensions) {
+        ErrorCodeList errList = new ErrorCodeList();
+        for (VmInstancePreStartExtensionPoint ext : preStartVmExtensions) {
             try {
-                String err = ext.preStartVm(inv);
-                if (err != null) {
-                    return operr("VmInstanceStartExtensionPoint[%s] refuses to start vm[uuid:%s]",
-                            ext.getClass().getSimpleName(), inv.getUuid())
-                            .withException(err);
-                }
+                ErrorCode err = ext.preStartVm(inv);
+                if (err != null) errList.add(err);
             } catch (Exception e) {
-                logger.error(String.format("Unhandled exception while calling %s", ext.getClass().getSimpleName()), e);
-                throw e;
+                errList.add(operr("preStartVm failed in %s", ext.getClass().getSimpleName())
+                        .withException(e));
             }
         }
-        return null;
+        int n = errList.size();
+        if (n == 0) {
+            return null;
+        }
+        if (n == 1) {
+            return errList.getCauses().get(0);
+        }
+        return multiErr(errList);
     }
 
     public void beforeStartVm(final VmInstanceInventory inv) {
@@ -498,6 +505,7 @@ public class VmInstanceExtensionPointEmitter implements Component {
         rebootVmExtensions = pluginRgty.getExtensionList(VmInstanceRebootExtensionPoint.class);
         destroyVmExtensions = pluginRgty.getExtensionList(VmInstanceDestroyExtensionPoint.class);
         startVmExtensions = pluginRgty.getExtensionList(VmInstanceStartExtensionPoint.class);
+        preStartVmExtensions = pluginRgty.getExtensionList(VmInstancePreStartExtensionPoint.class);
         migrateVmExtensions = pluginRgty.getExtensionList(VmInstanceMigrateExtensionPoint.class);
         attachVolumeExtensions = pluginRgty.getExtensionList(VmAttachVolumeExtensionPoint.class);
         detachVolumeExtensions = pluginRgty.getExtensionList(VmDetachVolumeExtensionPoint.class);

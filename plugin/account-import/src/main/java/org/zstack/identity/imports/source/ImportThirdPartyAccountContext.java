@@ -2,6 +2,7 @@ package org.zstack.identity.imports.source;
 
 import org.zstack.header.errorcode.ErrorCode;
 import org.zstack.header.identity.AccountInventory;
+import org.zstack.header.identity.AccountSource;
 import org.zstack.identity.imports.entity.AccountThirdPartyAccountSourceRefInventory;
 import org.zstack.identity.imports.entity.AccountThirdPartyAccountSourceRefVO;
 import org.zstack.identity.imports.header.ImportAccountItem;
@@ -12,6 +13,7 @@ import org.zstack.identity.imports.header.ImportAccountResult;
  */
 public class ImportThirdPartyAccountContext {
     public AccountInventory account;
+    public AccountSource accountSource;
     public ImportAccountItem spec;
     public AccountThirdPartyAccountSourceRefVO ref;
     public boolean readyToCreateAccount;

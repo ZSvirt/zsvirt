@@ -177,7 +177,7 @@ public class RBACManagerImpl extends AbstractService implements
                 if (AccountConstant.OTHER_ROLE_UUID.equals(role.uuid)
                         || AccountConstant.LEGACY_ROLE_UUID.equals(role.uuid)) {
                     List<String> accountUuidList = Q.New(AccountVO.class)
-                            .in(AccountVO_.type, list(AccountType.Normal, AccountType.ThirdParty))
+                            .eq(AccountVO_.type, AccountType.Normal)
                             .select(AccountVO_.uuid)
                             .listValues();
                     for (String accountUuid : accountUuidList) {

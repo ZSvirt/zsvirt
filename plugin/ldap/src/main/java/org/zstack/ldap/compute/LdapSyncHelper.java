@@ -22,7 +22,9 @@ import org.zstack.header.core.workflow.FlowTrigger;
 import org.zstack.header.core.workflow.NoRollbackFlow;
 import org.zstack.header.errorcode.ErrorCode;
 import org.zstack.header.errorcode.ErrorCodeList;
+import org.zstack.header.identity.AccountSource;
 import org.zstack.header.identity.AccountType;
+import org.zstack.ldap.entity.LdapServerType;
 import org.zstack.header.message.MessageReply;
 import org.zstack.identity.imports.AccountImportsConstant;
 import org.zstack.identity.imports.entity.AccountThirdPartyAccountSourceRefVO;
@@ -86,6 +88,7 @@ public class LdapSyncHelper {
         importSpec = new ImportAccountSpec();
         importSpec.setSourceType(LdapConstant.LOGIN_TYPE);
         importSpec.setSourceUuid(spec.sourceUuid);
+        importSpec.setAccountSource(toAccountSource(taskSpec.getServerType()));
         importSpec.setSyncCreateStrategy(taskSpec.getCreateAccountStrategy());
         importSpec.setSyncUpdateStrategy(SyncUpdateAccountStateStrategy.from(taskSpec.getCreateAccountStrategy()));
         importSpec.setCreateIfNotExist(
@@ -195,6 +198,7 @@ public class LdapSyncHelper {
                     ImportAccountSpec splitSpec = new ImportAccountSpec();
                     splitSpec.setSourceUuid(importSpec.getSourceUuid());
                     splitSpec.setSourceType(importSpec.getSourceType());
+                    splitSpec.setAccountSource(importSpec.getAccountSource());
                     splitSpec.setAccountList(importSpec.getAccountList().subList(count, toIndexExclude));
                     splitSpec.setSyncCreateStrategy(importSpec.getSyncCreateStrategy());
                     splitSpec.setSyncUpdateStrategy(importSpec.getSyncUpdateStrategy());
@@ -364,10 +368,14 @@ public class LdapSyncHelper {
         }
 
         account.setCredentials(dn);
-        account.setAccountType(AccountType.ThirdParty);
+        account.setAccountType(AccountType.Normal);
         account.setUsername(username);
         account.setEnable(ldapEntry.isEnable());
         return account;
+    }
+
+    private AccountSource toAccountSource(LdapServerType serverType) {
+        return AccountSource.fromLdapServerTypeName(serverType == null ? null : serverType.name());
     }
 
     private String buildFilter() {

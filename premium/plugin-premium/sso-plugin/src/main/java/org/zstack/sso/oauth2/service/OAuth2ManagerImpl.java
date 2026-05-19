@@ -612,7 +612,7 @@ public class OAuth2ManagerImpl implements RenewSessionPreAuthExtensionPoint, Log
         AccountVO account = Q.New(AccountVO.class)
                 .eq(AccountVO_.uuid, session.getAccountUuid())
                 .find();
-        if (account != null && account.getType() == AccountType.ThirdParty) {
+        if (account != null && account.getSource() == AccountSource.OAuth2) {
             return refreshToken(session);
         }
 

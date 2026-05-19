@@ -67,11 +67,12 @@ public class CasLoginIAM1 implements CasLogin {
         ImportAccountSpec spec = new ImportAccountSpec();
         spec.setSourceUuid(token.clientUuid);
         spec.setSourceType(CAS_CLIENT_TYPE);
+        spec.setAccountSource(AccountSource.CAS);
         spec.setSyncCreateStrategy(SyncCreatedAccountStrategy.CreateAccount);
 
         ImportAccountItem item = new ImportAccountItem();
         item.setAccountUuid(Platform.getUuid());
-        item.setAccountType(AccountType.ThirdParty);
+        item.setAccountType(AccountType.Normal);
         item.setCredentials(token.username);
         item.setUsername(token.username);
         spec.setAccountList(list(item));

@@ -1,5 +1,6 @@
 package org.zstack.identity.imports.header;
 
+import org.zstack.header.identity.AccountSource;
 import org.zstack.identity.imports.entity.SyncCreatedAccountStrategy;
 import org.zstack.identity.imports.entity.SyncUpdateAccountStateStrategy;
 
@@ -12,6 +13,7 @@ import java.util.List;
 public class ImportAccountSpec {
     private String sourceUuid;
     private String sourceType;
+    private AccountSource accountSource;
     public List<ImportAccountItem> accountList = new ArrayList<>();
     private boolean createIfNotExist = true;
     private SyncCreatedAccountStrategy syncCreateStrategy = SyncCreatedAccountStrategy.NoAction;
@@ -31,6 +33,14 @@ public class ImportAccountSpec {
 
     public void setSourceType(String sourceType) {
         this.sourceType = sourceType;
+    }
+
+    public AccountSource getAccountSource() {
+        return accountSource;
+    }
+
+    public void setAccountSource(AccountSource accountSource) {
+        this.accountSource = accountSource;
     }
 
     public List<ImportAccountItem> getAccountList() {

@@ -112,6 +112,7 @@ public class AccountManagerImpl extends AbstractService implements AccountManage
                     vo.setName(AccountConstant.INITIAL_SYSTEM_ADMIN_NAME);
                     vo.setPassword(AccountConstant.INITIAL_SYSTEM_ADMIN_PASSWORD);
                     vo.setType(AccountType.SystemAdmin);
+                    vo.setSource(AccountSource.Local);
                     vo.setState(AccountState.Enabled);
                     persist(vo);
                     flush();
@@ -535,7 +536,21 @@ public class AccountManagerImpl extends AbstractService implements AccountManage
                 vo.setName(msg.getName());
                 vo.setDescription(msg.getDescription());
                 vo.setPassword(msg.getPassword());
-                vo.setType(msg.getType() != null ? AccountType.valueOf(msg.getType()) : AccountType.Normal);
+                AccountType accountType = msg.getType() != null ? AccountType.valueOf(msg.getType()) : AccountType.Normal;
+                if (accountType == AccountType.ThirdParty) {
+                    throw operr("account type[ThirdParty] is deprecated; use Normal with account source instead")
+                            .toException();
+                }
+                vo.setType(accountType);
+
+                try {
+                    vo.setSource(AccountSource.valueOf(msg.getSource()));
+                } catch (RuntimeException e) {
+                    throw operr("invalid account source[%s]", msg.getSource())
+                            .withOpaque("allowed.values", list(AccountSource.values()))
+                            .toException();
+                }
+
                 vo.setState(msg.getState() == null ? AccountState.Enabled : msg.getState());
                 persist(vo);
                 reload(vo);
@@ -1005,6 +1020,11 @@ public class AccountManagerImpl extends AbstractService implements AccountManage
             throw new ApiMessageInterceptionException(argerr(
                     "Account[uuid:%s] is already %s.", msg.getUuid(), msg.getType()
             ));
+        }
+
+        if (AccountType.ThirdParty.toString().equals(msg.getType())) {
+            throw new ApiMessageInterceptionException(argerr(
+                    "account type[ThirdParty] is deprecated; use Normal with account source instead"));
         }
 
         if (!AccountType.SystemAdmin.toString().equals(msg.getType())) {

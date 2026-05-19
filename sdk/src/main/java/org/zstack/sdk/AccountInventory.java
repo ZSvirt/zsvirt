@@ -36,6 +36,14 @@ public class AccountInventory  {
         return this.type;
     }
 
+    public java.lang.String source;
+    public void setSource(java.lang.String source) {
+        this.source = source;
+    }
+    public java.lang.String getSource() {
+        return this.source;
+    }
+
     public java.lang.String state;
     public void setState(java.lang.String state) {
         this.state = state;

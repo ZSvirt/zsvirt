@@ -5,6 +5,8 @@ import org.zstack.header.identity.*;
 import org.zstack.header.identity.role.RoleAccountRefVO;
 import org.zstack.header.identity.role.RoleAccountRefVO_;
 
+import java.util.Objects;
+
 import static org.zstack.header.identity.AccountConstant.ALL_RESOURCES_READABLE_ROLE_UUID;
 import static org.zstack.header.identity.AccountConstant.SOD_AUDITOR_ROLE_UUID;
 import static org.zstack.header.identity.AccountConstant.SOD_SYSTEM_ADMIN_ROLE_UUID;
@@ -31,6 +33,13 @@ public interface Account {
                 .eq(AccountVO_.uuid, accountUuid)
                 .eq(AccountVO_.type, AccountType.SystemAdmin)
                 .isExists();
+    }
+
+    static boolean isAdminPermission(AccountInventory account) {
+        if (account == null) {
+            return false;
+        }
+        return isAdmin(account.getUuid()) || Objects.equals(account.getType(), AccountType.SystemAdmin.toString());
     }
 
     static boolean isAdmin(SessionInventory session) {

@@ -12,6 +12,7 @@ public class AccountVO_ extends ResourceVO_ {
     public static volatile SingularAttribute<AccountVO, String> description;
     public static volatile SingularAttribute<AccountVO, String> password;
     public static volatile SingularAttribute<AccountVO, AccountType> type;
+    public static volatile SingularAttribute<AccountVO, AccountSource> source;
     public static volatile SingularAttribute<AccountVO, AccountState> state;
     public static volatile SingularAttribute<AccountVO, Timestamp> createDate;
     public static volatile SingularAttribute<AccountVO, Timestamp> lastOpDate;

@@ -107,7 +107,6 @@ public abstract class AbstractAccountSourceBase {
     }
 
     protected ThirdPartyAccountSourceVO self;
-    public abstract String type();
 
     @MessageSafe
     public void handleMessage(Message msg) {
@@ -189,7 +188,6 @@ public abstract class AbstractAccountSourceBase {
                 for (ImportAccountItem accountSpec : spec.getAccountList()) {
                     final ImportThirdPartyAccountContext context = new ImportThirdPartyAccountContext();
                     context.spec = accountSpec;
-                    context.accountSource = spec.getAccountSource();
                     contexts.add(context);
                     validContexts.add(context);
                 }
@@ -262,7 +260,6 @@ public abstract class AbstractAccountSourceBase {
                     AccountVO account = uuidExistingAccountMap.get(accountUuid);
                     if (account != null) {
                         context.account = AccountInventory.valueOf(account);
-                        context.accountSource = spec.getAccountSource();
                         context.accountExisting = true;
                     }
                 }
@@ -352,20 +349,13 @@ public abstract class AbstractAccountSourceBase {
                 if (accountType == AccountType.ThirdParty) {
                     accountType = AccountType.Normal;
                 }
-                if (context.accountSource == null) {
-                    context.errorForAccountExecution = operr(
-                            "account source is required when importing account[name=%s]", context.spec.getUsername());
-                    validContexts.remove(context);
-                    whileCompletion.done();
-                    return;
-                }
 
                 CreateAccountMsg message = new CreateAccountMsg();
                 message.setUuid(accountUuid);
                 message.setName(context.spec.getUsername());
                 message.setPassword(generatePassword());
                 message.setType(accountType.toString());
-                message.setSource(context.accountSource.toString());
+                message.setSource(AccountSource.valueOf(self.getType()).toString());
                 message.setState(stateUpdateTo);
 
                 bus.makeTargetServiceIdByResourceUuid(message, AccountConstant.SERVICE_ID, accountUuid);
@@ -501,7 +491,7 @@ public abstract class AbstractAccountSourceBase {
 
         ImportAccountSpec batch = new ImportAccountSpec();
         batch.setSourceUuid(sourceUuid);
-        batch.setSourceType(this.type());
+        batch.setSourceType(self.getType());
         batch.setCreateIfNotExist(false);
 
         ImportAccountItem spec = new ImportAccountItem();
@@ -719,7 +709,7 @@ public abstract class AbstractAccountSourceBase {
 
         SyncTaskSpec spec = new SyncTaskSpec();
         spec.setSourceUuid(self.getUuid());
-        spec.setSourceType(type());
+        spec.setSourceType(self.getType());
         spec.setCreateAccountStrategy(createStrategy);
         spec.setDeleteAccountStrategy(deleteStrategy);
 

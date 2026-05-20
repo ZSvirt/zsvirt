@@ -111,7 +111,7 @@ public class ThirdPartyAccountSourceInventory implements Serializable {
         inventory.setUuid("dc6cd27ea6c25cafba684d19a01107f9");
         inventory.setName("Test-ldap");
         inventory.setDescription("some descriptions");
-        inventory.setType("ldap");
+        inventory.setType("OpenLdap");
         inventory.setCreateAccountStrategy(SyncCreatedAccountStrategy.CreateDisabledAccount.toString());
         inventory.setDeleteAccountStrategy(SyncDeletedAccountStrategy.StaleAccount.toString());
         inventory.setCreateDate(new Timestamp(org.zstack.header.message.DocUtils.date));

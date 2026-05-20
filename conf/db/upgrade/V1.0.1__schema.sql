@@ -28,3 +28,8 @@ WHERE src.type IN ('CAS', 'OAuth2');
 UPDATE `zstack`.`AccountVO`
 SET `type` = 'Normal'
 WHERE `type` = 'ThirdParty';
+
+UPDATE `zstack`.`ThirdPartyAccountSourceVO` src
+INNER JOIN `zstack`.`LdapServerVO` ldap ON ldap.uuid = src.uuid
+SET src.`type` = IF(ldap.serverType IN ('OpenLdap', 'WindowsAD'), ldap.serverType, 'WindowsAD')
+WHERE src.`type` = 'ldap';

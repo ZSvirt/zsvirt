@@ -1,19 +1,19 @@
 package org.zstack.ldap.compute;
 
 import org.zstack.identity.imports.header.SyncTaskResult;
-import org.zstack.ldap.LdapConstant;
 
 public class LdapSyncTaskResult extends SyncTaskResult {
-    {
-        setSourceType(LdapConstant.LOGIN_TYPE);
-    }
-
     public String stage;
     public int completeCount;
     public int totalCount;
 
     public LdapSyncTaskResult withLdapServer(String ldapServerUuid) {
         this.setSourceUuid(ldapServerUuid);
+        return this;
+    }
+
+    public LdapSyncTaskResult withSourceType(String sourceType) {
+        this.setSourceType(sourceType);
         return this;
     }
 

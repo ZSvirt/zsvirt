@@ -36,6 +36,8 @@ import org.zstack.header.rest.TimeoutRestTemplate;
 import org.zstack.identity.Session;
 import org.zstack.identity.LogoutExtensionPoint;
 import org.zstack.identity.imports.AccountImportsConstant;
+import org.zstack.identity.imports.entity.AccountThirdPartyAccountSourceRefVO;
+import org.zstack.identity.imports.entity.AccountThirdPartyAccountSourceRefVO_;
 import org.zstack.identity.imports.entity.SyncCreatedAccountStrategy;
 import org.zstack.identity.imports.header.ImportAccountResult;
 import org.zstack.identity.imports.message.ImportThirdPartyAccountMsg;
@@ -603,16 +605,24 @@ public class OAuth2ManagerImpl implements RenewSessionPreAuthExtensionPoint, Log
 
     @Override
     public ErrorCode checkAuth(SessionInventory session) {
-        if (!Q.New(OAuth2TokenVO.class)
+        List<String> tokenClientUuids = Q.New(OAuth2TokenVO.class)
                 .eq(OAuth2TokenVO_.userUuid, session.getAccountUuid())
-                .isExists()) {
+                .select(OAuth2TokenVO_.clientUuid)
+                .listValues();
+        if (tokenClientUuids.isEmpty()) {
             return null;
         }
 
-        AccountVO account = Q.New(AccountVO.class)
-                .eq(AccountVO_.uuid, session.getAccountUuid())
-                .find();
-        if (account != null && account.getSource() == AccountSource.OAuth2) {
+        // The account may carry tokens from multiple OAuth2 clients (multi-client login,
+        // un-cleaned historical tokens, etc.). Treat the session as refreshable as long as
+        // any one of those clients is still bound to the account.
+        boolean boundToAnyTokenClient = Q.New(AccountThirdPartyAccountSourceRefVO.class, OAuth2ClientVO.class)
+                .table0()
+                    .eq(AccountThirdPartyAccountSourceRefVO_.accountUuid, session.getAccountUuid())
+                    .in(AccountThirdPartyAccountSourceRefVO_.accountSourceUuid, tokenClientUuids)
+                    .eq(AccountThirdPartyAccountSourceRefVO_.accountSourceUuid).table1(OAuth2ClientVO_.uuid)
+                .isExists();
+        if (boundToAnyTokenClient) {
             return refreshToken(session);
         }
 

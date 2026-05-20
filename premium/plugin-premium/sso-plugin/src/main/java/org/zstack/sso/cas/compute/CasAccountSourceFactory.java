@@ -18,18 +18,22 @@ import org.zstack.sso.header.CasState;
 import org.zstack.sso.service.SSOCanonicalEvents;
 import org.zstack.sso.service.compute.SSOAccountSourceFactory;
 
+import java.util.Collections;
 import java.util.Map;
+import java.util.Set;
 
 import static org.zstack.core.Platform.operr;
 import static org.zstack.sso.SSOConstants.CAS_CLIENT_TYPE;
 
 public class CasAccountSourceFactory extends SSOAccountSourceFactory {
+    private static final Set<String> SUPPORTED_TYPES = Collections.singleton(CAS_CLIENT_TYPE);
+
     @Autowired
     private EventFacadeImpl eventFacade;
 
     @Override
-    public String type() {
-        return CAS_CLIENT_TYPE;
+    public Set<String> supportedTypes() {
+        return SUPPORTED_TYPES;
     }
 
     @Override

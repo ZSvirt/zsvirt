@@ -151,17 +151,18 @@ public class LdapManagerImpl extends AbstractService implements LdapManager, Log
     private void handle(APIAddLdapServerMsg msg) {
         APIAddLdapServerEvent event = new APIAddLdapServerEvent(msg.getId());
 
+        LdapServerType serverType = LdapServerType.valueOf(msg.getServerType());
         LdapAccountSourceSpec spec = new LdapAccountSourceSpec();
         spec.setUuid(Platform.getUuid());
         spec.setServerName(msg.getName());
         spec.setDescription(msg.getDescription());
-        spec.setType(LdapConstant.LOGIN_TYPE);
+        spec.setType(AccountSource.fromLdapServerTypeName(serverType.name()).name());
         spec.setUrl(msg.getUrl());
         spec.setBaseDn(msg.getBase());
         spec.setLogInUserName(msg.getUsername());
         spec.setLogInPassword(msg.getPassword());
         spec.setEncryption(LdapEncryptionType.valueOf(msg.getEncryption()));
-        spec.setServerType(LdapServerType.valueOf(msg.getServerType()));
+        spec.setServerType(serverType);
         spec.setCreateAccountStrategy(SyncCreatedAccountStrategy.valueOf(msg.getSyncCreatedAccountStrategy()));
         spec.setDeleteAccountStrategy(SyncDeletedAccountStrategy.valueOf(msg.getSyncDeletedAccountStrategy()));
         spec.setUsernameProperty(msg.getUsernameProperty());
@@ -284,9 +285,10 @@ public class LdapManagerImpl extends AbstractService implements LdapManager, Log
             return;
         }
 
+        LdapServerVO ldap = dbf.findByUuid(msg.getLdapServerUuid(), LdapServerVO.class);
         UnbindThirdPartyAccountsSpec spec = new UnbindThirdPartyAccountsSpec();
         spec.setSourceUuid(msg.getLdapServerUuid());
-        spec.setSourceType(LdapConstant.LOGIN_TYPE);
+        spec.setSourceType(ldap.getType());
         spec.setRemoveBindingOnly(true);
         spec.setSyncDeleteStrategy(SyncDeletedAccountStrategy.NoAction);
         spec.setAccountUuidList(list(msg.getAccountUuid()));
@@ -315,17 +317,22 @@ public class LdapManagerImpl extends AbstractService implements LdapManager, Log
     private void handle(APIUpdateLdapServerMsg msg) {
         APIUpdateLdapServerEvent event = new APIUpdateLdapServerEvent(msg.getId());
 
+        LdapServerType serverType = msg.getServerType() == null ? null : LdapServerType.valueOf(msg.getServerType());
         LdapAccountSourceSpec spec = new LdapAccountSourceSpec();
         spec.setUuid(msg.getLdapServerUuid());
         spec.setServerName(msg.getName());
         spec.setDescription(msg.getDescription());
-        spec.setType(LdapConstant.LOGIN_TYPE);
+
+        spec.setServerType(serverType);
+        if (serverType != null) {
+            spec.setType(AccountSource.fromLdapServerTypeName(serverType.name()).name());
+        }
+
         spec.setUrl(msg.getUrl());
         spec.setBaseDn(msg.getBase());
         spec.setLogInUserName(msg.getUsername());
         spec.setLogInPassword(msg.getPassword());
         spec.setEncryption(msg.getEncryption() == null ? null : LdapEncryptionType.valueOf(msg.getEncryption()));
-        spec.setServerType(msg.getServerType() == null ? null : LdapServerType.valueOf(msg.getServerType()));
         spec.setCreateAccountStrategy(msg.getSyncCreatedAccountStrategy() == null ? null :
                 SyncCreatedAccountStrategy.valueOf(msg.getSyncCreatedAccountStrategy()));
         spec.setDeleteAccountStrategy(msg.getSyncDeletedAccountStrategy() == null ? null :

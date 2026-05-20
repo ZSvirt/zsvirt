@@ -67,7 +67,6 @@ public class CasLoginIAM1 implements CasLogin {
         ImportAccountSpec spec = new ImportAccountSpec();
         spec.setSourceUuid(token.clientUuid);
         spec.setSourceType(CAS_CLIENT_TYPE);
-        spec.setAccountSource(AccountSource.CAS);
         spec.setSyncCreateStrategy(SyncCreatedAccountStrategy.CreateAccount);
 
         ImportAccountItem item = new ImportAccountItem();

@@ -21,7 +21,6 @@ import org.zstack.identity.imports.source.CreateAccountSourceExtensionPoint;
 import org.zstack.utils.CollectionUtils;
 
 import java.util.List;
-import java.util.Objects;
 
 import static org.zstack.core.Platform.operr;
 import static org.zstack.identity.imports.AccountImportsConstant.*;
@@ -71,7 +70,7 @@ public class AccountImportsManager extends AbstractService {
 
     private ErrorableValue<AccountSourceFactory> findFactoryByType(String type) {
         for (AccountSourceFactory factory : factories) {
-            if (Objects.equals(type, factory.type())) {
+            if (factory.supportedTypes().contains(type)) {
                 return ErrorableValue.of(factory);
             }
         }

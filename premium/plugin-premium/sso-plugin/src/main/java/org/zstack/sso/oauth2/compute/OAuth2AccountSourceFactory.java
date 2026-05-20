@@ -13,15 +13,19 @@ import org.zstack.sso.header.OAuth2ClientVO_;
 import org.zstack.sso.oauth2.header.OAuth2AccountSourceSpec;
 import org.zstack.sso.service.compute.SSOAccountSourceFactory;
 
+import java.util.Collections;
 import java.util.Map;
+import java.util.Set;
 
 import static org.zstack.core.Platform.operr;
 import static org.zstack.sso.SSOConstants.OAUTH2_CLIENT_TYPE;
 
 public class OAuth2AccountSourceFactory extends SSOAccountSourceFactory {
+    private static final Set<String> SUPPORTED_TYPES = Collections.singleton(OAUTH2_CLIENT_TYPE);
+
     @Override
-    public String type() {
-        return OAUTH2_CLIENT_TYPE;
+    public Set<String> supportedTypes() {
+        return SUPPORTED_TYPES;
     }
 
     @Override

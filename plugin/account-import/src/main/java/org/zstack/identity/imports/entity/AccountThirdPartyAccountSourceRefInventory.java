@@ -1,6 +1,8 @@
 package org.zstack.identity.imports.entity;
 
 import org.zstack.header.configuration.PythonClassInventory;
+import org.zstack.header.identity.AccountVO;
+import org.zstack.header.message.DocUtils;
 import org.zstack.header.search.Inventory;
 import org.zstack.utils.CollectionUtils;
 
@@ -82,5 +84,14 @@ public class AccountThirdPartyAccountSourceRefInventory {
 
     public void setLastOpDate(Timestamp lastOpDate) {
         this.lastOpDate = lastOpDate;
+    }
+
+    public static AccountThirdPartyAccountSourceRefInventory __example__() {
+        AccountThirdPartyAccountSourceRefInventory inventory = new AccountThirdPartyAccountSourceRefInventory();
+        inventory.setId(1L);
+        inventory.setCredentials("ou=Employee,uid=test");
+        inventory.setAccountUuid(DocUtils.createFixedUuid(AccountVO.class));
+        inventory.setAccountSourceUuid(DocUtils.createFixedUuid(ThirdPartyAccountSourceVO.class));
+        return inventory;
     }
 }

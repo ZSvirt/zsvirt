@@ -1,9 +1,11 @@
 package org.zstack.identity.imports.header;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.zstack.identity.imports.entity.SyncCreatedAccountStrategy;
-import org.zstack.identity.imports.entity.SyncUpdateAccountStateStrategy;
+import org.zstack.identity.imports.entity.SyncUpdateAccountStrategy;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -13,9 +15,8 @@ public class ImportAccountSpec {
     private String sourceUuid;
     private String sourceType;
     public List<ImportAccountItem> accountList = new ArrayList<>();
-    private boolean createIfNotExist = true;
     private SyncCreatedAccountStrategy syncCreateStrategy = SyncCreatedAccountStrategy.NoAction;
-    private SyncUpdateAccountStateStrategy syncUpdateStrategy = SyncUpdateAccountStateStrategy.NoAction;
+    private List<SyncUpdateAccountStrategy> syncUpdateStrategies = new ArrayList<>();
 
     public String getSourceUuid() {
         return sourceUuid;
@@ -41,14 +42,6 @@ public class ImportAccountSpec {
         this.accountList = accountList;
     }
 
-    public boolean isCreateIfNotExist() {
-        return createIfNotExist;
-    }
-
-    public void setCreateIfNotExist(boolean createIfNotExist) {
-        this.createIfNotExist = createIfNotExist;
-    }
-
     public SyncCreatedAccountStrategy getSyncCreateStrategy() {
         return syncCreateStrategy;
     }
@@ -57,11 +50,22 @@ public class ImportAccountSpec {
         this.syncCreateStrategy = syncCreateStrategy;
     }
 
-    public SyncUpdateAccountStateStrategy getSyncUpdateStrategy() {
-        return syncUpdateStrategy;
+    public List<SyncUpdateAccountStrategy> getSyncUpdateStrategies() {
+        return syncUpdateStrategies;
     }
 
-    public void setSyncUpdateStrategy(SyncUpdateAccountStateStrategy syncUpdateStrategy) {
-        this.syncUpdateStrategy = syncUpdateStrategy;
+    public void setSyncUpdateStrategies(List<SyncUpdateAccountStrategy> syncUpdateStrategies) {
+        this.syncUpdateStrategies = syncUpdateStrategies;
+    }
+
+    public boolean isCreateIfNotExist() {
+        return syncCreateStrategy != SyncCreatedAccountStrategy.NoAction;
+    }
+
+    public boolean hasUpdateAccountStrategy(SyncUpdateAccountStrategy... strategies) {
+        if (CollectionUtils.isEmpty(this.syncUpdateStrategies)) {
+            return false;
+        }
+        return Arrays.stream(strategies).anyMatch(it -> syncUpdateStrategies.contains(it));
     }
 }

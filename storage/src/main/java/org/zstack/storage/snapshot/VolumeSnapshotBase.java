@@ -1,16 +1,15 @@
 package org.zstack.storage.snapshot;
 
-import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.zstack.core.asyncbatch.While;
 import org.zstack.core.cloudbus.CloudBus;
 import org.zstack.core.cloudbus.CloudBusCallBack;
 import org.zstack.core.cloudbus.MessageSafe;
 import org.zstack.core.componentloader.PluginRegistry;
 import org.zstack.core.db.DatabaseFacade;
+import org.zstack.core.db.SQL;
 import org.zstack.core.workflow.FlowChainBuilder;
 import org.zstack.core.workflow.ShareFlow;
 import org.zstack.header.core.Completion;
@@ -26,12 +25,10 @@ import org.zstack.header.storage.primary.PrimaryStorageConstant;
 import org.zstack.header.storage.snapshot.*;
 import org.zstack.header.storage.snapshot.VolumeSnapshotStatus.StatusEvent;
 import org.zstack.utils.CollectionUtils;
-import org.zstack.utils.ExceptionDSL;
 import org.zstack.utils.Utils;
 import org.zstack.utils.function.ForEachFunction;
 import org.zstack.utils.logging.CLogger;
 
-import javax.persistence.PersistenceException;
 import java.util.Map;
 
 /**
@@ -210,8 +207,21 @@ public class VolumeSnapshotBase implements VolumeSnapshot {
 */
 
     private void changeStatus(VolumeSnapshotStatus.StatusEvent event) {
-        self.setStatus(self.getStatus().nextState(event));
-        dbf.update(self);
+        String uuid = self.getUuid();
+        VolumeSnapshotVO latest = dbf.reload(self);
+        if (latest == null) {
+            logger.debug(String.format("volume snapshot[uuid=%s] is not found", uuid));
+            return;
+        }
+
+        VolumeSnapshotStatus next = latest.getStatus().nextState(event);
+        SQL.New(VolumeSnapshotVO.class)
+                .eq(VolumeSnapshotVO_.uuid, latest.getUuid())
+                .set(VolumeSnapshotVO_.status, next)
+                .update();
+
+        latest.setStatus(next);
+        self = latest;
     }
 
     private void handle(final VolumeSnapshotPrimaryStorageDeletionMsg msg) {
@@ -237,23 +247,20 @@ public class VolumeSnapshotBase implements VolumeSnapshot {
                     @Override
                     public void done(ErrorCodeList errorCodeList) {
                         VolumeSnapshotPrimaryStorageDeletionReply dreply = new VolumeSnapshotPrimaryStorageDeletionReply();
-                        try {
-                            updateDb();
-                        } catch (DataIntegrityViolationException | PersistenceException e) {
-                            if (!ExceptionDSL.isCausedBy(e, ConstraintViolationException.class) && !ExceptionDSL.isCausedBy(e, DataIntegrityViolationException.class)) {
-                                throw e;
-                            }
-                            // volume snapshot group may has been removed, try again.
-                            updateDb();
+                        String uuid = self.getUuid();
+                        VolumeSnapshotVO latest = dbf.reload(self);
+                        if (latest == null) {
+                            logger.debug(String.format("volume snapshot[uuid=%s] is not found", uuid));
+                            bus.reply(msg, dreply);
+                            return;
                         }
-                        bus.reply(msg, dreply);
-                    }
 
-                    private void updateDb() {
-                        self = dbf.reload(self);
-                        self.setPrimaryStorageInstallPath(null);
-                        self.setPrimaryStorageUuid(null);
-                        dbf.update(self);
+                        SQL.New(VolumeSnapshotVO.class)
+                                .eq(VolumeSnapshotVO_.uuid, latest.getUuid())
+                                .set(VolumeSnapshotVO_.primaryStorageInstallPath, null)
+                                .set(VolumeSnapshotVO_.primaryStorageUuid, null)
+                                .update();
+                        bus.reply(msg, dreply);
                     }
                 });
             }

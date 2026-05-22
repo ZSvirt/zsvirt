@@ -11,8 +11,7 @@ ALTER TABLE `EncryptedResourceKeyRefVO`
         ADD CONSTRAINT `fkEncryptedResourceKeyRefResourceVO` FOREIGN KEY (`resourceUuid`) REFERENCES `ResourceVO`(`uuid`)
         ON DELETE CASCADE;
 
-ALTER TABLE `zstack`.`AccountVO`
-    ADD COLUMN `source` varchar(32) NOT NULL DEFAULT 'Local' AFTER `type`;
+CALL INSERT_COLUMN('AccountVO', 'source', 'varchar(32)', 0, 'Local', 'type');
 
 UPDATE `zstack`.`AccountVO` a
 INNER JOIN `zstack`.`AccountThirdPartyAccountSourceRefVO` ref ON ref.accountUuid = a.uuid
@@ -33,3 +32,5 @@ UPDATE `zstack`.`ThirdPartyAccountSourceVO` src
 INNER JOIN `zstack`.`LdapServerVO` ldap ON ldap.uuid = src.uuid
 SET src.`type` = IF(ldap.serverType IN ('OpenLdap', 'WindowsAD'), ldap.serverType, 'WindowsAD')
 WHERE src.`type` = 'ldap';
+
+CALL INSERT_COLUMN('ThirdPartyAccountSourceVO', 'updateAccountStrategies', 'varchar(255)', 0, '', 'createAccountStrategy');

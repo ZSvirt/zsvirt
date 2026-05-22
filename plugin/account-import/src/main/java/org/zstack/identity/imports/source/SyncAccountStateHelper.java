@@ -56,7 +56,8 @@ public class SyncAccountStateHelper {
      *   Account state which should update to. Return null if account should be deleted
      */
     public AccountState transform(@NonNull AccountState originalState, @NonNull AccountState stateInAccountSource) {
-        if (CollectionUtils.isEmpty(syncUpdateStrategies) || originalState == stateInAccountSource) {
+        if (CollectionUtils.isEmpty(syncUpdateStrategies) || originalState == stateInAccountSource
+                || syncUpdateStrategies.contains(SyncUpdateAccountStrategy.NeverUpdateState)) {
             return originalState;
         }
 

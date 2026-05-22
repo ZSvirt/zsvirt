@@ -172,10 +172,15 @@ public abstract class AbstractAccountSourceBase {
         SyncAccountStateHelper stateMachine = new SyncAccountStateHelper();
         stateMachine.setSyncCreateStrategy(spec.getSyncCreateStrategy());
 
-        List<SyncUpdateAccountStrategy> updateStrategies = new ArrayList<>();
-        updateStrategies.addAll(spec.getSyncUpdateStrategies());
-        updateStrategies.addAll(SyncUpdateAccountStrategy.from(spec.getSyncCreateStrategy()));
-        stateMachine.setSyncUpdateStrategies(SyncUpdateAccountStrategy.simplify(updateStrategies));
+        // from spec.getSyncUpdateStrategies() > "VO.UpdateAccountStrategies" > from "CreateAccountStrategy"
+        List<SyncUpdateAccountStrategy> defaultUpdateStrategies = SyncUpdateAccountStrategy.effectiveStrategies(
+                SyncUpdateAccountStrategy.valueOfStrategies(self.getUpdateAccountStrategies()),
+                SyncUpdateAccountStrategy.from(spec.getSyncCreateStrategy()));
+        final List<SyncUpdateAccountStrategy> effectiveUpdateStrategies = SyncUpdateAccountStrategy.effectiveStrategies(
+                spec.getSyncUpdateStrategies(),
+                defaultUpdateStrategies);
+        logger.debug("effective update strategies: " + effectiveUpdateStrategies);
+        stateMachine.setSyncUpdateStrategies(effectiveUpdateStrategies);
 
         FlowChain chain = FlowChainBuilder.newSimpleFlowChain();
         chain.setName(String.format("chain-with-importing-accounts-from-source-%s", spec.getSourceUuid()));
@@ -274,7 +279,9 @@ public abstract class AbstractAccountSourceBase {
             }
 
             private void fillAccountIfNameMatched() {
-                if (!spec.hasUpdateAccountStrategy(BindingSystemAdmin, BindingNormalAccount)) {
+                if (effectiveUpdateStrategies.contains(BindingNone)
+                        || (!effectiveUpdateStrategies.contains(BindingNormalAccount)
+                        && !effectiveUpdateStrategies.contains(BindingSystemAdmin))) {
                     return;
                 }
 
@@ -288,7 +295,7 @@ public abstract class AbstractAccountSourceBase {
 
                 Set<AccountType> accountTypes = new HashSet<>();
                 accountTypes.add(AccountType.Normal);
-                if (spec.hasUpdateAccountStrategy(BindingSystemAdmin)) {
+                if (effectiveUpdateStrategies.contains(BindingSystemAdmin)) {
                     accountTypes.add(AccountType.SystemAdmin);
                 }
 

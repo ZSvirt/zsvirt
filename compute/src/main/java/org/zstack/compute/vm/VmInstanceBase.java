@@ -151,6 +151,7 @@ public class VmInstanceBase extends AbstractVmInstance {
     protected String syncThreadName;
     private final static StaticIpOperator ipOperator = new StaticIpOperator();
     private final static VmConfigSyncHelper vmConfigSyncHelper = new VmConfigSyncHelper();
+    private final static VmBootTimeUtils vmBootTimeUtils = new VmBootTimeUtils();
 
     private void detachTpmKeyProviderBestEffort(String tpmUuid) {
         if (tpmUuid == null) {
@@ -381,6 +382,7 @@ public class VmInstanceBase extends AbstractVmInstance {
                 }
 
                 self.setState(state);
+                self.setBootTime(getBootTimeAfterStateChanged(bs, state, getCurrentBootTimeForStateChange()));
                 self = merge(self);
             }
         };
@@ -417,6 +419,35 @@ public class VmInstanceBase extends AbstractVmInstance {
         }
 
         return self;
+    }
+
+    private Timestamp getCurrentBootTimeForStateChange() {
+        if (self.getBootTime() != null) {
+            return self.getBootTime();
+        }
+
+        return Q.New(VmInstanceVO.class)
+                .select(VmInstanceVO_.bootTime)
+                .eq(VmInstanceVO_.uuid, self.getUuid())
+                .findValue();
+    }
+
+    private Timestamp getBootTimeAfterStateChanged(VmInstanceState oldState, VmInstanceState newState, Timestamp currentBootTime) {
+        if (!VmBootTimeUtils.isBootTimeValidState(newState)) {
+            return null;
+        }
+
+        if (newState != VmInstanceState.Running) {
+            return currentBootTime;
+        }
+
+        if (oldState == VmInstanceState.Starting
+                || oldState == VmInstanceState.Rebooting
+                || (oldState == VmInstanceState.Resuming && currentBootTime == null)) {
+            return Timestamp.valueOf(LocalDateTime.now());
+        }
+
+        return currentBootTime;
     }
 
     @Override
@@ -3724,6 +3755,13 @@ public class VmInstanceBase extends AbstractVmInstance {
     private void handle(APIGetVmUptimeMsg msg) {
         APIGetVmUptimeReply reply = new APIGetVmUptimeReply();
 
+        String uptime = StringUtils.defaultString(vmBootTimeUtils.getBootTime(self.getUuid()), VmBootTimeUtils.UNKNOWN_UPTIME);
+        if (StringUtils.isNotEmpty(uptime)) {
+            reply.setUptime(uptime);
+            bus.reply(msg, reply);
+            return;
+        }
+
         GetVmUptimeMsg gmsg = new GetVmUptimeMsg();
         gmsg.setVmInstanceUuid(self.getUuid());
         gmsg.setHostUuid(self.getHostUuid());
@@ -3732,12 +3770,12 @@ public class VmInstanceBase extends AbstractVmInstance {
         bus.send(gmsg, new CloudBusCallBack(msg) {
             @Override
             public void run(MessageReply r) {
-                if (!r.isSuccess()) {
-                    reply.setSuccess(false);
-                    reply.setError(r.getError());
-                } else {
+                if (r.isSuccess()) {
                     GetVmUptimeReply re = (GetVmUptimeReply) r;
-                    reply.setUptime(re.getUptime());
+                    vmBootTimeUtils.backfillBootTimeIfMissing(self.getUuid(), re.getUptime());
+                    reply.setUptime(StringUtils.defaultString(vmBootTimeUtils.getBootTime(self.getUuid()), VmBootTimeUtils.UNKNOWN_UPTIME));
+                } else {
+                    reply.setUptime(VmBootTimeUtils.UNKNOWN_UPTIME);
                 }
                 bus.reply(msg, reply);
             }

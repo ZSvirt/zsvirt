@@ -99,6 +99,9 @@ public class VmInstanceAO extends ResourceVO {
     @Enumerated(EnumType.STRING)
     private VmInstanceState state;
 
+    @Column
+    private Timestamp bootTime;
+
     public VmInstanceAO() {
     }
 
@@ -125,6 +128,7 @@ public class VmInstanceAO extends ResourceVO {
         this.createDate = other.createDate;
         this.lastOpDate = other.lastOpDate;
         this.state = other.state;
+        this.bootTime = other.bootTime;
         this.platform = other.platform;
         this.guestOsType = other.guestOsType;
         this.architecture = other.architecture;
@@ -277,6 +281,14 @@ public class VmInstanceAO extends ResourceVO {
 
     public void setState(VmInstanceState state) {
         this.state = state;
+    }
+
+    public Timestamp getBootTime() {
+        return bootTime;
+    }
+
+    public void setBootTime(Timestamp bootTime) {
+        this.bootTime = bootTime;
     }
 
     public String getRootVolumeUuid() {

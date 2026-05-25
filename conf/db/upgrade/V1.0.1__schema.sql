@@ -34,3 +34,37 @@ SET src.`type` = IF(ldap.serverType IN ('OpenLdap', 'WindowsAD'), ldap.serverTyp
 WHERE src.`type` = 'ldap';
 
 CALL INSERT_COLUMN('ThirdPartyAccountSourceVO', 'updateAccountStrategies', 'varchar(255)', 0, '', 'createAccountStrategy');
+
+-- Feature: VM boot time | ZSV-12297
+
+CALL INSERT_COLUMN('VmInstanceEO', 'bootTime', 'timestamp NULL', 1, NULL, 'state');
+
+CREATE OR REPLACE VIEW `zstack`.`VmInstanceVO` AS
+SELECT uuid,
+       name,
+       description,
+       zoneUuid,
+       clusterUuid,
+       imageUuid,
+       hostUuid,
+       internalId,
+       lastHostUuid,
+       instanceOfferingUuid,
+       rootVolumeUuid,
+       defaultL3NetworkUuid,
+       type,
+       hypervisorType,
+       cpuNum,
+       cpuSpeed,
+       memorySize,
+       reservedMemorySize,
+       platform,
+       guestOsType,
+       allocatorStrategy,
+       createDate,
+       lastOpDate,
+       state,
+       architecture,
+       bootTime
+FROM `zstack`.`VmInstanceEO`
+WHERE deleted IS NULL;

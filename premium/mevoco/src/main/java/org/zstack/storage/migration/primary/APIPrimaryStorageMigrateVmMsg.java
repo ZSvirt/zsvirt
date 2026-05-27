@@ -18,6 +18,7 @@ import org.zstack.header.volume.VolumeVO;
 import org.zstack.storage.migration.StorageMigrationMessage;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -35,15 +36,18 @@ public class APIPrimaryStorageMigrateVmMsg extends APIMessage implements Storage
     @APIParam(resourceType = VmInstanceVO.class)
     private String vmInstanceUuid;
 
-    @APIParam(resourceType = PrimaryStorageVO.class)
+    @Deprecated
+    @APIParam(required = false, resourceType = PrimaryStorageVO.class)
     private String dstPrimaryStorageUuid;
 
     @APIParam(required = false)
     private String dstHostUuid;
 
+    @Deprecated
     @APIParam(required = false)
     private boolean withDataVolumes = true;
 
+    @Deprecated
     @APIParam(required = false)
     private boolean withSnapshots = true;
 
@@ -55,6 +59,9 @@ public class APIPrimaryStorageMigrateVmMsg extends APIMessage implements Storage
 
     @APIParam(required = false)
     private long bandwidth;
+
+    @APIParam(required = false)
+    private List<VolumeMigrationAO> volumeMigrationAOs;
 
     public APIPrimaryStorageMigrateVmMsg(PrimaryStorageMigrateVmMsg pmsg) {
         vmInstanceUuid = pmsg.getVmInstanceUuid();
@@ -71,12 +78,21 @@ public class APIPrimaryStorageMigrateVmMsg extends APIMessage implements Storage
     public static APIPrimaryStorageMigrateVmMsg __example__() {
         APIPrimaryStorageMigrateVmMsg msg = new APIPrimaryStorageMigrateVmMsg();
         msg.setVmInstanceUuid(uuid());
-        msg.setWithDataVolumes(true);
-        msg.setWithSnapshots(false);
         msg.setDstPrimaryStorageUuid(uuid());
         msg.setDstHostUuid(uuid());
+        msg.setWithSnapshots(false);
         msg.setDownTime(300);
+        msg.setBandwidth(50L * 1024 * 1024);
+        msg.setVolumeMigrationAOs(Collections.singletonList(new VolumeMigrationAO(uuid(), uuid())));
         return msg;
+    }
+
+    public List<VolumeMigrationAO> getVolumeMigrationAOs() {
+        return volumeMigrationAOs;
+    }
+
+    public void setVolumeMigrationAOs(List<VolumeMigrationAO> volumeMigrationAOs) {
+        this.volumeMigrationAOs = volumeMigrationAOs;
     }
 
     public Integer getDownTime() {
@@ -97,22 +113,27 @@ public class APIPrimaryStorageMigrateVmMsg extends APIMessage implements Storage
         return dstPrimaryStorageUuid;
     }
 
+    @Deprecated
     public void setDstPrimaryStorageUuid(String dstPrimaryStorageUuid) {
         this.dstPrimaryStorageUuid = dstPrimaryStorageUuid;
     }
 
+    @Deprecated
     public boolean isWithDataVolumes() {
         return withDataVolumes;
     }
 
+    @Deprecated
     public void setWithDataVolumes(boolean withDataVolumes) {
         this.withDataVolumes = withDataVolumes;
     }
 
+    @Deprecated
     public boolean isWithSnapshots() {
         return withSnapshots;
     }
 
+    @Deprecated
     public void setWithSnapshots(boolean withSnapshots) {
         this.withSnapshots = withSnapshots;
     }

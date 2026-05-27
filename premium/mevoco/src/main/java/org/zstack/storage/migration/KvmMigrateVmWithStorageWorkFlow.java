@@ -29,13 +29,14 @@ import org.zstack.header.volume.VolumeAO;
 import org.zstack.header.volume.VolumeStatus;
 import org.zstack.header.volume.VolumeVO;
 import org.zstack.header.volume.VolumeVO_;
+import org.zstack.storage.migration.primary.VolumeMigrationAO;
 import org.zstack.utils.Utils;
 import org.zstack.utils.logging.CLogger;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.zstack.core.Platform.operr;
@@ -70,9 +71,15 @@ public class KvmMigrateVmWithStorageWorkFlow implements KvmLiveMigrationWorkFlow
     public List<Flow> getPrepareFlows(ParamIn paramIn) {
         VmInstanceVO vmInstanceVO = dbf.findByUuid(paramIn.getVmInstanceInventory().getUuid(), VmInstanceVO.class);
 
+        Set<String> requiredDstPsUuids = paramIn.getMsg().getVolumeMigrationAOs().stream()
+                .map(VolumeMigrationAO::getDstPrimaryStorageUuid)
+                .collect(Collectors.toSet());
+        List<String> sortedDstPsUuids = requiredDstPsUuids.stream().sorted().collect(Collectors.toList());
+        final String allocFlowName = "allocate-host-connected-to-ps-" + String.join(",", sortedDstPsUuids);
+
         List<Flow> flows = new ArrayList<>();
         flows.add(new Flow() {
-            String __name__ = "allocate-host-connected-to-ps-" + paramIn.getMsg().getDstPrimaryStorageUuid();
+            String __name__ = allocFlowName;
 
             @Override
             public void run(FlowTrigger trigger, Map data) {
@@ -89,7 +96,7 @@ public class KvmMigrateVmWithStorageWorkFlow implements KvmLiveMigrationWorkFlow
                 amsg.setL3NetworkUuids(VmNicHelper.getL3Uuids(VmNicInventory.valueOf(vmInstanceVO.getVmNics())));
                 amsg.setVmNicParams(VmNicHelper.getVmNicParamsWithVfNic(vmInstanceVO));
                 amsg.setAllowNoL3Networks(true);
-                amsg.setRequiredPrimaryStorageUuids(Collections.singleton(paramIn.getMsg().getDstPrimaryStorageUuid()));
+                amsg.setRequiredPrimaryStorageUuids(requiredDstPsUuids);
                 amsg.addLocationSpec(VmLocationSpec.avoidHost(vmInstanceVO.getHostUuid()));
                 amsg.setCpuCapacity(vmInstanceVO.getCpuNum());
                 amsg.setMemoryCapacity(vmInstanceVO.getMemorySize());

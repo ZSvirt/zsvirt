@@ -6,6 +6,9 @@ import org.zstack.header.vm.VmInstanceMessage;
 import org.zstack.storage.migration.PrimaryStorageMigrateVmContext;
 import org.zstack.storage.migration.StorageMigrationMessage;
 
+import java.util.Collections;
+import java.util.List;
+
 @SkipVmTracer(replyClass = PrimaryStorageLiveMigrateVmReply.class)
 public class PrimaryStorageLiveMigrateVmMsg extends NeedReplyMessage implements StorageMigrationMessage, VmInstanceMessage {
     private String vmInstanceUuid;
@@ -17,6 +20,7 @@ public class PrimaryStorageLiveMigrateVmMsg extends NeedReplyMessage implements 
     private PrimaryStorageMigrateVmContext jobContext;
     private String longJobUuid;
     private long bandwidth;
+    private List<VolumeMigrationAO> volumeMigrationAOs;
 
     public PrimaryStorageLiveMigrateVmMsg(PrimaryStorageMigrateVmMsg amsg) {
         this.vmInstanceUuid = amsg.getVmInstanceUuid();
@@ -29,6 +33,18 @@ public class PrimaryStorageLiveMigrateVmMsg extends NeedReplyMessage implements 
         this.jobContext = amsg.getJobContext();
         this.longJobUuid = amsg.getLongJobUuid();
         this.bandwidth = amsg.getBandwidth();
+        this.volumeMigrationAOs = amsg.getVolumeMigrationAOs();
+    }
+
+    public PrimaryStorageLiveMigrateVmMsg() {
+    }
+
+    public List<VolumeMigrationAO> getVolumeMigrationAOs() {
+        return volumeMigrationAOs == null ? Collections.emptyList() : volumeMigrationAOs;
+    }
+
+    public void setVolumeMigrationAOs(List<VolumeMigrationAO> volumeMigrationAOs) {
+        this.volumeMigrationAOs = volumeMigrationAOs;
     }
 
     public PrimaryStorageMigrateVmContext getJobContext() {

@@ -13,6 +13,8 @@ import org.zstack.header.core.workflow.Flow;
 import org.zstack.header.core.workflow.FlowTrigger;
 import org.zstack.header.core.workflow.NoRollbackFlow;
 import org.zstack.header.errorcode.ErrorCode;
+import org.zstack.header.errorcode.OperationFailureException;
+import org.zstack.storage.migration.primary.VolumeMigrationAO;
 import org.zstack.header.host.HostConstant;
 import org.zstack.header.message.MessageReply;
 import org.zstack.header.vm.VmInstanceInventory;
@@ -30,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static org.zstack.core.Platform.argerr;
 import static org.zstack.core.Platform.operr;
 
 public class KvmBlockLiveMigrationWorkFlow implements KvmLiveMigrationWorkFlowTemplate {
@@ -94,12 +97,27 @@ public class KvmBlockLiveMigrationWorkFlow implements KvmLiveMigrationWorkFlowTe
     }
 
     private boolean supportMigrateStorageOnly(ParamIn paramIn) {
+        String dstPs = resolveDstPs(paramIn);
         String clusterUuid = SQL.New("select h.clusterUuid from HostVO h where h.uuid = :huuid and h.clusterUuid in (" +
                 "select ref.clusterUuid from PrimaryStorageClusterRefVO ref where ref.primaryStorageUuid = :psuuid)", String.class)
                 .param("huuid", paramIn.getVmInstanceInventory().getHostUuid())
-                .param("psuuid", paramIn.getMsg().getDstPrimaryStorageUuid()).find();
+                .param("psuuid", dstPs).find();
 
         return clusterUuid != null;
+    }
+
+    private String resolveDstPs(ParamIn paramIn) {
+        if (paramIn.getVolumesToMigrate().isEmpty()) {
+            throw new OperationFailureException(argerr("no volume to migrate for vm[%s]",
+                    paramIn.getVmInstanceInventory().getUuid()));
+        }
+        String volUuid = paramIn.getVolumesToMigrate().get(0).getUuid();
+        return paramIn.getMsg().getVolumeMigrationAOs().stream()
+                .filter(s -> volUuid.equals(s.getVolumeUuid()))
+                .map(VolumeMigrationAO::getDstPrimaryStorageUuid)
+                .findFirst()
+                .orElseThrow(() -> new OperationFailureException(
+                        argerr("no migration spec for volume[%s]", volUuid)));
     }
 
     private VmBlockLiveMigrationCmd buildLiveMigrationCommand(VmInstanceInventory vmInstanceInventory, Map<String, VolumeTO> disks) {

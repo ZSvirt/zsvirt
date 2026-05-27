@@ -504,6 +504,7 @@ public class SourceClassMap {
 			put("org.zstack.storage.device.nvme.NvmeServerClusterRefInventory", "org.zstack.sdk.NvmeServerClusterRefInventory");
 			put("org.zstack.storage.device.nvme.NvmeServerInventory", "org.zstack.sdk.NvmeServerInventory");
 			put("org.zstack.storage.device.nvme.NvmeTargetInventory", "org.zstack.sdk.NvmeTargetInventory");
+			put("org.zstack.storage.migration.primary.VolumeMigrationAO", "org.zstack.sdk.VolumeMigrationAO");
 			put("org.zstack.storage.primary.block.BlockPrimaryStorageInventory", "org.zstack.sdk.BlockPrimaryStorageInventory");
 			put("org.zstack.storage.primary.local.APIGetLocalStorageHostDiskCapacityReply$HostDiskCapacity", "org.zstack.sdk.HostDiskCapacity");
 			put("org.zstack.storage.primary.local.LocalStorageResourceRefInventory", "org.zstack.sdk.LocalStorageResourceRefInventory");
@@ -1040,6 +1041,7 @@ public class SourceClassMap {
 			put("org.zstack.sdk.VolumeExternalBackupInfo", "org.zstack.externalbackup.VolumeExternalBackupInfo");
 			put("org.zstack.sdk.VolumeFormatReplyStruct", "org.zstack.header.volume.APIGetVolumeFormatReply$VolumeFormatReplyStruct");
 			put("org.zstack.sdk.VolumeInventory", "org.zstack.header.volume.VolumeInventory");
+			put("org.zstack.sdk.VolumeMigrationAO", "org.zstack.storage.migration.primary.VolumeMigrationAO");
 			put("org.zstack.sdk.VolumeSnapshotBackupStorageRefInventory", "org.zstack.header.storage.snapshot.VolumeSnapshotBackupStorageRefInventory");
 			put("org.zstack.sdk.VolumeSnapshotGroupAvailability", "org.zstack.header.storage.snapshot.group.VolumeSnapshotGroupAvailability");
 			put("org.zstack.sdk.VolumeSnapshotGroupInventory", "org.zstack.header.storage.snapshot.group.VolumeSnapshotGroupInventory");

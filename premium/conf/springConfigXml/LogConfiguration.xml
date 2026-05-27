@@ -19,4 +19,16 @@
             <zstack:extension interface="org.zstack.header.apimediator.ApiMessageInterceptor"/>
         </zstack:plugin>
     </bean>
+
+    <bean id="LogServerCascadeExtension" class="org.zstack.log.server.LogServerCascadeExtension">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.core.cascade.CascadeExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="LogServerUpgradeExtension" class="org.zstack.log.server.LogServerUpgradeExtension">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.Component" />
+        </zstack:plugin>
+    </bean>
 </beans>

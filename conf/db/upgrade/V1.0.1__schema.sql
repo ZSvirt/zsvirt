@@ -68,3 +68,19 @@ SELECT uuid,
        bootTime
 FROM `zstack`.`VmInstanceEO`
 WHERE deleted IS NULL;
+
+-- Feature: Log Server | ZSV-12254
+
+CREATE TABLE IF NOT EXISTS `zstack`.`LogServerVO` (
+    `uuid` varchar(32) NOT NULL UNIQUE,
+    `name` varchar(255) NOT NULL,
+    `description` varchar(2048) NULL,
+    `category` varchar(255) NOT NULL,
+    `type` varchar(255) NOT NULL,
+    `level` varchar(255) NULL,
+    `state` varchar(255) NOT NULL DEFAULT 'Enabled',
+    `configuration` text NOT NULL,
+    `lastOpDate` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `createDate` timestamp NOT NULL DEFAULT '1999-12-31 23:59:59',
+    PRIMARY KEY  (`uuid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;

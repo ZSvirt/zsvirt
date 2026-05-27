@@ -1,0 +1,52 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx" xmlns:zstack="http://zstack.org/schema/zstack"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+    http://www.springframework.org/schema/aop
+    http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+    http://www.springframework.org/schema/tx
+    http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+    http://zstack.org/schema/zstack
+    http://zstack.org/schema/zstack/plugin.xsd"
+       default-init-method="init" default-destroy-method="destroy">
+
+    <bean id="FluentBitServerFactory" class="org.zstack.premium.externalservice.fluentbit.FluentBitServerFactory">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.core.externalservice.ExternalServiceFactory"/>
+            <zstack:extension interface="org.zstack.header.Component"/>
+            <zstack:extension interface="org.zstack.header.managementnode.ManagementNodeReadyExtensionPoint"/>
+            <zstack:extension interface="org.zstack.log.LogConfigurationFactory"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="FluentBitSyslogProxyFactory" class="org.zstack.premium.externalservice.fluentbit.output.SyslogProxyFactory">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.premium.externalservice.fluentbit.output.FluentBitOutputFactory"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="FluentBitElasticsearchProxyFactory" class="org.zstack.premium.externalservice.fluentbit.output.ElasticsearchProxyFactory">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.premium.externalservice.fluentbit.output.FluentBitOutputFactory"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="FluentBitLokiProxyFactory" class="org.zstack.premium.externalservice.fluentbit.output.LokiProxyFactory">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.premium.externalservice.fluentbit.output.FluentBitOutputFactory"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="FluentBitKafkaProxyFactory" class="org.zstack.premium.externalservice.fluentbit.output.KafkaProxyFactory">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.premium.externalservice.fluentbit.output.FluentBitOutputFactory"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="FluentBitForwardProxyFactory" class="org.zstack.premium.externalservice.fluentbit.output.ForwardProxyFactory">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.premium.externalservice.fluentbit.output.FluentBitOutputFactory"/>
+        </zstack:plugin>
+    </bean>
+</beans>

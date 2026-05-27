@@ -32,6 +32,12 @@
 
         <dependency>
             <groupId>org.zstack</groupId>
+            <artifactId>log</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.zstack</groupId>
             <artifactId>kvm</artifactId>
             <version>${project.version}</version>
         </dependency>

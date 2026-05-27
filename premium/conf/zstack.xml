@@ -157,6 +157,7 @@
     <import resource="springConfigXml/vpcHa.xml" />
     <import resource="springConfigXml/LogConfiguration.xml"/>
     <import resource="springConfigXml/Log4j2Configuration.xml"/>
+    <import resource="springConfigXml/FluentBitConfiguration.xml"/>
     <import resource="springConfigXml/grafana.xml"/>
     <import resource="springConfigXml/guesttools.xml"/>
     <import resource="springConfigXml/drs.xml"/>

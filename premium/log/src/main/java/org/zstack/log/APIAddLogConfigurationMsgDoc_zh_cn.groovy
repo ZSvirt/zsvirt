@@ -28,7 +28,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "3.7.0"
+					since "zsv 3.7.0"
 				}
 				column {
 					name "description"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.7.0"
+					since "zsv 3.7.0"
 				}
 				column {
 					name "type"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "3.7.0"
+					since "zsv 3.7.0"
 				}
 				column {
 					name "configuration"
@@ -55,7 +55,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "3.7.0"
+					since "zsv 3.7.0"
 				}
 				column {
 					name "resourceUuid"
@@ -64,7 +64,16 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.7.0"
+					since "zsv 3.7.0"
+				}
+				column {
+					name "level"
+					enclosedIn "params"
+					desc "日志级别"
+					location "body"
+					type "String"
+					optional true
+					since "1.0.1, zsv 5.1.0"
 				}
 				column {
 					name "tagUuids"
@@ -73,7 +82,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.7.0"
+					since "zsv 3.7.0"
 				}
 				column {
 					name "systemTags"
@@ -82,7 +91,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.7.0"
+					since "zsv 3.7.0"
 				}
 				column {
 					name "userTags"
@@ -91,7 +100,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.7.0"
+					since "zsv 3.7.0"
 				}
 			}
 		}

@@ -148,7 +148,7 @@ public class KvmMigrateVmWithStorageWorkFlow implements KvmLiveMigrationWorkFlow
                 VmInstanceInventory vmInstanceInventory = VmInstanceInventory.valueOf(vmvo);
                 List<VmInstanceMigrateExtensionPoint> migrateVmExtensions = pluginRgty.getExtensionList(VmInstanceMigrateExtensionPoint.class);
                 // FIXME migration with storage do not match migrate extension point
-                new While<>(migrateVmExtensions).each((ext, comp) -> ext.preMigrateVm(vmInstanceInventory, paramIn.getDstHostInventory().getUuid(), new Completion(comp) {
+                new While<>(migrateVmExtensions).each((ext, comp) -> ext.preMigrateVm(vmInstanceInventory, paramIn.getDstHostInventory().getUuid(), paramIn.getMsg().getEnableMigrationTls(), new Completion(comp) {
                     @Override
                     public void success() {
                         comp.done();
@@ -156,11 +156,20 @@ public class KvmMigrateVmWithStorageWorkFlow implements KvmLiveMigrationWorkFlow
 
                     @Override
                     public void fail(ErrorCode errorCode) {
-                        comp.done();
+                        if (Boolean.TRUE.equals(paramIn.getMsg().getEnableMigrationTls())) {
+                            comp.addError(errorCode);
+                            comp.allDone();
+                        } else {
+                            comp.done();
+                        }
                     }
                 })).run(new WhileDoneCompletion(trigger) {
                     @Override
                     public void done(ErrorCodeList errorCodeList) {
+                        if (Boolean.TRUE.equals(paramIn.getMsg().getEnableMigrationTls()) && errorCodeList.hasError()) {
+                            trigger.fail(errorCodeList.getCauses().get(0));
+                            return;
+                        }
                         trigger.next();
                     }
                 });
@@ -272,6 +281,7 @@ public class KvmMigrateVmWithStorageWorkFlow implements KvmLiveMigrationWorkFlow
                 mmsg.setVmInventory(paramIn.getVmInstanceInventory());
                 mmsg.setStorageMigrationPolicy(MigrateVmOnHypervisorMsg.StorageMigrationPolicy.FullCopy);
                 mmsg.setBandwidth((long) Math.ceil((double) paramIn.getTotalBandwidth() / paramIn.getVolumesToMigrate().size()));
+                mmsg.setEnableMigrationTls(paramIn.getMsg().getEnableMigrationTls());
                 for (KvmMigrateVmWithStorageExtensionPoint ext : pluginRgty.getExtensionList(KvmMigrateVmWithStorageExtensionPoint.class)) {
                     ErrorCode err;
                     try {

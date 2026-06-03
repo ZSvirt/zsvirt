@@ -120,6 +120,15 @@ doc {
 					optional true
 					since "1.0.1, zsv 5.1.0"
 				}
+				column {
+					name "enableMigrationTls"
+					enclosedIn "primaryStorageMigrateVm"
+					desc ""
+					location "body"
+					type "Boolean"
+					optional true
+					since "1.0.1, zsv 5.1.0"
+				}
 			}
 		}
 

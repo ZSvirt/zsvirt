@@ -22,6 +22,7 @@
         <module>macvlan</module>
         <module>zops-plugin</module>
         <module>memory-balloon</module>
+        <module>host-pki</module>
         <module>zsv</module>
         <module>virtualSwitchNetwork</module>
     </modules>

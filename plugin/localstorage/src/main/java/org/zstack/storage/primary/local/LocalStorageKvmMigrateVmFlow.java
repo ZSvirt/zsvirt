@@ -26,6 +26,7 @@ import org.zstack.header.errorcode.ErrorCode;
 import org.zstack.header.host.HostConstant;
 import org.zstack.header.host.MigrateVmOnHypervisorMsg;
 import org.zstack.header.host.MigrateVmOnHypervisorMsg.StorageMigrationPolicy;
+import org.zstack.header.vm.MigrateVmMessage;
 import org.zstack.header.image.ImageConstant.ImageMediaType;
 import org.zstack.header.image.ImageInventory;
 import org.zstack.header.image.ImageStatus;
@@ -664,6 +665,9 @@ public class LocalStorageKvmMigrateVmFlow extends NoRollbackFlow {
                         msg.setDestHostInventory(spec.getDestHost());
                         msg.setSrcHostUuid(spec.getVmInventory().getHostUuid());
                         msg.setStorageMigrationPolicy(storageMigrationPolicy);
+                        if (spec.getMessage() instanceof MigrateVmMessage) {
+                            msg.setEnableMigrationTls(((MigrateVmMessage) spec.getMessage()).getEnableMigrationTls());
+                        }
                         bus.makeTargetServiceIdByResourceUuid(msg, HostConstant.SERVICE_ID, spec.getDestHost().getUuid());
                         bus.send(msg, new CloudBusCallBack(trigger) {
                             @Override

@@ -94,6 +94,15 @@ doc {
 					optional true
 					since "zsv 3.16.21"
 				}
+				column {
+					name "enableMigrationTls"
+					enclosedIn "migrateVm"
+					desc "迁移过程加密"
+					location "body"
+					type "Boolean"
+					optional true
+					since "1.0.1, zsv 5.1.0"
+				}
 			}
 		}
 

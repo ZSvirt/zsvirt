@@ -10,6 +10,7 @@ import org.zstack.header.core.workflow.FlowRollback;
 import org.zstack.header.core.workflow.FlowTrigger;
 import org.zstack.header.errorcode.ErrorCode;
 import org.zstack.header.host.HostInventory;
+import org.zstack.header.vm.MigrateVmMessage;
 import org.zstack.header.vm.VmInstanceConstant;
 import org.zstack.header.vm.VmInstanceSpec;
 
@@ -29,7 +30,11 @@ public class VmMigrateCallExtensionFlow implements Flow {
         final VmInstanceSpec spec = (VmInstanceSpec) data.get(VmInstanceConstant.Params.VmInstanceSpec.toString());
 
         final HostInventory destHost = spec.getDestHost();
-        extEmitter.preMigrateVm(spec.getVmInventory(), destHost.getUuid(), new Completion(trigger) {
+        Boolean enableMigrationTls = null;
+        if (spec.getMessage() instanceof MigrateVmMessage) {
+            enableMigrationTls = ((MigrateVmMessage) spec.getMessage()).getEnableMigrationTls();
+        }
+        extEmitter.preMigrateVm(spec.getVmInventory(), destHost.getUuid(), enableMigrationTls, new Completion(trigger) {
             @Override
             public void success() {
                 extEmitter.beforeMigrateVm(spec.getVmInventory(), destHost.getUuid());

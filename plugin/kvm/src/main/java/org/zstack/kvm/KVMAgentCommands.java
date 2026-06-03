@@ -4012,6 +4012,9 @@ public class KVMAgentCommands {
         private boolean autoConverge;
         private Integer downTime;
         private boolean xbzrle;
+        private boolean migrateTls;
+        private boolean mutualTls;
+        private String expectedDestCertFingerprint;
         private List<String> vdpaPaths;
         private List<NicTO> nics;
         private Map<String, VolumeTO> disks;  // A map from old install path to new volume
@@ -4088,6 +4091,30 @@ public class KVMAgentCommands {
 
         public void setXbzrle(boolean xbzrle) {
             this.xbzrle = xbzrle;
+        }
+
+        public boolean isMigrateTls() {
+            return migrateTls;
+        }
+
+        public void setMigrateTls(boolean migrateTls) {
+            this.migrateTls = migrateTls;
+        }
+
+        public boolean isMutualTls() {
+            return mutualTls;
+        }
+
+        public void setMutualTls(boolean mutualTls) {
+            this.mutualTls = mutualTls;
+        }
+
+        public String getExpectedDestCertFingerprint() {
+            return expectedDestCertFingerprint;
+        }
+
+        public void setExpectedDestCertFingerprint(String expectedDestCertFingerprint) {
+            this.expectedDestCertFingerprint = expectedDestCertFingerprint;
         }
 
         public boolean isMigrateFromDestination() {

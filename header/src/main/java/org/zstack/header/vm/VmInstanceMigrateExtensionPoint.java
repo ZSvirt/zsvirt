@@ -12,6 +12,11 @@ public interface VmInstanceMigrateExtensionPoint {
         completion.success();
     }
 
+    default void preMigrateVm(VmInstanceInventory inv, String destHostUuid, Boolean enableMigrationTls,
+                              Completion completion) {
+        preMigrateVm(inv, destHostUuid, completion);
+    }
+
     default void beforeMigrateVm(VmInstanceInventory inv, String destHostUuid) {}
 
     default void beforeMigrateVm(VmInstanceInventory inv, String destHostUuid, NoErrorCompletion completion) {

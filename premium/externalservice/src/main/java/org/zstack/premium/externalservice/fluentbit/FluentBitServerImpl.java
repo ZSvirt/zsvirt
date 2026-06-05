@@ -15,6 +15,8 @@ import org.zstack.header.exception.CloudRuntimeException;
 import org.zstack.log.server.LogCategory;
 import org.zstack.log.server.LogServerVO;
 import org.zstack.log.server.LogServerVO_;
+import org.zstack.premium.externalservice.fluentbit.output.FluentBitOutputConfigHelper;
+import org.zstack.premium.externalservice.fluentbit.output.OutPutType;
 import org.zstack.utils.Bash;
 import org.zstack.utils.Utils;
 import org.zstack.utils.gson.JSONObjectUtil;
@@ -74,17 +76,47 @@ public class FluentBitServerImpl extends AbstractLocalExternalService implements
 
     private void loadFluentBitConfiguration() {
         FluentBitServiceUnitConfig.generateFluentBitConfig();
-        List<String> list = Q.New(LogServerVO.class).select(LogServerVO_.configuration)
+        List<LogServerVO> list = Q.New(LogServerVO.class)
                 .eq(LogServerVO_.category, LogCategory.PlatformOperationLog)
                 .list();
-        for (String conf : list) {
-            FluentBitConfigurationStruct struct = FluentBitConfigurationStruct.fromJson(conf);
-            String configuration = struct.getConfiguration();
-            Map map = JSONObjectUtil.toObject(configuration, Map.class);
-            if (encryptFacade != null && map.containsKey("http_passwd")) {
-                map.put("http_passwd", encryptFacade.decrypt((String) map.get("http_passwd")));
+        for (LogServerVO vo : list) {
+            try {
+                FluentBitConfigurationStruct struct = FluentBitConfigurationStruct.fromJson(vo.getConfiguration());
+                OutPutType type = getOutPutType(struct == null ? null : struct.getType(), vo.getUuid());
+                if (type == null) {
+                    continue;
+                }
+
+                String configuration = struct.getConfiguration();
+                Map map = JSONObjectUtil.toObject(configuration, Map.class);
+                map = FluentBitOutputConfigHelper.normalizeConfiguration(map);
+                if (encryptFacade != null && map.containsKey("http_passwd")) {
+                    map.put("http_passwd", encryptFacade.decrypt((String) map.get("http_passwd")));
+                }
+                if (encryptFacade != null && map.containsKey("httpPassword")) {
+                    map.put("httpPassword", encryptFacade.decrypt((String) map.get("httpPassword")));
+                }
+                FluentBitServiceUnitConfig.addSingleFluentBitConfig(FluentBitOutputConfigHelper.makeOutputConfig(
+                        type, map, vo.getAccountUuid()));
+            } catch (Exception e) {
+                logger.warn(String.format("failed to load fluent-bit log server[uuid:%s], skip it: %s",
+                        vo.getUuid(), e.getMessage()), e);
             }
-            FluentBitServiceUnitConfig.addSingleFluentBitConfig(map);
+        }
+    }
+
+    private OutPutType getOutPutType(String type, String logServerUuid) {
+        if (type == null) {
+            logger.warn(String.format("fluent-bit log server[uuid:%s] contains empty output type, skip it", logServerUuid));
+            return null;
+        }
+
+        try {
+            return OutPutType.valueOf(type);
+        } catch (IllegalArgumentException e) {
+            logger.warn(String.format("fluent-bit log server[uuid:%s] contains unknown output type[%s], skip it",
+                    logServerUuid, type));
+            return null;
         }
     }
 

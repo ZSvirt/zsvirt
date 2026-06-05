@@ -155,7 +155,7 @@ public class FluentBitServerFactory implements ExternalServiceFactory, Component
         if (errorCode == null) {
             completion.success(struct.getConfiguration());
         } else {
-            FluentBitServiceUnitConfig.removeOutputConfig(fstruct.getConfiguration());
+            FluentBitServiceUnitConfig.removeOutputConfig(fstruct.getType(), fstruct.getConfiguration(), accountUuid);
             completion.fail(errorCode);
         }
     }
@@ -175,7 +175,7 @@ public class FluentBitServerFactory implements ExternalServiceFactory, Component
             throw new OperationFailureException(operr("No factory found for fluentbit output type:%s.", fstruct.getType()));
         }
 
-        FluentBitServiceUnitConfig.removeOutputConfig(fstruct.getConfiguration());
+        FluentBitServiceUnitConfig.removeOutputConfig(fstruct.getType(), fstruct.getConfiguration(), vo.getAccountUuid());
 
         fluentBitInstance.restartServer();
         fluentBitInstance.checkServiceReady();

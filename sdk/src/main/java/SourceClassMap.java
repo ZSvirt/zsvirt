@@ -255,6 +255,7 @@ public class SourceClassMap {
 			put("org.zstack.header.vm.CloneVmInstanceInventory", "org.zstack.sdk.CloneVmInstanceInventory");
 			put("org.zstack.header.vm.CloneVmInstanceResults", "org.zstack.sdk.CloneVmInstanceResults");
 			put("org.zstack.header.vm.CreateVmInstanceFromTemplatedVmInstanceResults", "org.zstack.sdk.CreateVmInstanceFromTemplatedVmInstanceResults");
+			put("org.zstack.header.vm.DiskAO", "org.zstack.sdk.DiskAO");
 			put("org.zstack.header.vm.TemplatedVmInstanceInventory", "org.zstack.sdk.TemplatedVmInstanceInventory");
 			put("org.zstack.header.vm.VdiPortInfo", "org.zstack.sdk.VdiPortInfo");
 			put("org.zstack.header.vm.VirtualizerInfo", "org.zstack.sdk.VirtualizerInfo");
@@ -687,6 +688,7 @@ public class SourceClassMap {
 			put("org.zstack.sdk.DeviceAddress", "org.zstack.header.vm.devices.DeviceAddress");
 			put("org.zstack.sdk.DeviceTO", "org.zstack.storage.device.multipath.DeviceTO");
 			put("org.zstack.sdk.DirectoryInventory", "org.zstack.directory.DirectoryInventory");
+			put("org.zstack.sdk.DiskAO", "org.zstack.header.vm.DiskAO");
 			put("org.zstack.sdk.DiskOfferingInventory", "org.zstack.header.configuration.DiskOfferingInventory");
 			put("org.zstack.sdk.EipInventory", "org.zstack.network.service.eip.EipInventory");
 			put("org.zstack.sdk.ElaborationCategory", "org.zstack.core.errorcode.ElaborationCategory");

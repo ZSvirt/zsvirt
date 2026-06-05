@@ -1,10 +1,12 @@
 package org.zstack.header.vm;
 
 import org.zstack.header.configuration.PythonClassInventory;
+import org.zstack.header.rest.SDK;
 import org.zstack.header.volume.VolumeVO;
 
 import java.util.List;
 
+@SDK(sdkClassName = "DiskAO")
 @PythonClassInventory
 public class DiskAO {
     private boolean boot;

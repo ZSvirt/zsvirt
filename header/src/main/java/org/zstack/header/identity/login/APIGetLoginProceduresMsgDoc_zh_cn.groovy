@@ -40,6 +40,15 @@ doc {
 					since "zsv 3.16.0"
 				}
 				column {
+					name "source"
+					enclosedIn ""
+					desc "账户来源，仅用于区分跨来源同名账户（可选）"
+					location "query"
+					type "String"
+					optional true
+					since "1.0.1, zsv_5.1.0"
+				}
+				column {
 					name "systemTags"
 					enclosedIn ""
 					desc "系统标签"

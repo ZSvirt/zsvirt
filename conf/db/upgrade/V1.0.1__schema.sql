@@ -207,3 +207,8 @@ CALL DELETE_INDEX('VpcVpnIpSecConfigVO', 'fkVpcVpnIpSecConfigVOAccountVO');
 CALL ADD_CONSTRAINT('VpcVpnIpSecConfigVO', 'fkVpcVpnIpSecConfigVOAccountVO', 'accountUuid', 'AccountVO', 'uuid', 'RESTRICT');
 CALL DROP_COLUMN('VpcVpnIpSecConfigVO', 'accountName');
 
+-- Feature: support duplicate name of accounts | ZSV-12379
+CALL CREATE_INDEX('AccountVO', 'idxAccountVOname', 'name');
+CALL DELETE_INDEX('AccountVO', 'name');
+ALTER TABLE `zstack`.`AccountVO` ADD CONSTRAINT `uqAccountVOSourceName` UNIQUE (`source`, `name`);
+

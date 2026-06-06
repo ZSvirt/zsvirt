@@ -234,6 +234,8 @@ public class SharedBlockKvmCommands {
         public String volumePath;
         public boolean sharedVolume = false;
         public boolean compareQcow2 = false;
+        @NoLogging
+        public String encryptedDek;
     }
 
     public static class CreateTemplateFromVolumeRsp extends AgentRsp {
@@ -254,7 +256,8 @@ public class SharedBlockKvmCommands {
         public String installPath;
         public String volumePath;
         public boolean compareQcow2 = false;
-        public String encryptLuksSecretMaterialFilePath;
+        @NoLogging
+        public String encryptedDek;
     }
 
     public static class CreateImageCacheFromVolumeRsp extends AgentRsp {
@@ -469,7 +472,8 @@ public class SharedBlockKvmCommands {
      */
     public static class EncryptVolumeBitsCmd extends AgentCmd implements HasThreadContext {
         public String installPath;
-        public String encryptLuksSecretMaterialFilePath;
+        @NoLogging
+        public String encryptedDek;
     }
 
     public static class ConvertVolumeEncryptionCmd extends AgentCmd implements HasThreadContext, Serializable {

@@ -1,11 +1,13 @@
 package org.zstack.storage.primary.sharedblock;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.zstack.core.cloudbus.CloudBusCallBack;
 import org.zstack.core.db.Q;
 import org.zstack.core.db.SimpleQuery;
 import org.zstack.core.workflow.FlowChainBuilder;
 import org.zstack.core.workflow.ShareFlow;
+import org.zstack.header.core.Completion;
 import org.zstack.header.core.ReturnValueCompletion;
 import org.zstack.header.core.workflow.*;
 import org.zstack.header.errorcode.ErrorCode;
@@ -23,7 +25,10 @@ import org.zstack.header.vm.VmInstanceVO_;
 import org.zstack.header.volume.*;
 import org.zstack.identity.AccountManager;
 import org.zstack.storage.backup.imagestore.*;
+import org.zstack.storage.encrypt.VolumeSnapshotEncryptionHelper;
 import org.zstack.storage.primary.PrimaryStorageGlobalConfig;
+import org.zstack.utils.Utils;
+import org.zstack.utils.logging.CLogger;
 
 import java.util.List;
 import java.util.Map;
@@ -31,11 +36,15 @@ import java.util.Map;
 import static org.zstack.core.Platform.operr;
 
 public class SharedBlockImageStoreKvmBackend extends SharedBlockKvmBackend {
+    private static final CLogger logger = Utils.getLogger(SharedBlockImageStoreKvmBackend.class);
+
     @Autowired
     private AccountManager acntMgr;
 
     @Autowired
     private SharedBlockGroupPrimaryStorageFactory primaryStorageFactory;
+    @Autowired
+    private VolumeSnapshotEncryptionHelper snapshotEncryptionHelper;
 
     public SharedBlockImageStoreKvmBackend(PrimaryStorageVO self) {
         super(self);
@@ -241,6 +250,42 @@ public class SharedBlockImageStoreKvmBackend extends SharedBlockKvmBackend {
         });
     }
 
+    private void createEncryptedSnapshotImageTemplate(String hostUuid, String snapshotUuid, String sourceInstallPath, String imageUuid,
+                                                      String temporaryTemplatePath,
+                                                      ReturnValueCompletion<String> completion) {
+        String encryptedDek;
+        try {
+            encryptedDek = snapshotEncryptionHelper.prepareTemporarySnapshotImageEncryptedDek(hostUuid, snapshotUuid, imageUuid, true);
+        } catch (OperationFailureException e) {
+            completion.fail(e.getErrorCode());
+            return;
+        }
+        if (StringUtils.isBlank(encryptedDek)) {
+            completion.fail(operr("cannot prepare LUKS encryptedDek for encrypted temporary snapshot image[uuid:%s] from snapshot[uuid:%s] on host[uuid:%s]",
+                    imageUuid, snapshotUuid, hostUuid));
+            return;
+        }
+
+        SharedBlockKvmCommands.CreateTemplateFromVolumeCmd cmd = new SharedBlockKvmCommands.CreateTemplateFromVolumeCmd();
+        cmd.installPath = temporaryTemplatePath;
+        cmd.volumePath = sourceInstallPath;
+        cmd.encryptedDek = encryptedDek;
+
+        new Do(hostUuid).go(SharedBlockKvmCommands.CREATE_TEMPLATE_FROM_VOLUME_PATH, cmd,
+                SharedBlockKvmCommands.CreateTemplateFromVolumeRsp.class,
+                new ReturnValueCompletion<SharedBlockKvmCommands.CreateTemplateFromVolumeRsp>(completion) {
+                    @Override
+                    public void success(SharedBlockKvmCommands.CreateTemplateFromVolumeRsp returnValue) {
+                        completion.success(temporaryTemplatePath);
+                    }
+
+                    @Override
+                    public void fail(ErrorCode errorCode) {
+                        completion.fail(errorCode);
+                    }
+                });
+    }
+
     private void handle(final SelectBackupStorageMsg msg) {
         SelectBackupStorageReply reply = new SelectBackupStorageReply();
         VolumeInventory vol = VolumeInventory.valueOf(dbf.findByUuid(msg.getVolumeUuid(), VolumeVO.class));
@@ -266,6 +311,7 @@ public class SharedBlockImageStoreKvmBackend extends SharedBlockKvmBackend {
             CommitVolumeAsImageRsp cvRsp;
             String volumeSnapshotInstallPath;
             String volumeSnapshotFormat;
+            String encryptedTemplateInstallPath;
             VolumeSnapshotInventory snapshot;
 
             // The flow logic:
@@ -350,6 +396,66 @@ public class SharedBlockImageStoreKvmBackend extends SharedBlockKvmBackend {
                     }
                 });
 
+                flow(new Flow() {
+                    String __name__ = "create-encrypted-template-from-snapshot";
+
+                    @Override
+                    public boolean skip(Map data) {
+                        return !Boolean.TRUE.equals(msg.getEncrypted());
+                    }
+
+                    @Override
+                    public void run(FlowTrigger trigger, Map data) {
+                        String hostUuid = primaryStorageFactory.getConnectedHostsForOperation(getSelfInventory()).get(0).getUuid();
+                        VolumeVO volumeVO = Q.New(VolumeVO.class).eq(VolumeVO_.uuid, msg.getVolumeUuid()).find();
+                        if (volumeVO.isAttached() && volumeVO.getVmInstanceUuid() != null) {
+                            VmInstanceVO instanceVO = Q.New(VmInstanceVO.class).eq(VmInstanceVO_.uuid, volumeVO.getVmInstanceUuid()).find();
+                            if (instanceVO.getHostUuid() != null) {
+                                hostUuid = instanceVO.getHostUuid();
+                            }
+                        }
+                        encryptedTemplateInstallPath = makeTemplateFromVolumeInWorkspacePath(msg.getImageUuid());
+                        createEncryptedSnapshotImageTemplate(hostUuid, snapshot.getUuid(), volumeSnapshotInstallPath, msg.getImageUuid(),
+                                encryptedTemplateInstallPath,
+                                new ReturnValueCompletion<String>(trigger) {
+                                    @Override
+                                    public void success(String returnValue) {
+                                        encryptedTemplateInstallPath = returnValue;
+                                        volumeSnapshotInstallPath = returnValue;
+                                        volumeSnapshotFormat = "qcow2";
+                                        trigger.next();
+                                    }
+
+                                    @Override
+                                    public void fail(ErrorCode errorCode) {
+                                        trigger.fail(errorCode);
+                                    }
+                                });
+                    }
+
+                    @Override
+                    public void rollback(FlowRollback trigger, Map data) {
+                        if (encryptedTemplateInstallPath == null) {
+                            trigger.rollback();
+                            return;
+                        }
+
+                        deleteBits(encryptedTemplateInstallPath, new Completion(trigger) {
+                            @Override
+                            public void success() {
+                                encryptedTemplateInstallPath = null;
+                                trigger.rollback();
+                            }
+
+                            @Override
+                            public void fail(ErrorCode errorCode) {
+                                logger.warn(String.format("failed to delete encrypted temporary template[%s], %s", encryptedTemplateInstallPath, errorCode));
+                                trigger.rollback();
+                            }
+                        });
+                    }
+                });
+
                 flow(new NoRollbackFlow() {
                     String __name__ = "commit-snapshot-to-local-image-registry";
 
@@ -396,6 +502,32 @@ public class SharedBlockImageStoreKvmBackend extends SharedBlockKvmBackend {
                             @Override
                             public void fail(ErrorCode errorCode) {
                                 trigger.fail(errorCode);
+                            }
+                        });
+                    }
+                });
+
+                flow(new NoRollbackFlow() {
+                    String __name__ = "delete-encrypted-temporary-template";
+
+                    @Override
+                    public boolean skip(Map data) {
+                        return encryptedTemplateInstallPath == null;
+                    }
+
+                    @Override
+                    public void run(FlowTrigger trigger, Map data) {
+                        deleteBits(encryptedTemplateInstallPath, new Completion(trigger) {
+                            @Override
+                            public void success() {
+                                encryptedTemplateInstallPath = null;
+                                trigger.next();
+                            }
+
+                            @Override
+                            public void fail(ErrorCode errorCode) {
+                                logger.warn(String.format("failed to delete encrypted temporary template[%s], %s", encryptedTemplateInstallPath, errorCode));
+                                trigger.next();
                             }
                         });
                     }

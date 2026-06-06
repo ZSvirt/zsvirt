@@ -854,7 +854,7 @@ public class SharedBlockKvmBackend extends SharedBlockHypervisorBackend implemen
             public void run(SyncTaskChain chain) {
                 SharedBlockKvmCommands.EncryptVolumeBitsCmd cmd = new SharedBlockKvmCommands.EncryptVolumeBitsCmd();
                 cmd.installPath = msg.getInstallPath();
-                cmd.encryptLuksSecretMaterialFilePath = msg.getEncryptLuksSecretMaterialFilePath();
+                cmd.encryptedDek = msg.getEncryptedDek();
                 cmd.vgUuid = self.getUuid();
                 cmd.hostUuid = msg.getHostUuid();
                 new Do(msg.getHostUuid()).go(SharedBlockKvmCommands.ENCRYPT_VOLUME_BITS_PATH, cmd,
@@ -2020,28 +2020,22 @@ public class SharedBlockKvmBackend extends SharedBlockHypervisorBackend implemen
                 cache.image = msg.getImageInventory();
                 cache.primaryStorageInstallPath = makeCachedImageInstallUrl(msg.getImageInventory());
                 String hostUuid = primaryStorageFactory.getConnectedHostsForOperation(getSelfInventory(), volume).get(0).getUuid();
-                boolean encrypted = Boolean.TRUE.equals(msg.getEncrypted());
-                VolumeLuksAgentSpec luksSpec;
-                try {
-                    luksSpec = snapshotEncryptionHelper.prepareTemporarySnapshotImageSecretMaterial(
-                            hostUuid,
-                            msg.getVolumeSnapshot().getUuid(),
-                            msg.getImageInventory().getUuid(),
-                            msg.getEncrypted());
-                } catch (OperationFailureException e) {
-                    completion.fail(e.getErrorCode());
-                    chain.next();
-                    return;
-                }
-                if (encrypted && (luksSpec == null || !luksSpec.isComplete())) {
-                    completion.fail(operr("cannot prepare LUKS secret for encrypted temporary snapshot image[uuid:%s] from snapshot[uuid:%s] on host[uuid:%s]",
-                            msg.getImageInventory().getUuid(), msg.getVolumeSnapshot().getUuid(), hostUuid));
-                    chain.next();
-                    return;
-                }
-                if (luksSpec != null && luksSpec.isComplete()) {
-                    cache.encryptLuksSecretMaterialFilePath = luksSpec.getEncryptLuksSecretMaterialFilePath();
+                if (Boolean.TRUE.equals(msg.getEncrypted())) {
                     cache.hostUuid = hostUuid;
+                    try {
+                        cache.encryptedDek = snapshotEncryptionHelper.prepareTemporarySnapshotImageEncryptedDek(
+                                hostUuid, msg.getVolumeSnapshot().getUuid(), msg.getImageInventory().getUuid(), true);
+                    } catch (OperationFailureException e) {
+                        completion.fail(e.getErrorCode());
+                        chain.next();
+                        return;
+                    }
+                    if (StringUtils.isBlank(cache.encryptedDek)) {
+                        completion.fail(operr("cannot prepare LUKS encryptedDek for encrypted temporary snapshot image[uuid:%s] from snapshot[uuid:%s] on host[uuid:%s]",
+                                msg.getImageInventory().getUuid(), msg.getVolumeSnapshot().getUuid(), hostUuid));
+                        chain.next();
+                        return;
+                    }
                 }
                 cache.download(new ReturnValueCompletion<ImageCacheInventory>(completion) {
                     @Override
@@ -3176,7 +3170,7 @@ public class SharedBlockKvmBackend extends SharedBlockHypervisorBackend implemen
         String backupStorageInstallPath;
         VolumeInventory volume;
         String volumeResourceInstallPath;
-        String encryptLuksSecretMaterialFilePath;
+        String encryptedDek;
         String hostUuid;
 
         void download(final ReturnValueCompletion<ImageCacheInventory> completion) {
@@ -3261,8 +3255,9 @@ public class SharedBlockKvmBackend extends SharedBlockHypervisorBackend implemen
                                     CreateImageCacheFromVolumeCmd cmd = new CreateImageCacheFromVolumeCmd();
                                     cmd.volumePath = volumeResourceInstallPath;
                                     cmd.installPath = primaryStorageInstallPath;
-                                    if (StringUtils.isNotBlank(encryptLuksSecretMaterialFilePath)) {
-                                        cmd.encryptLuksSecretMaterialFilePath = encryptLuksSecretMaterialFilePath;
+
+                                    if (StringUtils.isNotBlank(encryptedDek)) {
+                                        cmd.encryptedDek = encryptedDek;
                                     }
                                     Do createImageCache = StringUtils.isNotBlank(hostUuid) ? new Do(hostUuid) : new Do(volume);
                                     createImageCache.go(SharedBlockKvmCommands.CREATE_IMAGE_CACHE_FROM_VOLUME_PATH, cmd, CreateImageCacheFromVolumeRsp.class, new ReturnValueCompletion<CreateImageCacheFromVolumeRsp>(trigger) {

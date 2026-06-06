@@ -283,6 +283,7 @@ public class VmMevocoApiInterceptor implements GlobalApiMessageInterceptor {
             throw new ApiMessageInterceptionException(argerr("can not set primaryStorageUuidForRootVolume or " +
                     "primaryStorageUuidForDataVolume or rootVolumeSystemTags or dataVolumeSystemTags when diskAOs is not empty"));
         }
+        validateCloneDiskAOs(msg, vmInstanceVO);
 
         if (!StringUtils.isEmpty(msg.getVmNicParams())) {
             try {
@@ -300,13 +301,6 @@ public class VmMevocoApiInterceptor implements GlobalApiMessageInterceptor {
             new VmInstanceHelper().validateL3Networks(vmNicParams.stream().map(VmNicParam::getL3NetworkUuid).collect(Collectors.toList()));
         }
 
-        if (!CollectionUtils.isEmpty(msg.getDiskAOs())) {
-            boolean hasEncrypted = msg.getDiskAOs().stream().anyMatch(diskAO -> diskAO.getEncrypted() != null);
-            if (hasEncrypted) {
-                throw new ApiMessageInterceptionException(argerr("encrypted field in diskAOs is not allowed for clone vm, it is inherited from the source volume"));
-            }
-        }
-
         validateIpv6GatewaySystemTags(msg.getSystemTags(), vmNicParams);
         validateIpv6PrefixSystemTags(msg.getSystemTags(), vmNicParams);
         new StaticIpOperator().validateStaticIpTagsInApiMessage(msg);
@@ -316,6 +310,31 @@ public class VmMevocoApiInterceptor implements GlobalApiMessageInterceptor {
         }
 
         checkPrimaryStorageCapacity(msg.getNames().size(), vmInstanceVO);
+    }
+
+    private void validateCloneDiskAOs(APICloneVmInstanceMsg msg, VmInstanceVO vmInstanceVO) {
+        if (CollectionUtils.isEmpty(msg.getDiskAOs())) {
+            return;
+        }
+
+        Map<String, Boolean> sourceVolumeEncryptedByUuid = new HashMap<>();
+        vmInstanceVO.getAllVolumes().forEach(volume -> sourceVolumeEncryptedByUuid.put(volume.getUuid(), volume.isEncrypted()));
+
+        for (DiskAO diskAO : msg.getDiskAOs()) {
+            if (StringUtils.isEmpty(diskAO.getSourceUuid()) || !sourceVolumeEncryptedByUuid.containsKey(diskAO.getSourceUuid())) {
+                throw new ApiMessageInterceptionException(argerr(
+                        "diskAO source volume[uuid:%s] is not a volume of source vm[uuid:%s]",
+                        diskAO.getSourceUuid(), msg.getVmInstanceUuid()
+                ));
+            }
+
+            if (Boolean.TRUE.equals(sourceVolumeEncryptedByUuid.get(diskAO.getSourceUuid())) && Boolean.FALSE.equals(diskAO.getEncrypted())) {
+                throw new ApiMessageInterceptionException(argerr(
+                        "can not set encrypted=false for diskAO[sourceUuid:%s], because source volume is encrypted",
+                        diskAO.getSourceUuid()
+                ));
+            }
+        }
     }
 
     private void checkVmInstanceType(String type) {

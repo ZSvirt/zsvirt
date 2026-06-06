@@ -1162,6 +1162,7 @@ public class MevocoVmInstanceBase extends VmInstanceBase {
                             CreateRootVolumeTemplateMessage csmsg = fastCreate ?
                                     new CreateTemporaryRootVolumeTemplateFromVolumeSnapshotMsg() :
                                     new CreateRootVolumeTemplateFromVolumeSnapshotMsg();
+                            DiskAO diskAO = msg.getDiskAOsByVolumeUuid().get(snap.getVolumeUuid());
 
                             csmsg.setName(String.format("for-clone-vm-%s-rootVolume-%s", vivo.getUuid(),
                                     snap.getVolumeUuid()));
@@ -1170,15 +1171,19 @@ public class MevocoVmInstanceBase extends VmInstanceBase {
                             csmsg.setVirtio(VmExtraInfoGetter.New(vivo.getUuid()).isVirtio());
                             csmsg.setGuestOsType(vivo.getGuestOsType());
                             if (csmsg instanceof CreateTemporaryRootVolumeTemplateFromVolumeSnapshotMsg) {
-                                DiskAO diskAO = msg.getDiskAOsByVolumeUuid().get(snap.getVolumeUuid());
                                 ((CreateTemporaryRootVolumeTemplateFromVolumeSnapshotMsg) csmsg)
+                                        .setEncrypted(diskAO == null ? null : diskAO.getEncrypted());
+                            } else {
+                                ((CreateRootVolumeTemplateFromVolumeSnapshotMsg) csmsg)
                                         .setEncrypted(diskAO == null ? null : diskAO.getEncrypted());
                             }
                             cmsg = csmsg;
                         } else {
                             CreateDataVolumeTemplateFromVolumeSnapshotMsg csmsg = new CreateDataVolumeTemplateFromVolumeSnapshotMsg();
+                            DiskAO diskAO = msg.getDiskAOsByVolumeUuid().get(snap.getVolumeUuid());
                             csmsg.setName(String.format("for-clone-vm-%s-volume-%s",
                                     vivo.getUuid(), snap.getVolumeUuid()));
+                            csmsg.setEncrypted(diskAO == null ? null : diskAO.getEncrypted());
                             cmsg = csmsg;
                         }
 

@@ -421,25 +421,11 @@ public class CloneVmInstanceMessageBuilder {
                 requestedDiskAOs.add(diskAO);
             });
             List<DiskAO> diskAOs = buildVmDiskAOsForClone(msg.getVmInstanceUuid(), requestedDiskAOs);
-            inheritSourceVolumeEncryption(msg.getVmInstanceUuid(), diskAOs);
             return diskAOs;
         }
 
         List<DiskAO> diskAOs = buildVmDiskAOsForClone(msg.getVmInstanceUuid(), msg.getDiskAOs());
-        inheritSourceVolumeEncryption(msg.getVmInstanceUuid(), diskAOs);
         return diskAOs;
-    }
-
-    private void inheritSourceVolumeEncryption(String vmUuid, List<DiskAO> diskAOs) {
-        List<Tuple> volumeTuples = Q.New(VolumeVO.class).eq(VolumeVO_.vmInstanceUuid, vmUuid)
-                .in(VolumeVO_.type, Arrays.asList(VolumeType.Root, VolumeType.Data))
-                .select(VolumeVO_.uuid, VolumeVO_.encrypted).listTuple();
-        Map<String, Boolean> encryptedByVolumeUuid = volumeTuples.stream()
-                .collect(Collectors.toMap(t -> t.get(0, String.class), t -> t.get(1, Boolean.class)));
-
-        diskAOs.stream()
-                .filter(diskAO -> encryptedByVolumeUuid.containsKey(diskAO.getSourceUuid()))
-                .forEach(diskAO -> diskAO.setEncrypted(encryptedByVolumeUuid.get(diskAO.getSourceUuid())));
     }
 
     private List<DiskAO> mapTemplateDiskSourceUuidsToCacheVolumes(List<DiskAO> templatedVmDiskAOs, String templatedVmUuid, String templatedCacheVmUuid) {

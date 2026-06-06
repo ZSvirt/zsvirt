@@ -363,3 +363,16 @@ CREATE TABLE IF NOT EXISTS `zstack`.`HostCertificateVO` (
     CONSTRAINT `fkHostCertificateHost` FOREIGN KEY (`hostUuid`) REFERENCES `zstack`.`HostEO` (`uuid`) ON DELETE CASCADE,
     CONSTRAINT `fkHostCertificateCa` FOREIGN KEY (`caUuid`) REFERENCES `zstack`.`PkiCaVO` (`uuid`) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- Key provider / scanner alarm state (persists ACTIVE/INACTIVE across MN restart)
+
+CREATE TABLE IF NOT EXISTS `zstack`.`ScannerAlarmStateVO` (
+    `uuid` varchar(32) NOT NULL UNIQUE,
+    `scannerName` varchar(255) NOT NULL,
+    `alarmType` varchar(255) NOT NULL,
+    `alarmKey` varchar(255) NOT NULL,
+    `state` varchar(32) NOT NULL,
+    `lastUpdateTime` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (`uuid`),
+    UNIQUE KEY `ukScannerAlarmState` (`scannerName`, `alarmType`, `alarmKey`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;

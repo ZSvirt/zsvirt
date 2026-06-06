@@ -483,6 +483,7 @@
         <class>org.zstack.zwatch.migratedb.AuditsVO</class>
         <class>org.zstack.zwatch.migratedb.AlarmRecordsVO</class>
         <class>org.zstack.zwatch.migratedb.EventRecordsVO</class>
+        <class>org.zstack.zwatch.alarm.scanner.ScannerAlarmStateVO</class>
         <class>org.zstack.header.message.ReplayMessageVO</class>
         <class>org.zstack.header.allocator.HostAllocatedCpuVO</class>
         <class>org.zstack.header.vm.VmInstanceNumaNodeVO</class>

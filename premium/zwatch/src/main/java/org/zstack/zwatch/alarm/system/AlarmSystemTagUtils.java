@@ -22,6 +22,12 @@ import static org.zstack.zwatch.namespace.BackupStorageNamespace.BackupStorageDi
 import static org.zstack.zwatch.namespace.ClusterNamespace.ClusterQemuVersionMismatch;
 import static org.zstack.zwatch.namespace.HaNamespace.MigrateVMFailedWithHostMaintain;
 import static org.zstack.zwatch.namespace.HostNamespace.*;
+import static org.zstack.zwatch.namespace.KeyProviderNamespace.KeyProviderCertificateExpiring;
+import static org.zstack.zwatch.namespace.KeyProviderNamespace.KeyProviderCertificateRecovered;
+import static org.zstack.zwatch.namespace.KeyProviderNamespace.KeyProviderDefaultServiceRecovered;
+import static org.zstack.zwatch.namespace.KeyProviderNamespace.KeyProviderDefaultServiceUnavailable;
+import static org.zstack.zwatch.namespace.KeyProviderNamespace.KeyProviderResourceServiceRecovered;
+import static org.zstack.zwatch.namespace.KeyProviderNamespace.KeyProviderResourceServiceUnavailable;
 import static org.zstack.zwatch.namespace.ManagementNodeNamespace.ManagementNodeJoin;
 import static org.zstack.zwatch.namespace.ManagementNodeNamespace.ManagementNodeLeft;
 import static org.zstack.zwatch.namespace.PrimaryStorageNamespace.*;
@@ -173,7 +179,14 @@ public class AlarmSystemTagUtils {
 
             e(VMStateChangedOnHost.getName(), VM.VM_STATE_CHANGED_ON_HOST_NAME),
 
-            e(SchedulerJobGroupExecutedResult.getName(), Scheduler.SCHEDULER_JOB_GROUP_EXECUTED_RESULT_NAME)
+            e(SchedulerJobGroupExecutedResult.getName(), Scheduler.SCHEDULER_JOB_GROUP_EXECUTED_RESULT_NAME),
+
+            e(KeyProviderDefaultServiceUnavailable.getName(), KEY_PROVIDER_DEFAULT_SERVICE_UNAVAILABLE_EVENT_ALARM_NAME),
+            e(KeyProviderDefaultServiceRecovered.getName(), KEY_PROVIDER_DEFAULT_SERVICE_RECOVERED_EVENT_ALARM_NAME),
+            e(KeyProviderCertificateExpiring.getName(), KEY_PROVIDER_CERTIFICATE_EXPIRING_EVENT_ALARM_NAME),
+            e(KeyProviderCertificateRecovered.getName(), KEY_PROVIDER_CERTIFICATE_RECOVERED_EVENT_ALARM_NAME),
+            e(KeyProviderResourceServiceUnavailable.getName(), KEY_PROVIDER_RESOURCE_SERVICE_UNAVAILABLE_EVENT_ALARM_NAME),
+            e(KeyProviderResourceServiceRecovered.getName(), KEY_PROVIDER_RESOURCE_SERVICE_RECOVERED_EVENT_ALARM_NAME)
 
     );
 
@@ -219,7 +232,14 @@ public class AlarmSystemTagUtils {
 
             e(VMStateChangedOnHost.getName(), VM.VM_STATE_CHANGED_ON_HOST_NAME_CN),
 
-            e(SchedulerJobGroupExecutedResult.getName(), Scheduler.SCHEDULER_JOB_GROUP_EXECUTED_RESULT_NAME_CN)
+            e(SchedulerJobGroupExecutedResult.getName(), Scheduler.SCHEDULER_JOB_GROUP_EXECUTED_RESULT_NAME_CN),
+
+            e(KeyProviderDefaultServiceUnavailable.getName(), KEY_PROVIDER_DEFAULT_SERVICE_UNAVAILABLE_EVENT_ALARM_NAME_CN),
+            e(KeyProviderDefaultServiceRecovered.getName(), KEY_PROVIDER_DEFAULT_SERVICE_RECOVERED_EVENT_ALARM_NAME_CN),
+            e(KeyProviderCertificateExpiring.getName(), KEY_PROVIDER_CERTIFICATE_EXPIRING_EVENT_ALARM_NAME_CN),
+            e(KeyProviderCertificateRecovered.getName(), KEY_PROVIDER_CERTIFICATE_RECOVERED_EVENT_ALARM_NAME_CN),
+            e(KeyProviderResourceServiceUnavailable.getName(), KEY_PROVIDER_RESOURCE_SERVICE_UNAVAILABLE_EVENT_ALARM_NAME_CN),
+            e(KeyProviderResourceServiceRecovered.getName(), KEY_PROVIDER_RESOURCE_SERVICE_RECOVERED_EVENT_ALARM_NAME_CN)
     );
 
     public static final Map<String, String> ACTIVE_ALARM_CN_SYSTEM_TAG = map(

@@ -88,6 +88,24 @@
         </zstack:plugin>
     </bean>
 
+    <bean id="CertificateExpiryScanner" class="org.zstack.crypto.keyprovider.CertificateExpiryScanner">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.Component" order="-100"/>
+            <zstack:extension interface="org.zstack.header.managementnode.ManagementNodeChangeListener" />
+            <zstack:extension interface="org.zstack.header.managementnode.ManagementNodeReadyExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="ScannerAlarmStateStore" class="org.zstack.crypto.keyprovider.ScannerAlarmStateStore"/>
+
+    <bean id="KeyProviderServiceAlarmScanner" class="org.zstack.crypto.keyprovider.KeyProviderServiceAlarmScanner">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.Component" order="-100"/>
+            <zstack:extension interface="org.zstack.header.managementnode.ManagementNodeChangeListener" />
+            <zstack:extension interface="org.zstack.header.managementnode.ManagementNodeReadyExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
     <bean id="HostSecretEnvelopeCryptoExtension" class="org.zstack.crypto.envelope.HostSecretEnvelopeCryptoExtension">
         <zstack:plugin>
             <zstack:extension interface="org.zstack.kvm.HostSecretEnvelopeCryptoExtensionPoint" />

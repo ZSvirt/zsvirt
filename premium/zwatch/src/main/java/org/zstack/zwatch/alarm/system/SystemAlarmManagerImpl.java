@@ -58,6 +58,8 @@ public class SystemAlarmManagerImpl implements SystemAlarmManager,
     private HaNamespace haNamespace;
     @Autowired
     private SchedulerNamespace schedulerNamespace;
+    @Autowired
+    private KeyProviderNamespace keyProviderNamespace;
 
     @Override
     public void prepareDbInitialValue() {
@@ -714,6 +716,60 @@ public class SystemAlarmManagerImpl implements SystemAlarmManager,
                         .eventName(HostNamespace.HostProcessPhysicalMemoryUsageAbnormal.getName())
                         .namespace(hostNamespace.getName())
                         .emergencyLevel(EmergencyLevel.Important)
+                        .build();
+                eventBuilder.reset();
+
+                eventBuilder.uuid(KEY_PROVIDER_DEFAULT_SERVICE_UNAVAILABLE_EVENT_ALARM_UUID)
+                        .name(KEY_PROVIDER_DEFAULT_SERVICE_UNAVAILABLE_EVENT_ALARM_NAME)
+                        .nameCN(KEY_PROVIDER_DEFAULT_SERVICE_UNAVAILABLE_EVENT_ALARM_NAME_CN)
+                        .eventName(KeyProviderNamespace.KeyProviderDefaultServiceUnavailable.getName())
+                        .namespace(keyProviderNamespace.getName())
+                        .emergencyLevel(EmergencyLevel.Emergent)
+                        .build();
+                eventBuilder.reset();
+
+                eventBuilder.uuid(KEY_PROVIDER_DEFAULT_SERVICE_RECOVERED_EVENT_ALARM_UUID)
+                        .name(KEY_PROVIDER_DEFAULT_SERVICE_RECOVERED_EVENT_ALARM_NAME)
+                        .nameCN(KEY_PROVIDER_DEFAULT_SERVICE_RECOVERED_EVENT_ALARM_NAME_CN)
+                        .eventName(KeyProviderNamespace.KeyProviderDefaultServiceRecovered.getName())
+                        .namespace(keyProviderNamespace.getName())
+                        .emergencyLevel(EmergencyLevel.Normal)
+                        .build();
+                eventBuilder.reset();
+
+                eventBuilder.uuid(KEY_PROVIDER_CERTIFICATE_EXPIRING_EVENT_ALARM_UUID)
+                        .name(KEY_PROVIDER_CERTIFICATE_EXPIRING_EVENT_ALARM_NAME)
+                        .nameCN(KEY_PROVIDER_CERTIFICATE_EXPIRING_EVENT_ALARM_NAME_CN)
+                        .eventName(KeyProviderNamespace.KeyProviderCertificateExpiring.getName())
+                        .namespace(keyProviderNamespace.getName())
+                        .emergencyLevel(EmergencyLevel.Important)
+                        .build();
+                eventBuilder.reset();
+
+                eventBuilder.uuid(KEY_PROVIDER_CERTIFICATE_RECOVERED_EVENT_ALARM_UUID)
+                        .name(KEY_PROVIDER_CERTIFICATE_RECOVERED_EVENT_ALARM_NAME)
+                        .nameCN(KEY_PROVIDER_CERTIFICATE_RECOVERED_EVENT_ALARM_NAME_CN)
+                        .eventName(KeyProviderNamespace.KeyProviderCertificateRecovered.getName())
+                        .namespace(keyProviderNamespace.getName())
+                        .emergencyLevel(EmergencyLevel.Normal)
+                        .build();
+                eventBuilder.reset();
+
+                eventBuilder.uuid(KEY_PROVIDER_RESOURCE_SERVICE_UNAVAILABLE_EVENT_ALARM_UUID)
+                        .name(KEY_PROVIDER_RESOURCE_SERVICE_UNAVAILABLE_EVENT_ALARM_NAME)
+                        .nameCN(KEY_PROVIDER_RESOURCE_SERVICE_UNAVAILABLE_EVENT_ALARM_NAME_CN)
+                        .eventName(KeyProviderNamespace.KeyProviderResourceServiceUnavailable.getName())
+                        .namespace(keyProviderNamespace.getName())
+                        .emergencyLevel(EmergencyLevel.Emergent)
+                        .build();
+                eventBuilder.reset();
+
+                eventBuilder.uuid(KEY_PROVIDER_RESOURCE_SERVICE_RECOVERED_EVENT_ALARM_UUID)
+                        .name(KEY_PROVIDER_RESOURCE_SERVICE_RECOVERED_EVENT_ALARM_NAME)
+                        .nameCN(KEY_PROVIDER_RESOURCE_SERVICE_RECOVERED_EVENT_ALARM_NAME_CN)
+                        .eventName(KeyProviderNamespace.KeyProviderResourceServiceRecovered.getName())
+                        .namespace(keyProviderNamespace.getName())
+                        .emergencyLevel(EmergencyLevel.Normal)
                         .build();
                 eventBuilder.reset();
 

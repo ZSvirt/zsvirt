@@ -1079,22 +1079,42 @@ public class OvfManagerImpl extends AbstractService implements OvfManager {
                 vmMsg.setResourceUuid(bundle.getVmInstanceUuid());
                 vmMsg.setAccountUuid(bundle.getSession().getAccountUuid());
 
-                String rootImageUuid = bundle.getParams().stream()
+                CreateVmFromOvfImageParam rootImageParam = bundle.getParams().stream()
                         .filter(CreateVmFromOvfImageParam::isImageOfRootVolume)
-                        .map(CreateVmFromOvfImageParam::getUuid)
                         .findAny()
                         .orElseThrow(() -> new OperationFailureException(operr(
                                 "failed to create VM from OVF because the root disk of the VM cannot be found")));
+                String rootImageUuid = rootImageParam.getUuid();
                 vmMsg.setImageUuid(rootImageUuid);
+                if (vmMsg.getRootDisk() != null) {
+                    vmMsg.getRootDisk().setTemplateUuid(rootImageUuid);
+                    if (Boolean.TRUE.equals(bundle.getOvfDiskEncryption())) {
+                        vmMsg.getRootDisk().setEncrypted(true);
+                    }
+                }
 
                 // create OVF VM with data volumes
                 if (bundle.isHasDataVolumes()) {
-                    List<String> dataImageUuidList = bundle.getParams().stream()
-                            .filter(CreateVmFromOvfImageParam::isImageOfDataVolume)
-                            .map(CreateVmFromOvfImageParam::getUuid)
-                            .collect(Collectors.toList());
-                    vmMsg.setDataVolumeTemplateUuids(dataImageUuidList);
-                    vmMsg.setDataVolumeFromTemplateSystemTags(new HashMap<>());
+                    List<CreateVmFromOvfImageParam> dataImageParams = bundle.getParams().stream()
+	                            .filter(CreateVmFromOvfImageParam::isImageOfDataVolume)
+	                            .sorted(Comparator.comparingInt(CreateVmFromOvfImageParam::getIndex))
+	                            .collect(Collectors.toList());
+                    if (Boolean.TRUE.equals(bundle.getOvfDiskEncryption())) {
+                        List<DiskAO> dataVolumeSpecs = new ArrayList<>();
+                        if (vmMsg.getDeprecatedDataVolumeSpecs() != null) {
+                            dataVolumeSpecs.addAll(vmMsg.getDeprecatedDataVolumeSpecs());
+                        }
+                        dataVolumeSpecs.addAll(buildOvfDataDiskTemplateSpecs(dataImageParams, true));
+                        vmMsg.setDeprecatedDataVolumeSpecs(dataVolumeSpecs);
+                        vmMsg.setDataVolumeTemplateUuids(null);
+                        vmMsg.setDataVolumeFromTemplateSystemTags(null);
+                    } else {
+                        List<String> dataImageUuidList = dataImageParams.stream()
+                                .map(CreateVmFromOvfImageParam::getUuid)
+                                .collect(Collectors.toList());
+                        vmMsg.setDataVolumeTemplateUuids(dataImageUuidList);
+                        vmMsg.setDataVolumeFromTemplateSystemTags(new HashMap<>());
+                    }
                 }
 
                 bus.makeTargetServiceIdByResourceUuid(vmMsg, VmInstanceConstant.SERVICE_ID, bundle.getVmInstanceUuid());
@@ -1115,6 +1135,18 @@ public class OvfManagerImpl extends AbstractService implements OvfManager {
             void emitVMCreatingStateEvent() {
                 new OvfImageUploadTracker.OvfTrackCanonicalEvent(
                         STAGE_VM_CREATING, bundle.getVmInstanceUuid(), Collections.emptyList()).fire();
+            }
+
+            private List<DiskAO> buildOvfDataDiskTemplateSpecs(List<CreateVmFromOvfImageParam> dataImageParams, Boolean diskEncryption) {
+                List<DiskAO> templateSpecs = new ArrayList<>();
+                for (CreateVmFromOvfImageParam param : dataImageParams) {
+                    DiskAO disk = DiskAO.nonRootDisk();
+                    disk.setTemplateUuid(param.getUuid());
+                    disk.setName(param.getFileName());
+                    disk.setEncrypted(diskEncryption);
+                    templateSpecs.add(disk);
+                }
+                return templateSpecs;
             }
         }).then(new NoRollbackFlow() {
             String __name__ = "delete-image-on-success";

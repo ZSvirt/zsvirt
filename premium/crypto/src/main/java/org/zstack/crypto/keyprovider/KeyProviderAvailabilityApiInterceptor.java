@@ -344,11 +344,15 @@ public class KeyProviderAvailabilityApiInterceptor implements GlobalApiMessageIn
 
     private void collectProviders(APICreateVmInstanceFromOvfMsg msg, Set<String> providerUuids) {
         CreateVmInstanceFromOvfMsg.resolveCreateVmMsg(msg);
+        CreateVmInstanceFromOvfMsg.resolveOvfDiskEncryption(msg);
         Boolean vmEncryption = msg.getVmEncryption();
         if (vmEncryption == null && msg.getCreateVmMsg() != null) {
             vmEncryption = msg.getCreateVmMsg().getVmEncryption();
         }
         collectVmEncryptionProvider(vmEncryption, providerUuids);
+        if (Boolean.TRUE.equals(msg.getOvfDiskEncryption())) {
+            addDefaultProvider(providerUuids);
+        }
     }
 
     private void collectProviders(APIChangeVolumeEncryptionMsg msg, Set<String> providerUuids) {

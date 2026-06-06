@@ -103,6 +103,7 @@ public class OvfInterceptor implements ApiMessageInterceptor {
         }
 
         CreateVmInstanceFromOvfMsg.resolveCreateVmMsg(msg);
+        CreateVmInstanceFromOvfMsg.resolveOvfDiskEncryption(msg);
 
         new VmInstanceHelper().validate((NewVmInstanceMessage) msg.getCreateVmMsg());
 

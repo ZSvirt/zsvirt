@@ -2,7 +2,9 @@ package org.zstack.ovf.message;
 
 import org.zstack.header.message.NeedReplyMessage;
 import org.zstack.header.apimediator.ApiMessageInterceptionException;
+import org.zstack.header.errorcode.OperationFailureException;
 import org.zstack.header.vm.APICreateVmInstanceMsg;
+import org.zstack.ovf.OvfHelper;
 import org.zstack.ovf.api.APICreateVmInstanceFromOvfMsg;
 import org.zstack.ovf.datatype.CreateVmFromOvfImageParam;
 import org.zstack.utils.gson.JSONObjectUtil;
@@ -20,6 +22,7 @@ import static org.zstack.core.Platform.argerr;
 public class CreateVmInstanceFromOvfMsg extends NeedReplyMessage {
     private String xmlBase64;
     private List<CreateVmFromOvfImageParam> imageInfos = Collections.emptyList();
+    private Boolean ovfDiskEncryption;
     private String backupStorageUuid;
     private APICreateVmInstanceMsg createVmMsg;
 
@@ -52,6 +55,14 @@ public class CreateVmInstanceFromOvfMsg extends NeedReplyMessage {
 
     public void setCreateVmMsg(APICreateVmInstanceMsg createVmMsg) {
         this.createVmMsg = createVmMsg;
+    }
+
+    public Boolean getOvfDiskEncryption() {
+        return ovfDiskEncryption;
+    }
+
+    public void setOvfDiskEncryption(Boolean ovfDiskEncryption) {
+        this.ovfDiskEncryption = ovfDiskEncryption;
     }
 
     public boolean isDeleteImageAfterSuccess() {
@@ -96,10 +107,12 @@ public class CreateVmInstanceFromOvfMsg extends NeedReplyMessage {
 
     public static CreateVmInstanceFromOvfMsg fromApiMessage(APICreateVmInstanceFromOvfMsg apiMessage) {
         resolveCreateVmMsg(apiMessage);
+        resolveOvfDiskEncryption(apiMessage);
 
         CreateVmInstanceFromOvfMsg message = new CreateVmInstanceFromOvfMsg();
         message.setResourceUuid(apiMessage.getResourceUuid());
         message.setCreateVmMsg(apiMessage.getCreateVmMsg());
+        message.setOvfDiskEncryption(apiMessage.getOvfDiskEncryption());
         message.setBackupStorageUuid(apiMessage.getBackupStorageUuid());
         message.setXmlBase64(apiMessage.getXmlBase64());
         message.setImageInfos(apiMessage.getImageInfos());
@@ -130,6 +143,16 @@ public class CreateVmInstanceFromOvfMsg extends NeedReplyMessage {
         }
         if (apiMessage.getVmEncryption() != null) {
             apiMessage.getCreateVmMsg().setVmEncryption(apiMessage.getVmEncryption());
+        }
+    }
+
+    public static void resolveOvfDiskEncryption(APICreateVmInstanceFromOvfMsg apiMessage) {
+        if (apiMessage.getOvfDiskEncryption() == null) {
+            try {
+                apiMessage.setOvfDiskEncryption(OvfHelper.parseCreateVmFromOvfDiskEncryption(apiMessage.getJsonCreateVmParam()));
+            } catch (OperationFailureException e) {
+                throw new ApiMessageInterceptionException(e.getErrorCode());
+            }
         }
     }
 }

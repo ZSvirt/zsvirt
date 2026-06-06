@@ -463,7 +463,8 @@ public class CephPrimaryStorageBase extends PrimaryStorageBase {
 
     public static class KVMHostEncryptInPlaceCmd implements Serializable {
         public String psUuid;
-        public String secFilePath;
+        @NoLogging
+        public String encryptedDek;
         public String installPath;
     }
 
@@ -2236,7 +2237,7 @@ public class CephPrimaryStorageBase extends PrimaryStorageBase {
                 String allocatedInstall;
                 ImageCacheVO cvo = new ImageCacheVO();
                 String encryptHostUuid;
-                VolumeLuksAgentSpec imageLuksSpec;
+                String imageEncryptedDek;
 
                 @Override
                 public void setup() {
@@ -2296,11 +2297,16 @@ public class CephPrimaryStorageBase extends PrimaryStorageBase {
                         @Override
                         public void run(FlowTrigger trigger, Map data) {
                             encryptHostUuid = findConnectedHostForCephLuks();
-                            imageLuksSpec = snapshotEncryptionHelper.prepareTemporarySnapshotImageSecretMaterial(
+                            imageEncryptedDek = snapshotEncryptionHelper.prepareTemporarySnapshotImageEncryptedDek(
                                     encryptHostUuid,
                                     snapshot.getUuid(),
                                     image.getInventory().getUuid(),
                                     encrypted);
+                            if (StringUtils.isBlank(imageEncryptedDek)) {
+                                trigger.fail(operr("cannot prepare LUKS encryptedDek for encrypted temporary snapshot image[uuid:%s] from snapshot[uuid:%s] on host[uuid:%s]",
+                                        image.getInventory().getUuid(), snapshot.getUuid(), encryptHostUuid));
+                                return;
+                            }
                             trigger.next();
                         }
 
@@ -2329,12 +2335,13 @@ public class CephPrimaryStorageBase extends PrimaryStorageBase {
 
                         private void createFromVolumeSnapshot(FlowTrigger trigger) {
                             deleteOnRollback = true;
-                            if (imageLuksSpec != null && imageLuksSpec.isComplete()) {
+                            cachePath = dstPath;
+                            if (StringUtils.isNotBlank(imageEncryptedDek)) {
                                 KVMHostLuksCloneCmd kcmd = new KVMHostLuksCloneCmd();
                                 kcmd.psUuid = self.getUuid();
                                 kcmd.srcPath = snapshot.getPrimaryStorageInstallPath();
                                 kcmd.dstPath = dstPath;
-                                kcmd.encryptedDek = volumeEncryptedSecretHelper.prepareLuksEnvelopeDekOnHost(encryptHostUuid, image.getInventory().getUuid());
+                                kcmd.encryptedDek = imageEncryptedDek;
                                 httpCallToKvmHost(encryptHostUuid,
                                         KVM_HOST_LUKS_CLONE_PATH, kcmd, KVMHostLuksRsp.class,
                                         new ReturnValueCompletion<KVMHostLuksRsp>(trigger) {
@@ -3083,6 +3090,7 @@ public class CephPrimaryStorageBase extends PrimaryStorageBase {
                         cache.image = new ImageSpec();
                         cache.image.setInventory(msg.getImageInventory());
                         cache.snapshot = snapshot;
+                        cache.encrypted = snapshot != null && Boolean.TRUE.equals(snapshot.getEncrypted());
                         cache.download(new ReturnValueCompletion<ImageCacheVO>(trigger) {
                             @Override
                             public void success(ImageCacheVO cache) {
@@ -3479,7 +3487,7 @@ public class CephPrimaryStorageBase extends PrimaryStorageBase {
         KVMHostEncryptInPlaceCmd kcmd = new KVMHostEncryptInPlaceCmd();
         kcmd.psUuid = self.getUuid();
         kcmd.installPath = msg.getInstallPath();
-        kcmd.secFilePath = msg.getEncryptLuksSecretMaterialFilePath();
+        kcmd.encryptedDek = msg.getEncryptedDek();
         httpCallToKvmHost(msg.getHostUuid(),
                 KVM_HOST_LUKS_ENCRYPT_IN_PLACE_PATH, kcmd, KVMHostLuksRsp.class,
                 new ReturnValueCompletion<KVMHostLuksRsp>(msg) {
@@ -5728,14 +5736,6 @@ public class CephPrimaryStorageBase extends PrimaryStorageBase {
                     public void run(final FlowTrigger trigger, Map data) {
                         if (Boolean.TRUE.equals(msg.getVolume().getEncrypted())) {
                             String hostUuid = findConnectedHostForCephLuks();
-                            String secretPath = volumeEncryptedSecretHelper.prepareLuksSecretMaterialFileOnHost(
-                                    hostUuid, msg.getVolume().getUuid());
-                            if (StringUtils.isBlank(secretPath)) {
-                                trigger.fail(operr("cannot prepare LUKS secret for encrypted volume[uuid:%s] reimage on host[uuid:%s]",
-                                        msg.getVolume().getUuid(), hostUuid));
-                                return;
-                            }
-
                             KVMHostLuksCloneCmd kcmd = new KVMHostLuksCloneCmd();
                             kcmd.psUuid = self.getUuid();
                             kcmd.srcPath = installUrl;

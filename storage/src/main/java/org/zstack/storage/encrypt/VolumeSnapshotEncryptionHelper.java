@@ -14,7 +14,6 @@ import org.zstack.header.keyprovider.EncryptedResourceKeyManager;
 import org.zstack.header.storage.snapshot.VolumeSnapshotInventory;
 import org.zstack.header.storage.snapshot.VolumeSnapshotVO;
 import org.zstack.header.storage.snapshot.VolumeSnapshotVO_;
-import org.zstack.header.volume.VolumeLuksAgentSpec;
 import org.zstack.header.volume.VolumeVO;
 
 import static org.zstack.core.Platform.operr;
@@ -105,6 +104,13 @@ public class VolumeSnapshotEncryptionHelper {
             return;
         }
 
+        if (keyBackend.checkTemporarySnapshotImageKeyProviderAttached(volume.getRootImageUuid())) {
+            if (!keyBackend.checkVolumeKeyProviderAttached(volume.getUuid())) {
+                keyBackend.copyTemporarySnapshotImageKeyToVolume(volume.getRootImageUuid(), volume.getUuid());
+            }
+            return;
+        }
+
         if (imageUrl.startsWith("volume://")) {
             String srcVolumeUuid = imageUrl.substring("volume://".length());
             if (!keyBackend.checkVolumeKeyProviderAttached(volume.getUuid())) {
@@ -117,13 +123,6 @@ public class VolumeSnapshotEncryptionHelper {
 
         if (!imageUrl.startsWith(ImageConstant.IMAGE_FROM_SNAPSHOT_SCHEMA)
                 && !imageUrl.startsWith(ImageConstant.SNAPSHOT_REUSE_IMAGE_SCHEMA)) {
-            return;
-        }
-
-        if (keyBackend.checkTemporarySnapshotImageKeyProviderAttached(volume.getRootImageUuid())) {
-            if (!keyBackend.checkVolumeKeyProviderAttached(volume.getUuid())) {
-                keyBackend.copyTemporarySnapshotImageKeyToVolume(volume.getRootImageUuid(), volume.getUuid());
-            }
             return;
         }
 
@@ -185,10 +184,10 @@ public class VolumeSnapshotEncryptionHelper {
         return resultRef[0];
     }
 
-    public VolumeLuksAgentSpec prepareTemporarySnapshotImageSecretMaterial(String hostUuid,
-                                                                           String snapshotUuid,
-                                                                           String imageUuid,
-                                                                           Boolean encrypted) {
+    public String prepareTemporarySnapshotImageEncryptedDek(String hostUuid,
+                                                            String snapshotUuid,
+                                                            String imageUuid,
+                                                            Boolean encrypted) {
         if (StringUtils.isBlank(hostUuid) || StringUtils.isBlank(snapshotUuid) || StringUtils.isBlank(imageUuid)
                 || !Boolean.TRUE.equals(encrypted)) {
             return null;
@@ -206,10 +205,8 @@ public class VolumeSnapshotEncryptionHelper {
             keyResult = createTemporarySnapshotImageKey(imageUuid);
         }
 
-        VolumeLuksAgentSpec spec = new VolumeLuksAgentSpec();
-        spec.setEncryptLuksSecretMaterialFilePath(
-                secretHelper.ensureLuksSecretFileOnHost(hostUuid, imageUuid, keyResult.getDekBase64()));
-        return spec;
+        return secretHelper.prepareLuksEnvelopeDekOnHost(
+                hostUuid, imageUuid, keyResult.getDekBase64());
     }
 
     private EncryptedResourceKeyManager.ResourceKeyResult getTemporarySnapshotImageKey(String imageUuid) {

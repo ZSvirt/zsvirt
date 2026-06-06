@@ -1735,6 +1735,9 @@ public class VolumeSnapshotTreeBase {
         paramIn.setPrimaryStorageUuid(currentRoot.getPrimaryStorageUuid());
         paramIn.setSnapshot(currentLeaf.getInventory());
         paramIn.setImage(ImageInventory.valueOf(dbf.findByUuid(msg.getImageUuid(), ImageVO.class)));
+        if (msg.getEncrypted() != null) {
+            paramIn.getSnapshot().setEncrypted(msg.getEncrypted());
+        }
         WorkflowTemplate workflowTemplate = ext.createTemplateFromVolumeSnapshot(paramIn);
 
         ParamOut paramOut = new ParamOut();

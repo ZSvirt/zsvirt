@@ -706,6 +706,10 @@ public class VolumeManagerImpl extends AbstractService implements VolumeManager,
             return false;
         }
 
+        if (snapshotEncryptionHelper.hasTemporarySnapshotImageKey(imageUuid)) {
+            return true;
+        }
+
         String imageUrl = Q.New(ImageVO.class)
                 .eq(ImageVO_.uuid, imageUuid)
                 .select(ImageVO_.url)

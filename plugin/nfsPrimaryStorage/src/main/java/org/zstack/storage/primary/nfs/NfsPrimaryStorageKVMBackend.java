@@ -1451,20 +1451,18 @@ public class NfsPrimaryStorageKVMBackend implements NfsPrimaryStorageBackend,
                                                    ReturnValueCompletion<BitsInfo> completion) {
         final String installPath = NfsPrimaryStorageKvmHelper.makeCachedImageInstallUrl(primaryStorage, image);
         HostInventory host = nfsFactory.getConnectedHostForOperation(primaryStorage).get(0);
-        VolumeLuksAgentSpec volumeLuksAgentSpec = snapshotEncryptionHelper.prepareTemporarySnapshotImageSecretMaterial(
-                host.getUuid(), snapshotUuid, image.getUuid(), encrypted);
-        doCreateTemplateFromVolume(installPath, primaryStorage, volumeResource, image, volumeLuksAgentSpec, host, completion);
+        doCreateTemplateFromVolume(installPath, primaryStorage, volumeResource, image, snapshotUuid, encrypted, host, completion);
     }
 
     @Override
     public void createTemplateFromVolume(final PrimaryStorageInventory primaryStorage, final VolumeInventory volume, final ImageInventory image, final ReturnValueCompletion<BitsInfo> completion) {
         final String installPath = NfsPrimaryStorageKvmHelper.makeTemplateFromVolumeInWorkspacePath(primaryStorage, image.getUuid());
-        doCreateTemplateFromVolume(installPath, primaryStorage, volume.getInstallPath(), image, null, null, completion);
+        doCreateTemplateFromVolume(installPath, primaryStorage, volume.getInstallPath(), image, null, null, null, completion);
     }
 
     private void doCreateTemplateFromVolume(final String installPath, final PrimaryStorageInventory primaryStorage,
                                             final String volumeResourceInstallPath, final ImageInventory image,
-                                            VolumeLuksAgentSpec volumeLuksAgentSpec, HostInventory selectedHost,
+                                            String snapshotUuid, Boolean encrypted, HostInventory selectedHost,
                                             final ReturnValueCompletion<BitsInfo> completion) {
         final HostInventory destHost = selectedHost != null ? selectedHost :
                 nfsFactory.getConnectedHostForOperation(primaryStorage).get(0);
@@ -1473,8 +1471,28 @@ public class NfsPrimaryStorageKVMBackend implements NfsPrimaryStorageBackend,
         cmd.setInstallPath(installPath);
         cmd.setVolumePath(volumeResourceInstallPath);
         cmd.setUuid(primaryStorage.getUuid());
-        if (volumeLuksAgentSpec != null && volumeLuksAgentSpec.isComplete()) {
-            cmd.setEncryptLuksSecretMaterialFilePath(volumeLuksAgentSpec.getEncryptLuksSecretMaterialFilePath());
+
+        if (Boolean.TRUE.equals(encrypted)) {
+            if (StringUtils.isBlank(snapshotUuid)) {
+                completion.fail(operr("cannot prepare LUKS encryptedDek for encrypted temporary snapshot image[uuid:%s]: volume snapshot uuid is empty",
+                        image.getUuid()));
+                return;
+            }
+
+            String encryptedDek;
+            try {
+                encryptedDek = snapshotEncryptionHelper.prepareTemporarySnapshotImageEncryptedDek(
+                        destHost.getUuid(), snapshotUuid, image.getUuid(), encrypted);
+            } catch (OperationFailureException e) {
+                completion.fail(e.getErrorCode());
+                return;
+            }
+            if (StringUtils.isBlank(encryptedDek)) {
+                completion.fail(operr("cannot prepare LUKS encryptedDek for encrypted temporary snapshot image[uuid:%s] from snapshot[uuid:%s] on host[uuid:%s]",
+                        image.getUuid(), snapshotUuid, destHost.getUuid()));
+                return;
+            }
+            cmd.setEncryptedDek(encryptedDek);
         }
 
         KVMHostAsyncHttpCallMsg msg = new KVMHostAsyncHttpCallMsg();
@@ -2339,7 +2357,7 @@ public class NfsPrimaryStorageKVMBackend implements NfsPrimaryStorageBackend,
         EncryptVolumeBitsCmd cmd = new EncryptVolumeBitsCmd();
         cmd.setUuid(msg.getPrimaryStorageUuid());
         cmd.installPath = msg.getInstallPath();
-        cmd.encryptLuksSecretMaterialFilePath = msg.getEncryptLuksSecretMaterialFilePath();
+        cmd.encryptedDek = msg.getEncryptedDek();
 
         KVMHostAsyncHttpCallMsg hmsg = new KVMHostAsyncHttpCallMsg();
         hmsg.setCommand(cmd);

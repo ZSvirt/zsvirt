@@ -1,5 +1,6 @@
 package org.zstack.header.storage.primary;
 
+import org.zstack.header.log.NoLogging;
 import org.zstack.header.message.NeedReplyMessage;
 
 /**
@@ -8,15 +9,16 @@ import org.zstack.header.message.NeedReplyMessage;
  * volume is marked encrypted: the agent converts the plain qcow2/raw at {@link #installPath}
  * into a LUKS-encrypted qcow2 (overwriting in place).
  *
- * The DEK is staged on the host out-of-band (caller stages the secret material file via
- * SecretHostEnsureLuksSecretFileMsg and passes the file path here).
+ * The DEK is passed as a host-enveloped encryptedDek. The kvmagent unwraps it and
+ * creates any single-use secret material file locally as needed.
  */
 public class EncryptVolumeBitsOnPrimaryStorageMsg extends NeedReplyMessage implements PrimaryStorageMessage {
     private String primaryStorageUuid;
     private String hostUuid;
     private String volumeUuid;
     private String installPath;
-    private String encryptLuksSecretMaterialFilePath;
+    @NoLogging
+    private String encryptedDek;
 
     @Override
     public String getPrimaryStorageUuid() {
@@ -51,11 +53,11 @@ public class EncryptVolumeBitsOnPrimaryStorageMsg extends NeedReplyMessage imple
         this.installPath = installPath;
     }
 
-    public String getEncryptLuksSecretMaterialFilePath() {
-        return encryptLuksSecretMaterialFilePath;
+    public String getEncryptedDek() {
+        return encryptedDek;
     }
 
-    public void setEncryptLuksSecretMaterialFilePath(String encryptLuksSecretMaterialFilePath) {
-        this.encryptLuksSecretMaterialFilePath = encryptLuksSecretMaterialFilePath;
+    public void setEncryptedDek(String encryptedDek) {
+        this.encryptedDek = encryptedDek;
     }
 }

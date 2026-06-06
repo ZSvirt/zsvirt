@@ -151,25 +151,11 @@ public class VolumeEncryptedSecretHelper {
         return ensureLuksSecretFileOnHost(hostUuid, volumeUuid, dekBase64);
     }
 
-    public String prepareLuksEnvelopeDekOnHost(String hostUuid, String volumeUuid) {
-        if (StringUtils.isBlank(hostUuid) || StringUtils.isBlank(volumeUuid)) {
+    public String prepareLuksEnvelopeDekOnHost(String hostUuid, String resourceUuid, String dekBase64) {
+        if (StringUtils.isBlank(hostUuid) || StringUtils.isBlank(resourceUuid) ||
+                StringUtils.isBlank(dekBase64)) {
             throw new OperationFailureException(operr(
-                    "prepare LUKS envelope DEK requires non-blank hostUuid and volumeUuid"));
-        }
-
-        String kpUuid = volumeEncryptedResourceKeyBackend.findKeyProviderUuidByVolume(volumeUuid);
-        if (StringUtils.isBlank(kpUuid)) {
-            throw new OperationFailureException(operr(
-                    "volume[uuid:%s] requires LUKS secret material but has no key provider binding",
-                    volumeUuid));
-        }
-
-        EncryptedResourceKeyManager.ResourceKeyResult keyResult = materializeDek(volumeUuid, kpUuid);
-        String dekBase64 = keyResult.getDekBase64();
-        if (StringUtils.isBlank(dekBase64)) {
-            throw new OperationFailureException(operr(
-                    "encrypted volume[uuid:%s]: key manager returned empty DEK for LUKS envelope",
-                    volumeUuid));
+                    "prepare LUKS envelope DEK requires non-blank hostUuid, resourceUuid and dekBase64"));
         }
 
         HostKeyIdentityVO identity = HostKeyIdentityHelper.getHostKeyIdentity(dbf, hostUuid);
@@ -234,6 +220,30 @@ public class VolumeEncryptedSecretHelper {
                 }
             }
         }
+    }
+
+    public String prepareLuksEnvelopeDekOnHost(String hostUuid, String volumeUuid) {
+        if (StringUtils.isBlank(hostUuid) || StringUtils.isBlank(volumeUuid)) {
+            throw new OperationFailureException(operr(
+                    "prepare LUKS envelope DEK requires non-blank hostUuid and volumeUuid"));
+        }
+
+        String kpUuid = volumeEncryptedResourceKeyBackend.findKeyProviderUuidByVolume(volumeUuid);
+        if (StringUtils.isBlank(kpUuid)) {
+            throw new OperationFailureException(operr(
+                    "volume[uuid:%s] requires LUKS secret material but has no key provider binding",
+                    volumeUuid));
+        }
+
+        EncryptedResourceKeyManager.ResourceKeyResult keyResult = materializeDek(volumeUuid, kpUuid);
+        String dekBase64 = keyResult.getDekBase64();
+        if (StringUtils.isBlank(dekBase64)) {
+            throw new OperationFailureException(operr(
+                    "encrypted volume[uuid:%s]: key manager returned empty DEK for LUKS envelope",
+                    volumeUuid));
+        }
+
+        return prepareLuksEnvelopeDekOnHost(hostUuid, volumeUuid, dekBase64);
     }
 
     /**

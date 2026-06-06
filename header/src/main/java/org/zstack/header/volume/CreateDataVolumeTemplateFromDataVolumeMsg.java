@@ -6,6 +6,7 @@ public class CreateDataVolumeTemplateFromDataVolumeMsg extends NeedReplyMessage 
     private String volumeUuid;
     private String backupStorageUuid;
     private String imageUuid;
+    private Boolean encrypted;
     private boolean queuedInVolume = true;
 
     public boolean isQueuedInVolume() {
@@ -39,5 +40,13 @@ public class CreateDataVolumeTemplateFromDataVolumeMsg extends NeedReplyMessage 
 
     public void setBackupStorageUuid(String backupStorageUuid) {
         this.backupStorageUuid = backupStorageUuid;
+    }
+
+    public Boolean getEncrypted() {
+        return encrypted;
+    }
+
+    public void setEncrypted(Boolean encrypted) {
+        this.encrypted = encrypted;
     }
 }

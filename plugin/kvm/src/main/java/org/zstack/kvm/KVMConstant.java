@@ -55,7 +55,7 @@ public interface KVMConstant {
     String KVM_VM_ONLINE_INCREASE_MEMORY = "/vm/increase/mem";
     String KVM_VM_SYNC_PATH = "/vm/vmsync";
     String KVM_VOLUME_SYNC_PATH = "/vm/volumesync";
-    String KVM_GET_ACTIVE_VOLUME_SIZE_PATH = "/vm/volume/active/size";
+    String KVM_GET_ACTIVE_VOLUME_SIZE_PATH = "/vm/getactivevolumesize";
     String KVM_VOLUME_RESOLVE_LIBVIRT_SECRET_UUID_PATH = "/vm/volume/resolveLibvirtSecretUuid";
     String KVM_ATTACH_VOLUME = "/vm/attachdatavolume";
     String KVM_DETACH_VOLUME = "/vm/detachdatavolume";

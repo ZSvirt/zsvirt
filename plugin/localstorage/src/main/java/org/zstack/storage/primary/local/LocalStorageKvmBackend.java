@@ -288,7 +288,8 @@ public class LocalStorageKvmBackend extends LocalStorageHypervisorBackend {
 
     public static class EncryptVolumeBitsCmd extends AgentCommand {
         public String installPath;
-        public String encryptLuksSecretMaterialFilePath;
+        @NoLogging
+        public String encryptedDek;
     }
 
     public static class EncryptVolumeBitsRsp extends AgentResponse {
@@ -470,7 +471,8 @@ public class LocalStorageKvmBackend extends LocalStorageHypervisorBackend {
     public static class CreateTemplateFromVolumeCmd extends AgentCommand implements HasThreadContext{
         private String installPath;
         private String volumePath;
-        private String encryptLuksSecretMaterialFilePath;
+        @NoLogging
+        private String encryptedDek;
 
         public String getInstallPath() {
             return installPath;
@@ -488,12 +490,12 @@ public class LocalStorageKvmBackend extends LocalStorageHypervisorBackend {
             this.volumePath = rootVolumePath;
         }
 
-        public String getEncryptLuksSecretMaterialFilePath() {
-            return encryptLuksSecretMaterialFilePath;
+        public String getEncryptedDek() {
+            return encryptedDek;
         }
 
-        public void setEncryptLuksSecretMaterialFilePath(String encryptLuksSecretMaterialFilePath) {
-            this.encryptLuksSecretMaterialFilePath = encryptLuksSecretMaterialFilePath;
+        public void setEncryptedDek(String encryptedDek) {
+            this.encryptedDek = encryptedDek;
         }
     }
 
@@ -1509,7 +1511,7 @@ public class LocalStorageKvmBackend extends LocalStorageHypervisorBackend {
         String hostUuid;
         String primaryStorageInstallPath;
         String backupStorageInstallPath;
-        String encryptLuksSecretMaterialFilePath;
+        String encryptedDek;
 
         void download(final ReturnValueCompletion<ImageCacheInventory> completion) {
             DebugUtils.Assert(image != null, "image cannot be null");
@@ -1602,8 +1604,9 @@ public class LocalStorageKvmBackend extends LocalStorageHypervisorBackend {
                                     CreateTemplateFromVolumeCmd cmd = new CreateTemplateFromVolumeCmd();
                                     cmd.setInstallPath(primaryStorageInstallPath);
                                     cmd.setVolumePath(volumeResourceInstallPath);
-                                    if (StringUtils.isNotBlank(encryptLuksSecretMaterialFilePath)) {
-                                        cmd.setEncryptLuksSecretMaterialFilePath(encryptLuksSecretMaterialFilePath);
+
+                                    if (StringUtils.isNotBlank(encryptedDek)) {
+                                        cmd.setEncryptedDek(encryptedDek);
                                     }
 
                                     httpCall(CREATE_TEMPLATE_FROM_VOLUME, hostUuid, cmd, false,
@@ -3562,13 +3565,19 @@ public class LocalStorageKvmBackend extends LocalStorageHypervisorBackend {
         cache.hostUuid = ref.getHostUuid();
         cache.image = msg.getImageInventory();
         cache.volumeResourceInstallPath = msg.getVolumeSnapshot().getPrimaryStorageInstallPath();
-        VolumeLuksAgentSpec luksSpec = snapshotEncryptionHelper.prepareTemporarySnapshotImageSecretMaterial(
-                ref.getHostUuid(),
-                msg.getVolumeSnapshot().getUuid(),
-                msg.getImageInventory().getUuid(),
-                msg.getEncrypted());
-        if (luksSpec != null && luksSpec.isComplete()) {
-            cache.encryptLuksSecretMaterialFilePath = luksSpec.getEncryptLuksSecretMaterialFilePath();
+        if (Boolean.TRUE.equals(msg.getEncrypted())) {
+            try {
+                cache.encryptedDek = snapshotEncryptionHelper.prepareTemporarySnapshotImageEncryptedDek(
+                        ref.getHostUuid(), msg.getVolumeSnapshot().getUuid(), msg.getImageInventory().getUuid(), true);
+            } catch (OperationFailureException e) {
+                completion.fail(e.getErrorCode());
+                return;
+            }
+            if (StringUtils.isBlank(cache.encryptedDek)) {
+                completion.fail(operr("cannot prepare LUKS encryptedDek for encrypted temporary snapshot image[uuid:%s] from snapshot[uuid:%s] on host[uuid:%s]",
+                        msg.getImageInventory().getUuid(), msg.getVolumeSnapshot().getUuid(), ref.getHostUuid()));
+                return;
+            }
         }
         cache.download(new ReturnValueCompletion<ImageCacheInventory>(completion) {
             @Override
@@ -4167,7 +4176,7 @@ public class LocalStorageKvmBackend extends LocalStorageHypervisorBackend {
     void handle(EncryptVolumeBitsOnPrimaryStorageMsg msg, ReturnValueCompletion<EncryptVolumeBitsOnPrimaryStorageReply> completion) {
         EncryptVolumeBitsCmd cmd = new EncryptVolumeBitsCmd();
         cmd.installPath = msg.getInstallPath();
-        cmd.encryptLuksSecretMaterialFilePath = msg.getEncryptLuksSecretMaterialFilePath();
+        cmd.encryptedDek = msg.getEncryptedDek();
 
         httpCall(ENCRYPT_VOLUME_BITS_PATH, msg.getHostUuid(), cmd, EncryptVolumeBitsRsp.class, new ReturnValueCompletion<EncryptVolumeBitsRsp>(completion) {
             @Override

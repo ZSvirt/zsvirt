@@ -148,7 +148,8 @@ public class NfsPrimaryStorageKVMBackendCommands {
     public static class CreateTemplateFromVolumeCmd extends NfsPrimaryStorageAgentCommand implements HasThreadContext{
         private String installPath;
         private String rootVolumePath;
-        private String encryptLuksSecretMaterialFilePath;
+        @NoLogging
+        private String encryptedDek;
 
         public String getInstallPath() {
             return installPath;
@@ -163,11 +164,11 @@ public class NfsPrimaryStorageKVMBackendCommands {
         public void setVolumePath(String rootVolumePath) {
             this.rootVolumePath = rootVolumePath;
         }
-        public String getEncryptLuksSecretMaterialFilePath() {
-            return encryptLuksSecretMaterialFilePath;
+        public String getEncryptedDek() {
+            return encryptedDek;
         }
-        public void setEncryptLuksSecretMaterialFilePath(String encryptLuksSecretMaterialFilePath) {
-            this.encryptLuksSecretMaterialFilePath = encryptLuksSecretMaterialFilePath;
+        public void setEncryptedDek(String encryptedDek) {
+            this.encryptedDek = encryptedDek;
         }
     }
     public static class CreateTemplateFromVolumeRsp extends NfsPrimaryStorageAgentResponse {
@@ -529,7 +530,8 @@ public class NfsPrimaryStorageKVMBackendCommands {
 
     public static class EncryptVolumeBitsCmd extends NfsPrimaryStorageAgentCommand {
         public String installPath;
-        public String encryptLuksSecretMaterialFilePath;
+        @NoLogging
+        public String encryptedDek;
     }
 
     public static class EncryptVolumeBitsRsp extends NfsPrimaryStorageAgentResponse {

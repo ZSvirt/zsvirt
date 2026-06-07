@@ -1282,7 +1282,7 @@ public class MevocoVmInstanceBase extends VmInstanceBase {
                         cvmsg.setPlatform(msg.getPlatform());
                         cvmsg.setGuestOsType(msg.getGuestOsType());
                         cvmsg.setArchitecture(msg.getArchitecture());
-                        cvmsg.setVmEncryption(msg.getVmEncryption() != null ? msg.getVmEncryption() : vivo.isVmEncryption());
+                        cvmsg.setVmEncryption(msg.getVmEncryption());
                         cvmsg.setVirtio(cvmsg.hasSystemTag(VmSystemTags.VIRTIO::isMatch));
 
                         if (!cvmsg.hasSystemTag(VmSystemTags.CREATE_VM_CD_ROM_LIST::isMatch)) {

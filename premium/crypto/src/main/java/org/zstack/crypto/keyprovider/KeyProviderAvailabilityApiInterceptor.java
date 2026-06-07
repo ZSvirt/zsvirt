@@ -34,6 +34,7 @@ import org.zstack.header.vm.APICreateVmInstanceFromVolumeSnapshotGroupMsg;
 import org.zstack.header.vm.APICreateVmInstanceFromVolumeSnapshotMsg;
 import org.zstack.header.vm.APICreateVmInstanceMsg;
 import org.zstack.header.vm.APIMigrateVmMsg;
+import org.zstack.header.vm.APIUpdateVmInstanceMsg;
 import org.zstack.header.vm.DiskAO;
 import org.zstack.header.vm.VmInstanceVO;
 import org.zstack.header.vm.VmInstanceVO_;
@@ -71,6 +72,8 @@ public class KeyProviderAvailabilityApiInterceptor implements GlobalApiMessageIn
     public APIMessage intercept(APIMessage msg) throws ApiMessageInterceptionException {
         if (msg instanceof APICreateVmInstanceMsg) {
             validate((APICreateVmInstanceMsg) msg);
+        } else if (msg instanceof APIUpdateVmInstanceMsg) {
+            validate((APIUpdateVmInstanceMsg) msg);
         } else if (msg instanceof APICreateVmInstanceFromVolumeMsg) {
             validate((APICreateVmInstanceFromVolumeMsg) msg);
         } else if (msg instanceof APICreateVmInstanceFromVolumeSnapshotMsg) {
@@ -111,6 +114,7 @@ public class KeyProviderAvailabilityApiInterceptor implements GlobalApiMessageIn
     public List<Class> getMessageClassToIntercept() {
         return list(
                 APICreateVmInstanceMsg.class,
+                APIUpdateVmInstanceMsg.class,
                 APICreateVmInstanceFromVolumeMsg.class,
                 APICreateVmInstanceFromVolumeSnapshotMsg.class,
                 APICreateVmInstanceFromVolumeSnapshotGroupMsg.class,
@@ -135,6 +139,12 @@ public class KeyProviderAvailabilityApiInterceptor implements GlobalApiMessageIn
     }
 
     private void validate(APICreateVmInstanceMsg msg) {
+        Set<String> providerUuids = new LinkedHashSet<>();
+        collectProviders(msg, providerUuids);
+        ensureProvidersAvailable(providerUuids);
+    }
+
+    private void validate(APIUpdateVmInstanceMsg msg) {
         Set<String> providerUuids = new LinkedHashSet<>();
         collectProviders(msg, providerUuids);
         ensureProvidersAvailable(providerUuids);
@@ -231,31 +241,36 @@ public class KeyProviderAvailabilityApiInterceptor implements GlobalApiMessageIn
     }
 
     private void collectProviders(APICreateVmInstanceMsg msg, Set<String> providerUuids) {
-        if (Boolean.TRUE.equals(msg.getVmEncryption())) {
+        collectTemplateSourceProvider(msg.getImageUuid(), providerUuids);
+        collectRequestedTpmProvider(msg.getDevicesSpec(), providerUuids);
+        collectVmEncryptionProvider(msg.getVmEncryption(), providerUuids);
+        collectDiskProviders(msg.getDiskAOs(), providerUuids);
+    }
+
+    private void collectProviders(APIUpdateVmInstanceMsg msg, Set<String> providerUuids) {
+        collectVmEncryptionProvider(msg.getVmEncryption(), providerUuids);
+    }
+
+    private void collectVmEncryptionProvider(Boolean vmEncryption, Set<String> providerUuids) {
+        if (Boolean.TRUE.equals(vmEncryption)) {
             addDefaultProvider(providerUuids);
         }
-
-        collectTemplateSourceProvider(msg.getImageUuid(), providerUuids);
-        collectDiskProviders(msg.getDiskAOs(), providerUuids);
-        collectRequestedTpmProvider(msg.getDevicesSpec(), providerUuids);
     }
 
     private void collectProviders(APICreateVmInstanceFromVolumeMsg msg, Set<String> providerUuids) {
         boolean sourceEncrypted = isVolumeEncrypted(msg.getVolumeUuid());
         if (sourceEncrypted) {
             addResourceProvider(providerUuids, VolumeVO.class.getSimpleName(), msg.getVolumeUuid(), false);
-        } else if (Boolean.TRUE.equals(msg.getVmEncryption())) {
-            addDefaultProvider(providerUuids);
         }
+        collectVmEncryptionProvider(msg.getVmEncryption(), providerUuids);
     }
 
     private void collectProviders(APICreateVmInstanceFromVolumeSnapshotMsg msg, Set<String> providerUuids) {
         boolean sourceEncrypted = isSnapshotEncrypted(msg.getVolumeSnapshotUuid());
         if (sourceEncrypted) {
             addResourceProvider(providerUuids, VolumeSnapshotVO.class.getSimpleName(), msg.getVolumeSnapshotUuid(), false);
-        } else if (Boolean.TRUE.equals(msg.getVmEncryption())) {
-            addDefaultProvider(providerUuids);
         }
+        collectVmEncryptionProvider(msg.getVmEncryption(), providerUuids);
     }
 
     private void collectProviders(APICreateVmInstanceFromVolumeSnapshotGroupMsg msg, Set<String> providerUuids) {
@@ -270,10 +285,7 @@ public class KeyProviderAvailabilityApiInterceptor implements GlobalApiMessageIn
 
         collectSnapshotGroupTpmProvider(msg.getVolumeSnapshotGroupUuid(), Boolean.TRUE.equals(msg.getResetTpm()), providerUuids);
 
-        if (Boolean.TRUE.equals(msg.getVmEncryption())) {
-            addDefaultProvider(providerUuids);
-        }
-
+        collectVmEncryptionProvider(msg.getVmEncryption(), providerUuids);
         if (!CollectionUtils.isEmpty(msg.getVolumeSnapshotEncryptions())) {
             for (APICreateVmInstanceFromVolumeSnapshotGroupMsg.VolumeSnapshotEncryption encryption : msg.getVolumeSnapshotEncryptions()) {
                 if (Boolean.TRUE.equals(encryption.getEncrypted()) && !isSnapshotEncrypted(encryption.getVolumeSnapshotUuid())) {
@@ -286,11 +298,8 @@ public class KeyProviderAvailabilityApiInterceptor implements GlobalApiMessageIn
     private void collectProviders(APICreateVmInstanceFromTemplatedVmInstanceMsg msg, Set<String> providerUuids) {
         boolean resetTpm = Boolean.TRUE.equals(msg.getResetTpm());
         collectVmResourceProviders(msg.getTemplatedVmInstanceUuid(), providerUuids, !resetTpm);
+        collectVmEncryptionProvider(msg.getVmEncryption(), providerUuids);
         collectDiskProviders(msg.getDiskAOs(), providerUuids);
-
-        if (Boolean.TRUE.equals(msg.getVmEncryption())) {
-            addDefaultProvider(providerUuids);
-        }
 
         if (resetTpm && hasVmTpmKeyRef(msg.getTemplatedVmInstanceUuid())) {
             addDefaultProvider(providerUuids);
@@ -300,6 +309,7 @@ public class KeyProviderAvailabilityApiInterceptor implements GlobalApiMessageIn
     private void collectProviders(APICloneVmInstanceMsg msg, Set<String> providerUuids) {
         boolean resetTpm = Boolean.TRUE.equals(msg.getResetTpm());
         collectVmResourceProviders(msg.getVmInstanceUuid(), providerUuids, !resetTpm);
+        collectVmEncryptionProvider(msg.getVmEncryption(), providerUuids);
         collectDiskProviders(msg.getDiskAOs(), providerUuids);
 
         if (resetTpm && hasVmTpmKeyRef(msg.getVmInstanceUuid())) {

@@ -12,6 +12,7 @@ public class MemorySnapshotExclusionList {
             , "l3::{l3Uuid}::securityGroupIngressPolicy::{securityGroupIngressPolicy}::securityGroupEgressPolicy::{securityGroupEgressPolicy}-org.zstack.header.vm.VmInstanceVO"
             , "vm::edk::{edkRpm}-org.zstack.header.vm.VmInstanceVO"
             , "vmMetadata::registeringMnUuid::{registeringMnUuid}-org.zstack.header.vm.VmInstanceVO"
+            , "vmEncryption::{vmEncryption}-org.zstack.header.vm.VmInstanceVO"
             , "volumeLibvirtSecretHost::{hostUuid}-org.zstack.header.volume.VolumeVO"
             , "ZMigrateManagementNodeVm-org.zstack.header.vm.VmInstanceVO", "ZMigrateGatewayVm-org.zstack.header.vm.VmInstanceVO"
             , "ZMigrateVddkUploaded::{uploadTaskUuid}-org.zstack.header.vm.VmInstanceVO"

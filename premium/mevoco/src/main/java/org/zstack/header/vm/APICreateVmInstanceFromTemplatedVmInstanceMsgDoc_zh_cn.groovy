@@ -205,11 +205,11 @@ doc {
 				column {
 					name "vmEncryption"
 					enclosedIn "params"
-					desc ""
+					desc "虚拟机是否加密"
 					location "body"
 					type "Boolean"
 					optional true
-					since "1.0.1, zsv_5.1.0"
+					since "1.0.1, zsv 5.1.0"
 				}
 			}
 		}

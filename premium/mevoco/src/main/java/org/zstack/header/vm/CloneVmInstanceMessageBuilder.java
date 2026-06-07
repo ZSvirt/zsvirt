@@ -99,6 +99,7 @@ public class CloneVmInstanceMessageBuilder {
             clmsg.setDiskAOs(buildDiskAOsForAPICloneVmInstanceMsg(msg));
             clmsg.setVmCustomSpecification(msg.getVmCustomSpecification());
             clmsg.setResetTpm(msg.getResetTpm());
+            clmsg.setVmEncryption(resolveVmEncryptionForClone(msg.getVmInstanceUuid(), msg.getVmEncryption()));
             setL3NetworksForCloneVmInstanceMsg(clmsg, clmsg.getVmInstanceUuid(), null, null, msg.getVmNicParams());
         } else if (apiMessage instanceof APICreateTemplatedVmInstanceFromVmInstanceMsg) {
             APICreateTemplatedVmInstanceFromVmInstanceMsg msg = (APICreateTemplatedVmInstanceFromVmInstanceMsg) apiMessage;
@@ -155,7 +156,6 @@ public class CloneVmInstanceMessageBuilder {
                 clmsg.setCpuNum(msg.getCpuNum());
                 clmsg.setMemorySize(msg.getMemorySize());
                 clmsg.setReservedMemorySize(msg.getReservedMemorySize());
-                clmsg.setVmEncryption(msg.getVmEncryption());
                 clmsg.setVolumeSnapshotGroup(msg.getTemplatedCacheVolumeSnapshotGroup());
                 clmsg.setDescription(msg.getDescription());
                 DiskAO rootDiskAO = templatedVmVolumeDiskAOs
@@ -169,10 +169,28 @@ public class CloneVmInstanceMessageBuilder {
                         && ImagePlatform.Other.name().equals(msg.getTemplatedVmInstance().getPlatform())
                         ? VmCreationStrategy.CreateStopped.toString() : msg.getStrategy());
                 clmsg.setVmCustomSpecification(msg.getVmCustomSpecification());
+                clmsg.setVmEncryption(resolveVmEncryptionForClone(msg.getTemplatedVmInstanceUuid(), msg.getVmEncryption()));
                 setL3NetworksForCloneVmInstanceMsg(clmsg, msg.getTemplatedVmInstanceUuid(), msg.getL3NetworkUuids(), msg.getDefaultL3NetworkUuid(), msg.getVmNicParams());
             }
         }
         return clmsg;
+    }
+
+    private static Boolean resolveVmEncryptionForClone(String sourceVmUuid, Boolean requestedVmEncryption) {
+        if (requestedVmEncryption != null) {
+            return requestedVmEncryption;
+        }
+        return isSourceVmEncryptionEnabled(sourceVmUuid);
+    }
+
+    private static boolean isSourceVmEncryptionEnabled(String sourceVmUuid) {
+        if (VmSystemTags.VM_ENCRYPTION.hasTag(sourceVmUuid, VmInstanceVO.class)) {
+            return true;
+        }
+        return Boolean.TRUE.equals(Q.New(VmInstanceVO.class)
+                .select(VmInstanceVO_.vmEncryption)
+                .eq(VmInstanceVO_.uuid, sourceVmUuid)
+                .findValue());
     }
 
     // merge the configuration of the original vm with the incoming configuration
@@ -366,7 +384,7 @@ public class CloneVmInstanceMessageBuilder {
         Map<String, String> tagByFormat = new HashMap<>();
         systemTags.forEach(tag -> systemTagsToCopy.forEach(systemTagToBeCopied -> {
             if (TagUtils.isMatch(systemTagToBeCopied.getTagFormat(), tag)) {
-                tagByFormat.put(systemTagToBeCopied.getTagFormat(), tag);
+                tagByFormat.put(systemTagToBeCopied.getTagFormat(), VmSystemTags.plainTagForCreateMessage(resourceUuid, systemTagToBeCopied, tag));
             }
         }));
         return tagByFormat;

@@ -80,6 +80,9 @@ public class APICloneVmInstanceMsg extends APIMessage implements APIMultiAuditor
     @APIParam(required = false)
     private Boolean resetTpm;
 
+    @APIParam(required = false)
+    private Boolean vmEncryption;
+
     @APINoSee
     private VmInstanceInventory vmInstanceInventory;
 
@@ -201,6 +204,14 @@ public class APICloneVmInstanceMsg extends APIMessage implements APIMultiAuditor
 
     public void setResetTpm(Boolean resetTpm) {
         this.resetTpm = resetTpm;
+    }
+
+    public Boolean getVmEncryption() {
+        return vmEncryption;
+    }
+
+    public void setVmEncryption(Boolean vmEncryption) {
+        this.vmEncryption = vmEncryption;
     }
 
     public static APICloneVmInstanceMsg __example__() {

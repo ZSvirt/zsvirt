@@ -131,3 +131,79 @@ CREATE TABLE IF NOT EXISTS `zstack`.`ResNotifyWebhookRefVO` (
     CONSTRAINT `fk_ResNotifyWebhookRefVO_ResNotifySubscriptionVO`
         FOREIGN KEY (`uuid`) REFERENCES `ResNotifySubscriptionVO`(`uuid`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- Feature: replace VpcXxxVO.accountName by accountUuid | ZSV-12380
+-- VpcUserVpnGatewayVO
+-- the old unique key starts with dataCenterUuid, which also backs fkVpcUserVpnGatewayVODataCenterVO,
+-- so add a temporary index on dataCenterUuid before dropping the old unique key (avoids ERROR 1553).
+CALL INSERT_COLUMN('VpcUserVpnGatewayVO', 'accountUuid', 'varchar(32)', 1, NULL, 'uuid');
+UPDATE `zstack`.`VpcUserVpnGatewayVO` t
+    JOIN `zstack`.`AccountVO` a ON t.`accountName` = a.`name`
+    SET t.`accountUuid` = a.`uuid`;
+ALTER TABLE `zstack`.`VpcUserVpnGatewayVO` MODIFY `accountUuid` varchar(32) NOT NULL;
+CALL DROP_FOREIGN_KEY('VpcUserVpnGatewayVO', 'fkVpcUserVpnGatewayVOAccountVO');
+-- dropping the FK leaves a same-named index on accountName; drop it so the new FK name does not collide (avoids ERROR 1061).
+CALL DELETE_INDEX('VpcUserVpnGatewayVO', 'fkVpcUserVpnGatewayVOAccountVO');
+CALL CREATE_INDEX('VpcUserVpnGatewayVO', 'idxTmpVpcUserVpnGatewayVODataCenterUuid', 'dataCenterUuid');
+CALL DELETE_INDEX('VpcUserVpnGatewayVO', 'ukVpcUserVpnGatewayVO');
+ALTER TABLE `zstack`.`VpcUserVpnGatewayVO`
+    ADD UNIQUE KEY `ukVpcUserVpnGatewayVO` (`dataCenterUuid`, `accountUuid`, `gatewayId`) USING BTREE;
+CALL DELETE_INDEX('VpcUserVpnGatewayVO', 'idxTmpVpcUserVpnGatewayVODataCenterUuid');
+CALL ADD_CONSTRAINT('VpcUserVpnGatewayVO', 'fkVpcUserVpnGatewayVOAccountVO', 'accountUuid', 'AccountVO', 'uuid', 'RESTRICT');
+CALL DROP_COLUMN('VpcUserVpnGatewayVO', 'accountName');
+
+-- VpcVpnGatewayVO
+-- the old unique key starts with vSwitchUuid, which also backs fkVpcVpnGatewayVOEcsVSwitchVO,
+-- so add a temporary index on vSwitchUuid before dropping the old unique key (avoids ERROR 1553).
+CALL INSERT_COLUMN('VpcVpnGatewayVO', 'accountUuid', 'varchar(32)', 1, NULL, 'uuid');
+UPDATE `zstack`.`VpcVpnGatewayVO` t
+    JOIN `zstack`.`AccountVO` a ON t.`accountName` = a.`name`
+    SET t.`accountUuid` = a.`uuid`;
+ALTER TABLE `zstack`.`VpcVpnGatewayVO` MODIFY `accountUuid` varchar(32) NOT NULL;
+CALL DROP_FOREIGN_KEY('VpcVpnGatewayVO', 'fkVpcVpnGatewayVOAccountVO');
+CALL DELETE_INDEX('VpcVpnGatewayVO', 'fkVpcVpnGatewayVOAccountVO');
+CALL CREATE_INDEX('VpcVpnGatewayVO', 'idxTmpVpcVpnGatewayVOVSwitchUuid', 'vSwitchUuid');
+CALL DELETE_INDEX('VpcVpnGatewayVO', 'ukVpcVpnGatewayVO');
+ALTER TABLE `zstack`.`VpcVpnGatewayVO`
+    ADD UNIQUE KEY `ukVpcVpnGatewayVO` (`vSwitchUuid`, `accountUuid`, `gatewayId`) USING BTREE;
+CALL DELETE_INDEX('VpcVpnGatewayVO', 'idxTmpVpcVpnGatewayVOVSwitchUuid');
+CALL ADD_CONSTRAINT('VpcVpnGatewayVO', 'fkVpcVpnGatewayVOAccountVO', 'accountUuid', 'AccountVO', 'uuid', 'RESTRICT');
+CALL DROP_COLUMN('VpcVpnGatewayVO', 'accountName');
+
+-- VpcVpnConnectionVO
+-- the old unique key starts with connectionId (no foreign key on it), so no temporary index is needed.
+CALL INSERT_COLUMN('VpcVpnConnectionVO', 'accountUuid', 'varchar(32)', 1, NULL, 'uuid');
+UPDATE `zstack`.`VpcVpnConnectionVO` t
+    JOIN `zstack`.`AccountVO` a ON t.`accountName` = a.`name`
+    SET t.`accountUuid` = a.`uuid`;
+ALTER TABLE `zstack`.`VpcVpnConnectionVO` MODIFY `accountUuid` varchar(32) NOT NULL;
+CALL DROP_FOREIGN_KEY('VpcVpnConnectionVO', 'fkVpcVpnConnectionVOAccountVO');
+CALL DELETE_INDEX('VpcVpnConnectionVO', 'fkVpcVpnConnectionVOAccountVO');
+CALL DELETE_INDEX('VpcVpnConnectionVO', 'ukVpcVpnConnectionVO');
+ALTER TABLE `zstack`.`VpcVpnConnectionVO`
+    ADD UNIQUE KEY `ukVpcVpnConnectionVO` (`connectionId`, `accountUuid`, `userGatewayUuid`) USING BTREE;
+CALL ADD_CONSTRAINT('VpcVpnConnectionVO', 'fkVpcVpnConnectionVOAccountVO', 'accountUuid', 'AccountVO', 'uuid', 'RESTRICT');
+CALL DROP_COLUMN('VpcVpnConnectionVO', 'accountName');
+
+-- VpcVpnIkeConfigVO (without accountName unique key)
+CALL INSERT_COLUMN('VpcVpnIkeConfigVO', 'accountUuid', 'varchar(32)', 1, NULL, 'uuid');
+UPDATE `zstack`.`VpcVpnIkeConfigVO` t
+    JOIN `zstack`.`AccountVO` a ON t.`accountName` = a.`name`
+    SET t.`accountUuid` = a.`uuid`;
+ALTER TABLE `zstack`.`VpcVpnIkeConfigVO` MODIFY `accountUuid` varchar(32) NOT NULL;
+CALL DROP_FOREIGN_KEY('VpcVpnIkeConfigVO', 'fkVpcVpnIkeConfigVOAccountVO');
+CALL DELETE_INDEX('VpcVpnIkeConfigVO', 'fkVpcVpnIkeConfigVOAccountVO');
+CALL ADD_CONSTRAINT('VpcVpnIkeConfigVO', 'fkVpcVpnIkeConfigVOAccountVO', 'accountUuid', 'AccountVO', 'uuid', 'RESTRICT');
+CALL DROP_COLUMN('VpcVpnIkeConfigVO', 'accountName');
+
+-- VpcVpnIpSecConfigVO (without accountName unique key)
+CALL INSERT_COLUMN('VpcVpnIpSecConfigVO', 'accountUuid', 'varchar(32)', 1, NULL, 'uuid');
+UPDATE `zstack`.`VpcVpnIpSecConfigVO` t
+    JOIN `zstack`.`AccountVO` a ON t.`accountName` = a.`name`
+    SET t.`accountUuid` = a.`uuid`;
+ALTER TABLE `zstack`.`VpcVpnIpSecConfigVO` MODIFY `accountUuid` varchar(32) NOT NULL;
+CALL DROP_FOREIGN_KEY('VpcVpnIpSecConfigVO', 'fkVpcVpnIpSecConfigVOAccountVO');
+CALL DELETE_INDEX('VpcVpnIpSecConfigVO', 'fkVpcVpnIpSecConfigVOAccountVO');
+CALL ADD_CONSTRAINT('VpcVpnIpSecConfigVO', 'fkVpcVpnIpSecConfigVOAccountVO', 'accountUuid', 'AccountVO', 'uuid', 'RESTRICT');
+CALL DROP_COLUMN('VpcVpnIpSecConfigVO', 'accountName');
+

@@ -303,6 +303,8 @@ public class SystemTag {
 
                 tagMgr.validateSystemTag(resourceUuid, resourceClass.getSimpleName(), tag);
 
+                tag = tagMgr.applyBeforePersist(resourceUuid, resourceClass.getSimpleName(), tag);
+
                 SystemTagVO keepSameTagVO = null;
                 if (recreate) {
                     String sql;

@@ -47,7 +47,6 @@ public class VmInstanceUtils {
         } else {
             cmsg.setVirtio(msg.getVirtio());
         }
-
         if (!isEmpty(msg.getDiskAOs())) {
             DiskAO rootDisk = findOneOrNull(msg.getDiskAOs(), DiskAO::isBoot);
             cmsg.setRootDisk(rootDisk);

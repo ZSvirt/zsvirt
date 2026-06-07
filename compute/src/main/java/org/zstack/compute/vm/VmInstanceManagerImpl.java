@@ -150,6 +150,8 @@ public class VmInstanceManagerImpl extends AbstractService implements
     @Autowired
     private TagManager tagMgr;
     @Autowired
+    private VmSensitiveTagEncryptor vmSensitiveTagEncryptor;
+    @Autowired
     private ErrorFacade errf;
     @Autowired
     private ResourceDestinationMaker destMaker;
@@ -1064,6 +1066,17 @@ public class VmInstanceManagerImpl extends AbstractService implements
     }
 
     private void instantiateTagsForCreateMessage(final CreateVmInstanceMsg msg, final APICreateMessage cmsg, VmInstanceVO finalVo) {
+        Boolean vmEncryption = null;
+        if (cmsg instanceof APICreateVmInstanceMsg) {
+            vmEncryption = ((APICreateVmInstanceMsg) cmsg).getVmEncryption();
+        }
+        if (vmEncryption == null) {
+            vmEncryption = msg.getVmEncryption();
+        }
+        if (Boolean.TRUE.equals(vmEncryption)) {
+            vmSensitiveTagEncryptor.enableVmEncryption(finalVo.getUuid());
+        }
+
         if (cmsg != null) {
             tagMgr.createTagsFromAPICreateMessage(cmsg, finalVo.getUuid(), VmInstanceVO.class.getSimpleName());
         } else {

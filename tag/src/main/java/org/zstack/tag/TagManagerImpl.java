@@ -76,6 +76,9 @@ public class TagManagerImpl extends AbstractService implements TagManager,
     private Map<String, List<SystemTagResourceDeletionOperator>> resourceDeletionOperators = new HashMap<>();
     private Map<String, List<SystemTagLifeCycleExtension>> lifeCycleExtensions = new HashMap<>();
     private List<CreateTagFromMsgExtensionPoint> createTagExtensions = new ArrayList<>();
+    private List<SystemTagPersistExtensionPoint> persistExtensions = new ArrayList<>();
+    private List<SystemTagTokenDecryptExtensionPoint> tokenDecryptExtensions = new ArrayList<>();
+    private List<SystemTagCopyExtensionPoint> copyExtensions = new ArrayList<>();
     private List<Class> autoDeleteTagClasses;
 
 
@@ -208,6 +211,40 @@ public class TagManagerImpl extends AbstractService implements TagManager,
         }
 
         createTagExtensions.addAll(pluginRgty.getExtensionList(CreateTagFromMsgExtensionPoint.class));
+        persistExtensions.addAll(pluginRgty.getExtensionList(SystemTagPersistExtensionPoint.class));
+        tokenDecryptExtensions.addAll(pluginRgty.getExtensionList(SystemTagTokenDecryptExtensionPoint.class));
+        copyExtensions.addAll(pluginRgty.getExtensionList(SystemTagCopyExtensionPoint.class));
+    }
+
+    @Override
+    public String applyBeforePersist(String resourceUuid, String resourceType, String tag) {
+        String result = tag;
+        for (SystemTagPersistExtensionPoint ext : persistExtensions) {
+            result = ext.beforePersist(resourceUuid, resourceType, result);
+        }
+        return result;
+    }
+
+    @Override
+    public String decryptTokenValue(String resourceType, String tagHead, String tokenName, String tokenValue) {
+        String result = tokenValue;
+        for (SystemTagTokenDecryptExtensionPoint ext : tokenDecryptExtensions) {
+            result = ext.decryptTokenValue(resourceType, tagHead, tokenName, result);
+        }
+        return result;
+    }
+
+    @Override
+    public String transformTagForCopy(String srcResourceUuid, String srcResourceType,
+                                      String dstResourceUuid, String dstResourceType, String srcTag) {
+        String result = srcTag;
+        for (SystemTagCopyExtensionPoint ext : copyExtensions) {
+            result = ext.transformTagForCopy(srcResourceUuid, srcResourceType, dstResourceUuid, dstResourceType, result);
+            if (result == null) {
+                return null;
+            }
+        }
+        return result;
     }
 
     private boolean isTagExisting(String resourceUuid, String tag, TagType type, String resourceType) {
@@ -247,6 +284,7 @@ public class TagManagerImpl extends AbstractService implements TagManager,
             dbf.getEntityManager().refresh(vo);
             return UserTagInventory.valueOf(vo);
         } else {
+            tag = applyBeforePersist(resourceUuid, resourceType, tag);
             SystemTagVO vo = new SystemTagVO();
             vo.setResourceType(resourceType);
             vo.setUuid(Platform.getUuid());
@@ -292,6 +330,8 @@ public class TagManagerImpl extends AbstractService implements TagManager,
 
         validateSystemTag(resourceUuid, resourceType, tag);
 
+        tag = applyBeforePersist(resourceUuid, resourceType, tag);
+
         SystemTagVO vo = new SystemTagVO();
         vo.setResourceType(resourceType);
         vo.setUuid(Platform.getUuid());
@@ -322,6 +362,8 @@ public class TagManagerImpl extends AbstractService implements TagManager,
         }
 
         validateSystemTag(resourceUuid, resourceType, tag);
+
+        tag = applyBeforePersist(resourceUuid, resourceType, tag);
 
         SystemTagVO vo = new SystemTagVO();
         vo.setResourceType(resourceType);
@@ -433,10 +475,19 @@ public class TagManagerImpl extends AbstractService implements TagManager,
         }
 
         for (SystemTagVO stag : srctags) {
+            if (!isCloneable(stag.getTag(), srcResourceType)) {
+                continue;
+            }
+            String dstTag = transformTagForCopy(srcResourceUuid, srcResourceType,
+                    dstResourceUuid, dstResourceType, stag.getTag());
+            if (dstTag == null) {
+                continue;
+            }
             SystemTagVO ntag = new SystemTagVO(stag);
             ntag.setUuid(Platform.getUuid());
             ntag.setResourceType(dstResourceType);
             ntag.setResourceUuid(dstResourceUuid);
+            ntag.setTag(dstTag);
             dbf.getEntityManager().persist(ntag);
         }
     }
@@ -446,6 +497,7 @@ public class TagManagerImpl extends AbstractService implements TagManager,
         SystemTagVO vo = dbf.findByUuid(tagUuid, SystemTagVO.class);
         SystemTagInventory old = SystemTagInventory.valueOf(vo);
         if (!vo.getTag().equals(newTag)) {
+            newTag = applyBeforePersist(vo.getResourceUuid(), vo.getResourceType(), newTag);
             vo.setTag(newTag);
 
             preTagUpdated(old, vo.toInventory());

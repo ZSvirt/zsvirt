@@ -162,8 +162,7 @@ public class FluentBitServiceUnitConfig {
 
     public static void addSingleFluentBitConfig(Map<String, Object> outputMap) {
         if (outputMap.containsKey("http_passwd")) {
-            String match = (String) outputMap.get("match");
-            String envKey = "FB_HTTP_PASSWD_" + match.replaceAll("[^A-Za-z0-9]", "_").toUpperCase();
+            String envKey = makeSecretEnvKey(outputMap);
             writeSecret(envKey, (String) outputMap.get("http_passwd"));
             outputMap = new java.util.LinkedHashMap<>(outputMap);
             outputMap.put("http_passwd", "${" + envKey + "}");
@@ -177,6 +176,15 @@ public class FluentBitServiceUnitConfig {
         } catch (IOException e) {
             logger.warn(String.format("failed to write fluent-bit secret: %s", e.getMessage()));
         }
+    }
+
+    private static String makeSecretEnvKey(Map<String, Object> outputMap) {
+        String identity = String.format("%s_%s_%s_%s",
+                outputMap.get("name"),
+                outputMap.get("match"),
+                outputMap.get("host"),
+                outputMap.get("port"));
+        return "FB_HTTP_PASSWD_" + identity.replaceAll("[^A-Za-z0-9]", "_").toUpperCase();
     }
 
     private static void appendFluentBitConfigFile(String filePath, Map<String, Object> configMap) {
@@ -217,6 +225,36 @@ public class FluentBitServiceUnitConfig {
         Map<String, String> expected = normalizeOutputConfig(type, JSONObjectUtil.toObject(configuration, Map.class), accountUuid);
         String updatedContent = removeOutputBlock(configContent, expected);
         writeFile(configFilePath, updatedContent);
+        removeUnusedSecrets(updatedContent);
+    }
+
+    private static void removeUnusedSecrets(String configContent) {
+        Set<String> usedKeys = new HashSet<>();
+        Matcher matcher = Pattern.compile("\\$\\{([^}]+)}").matcher(configContent == null ? "" : configContent);
+        while (matcher.find()) {
+            usedKeys.add(matcher.group(1));
+        }
+
+        String secretsContent = readFile(secretsFilePath);
+        if (secretsContent == null || secretsContent.isEmpty()) {
+            return;
+        }
+
+        StringBuilder retained = new StringBuilder();
+        Set<String> retainedKeys = new HashSet<>();
+        for (String line : secretsContent.split("\\r?\\n")) {
+            int idx = line.indexOf('=');
+            if (idx <= 0) {
+                continue;
+            }
+
+            String key = line.substring(0, idx);
+            if (usedKeys.contains(key) && retainedKeys.add(key)) {
+                retained.append(line).append('\n');
+            }
+        }
+
+        writeFile(secretsFilePath, retained.toString());
     }
 
     static Map<String, String> normalizeOutputConfig(String type, Map<String, Object> config, String accountUuid) {

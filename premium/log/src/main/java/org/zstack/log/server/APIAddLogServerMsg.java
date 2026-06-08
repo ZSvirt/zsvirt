@@ -1,6 +1,7 @@
 package org.zstack.log.server;
 
 import org.springframework.http.HttpMethod;
+import org.zstack.header.log.NoLogging;
 import org.zstack.header.message.*;
 import org.zstack.header.other.APIAuditor;
 import org.zstack.header.rest.RestRequest;
@@ -29,6 +30,7 @@ public class APIAddLogServerMsg extends APICreateMessage implements APIAuditor {
     @APIParam(required = false, validValues = {"OFF", "FATAL", "ERROR", "WARN", "INFO", "DEBUG", "TRACE", "ALL"})
     private String level;
 
+    @NoLogging
     @APIParam(maxLength = 8192)
     private String configuration;
 

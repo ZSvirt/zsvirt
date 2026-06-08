@@ -564,6 +564,7 @@
         <class>org.zstack.header.vm.metadata.VmMetadataDirtyVO</class>
         <class>org.zstack.header.vm.metadata.VmMetadataFlushStateVO</class>
         <class>org.zstack.log.server.LogServerVO</class>
+        <class>org.zstack.header.core.external.service.ExternalServiceConfigurationVO</class>
 
         <!-- module agents -->
         <class>org.zstack.softwarePackage.entity.SoftwarePackageVO</class>

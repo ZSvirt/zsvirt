@@ -41,8 +41,34 @@ class PrometheusConfig {
         String url
     }
 
+    static class RemoteWrite {
+        String url
+        public BasicAuth basic_auth
+        public List<RelabelConfig> write_relabel_configs
+
+        void basicAuth(@DelegatesTo(strategy = Closure.DELEGATE_FIRST, value = BasicAuth.class) Closure c) {
+            basic_auth = new BasicAuth()
+
+            c.delegate = basic_auth
+            c.resolveStrategy = Closure.DELEGATE_FIRST
+            c()
+        }
+
+        void writeRelabelConfig(@DelegatesTo(strategy = Closure.DELEGATE_FIRST, value = RelabelConfig.class) Closure c) {
+            c.delegate = new RelabelConfig()
+            c.resolveStrategy = Closure.DELEGATE_FIRST
+            c()
+
+            if (write_relabel_configs == null) {
+                write_relabel_configs = []
+            }
+
+            write_relabel_configs.add(c.delegate)
+        }
+    }
+
     private Global global
-    private List<RemoteURL> remote_write
+    private List<RemoteWrite> remote_write
     private List<RemoteURL> remote_read
 
     PrometheusConfig() {
@@ -290,7 +316,7 @@ class PrometheusConfig {
         Global global
         List<String> rule_files
         List<ScrapeConfig> scrape_configs
-        List<RemoteURL> remote_write
+        List<RemoteWrite> remote_write
         List<RemoteURL> remote_read
     }
 
@@ -360,7 +386,15 @@ class PrometheusConfig {
     }
 
     void remoteWrite(String url) {
-        remote_write = [new RemoteURL(url: url)]
+        remote_write = [new RemoteWrite(url: url)]
+    }
+
+    void remoteWrite(List<RemoteWrite> rws) {
+        if (rws != null && !rws.isEmpty()) {
+            remote_write = rws
+        } else {
+            remote_write = null
+        }
     }
 
     void remoteRead(String url) {

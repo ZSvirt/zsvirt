@@ -1,6 +1,5 @@
 package org.zstack.ovf;
 
-import com.google.gson.JsonSyntaxException;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.zstack.compute.vm.VmInstanceHelper;
@@ -18,9 +17,9 @@ import org.zstack.ovf.api.APIExportVmOvaPackageMsg;
 import org.zstack.ovf.api.APIUpdateImagePackageMsg;
 import org.zstack.ovf.datatype.ImagePackageVO;
 import org.zstack.ovf.datatype.ImagePackageVO_;
+import org.zstack.ovf.message.CreateVmInstanceFromOvfMsg;
 import org.zstack.storage.backup.imagestore.ImageStoreBackupStorageVO;
 import org.zstack.storage.backup.imagestore.ImageStoreBackupStorageVO_;
-import org.zstack.utils.gson.JSONObjectUtil;
 
 import static org.zstack.core.Platform.*;
 
@@ -103,12 +102,7 @@ public class OvfInterceptor implements ApiMessageInterceptor {
             throw new ApiMessageInterceptionException(e.getErrorCode());
         }
 
-        try {
-            msg.setCreateVmMsg(JSONObjectUtil.toObject(msg.getJsonCreateVmParam(), APICreateVmInstanceMsg.class));
-        } catch (JsonSyntaxException e) {
-            throw new ApiMessageInterceptionException(argerr(
-                    "failed to parse jsonCreateVmParam in APICreateVmInstanceFromOvfMsg"));
-        }
+        CreateVmInstanceFromOvfMsg.resolveCreateVmMsg(msg);
 
         new VmInstanceHelper().validate((NewVmInstanceMessage) msg.getCreateVmMsg());
 

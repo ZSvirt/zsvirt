@@ -152,7 +152,7 @@ public class EncryptionInventoryReplyMarshaller implements MarshalReplyMessageEx
 
         Set<String> vmUuids = vmByUuid.keySet();
         Map<String, Timestamp> vmCreateDateByUuid = queryVmCreateDates(vmUuids);
-        Map<String, Boolean> vmEncryptedByUuid = queryVmEncryptedStates(vmUuids);
+        Map<String, Boolean> vmEncryptionByUuid = queryVmEncryptionStates(vmUuids);
         Map<String, List<String>> encryptedVolumeUuidsByVmUuid = new HashMap<>();
         Set<String> encryptedVolumeUuids = queryEncryptedVolumeUuids(vmUuids, encryptedVolumeUuidsByVmUuid);
         Map<String, String> tpmUuidToVmUuid = queryTpmUuidToVmUuid(vmUuids);
@@ -171,13 +171,13 @@ public class EncryptionInventoryReplyMarshaller implements MarshalReplyMessageEx
             }
 
             boolean hasEncryptedVolume = encryptedVolumeUuidsByVmUuid.containsKey(vm.getUuid());
-            boolean vmEncrypted = Boolean.TRUE.equals(vmEncryptedByUuid.get(vm.getUuid()));
+            boolean hasEncryptedVm = Boolean.TRUE.equals(vmEncryptionByUuid.get(vm.getUuid()));
             boolean hasEncryptedTpm = tpmKeyRefVmUuids.contains(vm.getUuid());
-            boolean hasEncryptionResource = vmEncrypted || hasEncryptedVolume || hasEncryptedTpm;
-            vm.setVmEncryption(vmEncrypted);
+            boolean hasEncryptionResource = hasEncryptedVm || hasEncryptedVolume || hasEncryptedTpm;
+            vm.setVmEncryption(hasEncryptedVm);
             vm.setHasEncryptionResource(hasEncryptionResource);
             vm.setKeyLastOpDate(hasEncryptionResource ?
-                    latestOrDefault(keyDatesByVmUuid.get(vm.getUuid()), vmEncrypted ? vmCreateDateByUuid.get(vm.getUuid()) : null) : null);
+                    latestOrDefault(keyDatesByVmUuid.get(vm.getUuid()), hasEncryptedVm ? vmCreateDateByUuid.get(vm.getUuid()) : null) : null);
         }
     }
 
@@ -193,7 +193,7 @@ public class EncryptionInventoryReplyMarshaller implements MarshalReplyMessageEx
         ));
     }
 
-    private Map<String, Boolean> queryVmEncryptedStates(Set<String> vmUuids) {
+    private Map<String, Boolean> queryVmEncryptionStates(Set<String> vmUuids) {
         List<Tuple> tuples = Q.New(VmInstanceVO.class)
                 .select(VmInstanceVO_.uuid, VmInstanceVO_.vmEncryption)
                 .in(VmInstanceVO_.uuid, vmUuids)

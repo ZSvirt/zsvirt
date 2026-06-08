@@ -28,6 +28,9 @@ import org.zstack.header.tpm.api.APIAddTpmMsg;
 import org.zstack.header.tpm.entity.TpmVO;
 import org.zstack.header.tpm.entity.TpmVO_;
 import org.zstack.header.vm.APICloneVmInstanceMsg;
+import org.zstack.header.storage.volume.backup.APICreateVmFromVmBackupMsg;
+import org.zstack.ovf.api.APICreateVmInstanceFromOvfMsg;
+import org.zstack.ovf.message.CreateVmInstanceFromOvfMsg;
 import org.zstack.header.vm.APICreateVmInstanceFromTemplatedVmInstanceMsg;
 import org.zstack.header.vm.APICreateVmInstanceFromVolumeMsg;
 import org.zstack.header.vm.APICreateVmInstanceFromVolumeSnapshotGroupMsg;
@@ -84,6 +87,10 @@ public class KeyProviderAvailabilityApiInterceptor implements GlobalApiMessageIn
             validate((APICreateVmInstanceFromTemplatedVmInstanceMsg) msg);
         } else if (msg instanceof APICloneVmInstanceMsg) {
             validate((APICloneVmInstanceMsg) msg);
+        } else if (msg instanceof APICreateVmFromVmBackupMsg) {
+            validate((APICreateVmFromVmBackupMsg) msg);
+        } else if (msg instanceof APICreateVmInstanceFromOvfMsg) {
+            validate((APICreateVmInstanceFromOvfMsg) msg);
         } else if (msg instanceof APIMigrateVmMsg) {
             validate((APIMigrateVmMsg) msg);
         } else if (msg instanceof APIPrimaryStorageMigrateVmMsg) {
@@ -120,6 +127,8 @@ public class KeyProviderAvailabilityApiInterceptor implements GlobalApiMessageIn
                 APICreateVmInstanceFromVolumeSnapshotGroupMsg.class,
                 APICreateVmInstanceFromTemplatedVmInstanceMsg.class,
                 APICloneVmInstanceMsg.class,
+                APICreateVmFromVmBackupMsg.class,
+                APICreateVmInstanceFromOvfMsg.class,
                 APIMigrateVmMsg.class,
                 APIPrimaryStorageMigrateVmMsg.class,
                 APIAttachDataVolumeToVmMsg.class,
@@ -175,6 +184,18 @@ public class KeyProviderAvailabilityApiInterceptor implements GlobalApiMessageIn
     }
 
     private void validate(APICloneVmInstanceMsg msg) {
+        Set<String> providerUuids = new LinkedHashSet<>();
+        collectProviders(msg, providerUuids);
+        ensureProvidersAvailable(providerUuids);
+    }
+
+    private void validate(APICreateVmFromVmBackupMsg msg) {
+        Set<String> providerUuids = new LinkedHashSet<>();
+        collectProviders(msg, providerUuids);
+        ensureProvidersAvailable(providerUuids);
+    }
+
+    private void validate(APICreateVmInstanceFromOvfMsg msg) {
         Set<String> providerUuids = new LinkedHashSet<>();
         collectProviders(msg, providerUuids);
         ensureProvidersAvailable(providerUuids);
@@ -315,6 +336,19 @@ public class KeyProviderAvailabilityApiInterceptor implements GlobalApiMessageIn
         if (resetTpm && hasVmTpmKeyRef(msg.getVmInstanceUuid())) {
             addDefaultProvider(providerUuids);
         }
+    }
+
+    private void collectProviders(APICreateVmFromVmBackupMsg msg, Set<String> providerUuids) {
+        collectVmEncryptionProvider(msg.getVmEncryption(), providerUuids);
+    }
+
+    private void collectProviders(APICreateVmInstanceFromOvfMsg msg, Set<String> providerUuids) {
+        CreateVmInstanceFromOvfMsg.resolveCreateVmMsg(msg);
+        Boolean vmEncryption = msg.getVmEncryption();
+        if (vmEncryption == null && msg.getCreateVmMsg() != null) {
+            vmEncryption = msg.getCreateVmMsg().getVmEncryption();
+        }
+        collectVmEncryptionProvider(vmEncryption, providerUuids);
     }
 
     private void collectProviders(APIChangeVolumeEncryptionMsg msg, Set<String> providerUuids) {

@@ -395,6 +395,7 @@ public class VolumeBackupManagerImpl extends AbstractService implements
                 cmsg.setResourceUuid(msg.getResourceUuid());
                 cmsg.setDefaultL3NetworkUuid(msg.getDefaultL3NetworkUuid());
                 cmsg.setStrategy(msg.getStrategy());
+                cmsg.setVmEncryption(msg.getVmEncryption());
 
                 Map<String, DiskAO> diskAOBySourceUuid = Optional.ofNullable(msg.getDiskAOs())
                         .orElse(Collections.emptyList()).stream()

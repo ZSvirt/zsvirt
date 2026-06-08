@@ -257,6 +257,15 @@ doc {
 					optional true
 					since "zsv 5.0.3"
 				}
+				column {
+					name "vmEncryption"
+					enclosedIn "params"
+					desc "虚拟机是否加密"
+					location "body"
+					type "Boolean"
+					optional true
+					since "1.0.1, zsv 5.1.0"
+				}
 			}
 		}
 

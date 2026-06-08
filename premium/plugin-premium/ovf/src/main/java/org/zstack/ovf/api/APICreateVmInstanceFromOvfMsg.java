@@ -41,6 +41,9 @@ public class APICreateVmInstanceFromOvfMsg extends APICreateMessage implements A
     @APIParam(required = false)
     private boolean deleteImageOnFail = false;
 
+    @APIParam(required = false)
+    private Boolean vmEncryption;
+
     @APINoSee
     private List<CreateVmFromOvfImageParam> imageInfos;
     @APINoSee
@@ -92,6 +95,14 @@ public class APICreateVmInstanceFromOvfMsg extends APICreateMessage implements A
 
     public void setDeleteImageOnFail(boolean deleteImageOnFail) {
         this.deleteImageOnFail = deleteImageOnFail;
+    }
+
+    public Boolean getVmEncryption() {
+        return vmEncryption;
+    }
+
+    public void setVmEncryption(Boolean vmEncryption) {
+        this.vmEncryption = vmEncryption;
     }
 
     public List<CreateVmFromOvfImageParam> getImageInfos() {

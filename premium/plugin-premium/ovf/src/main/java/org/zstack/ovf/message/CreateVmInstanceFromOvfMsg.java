@@ -1,12 +1,18 @@
 package org.zstack.ovf.message;
 
 import org.zstack.header.message.NeedReplyMessage;
+import org.zstack.header.apimediator.ApiMessageInterceptionException;
 import org.zstack.header.vm.APICreateVmInstanceMsg;
 import org.zstack.ovf.api.APICreateVmInstanceFromOvfMsg;
 import org.zstack.ovf.datatype.CreateVmFromOvfImageParam;
+import org.zstack.utils.gson.JSONObjectUtil;
+
+import com.google.gson.JsonSyntaxException;
 
 import java.util.Collections;
 import java.util.List;
+
+import static org.zstack.core.Platform.argerr;
 
 /**
  * Created by Wenhao.Zhang on 22/03/09
@@ -19,6 +25,8 @@ public class CreateVmInstanceFromOvfMsg extends NeedReplyMessage {
 
     private boolean deleteImageAfterSuccess = false;
     private boolean deleteImageOnFail = true;
+
+    private Boolean vmEncryption;
 
     private String resourceUuid;
 
@@ -62,6 +70,14 @@ public class CreateVmInstanceFromOvfMsg extends NeedReplyMessage {
         this.deleteImageOnFail = deleteImageOnFail;
     }
 
+    public Boolean getVmEncryption() {
+        return vmEncryption;
+    }
+
+    public void setVmEncryption(Boolean vmEncryption) {
+        this.vmEncryption = vmEncryption;
+    }
+
     public List<CreateVmFromOvfImageParam> getImageInfos() {
         return imageInfos;
     }
@@ -79,6 +95,8 @@ public class CreateVmInstanceFromOvfMsg extends NeedReplyMessage {
     }
 
     public static CreateVmInstanceFromOvfMsg fromApiMessage(APICreateVmInstanceFromOvfMsg apiMessage) {
+        resolveCreateVmMsg(apiMessage);
+
         CreateVmInstanceFromOvfMsg message = new CreateVmInstanceFromOvfMsg();
         message.setResourceUuid(apiMessage.getResourceUuid());
         message.setCreateVmMsg(apiMessage.getCreateVmMsg());
@@ -87,8 +105,31 @@ public class CreateVmInstanceFromOvfMsg extends NeedReplyMessage {
         message.setImageInfos(apiMessage.getImageInfos());
         message.setDeleteImageAfterSuccess(apiMessage.isDeleteImageAfterSuccess());
         message.setDeleteImageOnFail(apiMessage.isDeleteImageOnFail());
+        message.setVmEncryption(apiMessage.getVmEncryption());
         // create VM instance need account UUID which from session
         message.getCreateVmMsg().setSession(apiMessage.getSession());
         return message;
+    }
+
+    public static void resolveCreateVmMsg(APICreateVmInstanceFromOvfMsg apiMessage) {
+        if (apiMessage.getCreateVmMsg() != null) {
+            if (apiMessage.getVmEncryption() != null) {
+                apiMessage.getCreateVmMsg().setVmEncryption(apiMessage.getVmEncryption());
+            }
+            return;
+        }
+        if (apiMessage.getJsonCreateVmParam() == null) {
+            return;
+        }
+        // Fallback for direct fromApiMessage callers, such as OVF long-job resume paths.
+        try {
+            apiMessage.setCreateVmMsg(JSONObjectUtil.toObject(apiMessage.getJsonCreateVmParam(), APICreateVmInstanceMsg.class));
+        } catch (JsonSyntaxException e) {
+            throw new ApiMessageInterceptionException(argerr(
+                    "failed to parse jsonCreateVmParam in APICreateVmInstanceFromOvfMsg"));
+        }
+        if (apiMessage.getVmEncryption() != null) {
+            apiMessage.getCreateVmMsg().setVmEncryption(apiMessage.getVmEncryption());
+        }
     }
 }

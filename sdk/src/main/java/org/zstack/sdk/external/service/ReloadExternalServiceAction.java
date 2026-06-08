@@ -1,4 +1,4 @@
-package org.zstack.sdk;
+package org.zstack.sdk.external.service;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -12,7 +12,7 @@ public class ReloadExternalServiceAction extends AbstractAction {
 
     public static class Result {
         public ErrorCode error;
-        public org.zstack.sdk.ReloadExternalServiceResult value;
+        public org.zstack.sdk.external.service.ReloadExternalServiceResult value;
 
         public Result throwExceptionIfError() {
             if (error != null) {
@@ -60,8 +60,8 @@ public class ReloadExternalServiceAction extends AbstractAction {
             return ret;
         }
         
-        org.zstack.sdk.ReloadExternalServiceResult value = res.getResult(org.zstack.sdk.ReloadExternalServiceResult.class);
-        ret.value = value == null ? new org.zstack.sdk.ReloadExternalServiceResult() : value; 
+        org.zstack.sdk.external.service.ReloadExternalServiceResult value = res.getResult(org.zstack.sdk.external.service.ReloadExternalServiceResult.class);
+        ret.value = value == null ? new org.zstack.sdk.external.service.ReloadExternalServiceResult() : value; 
 
         return ret;
     }

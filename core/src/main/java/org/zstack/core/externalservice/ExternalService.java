@@ -16,4 +16,12 @@ public interface ExternalService {
     ExternalServiceCapabilities getExternalServiceCapabilities();
 
     void reload();
+
+    default String getServiceType() {
+        return getName();
+    }
+
+    default void externalConfig(String serviceType) {
+        // no-op by default
+    }
 }

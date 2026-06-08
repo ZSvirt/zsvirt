@@ -84,3 +84,16 @@ CREATE TABLE IF NOT EXISTS `zstack`.`LogServerVO` (
     `createDate` timestamp NOT NULL DEFAULT '1999-12-31 23:59:59',
     PRIMARY KEY  (`uuid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- Feature: External Service Configuration
+
+CREATE TABLE IF NOT EXISTS `zstack`.`ExternalServiceConfigurationVO` (
+    `uuid` varchar(32) NOT NULL UNIQUE,
+    `serviceType` varchar(32) NOT NULL,
+    `configuration` text DEFAULT NULL,
+    `description` varchar(2048) DEFAULT NULL,
+    `lastOpDate` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `createDate` timestamp NOT NULL DEFAULT '1999-12-31 23:59:59',
+    PRIMARY KEY (`uuid`),
+    UNIQUE KEY `ukExternalServiceConfigurationVOServiceType` (`serviceType`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;

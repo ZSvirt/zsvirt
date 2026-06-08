@@ -12786,8 +12786,8 @@ abstract class ApiHelper {
     }
 
 
-    def getExternalServices(@DelegatesTo(strategy = Closure.OWNER_FIRST, value = org.zstack.sdk.GetExternalServicesAction.class) Closure c) {
-        def a = new org.zstack.sdk.GetExternalServicesAction()
+    def addExternalServiceConfiguration(@DelegatesTo(strategy = Closure.OWNER_FIRST, value = org.zstack.sdk.external.service.AddExternalServiceConfigurationAction.class) Closure c) {
+        def a = new org.zstack.sdk.external.service.AddExternalServiceConfigurationAction()
         a.sessionId = Test.currentEnvSpec?.session?.uuid
         c.resolveStrategy = Closure.OWNER_FIRST
         c.delegate = a
@@ -12811,6 +12811,89 @@ abstract class ApiHelper {
             return errorOut(a.call())
         }
     }
+
+
+    def deleteExternalServiceConfiguration(@DelegatesTo(strategy = Closure.OWNER_FIRST, value = org.zstack.sdk.external.service.DeleteExternalServiceConfigurationAction.class) Closure c) {
+        def a = new org.zstack.sdk.external.service.DeleteExternalServiceConfigurationAction()
+        a.sessionId = Test.currentEnvSpec?.session?.uuid
+        c.resolveStrategy = Closure.OWNER_FIRST
+        c.delegate = a
+        c()
+        
+
+        if (System.getProperty("apipath") != null) {
+            if (a.apiId == null) {
+                a.apiId = Platform.uuid
+            }
+    
+            def tracker = new ApiPathTracker(a.apiId)
+            def out = errorOut(a.call())
+            def path = tracker.getApiPath()
+            if (!path.isEmpty()) {
+                Test.apiPaths[a.class.name] = path.join(" --->\n")
+            }
+        
+            return out
+        } else {
+            return errorOut(a.call())
+        }
+    }
+
+
+    def getExternalServices(@DelegatesTo(strategy = Closure.OWNER_FIRST, value = org.zstack.sdk.external.service.GetExternalServicesAction.class) Closure c) {
+        def a = new org.zstack.sdk.external.service.GetExternalServicesAction()
+        a.sessionId = Test.currentEnvSpec?.session?.uuid
+        c.resolveStrategy = Closure.OWNER_FIRST
+        c.delegate = a
+        c()
+        
+
+        if (System.getProperty("apipath") != null) {
+            if (a.apiId == null) {
+                a.apiId = Platform.uuid
+            }
+    
+            def tracker = new ApiPathTracker(a.apiId)
+            def out = errorOut(a.call())
+            def path = tracker.getApiPath()
+            if (!path.isEmpty()) {
+                Test.apiPaths[a.class.name] = path.join(" --->\n")
+            }
+        
+            return out
+        } else {
+            return errorOut(a.call())
+        }
+    }
+
+    def queryExternalServiceConfiguration(@DelegatesTo(strategy = Closure.OWNER_FIRST, value = org.zstack.sdk.external.service.QueryExternalServiceConfigurationAction.class) Closure c) {
+        def a = new org.zstack.sdk.external.service.QueryExternalServiceConfigurationAction()
+        a.sessionId = Test.currentEnvSpec?.session?.uuid
+        c.resolveStrategy = Closure.OWNER_FIRST
+        c.delegate = a
+        c()
+        
+        a.conditions = a.conditions.collect { it.toString() }
+
+
+        if (System.getProperty("apipath") != null) {
+            if (a.apiId == null) {
+                a.apiId = Platform.uuid
+            }
+    
+            def tracker = new ApiPathTracker(a.apiId)
+            def out = errorOut(a.call())
+            def path = tracker.getApiPath()
+            if (!path.isEmpty()) {
+                Test.apiPaths[a.class.name] = path.join(" --->\n")
+            }
+        
+            return out
+        } else {
+            return errorOut(a.call())
+        }
+    }
+
 
 
     def getFactoryModeState(@DelegatesTo(strategy = Closure.OWNER_FIRST, value = org.zstack.sdk.GetFactoryModeStateAction.class) Closure c) {
@@ -23417,8 +23500,8 @@ abstract class ApiHelper {
     }
 
 
-    def reloadExternalService(@DelegatesTo(strategy = Closure.OWNER_FIRST, value = org.zstack.sdk.ReloadExternalServiceAction.class) Closure c) {
-        def a = new org.zstack.sdk.ReloadExternalServiceAction()
+    def reloadExternalService(@DelegatesTo(strategy = Closure.OWNER_FIRST, value = org.zstack.sdk.external.service.ReloadExternalServiceAction.class) Closure c) {
+        def a = new org.zstack.sdk.external.service.ReloadExternalServiceAction()
         a.sessionId = Test.currentEnvSpec?.session?.uuid
         c.resolveStrategy = Closure.OWNER_FIRST
         c.delegate = a
@@ -23442,6 +23525,33 @@ abstract class ApiHelper {
             return errorOut(a.call())
         }
     }
+
+    def updateExternalServiceConfiguration(@DelegatesTo(strategy = Closure.OWNER_FIRST, value = org.zstack.sdk.external.service.UpdateExternalServiceConfigurationAction.class) Closure c) {
+        def a = new org.zstack.sdk.external.service.UpdateExternalServiceConfigurationAction()
+        a.sessionId = Test.currentEnvSpec?.session?.uuid
+        c.resolveStrategy = Closure.OWNER_FIRST
+        c.delegate = a
+        c()
+        
+
+        if (System.getProperty("apipath") != null) {
+            if (a.apiId == null) {
+                a.apiId = Platform.uuid
+            }
+    
+            def tracker = new ApiPathTracker(a.apiId)
+            def out = errorOut(a.call())
+            def path = tracker.getApiPath()
+            if (!path.isEmpty()) {
+                Test.apiPaths[a.class.name] = path.join(" --->\n")
+            }
+        
+            return out
+        } else {
+            return errorOut(a.call())
+        }
+    }
+
 
 
     def removeAccessControlListEntry(@DelegatesTo(strategy = Closure.OWNER_FIRST, value = org.zstack.sdk.RemoveAccessControlListEntryAction.class) Closure c) {

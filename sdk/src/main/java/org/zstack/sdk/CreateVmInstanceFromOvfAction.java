@@ -43,6 +43,9 @@ public class CreateVmInstanceFromOvfAction extends AbstractAction {
     @Param(required = false, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
     public boolean deleteImageOnFail = false;
 
+    @Param(required = false, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
+    public java.lang.Boolean vmEncryption;
+
     @Param(required = false)
     public java.lang.String resourceUuid;
 

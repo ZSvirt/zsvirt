@@ -7,11 +7,12 @@ import org.zstack.header.keyprovider.EncryptedResourceKeyRefVO_;
 import org.zstack.header.message.Message;
 import org.zstack.header.message.NeedReplyMessage;
 import org.zstack.header.storage.snapshot.APIQueryVolumeSnapshotReply;
+import org.zstack.header.storage.snapshot.APIQueryVolumeSnapshotTreeReply;
 import org.zstack.header.storage.snapshot.VolumeSnapshotInventory;
+import org.zstack.header.storage.snapshot.VolumeSnapshotTree;
+import org.zstack.header.storage.snapshot.VolumeSnapshotTreeInventory;
 import org.zstack.header.storage.snapshot.VolumeSnapshotVO;
 import org.zstack.header.storage.snapshot.VolumeSnapshotVO_;
-import org.zstack.header.tpm.entity.TpmVO;
-import org.zstack.header.tpm.entity.TpmVO_;
 import org.zstack.header.vm.APIQueryVmInstanceReply;
 import org.zstack.header.vm.VmInstanceInventory;
 import org.zstack.header.vm.VmInstanceVO;
@@ -42,6 +43,7 @@ public class EncryptionInventoryReplyMarshaller implements MarshalReplyMessageEx
                 APIQueryVmInstanceReply.class,
                 APIQueryVolumeReply.class,
                 APIQueryVolumeSnapshotReply.class,
+                APIQueryVolumeSnapshotTreeReply.class,
                 APIZQLQueryReply.class
         );
     }
@@ -54,6 +56,8 @@ public class EncryptionInventoryReplyMarshaller implements MarshalReplyMessageEx
             fillVolumeEncryptionInfo(((APIQueryVolumeReply) replyOrEvent).getInventories());
         } else if (replyOrEvent instanceof APIQueryVolumeSnapshotReply) {
             fillVolumeSnapshotEncryptionInfo(((APIQueryVolumeSnapshotReply) replyOrEvent).getInventories());
+        } else if (replyOrEvent instanceof APIQueryVolumeSnapshotTreeReply) {
+            fillVolumeSnapshotTreeEncryptionInfo(((APIQueryVolumeSnapshotTreeReply) replyOrEvent).getInventories());
         } else if (replyOrEvent instanceof APIZQLQueryReply) {
             fillZqlResultEncryptionInfo((APIZQLQueryReply) replyOrEvent);
         }
@@ -114,6 +118,35 @@ public class EncryptionInventoryReplyMarshaller implements MarshalReplyMessageEx
         }
     }
 
+    private void fillVolumeSnapshotTreeEncryptionInfo(List<VolumeSnapshotTreeInventory> trees) {
+        if (trees == null || trees.isEmpty()) {
+            return;
+        }
+
+        // Snapshot tree replies embed VolumeSnapshotInventory nodes that also need keyLastOpDate.
+        List<VolumeSnapshotInventory> snapshots = new ArrayList<>();
+        for (VolumeSnapshotTreeInventory tree : trees) {
+            collectSnapshotsFromTree(tree.getTree(), snapshots);
+        }
+        fillVolumeSnapshotEncryptionInfo(snapshots);
+    }
+
+    private void collectSnapshotsFromTree(VolumeSnapshotTree.SnapshotLeafInventory leaf,
+                                          List<VolumeSnapshotInventory> snapshots) {
+        if (leaf == null) {
+            return;
+        }
+
+        if (leaf.getInventory() != null) {
+            snapshots.add(leaf.getInventory());
+        }
+        if (leaf.getChildren() != null) {
+            for (VolumeSnapshotTree.SnapshotLeafInventory child : leaf.getChildren()) {
+                collectSnapshotsFromTree(child, snapshots);
+            }
+        }
+    }
+
     private void fillVolumeSnapshotEncryptionInfo(List<VolumeSnapshotInventory> snapshots) {
         if (snapshots == null || snapshots.isEmpty()) {
             return;
@@ -126,16 +159,59 @@ public class EncryptionInventoryReplyMarshaller implements MarshalReplyMessageEx
             return;
         }
 
+        Set<String> encryptedSnapshotUuids = new HashSet<>();
+        Map<String, Timestamp> createDateByUuid = new HashMap<>();
         List<Tuple> tuples = Q.New(VolumeSnapshotVO.class)
-                .select(VolumeSnapshotVO_.uuid, VolumeSnapshotVO_.encrypted)
+                .select(VolumeSnapshotVO_.uuid, VolumeSnapshotVO_.encrypted, VolumeSnapshotVO_.createDate)
                 .in(VolumeSnapshotVO_.uuid, snapshotByUuid.keySet())
                 .listTuple();
         for (Tuple t : tuples) {
             VolumeSnapshotInventory inv = snapshotByUuid.get(t.get(0, String.class));
-            if (inv != null) {
-                inv.setEncrypted(t.get(1, Boolean.class));
+            if (inv == null) {
+                continue;
+            }
+
+            String snapshotUuid = t.get(0, String.class);
+            boolean encrypted = Boolean.TRUE.equals(t.get(1, Boolean.class));
+            inv.setEncrypted(encrypted);
+            createDateByUuid.put(snapshotUuid, t.get(2, Timestamp.class));
+            if (encrypted) {
+                encryptedSnapshotUuids.add(snapshotUuid);
+            } else {
+                inv.setKeyLastOpDate(null);
             }
         }
+
+        Map<String, Timestamp> keyDateBySnapshotUuid = queryLatestKeyDates(
+                VolumeSnapshotVO.class.getSimpleName(), encryptedSnapshotUuids);
+        for (String snapshotUuid : encryptedSnapshotUuids) {
+            VolumeSnapshotInventory inv = snapshotByUuid.get(snapshotUuid);
+            if (inv == null) {
+                continue;
+            }
+
+            Timestamp keyDate = keyDateBySnapshotUuid.get(snapshotUuid);
+            inv.setKeyLastOpDate(keyDate != null ? keyDate : createDateByUuid.get(snapshotUuid));
+        }
+    }
+
+    private Map<String, Timestamp> queryLatestKeyDates(String resourceType, Set<String> resourceUuids) {
+        if (resourceUuids == null || resourceUuids.isEmpty()) {
+            return Collections.emptyMap();
+        }
+
+        List<EncryptedResourceKeyRefVO> refs = Q.New(EncryptedResourceKeyRefVO.class)
+                .eq(EncryptedResourceKeyRefVO_.resourceType, resourceType)
+                .in(EncryptedResourceKeyRefVO_.resourceUuid, resourceUuids)
+                .list();
+        Map<String, Timestamp> ret = new HashMap<>();
+        for (EncryptedResourceKeyRefVO ref : refs) {
+            Timestamp keyDate = ref.getLastOpDate() == null ? ref.getCreateDate() : ref.getLastOpDate();
+            if (keyDate != null) {
+                ret.merge(ref.getResourceUuid(), keyDate, (existing, incoming) -> incoming.after(existing) ? incoming : existing);
+            }
+        }
+        return ret;
     }
 
     private void fillVmEncryptionInfo(List<VmInstanceInventory> vms) {
@@ -155,15 +231,10 @@ public class EncryptionInventoryReplyMarshaller implements MarshalReplyMessageEx
         Map<String, Boolean> vmEncryptionByUuid = queryVmEncryptionStates(vmUuids);
         Map<String, List<String>> encryptedVolumeUuidsByVmUuid = new HashMap<>();
         Set<String> encryptedVolumeUuids = queryEncryptedVolumeUuids(vmUuids, encryptedVolumeUuidsByVmUuid);
-        Map<String, String> tpmUuidToVmUuid = queryTpmUuidToVmUuid(vmUuids);
 
-        Set<String> volumeKeyRefVmUuids = new HashSet<>();
-        Set<String> tpmKeyRefVmUuids = new HashSet<>();
         Map<String, List<Timestamp>> keyDatesByVmUuid = new HashMap<>();
-        addRefDates(volumeKeyRefVmUuids, keyDatesByVmUuid, Collections.singletonMap(VolumeVO.class.getSimpleName(), encryptedVolumeUuids),
+        addRefDates(keyDatesByVmUuid, Collections.singletonMap(VolumeVO.class.getSimpleName(), encryptedVolumeUuids),
                 resourceUuidToVmUuid(encryptedVolumeUuidsByVmUuid));
-        addRefDates(tpmKeyRefVmUuids, keyDatesByVmUuid, Collections.singletonMap(TpmVO.class.getSimpleName(), tpmUuidToVmUuid.keySet()),
-                tpmUuidToVmUuid);
 
         for (VmInstanceInventory vm : vms) {
             if (vm.getUuid() == null) {
@@ -172,8 +243,7 @@ public class EncryptionInventoryReplyMarshaller implements MarshalReplyMessageEx
 
             boolean hasEncryptedVolume = encryptedVolumeUuidsByVmUuid.containsKey(vm.getUuid());
             boolean hasEncryptedVm = Boolean.TRUE.equals(vmEncryptionByUuid.get(vm.getUuid()));
-            boolean hasEncryptedTpm = tpmKeyRefVmUuids.contains(vm.getUuid());
-            boolean hasEncryptionResource = hasEncryptedVm || hasEncryptedVolume || hasEncryptedTpm;
+            boolean hasEncryptionResource = hasEncryptedVm || hasEncryptedVolume;
             vm.setVmEncryption(hasEncryptedVm);
             vm.setHasEncryptionResource(hasEncryptionResource);
             vm.setKeyLastOpDate(hasEncryptionResource ?
@@ -225,18 +295,6 @@ public class EncryptionInventoryReplyMarshaller implements MarshalReplyMessageEx
         return ret;
     }
 
-    private Map<String, String> queryTpmUuidToVmUuid(Set<String> vmUuids) {
-        List<Tuple> tuples = Q.New(TpmVO.class)
-                .select(TpmVO_.uuid, TpmVO_.vmInstanceUuid)
-                .in(TpmVO_.vmInstanceUuid, vmUuids)
-                .listTuple();
-        return tuples.stream().collect(Collectors.toMap(
-                t -> t.get(0, String.class),
-                t -> t.get(1, String.class),
-                (a, b) -> a
-        ));
-    }
-
     private Map<String, String> resourceUuidToVmUuid(Map<String, List<String>> volumeUuidsByVmUuid) {
         Map<String, String> ret = new HashMap<>();
         for (Map.Entry<String, List<String>> e : volumeUuidsByVmUuid.entrySet()) {
@@ -247,8 +305,7 @@ public class EncryptionInventoryReplyMarshaller implements MarshalReplyMessageEx
         return ret;
     }
 
-    private void addRefDates(Set<String> keyRefVmUuids,
-                             Map<String, List<Timestamp>> keyDatesByVmUuid,
+    private void addRefDates(Map<String, List<Timestamp>> keyDatesByVmUuid,
                              Map<String, Set<String>> resourceUuidsByType,
                              Map<String, String> resourceUuidToVmUuid) {
         for (Map.Entry<String, Set<String>> e : resourceUuidsByType.entrySet()) {
@@ -266,7 +323,6 @@ public class EncryptionInventoryReplyMarshaller implements MarshalReplyMessageEx
                     continue;
                 }
 
-                keyRefVmUuids.add(vmUuid);
                 Timestamp keyDate = ref.getLastOpDate() == null ? ref.getCreateDate() : ref.getLastOpDate();
                 if (keyDate != null) {
                     keyDatesByVmUuid.computeIfAbsent(vmUuid, k -> new ArrayList<>()).add(keyDate);

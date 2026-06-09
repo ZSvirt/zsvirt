@@ -127,6 +127,13 @@ public class VolumeSnapshotInventory {
     private Long size;
 
     private Boolean encrypted;
+    /**
+     * @desc latest key update time of the encrypted snapshot; nullable when not encrypted.
+     * Not persisted on {@link VolumeSnapshotVO}; populated at query reply time from
+     * {@code EncryptedResourceKeyRefVO} by the encryption inventory marshaller.
+     * @nullable
+     */
+    private Timestamp keyLastOpDate;
 
     private int distance;
     /**
@@ -386,6 +393,14 @@ public class VolumeSnapshotInventory {
 
     public void setEncrypted(Boolean encrypted) {
         this.encrypted = encrypted;
+    }
+
+    public Timestamp getKeyLastOpDate() {
+        return keyLastOpDate;
+    }
+
+    public void setKeyLastOpDate(Timestamp keyLastOpDate) {
+        this.keyLastOpDate = keyLastOpDate;
     }
 
     public String getGroupUuid() {

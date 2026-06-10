@@ -59,6 +59,10 @@ public class AccessKeyApiInterceptor implements ApiMessageInterceptor {
             throw new ApiMessageInterceptionException(argerr("Access key ID and secret cannot contain ':'"));
         }
 
+        if (AccessKeyType.System.toString().equals(msg.getAccessKeyType()) && !Account.isAdminPermission(msg.getSession())) {
+            throw new ApiMessageInterceptionException(argerr("Only admin accounts can create a System type access key."));
+        }
+
         /* there is no limitation on SystemAdmin for accessKey */
         if (Account.isAdminPermission(msg.getAccountUuid())) {
             return;

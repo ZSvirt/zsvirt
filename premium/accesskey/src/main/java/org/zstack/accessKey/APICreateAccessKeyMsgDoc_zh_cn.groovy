@@ -28,7 +28,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "4.0.0"
+					since "zsv 4.0.0"
 				}
 				column {
 					name "userUuid"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "4.0.0"
+					since "zsv 4.0.0"
 				}
 				column {
 					name "description"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "4.0.0"
+					since "zsv 4.0.0"
 				}
 				column {
 					name "AccessKeyID"
@@ -55,7 +55,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "4.0.0"
+					since "zsv 4.0.0"
 				}
 				column {
 					name "AccessKeySecret"
@@ -64,7 +64,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "4.0.0"
+					since "zsv 4.0.0"
 				}
 				column {
 					name "resourceUuid"
@@ -73,7 +73,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "4.0.0"
+					since "zsv 4.0.0"
 				}
 				column {
 					name "systemTags"
@@ -82,7 +82,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "4.0.0"
+					since "zsv 4.0.0"
 				}
 				column {
 					name "userTags"
@@ -91,7 +91,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "4.0.0"
+					since "zsv 4.0.0"
 				}
 				column {
 					name "tagUuids"
@@ -100,7 +100,17 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "4.0.0"
+					since "zsv 4.0.0"
+				}
+				column {
+					name "accessKeyType"
+					enclosedIn "params"
+					desc "访问密钥类型，可选 User（用户级）或 System（系统级）"
+					location "body"
+					type "String"
+					optional true
+					since "1.0.1, zsv_5.1.0"
+					values ("User","System")
 				}
 			}
 		}

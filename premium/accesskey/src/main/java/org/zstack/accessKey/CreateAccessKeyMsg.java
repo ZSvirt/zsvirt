@@ -15,6 +15,8 @@ public class CreateAccessKeyMsg extends NeedReplyMessage implements CreateAccess
 
     private String accessKeySecret;
 
+    private String accessKeyType = AccessKeyType.User.toString();
+
     public String getResourceUuid() {
         return resourceUuid;
     }
@@ -66,5 +68,18 @@ public class CreateAccessKeyMsg extends NeedReplyMessage implements CreateAccess
 
     public void setAccessKeySecret(String accessKeySecret) {
         this.accessKeySecret = accessKeySecret;
+    }
+
+    @Override
+    public String getAccessKeyType() {
+        return accessKeyType;
+    }
+
+    public void setAccessKeyType(String accessKeyType) {
+        if (accessKeyType == null || accessKeyType.trim().isEmpty()) {
+            this.accessKeyType = AccessKeyType.User.toString();
+            return;
+        }
+        this.accessKeyType = AccessKeyType.valueOf(accessKeyType).toString();
     }
 }

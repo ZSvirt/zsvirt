@@ -7,6 +7,7 @@ public class SourceClassMap {
         {
 			put("org.zstack.accessKey.AccessKeyInventory", "org.zstack.sdk.AccessKeyInventory");
 			put("org.zstack.accessKey.AccessKeyState", "org.zstack.sdk.AccessKeyState");
+			put("org.zstack.accessKey.AccessKeyType", "org.zstack.sdk.AccessKeyType");
 			put("org.zstack.appliancevm.ApplianceVmInventory", "org.zstack.sdk.ApplianceVmInventory");
 			put("org.zstack.autoscaling.group.AutoScalingGroupInventory", "org.zstack.sdk.AutoScalingGroupInventory");
 			put("org.zstack.autoscaling.group.activity.AutoScalingGroupActivityInventory", "org.zstack.sdk.AutoScalingGroupActivityInventory");
@@ -608,6 +609,7 @@ public class SourceClassMap {
 			put("org.zstack.sdk.AccessControlRuleInventory", "org.zstack.loginControl.entity.AccessControlRuleInventory");
 			put("org.zstack.sdk.AccessKeyInventory", "org.zstack.accessKey.AccessKeyInventory");
 			put("org.zstack.sdk.AccessKeyState", "org.zstack.accessKey.AccessKeyState");
+			put("org.zstack.sdk.AccessKeyType", "org.zstack.accessKey.AccessKeyType");
 			put("org.zstack.sdk.AccessPathInfo", "org.zstack.header.volume.block.AccessPathInfo");
 			put("org.zstack.sdk.AccountInventory", "org.zstack.header.identity.AccountInventory");
 			put("org.zstack.sdk.AccountPriceTableRefInventory", "org.zstack.billing.table.AccountPriceTableRefInventory");

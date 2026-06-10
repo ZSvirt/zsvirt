@@ -1,6 +1,7 @@
 package org.zstack.sdk;
 
 import org.zstack.sdk.AccessKeyState;
+import org.zstack.sdk.AccessKeyType;
 
 public class AccessKeyInventory  {
 
@@ -59,6 +60,14 @@ public class AccessKeyInventory  {
     }
     public AccessKeyState getState() {
         return this.state;
+    }
+
+    public AccessKeyType type;
+    public void setType(AccessKeyType type) {
+        this.type = type;
+    }
+    public AccessKeyType getType() {
+        return this.type;
     }
 
     public java.sql.Timestamp createDate;

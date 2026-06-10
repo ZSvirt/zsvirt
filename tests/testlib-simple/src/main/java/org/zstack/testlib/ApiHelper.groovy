@@ -37537,6 +37537,112 @@ abstract class ApiHelper {
     }
 
 
+    def deleteResNotifySubscription(@DelegatesTo(strategy = Closure.OWNER_FIRST, value = org.zstack.sdk.zwatch.resnotify.DeleteResNotifySubscriptionAction.class) Closure c) {
+        def a = new org.zstack.sdk.zwatch.resnotify.DeleteResNotifySubscriptionAction()
+        a.sessionId = Test.currentEnvSpec?.session?.uuid
+        c.resolveStrategy = Closure.OWNER_FIRST
+        c.delegate = a
+        c()
+
+        if (System.getProperty("apipath") != null) {
+            if (a.apiId == null) {
+                a.apiId = Platform.uuid
+            }
+
+            def tracker = new ApiPathTracker(a.apiId)
+            def out = errorOut(a.call())
+            def path = tracker.getApiPath()
+            if (!path.isEmpty()) {
+                Test.apiPaths[a.class.name] = path.join(" --->\n")
+            }
+
+            return out
+        } else {
+            return errorOut(a.call())
+        }
+    }
+
+
+    def queryResNotifySubscription(@DelegatesTo(strategy = Closure.OWNER_FIRST, value = org.zstack.sdk.zwatch.resnotify.QueryResNotifySubscriptionAction.class) Closure c) {
+        def a = new org.zstack.sdk.zwatch.resnotify.QueryResNotifySubscriptionAction()
+        a.sessionId = Test.currentEnvSpec?.session?.uuid
+        c.resolveStrategy = Closure.OWNER_FIRST
+        c.delegate = a
+        c()
+
+        a.conditions = a.conditions.collect { it.toString() }
+
+        if (System.getProperty("apipath") != null) {
+            if (a.apiId == null) {
+                a.apiId = Platform.uuid
+            }
+
+            def tracker = new ApiPathTracker(a.apiId)
+            def out = errorOut(a.call())
+            def path = tracker.getApiPath()
+            if (!path.isEmpty()) {
+                Test.apiPaths[a.class.name] = path.join(" --->\n")
+            }
+
+            return out
+        } else {
+            return errorOut(a.call())
+        }
+    }
+
+
+    def subscribeResNotify(@DelegatesTo(strategy = Closure.OWNER_FIRST, value = org.zstack.sdk.zwatch.resnotify.SubscribeResNotifyAction.class) Closure c) {
+        def a = new org.zstack.sdk.zwatch.resnotify.SubscribeResNotifyAction()
+        a.sessionId = Test.currentEnvSpec?.session?.uuid
+        c.resolveStrategy = Closure.OWNER_FIRST
+        c.delegate = a
+        c()
+
+        if (System.getProperty("apipath") != null) {
+            if (a.apiId == null) {
+                a.apiId = Platform.uuid
+            }
+
+            def tracker = new ApiPathTracker(a.apiId)
+            def out = errorOut(a.call())
+            def path = tracker.getApiPath()
+            if (!path.isEmpty()) {
+                Test.apiPaths[a.class.name] = path.join(" --->\n")
+            }
+
+            return out
+        } else {
+            return errorOut(a.call())
+        }
+    }
+
+
+    def updateResNotifySubscription(@DelegatesTo(strategy = Closure.OWNER_FIRST, value = org.zstack.sdk.zwatch.resnotify.UpdateResNotifySubscriptionAction.class) Closure c) {
+        def a = new org.zstack.sdk.zwatch.resnotify.UpdateResNotifySubscriptionAction()
+        a.sessionId = Test.currentEnvSpec?.session?.uuid
+        c.resolveStrategy = Closure.OWNER_FIRST
+        c.delegate = a
+        c()
+
+        if (System.getProperty("apipath") != null) {
+            if (a.apiId == null) {
+                a.apiId = Platform.uuid
+            }
+
+            def tracker = new ApiPathTracker(a.apiId)
+            def out = errorOut(a.call())
+            def path = tracker.getApiPath()
+            if (!path.isEmpty()) {
+                Test.apiPaths[a.class.name] = path.join(" --->\n")
+            }
+
+            return out
+        } else {
+            return errorOut(a.call())
+        }
+    }
+
+
     def addThirdpartyPlatform(@DelegatesTo(strategy = Closure.OWNER_FIRST, value = org.zstack.sdk.zwatch.thirdparty.api.AddThirdpartyPlatformAction.class) Closure c) {
         def a = new org.zstack.sdk.zwatch.thirdparty.api.AddThirdpartyPlatformAction()
         a.sessionId = Test.currentEnvSpec?.session?.uuid

@@ -595,6 +595,10 @@ public class SourceClassMap {
 			put("org.zstack.zwatch.monitorgroup.entity.MonitorGroupTemplateRefInventory", "org.zstack.sdk.zwatch.monitorgroup.entity.MonitorGroupTemplateRefInventory");
 			put("org.zstack.zwatch.monitorgroup.entity.MonitorGroupTemplateRefVO", "org.zstack.sdk.zwatch.monitorgroup.entity.MonitorGroupTemplateRefVO");
 			put("org.zstack.zwatch.monitorgroup.entity.MonitorTemplateInventory", "org.zstack.sdk.zwatch.monitorgroup.entity.MonitorTemplateInventory");
+			put("org.zstack.zwatch.resnotify.ResNotifySubscriptionInventory", "org.zstack.sdk.zwatch.resnotify.ResNotifySubscriptionInventory");
+			put("org.zstack.zwatch.resnotify.ResNotifySubscriptionState", "org.zstack.sdk.zwatch.resnotify.ResNotifySubscriptionState");
+			put("org.zstack.zwatch.resnotify.ResNotifyType", "org.zstack.sdk.zwatch.resnotify.ResNotifyType");
+			put("org.zstack.zwatch.resnotify.ResNotifyWebhookRefInventory", "org.zstack.sdk.zwatch.resnotify.ResNotifyWebhookRefInventory");
 			put("org.zstack.zwatch.ruleengine.ComparisonOperator", "org.zstack.sdk.zwatch.ruleengine.ComparisonOperator");
 			put("org.zstack.zwatch.thirdparty.entity.SNSEndpointThirdpartyAlertHistoryInventory", "org.zstack.sdk.zwatch.thirdparty.entity.SNSEndpointThirdpartyAlertHistoryInventory");
 			put("org.zstack.zwatch.thirdparty.entity.ThirdpartyOriginalAlertInventory", "org.zstack.sdk.zwatch.thirdparty.entity.ThirdpartyOriginalAlertInventory");
@@ -1194,6 +1198,10 @@ public class SourceClassMap {
 			put("org.zstack.sdk.zwatch.monitorgroup.entity.MonitorGroupTemplateRefInventory", "org.zstack.zwatch.monitorgroup.entity.MonitorGroupTemplateRefInventory");
 			put("org.zstack.sdk.zwatch.monitorgroup.entity.MonitorGroupTemplateRefVO", "org.zstack.zwatch.monitorgroup.entity.MonitorGroupTemplateRefVO");
 			put("org.zstack.sdk.zwatch.monitorgroup.entity.MonitorTemplateInventory", "org.zstack.zwatch.monitorgroup.entity.MonitorTemplateInventory");
+			put("org.zstack.sdk.zwatch.resnotify.ResNotifySubscriptionInventory", "org.zstack.zwatch.resnotify.ResNotifySubscriptionInventory");
+			put("org.zstack.sdk.zwatch.resnotify.ResNotifySubscriptionState", "org.zstack.zwatch.resnotify.ResNotifySubscriptionState");
+			put("org.zstack.sdk.zwatch.resnotify.ResNotifyType", "org.zstack.zwatch.resnotify.ResNotifyType");
+			put("org.zstack.sdk.zwatch.resnotify.ResNotifyWebhookRefInventory", "org.zstack.zwatch.resnotify.ResNotifyWebhookRefInventory");
 			put("org.zstack.sdk.zwatch.ruleengine.ComparisonOperator", "org.zstack.zwatch.ruleengine.ComparisonOperator");
 			put("org.zstack.sdk.zwatch.thirdparty.entity.SNSEndpointThirdpartyAlertHistoryInventory", "org.zstack.zwatch.thirdparty.entity.SNSEndpointThirdpartyAlertHistoryInventory");
 			put("org.zstack.sdk.zwatch.thirdparty.entity.ThirdpartyOriginalAlertInventory", "org.zstack.zwatch.thirdparty.entity.ThirdpartyOriginalAlertInventory");

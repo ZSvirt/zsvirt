@@ -239,14 +239,15 @@ public class InstantiateVolumeForNewCreatedVmExtension implements PreVmInstantia
                 for (String imageUuid : spec.getDataVolumeTemplateUuids()) {
                     List<String> perImageTags = spec.getDataVolumeFromTemplateSystemTags() == null
                             ? null : spec.getDataVolumeFromTemplateSystemTags().get(imageUuid);
-                    msgs.add(buildCreateDataVolumeFromTemplateMsg(spec, imageUuid, defaultPsUuid, perImageTags, accountUuid));
+                    msgs.add(buildCreateDataVolumeFromTemplateMsg(spec, imageUuid, defaultPsUuid, perImageTags,
+                            accountUuid, null));
                 }
             }
 
             for (DiskAO diskAO : templateDataDisks) {
                 String psUuid = diskAO.getPrimaryStorageUuid() != null ? diskAO.getPrimaryStorageUuid() : defaultPsUuid;
                 msgs.add(buildCreateDataVolumeFromTemplateMsg(spec, diskAO.getTemplateUuid(), psUuid,
-                        diskAO.getSystemTags(), accountUuid));
+                        diskAO.getSystemTags(), accountUuid, diskAO.getEncrypted()));
             }
         }
 
@@ -254,7 +255,8 @@ public class InstantiateVolumeForNewCreatedVmExtension implements PreVmInstantia
     }
 
     private CreateDataVolumeFromVolumeTemplateMsg buildCreateDataVolumeFromTemplateMsg(
-            VmInstanceSpec spec, String imageUuid, String psUuid, List<String> systemTags, String accountUuid) {
+            VmInstanceSpec spec, String imageUuid, String psUuid, List<String> systemTags, String accountUuid,
+            Boolean encrypted) {
         CreateDataVolumeFromVolumeTemplateMsg cmsg = new CreateDataVolumeFromVolumeTemplateMsg();
         cmsg.setHostUuid(spec.getDestHost().getUuid());
         cmsg.setImageUuid(imageUuid);
@@ -266,6 +268,7 @@ public class InstantiateVolumeForNewCreatedVmExtension implements PreVmInstantia
         cmsg.setDescription(t.get(1, String.class));
         cmsg.setAccountUuid(accountUuid);
         cmsg.setSystemTags(systemTags);
+        cmsg.setEncrypted(encrypted);
         bus.makeLocalServiceId(cmsg, VolumeConstant.SERVICE_ID);
         return cmsg;
     }

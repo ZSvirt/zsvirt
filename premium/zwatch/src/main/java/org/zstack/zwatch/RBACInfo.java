@@ -226,5 +226,13 @@ public class RBACInfo implements PackageDescription {
                 )
                 .toService(SearchConstant.QUERY_FACADE_SERVICE_ID)
                 .build();
+        apis()
+                .inPackage("org.zstack.zwatch.resnotify")
+                .toService("zwatch.resNotify")
+                .build();
+        apis()
+                .api(org.zstack.zwatch.resnotify.APIQueryResNotifySubscriptionMsg.class)
+                .toService(SearchConstant.QUERY_FACADE_SERVICE_ID)
+                .build();
     }
 }

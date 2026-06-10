@@ -27,6 +27,16 @@ public class L3NetworkPrometheusNamespace extends AbstractPrometheusNamespace {
     }
 
     public static class L3NetworkCollector implements MetricCollector {
+        private static class L3Info {
+            String type;
+            L3NetworkState state;
+
+            L3Info(String type, L3NetworkState state) {
+                this.type = type;
+                this.state = state;
+            }
+        }
+
         private String seriesName(String metricName) {
             return PrometheusNamespace.makeSeriesName(Namespace.zstackNamespaceName(L3NetworkNamespace.NAME), metricName);
         }
@@ -63,22 +73,12 @@ public class L3NetworkPrometheusNamespace extends AbstractPrometheusNamespace {
 
                     long totalL3 = q(L3NetworkVO.class).count();
 
-                    class L3Info {
-                        String type;
-                        L3NetworkState state;
-
-                        L3Info(String type, L3NetworkState state) {
-                            this.type = type;
-                            this.state = state;
-                        }
-                    }
-
                     sql("select l3.uuid, l3.state, l3.type, ipr.startIp, ipr.endIp from L3NetworkVO l3, IpRangeVO ipr where l3.uuid = ipr.l3NetworkUuid and ipr.ipVersion = 4", Tuple.class)
                             .limit(500).paginate(totalL3, (List<Tuple> tss)-> {
                                 Map<String, Long> l3TotalIPCounts = new HashMap<>();
                                 Map<String, L3Info> info = new HashMap<>();
 
-                                tss.forEach(ts -> {
+                                for (Tuple ts : tss) {
                                     String l3Uuid = ts.get(0, String.class);
                                     L3NetworkState state = ts.get(1, L3NetworkState.class);
                                     String type = ts.get(2, String.class);
@@ -90,9 +90,11 @@ public class L3NetworkPrometheusNamespace extends AbstractPrometheusNamespace {
                                     l3TotalIPCounts.put(l3Uuid, l3TotalIPCount);
 
                                     info.putIfAbsent(l3Uuid, new L3Info(type, state));
-                                });
+                                }
 
-                                l3TotalIPCounts.forEach((l3Uuid, l3TotalIPCount)-> {
+                                for (Map.Entry<String, Long> entry : l3TotalIPCounts.entrySet()) {
+                                    String l3Uuid = entry.getKey();
+                                    Long l3TotalIPCount = entry.getValue();
                                     /* gateway ip is not in the iprange */
                                     long used = sql("select count(distinct u.ip) from UsedIpVO u where u.gateway != u.ip and u.l3NetworkUuid = :l3Uuid and u.ipVersion = 4", Long.class)
                                             .param("l3Uuid", l3Uuid).find();
@@ -115,7 +117,7 @@ public class L3NetworkPrometheusNamespace extends AbstractPrometheusNamespace {
                                     AvailableIPInPercent.addMetric(asList(l3Uuid, l3Info.type), l3TotalIPCount == 0 ? 0 : ((double) avail / l3TotalIPCount) * 100);
                                     UsedIPCount.addMetric(asList(l3Uuid, l3Info.type), used);
                                     UsedIPInPercent.addMetric(asList(l3Uuid, l3Info.type), l3TotalIPCount == 0 ? 0 : ((double) used / l3TotalIPCount) * 100);
-                                });
+                                }
                     });
 
                     samples.add(new GaugeMetricFamily(seriesName(L3NetworkNamespace.TotalAvailableIPCount.getName()), "help for TotalAvailableIPCount", allL3Avail));

@@ -565,6 +565,8 @@
         <class>org.zstack.header.vm.metadata.VmMetadataFlushStateVO</class>
         <class>org.zstack.log.server.LogServerVO</class>
         <class>org.zstack.header.core.external.service.ExternalServiceConfigurationVO</class>
+        <class>org.zstack.zwatch.resnotify.ResNotifySubscriptionVO</class>
+        <class>org.zstack.zwatch.resnotify.ResNotifyWebhookRefVO</class>
 
         <!-- module agents -->
         <class>org.zstack.softwarePackage.entity.SoftwarePackageVO</class>

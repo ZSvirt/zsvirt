@@ -56,7 +56,7 @@
 
     <bean id="EncryptionInventoryReplyMarshaller" class="org.zstack.crypto.keyprovider.EncryptionInventoryReplyMarshaller">
         <zstack:plugin>
-            <zstack:extension interface="org.zstack.core.cloudbus.MarshalReplyMessageExtensionPoint"/>
+            <zstack:extension interface="org.zstack.core.cloudbus.MarshalReplyMessageExtensionPoint" order="-100"/>
         </zstack:plugin>
     </bean>
 

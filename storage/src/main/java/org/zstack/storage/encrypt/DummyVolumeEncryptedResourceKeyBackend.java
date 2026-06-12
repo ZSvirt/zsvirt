@@ -32,6 +32,11 @@ public class DummyVolumeEncryptedResourceKeyBackend implements VolumeEncryptedRe
     }
 
     @Override
+    public void detachKeyProviderFromBackup(String backupUuid) {
+        logger.debug(String.format("ignore detach key provider from backup[uuid:%s]", backupUuid));
+    }
+
+    @Override
     public String findKeyProviderUuidByVolume(String volumeUuid) {
         return null;
     }
@@ -74,6 +79,11 @@ public class DummyVolumeEncryptedResourceKeyBackend implements VolumeEncryptedRe
     @Override
     public void copyTemporarySnapshotImageKeyToVolume(String imageUuid, String volumeUuid) {
         logger.debug(String.format("ignore copy temporary snapshot image[uuid:%s] key to volume[uuid:%s]", imageUuid, volumeUuid));
+    }
+
+    @Override
+    public void copyVolumeKeyToBackup(String volumeUuid, String backupUuid) {
+        logger.debug(String.format("ignore copy volume[uuid:%s] key to backup[uuid:%s]", volumeUuid, backupUuid));
     }
 
     @Override

@@ -24,6 +24,8 @@ public interface VolumeEncryptedResourceKeyBackend {
 
     void detachKeyProviderFromTemporarySnapshotImage(String imageUuid);
 
+    void detachKeyProviderFromBackup(String backupUuid);
+
     /**
      * @return provider uuid or null when not bound / crypto not installed
      */
@@ -47,6 +49,8 @@ public interface VolumeEncryptedResourceKeyBackend {
     void copySnapshotKeyToTemporarySnapshotImage(String snapshotUuid, String imageUuid);
 
     void copyTemporarySnapshotImageKeyToVolume(String imageUuid, String volumeUuid);
+
+    void copyVolumeKeyToBackup(String volumeUuid, String backupUuid);
 
     /**
      * Global default key provider uuid, or null (e.g. NONE / crypto not installed).

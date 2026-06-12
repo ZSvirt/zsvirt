@@ -294,7 +294,17 @@ VALUES ('vm-metadata-cleanup', 'Idle', CURRENT_TIMESTAMP);
 -- Feature: Volume LUKS encryption flag (API opt-in + EncryptedResourceKeyRefVO binding) | ZSPHER-222
 ALTER TABLE `zstack`.`VolumeEO` ADD COLUMN `encrypted` tinyint(1) NOT NULL DEFAULT 0;
 ALTER TABLE `zstack`.`VolumeSnapshotEO` ADD COLUMN `encrypted` tinyint(1) NOT NULL DEFAULT 0;
+ALTER TABLE `zstack`.`VolumeBackupVO` ADD COLUMN `encrypted` tinyint(1) NOT NULL DEFAULT 0;
 ALTER TABLE `zstack`.`VmInstanceEO` ADD COLUMN `vmEncryption` tinyint(1) NOT NULL DEFAULT 0;
+
+UPDATE `zstack`.`VolumeBackupVO` vb
+SET vb.`encrypted` = 1
+WHERE EXISTS (
+    SELECT 1
+    FROM `zstack`.`EncryptedResourceKeyRefVO` keyRef
+    WHERE keyRef.`resourceType` = 'VolumeBackupVO'
+      AND keyRef.`resourceUuid` = vb.`uuid`
+);
 
 DROP VIEW IF EXISTS `zstack`.`VolumeVO`;
 CREATE VIEW `zstack`.`VolumeVO` AS

@@ -75,6 +75,18 @@ doc {
 		type "Timestamp"
 		since "2.6"
 	}
+	field {
+		name "encrypted"
+		desc "备份数据是否加密"
+		type "Boolean"
+		since "1.0.1, zsv 5.1.0"
+	}
+	field {
+		name "keyLastOpDate"
+		desc "加密备份密钥最后更新时间，非加密备份为空"
+		type "Timestamp"
+		since "1.0.1, zsv 5.1.0"
+	}
 	ref {
 		name "backupStorageRefs"
 		path "org.zstack.header.storage.backup.VolumeBackupInventory.backupStorageRefs"

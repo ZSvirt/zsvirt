@@ -10,7 +10,9 @@ import org.zstack.storage.backup.imagestore.ImageStoreGlobalConfig;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class VolumeBackupKvmCommands {
     public static final String TAKE_VOLUME_BACKUP_PATH = "/vm/volume/takebackup";
@@ -254,6 +256,8 @@ public class VolumeBackupKvmCommands {
         private String username;
         @NoLogging
         private String password;
+        @NoLogging
+        private Map<String, Object> addons;
         private int sshPort;
         private String bsPath;
         private String uploadDir;
@@ -380,6 +384,17 @@ public class VolumeBackupKvmCommands {
 
         public void setStorageInfo(ImageStoreBackupStorageCommands.StorageInfo storageInfo) {
             this.storageInfo = storageInfo;
+        }
+
+        public Map<String, Object> getAddons() {
+            if (addons == null) {
+                addons = new HashMap<>();
+            }
+            return addons;
+        }
+
+        public void setAddons(Map<String, Object> addons) {
+            this.addons = addons;
         }
 
         public String getBsPath() {

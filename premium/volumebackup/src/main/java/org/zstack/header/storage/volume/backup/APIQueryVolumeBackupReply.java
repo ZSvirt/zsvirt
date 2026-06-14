@@ -28,6 +28,7 @@ public class APIQueryVolumeBackupReply extends APIQueryReply {
         inv.setDescription("my backup");
         inv.setSize(1310720L);
         inv.setVolumeUuid(uuid());
+        inv.setEncrypted(false);
 
         reply.setInventories(Collections.singletonList(inv));
         return reply;

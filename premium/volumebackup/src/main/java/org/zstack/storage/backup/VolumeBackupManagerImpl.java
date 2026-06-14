@@ -9,6 +9,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.zstack.compute.vm.NewVmInstanceMsgBuilder;
 import org.zstack.core.Platform;
 import org.zstack.core.asyncbatch.While;
+import org.zstack.core.cascade.CascadeConstant;
+import org.zstack.core.cascade.CascadeFacade;
 import org.zstack.core.cloudbus.CloudBus;
 import org.zstack.core.cloudbus.CloudBusCallBack;
 import org.zstack.core.cloudbus.MessageSafe;
@@ -110,6 +112,8 @@ public class VolumeBackupManagerImpl extends AbstractService implements
     private AccountManager acntMgr;
     @Autowired
     private PluginRegistry pluginRgty;
+    @Autowired
+    private CascadeFacade casf;
     @Autowired
     private VmInstanceResourceMetadataManager vidm;
 
@@ -1037,13 +1041,13 @@ public class VolumeBackupManagerImpl extends AbstractService implements
             return;
         }
 
+        String backupUuid = backup.getUuid();
         if (CollectionUtils.isEmpty(backup.getBackupStorageRefs())) {
             dbf.remove(backup);
             completion.success();
             return;
         }
 
-        String backupUuid = backup.getUuid();
         While.Do<DeleteBitsOnBackupStorageMsg> consumer, msgSender;
         BiFunction<String, String, Boolean> otherDelMsgBuilder;
         Map<String, VolumeBackupDeletionMsg> otherMsgs = new HashMap<>();
@@ -1406,7 +1410,8 @@ public class VolumeBackupManagerImpl extends AbstractService implements
             @Override
             public void run(SyncTaskChain chain) {
                 APIDeleteVolumeBackupEvent evt = new APIDeleteVolumeBackupEvent(msg.getId());
-                doDeleteVolumeBackup(msg,  msg.getBackupStorageUuids(), new Completion(msg, chain) {
+                // TODO: switch to cascade deletion when encrypted volume backup deletion is supported.
+                doDeleteVolumeBackup(msg, msg.getBackupStorageUuids(), new Completion(msg, chain) {
                     @Override
                     public void success() {
                         bus.publish(evt);
@@ -1437,31 +1442,32 @@ public class VolumeBackupManagerImpl extends AbstractService implements
             return;
         }
 
-        new While<>(vos).each((vo, whileCompletion) -> {
-            VolumeBackupDeletionMsg dmsg = new VolumeBackupDeletionMsg();
-            dmsg.setBackupStorageUuids(msg.getBackupStorageUuids());
-            dmsg.setUuid(vo.getUuid());
-            dmsg.setHandleDependency(msg.isHandleDependency());
-            bus.makeTargetServiceIdByResourceUuid(dmsg, VolumeBackupConstant.SERVICE_ID, vo.getVolumeUuid());
-            bus.send(dmsg, new CloudBusCallBack(whileCompletion) {
-                @Override
-                public void run(MessageReply reply) {
-                    if (!reply.isSuccess()) {
-                        logger.warn(String.format("delete volume backup failed: %s", reply.getError().getDetails()));
+        List<VolumeBackupDeletionStruct> structs = vos.stream().map(vo -> {
+            VolumeBackupDeletionStruct struct = new VolumeBackupDeletionStruct();
+            struct.setVolumeBackupUuid(vo.getUuid());
+            struct.setBackupStorageUuids(msg.getBackupStorageUuids());
+            struct.setHandleDependency(msg.isHandleDependency());
+            return struct;
+        }).collect(Collectors.toList());
+
+        casf.asyncCascade(CascadeConstant.DELETION_DELETE_CODE,
+                VolumeBackupVO.class.getSimpleName(),
+                structs,
+                new Completion(msg) {
+                    @Override
+                    public void success() {
+                        for (CleanUpVmBackupExtensionPoint ext : pluginRgty.getExtensionList(CleanUpVmBackupExtensionPoint.class)) {
+                            ext.afterCleanUpVmBackup(msg.getGroupUuid());
+                        }
+                        bus.publish(evt);
                     }
 
-                    whileCompletion.done();
-                }
-            });
-        }).run(new WhileDoneCompletion(msg) {
-            @Override
-            public void done(ErrorCodeList errorCodeList) {
-                for (CleanUpVmBackupExtensionPoint ext : pluginRgty.getExtensionList(CleanUpVmBackupExtensionPoint.class)) {
-                    ext.afterCleanUpVmBackup(msg.getGroupUuid());
-                }
-                bus.publish(evt);
-            }
-        });
+                    @Override
+                    public void fail(ErrorCode errorCode) {
+                        evt.setError(errorCode);
+                        bus.publish(evt);
+                    }
+                });
     }
 
     private void deleteImageAsync(String imageUuid, String bsUuid) {

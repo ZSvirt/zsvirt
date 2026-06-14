@@ -27,6 +27,24 @@
     <bean id="KeyProviderResourceKeyBackendVolume" class="org.zstack.crypto.keyprovider.KeyProviderResourceKeyBackendVolume" primary="true">
     </bean>
 
+    <bean id="VolumeBackupEncryptionCascadeExtension" class="org.zstack.crypto.volumebackup.VolumeBackupEncryptionCascadeExtension">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.core.cascade.CascadeExtensionPoint"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="VolumeBackupEncryptionKvmCommandExtension" class="org.zstack.crypto.volumebackup.VolumeBackupEncryptionKvmCommandExtension">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.storage.volume.backup.VmBackupKvmCommandExtensionPoint"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="VolumeBackupRekeyAssociation" class="org.zstack.crypto.volumebackup.VolumeBackupRekeyAssociation">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.keyprovider.KeyProviderRekeyAssociationExtensionPoint"/>
+        </zstack:plugin>
+    </bean>
+
     <bean id="EncryptedResourceKeyManager" class="org.zstack.crypto.keyprovider.EncryptedResourceKeyManagerImpl" primary="true">
     </bean>
 

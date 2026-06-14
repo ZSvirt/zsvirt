@@ -13,6 +13,10 @@ import org.zstack.header.storage.snapshot.VolumeSnapshotTree;
 import org.zstack.header.storage.snapshot.VolumeSnapshotTreeInventory;
 import org.zstack.header.storage.snapshot.VolumeSnapshotVO;
 import org.zstack.header.storage.snapshot.VolumeSnapshotVO_;
+import org.zstack.header.storage.backup.VolumeBackupInventory;
+import org.zstack.header.storage.backup.VolumeBackupVO;
+import org.zstack.header.storage.backup.VolumeBackupVO_;
+import org.zstack.header.storage.volume.backup.APIQueryVolumeBackupReply;
 import org.zstack.header.vm.APIQueryVmInstanceReply;
 import org.zstack.header.vm.VmInstanceInventory;
 import org.zstack.header.vm.VmInstanceVO;
@@ -44,6 +48,7 @@ public class EncryptionInventoryReplyMarshaller implements MarshalReplyMessageEx
                 APIQueryVolumeReply.class,
                 APIQueryVolumeSnapshotReply.class,
                 APIQueryVolumeSnapshotTreeReply.class,
+                APIQueryVolumeBackupReply.class,
                 APIZQLQueryReply.class
         );
     }
@@ -58,6 +63,8 @@ public class EncryptionInventoryReplyMarshaller implements MarshalReplyMessageEx
             fillVolumeSnapshotEncryptionInfo(((APIQueryVolumeSnapshotReply) replyOrEvent).getInventories());
         } else if (replyOrEvent instanceof APIQueryVolumeSnapshotTreeReply) {
             fillVolumeSnapshotTreeEncryptionInfo(((APIQueryVolumeSnapshotTreeReply) replyOrEvent).getInventories());
+        } else if (replyOrEvent instanceof APIQueryVolumeBackupReply) {
+            fillVolumeBackupEncryptionInfo(((APIQueryVolumeBackupReply) replyOrEvent).getInventories());
         } else if (replyOrEvent instanceof APIZQLQueryReply) {
             fillZqlResultEncryptionInfo((APIZQLQueryReply) replyOrEvent);
         }
@@ -80,6 +87,8 @@ public class EncryptionInventoryReplyMarshaller implements MarshalReplyMessageEx
                 fillVolumeEncryptionInfo(castInventoryList(result.inventories, VolumeInventory.class));
             } else if (first instanceof VolumeSnapshotInventory) {
                 fillVolumeSnapshotEncryptionInfo(castInventoryList(result.inventories, VolumeSnapshotInventory.class));
+            } else if (first instanceof VolumeBackupInventory) {
+                fillVolumeBackupEncryptionInfo(castInventoryList(result.inventories, VolumeBackupInventory.class));
             }
         }
     }
@@ -192,6 +201,54 @@ public class EncryptionInventoryReplyMarshaller implements MarshalReplyMessageEx
 
             Timestamp keyDate = keyDateBySnapshotUuid.get(snapshotUuid);
             inv.setKeyLastOpDate(keyDate != null ? keyDate : createDateByUuid.get(snapshotUuid));
+        }
+    }
+
+    private void fillVolumeBackupEncryptionInfo(List<VolumeBackupInventory> backups) {
+        if (backups == null || backups.isEmpty()) {
+            return;
+        }
+
+        Map<String, VolumeBackupInventory> backupByUuid = backups.stream()
+                .filter(b -> b.getUuid() != null)
+                .collect(Collectors.toMap(VolumeBackupInventory::getUuid, b -> b, (a, b) -> a));
+        if (backupByUuid.isEmpty()) {
+            return;
+        }
+
+        Set<String> encryptedBackupUuids = new HashSet<>();
+        Map<String, Timestamp> createDateByUuid = new HashMap<>();
+        List<Tuple> tuples = Q.New(VolumeBackupVO.class)
+                .select(VolumeBackupVO_.uuid, VolumeBackupVO_.encrypted, VolumeBackupVO_.createDate)
+                .in(VolumeBackupVO_.uuid, backupByUuid.keySet())
+                .listTuple();
+        for (Tuple t : tuples) {
+            VolumeBackupInventory inv = backupByUuid.get(t.get(0, String.class));
+            if (inv == null) {
+                continue;
+            }
+
+            String backupUuid = t.get(0, String.class);
+            boolean encrypted = Boolean.TRUE.equals(t.get(1, Boolean.class));
+            inv.setEncrypted(encrypted);
+            createDateByUuid.put(backupUuid, t.get(2, Timestamp.class));
+            if (encrypted) {
+                encryptedBackupUuids.add(backupUuid);
+            } else {
+                inv.setKeyLastOpDate(null);
+            }
+        }
+
+        Map<String, Timestamp> keyDateByBackupUuid = queryLatestKeyDates(
+                VolumeBackupVO.class.getSimpleName(), encryptedBackupUuids);
+        for (String backupUuid : encryptedBackupUuids) {
+            VolumeBackupInventory inv = backupByUuid.get(backupUuid);
+            if (inv == null) {
+                continue;
+            }
+
+            Timestamp keyDate = keyDateByBackupUuid.get(backupUuid);
+            inv.setKeyLastOpDate(keyDate != null ? keyDate : createDateByUuid.get(backupUuid));
         }
     }
 

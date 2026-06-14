@@ -446,6 +446,7 @@ public class VolumeBackupMetadataMaker implements CreateVolumeBackupExtensionPoi
                 vo.setType(metadata.getType());
                 vo.setVolumeUuid(metadata.getVolumeUuid());
                 vo.setVmInstanceUuid(metadata.getVmInstanceUuid());
+                vo.setEncrypted(Boolean.TRUE.equals(metadata.getEncrypted()));
                 vo.setState(VolumeBackupState.Enabled);
                 vo.setStatus(VolumeBackupStatus.Ready);
                 toPersists.add(vo);

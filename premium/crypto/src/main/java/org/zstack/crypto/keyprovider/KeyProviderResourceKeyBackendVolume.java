@@ -10,6 +10,7 @@ import org.zstack.header.keyprovider.KeyProviderGlobalConfig;
 import org.zstack.header.keyprovider.KeyProviderVO;
 import org.zstack.header.keyprovider.KeyProviderVO_;
 import org.zstack.header.image.ImageVO;
+import org.zstack.header.storage.backup.VolumeBackupVO;
 import org.zstack.header.storage.snapshot.VolumeSnapshotVO;
 import org.zstack.header.volume.VolumeVO;
 import org.zstack.storage.encrypt.VolumeEncryptedResourceKeyBackend;
@@ -93,6 +94,14 @@ public class KeyProviderResourceKeyBackendVolume implements VolumeEncryptedResou
     }
 
     @Override
+    public void detachKeyProviderFromBackup(String backupUuid) {
+        SQL.New(EncryptedResourceKeyRefVO.class)
+                .eq(EncryptedResourceKeyRefVO_.resourceType, VolumeBackupVO.class.getSimpleName())
+                .eq(EncryptedResourceKeyRefVO_.resourceUuid, backupUuid)
+                .delete();
+    }
+
+    @Override
     public boolean checkVolumeKeyProviderAttached(String volumeUuid) {
         Long count = Q.New(EncryptedResourceKeyRefVO.class)
                 .eq(EncryptedResourceKeyRefVO_.resourceType, VolumeVO.class.getSimpleName())
@@ -147,6 +156,12 @@ public class KeyProviderResourceKeyBackendVolume implements VolumeEncryptedResou
     public void copyTemporarySnapshotImageKeyToVolume(String imageUuid, String volumeUuid) {
         copyKeyRef(ImageVO.class.getSimpleName(), imageUuid,
                 VolumeVO.class.getSimpleName(), volumeUuid);
+    }
+
+    @Override
+    public void copyVolumeKeyToBackup(String volumeUuid, String backupUuid) {
+        copyKeyRef(VolumeVO.class.getSimpleName(), volumeUuid,
+                VolumeBackupVO.class.getSimpleName(), backupUuid);
     }
 
     @Override

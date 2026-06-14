@@ -2937,7 +2937,7 @@ public class VolumeSnapshotTreeBase {
 
     private void syncVolumeEncryptionAfterRevert(String volumeUuid, VolumeSnapshotVO snapshot) {
         if (snapshot.isEncrypted()) {
-            volumeEncryptedResourceKeyBackend.copySnapshotKeyToVolume(snapshot.getUuid(), volumeUuid);
+            volumeEncryptedResourceKeyBackend.copySnapshotKeyRefToVolume(snapshot.getUuid(), volumeUuid);
         } else {
             volumeEncryptedResourceKeyBackend.detachKeyProviderFromVolume(volumeUuid);
         }

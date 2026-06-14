@@ -206,6 +206,12 @@ public class VolumeInPlaceEncryptor {
                     }
                 });
         if (keyErrorRef[0] != null) {
+            if (VolumeEncryptedSecretHelper.isKeyProviderUnavailable(keyErrorRef[0])) {
+                failAfterRollingBackMetadata(volume.getUuid(), rollbackAttachedProvider, null,
+                        keyErrorRef[0], completion);
+                return;
+            }
+
             failAfterRollingBackMetadata(volume.getUuid(), rollbackAttachedProvider, null, operr(
                     "failed to materialize encryption key for volume[uuid:%s]",
                     volume.getUuid()).withCause(keyErrorRef[0]), completion);
@@ -230,7 +236,7 @@ public class VolumeInPlaceEncryptor {
         //    short-lived secret material file locally.
         final String encryptedDek;
         try {
-            encryptedDek = volumeEncryptedSecretHelper.prepareLuksEnvelopeDekOnHost(
+            encryptedDek = volumeEncryptedSecretHelper.verifyHostKeyAndHpkeSealDek(
                     ctx.getHostUuid(), volume.getUuid(), dekBase64);
         } catch (OperationFailureException e) {
             failAfterRollingBackMetadata(volume.getUuid(), rollbackAttachedProvider, keyResult, operr(

@@ -52,7 +52,7 @@ public class VolumeSnapshotEncryptionHelper {
         if (volume == null || snapshot == null || !volume.isEncrypted()) {
             return;
         }
-        keyBackend.copyVolumeKeyToSnapshot(volume.getUuid(), snapshot.getUuid());
+        keyBackend.copyVolumeKeyRefToSnapshot(volume.getUuid(), snapshot.getUuid());
     }
 
     public void inheritFromRelatedSnapshotKeyIfPossible(VolumeVO volume, String snapshotUuid) {
@@ -84,7 +84,7 @@ public class VolumeSnapshotEncryptionHelper {
                     snapshotUuid, volume.getUuid()));
         }
 
-        keyBackend.copySnapshotKeyToVolume(snapshotUuid, volume.getUuid());
+        keyBackend.copySnapshotKeyRefToVolume(snapshotUuid, volume.getUuid());
         if (!volume.isEncrypted()) {
             volume.setEncrypted(true);
             dbf.update(volume);
@@ -106,7 +106,7 @@ public class VolumeSnapshotEncryptionHelper {
 
         if (keyBackend.checkTemporarySnapshotImageKeyProviderAttached(volume.getRootImageUuid())) {
             if (!keyBackend.checkVolumeKeyProviderAttached(volume.getUuid())) {
-                keyBackend.copyTemporarySnapshotImageKeyToVolume(volume.getRootImageUuid(), volume.getUuid());
+                keyBackend.copyTemporarySnapshotImageKeyRefToVolume(volume.getRootImageUuid(), volume.getUuid());
             }
             return;
         }
@@ -115,7 +115,7 @@ public class VolumeSnapshotEncryptionHelper {
             String srcVolumeUuid = imageUrl.substring("volume://".length());
             if (!keyBackend.checkVolumeKeyProviderAttached(volume.getUuid())) {
                 if (keyBackend.checkVolumeKeyProviderAttached(srcVolumeUuid)) {
-                    keyBackend.copyVolumeKeyToVolume(srcVolumeUuid, volume.getUuid());
+                    keyBackend.copyVolumeKeyRefToVolume(srcVolumeUuid, volume.getUuid());
                 }
             }
             return;
@@ -174,6 +174,10 @@ public class VolumeSnapshotEncryptionHelper {
                 });
 
         if (errorRef[0] != null) {
+            if (VolumeEncryptedSecretHelper.isKeyProviderUnavailable(errorRef[0])) {
+                throw new OperationFailureException(errorRef[0]);
+            }
+
             throw new OperationFailureException(operr(
                     "failed to materialize encryption key for volume[uuid:%s]", volumeUuid).withCause(errorRef[0]));
         }
@@ -199,13 +203,13 @@ public class VolumeSnapshotEncryptionHelper {
                 .select(VolumeSnapshotVO_.encrypted)
                 .findValue();
         if (Boolean.TRUE.equals(snapshotEncrypted)) {
-            keyBackend.copySnapshotKeyToTemporarySnapshotImage(snapshotUuid, imageUuid);
+            keyBackend.copySnapshotKeyRefToTemporarySnapshotImage(snapshotUuid, imageUuid);
             keyResult = getTemporarySnapshotImageKey(imageUuid);
         } else {
             keyResult = createTemporarySnapshotImageKey(imageUuid);
         }
 
-        return secretHelper.prepareLuksEnvelopeDekOnHost(
+        return secretHelper.verifyHostKeyAndHpkeSealDek(
                 hostUuid, imageUuid, keyResult.getDekBase64());
     }
 
@@ -223,7 +227,7 @@ public class VolumeSnapshotEncryptionHelper {
         ctx.setKeyProviderUuid(kpUuid);
         ctx.setPurpose("prepare-temporary-snapshot-image-secret-material");
 
-        EncryptedResourceKeyManager.ResourceKeyResult keyResult = encryptedResourceKeyManager.getKey(ctx);
+        EncryptedResourceKeyManager.ResourceKeyResult keyResult = encryptedResourceKeyManager.getExistingKeySync(ctx);
         if (keyResult == null || StringUtils.isBlank(keyResult.getDekBase64())) {
             throw new OperationFailureException(operr(
                     "key manager returned empty DEK for encrypted temporary snapshot image[uuid:%s]", imageUuid));
@@ -263,6 +267,10 @@ public class VolumeSnapshotEncryptionHelper {
                 });
 
         if (errorRef[0] != null) {
+            if (VolumeEncryptedSecretHelper.isKeyProviderUnavailable(errorRef[0])) {
+                throw new OperationFailureException(errorRef[0]);
+            }
+
             throw new OperationFailureException(operr(
                     "failed to materialize encryption key for temporary snapshot image[uuid:%s]",
                     imageUuid).withCause(errorRef[0]));

@@ -450,6 +450,20 @@ public class CephPrimaryStorageBase extends PrimaryStorageBase {
         public Long virtualSize;
     }
 
+    public static class KVMHostImageStoreEncryptedDownloadCmd implements Serializable {
+        public String psUuid;
+        public String hostname;
+        public String backupStorageInstallPath;
+        public String primaryStorageInstallPath;
+        public int concurrency;
+        public String keyProviderUuid;
+        public Integer keyVersion;
+        public String cipher;
+        public boolean sourceEncrypted;
+        @NoLogging
+        public String encryptedDek;
+    }
+
     public static class KVMHostLuksConvertCmd implements Serializable {
         public String psUuid;
         @NoLogging
@@ -1418,6 +1432,7 @@ public class CephPrimaryStorageBase extends PrimaryStorageBase {
     public static final String KVM_HOST_LUKS_ENCRYPT_IN_PLACE_PATH = "/ceph/primarystorage/kvmhost/encryptinplace";
     public static final String KVM_HOST_LUKS_RESIZE_PATH = "/ceph/primarystorage/kvmhost/luksresize";
     public static final String KVM_HOST_LUKS_CONVERT_PATH = "/ceph/primarystorage/kvmhost/luksconvert";
+    public static final String KVM_HOST_IMAGESTORE_ENCRYPTED_DOWNLOAD_PATH = "/ceph/primarystorage/kvmhost/imagestore/encrypteddownload";
     public static final String FLATTEN_PATH = "/ceph/primarystorage/volume/flatten";
     public static final String SFTP_DOWNLOAD_PATH = "/ceph/primarystorage/sftpbackupstorage/download";
     public static final String SFTP_UPLOAD_PATH = "/ceph/primarystorage/sftpbackupstorage/upload";
@@ -1818,7 +1833,7 @@ public class CephPrimaryStorageBase extends PrimaryStorageBase {
             kcmd.psUuid = self.getUuid();
             kcmd.installPath = installPath;
             kcmd.size = volumeSize;
-            kcmd.encryptedDek = volumeEncryptedSecretHelper.prepareLuksEnvelopeDekOnHost(
+            kcmd.encryptedDek = volumeEncryptedSecretHelper.materializeAndSealVolumeDekForHost(
                     destHostUuid, volumeUuid);
             httpCallToKvmHost(destHostUuid,
                     KVM_HOST_LUKS_CREATE_EMPTY_PATH, kcmd, KVMHostLuksRsp.class,
@@ -2714,7 +2729,7 @@ public class CephPrimaryStorageBase extends PrimaryStorageBase {
                 KVMHostLuksResizeCmd kcmd = new KVMHostLuksResizeCmd();
                 kcmd.psUuid = self.getUuid();
                 kcmd.installPath = volumePath;
-                kcmd.encryptedDek = volumeEncryptedSecretHelper.prepareLuksEnvelopeDekOnHost(
+                kcmd.encryptedDek = volumeEncryptedSecretHelper.materializeAndSealVolumeDekForHost(
                         msg.getDestHost().getUuid(), msg.getVolume().getUuid());
                 if (ispec.getInventory().getSize() < msg.getVolume().getSize()) {
                     kcmd.virtualSize = msg.getVolume().getSize();
@@ -2786,7 +2801,7 @@ public class CephPrimaryStorageBase extends PrimaryStorageBase {
                             kcmd.psUuid = self.getUuid();
                             kcmd.srcPath = cloneInstallPath;
                             kcmd.dstPath = volumePath;
-                            kcmd.encryptedDek = volumeEncryptedSecretHelper.prepareLuksEnvelopeDekOnHost(msg.getDestHost().getUuid(), msg.getVolume().getUuid());
+                            kcmd.encryptedDek = volumeEncryptedSecretHelper.materializeAndSealVolumeDekForHost(msg.getDestHost().getUuid(), msg.getVolume().getUuid());
                             if (ispec.getInventory().getSize() < msg.getVolume().getSize()) {
                                 kcmd.virtualSizeForLuksClone = msg.getVolume().getSize();
                             }
@@ -3564,7 +3579,7 @@ public class CephPrimaryStorageBase extends PrimaryStorageBase {
         kcmd.sourceTrashInstallPath = item.getSourceTrashInstallPath();
         kcmd.targetEncrypted = msg.isTargetEncrypted();
         kcmd.virtualSize = msg.getVolume().getSize();
-        kcmd.encryptedDek = volumeEncryptedSecretHelper.prepareLuksEnvelopeDekOnHost(hostUuid, msg.getVolume().getUuid());
+        kcmd.encryptedDek = volumeEncryptedSecretHelper.materializeAndSealVolumeDekForHost(hostUuid, msg.getVolume().getUuid());
 
         httpCallToKvmHost(hostUuid, KVM_HOST_LUKS_CONVERT_PATH, kcmd, KVMHostLuksRsp.class,
                 new ReturnValueCompletion<KVMHostLuksRsp>(msg) {
@@ -3817,7 +3832,7 @@ public class CephPrimaryStorageBase extends PrimaryStorageBase {
         KVMHostLuksResizeCmd cmd = new KVMHostLuksResizeCmd();
         cmd.psUuid = self.getUuid();
         cmd.installPath = volume.getInstallPath();
-        cmd.encryptedDek = volumeEncryptedSecretHelper.prepareLuksEnvelopeDekOnHost(hostUuid, volume.getUuid());
+        cmd.encryptedDek = volumeEncryptedSecretHelper.materializeAndSealVolumeDekForHost(hostUuid, volume.getUuid());
         cmd.virtualSize = size;
 
         httpCallToKvmHost(hostUuid, KVM_HOST_LUKS_RESIZE_PATH, cmd, KVMHostLuksRsp.class, completion);
@@ -5550,7 +5565,7 @@ public class CephPrimaryStorageBase extends PrimaryStorageBase {
         kcmd.psUuid = self.getUuid();
         kcmd.srcPath = snapshotPath;
         kcmd.dstPath = volPath;
-        kcmd.encryptedDek = volumeEncryptedSecretHelper.prepareLuksEnvelopeDekOnHost(hostUuid, msg.getVolumeUuid());
+        kcmd.encryptedDek = volumeEncryptedSecretHelper.materializeAndSealVolumeDekForHost(hostUuid, msg.getVolumeUuid());
 
         VolumeVO volume = Q.New(VolumeVO.class).eq(VolumeVO_.uuid, msg.getVolumeUuid()).find();
         if (volume != null && volume.getSize() != 0) {
@@ -5759,7 +5774,7 @@ public class CephPrimaryStorageBase extends PrimaryStorageBase {
                             kcmd.psUuid = self.getUuid();
                             kcmd.srcPath = installUrl;
                             kcmd.dstPath = volumePath;
-                            kcmd.encryptedDek = volumeEncryptedSecretHelper.prepareLuksEnvelopeDekOnHost(hostUuid, msg.getVolume().getUuid());
+                            kcmd.encryptedDek = volumeEncryptedSecretHelper.materializeAndSealVolumeDekForHost(hostUuid, msg.getVolume().getUuid());
                             httpCallToKvmHost(hostUuid,
                                     KVM_HOST_LUKS_CLONE_PATH, kcmd, KVMHostLuksRsp.class,
                                     new ReturnValueCompletion<KVMHostLuksRsp>(trigger) {

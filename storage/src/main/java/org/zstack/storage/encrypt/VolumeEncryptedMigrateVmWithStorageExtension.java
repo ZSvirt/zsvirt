@@ -60,6 +60,6 @@ public class VolumeEncryptedMigrateVmWithStorageExtension implements KvmMigrateV
             return null;
         }
 
-        return volumeEncryptedSecretHelper.prepareLuksEnvelopeDekOnHost(hostUuid, volume.getUuid());
+        return volumeEncryptedSecretHelper.materializeAndSealVolumeDekForHost(hostUuid, volume.getUuid());
     }
 }

@@ -129,7 +129,7 @@ public class VolumeEncryptedStorageLiveMigrationPrepareTargetVolumeExtension imp
         }
 
         try {
-            volumeEncryptedResourceKeyBackend.copyVolumeKeyToVolume(sourceVolume.getUuid(), temporaryVolume.getUuid());
+            volumeEncryptedResourceKeyBackend.copyVolumeKeyRefToVolume(sourceVolume.getUuid(), temporaryVolume.getUuid());
             temporaryVolume.setEncrypted(true);
             return null;
         } catch (Exception e) {

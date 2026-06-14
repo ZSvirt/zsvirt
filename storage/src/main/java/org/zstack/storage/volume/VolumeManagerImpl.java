@@ -28,6 +28,7 @@ import org.zstack.header.core.WhileDoneCompletion;
 import org.zstack.header.core.workflow.*;
 import org.zstack.header.errorcode.ErrorCode;
 import org.zstack.header.errorcode.ErrorCodeList;
+import org.zstack.header.errorcode.ErrorableValue;
 import org.zstack.header.errorcode.OperationFailureException;
 import org.zstack.header.host.*;
 import org.zstack.header.identity.AccountResourceRefInventory;
@@ -666,7 +667,8 @@ public class VolumeManagerImpl extends AbstractService implements VolumeManager,
         vo.setStatus(VolumeStatus.NotInstantiated);
         vo.setType(VolumeType.valueOf(msg.getVolumeType()));
         vo.setDiskOfferingUuid(msg.getDiskOfferingUuid());
-        vo.setEncrypted(Boolean.TRUE.equals(msg.getEncrypted()));
+        vo.setEncrypted(Boolean.TRUE.equals(msg.getEncrypted()) ||
+                (vo.getType() == VolumeType.Root && isTemplateFromEncryptedSource(msg.getRootImageUuid())));
         if (vo.getType() == VolumeType.Root) {
             vo.setDeviceId(0);
         }
@@ -764,6 +766,17 @@ public class VolumeManagerImpl extends AbstractService implements VolumeManager,
         hostQuery.setLimit(1);
         HostVO host = hostQuery.find();
         return host == null ? null : HostInventory.valueOf(host);
+    }
+
+    @Override
+    public ErrorableValue<String> findConnectedKvmHostByPrimaryStorage(String primaryStorageUuid, String storageDescription, String operation) {
+        HostInventory host = selectHostForEncryptInPlace(primaryStorageUuid);
+        if (host == null) {
+            return ErrorableValue.ofErrorCode(operr(
+                    "cannot find a connected KVM host attached to %s[uuid:%s] to %s",
+                    storageDescription, primaryStorageUuid, operation));
+        }
+        return ErrorableValue.of(host.getUuid());
     }
 
     private boolean isTemplateFromEncryptedSource(String imageUuid) {

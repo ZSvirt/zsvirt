@@ -1,5 +1,7 @@
 package org.zstack.storage.encrypt;
 
+import java.util.Set;
+
 /**
  * Handles {@link org.zstack.header.volume.VolumeVO} rows in {@link org.zstack.header.keyprovider.EncryptedResourceKeyRefVO}
  * (key provider binding for LUKS volumes), analogous to {@link org.zstack.compute.vm.devices.TpmEncryptedResourceKeyBackend}
@@ -40,17 +42,25 @@ public interface VolumeEncryptedResourceKeyBackend {
 
     boolean checkTemporarySnapshotImageKeyProviderAttached(String imageUuid);
 
-    void copyVolumeKeyToSnapshot(String volumeUuid, String snapshotUuid);
+    boolean hasBackupKeyRef(String backupUuid);
 
-    void copySnapshotKeyToVolume(String snapshotUuid, String volumeUuid);
+    void copyVolumeKeyRefToSnapshot(String volumeUuid, String snapshotUuid);
 
-    void copyVolumeKeyToVolume(String srcVolumeUuid, String dstVolumeUuid);
+    void copyVolumeKeyRefToSnapshots(String volumeUuid, Set<String> snapshotUuids);
 
-    void copySnapshotKeyToTemporarySnapshotImage(String snapshotUuid, String imageUuid);
+    void copySnapshotKeyRefToVolume(String snapshotUuid, String volumeUuid);
 
-    void copyTemporarySnapshotImageKeyToVolume(String imageUuid, String volumeUuid);
+    void copyVolumeKeyRefToVolume(String srcVolumeUuid, String dstVolumeUuid);
 
-    void copyVolumeKeyToBackup(String volumeUuid, String backupUuid);
+    void copySnapshotKeyRefToTemporarySnapshotImage(String snapshotUuid, String imageUuid);
+
+    void copyTemporarySnapshotImageKeyRefToVolume(String imageUuid, String volumeUuid);
+
+    void copyVolumeKeyRefToBackup(String volumeUuid, String backupUuid);
+
+    void copyBackupKeyRefToTemporarySnapshotImage(String backupUuid, String imageUuid);
+
+    void copyBackupKeyRefToVolume(String backupUuid, String volumeUuid);
 
     /**
      * Global default key provider uuid, or null (e.g. NONE / crypto not installed).

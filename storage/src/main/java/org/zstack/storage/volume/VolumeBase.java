@@ -3838,24 +3838,54 @@ public class VolumeBase extends AbstractVolume implements Volume {
         }
         q.update();
 
+        Map<String, String> convertedSnapshotInstallPaths = new LinkedHashMap<>();
         for (VolumeSnapshotVO snapshot : snapshots) {
             String newPath = oldAndNewInstallPaths.get(snapshot.getPrimaryStorageInstallPath());
             if (StringUtils.isBlank(newPath)) {
                 continue;
             }
-            SQL.New(VolumeSnapshotVO.class)
-                    .eq(VolumeSnapshotVO_.uuid, snapshot.getUuid())
-                    .set(VolumeSnapshotVO_.primaryStorageInstallPath, newPath)
-                    .set(VolumeSnapshotVO_.encrypted, targetEncrypted)
-                    .update();
-            SQL.New(VolumeSnapshotGroupRefVO.class)
-                    .eq(VolumeSnapshotGroupRefVO_.volumeSnapshotUuid, snapshot.getUuid())
-                    .set(VolumeSnapshotGroupRefVO_.volumeSnapshotInstallPath, newPath)
-                    .update();
-            if (targetEncrypted) {
-                volumeEncryptedResourceKeyBackend.copyVolumeKeyToSnapshot(self.getUuid(), snapshot.getUuid());
-            }
+            convertedSnapshotInstallPaths.put(snapshot.getUuid(), newPath);
         }
+
+        updateConvertedSnapshotPaths(convertedSnapshotInstallPaths, targetEncrypted);
+        if (targetEncrypted && !convertedSnapshotInstallPaths.isEmpty()) {
+            volumeEncryptedResourceKeyBackend.copyVolumeKeyRefToSnapshots(self.getUuid(), convertedSnapshotInstallPaths.keySet());
+        }
+    }
+
+    private void updateConvertedSnapshotPaths(Map<String, String> snapshotInstallPaths, boolean targetEncrypted) {
+        if (snapshotInstallPaths.isEmpty()) {
+            return;
+        }
+
+        StringBuilder snapshotSql = new StringBuilder("update VolumeSnapshotVO vo set vo.primaryStorageInstallPath = case vo.uuid");
+        StringBuilder groupRefSql = new StringBuilder("update VolumeSnapshotGroupRefVO ref set ref.volumeSnapshotInstallPath = case ref.volumeSnapshotUuid");
+        int i = 0;
+        for (String ignored : snapshotInstallPaths.keySet()) {
+            snapshotSql.append(String.format(" when :uuid%s then :path%s", i, i));
+            groupRefSql.append(String.format(" when :uuid%s then :path%s", i, i));
+            i++;
+        }
+        snapshotSql.append(" else vo.primaryStorageInstallPath end, vo.encrypted = :encrypted where vo.uuid in (:snapshotUuids)");
+        groupRefSql.append(" else ref.volumeSnapshotInstallPath end where ref.volumeSnapshotUuid in (:snapshotUuids)");
+
+        SQL snapshotQuery = SQL.New(snapshotSql.toString())
+                .param("encrypted", targetEncrypted)
+                .param("snapshotUuids", snapshotInstallPaths.keySet());
+        SQL groupRefQuery = SQL.New(groupRefSql.toString())
+                .param("snapshotUuids", snapshotInstallPaths.keySet());
+
+        i = 0;
+        for (Map.Entry<String, String> entry : snapshotInstallPaths.entrySet()) {
+            snapshotQuery.param(String.format("uuid%s", i), entry.getKey());
+            snapshotQuery.param(String.format("path%s", i), entry.getValue());
+            groupRefQuery.param(String.format("uuid%s", i), entry.getKey());
+            groupRefQuery.param(String.format("path%s", i), entry.getValue());
+            i++;
+        }
+
+        snapshotQuery.execute();
+        groupRefQuery.execute();
     }
 
     private void handle(FlattenVolumeMsg msg) {

@@ -3,6 +3,8 @@ package org.zstack.storage.encrypt;
 import org.zstack.utils.Utils;
 import org.zstack.utils.logging.CLogger;
 
+import java.util.Set;
+
 /**
  * OSS / no-premium-crypto: no-op volume key-provider persistence, same role as
  * {@link org.zstack.compute.vm.devices.DummyTpmEncryptedResourceKeyBackend}.
@@ -57,33 +59,53 @@ public class DummyVolumeEncryptedResourceKeyBackend implements VolumeEncryptedRe
     }
 
     @Override
-    public void copyVolumeKeyToSnapshot(String volumeUuid, String snapshotUuid) {
+    public boolean hasBackupKeyRef(String backupUuid) {
+        return false;
+    }
+
+    @Override
+    public void copyVolumeKeyRefToSnapshot(String volumeUuid, String snapshotUuid) {
         logger.debug(String.format("ignore copy volume[uuid:%s] key to snapshot[uuid:%s]", volumeUuid, snapshotUuid));
     }
 
     @Override
-    public void copySnapshotKeyToVolume(String snapshotUuid, String volumeUuid) {
-        logger.debug(String.format("ignore copy snapshot[uuid:%s] key to volume[uuid:%s]", snapshotUuid, volumeUuid));
+    public void copyVolumeKeyRefToSnapshots(String volumeUuid, Set<String> snapshotUuids) {
+        logger.debug(String.format("ignore copy volume[uuid:%s] key to snapshots%s", volumeUuid, snapshotUuids));
     }
 
     @Override
-    public void copyVolumeKeyToVolume(String srcVolumeUuid, String dstVolumeUuid) {
-        logger.debug(String.format("ignore copy volume[uuid:%s] key to volume[uuid:%s]", srcVolumeUuid, dstVolumeUuid));
+    public void copySnapshotKeyRefToVolume(String snapshotUuid, String volumeUuid) {
+        logger.debug(String.format("ignore copy snapshot[uuid:%s] key ref to volume[uuid:%s]", snapshotUuid, volumeUuid));
     }
 
     @Override
-    public void copySnapshotKeyToTemporarySnapshotImage(String snapshotUuid, String imageUuid) {
-        logger.debug(String.format("ignore copy snapshot[uuid:%s] key to temporary snapshot image[uuid:%s]", snapshotUuid, imageUuid));
+    public void copyVolumeKeyRefToVolume(String srcVolumeUuid, String dstVolumeUuid) {
+        logger.debug(String.format("ignore copy volume[uuid:%s] key ref to volume[uuid:%s]", srcVolumeUuid, dstVolumeUuid));
     }
 
     @Override
-    public void copyTemporarySnapshotImageKeyToVolume(String imageUuid, String volumeUuid) {
-        logger.debug(String.format("ignore copy temporary snapshot image[uuid:%s] key to volume[uuid:%s]", imageUuid, volumeUuid));
+    public void copySnapshotKeyRefToTemporarySnapshotImage(String snapshotUuid, String imageUuid) {
+        logger.debug(String.format("ignore copy snapshot[uuid:%s] key ref to temporary snapshot image[uuid:%s]", snapshotUuid, imageUuid));
     }
 
     @Override
-    public void copyVolumeKeyToBackup(String volumeUuid, String backupUuid) {
-        logger.debug(String.format("ignore copy volume[uuid:%s] key to backup[uuid:%s]", volumeUuid, backupUuid));
+    public void copyTemporarySnapshotImageKeyRefToVolume(String imageUuid, String volumeUuid) {
+        logger.debug(String.format("ignore copy temporary snapshot image[uuid:%s] key ref to volume[uuid:%s]", imageUuid, volumeUuid));
+    }
+
+    @Override
+    public void copyVolumeKeyRefToBackup(String volumeUuid, String backupUuid) {
+        logger.debug(String.format("ignore copy volume[uuid:%s] key ref to backup[uuid:%s]", volumeUuid, backupUuid));
+    }
+
+    @Override
+    public void copyBackupKeyRefToTemporarySnapshotImage(String backupUuid, String imageUuid) {
+        logger.debug(String.format("ignore copy backup[uuid:%s] key to temporary snapshot image[uuid:%s]", backupUuid, imageUuid));
+    }
+
+    @Override
+    public void copyBackupKeyRefToVolume(String backupUuid, String volumeUuid) {
+        logger.debug(String.format("ignore copy backup[uuid:%s] key to volume[uuid:%s]", backupUuid, volumeUuid));
     }
 
     @Override

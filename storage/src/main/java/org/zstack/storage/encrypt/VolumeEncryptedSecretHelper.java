@@ -8,7 +8,9 @@ import org.zstack.core.cloudbus.CloudBus;
 import org.zstack.core.componentloader.PluginRegistry;
 import org.zstack.core.db.DatabaseFacade;
 import org.zstack.core.db.Q;
+import org.zstack.header.core.ExceptionSafe;
 import org.zstack.header.core.FutureReturnValueCompletion;
+import org.zstack.header.errorcode.ErrorableValue;
 import org.zstack.header.errorcode.ErrorCode;
 import org.zstack.header.errorcode.OperationFailureException;
 import org.zstack.header.host.HostConstant;
@@ -69,6 +71,7 @@ import static org.zstack.core.Platform.operr;
 @Configurable(preConstruction = true, autowire = Autowire.BY_TYPE)
 public class VolumeEncryptedSecretHelper {
     private static final CLogger logger = Utils.getLogger(VolumeEncryptedSecretHelper.class);
+    private static final String KEY_PROVIDER_UNAVAILABLE = "keyProviderUnavailable";
 
     @Autowired
     private CloudBus bus;
@@ -93,9 +96,14 @@ public class VolumeEncryptedSecretHelper {
         encryptedResourceKeyManager.getOrCreateKey(ctx, completion);
         completion.await(TimeUnit.MINUTES.toMillis(5));
         if (!completion.isSuccess()) {
+            ErrorCode errorCode = completion.getErrorCode();
+            if (isKeyProviderUnavailable(errorCode)) {
+                throw new OperationFailureException(errorCode);
+            }
+
             throw new OperationFailureException(operr(
                     "failed to materialize encryption key for volume[uuid:%s]", volUuid)
-                    .withCause(completion.getErrorCode()));
+                    .withCause(errorCode));
         }
 
         EncryptedResourceKeyManager.ResourceKeyResult result = completion.getResult();
@@ -104,6 +112,11 @@ public class VolumeEncryptedSecretHelper {
                     "key manager returned empty DEK for encrypted volume[uuid:%s]", volUuid));
         }
         return result;
+    }
+
+    public static boolean isKeyProviderUnavailable(ErrorCode errorCode) {
+        return errorCode != null && errorCode.getOpaque() != null
+                && Boolean.TRUE.equals(errorCode.getOpaque().get(KEY_PROVIDER_UNAVAILABLE));
     }
 
     public String ensureLuksSecretFileOnHost(String hostUuid, String resourceUuid, String dekBase64) {
@@ -151,7 +164,7 @@ public class VolumeEncryptedSecretHelper {
         return ensureLuksSecretFileOnHost(hostUuid, volumeUuid, dekBase64);
     }
 
-    public String prepareLuksEnvelopeDekOnHost(String hostUuid, String resourceUuid, String dekBase64) {
+    public String verifyHostKeyAndHpkeSealDek(String hostUuid, String resourceUuid, String dekBase64) {
         if (StringUtils.isBlank(hostUuid) || StringUtils.isBlank(resourceUuid) ||
                 StringUtils.isBlank(dekBase64)) {
             throw new OperationFailureException(operr(
@@ -222,7 +235,12 @@ public class VolumeEncryptedSecretHelper {
         }
     }
 
-    public String prepareLuksEnvelopeDekOnHost(String hostUuid, String volumeUuid) {
+    @ExceptionSafe
+    public ErrorableValue<String> verifyHostKeyAndHpkeSealDekErrorable(String hostUuid, String resourceUuid, String dekBase64) {
+        return ErrorableValue.of(verifyHostKeyAndHpkeSealDek(hostUuid, resourceUuid, dekBase64));
+    }
+
+    public String materializeAndSealVolumeDekForHost(String hostUuid, String volumeUuid) {
         if (StringUtils.isBlank(hostUuid) || StringUtils.isBlank(volumeUuid)) {
             throw new OperationFailureException(operr(
                     "prepare LUKS envelope DEK requires non-blank hostUuid and volumeUuid"));
@@ -243,7 +261,7 @@ public class VolumeEncryptedSecretHelper {
                     volumeUuid));
         }
 
-        return prepareLuksEnvelopeDekOnHost(hostUuid, volumeUuid, dekBase64);
+        return verifyHostKeyAndHpkeSealDek(hostUuid, volumeUuid, dekBase64);
     }
 
     /**

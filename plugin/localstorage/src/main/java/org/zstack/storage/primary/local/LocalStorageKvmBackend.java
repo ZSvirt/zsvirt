@@ -4222,6 +4222,6 @@ public class LocalStorageKvmBackend extends LocalStorageHypervisorBackend {
         if (!required) {
             return null;
         }
-        return volumeEncryptedSecretHelper.prepareLuksEnvelopeDekOnHost(hostUuid, volume.getUuid());
+        return volumeEncryptedSecretHelper.materializeAndSealVolumeDekForHost(hostUuid, volume.getUuid());
     }
 }

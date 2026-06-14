@@ -2427,6 +2427,6 @@ public class NfsPrimaryStorageKVMBackend implements NfsPrimaryStorageBackend,
         if (!required) {
             return null;
         }
-        return volumeEncryptedSecretHelper.prepareLuksEnvelopeDekOnHost(hostUuid, volume.getUuid());
+        return volumeEncryptedSecretHelper.materializeAndSealVolumeDekForHost(hostUuid, volume.getUuid());
     }
 }

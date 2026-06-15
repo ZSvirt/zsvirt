@@ -3403,27 +3403,16 @@ public class VolumeBase extends AbstractVolume implements Volume {
             @Override
             public void setup() {
                 flow(new NoRollbackFlow() {
-                    String __name__ = "merge-ceph-volume-snapshots-before-encryption-conversion";
-
-                    @Override
-                    public boolean skip(Map data) {
-                        return !isCephInstallPath(self.getInstallPath());
-                    }
+                    String __name__ = "validate-volume-encryption-conversion";
 
                     @Override
                     public void run(FlowTrigger trigger, Map data) {
-                        mergeCephSnapshotsBeforeEncryptionConversion(new Completion(trigger) {
-                            @Override
-                            public void success() {
-                                refreshVO();
-                                trigger.next();
-                            }
-
-                            @Override
-                            public void fail(ErrorCode errorCode) {
-                                trigger.fail(errorCode);
-                            }
-                        });
+                        ErrorCode errorCode = validateVolumeEncryptionConversion();
+                        if (errorCode != null) {
+                            trigger.fail(errorCode);
+                            return;
+                        }
+                        trigger.next();
                     }
                 });
 
@@ -3596,44 +3585,21 @@ public class VolumeBase extends AbstractVolume implements Volume {
         return ctx;
     }
 
-    private void mergeCephSnapshotsBeforeEncryptionConversion(Completion completion) {
-        List<VolumeSnapshotVO> roots = Q.New(VolumeSnapshotVO.class)
-                .eq(VolumeSnapshotVO_.volumeUuid, self.getUuid())
-                .notNull(VolumeSnapshotVO_.primaryStorageUuid)
-                .isNull(VolumeSnapshotVO_.parentUuid)
-                .list();
-        if (roots.isEmpty()) {
-            completion.success();
-            return;
+    private ErrorCode validateVolumeEncryptionConversion() {
+        if (!isCephInstallPath(self.getInstallPath())) {
+            return null;
         }
 
-        new While<>(roots).step((root, whileCompletion) -> {
-            VolumeSnapshotDeletionMsg dmsg = new VolumeSnapshotDeletionMsg();
-            dmsg.setTreeUuid(root.getTreeUuid());
-            dmsg.setVolumeUuid(root.getVolumeUuid());
-            dmsg.setSnapshotUuid(root.getUuid());
-            dmsg.setDirection(DeleteVolumeSnapshotDirection.Commit.toString());
-            dmsg.setScope(DeleteVolumeSnapshotScope.Chain.toString());
-            bus.makeTargetServiceIdByResourceUuid(dmsg, VolumeSnapshotConstant.SERVICE_ID, root.getUuid());
-            bus.send(dmsg, new CloudBusCallBack(whileCompletion) {
-                @Override
-                public void run(MessageReply reply) {
-                    if (!reply.isSuccess()) {
-                        whileCompletion.addError(reply.getError());
-                    }
-                    whileCompletion.done();
-                }
-            });
-        }, 1).run(new WhileDoneCompletion(completion) {
-            @Override
-            public void done(ErrorCodeList errorCodeList) {
-                if (errorCodeList.getCauses().isEmpty()) {
-                    completion.success();
-                } else {
-                    completion.fail(errorCodeList.getCauses().get(0));
-                }
-            }
-        });
+        boolean hasSnapshots = Q.New(VolumeSnapshotVO.class)
+                .eq(VolumeSnapshotVO_.volumeUuid, self.getUuid())
+                .notNull(VolumeSnapshotVO_.primaryStorageUuid)
+                .isExists();
+        if (!hasSnapshots) {
+            return null;
+        }
+
+        return operr("cannot change encryption for Ceph/RBD volume[uuid:%s] because it has snapshots; delete snapshots before changing volume encryption",
+                self.getUuid());
     }
 
     private String resolveVolumeSecretHostUuid(VolumeVO volume) {

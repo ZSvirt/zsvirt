@@ -58,6 +58,15 @@ doc {
 					since "zsv 0.6"
 				}
 				column {
+					name "encrypted"
+					enclosedIn "params"
+					desc "是否创建加密云盘"
+					location "body"
+					type "Boolean"
+					optional true
+					since "1.0.1, zsv 5.1.0"
+				}
+				column {
 					name "resourceUuid"
 					enclosedIn "params"
 					desc "资源的Uuid"

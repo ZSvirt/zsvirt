@@ -32,6 +32,7 @@ public class CreateDataVolumeFromVolumeTemplateMsg extends NeedReplyMessage impl
         hostUuid = amsg.getHostUuid();
         resourceUuid = amsg.getResourceUuid();
         accountUuid = amsg.getSession().getAccountUuid();
+        encrypted = amsg.getEncrypted();
         apiMsg = amsg;
     }
 

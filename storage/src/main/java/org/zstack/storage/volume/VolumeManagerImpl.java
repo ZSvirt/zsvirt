@@ -1147,6 +1147,7 @@ public class VolumeManagerImpl extends AbstractService implements VolumeManager,
         vo.setType(VolumeType.Data);
         vo.setStatus(VolumeStatus.NotInstantiated);
         vo.setAccountUuid(msg.getAccountUuid());
+        vo.setEncrypted(Boolean.TRUE.equals(msg.getEncrypted()));
 
         if (msg.getSystemTags() != null) {
             Iterator<String> iterators = msg.getSystemTags().iterator();
@@ -1240,6 +1241,7 @@ public class VolumeManagerImpl extends AbstractService implements VolumeManager,
         cmsg.setDiskOfferingUuid(msg.getDiskOfferingUuid());
         cmsg.setPrimaryStorageUuid(msg.getPrimaryStorageUuid());
         cmsg.setDescription(msg.getDescription());
+        cmsg.setEncrypted(msg.getEncrypted());
         cmsg.setApiMsg(msg);
         bus.makeLocalServiceId(cmsg, VolumeConstant.SERVICE_ID);
         bus.send(cmsg, new CloudBusCallBack(msg) {

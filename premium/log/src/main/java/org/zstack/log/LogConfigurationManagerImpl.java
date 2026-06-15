@@ -34,6 +34,7 @@ import org.zstack.header.errorcode.OperationFailureException;
 import org.zstack.header.errorcode.SysErrors;
 import org.zstack.header.exception.CloudRuntimeException;
 import org.zstack.header.identity.AccountConstant;
+import org.zstack.identity.Account;
 import org.zstack.header.managementnode.ManagementNodeReadyExtensionPoint;
 import org.zstack.header.managementnode.ManagementNodeVO;
 import org.zstack.header.managementnode.ManagementNodeVO_;
@@ -704,7 +705,7 @@ public class LogConfigurationManagerImpl extends AbstractService implements LogC
     }
 
     private void checkPermissions(String logServerUuid, String accountUuid) {
-        if (accountUuid.equals(AccountConstant.INITIAL_SYSTEM_ADMIN_UUID)) {
+        if (Account.isAdminPermission(accountUuid)) {
             return;
         }
         LogServerVO logServer = SQL.New("select vo from LogServerVO vo, AccountResourceRefVO ref " +
@@ -719,7 +720,7 @@ public class LogConfigurationManagerImpl extends AbstractService implements LogC
 
     private void validate(APIAddLogServerMsg msg) {
         String accountUuid = msg.getSession().getAccountUuid();
-        if (!accountUuid.equals(AccountConstant.INITIAL_SYSTEM_ADMIN_UUID)) {
+        if (!Account.isAdminPermission(accountUuid)) {
             if (msg.getCategory().equals(LogCategory.ManagementNodeLog.toString())) {
                 throw new ApiMessageInterceptionException(argerr("Access denied: Account[uuid:%s] is not authorized to get management node log." +
                         " Only admin accounts have this privilege.", accountUuid));

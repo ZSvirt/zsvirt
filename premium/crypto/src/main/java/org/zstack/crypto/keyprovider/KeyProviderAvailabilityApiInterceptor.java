@@ -48,6 +48,7 @@ import org.zstack.header.vm.devices.VmDevicesSpec;
 import org.zstack.header.volume.APIAttachDataVolumeToHostMsg;
 import org.zstack.header.volume.APIAttachDataVolumeToVmMsg;
 import org.zstack.header.volume.APIChangeVolumeEncryptionMsg;
+import org.zstack.header.volume.APICreateDataVolumeMsg;
 import org.zstack.header.volume.APICreateDataVolumeFromVolumeSnapshotMsg;
 import org.zstack.header.volume.APICreateDataVolumeFromVolumeTemplateMsg;
 import org.zstack.header.volume.APICreateVolumeSnapshotGroupMsg;
@@ -105,6 +106,8 @@ public class KeyProviderAvailabilityApiInterceptor implements GlobalApiMessageIn
             validate((APICreateVolumeSnapshotMsg) msg);
         } else if (msg instanceof APICreateVolumeSnapshotGroupMsg) {
             validate((APICreateVolumeSnapshotGroupMsg) msg);
+        } else if (msg instanceof APICreateDataVolumeMsg) {
+            validate((APICreateDataVolumeMsg) msg);
         } else if (msg instanceof APICreateDataVolumeFromVolumeSnapshotMsg) {
             validate((APICreateDataVolumeFromVolumeSnapshotMsg) msg);
         } else if (msg instanceof APICreateDataVolumeFromVolumeTemplateMsg) {
@@ -136,6 +139,7 @@ public class KeyProviderAvailabilityApiInterceptor implements GlobalApiMessageIn
                 APIChangeVolumeEncryptionMsg.class,
                 APICreateVolumeSnapshotMsg.class,
                 APICreateVolumeSnapshotGroupMsg.class,
+                APICreateDataVolumeMsg.class,
                 APICreateDataVolumeFromVolumeSnapshotMsg.class,
                 APICreateDataVolumeFromVolumeTemplateMsg.class,
                 APIAddTpmMsg.class
@@ -249,9 +253,16 @@ public class KeyProviderAvailabilityApiInterceptor implements GlobalApiMessageIn
         ensureProvidersAvailable(providerUuids);
     }
 
+    private void validate(APICreateDataVolumeMsg msg) {
+        Set<String> providerUuids = new LinkedHashSet<>();
+        collectDataVolumeCreationProvider(msg.getEncrypted(), providerUuids);
+        ensureProvidersAvailable(providerUuids);
+    }
+
     private void validate(APICreateDataVolumeFromVolumeTemplateMsg msg) {
         Set<String> providerUuids = new LinkedHashSet<>();
         collectTemplateSourceProvider(msg.getImageUuid(), providerUuids);
+        collectDataVolumeCreationProvider(msg.getEncrypted(), providerUuids);
         ensureProvidersAvailable(providerUuids);
     }
 
@@ -274,6 +285,12 @@ public class KeyProviderAvailabilityApiInterceptor implements GlobalApiMessageIn
 
     private void collectVmEncryptionProvider(Boolean vmEncryption, Set<String> providerUuids) {
         if (Boolean.TRUE.equals(vmEncryption)) {
+            addDefaultProvider(providerUuids);
+        }
+    }
+
+    private void collectDataVolumeCreationProvider(Boolean encrypted, Set<String> providerUuids) {
+        if (Boolean.TRUE.equals(encrypted)) {
             addDefaultProvider(providerUuids);
         }
     }

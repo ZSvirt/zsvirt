@@ -38,11 +38,6 @@ public class VolumeEncryptedInitialExtension implements PreInstantiateVolumeExte
 
     @Override
     public void preInstantiateVolume(InstantiateVolumeMsg msg) {
-        String hostUuid = msg.getHostUuid();
-        if (StringUtils.isBlank(hostUuid)) {
-            return;
-        }
-
         String volUuid = msg.getVolumeUuid();
         VolumeVO volume = dbf.findByUuid(volUuid, VolumeVO.class);
 

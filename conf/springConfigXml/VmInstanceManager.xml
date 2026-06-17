@@ -344,6 +344,12 @@
         </zstack:plugin>
     </bean>
 
+    <bean id="VmVolumeSnapshotRekeyAssociation" class="org.zstack.compute.vm.devices.VmVolumeSnapshotRekeyAssociation">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.keyprovider.KeyProviderRekeyAssociationExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
     <bean id="DummyTpmEncryptedResourceKeyBackend" class="org.zstack.compute.vm.devices.DummyTpmEncryptedResourceKeyBackend"/>
     <bean id="DummyEncryptedResourceKeyManager" class="org.zstack.compute.vm.devices.DummyEncryptedResourceKeyManager"/>
     <bean id="DummyVmHostFileManager" class="org.zstack.compute.vm.devices.DummyVmHostFileManager"/>

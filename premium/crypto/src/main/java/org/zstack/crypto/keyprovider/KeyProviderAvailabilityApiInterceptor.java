@@ -53,6 +53,7 @@ import org.zstack.header.volume.APICreateDataVolumeFromVolumeSnapshotMsg;
 import org.zstack.header.volume.APICreateDataVolumeFromVolumeTemplateMsg;
 import org.zstack.header.volume.APICreateVolumeSnapshotGroupMsg;
 import org.zstack.header.volume.APICreateVolumeSnapshotMsg;
+import org.zstack.header.volume.VolumeStatus;
 import org.zstack.header.volume.VolumeVO;
 import org.zstack.header.volume.VolumeVO_;
 import org.zstack.kvm.KVMSystemTags;
@@ -219,13 +220,13 @@ public class KeyProviderAvailabilityApiInterceptor implements GlobalApiMessageIn
 
     private void validate(APIAttachDataVolumeToVmMsg msg) {
         Set<String> providerUuids = new LinkedHashSet<>();
-        collectEncryptedVolumeProvider(msg.getVolumeUuid(), providerUuids);
+        collectAttachVolumeProvider(msg.getVolumeUuid(), providerUuids);
         ensureProvidersAvailable(providerUuids);
     }
 
     private void validate(APIAttachDataVolumeToHostMsg msg) {
         Set<String> providerUuids = new LinkedHashSet<>();
-        collectEncryptedVolumeProvider(msg.getVolumeUuid(), providerUuids);
+        collectAttachVolumeProvider(msg.getVolumeUuid(), providerUuids);
         ensureProvidersAvailable(providerUuids);
     }
 
@@ -567,6 +568,12 @@ public class KeyProviderAvailabilityApiInterceptor implements GlobalApiMessageIn
         }
     }
 
+    private void collectAttachVolumeProvider(String volumeUuid, Set<String> providerUuids) {
+        if (StringUtils.isNotBlank(volumeUuid) && isVolumeEncrypted(volumeUuid)) {
+            addResourceProvider(providerUuids, VolumeVO.class.getSimpleName(), volumeUuid, isVolumeNotInstantiated(volumeUuid));
+        }
+    }
+
     private void collectEncryptedSnapshotProvider(String snapshotUuid, Set<String> providerUuids) {
         if (StringUtils.isNotBlank(snapshotUuid) && isSnapshotEncrypted(snapshotUuid)) {
             addResourceProvider(providerUuids, VolumeSnapshotVO.class.getSimpleName(), snapshotUuid, false);
@@ -689,6 +696,13 @@ public class KeyProviderAvailabilityApiInterceptor implements GlobalApiMessageIn
                 .select(VolumeVO_.encrypted)
                 .eq(VolumeVO_.uuid, volumeUuid)
                 .findValue());
+    }
+
+    private boolean isVolumeNotInstantiated(String volumeUuid) {
+        return VolumeStatus.NotInstantiated == Q.New(VolumeVO.class)
+                .select(VolumeVO_.status)
+                .eq(VolumeVO_.uuid, volumeUuid)
+                .findValue();
     }
 
     private boolean isSnapshotEncrypted(String snapshotUuid) {

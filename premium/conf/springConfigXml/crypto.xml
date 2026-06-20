@@ -39,6 +39,22 @@
         </zstack:plugin>
     </bean>
 
+    <bean id="BackupImageDownloadExtension" class="org.zstack.crypto.volumebackup.BackupImageDownloadExtension"/>
+
+    <bean id="BackupVmSpecEncryptionExtension" class="org.zstack.crypto.volumebackup.BackupVmSpecEncryptionExtension">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.compute.vm.BuildVmSpecExtensionPoint"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="BackupImageKeyManager" class="org.zstack.crypto.volumebackup.BackupImageKeyManager"/>
+
+    <bean id="BackupImageKeyCleanupExtension" class="org.zstack.crypto.volumebackup.BackupImageKeyCleanupExtension">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.image.ExpungeImageExtensionPoint"/>
+        </zstack:plugin>
+    </bean>
+
     <bean id="VolumeBackupRekeyAssociation" class="org.zstack.crypto.volumebackup.VolumeBackupRekeyAssociation">
         <zstack:plugin>
             <zstack:extension interface="org.zstack.header.keyprovider.KeyProviderRekeyAssociationExtensionPoint"/>
@@ -66,11 +82,7 @@
         </zstack:plugin>
     </bean>
 
-    <bean id="KeyProviderAvailabilityApiInterceptor" class="org.zstack.crypto.keyprovider.KeyProviderAvailabilityApiInterceptor">
-        <zstack:plugin>
-            <zstack:extension interface="org.zstack.header.apimediator.GlobalApiMessageInterceptor"/>
-        </zstack:plugin>
-    </bean>
+    <bean id="KeyProviderAvailabilityChecker" class="org.zstack.crypto.keyprovider.KeyProviderAvailabilityChecker"/>
 
     <bean id="EncryptionInventoryReplyMarshaller" class="org.zstack.crypto.keyprovider.EncryptionInventoryReplyMarshaller">
         <zstack:plugin>

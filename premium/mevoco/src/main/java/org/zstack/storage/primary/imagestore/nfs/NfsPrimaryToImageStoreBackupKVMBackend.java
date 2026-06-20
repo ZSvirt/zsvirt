@@ -17,6 +17,8 @@ import org.zstack.header.image.*;
 import org.zstack.header.message.MessageReply;
 import org.zstack.header.storage.backup.BackupStorageConstant;
 import org.zstack.header.storage.backup.BackupStorageInventory;
+import org.zstack.header.storage.primary.imagestore.ImageStoreDownloadContext;
+import org.zstack.header.storage.primary.imagestore.ImageStoreDownloadExtension;
 import org.zstack.header.storage.primary.PrimaryStorageInventory;
 import org.zstack.identity.AccountManager;
 import org.zstack.kvm.KVMConstant;
@@ -28,6 +30,7 @@ import org.zstack.storage.backup.imagestore.GetImageStoreBackupStorageDownloadCr
 import org.zstack.storage.backup.imagestore.GetImageStoreBackupStorageDownloadCredentialReply;
 import org.zstack.storage.backup.imagestore.ImageStoreBackupStorageConstant;
 import org.zstack.storage.backup.imagestore.ImageStoreGlobalConfig;
+import org.zstack.storage.primary.imagestore.ImageStoreDownloadExtensions;
 import org.zstack.storage.primary.imagestore.local.LocalStorageKvmImageStoreBackupStorageMediatorImpl;
 import org.zstack.storage.primary.nfs.*;
 import org.zstack.utils.Utils;
@@ -59,6 +62,8 @@ public class NfsPrimaryToImageStoreBackupKVMBackend implements NfsPrimaryToBacku
     private PluginRegistry pluginRgty;
     @Autowired
     private ResourceConfigFacade rcf;
+    @Autowired(required = false)
+    private ImageStoreDownloadExtension imageStoreDownloadExtension;
 
     public static final String UPLOAD_TO_IMAGESTORE_PATH = "/nfsprimarystorage/imagestore/upload";
     public static final String DOWNLOAD_FROM_IMAGESTORE_PATH = "/nfsprimarystorage/imagestore/download";
@@ -240,13 +245,29 @@ public class NfsPrimaryToImageStoreBackupKVMBackend implements NfsPrimaryToBacku
                             return;
                         }
 
-                        completion.success();
+                        ImageStoreDownloadExtensions.afterDownload(imageStoreDownloadExtension, buildDownloadContext(pinv, bsinv,
+                                backupStorageInstallPath, primaryStorageInstallPath, hostUuid, isData), completion);
                     }
                 });
             }
         });
     }
 
+    private ImageStoreDownloadContext buildDownloadContext(PrimaryStorageInventory pinv,
+                                                           BackupStorageInventory bsinv,
+                                                           String backupStorageInstallPath,
+                                                           String primaryStorageInstallPath,
+                                                           String hostUuid,
+                                                           boolean isData) {
+        ImageStoreDownloadContext context = new ImageStoreDownloadContext();
+        context.setPrimaryStorageUuid(pinv.getUuid());
+        context.setBackupStorageUuid(bsinv.getUuid());
+        context.setBackupStorageInstallPath(backupStorageInstallPath);
+        context.setPrimaryStorageInstallPath(primaryStorageInstallPath);
+        context.setHostUuid(hostUuid);
+        context.setData(isData);
+        return context;
+    }
 
     @Override
     public void uploadBits(final String imageUuid, final PrimaryStorageInventory pinv, BackupStorageInventory bsinv, final String backupStorageInstallPath, final String primaryStorageInstallPath, final ReturnValueCompletion<String> completion) {

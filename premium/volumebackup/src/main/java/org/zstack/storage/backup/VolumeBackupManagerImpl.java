@@ -410,6 +410,7 @@ public class VolumeBackupManagerImpl extends AbstractService implements
                 DiskAO rootUserAO = diskAOBySourceUuid.get(rootBundle.originVolumeUuid);
                 DiskAO rootDisk = DiskAO.rootDisk();
                 rootDisk.withImage(rootBundle.imageUuid);
+                rootDisk.setVolumeBackupTemplate(true);
                 rootDisk.setPrimaryStorageUuid(
                         rootUserAO != null && rootUserAO.getPrimaryStorageUuid() != null
                                 ? rootUserAO.getPrimaryStorageUuid()
@@ -418,6 +419,9 @@ public class VolumeBackupManagerImpl extends AbstractService implements
                 if (rootUserAO != null && rootUserAO.getName() != null) {
                     rootDisk.setName(rootUserAO.getName());
                 }
+                if (rootUserAO != null) {
+                    rootDisk.setEncrypted(rootUserAO.getEncrypted());
+                }
                 cmsg.setRootDisk(rootDisk);
 
                 // sort data disks by device-id to preserve original disk order
@@ -425,18 +429,22 @@ public class VolumeBackupManagerImpl extends AbstractService implements
                         it.metadata.getDeviceId() != null ? it.metadata.getDeviceId() : Integer.MAX_VALUE));
 
                 // Data disks go through deprecatedDataVolumeSpecs for legacy template flow
-                // (naming + device-id restoration). Only templateUuid/primaryStorageUuid/systemTags
+                // (naming + device-id restoration). Only templateUuid/primaryStorageUuid/systemTags/encrypted
                 // are set; size/diskOffering omitted so allocate flows skip these.
                 List<DiskAO> templateDataDisks = new ArrayList<>();
                 for (Bundle dataBundle : createStruct.dataVolBuckets) {
                     DiskAO userAO = diskAOBySourceUuid.get(dataBundle.originVolumeUuid);
                     DiskAO disk = DiskAO.nonRootDisk();
                     disk.setTemplateUuid(dataBundle.imageUuid);
+                    disk.setVolumeBackupTemplate(true);
                     disk.setPrimaryStorageUuid(
                             userAO != null && userAO.getPrimaryStorageUuid() != null
                                     ? userAO.getPrimaryStorageUuid()
                                     : msg.getPrimaryStorageUuidForDataVolume());
                     disk.setSystemTags(resolveSystemTags(userAO, dataBundle.metadata, msg.getDataVolumeSystemTags()));
+                    if (userAO != null) {
+                        disk.setEncrypted(userAO.getEncrypted());
+                    }
                     templateDataDisks.add(disk);
                 }
                 cmsg.setDeprecatedDataVolumeSpecs(templateDataDisks);
@@ -2336,6 +2344,10 @@ public class VolumeBackupManagerImpl extends AbstractService implements
 
     private Map<String, String> getBackupBsUuids(List<VolumeBackupVO> vos, String bsUuid) {
         Map<String, String> res = new HashMap<>();
+        if (vos.isEmpty()) {
+            return res;
+        }
+
         if (bsUuid != null) {
             vos.forEach(vo -> {
                 res.put(vo.getUuid(), bsUuid);
@@ -2344,18 +2356,29 @@ public class VolumeBackupManagerImpl extends AbstractService implements
             return res;
         }
 
-        List<String> remoteUuids = ImageStoreBackupStorageSelector.getRemoteBsUuids();
+        Set<String> remoteUuids = new HashSet<>(ImageStoreBackupStorageSelector.getRemoteBsUuids());
+        List<String> backupUuids = vos.stream().map(VolumeBackupVO::getUuid).collect(Collectors.toList());
+        Map<String, List<String>> backupStorageUuidsByBackupUuid = new HashMap<>();
+        List<Tuple> refs = Q.New(VolumeBackupStorageRefVO.class)
+                .in(VolumeBackupStorageRefVO_.volumeBackupUuid, backupUuids)
+                .select(VolumeBackupStorageRefVO_.volumeBackupUuid, VolumeBackupStorageRefVO_.backupStorageUuid)
+                .listTuple();
+        for (Tuple ref : refs) {
+            String backupStorageUuid = ref.get(1, String.class);
+            if (remoteUuids.contains(backupStorageUuid)) {
+                continue;
+            }
+            backupStorageUuidsByBackupUuid.computeIfAbsent(ref.get(0, String.class), k -> new ArrayList<>()).add(backupStorageUuid);
+        }
+
         vos.forEach(vo -> {
-            List<String> backupStorageUuids = Q.New(VolumeBackupStorageRefVO.class)
-                    .eq(VolumeBackupStorageRefVO_.volumeBackupUuid, vo.getUuid())
-                    .select(VolumeBackupStorageRefVO_.backupStorageUuid)
-                    .listValues();
-            backupStorageUuids.removeAll(remoteUuids);
+            List<String> backupStorageUuids = backupStorageUuidsByBackupUuid.getOrDefault(vo.getUuid(), Collections.emptyList());
             if (backupStorageUuids.isEmpty()) {
                 throw new OperationFailureException(Platform.argerr("Volume backup[uuid:%s] not found on any backup storage", vo.getUuid()));
             }
-            Collections.shuffle(backupStorageUuids);
-            res.put(vo.getUuid(), backupStorageUuids.get(0));
+            List<String> candidates = new ArrayList<>(backupStorageUuids);
+            Collections.shuffle(candidates);
+            res.put(vo.getUuid(), candidates.get(0));
         });
 
         return res;

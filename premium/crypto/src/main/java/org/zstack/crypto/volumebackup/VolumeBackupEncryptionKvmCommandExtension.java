@@ -55,7 +55,7 @@ public class VolumeBackupEncryptionKvmCommandExtension implements VmBackupKvmCom
                         throw operr("volume backup record for volume[uuid:%s] not found", volume.getUuid()).toException();
                     }
 
-                    volumeEncryptedResourceKeyBackend.copyVolumeKeyToBackup(volume.getUuid(), backup.getUuid());
+                    volumeEncryptedResourceKeyBackend.copyVolumeKeyRefToBackup(volume.getUuid(), backup.getUuid());
                     copiedBackupUuids.add(backup.getUuid());
                 }
             }
@@ -105,7 +105,7 @@ public class VolumeBackupEncryptionKvmCommandExtension implements VmBackupKvmCom
             return spec;
         }
 
-        String encryptedDek = volumeEncryptedSecretHelper.prepareLuksEnvelopeDekOnHost(hostUuid, volume.getUuid());
+        String encryptedDek = volumeEncryptedSecretHelper.materializeAndSealVolumeDekForHost(hostUuid, volume.getUuid());
         String keyProviderUuid = volumeEncryptedResourceKeyBackend.findKeyProviderUuidByVolume(volume.getUuid());
         Integer keyVersion = volumeEncryptedResourceKeyBackend.findKeyVersionByVolume(volume.getUuid());
         if (StringUtils.isBlank(encryptedDek) || StringUtils.isBlank(keyProviderUuid) || keyVersion == null) {

@@ -1,9 +1,11 @@
 package org.zstack.crypto.keyprovider;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.zstack.core.db.DatabaseFacade;
 import org.zstack.core.db.Q;
 import org.zstack.core.db.SQL;
+import org.zstack.core.db.SQLBatch;
 import org.zstack.header.keyprovider.EncryptedResourceKeyRefVO;
 import org.zstack.header.keyprovider.EncryptedResourceKeyRefVO_;
 import org.zstack.header.keyprovider.KeyProviderGlobalConfig;
@@ -17,7 +19,10 @@ import org.zstack.storage.encrypt.VolumeEncryptedResourceKeyBackend;
 import org.zstack.utils.Utils;
 import org.zstack.utils.logging.CLogger;
 
+import javax.persistence.Query;
+import java.util.LinkedHashSet;
 import java.util.Objects;
+import java.util.Set;
 
 import static org.zstack.core.Platform.err;
 import static org.zstack.core.Platform.operr;
@@ -31,14 +36,13 @@ public class KeyProviderResourceKeyBackendVolume implements VolumeEncryptedResou
 
     @Autowired
     private DatabaseFacade databaseFacade;
+    @Autowired
+    private KeyProviderAvailabilityChecker keyProviderAvailabilityChecker;
 
     @Override
     public void attachKeyProviderToVolume(String volumeUuid, String keyProviderUuid) {
-        final String existKeyProviderUuid = Q.New(EncryptedResourceKeyRefVO.class)
-                .eq(EncryptedResourceKeyRefVO_.resourceType, VolumeVO.class.getSimpleName())
-                .eq(EncryptedResourceKeyRefVO_.resourceUuid, volumeUuid)
-                .select(EncryptedResourceKeyRefVO_.providerUuid)
-                .findValue();
+        EncryptedResourceKeyRefVO exist = findKeyRef(VolumeVO.class.getSimpleName(), volumeUuid);
+        final String existKeyProviderUuid = exist == null ? null : exist.getProviderUuid();
         if (Objects.equals(existKeyProviderUuid, keyProviderUuid)) {
             logger.debug(String.format(
                     "The key provider[uuid:%s] is already attached to volume[uuid:%s], skip attach",
@@ -52,6 +56,8 @@ public class KeyProviderResourceKeyBackendVolume implements VolumeEncryptedResou
                     .withOpaque("volume.uuid", volumeUuid)
                     .toException();
         }
+
+        keyProviderAvailabilityChecker.ensureProviderAvailable(keyProviderUuid);
 
         final KeyProviderVO provider = Q.New(KeyProviderVO.class)
                 .eq(KeyProviderVO_.uuid, keyProviderUuid)
@@ -129,39 +135,113 @@ public class KeyProviderResourceKeyBackendVolume implements VolumeEncryptedResou
     }
 
     @Override
-    public void copyVolumeKeyToSnapshot(String volumeUuid, String snapshotUuid) {
+    public boolean hasBackupKeyRef(String backupUuid) {
+        Long count = Q.New(EncryptedResourceKeyRefVO.class)
+                .eq(EncryptedResourceKeyRefVO_.resourceType, VolumeBackupVO.class.getSimpleName())
+                .eq(EncryptedResourceKeyRefVO_.resourceUuid, backupUuid)
+                .count();
+        return count != null && count.longValue() > 0;
+    }
+
+    @Override
+    public void copyVolumeKeyRefToSnapshot(String volumeUuid, String snapshotUuid) {
         copyKeyRef(VolumeVO.class.getSimpleName(), volumeUuid,
                 VolumeSnapshotVO.class.getSimpleName(), snapshotUuid);
     }
 
     @Override
-    public void copySnapshotKeyToVolume(String snapshotUuid, String volumeUuid) {
+    public void copyVolumeKeyRefToSnapshots(String volumeUuid, Set<String> snapshotUuids) {
+        if (CollectionUtils.isEmpty(snapshotUuids)) {
+            return;
+        }
+
+        EncryptedResourceKeyRefVO src = findKeyRef(VolumeVO.class.getSimpleName(), volumeUuid);
+        if (src == null) {
+            throw operr("encrypted key ref[type:%s, uuid:%s] not found",
+                    VolumeVO.class.getSimpleName(), volumeUuid).toException();
+        }
+
+        Set<String> dstUuids = new LinkedHashSet<>(snapshotUuids);
+        new SQLBatch() {
+            @Override
+            protected void scripts() {
+                sql(EncryptedResourceKeyRefVO.class)
+                        .eq(EncryptedResourceKeyRefVO_.resourceType, VolumeSnapshotVO.class.getSimpleName())
+                        .in(EncryptedResourceKeyRefVO_.resourceUuid, dstUuids)
+                        .delete();
+
+                StringBuilder sql = new StringBuilder("insert into EncryptedResourceKeyRefVO " +
+                        "(resourceType, resourceUuid, providerUuid, providerName, keyVersion, kekRef, wrappedDek, algorithm) " +
+                        "select :resourceType, dst.resourceUuid, :providerUuid, :providerName, :keyVersion, :kekRef, :wrappedDek, :algorithm from (");
+                int i = 0;
+                for (String ignored : dstUuids) {
+                    if (i > 0) {
+                        sql.append(" union all ");
+                    }
+                    sql.append(String.format("select :resourceUuid%s as resourceUuid", i));
+                    i++;
+                }
+                sql.append(") dst");
+
+                Query query = databaseFacade.getEntityManager().createNativeQuery(sql.toString());
+                query.setParameter("resourceType", VolumeSnapshotVO.class.getSimpleName());
+                query.setParameter("providerUuid", src.getProviderUuid());
+                query.setParameter("providerName", src.getProviderName());
+                query.setParameter("keyVersion", src.getKeyVersion());
+                query.setParameter("kekRef", src.getKekRef());
+                query.setParameter("wrappedDek", src.getWrappedDek());
+                query.setParameter("algorithm", src.getAlgorithm());
+
+                int idx = 0;
+                for (String snapshotUuid : dstUuids) {
+                    query.setParameter(String.format("resourceUuid%s", idx), snapshotUuid);
+                    idx++;
+                }
+                query.executeUpdate();
+            }
+        }.execute();
+    }
+
+    @Override
+    public void copySnapshotKeyRefToVolume(String snapshotUuid, String volumeUuid) {
         copyKeyRef(VolumeSnapshotVO.class.getSimpleName(), snapshotUuid,
                 VolumeVO.class.getSimpleName(), volumeUuid);
     }
 
     @Override
-    public void copyVolumeKeyToVolume(String srcVolumeUuid, String dstVolumeUuid) {
+    public void copyVolumeKeyRefToVolume(String srcVolumeUuid, String dstVolumeUuid) {
         copyKeyRef(VolumeVO.class.getSimpleName(), srcVolumeUuid,
                 VolumeVO.class.getSimpleName(), dstVolumeUuid);
     }
 
     @Override
-    public void copySnapshotKeyToTemporarySnapshotImage(String snapshotUuid, String imageUuid) {
+    public void copySnapshotKeyRefToTemporarySnapshotImage(String snapshotUuid, String imageUuid) {
         copyKeyRef(VolumeSnapshotVO.class.getSimpleName(), snapshotUuid,
                 ImageVO.class.getSimpleName(), imageUuid);
     }
 
     @Override
-    public void copyTemporarySnapshotImageKeyToVolume(String imageUuid, String volumeUuid) {
+    public void copyTemporarySnapshotImageKeyRefToVolume(String imageUuid, String volumeUuid) {
         copyKeyRef(ImageVO.class.getSimpleName(), imageUuid,
                 VolumeVO.class.getSimpleName(), volumeUuid);
     }
 
     @Override
-    public void copyVolumeKeyToBackup(String volumeUuid, String backupUuid) {
+    public void copyVolumeKeyRefToBackup(String volumeUuid, String backupUuid) {
         copyKeyRef(VolumeVO.class.getSimpleName(), volumeUuid,
                 VolumeBackupVO.class.getSimpleName(), backupUuid);
+    }
+
+    @Override
+    public void copyBackupKeyRefToTemporarySnapshotImage(String backupUuid, String imageUuid) {
+        copyKeyRef(VolumeBackupVO.class.getSimpleName(), backupUuid,
+                ImageVO.class.getSimpleName(), imageUuid);
+    }
+
+    @Override
+    public void copyBackupKeyRefToVolume(String backupUuid, String volumeUuid) {
+        copyKeyRef(VolumeBackupVO.class.getSimpleName(), backupUuid,
+                VolumeVO.class.getSimpleName(), volumeUuid);
     }
 
     @Override
@@ -175,54 +255,36 @@ public class KeyProviderResourceKeyBackendVolume implements VolumeEncryptedResou
 
     @Override
     public String findKeyProviderUuidByVolume(String volumeUuid) {
-        return Q.New(EncryptedResourceKeyRefVO.class)
-                .eq(EncryptedResourceKeyRefVO_.resourceType, VolumeVO.class.getSimpleName())
-                .eq(EncryptedResourceKeyRefVO_.resourceUuid, volumeUuid)
-                .select(EncryptedResourceKeyRefVO_.providerUuid)
-                .findValue();
+        EncryptedResourceKeyRefVO ref = findKeyRef(VolumeVO.class.getSimpleName(), volumeUuid);
+        return ref == null ? null : ref.getProviderUuid();
     }
 
     @Override
     public String findKeyProviderUuidBySnapshot(String snapshotUuid) {
-        return Q.New(EncryptedResourceKeyRefVO.class)
-                .eq(EncryptedResourceKeyRefVO_.resourceType, VolumeSnapshotVO.class.getSimpleName())
-                .eq(EncryptedResourceKeyRefVO_.resourceUuid, snapshotUuid)
-                .select(EncryptedResourceKeyRefVO_.providerUuid)
-                .findValue();
+        EncryptedResourceKeyRefVO ref = findKeyRef(VolumeSnapshotVO.class.getSimpleName(), snapshotUuid);
+        return ref == null ? null : ref.getProviderUuid();
     }
 
     @Override
     public String findKeyProviderUuidByTemporarySnapshotImage(String imageUuid) {
-        return Q.New(EncryptedResourceKeyRefVO.class)
-                .eq(EncryptedResourceKeyRefVO_.resourceType, ImageVO.class.getSimpleName())
-                .eq(EncryptedResourceKeyRefVO_.resourceUuid, imageUuid)
-                .select(EncryptedResourceKeyRefVO_.providerUuid)
-                .findValue();
+        EncryptedResourceKeyRefVO ref = findKeyRef(ImageVO.class.getSimpleName(), imageUuid);
+        return ref == null ? null : ref.getProviderUuid();
     }
 
     @Override
     public Integer findKeyVersionByVolume(String volumeUuid) {
-        return Q.New(EncryptedResourceKeyRefVO.class)
-                .eq(EncryptedResourceKeyRefVO_.resourceType, VolumeVO.class.getSimpleName())
-                .eq(EncryptedResourceKeyRefVO_.resourceUuid, volumeUuid)
-                .select(EncryptedResourceKeyRefVO_.keyVersion)
-                .findValue();
+        EncryptedResourceKeyRefVO ref = findKeyRef(VolumeVO.class.getSimpleName(), volumeUuid);
+        return ref == null ? null : ref.getKeyVersion();
     }
 
     @Override
     public Integer findKeyVersionBySnapshot(String snapshotUuid) {
-        return Q.New(EncryptedResourceKeyRefVO.class)
-                .eq(EncryptedResourceKeyRefVO_.resourceType, VolumeSnapshotVO.class.getSimpleName())
-                .eq(EncryptedResourceKeyRefVO_.resourceUuid, snapshotUuid)
-                .select(EncryptedResourceKeyRefVO_.keyVersion)
-                .findValue();
+        EncryptedResourceKeyRefVO ref = findKeyRef(VolumeSnapshotVO.class.getSimpleName(), snapshotUuid);
+        return ref == null ? null : ref.getKeyVersion();
     }
 
     private void copyKeyRef(String srcType, String srcUuid, String dstType, String dstUuid) {
-        EncryptedResourceKeyRefVO src = Q.New(EncryptedResourceKeyRefVO.class)
-                .eq(EncryptedResourceKeyRefVO_.resourceType, srcType)
-                .eq(EncryptedResourceKeyRefVO_.resourceUuid, srcUuid)
-                .find();
+        EncryptedResourceKeyRefVO src = findKeyRef(srcType, srcUuid);
         if (src == null) {
             throw operr("encrypted key ref[type:%s, uuid:%s] not found", srcType, srcUuid).toException();
         }
@@ -242,5 +304,12 @@ public class KeyProviderResourceKeyBackendVolume implements VolumeEncryptedResou
         dst.setWrappedDek(src.getWrappedDek());
         dst.setAlgorithm(src.getAlgorithm());
         databaseFacade.persist(dst);
+    }
+
+    private EncryptedResourceKeyRefVO findKeyRef(String resourceType, String resourceUuid) {
+        return Q.New(EncryptedResourceKeyRefVO.class)
+                .eq(EncryptedResourceKeyRefVO_.resourceType, resourceType)
+                .eq(EncryptedResourceKeyRefVO_.resourceUuid, resourceUuid)
+                .find();
     }
 }

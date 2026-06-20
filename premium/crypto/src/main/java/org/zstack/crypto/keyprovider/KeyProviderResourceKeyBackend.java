@@ -35,6 +35,8 @@ public class KeyProviderResourceKeyBackend implements TpmEncryptedResourceKeyBac
     private DatabaseFacade databaseFacade;
     @Autowired
     private TimeHelper timeHelper;
+    @Autowired
+    private KeyProviderAvailabilityChecker keyProviderAvailabilityChecker;
 
     @Override
     public void attachKeyProviderToTpm(String tpmUuid, String keyProviderUuid) {
@@ -53,6 +55,8 @@ public class KeyProviderResourceKeyBackend implements TpmEncryptedResourceKeyBac
                     .withOpaque("tpm.uuid", tpmUuid)
                     .toException();
         }
+
+        keyProviderAvailabilityChecker.ensureProviderAvailable(keyProviderUuid);
 
         final KeyProviderVO provider = Q.New(KeyProviderVO.class)
                 .eq(KeyProviderVO_.uuid, keyProviderUuid)
@@ -165,6 +169,7 @@ public class KeyProviderResourceKeyBackend implements TpmEncryptedResourceKeyBac
             logger.info(String.format("reset encrypted resource key for TPM[uuid=%s] from source TPM[uuid=%s]",
                     context.dstTpmUuid, context.srcTpmUuid));
             String defaultProviderUuid = defaultKeyProviderUuid();
+            keyProviderAvailabilityChecker.ensureProviderAvailable(defaultProviderUuid);
             String defaultProviderName = Q.New(KeyProviderVO.class)
                     .eq(KeyProviderVO_.uuid, defaultProviderUuid)
                     .select(KeyProviderVO_.name)

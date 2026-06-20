@@ -2,6 +2,7 @@ package org.zstack.storage.backup.imagestore;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.zstack.core.CoreGlobalProperty;
 import org.zstack.core.Platform;
@@ -39,6 +40,7 @@ import org.zstack.header.core.WhileDoneCompletion;
 import org.zstack.header.core.workflow.*;
 import org.zstack.header.errorcode.ErrorCode;
 import org.zstack.header.errorcode.ErrorCodeList;
+import org.zstack.header.errorcode.ErrorableValue;
 import org.zstack.header.errorcode.OperationFailureException;
 import org.zstack.header.host.*;
 import org.zstack.header.image.*;
@@ -47,6 +49,7 @@ import org.zstack.header.managementnode.ManagementNodeReadyExtensionPoint;
 import org.zstack.header.message.APIMessage;
 import org.zstack.header.message.Message;
 import org.zstack.header.message.MessageReply;
+import org.zstack.header.query.QueryOp;
 import org.zstack.header.storage.backup.*;
 import org.zstack.header.storage.database.backup.DatabaseBackupStatus;
 import org.zstack.header.storage.database.backup.DatabaseBackupStorageRefVO;
@@ -58,8 +61,10 @@ import org.zstack.header.vo.ResourceInventory;
 import org.zstack.identity.AccountManager;
 import org.zstack.image.ImageSystemTags;
 import org.zstack.kvm.*;
+import org.zstack.query.QueryFacade;
 import org.zstack.resourceconfig.ResourceConfig;
 import org.zstack.resourceconfig.ResourceConfigFacade;
+import org.zstack.storage.volume.VolumeManager;
 import org.zstack.tag.SystemTagCreator;
 import org.zstack.tag.TagManager;
 import org.zstack.utils.*;
@@ -110,6 +115,10 @@ public class ImageStoreBackupStorageManagerImpl extends AbstractService
     protected ResourceConfigFacade rcf;
     @Autowired
     private ImageStoreBackupStorageMetaDataMaker metaDataMaker;
+    @Autowired
+    private QueryFacade qf;
+    @Autowired
+    private VolumeManager volumeManager;
 
     // Zstack store client & server shares the same installer package
     static private final String agentPackageName = ImageStoreBackupStorageGlobalProperty.AGENT_PACKAGE_NAME;
@@ -1477,6 +1486,102 @@ public class ImageStoreBackupStorageManagerImpl extends AbstractService
                 }
             }
         });
+    }
+
+    @Override
+    public String findImageUuid(String backupStorageUuid, String installPath) {
+        return Q.New(ImageBackupStorageRefVO.class)
+                .eq(ImageBackupStorageRefVO_.backupStorageUuid, backupStorageUuid)
+                .eq(ImageBackupStorageRefVO_.installPath, installPath)
+                .select(ImageBackupStorageRefVO_.imageUuid)
+                .limit(1)
+                .findValue();
+    }
+
+    @Override
+    public String findVolumeBackupUuid(String backupStorageUuid, String installPath) {
+        return Q.New(VolumeBackupStorageRefVO.class)
+                .eq(VolumeBackupStorageRefVO_.backupStorageUuid, backupStorageUuid)
+                .eq(VolumeBackupStorageRefVO_.installPath, installPath)
+                .select(VolumeBackupStorageRefVO_.volumeBackupUuid)
+                .limit(1)
+                .findValue();
+    }
+
+    @Override
+    public String findVolumeBackupUuidByImageUuid(String imageUuid) {
+        if (StringUtils.isBlank(imageUuid)) {
+            return null;
+        }
+
+        String backupUuid = SQL.New("select bref.volumeBackupUuid from VolumeBackupStorageRefVO bref, ImageBackupStorageRefVO iref" +
+                " where iref.imageUuid = :imageUuid" +
+                " and iref.backupStorageUuid = bref.backupStorageUuid" +
+                " and iref.installPath = bref.installPath", String.class)
+                .param("imageUuid", imageUuid)
+                .limit(1)
+                .find();
+        if (StringUtils.isNotBlank(backupUuid)) {
+            return backupUuid;
+        }
+
+        return null;
+    }
+
+    @Override
+    public String findVolumeBackupUuidByImageUuidWithMetadataFallback(String imageUuid) {
+        String backupUuid = findVolumeBackupUuidByImageUuid(imageUuid);
+        if (StringUtils.isNotBlank(backupUuid)) {
+            return backupUuid;
+        }
+
+        return findVolumeBackupUuidFromImageMetadata(imageUuid);
+    }
+
+    @Override
+    public long countImageBackupStorageRefs(String imageUuid) {
+        return Q.New(ImageBackupStorageRefVO.class)
+                .eq(ImageBackupStorageRefVO_.imageUuid, imageUuid)
+                .count();
+    }
+
+    @Override
+    public ErrorableValue<String> findConnectedKvmHost(String primaryStorageUuid, String storageDescription, String operation) {
+        return volumeManager.findConnectedKvmHostByPrimaryStorage(primaryStorageUuid, storageDescription, operation);
+    }
+
+    private String findVolumeBackupUuidFromImageMetadata(String imageUuid) {
+        ImageVO image = Q.New(ImageVO.class)
+                .eq(ImageVO_.uuid, imageUuid)
+                .find();
+        if (image == null) {
+            return null;
+        }
+
+        String backupUuid = parseVolumeBackupUuid(image.getDescription(), "Created from backup: ");
+        if (StringUtils.isBlank(backupUuid)) {
+            backupUuid = parseVolumeBackupUuid(image.getName(), "create-from-backup-");
+        }
+
+        if (StringUtils.isBlank(backupUuid)) {
+            return null;
+        }
+        return volumeBackupExists(backupUuid) ? backupUuid : null;
+    }
+
+    private boolean volumeBackupExists(String backupUuid) {
+        if (StringUtils.isBlank(backupUuid)) {
+            return false;
+        }
+
+        return Q.New(VolumeBackupVO.class).eq(VolumeBackupVO_.uuid, backupUuid).isExists();
+    }
+
+    private String parseVolumeBackupUuid(String value, String prefix) {
+        if (StringUtils.isBlank(value) || !value.startsWith(prefix)) {
+            return null;
+        }
+        return value.substring(prefix.length()).trim();
     }
 
     @Override

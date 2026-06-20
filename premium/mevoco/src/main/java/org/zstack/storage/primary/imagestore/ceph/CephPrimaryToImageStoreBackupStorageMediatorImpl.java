@@ -29,6 +29,8 @@ import org.zstack.header.storage.primary.BackupStorageMediator;
 import org.zstack.header.storage.primary.MediatorDownloadParam;
 import org.zstack.header.storage.primary.MediatorUploadParam;
 import org.zstack.header.storage.primary.PrimaryToBackupStorageMediator;
+import org.zstack.header.storage.primary.imagestore.ImageStoreDownloadExtension;
+import org.zstack.header.storage.primary.imagestore.ceph.CephImageStoreDownloadContext;
 import org.zstack.kvm.KVMConstant;
 import org.zstack.resourceconfig.ResourceConfig;
 import org.zstack.resourceconfig.ResourceConfigFacade;
@@ -39,6 +41,7 @@ import org.zstack.storage.ceph.primary.CephPrimaryStorageBase;
 import org.zstack.storage.ceph.primary.CephPrimaryStorageMonBase;
 import org.zstack.storage.ceph.primary.CephPrimaryStorageMonVO;
 import org.zstack.storage.ceph.primary.CephPrimaryStorageVO;
+import org.zstack.storage.primary.imagestore.ImageStoreDownloadExtensions;
 import org.zstack.utils.DebugUtils;
 import org.zstack.utils.Utils;
 import org.zstack.utils.logging.CLogger;
@@ -67,6 +70,8 @@ public class CephPrimaryToImageStoreBackupStorageMediatorImpl extends BackupStor
     protected DatabaseFacade dbf;
     @Autowired
     private ResourceConfigFacade rcf;
+    @Autowired(required = false)
+    private ImageStoreDownloadExtension imageStoreDownloadExtension;
 
     public static class DownloadCmd extends CephPrimaryStorageBase.AgentCommand implements HasThreadContext {
         String hostname;
@@ -161,6 +166,24 @@ public class CephPrimaryToImageStoreBackupStorageMediatorImpl extends BackupStor
         });
     }
 
+    private CephImageStoreDownloadContext buildDownloadContext(final MediatorDownloadParam param,
+                                                               final ImageStoreBackupStorageInventory inv,
+                                                               final CephPrimaryStorageVO vo,
+                                                               String hostName) {
+        CephImageStoreDownloadContext context = new CephImageStoreDownloadContext();
+        context.setParam(param);
+        context.setBackupStorage(inv);
+        context.setPrimaryStorage(vo);
+        context.setBackupStorageHostname(hostName);
+        ResourceConfig rc = rcf.getResourceConfig(ImageStoreGlobalConfig.BLOB_DOWNLOAD_CONCURRENCY.getIdentity());
+        context.setConcurrency(rc.getResourceConfigValue(inv.getUuid(), Integer.class));
+        return context;
+    }
+
+    private boolean needsEncryptedDownload(CephImageStoreDownloadContext context) {
+        return ImageStoreDownloadExtensions.supports(imageStoreDownloadExtension, context);
+    }
+
     private void downloadBits(final MediatorDownloadParam param, Completion completion) {
         DebugUtils.Assert(param.getPrimaryStorageUuid() != null, "primaryStorageUuid cannot be null in MediatorDowloadParam!");
         CephPrimaryStorageVO vo = dbf.findByUuid(param.getPrimaryStorageUuid(), CephPrimaryStorageVO.class);
@@ -201,6 +224,33 @@ public class CephPrimaryToImageStoreBackupStorageMediatorImpl extends BackupStor
                                 trigger.fail(errorCode);
                             }
                         }).call();
+                    }
+                });
+            }
+
+            private void setUpEncryptedDownloadFlow() {
+                flow(new NoRollbackFlow() {
+                    String __name__ = "download-encrypted-image";
+
+                    @Override
+                    public void run(FlowTrigger trigger, Map data) {
+                        CephImageStoreDownloadContext context = buildDownloadContext(param, getInventory(), vo, hostName);
+                        if (!ImageStoreDownloadExtensions.supports(imageStoreDownloadExtension, context)) {
+                            trigger.fail(operr("cannot find ImageStore download extension for encrypted image[uuid:%s]",
+                                    context.getParam().getImage().getInventory().getUuid()));
+                            return;
+                        }
+                        imageStoreDownloadExtension.download(context, new Completion(trigger) {
+                            @Override
+                            public void success() {
+                                trigger.next();
+                            }
+
+                            @Override
+                            public void fail(ErrorCode errorCode) {
+                                trigger.fail(errorCode);
+                            }
+                        });
                     }
                 });
             }
@@ -319,7 +369,9 @@ public class CephPrimaryToImageStoreBackupStorageMediatorImpl extends BackupStor
                     }
                 });
 
-                if (ImageStoreSystemTags.SUPPORT_FUSE.hasTag(bsRef.getBackupStorageUuid())) {
+                if (needsEncryptedDownload(buildDownloadContext(param, getInventory(), vo, null))) {
+                    setUpEncryptedDownloadFlow();
+                } else if (ImageStoreSystemTags.SUPPORT_FUSE.hasTag(bsRef.getBackupStorageUuid())) {
                     setUpFuseDownloadFlow();
                 } else {
                     setUpLegacyDownloadFlow();

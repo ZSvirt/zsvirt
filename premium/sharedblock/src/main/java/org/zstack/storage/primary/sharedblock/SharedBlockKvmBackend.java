@@ -1591,7 +1591,7 @@ public class SharedBlockKvmBackend extends SharedBlockHypervisorBackend implemen
         if (volume == null || !required || StringUtils.isBlank(hostUuid)) {
             return null;
         }
-        return volumeEncryptedSecretHelper.prepareLuksEnvelopeDekOnHost(hostUuid, volume.getUuid());
+        return volumeEncryptedSecretHelper.materializeAndSealVolumeDekForHost(hostUuid, volume.getUuid());
     }
 
     @Override
@@ -6039,7 +6039,7 @@ public class SharedBlockKvmBackend extends SharedBlockHypervisorBackend implemen
                         String encryptedDek = null;
                         if (encrypted) {
                             try {
-                                encryptedDek = volumeEncryptedSecretHelper.prepareLuksEnvelopeDekOnHost(hostUuid, job.getVolumeUuid());
+                                encryptedDek = volumeEncryptedSecretHelper.materializeAndSealVolumeDekForHost(hostUuid, job.getVolumeUuid());
                             } catch (OperationFailureException e) {
                                 errList1.getCauses().add(e.getErrorCode());
                                 whileCompletion1.done();

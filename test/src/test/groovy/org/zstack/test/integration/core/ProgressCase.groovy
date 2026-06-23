@@ -2,9 +2,11 @@ package org.zstack.test.integration.core
 
 import org.apache.logging.log4j.ThreadContext
 import org.zstack.core.Platform
+import org.zstack.core.db.DatabaseFacade
 import org.zstack.core.db.Q
 import org.zstack.core.db.SQL
 import org.zstack.core.progress.ActionProgressService
+import org.zstack.core.progress.ProgressGlobalConfig
 import org.zstack.core.workflow.FlowChainBuilder
 import org.zstack.header.core.progress.TaskProgressInventory
 import org.zstack.header.core.progress.TaskProgressVO_
@@ -17,6 +19,7 @@ import org.zstack.header.errorcode.ErrorCode
 import org.zstack.testlib.SubCase
 
 import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.TimeUnit
 
 import static org.zstack.header.Constants.THREAD_CONTEXT_API
 
@@ -43,6 +46,7 @@ class ProgressCase extends SubCase {
     void test() {
         testReportUntil()
         testFlowChainProgress()
+        testProgressTtlUsesSeconds()
     }
 
     void testReportUntil() {
@@ -163,6 +167,65 @@ class ProgressCase extends SubCase {
         assert chainDoneProgressList[0].content == "Test-011: done"
         assert chainDoneProgressList[0].currentStep == 2
         assert chainDoneProgressList[0].totalStep == 2
+    }
+
+    void testProgressTtlUsesSeconds() {
+        def oldTtl = ProgressGlobalConfig.PROGRESS_TTL_SECONDS.value()
+        def oldInterval = ProgressGlobalConfig.CLEANUP_THREAD_INTERVAL.value()
+        def oldNow = ActionProgressService.nowInMillis
+        def oldLastCleanTime = getStaticField(ActionProgressService.class, "lastCleanTime")
+
+        ProgressGlobalConfig.PROGRESS_TTL_SECONDS.updateValue(86400)
+        ProgressGlobalConfig.CLEANUP_THREAD_INTERVAL.updateValue(2)
+
+        long now = System.currentTimeMillis()
+        ActionProgressService.nowInMillis = now
+        setStaticField(ActionProgressService.class, "lastCleanTime", 0L)
+
+        def recentApiId = Platform.getUuid()
+        def expiredApiId = Platform.getUuid()
+        persistProgress(recentApiId, now - 120_000L)
+        persistProgress(expiredApiId, now - TimeUnit.HOURS.toMillis(25))
+
+        def method = ActionProgressService.class.getDeclaredMethod("cleanExpiredProgressIfNeeded")
+        method.setAccessible(true)
+        method.invoke(null)
+
+        assert Q.New(TaskProgressVO.class)
+                .eq(TaskProgressVO_.apiId, recentApiId)
+                .isExists()
+        assert !Q.New(TaskProgressVO.class)
+                .eq(TaskProgressVO_.apiId, expiredApiId)
+                .isExists()
+
+        ProgressGlobalConfig.PROGRESS_TTL_SECONDS.updateValue(oldTtl)
+        ProgressGlobalConfig.CLEANUP_THREAD_INTERVAL.updateValue(oldInterval)
+        ActionProgressService.nowInMillis = oldNow
+        setStaticField(ActionProgressService.class, "lastCleanTime", oldLastCleanTime)
+    }
+
+    void persistProgress(String apiId, long lastOpTime) {
+        def vo = new TaskProgressVO()
+        vo.apiId = apiId
+        vo.content = "ttl-test"
+        vo.opaque = "{}"
+        vo.createTime = lastOpTime
+        vo.lastOpTime = lastOpTime
+        vo.currentStep = 1L
+        vo.totalStep = 1L
+        bean(DatabaseFacade.class).persist(vo)
+    }
+
+    void setStaticField(Class clz, String name, Object value) {
+        def field = clz.getDeclaredField(name)
+        field.setAccessible(true)
+        field.set(null, value)
+    }
+
+    Object getStaticField(Class clz, String name) {
+        def field = clz.getDeclaredField(name)
+        field.setAccessible(true)
+        return field.get(null)
     }
 }
 

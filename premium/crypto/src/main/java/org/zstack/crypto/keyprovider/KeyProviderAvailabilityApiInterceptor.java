@@ -20,8 +20,10 @@ import org.zstack.header.keyprovider.KeyProviderVO;
 import org.zstack.header.keyprovider.KeyProviderVO_;
 import org.zstack.header.message.APIMessage;
 import org.zstack.header.message.MessageReply;
+import org.zstack.header.storage.snapshot.APIRevertVolumeFromSnapshotMsg;
 import org.zstack.header.storage.snapshot.VolumeSnapshotVO;
 import org.zstack.header.storage.snapshot.VolumeSnapshotVO_;
+import org.zstack.header.storage.snapshot.group.APIRevertVmFromSnapshotGroupMsg;
 import org.zstack.header.storage.snapshot.group.VolumeSnapshotGroupRefVO;
 import org.zstack.header.storage.snapshot.group.VolumeSnapshotGroupRefVO_;
 import org.zstack.header.tpm.api.APIAddTpmMsg;
@@ -115,6 +117,10 @@ public class KeyProviderAvailabilityApiInterceptor implements GlobalApiMessageIn
             validate((APICreateDataVolumeFromVolumeTemplateMsg) msg);
         } else if (msg instanceof APIAddTpmMsg) {
             validate((APIAddTpmMsg) msg);
+        } else if (msg instanceof APIRevertVolumeFromSnapshotMsg) {
+            validate((APIRevertVolumeFromSnapshotMsg) msg);
+        } else if (msg instanceof APIRevertVmFromSnapshotGroupMsg) {
+            validate((APIRevertVmFromSnapshotGroupMsg) msg);
         }
 
         return msg;
@@ -143,7 +149,9 @@ public class KeyProviderAvailabilityApiInterceptor implements GlobalApiMessageIn
                 APICreateDataVolumeMsg.class,
                 APICreateDataVolumeFromVolumeSnapshotMsg.class,
                 APICreateDataVolumeFromVolumeTemplateMsg.class,
-                APIAddTpmMsg.class
+                APIAddTpmMsg.class,
+                APIRevertVolumeFromSnapshotMsg.class,
+                APIRevertVmFromSnapshotGroupMsg.class
         );
     }
 
@@ -270,6 +278,24 @@ public class KeyProviderAvailabilityApiInterceptor implements GlobalApiMessageIn
     private void validate(APIAddTpmMsg msg) {
         Set<String> providerUuids = new LinkedHashSet<>();
         collectProviders(msg, providerUuids);
+        ensureProvidersAvailable(providerUuids);
+    }
+
+    private void validate(APIRevertVolumeFromSnapshotMsg msg) {
+        Set<String> providerUuids = new LinkedHashSet<>();
+        collectRevertSnapshotProviders(msg.getUuid(), providerUuids);
+        ensureProvidersAvailable(providerUuids);
+    }
+
+    private void validate(APIRevertVmFromSnapshotGroupMsg msg) {
+        Set<String> providerUuids = new LinkedHashSet<>();
+        List<String> snapshotUuids = Q.New(VolumeSnapshotGroupRefVO.class)
+                .select(VolumeSnapshotGroupRefVO_.volumeSnapshotUuid)
+                .eq(VolumeSnapshotGroupRefVO_.volumeSnapshotGroupUuid, msg.getUuid())
+                .listValues();
+        if (snapshotUuids != null) {
+            snapshotUuids.forEach(uuid -> collectRevertSnapshotProviders(uuid, providerUuids));
+        }
         ensureProvidersAvailable(providerUuids);
     }
 
@@ -578,6 +604,19 @@ public class KeyProviderAvailabilityApiInterceptor implements GlobalApiMessageIn
         if (StringUtils.isNotBlank(snapshotUuid) && isSnapshotEncrypted(snapshotUuid)) {
             addResourceProvider(providerUuids, VolumeSnapshotVO.class.getSimpleName(), snapshotUuid, false);
         }
+    }
+
+    private void collectRevertSnapshotProviders(String snapshotUuid, Set<String> providerUuids) {
+        if (StringUtils.isBlank(snapshotUuid)) {
+            return;
+        }
+
+        String volumeUuid = Q.New(VolumeSnapshotVO.class)
+                .select(VolumeSnapshotVO_.volumeUuid)
+                .eq(VolumeSnapshotVO_.uuid, snapshotUuid)
+                .findValue();
+        collectEncryptedVolumeProvider(volumeUuid, providerUuids);
+        collectEncryptedSnapshotProvider(snapshotUuid, providerUuids);
     }
 
     private void addResourceProvider(Set<String> providerUuids, String resourceType, String resourceUuid, boolean fallbackToDefault) {

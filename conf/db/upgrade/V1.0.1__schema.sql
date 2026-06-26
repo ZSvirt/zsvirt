@@ -263,3 +263,8 @@ CREATE TABLE IF NOT EXISTS `zstack`.`LicenseAuthorizeHistoryVO` (
     `createDate` timestamp NOT NULL DEFAULT '1999-12-31 23:59:59',
     PRIMARY KEY (`id`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DELETE shadow FROM ImageCacheShadowVO shadow
+    LEFT JOIN PrimaryStorageEO ps ON shadow.primaryStorageUuid = ps.uuid
+    WHERE ps.uuid IS NULL;
+CALL ADD_CONSTRAINT('ImageCacheShadowVO', 'fkImageCacheShadowVOPrimaryStorageEOCascade', 'primaryStorageUuid', 'PrimaryStorageEO', 'uuid', 'CASCADE');

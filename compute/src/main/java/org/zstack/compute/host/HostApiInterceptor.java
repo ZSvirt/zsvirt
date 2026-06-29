@@ -23,6 +23,13 @@ import org.zstack.utils.ShellResult;
 import org.zstack.utils.ShellUtils;
 import org.zstack.utils.network.NetworkUtils;
 
+import org.zstack.header.storage.primary.PrimaryStorageClusterRefVO;
+import org.zstack.header.storage.primary.PrimaryStorageClusterRefVO_;
+import org.zstack.header.storage.primary.PrimaryStorageConstants;
+import org.zstack.header.storage.primary.PrimaryStorageVO;
+import org.zstack.header.storage.primary.PrimaryStorageVO_;
+
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -156,6 +163,10 @@ public class HostApiInterceptor implements GlobalApiMessageInterceptor {
     }
 
     private void validate(APIMountBlockDeviceMsg msg) {
+        validatePath(msg.getPath());
+        validateMountPoint(msg.getMountPoint());
+        validateMountPointNotOccupiedByLocalStorage(msg);
+
         if (msg.getPassword() != null) {
             return;
         }
@@ -166,9 +177,6 @@ public class HostApiInterceptor implements GlobalApiMessageInterceptor {
         }
         msg.setPassword(proxyHardware.getPassword());
         msg.setUsername(msg.getUsername() != null ? msg.getUsername() : proxyHardware.getUsername());
-
-        validatePath(msg.getPath());
-        validateMountPoint(msg.getMountPoint());
     }
 
     private void validate(APIUpdateHostnameMsg msg) {
@@ -219,10 +227,19 @@ public class HostApiInterceptor implements GlobalApiMessageInterceptor {
                             "invalid value detected: '%s'",
                     SAFE_MOUNT_POINT_PATTERN, mountPoint));
         }
-        if (mountPoint.endsWith("/") && !mountPoint.equals("/")) {
+        if (containsCurrentDirectoryPathSegment(mountPoint)) {
             throw new ApiMessageInterceptionException(operr(
-                    "mountPoint should not end with '/' except root directory"));
+                    "mount point must not contain '.' as a path segment: '%s'", mountPoint));
         }
+    }
+
+    private boolean containsCurrentDirectoryPathSegment(String path) {
+        for (String segment : path.split("/")) {
+            if (".".equals(segment)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private ProxyHardware getProxyHardware(String hostname) {
@@ -233,6 +250,54 @@ public class HostApiInterceptor implements GlobalApiMessageInterceptor {
             }
         }
         return null;
+    }
+
+    private String getClusterUuid(String hostname) {
+        for (ProxyHardwareFactory factory : pluginRgty.getExtensionList(ProxyHardwareFactory.class)) {
+            String clusterUuid = factory.getClusterUuid(hostname);
+            if (clusterUuid != null) {
+                return clusterUuid;
+            }
+        }
+        return null;
+    }
+
+    private void validateMountPointNotOccupiedByLocalStorage(APIMountBlockDeviceMsg msg) {
+        String clusterUuid = getClusterUuid(msg.getHostName());
+        if (clusterUuid == null) {
+            return;
+        }
+
+        List<String> primaryStorageUuids = Q.New(PrimaryStorageClusterRefVO.class)
+                .select(PrimaryStorageClusterRefVO_.primaryStorageUuid)
+                .eq(PrimaryStorageClusterRefVO_.clusterUuid, clusterUuid)
+                .listValues();
+        if (primaryStorageUuids.isEmpty()) {
+            return;
+        }
+
+        String mountPoint = normalizeMountPoint(msg.getMountPoint());
+        List<String> localStorageUrls = Q.New(PrimaryStorageVO.class)
+                .select(PrimaryStorageVO_.url)
+                .eq(PrimaryStorageVO_.type, PrimaryStorageConstants.LOCAL_STORAGE_TYPE)
+                .in(PrimaryStorageVO_.uuid, primaryStorageUuids)
+                .listValues();
+
+        for (String url : localStorageUrls) {
+            if (!mountPoint.equals(normalizeMountPoint(url))) {
+                continue;
+            }
+            throw new ApiMessageInterceptionException(argerr(
+                    "url[%s] has been occupied by local primary storage in cluster[uuid:%s]",
+                    msg.getMountPoint(), clusterUuid));
+        }
+    }
+
+    private static String normalizeMountPoint(String path) {
+        while (path.length() > 1 && path.endsWith("/")) {
+            path = path.substring(0, path.length() - 1);
+        }
+        return path;
     }
 
     @Override

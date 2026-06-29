@@ -1232,4 +1232,12 @@ public class KVMHostFactory extends AbstractService implements HypervisorFactory
                 "and host.managementIp = :hostname";
         return SQL.New(sql, KVMHostVO.class).param("hostname", hostName).find();
     }
+
+    @Override
+    public String getClusterUuid(String hostName) {
+        return Q.New(HostVO.class)
+                .select(HostVO_.clusterUuid)
+                .eq(HostVO_.managementIp, hostName)
+                .findValue();
+    }
 }

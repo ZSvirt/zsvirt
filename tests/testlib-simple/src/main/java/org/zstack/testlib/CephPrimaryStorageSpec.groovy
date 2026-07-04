@@ -262,6 +262,79 @@ class CephPrimaryStorageSpec extends PrimaryStorageSpec {
                 return rsp
             }
 
+            simulator(CephPrimaryStorageBase.LUKS_REPLACE_VOLUME_PATH) { HttpEntity<String> e, EnvSpec spec ->
+                return new CephPrimaryStorageBase.ReplaceLuksRbdRsp()
+            }
+
+            VFS.vfsHook(CephPrimaryStorageBase.LUKS_REPLACE_VOLUME_PATH, espec) { CephPrimaryStorageBase.ReplaceLuksRbdRsp rsp, HttpEntity<String> e, EnvSpec spec ->
+                def cmd = JSONObjectUtil.toObject(e.body, CephPrimaryStorageBase.ReplaceLuksRbdCmd.class)
+                VFS vfs = vfs(cmd, spec)
+                String srcPath = cephPathToVFSPath(cmd.installPath)
+                String tmpPath = cephPathToVFSPath(cmd.temporaryInstallPath)
+                String targetPath = cephPathToVFSPath(cmd.targetInstallPath ?: cmd.installPath)
+                boolean deleteSourceTrash = cmd.deleteSourceTrash || !cmd.sourceTrashInstallPath
+                String trashPath = cephPathToVFSPath(cmd.sourceTrashInstallPath ?: "${srcPath}-trash-${Platform.uuid.substring(0, 8)}")
+
+                [srcPath, tmpPath, targetPath, trashPath].each {
+                    vfs.Assert(!it.contains("@"), "RBD LUKS replacement only supports active image paths[${it}]")
+                }
+                vfs.Assert(vfs.isFile(srcPath), "cannot find the source file[${cmd.installPath}]")
+                CephRaw src = vfs.getFile(srcPath, true)
+                if (!vfs.exists(tmpPath)) {
+                    CephRaw tmp = vfs.createCephRaw(tmpPath, src.virtualSize)
+                    tmp.actualSize = src.actualSize
+                    tmp.update()
+                }
+                vfs.Assert(vfs.isFile(tmpPath), "cannot find the temporary file[${cmd.temporaryInstallPath}]")
+                vfs.Assert(!vfs.exists(trashPath), "trash file[${trashPath}] already exists")
+                if (targetPath != srcPath) {
+                    vfs.Assert(!vfs.exists(targetPath), "target file[${targetPath}] already exists")
+                }
+
+                src.move(trashPath)
+                CephRaw tmp = vfs.getFile(tmpPath, true)
+                CephRaw target = tmp.move(targetPath)
+                if (deleteSourceTrash && vfs.exists(trashPath)) {
+                    vfs.delete(trashPath)
+                }
+
+                rsp.size = target.virtualSize
+                rsp.actualSize = target.actualSize
+                return rsp
+            }
+
+            simulator(CephPrimaryStorageBase.LUKS_SWAP_IN_PLACE_PATH) { HttpEntity<String> e, EnvSpec spec ->
+                return new CephPrimaryStorageBase.AgentResponse()
+            }
+
+            VFS.vfsHook(CephPrimaryStorageBase.LUKS_SWAP_IN_PLACE_PATH, espec) { rsp, HttpEntity<String> e, EnvSpec spec ->
+                def cmd = JSONObjectUtil.toObject(e.body, CephPrimaryStorageBase.SwapInPlaceLuksRbdCmd.class)
+                VFS vfs = vfs(cmd, spec)
+                String srcPath = cephPathToVFSPath(cmd.installPath)
+                String tmpPath = cephPathToVFSPath(cmd.temporaryInstallPath)
+                String oldPath = "${srcPath}-plain-${Platform.uuid.substring(0, 8)}"
+
+                [srcPath, tmpPath].each {
+                    vfs.Assert(!it.contains("@"), "RBD LUKS in-place swap only supports active image paths[${it}]")
+                }
+                vfs.Assert(vfs.isFile(srcPath), "cannot find the source file[${cmd.installPath}]")
+                CephRaw src = vfs.getFile(srcPath, true)
+                if (!vfs.exists(tmpPath)) {
+                    CephRaw tmp = vfs.createCephRaw(tmpPath, src.virtualSize)
+                    tmp.actualSize = src.actualSize
+                    tmp.update()
+                }
+                vfs.Assert(vfs.isFile(tmpPath), "cannot find the temporary file[${cmd.temporaryInstallPath}]")
+                vfs.Assert(!vfs.exists(oldPath), "old file[${oldPath}] already exists")
+
+                src.move(oldPath)
+                CephRaw tmp = vfs.getFile(tmpPath, true)
+                tmp.move(srcPath)
+                vfs.delete(oldPath)
+
+                return rsp
+            }
+
             simulator(CephPrimaryStorageBase.KVM_CREATE_SECRET_PATH) {
                 return new KVMAgentCommands.AgentResponse()
             }

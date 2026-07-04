@@ -88,6 +88,7 @@ import java.net.URISyntaxException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static org.zstack.core.Platform.*;
@@ -480,10 +481,29 @@ public class CephPrimaryStorageBase extends PrimaryStorageBase {
         @NoLogging
         public String encryptedDek;
         public String installPath;
+        public String targetInstallPath;
     }
 
     public static class KVMHostLuksRsp extends KVMAgentCommands.AgentResponse {
         public Long actualSize;
+    }
+
+    public static class ReplaceLuksRbdCmd extends AgentCommand {
+        public String installPath;
+        public String targetInstallPath;
+        public String temporaryInstallPath;
+        public String sourceTrashInstallPath;
+        public boolean deleteSourceTrash;
+    }
+
+    public static class ReplaceLuksRbdRsp extends AgentResponse {
+        public Long size;
+        public Long actualSize;
+    }
+
+    public static class SwapInPlaceLuksRbdCmd extends AgentCommand {
+        public String installPath;
+        public String temporaryInstallPath;
     }
 
     public static class DeleteCmd extends AgentCommand {
@@ -1432,6 +1452,8 @@ public class CephPrimaryStorageBase extends PrimaryStorageBase {
     public static final String KVM_HOST_LUKS_ENCRYPT_IN_PLACE_PATH = "/ceph/primarystorage/kvmhost/encryptinplace";
     public static final String KVM_HOST_LUKS_RESIZE_PATH = "/ceph/primarystorage/kvmhost/luksresize";
     public static final String KVM_HOST_LUKS_CONVERT_PATH = "/ceph/primarystorage/kvmhost/luksconvert";
+    public static final String LUKS_REPLACE_VOLUME_PATH = "/ceph/primarystorage/volume/luksreplace";
+    public static final String LUKS_SWAP_IN_PLACE_PATH = "/ceph/primarystorage/volume/luksswapinplace";
     public static final String KVM_HOST_IMAGESTORE_ENCRYPTED_DOWNLOAD_PATH = "/ceph/primarystorage/kvmhost/imagestore/encrypteddownload";
     public static final String FLATTEN_PATH = "/ceph/primarystorage/volume/flatten";
     public static final String SFTP_DOWNLOAD_PATH = "/ceph/primarystorage/sftpbackupstorage/download";
@@ -1852,9 +1874,21 @@ public class CephPrimaryStorageBase extends PrimaryStorageBase {
                             // assumes the agent returned a bare pool/uuid relative path).
                             vol.setInstallPath(installPath);
                             vol.setFormat(VolumeConstant.VOLUME_FORMAT_RAW);
-                            vol.setActualSize(ret.actualSize);
-                            reply.setVolume(vol);
-                            bus.reply(msg, reply);
+                            getRbdActualSizeFromPrimaryStorageAgent(volumeUuid, installPath,
+                                    new ReturnValueCompletion<Long>(msg) {
+                                        @Override
+                                        public void success(Long actualSize) {
+                                            vol.setActualSize(actualSize);
+                                            reply.setVolume(vol);
+                                            bus.reply(msg, reply);
+                                        }
+
+                                        @Override
+                                        public void fail(ErrorCode errorCode) {
+                                            reply.setError(errorCode);
+                                            bus.reply(msg, reply);
+                                        }
+                                    });
                         }
                     });
             return;
@@ -2378,11 +2412,12 @@ public class CephPrimaryStorageBase extends PrimaryStorageBase {
                                         new ReturnValueCompletion<KVMHostLuksRsp>(trigger) {
                                             @Override
                                             public void success(KVMHostLuksRsp rsp) {
-                                                if (rsp.actualSize != null) {
-                                                    actualSize = rsp.actualSize;
-                                                }
-                                                cachePath = dstPath;
-                                                trigger.next();
+                                                continueFlowWithRbdActualSize(image.getInventory().getUuid(), dstPath, trigger, returnValue -> {
+                                                    if (returnValue != null) {
+                                                        actualSize = returnValue;
+                                                    }
+                                                    cachePath = dstPath;
+                                                });
                                             }
 
                                             @Override
@@ -2745,8 +2780,8 @@ public class CephPrimaryStorageBase extends PrimaryStorageBase {
 
                             @Override
                             public void success(KVMHostLuksRsp ret) {
-                                actualSize = ret.actualSize;
-                                trigger.next();
+                                continueFlowWithRbdActualSize(msg.getVolume().getUuid(), volumePath, trigger,
+                                        returnValue -> actualSize = returnValue);
                             }
                         });
             }
@@ -2815,8 +2850,8 @@ public class CephPrimaryStorageBase extends PrimaryStorageBase {
 
                                         @Override
                                         public void success(KVMHostLuksRsp ret) {
-                                            actualSize = ret.actualSize;
-                                            trigger.next();
+                                            continueFlowWithRbdActualSize(msg.getVolume().getUuid(), volumePath, trigger,
+                                                    returnValue -> actualSize = returnValue);
                                         }
                                     });
                             return;
@@ -3518,19 +3553,37 @@ public class CephPrimaryStorageBase extends PrimaryStorageBase {
         KVMHostEncryptInPlaceCmd kcmd = new KVMHostEncryptInPlaceCmd();
         kcmd.psUuid = self.getUuid();
         kcmd.installPath = msg.getInstallPath();
+        kcmd.targetInstallPath = makeTemporaryLuksRbdInstallPath(msg.getInstallPath(), "encrypting");
         kcmd.encryptedDek = msg.getEncryptedDek();
         httpCallToKvmHost(msg.getHostUuid(),
                 KVM_HOST_LUKS_ENCRYPT_IN_PLACE_PATH, kcmd, KVMHostLuksRsp.class,
                 new ReturnValueCompletion<KVMHostLuksRsp>(msg) {
                     @Override
                     public void fail(ErrorCode err) {
+                        deleteRbdBitsBestEffort(kcmd.targetInstallPath);
                         reply.setError(err);
                         bus.reply(msg, reply);
                     }
 
                     @Override
                     public void success(KVMHostLuksRsp ret) {
-                        bus.reply(msg, reply);
+                        SwapInPlaceLuksRbdCmd rcmd = new SwapInPlaceLuksRbdCmd();
+                        rcmd.installPath = msg.getInstallPath();
+                        rcmd.temporaryInstallPath = kcmd.targetInstallPath;
+                        httpCall(LUKS_SWAP_IN_PLACE_PATH, rcmd, AgentResponse.class,
+                                new ReturnValueCompletion<AgentResponse>(msg) {
+                                    @Override
+                                    public void success(AgentResponse returnValue) {
+                                        bus.reply(msg, reply);
+                                    }
+
+                                    @Override
+                                    public void fail(ErrorCode errorCode) {
+                                        deleteRbdBitsBestEffort(kcmd.targetInstallPath);
+                                        reply.setError(errorCode);
+                                        bus.reply(msg, reply);
+                                    }
+                                });
                     }
                 });
     }
@@ -3575,7 +3628,7 @@ public class CephPrimaryStorageBase extends PrimaryStorageBase {
         KVMHostLuksConvertCmd kcmd = new KVMHostLuksConvertCmd();
         kcmd.psUuid = self.getUuid();
         kcmd.installPath = item.getSourceInstallPath();
-        kcmd.targetInstallPath = item.getTargetInstallPath();
+        kcmd.targetInstallPath = makeTemporaryLuksRbdInstallPath(item.getTargetInstallPath(), "converting");
         kcmd.sourceTrashInstallPath = item.getSourceTrashInstallPath();
         kcmd.targetEncrypted = msg.isTargetEncrypted();
         kcmd.virtualSize = msg.getVolume().getSize();
@@ -3585,16 +3638,36 @@ public class CephPrimaryStorageBase extends PrimaryStorageBase {
                 new ReturnValueCompletion<KVMHostLuksRsp>(msg) {
                     @Override
                     public void fail(ErrorCode err) {
+                        deleteRbdBitsBestEffort(kcmd.targetInstallPath);
                         reply.setError(err);
                         bus.reply(msg, reply);
                     }
 
                     @Override
                     public void success(KVMHostLuksRsp ret) {
-                        if (ret.actualSize != null) {
-                            reply.setActualSizes(Collections.singletonMap(msg.getVolume().getUuid(), ret.actualSize));
-                        }
-                        bus.reply(msg, reply);
+                        ReplaceLuksRbdCmd rcmd = new ReplaceLuksRbdCmd();
+                        rcmd.installPath = item.getSourceInstallPath();
+                        rcmd.targetInstallPath = item.getTargetInstallPath();
+                        rcmd.temporaryInstallPath = kcmd.targetInstallPath;
+                        rcmd.sourceTrashInstallPath = item.getSourceTrashInstallPath();
+                        rcmd.deleteSourceTrash = false;
+                        httpCall(LUKS_REPLACE_VOLUME_PATH, rcmd, ReplaceLuksRbdRsp.class,
+                                new ReturnValueCompletion<ReplaceLuksRbdRsp>(msg) {
+                                    @Override
+                                    public void success(ReplaceLuksRbdRsp rsp) {
+                                        if (rsp.actualSize != null) {
+                                            reply.setActualSizes(Collections.singletonMap(msg.getVolume().getUuid(), rsp.actualSize));
+                                        }
+                                        bus.reply(msg, reply);
+                                    }
+
+                                    @Override
+                                    public void fail(ErrorCode errorCode) {
+                                        deleteRbdBitsBestEffort(kcmd.targetInstallPath);
+                                        reply.setError(errorCode);
+                                        bus.reply(msg, reply);
+                                    }
+                                });
                     }
                 });
     }
@@ -3783,6 +3856,31 @@ public class CephPrimaryStorageBase extends PrimaryStorageBase {
         new HttpCaller<>(path, cmd, retClass, callback, unit, timeout).call();
     }
 
+    private String makeTemporaryLuksRbdInstallPath(String installPath, String marker) {
+        return String.format("%s-%s-%s", installPath, marker, Platform.getUuid().substring(0, 8));
+    }
+
+    private void deleteRbdBitsBestEffort(String installPath) {
+        if (StringUtils.isBlank(installPath)) {
+            return;
+        }
+
+        DeleteCmd cmd = new DeleteCmd();
+        cmd.installPath = installPath;
+        httpCall(DELETE_PATH, cmd, DeleteRsp.class, new ReturnValueCompletion<DeleteRsp>(new NopeCompletion()) {
+            @Override
+            public void success(DeleteRsp returnValue) {
+                logger.debug(String.format("deleted RBD image after failed LUKS operation: %s", installPath));
+            }
+
+            @Override
+            public void fail(ErrorCode errorCode) {
+                logger.warn(String.format("failed to delete RBD image after failed LUKS operation: %s, because: %s",
+                        installPath, errorCode));
+            }
+        });
+    }
+
     /**
      * Send an HTTP cmd to a KVM host's kvmagent (not to cephagent). Used by the
      * LUKS variants of clone / createempty / encrypt-in-place, where qemu-img
@@ -3826,6 +3924,39 @@ public class CephPrimaryStorageBase extends PrimaryStorageBase {
         });
     }
 
+    private void getRbdActualSizeFromPrimaryStorageAgent(String resourceUuid, String installPath,
+                                                         ReturnValueCompletion<Long> completion) {
+        syncVolumeSize(resourceUuid, installPath, new ReturnValueCompletion<GetVolumeSizeRsp>(completion) {
+            @Override
+            public void success(GetVolumeSizeRsp rsp) {
+                completion.success(rsp.actualSize);
+            }
+
+            @Override
+            public void fail(ErrorCode errorCode) {
+                logger.warn(String.format("failed to get RBD actual size from primary storage agent, resource[uuid:%s], installPath[%s], because: %s",
+                        resourceUuid, installPath, errorCode));
+                completion.success(null);
+            }
+        });
+    }
+
+    private void continueFlowWithRbdActualSize(String resourceUuid, String installPath, FlowTrigger trigger,
+                                               Consumer<Long> consumer) {
+        getRbdActualSizeFromPrimaryStorageAgent(resourceUuid, installPath, new ReturnValueCompletion<Long>(trigger) {
+            @Override
+            public void success(Long actualSize) {
+                consumer.accept(actualSize);
+                trigger.next();
+            }
+
+            @Override
+            public void fail(ErrorCode errorCode) {
+                trigger.fail(errorCode);
+            }
+        });
+    }
+
     protected void resizeEncryptedRbdVolumeOnKvmHost(VolumeInventory volume, long size,
                                                      ReturnValueCompletion<KVMHostLuksRsp> completion) {
         String hostUuid = findConnectedHostForCephLuks();
@@ -3835,7 +3966,30 @@ public class CephPrimaryStorageBase extends PrimaryStorageBase {
         cmd.encryptedDek = volumeEncryptedSecretHelper.materializeAndSealVolumeDekForHost(hostUuid, volume.getUuid());
         cmd.virtualSize = size;
 
-        httpCallToKvmHost(hostUuid, KVM_HOST_LUKS_RESIZE_PATH, cmd, KVMHostLuksRsp.class, completion);
+        httpCallToKvmHost(hostUuid, KVM_HOST_LUKS_RESIZE_PATH, cmd, KVMHostLuksRsp.class,
+                new ReturnValueCompletion<KVMHostLuksRsp>(completion) {
+                    @Override
+                    public void success(KVMHostLuksRsp rsp) {
+                        getRbdActualSizeFromPrimaryStorageAgent(volume.getUuid(), volume.getInstallPath(),
+                                new ReturnValueCompletion<Long>(completion) {
+                                    @Override
+                                    public void success(Long actualSize) {
+                                        rsp.actualSize = actualSize;
+                                        completion.success(rsp);
+                                    }
+
+                                    @Override
+                                    public void fail(ErrorCode errorCode) {
+                                        completion.fail(errorCode);
+                                    }
+                                });
+                    }
+
+                    @Override
+                    public void fail(ErrorCode errorCode) {
+                        completion.fail(errorCode);
+                    }
+                });
     }
 
     public class HttpCaller<T extends AgentResponse> {
@@ -5577,12 +5731,25 @@ public class CephPrimaryStorageBase extends PrimaryStorageBase {
                 new ReturnValueCompletion<KVMHostLuksRsp>(completion) {
                     @Override
                     public void success(KVMHostLuksRsp rsp) {
-                        reply.setInstallPath(volPath);
-                        long asize = rsp.actualSize == null ? 1 : rsp.actualSize;
-                        reply.setActualSize(asize);
-                        reply.setSize(volume == null ? sp.getSize() : volume.getSize());
-                        bus.reply(msg, reply);
-                        completion.done();
+                        getRbdActualSizeFromPrimaryStorageAgent(msg.getVolumeUuid(), volPath,
+                                new ReturnValueCompletion<Long>(completion) {
+                                    @Override
+                                    public void success(Long actualSize) {
+                                        reply.setInstallPath(volPath);
+                                        long asize = actualSize == null ? 1 : actualSize;
+                                        reply.setActualSize(asize);
+                                        reply.setSize(volume == null ? sp.getSize() : volume.getSize());
+                                        bus.reply(msg, reply);
+                                        completion.done();
+                                    }
+
+                                    @Override
+                                    public void fail(ErrorCode errorCode) {
+                                        reply.setError(errorCode);
+                                        bus.reply(msg, reply);
+                                        completion.done();
+                                    }
+                                });
                     }
 
                     @Override

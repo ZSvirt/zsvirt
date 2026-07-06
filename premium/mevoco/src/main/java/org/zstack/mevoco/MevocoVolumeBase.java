@@ -1937,7 +1937,11 @@ public class MevocoVolumeBase extends VolumeBase {
                                     }
 
                                     SyncVolumeSizeReply r = reply.castReply();
-                                    self.setSize(r.getSize());
+                                    if (self.isEncrypted() && VolumeProtocol.CBD.toString().equals(self.getProtocol())) {
+                                        self.setSize(resize);
+                                    } else {
+                                        self.setSize(r.getSize());
+                                    }
                                     self.setActualSize(r.getActualSize());
                                     self = dbf.updateAndRefresh(self);
                                     trigger.next();

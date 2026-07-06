@@ -49,6 +49,12 @@
 
     <bean id="BackupImageKeyManager" class="org.zstack.crypto.volumebackup.BackupImageKeyManager"/>
 
+    <bean id="ZbsEncryptedCbdResizeExtension" class="org.zstack.crypto.volume.ZbsEncryptedCbdResizeExtension">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.volume.ResizeVolumeExtensionPoint"/>
+        </zstack:plugin>
+    </bean>
+
     <bean id="BackupImageKeyCleanupExtension" class="org.zstack.crypto.volumebackup.BackupImageKeyCleanupExtension">
         <zstack:plugin>
             <zstack:extension interface="org.zstack.header.image.ExpungeImageExtensionPoint"/>

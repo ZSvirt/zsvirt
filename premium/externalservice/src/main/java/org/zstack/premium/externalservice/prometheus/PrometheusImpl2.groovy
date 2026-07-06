@@ -222,12 +222,10 @@ class PrometheusImpl2 extends AbstractPrometheusImpl implements Prometheus {
     List<PrometheusConfig.RemoteWrite> queryRemoteWrite(String serviceType) {
         List<ExternalServiceConfigurationVO> vos = Q.New(ExternalServiceConfigurationVO.class)
                 .eq(ExternalServiceConfigurationVO_.serviceType, serviceType)
+                .orderByAsc(ExternalServiceConfigurationVO_.createDate)
                 .list()
         if (vos.isEmpty()) {
             return null
-        }
-        if (vos.size() > 1) {
-            throw new OperationFailureException(operr("found multiple external service configurations for type [%s]", serviceType))
         }
 
         List<ExternalServiceConfigurationInventory> invs = ExternalServiceConfigurationInventory.valueOf(vos, false)

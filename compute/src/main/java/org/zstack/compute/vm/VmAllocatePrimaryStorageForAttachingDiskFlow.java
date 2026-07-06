@@ -63,6 +63,9 @@ public class VmAllocatePrimaryStorageForAttachingDiskFlow implements Flow {
         } else {
             amsg.setRequiredHostUuid(hinv.getUuid());
         }
+        if (Boolean.TRUE.equals(volume.getEncrypted())) {
+            amsg.addRequiredFeature(PrimaryStorageFeature.ENCRYPTED_VOLUME);
+        }
 
         bus.send(amsg, new CloudBusCallBack(chain) {
             @Override

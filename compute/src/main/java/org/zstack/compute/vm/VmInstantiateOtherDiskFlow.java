@@ -130,6 +130,9 @@ public class VmInstantiateOtherDiskFlow implements Flow {
                         amsg.setRequiredPrimaryStorageUuid(diskAO.getPrimaryStorageUuid());
                         amsg.setPurpose(PrimaryStorageAllocationPurpose.CreateDataVolume.toString());
                         amsg.setTags(diskAO.getSystemTags());
+                        if (Boolean.TRUE.equals(diskAO.getEncrypted()) && diskAO.getPrimaryStorageUuid() == null) {
+                            amsg.addRequiredFeature(PrimaryStorageFeature.ENCRYPTED_VOLUME);
+                        }
                         bus.makeLocalServiceId(amsg, PrimaryStorageConstant.SERVICE_ID);
                         bus.send(amsg, new CloudBusCallBack(innerTrigger) {
                             @Override
@@ -280,6 +283,9 @@ public class VmInstantiateOtherDiskFlow implements Flow {
                         List<String> bsUuids = template.getBackupStorageRefs().stream()
                                 .map(ImageBackupStorageRefVO::getBackupStorageUuid).collect(Collectors.toList());
                         amsg.setPossiblePrimaryStorageTypes(possiblePrimaryStorageTypes(bsUuids));
+                        if (Boolean.TRUE.equals(diskAO.getEncrypted())) {
+                            amsg.addRequiredFeature(PrimaryStorageFeature.ENCRYPTED_VOLUME);
+                        }
 
                         bus.makeLocalServiceId(amsg, PrimaryStorageConstant.SERVICE_ID);
                         bus.send(amsg, new CloudBusCallBack(innerTrigger) {

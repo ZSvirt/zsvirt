@@ -135,6 +135,14 @@
         </zstack:plugin>
     </bean>
 
+    <bean id="EncryptedVolumePrimaryStorageAllocatorExtension"
+          class="org.zstack.storage.encrypt.EncryptedVolumePrimaryStorageAllocatorExtension">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.vm.VmAllocatePrimaryStorageExtensionPoint"/>
+            <zstack:extension interface="org.zstack.storage.primary.PrimaryStorageFeatureAllocatorExtensionPoint"/>
+        </zstack:plugin>
+    </bean>
+
     <bean id="VolumeEncryptedStartExtension" class="org.zstack.storage.encrypt.VolumeEncryptedStartExtension">
         <zstack:plugin>
             <zstack:extension interface="org.zstack.header.vm.VmBeforeStartOnHypervisorExtensionPoint"/>

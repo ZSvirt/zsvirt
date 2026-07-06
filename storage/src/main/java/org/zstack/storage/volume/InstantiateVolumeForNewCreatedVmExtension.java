@@ -22,6 +22,7 @@ import org.zstack.header.vm.*;
 import org.zstack.header.vm.VmInstanceSpec.ImageSpec;
 import org.zstack.header.volume.*;
 import org.zstack.identity.AccountManager;
+import org.zstack.storage.encrypt.EncryptedVolumePrimaryStorageAllocatorExtension;
 import org.zstack.utils.Utils;
 import org.zstack.utils.gson.JSONObjectUtil;
 import org.zstack.utils.logging.CLogger;
@@ -30,6 +31,8 @@ import javax.persistence.Tuple;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
+
+import static org.zstack.core.Platform.operr;
 
 public class InstantiateVolumeForNewCreatedVmExtension implements PreVmInstantiateResourceExtensionPoint {
     private static final CLogger logger = Utils.getLogger(InstantiateVolumeForNewCreatedVmExtension.class);
@@ -42,6 +45,8 @@ public class InstantiateVolumeForNewCreatedVmExtension implements PreVmInstantia
     private PluginRegistry pluginRgty;
     @Autowired
     protected AccountManager acntMgr;
+    @Autowired
+    private EncryptedVolumePrimaryStorageAllocatorExtension encryptedVolumePrimaryStorageAllocatorExtension;
 
     @Override
     public void preBeforeInstantiateVmResource(VmInstanceSpec spec) throws VmInstantiateResourceException {
@@ -246,6 +251,12 @@ public class InstantiateVolumeForNewCreatedVmExtension implements PreVmInstantia
 
             for (DiskAO diskAO : templateDataDisks) {
                 String psUuid = diskAO.getPrimaryStorageUuid() != null ? diskAO.getPrimaryStorageUuid() : defaultPsUuid;
+                if (diskAO.getPrimaryStorageUuid() == null && Boolean.TRUE.equals(diskAO.getEncrypted())
+                        && encryptedVolumePrimaryStorageAllocatorExtension
+                        .isEncryptedVolumeUnsupportedPrimaryStorage(psUuid)) {
+                    completion.fail(operr("no primary storage candidate is available"));
+                    return;
+                }
                 msgs.add(buildCreateDataVolumeFromTemplateMsg(spec, diskAO.getTemplateUuid(), psUuid,
                         diskAO.getSystemTags(), accountUuid, diskAO.getEncrypted()));
             }

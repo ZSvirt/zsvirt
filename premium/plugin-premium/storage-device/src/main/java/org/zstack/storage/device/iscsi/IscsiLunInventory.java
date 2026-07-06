@@ -1,5 +1,6 @@
 package org.zstack.storage.device.iscsi;
 
+import org.apache.commons.lang.StringUtils;
 import org.zstack.header.configuration.PythonClassInventory;
 import org.zstack.header.query.ExpandedQueries;
 import org.zstack.header.query.ExpandedQuery;
@@ -27,16 +28,17 @@ public class IscsiLunInventory extends ScsiLunInventory implements Serializable,
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof IscsiLunInventory)) return false;
-        if (!super.equals(o)) return false;
 
         IscsiLunInventory that = (IscsiLunInventory) o;
-        return getSerial().equals(that.getSerial());
+        return (StringUtils.isNotBlank(getComparableSerial()) || StringUtils.isNotBlank(getComparableWwid())) &&
+                getComparableSerial().equals(that.getComparableSerial()) &&
+                getComparableWwid().equals(that.getComparableWwid());
     }
 
     @Override
     public int hashCode() {
-        int result = super.hashCode();
-        result = 31 * result + (getSerial() == null ? 0 : getSerial().hashCode());
+        int result = getComparableSerial().hashCode();
+        result = 31 * result + getComparableWwid().hashCode();
         return result;
     }
 
@@ -49,19 +51,34 @@ public class IscsiLunInventory extends ScsiLunInventory implements Serializable,
     }
 
     private String getProperWwid(List<String> wwids) {
+        List<String> validWwids = new ArrayList<>();
+        if (wwids != null) {
+            for (String wwid : wwids) {
+                if (StringUtils.isNotBlank(wwid)) {
+                    validWwids.add(wwid);
+                }
+            }
+        }
+
+        if (validWwids.isEmpty()) {
+            return "";
+        }
+
         //NOTE(weiw): lvm-pv as a wwid is not stable, a simple wipefs will change it
-        Collections.sort(wwids);
-        for (String wwid : wwids) {
+        Collections.sort(validWwids);
+        for (String wwid : validWwids) {
             if (wwid.contains("lvm-pv")) {
                 continue;
             }
             return wwid;
         }
-        return wwids.get(0);
+        return validWwids.get(0);
     }
 
     public IscsiLunInventory(IscsiLunStruct s) {
-        Collections.sort(s.wwids);
+        if (s.wwids != null) {
+            Collections.sort(s.wwids);
+        }
         this.setWwid(getProperWwid(s.wwids));
         this.setVendor(s.vendor);
         this.setModel(s.model);
@@ -106,6 +123,15 @@ public class IscsiLunInventory extends ScsiLunInventory implements Serializable,
 
     @Override
     public int compareTo(IscsiLunInventory o) {
-        return this.getSerial().compareTo(o.getSerial());
+        int result = getComparableSerial().compareTo(o.getComparableSerial());
+        return result != 0 ? result : getComparableWwid().compareTo(o.getComparableWwid());
+    }
+
+    private String getComparableSerial() {
+        return StringUtils.trimToEmpty(getSerial());
+    }
+
+    private String getComparableWwid() {
+        return StringUtils.trimToEmpty(getWwid());
     }
 }

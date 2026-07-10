@@ -12,7 +12,7 @@ public class RBACInfo implements PackageDescription {
     {
         permissionBuilder()
                 .adminOnlyForAll()
-                .normalAPIs(APIQueryPrimaryStorageMsg.class)
+                .normalAPIs(APIQueryPrimaryStorageMsg.class, APIQueryImageCacheMsg.class)
                 .communityAvailable()
                 .zsvBasicAvailable()
                 .zsvProAvailable()

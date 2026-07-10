@@ -7,6 +7,9 @@ public class CreateVolumeSpec {
     private String uuid;
     private long size;
     private VolumeQos qos;
+    private boolean encrypted;
+    private String hostUuid;
+    private String encryptedDek;
 
     private String allocatedUrl;
     private boolean dryRun;
@@ -57,5 +60,29 @@ public class CreateVolumeSpec {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public boolean isEncrypted() {
+        return encrypted;
+    }
+
+    public void setEncrypted(boolean encrypted) {
+        this.encrypted = encrypted;
+    }
+
+    public String getHostUuid() {
+        return hostUuid;
+    }
+
+    public void setHostUuid(String hostUuid) {
+        this.hostUuid = hostUuid;
+    }
+
+    public String getEncryptedDek() {
+        return encryptedDek;
+    }
+
+    public void setEncryptedDek(String encryptedDek) {
+        this.encryptedDek = encryptedDek;
     }
 }

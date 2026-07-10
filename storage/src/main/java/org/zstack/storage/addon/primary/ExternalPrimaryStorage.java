@@ -144,6 +144,8 @@ public class ExternalPrimaryStorage extends PrimaryStorageBase {
             handle((GetVolumeBackingChainFromPrimaryStorageMsg) msg);
         } else if (msg instanceof DeleteVolumeChainOnPrimaryStorageMsg) {
             handle((DeleteVolumeChainOnPrimaryStorageMsg) msg);
+        } else if (msg instanceof EncryptVolumeBitsOnPrimaryStorageMsg) {
+            handle((EncryptVolumeBitsOnPrimaryStorageMsg) msg);
         } else {
             super.handleLocalMessage(msg);
         }
@@ -255,6 +257,7 @@ public class ExternalPrimaryStorage extends PrimaryStorageBase {
         spec.setUuid(volume.getUuid());
         spec.setSize(volume.getSize());
         spec.setAllocatedUrl(msg.getAllocatedInstallUrl());
+        spec.setEncrypted(Boolean.TRUE.equals(volume.getEncrypted()));
         if (msg instanceof InstantiateTemporaryRootVolumeFromTemplateOnPrimaryStorageMsg) {
             // FIXME: use more accurate name
             spec.setName(buildReimageVolumeName(((InstantiateTemporaryRootVolumeFromTemplateOnPrimaryStorageMsg) msg).getOriginVolumeUuid()));
@@ -281,8 +284,14 @@ public class ExternalPrimaryStorage extends PrimaryStorageBase {
         spec.setUuid(msg.getVolumeUuid());
         spec.setName(buildVolumeName(msg.getVolumeUuid()));
 
-        Long volumeSize = Q.New(VolumeVO.class).eq(VolumeVO_.uuid, msg.getVolumeUuid()).select(VolumeVO_.size).findValue();
-        spec.setSize(volumeSize != null && volumeSize != 0 ? volumeSize : msg.getSnapshot().getSize());
+        VolumeVO volume = dbf.findByUuid(msg.getVolumeUuid(), VolumeVO.class);
+        if (volume == null) {
+            reply.setError(operr("cannot find target volume[uuid:%s] to pass encryption attribute", msg.getVolumeUuid()));
+            bus.reply(msg, reply);
+            return;
+        }
+        spec.setSize(volume.getSize() != 0 ? volume.getSize() : msg.getSnapshot().getSize());
+        spec.setEncrypted(volume.isEncrypted());
         ReturnValueCompletion<VolumeStats> completion = new ReturnValueCompletion<VolumeStats>(msg) {
             @Override
             public void success(VolumeStats stats) {
@@ -290,7 +299,8 @@ public class ExternalPrimaryStorage extends PrimaryStorageBase {
                 reply.setSize(stats.getSize());
                 reply.setInstallPath(stats.getInstallPath());
                 reply.setProtocol(externalVO.getDefaultProtocol());
-                reply.setIncremental(!controller.reportCapabilities().getSnapshotCapability().isSupportLazyDelete());
+                reply.setIncremental(stats.getParentUri() != null
+                        && !controller.reportCapabilities().getSnapshotCapability().isSupportLazyDelete());
                 bus.reply(msg, reply);
             }
 
@@ -434,6 +444,22 @@ public class ExternalPrimaryStorage extends PrimaryStorageBase {
         });
     }
 
+    private void handle(EncryptVolumeBitsOnPrimaryStorageMsg msg) {
+        EncryptVolumeBitsOnPrimaryStorageReply reply = new EncryptVolumeBitsOnPrimaryStorageReply();
+        controller.encryptVolumeBits(msg, new ReturnValueCompletion<EncryptVolumeBitsOnPrimaryStorageReply>(msg) {
+            @Override
+            public void success(EncryptVolumeBitsOnPrimaryStorageReply returnValue) {
+                bus.reply(msg, returnValue);
+            }
+
+            @Override
+            public void fail(ErrorCode errorCode) {
+                reply.setError(errorCode);
+                bus.reply(msg, reply);
+            }
+        });
+    }
+
     protected void handle(final SetTrashExpirationTimeMsg msg) {
         controller.setTrashExpireTime(msg.getExpirationTime(), new Completion(msg) {
             @Override
@@ -534,7 +560,7 @@ public class ExternalPrimaryStorage extends PrimaryStorageBase {
     }
 
     protected void handle(ResizeVolumeOnPrimaryStorageMsg msg) {
-        controller.expandVolume(msg.getVolume().getInstallPath(), msg.getSize(), new ReturnValueCompletion<VolumeStats>(msg) {
+        controller.expandVolume(msg.getVolume(), msg.getSize(), new ReturnValueCompletion<VolumeStats>(msg) {
             final ResizeVolumeOnPrimaryStorageReply reply = new ResizeVolumeOnPrimaryStorageReply();
 
             @Override
@@ -562,7 +588,13 @@ public class ExternalPrimaryStorage extends PrimaryStorageBase {
             return;
         }
 
-        VolumeInventory vol = VolumeInventory.valueOf(dbf.findByUuid(sp.getVolumeUuid(), VolumeVO.class));
+        VolumeVO volumeVO = dbf.findByUuid(sp.getVolumeUuid(), VolumeVO.class);
+        ZbsVolumeEncryptionExtensionPoint zbsEncryptionExtension = getZbsVolumeEncryptionExtension();
+        if (zbsEncryptionExtension != null) {
+            zbsEncryptionExtension.beforeTakeSnapshot(self.getUuid(), volumeVO, sp);
+        }
+
+        VolumeInventory vol = VolumeInventory.valueOf(volumeVO);
         CreateVolumeSnapshotSpec sspec = new CreateVolumeSnapshotSpec();
         sspec.setVolumeInstallPath(vol.getInstallPath());
         sspec.setName(buildSnapshotName(sp.getUuid()));
@@ -573,6 +605,9 @@ public class ExternalPrimaryStorage extends PrimaryStorageBase {
                 sp.setPrimaryStorageUuid(self.getUuid());
                 sp.setType(VolumeSnapshotConstant.STORAGE_SNAPSHOT_TYPE.toString());
                 sp.setSize(stats.getActualSize());
+                if (zbsEncryptionExtension != null) {
+                    zbsEncryptionExtension.afterTakeSnapshot(self.getUuid(), volumeVO, sp);
+                }
                 reply.setInventory(sp);
                 bus.reply(msg, reply);
             }
@@ -583,6 +618,18 @@ public class ExternalPrimaryStorage extends PrimaryStorageBase {
                 bus.reply(msg, reply);
             }
         });
+    }
+
+    private ZbsVolumeEncryptionExtensionPoint getZbsVolumeEncryptionExtension() {
+        if (!ZbsVolumeEncryptionExtensionPoint.PRIMARY_STORAGE_IDENTITY.equals(controller.getIdentity())) {
+            return null;
+        }
+
+        List<ZbsVolumeEncryptionExtensionPoint> exts = pluginRgty.getExtensionList(ZbsVolumeEncryptionExtensionPoint.class);
+        if (exts.isEmpty()) {
+            throw new OperationFailureException(operr("cannot find ZBS volume encryption extension"));
+        }
+        return exts.get(0);
     }
 
     private BlockExternalPrimaryStorageBackend getBlockBackend(String vendor) {
@@ -745,7 +792,9 @@ public class ExternalPrimaryStorage extends PrimaryStorageBase {
     protected void handle(CreateImageCacheFromVolumeSnapshotOnPrimaryStorageMsg msg) {
         CreateImageCacheFromVolumeSnapshotOnPrimaryStorageReply reply = new CreateImageCacheFromVolumeSnapshotOnPrimaryStorageReply();
 
-        boolean useSnapshotAsCache = msg.hasSystemTag(VolumeSystemTags.FAST_CREATE.getTagFormat());
+        boolean targetEncrypted = Boolean.TRUE.equals(msg.getEncrypted()) || Boolean.TRUE.equals(msg.getVolumeSnapshot().getEncrypted());
+        boolean useSnapshotAsCache = msg.hasSystemTag(VolumeSystemTags.FAST_CREATE.getTagFormat())
+                && (!targetEncrypted || Boolean.TRUE.equals(msg.getVolumeSnapshot().getEncrypted()));
         if (useSnapshotAsCache) {
             ImageCacheVO cache = createTemporaryImageCacheFromVolumeSnapshot(msg.getImageInventory(), msg.getVolumeSnapshot());
             dbf.persist(cache);
@@ -789,6 +838,7 @@ public class ExternalPrimaryStorage extends PrimaryStorageBase {
                         spec.setName(buildImageName(image.getUuid()));
                         spec.setUuid(msg.getImageInventory().getUuid());
                         spec.setSize(msg.getImageInventory().getSize());
+                        spec.setEncrypted(Boolean.TRUE.equals(msg.getEncrypted()) || Boolean.TRUE.equals(msg.getVolumeSnapshot().getEncrypted()));
                         controller.copyVolume(msg.getVolumeSnapshot().getPrimaryStorageInstallPath(), spec, new ReturnValueCompletion<VolumeStats>(trigger) {
                             @Override
                             public void success(VolumeStats dst) {
@@ -1896,6 +1946,7 @@ public class ExternalPrimaryStorage extends PrimaryStorageBase {
                         spec.setName(buildReimageVolumeName(msg.getVolume().getUuid()));
                         spec.setUuid(msg.getVolume().getUuid());
                         spec.setSize(msg.getVolume().getSize());
+                        spec.setEncrypted(Boolean.TRUE.equals(msg.getVolume().getEncrypted()));
                         controller.cloneVolume(installUrl, spec, new ReturnValueCompletion<VolumeStats>(trigger) {
                             @Override
                             public void success(VolumeStats returnValue) {

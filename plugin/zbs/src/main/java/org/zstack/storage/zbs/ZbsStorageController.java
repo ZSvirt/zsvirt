@@ -12,6 +12,7 @@ import org.zstack.core.CoreGlobalProperty;
 import org.zstack.core.asyncbatch.While;
 import org.zstack.core.cloudbus.CloudBus;
 import org.zstack.core.cloudbus.CloudBusCallBack;
+import org.zstack.core.componentloader.PluginRegistry;
 import org.zstack.core.db.DatabaseFacade;
 import org.zstack.core.db.SQL;
 import org.zstack.core.workflow.FlowChainBuilder;
@@ -36,6 +37,7 @@ import org.zstack.header.storage.addon.primary.*;
 import org.zstack.header.storage.primary.*;
 import org.zstack.header.storage.snapshot.VolumeSnapshotStats;
 import org.zstack.header.volume.VolumeConstant;
+import org.zstack.header.volume.VolumeInventory;
 import org.zstack.header.volume.VolumeProtocol;
 import org.zstack.header.volume.VolumeStats;
 import org.zstack.kvm.KVMHostAsyncHttpCallMsg;
@@ -77,6 +79,8 @@ public class ZbsStorageController implements PrimaryStorageControllerSvc, Primar
     private ResourceConfigFacade rcf;
     @Autowired
     private CloudBus bus;
+    @Autowired
+    private PluginRegistry pluginRgty;
 
     private ExternalPrimaryStorageVO self;
     private AddonInfo addonInfo;
@@ -581,9 +585,33 @@ public class ZbsStorageController implements PrimaryStorageControllerSvc, Primar
         return logicalPoolInfos;
     }
 
+    private ZbsVolumeEncryptionExtensionPoint getVolumeEncryptionExtension() {
+        List<ZbsVolumeEncryptionExtensionPoint> exts = pluginRgty.getExtensionList(ZbsVolumeEncryptionExtensionPoint.class);
+        if (exts.isEmpty()) {
+            throw new OperationFailureException(operr("cannot find ZBS volume encryption extension"));
+        }
+        return exts.get(0);
+    }
+
+    private ZbsVolumeEncryptionBackend encryptionBackend() {
+        if (config == null || addonInfo == null) {
+            reloadDbInfo();
+        }
+        return new ZbsVolumeEncryptionBackendImpl(this, self.getUuid(), addonInfo, config);
+    }
+
     @Override
     public void createVolume(CreateVolumeSpec v, ReturnValueCompletion<VolumeStats> comp) {
         reloadDbInfo();
+
+        if (v.isEncrypted()) {
+            try {
+                getVolumeEncryptionExtension().createEncryptedEmptyVolume(encryptionBackend(), v, comp);
+            } catch (OperationFailureException e) {
+                comp.fail(e.getErrorCode());
+            }
+            return;
+        }
 
         CreateVolumeCmd cmd = new CreateVolumeCmd();
         cmd.setLogicalPool(config.getLogicalPoolName());
@@ -627,6 +655,15 @@ public class ZbsStorageController implements PrimaryStorageControllerSvc, Primar
 
     @Override
     public void cloneVolume(String srcInstallPath, CreateVolumeSpec dst, ReturnValueCompletion<VolumeStats> comp) {
+        if (dst.isEncrypted()) {
+            try {
+                getVolumeEncryptionExtension().cloneEncryptedVolumeFromImage(encryptionBackend(), srcInstallPath, dst, comp);
+            } catch (OperationFailureException e) {
+                comp.fail(e.getErrorCode());
+            }
+            return;
+        }
+
         VolumeStats stats = new VolumeStats();
 
         FlowChain chain = FlowChainBuilder.newShareFlowChain();
@@ -711,6 +748,15 @@ public class ZbsStorageController implements PrimaryStorageControllerSvc, Primar
 
     @Override
     public void copyVolume(String srcInstallPath, CreateVolumeSpec dst, ReturnValueCompletion<VolumeStats> comp) {
+        if (dst.isEncrypted()) {
+            try {
+                getVolumeEncryptionExtension().copyEncryptedVolumeFromSnapshot(encryptionBackend(), srcInstallPath, dst, comp);
+            } catch (OperationFailureException e) {
+                comp.fail(e.getErrorCode());
+            }
+            return;
+        }
+
         CopyCmd cmd = new CopyCmd();
         cmd.setPath(srcInstallPath);
         cmd.setDstVolume(dst.getName());
@@ -732,6 +778,15 @@ public class ZbsStorageController implements PrimaryStorageControllerSvc, Primar
                 comp.fail(errorCode);
             }
         });
+    }
+
+    @Override
+    public void encryptVolumeBits(EncryptVolumeBitsOnPrimaryStorageMsg msg, ReturnValueCompletion<EncryptVolumeBitsOnPrimaryStorageReply> comp) {
+        try {
+            getVolumeEncryptionExtension().encryptVolumeBits(encryptionBackend(), msg, comp);
+        } catch (OperationFailureException e) {
+            comp.fail(e.getErrorCode());
+        }
     }
 
     @Override
@@ -808,7 +863,18 @@ public class ZbsStorageController implements PrimaryStorageControllerSvc, Primar
     }
 
     @Override
-    public void expandVolume(String installPath, long size, ReturnValueCompletion<VolumeStats> comp) {
+    public void expandVolume(VolumeInventory volume, long size, ReturnValueCompletion<VolumeStats> comp) {
+        if (Boolean.TRUE.equals(volume.getEncrypted())) {
+            List<ZbsVolumeEncryptionExtensionPoint> exts = pluginRgty.getExtensionList(ZbsVolumeEncryptionExtensionPoint.class);
+            if (exts.isEmpty()) {
+                comp.fail(operr("cannot find ZBS volume encryption extension"));
+                return;
+            }
+            exts.get(0).resizeEncryptedVolume(self.getUuid(), volume, size, comp);
+            return;
+        }
+
+        String installPath = volume.getInstallPath();
         ExpandVolumeCmd cmd = new ExpandVolumeCmd();
         cmd.setPath(installPath);
         cmd.setUnit(getSizeUnit(addonInfo.getClusterInfo().getVersion()));

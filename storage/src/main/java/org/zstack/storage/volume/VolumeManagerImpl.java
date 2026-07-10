@@ -514,6 +514,9 @@ public class VolumeManagerImpl extends AbstractService implements VolumeManager,
                         volumeInPlaceEncryptor.encryptInPlace(vol, ctx, new ReturnValueCompletion<VolumeVO>(trigger) {
                             @Override
                             public void success(VolumeVO latest) {
+                                if (StringUtils.isNotBlank(latest.getInstallPath())) {
+                                    primaryStorageInstallPath = latest.getInstallPath();
+                                }
                                 trigger.next();
                             }
 

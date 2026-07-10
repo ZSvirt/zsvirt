@@ -86,7 +86,6 @@ public class VmInstantiateOtherDiskFlow implements Flow {
                 } else if (isAttachDataVolume()) {
                     VolumeVO volume = Q.New(VolumeVO.class).eq(VolumeVO_.uuid, diskAO.getSourceUuid()).find();
                     volumeInventory = VolumeInventory.valueOf(volume);
-                    setupEncryptExistingVolumeFlow();
                     setupAttachVolumeFlows();
                 } else if (diskAO.getSourceUuid() != null && diskAO.getSourceType() != null) {
                     setupAttachOtherDiskFlows();
@@ -407,56 +406,6 @@ public class VmInstantiateOtherDiskFlow implements Flow {
                 });
             }
 
-            /**
-             * When the caller requested an encrypted data volume (DiskAO.encrypted=true) but the
-             * existing source volume is not yet encrypted, transition the source bits to LUKS
-             * in place before attaching. Delegates to {@code EncryptVolumeMsg} so the actual
-             * key/secret/PS-conversion logic lives in {@code VolumeBase} (shared with the
-             * create-data-volume-from-template flow).
-             *
-             * <p>Skipped when:
-             * <ul>
-             *   <li>{@code DiskAO.encrypted} is false/null, or</li>
-             *   <li>the source volume is already encrypted (no-op transition).</li>
-             * </ul>
-             */
-            private void setupEncryptExistingVolumeFlow() {
-                if (!Boolean.TRUE.equals(diskAO.getEncrypted())) {
-                    return;
-                }
-                if (volumeInventory != null && Boolean.TRUE.equals(volumeInventory.getEncrypted())) {
-                    return;
-                }
-                flow(new NoRollbackFlow() {
-                    String __name__ = String.format("encrypt-existing-data-volume-%s-in-place",
-                            diskAO.getSourceUuid());
-
-                    @Override
-                    public void run(final FlowTrigger innerTrigger, Map data) {
-                        EncryptVolumeMsg emsg = new EncryptVolumeMsg();
-                        emsg.setVolumeUuid(volumeInventory.getUuid());
-                        emsg.setHostUuid(hostUuid);
-                        emsg.setPurpose("attach-existing-disk-as-encrypted-data-volume");
-                        bus.makeTargetServiceIdByResourceUuid(emsg, VolumeConstant.SERVICE_ID,
-                                volumeInventory.getUuid());
-                        bus.send(emsg, new CloudBusCallBack(innerTrigger) {
-                            @Override
-                            public void run(MessageReply reply) {
-                                if (!reply.isSuccess()) {
-                                    innerTrigger.fail(reply.getError());
-                                    return;
-                                }
-                                EncryptVolumeReply er = reply.castReply();
-                                if (er.getInventory() != null) {
-                                    volumeInventory = er.getInventory();
-                                }
-                                innerTrigger.next();
-                            }
-                        });
-                    }
-                });
-            }
-
             private void setupAttachOtherDiskFlows() {
                 flow(new NoRollbackFlow() {
                     String __name__ = String.format("attach-other-Disk-to-vm-%s", vmUuid);
@@ -514,4 +463,3 @@ public class VmInstantiateOtherDiskFlow implements Flow {
         });
     }
 }
-

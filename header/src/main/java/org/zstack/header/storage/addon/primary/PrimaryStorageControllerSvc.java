@@ -4,7 +4,10 @@ import org.zstack.header.core.Completion;
 import org.zstack.header.core.ReturnValueCompletion;
 import org.zstack.header.host.HostInventory;
 import org.zstack.header.storage.addon.*;
+import org.zstack.header.storage.primary.EncryptVolumeBitsOnPrimaryStorageMsg;
+import org.zstack.header.storage.primary.EncryptVolumeBitsOnPrimaryStorageReply;
 import org.zstack.header.storage.snapshot.VolumeSnapshotStats;
+import org.zstack.header.volume.VolumeInventory;
 import org.zstack.header.volume.VolumeProtocol;
 import org.zstack.header.volume.VolumeStats;
 
@@ -30,6 +33,7 @@ public interface PrimaryStorageControllerSvc {
     void trashVolume(String installPath, Completion comp);
     void cloneVolume(String srcInstallPath, CreateVolumeSpec dst, ReturnValueCompletion<VolumeStats>comp);
     void copyVolume(String srcInstallPath, CreateVolumeSpec dst, ReturnValueCompletion<VolumeStats>comp);
+    void encryptVolumeBits(EncryptVolumeBitsOnPrimaryStorageMsg msg, ReturnValueCompletion<EncryptVolumeBitsOnPrimaryStorageReply> comp);
     void flattenVolume(String installPath, ReturnValueCompletion<VolumeStats>comp);
 
     // support uri or path
@@ -37,7 +41,7 @@ public interface PrimaryStorageControllerSvc {
 
     void batchStats(Collection<String> installPath, ReturnValueCompletion<List<VolumeStats>> comp);
 
-    void expandVolume(String installPath, long size, ReturnValueCompletion<VolumeStats> comp);
+    void expandVolume(VolumeInventory volume, long size, ReturnValueCompletion<VolumeStats> comp);
     void setVolumeQos(BaseVolumeInfo v, Completion comp);
     void deleteVolumeQos(BaseVolumeInfo v, Completion comp);
     void export(ExportSpec espec, VolumeProtocol protocol, ReturnValueCompletion<RemoteTarget> comp);

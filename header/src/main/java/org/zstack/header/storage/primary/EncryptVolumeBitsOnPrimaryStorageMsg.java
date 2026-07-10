@@ -3,20 +3,12 @@ package org.zstack.header.storage.primary;
 import org.zstack.header.log.NoLogging;
 import org.zstack.header.message.NeedReplyMessage;
 
-/**
- * Triggers an in-place LUKS encryption of an existing volume file on primary storage.
- * Used after downloading a data-volume template's plain bits to LocalStorage when the
- * volume is marked encrypted: the agent converts the plain qcow2/raw at {@link #installPath}
- * into a LUKS-encrypted qcow2 (overwriting in place).
- *
- * The DEK is passed as a host-enveloped encryptedDek. The kvmagent unwraps it and
- * creates any single-use secret material file locally as needed.
- */
 public class EncryptVolumeBitsOnPrimaryStorageMsg extends NeedReplyMessage implements PrimaryStorageMessage {
     private String primaryStorageUuid;
     private String hostUuid;
     private String volumeUuid;
     private String installPath;
+    private String targetInstallPath;
     @NoLogging
     private String encryptedDek;
 
@@ -51,6 +43,14 @@ public class EncryptVolumeBitsOnPrimaryStorageMsg extends NeedReplyMessage imple
 
     public void setInstallPath(String installPath) {
         this.installPath = installPath;
+    }
+
+    public String getTargetInstallPath() {
+        return targetInstallPath;
+    }
+
+    public void setTargetInstallPath(String targetInstallPath) {
+        this.targetInstallPath = targetInstallPath;
     }
 
     public String getEncryptedDek() {

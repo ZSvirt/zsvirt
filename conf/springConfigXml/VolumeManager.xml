@@ -103,6 +103,20 @@
 
     <bean id="VolumeSnapshotEncryptionHelper" class="org.zstack.storage.encrypt.VolumeSnapshotEncryptionHelper"/>
 
+    <bean id="ZbsVolumeEncryptionMaterialFactory" class="org.zstack.storage.encrypt.ZbsVolumeEncryptionMaterialFactory"/>
+    <bean id="ZbsVolumeEncryptionKvmCaller" class="org.zstack.storage.encrypt.ZbsVolumeEncryptionKvmCaller"/>
+    <bean id="ZbsVolumeEncryptionCleanup" class="org.zstack.storage.encrypt.ZbsVolumeEncryptionCleanup"/>
+    <bean id="ZbsEncryptedEmptyVolumeCreator" class="org.zstack.storage.encrypt.ZbsEncryptedEmptyVolumeCreator"/>
+    <bean id="ZbsEncryptedVolumeCloner" class="org.zstack.storage.encrypt.ZbsEncryptedVolumeCloner"/>
+    <bean id="ZbsEncryptedSnapshotVolumeCopier" class="org.zstack.storage.encrypt.ZbsEncryptedSnapshotVolumeCopier"/>
+    <bean id="ZbsVolumeEncryptInPlaceHandler" class="org.zstack.storage.encrypt.ZbsVolumeEncryptInPlaceHandler"/>
+    <bean id="ZbsEncryptedVolumeResizer" class="org.zstack.storage.encrypt.ZbsEncryptedVolumeResizer"/>
+    <bean id="ZbsVolumeEncryptionExtension" class="org.zstack.storage.encrypt.ZbsVolumeEncryptionExtension">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.storage.addon.primary.ZbsVolumeEncryptionExtensionPoint"/>
+        </zstack:plugin>
+    </bean>
+
     <bean id="VolumeSnapshotEncryptionExtension" class="org.zstack.storage.encrypt.VolumeSnapshotEncryptionExtension">
         <zstack:plugin>
             <zstack:extension interface="org.zstack.kvm.KVMTakeSnapshotExtensionPoint"/>

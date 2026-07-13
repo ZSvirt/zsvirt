@@ -27,8 +27,6 @@ import org.zstack.header.storage.primary.PrimaryStorageDiscoverExtensionPoint;
 import org.zstack.header.storage.primary.PrimaryStorageDiscoveryResult;
 import org.zstack.header.storage.primary.PrimaryStorageInventory;
 import org.zstack.header.storage.primary.PrimaryStorageStatus;
-import org.zstack.header.storage.primary.PrimaryStorageVO;
-import org.zstack.header.storage.primary.PrimaryStorageVO_;
 import org.zstack.header.tag.SystemTagCreateMessageValidator;
 import org.zstack.header.tag.SystemTagValidator;
 import org.zstack.header.volume.VolumeVO;
@@ -38,6 +36,7 @@ import org.zstack.utils.CollectionUtils;
 import org.zstack.utils.Utils;
 import org.zstack.utils.logging.CLogger;
 
+import javax.persistence.Tuple;
 import java.math.BigInteger;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -307,6 +306,7 @@ public class SharedBlockManagerImpl extends AbstractService implements PrimarySt
                 });
 
                 Set<String> existingSharedBlockGroupUuids = getExistingSharedBlockGroupUuids(allVgUuids);
+                Map<String, Set<String>> attachedSharedBlockWwids = getAttachedSharedBlockWwids(clusterUuid);
 
                 List<PrimaryStorageInventory> inventories = new ArrayList<>();
                 List<String> resetVgUuidRequiredUuids = new ArrayList<>();
@@ -315,6 +315,13 @@ public class SharedBlockManagerImpl extends AbstractService implements PrimarySt
 
                     logger.debug(String.format("discover VG[uuid:%s] existingDiskIdsByHost: %s",
                             vgUuid, aggregation.hostDiskIds));
+
+                    if (isSameSharedBlockInCluster(vgUuid, aggregation, attachedSharedBlockWwids)) {
+                        logger.debug(String.format("skip discovered VG[uuid:%s] because current cluster already has " +
+                                        "the same VG UUID and LUN WWIDs",
+                                vgUuid));
+                        continue;
+                    }
 
                     SharedBlockGroupPrimaryStorageInventory inv = new SharedBlockGroupPrimaryStorageInventory();
                     inv.setUuid(vgUuid);
@@ -361,6 +368,74 @@ public class SharedBlockManagerImpl extends AbstractService implements PrimarySt
         return new HashSet<>(existingUuids);
     }
 
+    private Map<String, Set<String>> getAttachedSharedBlockWwids(String clusterUuid) {
+        List<String> attachedSharedBlockUuids = SQL.New("select sbg.uuid" +
+                " from PrimaryStorageClusterRefVO ref, SharedBlockGroupVO sbg" +
+                " where ref.clusterUuid = :clusterUuid" +
+                " and ref.primaryStorageUuid = sbg.uuid", String.class)
+                .param("clusterUuid", clusterUuid)
+                .list();
+
+        Map<String, Set<String>> ret = new HashMap<>();
+        if (isEmpty(attachedSharedBlockUuids)) {
+            return ret;
+        }
+
+        List<Tuple> diskTuples = Q.New(SharedBlockVO.class)
+                .select(SharedBlockVO_.sharedBlockGroupUuid, SharedBlockVO_.diskUuid)
+                .in(SharedBlockVO_.sharedBlockGroupUuid, attachedSharedBlockUuids)
+                .listTuple();
+
+        for (Tuple tuple : diskTuples) {
+            String vgUuid = tuple.get(0, String.class);
+            String diskUuid = normalizeWwid(tuple.get(1, String.class));
+            if (diskUuid == null) {
+                continue;
+            }
+
+            ret.computeIfAbsent(vgUuid, k -> new HashSet<>()).add(diskUuid);
+        }
+
+        return ret;
+    }
+
+    private boolean isSameSharedBlockInCluster(String vgUuid, DiskAggregation aggregation,
+                                               Map<String, Set<String>> attachedSharedBlockWwids) {
+        Set<String> existingWwids = attachedSharedBlockWwids.get(vgUuid);
+        if (isEmpty(existingWwids)) {
+            return false;
+        }
+
+        return aggregation.completeHostWwidSets.stream()
+                .map(this::normalizeWwids)
+                .anyMatch(existingWwids::equals);
+    }
+
+    private Set<String> normalizeWwids(Collection<String> wwids) {
+        Set<String> ret = new HashSet<>();
+        if (isEmpty(wwids)) {
+            return ret;
+        }
+
+        for (String wwid : wwids) {
+            String normalized = normalizeWwid(wwid);
+            if (normalized != null) {
+                ret.add(normalized);
+            }
+        }
+
+        return ret;
+    }
+
+    private String normalizeWwid(String wwid) {
+        if (wwid == null) {
+            return null;
+        }
+
+        String normalized = wwid.trim();
+        return normalized.isEmpty() ? null : normalized.toLowerCase(Locale.ROOT);
+    }
+
     private DiskAggregation collectDiskAggregation(String vgUuid, List<String> hostUuids, Map<String, SharedBlockKvmCommands.GetVgsInfoRsp> hostResults) {
         DiskAggregation aggregation = new DiskAggregation();
 
@@ -402,6 +477,10 @@ public class SharedBlockManagerImpl extends AbstractService implements PrimarySt
         }
 
         aggregation.hostDiskIds.put(hostUuid, new ArrayList<>(hostWwids));
+        if (isLocalComplete && hostWwids.size() == luns.size()) {
+            aggregation.completeHostWwidSets.add(hostWwids);
+        }
+
         if (aggregation.intersectedWwids == null) {
             aggregation.intersectedWwids = new HashSet<>(hostWwids);
             return;
@@ -415,5 +494,6 @@ public class SharedBlockManagerImpl extends AbstractService implements PrimarySt
         private Set<String> intersectedWwids;
         private final Map<String, SharedBlockCandidateStruct> allDiskStructs = new HashMap<>();
         private final Map<String, List<String>> hostDiskIds = new HashMap<>();
+        private final List<Set<String>> completeHostWwidSets = new ArrayList<>();
     }
 }

@@ -3382,7 +3382,6 @@ public class VolumeBase extends AbstractVolume implements Volume {
     private static class VolumeEncryptionConversionContext {
         List<VolumeSnapshotVO> snapshots;
         Map<String, String> oldAndNewInstallPaths;
-        Map<String, String> oldAndTrashInstallPaths;
         VolumeInventory oldVolumeInventory;
         List<VolumeSnapshotInventory> oldSnapshotInventories;
         List<ConvertVolumeEncryptionOnPrimaryStorageMsg.VolumeEncryptionConversionItem> items;
@@ -3439,7 +3438,7 @@ public class VolumeBase extends AbstractVolume implements Volume {
 
                     @Override
                     public void run(FlowTrigger trigger, Map data) {
-                        conversionContext.set(buildVolumeEncryptionConversionContext());
+                        conversionContext.set(buildVolumeEncryptionConversionContext(targetEncrypted));
                         trigger.next();
                     }
                 });
@@ -3483,7 +3482,12 @@ public class VolumeBase extends AbstractVolume implements Volume {
                         VolumeEncryptionConversionContext ctx = conversionContext.get();
                         updateVolumeEncryptionConversionInDb(targetEncrypted, ctx.snapshots, ctx.oldAndNewInstallPaths,
                                 (Map<String, Long>) data.get("actualSizes"));
-                        refreshVO();
+                        try {
+                            refreshVO();
+                        } catch (RuntimeException e) {
+                            logger.warn(String.format("failed to refresh volume[uuid:%s] after encryption conversion DB update: %s",
+                                    self.getUuid(), e.getMessage()), e);
+                        }
                         trigger.next();
                     }
 
@@ -3508,8 +3512,14 @@ public class VolumeBase extends AbstractVolume implements Volume {
                             return;
                         }
 
-                        volumeEncryptedSecretHelper.deleteSecretOnHostBestEffort(
-                                sourceSecretHostUuid, sourceSecretVmUuid, self.getUuid(), sourceKeyVersion);
+                        try {
+                            volumeEncryptedSecretHelper.deleteSecretOnHostBestEffort(
+                                    sourceSecretHostUuid, sourceSecretVmUuid, self.getUuid(), sourceKeyVersion);
+                            VolumeSystemTags.VOLUME_LIBVIRT_SECRET_HOST.delete(self.getUuid(), VolumeVO.class);
+                        } catch (RuntimeException e) {
+                            logger.warn(String.format("failed to cleanup old libvirt secret for volume[uuid:%s] after encryption conversion: %s",
+                                    self.getUuid(), e.getMessage()), e);
+                        }
                         trigger.next();
                     }
                 });
@@ -3524,9 +3534,14 @@ public class VolumeBase extends AbstractVolume implements Volume {
                             return;
                         }
 
-                        volumeEncryptedResourceKeyBackend.detachKeyProviderFromVolume(self.getUuid());
-                        for (VolumeSnapshotVO snapshot : conversionContext.get().snapshots) {
-                            volumeEncryptedResourceKeyBackend.detachKeyProviderFromSnapshot(snapshot.getUuid());
+                        try {
+                            volumeEncryptedResourceKeyBackend.detachKeyProviderFromVolume(self.getUuid());
+                            for (VolumeSnapshotVO snapshot : conversionContext.get().snapshots) {
+                                volumeEncryptedResourceKeyBackend.detachKeyProviderFromSnapshot(snapshot.getUuid());
+                            }
+                        } catch (RuntimeException e) {
+                            logger.warn(String.format("failed to cleanup plain resource key refs for volume[uuid:%s] after encryption conversion: %s",
+                                    self.getUuid(), e.getMessage()), e);
                         }
                         trigger.next();
                     }
@@ -3537,10 +3552,15 @@ public class VolumeBase extends AbstractVolume implements Volume {
 
                     @Override
                     public void run(FlowTrigger trigger, Map data) {
-                        VolumeEncryptionConversionContext ctx = conversionContext.get();
-                        trash.createTrash(TrashType.ConvertVolumeEncryption, false, ctx.oldVolumeInventory);
-                        for (VolumeSnapshotInventory snapshot : ctx.oldSnapshotInventories) {
-                            trash.createTrash(TrashType.ConvertVolumeSnapshotEncryption, false, snapshot);
+                        try {
+                            VolumeEncryptionConversionContext ctx = conversionContext.get();
+                            trash.createTrash(TrashType.ConvertVolumeEncryption, false, ctx.oldVolumeInventory);
+                            for (VolumeSnapshotInventory snapshot : ctx.oldSnapshotInventories) {
+                                trash.createTrash(TrashType.ConvertVolumeSnapshotEncryption, false, snapshot);
+                            }
+                        } catch (RuntimeException e) {
+                            logger.warn(String.format("failed to record old volume bits in trash for volume[uuid:%s] after encryption conversion: %s",
+                                    self.getUuid(), e.getMessage()), e);
                         }
                         trigger.next();
                     }
@@ -3559,7 +3579,7 @@ public class VolumeBase extends AbstractVolume implements Volume {
         }).start();
     }
 
-    private VolumeEncryptionConversionContext buildVolumeEncryptionConversionContext() {
+    private VolumeEncryptionConversionContext buildVolumeEncryptionConversionContext(boolean targetEncrypted) {
         VolumeEncryptionConversionContext ctx = new VolumeEncryptionConversionContext();
         ctx.snapshots = Q.New(VolumeSnapshotVO.class)
                 .eq(VolumeSnapshotVO_.volumeUuid, self.getUuid())
@@ -3568,20 +3588,13 @@ public class VolumeBase extends AbstractVolume implements Volume {
                 .comparingInt(VolumeSnapshotVO::getDistance)
                 .thenComparing(VolumeSnapshotVO::getUuid));
 
-        ctx.oldAndNewInstallPaths = buildEncryptionConversionInstallPaths(ctx.snapshots);
-        ctx.oldAndTrashInstallPaths = buildEncryptionConversionSourceTrashInstallPaths(ctx.snapshots);
+        ctx.oldAndNewInstallPaths = buildEncryptionConversionInstallPaths(ctx.snapshots, targetEncrypted, Platform.getUuid());
         ctx.oldVolumeInventory = VolumeInventory.valueOf(self);
-        ctx.oldVolumeInventory.setInstallPath(ctx.oldAndTrashInstallPaths.get(self.getInstallPath()));
         ctx.oldSnapshotInventories = ctx.snapshots.stream()
                 .filter(snapshot -> StringUtils.isNotBlank(snapshot.getPrimaryStorageInstallPath()))
-                .filter(snapshot -> StringUtils.isNotBlank(ctx.oldAndTrashInstallPaths.get(snapshot.getPrimaryStorageInstallPath())))
-                .map(snapshot -> {
-                    VolumeSnapshotInventory inv = VolumeSnapshotInventory.valueOf(snapshot);
-                    inv.setPrimaryStorageInstallPath(ctx.oldAndTrashInstallPaths.get(snapshot.getPrimaryStorageInstallPath()));
-                    return inv;
-                })
+                .map(VolumeSnapshotInventory::valueOf)
                 .collect(Collectors.toList());
-        ctx.items = buildEncryptionConversionItems(ctx.snapshots, ctx.oldAndNewInstallPaths, ctx.oldAndTrashInstallPaths);
+        ctx.items = buildEncryptionConversionItems(ctx.snapshots, ctx.oldAndNewInstallPaths);
         return ctx;
     }
 
@@ -3647,37 +3660,25 @@ public class VolumeBase extends AbstractVolume implements Volume {
         return true;
     }
 
-    private Map<String, String> buildEncryptionConversionInstallPaths(List<VolumeSnapshotVO> snapshots) {
+    private Map<String, String> buildEncryptionConversionInstallPaths(List<VolumeSnapshotVO> snapshots,
+                                                                      boolean targetEncrypted,
+                                                                      String conversionUuid) {
         Map<String, String> paths = new LinkedHashMap<>();
         for (VolumeSnapshotVO snapshot : snapshots) {
             if (StringUtils.isNotBlank(snapshot.getPrimaryStorageInstallPath())) {
                 paths.put(snapshot.getPrimaryStorageInstallPath(),
-                        makeConvertedSnapshotInstallPath(snapshot.getPrimaryStorageInstallPath(), snapshot.getUuid()));
+                        makeConvertedSnapshotInstallPath(snapshot.getPrimaryStorageInstallPath(), snapshot.getUuid(),
+                                targetEncrypted, conversionUuid));
             }
         }
-        paths.put(self.getInstallPath(), makeConvertedVolumeInstallPath(self.getInstallPath(), self.getUuid()));
-        return paths;
-    }
-
-    private Map<String, String> buildEncryptionConversionSourceTrashInstallPaths(List<VolumeSnapshotVO> snapshots) {
-        Map<String, String> paths = new LinkedHashMap<>();
-        Set<String> trashPaths = new HashSet<>();
-        for (VolumeSnapshotVO snapshot : snapshots) {
-            if (StringUtils.isNotBlank(snapshot.getPrimaryStorageInstallPath())) {
-                String sourceTrashPath = makeSourceSnapshotTrashInstallPath(snapshot.getPrimaryStorageInstallPath(), snapshot.getUuid(),
-                        snapshot.isEncrypted(), trashPaths);
-                if (StringUtils.isNotBlank(sourceTrashPath)) {
-                    paths.put(snapshot.getPrimaryStorageInstallPath(), sourceTrashPath);
-                }
-            }
-        }
-        paths.put(self.getInstallPath(), makeSourceTrashInstallPath(self.getInstallPath(), self.getUuid(), self.isEncrypted(), trashPaths));
+        paths.put(self.getInstallPath(), makeConvertedVolumeInstallPath(self.getInstallPath(), self.getUuid(),
+                targetEncrypted, conversionUuid));
+        validateEncryptionConversionTargetPaths(paths);
         return paths;
     }
 
     private List<ConvertVolumeEncryptionOnPrimaryStorageMsg.VolumeEncryptionConversionItem> buildEncryptionConversionItems(
-            List<VolumeSnapshotVO> snapshots, Map<String, String> oldAndNewInstallPaths,
-            Map<String, String> oldAndTrashInstallPaths) {
+            List<VolumeSnapshotVO> snapshots, Map<String, String> oldAndNewInstallPaths) {
         Map<String, VolumeSnapshotVO> snapshotMap = snapshots.stream()
                 .collect(Collectors.toMap(VolumeSnapshotVO::getUuid, it -> it));
         List<ConvertVolumeEncryptionOnPrimaryStorageMsg.VolumeEncryptionConversionItem> items = new ArrayList<>();
@@ -3692,7 +3693,7 @@ public class VolumeBase extends AbstractVolume implements Volume {
             // When parent is null, no target backing is set and the converted base snapshot becomes full.
             items.add(makeEncryptionConversionItem(snapshot.getUuid(), VolumeSnapshotVO.class.getSimpleName(),
                     snapshot.getPrimaryStorageInstallPath(), oldAndNewInstallPaths.get(snapshot.getPrimaryStorageInstallPath()),
-                    oldAndTrashInstallPaths.get(snapshot.getPrimaryStorageInstallPath()), newBackingPath));
+                    newBackingPath));
         }
 
         String activeBackingPath = null;
@@ -3711,42 +3712,59 @@ public class VolumeBase extends AbstractVolume implements Volume {
         }
         items.add(makeEncryptionConversionItem(self.getUuid(), VolumeVO.class.getSimpleName(),
                 self.getInstallPath(), oldAndNewInstallPaths.get(self.getInstallPath()),
-                oldAndTrashInstallPaths.get(self.getInstallPath()), activeBackingPath));
+                activeBackingPath));
         return items;
     }
 
     private ConvertVolumeEncryptionOnPrimaryStorageMsg.VolumeEncryptionConversionItem makeEncryptionConversionItem(
             String resourceUuid, String resourceType, String sourcePath, String targetPath,
-            String sourceTrashPath, String targetBackingPath) {
+            String targetBackingPath) {
         ConvertVolumeEncryptionOnPrimaryStorageMsg.VolumeEncryptionConversionItem item =
                 new ConvertVolumeEncryptionOnPrimaryStorageMsg.VolumeEncryptionConversionItem();
         item.setResourceUuid(resourceUuid);
         item.setResourceType(resourceType);
         item.setSourceInstallPath(sourcePath);
-        item.setSourceTrashInstallPath(sourceTrashPath);
         item.setTargetInstallPath(targetPath);
         item.setTargetBackingInstallPath(targetBackingPath);
         return item;
     }
 
-    private String makeConvertedVolumeInstallPath(String installPath, String resourceUuid) {
+    private String makeConvertedVolumeInstallPath(String installPath, String resourceUuid,
+                                                  boolean targetEncrypted, String conversionUuid) {
+        String convertedName = String.format("%s.%s.%s", resourceUuid, targetEncrypted ? "encrypted" : "plain", conversionUuid);
         if (isCephInstallPath(installPath)) {
-            return makeCephVolumeInstallPath(installPath, resourceUuid);
+            return makeCephVolumeInstallPath(installPath, convertedName);
         }
         if (isSharedBlockInstallPath(installPath) || installPath.startsWith("/dev/")) {
-            return makeSiblingInstallPath(installPath, resourceUuid);
+            return makeSiblingInstallPath(installPath, convertedName);
         }
-        return makeSiblingInstallPath(installPath, String.format("%s.qcow2", resourceUuid));
+        return makeSiblingInstallPath(installPath, String.format("%s.qcow2", convertedName));
     }
 
-    private String makeConvertedSnapshotInstallPath(String installPath, String resourceUuid) {
-        if (isCephInstallPath(installPath)) {
-            return String.format("%s@%s", makeCephVolumeInstallPath(installPath, self.getUuid()), resourceUuid);
-        }
+    private String makeConvertedSnapshotInstallPath(String installPath, String resourceUuid,
+                                                    boolean targetEncrypted, String conversionUuid) {
+        String convertedName = String.format("%s.%s.%s", resourceUuid, targetEncrypted ? "encrypted" : "plain", conversionUuid);
         if (isSharedBlockInstallPath(installPath) || installPath.startsWith("/dev/")) {
-            return makeSiblingInstallPath(installPath, resourceUuid);
+            return makeSiblingInstallPath(installPath, convertedName);
         }
-        return makeSiblingInstallPath(installPath, String.format("%s.qcow2", resourceUuid));
+        return makeSiblingInstallPath(installPath, String.format("%s.qcow2", convertedName));
+    }
+
+    private void validateEncryptionConversionTargetPaths(Map<String, String> oldAndNewInstallPaths) {
+        Set<String> targets = new HashSet<>();
+        for (Map.Entry<String, String> entry : oldAndNewInstallPaths.entrySet()) {
+            if (StringUtils.isBlank(entry.getValue())) {
+                throw new OperationFailureException(operr("failed to build converted install path for source path[%s]",
+                        entry.getKey()));
+            }
+            if (entry.getKey().equals(entry.getValue())) {
+                throw new OperationFailureException(operr("converted install path must differ from source path[%s]",
+                        entry.getKey()));
+            }
+            if (!targets.add(entry.getValue())) {
+                throw new OperationFailureException(operr("duplicate converted install path[%s]", entry.getValue()));
+            }
+        }
     }
 
     private String makeSiblingInstallPath(String installPath, String fileName) {
@@ -3773,27 +3791,6 @@ public class VolumeBase extends AbstractVolume implements Volume {
             return imagePath;
         }
         return String.format("%s%s/%s", prefix, path.substring(0, poolEnd), resourceUuid);
-    }
-
-    private String makeSourceSnapshotTrashInstallPath(String installPath, String resourceUuid, boolean sourceEncrypted, Set<String> trashPaths) {
-        if (isCephInstallPath(installPath)) {
-            return null;
-        }
-        return makeSourceTrashInstallPath(installPath, resourceUuid, sourceEncrypted, trashPaths);
-    }
-
-    private String makeSourceTrashInstallPath(String installPath, String resourceUuid, boolean sourceEncrypted, Set<String> trashPaths) {
-        String trashPath;
-        do {
-            String fileName = String.format("%s.trash.%s.%s.qcow2",
-                    resourceUuid, sourceEncrypted ? "encrypted" : "plain", Platform.getUuid().substring(0, 6));
-            if (isCephInstallPath(installPath)) {
-                trashPath = makeCephVolumeInstallPath(installPath, fileName);
-            } else {
-                trashPath = makeSiblingInstallPath(installPath, fileName);
-            }
-        } while (!trashPaths.add(trashPath));
-        return trashPath;
     }
 
     private boolean isCephInstallPath(String installPath) {
@@ -3823,34 +3820,38 @@ public class VolumeBase extends AbstractVolume implements Volume {
         }
     }
 
-    @Transactional
     private void updateVolumeEncryptionConversionInDb(boolean targetEncrypted, List<VolumeSnapshotVO> snapshots,
                                                       Map<String, String> oldAndNewInstallPaths,
                                                       Map<String, Long> actualSizes) {
-        VolumeSnapshotReferenceUtils.handleVolumeInstallUrlChange(self.getUuid(), oldAndNewInstallPaths);
+        new SQLBatch() {
+            @Override
+            protected void scripts() {
+                VolumeSnapshotReferenceUtils.handleVolumeInstallUrlChange(self.getUuid(), oldAndNewInstallPaths);
 
-        UpdateQuery q = SQL.New(VolumeVO.class)
-                .eq(VolumeVO_.uuid, self.getUuid())
-                .set(VolumeVO_.installPath, oldAndNewInstallPaths.get(self.getInstallPath()))
-                .set(VolumeVO_.encrypted, targetEncrypted);
-        if (actualSizes != null && actualSizes.get(self.getUuid()) != null) {
-            q.set(VolumeVO_.actualSize, actualSizes.get(self.getUuid()));
-        }
-        q.update();
+                UpdateQuery q = SQL.New(VolumeVO.class)
+                        .eq(VolumeVO_.uuid, self.getUuid())
+                        .set(VolumeVO_.installPath, oldAndNewInstallPaths.get(self.getInstallPath()))
+                        .set(VolumeVO_.encrypted, targetEncrypted);
+                if (actualSizes != null && actualSizes.get(self.getUuid()) != null) {
+                    q.set(VolumeVO_.actualSize, actualSizes.get(self.getUuid()));
+                }
+                q.update();
 
-        Map<String, String> convertedSnapshotInstallPaths = new LinkedHashMap<>();
-        for (VolumeSnapshotVO snapshot : snapshots) {
-            String newPath = oldAndNewInstallPaths.get(snapshot.getPrimaryStorageInstallPath());
-            if (StringUtils.isBlank(newPath)) {
-                continue;
+                Map<String, String> convertedSnapshotInstallPaths = new LinkedHashMap<>();
+                for (VolumeSnapshotVO snapshot : snapshots) {
+                    String newPath = oldAndNewInstallPaths.get(snapshot.getPrimaryStorageInstallPath());
+                    if (StringUtils.isBlank(newPath)) {
+                        continue;
+                    }
+                    convertedSnapshotInstallPaths.put(snapshot.getUuid(), newPath);
+                }
+
+                updateConvertedSnapshotPaths(convertedSnapshotInstallPaths, targetEncrypted);
+                if (targetEncrypted && !convertedSnapshotInstallPaths.isEmpty()) {
+                    volumeEncryptedResourceKeyBackend.copyVolumeKeyRefToSnapshots(self.getUuid(), convertedSnapshotInstallPaths.keySet());
+                }
             }
-            convertedSnapshotInstallPaths.put(snapshot.getUuid(), newPath);
-        }
-
-        updateConvertedSnapshotPaths(convertedSnapshotInstallPaths, targetEncrypted);
-        if (targetEncrypted && !convertedSnapshotInstallPaths.isEmpty()) {
-            volumeEncryptedResourceKeyBackend.copyVolumeKeyRefToSnapshots(self.getUuid(), convertedSnapshotInstallPaths.keySet());
-        }
+        }.execute();
     }
 
     private void updateConvertedSnapshotPaths(Map<String, String> snapshotInstallPaths, boolean targetEncrypted) {

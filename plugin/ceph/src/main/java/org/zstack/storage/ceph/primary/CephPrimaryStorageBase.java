@@ -471,7 +471,6 @@ public class CephPrimaryStorageBase extends PrimaryStorageBase {
         public String encryptedDek;
         public String installPath;
         public String targetInstallPath;
-        public String sourceTrashInstallPath;
         public boolean targetEncrypted;
         public Long virtualSize;
     }
@@ -485,19 +484,6 @@ public class CephPrimaryStorageBase extends PrimaryStorageBase {
     }
 
     public static class KVMHostLuksRsp extends KVMAgentCommands.AgentResponse {
-        public Long actualSize;
-    }
-
-    public static class ReplaceLuksRbdCmd extends AgentCommand {
-        public String installPath;
-        public String targetInstallPath;
-        public String temporaryInstallPath;
-        public String sourceTrashInstallPath;
-        public boolean deleteSourceTrash;
-    }
-
-    public static class ReplaceLuksRbdRsp extends AgentResponse {
-        public Long size;
         public Long actualSize;
     }
 
@@ -1452,7 +1438,6 @@ public class CephPrimaryStorageBase extends PrimaryStorageBase {
     public static final String KVM_HOST_LUKS_ENCRYPT_IN_PLACE_PATH = "/ceph/primarystorage/kvmhost/encryptinplace";
     public static final String KVM_HOST_LUKS_RESIZE_PATH = "/ceph/primarystorage/kvmhost/luksresize";
     public static final String KVM_HOST_LUKS_CONVERT_PATH = "/ceph/primarystorage/kvmhost/luksconvert";
-    public static final String LUKS_REPLACE_VOLUME_PATH = "/ceph/primarystorage/volume/luksreplace";
     public static final String LUKS_SWAP_IN_PLACE_PATH = "/ceph/primarystorage/volume/luksswapinplace";
     public static final String KVM_HOST_IMAGESTORE_ENCRYPTED_DOWNLOAD_PATH = "/ceph/primarystorage/kvmhost/imagestore/encrypteddownload";
     public static final String FLATTEN_PATH = "/ceph/primarystorage/volume/flatten";
@@ -3628,12 +3613,38 @@ public class CephPrimaryStorageBase extends PrimaryStorageBase {
         KVMHostLuksConvertCmd kcmd = new KVMHostLuksConvertCmd();
         kcmd.psUuid = self.getUuid();
         kcmd.installPath = item.getSourceInstallPath();
-        kcmd.targetInstallPath = makeTemporaryLuksRbdInstallPath(item.getTargetInstallPath(), "converting");
-        kcmd.sourceTrashInstallPath = item.getSourceTrashInstallPath();
+        kcmd.targetInstallPath = item.getTargetInstallPath();
         kcmd.targetEncrypted = msg.isTargetEncrypted();
         kcmd.virtualSize = msg.getVolume().getSize();
         kcmd.encryptedDek = volumeEncryptedSecretHelper.materializeAndSealVolumeDekForHost(hostUuid, msg.getVolume().getUuid());
 
+        CheckIsBitsExistingCmd checkTargetCmd = new CheckIsBitsExistingCmd();
+        checkTargetCmd.setInstallPath(item.getTargetInstallPath());
+        httpCall(CHECK_BITS_PATH, checkTargetCmd, CheckIsBitsExistingRsp.class,
+                new ReturnValueCompletion<CheckIsBitsExistingRsp>(msg) {
+                    @Override
+                    public void success(CheckIsBitsExistingRsp returnValue) {
+                        if (returnValue.isExisting()) {
+                            reply.setError(operr("RBD LUKS conversion target already exists: %s", item.getTargetInstallPath()));
+                            bus.reply(msg, reply);
+                            return;
+                        }
+                        convertVolumeEncryptionOnKvmHost(msg, reply, kcmd, hostUuid);
+                    }
+
+                    @Override
+                    public void fail(ErrorCode errorCode) {
+                        reply.setError(errorCode);
+                        bus.reply(msg, reply);
+                    }
+                });
+    }
+
+    private void convertVolumeEncryptionOnKvmHost(ConvertVolumeEncryptionOnPrimaryStorageMsg msg,
+                                                  ConvertVolumeEncryptionOnPrimaryStorageReply reply,
+                                                  KVMHostLuksConvertCmd kcmd,
+                                                  String hostUuid) {
+        ConvertVolumeEncryptionOnPrimaryStorageMsg.VolumeEncryptionConversionItem item = msg.getItems().get(0);
         httpCallToKvmHost(hostUuid, KVM_HOST_LUKS_CONVERT_PATH, kcmd, KVMHostLuksRsp.class,
                 new ReturnValueCompletion<KVMHostLuksRsp>(msg) {
                     @Override
@@ -3645,16 +3656,16 @@ public class CephPrimaryStorageBase extends PrimaryStorageBase {
 
                     @Override
                     public void success(KVMHostLuksRsp ret) {
-                        ReplaceLuksRbdCmd rcmd = new ReplaceLuksRbdCmd();
-                        rcmd.installPath = item.getSourceInstallPath();
-                        rcmd.targetInstallPath = item.getTargetInstallPath();
-                        rcmd.temporaryInstallPath = kcmd.targetInstallPath;
-                        rcmd.sourceTrashInstallPath = item.getSourceTrashInstallPath();
-                        rcmd.deleteSourceTrash = false;
-                        httpCall(LUKS_REPLACE_VOLUME_PATH, rcmd, ReplaceLuksRbdRsp.class,
-                                new ReturnValueCompletion<ReplaceLuksRbdRsp>(msg) {
+                        if (ret.actualSize != null) {
+                            reply.setActualSizes(Collections.singletonMap(msg.getVolume().getUuid(), ret.actualSize));
+                            bus.reply(msg, reply);
+                            return;
+                        }
+
+                        syncVolumeSize(msg.getVolume().getUuid(), item.getTargetInstallPath(),
+                                new ReturnValueCompletion<GetVolumeSizeRsp>(msg) {
                                     @Override
-                                    public void success(ReplaceLuksRbdRsp rsp) {
+                                    public void success(GetVolumeSizeRsp rsp) {
                                         if (rsp.actualSize != null) {
                                             reply.setActualSizes(Collections.singletonMap(msg.getVolume().getUuid(), rsp.actualSize));
                                         }
@@ -3663,8 +3674,8 @@ public class CephPrimaryStorageBase extends PrimaryStorageBase {
 
                                     @Override
                                     public void fail(ErrorCode errorCode) {
-                                        deleteRbdBitsBestEffort(kcmd.targetInstallPath);
-                                        reply.setError(errorCode);
+                                        logger.warn(String.format("failed to sync converted RBD volume[uuid:%s, installPath:%s] size: %s",
+                                                msg.getVolume().getUuid(), item.getTargetInstallPath(), errorCode.getReadableDetails()));
                                         bus.reply(msg, reply);
                                     }
                                 });

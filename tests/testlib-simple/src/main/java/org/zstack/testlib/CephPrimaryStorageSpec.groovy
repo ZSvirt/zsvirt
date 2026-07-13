@@ -262,47 +262,6 @@ class CephPrimaryStorageSpec extends PrimaryStorageSpec {
                 return rsp
             }
 
-            simulator(CephPrimaryStorageBase.LUKS_REPLACE_VOLUME_PATH) { HttpEntity<String> e, EnvSpec spec ->
-                return new CephPrimaryStorageBase.ReplaceLuksRbdRsp()
-            }
-
-            VFS.vfsHook(CephPrimaryStorageBase.LUKS_REPLACE_VOLUME_PATH, espec) { CephPrimaryStorageBase.ReplaceLuksRbdRsp rsp, HttpEntity<String> e, EnvSpec spec ->
-                def cmd = JSONObjectUtil.toObject(e.body, CephPrimaryStorageBase.ReplaceLuksRbdCmd.class)
-                VFS vfs = vfs(cmd, spec)
-                String srcPath = cephPathToVFSPath(cmd.installPath)
-                String tmpPath = cephPathToVFSPath(cmd.temporaryInstallPath)
-                String targetPath = cephPathToVFSPath(cmd.targetInstallPath ?: cmd.installPath)
-                boolean deleteSourceTrash = cmd.deleteSourceTrash || !cmd.sourceTrashInstallPath
-                String trashPath = cephPathToVFSPath(cmd.sourceTrashInstallPath ?: "${srcPath}-trash-${Platform.uuid.substring(0, 8)}")
-
-                [srcPath, tmpPath, targetPath, trashPath].each {
-                    vfs.Assert(!it.contains("@"), "RBD LUKS replacement only supports active image paths[${it}]")
-                }
-                vfs.Assert(vfs.isFile(srcPath), "cannot find the source file[${cmd.installPath}]")
-                CephRaw src = vfs.getFile(srcPath, true)
-                if (!vfs.exists(tmpPath)) {
-                    CephRaw tmp = vfs.createCephRaw(tmpPath, src.virtualSize)
-                    tmp.actualSize = src.actualSize
-                    tmp.update()
-                }
-                vfs.Assert(vfs.isFile(tmpPath), "cannot find the temporary file[${cmd.temporaryInstallPath}]")
-                vfs.Assert(!vfs.exists(trashPath), "trash file[${trashPath}] already exists")
-                if (targetPath != srcPath) {
-                    vfs.Assert(!vfs.exists(targetPath), "target file[${targetPath}] already exists")
-                }
-
-                src.move(trashPath)
-                CephRaw tmp = vfs.getFile(tmpPath, true)
-                CephRaw target = tmp.move(targetPath)
-                if (deleteSourceTrash && vfs.exists(trashPath)) {
-                    vfs.delete(trashPath)
-                }
-
-                rsp.size = target.virtualSize
-                rsp.actualSize = target.actualSize
-                return rsp
-            }
-
             simulator(CephPrimaryStorageBase.LUKS_SWAP_IN_PLACE_PATH) { HttpEntity<String> e, EnvSpec spec ->
                 return new CephPrimaryStorageBase.AgentResponse()
             }
@@ -672,7 +631,11 @@ class CephPrimaryStorageSpec extends PrimaryStorageSpec {
             VFS.vfsHook(CephPrimaryStorageBase.CHECK_BITS_PATH, espec) { rsp, HttpEntity<String> e, EnvSpec spec ->
                 def cmd = JSONObjectUtil.toObject(e.body, CephPrimaryStorageBase.CheckIsBitsExistingCmd.class)
                 VFS vfs = vfs(cmd, spec)
-                vfs.Assert(vfs.isFile(cephPathToVFSPath(cmd.installPath)), "cannot find ${cmd.installPath}")
+                if (cmd.installPath ==~ /.*[0-9a-f]{32}\.(encrypted|plain)\.[0-9a-f]{32}$/) {
+                    rsp.existing = vfs.exists(cephPathToVFSPath(cmd.installPath))
+                } else {
+                    vfs.Assert(vfs.isFile(cephPathToVFSPath(cmd.installPath)), "cannot find ${cmd.installPath}")
+                }
 
                 return rsp
             }

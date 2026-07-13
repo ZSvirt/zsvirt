@@ -4,6 +4,7 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.zstack.compute.vm.metadata.MetadataRegistrationPersistHelper;
 import org.zstack.compute.vm.metadata.VmMetadataBuilderUtils;
+import org.zstack.compute.vm.metadata.VmMetadataUuidRewriteHelper;
 import org.zstack.compute.vm.metadata.dirty.VmMetadataDirtyMarker;
 import org.zstack.core.Platform;
 import org.zstack.core.asyncbatch.While;
@@ -423,6 +424,8 @@ public class MevocoVmManagerImpl implements VmInstanceExtensionManager, BeforeVm
             String metadataJson;
             VmInstanceMetadataDTO dto;
             String vmUuid;
+            String metadataVmUuid;
+            boolean regeneratedVmUuid;
             Map<String, String> metadataToCurrentPathMap;
             String psType;
             VmMetadataPathReplacementExtensionPoint.PathReplacementResult replacement;
@@ -477,9 +480,20 @@ public class MevocoVmManagerImpl implements VmInstanceExtensionManager, BeforeVm
                             return;
                         }
 
-                        vmUuid = dto.getVm().getResourceUuid();
-                        if (StringUtils.isEmpty(vmUuid)) {
+                        metadataVmUuid = dto.getVm().getResourceUuid();
+                        if (StringUtils.isEmpty(metadataVmUuid)) {
                             trigger.fail(Platform.operr("vm resourceUuid is missing in metadata"));
+                            return;
+                        }
+
+                        try {
+                            VmMetadataUuidRewriteHelper.RewriteResult rewriteResult =
+                                    VmMetadataUuidRewriteHelper.rewriteVmUuid(dto, msg.isRegenerateUuid());
+                            metadataVmUuid = rewriteResult.originalVmUuid;
+                            vmUuid = rewriteResult.targetVmUuid;
+                            regeneratedVmUuid = rewriteResult.changed;
+                        } catch (Exception e) {
+                            trigger.fail(Platform.operr("failed to rewrite VM UUID in metadata: %s", e.getMessage()));
                             return;
                         }
 
@@ -712,6 +726,47 @@ public class MevocoVmManagerImpl implements VmInstanceExtensionManager, BeforeVm
                             MetadataRegistrationPersistHelper.rollbackRegistration(vmUuid);
                         }
                         trigger.rollback();
+                    }
+                });
+
+                flow(new NoRollbackFlow() {
+                    String __name__ = "cleanup-original-metadata-after-regenerate-uuid";
+
+                    @Override
+                    public void run(FlowTrigger trigger, Map data) {
+                        if (!regeneratedVmUuid) {
+                            trigger.next();
+                            return;
+                        }
+
+                        String rootVolumeUuid = Q.New(VmInstanceVO.class)
+                                .select(VmInstanceVO_.rootVolumeUuid)
+                                .eq(VmInstanceVO_.uuid, vmUuid)
+                                .findValue();
+
+                        CleanupVmInstanceMetadataOnPrimaryStorageMsg cmsg = new CleanupVmInstanceMetadataOnPrimaryStorageMsg();
+                        cmsg.setPrimaryStorageUuid(primaryStorageUuid);
+                        cmsg.setVmInstanceUuid(metadataVmUuid);
+                        cmsg.setRootVolumeUuid(rootVolumeUuid);
+                        cmsg.setHostUuid(hostUuid);
+                        cmsg.setMetadataPath(msg.getMetadataPath());
+                        bus.makeTargetServiceIdByResourceUuid(cmsg, PrimaryStorageConstant.SERVICE_ID, primaryStorageUuid);
+                        bus.send(cmsg, new CloudBusCallBack(trigger) {
+                            @Override
+                            public void run(MessageReply reply) {
+                                if (!reply.isSuccess()) {
+                                    trigger.fail(Platform.operr(
+                                            "failed to cleanup original metadata[path:%s] for regenerated vm[oldUuid:%s, newUuid:%s]",
+                                            msg.getMetadataPath(), metadataVmUuid, vmUuid).withCause(reply.getError()));
+                                    return;
+                                }
+
+                                logger.info(String.format("[MetadataRegistration] cleaned up original metadata[path:%s] " +
+                                                "after regenerated vm uuid registration[oldUuid:%s, newUuid:%s]",
+                                        msg.getMetadataPath(), metadataVmUuid, vmUuid));
+                                trigger.next();
+                            }
+                        });
                     }
                 });
 

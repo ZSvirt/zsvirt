@@ -1,12 +1,14 @@
 package org.zstack.storage.backup.imagestore;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.zstack.compute.host.MountPointPathValidator;
 import org.zstack.core.Platform;
 import org.zstack.core.componentloader.PluginRegistry;
 import org.zstack.core.db.DatabaseFacade;
 import org.zstack.core.db.Q;
 import org.zstack.core.db.SimpleQuery;
 import org.zstack.core.db.SimpleQuery.Op;
+import org.zstack.header.host.APIMountBlockDeviceMsg;
 import org.zstack.header.agent.ProxyHardwareFactory;
 import org.zstack.header.agent.ProxyHardware;
 import org.zstack.header.apimediator.ApiMessageInterceptionException;
@@ -49,9 +51,28 @@ public class ImageStoreBackupStorageApiInterceptor implements GlobalApiMessageIn
             validate((APIRecoveryImageFromImageStoreBackupStorageMsg) msg);
         } else if (msg instanceof APIReclaimSpaceFromImageStoreMsg) {
             validate((APIReclaimSpaceFromImageStoreMsg) msg);
+        } else if (msg instanceof APIMountBlockDeviceMsg) {
+            validate((APIMountBlockDeviceMsg) msg);
         }
 
         return msg;
+    }
+
+    private void validate(APIMountBlockDeviceMsg msg) {
+        List<String> imageStoreUrls = Q.New(ImageStoreBackupStorageVO.class)
+                .select(ImageStoreBackupStorageVO_.url)
+                .eq(ImageStoreBackupStorageVO_.hostname, msg.getHostName())
+                .listValues();
+        String mountPoint = MountPointPathValidator.validateAndNormalize(msg.getMountPoint());
+
+        for (String url : imageStoreUrls) {
+            if (!mountPoint.equals(MountPointPathValidator.normalize(url))) {
+                continue;
+            }
+            throw new ApiMessageInterceptionException(argerr(
+                    "url[%s] has been occupied by image store backup storage on host[%s]",
+                    msg.getMountPoint(), msg.getHostName()));
+        }
     }
 
     private void validate(final APIReclaimSpaceFromImageStoreMsg msg) {
@@ -217,7 +238,8 @@ public class ImageStoreBackupStorageApiInterceptor implements GlobalApiMessageIn
             APIAddImageStoreBackupStorageMsg.class,
             APIAddDisasterImageStoreBackupStorageMsg.class,
             APIUpdateImageStoreBackupStorageMsg.class,
-            APIQueryImageStoreBackupStorageMsg.class
+            APIQueryImageStoreBackupStorageMsg.class,
+            APIMountBlockDeviceMsg.class
         );
     }
 

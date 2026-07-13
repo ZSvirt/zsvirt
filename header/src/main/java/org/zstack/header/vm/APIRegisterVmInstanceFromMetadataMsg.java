@@ -40,6 +40,9 @@ public class APIRegisterVmInstanceFromMetadataMsg extends APIMessage {
     @APIParam(required = false, maxLength = 255)
     private String name;
 
+    @APIParam(required = false)
+    private boolean regenerateUuid = false;
+
     public String getMetadataPath() {
         return metadataPath;
     }
@@ -88,6 +91,14 @@ public class APIRegisterVmInstanceFromMetadataMsg extends APIMessage {
         this.name = name;
     }
 
+    public boolean isRegenerateUuid() {
+        return regenerateUuid;
+    }
+
+    public void setRegenerateUuid(boolean regenerateUuid) {
+        this.regenerateUuid = regenerateUuid;
+    }
+
     public static APIRegisterVmInstanceFromMetadataMsg __example__() {
         APIRegisterVmInstanceFromMetadataMsg msg = new APIRegisterVmInstanceFromMetadataMsg();
         String vmUuid = uuid(VmInstanceVO.class);
@@ -97,6 +108,7 @@ public class APIRegisterVmInstanceFromMetadataMsg extends APIMessage {
         msg.clusterUuid = uuid(ClusterVO.class);
         msg.hostUuid = uuid(HostVO.class);
         msg.name = "my-restored-vm";
+        msg.regenerateUuid = true;
         return msg;
     }
 }

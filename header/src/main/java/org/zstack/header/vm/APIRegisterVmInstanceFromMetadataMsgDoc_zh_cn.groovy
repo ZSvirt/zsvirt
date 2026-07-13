@@ -76,6 +76,15 @@ doc {
 					since "zsv 5.0.0"
 				}
 				column {
+					name "regenerateUuid"
+					enclosedIn "params"
+					desc "是否在注册时重新生成云主机UUID；默认为false，表示沿用元数据中的云主机UUID"
+					location "body"
+					type "boolean"
+					optional true
+					since "1.0.1, zsv_5.1.0"
+				}
+				column {
 					name "tagUuids"
 					enclosedIn "params"
 					desc "标签UUID列表"

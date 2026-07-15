@@ -21,5 +21,12 @@ public interface ZbsVolumeEncryptionBackend {
 
     void checkNoSnapshots(String installPath, Completion completion);
 
+    void validateConversionPaths(String sourceInstallPath, String targetInstallPath);
+
+    void createConversionTarget(String targetInstallPath, long virtualSize, boolean targetEncrypted,
+                                ReturnValueCompletion<String> completion);
+
+    void deleteConversionTarget(String targetInstallPath, Completion completion);
+
     void stats(String installPath, ReturnValueCompletion<VolumeStats> completion);
 }

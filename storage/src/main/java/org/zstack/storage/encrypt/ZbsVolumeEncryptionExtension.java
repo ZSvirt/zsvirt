@@ -7,6 +7,8 @@ import org.zstack.header.storage.addon.primary.ZbsVolumeEncryptionBackend;
 import org.zstack.header.storage.addon.primary.ZbsVolumeEncryptionExtensionPoint;
 import org.zstack.header.storage.primary.EncryptVolumeBitsOnPrimaryStorageMsg;
 import org.zstack.header.storage.primary.EncryptVolumeBitsOnPrimaryStorageReply;
+import org.zstack.header.storage.primary.ConvertVolumeEncryptionOnPrimaryStorageMsg;
+import org.zstack.header.storage.primary.ConvertVolumeEncryptionOnPrimaryStorageReply;
 import org.zstack.header.storage.snapshot.VolumeSnapshotInventory;
 import org.zstack.header.volume.VolumeInventory;
 import org.zstack.header.volume.VolumeStats;
@@ -21,6 +23,8 @@ public class ZbsVolumeEncryptionExtension implements ZbsVolumeEncryptionExtensio
     private ZbsEncryptedSnapshotVolumeCopier snapshotVolumeCopier;
     @Autowired
     private ZbsVolumeEncryptInPlaceHandler encryptInPlaceHandler;
+    @Autowired
+    private ZbsVolumeEncryptionConverter volumeEncryptionConverter;
     @Autowired
     private ZbsEncryptedVolumeResizer volumeResizer;
     @Autowired
@@ -48,6 +52,13 @@ public class ZbsVolumeEncryptionExtension implements ZbsVolumeEncryptionExtensio
     public void encryptVolumeBits(ZbsVolumeEncryptionBackend backend, EncryptVolumeBitsOnPrimaryStorageMsg msg,
                                   ReturnValueCompletion<EncryptVolumeBitsOnPrimaryStorageReply> completion) {
         encryptInPlaceHandler.encrypt(backend, msg, completion);
+    }
+
+    @Override
+    public void convertVolumeEncryption(ZbsVolumeEncryptionBackend backend,
+                                        ConvertVolumeEncryptionOnPrimaryStorageMsg msg,
+                                        ReturnValueCompletion<ConvertVolumeEncryptionOnPrimaryStorageReply> completion) {
+        volumeEncryptionConverter.convert(backend, msg, completion);
     }
 
     @Override

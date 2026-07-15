@@ -460,6 +460,24 @@ public class ExternalPrimaryStorage extends PrimaryStorageBase {
         });
     }
 
+    @Override
+    protected void handle(ConvertVolumeEncryptionOnPrimaryStorageMsg msg) {
+        ConvertVolumeEncryptionOnPrimaryStorageReply reply = new ConvertVolumeEncryptionOnPrimaryStorageReply();
+        controller.convertVolumeEncryption(msg,
+                new ReturnValueCompletion<ConvertVolumeEncryptionOnPrimaryStorageReply>(msg) {
+                    @Override
+                    public void success(ConvertVolumeEncryptionOnPrimaryStorageReply returnValue) {
+                        bus.reply(msg, returnValue);
+                    }
+
+                    @Override
+                    public void fail(ErrorCode errorCode) {
+                        reply.setError(errorCode);
+                        bus.reply(msg, reply);
+                    }
+                });
+    }
+
     protected void handle(final SetTrashExpirationTimeMsg msg) {
         controller.setTrashExpireTime(msg.getExpirationTime(), new Completion(msg) {
             @Override

@@ -104,6 +104,7 @@
     <bean id="VolumeSnapshotEncryptionHelper" class="org.zstack.storage.encrypt.VolumeSnapshotEncryptionHelper"/>
 
     <bean id="ZbsVolumeEncryptionMaterialFactory" class="org.zstack.storage.encrypt.ZbsVolumeEncryptionMaterialFactory"/>
+    <bean id="ZbsVolumeEncryptionConverter" class="org.zstack.storage.encrypt.ZbsVolumeEncryptionConverter"/>
     <bean id="ZbsVolumeEncryptionKvmCaller" class="org.zstack.storage.encrypt.ZbsVolumeEncryptionKvmCaller"/>
     <bean id="ZbsVolumeEncryptionCleanup" class="org.zstack.storage.encrypt.ZbsVolumeEncryptionCleanup"/>
     <bean id="ZbsEncryptedEmptyVolumeCreator" class="org.zstack.storage.encrypt.ZbsEncryptedEmptyVolumeCreator"/>

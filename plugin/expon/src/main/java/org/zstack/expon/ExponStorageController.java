@@ -37,6 +37,8 @@ import org.zstack.header.storage.addon.*;
 import org.zstack.header.storage.addon.primary.*;
 import org.zstack.header.storage.primary.EncryptVolumeBitsOnPrimaryStorageMsg;
 import org.zstack.header.storage.primary.EncryptVolumeBitsOnPrimaryStorageReply;
+import org.zstack.header.storage.primary.ConvertVolumeEncryptionOnPrimaryStorageMsg;
+import org.zstack.header.storage.primary.ConvertVolumeEncryptionOnPrimaryStorageReply;
 import org.zstack.header.storage.primary.ImageCacheInventory;
 import org.zstack.header.storage.primary.VolumeSnapshotCapability;
 import org.zstack.header.storage.snapshot.VolumeSnapshotStats;
@@ -1100,6 +1102,13 @@ public class ExponStorageController implements PrimaryStorageControllerSvc, Prim
     public void encryptVolumeBits(EncryptVolumeBitsOnPrimaryStorageMsg msg, ReturnValueCompletion<EncryptVolumeBitsOnPrimaryStorageReply> comp) {
         String details = String.format("primary storage controller[%s] does not support encrypting volume bits in place", getIdentity());
         comp.fail(new ErrorCode(SysErrors.UNIMPLEMENTED_OPERATION_ERROR.toString(), "unimplemented operation", details));
+    }
+
+    @Override
+    public void convertVolumeEncryption(ConvertVolumeEncryptionOnPrimaryStorageMsg msg,
+                                        ReturnValueCompletion<ConvertVolumeEncryptionOnPrimaryStorageReply> completion) {
+        String details = String.format("primary storage controller[%s] does not support volume encryption conversion", getIdentity());
+        completion.fail(new ErrorCode(SysErrors.UNIMPLEMENTED_OPERATION_ERROR.toString(), "unimplemented operation", details));
     }
 
     @Override

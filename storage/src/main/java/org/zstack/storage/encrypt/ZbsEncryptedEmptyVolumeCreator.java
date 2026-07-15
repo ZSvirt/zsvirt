@@ -57,7 +57,7 @@ public class ZbsEncryptedEmptyVolumeCreator {
                                          ReturnValueCompletion<VolumeStats> completion) {
         ZbsVolumeEncryptionMaterial material;
         try {
-            material = materialFactory.prepareVolumeEncryption(primaryStorageUuid, spec.getUuid(),
+            material = materialFactory.prepareVolumeEncryption(primaryStorageUuid, spec,
                     String.format("create encrypted volume[uuid:%s]", spec.getUuid()));
         } catch (OperationFailureException e) {
             completion.fail(e.getErrorCode());

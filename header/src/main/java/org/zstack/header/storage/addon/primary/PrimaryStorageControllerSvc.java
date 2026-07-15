@@ -6,6 +6,8 @@ import org.zstack.header.host.HostInventory;
 import org.zstack.header.storage.addon.*;
 import org.zstack.header.storage.primary.EncryptVolumeBitsOnPrimaryStorageMsg;
 import org.zstack.header.storage.primary.EncryptVolumeBitsOnPrimaryStorageReply;
+import org.zstack.header.storage.primary.ConvertVolumeEncryptionOnPrimaryStorageMsg;
+import org.zstack.header.storage.primary.ConvertVolumeEncryptionOnPrimaryStorageReply;
 import org.zstack.header.storage.snapshot.VolumeSnapshotStats;
 import org.zstack.header.volume.VolumeInventory;
 import org.zstack.header.volume.VolumeProtocol;
@@ -34,6 +36,8 @@ public interface PrimaryStorageControllerSvc {
     void cloneVolume(String srcInstallPath, CreateVolumeSpec dst, ReturnValueCompletion<VolumeStats>comp);
     void copyVolume(String srcInstallPath, CreateVolumeSpec dst, ReturnValueCompletion<VolumeStats>comp);
     void encryptVolumeBits(EncryptVolumeBitsOnPrimaryStorageMsg msg, ReturnValueCompletion<EncryptVolumeBitsOnPrimaryStorageReply> comp);
+    void convertVolumeEncryption(ConvertVolumeEncryptionOnPrimaryStorageMsg msg,
+                                 ReturnValueCompletion<ConvertVolumeEncryptionOnPrimaryStorageReply> completion);
     void flattenVolume(String installPath, ReturnValueCompletion<VolumeStats>comp);
 
     // support uri or path

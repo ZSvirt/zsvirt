@@ -10,6 +10,8 @@ public class CreateVolumeSpec {
     private boolean encrypted;
     private String hostUuid;
     private String encryptedDek;
+    private String encryptionKeyResourceType;
+    private String encryptionKeyResourceUuid;
 
     private String allocatedUrl;
     private boolean dryRun;
@@ -84,5 +86,21 @@ public class CreateVolumeSpec {
 
     public void setEncryptedDek(String encryptedDek) {
         this.encryptedDek = encryptedDek;
+    }
+
+    public String getEncryptionKeyResourceType() {
+        return encryptionKeyResourceType;
+    }
+
+    public void setEncryptionKeyResourceType(String encryptionKeyResourceType) {
+        this.encryptionKeyResourceType = encryptionKeyResourceType;
+    }
+
+    public String getEncryptionKeyResourceUuid() {
+        return encryptionKeyResourceUuid;
+    }
+
+    public void setEncryptionKeyResourceUuid(String encryptionKeyResourceUuid) {
+        this.encryptionKeyResourceUuid = encryptionKeyResourceUuid;
     }
 }

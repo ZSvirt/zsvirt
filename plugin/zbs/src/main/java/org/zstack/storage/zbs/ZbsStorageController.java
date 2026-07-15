@@ -790,6 +790,16 @@ public class ZbsStorageController implements PrimaryStorageControllerSvc, Primar
     }
 
     @Override
+    public void convertVolumeEncryption(ConvertVolumeEncryptionOnPrimaryStorageMsg msg,
+                                        ReturnValueCompletion<ConvertVolumeEncryptionOnPrimaryStorageReply> completion) {
+        try {
+            getVolumeEncryptionExtension().convertVolumeEncryption(encryptionBackend(), msg, completion);
+        } catch (OperationFailureException e) {
+            completion.fail(e.getErrorCode());
+        }
+    }
+
+    @Override
     public void flattenVolume(String installPath, ReturnValueCompletion<VolumeStats> comp) {
         FlattenVolumeCmd cmd = new FlattenVolumeCmd();
         cmd.setPath(installPath);

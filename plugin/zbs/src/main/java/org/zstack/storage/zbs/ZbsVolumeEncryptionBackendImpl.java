@@ -13,6 +13,8 @@ import org.zstack.header.storage.addon.primary.CreateVolumeSpec;
 import org.zstack.header.storage.addon.primary.ZbsVolumeEncryptionBackend;
 import org.zstack.header.volume.VolumeConstant;
 import org.zstack.header.volume.VolumeStats;
+import org.zstack.utils.Utils;
+import org.zstack.utils.logging.CLogger;
 
 import java.util.UUID;
 
@@ -22,6 +24,7 @@ import static org.zstack.storage.zbs.ZbsHelper.buildVolumePath;
 import static org.zstack.storage.zbs.ZbsHelper.getSizeUnit;
 
 class ZbsVolumeEncryptionBackendImpl implements ZbsVolumeEncryptionBackend {
+    private static final CLogger logger = Utils.getLogger(ZbsVolumeEncryptionBackendImpl.class);
     private static final String QUERY_SNAPSHOT_PATH = "/zbs/primarystorage/snapshot/query";
     private static final long LUKS_PAYLOAD_OFFSET = 8L * 1024 * 1024;
 
@@ -179,6 +182,97 @@ class ZbsVolumeEncryptionBackendImpl implements ZbsVolumeEncryptionBackend {
     }
 
     @Override
+    public void validateConversionPaths(String sourceInstallPath, String targetInstallPath) {
+        String version = addonInfo.getClusterInfo() == null ? null : addonInfo.getClusterInfo().getVersion();
+        if (StringUtils.isBlank(version) || !ZbsConstants.MEGABYTE_UNIT.equals(getSizeUnit(version))) {
+            throw new OperationFailureException(operr(
+                    "ZBS volume encryption conversion requires ZBS version[%s] or later, but current version is[%s]",
+                    ZbsConstants.MEGABYTE_SUPPORTED_VERSION, version));
+        }
+
+        CbdPath source = parseConversionCbdPath(sourceInstallPath);
+        CbdPath target = parseConversionCbdPath(targetInstallPath);
+        if (!source.physicalPool.equals(target.physicalPool) || !source.logicalPool.equals(target.logicalPool)) {
+            throw new OperationFailureException(operr(
+                    "ZBS volume encryption conversion requires source[%s] and target[%s] in the same physical and logical pool",
+                    sourceInstallPath, targetInstallPath));
+        }
+        if (source.volume.equals(target.volume)) {
+            throw new OperationFailureException(operr(
+                    "ZBS volume encryption conversion requires different source and target volumes, but both are[%s]",
+                    sourceInstallPath));
+        }
+    }
+
+    @Override
+    public void createConversionTarget(String targetInstallPath, long virtualSize, boolean targetEncrypted,
+                                       ReturnValueCompletion<String> completion) {
+        CbdPath target;
+        try {
+            target = parseConversionCbdPath(targetInstallPath);
+        } catch (OperationFailureException e) {
+            completion.fail(e.getErrorCode());
+            return;
+        }
+
+        ZbsStorageController.CreateVolumeCmd cmd = new ZbsStorageController.CreateVolumeCmd();
+        cmd.setLogicalPool(target.logicalPool);
+        cmd.setVolume(target.volume);
+        cmd.setUnit(getSizeUnit(addonInfo.getClusterInfo().getVersion()));
+        long allocatedSize = targetEncrypted ? luksBackingSize(virtualSize) : virtualSize;
+        cmd.setSize(alignSizeTo(allocatedSize, cmd.getUnit()));
+        cmd.setSkipIfExisting(false);
+
+        controller.httpCall(ZbsStorageController.CREATE_VOLUME_PATH, cmd, ZbsStorageController.CreateVolumeRsp.class,
+                new ReturnValueCompletion<ZbsStorageController.CreateVolumeRsp>(completion) {
+                    @Override
+                    public void success(ZbsStorageController.CreateVolumeRsp returnValue) {
+                        String createdInstallPath = returnValue.getInstallPath();
+                        if (targetInstallPath.equals(createdInstallPath)) {
+                            completion.success(createdInstallPath);
+                            return;
+                        }
+
+                        ErrorCode error = operr(
+                                "ZBS volume encryption conversion target[%s] was created at unexpected path[%s]",
+                                targetInstallPath, createdInstallPath);
+                        String cleanupInstallPath = targetInstallPath;
+                        try {
+                            deleteConversionTarget(cleanupInstallPath, new Completion(completion) {
+                                @Override
+                                public void success() {
+                                    completion.fail(error);
+                                }
+
+                                @Override
+                                public void fail(ErrorCode cleanupError) {
+                                    logger.warn(String.format(
+                                            "failed to cleanup unexpected ZBS conversion target[installPath:%s] after create path mismatch: %s",
+                                            cleanupInstallPath, cleanupError));
+                                    completion.fail(error);
+                                }
+                            });
+                        } catch (Exception e) {
+                            logger.warn(String.format(
+                                    "failed to cleanup unexpected ZBS conversion target[installPath:%s] after create path mismatch: %s",
+                                    cleanupInstallPath, e.getMessage()));
+                            completion.fail(error);
+                        }
+                    }
+
+                    @Override
+                    public void fail(ErrorCode errorCode) {
+                        completion.fail(errorCode);
+                    }
+                });
+    }
+
+    @Override
+    public void deleteConversionTarget(String targetInstallPath, Completion completion) {
+        controller.doDeleteVolume(targetInstallPath, true, completion);
+    }
+
+    @Override
     public void stats(String installPath, ReturnValueCompletion<VolumeStats> completion) {
         controller.stats(installPath, completion);
     }
@@ -204,6 +298,25 @@ class ZbsVolumeEncryptionBackendImpl implements ZbsVolumeEncryptionBackend {
         if (StringUtils.isNotBlank(path.snapshot)) {
             throw new OperationFailureException(operr("ZBS operation requires active volume path, but got[%s]", installPath));
         }
+        return path;
+    }
+
+    private CbdPath parseConversionCbdPath(String installPath) {
+        if (StringUtils.isBlank(installPath) || !installPath.startsWith("cbd:") || installPath.contains("@")) {
+            throw new OperationFailureException(operr(
+                    "ZBS volume encryption conversion requires an active CBD path, but got[%s]", installPath));
+        }
+
+        String[] parts = installPath.substring("cbd:".length()).split("/", -1);
+        if (parts.length != 3 || StringUtils.isBlank(parts[0]) || StringUtils.isBlank(parts[1]) ||
+                StringUtils.isBlank(parts[2])) {
+            throw new OperationFailureException(operr("invalid ZBS CBD path[%s]", installPath));
+        }
+
+        CbdPath path = new CbdPath();
+        path.physicalPool = parts[0];
+        path.logicalPool = parts[1];
+        path.volume = parts[2];
         return path;
     }
 

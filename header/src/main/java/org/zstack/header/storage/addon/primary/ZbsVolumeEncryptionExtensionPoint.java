@@ -3,6 +3,8 @@ package org.zstack.header.storage.addon.primary;
 import org.zstack.header.core.ReturnValueCompletion;
 import org.zstack.header.storage.primary.EncryptVolumeBitsOnPrimaryStorageMsg;
 import org.zstack.header.storage.primary.EncryptVolumeBitsOnPrimaryStorageReply;
+import org.zstack.header.storage.primary.ConvertVolumeEncryptionOnPrimaryStorageMsg;
+import org.zstack.header.storage.primary.ConvertVolumeEncryptionOnPrimaryStorageReply;
 import org.zstack.header.storage.snapshot.VolumeSnapshotInventory;
 import org.zstack.header.volume.VolumeInventory;
 import org.zstack.header.volume.VolumeStats;
@@ -22,6 +24,9 @@ public interface ZbsVolumeEncryptionExtensionPoint {
 
     void encryptVolumeBits(ZbsVolumeEncryptionBackend backend, EncryptVolumeBitsOnPrimaryStorageMsg msg,
                            ReturnValueCompletion<EncryptVolumeBitsOnPrimaryStorageReply> completion);
+
+    void convertVolumeEncryption(ZbsVolumeEncryptionBackend backend, ConvertVolumeEncryptionOnPrimaryStorageMsg msg,
+                                 ReturnValueCompletion<ConvertVolumeEncryptionOnPrimaryStorageReply> completion);
 
     void resizeEncryptedVolume(String primaryStorageUuid, VolumeInventory volume, long size,
                                ReturnValueCompletion<VolumeStats> completion);

@@ -42,6 +42,16 @@ final class ZbsVolumeEncryptionCommands {
         public Long virtualSize;
     }
 
+    static class KVMHostLuksConvertCmd extends KVMAgentCommands.AgentCommand implements Serializable {
+        public String psUuid;
+        @NoLogging
+        public String encryptedDek;
+        public String installPath;
+        public String targetInstallPath;
+        public boolean targetEncrypted;
+        public long virtualSize;
+    }
+
     static class KVMHostLuksRsp extends KVMAgentCommands.AgentResponse {
         public Long actualSize;
         public String installPath;

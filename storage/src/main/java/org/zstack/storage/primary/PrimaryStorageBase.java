@@ -430,6 +430,8 @@ public abstract class PrimaryStorageBase extends AbstractPrimaryStorage {
             handle((GetVmInstanceMetadataFromPrimaryStorageMsg) msg);
         } else if (msg instanceof CleanupVmInstanceMetadataOnPrimaryStorageMsg) {
             handle((CleanupVmInstanceMetadataOnPrimaryStorageMsg) msg);
+        } else if (msg instanceof CleanupAllVmMetadataOnPrimaryStorageMsg) {
+            handle((CleanupAllVmMetadataOnPrimaryStorageMsg) msg);
         } else if (msg instanceof RebaseVolumeBackingFileOnPrimaryStorageMsg) {
             handle((RebaseVolumeBackingFileOnPrimaryStorageMsg) msg);
         } else {
@@ -1818,6 +1820,12 @@ public abstract class PrimaryStorageBase extends AbstractPrimaryStorage {
 
     protected void handle(CleanupVmInstanceMetadataOnPrimaryStorageMsg msg) {
         CleanupVmInstanceMetadataOnPrimaryStorageReply reply = new CleanupVmInstanceMetadataOnPrimaryStorageReply();
+        reply.setError(operr("operation not supported"));
+        bus.reply(msg, reply);
+    }
+
+    protected void handle(CleanupAllVmMetadataOnPrimaryStorageMsg msg) {
+        CleanupAllVmMetadataOnPrimaryStorageReply reply = new CleanupAllVmMetadataOnPrimaryStorageReply();
         reply.setError(operr("operation not supported"));
         bus.reply(msg, reply);
     }

@@ -217,6 +217,7 @@
         <class>org.zstack.header.resourceattribute.entity.ResourceAttributeValueVO</class>
         <class>org.zstack.header.resourceattribute.entity.ResourceAttributeKeyResourceTypeVO</class>
         <class>org.zstack.header.resourceattribute.entity.ResourceAttributeConstraintVO</class>
+        <class>org.zstack.header.vm.metadata.VmMetadataCleanupBarrierVO</class>
         <class>org.zstack.header.vm.metadata.VmMetadataDirtyVO</class>
         <class>org.zstack.header.vm.metadata.VmMetadataFlushStateVO</class>
         <class>org.zstack.log.server.LogServerVO</class>

@@ -917,6 +917,7 @@ public class LocalStorageKvmBackend extends LocalStorageHypervisorBackend {
     public static class WriteVmMetadataCmd extends AgentCommand {
         public String metadata;
         public String metadataPath;
+        public long metadataGeneration;
         public String vmUuid;
         public String vmName;
         public String vmCategory;
@@ -948,6 +949,16 @@ public class LocalStorageKvmBackend extends LocalStorageHypervisorBackend {
     }
 
     public static class CleanupVmMetadataRsp extends AgentResponse {
+    }
+
+    public static class CleanupAllVmMetadataCmd extends AgentCommand {
+        public String metadataDir;
+        public long metadataGeneration;
+    }
+
+    public static class CleanupAllVmMetadataRsp extends AgentResponse {
+        public boolean skipped;
+        public Long currentGeneration;
     }
 
     public static class PrefixRebaseBackingFilesCmd extends LocalStorageKvmBackend.AgentCommand {
@@ -996,6 +1007,7 @@ public class LocalStorageKvmBackend extends LocalStorageHypervisorBackend {
     public static final String GET_VM_INSTANCE_METADATA_PATH = "/localstorage/vm/metadata/get";
     public static final String SCAN_VM_METADATA_PATH = "/localstorage/vm/metadata/scan";
     public static final String CLEANUP_VM_METADATA_PATH = "/localstorage/vm/metadata/cleanup";
+    public static final String CLEANUP_ALL_VM_METADATA_PATH = "/localstorage/vm/metadata/cleanupall";
     public static final String PREFIX_REBASE_BACKING_FILES_PATH = "/localstorage/snapshot/prefixrebasebackingfiles";
 
     public LocalStorageKvmBackend() {
@@ -3869,6 +3881,7 @@ public class LocalStorageKvmBackend extends LocalStorageHypervisorBackend {
         WriteVmMetadataCmd cmd = new WriteVmMetadataCmd();
         cmd.metadata = msg.getMetadata();
         cmd.metadataPath = msg.getMetadataPath();
+        cmd.metadataGeneration = msg.getMetadataGeneration();
         cmd.vmUuid = msg.getVmInstanceUuid();
         cmd.vmName = msg.getVmInstanceName();
         cmd.vmCategory = msg.getVmCategory();
@@ -3945,6 +3958,28 @@ public class LocalStorageKvmBackend extends LocalStorageHypervisorBackend {
             @Override
             public void success(CleanupVmMetadataRsp rsp) {
                 CleanupVmInstanceMetadataOnPrimaryStorageReply reply = new CleanupVmInstanceMetadataOnPrimaryStorageReply();
+                completion.success(reply);
+            }
+
+            @Override
+            public void fail(ErrorCode errorCode) {
+                completion.fail(errorCode);
+            }
+        });
+    }
+
+    @Override
+    void handle(CleanupAllVmMetadataOnPrimaryStorageMsg msg, String hostUuid, ReturnValueCompletion<CleanupAllVmMetadataOnPrimaryStorageReply> completion) {
+        CleanupAllVmMetadataCmd cmd = new CleanupAllVmMetadataCmd();
+        cmd.metadataDir = msg.getMetadataDir();
+        cmd.metadataGeneration = msg.getMetadataGeneration();
+
+        httpCall(CLEANUP_ALL_VM_METADATA_PATH, hostUuid, cmd, CleanupAllVmMetadataRsp.class, new ReturnValueCompletion<CleanupAllVmMetadataRsp>(completion) {
+            @Override
+            public void success(CleanupAllVmMetadataRsp rsp) {
+                CleanupAllVmMetadataOnPrimaryStorageReply reply = new CleanupAllVmMetadataOnPrimaryStorageReply();
+                reply.setSkipped(rsp.skipped);
+                reply.setCurrentGeneration(rsp.currentGeneration);
                 completion.success(reply);
             }
 

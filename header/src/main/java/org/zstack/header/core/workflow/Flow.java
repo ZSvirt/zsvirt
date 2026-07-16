@@ -1,5 +1,6 @@
 package org.zstack.header.core.workflow;
 
+import org.zstack.header.errorcode.ErrorCode;
 import org.zstack.utils.DebugUtils;
 import org.zstack.utils.FieldUtils;
 
@@ -7,6 +8,7 @@ import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 public interface Flow {
     void run(FlowTrigger trigger, Map data);
@@ -64,6 +66,12 @@ public interface Flow {
         public FlowBuilder handle(Consumer<FlowTrigger> consumer) {
             DebugUtils.Assert(consumer != null, "consumer of FlowBuilder.handle() should not be null");
             this.triggerConsumer = (trigger, data) -> consumer.accept(trigger);
+            return this;
+        }
+
+        public FlowBuilder handle(Supplier<ErrorCode> supplier) {
+            DebugUtils.Assert(supplier != null, "supplier of FlowBuilder.handle() should not be null");
+            this.triggerConsumer = (trigger, data) -> trigger.next(supplier.get());
             return this;
         }
 

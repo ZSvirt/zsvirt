@@ -2096,6 +2096,34 @@ public class SharedBlockGroupPrimaryStorageBase extends PrimaryStorageBase imple
     }
 
     @Override
+    protected void handle(CleanupAllVmMetadataOnPrimaryStorageMsg msg) {
+        CleanupAllVmMetadataOnPrimaryStorageReply reply = new CleanupAllVmMetadataOnPrimaryStorageReply();
+
+        List<PrimaryStorageClusterRefVO> refs = Q.New(PrimaryStorageClusterRefVO.class)
+                .eq(PrimaryStorageClusterRefVO_.primaryStorageUuid, self.getUuid())
+                .list();
+        if (refs.isEmpty()) {
+            reply.setError(operr("no cluster attached to shared block primary storage[uuid:%s]", self.getUuid()));
+            bus.reply(msg, reply);
+            return;
+        }
+
+        SharedBlockHypervisorBackend bkd = getHypervisorFactoryByClusterUuid(refs.get(0).getClusterUuid()).getHypervisorBackend(self);
+        bkd.handle(msg, new ReturnValueCompletion<CleanupAllVmMetadataOnPrimaryStorageReply>(msg) {
+            @Override
+            public void success(CleanupAllVmMetadataOnPrimaryStorageReply returnValue) {
+                bus.reply(msg, returnValue);
+            }
+
+            @Override
+            public void fail(ErrorCode errorCode) {
+                reply.setError(errorCode);
+                bus.reply(msg, reply);
+            }
+        });
+    }
+
+    @Override
     protected void handle(RebaseVolumeBackingFileOnPrimaryStorageMsg msg) {
         RebaseVolumeBackingFileOnPrimaryStorageReply reply = new RebaseVolumeBackingFileOnPrimaryStorageReply();
 

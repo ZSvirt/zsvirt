@@ -154,6 +154,8 @@ public abstract class SharedBlockHypervisorBackend extends SharedBlockGroupPrima
 
     abstract void handle(CleanupVmInstanceMetadataOnPrimaryStorageMsg msg, ReturnValueCompletion<CleanupVmInstanceMetadataOnPrimaryStorageReply> completion);
 
+    abstract void handle(CleanupAllVmMetadataOnPrimaryStorageMsg msg, ReturnValueCompletion<CleanupAllVmMetadataOnPrimaryStorageReply> completion);
+
     abstract void handle(RebaseVolumeBackingFileOnPrimaryStorageMsg msg, ReturnValueCompletion<RebaseVolumeBackingFileOnPrimaryStorageReply> completion);
 
 }

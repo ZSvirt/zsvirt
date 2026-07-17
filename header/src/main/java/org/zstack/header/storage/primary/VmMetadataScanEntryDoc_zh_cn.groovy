@@ -64,4 +64,10 @@ doc {
 		type "boolean"
 		since "zsv 5.0.0"
 	}
+	field {
+		name "regenerateUuidRequired"
+		desc "注册该元数据时是否必须重新生成云主机UUID"
+		type "boolean"
+		since "1.0.1, zsv_5.1.0"
+	}
 }

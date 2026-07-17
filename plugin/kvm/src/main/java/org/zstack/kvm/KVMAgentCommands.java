@@ -3841,6 +3841,7 @@ public class KVMAgentCommands {
 
     public static class CheckDefaultSecurityGroupCmd extends AgentCommand {
         Boolean skipIpv6;
+        Boolean disableIp6Tables;
     }
 
     public static class CheckDefaultSecurityGroupResponse extends AgentResponse {
@@ -3864,6 +3865,7 @@ public class KVMAgentCommands {
 
     public static class CleanupUnusedRulesOnHostCmd extends AgentCommand {
         Boolean skipIpv6;
+        Boolean disableIp6Tables;
     }
 
     public static class CleanupUnusedRulesOnHostResponse extends AgentResponse {

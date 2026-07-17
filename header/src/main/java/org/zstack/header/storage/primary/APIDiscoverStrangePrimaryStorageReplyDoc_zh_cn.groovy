@@ -13,6 +13,12 @@ doc {
 		since "zsv 5.0.0"
 	}
 	field {
+		name "resetVgUuidRequiredUuids"
+		desc "必须重置VG UUID的候选主存储UUID列表"
+		type "List"
+		since "1.0.1, zsv_5.1.0"
+	}
+	field {
 		name "success"
 		desc "操作是否成功"
 		type "boolean"

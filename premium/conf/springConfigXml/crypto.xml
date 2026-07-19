@@ -39,6 +39,12 @@
         </zstack:plugin>
     </bean>
 
+    <bean id="ImageStoreEncryptionCreateImageExtension" class="org.zstack.crypto.volume.ImageStoreEncryptionCreateImageExtension">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.image.CreateImageExtensionPoint"/>
+        </zstack:plugin>
+    </bean>
+
     <bean id="BackupImageDownloadExtension" class="org.zstack.crypto.volumebackup.BackupImageDownloadExtension"/>
 
     <bean id="ZbsVolumeBackupImageDownloadHandler" class="org.zstack.crypto.volumebackup.ZbsVolumeBackupImageDownloadHandler"/>

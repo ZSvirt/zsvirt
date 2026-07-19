@@ -229,6 +229,7 @@ public class SharedBlockImageStoreKvmBackend extends SharedBlockKvmBackend {
 
         StringBuilder desc = new StringBuilder();
         for (CreateImageExtensionPoint ext : pluginRgty.getExtensionList(CreateImageExtensionPoint.class)) {
+            ext.addAddon(msg, hostUuid, cmd.getAddons());
             String tmp = ext.getImageDescription(inv);
             if (tmp != null && !tmp.trim().equals("")) {
                 desc.append(tmp);
@@ -406,6 +407,10 @@ public class SharedBlockImageStoreKvmBackend extends SharedBlockKvmBackend {
 
                     @Override
                     public void run(FlowTrigger trigger, Map data) {
+                        if (Boolean.TRUE.equals(snapshot.getEncrypted())) {
+                            trigger.next();
+                            return;
+                        }
                         String hostUuid = primaryStorageFactory.getConnectedHostsForOperation(getSelfInventory()).get(0).getUuid();
                         VolumeVO volumeVO = Q.New(VolumeVO.class).eq(VolumeVO_.uuid, msg.getVolumeUuid()).find();
                         if (volumeVO.isAttached() && volumeVO.getVmInstanceUuid() != null) {

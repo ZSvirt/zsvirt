@@ -285,12 +285,12 @@ public class PrometheusStaticConfigManagerImpl implements PrometheusStaticConfig
             configFileMap.computeIfAbsent(uuid, k -> new ArrayList<>()).add(cfile);
             deletors.put(uuid, () -> {
                 List<File> files = configFileMap.remove(uuid);
-                for (File file : files) {
-                    deleteFile(file);
+                if (files != null) {
+                    for (File file : files) {
+                        deleteFile(file);
+                    }
                 }
                 deletors.remove(uuid);
-
-                prometheusFactory.getPrometheus().reload();
             });
 
             prometheusFactory.getPrometheus().reload();
@@ -325,40 +325,53 @@ public class PrometheusStaticConfigManagerImpl implements PrometheusStaticConfig
             for (String dirPath : hostConfigDirs()) {
                 deleteConfigFilesForUuid(dirPath, hostUuid);
             }
+            forgetConfig(hostUuid);
         }
     }
 
     public void deleteVRConfig(String vrUuid, String ip) {
         synchronized (staticConfigLock) {
             deleteConfigFilesForUuid(VR_DIR, vrUuid);
+            forgetConfig(vrUuid);
         }
     }
 
     public void deleteBackupStorageConfig(String bsUuid, String ip) {
         synchronized (staticConfigLock) {
             deleteConfigFilesForUuid(BS_DIR, bsUuid);
+            forgetConfig(bsUuid);
         }
     }
 
     public void deleteBaremetaPxeServerConfig(String uuid, String ip) {
         synchronized (staticConfigLock) {
             deleteConfigFilesForUuid(PXESERVER_DIR, uuid);
+            forgetConfig(uuid);
         }
     }
 
-    private void deleteConfig(String uuid) {
+    private void forgetConfig(String uuid) {
+        configFileMap.remove(uuid);
+        deletors.remove(uuid);
+    }
+
+    private void deleteConfig(String uuid, String... fallbackDirPaths) {
         synchronized (staticConfigLock) {
             Runnable r = deletors.get(uuid);
             if (r != null) {
                 r.run();
             }
+            for (String dirPath : fallbackDirPaths) {
+                deleteConfigFilesForUuid(dirPath, uuid);
+            }
+            forgetConfig(uuid);
         }
     }
 
     @Override
     @BypassWhenUnitTest
     public void deleteHostConfig(String hostUuid) {
-        deleteConfig(hostUuid);
+        deleteConfig(hostUuid, hostConfigDirs().toArray(new String[0]));
     }
 
     @Override
@@ -378,7 +391,7 @@ public class PrometheusStaticConfigManagerImpl implements PrometheusStaticConfig
     @Override
     @BypassWhenUnitTest
     public void deleteVRConfig(String vrUuid) {
-        deleteConfig(vrUuid);
+        deleteConfig(vrUuid, VR_DIR);
     }
 
     @Override
@@ -398,7 +411,7 @@ public class PrometheusStaticConfigManagerImpl implements PrometheusStaticConfig
     @Override
     @BypassWhenUnitTest
     public void deleteBackupStorageConfig(String bsUuid) {
-        deleteConfig(bsUuid);
+        deleteConfig(bsUuid, BS_DIR);
     }
 
     @Override
@@ -413,6 +426,12 @@ public class PrometheusStaticConfigManagerImpl implements PrometheusStaticConfig
             writer.uuid = uuid;
             writer.write();
         }
+    }
+
+    @Override
+    @BypassWhenUnitTest
+    public void deleteBaremetaPxeServerConfig(String uuid) {
+        deleteConfig(uuid, PXESERVER_DIR);
     }
 
     @Override
@@ -559,6 +578,7 @@ public class PrometheusStaticConfigManagerImpl implements PrometheusStaticConfig
         }
 
         deleteConfigFilesForUuid(dirPath, uuid);
+        forgetConfig(uuid);
     }
 
     private RuntimeException addFailure(RuntimeException failure, RuntimeException next) {

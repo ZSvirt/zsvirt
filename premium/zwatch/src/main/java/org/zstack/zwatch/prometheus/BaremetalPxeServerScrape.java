@@ -1,6 +1,5 @@
 package org.zstack.zwatch.prometheus;
 
-import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.zstack.core.cloudbus.EventCallback;
 import org.zstack.core.cloudbus.EventFacade;
@@ -17,7 +16,6 @@ import org.zstack.utils.Utils;
 import org.zstack.utils.logging.CLogger;
 import org.zstack.utils.path.PathUtil;
 
-import java.io.File;
 import java.util.HashSet;
 import java.util.Map;
 
@@ -66,21 +64,7 @@ public class BaremetalPxeServerScrape implements PreparePrometheusConfigExtensio
     }
 
     private void deleteBaremetalPxeServerConfig(String uuid) {
-        File[] files = new File(DISCOVER_DIR).listFiles();
-        if (files == null) {
-            return;
-        }
-
-        for (File file : files) {
-            if (file.isFile() && file.getName().startsWith(uuid)) {
-                try {
-                    FileUtils.forceDelete(file);
-                    logger.info(String.format("delete file %s success after delete baremetal pxe server", file.getName()));
-                }catch (Exception e) {
-                    logger.error(String.format("delete file %s fail after delete baremetal pxe server because %s", file.getName(), e.getMessage()));
-                }
-            }
-        }
+        pscMgr.deleteBaremetaPxeServerConfig(uuid);
     }
 
     @Override

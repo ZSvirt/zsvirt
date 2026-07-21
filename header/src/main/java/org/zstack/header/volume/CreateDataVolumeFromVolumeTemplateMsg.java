@@ -19,6 +19,7 @@ public class CreateDataVolumeFromVolumeTemplateMsg extends NeedReplyMessage impl
     private String resourceUuid;
     private String accountUuid;
     private Boolean encrypted;
+    private boolean encryptedVolumeBackupRestore;
     private APICreateDataVolumeFromVolumeTemplateMsg apiMsg;
 
     public CreateDataVolumeFromVolumeTemplateMsg() {
@@ -106,5 +107,13 @@ public class CreateDataVolumeFromVolumeTemplateMsg extends NeedReplyMessage impl
 
     public void setEncrypted(Boolean encrypted) {
         this.encrypted = encrypted;
+    }
+
+    public boolean isEncryptedVolumeBackupRestore() {
+        return encryptedVolumeBackupRestore;
+    }
+
+    public void setEncryptedVolumeBackupRestore(boolean encryptedVolumeBackupRestore) {
+        this.encryptedVolumeBackupRestore = encryptedVolumeBackupRestore;
     }
 }

@@ -336,6 +336,8 @@ public class VmInstantiateOtherDiskFlow implements Flow {
                             cmsg.setPrimaryStorageUuid(allocatedPrimaryStorageUuid[0]);
                         }
                         cmsg.setEncrypted(Boolean.TRUE.equals(diskAO.getEncrypted()));
+                        cmsg.setEncryptedVolumeBackupRestore(diskAO.isVolumeBackupTemplate()
+                                && Boolean.TRUE.equals(diskAO.getEncrypted()));
 
                         bus.makeLocalServiceId(cmsg, VolumeConstant.SERVICE_ID);
                         bus.send(cmsg, new CloudBusCallBack(innerTrigger) {

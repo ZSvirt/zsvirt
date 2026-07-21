@@ -453,6 +453,7 @@ public class VolumeManagerImpl extends AbstractService implements VolumeManager,
                         dmsg.setImage(ImageInventory.valueOf(template));
                         dmsg.setHostUuid(selectedHostUuid);
                         dmsg.setAllocatedInstallUrl(allocatedInstallUrl);
+                        dmsg.setEncryptedVolumeBackupRestore(msg.isEncryptedVolumeBackupRestore());
                         bus.makeTargetServiceIdByResourceUuid(dmsg, PrimaryStorageConstant.SERVICE_ID, targetPrimaryStorage.getUuid());
                         bus.send(dmsg, new CloudBusCallBack(trigger) {
                             @Override

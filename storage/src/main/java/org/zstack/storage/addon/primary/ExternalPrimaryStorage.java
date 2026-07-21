@@ -23,6 +23,7 @@ import org.zstack.header.core.Completion;
 import org.zstack.header.core.NopeCompletion;
 import org.zstack.header.core.ReturnValueCompletion;
 import org.zstack.header.core.WhileDoneCompletion;
+import org.zstack.header.core.encrypt.CryptoServiceConstant;
 import org.zstack.header.core.workflow.*;
 import org.zstack.header.errorcode.ErrorCode;
 import org.zstack.header.errorcode.ErrorCodeList;
@@ -352,7 +353,7 @@ public class ExternalPrimaryStorage extends PrimaryStorageBase {
 
                     @Override
                     public void run(final FlowTrigger trigger, Map data) {
-                        downloadImageCache(msg.getTemplateSpec().getInventory(), new ReturnValueCompletion<ImageCacheInventory>(trigger) {
+                        downloadImageCache(msg.getTemplateSpec().getInventory(), msg.isEncryptedVolumeBackupRestore(), new ReturnValueCompletion<ImageCacheInventory>(trigger) {
                             @Override
                             public void success(ImageCacheInventory returnValue) {
                                 pathInCache = ImageCacheUtil.getImageCachePath(returnValue);
@@ -1247,7 +1248,9 @@ public class ExternalPrimaryStorage extends PrimaryStorageBase {
         spec.setAllocatedUrl(msg.getAllocatedInstallUrl());
         spec.setName(buildVolumeName(msg.getVolumeUuid()));
         spec.setUuid(msg.getVolumeUuid());
-        downloadImageTo(msg.getImage(), spec, VolumeVO.class.getSimpleName(), new ReturnValueCompletion<VolumeStats>(msg) {
+        downloadImageTo(msg.getImage(), spec, VolumeVO.class.getSimpleName(),
+                msg.isEncryptedVolumeBackupRestore(),
+                new ReturnValueCompletion<VolumeStats>(msg) {
             @Override
             public void success(VolumeStats returnValue) {
                 reply.setInstallPath(returnValue.getInstallPath());
@@ -1265,6 +1268,11 @@ public class ExternalPrimaryStorage extends PrimaryStorageBase {
     }
 
     private void downloadImageCache(ImageInventory image, ReturnValueCompletion<ImageCacheInventory> completion) {
+        downloadImageCache(image, false, completion);
+    }
+
+    private void downloadImageCache(ImageInventory image, boolean encryptedVolumeBackupRestore,
+                                    ReturnValueCompletion<ImageCacheInventory> completion) {
         thdf.chainSubmit(new ChainTask(completion) {
             @Override
             public String getSyncSignature() {
@@ -1273,7 +1281,7 @@ public class ExternalPrimaryStorage extends PrimaryStorageBase {
 
             @Override
             public void run(SyncTaskChain chain) {
-                doDownloadImageCache(image, new ReturnValueCompletion<ImageCacheInventory>(chain) {
+                doDownloadImageCache(image, encryptedVolumeBackupRestore, new ReturnValueCompletion<ImageCacheInventory>(chain) {
                     @Override
                     public void success(ImageCacheInventory returnValue) {
                         completion.success(returnValue);
@@ -1295,7 +1303,8 @@ public class ExternalPrimaryStorage extends PrimaryStorageBase {
         });
     }
 
-    private void doDownloadImageCache(ImageInventory image, ReturnValueCompletion<ImageCacheInventory> completion) {
+    private void doDownloadImageCache(ImageInventory image, boolean encryptedVolumeBackupRestore,
+                                      ReturnValueCompletion<ImageCacheInventory> completion) {
         CreateVolumeSpec spec = new CreateVolumeSpec();
         spec.setUuid(image.getUuid());
         spec.setName(buildImageName(image.getUuid()));
@@ -1310,7 +1319,8 @@ public class ExternalPrimaryStorage extends PrimaryStorageBase {
             return;
         }
 
-        downloadImageTo(image, spec, ImageCacheVO.class.getSimpleName(), new ReturnValueCompletion<VolumeStats>(completion) {
+        downloadImageTo(image, spec, ImageCacheVO.class.getSimpleName(), encryptedVolumeBackupRestore,
+                new ReturnValueCompletion<VolumeStats>(completion) {
             @Override
             public void success(VolumeStats volStats) {
                 ImageCacheVO cache = new ImageCacheVO();
@@ -1335,7 +1345,9 @@ public class ExternalPrimaryStorage extends PrimaryStorageBase {
         });
     }
 
-    private void downloadImageTo(ImageInventory image, CreateVolumeSpec spec, String targetClz, ReturnValueCompletion<VolumeStats> completion) {
+    private void downloadImageTo(ImageInventory image, CreateVolumeSpec spec, String targetClz,
+                                 boolean encryptedVolumeBackupRestore,
+                                 ReturnValueCompletion<VolumeStats> completion) {
         FlowChain chain = FlowChainBuilder.newShareFlowChain();
         chain.setName(String.format("download-image-%s-to-%s", image.getUuid(), spec.getName()));
         chain.then(new ShareFlow() {
@@ -1349,12 +1361,47 @@ public class ExternalPrimaryStorage extends PrimaryStorageBase {
                     : rcf.getResourceConfigValue(ExternalPrimaryStorageGlobalConfig.IMAGE_EXPORT_PROTOCOL, self.getUuid(), String.class);
             @Override
             public void setup() {
+                flow(new NoRollbackFlow() {
+                    String __name__ = "prepare-encrypted-image-download";
+
+                    @Override
+                    public boolean skip(Map data) {
+                        return !encryptedVolumeBackupRestore;
+                    }
+
+                    @Override
+                    public void run(FlowTrigger trigger, Map data) {
+                        PrepareExternalPrimaryStorageEncryptedImageDownloadMsg pmsg =
+                                new PrepareExternalPrimaryStorageEncryptedImageDownloadMsg();
+                        pmsg.setPrimaryStorageType(externalVO.getIdentity());
+                        pmsg.setImageUuid(image.getUuid());
+                        pmsg.setBackupStorageUuid(bsUuid);
+                        pmsg.setBackupStorageInstallPath(image.getBackupStorageRefs().get(0).getInstallPath());
+                        bus.makeLocalServiceId(pmsg, CryptoServiceConstant.SERVICE_ID);
+                        bus.send(pmsg, new CloudBusCallBack(trigger) {
+                            @Override
+                            public void run(MessageReply reply) {
+                                if (!reply.isSuccess()) {
+                                    trigger.fail(reply.getError());
+                                    return;
+                                }
+
+                                trigger.next();
+                            }
+                        });
+                    }
+                });
                 flow(new Flow() {
                     String __name__ = "create-volume";
 
                     @Override
                     public void run(FlowTrigger trigger, Map data) {
                         spec.setSize(Long.max(image.getActualSize(), image.getSize()));
+                        if (encryptedVolumeBackupRestore) {
+                            spec.setEncrypted(true);
+                            spec.setEncryptionKeyResourceType(ImageVO.class.getSimpleName());
+                            spec.setEncryptionKeyResourceUuid(image.getUuid());
+                        }
                         controller.createVolume(spec, new ReturnValueCompletion<VolumeStats>(trigger) {
                             @Override
                             public void success(VolumeStats stats) {
@@ -1434,7 +1481,45 @@ public class ExternalPrimaryStorage extends PrimaryStorageBase {
                 });
 
                 flow(new NoRollbackFlow() {
+                    String __name__ = "download-image-for-encryption";
+
+                    @Override
+                    public boolean skip(Map data) {
+                        return !encryptedVolumeBackupRestore;
+                    }
+
+                    @Override
+                    public void run(FlowTrigger trigger, Map data) {
+                        DownloadExternalPrimaryStorageEncryptedImageMsg dmsg =
+                                new DownloadExternalPrimaryStorageEncryptedImageMsg();
+                        dmsg.setPrimaryStorageUuid(self.getUuid());
+                        dmsg.setPrimaryStorageType(externalVO.getIdentity());
+                        dmsg.setImageUuid(image.getUuid());
+                        dmsg.setBackupStorageUuid(bsUuid);
+                        dmsg.setBackupStorageInstallPath(image.getBackupStorageRefs().get(0).getInstallPath());
+                        dmsg.setPrimaryStorageInstallPath(volume.getInstallPath());
+                        dmsg.setRemoteTargetUrl(remoteTarget.getResourceURI());
+                        bus.makeLocalServiceId(dmsg, CryptoServiceConstant.SERVICE_ID);
+                        bus.send(dmsg, new CloudBusCallBack(trigger) {
+                            @Override
+                            public void run(MessageReply reply) {
+                                if (!reply.isSuccess()) {
+                                    trigger.fail(reply.getError());
+                                } else {
+                                    trigger.next();
+                                }
+                            }
+                        });
+                    }
+                });
+
+                flow(new NoRollbackFlow() {
                     String __name__ = "download-image";
+
+                    @Override
+                    public boolean skip(Map data) {
+                        return encryptedVolumeBackupRestore;
+                    }
 
                     @Override
                     public void run(FlowTrigger trigger, Map data) {

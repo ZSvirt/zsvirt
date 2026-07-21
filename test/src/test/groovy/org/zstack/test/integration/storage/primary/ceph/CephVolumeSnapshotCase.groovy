@@ -1,12 +1,17 @@
 package org.zstack.test.integration.storage.primary.ceph
 
 import org.springframework.http.HttpEntity
+import org.zstack.core.cloudbus.CloudBus
+import org.zstack.core.db.DatabaseFacade
 import org.zstack.core.db.Q
 import org.zstack.core.trash.StorageTrash
+import org.zstack.header.storage.primary.ResizeVolumeOnPrimaryStorageMsg
+import org.zstack.header.storage.primary.ResizeVolumeOnPrimaryStorageReply
 import org.zstack.header.storage.snapshot.VolumeSnapshotConstant
 import org.zstack.header.storage.snapshot.VolumeSnapshotStatus
 import org.zstack.header.storage.snapshot.VolumeSnapshotTreeVO
 import org.zstack.header.storage.snapshot.VolumeSnapshotTreeVO_
+import org.zstack.header.storage.snapshot.VolumeSnapshotVO
 import org.zstack.header.volume.VolumeType
 import org.zstack.header.volume.VolumeVO
 import org.zstack.header.volume.VolumeVO_
@@ -16,11 +21,20 @@ import org.zstack.sdk.VmInstanceInventory
 import org.zstack.sdk.VolumeInventory
 import org.zstack.sdk.VolumeSnapshotInventory
 import org.zstack.storage.ceph.primary.CephPrimaryStorageBase
+import org.zstack.storage.ceph.primary.CephPrimaryStorageVO
+import org.zstack.storage.ceph.primary.CephPrimaryStorageVO_
+import org.zstack.storage.encrypt.VolumeEncryptedInitialExtension
+import org.zstack.storage.encrypt.VolumeEncryptedSecretHelper
+import org.zstack.storage.encrypt.VolumeSnapshotEncryptionHelper
 import org.zstack.storage.snapshot.VolumeSnapshotGlobalConfig
 import org.zstack.test.integration.storage.CephEnv
 import org.zstack.test.integration.storage.StorageTest
+import org.zstack.testlib.CephPrimaryStorageSpec
 import org.zstack.testlib.EnvSpec
 import org.zstack.testlib.SubCase
+import org.zstack.testlib.Test
+import org.zstack.utils.data.SizeUnit
+import org.zstack.utils.gson.JSONObjectUtil
 /**
  * Created by mingjian.deng on 2019/1/7.*/
 class CephVolumeSnapshotCase extends SubCase {
@@ -52,11 +66,19 @@ class CephVolumeSnapshotCase extends SubCase {
 
     @Override
     void test() {
+        env.message(ResizeVolumeOnPrimaryStorageMsg.class) { ResizeVolumeOnPrimaryStorageMsg msg, CloudBus cloudBus ->
+            ResizeVolumeOnPrimaryStorageReply reply = new ResizeVolumeOnPrimaryStorageReply()
+            msg.volume.size = msg.size
+            reply.volume = msg.volume
+            cloudBus.reply(msg, reply)
+        }
+
         env.create {
             prepare()
             testCreateRootSnapshot()
             testCreateDataSnapshot()
             testCreateVolumeFromSnapshot()
+            testCreateVolumeFromEncryptedSnapshot()
             stopVmInstance {
                 uuid = vm.uuid
             }
@@ -126,6 +148,106 @@ class CephVolumeSnapshotCase extends SubCase {
         } as VolumeInventory
 
         assert volume.installPath == data.installPath - data.uuid + volume.uuid
+    }
+
+    void testCreateVolumeFromEncryptedSnapshot() {
+        long snapshotVirtualSize = data.size + SizeUnit.MEGABYTE.toByte(16)
+
+        long originalSnapshotVirtualSize = replaceCephRawVirtualSize(dataSnapshot.primaryStorageInstallPath, snapshotVirtualSize)
+        VolumeInventory encryptedVolume
+        setSnapshotEncrypted(true)
+        try {
+            withEncryptedSnapshotCloneStubs(snapshotVirtualSize) {
+                encryptedVolume = createDataVolumeFromVolumeSnapshot {
+                    name = "test-encrypted-data-vol-from-snap"
+                    volumeSnapshotUuid = dataSnapshot.uuid
+                } as VolumeInventory
+            }
+        } finally {
+            replaceCephRawVirtualSize(dataSnapshot.primaryStorageInstallPath, originalSnapshotVirtualSize)
+            setSnapshotEncrypted(false)
+        }
+
+        VolumeVO persisted = bean(DatabaseFacade.class).findByUuid(encryptedVolume.uuid, VolumeVO.class)
+        assert persisted.size == snapshotVirtualSize :
+                "VolumeVO.size should be updated from encrypted snapshot virtual size: expected=${snapshotVirtualSize} actual=${persisted.size}"
+        long targetVirtualSize = cephRaw(encryptedVolume.installPath).virtualSize
+        assert targetVirtualSize == snapshotVirtualSize :
+                "Encrypted Ceph snapshot clone should create target RBD with snapshot virtual size: expected=${snapshotVirtualSize} actual=${targetVirtualSize}"
+    }
+
+    def cephVfs() {
+        String fsId = Q.New(CephPrimaryStorageVO.class)
+                .select(CephPrimaryStorageVO_.fsid)
+                .eq(CephPrimaryStorageVO_.uuid, ps.uuid)
+                .findValue()
+        return CephPrimaryStorageSpec.vfs1(fsId, env)
+    }
+
+    def cephRaw(String installPath) {
+        return cephVfs().getFile(CephPrimaryStorageSpec.cephPathToVFSPath(installPath), true)
+    }
+
+    long replaceCephRawVirtualSize(String installPath, long virtualSize) {
+        def raw = cephRaw(installPath)
+        long originalVirtualSize = raw.virtualSize
+        raw.virtualSize = virtualSize
+        raw.update()
+        return originalVirtualSize
+    }
+
+    void setSnapshotEncrypted(boolean encrypted) {
+        DatabaseFacade dbf = bean(DatabaseFacade.class)
+        VolumeSnapshotVO vo = dbf.findByUuid(dataSnapshot.uuid, VolumeSnapshotVO.class)
+        vo.encrypted = encrypted
+        dbf.update(vo)
+    }
+
+    private <T> T withEncryptedSnapshotCloneStubs(long snapshotVirtualSize, Closure<T> body) {
+        def snapshotHelper = new NoopVolumeSnapshotEncryptionHelper()
+        def secretHelper = new StubVolumeEncryptedSecretHelper()
+        def initialExtension = bean(VolumeEncryptedInitialExtension.class)
+        def originalSnapshotHelper = setField(initialExtension, VolumeEncryptedInitialExtension.class,
+                "snapshotEncryptionHelper", snapshotHelper)
+        Closure originalSnapshotSizeSimulator = env.getSimulator(CephPrimaryStorageBase.GET_VOLUME_SNAPSHOT_SIZE_PATH)
+        Closure originalCephFactory = Test.functionForMockTestObjectFactory.put(CephPrimaryStorageBase.class,
+                { CephPrimaryStorageBase base ->
+                    setField(base, CephPrimaryStorageBase.class, "volumeEncryptedSecretHelper", secretHelper)
+                    return base
+                })
+
+        env.simulator(CephPrimaryStorageBase.GET_VOLUME_SNAPSHOT_SIZE_PATH) {
+            def rsp = new CephPrimaryStorageBase.GetVolumeSnapshotSizeRsp()
+            rsp.size = snapshotVirtualSize
+            return rsp
+        }
+        env.simulator(CephPrimaryStorageBase.KVM_HOST_LUKS_CLONE_PATH) { HttpEntity<String> e, EnvSpec spec ->
+            def cmd = JSONObjectUtil.toObject(e.body, CephPrimaryStorageBase.KVMHostLuksCloneCmd.class)
+            cephVfs().createCephRaw(CephPrimaryStorageSpec.cephPathToVFSPath(cmd.dstPath),
+                    cmd.virtualSizeForLuksClone == null ? 0L : cmd.virtualSizeForLuksClone)
+            return new CephPrimaryStorageBase.KVMHostLuksRsp()
+        }
+
+        try {
+            return body.call()
+        } finally {
+            env.simulator(CephPrimaryStorageBase.GET_VOLUME_SNAPSHOT_SIZE_PATH, originalSnapshotSizeSimulator)
+            setField(initialExtension, VolumeEncryptedInitialExtension.class,
+                    "snapshotEncryptionHelper", originalSnapshotHelper)
+            if (originalCephFactory == null) {
+                Test.functionForMockTestObjectFactory.remove(CephPrimaryStorageBase.class)
+            } else {
+                Test.functionForMockTestObjectFactory.put(CephPrimaryStorageBase.class, originalCephFactory)
+            }
+        }
+    }
+
+    private static Object setField(Object target, Class targetClass, String fieldName, Object value) {
+        def field = targetClass.getDeclaredField(fieldName)
+        field.accessible = true
+        Object original = field.get(target)
+        field.set(target, value)
+        return original
     }
 
     void testRollbackVolumeFromSnapshot() {
@@ -208,5 +330,18 @@ class CephVolumeSnapshotCase extends SubCase {
         assert snapshot.primaryStorageInstallPath.contains(installPath+"@")
         assert snapshot.volumeUuid == root.uuid
         assert !volumeDeleted
+    }
+
+    private static class StubVolumeEncryptedSecretHelper extends VolumeEncryptedSecretHelper {
+        @Override
+        String materializeAndSealVolumeDekForHost(String hostUuid, String volumeUuid) {
+            return "sealed-dek"
+        }
+    }
+
+    private static class NoopVolumeSnapshotEncryptionHelper extends VolumeSnapshotEncryptionHelper {
+        @Override
+        void inheritFromRelatedSnapshotKeyIfPossible(VolumeVO volume, String snapshotUuid) {
+        }
     }
 }

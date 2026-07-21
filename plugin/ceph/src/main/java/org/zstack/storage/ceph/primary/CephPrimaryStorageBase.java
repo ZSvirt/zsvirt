@@ -5731,36 +5731,25 @@ public class CephPrimaryStorageBase extends PrimaryStorageBase {
         kcmd.srcPath = snapshotPath;
         kcmd.dstPath = volPath;
         kcmd.encryptedDek = volumeEncryptedSecretHelper.materializeAndSealVolumeDekForHost(hostUuid, msg.getVolumeUuid());
+        Long targetSize = Q.New(VolumeVO.class)
+                .select(VolumeVO_.size)
+                .eq(VolumeVO_.uuid, msg.getVolumeUuid())
+                .findValue();
+        long targetVolumeSize = targetSize == null ? 0 : targetSize;
 
-        VolumeVO volume = Q.New(VolumeVO.class).eq(VolumeVO_.uuid, msg.getVolumeUuid()).find();
-        if (volume != null && volume.getSize() != 0) {
-            kcmd.virtualSizeForLuksClone = volume.getSize();
-        }
-
-        httpCallToKvmHost(hostUuid,
-                KVM_HOST_LUKS_CLONE_PATH, kcmd, KVMHostLuksRsp.class,
-                new ReturnValueCompletion<KVMHostLuksRsp>(completion) {
+        getCephSnapshotVirtualSize(sp, snapshotPath, new ReturnValueCompletion<Long>(completion) {
+            @Override
+            public void success(Long snapshotVirtualSize) {
+                long luksVirtualSize = Math.max(targetVolumeSize, snapshotVirtualSize);
+                ReturnValueCompletion<Long> actualSizeCompletion = new ReturnValueCompletion<Long>(completion) {
                     @Override
-                    public void success(KVMHostLuksRsp rsp) {
-                        getRbdActualSizeFromPrimaryStorageAgent(msg.getVolumeUuid(), volPath,
-                                new ReturnValueCompletion<Long>(completion) {
-                                    @Override
-                                    public void success(Long actualSize) {
-                                        reply.setInstallPath(volPath);
-                                        long asize = actualSize == null ? 1 : actualSize;
-                                        reply.setActualSize(asize);
-                                        reply.setSize(volume == null ? sp.getSize() : volume.getSize());
-                                        bus.reply(msg, reply);
-                                        completion.done();
-                                    }
-
-                                    @Override
-                                    public void fail(ErrorCode errorCode) {
-                                        reply.setError(errorCode);
-                                        bus.reply(msg, reply);
-                                        completion.done();
-                                    }
-                                });
+                    public void success(Long actualSize) {
+                        reply.setInstallPath(volPath);
+                        long asize = actualSize == null ? 1 : actualSize;
+                        reply.setActualSize(asize);
+                        reply.setSize(luksVirtualSize);
+                        bus.reply(msg, reply);
+                        completion.done();
                     }
 
                     @Override
@@ -5768,6 +5757,60 @@ public class CephPrimaryStorageBase extends PrimaryStorageBase {
                         reply.setError(errorCode);
                         bus.reply(msg, reply);
                         completion.done();
+                    }
+                };
+
+                kcmd.virtualSizeForLuksClone = luksVirtualSize;
+                httpCallToKvmHost(hostUuid, KVM_HOST_LUKS_CLONE_PATH, kcmd, KVMHostLuksRsp.class,
+                        new ReturnValueCompletion<KVMHostLuksRsp>(completion) {
+                            @Override
+                            public void success(KVMHostLuksRsp rsp) {
+                                getRbdActualSizeFromPrimaryStorageAgent(msg.getVolumeUuid(), volPath,
+                                        actualSizeCompletion);
+                            }
+
+                            @Override
+                            public void fail(ErrorCode errorCode) {
+                                reply.setError(errorCode);
+                                bus.reply(msg, reply);
+                                completion.done();
+                            }
+                        });
+            }
+
+            @Override
+            public void fail(ErrorCode errorCode) {
+                reply.setError(errorCode);
+                bus.reply(msg, reply);
+                completion.done();
+            }
+        });
+    }
+
+    private void getCephSnapshotVirtualSize(VolumeSnapshotInventory sp, String snapshotPath,
+                                            ReturnValueCompletion<Long> completion) {
+        GetVolumeSnapshotSizeCmd cmd = new GetVolumeSnapshotSizeCmd();
+        cmd.fsId = getSelf().getFsid();
+        cmd.uuid = self.getUuid();
+        cmd.volumeSnapshotUuid = sp.getUuid();
+        cmd.installPath = snapshotPath;
+
+        httpCall(GET_VOLUME_SNAPSHOT_SIZE_PATH, cmd, GetVolumeSnapshotSizeRsp.class,
+                new ReturnValueCompletion<GetVolumeSnapshotSizeRsp>(completion) {
+                    @Override
+                    public void success(GetVolumeSnapshotSizeRsp rsp) {
+                        if (rsp.size == null || rsp.size <= 0) {
+                            completion.fail(operr("failed to get valid virtual size of ceph snapshot[uuid:%s, path:%s]," +
+                                            " expected > 0 but got %s", sp.getUuid(), snapshotPath, rsp.size));
+                            return;
+                        }
+
+                        completion.success(rsp.size);
+                    }
+
+                    @Override
+                    public void fail(ErrorCode errorCode) {
+                        completion.fail(errorCode);
                     }
                 });
     }

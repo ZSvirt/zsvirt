@@ -9,6 +9,7 @@ public class ChangeVmImageMsg extends NeedReplyMessage implements VmInstanceMess
     private String vmInstanceUuid;
     private String imageUuid;
     private String resourceUuid;
+    private boolean encryptedVolumeBackupRestore;
 
     @Override
     public String getVmInstanceUuid() {
@@ -33,5 +34,13 @@ public class ChangeVmImageMsg extends NeedReplyMessage implements VmInstanceMess
 
     public void setResourceUuid(String resourceUuid) {
     	this.resourceUuid = resourceUuid;
+    }
+
+    public boolean isEncryptedVolumeBackupRestore() {
+        return encryptedVolumeBackupRestore;
+    }
+
+    public void setEncryptedVolumeBackupRestore(boolean encryptedVolumeBackupRestore) {
+        this.encryptedVolumeBackupRestore = encryptedVolumeBackupRestore;
     }
 }

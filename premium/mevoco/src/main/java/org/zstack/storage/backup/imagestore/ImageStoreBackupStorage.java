@@ -754,6 +754,10 @@ public class ImageStoreBackupStorage extends BackupStorageBase {
             handle((PackExportedImagesOnImageStoreMsg) msg);
         } else if (msg instanceof DeleteImagePackageOnImageStoreMsg) {
             handle((DeleteImagePackageOnImageStoreMsg) msg);
+        } else if (msg instanceof ExportImageNbdChainMsg) {
+            handle((ExportImageNbdChainMsg) msg);
+        } else if (msg instanceof CleanupImageNbdChainMsg) {
+            handle((CleanupImageNbdChainMsg) msg);
         } else if (msg instanceof ExportImageFromBackupStorageMsg) {
             handle((ExportImageFromBackupStorageMsg) msg);
         } else if (msg instanceof DeleteExportedImageFromImageStoreBackupStorageMsg) {
@@ -1377,6 +1381,72 @@ public class ImageStoreBackupStorage extends BackupStorageBase {
         }
 
         exportImageWithDesignedProtocol(msg);
+    }
+
+    private void handle(final ExportImageNbdChainMsg msg) {
+        ExportImageNbdChainReply reply = new ExportImageNbdChainReply();
+        String installPath = getBackupStorageInstallPath(msg.getImageUuid());
+        if (StringUtils.isBlank(installPath)) {
+            reply.setError(operr("image[%s] not found on backup storage[%s]", msg.getImageUuid(), self.getUuid()));
+            bus.reply(msg, reply);
+            return;
+        }
+
+        ExportImageNbdChainCmd cmd = new ExportImageNbdChainCmd();
+        cmd.setInstallPath(installPath);
+        restf.asyncJsonPost(buildUrl(ImageStoreBackupStorageConstant.EXPORT_IMAGE_NBD_CHAIN), cmd,
+                new JsonAsyncRESTCallback<ExportImageNbdChainResponse>(msg) {
+            @Override
+            public void fail(ErrorCode err) {
+                reply.setError(err);
+                bus.reply(msg, reply);
+            }
+
+            @Override
+            public void success(ExportImageNbdChainResponse ret) {
+                if (ret.isSuccess()) {
+                    reply.setHostname(getSelf().getHostname());
+                    reply.setSessionId(ret.getSessionId());
+                    reply.setPort(ret.getPort());
+                    reply.setExportNames(ret.getExportNames());
+                } else {
+                    reply.setError(operr("operation error, because:%s", ret.getError()));
+                }
+                bus.reply(msg, reply);
+            }
+
+            @Override
+            public Class<ExportImageNbdChainResponse> getReturnClass() {
+                return ExportImageNbdChainResponse.class;
+            }
+        });
+    }
+
+    private void handle(final CleanupImageNbdChainMsg msg) {
+        MessageReply reply = new MessageReply();
+        CleanupImageNbdChainCmd cmd = new CleanupImageNbdChainCmd();
+        cmd.setSessionId(msg.getSessionId());
+        restf.asyncJsonPost(buildUrl(ImageStoreBackupStorageConstant.CLEANUP_IMAGE_NBD_CHAIN), cmd,
+                new JsonAsyncRESTCallback<CleanupImageNbdChainResponse>(msg) {
+            @Override
+            public void fail(ErrorCode err) {
+                reply.setError(err);
+                bus.reply(msg, reply);
+            }
+
+            @Override
+            public void success(CleanupImageNbdChainResponse ret) {
+                if (!ret.isSuccess()) {
+                    reply.setError(operr("operation error, because:%s", ret.getError()));
+                }
+                bus.reply(msg, reply);
+            }
+
+            @Override
+            public Class<CleanupImageNbdChainResponse> getReturnClass() {
+                return CleanupImageNbdChainResponse.class;
+            }
+        });
     }
 
     private void exportImageWithHttpProtocol(final ExportImageFromBackupStorageMsg msg) {

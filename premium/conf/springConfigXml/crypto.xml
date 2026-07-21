@@ -41,6 +41,14 @@
 
     <bean id="BackupImageDownloadExtension" class="org.zstack.crypto.volumebackup.BackupImageDownloadExtension"/>
 
+    <bean id="ZbsVolumeBackupImageDownloadHandler" class="org.zstack.crypto.volumebackup.ZbsVolumeBackupImageDownloadHandler"/>
+
+    <bean id="CryptoVolumeBackupService" class="org.zstack.crypto.volumebackup.CryptoVolumeBackupService">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.Service"/>
+        </zstack:plugin>
+    </bean>
+
     <bean id="BackupVmSpecEncryptionExtension" class="org.zstack.crypto.volumebackup.BackupVmSpecEncryptionExtension">
         <zstack:plugin>
             <zstack:extension interface="org.zstack.compute.vm.BuildVmSpecExtensionPoint"/>

@@ -2464,6 +2464,7 @@ public class VolumeBackupManagerImpl extends AbstractService implements
                         cmsg.setName(volumeVO.getName());
                         cmsg.setDescription("Recovered from backup: " + backupUuid);
                         cmsg.setPrimaryStorageUuid(volumeVO.getPrimaryStorageUuid());
+                        cmsg.setEncryptedVolumeBackupRestore(volumeVO.isEncrypted());
 
                         if (VolumeSystemTags.VOLUME_PROVISIONING_STRATEGY.hasTag(volumeVO.getUuid(), VolumeVO.class)) {
                             cmsg.setSystemTags(Arrays.asList(VolumeSystemTags.VOLUME_PROVISIONING_STRATEGY.getTag(volumeVO.getUuid(), VolumeVO.class)));
@@ -2618,6 +2619,8 @@ public class VolumeBackupManagerImpl extends AbstractService implements
                         ChangeVmImageMsg cmsg = new ChangeVmImageMsg();
                         cmsg.setImageUuid(imageUuid);
                         cmsg.setVmInstanceUuid(getVmInstanceUuid(backupUuid));
+                        cmsg.setEncryptedVolumeBackupRestore(
+                                dbf.findByUuid(backupUuid, VolumeBackupVO.class).isEncrypted());
                         bus.makeTargetServiceIdByResourceUuid(cmsg, VmInstanceConstant.SERVICE_ID, cmsg.getVmInstanceUuid());
                         bus.send(cmsg, new CloudBusCallBack(trigger) {
                             @Override

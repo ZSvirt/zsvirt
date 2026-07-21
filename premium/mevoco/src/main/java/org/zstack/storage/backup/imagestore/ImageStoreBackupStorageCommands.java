@@ -370,6 +370,63 @@ public class ImageStoreBackupStorageCommands {
         }
     }
 
+    public static class ExportImageNbdChainCmd extends AgentCommand implements HasThreadContext {
+        private String installPath;
+
+        public String getInstallPath() {
+            return installPath;
+        }
+
+        public void setInstallPath(String installPath) {
+            this.installPath = installPath;
+        }
+    }
+
+    public static class ExportImageNbdChainResponse extends ImageStoreResponse {
+        private String sessionId;
+        private int port;
+        private List<String> exportNames;
+
+        public String getSessionId() {
+            return sessionId;
+        }
+
+        public void setSessionId(String sessionId) {
+            this.sessionId = sessionId;
+        }
+
+        public int getPort() {
+            return port;
+        }
+
+        public void setPort(int port) {
+            this.port = port;
+        }
+
+        public List<String> getExportNames() {
+            return exportNames;
+        }
+
+        public void setExportNames(List<String> exportNames) {
+            this.exportNames = exportNames;
+        }
+    }
+
+    public static class CleanupImageNbdChainCmd extends AgentCommand implements HasThreadContext {
+        private String sessionId;
+
+        public String getSessionId() {
+            return sessionId;
+        }
+
+        public void setSessionId(String sessionId) {
+            this.sessionId = sessionId;
+        }
+    }
+
+    public static class CleanupImageNbdChainResponse extends ImageStoreResponse {
+    }
+
     public static class DelExpImageCmd extends AgentCommand {
         public String getInstallPath() {
             return installPath;

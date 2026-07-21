@@ -646,6 +646,9 @@ public class MevocoVmInstanceBase extends VmInstanceBase {
                 vmSpec.setRootDisk(DiskAO.rootDisk());
             }
             vmSpec.getRootDisk().setEncrypted(true);
+            if (msg.isEncryptedVolumeBackupRestore()) {
+                vmSpec.getRootDisk().setVolumeBackupTemplate(true);
+            }
         }
 
         // discard these info in vmSpec

@@ -1314,6 +1314,7 @@ public class VmInstanceManagerImpl extends AbstractService implements
                         smsg.setDataVolumeTemplateUuids(msg.getDataVolumeTemplateUuids());
                         smsg.setDataVolumeFromTemplateSystemTags(msg.getDataVolumeFromTemplateSystemTags());
                         smsg.setL3NetworkUuids(msg.getL3NetworkSpecs());
+                        smsg.setVmNicSecurityPolicyByDeviceId(msg.getVmNicSecurityPolicyByDeviceId());
 
                         final DiskAO rootDisk = msg.getRootDisk();
                         DiskOfferingVO dvo = null;

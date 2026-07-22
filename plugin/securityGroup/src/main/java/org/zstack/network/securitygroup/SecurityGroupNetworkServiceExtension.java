@@ -18,6 +18,7 @@ import org.zstack.header.network.service.NetworkServiceProviderType;
 import org.zstack.header.network.service.NetworkServiceType;
 import org.zstack.header.vm.*;
 import org.zstack.network.service.AbstractNetworkServiceExtension;
+import org.zstack.tag.PatternedSystemTag;
 import org.zstack.utils.Utils;
 import org.zstack.utils.logging.CLogger;
 
@@ -43,21 +44,31 @@ public class SecurityGroupNetworkServiceExtension extends AbstractNetworkService
         return SecurityGroupProviderFactory.networkServiceType;
     }
 
-    private List<String> syncSystemTagToVmNicSecurityGroup(String vmUuid) {
-        final List<String> sgUuids = new ArrayList<>();
-        List<String> tags = VmSystemTags.L3_NETWORK_SECURITY_GROUP_UUIDS_REF.getTags(vmUuid);
+    private List<String> getVmNicUuids(String vmUuid, String l3Uuid, Collection<String> targetVmNicUuids) {
+        List<String> vmNicUuids = Q.New(VmNicVO.class)
+                .eq(VmNicVO_.l3NetworkUuid, l3Uuid)
+                .eq(VmNicVO_.vmInstanceUuid, vmUuid)
+                .select(VmNicVO_.uuid)
+                .listValues();
+        if (targetVmNicUuids == null) {
+            return vmNicUuids;
+        }
 
-        for (String tag : tags) {
-            Map<String, String> tokens = VmSystemTags.L3_NETWORK_SECURITY_GROUP_UUIDS_REF.getTokensByTag(tag);
-            String l3Uuid = tokens.get(VmSystemTags.L3_UUID_TOKEN);
-            List<String> securityGroupUuids = Arrays.asList(tokens.get(VmSystemTags.SECURITY_GROUP_UUIDS_TOKEN).split(","));
+        return vmNicUuids.stream().filter(targetVmNicUuids::contains).collect(Collectors.toList());
+    }
 
-            sgUuids.addAll(securityGroupUuids);
-            String vmNicUuid = Q.New(VmNicVO.class)
-                    .eq(VmNicVO_.l3NetworkUuid, l3Uuid)
-                    .eq(VmNicVO_.vmInstanceUuid, vmUuid)
-                    .select(VmNicVO_.uuid)
-                    .findValue();
+    private List<String> getVmNicUuids(String vmUuid, String l3Uuid, int deviceId) {
+        String vmNicUuid = Q.New(VmNicVO.class)
+                .eq(VmNicVO_.l3NetworkUuid, l3Uuid)
+                .eq(VmNicVO_.vmInstanceUuid, vmUuid)
+                .eq(VmNicVO_.deviceId, deviceId)
+                .select(VmNicVO_.uuid)
+                .findValue();
+        return vmNicUuid == null ? Collections.emptyList() : Collections.singletonList(vmNicUuid);
+    }
+
+    private void syncSecurityGroups(String vmUuid, List<String> vmNicUuids, List<String> securityGroupUuids) {
+        for (String vmNicUuid : vmNicUuids) {
             List<VmNicSecurityGroupRefVO> refs = Q.New(VmNicSecurityGroupRefVO.class).eq(VmNicSecurityGroupRefVO_.vmNicUuid, vmNicUuid).eq(VmNicSecurityGroupRefVO_.vmInstanceUuid, vmUuid).list();
             List<VmNicSecurityGroupRefVO> toCreate = new ArrayList<>();
             for (String sgUuid : securityGroupUuids) {
@@ -72,10 +83,7 @@ public class SecurityGroupNetworkServiceExtension extends AbstractNetworkService
                 });
             }
             if (!toCreate.isEmpty()) {
-                toCreate.stream().forEach(ref -> {
-                    ref.setPriority(refs.size() + toCreate.indexOf(ref) + 1);
-                });
-
+                toCreate.forEach(ref -> ref.setPriority(refs.size() + toCreate.indexOf(ref) + 1));
                 dbf.persistCollection(toCreate);
 
                 if (!Q.New(VmNicSecurityPolicyVO.class).eq(VmNicSecurityPolicyVO_.vmNicUuid, vmNicUuid).isExists()) {
@@ -88,35 +96,100 @@ public class SecurityGroupNetworkServiceExtension extends AbstractNetworkService
                 }
             }
         }
-        VmSystemTags.L3_NETWORK_SECURITY_GROUP_UUIDS_REF.delete(vmUuid);
+    }
 
-        tags = VmSystemTags.SECURITY_GROUP_POLICY.getTags(vmUuid);
+    private void syncSecurityGroupPolicy(List<String> vmNicUuids, String ingressPolicy, String egressPolicy) {
+        for (String vmNicUuid : vmNicUuids) {
+            SQL.New(VmNicSecurityPolicyVO.class).eq(VmNicSecurityPolicyVO_.vmNicUuid, vmNicUuid)
+                    .set(VmNicSecurityPolicyVO_.ingressPolicy, ingressPolicy)
+                    .set(VmNicSecurityPolicyVO_.egressPolicy, egressPolicy).update();
+        }
+    }
+
+    private List<String> getExactTags(PatternedSystemTag systemTag, String vmUuid) {
+        return systemTag.getTags(vmUuid).stream().filter(systemTag::isMatch).collect(Collectors.toList());
+    }
+
+    private void deleteExactTags(PatternedSystemTag systemTag, String vmUuid, List<String> tags) {
+        tags.forEach(tag -> systemTag.delete(vmUuid, tag));
+    }
+
+    private List<String> syncSystemTagToVmNicSecurityGroup(String vmUuid) {
+        return syncSystemTagToVmNicSecurityGroup(vmUuid, null);
+    }
+
+    private List<String> syncSystemTagToVmNicSecurityGroup(String vmUuid, Collection<String> targetVmNicUuids) {
+        final List<String> sgUuids = new ArrayList<>();
+        List<String> tags = getExactTags(VmSystemTags.L3_NETWORK_SECURITY_GROUP_UUIDS_REF, vmUuid);
+
+        for (String tag : tags) {
+            Map<String, String> tokens = VmSystemTags.L3_NETWORK_SECURITY_GROUP_UUIDS_REF.getTokensByTag(tag);
+            String l3Uuid = tokens.get(VmSystemTags.L3_UUID_TOKEN);
+            List<String> securityGroupUuids = Arrays.asList(tokens.get(VmSystemTags.SECURITY_GROUP_UUIDS_TOKEN).split(","));
+            sgUuids.addAll(securityGroupUuids);
+            syncSecurityGroups(vmUuid, getVmNicUuids(vmUuid, l3Uuid, targetVmNicUuids), securityGroupUuids);
+        }
+        deleteExactTags(VmSystemTags.L3_NETWORK_SECURITY_GROUP_UUIDS_REF, vmUuid, tags);
+
+        tags = getExactTags(VmSystemTags.SECURITY_GROUP_POLICY, vmUuid);
         for (String tag : tags) {
             Map<String, String> tokens = VmSystemTags.SECURITY_GROUP_POLICY.getTokensByTag(tag);
             String l3Uuid = tokens.get(VmSystemTags.L3_UUID_TOKEN);
             String ingressPolicy = tokens.get(VmSystemTags.SECURITY_GROUP_INGRESS_POLICY_TOKEN);
             String egressPolicy = tokens.get(VmSystemTags.SECURITY_GROUP_EGRESS_POLICY_TOKEN);
-
-            String vmNicUuid = Q.New(VmNicVO.class)
-                    .eq(VmNicVO_.l3NetworkUuid, l3Uuid)
-                    .eq(VmNicVO_.vmInstanceUuid, vmUuid)
-                    .select(VmNicVO_.uuid)
-                    .findValue();
-
-            SQL.New(VmNicSecurityPolicyVO.class).eq(VmNicSecurityPolicyVO_.vmNicUuid, vmNicUuid)
-                    .set(VmNicSecurityPolicyVO_.ingressPolicy, ingressPolicy)
-                    .set(VmNicSecurityPolicyVO_.egressPolicy, egressPolicy).update();
+            syncSecurityGroupPolicy(getVmNicUuids(vmUuid, l3Uuid, targetVmNicUuids), ingressPolicy, egressPolicy);
         }
-        VmSystemTags.SECURITY_GROUP_POLICY.delete(vmUuid);
-
+        deleteExactTags(VmSystemTags.SECURITY_GROUP_POLICY, vmUuid, tags);
 
         return sgUuids.stream().distinct().collect(Collectors.toList());
     }
 
+    private List<String> syncVmNicParamToVmNicSecurityGroup(VmInstanceSpec servedVm) {
+        final List<String> sgUuids = new ArrayList<>();
+        if (servedVm.getL3Networks() == null || servedVm.getL3Networks().isEmpty()) {
+            return sgUuids;
+        }
+
+        Map<String, Map<String, String>> policies = servedVm.getExtensionData(
+                VmInstanceConstant.Params.VmNicSecurityPolicyByDeviceId.toString(), Map.class);
+        String vmUuid = servedVm.getVmInventory().getUuid();
+        for (int deviceId = 0; deviceId < servedVm.getL3Networks().size(); deviceId++) {
+            VmNicSpec nicSpec = servedVm.getL3Networks().get(deviceId);
+            if (nicSpec.getL3Invs() == null || nicSpec.getL3Invs().isEmpty()) {
+                continue;
+            }
+
+            VmNicParam nicParam = nicSpec.getVmNicParam();
+            if (nicParam.getSgUuids() == null || nicParam.getSgUuids().isEmpty()) {
+                continue;
+            }
+
+            String l3Uuid = nicSpec.getL3Invs().get(0).getUuid();
+            List<String> vmNicUuids = getVmNicUuids(vmUuid, l3Uuid, deviceId);
+            if (vmNicUuids.isEmpty()) {
+                continue;
+            }
+
+            sgUuids.addAll(nicParam.getSgUuids());
+            syncSecurityGroups(vmUuid, vmNicUuids, nicParam.getSgUuids());
+
+            Map<String, String> policy = policies == null ? null : policies.get(String.valueOf(deviceId));
+            if (policy != null) {
+                syncSecurityGroupPolicy(vmNicUuids,
+                        policy.get(VmSystemTags.SECURITY_GROUP_INGRESS_POLICY_TOKEN),
+                        policy.get(VmSystemTags.SECURITY_GROUP_EGRESS_POLICY_TOKEN));
+            }
+        }
+
+        return sgUuids.stream().distinct().collect(Collectors.toList());
+    }
 
     @Override
     public void applyNetworkService(VmInstanceSpec servedVm, Map<String, Object> data, final Completion completion) {
-        List<String> sgUuids = syncSystemTagToVmNicSecurityGroup(servedVm.getVmInventory().getUuid());
+        List<String> sgUuids = new ArrayList<>();
+        sgUuids.addAll(syncSystemTagToVmNicSecurityGroup(servedVm.getVmInventory().getUuid()));
+        sgUuids.addAll(syncVmNicParamToVmNicSecurityGroup(servedVm));
+        sgUuids = sgUuids.stream().distinct().collect(Collectors.toList());
 
         Map<NetworkServiceProviderType, List<L3NetworkInventory>> map = getNetworkServiceProviderMap(SecurityGroupProviderFactory.networkServiceType,
                 VmNicSpec.getL3NetworkInventoryOfSpec(servedVm.getL3Networks()));
@@ -192,7 +265,7 @@ public class SecurityGroupNetworkServiceExtension extends AbstractNetworkService
 
     @Override
     public void afterAttachNic(String nicUuid, VmInstanceInventory vmInstanceInventory, Completion completion) {
-        List<String> sgUuids = syncSystemTagToVmNicSecurityGroup(vmInstanceInventory.getUuid());
+        List<String> sgUuids = syncSystemTagToVmNicSecurityGroup(vmInstanceInventory.getUuid(), Collections.singletonList(nicUuid));
         if (StringUtils.isEmpty(vmInstanceInventory.getHostUuid())) {
             completion.success();
             return;

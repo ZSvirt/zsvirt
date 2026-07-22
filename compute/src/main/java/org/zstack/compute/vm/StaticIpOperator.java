@@ -316,6 +316,27 @@ public class StaticIpOperator {
         return nicStaticIpMap;
     }
 
+    public Map<Integer, String> getNicStaticIpMap(List<String> nicStaticIpList, VmNicParam vmNicParam,
+                                                  Set<Integer> vmNicParamIpVersions) {
+        Map<Integer, String> nicStaticIpMap = getNicStaticIpMap(nicStaticIpList);
+        if (vmNicParamIpVersions != null) {
+            vmNicParamIpVersions.forEach(nicStaticIpMap::remove);
+        }
+        if (vmNicParam == null) {
+            return nicStaticIpMap;
+        }
+
+        if (!StringUtils.isEmpty(vmNicParam.getIp())) {
+            nicStaticIpMap.put(IPv6Constants.IPv4, vmNicParam.getIp());
+        }
+        if (!StringUtils.isEmpty(vmNicParam.getIp6())) {
+            nicStaticIpMap.put(IPv6Constants.IPv6,
+                    IPv6NetworkUtils.getIpv6AddressCanonicalString(vmNicParam.getIp6()));
+        }
+
+        return nicStaticIpMap;
+    }
+
     public void setIpChange(String vmUuid, String l3Uuid) {
         SystemTagCreator creator = VmSystemTags.VM_IP_CHANGED.newSystemTagCreator(vmUuid);
         creator.recreate = true;

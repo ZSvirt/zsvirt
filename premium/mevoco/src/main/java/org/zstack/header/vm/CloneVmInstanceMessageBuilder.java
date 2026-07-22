@@ -462,18 +462,40 @@ public class CloneVmInstanceMessageBuilder {
                 .orderBy(VmNicSecurityGroupRefVO_.priority, SimpleQuery.Od.ASC)
                 .list();
 
-        Map<String, Set<String>> nicSgUuidsMap = new HashMap<>();
-        // new list to solve one l3 with multiple nics
+        Map<String, List<VmNicVO>> sourceNicsByL3 = sortedVmNics.stream()
+                .collect(Collectors.groupingBy(VmNicVO::getL3NetworkUuid, LinkedHashMap::new, Collectors.toList()));
+        Map<String, VmNicSecurityPolicyVO> securityPolicyByNicUuid = new HashMap<>();
+        if (!sortedVmNics.isEmpty()) {
+            Set<String> sourceNicUuids = sortedVmNics.stream().map(VmNicVO::getUuid).collect(Collectors.toSet());
+            List<VmNicSecurityPolicyVO> securityPolicyVOS = Q.New(VmNicSecurityPolicyVO.class)
+                    .in(VmNicSecurityPolicyVO_.vmNicUuid, sourceNicUuids)
+                    .list();
+            for (VmNicSecurityPolicyVO policyVO : securityPolicyVOS) {
+                securityPolicyByNicUuid.putIfAbsent(policyVO.getVmNicUuid(), policyVO);
+            }
+        }
+        Map<String, Integer> targetNicIndexByL3 = new HashMap<>();
+        if (clmsg.getVmNicParams() == null) {
+            clmsg.setVmNicParams(new ArrayList<>());
+        }
         List<VmNicParam> vmNicParams = clmsg.getVmNicParams() != null ? new ArrayList<>(clmsg.getVmNicParams()) : new ArrayList<>();
-        for (String l3Uuid : clmsg.getL3NetworkUuids()) {
-            VmNicVO oldNic = sortedVmNics.stream()
-                    .filter(nic -> Objects.equals(nic.getL3NetworkUuid(), l3Uuid))
-                    .findFirst()
-                    .orElse(null);
+        for (int targetNicDeviceId = 0; targetNicDeviceId < clmsg.getL3NetworkUuids().size(); targetNicDeviceId++) {
+            String l3Uuid = clmsg.getL3NetworkUuids().get(targetNicDeviceId);
+            List<VmNicVO> sourceNics = sourceNicsByL3.getOrDefault(l3Uuid, Collections.emptyList());
+            int targetNicIndex = targetNicIndexByL3.getOrDefault(l3Uuid, 0);
+            targetNicIndexByL3.put(l3Uuid, targetNicIndex + 1);
+            VmNicVO oldNic = targetNicIndex < sourceNics.size()
+                    ? sourceNics.get(targetNicIndex)
+                    : sourceNics.size() == 1 ? sourceNics.get(0) : null;
             VmNicParam nicParam = vmNicParams.stream()
                     .filter(param -> Objects.equals(param.getL3NetworkUuid(), l3Uuid))
                     .findFirst()
-                    .orElse(new VmNicParam());
+                    .orElse(null);
+            if (nicParam == null) {
+                nicParam = new VmNicParam();
+                nicParam.setL3NetworkUuid(l3Uuid);
+                clmsg.getVmNicParams().add(nicParam);
+            }
 
             if (oldNic == null) {
                 continue;
@@ -483,10 +505,11 @@ public class CloneVmInstanceMessageBuilder {
                     .filter(ref -> Objects.equals(ref.getVmNicUuid(), oldNic.getUuid()))
                     .map(VmNicSecurityGroupRefVO::getSecurityGroupUuid)
                     .collect(Collectors.toList());
+            Set<String> targetNicSgUuids = new LinkedHashSet<>();
             if (nicParam.getSgUuids() == null) {
-                nicSgUuidsMap.computeIfAbsent(oldNic.getUuid(), v -> new HashSet<>()).addAll(nicSgUuids);
+                targetNicSgUuids.addAll(nicSgUuids);
             } else {
-                nicSgUuidsMap.computeIfAbsent(oldNic.getUuid(), v -> new HashSet<>()).addAll(nicParam.getSgUuids());
+                targetNicSgUuids.addAll(nicParam.getSgUuids());
 
                 /* admin maybe adds some sg to user vm, and the user doesn't know it.
                  *  when clone vm, these sgs should be added to vm */
@@ -498,42 +521,25 @@ public class CloneVmInstanceMessageBuilder {
                         continue;
                     }
 
-                    nicSgUuidsMap.computeIfAbsent(oldNic.getUuid(), v -> new HashSet<>()).addAll(
-                            nicSgUuids.stream()
-                                    .filter(sgUuid -> !ownSgUuids.contains(sgUuid))
-                                    .collect(Collectors.toSet())
-                    );
+                    targetNicSgUuids.addAll(nicSgUuids.stream()
+                            .filter(sgUuid -> !ownSgUuids.contains(sgUuid))
+                            .collect(Collectors.toSet()));
                 }
             }
 
-            sortedVmNics.remove(oldNic);
             vmNicParams.remove(nicParam);
-        }
-
-        for (Map.Entry<String, Set<String>> entry : nicSgUuidsMap.entrySet()) {
-            if (entry.getValue().isEmpty()) {
+            if (targetNicSgUuids.isEmpty()) {
                 continue;
             }
 
-            VmNicVO vmNic = vm.getVmNics().stream()
-                    .filter(nic -> Objects.equals(nic.getUuid(), entry.getKey()))
-                    .findFirst()
-                    .orElse(null);
-            if (vmNic == null) {
-                continue;
-            }
-
-            clmsg.getSystemTags().add(VmSystemTags.L3_NETWORK_SECURITY_GROUP_UUIDS_REF.instantiateTag(
-                    map(e(VmSystemTags.L3_UUID_TOKEN, vmNic.getL3NetworkUuid()),
-                            e(VmSystemTags.SECURITY_GROUP_UUIDS_TOKEN, String.join(",", entry.getValue())))));
-            VmNicSecurityPolicyVO policyVO = Q.New(VmNicSecurityPolicyVO.class).eq(VmNicSecurityPolicyVO_.vmNicUuid, vmNic.getUuid()).find();
+            nicParam.setSgUuids(new ArrayList<>(targetNicSgUuids));
+            VmNicSecurityPolicyVO policyVO = securityPolicyByNicUuid.get(oldNic.getUuid());
             /* vmnic default policy has been changed */
             if (policyVO != null && (!policyVO.getIngressPolicy().equals(VmNicSecurityPolicy.DENY.toString())
                     || !policyVO.getEgressPolicy().equals(VmNicSecurityPolicy.ALLOW.toString()))) {
-                clmsg.getSystemTags().add(VmSystemTags.SECURITY_GROUP_POLICY.instantiateTag(
-                        map(e(VmSystemTags.L3_UUID_TOKEN, vmNic.getL3NetworkUuid()),
-                                e(VmSystemTags.SECURITY_GROUP_INGRESS_POLICY_TOKEN, policyVO.getIngressPolicy()),
-                                e(VmSystemTags.SECURITY_GROUP_EGRESS_POLICY_TOKEN, policyVO.getEgressPolicy()))));
+                clmsg.getVmNicSecurityPolicyByDeviceId().put(String.valueOf(targetNicDeviceId),
+                        map(e(VmSystemTags.SECURITY_GROUP_INGRESS_POLICY_TOKEN, policyVO.getIngressPolicy()),
+                                e(VmSystemTags.SECURITY_GROUP_EGRESS_POLICY_TOKEN, policyVO.getEgressPolicy())));
             }
         }
     }

@@ -16,6 +16,7 @@ import org.zstack.core.workflow.FlowChainBuilder;
 import org.zstack.header.AbstractService;
 import org.zstack.header.Component;
 import org.zstack.header.cbt.*;
+import org.zstack.header.core.AsyncBackup;
 import org.zstack.header.core.Completion;
 import org.zstack.header.core.ReturnValueCompletion;
 import org.zstack.header.core.WhileDoneCompletion;
@@ -59,6 +60,7 @@ import static org.zstack.utils.CollectionDSL.map;
 
 public class CbtBackupManagerImpl extends AbstractService implements Component, CbtBackupManager {
     private static final CLogger logger = Utils.getLogger(CbtBackupManagerImpl.class);
+    private static final String CBT_HOST_OPERATION_SYNC_SIGNATURE = "cbt-host-operation-on-host-%s";
     private final Map<String, CbtBackupFactory> bkFactories = new ConcurrentHashMap<>();
 
     @Autowired
@@ -127,21 +129,43 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
 
             @Override
             public void run(SyncTaskChain chain) {
-                exportNbdVolumesFlow(msg.isForce(), msg.getVmInstanceUuid(), msg.getVolumeUuids(), new ReturnValueCompletion<List<VolumeCbtBackupInfo>>(msg) {
-                    final APIExportNbdVolumesEvent evt = new APIExportNbdVolumesEvent(msg.getId());
+                final APIExportNbdVolumesEvent evt = new APIExportNbdVolumesEvent(msg.getId());
+                ErrorCode err = validateVmStateForOperation(msg.getVmInstanceUuid(), VmInstanceState.Stopped, "export NBD volumes");
+                if (err != null) {
+                    evt.setError(err);
+                    bus.publish(evt);
+                    chain.next();
+                    return;
+                }
 
-                    @Override
-                    public void success(List<VolumeCbtBackupInfo> volumeInfos) {
-                        evt.setVolumeInfos(volumeInfos);
-                        bus.publish(evt);
-                        chain.next();
-                    }
+                String hostUuid = getVmHostUuid(msg.getVmInstanceUuid());
+                if (hostUuid == null) {
+                    evt.setError(operr("host not found for VM: %s", msg.getVmInstanceUuid()));
+                    bus.publish(evt);
+                    chain.next();
+                    return;
+                }
 
+                runInCbtHostOperationQueue(hostUuid, msg, String.format("export-nbd-volumes-on-host-%s", hostUuid), new CbtHostOperation() {
                     @Override
-                    public void fail(ErrorCode errorCode) {
-                        evt.setError(errorCode);
-                        bus.publish(evt);
-                        chain.next();
+                    public void run(SyncTaskChain hostChain) {
+                        exportNbdVolumesFlow(msg.isForce(), msg.getVmInstanceUuid(), msg.getVolumeUuids(), new ReturnValueCompletion<List<VolumeCbtBackupInfo>>(msg, hostChain) {
+                            @Override
+                            public void success(List<VolumeCbtBackupInfo> volumeInfos) {
+                                evt.setVolumeInfos(volumeInfos);
+                                bus.publish(evt);
+                                hostChain.next();
+                                chain.next();
+                            }
+
+                            @Override
+                            public void fail(ErrorCode errorCode) {
+                                evt.setError(errorCode);
+                                bus.publish(evt);
+                                hostChain.next();
+                                chain.next();
+                            }
+                        });
                     }
                 });
             }
@@ -171,19 +195,34 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
                     return;
                 }
 
-                CbtBackupHypervisorBackend backend = getCbtBackend(msg.getVmInstanceUuid());
-                backend.unexportNbdVolumesForRecovery(msg.getVmInstanceUuid(), msg.getVolumeUuids(), new Completion(msg) {
-                    @Override
-                    public void success() {
-                        bus.publish(evt);
-                        chain.next();
-                    }
+                String hostUuid = getVmHostUuid(msg.getVmInstanceUuid());
+                if (hostUuid == null) {
+                    evt.setError(operr("host not found for VM: %s", msg.getVmInstanceUuid()));
+                    bus.publish(evt);
+                    chain.next();
+                    return;
+                }
 
+                runInCbtHostOperationQueue(hostUuid, msg, String.format("unexport-nbd-volumes-on-host-%s", hostUuid), new CbtHostOperation() {
                     @Override
-                    public void fail(ErrorCode errorCode) {
-                        evt.setError(errorCode);
-                        bus.publish(evt);
-                        chain.next();
+                    public void run(SyncTaskChain hostChain) {
+                        CbtBackupHypervisorBackend backend = getCbtBackend(msg.getVmInstanceUuid());
+                        backend.unexportNbdVolumesForRecovery(msg.getVmInstanceUuid(), msg.getVolumeUuids(), new Completion(msg, hostChain) {
+                            @Override
+                            public void success() {
+                                bus.publish(evt);
+                                hostChain.next();
+                                chain.next();
+                            }
+
+                            @Override
+                            public void fail(ErrorCode errorCode) {
+                                evt.setError(errorCode);
+                                bus.publish(evt);
+                                hostChain.next();
+                                chain.next();
+                            }
+                        });
                     }
                 });
             }
@@ -347,6 +386,29 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
             @Override
             public String getName() {
                 return String.format("running-cbt-task-%s", taskVO.getUuid());
+            }
+        });
+    }
+
+    private interface CbtHostOperation {
+        void run(SyncTaskChain chain);
+    }
+
+    private void runInCbtHostOperationQueue(final String hostUuid, final AsyncBackup backup, final String name, final CbtHostOperation operation) {
+        thdf.chainSubmit(new ChainTask(backup) {
+            @Override
+            public String getSyncSignature() {
+                return String.format(CBT_HOST_OPERATION_SYNC_SIGNATURE, hostUuid);
+            }
+
+            @Override
+            public void run(SyncTaskChain chain) {
+                operation.run(chain);
+            }
+
+            @Override
+            public String getName() {
+                return name;
             }
         });
     }
@@ -676,7 +738,7 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
         thdf.chainSubmit(new ChainTask(completion) {
             @Override
             public String getSyncSignature() {
-                return String.format("take-volume-cbt-backup-on-host-%s", hostUuid);
+                return String.format(CBT_HOST_OPERATION_SYNC_SIGNATURE, hostUuid);
             }
 
             @Override

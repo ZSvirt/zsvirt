@@ -6,26 +6,36 @@ import org.zstack.core.cloudbus.CloudBus;
 import org.zstack.core.cloudbus.CloudBusCallBack;
 import org.zstack.core.cloudbus.EventFacade;
 import org.zstack.core.db.DatabaseFacade;
+import org.zstack.core.db.Q;
+import org.zstack.core.db.SQL;
 import org.zstack.core.thread.ThreadFacade;
 import org.zstack.header.core.NoErrorCompletion;
 import org.zstack.header.core.ReturnValueCompletion;
 import org.zstack.header.errorcode.ErrorCode;
 import org.zstack.header.errorcode.SysErrors;
 import org.zstack.header.longjob.LongJob;
+import org.zstack.header.longjob.LongJobState;
 import org.zstack.header.longjob.LongJobVO;
+import org.zstack.header.longjob.LongJobVO_;
 import org.zstack.header.message.APIEvent;
 import org.zstack.header.message.MessageReply;
+import org.zstack.header.message.NeedReplyMessage;
 import org.zstack.longjob.LongJobGlobalConfig;
 import org.zstack.longjob.LongJobUtils;
 import org.zstack.softwarePackage.SoftwarePackageConstant;
 import org.zstack.softwarePackage.compute.SoftwarePackageCanonicalEvents;
 import org.zstack.softwarePackage.compute.SoftwarePackageSystemTags;
+import org.zstack.softwarePackage.entity.SoftwarePackageStatus;
 import org.zstack.softwarePackage.entity.SoftwarePackageVO;
+import org.zstack.softwarePackage.entity.SoftwarePackageVO_;
 import org.zstack.softwarePackage.header.SoftwarePackageInventory;
 import org.zstack.softwarePackage.message.CleanSoftwarePackageMsg;
+import org.zstack.softwarePackage.message.CleanUpgradeSoftwarePackageMsg;
 import org.zstack.utils.Utils;
 import org.zstack.utils.logging.CLogger;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -185,7 +195,31 @@ public abstract class AbstractSoftwarePackageLongJob implements LongJob {
         bus.send(cmsg, new CloudBusCallBack(completion) {
             @Override
             public void run(MessageReply reply) {
-                completion.fail(err);
+                if (reply.isSuccess()) {
+                    completion.fail(err);
+                    return;
+                }
+
+                logger.warn(String.format("failed to clean canceled software package [uuid:%s]: %s",
+                        softwarePackageUuid, reply.getError().getReadableDetails()));
+            }
+        });
+    }
+
+    protected void cleanUpgradeSoftwarePackage(CleanUpgradeSoftwarePackageMsg cmsg,
+                                               SoftwarePackageLongJobCompletion completion,
+                                               ErrorCode err) {
+        bus.makeLocalServiceId(cmsg, SoftwarePackageConstant.SERVICE_ID);
+        bus.send(cmsg, new CloudBusCallBack(completion) {
+            @Override
+            public void run(MessageReply reply) {
+                if (reply.isSuccess()) {
+                    completion.fail(err);
+                    return;
+                }
+
+                logger.warn(String.format("failed to clean canceled upgrade software package [uuid:%s]: %s",
+                        cmsg.getUuid(), reply.getError().getReadableDetails()));
             }
         });
     }
@@ -198,6 +232,55 @@ public abstract class AbstractSoftwarePackageLongJob implements LongJob {
     protected String getBackupStorageHostUuid(String softwarePackageUuid) {
         return SoftwarePackageSystemTags.SOFTWARE_PACKAGE_ON_BACKUP_STORAGE_HOST_UUID
                 .getTokenByResourceUuid(softwarePackageUuid, SoftwarePackageSystemTags.SOFTWARE_PACKAGE_ON_BACKUP_STORAGE_HOST_UUID_TOKEN);
+    }
+
+
+    protected void updateSoftwarePackageStatusOnCancel(String longJobUuid, String softwarePackageUuid,
+                                                      SoftwarePackageStatus expectedStatus,
+                                                      SoftwarePackageStatus canceledStatus) {
+        updateSoftwarePackageStatusOnCancel(longJobUuid, softwarePackageUuid,
+                Arrays.asList(expectedStatus.toString()), canceledStatus);
+    }
+
+    protected void updateSoftwarePackageStatusOnCancel(String longJobUuid, String softwarePackageUuid,
+                                                      Collection<String> expectedStatuses,
+                                                      SoftwarePackageStatus canceledStatus) {
+        LongJobState state = Q.New(LongJobVO.class)
+                .eq(LongJobVO_.uuid, longJobUuid)
+                .select(LongJobVO_.state)
+                .findValue();
+        if (state != LongJobState.Canceling) {
+            logger.debug(String.format("skip cancel status update for software package [uuid:%s], longjob[uuid:%s] state is %s",
+                    softwarePackageUuid, longJobUuid, state));
+            return;
+        }
+
+        int updated = SQL.New(SoftwarePackageVO.class)
+                .eq(SoftwarePackageVO_.uuid, softwarePackageUuid)
+                .in(SoftwarePackageVO_.status, expectedStatuses)
+                .set(SoftwarePackageVO_.status, canceledStatus.toString())
+                .update();
+        if (updated == 0) {
+            String currentStatus = Q.New(SoftwarePackageVO.class)
+                    .eq(SoftwarePackageVO_.uuid, softwarePackageUuid)
+                    .select(SoftwarePackageVO_.status)
+                    .findValue();
+            logger.info(String.format("skip cancel status update for software package [uuid:%s], expected status is %s but current status is %s",
+                    softwarePackageUuid, expectedStatuses, currentStatus));
+        }
+    }
+
+    protected void cleanAndCompleteCancel(NeedReplyMessage cleanMsg, ReturnValueCompletion<Boolean> completion) {
+        bus.send(cleanMsg, new CloudBusCallBack(completion) {
+            @Override
+            public void run(MessageReply reply) {
+                if (reply.isSuccess()) {
+                    completion.success(true);
+                } else {
+                    completion.fail(reply.getError());
+                }
+            }
+        });
     }
 
     @Override

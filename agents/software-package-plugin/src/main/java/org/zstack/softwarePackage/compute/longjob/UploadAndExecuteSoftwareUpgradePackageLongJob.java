@@ -5,14 +5,17 @@ import org.springframework.beans.factory.annotation.Configurable;
 import org.zstack.core.cloudbus.CloudBusCallBack;
 import org.zstack.core.db.Q;
 import org.zstack.core.db.SQL;
+import org.zstack.header.core.NoErrorCompletion;
 import org.zstack.header.core.ReturnValueCompletion;
 import org.zstack.header.errorcode.SysErrors;
 import org.zstack.header.longjob.LongJobFor;
 import org.zstack.header.longjob.LongJobVO;
 import org.zstack.header.message.APIEvent;
+import org.zstack.header.message.CancelTaskResult;
 import org.zstack.header.message.MessageReply;
 import org.zstack.header.storage.backup.BackupStorageConstant;
 import org.zstack.header.storage.backup.CancelDownloadFileOnBackupStorageHostMsg;
+import org.zstack.header.storage.backup.CancelDownloadFileOnBackupStorageHostReply;
 import org.zstack.softwarePackage.SoftwarePackageConstant;
 import org.zstack.softwarePackage.compute.UploadSoftwarePackageToBackupStorageTracker;
 import org.zstack.softwarePackage.entity.SoftwarePackageStatus;
@@ -20,11 +23,14 @@ import org.zstack.softwarePackage.entity.SoftwarePackageVO;
 import org.zstack.softwarePackage.entity.SoftwarePackageVO_;
 import org.zstack.softwarePackage.entity.UploadSoftwarePackageToBackupStorageLongJobData;
 import org.zstack.softwarePackage.header.*;
+import org.zstack.softwarePackage.message.CleanUpgradeSoftwarePackageMsg;
 import org.zstack.softwarePackage.message.UploadAndExecuteSoftwareUpgradePackageMsg;
 import org.zstack.softwarePackage.message.UploadAndExecuteSoftwareUpgradePackageReply;
 import org.zstack.utils.Utils;
 import org.zstack.utils.gson.JSONObjectUtil;
 import org.zstack.utils.logging.CLogger;
+
+import java.util.Arrays;
 
 import static org.zstack.core.Platform.err;
 import static org.zstack.longjob.LongJobUtils.cancelErr;
@@ -70,7 +76,7 @@ public class UploadAndExecuteSoftwareUpgradePackageLongJob extends AbstractSoftw
                 UploadAndExecuteSoftwareUpgradePackageReply r = reply.castReply();
                 auditResourceUuid = r.getInventory().getUuid();
                 if (jobCanceled(job.getUuid())) {
-                    cleanSoftwarePackage(msg.getSoftwarePackageUuid(), comp, cancelErr(job.getUuid()));
+                    cleanUpgradeSoftwarePackage(buildCleanUpgradeSoftwarePackageMsg(msg), comp, cancelErr(job.getUuid()));
                 } else if (msg.needTrack()) {
                     comp.track(r.getInventory());
                 } else {
@@ -83,6 +89,13 @@ public class UploadAndExecuteSoftwareUpgradePackageLongJob extends AbstractSoftw
     @Override
     public void cancel(LongJobVO job, ReturnValueCompletion<Boolean> completion) {
         UploadAndExecuteSoftwareUpgradePackageMsg umsg = JSONObjectUtil.toObject(job.getJobData(), UploadAndExecuteSoftwareUpgradePackageMsg.class);
+        if (!umsg.isOriginalPackageSnapshotCaptured()) {
+            logger.warn(String.format(
+                    "skip cleanup while canceling legacy upgrade long job [uuid:%s], original software package snapshot is unavailable",
+                    job.getUuid()));
+            completion.success(true);
+            return;
+        }
 
         final String backupStorageUuid = getBackupStorageUuid(umsg.getSoftwarePackageUuid());
         final String backupStorageHostUuid = getBackupStorageHostUuid(umsg.getSoftwarePackageUuid());
@@ -97,19 +110,81 @@ public class UploadAndExecuteSoftwareUpgradePackageLongJob extends AbstractSoftw
         cmsg.setBackupStorageUuid(backupStorageUuid);
         cmsg.setBackupStorageHostUuid(backupStorageHostUuid);
         cmsg.setCancellationApiId(job.getApiId());
+        cmsg.setAllowTaskNotFound(true);
         bus.makeTargetServiceIdByResourceUuid(cmsg, BackupStorageConstant.SERVICE_ID, backupStorageUuid);
         bus.send(cmsg, new CloudBusCallBack(completion) {
             @Override
             public void run(MessageReply reply) {
                 if (reply.isSuccess()) {
-                    completion.success(false);
+                    updateSoftwarePackageStatusOnCancel(job.getUuid(), umsg.getSoftwarePackageUuid(),
+                            Arrays.asList(SoftwarePackageStatus.Upgrading.toString(),
+                                    SoftwarePackageStatus.UpgradePackageUploaded.toString()),
+                            SoftwarePackageStatus.UpgradePackageUploadFailed);
+                    CancelDownloadFileOnBackupStorageHostReply creply = reply.castReply();
+                    if (creply.getCancelResult() == CancelTaskResult.TASK_NOT_FOUND) {
+                        if (umsg.needTrack()) {
+                            completion.success(false);
+                        } else {
+                            cleanAndCompleteCancel(umsg, completion);
+                        }
+                    } else {
+                        completion.success(false);
+                    }
                 } else if (reply.getError().isError(SysErrors.RESOURCE_NOT_FOUND)) {
-                    completion.success(true);
+                    updateSoftwarePackageStatusOnCancel(job.getUuid(), umsg.getSoftwarePackageUuid(),
+                            Arrays.asList(SoftwarePackageStatus.Upgrading.toString(),
+                                    SoftwarePackageStatus.UpgradePackageUploaded.toString()),
+                            SoftwarePackageStatus.UpgradePackageUploadFailed);
+                    cleanAndCompleteCancel(umsg, completion);
                 } else {
                     completion.fail(reply.getError());
                 }
             }
         });
+    }
+
+    private void cleanAndCompleteCancel(UploadAndExecuteSoftwareUpgradePackageMsg msg,
+                                        ReturnValueCompletion<Boolean> completion) {
+        CleanUpgradeSoftwarePackageMsg cmsg = buildCleanUpgradeSoftwarePackageMsg(msg);
+        bus.makeLocalServiceId(cmsg, SoftwarePackageConstant.SERVICE_ID);
+        cleanAndCompleteCancel(cmsg, completion);
+    }
+
+    @Override
+    public void clean(LongJobVO job, NoErrorCompletion completion) {
+        UploadAndExecuteSoftwareUpgradePackageMsg msg =
+                JSONObjectUtil.toObject(job.getJobData(), UploadAndExecuteSoftwareUpgradePackageMsg.class);
+        if (!msg.isOriginalPackageSnapshotCaptured()) {
+            logger.warn(String.format(
+                    "skip cleanup for legacy upgrade long job [uuid:%s], original software package snapshot is unavailable",
+                    job.getUuid()));
+            completion.done();
+            return;
+        }
+        CleanUpgradeSoftwarePackageMsg cmsg = buildCleanUpgradeSoftwarePackageMsg(msg);
+        bus.makeLocalServiceId(cmsg, SoftwarePackageConstant.SERVICE_ID);
+        bus.send(cmsg, new CloudBusCallBack(completion) {
+            @Override
+            public void run(MessageReply reply) {
+                completion.done();
+            }
+        });
+    }
+
+    private CleanUpgradeSoftwarePackageMsg buildCleanUpgradeSoftwarePackageMsg(
+            UploadAndExecuteSoftwareUpgradePackageMsg msg) {
+        CleanUpgradeSoftwarePackageMsg cmsg = new CleanUpgradeSoftwarePackageMsg();
+        cmsg.setUuid(msg.getSoftwarePackageUuid());
+        cmsg.setUpgradeBackupStorageUuid(msg.getBackupStorageUuid());
+        cmsg.setUpgradeBackupStorageHostUuid(getBackupStorageHostUuid(msg.getSoftwarePackageUuid()));
+        cmsg.setUpgradeInstallPath(msg.getInstallPath());
+        cmsg.setOriginalInstallPath(msg.getOriginalInstallPath());
+        cmsg.setOriginalUnzipInstallPath(msg.getOriginalUnzipInstallPath());
+        cmsg.setOriginalMd5sum(msg.getOriginalMd5sum());
+        cmsg.setOriginalSize(msg.getOriginalSize());
+        cmsg.setOriginalBackupStorageUuid(msg.getOriginalBackupStorageUuid());
+        cmsg.setOriginalBackupStorageHostUuid(msg.getOriginalBackupStorageHostUuid());
+        return cmsg;
     }
 
     @Override

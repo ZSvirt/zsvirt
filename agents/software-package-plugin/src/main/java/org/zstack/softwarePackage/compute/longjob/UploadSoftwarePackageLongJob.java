@@ -18,9 +18,11 @@ import org.zstack.header.core.ReturnValueCompletion;
 import org.zstack.header.errorcode.ErrorCode;
 import org.zstack.header.errorcode.SysErrors;
 import org.zstack.header.host.CancelHostTaskMsg;
+import org.zstack.header.host.CancelHostTaskReply;
 import org.zstack.header.host.HostConstant;
 import org.zstack.header.longjob.*;
 import org.zstack.header.message.APIEvent;
+import org.zstack.header.message.CancelTaskResult;
 import org.zstack.header.message.MessageReply;
 import org.zstack.longjob.LongJobGlobalConfig;
 import org.zstack.longjob.LongJobUtils;
@@ -200,13 +202,37 @@ public class UploadSoftwarePackageLongJob implements LongJob {
         CancelHostTaskMsg cmsg = new CancelHostTaskMsg();
         cmsg.setHostUuid(umsg.getHostUuid());
         cmsg.setCancellationApiId(job.getApiId());
+        cmsg.setAllowTaskNotFound(true);
         bus.makeLocalServiceId(cmsg, HostConstant.SERVICE_ID);
         bus.send(cmsg, new CloudBusCallBack(completion) {
             @Override
             public void run(MessageReply reply) {
                 if (reply.isSuccess()) {
-                    completion.success(false);
+                    CancelHostTaskReply creply = reply.castReply();
+                    if (creply.getCancelResult() == CancelTaskResult.TASK_NOT_FOUND) {
+                        cleanAndCompleteCancel(job, completion);
+                    } else {
+                        completion.success(false);
+                    }
                 } else if (reply.getError().isError(SysErrors.RESOURCE_NOT_FOUND)) {
+                    cleanAndCompleteCancel(job, completion);
+                } else {
+                    completion.fail(reply.getError());
+                }
+            }
+        });
+    }
+
+    private void cleanAndCompleteCancel(LongJobVO job, ReturnValueCompletion<Boolean> completion) {
+        UploadSoftwarePackageMsg msg =
+                JSONObjectUtil.toObject(job.getJobData(), UploadSoftwarePackageMsg.class);
+        CleanSoftwarePackageMsg cmsg = new CleanSoftwarePackageMsg();
+        cmsg.setUuid(msg.getResourceUuid());
+        bus.makeServiceIdByManagementNodeId(cmsg, SERVICE_ID, msg.getManagementNodeUuid());
+        bus.send(cmsg, new CloudBusCallBack(completion) {
+            @Override
+            public void run(MessageReply reply) {
+                if (reply.isSuccess()) {
                     completion.success(true);
                 } else {
                     completion.fail(reply.getError());
@@ -246,7 +272,17 @@ public class UploadSoftwarePackageLongJob implements LongJob {
 
     @Override
     public void clean(LongJobVO job, NoErrorCompletion completion) {
-        completion.done();
+        UploadSoftwarePackageMsg msg =
+                JSONObjectUtil.toObject(job.getJobData(), UploadSoftwarePackageMsg.class);
+        CleanSoftwarePackageMsg cmsg = new CleanSoftwarePackageMsg();
+        cmsg.setUuid(msg.getResourceUuid());
+        bus.makeServiceIdByManagementNodeId(cmsg, SERVICE_ID, msg.getManagementNodeUuid());
+        bus.send(cmsg, new CloudBusCallBack(completion) {
+            @Override
+            public void run(MessageReply reply) {
+                completion.done();
+            }
+        });
     }
 
     @Override

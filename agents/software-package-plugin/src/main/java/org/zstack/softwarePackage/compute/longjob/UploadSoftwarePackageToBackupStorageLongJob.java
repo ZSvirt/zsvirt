@@ -4,14 +4,17 @@ import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.zstack.core.cloudbus.CloudBusCallBack;
 import org.zstack.core.db.Q;
+import org.zstack.header.core.NoErrorCompletion;
 import org.zstack.header.core.ReturnValueCompletion;
 import org.zstack.header.errorcode.SysErrors;
 import org.zstack.header.longjob.LongJobFor;
 import org.zstack.header.longjob.LongJobVO;
 import org.zstack.header.message.APIEvent;
+import org.zstack.header.message.CancelTaskResult;
 import org.zstack.header.message.MessageReply;
 import org.zstack.header.storage.backup.BackupStorageConstant;
 import org.zstack.header.storage.backup.CancelDownloadFileOnBackupStorageHostMsg;
+import org.zstack.header.storage.backup.CancelDownloadFileOnBackupStorageHostReply;
 import org.zstack.softwarePackage.SoftwarePackageConstant;
 import org.zstack.softwarePackage.compute.UploadSoftwarePackageToBackupStorageTracker;
 import org.zstack.softwarePackage.entity.SoftwarePackageStatus;
@@ -95,17 +98,54 @@ public class UploadSoftwarePackageToBackupStorageLongJob extends AbstractSoftwar
         cmsg.setBackupStorageUuid(backupStorageUuid);
         cmsg.setBackupStorageHostUuid(backupStorageHostUuid);
         cmsg.setCancellationApiId(job.getApiId());
+        cmsg.setAllowTaskNotFound(true);
         bus.makeTargetServiceIdByResourceUuid(cmsg, BackupStorageConstant.SERVICE_ID, backupStorageUuid);
         bus.send(cmsg, new CloudBusCallBack(completion) {
             @Override
             public void run(MessageReply reply) {
                 if (reply.isSuccess()) {
-                    completion.success(false);
+                    updateSoftwarePackageStatusOnCancel(job.getUuid(), umsg.getResourceUuid(),
+                            SoftwarePackageStatus.Uploading, SoftwarePackageStatus.UploadFailed);
+                    CancelDownloadFileOnBackupStorageHostReply creply = reply.castReply();
+                    if (creply.getCancelResult() == CancelTaskResult.TASK_NOT_FOUND) {
+                        if (umsg.needTrack()) {
+                            completion.success(false);
+                        } else {
+                            cleanAndCompleteCancel(umsg, completion);
+                        }
+                    } else {
+                        completion.success(false);
+                    }
                 } else if (reply.getError().isError(SysErrors.RESOURCE_NOT_FOUND)) {
-                    completion.success(true);
+                    updateSoftwarePackageStatusOnCancel(job.getUuid(), umsg.getResourceUuid(),
+                            SoftwarePackageStatus.Uploading, SoftwarePackageStatus.UploadFailed);
+                    cleanAndCompleteCancel(umsg, completion);
                 } else {
                     completion.fail(reply.getError());
                 }
+            }
+        });
+    }
+
+    private void cleanAndCompleteCancel(UploadSoftwarePackageToBackupStorageMsg msg,
+                                        ReturnValueCompletion<Boolean> completion) {
+        CleanSoftwarePackageMsg cmsg = new CleanSoftwarePackageMsg();
+        cmsg.setUuid(msg.getResourceUuid());
+        bus.makeLocalServiceId(cmsg, SoftwarePackageConstant.SERVICE_ID);
+        cleanAndCompleteCancel(cmsg, completion);
+    }
+
+    @Override
+    public void clean(LongJobVO job, NoErrorCompletion completion) {
+        UploadSoftwarePackageToBackupStorageMsg msg =
+                JSONObjectUtil.toObject(job.getJobData(), UploadSoftwarePackageToBackupStorageMsg.class);
+        CleanSoftwarePackageMsg cmsg = new CleanSoftwarePackageMsg();
+        cmsg.setUuid(msg.getResourceUuid());
+        bus.makeLocalServiceId(cmsg, SoftwarePackageConstant.SERVICE_ID);
+        bus.send(cmsg, new CloudBusCallBack(completion) {
+            @Override
+            public void run(MessageReply reply) {
+                completion.done();
             }
         });
     }

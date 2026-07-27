@@ -39,6 +39,8 @@ public class PrimaryStorageMigrateVmMsg extends NeedReplyMessage implements Prim
 
     private List<VolumeMigrationAO> volumeMigrationAOs;
 
+    private Boolean legacyRootOnlyMigration;
+
     public PrimaryStorageMigrateVmContext getJobContext() {
         return jobContext;
     }
@@ -69,6 +71,8 @@ public class PrimaryStorageMigrateVmMsg extends NeedReplyMessage implements Prim
         downTime = amsg.getDownTime();
         bandwidth = amsg.getBandwidth();
         volumeMigrationAOs = amsg.getVolumeMigrationAOs();
+        legacyRootOnlyMigration = amsg.getLegacyRootOnlyMigration();
+        resolveLegacyRootOnlyMigration();
     }
 
     public Integer getDownTime() {
@@ -140,5 +144,36 @@ public class PrimaryStorageMigrateVmMsg extends NeedReplyMessage implements Prim
 
     public void setVolumeMigrationAOs(List<VolumeMigrationAO> volumeMigrationAOs) {
         this.volumeMigrationAOs = volumeMigrationAOs;
+    }
+
+    public boolean isLegacyRootOnlyMigration() {
+        return Boolean.TRUE.equals(legacyRootOnlyMigration);
+    }
+
+    public void setLegacyRootOnlyMigration(Boolean legacyRootOnlyMigration) {
+        this.legacyRootOnlyMigration = legacyRootOnlyMigration;
+    }
+
+    public void resolveLegacyRootOnlyMigration() {
+        if (legacyRootOnlyMigration != null) {
+            return;
+        }
+        if (getVolumeMigrationAOs().isEmpty()) {
+            legacyRootOnlyMigration = dstPrimaryStorageUuid != null && !withDataVolumes;
+        }
+    }
+
+    public void resolveLegacyRootOnlyMigration(String rootVolumeUuid) {
+        resolveLegacyRootOnlyMigration();
+        if (legacyRootOnlyMigration != null) {
+            return;
+        }
+
+        List<VolumeMigrationAO> specs = getVolumeMigrationAOs();
+        legacyRootOnlyMigration = specs.size() == 1
+                && dstPrimaryStorageUuid != null
+                && !withDataVolumes
+                && rootVolumeUuid.equals(specs.get(0).getVolumeUuid())
+                && dstPrimaryStorageUuid.equals(specs.get(0).getDstPrimaryStorageUuid());
     }
 }

@@ -12,6 +12,7 @@ import org.zstack.core.Platform;
 import org.zstack.core.db.Q;
 import org.zstack.core.db.SimpleQuery;
 import org.zstack.ha.HaSystemTags;
+import org.zstack.header.apimediator.ApiMessageInterceptionException;
 import org.zstack.header.image.ImagePlatform;
 import org.zstack.header.message.APIMessage;
 import org.zstack.header.tag.SystemTagVO;
@@ -33,6 +34,9 @@ import org.zstack.utils.CollectionUtils;
 import org.zstack.utils.TagUtils;
 import org.zstack.utils.WwnUtils;
 import org.zstack.utils.gson.JSONObjectUtil;
+import org.zstack.utils.network.IPv6Constants;
+import org.zstack.utils.network.IPv6NetworkUtils;
+import org.zstack.utils.network.NetworkUtils;
 
 import javax.persistence.Tuple;
 import java.util.*;
@@ -478,7 +482,6 @@ public class CloneVmInstanceMessageBuilder {
                 clmsg.setDefaultL3NetworkUuid(vm.getDefaultL3NetworkUuid());
             }
         }
-
         List<VmNicSecurityGroupRefVO> refVOS = Q.New(VmNicSecurityGroupRefVO.class)
                 .eq(VmNicSecurityGroupRefVO_.vmInstanceUuid, vmInstanceUuid)
                 .orderBy(VmNicSecurityGroupRefVO_.priority, SimpleQuery.Od.ASC)
@@ -564,6 +567,196 @@ public class CloneVmInstanceMessageBuilder {
                                 e(VmSystemTags.SECURITY_GROUP_EGRESS_POLICY_TOKEN, policyVO.getEgressPolicy())));
             }
         }
+
+        bindStaticIpsToVmNicParams(clmsg);
+    }
+
+    private void bindStaticIpsToVmNicParams(CloneVmInstanceMsg clmsg) {
+        if (CollectionUtils.isEmpty(clmsg.getSystemTags()) || CollectionUtils.isEmpty(clmsg.getVmNicParams())) {
+            return;
+        }
+
+        Map<String, StaticIpTagContext> staticIpTags =
+                buildStaticIpTagContext(clmsg.getSystemTags(), clmsg.getVmNicParams());
+        if (staticIpTags.isEmpty()) {
+            return;
+        }
+
+        for (VmNicParam vmNicParam : clmsg.getVmNicParams()) {
+            if (StringUtils.isEmpty(vmNicParam.getL3NetworkUuid())) {
+                continue;
+            }
+
+            reserveExplicitStaticIps(vmNicParam, staticIpTags.get(vmNicParam.getL3NetworkUuid()));
+        }
+
+        for (VmNicParam vmNicParam : clmsg.getVmNicParams()) {
+            if (StringUtils.isEmpty(vmNicParam.getL3NetworkUuid())) {
+                continue;
+            }
+
+            bindStaticIpToVmNicParam(vmNicParam, staticIpTags.get(vmNicParam.getL3NetworkUuid()));
+        }
+    }
+
+    private Map<String, StaticIpTagContext> buildStaticIpTagContext(List<String> systemTags,
+                                                                    List<VmNicParam> vmNicParams) {
+        Map<String, StaticIpTagContext> ret = new HashMap<>();
+        for (String systemTag : systemTags) {
+            if (StringUtils.isEmpty(systemTag) || !VmSystemTags.STATIC_IP.isMatch(systemTag)) {
+                continue;
+            }
+
+            Map<String, String> tokens = TagUtils.parse(VmSystemTags.STATIC_IP.getTagFormat(), systemTag);
+            String l3Uuid = tokens.get(VmSystemTags.STATIC_IP_L3_UUID_TOKEN);
+            StaticIpTagContext context = ret.computeIfAbsent(l3Uuid, k -> new StaticIpTagContext());
+            String ip = IPv6NetworkUtils.ipv6TagValueToAddress(tokens.get(VmSystemTags.STATIC_IP_TOKEN));
+            if (NetworkUtils.isIpv4Address(ip)) {
+                context.ipv4.add(ip);
+                context.hasIpv4 = true;
+            } else if (IPv6NetworkUtils.isIpv6Address(ip)) {
+                context.ipv6.add(IPv6NetworkUtils.getIpv6AddressCanonicalString(ip));
+                context.hasIpv6 = true;
+            }
+        }
+
+        for (VmNicParam vmNicParam : vmNicParams) {
+            if (StringUtils.isEmpty(vmNicParam.getL3NetworkUuid())) {
+                continue;
+            }
+
+            StaticIpTagContext context =
+                    ret.computeIfAbsent(vmNicParam.getL3NetworkUuid(), k -> new StaticIpTagContext());
+            context.hasIpv4 |= !StringUtils.isEmpty(vmNicParam.getIp());
+            context.hasIpv6 |= !StringUtils.isEmpty(vmNicParam.getIp6());
+        }
+
+        for (String systemTag : systemTags) {
+            if (StringUtils.isEmpty(systemTag)) {
+                continue;
+            }
+
+            if (VmSystemTags.IPV4_GATEWAY.isMatch(systemTag)) {
+                Map<String, String> tokens = TagUtils.parse(VmSystemTags.IPV4_GATEWAY.getTagFormat(), systemTag);
+                String l3Uuid = tokens.get(VmSystemTags.IPV4_GATEWAY_L3_UUID_TOKEN);
+                StaticIpTagContext context = ret.get(l3Uuid);
+                if (context != null && context.hasIpv4) {
+                    context.ipv4Gateway = tokens.get(VmSystemTags.IPV4_GATEWAY_TOKEN);
+                }
+            } else if (VmSystemTags.IPV4_NETMASK.isMatch(systemTag)) {
+                Map<String, String> tokens = TagUtils.parse(VmSystemTags.IPV4_NETMASK.getTagFormat(), systemTag);
+                String l3Uuid = tokens.get(VmSystemTags.IPV4_NETMASK_L3_UUID_TOKEN);
+                StaticIpTagContext context = ret.get(l3Uuid);
+                if (context != null && context.hasIpv4) {
+                    context.ipv4Netmask = tokens.get(VmSystemTags.IPV4_NETMASK_TOKEN);
+                }
+            } else if (VmSystemTags.IPV6_GATEWAY.isMatch(systemTag)) {
+                Map<String, String> tokens = TagUtils.parse(VmSystemTags.IPV6_GATEWAY.getTagFormat(), systemTag);
+                String l3Uuid = tokens.get(VmSystemTags.IPV6_GATEWAY_L3_UUID_TOKEN);
+                StaticIpTagContext context = ret.get(l3Uuid);
+                if (context != null && context.hasIpv6) {
+                    context.ipv6Gateway = IPv6NetworkUtils.getIpv6AddressCanonicalString(
+                            IPv6NetworkUtils.ipv6TagValueToAddress(tokens.get(VmSystemTags.IPV6_GATEWAY_TOKEN)));
+                }
+            } else if (VmSystemTags.IPV6_PREFIX.isMatch(systemTag)) {
+                Map<String, String> tokens = TagUtils.parse(VmSystemTags.IPV6_PREFIX.getTagFormat(), systemTag);
+                String l3Uuid = tokens.get(VmSystemTags.IPV6_PREFIX_L3_UUID_TOKEN);
+                StaticIpTagContext context = ret.get(l3Uuid);
+                if (context != null && context.hasIpv6) {
+                    context.ipv6Prefix = parseIpv6Prefix(
+                            tokens.get(VmSystemTags.IPV6_PREFIX_TOKEN), systemTag);
+                }
+            }
+        }
+
+        return ret;
+    }
+
+    private Integer parseIpv6Prefix(String prefix, String systemTag) {
+        try {
+            int prefixLen = Integer.parseInt(prefix);
+            if (prefixLen > IPv6Constants.IPV6_PREFIX_LEN_MAX || prefixLen < IPv6Constants.IPV6_PREFIX_LEN_MIN) {
+                throw new ApiMessageInterceptionException(Platform.argerr("ip range prefix length[%d] is out of range [%d - %d]. Please correct your system tag[%s] of %s",
+                        prefixLen, IPv6Constants.IPV6_PREFIX_LEN_MIN, IPv6Constants.IPV6_PREFIX_LEN_MAX, systemTag, VmSystemTags.IPV6_PREFIX_TOKEN));
+            }
+            return prefixLen;
+        } catch (NumberFormatException e) {
+            throw new ApiMessageInterceptionException(Platform.argerr("ipv6 prefix length[%s] must be an integer. Please correct your system tag[%s] of %s",
+                    prefix, systemTag, VmSystemTags.IPV6_PREFIX_TOKEN));
+        }
+    }
+
+    private void reserveExplicitStaticIps(VmNicParam vmNicParam, StaticIpTagContext staticIpTags) {
+        if (staticIpTags == null) {
+            return;
+        }
+
+        if (!StringUtils.isEmpty(vmNicParam.getIp())) {
+            staticIpTags.ipv4.removeFirstOccurrence(vmNicParam.getIp());
+        }
+
+        String ip6 = normalizeIpv6(vmNicParam.getIp6());
+        if (!StringUtils.isEmpty(ip6)) {
+            staticIpTags.ipv6.removeFirstOccurrence(ip6);
+        }
+    }
+
+    private void bindStaticIpToVmNicParam(VmNicParam vmNicParam, StaticIpTagContext staticIpTags) {
+        if (staticIpTags == null) {
+            return;
+        }
+
+        if (StringUtils.isEmpty(vmNicParam.getIp()) && !staticIpTags.ipv4.isEmpty()) {
+            vmNicParam.setIp(staticIpTags.ipv4.pollFirst());
+        }
+        if (!StringUtils.isEmpty(vmNicParam.getIp())) {
+            fillIpv4NetworkInfo(vmNicParam, staticIpTags);
+        }
+
+        if (StringUtils.isEmpty(vmNicParam.getIp6()) && !staticIpTags.ipv6.isEmpty()) {
+            vmNicParam.setIp6(staticIpTags.ipv6.pollFirst());
+        }
+        if (!StringUtils.isEmpty(vmNicParam.getIp6())) {
+            fillIpv6NetworkInfo(vmNicParam, staticIpTags);
+        }
+    }
+
+    private void fillIpv4NetworkInfo(VmNicParam vmNicParam, StaticIpTagContext staticIpTags) {
+        if (StringUtils.isEmpty(vmNicParam.getGateway())) {
+            vmNicParam.setGateway(staticIpTags.ipv4Gateway);
+        }
+        if (StringUtils.isEmpty(vmNicParam.getNetmask())) {
+            vmNicParam.setNetmask(staticIpTags.ipv4Netmask);
+        }
+    }
+
+    private void fillIpv6NetworkInfo(VmNicParam vmNicParam, StaticIpTagContext staticIpTags) {
+        if (StringUtils.isEmpty(vmNicParam.getIpv6Gateway())) {
+            vmNicParam.setIpv6Gateway(staticIpTags.ipv6Gateway);
+        }
+        if (vmNicParam.getIpv6Prefix() == null) {
+            vmNicParam.setIpv6Prefix(staticIpTags.ipv6Prefix);
+        }
+    }
+
+    private String normalizeIpv6(String ip6) {
+        if (StringUtils.isEmpty(ip6)) {
+            return null;
+        }
+
+        ip6 = IPv6NetworkUtils.ipv6TagValueToAddress(ip6);
+        return IPv6NetworkUtils.isIpv6Address(ip6) ? IPv6NetworkUtils.getIpv6AddressCanonicalString(ip6) : null;
+    }
+
+    private static class StaticIpTagContext {
+        Deque<String> ipv4 = new ArrayDeque<>();
+        Deque<String> ipv6 = new ArrayDeque<>();
+        String ipv4Gateway;
+        String ipv4Netmask;
+        String ipv6Gateway;
+        Integer ipv6Prefix;
+        boolean hasIpv4;
+        boolean hasIpv6;
     }
 
 }

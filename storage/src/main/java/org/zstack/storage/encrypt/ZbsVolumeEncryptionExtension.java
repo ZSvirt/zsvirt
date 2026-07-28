@@ -33,24 +33,28 @@ public class ZbsVolumeEncryptionExtension implements ZbsVolumeEncryptionExtensio
     @Override
     public void createEncryptedEmptyVolume(ZbsVolumeEncryptionBackend backend, CreateVolumeSpec spec,
                                            ReturnValueCompletion<VolumeStats> completion) {
+        backend.validateEncryptionSupported();
         emptyVolumeCreator.create(backend, spec, completion);
     }
 
     @Override
     public void cloneEncryptedVolumeFromImage(ZbsVolumeEncryptionBackend backend, String srcInstallPath,
                                               CreateVolumeSpec dst, ReturnValueCompletion<VolumeStats> completion) {
+        backend.validateEncryptionSupported();
         volumeCloner.cloneFromImage(backend, srcInstallPath, dst, completion);
     }
 
     @Override
     public void copyEncryptedVolumeFromSnapshot(ZbsVolumeEncryptionBackend backend, String srcInstallPath,
                                                 CreateVolumeSpec dst, ReturnValueCompletion<VolumeStats> completion) {
+        backend.validateEncryptionSupported();
         snapshotVolumeCopier.copy(backend, srcInstallPath, dst, completion);
     }
 
     @Override
     public void encryptVolumeBits(ZbsVolumeEncryptionBackend backend, EncryptVolumeBitsOnPrimaryStorageMsg msg,
                                   ReturnValueCompletion<EncryptVolumeBitsOnPrimaryStorageReply> completion) {
+        backend.validateEncryptionSupported();
         encryptInPlaceHandler.encrypt(backend, msg, completion);
     }
 
@@ -62,9 +66,10 @@ public class ZbsVolumeEncryptionExtension implements ZbsVolumeEncryptionExtensio
     }
 
     @Override
-    public void resizeEncryptedVolume(String primaryStorageUuid, VolumeInventory volume, long size,
+    public void resizeEncryptedVolume(ZbsVolumeEncryptionBackend backend, VolumeInventory volume, long size,
                                       ReturnValueCompletion<VolumeStats> completion) {
-        volumeResizer.resize(primaryStorageUuid, volume, size, completion);
+        backend.validateEncryptionSupported();
+        volumeResizer.resize(backend.getPrimaryStorageUuid(), volume, size, completion);
     }
 
     @Override

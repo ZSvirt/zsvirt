@@ -214,6 +214,7 @@ class ZbsVolumeEncryptionCase extends SubCase {
                 new StubVolumeEncryptedResourceKeyBackend(keyProviderUuid: keyProviderUuid)
         List<String> deletedPaths = []
         ZbsVolumeEncryptionBackend backend = [
+                validateEncryptionSupported: { },
                 getPrimaryStorageUuid  : { ps.uuid },
                 buildConfiguredVolumePath: { String volumeName -> installPath },
                 createLuksBackingVolume: { String path, long size, ReturnValueCompletion<String> completion ->

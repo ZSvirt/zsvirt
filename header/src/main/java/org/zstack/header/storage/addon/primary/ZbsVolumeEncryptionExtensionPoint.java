@@ -28,7 +28,7 @@ public interface ZbsVolumeEncryptionExtensionPoint {
     void convertVolumeEncryption(ZbsVolumeEncryptionBackend backend, ConvertVolumeEncryptionOnPrimaryStorageMsg msg,
                                  ReturnValueCompletion<ConvertVolumeEncryptionOnPrimaryStorageReply> completion);
 
-    void resizeEncryptedVolume(String primaryStorageUuid, VolumeInventory volume, long size,
+    void resizeEncryptedVolume(ZbsVolumeEncryptionBackend backend, VolumeInventory volume, long size,
                                ReturnValueCompletion<VolumeStats> completion);
 
     void beforeTakeSnapshot(String primaryStorageUuid, VolumeVO volume, VolumeSnapshotInventory snapshot);

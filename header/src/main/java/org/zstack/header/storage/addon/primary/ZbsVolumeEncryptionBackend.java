@@ -5,6 +5,8 @@ import org.zstack.header.core.ReturnValueCompletion;
 import org.zstack.header.volume.VolumeStats;
 
 public interface ZbsVolumeEncryptionBackend {
+    void validateEncryptionSupported();
+
     String getPrimaryStorageUuid();
 
     String buildConfiguredVolumePath(String volumeName);

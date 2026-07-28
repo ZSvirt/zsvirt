@@ -880,7 +880,7 @@ public class ZbsStorageController implements PrimaryStorageControllerSvc, Primar
                 comp.fail(operr("cannot find ZBS volume encryption extension"));
                 return;
             }
-            exts.get(0).resizeEncryptedVolume(self.getUuid(), volume, size, comp);
+            exts.get(0).resizeEncryptedVolume(encryptionBackend(), volume, size, comp);
             return;
         }
 

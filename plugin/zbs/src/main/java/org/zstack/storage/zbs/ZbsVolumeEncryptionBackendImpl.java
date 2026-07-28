@@ -42,6 +42,16 @@ class ZbsVolumeEncryptionBackendImpl implements ZbsVolumeEncryptionBackend {
     }
 
     @Override
+    public void validateEncryptionSupported() {
+        String version = addonInfo.getClusterInfo() == null ? null : addonInfo.getClusterInfo().getVersion();
+        if (StringUtils.isBlank(version) || !ZbsConstants.MEGABYTE_UNIT.equals(getSizeUnit(version))) {
+            throw new OperationFailureException(operr(
+                    "ZBS volume encryption requires ZBS version[%s] or later, but current version is[%s]",
+                    ZbsConstants.MEGABYTE_SUPPORTED_VERSION, version));
+        }
+    }
+
+    @Override
     public String getPrimaryStorageUuid() {
         return primaryStorageUuid;
     }

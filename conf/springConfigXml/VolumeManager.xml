@@ -96,6 +96,9 @@
     <bean id="DummyVolumeEncryptedResourceKeyBackend"
           class="org.zstack.storage.encrypt.DummyVolumeEncryptedResourceKeyBackend"/>
 
+    <bean id="DummyVolumeBackupEncryptionConversionCommitter"
+          class="org.zstack.storage.encrypt.DummyVolumeBackupEncryptionConversionCommitter"/>
+
     <bean id="VolumeInPlaceEncryptor" class="org.zstack.storage.volume.VolumeInPlaceEncryptor"/>
 
     <bean id="VolumeEncryptedSecretHelper" class="org.zstack.storage.encrypt.VolumeEncryptedSecretHelper"/>

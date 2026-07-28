@@ -25,6 +25,7 @@ import org.zstack.core.workflow.FlowChainBuilder;
 import org.zstack.core.workflow.ShareFlow;
 import org.zstack.core.workflow.SimpleFlowChain;
 import org.zstack.header.core.*;
+import org.zstack.header.core.encrypt.CryptoServiceConstant;
 import org.zstack.header.core.workflow.*;
 import org.zstack.header.errorcode.ErrorCode;
 import org.zstack.header.errorcode.ErrorCodeList;
@@ -35,6 +36,7 @@ import org.zstack.header.host.*;
 import org.zstack.header.image.*;
 import org.zstack.header.message.APIDeleteMessage.DeletionMode;
 import org.zstack.header.message.*;
+import org.zstack.header.storage.backup.*;
 import org.zstack.header.storage.primary.*;
 import org.zstack.header.storage.snapshot.*;
 import org.zstack.header.storage.snapshot.group.*;
@@ -119,6 +121,8 @@ public class VolumeBase extends AbstractVolume implements Volume {
     private VolumeEncryptedResourceKeyBackend volumeEncryptedResourceKeyBackend;
     @Autowired
     private VolumeEncryptedSecretHelper volumeEncryptedSecretHelper;
+    @Autowired
+    private VolumeBackupEncryptionConversionCommitter volumeBackupEncryptionConversionCommitter;
 
     public VolumeBase(VolumeVO vo) {
         self = vo;
@@ -3390,12 +3394,14 @@ public class VolumeBase extends AbstractVolume implements Volume {
         List<ConvertVolumeEncryptionOnPrimaryStorageMsg.VolumeEncryptionConversionItem> items;
     }
 
+    // TODO: Move volume encryption conversion into the volume encryption module and backup conversion into the backup encryption module.
     private void changeVolumeEncryption(boolean targetEncrypted, ReturnValueCompletion<VolumeInventory> completion) {
         boolean sourceEncrypted = self.isEncrypted();
         Integer sourceKeyVersion = sourceEncrypted ? volumeEncryptedResourceKeyBackend.findKeyVersionByVolume(self.getUuid()) : null;
         String sourceSecretHostUuid = sourceEncrypted ? resolveVolumeSecretHostUuid(self) : null;
         String sourceSecretVmUuid = StringUtils.defaultIfBlank(self.getVmInstanceUuid(), self.getUuid());
         AtomicReference<VolumeEncryptionConversionContext> conversionContext = new AtomicReference<>();
+        AtomicReference<VolumeBackupEncryptionConversionResult> backupConversionResult = new AtomicReference<>();
 
         FlowChain chain = FlowChainBuilder.newShareFlowChain();
         chain.setName(String.format("change-volume-%s-encryption-to-%s", self.getUuid(), targetEncrypted));
@@ -3414,7 +3420,24 @@ public class VolumeBase extends AbstractVolume implements Volume {
                             trigger.fail(errorCode);
                             return;
                         }
-                        trigger.next();
+                        if (!volumeBackupEncryptionConversionCommitter.isAvailable()) {
+                            trigger.next();
+                            return;
+                        }
+                        ValidateVolumeBackupEncryptionConversionMsg vmsg = new ValidateVolumeBackupEncryptionConversionMsg();
+                        vmsg.setVolume(getSelfInventory());
+                        vmsg.setTargetEncrypted(targetEncrypted);
+                        bus.makeLocalServiceId(vmsg, CryptoServiceConstant.SERVICE_ID);
+                        bus.send(vmsg, new CloudBusCallBack(trigger) {
+                            @Override
+                            public void run(MessageReply reply) {
+                                if (!reply.isSuccess()) {
+                                    trigger.fail(reply.getError());
+                                    return;
+                                }
+                                trigger.next();
+                            }
+                        });
                     }
                 });
 
@@ -3478,13 +3501,52 @@ public class VolumeBase extends AbstractVolume implements Volume {
                 });
 
                 flow(new Flow() {
+                    String __name__ = "volume-backup-encryption-conversion";
+
+                    @Override
+                    public void run(FlowTrigger trigger, Map data) {
+                        if (!volumeBackupEncryptionConversionCommitter.isAvailable()) {
+                            trigger.next();
+                            return;
+                        }
+                        ConvertVolumeBackupEncryptionMsg cmsg = new ConvertVolumeBackupEncryptionMsg();
+                        cmsg.setVolume(getSelfInventory());
+                        cmsg.setTargetEncrypted(targetEncrypted);
+                        bus.makeLocalServiceId(cmsg, CryptoServiceConstant.SERVICE_ID);
+                        bus.send(cmsg, new CloudBusCallBack(trigger) {
+                            @Override
+                            public void run(MessageReply reply) {
+                                if (!reply.isSuccess()) {
+                                    trigger.fail(reply.getError());
+                                    return;
+                                }
+                                ConvertVolumeBackupEncryptionReply cr = reply.castReply();
+                                backupConversionResult.set(cr.getResult());
+                                trigger.next();
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void rollback(FlowRollback trigger, Map data) {
+                        deleteVolumeBackupConversionPlaceholders(backupConversionResult.get(),
+                                new NoErrorCompletion(trigger) {
+                                    @Override
+                                    public void done() {
+                                        trigger.rollback();
+                                    }
+                                });
+                    }
+                });
+
+                flow(new Flow() {
                     String __name__ = "update-volume-encryption-in-db";
 
                     @Override
                     public void run(FlowTrigger trigger, Map data) {
                         VolumeEncryptionConversionContext ctx = conversionContext.get();
                         updateVolumeEncryptionConversionInDb(targetEncrypted, ctx.snapshots, ctx.oldAndNewInstallPaths,
-                                (Map<String, Long>) data.get("actualSizes"));
+                                (Map<String, Long>) data.get("actualSizes"), backupConversionResult.get());
                         try {
                             refreshVO();
                         } catch (RuntimeException e) {
@@ -3497,6 +3559,70 @@ public class VolumeBase extends AbstractVolume implements Volume {
                     @Override
                     public void rollback(FlowRollback trigger, Map data) {
                         trigger.rollback();
+                    }
+                });
+
+                flow(new NoRollbackFlow() {
+                    String __name__ = "refresh-volume-backup-metadata";
+
+                    @Override
+                    public void run(FlowTrigger trigger, Map data) {
+                        VolumeBackupEncryptionConversionResult result = backupConversionResult.get();
+                        if (result == null || CollectionUtils.isEmpty(result.getConvertedBackupUuids())) {
+                            trigger.next();
+                            return;
+                        }
+
+                        RefreshVolumeBackupMetadataMsg rmsg = new RefreshVolumeBackupMetadataMsg();
+                        rmsg.setBackupUuids(result.getConvertedBackupUuids());
+                        bus.makeLocalServiceId(rmsg, CryptoServiceConstant.SERVICE_ID);
+                        bus.send(rmsg, new CloudBusCallBack(trigger) {
+                            @Override
+                            public void run(MessageReply reply) {
+                                if (!reply.isSuccess()) {
+                                    logger.warn(String.format("failed to refresh converted volume backup metadata for volume[uuid:%s]: %s",
+                                            self.getUuid(), reply.getError().getReadableDetails()));
+                                }
+                                trigger.next();
+                            }
+                        });
+                    }
+                });
+
+                flow(new NoRollbackFlow() {
+                    String __name__ = "cleanup-old-volume-backup-bits";
+
+                    @Override
+                    public void run(FlowTrigger trigger, Map data) {
+                        VolumeBackupEncryptionConversionResult result = backupConversionResult.get();
+                        if (result == null || CollectionUtils.isEmpty(result.getDeleteOldBits())) {
+                            trigger.next();
+                            return;
+                        }
+
+                        new While<>(result.getDeleteOldBits()).each((bits, whileCompletion) -> {
+                            DeleteBitsOnBackupStorageMsg dmsg = new DeleteBitsOnBackupStorageMsg();
+                            dmsg.setBackupStorageUuid(bits.getBackupStorageUuid());
+                            dmsg.setInstallPath(bits.getInstallPath());
+                            bus.makeTargetServiceIdByResourceUuid(dmsg, BackupStorageConstant.SERVICE_ID,
+                                    bits.getBackupStorageUuid());
+                            bus.send(dmsg, new CloudBusCallBack(whileCompletion) {
+                                @Override
+                                public void run(MessageReply reply) {
+                                    if (!reply.isSuccess()) {
+                                        logger.warn(String.format("failed to delete old volume backup bits[backupStorageUuid:%s, installPath:%s]: %s",
+                                                bits.getBackupStorageUuid(), bits.getInstallPath(),
+                                                reply.getError().getReadableDetails()));
+                                    }
+                                    whileCompletion.done();
+                                }
+                            });
+                        }).run(new WhileDoneCompletion(trigger) {
+                            @Override
+                            public void done(ErrorCodeList errorCodeList) {
+                                trigger.next();
+                            }
+                        });
                     }
                 });
 
@@ -3521,29 +3647,6 @@ public class VolumeBase extends AbstractVolume implements Volume {
                             VolumeSystemTags.VOLUME_LIBVIRT_SECRET_HOST.delete(self.getUuid(), VolumeVO.class);
                         } catch (RuntimeException e) {
                             logger.warn(String.format("failed to cleanup old libvirt secret for volume[uuid:%s] after encryption conversion: %s",
-                                    self.getUuid(), e.getMessage()), e);
-                        }
-                        trigger.next();
-                    }
-                });
-
-                flow(new NoRollbackFlow() {
-                    String __name__ = "cleanup-plain-resource-key-ref";
-
-                    @Override
-                    public void run(FlowTrigger trigger, Map data) {
-                        if (targetEncrypted) {
-                            trigger.next();
-                            return;
-                        }
-
-                        try {
-                            volumeEncryptedResourceKeyBackend.detachKeyProviderFromVolume(self.getUuid());
-                            for (VolumeSnapshotVO snapshot : conversionContext.get().snapshots) {
-                                volumeEncryptedResourceKeyBackend.detachKeyProviderFromSnapshot(snapshot.getUuid());
-                            }
-                        } catch (RuntimeException e) {
-                            logger.warn(String.format("failed to cleanup plain resource key refs for volume[uuid:%s] after encryption conversion: %s",
                                     self.getUuid(), e.getMessage()), e);
                         }
                         trigger.next();
@@ -3827,6 +3930,9 @@ public class VolumeBase extends AbstractVolume implements Volume {
             dmsg.setInstallPath(item.getTargetInstallPath());
             dmsg.setBitsUuid(item.getResourceUuid());
             dmsg.setBitsType(item.getResourceType());
+            // target shares resourceUuid with the source volume; deleteResourceRefVO matches by
+            // resourceUuid only, so skip it here to avoid dropping the source's still-valid ref
+            dmsg.setFromRecycle(true);
             dmsg.setHypervisorType(VolumeFormat.getMasterHypervisorTypeByVolumeFormat(self.getFormat()).toString());
             bus.makeTargetServiceIdByResourceUuid(dmsg, PrimaryStorageConstant.SERVICE_ID, self.getPrimaryStorageUuid());
             bus.send(dmsg);
@@ -3835,7 +3941,8 @@ public class VolumeBase extends AbstractVolume implements Volume {
 
     private void updateVolumeEncryptionConversionInDb(boolean targetEncrypted, List<VolumeSnapshotVO> snapshots,
                                                       Map<String, String> oldAndNewInstallPaths,
-                                                      Map<String, Long> actualSizes) {
+                                                      Map<String, Long> actualSizes,
+                                                      VolumeBackupEncryptionConversionResult backupResult) {
         new SQLBatch() {
             @Override
             protected void scripts() {
@@ -3863,8 +3970,39 @@ public class VolumeBase extends AbstractVolume implements Volume {
                 if (targetEncrypted && !convertedSnapshotInstallPaths.isEmpty()) {
                     volumeEncryptedResourceKeyBackend.copyVolumeKeyRefToSnapshots(self.getUuid(), convertedSnapshotInstallPaths.keySet());
                 }
+
+                if (backupResult != null) {
+                    volumeBackupEncryptionConversionCommitter.commitVolumeBackupEncryptionConversion(backupResult);
+                }
+                if (!targetEncrypted) {
+                    volumeEncryptedResourceKeyBackend.detachKeyProviderFromVolume(self.getUuid());
+                    convertedSnapshotInstallPaths.keySet().forEach(
+                            volumeEncryptedResourceKeyBackend::detachKeyProviderFromSnapshot);
+                }
             }
         }.execute();
+    }
+
+    private void deleteVolumeBackupConversionPlaceholders(VolumeBackupEncryptionConversionResult result,
+                                                           NoErrorCompletion completion) {
+        if (result == null || CollectionUtils.isEmpty(result.getPlaceholderBackupUuids())) {
+            completion.done();
+            return;
+        }
+
+        DeleteVolumeBackupConversionPlaceholdersMsg dmsg = new DeleteVolumeBackupConversionPlaceholdersMsg();
+        dmsg.setPlaceholderBackupUuids(result.getPlaceholderBackupUuids());
+        bus.makeLocalServiceId(dmsg, CryptoServiceConstant.SERVICE_ID);
+        bus.send(dmsg, new CloudBusCallBack(completion) {
+            @Override
+            public void run(MessageReply reply) {
+                if (!reply.isSuccess()) {
+                    logger.warn(String.format("failed to delete volume backup conversion placeholders for volume[uuid:%s]: %s",
+                            self.getUuid(), reply.getError().getReadableDetails()));
+                }
+                completion.done();
+            }
+        });
     }
 
     private void updateConvertedSnapshotPaths(Map<String, String> snapshotInstallPaths, boolean targetEncrypted) {

@@ -17,6 +17,7 @@ import java.util.Map;
 public class VolumeBackupKvmCommands {
     public static final String TAKE_VOLUME_BACKUP_PATH = "/vm/volume/takebackup";
     public static final String TAKE_VOLUMES_BACKUP_PATH = "/vm/volumes/takebackup";
+    public static final String CONVERT_VOLUME_BACKUP_PATH = "/vm/volumes/backup/convertencryption";
 
     public static final String CANCEL_VOLUME_BACKUP_JOBS_PATH = "/vm/volume/cancel/backupjobs";
     public static final String CANCEL_VOLUME_BACKUP_JOB_PATH = "/vm/volume/cancel/backupjob";
@@ -484,6 +485,103 @@ public class VolumeBackupKvmCommands {
 
         public void setBackupInfos(List<VolumeBackupInfo> backupInfos) {
             this.backupInfos = backupInfos;
+        }
+    }
+
+    public static class ConvertVolumeBackupCmd extends KVMAgentCommands.AgentCommand implements HasThreadContext, Serializable {
+        private String taskUuid;
+        private String bsAgentHost;
+        private int bsAgentPort;
+        private String nbdHost;
+        private String targetChainName;
+        private boolean targetEncrypted;
+        private int uploadConcurrency;
+        @NoLogging
+        private String encryptedDek;
+        private List<String> leafInstallPaths;
+
+        public String getTaskUuid() {
+            return taskUuid;
+        }
+
+        public void setTaskUuid(String taskUuid) {
+            this.taskUuid = taskUuid;
+        }
+
+        public String getBsAgentHost() {
+            return bsAgentHost;
+        }
+
+        public void setBsAgentHost(String bsAgentHost) {
+            this.bsAgentHost = bsAgentHost;
+        }
+
+        public int getBsAgentPort() {
+            return bsAgentPort;
+        }
+
+        public void setBsAgentPort(int bsAgentPort) {
+            this.bsAgentPort = bsAgentPort;
+        }
+
+        public String getNbdHost() {
+            return nbdHost;
+        }
+
+        public void setNbdHost(String nbdHost) {
+            this.nbdHost = nbdHost;
+        }
+
+        public String getTargetChainName() {
+            return targetChainName;
+        }
+
+        public void setTargetChainName(String targetChainName) {
+            this.targetChainName = targetChainName;
+        }
+
+        public boolean isTargetEncrypted() {
+            return targetEncrypted;
+        }
+
+        public void setTargetEncrypted(boolean targetEncrypted) {
+            this.targetEncrypted = targetEncrypted;
+        }
+
+        public int getUploadConcurrency() {
+            return uploadConcurrency;
+        }
+
+        public void setUploadConcurrency(int uploadConcurrency) {
+            this.uploadConcurrency = uploadConcurrency;
+        }
+
+        public String getEncryptedDek() {
+            return encryptedDek;
+        }
+
+        public void setEncryptedDek(String encryptedDek) {
+            this.encryptedDek = encryptedDek;
+        }
+
+        public List<String> getLeafInstallPaths() {
+            return leafInstallPaths;
+        }
+
+        public void setLeafInstallPaths(List<String> leafInstallPaths) {
+            this.leafInstallPaths = leafInstallPaths;
+        }
+    }
+
+    public static class ConvertVolumeBackupResponse extends KVMAgentCommands.AgentResponse {
+        private Map<String, String> installPaths;
+
+        public Map<String, String> getInstallPaths() {
+            return installPaths;
+        }
+
+        public void setInstallPaths(Map<String, String> installPaths) {
+            this.installPaths = installPaths;
         }
     }
 

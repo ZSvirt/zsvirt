@@ -45,6 +45,10 @@
         </zstack:plugin>
     </bean>
 
+    <bean id="VolumeBackupEncryptionConversion" class="org.zstack.crypto.volumebackup.VolumeBackupEncryptionConversion"/>
+
+    <bean id="VolumeBackupEncryptionConversionCommitter" class="org.zstack.crypto.volumebackup.VolumeBackupEncryptionConversionCommitterImpl" primary="true"/>
+
     <bean id="BackupImageDownloadExtension" class="org.zstack.crypto.volumebackup.BackupImageDownloadExtension"/>
 
     <bean id="ZbsVolumeBackupImageDownloadHandler" class="org.zstack.crypto.volumebackup.ZbsVolumeBackupImageDownloadHandler"/>

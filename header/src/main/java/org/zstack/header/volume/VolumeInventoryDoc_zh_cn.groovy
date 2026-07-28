@@ -139,6 +139,6 @@ doc {
 		name "encrypted"
 		desc ""
 		type "Boolean"
-		since "zsv 5.0.0"
+		since "1.0.1, zsv 5.1.0"
 	}
 }

@@ -67,6 +67,7 @@ import org.zstack.resourceconfig.ResourceConfigFacade;
 import org.zstack.storage.snapshot.group.RevertVmFromSnapShotGroupExtension;
 import org.zstack.storage.snapshot.group.VolumeSnapshotGroupConstant;
 import org.zstack.tag.SystemTagCreator;
+import org.zstack.utils.ExceptionDSL;
 import org.zstack.utils.Utils;
 import org.zstack.utils.gson.JSONObjectUtil;
 import org.zstack.utils.logging.CLogger;
@@ -78,6 +79,7 @@ import org.zstack.utils.path.PathUtil;
 import javax.persistence.TypedQuery;
 import java.io.File;
 import java.io.IOException;
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -208,6 +210,25 @@ public class GuestToolsManagerImpl extends AbstractService implements GuestTools
         }
 
         String toolsVersion = VmSystemTags.VM_GUEST_TOOLS.getTokenByResourceUuid(vmUuid, VmSystemTags.VM_GUEST_TOOLS_VERSION_TOKEN);
+        try {
+            return createGuestToolsStateIfAbsent(vmUuid, toolsVersion);
+        } catch (RuntimeException e) {
+            GuestToolsStateVO existing = dbf.findByUuid(vmUuid, GuestToolsStateVO.class);
+            if (existing != null) {
+                logger.debug(String.format("GuestToolsStateVO for vm[uuid:%s] was created concurrently, continue guest tools state update",
+                        vmUuid));
+                return existing;
+            }
+            throw e;
+        }
+    }
+
+    private GuestToolsStateVO createGuestToolsStateIfAbsent(String vmUuid, String toolsVersion) {
+        GuestToolsStateVO existing = dbf.findByUuid(vmUuid, GuestToolsStateVO.class);
+        if (existing != null) {
+            return existing;
+        }
+
         GuestToolsStateVO stateVO = initGuestToolsStateByGuestToolsVersion(vmUuid, toolsVersion);
         try {
             stateVO = dbf.persistAndRefresh(stateVO);
@@ -215,7 +236,10 @@ public class GuestToolsManagerImpl extends AbstractService implements GuestTools
                     vmUuid, JSONObjectUtil.toJsonString(stateVO)));
             return stateVO;
         } catch (RuntimeException e) {
-            GuestToolsStateVO existing = dbf.findByUuid(vmUuid, GuestToolsStateVO.class);
+            if (!ExceptionDSL.isCausedBy(e, SQLIntegrityConstraintViolationException.class, "Duplicate entry")) {
+                throw e;
+            }
+            existing = dbf.findByUuid(vmUuid, GuestToolsStateVO.class);
             if (existing != null) {
                 logger.debug(String.format("GuestToolsStateVO for vm[uuid:%s] was created concurrently, continue guest tools state update",
                         vmUuid));
@@ -2987,10 +3011,9 @@ public class GuestToolsManagerImpl extends AbstractService implements GuestTools
             toolsVersion = ImageSystemTags.IMAGE_GUEST_TOOLS.getTokenByResourceUuid(inv.getImageUuid(), ImageSystemTags.IMAGE_GUEST_TOOLS_VERSION_TOKEN);
         }
 
-        GuestToolsStateVO vo = initGuestToolsStateByGuestToolsVersion(inv.getUuid(), toolsVersion);
-        dbf.persist(vo);
+        GuestToolsStateVO vo = createGuestToolsStateIfAbsent(inv.getUuid(), toolsVersion);
 
-        logger.debug(String.format("create GuestToolsStateVO after vm create: %s",
+        logger.debug(String.format("ensure GuestToolsStateVO after vm create: %s",
                 JSONObjectUtil.toJsonString(vo)));
     }
 

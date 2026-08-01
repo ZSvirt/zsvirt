@@ -3321,7 +3321,17 @@ public class VolumeBase extends AbstractVolume implements Volume {
         cmsg.setVolumeUuid(msg.getUuid());
         cmsg.setEncrypted(msg.isEncrypted());
         bus.makeTargetServiceIdByResourceUuid(cmsg, VolumeConstant.SERVICE_ID, msg.getVolumeUuid());
-        bus.send(cmsg, new CloudBusCallBack(msg) {
+
+        NeedReplyMessage callMsg = cmsg;
+        if (self.getVmInstanceUuid() != null) {
+            ChangeVolumeEncryptionOverlayVmMsg omsg = new ChangeVolumeEncryptionOverlayVmMsg();
+            omsg.setVmInstanceUuid(self.getVmInstanceUuid());
+            omsg.setMessage(cmsg);
+            bus.makeTargetServiceIdByResourceUuid(omsg, VmInstanceConstant.SERVICE_ID, self.getVmInstanceUuid());
+            callMsg = omsg;
+        }
+
+        bus.send(callMsg, new CloudBusCallBack(msg) {
             @Override
             public void run(MessageReply reply) {
                 APIChangeVolumeEncryptionEvent evt = new APIChangeVolumeEncryptionEvent(msg.getId());

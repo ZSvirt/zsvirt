@@ -182,6 +182,24 @@ public class CbtBackupKvmBackend implements CbtBackupHypervisorBackend {
                 .param("taskUuid", vo.getUuid())
                 .list();
 
+        doDisableVolumeCbtBackup(vmUuid, hostUuid, records, completion);
+    }
+
+    @Override
+    public void rollbackVolumeCbtBackup(String vmUuid, String hostUuid, List<VolumeCbtBackupInfo> volumeInfos, Completion completion) {
+        List<VolumeCbtBackupRecordVO> records = new ArrayList<VolumeCbtBackupRecordVO>();
+        for (VolumeCbtBackupInfo info : volumeInfos) {
+            VolumeCbtBackupRecordVO record = new VolumeCbtBackupRecordVO();
+            record.setScratchNodeName(info.getScratchNodeName());
+            record.setTarget(info.getTarget());
+            record.setLastBitmapName(info.getBitmapName());
+            records.add(record);
+        }
+
+        doDisableVolumeCbtBackup(vmUuid, hostUuid, records, completion);
+    }
+
+    private void doDisableVolumeCbtBackup(String vmUuid, String hostUuid, List<VolumeCbtBackupRecordVO> records, Completion completion) {
         DisableVolumeCbtBackupCmd cmd = new DisableVolumeCbtBackupCmd();
         cmd.vmUuid = vmUuid;
         cmd.records = records;

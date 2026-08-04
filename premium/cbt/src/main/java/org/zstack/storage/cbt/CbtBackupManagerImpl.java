@@ -682,7 +682,13 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
 
             @Override
             public void rollback(FlowRollback trigger, Map data) {
-                backend.disableVolumeCbtBackup(taskVO, vmUuid, hostUuid, new Completion(trigger) {
+                boolean backupTaken = volumeInfos.stream().anyMatch(info -> !Strings.isNullOrEmpty(info.getScratchNodeName()));
+                if (!backupTaken) {
+                    trigger.rollback();
+                    return;
+                }
+
+                backend.rollbackVolumeCbtBackup(vmUuid, hostUuid, volumeInfos, new Completion(trigger) {
                     @Override
                     public void success() {
                         trigger.rollback();
@@ -690,6 +696,8 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
 
                     @Override
                     public void fail(ErrorCode errorCode) {
+                        logger.warn(String.format("rollback cbt[uuid:%s] backup for vm[uuid:%s] on host[uuid:%s] failed, continue rollback. %s",
+                                taskVO.getUuid(), vmUuid, hostUuid, errorCode));
                         trigger.rollback();
                     }
                 });

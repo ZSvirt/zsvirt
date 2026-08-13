@@ -473,6 +473,12 @@
         </zstack:plugin>
     </bean>
 
+    <bean id="FstabNonBlockingMountOptionsUpdaterExtension" class="org.zstack.storage.primary.FstabNonBlockingMountOptionsUpdaterExtension">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.managementnode.ManagementNodeReadyExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
     <bean id="MevocoVmHostFileAutoCompleter" class="org.zstack.compute.vm.vmfiles.MevocoVmHostFileAutoCompleter">
         <zstack:plugin>
             <zstack:extension interface="org.zstack.header.apimediator.GlobalApiMessageInterceptor"/>

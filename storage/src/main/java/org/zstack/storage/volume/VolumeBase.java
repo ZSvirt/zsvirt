@@ -40,7 +40,11 @@ import org.zstack.header.storage.snapshot.*;
 import org.zstack.header.storage.snapshot.group.*;
 import org.zstack.header.tag.SystemTagVO;
 import org.zstack.header.tag.SystemTagVO_;
+import org.zstack.header.tpm.entity.TpmVO;
+import org.zstack.header.tpm.entity.TpmVO_;
 import org.zstack.header.vm.*;
+import org.zstack.header.tpm.TpmConstants;
+import org.zstack.header.vm.additions.VmHostBackupFileDeletionMsg;
 import org.zstack.header.vm.additions.VmHostBackupFileVO;
 import org.zstack.header.vm.additions.VmHostBackupFileVO_;
 import org.zstack.header.vm.devices.VmInstanceResourceMetadataManager;
@@ -48,9 +52,11 @@ import org.zstack.header.volume.*;
 import org.zstack.header.volume.VolumeConstant.Capability;
 import org.zstack.header.volume.VolumeDeletionPolicyManager.VolumeDeletionPolicy;
 import org.zstack.identity.AccountManager;
+import org.zstack.header.tpm.message.BackupTpmEncryptionKeyMsg;
 import org.zstack.storage.primary.EstimateVolumeTemplateSizeOnPrimaryStorageMsg;
 import org.zstack.storage.primary.EstimateVolumeTemplateSizeOnPrimaryStorageReply;
 import org.zstack.storage.primary.PrimaryStorageGlobalConfig;
+import org.zstack.storage.snapshot.VolumeSnapshotGroupSystemTags;
 import org.zstack.storage.snapshot.group.VolumeSnapshotGroupOperationValidator;
 import org.zstack.storage.snapshot.reference.VolumeSnapshotReferenceUtils;
 import org.zstack.tag.SystemTagCreator;
@@ -71,6 +77,7 @@ import static org.zstack.core.Platform.*;
 import static org.zstack.storage.volume.VolumeSystemTags.VOLUME_PROVISIONING_STRATEGY;
 import static org.zstack.storage.volume.VolumeSystemTags.VOLUME_PROVISIONING_STRATEGY_TOKEN;
 import static org.zstack.utils.CollectionDSL.*;
+import static org.zstack.utils.CollectionUtils.transform;
 
 /**
  * Created with IntelliJ IDEA.
@@ -3094,6 +3101,7 @@ public class VolumeBase extends AbstractVolume implements Volume {
                 .filter(it -> it.isDisk() || msg.getConsistentType() == ConsistentType.Application
                         && it.getType().equals(VolumeType.Memory.toString()))
                 .collect(Collectors.toMap(VolumeInventory::getUuid, it -> it));
+        boolean withMemory = msg.getConsistentType() == ConsistentType.Application;
 
         for (VolumeInventory vol : vols.values()) {
             CreateVolumesSnapshotsJobStruct volumesSnapshotsJob = new CreateVolumesSnapshotsJobStruct();
@@ -3184,6 +3192,71 @@ public class VolumeBase extends AbstractVolume implements Volume {
                                 .update();
                     }
                     trigger.next();
+                })
+                .rollback(trigger -> {
+                    if (CollectionUtils.isEmpty(hostBackupFileUuidList)) {
+                        trigger.rollback();
+                        return;
+                    }
+
+                    new While<>(hostBackupFileUuidList).each((uuid, whileCompletion) -> {
+                        VmHostBackupFileDeletionMsg deletionMsg = new VmHostBackupFileDeletionMsg();
+                        deletionMsg.setUuid(uuid);
+                        deletionMsg.setForceDelete(true);
+                        bus.makeLocalServiceId(deletionMsg, VmInstanceConstant.SECURE_BOOT_SERVICE_ID);
+                        bus.send(deletionMsg, new CloudBusCallBack(whileCompletion) {
+                            @Override
+                            public void run(MessageReply reply) {
+                                if (reply.isSuccess()) {
+                                    whileCompletion.done();
+                                    return;
+                                }
+                                whileCompletion.addError(reply.getError());
+                                whileCompletion.done();
+                            }
+                        });
+                    }).run(new WhileDoneCompletion(trigger) {
+                        @Override
+                        public void done(ErrorCodeList errorCodeList) {
+                            if (errorCodeList.hasError()) {
+                                logger.warn("failed to delete some VmHostBackupFiles:\n" + String.join("\n",
+                                        transform(errorCodeList.getCauses(), ErrorCode::getReadableDetails)));
+                            }
+                            trigger.rollback();
+                        }
+                    });
+                })
+                .build())
+            .then(Flow.of("backup-encrypted-resource-key-ref-for-snapshot-group")
+                .skipIf(data -> CollectionUtils.isEmpty(hostBackupFileUuidList) || !withMemory)
+                .handle(trigger -> {
+                    String tpmUuid = Q.New(TpmVO.class)
+                            .eq(TpmVO_.vmInstanceUuid, vm.getUuid())
+                            .select(TpmVO_.uuid)
+                            .findValue();
+                    if (tpmUuid == null) {
+                        trigger.next();
+                        return;
+                    }
+
+                    tagMgr.createInherentSystemTag(resourceUuid,
+                            VolumeSnapshotGroupSystemTags.WITH_TPM.getTagFormat(),
+                            VolumeSnapshotGroupVO.class.getSimpleName());
+
+                    BackupTpmEncryptionKeyMsg backupMsg = new BackupTpmEncryptionKeyMsg();
+                    backupMsg.setSrcResourceUuid(tpmUuid);
+                    backupMsg.setDstResourceUuid(resourceUuid);
+                    bus.makeLocalServiceId(backupMsg, TpmConstants.SERVICE_ID);
+                    bus.send(backupMsg, new CloudBusCallBack(trigger) {
+                        @Override
+                        public void run(MessageReply reply) {
+                            if (!reply.isSuccess()) {
+                                trigger.fail(reply.getError());
+                                return;
+                            }
+                            trigger.next();
+                        }
+                    });
                 })
                 .build())
             .propagateExceptionTo(completion)

@@ -62,15 +62,27 @@ public class DummyTpmEncryptedResourceKeyBackend implements TpmEncryptedResource
     }
 
     @Override
-    public void backupEncryptedResourceKey(BackupEncryptedResourceKeyContent context) {
+    public void backupEncryptedResourceKey(BackupEncryptedResourceKeyContext context) {
         // do nothing
-        logger.debug("ignore backup encrypted resource key request for TPM uuid "
-                + context.srcTpmUuid + " -> VmHostBackupFileVO: " + context.dstVmHostBackupFileUuid);
+        logger.debug("ignore backup encrypted resource key request for src resource: "
+                + context.srcResourceUuid + " -> dest resource: " + context.dstResourceUuid);
+    }
+
+    @Override
+    public void restoreEncryptedResourceKey(RestoreEncryptedResourceKeyContext context) {
+        // do nothing
+        logger.debug("ignore restore encrypted resource key request for src resource: "
+                + context.srcResourceUuid + " -> dest resource: " + context.dstResourceUuid);
     }
 
     @Override
     public void cleanEncryptedResourceKey(String vmHostBackupFileUuid) {
         // do nothing
         logger.debug("ignore cleanup encrypted resource key request for VmHostBackupFileVO: " + vmHostBackupFileUuid);
+    }
+
+    @Override
+    public void cleanTpmKeyBackupEncryptedResourceKey(String tpmKeyBackupUuid) {
+        logger.debug("ignore cleanup encrypted resource key request for TpmKeyBackupVO: " + tpmKeyBackupUuid);
     }
 }

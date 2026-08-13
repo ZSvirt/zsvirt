@@ -4,7 +4,17 @@ import org.zstack.header.message.NeedReplyMessage;
 import org.zstack.header.tpm.api.APIAddTpmMsg;
 
 public class AddTpmMsg extends NeedReplyMessage {
+    /**
+     * Create new key with the provider uuid.
+     * "keyProviderUuid" and "resourceUuidKeyFrom" should not be set at the same time.
+     */
     private String keyProviderUuid;
+    /**
+     * Copy key from the resource uuid.
+     * "keyProviderUuid" and "resourceUuidKeyFrom" should not be set at the same time.
+     */
+    private String resourceUuidKeyFrom;
+
     private String vmInstanceUuid;
     /**
      * for creating TpmVO
@@ -17,6 +27,14 @@ public class AddTpmMsg extends NeedReplyMessage {
 
     public void setKeyProviderUuid(String keyProviderUuid) {
         this.keyProviderUuid = keyProviderUuid;
+    }
+
+    public String getResourceUuidKeyFrom() {
+        return resourceUuidKeyFrom;
+    }
+
+    public void setResourceUuidKeyFrom(String resourceUuidKeyFrom) {
+        this.resourceUuidKeyFrom = resourceUuidKeyFrom;
     }
 
     public String getVmInstanceUuid() {

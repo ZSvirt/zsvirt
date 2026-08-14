@@ -131,7 +131,7 @@ public class LogConfigurationManagerImpl extends AbstractService implements LogC
         applyLogConfiguration(msg.getStruct(), new ReturnValueCompletion<String>(msg) {
             @Override
             public void success(String value) {
-                reply.setValue(value);
+                reply.setValue(LogServerInventory.maskSensitiveConfiguration(value));
                 reply.setManagementNodeUuid(Platform.getManagementServerId());
                 bus.reply(msg, reply);
             }
@@ -210,10 +210,11 @@ public class LogConfigurationManagerImpl extends AbstractService implements LogC
         vo.setAccountUuid(msg.getSession().getAccountUuid());
         dbf.persist(vo);
 
-        applyLogServerConfigurationToAllNodes(LogServerInventory.valueOf(vo), new ReturnValueCompletion<List<ApplyLogConfigurationResult>>(completion) {
+        applyLogServerConfigurationToAllNodes(LogServerInventory.rawValueOf(vo), new ReturnValueCompletion<List<ApplyLogConfigurationResult>>(completion) {
             @Override
             public void success(List<ApplyLogConfigurationResult> returnValue) {
-                completion.success(LogServerInventory.valueOf(vo));
+                LogServerVO updated = dbf.findByUuid(vo.getUuid(), LogServerVO.class);
+                completion.success(LogServerInventory.valueOf(updated == null ? vo : updated));
             }
 
             @Override

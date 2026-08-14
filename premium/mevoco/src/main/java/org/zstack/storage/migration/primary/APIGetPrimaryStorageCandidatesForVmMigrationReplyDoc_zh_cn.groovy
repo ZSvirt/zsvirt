@@ -11,14 +11,14 @@ doc {
 		name "success"
 		desc ""
 		type "boolean"
-		since "0.6"
+		since "zsv 0.6"
 	}
 	ref {
 		name "error"
 		path "org.zstack.storage.migration.primary.APIGetPrimaryStorageCandidatesForVmMigrationReply.error"
-		desc "错误码，若不为null，则表示操作失败, 操作成功时该字段为null",false
+		desc "错误码，若不为null，则表示操作失败, 操作成功时该字段为null"
 		type "ErrorCode"
-		since "0.6"
+		since "zsv 0.6"
 		clz ErrorCode.class
 	}
 	ref {
@@ -26,7 +26,7 @@ doc {
 		path "org.zstack.storage.migration.primary.APIGetPrimaryStorageCandidatesForVmMigrationReply.inventories"
 		desc "null"
 		type "List"
-		since "0.6"
+		since "zsv 0.6"
 		clz PrimaryStorageInventory.class
 	}
 }

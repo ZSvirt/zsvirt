@@ -2,6 +2,7 @@ package org.zstack.log;
 
 import org.apache.logging.log4j.Level;
 import org.springframework.http.HttpMethod;
+import org.zstack.header.log.NoLogging;
 import org.zstack.header.message.APICreateMessage;
 import org.zstack.header.message.APIEvent;
 import org.zstack.header.message.APIMessage;
@@ -26,6 +27,7 @@ public class APIAddLogConfigurationMsg extends APICreateMessage implements APIAu
     private String type;
     @APIParam(validValues = {"OFF", "FATAL", "ERROR", "WARN", "INFO", "DEBUG", "TRACE", "ALL"}, required = false)
     private String level;
+    @NoLogging
     @APIParam
     private String configuration;
 

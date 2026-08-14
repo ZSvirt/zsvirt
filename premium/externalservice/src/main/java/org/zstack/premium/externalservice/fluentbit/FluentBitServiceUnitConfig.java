@@ -2,6 +2,7 @@ package org.zstack.premium.externalservice.fluentbit;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.zstack.header.identity.AccountConstant;
 import org.zstack.utils.Utils;
 import org.zstack.utils.gson.JSONObjectUtil;
 import org.zstack.utils.logging.CLogger;
@@ -161,8 +162,7 @@ public class FluentBitServiceUnitConfig {
 
     public static void addSingleFluentBitConfig(Map<String, Object> outputMap) {
         if (outputMap.containsKey("http_passwd")) {
-            String match = (String) outputMap.get("match");
-            String envKey = "FB_HTTP_PASSWD_" + match.replaceAll("[^A-Za-z0-9]", "_").toUpperCase();
+            String envKey = makeSecretEnvKey(outputMap);
             writeSecret(envKey, (String) outputMap.get("http_passwd"));
             outputMap = new java.util.LinkedHashMap<>(outputMap);
             outputMap.put("http_passwd", "${" + envKey + "}");
@@ -178,34 +178,39 @@ public class FluentBitServiceUnitConfig {
         }
     }
 
+    private static String makeSecretEnvKey(Map<String, Object> outputMap) {
+        String identity = String.format("%s_%s_%s_%s",
+                outputMap.get("name"),
+                outputMap.get("match"),
+                outputMap.get("host"),
+                outputMap.get("port"));
+        return "FB_HTTP_PASSWD_" + identity.replaceAll("[^A-Za-z0-9]", "_").toUpperCase();
+    }
+
     private static void appendFluentBitConfigFile(String filePath, Map<String, Object> configMap) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath, true))) {
             writer.write("[OUTPUT]");
             writer.newLine();
 
             boolean isKafka = "kafka".equals(configMap.get("name"));
-            String host = null;
-            String port = null;
+            String host = configMap.get("host") == null ? null : String.valueOf(configMap.get("host"));
+            String port = configMap.get("port") == null ? null : String.valueOf(configMap.get("port"));
 
             for (Map.Entry<String, Object> entry : configMap.entrySet()) {
                 String key = entry.getKey();
-                String value = (String) entry.getValue();
+                String value = String.valueOf(entry.getValue());
                 if (isKafka && "host".equals(key)) {
-                    host = value;
                     continue;
                 }
                 if (isKafka && "port".equals(key)) {
-                    port = value;
-
-                    if (host != null && port != null) {
-                        String brokers = String.format("%s:%s", host, port);
-                        writer.write("    brokers " + brokers);
-                        writer.newLine();
-                    }
                     continue;
                 }
 
                 writer.write("    " + key + " " + value);
+                writer.newLine();
+            }
+            if (isKafka && host != null && port != null) {
+                writer.write("    brokers " + host + ":" + port);
                 writer.newLine();
             }
 
@@ -215,46 +220,174 @@ public class FluentBitServiceUnitConfig {
         }
     }
 
-    public static void removeOutputConfig(String configuration) {
+    public static void removeOutputConfig(String type, String configuration, String accountUuid) {
         String configContent = readFile(configFilePath);
-        Pattern pattern = Pattern.compile(convertJsonToRegex(configuration), Pattern.MULTILINE);
-        String updatedContent = removeBlock(configContent, pattern);
+        Map<String, String> expected = normalizeOutputConfig(type, JSONObjectUtil.toObject(configuration, Map.class), accountUuid);
+        String updatedContent = removeOutputBlock(configContent, expected);
         writeFile(configFilePath, updatedContent);
+        removeUnusedSecrets(updatedContent);
     }
 
-    public static String convertJsonToRegex(String jsonString) {
-        Map<String, String> jsonMap = JSONObjectUtil.toObject(jsonString, Map.class);
-
-        StringBuilder regexBuilder = new StringBuilder();
-        regexBuilder.append("\\[OUTPUT\\]\\s*\n");
-        boolean isKafka = "kafka".equals(jsonMap.get("name"));
-        String host = null;
-        String port = null;
-
-        for (Map.Entry<String, String> entry : jsonMap.entrySet()) {
-            String key = entry.getKey();
-            String value = entry.getValue();
-            if (isKafka && "host".equals(key)) {
-                host = value;
-                continue;
-            }
-            if (isKafka && "port".equals(key)) {
-                port = value;
-
-                if (host != null && port != null) {
-                    String brokers = String.format("%s:%s", host, port);
-                    regexBuilder.append("\\s*brokers\\s+").append(escapeSpecialChars(brokers)).append("\\s*\n");
-                }
-                continue;
-            }
-            regexBuilder.append("\\s*").append(key).append("\\s+").append(escapeSpecialChars(value)).append("\\s*\n");
+    private static void removeUnusedSecrets(String configContent) {
+        Set<String> usedKeys = new HashSet<>();
+        Matcher matcher = Pattern.compile("\\$\\{([^}]+)}").matcher(configContent == null ? "" : configContent);
+        while (matcher.find()) {
+            usedKeys.add(matcher.group(1));
         }
 
-        return regexBuilder.toString();
+        String secretsContent = readFile(secretsFilePath);
+        if (secretsContent == null || secretsContent.isEmpty()) {
+            return;
+        }
+
+        StringBuilder retained = new StringBuilder();
+        Set<String> retainedKeys = new HashSet<>();
+        for (String line : secretsContent.split("\\r?\\n")) {
+            int idx = line.indexOf('=');
+            if (idx <= 0) {
+                continue;
+            }
+
+            String key = line.substring(0, idx);
+            if (usedKeys.contains(key) && retainedKeys.add(key)) {
+                retained.append(line).append('\n');
+            }
+        }
+
+        writeFile(secretsFilePath, retained.toString());
     }
 
-    private static String escapeSpecialChars(String input) {
-        return input.replaceAll("([.*+?^${}()|\\[\\]\\\\])", "\\\\$1");
+    static Map<String, String> normalizeOutputConfig(String type, Map<String, Object> config, String accountUuid) {
+        LinkedHashMap<String, String> expected = new LinkedHashMap<>();
+        if (config == null) {
+            config = Collections.emptyMap();
+        }
+
+        for (Map.Entry<String, Object> entry : config.entrySet()) {
+            if (entry.getValue() == null || "null".equalsIgnoreCase(String.valueOf(entry.getValue()))) {
+                continue;
+            }
+            expected.put(entry.getKey(), String.valueOf(entry.getValue()));
+        }
+
+        appendOutputName(type, expected);
+        appendMatch(expected, accountUuid);
+
+        boolean isKafka = "Kafka".equals(type) || "kafka".equals(expected.get("name"));
+        String host = expected.get("host");
+        String port = expected.get("port");
+        if (isKafka && host != null && port != null) {
+            expected.remove("host");
+            expected.remove("port");
+            expected.put("brokers", host + ":" + port);
+        }
+
+        if ("Elasticsearch".equals(type) && !"on".equalsIgnoreCase(expected.get("tls"))) {
+            expected.remove("tls");
+        }
+
+        String httpUser = expected.remove("httpUser");
+        String username = expected.remove("username");
+        if (!expected.containsKey("http_user") && httpUser != null) {
+            expected.put("http_user", httpUser);
+        } else if (!expected.containsKey("http_user") && username != null) {
+            expected.put("http_user", username);
+        }
+
+        // Passwords may be rendered through the systemd EnvironmentFile, so use
+        // endpoint fields to identify the output block instead.
+        expected.remove("http_passwd");
+        expected.remove("httpPassword");
+        expected.remove("password");
+        return expected;
+    }
+
+    private static void appendMatch(Map<String, String> expected, String accountUuid) {
+        if (AccountConstant.INITIAL_SYSTEM_ADMIN_UUID.equals(accountUuid) || accountUuid == null || accountUuid.isEmpty()) {
+            expected.put("match", "account_*");
+        } else {
+            expected.put("match", "account_" + accountUuid);
+        }
+    }
+
+    private static void appendOutputName(String type, Map<String, String> expected) {
+        if (expected.containsKey("name") || type == null) {
+            return;
+        }
+
+        switch (type) {
+            case "Forward":
+                expected.put("name", "forward");
+                break;
+            case "Kafka":
+                expected.put("name", "kafka");
+                break;
+            case "Syslog":
+                expected.put("name", "syslog");
+                break;
+            case "Elasticsearch":
+                expected.put("name", "es");
+                break;
+            case "Loki":
+                expected.put("name", "loki");
+                break;
+            default:
+                break;
+        }
+    }
+
+    static String removeOutputBlock(String content, Map<String, String> expected) {
+        Pattern outputPattern = Pattern.compile("(?m)^\\[OUTPUT\\]\\s*$");
+        Matcher matcher = outputPattern.matcher(content);
+        while (matcher.find()) {
+            int start = matcher.start();
+            int end = findBlockEnd(content, matcher.end());
+            String block = content.substring(start, end);
+            if (isExpectedOutputBlock(block, expected)) {
+                return content.substring(0, start) + content.substring(end);
+            }
+        }
+
+        return content;
+    }
+
+    static int findBlockEnd(String content, int offset) {
+        Pattern nextSectionPattern = Pattern.compile("(?m)^\\[[A-Z]+\\]\\s*$");
+        Matcher matcher = nextSectionPattern.matcher(content);
+        if (matcher.find(offset)) {
+            return matcher.start();
+        }
+
+        return content.length();
+    }
+
+    static boolean isExpectedOutputBlock(String block, Map<String, String> expected) {
+        Map<String, String> actual = new HashMap<>();
+        for (String line : block.split("\\n")) {
+            String trimmed = line.trim();
+            if (trimmed.isEmpty() || trimmed.startsWith("[")) {
+                continue;
+            }
+
+            String[] parts = trimmed.split("\\s+", 2);
+            if (parts.length == 2) {
+                actual.put(parts[0], parts[1].trim());
+            }
+        }
+
+        for (Map.Entry<String, String> entry : expected.entrySet()) {
+            String key = entry.getKey();
+            String value = entry.getValue();
+            if (value == null || value.trim().isEmpty()) {
+                continue;
+            }
+
+            if (!value.trim().equals(actual.get(key))) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private static String readFile(String filePath) {
@@ -268,18 +401,6 @@ public class FluentBitServiceUnitConfig {
             logger.warn(String.format("failed to read file: %s", e.getMessage()));
         }
         return content.toString();
-    }
-
-    private static String removeBlock(String content, Pattern pattern) {
-        Matcher matcher = pattern.matcher(content);
-        // delete the first matched [OUTPUT]
-        if (matcher.find()) {
-            int start = matcher.start();
-            int end = matcher.end();
-
-            return content.substring(0, start) + content.substring(end);
-        }
-        return content;
     }
 
     private static void writeFile(String filePath, String content) {

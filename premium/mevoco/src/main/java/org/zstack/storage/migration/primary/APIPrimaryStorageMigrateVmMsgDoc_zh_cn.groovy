@@ -24,11 +24,11 @@ doc {
 				column {
 					name "vmInstanceUuid"
 					enclosedIn "primaryStorageMigrateVm"
-					desc "云主机UUID"
+					desc "虚拟机UUID"
 					location "url"
 					type "String"
 					optional false
-					since "2.6.0"
+					since "zsv 2.6.0"
 				}
 				column {
 					name "dstPrimaryStorageUuid"
@@ -36,26 +36,26 @@ doc {
 					desc "目标主存储UUID"
 					location "body"
 					type "String"
-					optional false
-					since "2.6.0"
+					optional true
+					since "zsv 2.6.0"
 				}
 				column {
 					name "withDataVolumes"
 					enclosedIn "primaryStorageMigrateVm"
-					desc "迁移包含云盘"
+					desc "迁移包含硬盘（已废弃，请使用 volumeMigrationAOs 指定要迁移的云盘）"
 					location "body"
 					type "boolean"
 					optional true
-					since "2.6.0"
+					since "zsv 2.6.0"
 				}
 				column {
 					name "withSnapshots"
 					enclosedIn "primaryStorageMigrateVm"
-					desc "迁移包含快照"
+					desc "迁移包含快照（已废弃，请使用 volumeMigrationAOs 中每项的 withSnapshots 按云盘指定）"
 					location "body"
 					type "boolean"
 					optional true
-					since "2.6.0"
+					since "zsv 2.6.0"
 				}
 				column {
 					name "systemTags"
@@ -64,7 +64,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "2.6.0"
+					since "zsv 2.6.0"
 				}
 				column {
 					name "userTags"
@@ -73,7 +73,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "2.6.0"
+					since "zsv 2.6.0"
 				}
 				column {
 					name "dstHostUuid"
@@ -82,7 +82,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.10.0"
+					since "zsv 3.10.0"
 				}
 				column {
 					name "strategy"
@@ -91,7 +91,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.14.34"
+					since "zsv 3.14.34"
 				}
 				column {
 					name "downTime"
@@ -100,7 +100,7 @@ doc {
 					location "body"
 					type "Integer"
 					optional true
-					since "3.16.21"
+					since "zsv 3.16.21"
 				}
 				column {
 					name "bandwidth"
@@ -109,7 +109,16 @@ doc {
 					location "body"
 					type "long"
 					optional true
-					since "3.17.11"
+					since "zsv 3.17.11"
+				}
+				column {
+					name "volumeMigrationAOs"
+					enclosedIn "primaryStorageMigrateVm"
+					desc "按云盘指定目标主存储的迁移规格列表，每项包含 volumeUuid、dstPrimaryStorageUuid 与 withSnapshots"
+					location "body"
+					type "List"
+					optional true
+					since "1.0.1, zsv 5.1.0"
 				}
 			}
 		}

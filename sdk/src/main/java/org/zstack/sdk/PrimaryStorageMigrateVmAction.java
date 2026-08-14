@@ -28,15 +28,18 @@ public class PrimaryStorageMigrateVmAction extends AbstractAction {
     @Param(required = true, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
     public java.lang.String vmInstanceUuid;
 
-    @Param(required = true, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
+    @Deprecated
+    @Param(required = false, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
     public java.lang.String dstPrimaryStorageUuid;
 
     @Param(required = false, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
     public java.lang.String dstHostUuid;
 
+    @Deprecated
     @Param(required = false, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
     public boolean withDataVolumes = true;
 
+    @Deprecated
     @Param(required = false, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
     public boolean withSnapshots = true;
 
@@ -48,6 +51,9 @@ public class PrimaryStorageMigrateVmAction extends AbstractAction {
 
     @Param(required = false, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
     public long bandwidth = 0L;
+
+    @Param(required = false, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
+    public java.util.List volumeMigrationAOs;
 
     @Param(required = false)
     public java.util.List systemTags;

@@ -118,7 +118,7 @@ public class LogServerBase {
 
     private void deleteLogServer(Completion completion) {
         final String issuer = LogServerVO.class.getSimpleName();
-        final List<LogServerInventory> ctx = list(LogServerInventory.valueOf(self));
+        final List<LogServerInventory> ctx = list(LogServerInventory.rawValueOf(self));
 
         final FlowChain chain = FlowChainBuilder.newShareFlowChain();
         chain.setName(String.format("delete-log-server-%s", self.getUuid()));
@@ -198,4 +198,3 @@ public class LogServerBase {
         });
     }
 }
-

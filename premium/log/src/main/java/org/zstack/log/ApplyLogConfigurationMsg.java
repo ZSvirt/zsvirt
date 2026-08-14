@@ -1,8 +1,10 @@
 package org.zstack.log;
 
+import org.zstack.header.log.NoLogging;
 import org.zstack.header.message.NeedReplyMessage;
 
 public class ApplyLogConfigurationMsg extends NeedReplyMessage {
+    @NoLogging
     private LogConfigurationStruct struct;
     private String labelKey;
 

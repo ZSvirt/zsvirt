@@ -3,6 +3,7 @@ package org.zstack.log.server;
 import org.zstack.header.identity.OwnedByAccount;
 import org.zstack.header.vo.ResourceVO;
 import org.zstack.header.vo.ToInventory;
+import org.zstack.core.convert.PasswordConverter;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
@@ -29,6 +30,7 @@ public class LogServerVO extends ResourceVO implements ToInventory, OwnedByAccou
     @Enumerated(EnumType.STRING)
     private LogServerState state = LogServerState.Enabled;
     @Column
+    @Convert(converter = PasswordConverter.class)
     private String configuration;
     @Column
     private Timestamp createDate;

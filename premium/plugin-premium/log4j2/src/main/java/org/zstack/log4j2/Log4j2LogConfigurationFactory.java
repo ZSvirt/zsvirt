@@ -10,6 +10,7 @@ import org.apache.logging.log4j.core.Appender;
 import org.apache.logging.log4j.core.LoggerContext;
 import org.apache.logging.log4j.core.appender.AsyncAppender;
 import org.apache.logging.log4j.core.config.AppenderRef;
+import org.apache.logging.log4j.core.config.AbstractConfiguration;
 import org.apache.logging.log4j.core.config.Configuration;
 import org.apache.logging.log4j.core.config.LoggerConfig;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,16 +66,17 @@ public class Log4j2LogConfigurationFactory implements Component, LogConfiguratio
             throw new OperationFailureException(operr("No factory found for log4j2 appender type:%s.", log4j2.getAppenderType()));
         }
 
-        String appenderString = factory.createLog4j2Appender(config, log4j2, struct.getUuid());
+        String delegateUuid = struct.getUuid() + "-delegate";
+        String appenderString = factory.createLog4j2Appender(config, log4j2, delegateUuid);
 
-        AppenderRef ref = AppenderRef.createAppenderRef(struct.getUuid(), struct.getLog4jOfLevel(), null);
-        AppenderRef[] refs = new AppenderRef[]{ref};
+        AppenderRef ref = AppenderRef.createAppenderRef(delegateUuid, struct.getLog4jOfLevel(), null);
         Appender appender = AsyncAppender.newBuilder()
                 .setConfiguration(config)
                 .setName(struct.getUuid())
-                .setAppenderRefs(refs)
+                .setAppenderRefs(new AppenderRef[]{ref})
                 .build();
         appender.start();
+        config.addAppender(appender);
         rootConfig.addAppender(appender, null, null);
         ctx.updateLoggers();
 
@@ -85,9 +87,9 @@ public class Log4j2LogConfigurationFactory implements Component, LogConfiguratio
     public void deleteLogConfiguration(String uuid) {
         logger.debug(String.format("delete log4j configuration on managementNode[uuid:%s]", Platform.getManagementServerId()));
         final LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
-        final Configuration config = ctx.getConfiguration();
-        final LoggerConfig rootConfig = config.getRootLogger();
-        rootConfig.removeAppender(uuid);
+        final AbstractConfiguration config = (AbstractConfiguration) ctx.getConfiguration();
+        config.removeAppender(uuid);
+        config.removeAppender(uuid + "-delegate");
         config.removeLogger(uuid);
         ctx.updateLoggers();
     }
@@ -113,17 +115,18 @@ public class Log4j2LogConfigurationFactory implements Component, LogConfiguratio
             if (factory == null) {
                 throw new OperationFailureException(operr("No factory found for log4j2 appender type:%s.", log4j2s.getAppenderType()));
             }
-            factory.createLog4j2Appender(config, log4j2s, vo.getUuid());
+            String delegateUuid = vo.getUuid() + "-delegate";
+            factory.createLog4j2Appender(config, log4j2s, delegateUuid);
 
             Level level = vo.getLevel() == null ? Level.ALL : Level.getLevel(vo.getLevel().name());
-            AppenderRef ref = AppenderRef.createAppenderRef(vo.getUuid(), level, null);
-            AppenderRef[] refs = new AppenderRef[]{ref};
+            AppenderRef ref = AppenderRef.createAppenderRef(delegateUuid, level, null);
             Appender appender = AsyncAppender.newBuilder()
                     .setConfiguration(config)
                     .setName(vo.getUuid())
-                    .setAppenderRefs(refs)
+                    .setAppenderRefs(new AppenderRef[]{ref})
                     .build();
             appender.start();
+            config.addAppender(appender);
             rootConfig.addAppender(appender, null, null);
         }
 

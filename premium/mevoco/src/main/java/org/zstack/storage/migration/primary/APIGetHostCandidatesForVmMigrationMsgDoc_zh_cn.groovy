@@ -24,11 +24,11 @@ doc {
 				column {
 					name "vmInstanceUuid"
 					enclosedIn ""
-					desc "云主机UUID"
+					desc "虚拟机UUID"
 					location "url"
 					type "String"
 					optional false
-					since "3.10.0"
+					since "zsv 3.10.0"
 				}
 				column {
 					name "dstPrimaryStorageUuid"
@@ -37,7 +37,7 @@ doc {
 					location "query"
 					type "String"
 					optional false
-					since "3.10.0"
+					since "zsv 3.10.0"
 				}
 				column {
 					name "limit"
@@ -46,7 +46,7 @@ doc {
 					location "query"
 					type "Integer"
 					optional true
-					since "3.10.0"
+					since "zsv 3.10.0"
 				}
 				column {
 					name "systemTags"
@@ -55,7 +55,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "3.10.0"
+					since "zsv 3.10.0"
 				}
 				column {
 					name "userTags"
@@ -64,7 +64,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "3.10.0"
+					since "zsv 3.10.0"
 				}
 			}
 		}

@@ -10,16 +10,24 @@ import org.zstack.header.search.Inventory;
 import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 @Inventory(mappingVOClass = LogServerVO.class)
 @PythonClassInventory
 public class LogServerInventory implements Serializable {
-    private static final Pattern HTTP_PASSWORD_PATTERN = Pattern.compile("(\\\"(?:httpPassword|http_passwd)\\\"\\s*:\\s*\\\")([^\\\"]*)(\\\")");
+    private static final Set<String> SENSITIVE_CONFIGURATION_KEYS = new HashSet<>(Arrays.asList(
+            "password",
+            "http_passwd",
+            "httpPassword"
+    ));
+    private static final Pattern PASSWORD_PATTERN = Pattern.compile("(\\\"(?:password|http_passwd|httpPassword)\\\"\\s*:\\s*\\\")([^\\\"]*)(\\\")");
     private String uuid;
     private String name;
     private String description;
@@ -33,6 +41,12 @@ public class LogServerInventory implements Serializable {
     private Timestamp lastOpDate;
 
     public static LogServerInventory valueOf(LogServerVO vo) {
+        LogServerInventory inv = rawValueOf(vo);
+        inv.setConfiguration(maskSensitiveConfiguration(inv.getConfiguration()));
+        return inv;
+    }
+
+    public static LogServerInventory rawValueOf(LogServerVO vo) {
         LogServerInventory inv = new LogServerInventory();
         inv.setUuid(vo.getUuid());
         inv.setName(vo.getName());
@@ -41,11 +55,7 @@ public class LogServerInventory implements Serializable {
         inv.setType(vo.getType());
         inv.setLevel(vo.getLevel());
         inv.setState(vo.getState());
-        String conf = vo.getConfiguration();
-        if (conf != null) {
-            conf = maskHttpPassword(conf);
-        }
-        inv.setConfiguration(conf);
+        inv.setConfiguration(vo.getConfiguration());
         inv.setAccountUuid(vo.getAccountUuid());
         inv.setCreateDate(vo.getCreateDate());
         inv.setLastOpDate(vo.getLastOpDate());
@@ -60,7 +70,7 @@ public class LogServerInventory implements Serializable {
         return invs;
     }
 
-    private static String maskHttpPassword(String conf) {
+    public static String maskSensitiveConfiguration(String conf) {
         if (conf == null) {
             return null;
         }
@@ -68,14 +78,14 @@ public class LogServerInventory implements Serializable {
         try {
             ObjectMapper mapper = new ObjectMapper();
             JsonNode root = mapper.readTree(conf);
-            maskSensitiveNode(root);
+            maskSensitiveNode(root, mapper);
             return mapper.writeValueAsString(root);
         } catch (Exception e) {
-            return HTTP_PASSWORD_PATTERN.matcher(conf).replaceAll("$1***$3");
+            return PASSWORD_PATTERN.matcher(conf).replaceAll("$1***$3");
         }
     }
 
-    private static void maskSensitiveNode(JsonNode node) {
+    private static void maskSensitiveNode(JsonNode node, ObjectMapper mapper) {
         if (node == null || node.isNull()) {
             return;
         }
@@ -88,17 +98,17 @@ public class LogServerInventory implements Serializable {
                 String fieldName = entry.getKey();
                 JsonNode value = entry.getValue();
 
-                if ("httpPassword".equals(fieldName) || "http_passwd".equals(fieldName)) {
+                if (SENSITIVE_CONFIGURATION_KEYS.contains(fieldName)) {
                     objectNode.put(fieldName, "***");
                     continue;
                 }
 
                 if (value != null && value.isTextual()) {
-                    objectNode.put(fieldName, maskSensitiveText(value.asText()));
+                    objectNode.put(fieldName, maskSensitiveText(value.asText(), mapper));
                     continue;
                 }
 
-                maskSensitiveNode(value);
+                maskSensitiveNode(value, mapper);
             }
             return;
         }
@@ -106,23 +116,22 @@ public class LogServerInventory implements Serializable {
         if (node.isArray()) {
             ArrayNode arrayNode = (ArrayNode) node;
             for (JsonNode child : arrayNode) {
-                maskSensitiveNode(child);
+                maskSensitiveNode(child, mapper);
             }
         }
     }
 
-    private static String maskSensitiveText(String text) {
+    private static String maskSensitiveText(String text, ObjectMapper mapper) {
         if (text == null) {
             return null;
         }
 
         try {
-            ObjectMapper mapper = new ObjectMapper();
             JsonNode root = mapper.readTree(text);
-            maskSensitiveNode(root);
+            maskSensitiveNode(root, mapper);
             return mapper.writeValueAsString(root);
         } catch (Exception ignored) {
-            return HTTP_PASSWORD_PATTERN.matcher(text).replaceAll("$1***$3");
+            return PASSWORD_PATTERN.matcher(text).replaceAll("$1***$3");
         }
     }
 

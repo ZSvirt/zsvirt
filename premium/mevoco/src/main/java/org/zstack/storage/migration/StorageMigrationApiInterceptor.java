@@ -47,11 +47,13 @@ import org.zstack.storage.migration.primary.APIGetPrimaryStorageCandidatesForVmM
 import org.zstack.storage.migration.primary.APIGetPrimaryStorageCandidatesForVolumeMigrationMsg;
 import org.zstack.storage.migration.primary.APIPrimaryStorageMigrateVmMsg;
 import org.zstack.storage.migration.primary.APIPrimaryStorageMigrateVolumeMsg;
+import org.zstack.storage.migration.primary.VolumeMigrationAO;
 import org.zstack.storage.primary.nfs.NfsPrimaryStorageConstant;
 import org.zstack.utils.Utils;
 import org.zstack.utils.logging.CLogger;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by GuoYi on 9/1/17.
@@ -93,6 +95,7 @@ public class StorageMigrationApiInterceptor implements GlobalApiMessageIntercept
         } else if (msg instanceof APIPrimaryStorageMigrateVolumeMsg) {
             validate((APIPrimaryStorageMigrateVolumeMsg) msg);
         } else if (msg instanceof APIPrimaryStorageMigrateVmMsg) {
+            normalize((APIPrimaryStorageMigrateVmMsg) msg);
             validate((APIPrimaryStorageMigrateVmMsg) msg);
         }
 
@@ -115,6 +118,41 @@ public class StorageMigrationApiInterceptor implements GlobalApiMessageIntercept
     @Override
     public InterceptorPosition getPosition() {
         return InterceptorPosition.DEFAULT;
+    }
+
+    private void normalize(APIPrimaryStorageMigrateVmMsg msg) {
+        if (msg.getVolumeMigrationAOs() != null && !msg.getVolumeMigrationAOs().isEmpty()) {
+            return;
+        }
+        if (msg.getDstPrimaryStorageUuid() == null) {
+            throw new ApiMessageInterceptionException(Platform.argerr(
+                    "either volumeMigrationAOs or dstPrimaryStorageUuid is required"));
+        }
+
+        VmInstanceVO vm = dbf.findByUuid(msg.getVmInstanceUuid(), VmInstanceVO.class);
+        if (vm == null) {
+            throw new ApiMessageInterceptionException(Platform.argerr(
+                    "cannot find VM[uuid:%s]", msg.getVmInstanceUuid()));
+        }
+
+        msg.setVolumeMigrationAOs(VolumeMigrationAO.fromLegacyDstPs(
+                vm, msg.getVolumeMigrationAOs(), msg.getDstPrimaryStorageUuid(), msg.isWithDataVolumes(), msg.isWithSnapshots()));
+    }
+
+    private boolean isFullVmMigration(VmInstanceVO vm, List<VolumeMigrationAO> specs) {
+        if (specs == null || specs.isEmpty()) {
+            return true;
+        }
+        Set<String> specVolUuids = new HashSet<>();
+        for (VolumeMigrationAO s : specs) {
+            specVolUuids.add(s.getVolumeUuid());
+        }
+        for (VolumeVO v : vm.getAllDiskVolumes()) {
+            if (!specVolUuids.contains(v.getUuid())) {
+                return false;
+            }
+        }
+        return true;
     }
 
     // do not migrate vm with iso in ceph backup storage attached
@@ -144,71 +182,136 @@ public class StorageMigrationApiInterceptor implements GlobalApiMessageIntercept
 
     private void validate(APIPrimaryStorageMigrateVmMsg msg) {
         VmInstanceVO vmInstanceVO = Q.New(VmInstanceVO.class).eq(VmInstanceVO_.uuid, msg.getVmInstanceUuid()).find();
-        Set<String> canMigrateVolumeVOS = new HashSet<>();
+        if (vmInstanceVO == null) {
+            throw new ApiMessageInterceptionException(Platform.argerr(
+                    "cannot find VM[uuid:%s]", msg.getVmInstanceUuid()));
+        }
 
         checkAttachedISO(vmInstanceVO);
 
-        List<VmStorageMigrationMetric> vmStorageMigrationMetrics =
-                new ArrayList<>(pluginRegistry.getExtensionList(VmStorageMigrationMetric.class));
+        List<VolumeMigrationAO> specs = msg.getVolumeMigrationAOs();
 
-        PrimaryStorageVO dstPrimaryStorageVO = Q.New(PrimaryStorageVO.class)
-                .eq(PrimaryStorageVO_.uuid, msg.getDstPrimaryStorageUuid())
-                .find();
-
-        if (Q.New(ShareableVolumeVmInstanceRefVO.class).eq(ShareableVolumeVmInstanceRefVO_.vmInstanceUuid, vmInstanceVO.getUuid()).isExists()) {
-            throw new ApiMessageInterceptionException(Platform.argerr(
-                    "do not support storage migration of vm[uuid:%s, name: %s] while shared volume attached", vmInstanceVO.getUuid(), vmInstanceVO.getName()
-            ));
+        List<String> shareableVolUuids = Q.New(ShareableVolumeVmInstanceRefVO.class)
+                .eq(ShareableVolumeVmInstanceRefVO_.vmInstanceUuid, vmInstanceVO.getUuid())
+                .select(ShareableVolumeVmInstanceRefVO_.volumeUuid)
+                .listValues();
+        if (!shareableVolUuids.isEmpty()) {
+            boolean specsHitShareable = specs != null && specs.stream()
+                    .map(VolumeMigrationAO::getVolumeUuid)
+                    .anyMatch(shareableVolUuids::contains);
+            if (isFullVmMigration(vmInstanceVO, specs) || specsHitShareable) {
+                throw new ApiMessageInterceptionException(Platform.argerr(
+                        "do not support storage migration of vm[uuid:%s, name: %s] while shared volume attached",
+                        vmInstanceVO.getUuid(), vmInstanceVO.getName()));
+            }
         }
 
+        if (specs == null || specs.isEmpty()) {
+            throw new ApiMessageInterceptionException(Platform.argerr(
+                    "volumeMigrationAOs is required"));
+        }
 
-        for (VolumeVO volumeVO : vmInstanceVO.getAllDiskVolumes()) {
-            if (!msg.isWithDataVolumes() && volumeVO.getType() == VolumeType.Data) {
-                continue;
+        Set<String> seenVolUuids = new HashSet<>();
+        for (VolumeMigrationAO s : specs) {
+            if (s.getVolumeUuid() == null || s.getDstPrimaryStorageUuid() == null) {
+                throw new ApiMessageInterceptionException(Platform.argerr(
+                        "volumeMigrationAOs entry has null volumeUuid or dstPrimaryStorageUuid"));
+            }
+            if (!seenVolUuids.add(s.getVolumeUuid())) {
+                throw new ApiMessageInterceptionException(Platform.argerr(
+                        "duplicate volumeUuid[%s] in volumeMigrationAOs", s.getVolumeUuid()));
+            }
+        }
+
+        Map<String, VolumeVO> vmVols = new HashMap<>();
+        for (VolumeVO v : vmInstanceVO.getAllDiskVolumes()) {
+            vmVols.put(v.getUuid(), v);
+        }
+        for (VolumeMigrationAO s : specs) {
+            if (!vmVols.containsKey(s.getVolumeUuid())) {
+                throw new ApiMessageInterceptionException(Platform.argerr(
+                        "volume[uuid:%s] is not a disk of VM[uuid:%s]",
+                        s.getVolumeUuid(), vmInstanceVO.getUuid()));
+            }
+        }
+
+        if (!vmInstanceVO.getState().equals(VmInstanceState.Stopped) && vmInstanceVO.getHostUuid() == null) {
+            throw new ApiMessageInterceptionException(Platform.argerr(
+                    "VM[uuid:%s] is %s but host uuid is missing",
+                    vmInstanceVO.getUuid(), vmInstanceVO.getState()));
+        }
+
+        List<VmStorageMigrationMetric> metrics =
+                new ArrayList<>(pluginRegistry.getExtensionList(VmStorageMigrationMetric.class));
+
+        Map<String, PrimaryStorageVO> dstPsCache = new HashMap<>();
+        for (VolumeMigrationAO spec : specs) {
+            VolumeVO volumeVO = vmVols.get(spec.getVolumeUuid());
+
+            if (volumeVO.getState() == VolumeState.Disabled) {
+                throw new ApiMessageInterceptionException(Platform.argerr(
+                        "cannot migrate volume[uuid:%s] in state Disabled", volumeVO.getUuid()));
+            }
+            if (volumeVO.getStatus() != VolumeStatus.Ready && volumeVO.getStatus() != VolumeStatus.Migrating) {
+                throw new ApiMessageInterceptionException(Platform.argerr(
+                        "cannot migrate volume[uuid:%s] in status[%s]", volumeVO.getUuid(), volumeVO.getStatus()));
             }
 
-            PrimaryStorageVO primaryStorageVO = Q.New(PrimaryStorageVO.class)
+            PrimaryStorageVO dstPrimaryStorageVO = dstPsCache.computeIfAbsent(spec.getDstPrimaryStorageUuid(),
+                    uuid -> Q.New(PrimaryStorageVO.class).eq(PrimaryStorageVO_.uuid, uuid).find());
+            if (dstPrimaryStorageVO == null) {
+                throw new ApiMessageInterceptionException(Platform.argerr(
+                        "destination primary storage[uuid:%s] does not exist", spec.getDstPrimaryStorageUuid()));
+            }
+            if (dstPrimaryStorageVO.getState() == PrimaryStorageState.Disabled
+                    || dstPrimaryStorageVO.getState() == PrimaryStorageState.Maintenance) {
+                throw new ApiMessageInterceptionException(Platform.argerr(
+                        "destination primary storage[uuid:%s] state is %s",
+                        dstPrimaryStorageVO.getUuid(), dstPrimaryStorageVO.getState()));
+            }
+
+            PrimaryStorageVO srcPrimaryStorageVO = Q.New(PrimaryStorageVO.class)
                     .eq(PrimaryStorageVO_.uuid, volumeVO.getPrimaryStorageUuid())
                     .find();
-
-            String srcPsType = primaryStorageVO.getType();
+            if (srcPrimaryStorageVO == null) {
+                throw new ApiMessageInterceptionException(Platform.argerr(
+                        "source primary storage[uuid:%s] of volume[uuid:%s] not found",
+                        volumeVO.getPrimaryStorageUuid(), volumeVO.getUuid()));
+            }
+            String srcPsType = srcPrimaryStorageVO.getType();
             String dstPsType = dstPrimaryStorageVO.getType();
-            for (VmStorageMigrationMetric metric : vmStorageMigrationMetrics) {
+
+            boolean capable = false;
+            for (VmStorageMigrationMetric metric : metrics) {
                 if (!metric.isCapable(srcPsType, dstPsType)) {
                     continue;
                 }
 
-                if ((vmInstanceVO.getState().equals(VmInstanceState.Running) || vmInstanceVO.getState().equals(VmInstanceState.Paused)) &&
-                        !metric.isSupportLive()) {
+                if ((vmInstanceVO.getState().equals(VmInstanceState.Running) || vmInstanceVO.getState().equals(VmInstanceState.Paused))
+                        && !metric.isSupportLive()) {
                     continue;
                 }
 
-                if (vmInstanceVO.getState().equals(VmInstanceState.Stopped) &&
-                        !metric.isSupportOffline()) {
+                if (vmInstanceVO.getState().equals(VmInstanceState.Stopped) && !metric.isSupportOffline()) {
                     continue;
                 }
 
-                if (msg.isWithDataVolumes() && !metric.isSupportWithDataVolume()) {
-                    throw new ApiMessageInterceptionException(Platform.argerr(
-                            "do not support storage migration from [%s] to [%s] with data volume", srcPsType, dstPsType));
+                if (volumeVO.getType() == VolumeType.Data && !metric.isSupportWithDataVolume()) {
+                    continue;
                 }
 
-                if (msg.isWithSnapshots() && !metric.isSupportWithSnapshot()) {
-                    throw new ApiMessageInterceptionException(Platform.argerr(
-                            "do not support storage migration from [%s] to [%s] with snapshot", srcPsType, dstPsType));
+                if (spec.isWithSnapshots() && !metric.isSupportWithSnapshot()) {
+                    continue;
                 }
-                canMigrateVolumeVOS.add(volumeVO.getUuid());
+
+                capable = true;
+                break;
             }
 
-            if (!canMigrateVolumeVOS.contains(volumeVO.getUuid())) {
+            if (!capable) {
                 throw new ApiMessageInterceptionException(Platform.argerr(
-                        "do not support storage migration from [%s] to [%s]", primaryStorageVO.getType(), dstPrimaryStorageVO.getType()));
-            }
-
-            if (!vmInstanceVO.getState().equals(VmInstanceState.Stopped) &&
-                    vmInstanceVO.getHostUuid() == null) {
-                throw new ApiMessageInterceptionException(Platform.argerr(
-                        "VM[uuid:%s] is running but host uuid is missing", vmInstanceVO.getUuid()));
+                        "do not support storage migration of volume[uuid:%s] from [%s] to [%s]",
+                        volumeVO.getUuid(), srcPsType, dstPsType));
             }
         }
     }
@@ -322,23 +425,33 @@ public class StorageMigrationApiInterceptor implements GlobalApiMessageIntercept
                 }
             }
 
-            // get proper destination cluster
+            // get proper destination cluster: must be a single cluster reachable by ALL VM NICs
+            Set<String> dstClusterUuids = dstPS.getAttachedClusterRefs().stream()
+                    .map(PrimaryStorageClusterRefVO::getClusterUuid)
+                    .collect(Collectors.toSet());
+            Set<String> reachableClusterUuids = srcVm.getVmNics().isEmpty()
+                    ? new HashSet<>(dstClusterUuids) : null;
             for (VmNicVO vmNic : srcVm.getVmNics()) {
-                boolean match = false;
                 L3NetworkVO l3 = dbf.findByUuid(vmNic.getL3NetworkUuid(), L3NetworkVO.class);
                 L2NetworkVO l2 = dbf.findByUuid(l3.getL2NetworkUuid(), L2NetworkVO.class);
-                for (PrimaryStorageClusterRefVO pcRef : dstPS.getAttachedClusterRefs()) {
-                    match = Q.New(L2NetworkClusterRefVO.class)
-                            .eq(L2NetworkClusterRefVO_.l2NetworkUuid, l2.getUuid())
-                            .eq(L2NetworkClusterRefVO_.clusterUuid, pcRef.getClusterUuid())
-                            .isExists();
-                    if (match) break;
+                Set<String> nicClusterUuids = new HashSet<>(Q.New(L2NetworkClusterRefVO.class)
+                        .select(L2NetworkClusterRefVO_.clusterUuid)
+                        .eq(L2NetworkClusterRefVO_.l2NetworkUuid, l2.getUuid())
+                        .in(L2NetworkClusterRefVO_.clusterUuid, dstClusterUuids)
+                        .listValues());
+                if (reachableClusterUuids == null) {
+                    reachableClusterUuids = nicClusterUuids;
+                } else {
+                    reachableClusterUuids.retainAll(nicClusterUuids);
                 }
-                if (!match) {
-                    throw new ApiMessageInterceptionException(
-                            Platform.argerr("The destination primary storage is not attached to any cluster that has the same L2 networks as source cluster.")
-                    );
+                if (reachableClusterUuids.isEmpty()) {
+                    break;
                 }
+            }
+            if (reachableClusterUuids == null || reachableClusterUuids.isEmpty()) {
+                throw new ApiMessageInterceptionException(
+                        Platform.argerr("The destination primary storage is not attached to any cluster that has the same L2 networks as source cluster.")
+                );
             }
         } else if (srcVolume.getType() == VolumeType.Data) {
             if (srcVolume.getVmInstanceUuid() != null) {

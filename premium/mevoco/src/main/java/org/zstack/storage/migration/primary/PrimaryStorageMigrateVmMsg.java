@@ -6,6 +6,9 @@ import org.zstack.header.vm.VmInstanceMessage;
 import org.zstack.storage.migration.PrimaryStorageMigrateVmContext;
 import org.zstack.storage.migration.PrimaryStorageMigrateVmMessage;
 
+import java.util.Collections;
+import java.util.List;
+
 /**
  * Created by GuoYi on 12/7/17.
  * <p>
@@ -33,6 +36,8 @@ public class PrimaryStorageMigrateVmMsg extends NeedReplyMessage implements Prim
     private String longJobUuid;
 
     private long bandwidth;
+
+    private List<VolumeMigrationAO> volumeMigrationAOs;
 
     public PrimaryStorageMigrateVmContext getJobContext() {
         return jobContext;
@@ -63,6 +68,7 @@ public class PrimaryStorageMigrateVmMsg extends NeedReplyMessage implements Prim
         strategy = amsg.getStrategy();
         downTime = amsg.getDownTime();
         bandwidth = amsg.getBandwidth();
+        volumeMigrationAOs = amsg.getVolumeMigrationAOs();
     }
 
     public Integer getDownTime() {
@@ -125,5 +131,14 @@ public class PrimaryStorageMigrateVmMsg extends NeedReplyMessage implements Prim
 
     public void setBandwidth(long bandwidth) {
         this.bandwidth = bandwidth;
+    }
+
+    @Override
+    public List<VolumeMigrationAO> getVolumeMigrationAOs() {
+        return volumeMigrationAOs == null ? Collections.emptyList() : volumeMigrationAOs;
+    }
+
+    public void setVolumeMigrationAOs(List<VolumeMigrationAO> volumeMigrationAOs) {
+        this.volumeMigrationAOs = volumeMigrationAOs;
     }
 }

@@ -85,6 +85,7 @@ public class PrimaryStorageMigrateVmJob implements LongJob {
         cmsg.setCancellationApiId(job.getApiId());
         cmsg.setDstHostUuid(msg.getDstHostUuid());
         cmsg.setSystemTags(msg.getSystemTags());
+        cmsg.setVolumeMigrationAOs(msg.getVolumeMigrationAOs());
         bus.makeLocalServiceId(cmsg, MevocoConstants.SERVICE_ID);
         bus.send(cmsg, new CloudBusCallBack(completion) {
             @Override

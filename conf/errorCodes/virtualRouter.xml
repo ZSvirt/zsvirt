@@ -1,0 +1,19 @@
+<error>
+    <prefix>VR</prefix>
+
+    <code>
+        <id>1000</id>
+        <description>Virtual router is not in a corret state</description>
+    </code>
+
+    <code>
+        <id>1001</id>
+        <description>No public network defined in virtual router offering</description>
+    </code>
+
+    <code>
+        <id>1002</id>
+        <description>No default virtual router offering found</description>
+    </code>
+</error>
+

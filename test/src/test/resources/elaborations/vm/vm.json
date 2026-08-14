@@ -1,0 +1,12 @@
+[
+  {
+    "code": "1000",
+    "regex": "The state of vm[uuid:%s] is %s. Only these state[Running,Stopped] is allowed to update cpu or memory.",
+    "message_cn": "云主机的状态为%2$s,只有状态[Running,Stopped]允许升级CPU/内存"
+  },
+  {
+    "category": "VM",
+    "code": "1001",
+    "message_cn": "找不到合适的host来启动vm"
+  }
+]

@@ -1,0 +1,148 @@
+package org.zstack.storage.backup.imagestore
+
+import org.zstack.storage.backup.imagestore.APIAddImageStoreBackupStorageEvent
+
+doc {
+	title "添加镜像仓库镜像服务器(AddImageStoreBackupStorage)"
+
+	category "storage.backup.imagestore"
+
+	desc """添加镜像仓库镜像服务器"""
+
+	rest {
+		request {
+			url "POST /v1/backup-storage/image-store"
+
+			header (Authorization: 'OAuth the-session-uuid')
+
+			clz APIAddImageStoreBackupStorageMsg.class
+
+			desc """"""
+
+			params {
+
+				column {
+					name "hostname"
+					enclosedIn "params"
+					desc "服务器主机地址"
+					location "body"
+					type "String"
+					optional false
+					since "1.6"
+				}
+				column {
+					name "username"
+					enclosedIn "params"
+					desc "服务器 SSH 用户名 (用于 Ansible 部署)"
+					location "body"
+					type "String"
+					optional false
+					since "1.6"
+				}
+				column {
+					name "password"
+					enclosedIn "params"
+					desc "服务器 SSH 用户密码"
+					location "body"
+					type "String"
+					optional true
+					since "1.6"
+				}
+				column {
+					name "sshPort"
+					enclosedIn "params"
+					desc "服务器 SSH 端口"
+					location "body"
+					type "int"
+					optional true
+					since "1.6"
+				}
+				column {
+					name "url"
+					enclosedIn "params"
+					desc "镜像仓库本地数据存放地址"
+					location "body"
+					type "String"
+					optional false
+					since "1.6"
+				}
+				column {
+					name "name"
+					enclosedIn "params"
+					desc "镜像仓库服务器名称"
+					location "body"
+					type "String"
+					optional false
+					since "1.6"
+				}
+				column {
+					name "description"
+					enclosedIn "params"
+					desc "镜像仓库的详细描述"
+					location "body"
+					type "String"
+					optional true
+					since "1.6"
+				}
+				column {
+					name "type"
+					enclosedIn "params"
+					desc "这里是 ImageStoreBackupStorage"
+					location "body"
+					type "String"
+					optional true
+					since "1.6"
+				}
+				column {
+					name "importImages"
+					enclosedIn "params"
+					desc "是否导入镜像"
+					location "body"
+					type "boolean"
+					optional true
+					since "1.9"
+				}
+				column {
+					name "resourceUuid"
+					enclosedIn "params"
+					desc "资源UUID。若指定，镜像服务器会使用该字段值作为UUID"
+					location "body"
+					type "String"
+					optional true
+					since "1.6"
+				}
+				column {
+					name "systemTags"
+					enclosedIn ""
+					desc "系统标签"
+					location "body"
+					type "List"
+					optional true
+					since "1.6"
+				}
+				column {
+					name "userTags"
+					enclosedIn ""
+					desc "用户标签"
+					location "body"
+					type "List"
+					optional true
+					since "1.6"
+				}
+				column {
+					name "tagUuids"
+					enclosedIn "params"
+					desc "标签UUID列表"
+					location "body"
+					type "List"
+					optional true
+					since "3.4.0"
+				}
+			}
+		}
+
+		response {
+			clz APIAddImageStoreBackupStorageEvent.class
+		}
+	}
+}

@@ -1,0 +1,366 @@
+[
+  {
+    "raw": "listener[uuid:%s] are being used by the autoScalingVmTemplate[%s] and cannot be deleted",
+    "en_US": "listener[uuid:{0}] are being used by the autoScalingVmTemplate[{1}] and cannot be deleted",
+    "zh_CN": "侦听器[uuid：{0}]正由AutoScalingVMTemplate[{1}]使用，无法删除",
+    "arguments": [
+      "msg.getUuid()",
+      "uuid"
+    ],
+    "fileName": "src/main/java/org/zstack/autoscaling/AutoScalingInterceptor.java"
+  },
+  {
+    "raw": "The instance[%s] does not exist in the scaling group[%s]",
+    "en_US": "The instance[{0}] does not exist in the scaling group[{1}]",
+    "zh_CN": "缩放组[{1}]中不存在实例[{0}]",
+    "arguments": [
+      "msg.getInstanceUuid()",
+      "msg.getGroupUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/autoscaling/AutoScalingInterceptor.java"
+  },
+  {
+    "raw": "alarm[uuid:%s] are being used by the autoScalingGroup[%s] which cannot be deleted",
+    "en_US": "alarm[uuid:{0}] are being used by the autoScalingGroup[{1}] which cannot be deleted",
+    "zh_CN": "无法删除的AutoScalingGroup[{1}]正在使用报警[uuid：{0}]",
+    "arguments": [
+      "msg.getAlarmUuid()",
+      "ruleVO.getScalingGroupUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/autoscaling/AutoScalingInterceptor.java"
+  },
+  {
+    "raw": "rule[%s] state is Disabled",
+    "en_US": "rule[{0}] state is Disabled",
+    "zh_CN": "规则[{0}]状态已禁用",
+    "arguments": [
+      "msg.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/autoscaling/AutoScalingInterceptor.java"
+  },
+  {
+    "raw": "invalid l3 network uuids[%s] for listener that belongs lb[%s], all the networks must be attached the LB service and be attached with the same vRouter with LB",
+    "en_US": "invalid l3 network uuids[{0}] for listener that belongs lb[{1}], all the networks must be attached the LB service and be attached with the same vRouter with LB",
+    "zh_CN": "属于LB[{1}]的侦听器的三层网络uuid[{0}]无效，所有网络都必须附加到LB服务，并且必须附加到与LB相同的VRouter",
+    "arguments": [
+      "l3Uuids",
+      "uuid"
+    ],
+    "fileName": "src/main/java/org/zstack/autoscaling/AutoScalingManagerImpl.java"
+  },
+  {
+    "raw": "detach autoScalingTemplate[%s] from AutoScalingGroup failed, errors are %s",
+    "en_US": "detach autoScalingTemplate[{0}] from AutoScalingGroup failed, errors are {1}",
+    "zh_CN": "从AutoScalingGroup分离AutoScalingTemplate[{0}]失败，错误为{1}",
+    "arguments": [
+      "msg.getTemplateUuid()",
+      "JSONObjectUtil.toJsonString(errors)"
+    ],
+    "fileName": "src/main/java/org/zstack/autoscaling/AutoScalingManagerImpl.java"
+  },
+  {
+    "raw": "Only one scaling activity can be executed in the same scaling group at the same time.",
+    "en_US": "Only one scaling activity can be executed in the same scaling group at the same time.",
+    "zh_CN": "同一伸缩组中同一时间只能执行一个伸缩活动。",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/autoscaling/group/AutoScalingGroupBase.java"
+  },
+  {
+    "raw": "autoScalingGroup[%s] create vms failed completely",
+    "en_US": "autoScalingGroup[{0}] create vms failed completely",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getAutoScalingGroupUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/autoscaling/group/AutoScalingGroupBase.java"
+  },
+  {
+    "raw": "add vm nic to loadBalancer failed, No loadBalancer[uuids\u003d%s] can be found.",
+    "en_US": "add vm nic to loadBalancer failed, No loadBalancer[uuids\u003d{0}] can be found.",
+    "zh_CN": "将VM NIC添加到LoadBalancer失败，找不到LoadBalancer[uuid\u003d{0}]。",
+    "arguments": [
+      "loadBalancerListenerUuidListStr"
+    ],
+    "fileName": "src/main/java/org/zstack/autoscaling/group/AutoScalingGroupBase.java"
+  },
+  {
+    "raw": "autoScalingGroup[%s] add newly created vm to loadBalancer failed completely, errors are %s",
+    "en_US": "autoScalingGroup[{0}] add newly created vm to loadBalancer failed completely, errors are {1}",
+    "zh_CN": "AutoScalingGroup[{0}]将新创建的VM添加到LoadBalancer完全失败，错误为{1}",
+    "arguments": [
+      "msg.getAutoScalingGroupUuid()",
+      "JSONObjectUtil.toJsonString(addVmNicToLoadBalancerErrorCodes)"
+    ],
+    "fileName": "src/main/java/org/zstack/autoscaling/group/AutoScalingGroupBase.java"
+  },
+  {
+    "raw": "add vm nic to securityGroup failed, No securityGroup[uuid\u003d%s] can be found.",
+    "en_US": "add vm nic to securityGroup failed, No securityGroup[uuid\u003d{0}] can be found.",
+    "zh_CN": "将VM NIC添加到SecurityGroup失败，找不到SecurityGroup[uuid\u003d{0}]。",
+    "arguments": [
+      "securityGroupUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/autoscaling/group/AutoScalingGroupBase.java"
+  },
+  {
+    "raw": "autoScalingGroup[%s] add newly created vm to securityGroup failed completely, errors are %s",
+    "en_US": "autoScalingGroup[{0}] add newly created vm to securityGroup failed completely, errors are {1}",
+    "zh_CN": "AutoScalingGroup[{0}]将新创建的VM添加到SecurityGroup完全失败，错误为{1}",
+    "arguments": [
+      "msg.getAutoScalingGroupUuid()",
+      "JSONObjectUtil.toJsonString(addVmNicToSecurityGroupErrorCodes)"
+    ],
+    "fileName": "src/main/java/org/zstack/autoscaling/group/AutoScalingGroupBase.java"
+  },
+  {
+    "raw": "A resource can not be found, details: resource[uuid:%s, type:AutoScalingVmTemplateVO] not found",
+    "en_US": "A resource can not be found, details: resource[uuid:{0}, type:AutoScalingVmTemplateVO] not found",
+    "zh_CN": "找不到资源，详细信息：找不到资源[uuid：{0}，类型：AutoScalingVMTemplateVo]",
+    "arguments": [
+      "templateGroupRefVO.getTemplateUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/autoscaling/group/AutoScalingGroupBase.java"
+  },
+  {
+    "raw": "A resource can not be found, details: resource[uuid:%s, type:InstanceOfferingVO] not found",
+    "en_US": "A resource can not be found, details: resource[uuid:{0}, type:InstanceOfferingVO] not found",
+    "zh_CN": "找不到资源，详细信息：找不到资源[uuid：{0}，类型：InstanceOfferingVO]",
+    "arguments": [
+      "vmTemplateVO.getVmInstanceOfferingUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/autoscaling/group/AutoScalingGroupBase.java"
+  },
+  {
+    "raw": "instance offering[uuid:%s] is Disabled, can\u0027t create vm from it",
+    "en_US": "instance offering[uuid:{0}] is Disabled, can\u0027t create vm from it",
+    "zh_CN": "计算规格[uuid:{0}]没有被启用，不能根据该规格创建云主机",
+    "arguments": [
+      "instanceOfferingVO.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/autoscaling/group/AutoScalingGroupBase.java"
+  },
+  {
+    "raw": "instance offering[uuid:%s, type:%s] is not UserVm type, can\u0027t create vm from it",
+    "en_US": "instance offering[uuid:{0}, type:{1}] is not UserVm type, can\u0027t create vm from it",
+    "zh_CN": "计算规格[uuid:{0}, type:{1}]不是UserVm类型，不能通过它创建云主机",
+    "arguments": [
+      "instanceOfferingVO.getUuid()",
+      "instanceOfferingVO.getType()"
+    ],
+    "fileName": "src/main/java/org/zstack/autoscaling/group/AutoScalingGroupBase.java"
+  },
+  {
+    "raw": "A resource can not be found, details: resource[uuid:%s, type:ImageVO] not found",
+    "en_US": "A resource can not be found, details: resource[uuid:{0}, type:ImageVO] not found",
+    "zh_CN": "找不到资源，详细信息：找不到资源[uuid：{0}，类型：ImageVO]",
+    "arguments": [
+      "vmTemplateVO.getImageUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/autoscaling/group/AutoScalingGroupBase.java"
+  },
+  {
+    "raw": "image[uuid:%s] is Disabled, can\u0027t create vm from it",
+    "en_US": "image[uuid:{0}] is Disabled, can\u0027t create vm from it",
+    "zh_CN": "镜像[uuid:{0}]没被启用，不能根据该镜像创建云主机",
+    "arguments": [
+      "imageVO.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/autoscaling/group/AutoScalingGroupBase.java"
+  },
+  {
+    "raw": "image[uuid:%s] is not ready yet, can\u0027t create vm from it",
+    "en_US": "image[uuid:{0}] is not ready yet, can\u0027t create vm from it",
+    "zh_CN": "镜像[uuid：{0}]尚未就绪，无法从中创建VM",
+    "arguments": [
+      "imageVO.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/autoscaling/group/AutoScalingGroupBase.java"
+  },
+  {
+    "raw": "image[uuid:%s] is of mediaType: %s, only RootVolumeTemplate and ISO can be used to create vm",
+    "en_US": "image[uuid:{0}] is of mediaType: {1}, only RootVolumeTemplate and ISO can be used to create vm",
+    "zh_CN": "镜像[uuid：{0}]类型为{1}，只能用RootVolumeTemplate和ISO来创建云主机",
+    "arguments": [
+      "imageVO.getUuid()",
+      "imageVO.getMediaType()"
+    ],
+    "fileName": "src/main/java/org/zstack/autoscaling/group/AutoScalingGroupBase.java"
+  },
+  {
+    "raw": "rootDiskOfferingUuid cannot be null when image mediaType is ISO",
+    "en_US": "rootDiskOfferingUuid cannot be null when image mediaType is ISO",
+    "zh_CN": "云盘规格不能为空在镜像类型为ISO时",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/autoscaling/group/AutoScalingGroupBase.java"
+  },
+  {
+    "raw": "image[uuid:%s] is system image, can\u0027t be used to create user vm",
+    "en_US": "image[uuid:{0}] is system image, can\u0027t be used to create user vm",
+    "zh_CN": "镜像[uuid:{0}] 是系统镜像，不能使用它创建用户云主机",
+    "arguments": [
+      "imageVO.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/autoscaling/group/AutoScalingGroupBase.java"
+  },
+  {
+    "raw": "A resource can not be found, details: resource[uuid:%s, type:DiskOfferingVO] not found",
+    "en_US": "A resource can not be found, details: resource[uuid:{0}, type:DiskOfferingVO] not found",
+    "zh_CN": "找不到资源，详细信息：找不到资源[uuid：{0}，类型：DiskOfferingVO]",
+    "arguments": [
+      "diskOffering"
+    ],
+    "fileName": "src/main/java/org/zstack/autoscaling/group/AutoScalingGroupBase.java"
+  },
+  {
+    "raw": "disk offerings[uuids:%s] are Disabled, can not create vm from it",
+    "en_US": "disk offerings[uuids:{0}] are Disabled, can not create vm from it",
+    "zh_CN": "硬盘规格[uuids:{0}]没有被启用，不能使用它创建虚拟机",
+    "arguments": [
+      "diskOfferingVO.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/autoscaling/group/AutoScalingGroupBase.java"
+  },
+  {
+    "raw": "A resource can not be found, details: resource[uuid:%s, type:L3NetworkVO] not found",
+    "en_US": "A resource can not be found, details: resource[uuid:{0}, type:L3NetworkVO] not found",
+    "zh_CN": "找不到资源，详细信息：找不到资源[uuid：{0}，类型：L3NetworkVO]",
+    "arguments": [
+      "l3Uuid"
+    ],
+    "fileName": "src/main/java/org/zstack/autoscaling/group/AutoScalingGroupBase.java"
+  },
+  {
+    "raw": "l3Network[uuid:%s] is Disabled, can not create vm on it",
+    "en_US": "l3Network[uuid:{0}] is Disabled, can not create vm on it",
+    "zh_CN": "三层网络[uuid：{0}]没有被启用，不能在这上面创建云主机",
+    "arguments": [
+      "l3Uuid"
+    ],
+    "fileName": "src/main/java/org/zstack/autoscaling/group/AutoScalingGroupBase.java"
+  },
+  {
+    "raw": "l3Network[uuid:%s] is system network, can not create user vm on it",
+    "en_US": "l3Network[uuid:{0}] is system network, can not create user vm on it",
+    "zh_CN": "三层网络[uuid：{0}]是系统网络，不能在这上面创建云主机",
+    "arguments": [
+      "l3Uuid"
+    ],
+    "fileName": "src/main/java/org/zstack/autoscaling/group/AutoScalingGroupBase.java"
+  },
+  {
+    "raw": "there are more than one L3 network specified in l3NetworkUuids, but defaultL3NetworkUuid is null",
+    "en_US": "there are more than one L3 network specified in l3NetworkUuids, but defaultL3NetworkUuid is null",
+    "zh_CN": "在三层网络uuid列表中指定了多个三层网络，但是默认的三层网络的uuid为空",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/autoscaling/group/AutoScalingGroupBase.java"
+  },
+  {
+    "raw": "defaultL3NetworkUuid[uuid:%s] is not in l3NetworkUuids %s",
+    "en_US": "defaultL3NetworkUuid[uuid:{0}] is not in l3NetworkUuids {1}",
+    "zh_CN": "默认L3NetworkUuid[Uuid：{0}]不在L3NetworkUuids{1}中",
+    "arguments": [
+      "vmTemplateVO.getDefaultL3NetworkUuid()",
+      "l3Uuids"
+    ],
+    "fileName": "src/main/java/org/zstack/autoscaling/group/AutoScalingGroupBase.java"
+  },
+  {
+    "raw": "the auto scaling group[%s] state error, expected: %s state",
+    "en_US": "the auto scaling group[{0}] state error, expected: {1} state",
+    "zh_CN": "自动缩放组[{0}]状态错误，应为：{1}状态",
+    "arguments": [
+      "self.getUuid()",
+      "AutoScalingGroupState.Enabled.toString()"
+    ],
+    "fileName": "src/main/java/org/zstack/autoscaling/group/AutoScalingGroupBase.java"
+  },
+  {
+    "raw": "The autoScalingGroup[%s] not attach any vm template",
+    "en_US": "The autoScalingGroup[{0}] not attach any vm template",
+    "zh_CN": "AutoScalingGroup[{0}]未附加任何VM模板",
+    "arguments": [
+      "self.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/autoscaling/group/AutoScalingGroupBase.java"
+  },
+  {
+    "raw": "autoScalingGroup[%s] destroy vms[%s] failed completely, errors are %s",
+    "en_US": "autoScalingGroup[{0}] destroy vms[{1}] failed completely, errors are {2}",
+    "zh_CN": "AutoScalingGroup[{0}]销毁云主机[{1}]完全失败，错误为{2}",
+    "arguments": [
+      "self.getUuid()",
+      "vmInstanceUuids",
+      "JSONObjectUtil.toJsonString(errors)"
+    ],
+    "fileName": "src/main/java/org/zstack/autoscaling/group/AutoScalingGroupBase.java"
+  },
+  {
+    "raw": "The number of instances exceeds the limit",
+    "en_US": "The number of instances exceeds the limit",
+    "zh_CN": "实例数超过限制",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/autoscaling/group/AutoScalingGroupBase.java"
+  },
+  {
+    "raw": "Cannot find deleted target instance list",
+    "en_US": "Cannot find deleted target instance list",
+    "zh_CN": "找不到已删除的目标实例列表",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/autoscaling/group/AutoScalingGroupBase.java"
+  },
+  {
+    "raw": "need skip autoScalingGroup activity",
+    "en_US": "need skip autoScalingGroup activity",
+    "zh_CN": "需要跳过自动缩放组活动",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/autoscaling/group/AutoScalingGroupBase.java"
+  },
+  {
+    "raw": "delete autoScalingRule[%s] triggers failed, errors are %s",
+    "en_US": "delete autoScalingRule[{0}] triggers failed, errors are {1}",
+    "zh_CN": "删除AutoScalingRule[{0}]触发器失败，错误为{1}",
+    "arguments": [
+      "ruleUuid",
+      "JSONObjectUtil.toJsonString(errors)"
+    ],
+    "fileName": "src/main/java/org/zstack/autoscaling/group/AutoScalingGroupBase.java"
+  },
+  {
+    "raw": "Unsupported RemovalPolicy[%s] type",
+    "en_US": "Unsupported RemovalPolicy[{0}] type",
+    "zh_CN": "不支持RemovalPolicy[{0}]类型",
+    "arguments": [
+      "removalPolicy.toString()"
+    ],
+    "fileName": "src/main/java/org/zstack/autoscaling/group/AutoScalingGroupBase.java"
+  },
+  {
+    "raw": "AutoScalingRuleSchedulerJobTriggerVO[uuid:%s] is %s, state change is not allowed",
+    "en_US": "AutoScalingRuleSchedulerJobTriggerVO[uuid:{0}] is {1}, state change is not allowed",
+    "zh_CN": "AutoScalingRuleSchedulerJobTriggerVO[uuid：{0}]为{1}，不允许更改状态",
+    "arguments": [
+      "triggerVO.getUuid()",
+      "triggerVO.getState()"
+    ],
+    "fileName": "src/main/java/org/zstack/autoscaling/group/rule/AutoScalingRuleManagerImpl.java"
+  },
+  {
+    "raw": "AutoScalingRuleSchedulerJobTriggerVO[uuid:%s] is be in cooldownDate",
+    "en_US": "AutoScalingRuleSchedulerJobTriggerVO[uuid:{0}] is be in cooldownDate",
+    "zh_CN": "AutoScalingRuleSchedulerJobTriggerVO[uuid：{0}]在CooldownDate中",
+    "arguments": [
+      "ruleUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/autoscaling/group/rule/AutoScalingRuleManagerImpl.java"
+  },
+  {
+    "raw": "AutoScalingRuleVO[uuid:%s] is %s, state change is not allowed",
+    "en_US": "AutoScalingRuleVO[uuid:{0}] is {1}, state change is not allowed",
+    "zh_CN": "AutoScalingRuleVO[uuid：{0}]为{1}，不允许更改状态",
+    "arguments": [
+      "ruleUuid",
+      "AutoScalingRuleState.Disabled.toString()"
+    ],
+    "fileName": "src/main/java/org/zstack/autoscaling/group/rule/AutoScalingRuleManagerImpl.java"
+  }
+]

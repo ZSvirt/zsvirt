@@ -1,0 +1,39 @@
+[
+  {
+    "raw": "target backup storage[uuid:%s] became unavailable",
+    "en_US": "target backup storage[uuid:{0}] became unavailable",
+    "zh_CN": "目标备份存储[uuid：{0}]变得不可用",
+    "arguments": [
+      "targetBsUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/imagereplicator/ImageReplicatorImpl.java"
+  },
+  {
+    "raw": "One or more backup storage[uuids:%s] has been added to replication group[uuid:%s]",
+    "en_US": "One or more backup storage[uuids:{0}] has been added to replication group[uuid:{1}]",
+    "zh_CN": "已将一个或多个备份存储[uuid：{0}]添加到复制组[uuid：{1}]",
+    "arguments": [
+      "String.join(\",\", msg.getBackupStorageUuids())",
+      "msg.getReplicationGroupUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/imagereplicator/ReplicationGroupApiInterceptor.java"
+  },
+  {
+    "raw": "Backup storage[uuids:%s] is not of type ImageStore",
+    "en_US": "Backup storage[uuids:{0}] is not of type ImageStore",
+    "zh_CN": "备份存储[uuid：{0}]不属于ImageStore类型",
+    "arguments": [
+      "bsUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/imagereplicator/ReplicationGroupApiInterceptor.java"
+  },
+  {
+    "raw": "Backup storage[uuids:%s] is not attached to any Zone",
+    "en_US": "Backup storage[uuids:{0}] is not attached to any Zone",
+    "zh_CN": "备份存储[uuid：{0}]未连接到任何数据中心",
+    "arguments": [
+      "bsUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/imagereplicator/ReplicationGroupApiInterceptor.java"
+  }
+]

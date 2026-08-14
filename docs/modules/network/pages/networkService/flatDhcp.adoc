@@ -1,0 +1,204 @@
+= DHCP
+
+== 简介
+
+DHCP服务的入口在 `DhcpExtension`, 它实现了接口 `NetworkServiceExtensionPoint` 中，包含了配置DHCP和删除DHCP的方法
+[source,java]
+----
+public interface NetworkServiceExtensionPoint {
+    void applyNetworkService(VmInstanceSpec servedVm, Map<String, Object> data, Completion completion);
+    void releaseNetworkService(VmInstanceSpec servedVm, Map<String, Object> data, NoErrorCompletion completion);
+}
+----
+目前有两种:
+
+* Flat   --  分布式DHCP
+* vrouter  -- 集中式DHCP
+
+云主机使用哪种backend，取决于云主机网卡的三层网路配置
+[source,bash]
+----
+admin >>>QueryL3Network uuid='e82f9446c3e34111b8b74cfcf70f4562'
+{
+    "inventories": [
+        {
+            "category": "Private",
+            "createDate": "Aug 23, 2022 4:31:36 PM",
+            "hostRoute": [],
+            "ipRanges": [
+                {
+                    "createDate": "Aug 23, 2022 4:31:36 PM",
+                    "endIp": "192.168.1.254",
+                    "gateway": "192.168.1.1",
+                    "ipVersion": 4,
+                    "l3NetworkUuid": "e82f9446c3e34111b8b74cfcf70f4562",
+                    "lastOpDate": "Aug 23, 2022 4:31:36 PM",
+                    "name": "192.168.1.0/24",
+                    "netmask": "255.255.255.0",
+                    "networkCidr": "192.168.1.0/24",
+                    "prefixLen": 24,
+                    "startIp": "192.168.1.2",
+                    "uuid": "114691a225164a10904e8ac176cbdec1"
+                }
+            ],
+            "ipVersion": 4,
+            "l2NetworkUuid": "8fe67ed8517845b98b7715e31828710d",
+            "lastOpDate": "Aug 23, 2022 4:31:36 PM",
+            "name": "vx-2",
+            "networkServices": [
+                {
+                    "l3NetworkUuid": "e82f9446c3e34111b8b74cfcf70f4562",
+                    "networkServiceProviderUuid": "a09b3ad773b24b34b7ac81a01a04df9b",
+                    "networkServiceType": "LoadBalancer"
+                },
+                {
+                    "l3NetworkUuid": "e82f9446c3e34111b8b74cfcf70f4562",
+                    "networkServiceProviderUuid": "a09b3ad773b24b34b7ac81a01a04df9b",
+                    "networkServiceType": "CentralizedDNS"
+                },
+                {
+                    "l3NetworkUuid": "e82f9446c3e34111b8b74cfcf70f4562",
+                    "networkServiceProviderUuid": "cb69890a791348009e1ec61d91de8ec3",
+                    "networkServiceType": "DHCP"
+                },
+                {
+                    "l3NetworkUuid": "e82f9446c3e34111b8b74cfcf70f4562",
+                    "networkServiceProviderUuid": "a09b3ad773b24b34b7ac81a01a04df9b",
+                    "networkServiceType": "Eip"
+                },
+                {
+                    "l3NetworkUuid": "e82f9446c3e34111b8b74cfcf70f4562",
+                    "networkServiceProviderUuid": "cb69890a791348009e1ec61d91de8ec3",
+                    "networkServiceType": "Userdata"
+                },
+                {
+                    "l3NetworkUuid": "e82f9446c3e34111b8b74cfcf70f4562",
+                    "networkServiceProviderUuid": "a09b3ad773b24b34b7ac81a01a04df9b",
+                    "networkServiceType": "PortForwarding"
+                },
+                {
+                    "l3NetworkUuid": "e82f9446c3e34111b8b74cfcf70f4562",
+                    "networkServiceProviderUuid": "a09b3ad773b24b34b7ac81a01a04df9b",
+                    "networkServiceType": "SNAT"
+                },
+                {
+                    "l3NetworkUuid": "e82f9446c3e34111b8b74cfcf70f4562",
+                    "networkServiceProviderUuid": "a09b3ad773b24b34b7ac81a01a04df9b",
+                    "networkServiceType": "IPsec"
+                },
+                {
+                    "l3NetworkUuid": "e82f9446c3e34111b8b74cfcf70f4562",
+                    "networkServiceProviderUuid": "a09b3ad773b24b34b7ac81a01a04df9b",
+                    "networkServiceType": "VRouterRoute"
+                },
+                {
+                    "l3NetworkUuid": "e82f9446c3e34111b8b74cfcf70f4562",
+                    "networkServiceProviderUuid": "a09b3ad773b24b34b7ac81a01a04df9b",
+                    "networkServiceType": "VipQos"
+                },
+                {
+                    "l3NetworkUuid": "e82f9446c3e34111b8b74cfcf70f4562",
+                    "networkServiceProviderUuid": "67bcc5c436a148a6a8d156aa7b1821eb",
+                    "networkServiceType": "SecurityGroup"
+                }
+            ],
+            "state": "Enabled",
+            "system": false,
+            "type": "L3VpcNetwork",
+            "uuid": "e82f9446c3e34111b8b74cfcf70f4562",
+            "zoneUuid": "f3b1d4ee02b5497ab1bff0deb3764bca"
+        }
+    ],
+    "success": true
+}
+admin >>>QueryNetworkServiceProvider uuid=cb69890a791348009e1ec61d91de8ec3
+{
+    "inventories": [
+        {
+            "attachedL2NetworkUuids": [
+                "6c84e4ebdf4e4d1bb119c46488a7cc90",
+                "ba7a2ac0f45d4d6a9a8da7c311ded9bb",
+                "2131fa08cc4e43d7b82899f64f788749",
+                "bbe2b8b0775246b0a6a7f52c6ee35cd6",
+                "bd733a753aa545f2b9b3119aaa30e969",
+                "8fe67ed8517845b98b7715e31828710d",
+                "9bd8ef54b3e541c994d95cb495326e26",
+                "7885fb46a0a847b5b88485c092026ad0"
+            ],
+            "createDate": "Aug 15, 2022 11:58:22 AM",
+            "description": "Flat Network Service Provider",
+            "lastOpDate": "Aug 15, 2022 11:58:22 AM",
+            "name": "Flat Network Service Provider",
+            "networkServiceTypes": [
+                "VipQos",
+                "DNS",
+                "HostRoute",
+                "Userdata",
+                "Eip",
+                "DHCP"
+            ],
+            "type": "Flat",
+            "uuid": "cb69890a791348009e1ec61d91de8ec3"
+        }
+    ],
+    "success": true
+}
+----
+
+可以看到这个网络DHCP使用Flat方式。这个配置是在创建L3网络的时候，通过 `APIAttachNetworkServiceToL3NetworkMsg` 添加的，也可以通过 `APIDetachNetworkServiceFromL3NetworkMsg` 删除。
+
+云主机的启动流程中有一个Flow: `VmInstantiateResourcePreFlow`, 它的主要逻辑是：在vm启动之前，准备vm所需的服务，其中包含网络服务，因此DHCP后端的 `applyNetworkService` 被调用。
+
+云主机的删除流程/停止流程中有一个Flow: `VmReleaseResourceFlow`, 它的主要逻辑是：在vm删除/停止之前，释放vm所需的服务，其中包含网络服务，因此DHCP后端的 `releaseNetworkService` 被调用。
+
+== 分布式DHCP
+
+每个网络在每个物理机上都有一个dhcp server, 它只为当前这个物理机上的云主机提供DHCP服务。
+
+物理机上结构如下：
+
+image::networkService/flatDhcp/arch.svg[]
+
+在物理机上为每个三层网路启动一个namespace, 且连接到三层网络的bridge，在namespsace中启动dnsmasq。云主机启动以后，发送DHCP请求，namespace中的dnsmasq
+响应DHCP请求。在在每个物理机上都有相同的dnsmasq,为了避免彼此干扰，在bridge的物理口配置规则：
+
+[source,bash]
+----
+# ebtables-save
+# Generated by ebtables-save v1.0 on Wed Oct 12 17:15:53 CST 2022
+*filter
+:INPUT ACCEPT
+:FORWARD ACCEPT
+:OUTPUT ACCEPT
+:ZSTACK-192.168.1.161 ACCEPT
+:USERDATA-br_vx_100-847284cd ACCEPT
+-A FORWARD -j ZSTACK-192.168.1.161
+-A ZSTACK-192.168.1.161 -p IPv4 -i vxlan100 --ip-proto udp --ip-sport 67:68 -j DROP
+-A ZSTACK-192.168.1.161 -p IPv4 -o vxlan100 --ip-proto udp --ip-sport 67:68 -j DROP
+-A ZSTACK-192.168.1.161 -p ARP -i vxlan100 --arp-ip-src 192.168.1.161 -j DROP
+-A ZSTACK-192.168.1.161 -p ARP -o vxlan100 --arp-ip-src 192.168.1.161 -j DROP
+-A ZSTACK-192.168.1.161 -p ARP -i vxlan100 --arp-ip-dst 192.168.1.161 -j DROP
+-A ZSTACK-192.168.1.161 -p ARP -o vxlan100 --arp-ip-dst 192.168.1.161 -j DROP
+-A ZSTACK-192.168.1.161 -j RETURN
+----
+
+dnsmasq进程信息：
+
+[source,bash]
+----
+# ps aux | grep dnsmasq
+nobody   14074  0.0  0.0   6812  1540 ?        S    Sep29   0:00 /usr/local/zstack/dnsmasq --conf-file=/var/lib/zstack/dnsmasq/br_vx_100_847284cd3c1b44be9569ed03f670ea00/dnsmasq.conf -K
+----
+
+在物理机上，三层网络的第一个云主机启动之前，创建namespace, 启动dnsqmasq服务。当删除这个三层网络的时候，会删除这个namespace, 停止dnsmasq.
+
+
+
+
+
+
+
+
+
+
+

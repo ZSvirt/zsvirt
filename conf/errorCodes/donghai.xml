@@ -1,0 +1,48 @@
+<error>
+    <prefix>DONGHAI</prefix>
+    <code>
+        <id>1001</id>
+        <description>user password invalidation!</description>
+    </code>
+
+    <code>
+        <id>1002</id>
+        <description>get sessionid failed,user authenticate failed!</description>
+    </code>
+
+    <code>
+        <id>1003</id>
+        <description>connection authentication error,please check it!</description>
+    </code>
+
+    <code>
+        <id>1004</id>
+        <description>get sessionid failed,username or password is null,please check it!</description>
+    </code>
+
+    <code>
+        <id>1005</id>
+        <description>you don't have permission to log in now</description>
+    </code>
+
+    <code>
+        <id>1006</id>
+        <description>user authentication unknown exception</description>
+    </code>
+
+    <code>
+        <id>1007</id>
+        <description>user does not exist.</description>
+    </code>
+
+    <code>
+        <id>1008</id>
+        <description>user authentication password error.</description>
+    </code>
+
+    <code>
+        <id>1009</id>
+        <description>get token failed,user authenticate  failed!</description>
+    </code>
+</error>
+

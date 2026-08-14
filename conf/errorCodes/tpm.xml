@@ -1,0 +1,24 @@
+<error>
+    <prefix>TPM</prefix>
+
+    <code>
+        <id>1000</id>
+        <description>General error</description>
+    </code>
+
+    <code>
+        <id>1701</id>
+        <description>TPM already exists in this VM</description>
+    </code>
+
+    <code>
+        <id>1702</id>
+        <description>TPM not found</description>
+    </code>
+
+    <code>
+        <id>1703</id>
+        <description>The current VM state does not support this TPM operations</description>
+    </code>
+</error>
+

@@ -1,0 +1,9 @@
+<error>
+    <prefix>VOL_BACKUP</prefix>
+
+    <code>
+        <id>1000</id>
+        <description>Unable to create volume backup for stopped vm.</description>
+    </code>
+
+</error>

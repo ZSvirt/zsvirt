@@ -1,0 +1,95 @@
+[
+  {
+    "raw": "crond is not running",
+    "en_US": "crond is not running",
+    "zh_CN": "crond任务未在运行",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/externalservice/cronjob/CronJobImpl.java"
+  },
+  {
+    "raw": "error on remote node",
+    "en_US": "error on remote node",
+    "zh_CN": "错误发生在远端的节点上",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/externalservice/vops/VOpsClientRestHttp.java"
+  },
+  {
+    "raw": "client http timeout",
+    "en_US": "client http timeout",
+    "zh_CN": "客户端 HTTP 超时",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/externalservice/vops/VOpsClientRestHttp.java"
+  },
+  {
+    "raw": "non support method: %s",
+    "en_US": "non support method: {0}",
+    "zh_CN": "不支持方法：{0}",
+    "arguments": [
+      "method"
+    ],
+    "fileName": "src/main/java/org/zstack/premium/externalservice/grafana/api/GrafanaAPI.java"
+  },
+  {
+    "raw": "http request error! status_code: %s, error: %s",
+    "en_US": "http request error! status_code: {0}, error: {1}",
+    "zh_CN": "HTTP请求错误！状态_代码：{0}，错误：{1}",
+    "arguments": [
+      "statusCode",
+      "response.getStatusLine().getReasonPhrase()"
+    ],
+    "fileName": "src/main/java/org/zstack/premium/externalservice/grafana/api/GrafanaAPI.java"
+  },
+  {
+    "raw": "sqlite3 execute failed, because: %s",
+    "en_US": "sqlite3 execute failed, because: {0}",
+    "zh_CN": "SQLite3执行失败，因为：{0}",
+    "arguments": [
+      "r.getStderr()"
+    ],
+    "fileName": "src/main/java/org/zstack/premium/externalservice/grafana/api/GrafanaDB.java"
+  },
+  {
+    "raw": "cannot find folder: %s in dashboard",
+    "en_US": "cannot find folder: {0} in dashboard",
+    "zh_CN": "在仪表板中找不到文件夹：{0}",
+    "arguments": [
+      "GrafanaDB.folderTitle"
+    ],
+    "fileName": "src/main/java/org/zstack/premium/externalservice/grafana/api/GrafanaDashboard.java"
+  },
+  {
+    "raw": "cannot copy %s to %s, caused: %s",
+    "en_US": "cannot copy {0} to {1}, caused: {2}",
+    "zh_CN": "无法将{0}复制到{1}，原因：{2}",
+    "arguments": [
+      "src.getAbsolutePath()",
+      "dst.getAbsolutePath()",
+      "rst.getStderr()"
+    ],
+    "fileName": "src/main/java/org/zstack/premium/externalservice/loki/LokiFactory.java"
+  },
+  {
+    "raw": "ssh failed",
+    "en_US": "ssh failed",
+    "zh_CN": "SSH失败",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/premium/externalservice/loki/PromtailFactory.java"
+  },
+  {
+    "raw": "unknown value type %s, key \u003d %s",
+    "en_US": "unknown value type {0}, key \u003d {1}",
+    "zh_CN": "未知的值类型{0}，键\u003d{1}",
+    "arguments": [
+      "v.getClass().getSimpleName()",
+      "k"
+    ],
+    "fileName": "src/main/java/org/zstack/premium/externalservice/prometheus/MultiNodePrometheus.java"
+  },
+  {
+    "raw": "failed to HTTP call all prometheus instances",
+    "en_US": "failed to HTTP call all prometheus instances",
+    "zh_CN": "无法对所有Prometheus实例进行HTTP调用",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/premium/externalservice/prometheus/MultiNodePrometheus.java"
+  }
+]

@@ -1,0 +1,22 @@
+[
+  {
+    "raw": "[%s] field is excepted an int or long, but was [%s].",
+    "en_US": "[{0}] field is excepted an int or long, but was [{1}].",
+    "zh_CN": "[{0}] 属性期望是一个整数，但是得到的是 [{1}]",
+    "arguments": [
+      "f.getName()",
+      "source"
+    ],
+    "fileName": "src/main/java/org/zstack/rest/TypeVerifier.java"
+  },
+  {
+    "raw": "Invalid value for boolean field [%s], [%s] is not a valid boolean string[true, false].",
+    "en_US": "Invalid value for boolean field [{0}], [{1}] is not a valid boolean string[true, false].",
+    "zh_CN": "[%s] 属性值无效，[%s] 不是一个有效的布尔值字符串[true, false]",
+    "arguments": [
+      "f.getName()",
+      "source"
+    ],
+    "fileName": "src/main/java/org/zstack/rest/TypeVerifier.java"
+  }
+]

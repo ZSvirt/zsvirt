@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<globalConfig xmlns="http://zstack.org/schema/zstack">
+    <config>
+        <name>backupStorage.image.download.timeout</name>
+        <description>timeout of command of downloading images to ceph backup storage, in seconds.</description>
+        <category>ceph</category>
+        <defaultValue>3600</defaultValue>
+        <type>java.lang.Long</type>
+    </config>
+
+    <config>
+        <name>imageCache.cleanup.interval</name>
+        <description>interval to cleanup stale image cache on primary storage, in seconds.</description>
+        <category>ceph</category>
+        <defaultValue>43200</defaultValue>
+        <type>java.lang.Long</type>
+    </config>
+
+    <config>
+        <name>trash.cleanup.interval</name>
+        <description>interval to cleanup image trash on primary storage, in seconds.</description>
+        <category>ceph</category>
+        <defaultValue>43200</defaultValue>
+        <type>java.lang.Long</type>
+    </config>
+
+    <config>
+        <name>image.expiration.time</name>
+        <description>the expiration time in seconds of an image so it can be purged when it is stale.</description>
+        <category>ceph</category>
+        <defaultValue>604800</defaultValue>
+        <type>java.lang.Long</type>
+    </config>
+
+    <config>
+        <name>primaryStorage.deletePool</name>
+        <description>delete all primary storage related pools when deleting the ceph primary storage</description>
+        <category>ceph</category>
+        <defaultValue>false</defaultValue>
+        <type>java.lang.Boolean</type>
+    </config>
+
+    <config>
+        <name>primaryStorage.mon.reconnectDelay</name>
+        <description>the delay to reconnect a primary storage ceph mon after a ping failure, in seconds</description>
+        <category>ceph</category>
+        <defaultValue>30</defaultValue>
+        <type>java.lang.Integer</type>
+    </config>
+
+    <config>
+        <name>backupStorage.mon.reconnectDelay</name>
+        <description>the delay to reconnect a backup storage ceph mon after a ping failure, in seconds</description>
+        <category>ceph</category>
+        <defaultValue>30</defaultValue>
+        <type>java.lang.Integer</type>
+    </config>
+
+    <config>
+        <name>primaryStorage.mon.autoReconnect</name>
+        <description>whether to automatically reconnect a ceph primary storage mon when it's unable to be pinged</description>
+        <category>ceph</category>
+        <defaultValue>true</defaultValue>
+        <type>java.lang.Boolean</type>
+    </config>
+
+    <config>
+        <name>backupStorage.mon.autoReconnect</name>
+        <description>whether to automatically reconnect a ceph backup storage mon when it's unable to be pinged</description>
+        <category>ceph</category>
+        <defaultValue>true</defaultValue>
+        <type>java.lang.Boolean</type>
+    </config>
+
+    <config>
+        <name>deletion.gcInterval</name>
+        <description>the interval to garbage collect stale volumes, in seconds</description>
+        <defaultValue>3600</defaultValue>
+        <category>ceph</category>
+        <type>java.lang.Integer</type>
+    </config>
+
+    <config>
+        <name>cephbs.allow.ports</name>
+        <description>tcp or udp ports allowed by ceph backup storage, udp port start with 'u' like 'u67', port range can be like this: 1100:1200, multiple port or port range can be separated by ”,“</description>
+        <defaultValue>7761</defaultValue>
+        <category>ceph</category>
+        <type>java.lang.String</type>
+    </config>
+
+    <config>
+        <name>cephps.allow.ports</name>
+        <description>tcp or udp ports allowed by ceph primary storage, udp port start with 'u' like 'u67', port range can be like this: 1100:1200, multiple port or port range can be separated by ”,“</description>
+        <defaultValue>7762</defaultValue>
+        <category>ceph</category>
+        <type>java.lang.String</type>
+    </config>
+
+    <config>
+        <name>ceph.syncLevel</name>
+        <description>ceph queue Operation</description>
+        <defaultValue>30</defaultValue>
+        <category>ceph</category>
+        <type>java.lang.Long</type>
+    </config>
+
+    <config>
+        <name>sds.admin.password</name>
+        <description>the password of ceph admin user</description>
+        <defaultValue>password</defaultValue>
+        <category>ceph</category>
+        <type>java.lang.String</type>
+    </config>
+
+    <config>
+        <name>primaryStorage.mon.ping.maxFailure</name>
+        <description>The maximum count of ping failure before reconnecting primary storage ceph mon</description>
+        <category>ceph</category>
+        <defaultValue>3</defaultValue>
+        <type>java.lang.Integer</type>
+    </config>
+
+    <config>
+        <name>ping.sleepPeriodAfterFailure</name>
+        <description>The sleep period in seconds before retrying the next ping after a ping failure</description>
+        <category>ceph</category>
+        <defaultValue>1</defaultValue>
+        <type>java.lang.Integer</type>
+    </config>
+</globalConfig>

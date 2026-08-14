@@ -1,0 +1,18 @@
+<error>
+    <prefix>LUN</prefix>
+
+    <code>
+        <id>1000</id>
+        <description>General error</description>
+    </code>
+
+    <code>
+        <id>1001</id>
+        <description>Lun has been created</description>
+    </code>
+
+    <code>
+        <id>1002</id>
+        <description>Lun cannot be found</description>
+    </code>
+</error>

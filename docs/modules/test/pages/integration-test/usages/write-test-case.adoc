@@ -1,0 +1,854 @@
+= 编写测试用例
+
+== 构成
+
+所有 Integreation Test（除后文讲到的 Test Suite）都继承 `SubCase` 类，例如：
+
+[source,groovy]
+----
+class OneVmBasicLifeCycleCase extends SubCase {
+----
+
+并实现 4 个抽象函数：
+
+[arabic]
+. setup：配置用例，主要用于加载运行用例需要用到的 ZStack 服务和组件
+. environment： 构造测试环境，例如创建 zone、cluster，添加 host 等操作
+. test：执行具体测试代码
+. clean：清理环境 （仅当该 case 在 test suite 中运行时执行，后文详述）
+
+测试用例运行时，上述 4 个函数依次执行，任何一个环节出现错误则测试终止退出（case 在 test
+suite 中运行时例外）。
+
+
+[CAUTION]
+====
+对于 ZStack 企业版的开发者，应当将测试写到企业版的插件目录中，以确保管理节点加载所有插件后的行为符合预期。
+
+此外，每个 case 不应该太大越！
+====
+
+== 配置测试用例： setup()
+
+ZStack 采用 Spring 框架，通过 XML 文件配置和管理要加载的服务和组件。XML 配置文件存在于两个目录：
+
+[arabic]
+. https://github.com/zstackio/zstack/tree/master/conf/springConfigXml[conf]:
+包含所有 ZStack 组件的 XML 配置文件
+. https://github.com/zstackio/zstack/tree/master/test/src/test/resources/springConfigXml[test/src/test/resources/springConfigXml]：包含测试用例自有的 XML 配置文件（例如有的测试用例可能增加自己组件或服务），以及用于覆盖默认组件的的 XML 配置文件（例如 https://github.com/zstackio/zstack/blob/master/test/src/test/resources/springConfigXml/Kvm.xml[test/src/test/resources/springConfigXml/Kvm.xml]）在测试时就会覆盖默认的 https://github.com/zstackio/zstack/blob/master/conf/springConfigXml/Kvm.xml[conf/springConfigXml/Kvm.xml]
++
+____
+开发者可以使用覆盖默认组件的 XML 配置文件实现测试时改变默认组件的加载行为
+____
+
+在 `setup()` 函数中，我们需要指定该测试用例需要加载哪些组件的 XML 配置文件，这通过 `spring` 函数的 DSL 语法实现，例如：
+
+[source,groovy]
+----
+    @Override
+    void setup() {
+        spring {
+            sftpBackupStorage()
+            localStorage()
+            virtualRouter()
+            securityGroup()
+            kvm()
+        }
+    }
+----
+
+____
+这里使用的 DSL 是典型的 https://www.tutorialspoint.com/groovy/groovy_builders.htm[groovy
+builder pattern]，在整个 Integreation Test 框架中我们大量使用了该 DSL
+pattern。
+____
+
+在 `spring` 函数后的 `{}`
+body 中，开发者可以通过 `include()` 函数指定要加载的 XML 文件，例如：
+
+[source,groovy]
+----
+    @Override
+    void setup() {
+        spring {
+            include("Kvm.xml") // 指定 XML 文件名即可，不需要加路径
+            include("eip.xml")
+        }
+    }
+----
+
+或者使用 spring
+DSL 内置的函数直接加载相关 XML 文件，例如 `kvm()` 就等同于 `include("Kvm.xml")`。目前 spring
+DSL 提供如下默认内置函数：
+
+[cols=",",options="header",]
+|===
+| 函数名 | 描述
+|includeAll | 加载系统中所有组件
+|includeCoreServices | 加载系统核心服务
+|nfsPrimaryStorage | 加载 NFS 主存储服务
+|localStorage | 加载本地主存储服务
+|vyos | 加载 vyos 云路由服务
+|virtualRouter | 加载虚拟路由服务
+|sftpBackupStorage | 加载 sftp 备份存储服务
+|eip | 加载 eip 服务
+|lb | 加载负载均衡服务
+|portForwarding | 加载端口转发服务
+|kvm | 加载 kvm 服务
+|ceph | 加载 ceph 主存储 / 备份存储服务
+|smp | 加载 sharedMountPoint 主存储服务
+|securityGroup | 加载安全组服务
+|===
+
+其中 `includeAll` 不应该被直接使用，开发者应该只加载测试用例使用的组件和服务。`includeCoreServices` 会被 spring
+DSL 默认调用，例如：
+
+[source,groovy]
+----
+    @Override
+    void setup() {
+        spring {
+            // 虽然没有指定任何 XML，spring DSL 仍然会为我们加载核心服务
+        }
+    }
+----
+
+会默认加载 ZStack 核心服务。 https://github.com/zstackio/zstack/blob/0e2b956be2058a0971d52a61763d789948a89169/tests/testlib-simple/src/main/java/org/zstack/testlib/SpringSpec.groovy[SpringSpec.groovy] 包含了核心服务定义：
+
+[source,groovy]
+----
+    List<String> CORE_SERVICES = [
+            "HostManager.xml",
+            "ZoneManager.xml",
+            "ClusterManager.xml",
+            "PrimaryStorageManager.xml",
+            "BackupStorageManager.xml",
+            "ImageManager.xml",
+            "HostAllocatorManager.xml",
+            "ConfigurationManager.xml",
+            "VolumeManager.xml",
+            "NetworkManager.xml",
+            "VmInstanceManager.xml",
+            "AccountManager.xml",
+            "NetworkService.xml",
+            "volumeSnapshot.xml",
+            "tag.xml",
+    ]
+----
+
+____
+核心服务是指
+提供一个基础 IaaS 环境所需要的服务，并非指启动 ZStack 进程所需要的服务。例如我们完全可以启动一个不包含 VmInstanceManager.xml（虚拟机服务）的 ZStack 进程，它仍然工作，例如可以提供物理机相关的 API，但不能提供虚拟机相关 API（因为虚拟机服务没有加载）。
+____
+
+核心服务之间大多并不相互依赖，例如 `ZoneManager.xml` 并不依赖于 `HostManager.xml`。当开发人员想细粒度的控制系统加载的服务，可以通过将 `INCLUDE_CORE_SERVICES` 变量设置成 false 以阻止 spring
+DSL 自动加载核心服务，例如：
+
+[source,groovy]
+----
+    @Override
+    void setup() {
+        INCLUDE_CORE_SERVICES = false // <1>
+
+        spring {
+            include("ZoneManager.xml") // <2>
+        }
+    }
+----
+<1> 当该变量设置成 false 后，后续的 spring DSL 不会自动加载核心服务
+<2> 这里我们只加载跟 zone 相关的服务
+
+spring
+DSL 提供的内置函数定义在 https://github.com/zstackio/zstack/blob/0e2b956be2058a0971d52a61763d789948a89169/tests/testlib-simple/src/main/java/org/zstack/testlib/SpringSpec.groovy[SpringSpec.groovy] 中，开发人员可以直接查看。随着后续 ZStack 服务的增加，还会有新的内置函数加入。
+
+== 构建用例环境：environment()
+
+绝大部分 Integreation
+Test 需要构建测试环境，例如要测试停止虚拟机，首先需要一个已经创建好的虚拟机，而创建一个虚拟机又必须事先创建好物理机、主存储、镜像、网络等资源。为了将开发者从构建环境的重复劳动中解放出来，Integreation
+Test 框架提供 env DSL 帮助自动创建环境，先看一个例子：
+
+[source,groovy]
+----
+    EnvSpec myenv
+
+    @Override
+    void environment() {
+        myenv = env {
+            zone {
+                name = "zone"
+
+                l2NoVlanNetwork {
+                    name = "l2"
+                    physicalInterface = "eth0"
+
+                    l3Network {
+                        name = "l3"
+
+                        ip {
+                            name = "ipr"
+                            startIp = "10.223.110.10"
+                            endIp = "10.223.110.20"
+                            gateway = "10.223.110.1"
+                            netmask = "255.255.255.0"
+                        }
+                    }
+                }
+            }
+        }
+    }
+----
+
+在这个例子中，我们通过 env
+DSL 描述了一个环境，里面包含 zone、l2NoVlanNetwork、l3Network、ip 共 4 个资源。这里 `env()` 函数是 env
+DSL 的入口，用于创建一个 `EnvSpec` 对象，开发者可以直接调用其 `create()` 方法部署整个环境：
+
+[source,groovy]
+----
+  @Override
+  void test() {
+     myenv.create()
+  }
+----
+
+env DSL 语法中每个资源可以包含三种成员：
+
+[arabic]
+. 参数：用于创建该资源的参数，例如 `name = "zone"` 就指定了创建该 zone 的 name 参数
+. 子资源：例如 l2NoVlanNetwork 包含在 zone 中，它就是 zone 的一个子资源
+. 函数：通常用于引用其它资源或关联其它资源
+
+当 `create()` 函数调用时，测试框架会遍历 env
+DSL 定义的资源树，并调用相应资源的 SDK
+API 进行创建，例如 zone 就会使用 SDK 中的 https://github.com/zstackio/zstack/blob/master/sdk/src/main/java/org/zstack/sdk/CreateZoneAction.java[CreateZoneAction] 进行创建。所以 env
+DSL 实质是为不同资源在 SDK 中的 Create
+Action 的参数赋值。例如 zone 资源包含 `name` 和 `description` 两个参数就对应了 CreateZoneAction 的 name 和 description 参数。
+
+当一个资源被包含在另一个资源的描述中时，被包含的资源称为子资源，例如上例中 l2NoVlanNetwork 是 zone 的子资源。`create()` 方法在遍历资源树时，会先创建父资源，再创建子资源。
+
+当一个资源的创建依赖于其它资源时，需要使用 `useXXX()` 函数通过被依赖资源的名称引用该资源。例如：
+
+[source,groovy]
+----
+                virtualRouterOffering {
+                    name = "vr"
+                    memory = SizeUnit.MEGABYTE.toByte(512)
+                    cpu = 2
+                    useManagementL3Network("pubL3")
+                    usePublicL3Network("pubL3")
+                    useImage("vr")
+                    useAccount("xin")
+                }
+----
+
+对于 virtualRouterOffering 资源，其 SDK https://github.com/zstackio/zstack/blob/master/sdk/src/main/java/org/zstack/sdk/CreateVirtualRouterOfferingAction.java[CreateVirtualRouterOfferingAction] 需要指定 `managementNetworkUuid`、`publicNetworkUuid`、`imageUuid` 字段，我们用 `useManagementL3Network`、`usePublicL3Network`、`useImage` 去引用名为 pubL3 三层网络和名为 vr 的镜像，它们都是 virtualRouterOffering 的被依赖资源。`create()` 函数遍历资源树时，会首先创建被依赖资源，例如这里会保证 pubL3 三层网络和 vr 镜像先于 virtualRouterOffering 之前创建，并且在创建 virtualRouterOffering 时自动为 `managementNetworkUuid`、`publicNetworkUuid`、`imageUuid` 字段赋上相应资源的 UUID 值。
+
+某些资源（例如 cluster、zone）也可以使用函数去关联其它资源，例如 cluster 可以加载 primary
+storage 和 l2network，则需要使用 `attachPrimaryStorage()` 和 `attachL2Network()` 函数：
+
+[source,groovy]
+----
+                cluster {
+                    name = "cluster"
+                    hypervisorType = "KVM"
+
+                    kvm {
+                        name = "kvm"
+                        managementIp = "localhost"
+                        username = "root"
+                        password = "password"
+                        usedMem = 1000
+                        totalCpu = 10
+                    }
+
+                    attachPrimaryStorage("nfs", "ceph-pri", "local", "smp")
+                    attachL2Network("l2")
+                }
+----
+
+在上例中，cluster 会加载”nfs”, ``ceph-pri'', ``local'',
+``smp'' 等 4 个 primary
+storage 以及名为”l2”的 l2network，`create()` 函数在遍历资源树时会保证这些资源在 attach 操作时就已经创建完成。
+
+`env()` 函数返回的 `EnvSpec` 对象是 integreation
+test 核心对象，通常应该保存成为测试用例的一个成员变量，例如：
+
+[source,groovy]
+----
+class OneL3OneIpRangeNoIpUsed extends SubCase {
+    EnvSpec env
+
+    @Override
+    void environment() {
+        env = env {
+            // 在这里描述环境
+        }
+    }
+
+    @Override
+    void test() {
+        env.create {
+            // 这里执行测试逻辑
+        }
+    }
+}
+----
+
+`EnvSpec.create()` 可以接受一个函数作为参数，具体测试的函数都包含在该函数中运行。
+
+=== env DSL 清单
+
+env DSL 目前支持的所有资源、参数、函数如下：
+
+....
+└── env
+    ├── account
+    │   ├── (field required) name
+    │   └── (field required) password
+    ├── cephBackupStorage
+    │   ├── (field optional) availableCapacity
+    │   ├── (field optional) description
+    │   ├── (field optional) monAddrs
+    │   ├── (field optional) totalCapacity
+    │   ├── (field required) fsid
+    │   ├── (field required) monUrls
+    │   ├── (field required) name
+    │   └── (field required) url
+    ├── diskOffering
+    │   ├── (field optional) allocatorStrategy
+    │   ├── (field optional) description
+    │   ├── (field required) diskSize
+    │   ├── (field required) name
+    │   └── (method) useAccount
+    ├── instanceOffering
+    │   ├── (field optional) allocatorStrategy
+    │   ├── (field optional) cpu
+    │   ├── (field optional) description
+    │   ├── (field optional) memory
+    │   ├── (field required) name
+    │   └── (method) useAccount
+    ├── sftpBackupStorage
+    │   ├── (field optional) availableCapacity
+    │   ├── (field optional) description
+    │   ├── (field optional) hostname
+    │   ├── (field optional) password
+    │   ├── (field optional) totalCapacity
+    │   ├── (field optional) username
+    │   ├── (field required) name
+    │   └── (field required) url
+    ├── vm
+    │   ├── (field optional) description
+    │   ├── (field required) name
+    │   ├── (method) useAccount
+    │   ├── (method) useCluster
+    │   ├── (method) useDefaultL3Network
+    │   ├── (method) useDiskOfferings
+    │   ├── (method) useHost
+    │   ├── (method) useImage
+    │   ├── (method) useInstanceOffering
+    │   ├── (method) useL3Networks
+    │   └── (method) useRootDiskOffering
+    └── zone
+        ├── (field optional) description
+        ├── (field required) name
+        ├── (method) attachBackupStorage
+        ├── cephPrimaryStorage
+        │   ├── (field optional) availableCapacity
+        │   ├── (field optional) description
+        │   ├── (field optional) monAddrs
+        │   ├── (field optional) totalCapacity
+        │   ├── (field required) fsid
+        │   ├── (field required) monUrls
+        │   ├── (field required) name
+        │   └── (field required) url
+        ├── cluster
+        │   ├── (field optional) description
+        │   ├── (field required) hypervisorType
+        │   ├── (field required) name
+        │   ├── (method) attachL2Network
+        │   ├── (method) attachPrimaryStorage
+        │   └── kvm
+        │       ├── (field optional) description
+        │       ├── (field optional) managementIp
+        │       ├── (field optional) totalCpu
+        │       ├── (field optional) totalMem
+        │       ├── (field optional) usedCpu
+        │       ├── (field optional) usedMem
+        │       ├── (field required) name
+        │       ├── (field required) password
+        │       └── (field required) username
+        ├── eip
+        │   ├── (field optional) description
+        │   ├── (field optional) requiredIp
+        │   ├── (field required) name
+        │   ├── (method) useAccount
+        │   ├── (method) useVip
+        │   └── (method) useVmNic
+        ├── l2NoVlanNetwork
+        │   ├── (field optional) description
+        │   ├── (field required) name
+        │   └── (field required) physicalInterface
+        ├── l2VlanNetwork
+        │   ├── (field optional) description
+        │   ├── (field required) name
+        │   ├── (field required) physicalInterface
+        │   └── (field required) vlan
+        ├── lb
+        │   ├── (field optional) description
+        │   ├── (field required) name
+        │   ├── (method) useAccount
+        │   ├── (method) useVip
+        │   └── listener
+        │       ├── (field optional) description
+        │       ├── (field required) instancePort
+        │       ├── (field required) loadBalancerPort
+        │       ├── (field required) name
+        │       ├── (field required) protocol
+        │       └── (method) useAccount
+        ├── localPrimaryStorage
+        │   ├── (field optional) availableCapacity
+        │   ├── (field optional) description
+        │   ├── (field optional) totalCapacity
+        │   ├── (field required) name
+        │   └── (field required) url
+        ├── nfsPrimaryStorage
+        │   ├── (field optional) availableCapacity
+        │   ├── (field optional) description
+        │   ├── (field optional) totalCapacity
+        │   ├── (field required) name
+        │   └── (field required) url
+        ├── portForwarding
+        │   ├── (field optional) allowedCidr
+        │   ├── (field optional) description
+        │   ├── (field required) name
+        │   ├── (field required) privatePortEnd
+        │   ├── (field required) privatePortStart
+        │   ├── (field required) protocolType
+        │   ├── (field required) vipPortEnd
+        │   ├── (field required) vipPortStart
+        │   ├── (method) useAccount
+        │   ├── (method) useVip
+        │   └── (method) useVmNic
+        ├── securityGroup
+        │   ├── (field optional) description
+        │   ├── (field required) name
+        │   ├── (method) attachL3Network
+        │   ├── (method) useAccount
+        │   ├── (method) useVmNic
+        │   └── rule
+        │       ├── (field optional) allowedCidr
+        │       ├── (field required) endPort
+        │       ├── (field required) protocol
+        │       ├── (field required) startPort
+        │       └── (field required) type
+        ├── smpPrimaryStorage
+        │   ├── (field optional) availableCapacity
+        │   ├── (field optional) description
+        │   ├── (field optional) totalCapacity
+        │   ├── (field required) name
+        │   └── (field required) url
+        └── virtualRouterOffering
+            ├── (field optional) allocatorStrategy
+            ├── (field optional) cpu
+            ├── (field optional) description
+            ├── (field optional) isDefault
+            ├── (field optional) memory
+            ├── (field required) name
+            ├── (method) useAccount
+            ├── (method) useImage
+            ├── (method) useManagementL3Network
+            └── (method) usePublicL3Network
+
+....
+
+[TIP]
+====
+env 内的内容应当越少越好，env 越少 case 加载越快
+====
+
+== 执行测试逻辑：test()
+
+具体的测试逻辑包含在 `test()` 函数中，作为 integreation
+test，开发人员应该更多从 API 层面验证程序功能。
+
+=== 用函数名作为注释
+
+一个 integreation
+test 通常包含多个程序逻辑的验证，相互混杂在一起常常让阅读代码的人不能直观的了解测试逻辑。ZStack 要求**每个独立的测试逻辑都封装到一个函数中，并使用函数名作为测试逻辑的注释**。例如：
+
+[source,groovy]
+----
+    void useIpRangeUuidWithStartBeyondTheEndIp() {
+        IpRangeSpec ipr = env.specByName("ipr")
+
+        List<FreeIpInventory> freeIps = getFreeIpOfIpRange {
+            ipRangeUuid = ipr.inventory.uuid
+            start = "10.223.110.21"
+        }
+
+        assert freeIps.size() = 0
+    }
+----
+
+该函数包含在 `org.zstack.test.integration.l3network.getfreeip.OneL3OneIpRangeNoIpUsed` 类中，通过类名和函数名，我们能够很容易的理解这个函数测试的逻辑是：测试 getfreeip
+API，并且使用了一个 l3network 和一个 iprange，目前 iprange 中没有 ip 被占用；通过 iprange
+uuid 去获取 freeip 指定 API 的 start 参数，而且该参数已经超过了 iprange 的 end
+ip。
+
+命名规则如下：
+
+[arabic]
+. 通过 package 名描述测试资源的场景，例如 `getfreeip` 是 l3network 的一个场景，而 `org.zstack.test.integration.kvm.lifecycle` 是 kvm 的 lifecycle 场景。每个新场景都需要创建一个新的子 package。
+. 通过 class 名描述部署环境，例如 `OneL3OneIpRangeNoIpUsed` 和 `OneVmBasicLifeCycleCase` 都能表示大概的部署场景。
+. 通过函数名描述测试的具体内容，例如 `useIpRangeUuidWithStartBeyondTheEndIp`、`testStopVm`。
+. 如果名字太长，英语中的一些介词可以省略，例如 `useIpRangeUuidWithStartBeyondTheEndIp` 可以省掉 `with`、`the` 变成 `useIpRangeUuidStartBeyondEndIp`。
+
+=== 每个测试函数只包含一个测试场景
+
+测试场景应该进行细粒度分割，保证每个函数中只有一个测试场景，方便阅读，例如下面这个例子只测试停止 VM 一个场景：
+
+[source,groovy]
+----
+    void testStopVm() {
+        VmSpec spec = env.specByName("vm")
+
+        KVMAgentCommands.StopVmCmd cmd = null
+
+        env.afterSimulator(KVMConstant.KVM_STOP_VM_PATH) { rsp, HttpEntity<String> e ->
+            cmd = JSONObjectUtil.toObject(e.body, KVMAgentCommands.StopVmCmd.class)
+            return rsp
+        }
+
+        VmInstanceInventory inv = stopVmInstance {
+            uuid = spec.inventory.uuid
+        }
+
+        assert inv.state = VmInstanceState.Stopped.toString()
+
+        assert cmd != null
+        assert cmd.uuid = spec.inventory.uuid
+
+        def vmvo = dbFindByUuid(cmd.uuid, VmInstanceVO.class)
+        assert vmvo.state = VmInstanceState.Stopped
+    }
+----
+
+我们允许调用一个测试场景的函数来验证另一个测试场景。例如测试 recover
+VM 这个功能时，我们要确认被 recover 的 VM 可以成功启动，则可以在测试 recover
+VM 的函数中调用测试 start VM 的函数进行验证：
+
+[source,groovy]
+----
+    void testRecoverVm() {
+        VmSpec spec = env.specByName("vm")
+
+        VmInstanceInventory inv = recoverVmInstance {
+            uuid = spec.inventory.uuid
+        }
+
+        assert inv.state = VmInstanceState.Stopped.toString()
+
+        // confirm the vm can start after being recovered
+        testStartVm()
+    }
+----
+
+=== 调用 API
+
+Integreation
+Test 中大部分时候是基于 API 对具体场景进行测试。所有测试用例必须使用 ZStack
+Java SDK 调用 API，任何其他形式都是禁止的（例如通过 CloudBus 发 API
+Message）。为了方便 API 调用，Integreation Test 将所有 Java SDK 封装成了 API
+DSL。例如使用 SDK 启动一个云主机，写法为：
+
+[source,groovy]
+----
+StartVmInstanceAction a = new StartVmInstanceAction()
+a.sessionId = "583c56b6352d4399aac23295b1507506"
+a.uuid = "36c27e8ff05c4780bf6d2fa65700f22e"
+StartVmInstanceAction.Result res = a.call()
+assert res.error != null: "API StartVmInstanceAction fails with an error ${res.error}"
+VmInstanceInventory vm = res.value.inventory
+----
+
+使用 API DSL 代码则简化为：
+
+[source,groovy]
+----
+VmInstanceInventory inv = startVmInstance {
+     uuid = "36c27e8ff05c4780bf6d2fa65700f22e"
+     sessionId = "583c56b6352d4399aac23295b1507506"
+}
+----
+
+API DSL 会自动检查返回值，如果 error 不为空则 assert 异常。
+
+如果一个 API 失败的行为是期望的，可以用 `expect` 函数。`expect` 的第一个参数可以是一个 Throwable
+Class，也可以是一个 Throwable Class 的集合：
+
+[source,groovy]
+----
+    expect(RuntimeException.class) {
+        throw new RuntimeException("ok")
+    }
+
+    expect([CloudRuntimeException.class, IllegalArgumentException.class]) {
+        throw new RuntimeException("ok")
+    }
+
+    expect(AssertionError.class) {
+        VmInstanceInventory inv = startVmInstance {
+            uuid = "36c27e8ff05c4780bf6d2fa65700f22e"
+            sessionId = "583c56b6352d4399aac23295b1507506"
+        }
+    }
+----
+
+如果 `expect` 后的函数抛出的异常不是所期望的，`expect` 本身则会抛出一个 Exception 导致测试失败。
+
+____
+API
+DSL 的函数命名方式很简单，将 SDK 对应类名的 __Action__ 去掉，并且首字母小写就是对应的函数名。例如 StartVmInstanceAction 对应 startVmInstance。使用 Intellij 等 IDE 输入函数名时又自动提示和补全。
+____
+
+*由于 API
+DSL 会自动检查返回值，如果返回 error 是预期行为并想对 error 进行检查，则不能使用 API
+DSL，而要使用 SDK。*
+
+[CAUTION]
+====
+写 Integration Test Case 时，尽量少用内部 Msg 去做某些事情，因为内部 msg 执行后，可能会产生不符合预期的脏数据。 即使要用内部 msg 去模拟一些极端的场景的，也一定要把这部分代码放在 case 最末尾执行，或者单独新增一个case来做这件事。
+====
+
+=== 通过 assert 来验证测试结果
+
+测试用例在验证测试结果的时候可以使用 groovy 的 assert 功能来验证结果，例如：
+
+[source,groovy]
+----
+assert inv.state = VmInstanceState.Stopped.toString()
+----
+
+当验证失败时，log 里面也会有详细信息：
+
+....
+assert freeIps.size() = 10
+       |       |      |
+       []      0      false org.codehaus.groovy.runtime.powerassert.PowerAssertionError: assert freeIps.size() = 10
+       |       |      |
+       []      0      false
+    ... suppressed 2 lines
+    at org.zstack.test.integration.l3network.getfreeip.OneL3OneIpRangeNoIpUsed.useIpRangeUuidWithStartBeyondTheEndIp(OneL3OneIpRangeNoIpUsed.groovy:76) ~[test-classes/:?]
+    ... suppressed 12 lines
+    at org.zstack.test.integration.l3network.getfreeip.OneL3OneIpRangeNoIpUsed$_test_closure3.doCall(OneL3OneIpRangeNoIpUsed.groovy:60) ~[test-classes/:?]
+    at org.zstack.test.integration.l3network.getfreeip.OneL3OneIpRangeNoIpUsed$_test_closure3.doCall(OneL3OneIpRangeNoIpUsed.groovy) ~[test-classes/:?]
+    ... suppressed 12 lines
+    at org.zstack.testlib.EnvSpec.create(EnvSpec.groovy:229) ~[testlib-1.9.0.jar:?]
+    at org.zstack.testlib.EnvSpec$create.call(Unknown Source) ~[?:?]
+....
+
+=== 模拟 agent 行为
+
+ZStack Integreation
+Test 最核心功能是通过基于 Jetty 的模拟器模拟真实环境下物理设备上安装的 agent，例如模拟物理机上安装的 KVM
+agent。当测试的场景涉及到后端 agent 调用时，我们需要捕获这些 HTTP 请求并进行验证，也可以伪造 agent 返回测试 API 逻辑。
+
+`EnvSpec` 提供 `simulator()` 和 `afterSimulator()` 模拟 agent 行为，两者的区别在于 `simulator()` 会替换测试框架默认的处理函数，而 `afterSimulator()` 允许在默认处理函数执行完后再执行一段额外的逻辑。例如
+
+[source,groovy]
+----
+env.simulator(KVMConstant.KVM_START_VM_PATH) {
+    throw new Exception("fail to start a VM on purpose")
+}
+----
+
+在上例中，我们通过 `simulator()` 替换掉了框架对 `KVMConstant.KVM_START_VM_PATH` 的默认处理函数，并在我们自己的处理函数中抛出了一个异常来模拟启动 VM 失败的情况。而使用 `afterSimulator()` 则可以在默认处理函数执行完后增加一段逻辑，例如下面例子中，我们捕获了发往 `KVMConstant.KVM_START_VM_PATH` 的命令，并对相关字段进行了验证：
+
+[source,groovy]
+----
+void testStartVm() {
+    VmSpec spec = env.specByName("vm")
+
+    KVMAgentCommands.StartVmCmd cmd = null
+
+    env.afterSimulator(KVMConstant.KVM_START_VM_PATH) { rsp, HttpEntity<String> e ->
+        cmd = JSONObjectUtil.toObject(e.body, KVMAgentCommands.StartVmCmd.class)
+        return rsp
+    }
+
+    VmInstanceInventory inv = startVmInstance {
+        uuid = spec.inventory.uuid
+    }
+
+    assert cmd != null
+    assert cmd.vmInstanceUuid = spec.inventory.uuid
+    assert inv.state = VmInstanceState.Running.toString()
+
+    VmInstanceVO vmvo = dbFindByUuid(cmd.vmInstanceUuid, VmInstanceVO.class)
+    assert vmvo.state = VmInstanceState.Running
+    assert cmd.vmInternalId = vmvo.internalId
+    assert cmd.vmName = vmvo.name
+    assert cmd.memory = vmvo.memorySize
+    assert cmd.cpuNum = vmvo.cpuNum
+    //TODO: test socketNum, cpuOnSocket
+    assert cmd.rootVolume.installPath = vmvo.rootVolumes.installPath
+    assert cmd.useVirtio
+    vmvo.vmNics.each { nic ->
+        KVMAgentCommands.NicTO to = cmd.nics.find { nic.mac = it.mac }
+        assert to != null: "unable to find the nic[mac:${nic.mac}]"
+        assert to.deviceId = nic.deviceId
+        assert to.useVirtio
+        assert to.nicInternalName = nic.internalName
+    }
+}
+----
+
+测试框架对所有 HTTP
+RPC 都注册了返回执行成功的默认 handler。`simulator()` 和 `afterSimulator()` 仅仅改变所关联 EnvSpec 对象上的 agent 逻辑，不影响其它 EnvSpec 对象。
+
+==== simulator() 定义
+
+当我们希望改变测试框架默认 handler 的行为，使用 `simulator()`：
+
+[source,groovy]
+----
+// httpPath: agent 的 HTTP RPC 路径，例如上例中的 KVM_START_VM_PATH = "/vm/start"
+// handler: 处理 HTTP RPC 调用的函数
+void simulator(String httpPath, Closure handler)
+
+// handler 作为 groovy Closure 类型可以接收两个可选参数：
+// entity：HTTP request，可以获得 HTTP header 和 body
+// spec: 该 handler 挂载的 EnvSpec，可以通过它获得其它资源的 spec
+// 返回值：返回给 HTTP PRC 调用的 response，如果该 HTTP RPC 不需要返回值，则返回一个空 map：[:] 或 null。
+def handler = { HttpEntity<String> entity, EnvSpec spec ->
+    return [:]
+}
+----
+
+==== afterSimulator() 定义
+
+当我们不希望改变测试框架默认 handler 的行为，仅仅希望捕获 HTTP
+RPC 命令，或者改变返回的 response 时，用 `afterSimulator()`：
+
+[source,groovy]
+----
+// httpPath: agent 的 HTTP RPC 路径，例如上例中的 KVM_START_VM_PATH = "/vm/start"
+// handler: 需要在系统默认 handler 执行后被调用的函数
+void afterSimulator(String httpPath, Closure handler)
+
+// handler 可以接收三个可选参数
+// response: 系统默认 handler 返回的 response 对象
+// entity：HTTP request，可以获得 HTTP header 和 body
+// spec: 该 handler 挂载的 EnvSpec，可以通过它获得其它资源的 spec
+// 返回值：返回给 HTTP PRC 调用的 response，如果该 HTTP RPC 不需要返回值，则返回一个空 map：[:] 或 null。
+def handler = { Object response, HttpEntity<String> entity, EnvSpec spec ->
+    return response
+}
+----
+
+=== 模拟 HTTP 错误
+
+我们可以在 `simulator()` 和 `afterSimulator()` 函数中抛出 `HttpError` 异常模拟 HTTP 错误，例如：
+
+[source,groovy]
+----
+env.simulator(KVMConstant.KVM_START_VM_PATH) {
+    throw new HttpError(403, "fail to start a VM on purpose")
+}
+----
+
+=== 捕获消息
+
+我们可以用 `EnvSpec.message()` 捕获一个消息，并模拟消息的行为，例如：
+
+[source,groovy]
+----
+@Override
+void test() {
+    ErrorFacade errf = bean(ErrorFacade.class)
+
+    env.message(StartNewCreatedVmInstanceMsg.class) { StartNewCreatedVmInstanceMsg msg, CloudBus bus ->
+        def reply = new MessageReply()
+        reply.setError(errf.stringToOperationError("on purpose"))
+        bus.reply(msg, reply)
+    }
+}
+----
+
+这里我们捕获了 `StartNewCreatedVmInstanceMsg` 消息并制造了一个错误作为消息返回。`message()` 还可以接受一个条件函数用来选择性捕获某些消息，例如：
+
+[source,groovy]
+----
+@Override
+void test() {
+    ErrorFacade errf = bean(ErrorFacade.class)
+
+    message(StartNewCreatedVmInstanceMsg.class, { StartNewCreatedVmInstanceMsg msg ->
+        return msg.vmInstanceInventory.name = "web"
+    }) { StartNewCreatedVmInstanceMsg msg, CloudBus bus ->
+        def reply = new MessageReply()
+        reply.setError(errf.stringToOperationError("on purpose"))
+        bus.reply(msg, reply)
+    }
+}
+----
+
+在这里例子中，只有当 `msg.vmInstanceInventory.name = "web"` 这个条件满足时，消息才会被捕获。
+
+==== message() 定义
+
+[source,groovy]
+----
+// msgClz: 要捕获消息的类型
+// condition: 条件函数，当函数返回 true 时，消息才会被捕获并执行 handler
+// handler: 处理被捕获消息的函数
+void message(Class<? extends Message> msgClz, Closure condition, Closure handler)
+
+// condition 接收一个可选参数
+// msg: 被捕获的消息
+// 返回值： true 捕获消息，false 不捕获消息
+def condition = { Message msg ->
+    return true
+}
+
+// handler 接收两个可选参数
+// msg: 被捕获的消息
+// bus: CloudBus 对象
+// 无返回值
+def handler = { Message msg, CloudBus bus ->
+}
+----
+
+=== 执行多个测试场景
+
+用例通常包含多个测试场景，执行时应该按顺序包含在 `EnvSpec.create()` 函数接收的 Closure 中，例如 :
+
+[source,groovy]
+----
+@Override
+void test() {
+    env.create {
+        testStopVm()
+        testStartVm()
+        testRebootVm()
+        testDestroyVm()
+        testRecoverVm()
+    }
+}
+----
+
+== 销毁测试环境：clean()
+
+每个测试用例都应该在 `clean()` 函数中销毁在 `environment()` 中构建的 `EnvSpec` 对象，例如：
+
+[source,groovy]
+----
+@Override
+void clean() {
+    env.delete()
+}
+----
+
+____
+测试用例单独执行时 `clean()` 不会被调用，以留存数据库环境供手动分析
+____
+

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:zstack="http://zstack.org/schema/zstack"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+         http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+         http://zstack.org/schema/zstack
+         http://zstack.org/schema/zstack/plugin.xsd"
+       default-init-method="init" default-destroy-method="destroy">
+
+    <bean id="DatabaseBackupManager" class="org.zstack.storage.backup.DatabaseBackupManagerImpl">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.Component"/>
+            <zstack:extension interface="org.zstack.header.Service"/>
+            <zstack:extension interface="org.zstack.storage.backup.DatabaseBackupManager"/>
+            <zstack:extension interface="org.zstack.header.imagestore.ImageStoreReclaimSpaceExtensionPoint"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="DatabaseBackupJobFactory" class="org.zstack.storage.backup.DatabaseBackupJobFactory">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.scheduler.SchedulerJobFactory"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="DatabaseBackupApiInterceptor" class="org.zstack.storage.backup.DatabaseBackupApiInterceptor">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.apimediator.ApiMessageInterceptor"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="DatabaseBackupCascadeExtension" class="org.zstack.storage.backup.DatabaseBackupCascadeExtension">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.core.cascade.CascadeExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="MultiDatabaseRecoverChecker" class="org.zstack.storage.backup.MultiDatabaseRecoverChecker">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.storage.backup.DatabaseRecoverChecker" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="SingleDatabaseRecoverChecker" class="org.zstack.storage.backup.SingleDatabaseRecoverChecker">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.storage.backup.DatabaseRecoverChecker" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="DatabaseBackupHistoryUpgradeExtension" class="org.zstack.storage.backup.DatabaseBackupHistoryUpgradeExtension">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.Component" order="-1"/>
+        </zstack:plugin>
+    </bean>
+</beans>

@@ -1,0 +1,928 @@
+[
+  {
+    "raw": "unknown parameter[%s] in zwatch return with clause, %s",
+    "en_US": "unknown parameter[{0}] in zwatch return with clause, {1}",
+    "zh_CN": "ZWatch Return WITH子句中的未知参数[{0}]，{1}",
+    "arguments": [
+      "paramName",
+      "normalizedExpr"
+    ],
+    "fileName": "src/main/java/org/zstack/zwatch/ZQLReturnWithExtension.java"
+  },
+  {
+    "raw": "invalid zwatch return with clause: %s, %s",
+    "en_US": "invalid zwatch return with clause: {0}, {1}",
+    "zh_CN": "无效的ZWatch返回WITH子句：{0}，{1}",
+    "arguments": [
+      "expr",
+      "e.getMessage()"
+    ],
+    "fileName": "src/main/java/org/zstack/zwatch/ZQLReturnWithExtension.java"
+  },
+  {
+    "raw": "Some messages have expired. The expired messages are not allowed to be modified. The system will automatically clean up the expired messages. Please operate later",
+    "en_US": "Some messages have expired. The expired messages are not allowed to be modified. The system will automatically clean up the expired messages. Please operate later",
+    "zh_CN": "部分消息已过期，过期消息不允许修改。系统会自动清理过期消息，请稍后再操作",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zwatch/ZWatchManagerImpl.java"
+  },
+  {
+    "raw": "the action[uuid:%s] already attached to the event subscription[uuid:%s]",
+    "en_US": "the action[uuid:{0}] already attached to the event subscription[uuid:{1}]",
+    "zh_CN": "报警动作[uuid:{0}]已经被加载到报警时间订阅[uuid:{1}]",
+    "arguments": [
+      "msg.getActionUuid()",
+      "msg.getSubscriptionUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/zwatch/alarm/AlarmApiInterceptor.java"
+  },
+  {
+    "raw": "event doesn\u0027t have label[%s]",
+    "en_US": "event doesn\u0027t have label[{0}]",
+    "zh_CN": "报警事件没有标签[{0}]",
+    "arguments": [
+      "msg.getKey()"
+    ],
+    "fileName": "src/main/java/org/zstack/zwatch/alarm/AlarmApiInterceptor.java"
+  },
+  {
+    "raw": "the event subscription already has the label[%s]",
+    "en_US": "the event subscription already has the label[{0}]",
+    "zh_CN": "事件订阅已经有标签[{0}]",
+    "arguments": [
+      "msg.getKey()"
+    ],
+    "fileName": "src/main/java/org/zstack/zwatch/alarm/AlarmApiInterceptor.java"
+  },
+  {
+    "raw": "namespace[%s] doesn\u0027t have the event[%s]",
+    "en_US": "namespace[{0}] doesn\u0027t have the event[{1}]",
+    "zh_CN": "命名空间[{0}]中没有事件[{1}]",
+    "arguments": [
+      "ns.getName()",
+      "msg.getEventName()"
+    ],
+    "fileName": "src/main/java/org/zstack/zwatch/alarm/AlarmApiInterceptor.java"
+  },
+  {
+    "raw": "event[%s] doesn\u0027t have the label[%s]",
+    "en_US": "event[{0}] doesn\u0027t have the label[{1}]",
+    "zh_CN": "事件[{0}]不存在标签[{1}]",
+    "arguments": [
+      "msg.getEventName()",
+      "l.getKey()"
+    ],
+    "fileName": "src/main/java/org/zstack/zwatch/alarm/AlarmApiInterceptor.java"
+  },
+  {
+    "raw": "namespace[%s] not found",
+    "en_US": "namespace[{0}] not found",
+    "zh_CN": "找不到命名空间[{0}]",
+    "arguments": [
+      "msg.getNamespace()"
+    ],
+    "fileName": "src/main/java/org/zstack/zwatch/alarm/AlarmApiInterceptor.java"
+  },
+  {
+    "raw": "Period field can not be null for metric [name:%s]",
+    "en_US": "Period field can not be null for metric [name:{0}]",
+    "zh_CN": "度量[名称：{0}]的期间字段不能为Null",
+    "arguments": [
+      "msg.getMetricName()"
+    ],
+    "fileName": "src/main/java/org/zstack/zwatch/alarm/AlarmApiInterceptor.java"
+  },
+  {
+    "raw": "Period field is not supported for metric [name:%s]",
+    "en_US": "Period field is not supported for metric [name:{0}]",
+    "zh_CN": "度量[名称：{0}]不支持期间字段",
+    "arguments": [
+      "msg.getMetricName()"
+    ],
+    "fileName": "src/main/java/org/zstack/zwatch/alarm/AlarmApiInterceptor.java"
+  },
+  {
+    "raw": "invalid action type[%s]",
+    "en_US": "invalid action type[{0}]",
+    "zh_CN": "无效的报警动作类型[{0}]",
+    "arguments": [
+      "actionType"
+    ],
+    "fileName": "src/main/java/org/zstack/zwatch/alarm/AlarmApiInterceptor.java"
+  },
+  {
+    "raw": "action[uuid:%s, type:%s] not found",
+    "en_US": "action[uuid:{0}, type:{1}] not found",
+    "zh_CN": "找不到报警动作[uuid:{0}, 类型:{1}]",
+    "arguments": [
+      "actionUuid",
+      "actionType"
+    ],
+    "fileName": "src/main/java/org/zstack/zwatch/alarm/AlarmApiInterceptor.java"
+  },
+  {
+    "raw": "duplicated action[uuid:%s, type:%s] for the alarm[uuid:%s]",
+    "en_US": "duplicated action[uuid:{0}, type:{1}] for the alarm[uuid:{2}]",
+    "zh_CN": "报警器[uuid:{2}]已经存在报警动作[uuid:{0}, 类型:{1}]",
+    "arguments": [
+      "msg.getActionUuid()",
+      "msg.getActionType()",
+      "msg.getAlarmUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/zwatch/alarm/AlarmApiInterceptor.java"
+  },
+  {
+    "raw": "duplicate label[key:%s, operator:%s, value:%s] for the alarm[uuid:%s]",
+    "en_US": "duplicate label[key:{0}, operator:{1}, value:{2}] for the alarm[uuid:{3}]",
+    "zh_CN": "报警器[uuid:{2}]已经存在标签[key:{0}, operator:{1}, value:{2}]",
+    "arguments": [
+      "msg.getKey()",
+      "msg.getOperator()",
+      "msg.getValue()",
+      "msg.getAlarmUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/zwatch/alarm/AlarmApiInterceptor.java"
+  },
+  {
+    "raw": "the metric[%s] doesn\u0027t have the label[%s]",
+    "en_US": "the metric[{0}] doesn\u0027t have the label[{1}]",
+    "zh_CN": "时序数据[{0}]没有标签[{0}]",
+    "arguments": [
+      "templateVO.getMetricName()",
+      "l.getKey()"
+    ],
+    "fileName": "src/main/java/org/zstack/zwatch/alarm/AlarmApiInterceptor.java"
+  },
+  {
+    "raw": "duplicate key[%s] with values%s",
+    "en_US": "duplicate key[{0}] with values{1}",
+    "zh_CN": "重复的键[{0}]和键值{1}",
+    "arguments": [
+      "k",
+      "l"
+    ],
+    "fileName": "src/main/java/org/zstack/zwatch/alarm/AlarmApiInterceptor.java"
+  },
+  {
+    "raw": "namespace[%s] not support",
+    "en_US": "namespace[{0}] not support",
+    "zh_CN": "不支持命名空间[{0}]",
+    "arguments": [
+      "msg.getNamespace()"
+    ],
+    "fileName": "src/main/java/org/zstack/zwatch/alarm/AlarmApiInterceptor.java"
+  },
+  {
+    "raw": "namespace[%s] doesn\u0027t have the metric[%s]",
+    "en_US": "namespace[{0}] doesn\u0027t have the metric[{1}]",
+    "zh_CN": "命名空间[{0}]不包含时序数据[{1}]",
+    "arguments": [
+      "msg.getNamespace()",
+      "metricName"
+    ],
+    "fileName": "src/main/java/org/zstack/zwatch/alarm/AlarmApiInterceptor.java"
+  },
+  {
+    "raw": "the metric[%s] is admin only, not available for current user",
+    "en_US": "the metric[{0}] is admin only, not available for current user",
+    "zh_CN": "指标[{0}]仅供管理员使用，不可用于当前用户",
+    "arguments": [
+      "metric"
+    ],
+    "fileName": "src/main/java/org/zstack/zwatch/alarm/AlarmApiInterceptor.java"
+  },
+  {
+    "raw": "cannot find the event subscription[uuid:%s], it may have been deleted",
+    "en_US": "cannot find the event subscription[uuid:{0}], it may have been deleted",
+    "zh_CN": "找不到事件订阅[uuid:{0}]，它可能已经被删除",
+    "arguments": [
+      "msg.getSubscriptionUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/zwatch/alarm/AlarmManagerImpl.java"
+  },
+  {
+    "raw": "cannot find the alarm[uuid:%s], it may have been deleted",
+    "en_US": "cannot find the alarm[uuid:{0}], it may have been deleted",
+    "zh_CN": "找不到报警器[uuid:{0}]，它可能已经被删除",
+    "arguments": [
+      "msg.getAlarmUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/zwatch/alarm/AlarmManagerImpl.java"
+  },
+  {
+    "raw": "the metric[%s] repeatInterval value cannot be less than 1h",
+    "en_US": "the metric[{0}] repeatInterval value cannot be less than 1h",
+    "zh_CN": "时序数据[{0}]的报警间隔时间不能低于1h",
+    "arguments": [
+      "alarmVO.getMetricName()"
+    ],
+    "fileName": "src/main/java/org/zstack/zwatch/alarm/AlarmManagerImpl.java"
+  },
+  {
+    "raw": "OK",
+    "en_US": "OK",
+    "zh_CN": "监控中",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zwatch/alarm/AlarmStatus.java"
+  },
+  {
+    "raw": "Alarm",
+    "en_US": "Alarm",
+    "zh_CN": "已触发",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zwatch/alarm/AlarmStatus.java"
+  },
+  {
+    "raw": "InsufficientData",
+    "en_US": "InsufficientData",
+    "zh_CN": "数据不足",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zwatch/alarm/AlarmStatus.java"
+  },
+  {
+    "raw": "cannot find ActiveAlarmTemplateVO[uuid:%s], it may have been deleted",
+    "en_US": "cannot find ActiveAlarmTemplateVO[uuid:{0}], it may have been deleted",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/zwatch/alarm/activealarm/ActiveAlarmManagerImpl.java"
+  },
+  {
+    "raw": "cannot find the topic[uuid:%s]",
+    "en_US": "cannot find the topic[uuid:{0}]",
+    "zh_CN": "找不到主题[uuid:{0}]",
+    "arguments": [
+      "actionUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/zwatch/alarm/sns/SNSActionFactory.java"
+  },
+  {
+    "raw": "cannot find SNSTextTemplate[uuid:%s], it may have been deleted",
+    "en_US": "cannot find SNSTextTemplate[uuid:{0}], it may have been deleted",
+    "zh_CN": "找不到报警文本模板[uuid:{0}], 它可能已经被删除",
+    "arguments": [
+      "msg.getAlarmTextTemplateUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/zwatch/alarm/sns/SNSActionFactory.java"
+  },
+  {
+    "raw": "The length of aliyun sms sign should between 2 to 12 characters. Got sign: [%s] with [%d] characters.",
+    "en_US": "The length of aliyun sms sign should between 2 to 12 characters. Got sign: [{0}] with [{1}] characters.",
+    "zh_CN": "阿里云短信标识的长度应在2-12个字符之间。获得符号：[{0}]，包含[{1}]个字符。",
+    "arguments": [
+      "sign",
+      "sign.length()"
+    ],
+    "fileName": "src/main/java/org/zstack/zwatch/alarm/sns/SNSTextTemplateApiInterceptor.java"
+  },
+  {
+    "raw": "Sms template code is a string with 13 characters. Got alarm template code: [%s] with [%d] characters.",
+    "en_US": "Sms template code is a string with 13 characters. Got alarm template code: [{0}] with [{1}] characters.",
+    "zh_CN": "短信模板代码是一个13个字符的字符串。获取报警模板代码：[{0}]，包含[{1}]个字符。",
+    "arguments": [
+      "alarmTemplateCode",
+      "alarmTemplateCode.length()"
+    ],
+    "fileName": "src/main/java/org/zstack/zwatch/alarm/sns/SNSTextTemplateApiInterceptor.java"
+  },
+  {
+    "raw": "Sms template code is a string with 13 characters. Got event template code: [%s] with [%d] characters.",
+    "en_US": "Sms template code is a string with 13 characters. Got event template code: [{0}] with [{1}] characters.",
+    "zh_CN": "短信模板代码是一个13个字符的字符串。获取事件模板代码：[{0}]，包含[{1}]个字符。",
+    "arguments": [
+      "eventTemplateCode",
+      "eventTemplateCode.length()"
+    ],
+    "fileName": "src/main/java/org/zstack/zwatch/alarm/sns/SNSTextTemplateApiInterceptor.java"
+  },
+  {
+    "raw": "invalid application platform type[%s]",
+    "en_US": "invalid application platform type[{0}]",
+    "zh_CN": "无效的平台类型[{0}]",
+    "arguments": [
+      "vo.getApplicationPlatformType()"
+    ],
+    "fileName": "src/main/java/org/zstack/zwatch/alarm/sns/SNSTextTemplateApiInterceptor.java"
+  },
+  {
+    "raw": "application platform/endpoint [%s] doesn\u0027t support user-defined template",
+    "en_US": "application platform/endpoint [{0}] doesn\u0027t support user-defined template",
+    "zh_CN": "应用平台/终端[{0}]不支持用户定义模板",
+    "arguments": [
+      "vo.getApplicationPlatformType()"
+    ],
+    "fileName": "src/main/java/org/zstack/zwatch/alarm/sns/SNSTextTemplateApiInterceptor.java"
+  },
+  {
+    "raw": "parameters:\\n %s are not supported by ZStack, available values are:\\n %s",
+    "en_US": "parameters:\\n {0} are not supported by ZStack, available values are:\\n {1}",
+    "zh_CN": "参数：\\n{0}不受ZStack支持，可用值为：\\n{1}",
+    "arguments": [
+      "String.join(\",\\n\", errorRecoverParams)",
+      "String.join(\",\\n\", AbstractTextTemplate.defaultSupportedParams.get(vo.getType()))"
+    ],
+    "fileName": "src/main/java/org/zstack/zwatch/alarm/sns/SNSTextTemplateApiInterceptor.java"
+  },
+  {
+    "raw": "no template of this type：%s, ",
+    "en_US": "no template of this type：{0}, ",
+    "zh_CN": "没有此类型的模板：{0}，",
+    "arguments": [
+      "type"
+    ],
+    "fileName": "src/main/java/org/zstack/zwatch/alarm/sns/TextTemplateFactory.java"
+  },
+  {
+    "raw": "template error：%s",
+    "en_US": "template error：{0}",
+    "zh_CN": "模板错误：{0}",
+    "arguments": [
+      "e.getMessage()"
+    ],
+    "fileName": "src/main/java/org/zstack/zwatch/alarm/sns/TextTemplateFactory.java"
+  },
+  {
+    "raw": "http template save error, please check template text：%s",
+    "en_US": "http template save error, please check template text：{0}",
+    "zh_CN": "",
+    "arguments": [
+      "e.getMessage()"
+    ],
+    "fileName": "src/main/java/org/zstack/zwatch/alarm/sns/template/http/HttpTextTemplateFactory.java"
+  },
+  {
+    "raw": "alarm[uuid:%s] is a system alarm which cannot be deleted",
+    "en_US": "alarm[uuid:{0}] is a system alarm which cannot be deleted",
+    "zh_CN": "报警器[uuid:{0}]是一个系统报警器，不能被删除",
+    "arguments": [
+      "DATA_DIR_CAPACITY_ALARM_UUID"
+    ],
+    "fileName": "src/main/java/org/zstack/zwatch/alarm/system/SystemAlarmManagerImpl.java"
+  },
+  {
+    "raw": "removing system topic[uuid:%s] from system alarm[uuid:%s] is forbidden",
+    "en_US": "removing system topic[uuid:{0}] from system alarm[uuid:{1}] is forbidden",
+    "zh_CN": "禁止从系统报警器[uuid:{1}]移除系统主题[uuid:{0}]",
+    "arguments": [
+      "SNSSystemAlarmTopicManager.SYSTEM_ALARM_TOPIC_UUID",
+      "DATA_DIR_CAPACITY_ALARM_UUID"
+    ],
+    "fileName": "src/main/java/org/zstack/zwatch/alarm/system/SystemAlarmManagerImpl.java"
+  },
+  {
+    "raw": "dataUuid cannot be missed",
+    "en_US": "dataUuid cannot be missed",
+    "zh_CN": "不能缺少数据用户ID",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zwatch/api/ZWatchApiInterceptor.java"
+  },
+  {
+    "raw": "dataStartTime and dataEndTime cannot be missed",
+    "en_US": "dataStartTime and dataEndTime cannot be missed",
+    "zh_CN": "DataStartTime和DataEndTime不能丢失",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zwatch/api/ZWatchApiInterceptor.java"
+  },
+  {
+    "raw": "dataStartTime[%s] is greater than dataEndTime[%s]",
+    "en_US": "dataStartTime[{0}] is greater than dataEndTime[{1}]",
+    "zh_CN": "DataStartTime[{0}]大于DataEndTime[{1}]",
+    "arguments": [
+      "msg.getDataStartTime()",
+      "msg.getDataEndTime()"
+    ],
+    "fileName": "src/main/java/org/zstack/zwatch/api/ZWatchApiInterceptor.java"
+  },
+  {
+    "raw": "namespace name cannot start with %s that is reserved",
+    "en_US": "namespace name cannot start with {0} that is reserved",
+    "zh_CN": "名字空间(namespace)不能以{0}开头",
+    "arguments": [
+      "Namespace.ZSTACK_NAMESPACE_PREFIX"
+    ],
+    "fileName": "src/main/java/org/zstack/zwatch/api/ZWatchApiInterceptor.java"
+  },
+  {
+    "raw": "query period cannot exceed %s",
+    "en_US": "query period cannot exceed {0}",
+    "zh_CN": "查询期间不能超过{0}",
+    "arguments": [
+      "MAX_QUERY_PERIOD"
+    ],
+    "fileName": "src/main/java/org/zstack/zwatch/api/ZWatchApiInterceptor.java"
+  },
+  {
+    "raw": "cannot find metric[%s] in namespace[%s]",
+    "en_US": "cannot find metric[{0}] in namespace[{1}]",
+    "zh_CN": "名字空间(namespace[{1}]中找不到时序数据[{0}]",
+    "arguments": [
+      "msg.getMetricName()",
+      "msg.getNamespace()"
+    ],
+    "fileName": "src/main/java/org/zstack/zwatch/api/ZWatchApiInterceptor.java"
+  },
+  {
+    "raw": "metric[%s] does not has filter[%s]",
+    "en_US": "metric[{0}] does not has filter[{1}]",
+    "zh_CN": "时序数据[{0}]不包含过滤条件[{1}]",
+    "arguments": [
+      "msg.getMetricName()",
+      "l.getValue()"
+    ],
+    "fileName": "src/main/java/org/zstack/zwatch/api/ZWatchApiInterceptor.java"
+  },
+  {
+    "raw": "invalid label[%s], valid queryable labels are %s",
+    "en_US": "invalid label[{0}], valid queryable labels are {1}",
+    "zh_CN": "无效的标签[{0}]，有效的可查询标签是{1}",
+    "arguments": [
+      "l.getKey()",
+      "AuditDataV2.queryableLoginLabels"
+    ],
+    "fileName": "src/main/java/org/zstack/zwatch/api/ZWatchApiInterceptor.java"
+  },
+  {
+    "raw": "account[uuid: %s] has no access to the resource[uuid: %s]",
+    "en_US": "account[uuid: {0}] has no access to the resource[uuid: {1}]",
+    "zh_CN": "帐户[uuid：{0}]无权访问资源[uuid：{1}]",
+    "arguments": [
+      "msg.getSession().getAccountUuid()",
+      "opt.get().getValue()"
+    ],
+    "fileName": "src/main/java/org/zstack/zwatch/api/ZWatchApiInterceptor.java"
+  },
+  {
+    "raw": "if namespace is all, not support specify metric and labels",
+    "en_US": "if namespace is all, not support specify metric and labels",
+    "zh_CN": "如果命名空间为ALL，则不支持指定规格和标签",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zwatch/api/ZWatchApiInterceptor.java"
+  },
+  {
+    "raw": "cannot find namespace[%s]",
+    "en_US": "cannot find namespace[{0}]",
+    "zh_CN": "名字空间(namespace[{0}]不存在",
+    "arguments": [
+      "msg.getNamespace()"
+    ],
+    "fileName": "src/main/java/org/zstack/zwatch/api/ZWatchApiInterceptor.java"
+  },
+  {
+    "raw": "metric[%s]\u0027s labels[%s] does not include [%s]",
+    "en_US": "metric[{0}]\u0027s labels[{1}] does not include [{2}]",
+    "zh_CN": "时序数据[{0}]的标签列表[{1}]没有指定的标签[{2}]",
+    "arguments": [
+      "msg.getMetricName()",
+      "labels",
+      "label.getKey()"
+    ],
+    "fileName": "src/main/java/org/zstack/zwatch/api/ZWatchApiInterceptor.java"
+  },
+  {
+    "raw": "endTime[%s, %sms] must not be before startTime[%s, %sms]",
+    "en_US": "endTime[{0}, {1}ms] must not be before startTime[{2}, {3}ms]",
+    "zh_CN": "停止时间(endTime)[{0}, {1}ms]不能在开始时间(startTime)[{2}, {3}ms]",
+    "arguments": [
+      "end",
+      "msg.getEndTime()",
+      "start",
+      "msg.getStartTime()"
+    ],
+    "fileName": "src/main/java/org/zstack/zwatch/api/ZWatchApiInterceptor.java"
+  },
+  {
+    "raw": "The url format is invalid, the beginning is not http",
+    "en_US": "The url format is invalid, the beginning is not http",
+    "zh_CN": "URL格式无效，开头不是HTTP",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zwatch/api/ZWatchApiInterceptor.java"
+  },
+  {
+    "raw": "no namespace[%s] defined in the system",
+    "en_US": "no namespace[{0}] defined in the system",
+    "zh_CN": "系统中未定义名字空间(namespace[{0}])",
+    "arguments": [
+      "msg.getNamespace()"
+    ],
+    "fileName": "src/main/java/org/zstack/zwatch/api/ZWatchApiInterceptor.java"
+  },
+  {
+    "raw": "the namespace[%s] has no metric[%s]",
+    "en_US": "the namespace[{0}] has no metric[{1}]",
+    "zh_CN": "名字空间(namespace[{0}])不包含时序数据[{1}]",
+    "arguments": [
+      "msg.getNamespace()",
+      "msg.getMetricName()"
+    ],
+    "fileName": "src/main/java/org/zstack/zwatch/api/ZWatchApiInterceptor.java"
+  },
+  {
+    "raw": "Illegal json string, labelsJsonStr format is invalid",
+    "en_US": "Illegal json string, labelsJsonStr format is invalid",
+    "zh_CN": "非法的JSON字符串，labelsjsonstr格式无效",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zwatch/api/ZWatchApiInterceptor.java"
+  },
+  {
+    "raw": "platform[url\u003d%s] already exists",
+    "en_US": "platform[url\u003d{0}] already exists",
+    "zh_CN": "平台[URL\u003d{0}]已存在",
+    "arguments": [
+      "url"
+    ],
+    "fileName": "src/main/java/org/zstack/zwatch/api/ZWatchApiInterceptor.java"
+  },
+  {
+    "raw": "startTime[%s] is greater than endTime[%s]",
+    "en_US": "startTime[{0}] is greater than endTime[{1}]",
+    "zh_CN": "开始时间[{0}]大于结束时间[{1}]",
+    "arguments": [
+      "startTime",
+      "endTime"
+    ],
+    "fileName": "src/main/java/org/zstack/zwatch/api/ZWatchApiInterceptor.java"
+  },
+  {
+    "raw": "alert acknowledgement record does not exist",
+    "en_US": "alert acknowledgement record does not exist",
+    "zh_CN": "警报确认记录不存在",
+    "arguments": [
+      "msg.getAlertDataUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/zwatch/api/ZWatchApiInterceptor.java"
+  },
+  {
+    "raw": "invalid table[%s]",
+    "en_US": "invalid table[{0}]",
+    "zh_CN": "表[{0}]无效",
+    "arguments": [
+      "tableName"
+    ],
+    "fileName": "src/main/java/org/zstack/zwatch/api/ZWatchApiInterceptor.java"
+  },
+  {
+    "raw": "endTime[%s] must not be before startTime[%s]",
+    "en_US": "endTime[{0}] must not be before startTime[{1}]",
+    "zh_CN": "EndTime[{0}]不能早于StartTime[{1}]",
+    "arguments": [
+      "endTime",
+      "startTime"
+    ],
+    "fileName": "src/main/java/org/zstack/zwatch/api/ZWatchApiInterceptor.java"
+  },
+  {
+    "raw": "the time interval exceeds % days",
+    "en_US": "the time interval exceeds % days",
+    "zh_CN": "时间间隔超过%天",
+    "arguments": [
+      "maxDurationDay"
+    ],
+    "fileName": "src/main/java/org/zstack/zwatch/api/ZWatchApiInterceptor.java"
+  },
+  {
+    "raw": "Emergent",
+    "en_US": "Emergent",
+    "zh_CN": "紧急",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zwatch/datatype/EmergencyLevel.java"
+  },
+  {
+    "raw": "Important",
+    "en_US": "Important",
+    "zh_CN": "严重",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zwatch/datatype/EmergencyLevel.java"
+  },
+  {
+    "raw": "Normal",
+    "en_US": "Normal",
+    "zh_CN": "提示",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zwatch/datatype/EmergencyLevel.java"
+  },
+  {
+    "raw": "invalid function: %s, %s",
+    "en_US": "invalid function: {0}, {1}",
+    "zh_CN": "无效的方法: {0}, {1}",
+    "arguments": [
+      "expr",
+      "e.getMessage()"
+    ],
+    "fileName": "src/main/java/org/zstack/zwatch/datatype/Function.java"
+  },
+  {
+    "raw": "invalid expression: %s, no function found",
+    "en_US": "invalid expression: {0}, no function found",
+    "zh_CN": "无效的表达式: {0}，找不到对应的方法",
+    "arguments": [
+      "expr"
+    ],
+    "fileName": "src/main/java/org/zstack/zwatch/datatype/Function.java"
+  },
+  {
+    "raw": "the label string[%s] contains no valid operator",
+    "en_US": "the label string[{0}] contains no valid operator",
+    "zh_CN": "标签中[{0}]未包含有效的比较符号(operator)",
+    "arguments": [
+      "str"
+    ],
+    "fileName": "src/main/java/org/zstack/zwatch/datatype/ValueCondition.java"
+  },
+  {
+    "raw": "the ValueCondition string[%s] require \u0027value\u0027 as key ",
+    "en_US": "the ValueCondition string[{0}] require \u0027value\u0027 as key ",
+    "zh_CN": "ValueCondition字符串[{0}]需要“ value ”作为键",
+    "arguments": [
+      "str"
+    ],
+    "fileName": "src/main/java/org/zstack/zwatch/datatype/ValueCondition.java"
+  },
+  {
+    "raw": "invalid label, \u0027key\u0027 field cannot be null. %s",
+    "en_US": "invalid label, \u0027key\u0027 field cannot be null. {0}",
+    "zh_CN": "无效的标签\"key\"不能为空。{0}",
+    "arguments": [
+      "JSONObjectUtil.toJsonString(this)"
+    ],
+    "fileName": "src/main/java/org/zstack/zwatch/datatype/ValueCondition.java"
+  },
+  {
+    "raw": "invalid label, \u0027op\u0027 field is null or something another than Regex and Equal. %s",
+    "en_US": "invalid label, \u0027op\u0027 field is null or something another than Regex and Equal. {0}",
+    "zh_CN": "无效的标签，\u0027op\u0027为空或者是其它的非正则或者等于符号。{0}",
+    "arguments": [
+      "JSONObjectUtil.toJsonString(this)"
+    ],
+    "fileName": "src/main/java/org/zstack/zwatch/datatype/ValueCondition.java"
+  },
+  {
+    "raw": "invalid label, \u0027value\u0027 field cannot be null. %s",
+    "en_US": "invalid label, \u0027value\u0027 field cannot be null. {0}",
+    "zh_CN": "无效的标签\"value\"不能为空。{0}",
+    "arguments": [
+      "JSONObjectUtil.toJsonString(this)"
+    ],
+    "fileName": "src/main/java/org/zstack/zwatch/datatype/ValueCondition.java"
+  },
+  {
+    "raw": "invalid value[%s] of the argument[%s]",
+    "en_US": "invalid value[{0}] of the argument[{1}]",
+    "zh_CN": "参数[{1}]值(value)[{0}]无效",
+    "arguments": [
+      "value",
+      "name"
+    ],
+    "fileName": "src/main/java/org/zstack/zwatch/function/ArgumentChecker.java"
+  },
+  {
+    "raw": "unknown arguments",
+    "en_US": "unknown arguments",
+    "zh_CN": "未知参数",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zwatch/function/ExtremumFunction.java"
+  },
+  {
+    "raw": "missing required argument",
+    "en_US": "missing required argument",
+    "zh_CN": "缺少必需的参数",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zwatch/function/ExtremumFunction.java"
+  },
+  {
+    "raw": "missing required argument[%s]",
+    "en_US": "missing required argument[{0}]",
+    "zh_CN": "缺少参数[{0}]",
+    "arguments": [
+      "name"
+    ],
+    "fileName": "src/main/java/org/zstack/zwatch/function/MetricFunction.java"
+  },
+  {
+    "raw": "duplicate argument[%s]",
+    "en_US": "duplicate argument[{0}]",
+    "zh_CN": "重复的参数[{0}]",
+    "arguments": [
+      "k"
+    ],
+    "fileName": "src/main/java/org/zstack/zwatch/function/MetricFunction.java"
+  },
+  {
+    "raw": "unknown function[%s]",
+    "en_US": "unknown function[{0}]",
+    "zh_CN": "未知方法[{0}]",
+    "arguments": [
+      "func.getName()"
+    ],
+    "fileName": "src/main/java/org/zstack/zwatch/function/MetricFunction.java"
+  },
+  {
+    "raw": "invalid argument[limit:%s], it can\u0027t be a negative number",
+    "en_US": "invalid argument[limit:{0}], it can\u0027t be a negative number",
+    "zh_CN": "无效的参数[limit:{0}]，不能是负数",
+    "arguments": [
+      "v"
+    ],
+    "fileName": "src/main/java/org/zstack/zwatch/function/PaginationFunction.java"
+  },
+  {
+    "raw": "invalid argument[start:%s], it can\u0027t be a negative number",
+    "en_US": "invalid argument[start:{0}], it can\u0027t be a negative number",
+    "zh_CN": "参数[开始：{0}]无效，它不能是负数",
+    "arguments": [
+      "v"
+    ],
+    "fileName": "src/main/java/org/zstack/zwatch/function/PaginationFunction.java"
+  },
+  {
+    "raw": "value[%s] is not a Integer number",
+    "en_US": "value[{0}] is not a Integer number",
+    "zh_CN": "值(value)[{0}]不是一个整数",
+    "arguments": [
+      "v"
+    ],
+    "fileName": "src/main/java/org/zstack/zwatch/function/PaginationFunction.java"
+  },
+  {
+    "raw": "unknown argument[%s]",
+    "en_US": "unknown argument[{0}]",
+    "zh_CN": "未知参数[{0}]",
+    "arguments": [
+      "arg.name"
+    ],
+    "fileName": "src/main/java/org/zstack/zwatch/function/SortFunction.java"
+  },
+  {
+    "raw": "there are multiple EventFamily with the name[%s], you must specify the label[%s]",
+    "en_US": "there are multiple EventFamily with the name[{0}], you must specify the label[{1}]",
+    "zh_CN": "存在多个同名[{0}]的事件族，必须指定标签[{1}]",
+    "arguments": [
+      "name.getValue()",
+      "InfluxEventDataV2.FIELD_NAMESPACE"
+    ],
+    "fileName": "src/main/java/org/zstack/zwatch/migratedb/MigrateDBEventDatabaseDriver.java"
+  },
+  {
+    "raw": "invalid query label[%s]. Allowed label names are %s",
+    "en_US": "invalid query label[{0}]. Allowed label names are {1}",
+    "zh_CN": "无效的查询标签[{0}]。允许标签名是 {1}",
+    "arguments": [
+      "label.getKey()",
+      "nameSpaceLabelList"
+    ],
+    "fileName": "src/main/java/org/zstack/zwatch/migratedb/MigrateDBEventDatabaseDriver.java"
+  },
+  {
+    "raw": "cannot find EventFamily[name:%s, namespace:%s]",
+    "en_US": "cannot find EventFamily[name:{0}, namespace:{1}]",
+    "zh_CN": "找不到事件族[name:{0}, namespace:{1}]",
+    "arguments": [
+      "name",
+      "namespace"
+    ],
+    "fileName": "src/main/java/org/zstack/zwatch/migratedb/MigrateDBEventDatabaseDriver.java"
+  },
+  {
+    "raw": "cannot find EventFamily[name:%s]",
+    "en_US": "cannot find EventFamily[name:{0}]",
+    "zh_CN": "找不到事件族[name:{0}]",
+    "arguments": [
+      "name"
+    ],
+    "fileName": "src/main/java/org/zstack/zwatch/migratedb/MigrateDBEventDatabaseDriver.java"
+  },
+  {
+    "raw": "the instance[%s] is already in the group",
+    "en_US": "the instance[{0}] is already in the group",
+    "zh_CN": "实例[{0}]已在组中",
+    "arguments": [
+      "msg.getInstanceUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/zwatch/monitorgroup/MonitorGroupApiInterceptor.java"
+  },
+  {
+    "raw": "instance[%s] is not in the group",
+    "en_US": "instance[{0}] is not in the group",
+    "zh_CN": "实例[{0}]不在组中",
+    "arguments": [
+      "msg.getInstanceUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/zwatch/monitorgroup/MonitorGroupApiInterceptor.java"
+  },
+  {
+    "raw": "The monitorGroup[%s] does not have an monitorTemplate applied",
+    "en_US": "The monitorGroup[{0}] does not have an monitorTemplate applied",
+    "zh_CN": "MonitorGroup[{0}]未应用MonitorTemplate",
+    "arguments": [
+      "msg.getGroupUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/zwatch/monitorgroup/MonitorGroupApiInterceptor.java"
+  },
+  {
+    "raw": "The instance in the group has reached the maximum limit",
+    "en_US": "The instance in the group has reached the maximum limit",
+    "zh_CN": "组中的实例已达到最大限制",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zwatch/monitorgroup/MonitorGroupBase.java"
+  },
+  {
+    "raw": "The rule in the template has reached the maximum limit",
+    "en_US": "The rule in the template has reached the maximum limit",
+    "zh_CN": "模板中的规则已达到最大限制",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zwatch/monitorgroup/MonitorGroupManagerImpl.java"
+  },
+  {
+    "raw": "no mysql namespace[%s] found",
+    "en_US": "no mysql namespace[{0}] found",
+    "zh_CN": "未找到MySQL命名空间[{0}]",
+    "arguments": [
+      "qo.getNamespaceName()"
+    ],
+    "fileName": "src/main/java/org/zstack/zwatch/mysql/MysqlDatabaseDriver.java"
+  },
+  {
+    "raw": "namespace[%s] has no metric[%s]",
+    "en_US": "namespace[{0}] has no metric[{1}]",
+    "zh_CN": "名字空间(namespace)[{0}]没有任何时序数据(metric)[{1}]",
+    "arguments": [
+      "getName()",
+      "queryObject.getMetricName()"
+    ],
+    "fileName": "src/main/java/org/zstack/zwatch/namespace/AbstractNamespace.java"
+  },
+  {
+    "raw": "metric[%s] of the namespace[%s] has no label named %s",
+    "en_US": "metric[{0}] of the namespace[{1}] has no label named {2}",
+    "zh_CN": "名字空间(namespace)[{1}]的时序数据(metric)[{0}]没有名为{2}的标签",
+    "arguments": [
+      "m.getName()",
+      "getName()",
+      "l.getKey()"
+    ],
+    "fileName": "src/main/java/org/zstack/zwatch/namespace/AbstractNamespace.java"
+  },
+  {
+    "raw": "error happened but reason not specified",
+    "en_US": "error happened but reason not specified",
+    "zh_CN": "发生了意想不到的错误",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zwatch/namespace/NamespaceEventManagerImpl.java"
+  },
+  {
+    "raw": "folder[%s] not found on the management server[%s]",
+    "en_US": "folder[{0}] not found on the management server[{1}]",
+    "zh_CN": "在管理服务器[{1}]上找不到对应的文件夹[{0}]",
+    "arguments": [
+      "d",
+      "Platform.getManagementServerIp()"
+    ],
+    "fileName": "src/main/java/org/zstack/zwatch/namespace/SystemNamespace.java"
+  },
+  {
+    "raw": "%s",
+    "en_US": "{0}",
+    "zh_CN": "{0}",
+    "arguments": [
+      "rsp.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/zwatch/prometheus/ImageStoreScrape.java"
+  },
+  {
+    "raw": "GreaterThanOrEqualTo",
+    "en_US": "GreaterThanOrEqualTo",
+    "zh_CN": "大于等于",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zwatch/ruleengine/ComparisonOperator.java"
+  },
+  {
+    "raw": "GreaterThan",
+    "en_US": "GreaterThan",
+    "zh_CN": "大于",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zwatch/ruleengine/ComparisonOperator.java"
+  },
+  {
+    "raw": "LessThan",
+    "en_US": "LessThan",
+    "zh_CN": "小于",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zwatch/ruleengine/ComparisonOperator.java"
+  },
+  {
+    "raw": "LessThanOrEqualTo",
+    "en_US": "LessThanOrEqualTo",
+    "zh_CN": "小于等于",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zwatch/ruleengine/ComparisonOperator.java"
+  },
+  {
+    "raw": "resource[%s] doesn\u0027t support zwatch return with clause",
+    "en_US": "resource[{0}] doesn\u0027t support zwatch return with clause",
+    "zh_CN": "资源[{0}]不支持ZWatch Return WITH子句",
+    "arguments": [
+      "voClassSimpleName"
+    ],
+    "fileName": "src/main/java/org/zstack/zwatch/utils/ResourceVOToNamespaceMappingUtils.java"
+  }
+]

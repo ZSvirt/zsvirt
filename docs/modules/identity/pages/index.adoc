@@ -1,0 +1,14 @@
+= ZStack Cloud 权限认证模块：identity
+
+== 简介
+
+[quote]
+====
+本节内容主要对应 `identity` 目录
+
+identy 目录内主要是 ZStack 项目的登录认证，权限控制代码，包括：
+
+* xref:login.adoc[]
+
+等等，具体可以阅读本节的文档以及代码。
+====

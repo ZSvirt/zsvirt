@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<globalConfig xmlns="http://zstack.org/schema/zstack">
+    <config>
+        <name>agent.deployOnStart</name>
+        <description>A boolean value. When set to true, management server will deploy virtual router agent every time a virtual router being created/started/reboot, using ansible. The  virtual router image has agent built in by default, so in most of time this value doesn't need setting to true, as it will significantly increase boot time of virtual router; however, in case you have a new agent needed deploying in an existing virtual router, set this value to true and reboot virtual router will do the work.</description>
+        <defaultValue>false</defaultValue>
+        <category>virtualRouter</category>
+        <type>java.lang.Boolean</type>
+    </config>
+    <config>
+        <name>command.parallelismDegree</name>
+        <description>The max concurrent requests a virtual router can execute</description>
+        <defaultValue>100</defaultValue>
+        <category>virtualRouter</category>
+        <type>java.lang.Integer</type>
+    </config>
+    <config>
+        <name>dnsmasq.restartAfterNumberOfSIGUSER1</name>
+        <description>Restart DNSMASQ after sending $value times SIGUSER1 to it; because DNSMASQ will be stuck in reloading configuration file if there are lots of of SIGUSER1</description>
+        <defaultValue>500</defaultValue>
+        <category>virtualRouter</category>
+        <type>java.lang.Integer</type>
+    </config>
+    <config>
+        <name>ping.interval</name>
+        <description>The interval management nodes ping the virtual router agents running virtual router VMs, in seconds</description>
+        <defaultValue>15</defaultValue>
+        <category>virtualRouter</category>
+        <type>java.lang.Integer</type>
+    </config>
+    <config>
+        <name>ping.parallelismDegree</name>
+        <description>The max number of virtual router VMs that management nodes will ping concurrently</description>
+        <defaultValue>60</defaultValue>
+        <category>virtualRouter</category>
+        <type>java.lang.Integer</type>
+    </config>
+    <config>
+        <name>ssh.username</name>
+        <description>The username to ssh login the virtual router</description>
+        <defaultValue>vyos</defaultValue>
+        <category>virtualRouter</category>
+    </config>
+    <config>
+        <name>ssh.port</name>
+        <description>The ssh port of the virtual router</description>
+        <defaultValue>22</defaultValue>
+        <category>virtualRouter</category>
+        <type>java.lang.Integer</type>
+    </config>
+    <config>
+        <name>ssh.passwordAuth</name>
+        <description>A boolean value, if true,the ssh of the virtual router supports the password authentication, otherwise it just supports the publickey authentication.</description>
+        <defaultValue>false</defaultValue>
+        <category>virtualRouter</category>
+        <type>java.lang.Boolean</type>
+    </config>
+    <config>
+        <name>vrouter.password</name>
+        <description>The password for vrouter vm</description>
+        <defaultValue>vrouter12#</defaultValue>
+        <category>virtualRouter</category>
+    </config>
+    <config>
+        <name>vrouter.echoTimeout</name>
+        <description>The echo timeout for vrouter vm</description>
+        <defaultValue>120</defaultValue>
+        <type>java.lang.Integer</type>
+        <category>virtualRouter</category>
+    </config>
+    <config>
+        <category>virtualRouter</category>
+        <name>haproxy.logLevel</name>
+        <description>The log level of haproxy (debug | info | warn | error)</description>
+        <defaultValue>info</defaultValue>
+        <type>java.lang.String</type>
+    </config>
+    <config>
+        <category>virtualRouter</category>
+        <name>ipv4LocalPortRange</name>
+        <description>net.ipv4.ip_local_port_range, defines the local port range that is used by TCP and UDP traffic to choose the local port.
+            0-0，means that the system configuration will not be changed,which depends on the system.Notice that it has to start at 1024</description>
+        <defaultValue>0-0</defaultValue>
+        <type>java.lang.String</type>
+    </config>
+
+    <config>
+        <name>tc.for.vipqos</name>
+        <description>use linux tc for qos policy</description>
+        <defaultValue>true</defaultValue>
+        <category>virtualRouter</category>
+        <type>java.lang.Boolean</type>
+    </config>
+</globalConfig>

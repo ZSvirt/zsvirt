@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+    xmlns:tx="http://www.springframework.org/schema/tx" xmlns:zstack="http://zstack.org/schema/zstack"
+    xmlns:util="http://www.springframework.org/schema/util"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+    http://www.springframework.org/schema/aop
+    http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+    http://www.springframework.org/schema/tx
+    http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+    http://zstack.org/schema/zstack
+    http://zstack.org/schema/zstack/plugin.xsd
+    http://www.springframework.org/schema/util
+    http://www.springframework.org/schema/util/spring-util-3.0.xsd"
+
+    default-init-method="init" default-destroy-method="destroy">
+
+    <bean id="SchedulerFacade" class="org.zstack.scheduler.SchedulerFacadeImpl">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.Component" />
+            <zstack:extension interface="org.zstack.header.Service" />
+            <zstack:extension interface="org.zstack.header.managementnode.ManagementNodeReadyExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.managementnode.ManagementNodeChangeListener"/>
+            <zstack:extension interface="org.zstack.header.identity.ResourceOwnerAfterChangeExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.vm.VmStateChangedExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.vm.VmInstanceDestroyExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.vm.VmBeforeExpungeExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.vm.RecoverVmExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.identity.ReportQuotaExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.volume.VolumeDeletionExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.volume.VolumeBeforeExpungeExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.volume.VolumeJustBeforeDeleteFromDbExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.vm.VmJustBeforeDeleteFromDbExtensionPoint"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="schedulerFactoryBean" class="org.springframework.scheduling.quartz.SchedulerFactoryBean" >
+    <property name="quartzProperties">
+        <props>
+            <prop key="org.quartz.threadPool.threadCount">20</prop>
+            <prop key="org.quartz.jobStore.misfireThreshold">1</prop>
+        </props>
+    </property>
+    </bean>
+
+    <bean id="StartVmJobFactory" class="org.zstack.scheduler.StartVmJobFactory">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.scheduler.SchedulerJobFactory"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="StopVmJobFactory" class="org.zstack.scheduler.StopVmJobFactory">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.scheduler.SchedulerJobFactory"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="RebootVmJobFactory" class="org.zstack.scheduler.RebootVmJobFactory">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.scheduler.SchedulerJobFactory"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="AutoScalingGroupFactory" class="org.zstack.scheduler.AutoScalingGroupFactory">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.scheduler.SchedulerJobFactory"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="VolumeSnapshotJobFactory" class="org.zstack.scheduler.VolumeSnapshotJobFactory">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.scheduler.SchedulerJobFactory"/>
+        </zstack:plugin>
+
+        <property name="supportSnapshotsRetentionJobPrimaryStorage" ref="SupportSnapshotsRetentionJobPrimaryStorage"/>
+    </bean>
+
+    <util:list id="SupportSnapshotsRetentionJobPrimaryStorage">
+        <value>Ceph</value>
+    </util:list>
+
+    <bean id="SchedulerApiInterceptor" class="org.zstack.scheduler.SchedulerApiInterceptor">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.apimediator.ApiMessageInterceptor" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="SchedulerCascadeExtension" class="org.zstack.scheduler.SchedulerCascadeExtension">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.core.cascade.CascadeExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="SchedulerJobHistoryUpgradeExtension" class="org.zstack.scheduler.SchedulerJobHistoryUpgradeExtension">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.Component" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="CancleIAM2ProjectLoginExpiredFactory" class="org.zstack.scheduler.CancleIAM2ProjectLoginExpiredFactory">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.scheduler.SchedulerJobFactory"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="TakeIAM2ProjectLoginExpiredFactory" class="org.zstack.scheduler.AddIAM2ProjectLoginExpiredFactory">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.scheduler.SchedulerJobFactory"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="VolumeSnapshotGroupJobFactory" class="org.zstack.scheduler.VolumeSnapshotGroupJobFactory">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.scheduler.SchedulerJobFactory"/>
+        </zstack:plugin>
+    </bean>
+</beans>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+    xmlns:tx="http://www.springframework.org/schema/tx" xmlns:zstack="http://zstack.org/schema/zstack"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+    http://www.springframework.org/schema/aop
+    http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+    http://www.springframework.org/schema/tx 
+    http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+    http://zstack.org/schema/zstack 
+    http://zstack.org/schema/zstack/plugin.xsd"
+    default-init-method="init" default-destroy-method="destroy">
+
+    <bean id="ValidationFacade" class="org.zstack.core.validation.ValidationFacadeImpl" >
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.Component" />
+        </zstack:plugin>
+    </bean>
+
+
+    <bean id="DefaultValidator" class = "org.zstack.core.validation.DefaultValidator">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.core.validation.Validator" />
+        </zstack:plugin>
+    </bean>
+
+</beans>

@@ -1,0 +1,665 @@
+[
+  {
+    "raw": "sanlock says host %s is offline on %s",
+    "en_US": "sanlock says host {0} is offline on {1}",
+    "zh_CN": "SANlock指出主机{0}在{1}上处于脱机状态",
+    "arguments": [
+      "cmd.hostIds",
+      "sentinelHostUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/sharedblock/HaSanlockHostChecker.java"
+  },
+  {
+    "raw": "can not find volume need to operate shared block group primary storage",
+    "en_US": "can not find volume need to operate shared block group primary storage",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/storage/primary/sharedblock/KvmAgentCommandDispatcher.java"
+  },
+  {
+    "raw": "KVM host which volume[uuid%s] attached disconnected with the shared block group storage[uuid:%s]",
+    "en_US": "KVM host which volume[uuid{0}] attached disconnected with the shared block group storage[uuid:{1}]",
+    "zh_CN": "",
+    "arguments": [
+      "volumeInventory.getUuid()",
+      "primaryStorageUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/sharedblock/KvmAgentCommandDispatcher.java"
+  },
+  {
+    "raw": "cannot find any connected host to perform the operation, it seems all KVM hosts in the clusters attached with the shared block group storage[uuid:%s] are disconnected",
+    "en_US": "cannot find any connected host to perform the operation, it seems all KVM hosts in the clusters attached with the shared block group storage[uuid:{0}] are disconnected",
+    "zh_CN": "",
+    "arguments": [
+      "primaryStorageUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/sharedblock/KvmAgentCommandDispatcher.java"
+  },
+  {
+    "raw": "templated vm[uuid: %s] cannot be create from vm with scsi lun[uuids: %s]",
+    "en_US": "templated vm[uuid: {0}] cannot be create from vm with scsi lun[uuids: {1}]",
+    "zh_CN": "",
+    "arguments": [
+      "vmInstanceUuid",
+      "lunUuids"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/sharedblock/SharedBlockApiInterceptor.java"
+  },
+  {
+    "raw": "primary storage[uuid: %s] has attached the scsi lun[wwid: %s]",
+    "en_US": "primary storage[uuid: {0}] has attached the scsi lun[wwid: {1}]",
+    "zh_CN": "主存储[uuid：{0}]已连接SCSI Lun[WWID：{1}]",
+    "arguments": [
+      "sharedBlockVO.getSharedBlockGroupUuid()",
+      "scsiLunVO.getWwid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/sharedblock/SharedBlockApiInterceptor.java"
+  },
+  {
+    "raw": "the vm[uuid: %s] does not has additional qmp socket, it may because of the vm start without the global config[vm.additionalQmp] enabled, please make sure it enabled and reboot vm in zstack",
+    "en_US": "the vm[uuid: {0}] does not has additional qmp socket, it may because of the vm start without the global config[vm.additionalQmp] enabled, please make sure it enabled and reboot vm in zstack",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getVmInstanceUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/sharedblock/SharedBlockApiInterceptor.java"
+  },
+  {
+    "raw": "must specify at least one disk when add shared block group primary storage",
+    "en_US": "must specify at least one disk when add shared block group primary storage",
+    "zh_CN": "添加共享块存储时必须指定至少一个云盘",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/storage/primary/sharedblock/SharedBlockApiInterceptor.java"
+  },
+  {
+    "raw": "shared block[uuid:%s, diskUuid:%s, description:%s] already added to shared block group[uuid:%s]in new shared block group",
+    "en_US": "shared block[uuid:{0}, diskUuid:{1}, description:{2}] already added to shared block group[uuid:{3}]in new shared block group",
+    "zh_CN": "",
+    "arguments": [
+      "vo.getUuid()",
+      "vo.getDiskUuid()",
+      "vo.getDescription()",
+      "vo.getSharedBlockGroupUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/sharedblock/SharedBlockApiInterceptor.java"
+  },
+  {
+    "raw": "shared volume[uuid: %s] on shared block group primary storage can not resize",
+    "en_US": "shared volume[uuid: {0}] on shared block group primary storage can not resize",
+    "zh_CN": "SharedBlock主存储上的共享云盘[uuid: {0}]暂时不支持扩容",
+    "arguments": [
+      "msg.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/sharedblock/SharedBlockApiInterceptor.java"
+  },
+  {
+    "raw": "shared volume[uuid: %s] on shared block group primary storage has attached to not stopped vm instances[uuids: %s]",
+    "en_US": "shared volume[uuid: {0}] on shared block group primary storage has attached to not stopped vm instances[uuids: {1}]",
+    "zh_CN": "SharedBlock存储上的共享云盘[uuid: {0}]加载到了不是停止状态的虚拟机[uuid: {1}]，请先从虚拟机卸载或将虚拟机停止",
+    "arguments": [
+      "volumeUuid",
+      "notStoppedVmUuids"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/sharedblock/SharedBlockApiInterceptor.java"
+  },
+  {
+    "raw": "can not find the preparation of the volume[%s]",
+    "en_US": "can not find the preparation of the volume[{0}]",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getVolumeUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/sharedblock/SharedBlockApiInterceptor.java"
+  },
+  {
+    "raw": "use the thick provisioning volume as the cache volume. the preparation of the volume[%s] is %s",
+    "en_US": "use the thick provisioning volume as the cache volume. the preparation of the volume[{0}] is {1}",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getVolumeUuid()",
+      "volumeProvisioningStrategy"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/sharedblock/SharedBlockApiInterceptor.java"
+  },
+  {
+    "raw": "the scsi lun[uuid: %s, wwid: %s] is already attach to primary storage[uuid: %s]",
+    "en_US": "the scsi lun[uuid: {0}, wwid: {1}] is already attach to primary storage[uuid: {2}]",
+    "zh_CN": "",
+    "arguments": [
+      "t.get(0, String.class)",
+      "t.get(1, String.class)",
+      "t.get(2, String.class)"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/sharedblock/SharedBlockApiInterceptor.java"
+  },
+  {
+    "raw": "the shared mount point primary storage[uuid:%s, name:%s] cannot find any available host in attached clusters for instantiating the volume",
+    "en_US": "the shared mount point primary storage[uuid:{0}, name:{1}] cannot find any available host in attached clusters for instantiating the volume",
+    "zh_CN": "",
+    "arguments": [
+      "self.getUuid()",
+      "self.getName()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/sharedblock/SharedBlockGroupPrimaryStorageBase.java"
+  },
+  {
+    "raw": "can not found any cluster attached on shared block group primary storage[uuid: %S]",
+    "en_US": "can not found any cluster attached on shared block group primary storage[uuid: %S]",
+    "zh_CN": "找不到任何挂载了共享块主存储[uuid: %S]",
+    "arguments": [
+      "getSelfInventory().getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/sharedblock/SharedBlockGroupPrimaryStorageBase.java"
+  },
+  {
+    "raw": "the shared block group primary storage[uuid:%s, name:%s] has not attached to any clusters, or no hosts in the attached clusters are connected",
+    "en_US": "the shared block group primary storage[uuid:{0}, name:{1}] has not attached to any clusters, or no hosts in the attached clusters are connected",
+    "zh_CN": "",
+    "arguments": [
+      "self.getUuid()",
+      "self.getName()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/sharedblock/SharedBlockGroupPrimaryStorageBase.java"
+  },
+  {
+    "raw": "failed to connect to all clusters%s",
+    "en_US": "failed to connect to all clusters{0}",
+    "zh_CN": "",
+    "arguments": [
+      "finalClusterUuids"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/sharedblock/SharedBlockGroupPrimaryStorageBase.java"
+  },
+  {
+    "raw": "the SharedBlock primary storage[uuid:%s, name:%s] has not attached to any clusters, or no hosts in the attached clusters are connected",
+    "en_US": "the SharedBlock primary storage[uuid:{0}, name:{1}] has not attached to any clusters, or no hosts in the attached clusters are connected",
+    "zh_CN": "",
+    "arguments": [
+      "self.getUuid()",
+      "self.getName()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/sharedblock/SharedBlockGroupPrimaryStorageBase.java"
+  },
+  {
+    "raw": "cannot find volume snapshot[uuid:%s]",
+    "en_US": "cannot find volume snapshot[uuid:{0}]",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getSnapshotUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/sharedblock/SharedBlockGroupPrimaryStorageBase.java"
+  },
+  {
+    "raw": "cannot find available host for operation on primary storage[uuid:%s].",
+    "en_US": "cannot find available host for operation on primary storage[uuid:{0}].",
+    "zh_CN": "",
+    "arguments": [
+      "self.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/sharedblock/SharedBlockGroupPrimaryStorageBase.java"
+  },
+  {
+    "raw": "host where vm[uuid:%s] locate is not Connected.",
+    "en_US": "host where vm[uuid:{0}] locate is not Connected.",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getVmInstanceUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/sharedblock/SharedBlockGroupPrimaryStorageBase.java"
+  },
+  {
+    "raw": "empty migrateVolumeStructs in migrateVolumesBetweenSharedBlockGroupPrimaryStorageMsg!",
+    "en_US": "empty migrateVolumeStructs in migrateVolumesBetweenSharedBlockGroupPrimaryStorageMsg!",
+    "zh_CN": "MigrateEvoluesBetweenSharedBlockGroupPrimaryStorageMsg中的MigrateEvolumeStructs为空！",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/storage/primary/sharedblock/SharedBlockGroupPrimaryStorageBase.java"
+  },
+  {
+    "raw": "no volume in migrateVolumeStructs in migrateVolumesBetweenSharedBlockGroupPrimaryStorageMsg!",
+    "en_US": "no volume in migrateVolumeStructs in migrateVolumesBetweenSharedBlockGroupPrimaryStorageMsg!",
+    "zh_CN": "MigrateEvolumesBetweenSharedBlockGroupPrimaryStorageMsg中的MigrateEvolmeStructs中没有卷！",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/storage/primary/sharedblock/SharedBlockGroupPrimaryStorageBase.java"
+  },
+  {
+    "raw": "%s",
+    "en_US": "{0}",
+    "zh_CN": "{0}",
+    "arguments": [
+      "rsp.error"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/sharedblock/SharedBlockGroupPrimaryStorageBase.java"
+  },
+  {
+    "raw": "cannot find proper hypervisorType for primary storage[uuid:%s] to handle image format or volume format[%s]",
+    "en_US": "cannot find proper hypervisorType for primary storage[uuid:{0}] to handle image format or volume format[{1}]",
+    "zh_CN": "对主存储[uuid:{0}]来说不能发现合适的管理程序类型来处理镜像格式或云盘格式[{1}]",
+    "arguments": [
+      "psUuid",
+      "imageFormat"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/sharedblock/SharedBlockGroupPrimaryStorageBase.java"
+  },
+  {
+    "raw": "the value[%s] is not power of 2",
+    "en_US": "the value[{0}] is not power of 2",
+    "zh_CN": "输入值[{0}]不是2的幂次",
+    "arguments": [
+      "newValue"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/sharedblock/SharedBlockGroupPrimaryStorageFactory.java"
+  },
+  {
+    "raw": "cannot find an available host to execute command for shared block group primary storage[uuid:%s]",
+    "en_US": "cannot find an available host to execute command for shared block group primary storage[uuid:{0}]",
+    "zh_CN": "找不到加载了共享块存储的[uuid:{0}]可用的主机",
+    "arguments": [
+      "pri.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/sharedblock/SharedBlockGroupPrimaryStorageFactory.java"
+  },
+  {
+    "raw": "cannot find a host which has connected shared block to execute command for shared block group primary storage[uuid:%s]",
+    "en_US": "cannot find a host which has connected shared block to execute command for shared block group primary storage[uuid:{0}]",
+    "zh_CN": "",
+    "arguments": [
+      "pri.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/sharedblock/SharedBlockGroupPrimaryStorageFactory.java"
+  },
+  {
+    "raw": "the host[uuid: %s] running on is not available to resize volume[uuid: %s] on shared block group primary storage[uuid: %s]",
+    "en_US": "the host[uuid: {0}] running on is not available to resize volume[uuid: {1}] on shared block group primary storage[uuid: {2}]",
+    "zh_CN": "",
+    "arguments": [
+      "vmvo.getHostUuid()",
+      "volumeInventory.getUuid()",
+      "volumeInventory.getPrimaryStorageUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/sharedblock/SharedBlockGroupPrimaryStorageFactory.java"
+  },
+  {
+    "raw": "primary storage[uuid:%s] not found",
+    "en_US": "primary storage[uuid:{0}] not found",
+    "zh_CN": "找不到主存储[uuid：{0}]",
+    "arguments": [
+      "psUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/sharedblock/SharedBlockGroupPrimaryStorageFactory.java"
+  },
+  {
+    "raw": "volume[uuid:%s] not found",
+    "en_US": "volume[uuid:{0}] not found",
+    "zh_CN": "未找到卷[uuid：{0}]",
+    "arguments": [
+      "volUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/sharedblock/SharedBlockGroupPrimaryStorageFactory.java"
+  },
+  {
+    "raw": "can not get cluster uuid of volume %s",
+    "en_US": "can not get cluster uuid of volume {0}",
+    "zh_CN": "无法获取卷{0}的集群uuid",
+    "arguments": [
+      "volumeUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/sharedblock/SharedBlockImageStoreBackend.java"
+  },
+  {
+    "raw": "can not find qualified kvm host for shared block group primary storage[uuid: %s]",
+    "en_US": "can not find qualified kvm host for shared block group primary storage[uuid: {0}]",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getPsUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/sharedblock/SharedBlockImageStoreKvmBackend.java"
+  },
+  {
+    "raw": "shared volume not support thin provisioning",
+    "en_US": "shared volume not support thin provisioning",
+    "zh_CN": "共享云盘不支持精简配置",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/storage/primary/sharedblock/SharedBlockKvmBackend.java"
+  },
+  {
+    "raw": "vm[uuid:%s] is not Running, Paused or Stopped, current state[%s]",
+    "en_US": "vm[uuid:{0}] is not Running, Paused or Stopped, current state[{1}]",
+    "zh_CN": "虚拟机[uuid:{0}]不是运行中、已暂停或者已停止状态，现在的状态是[{1}]",
+    "arguments": [
+      "vol.getVmInstanceUuid()",
+      "state"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/sharedblock/SharedBlockKvmBackend.java"
+  },
+  {
+    "raw": "the volume[uuid;%s] is attached to a VM[uuid:%s] which is in state of %s, cannot do the snapshot merge",
+    "en_US": "the volume[uuid;{0}] is attached to a VM[uuid:{1}] which is in state of {2}, cannot do the snapshot merge",
+    "zh_CN": "云盘[uuid;{0}] 挂载到处于{2}状态的虚拟机，不能合并快照",
+    "arguments": [
+      "volume.getUuid()",
+      "volume.getVmInstanceUuid()",
+      "state"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/sharedblock/SharedBlockKvmBackend.java"
+  },
+  {
+    "raw": "not support online merge snapshot for shareable volume[uuid: %s] on sharedblock",
+    "en_US": "not support online merge snapshot for shareable volume[uuid: {0}] on sharedblock",
+    "zh_CN": "不支持对共享块存储上的共享云盘[uuid: {1}]做在线合并快照，请关机或卸载后操作",
+    "arguments": [
+      "volume.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/sharedblock/SharedBlockKvmBackend.java"
+  },
+  {
+    "raw": "the image[uuid:%s, name: %s] is not available to download on any backup storage:\\n1. check if image is in status of Deleted\\n2. check if the backup storage on which the image is shown as Ready is attached to the zone[uuid:%s]",
+    "en_US": "the image[uuid:{0}, name: {1}] is not available to download on any backup storage:\\n1. check if image is in status of Deleted\\n2. check if the backup storage on which the image is shown as Ready is attached to the zone[uuid:{2}]",
+    "zh_CN": "",
+    "arguments": [
+      "img.getUuid()",
+      "img.getName()",
+      "self.getZoneUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/sharedblock/SharedBlockKvmBackend.java"
+  },
+  {
+    "raw": "the image[uuid: %s, name:%s] is not found on any backup storage",
+    "en_US": "the image[uuid: {0}, name:{1}] is not found on any backup storage",
+    "zh_CN": "在任何备份存储上都找不到镜像[uuid：{0}，名称：{1}]",
+    "arguments": [
+      "img.getUuid()",
+      "img.getName()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/sharedblock/SharedBlockKvmBackend.java"
+  },
+  {
+    "raw": "no connected host found in the cluster[uuid:%s]",
+    "en_US": "no connected host found in the cluster[uuid:{0}]",
+    "zh_CN": "cluster[uuid:{0}]不存在已连接的主机",
+    "arguments": [
+      "clusterUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/sharedblock/SharedBlockKvmBackend.java"
+  },
+  {
+    "raw": "hosts[uuid:%s] have the disk uuid of shared block, but actually different storage.",
+    "en_US": "hosts[uuid:{0}] have the disk uuid of shared block, but actually different storage.",
+    "zh_CN": "主机[uuid:{0}]已经加载了相同uuid的共享块，但实际上是不同的存储",
+    "arguments": [
+      "ret.firstAccessHosts.stream().map( h -\u003e h.hostUuid).collect(Collectors.toList())"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/sharedblock/SharedBlockKvmBackend.java"
+  },
+  {
+    "raw": "can not find volume[uuid: %s]",
+    "en_US": "can not find volume[uuid: {0}]",
+    "zh_CN": "找不到云盘[uuid: {0}]",
+    "arguments": [
+      "msg.getVolumeUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/sharedblock/SharedBlockKvmBackend.java"
+  },
+  {
+    "raw": "not support convert thin volume to thick volume yet",
+    "en_US": "not support convert thin volume to thick volume yet",
+    "zh_CN": "尚不支持将精简卷转换为密集卷",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/storage/primary/sharedblock/SharedBlockKvmBackend.java"
+  },
+  {
+    "raw": "expected status is %s and current status",
+    "en_US": "expected status is {0} and current status",
+    "zh_CN": "预期状态为{0}，当前状态为",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/storage/primary/sharedblock/SharedBlockKvmBackend.java"
+  },
+  {
+    "raw": "cannot find backup storage[uuid:%s]",
+    "en_US": "cannot find backup storage[uuid:{0}]",
+    "zh_CN": "找不到镜像服务器[uuid:{0}]",
+    "arguments": [
+      "backupStorageUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/sharedblock/SharedBlockKvmBackend.java"
+  },
+  {
+    "raw": "VM[uuid:%s] has multiple ISOs from different primary storage: %s",
+    "en_US": "VM[uuid:{0}] has multiple ISOs from different primary storage: {1}",
+    "zh_CN": "VM[uuid:{0}]挂载了来自不同主存储:{1}的ISO",
+    "arguments": [
+      "spec.getVmInventory().getUuid()",
+      "String.join(\",\", psUuids)"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/sharedblock/SharedBlockKvmBackend.java"
+  },
+  {
+    "raw": "QCow2 shared volume[uuid:%s] is not supported",
+    "en_US": "QCow2 shared volume[uuid:{0}] is not supported",
+    "zh_CN": "不支持QCOW2共享云盘[uuid：{0}]",
+    "arguments": [
+      "volume.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/sharedblock/SharedBlockKvmBackend.java"
+  },
+  {
+    "raw": "can not find any available host to take snapshot for volume[uuid: %s] on shared block group primary storage[uuid: %s]",
+    "en_US": "can not find any available host to take snapshot for volume[uuid: {0}] on shared block group primary storage[uuid: {1}]",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getVolumeUuid()",
+      "msg.getTargetPrimaryStorageUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/sharedblock/SharedBlockKvmBackend.java"
+  },
+  {
+    "raw": "only support full",
+    "en_US": "only support full",
+    "zh_CN": "共享块存储目前只支持全量快照",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/storage/primary/sharedblock/SharedBlockKvmBackend.java"
+  },
+  {
+    "raw": "can not find any available host to migrate volume[uuid: %s] between shared block group primary storage[uuid: %s] and [uuid: %s]",
+    "en_US": "can not find any available host to migrate volume[uuid: {0}] between shared block group primary storage[uuid: {1}] and [uuid: {2}]",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getMigrateVolumeStructs().get(0).volumeUuid",
+      "msg.getPrimaryStorageUuid()",
+      "msg.getTargetPrimaryStorageUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/sharedblock/SharedBlockKvmBackend.java"
+  },
+  {
+    "raw": "can not find any available host to migrate for volume[uuid: %s] on shared block group primary storage[uuid: %s] and [uuid: %s]",
+    "en_US": "can not find any available host to migrate for volume[uuid: {0}] on shared block group primary storage[uuid: {1}] and [uuid: {2}]",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getMigrateVolumeStructs().get(0).volumeUuid",
+      "msg.getTargetPrimaryStorageUuid()",
+      "msg.getTargetPrimaryStorageUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/sharedblock/SharedBlockKvmBackend.java"
+  },
+  {
+    "raw": "can not find hosts both connect to primary storage[uuid: %s] and primary storage[uuid: %s]",
+    "en_US": "can not find hosts both connect to primary storage[uuid: {0}] and primary storage[uuid: {1}]",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getPrimaryStorageUuid()",
+      "msg.getTargetPrimaryStorageUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/sharedblock/SharedBlockKvmBackend.java"
+  },
+  {
+    "raw": "cannot find any connected host to perform the operation, it seems all KVM hosts attached with the shared block group storage[uuid:%s] are disconnected",
+    "en_US": "cannot find any connected host to perform the operation, it seems all KVM hosts attached with the shared block group storage[uuid:{0}] are disconnected",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getPrimaryStorageUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/sharedblock/SharedBlockKvmBackend.java"
+  },
+  {
+    "raw": "operation error, because:%s",
+    "en_US": "operation error, because:{0}",
+    "zh_CN": "操作错误，因为{0}",
+    "arguments": [
+      "returnValue.error"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/sharedblock/SharedBlockKvmBackend.java"
+  },
+  {
+    "raw": "cannot shrink snapshot %s, because volume %s not ready",
+    "en_US": "cannot shrink snapshot {0}, because volume {1} not ready",
+    "zh_CN": "无法收缩快照{0}，因为卷{1}未就绪",
+    "arguments": [
+      "snapshotVO.getUuid()",
+      "volumeVO.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/sharedblock/SharedBlockKvmBackend.java"
+  },
+  {
+    "raw": "cannot shrink snapshot %s, beacuse vm %s not in Running/Stopped state",
+    "en_US": "cannot shrink snapshot {0}, beacuse vm {1} not in Running/Stopped state",
+    "zh_CN": "无法收缩快照{0}，因为VM{1}未处于正在运行/已停止状态",
+    "arguments": [
+      "snapshotVO.getUuid()",
+      "instanceVO.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/sharedblock/SharedBlockKvmBackend.java"
+  },
+  {
+    "raw": "get null install path in snapshot for vm %s",
+    "en_US": "get null install path in snapshot for vm {0}",
+    "zh_CN": "在虚拟机{0}的快照中获取Null安装路径",
+    "arguments": [
+      "vm.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/sharedblock/SharedBlockKvmBackend.java"
+  },
+  {
+    "raw": "active children snapshot failed, because %s",
+    "en_US": "active children snapshot failed, because {0}",
+    "zh_CN": "",
+    "arguments": [
+      "errorCodeList.getCauses().toString()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/sharedblock/SharedBlockKvmBackend.java"
+  },
+  {
+    "raw": "active installPath %s failed, because %s",
+    "en_US": "active installPath {0} failed, because {1}",
+    "zh_CN": "",
+    "arguments": [
+      "childrenPath",
+      "errorCode.getDetails()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/sharedblock/SharedBlockKvmBackend.java"
+  },
+  {
+    "raw": "deactive installPath failed, because %s",
+    "en_US": "deactive installPath failed, because {0}",
+    "zh_CN": "",
+    "arguments": [
+      "errorCodeList.getCauses().toString()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/sharedblock/SharedBlockKvmBackend.java"
+  },
+  {
+    "raw": "invalid thinProvisioningInitializeSize tag",
+    "en_US": "invalid thinProvisioningInitializeSize tag",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/storage/primary/sharedblock/SharedBlockManagerImpl.java"
+  },
+  {
+    "raw": "invalid thinProvisioningInitializeSize tag, it must be greater than or equal to %s",
+    "en_US": "invalid thinProvisioningInitializeSize tag, it must be greater than or equal to {0}",
+    "zh_CN": "",
+    "arguments": [
+      "SharedBlockConstants.MIN_THIN_PROVISIONING_INITIALIZE_SIZE"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/sharedblock/SharedBlockManagerImpl.java"
+  },
+  {
+    "raw": "invalid thinProvisioningInitializeSize, it is not a number",
+    "en_US": "invalid thinProvisioningInitializeSize, it is not a number",
+    "zh_CN": "",
+    "arguments": [
+      "size"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/sharedblock/SharedBlockManagerImpl.java"
+  },
+  {
+    "raw": "invalid thinProvisioningInitializeSize is larger than %d",
+    "en_US": "invalid thinProvisioningInitializeSize is larger than {0}",
+    "zh_CN": "",
+    "arguments": [
+      "size",
+      "Long.MAX_VALUE"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/sharedblock/SharedBlockManagerImpl.java"
+  },
+  {
+    "raw": "migrate volume without snapshot on shared block is not support to cancel.",
+    "en_US": "migrate volume without snapshot on shared block is not support to cancel.",
+    "zh_CN": "不支持取消在共享数据块上迁移不带快照的卷。",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/storage/primary/sharedblock/migration/SblkToSblkCancelMigrateVolumeFlow.java"
+  },
+  {
+    "raw": "found trashId(%s) in PrimaryStorage [%s] for the migrate installPath[%s]. Please clean it first by \u0027APICleanUpTrashOnPrimaryStorageMsg\u0027 if you insist to migrate the volume[%s]",
+    "en_US": "found trashId({0}) in PrimaryStorage [{1}] for the migrate installPath[{2}]. Please clean it first by \u0027APICleanUpTrashOnPrimaryStorageMsg\u0027 if you insist to migrate the volume[{3}]",
+    "zh_CN": "在主存储[{1}]的回收数据({0})中己存在要迁移的目标路径[{2}]，如果要继续迁移云盘[{3}]，请先调用\u0027APICleanUpTrashOnPrimaryStorageMsg\u0027来手动清理该回收数据",
+    "arguments": [
+      "reply1.getTrashId()",
+      "dstPsUuid",
+      "dstVolumeFolderPath",
+      "reply1.getResourceUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/sharedblock/migration/SblkToSblkMigrateVolumeFlow.java"
+  },
+  {
+    "raw": "cannot find the image[uuid:%s] in any connected backup storage attached to the zone[uuid:%s]. check below:\\n1. whether the backup storage is attached to the zone[uuid:%s]\\n2. whether the backup storage is in connected status; try to reconnect it if not",
+    "en_US": "cannot find the image[uuid:{0}] in any connected backup storage attached to the zone[uuid:{1}]. check below:\\n1. whether the backup storage is attached to the zone[uuid:{2}]\\n2. whether the backup storage is in connected status; try to reconnect it if not",
+    "zh_CN": "",
+    "arguments": [
+      "imageUuid",
+      "zoneUuid",
+      "zoneUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/sharedblock/migration/SblkToSblkMigrateVolumeFlow.java"
+  },
+  {
+    "raw": "there are not enough capacity for image[uuid: %s] download while volume[uuid: %s] storage migration, required capacity: %s, current available physical capacity: %s",
+    "en_US": "there are not enough capacity for image[uuid: {0}] download while volume[uuid: {1}] storage migration, required capacity: {2}, current available physical capacity: {3}",
+    "zh_CN": "",
+    "arguments": [
+      "image.getUuid()",
+      "volumeUuid",
+      "image.getActualSize()",
+      "dstPsInv.getAvailablePhysicalCapacity()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/sharedblock/migration/SblkToSblkMigrateVolumeFlow.java"
+  },
+  {
+    "raw": "there are not enough capacity for volume[uuid: %s] storage migration, required capacity: %s, current available physical capacity: %s",
+    "en_US": "there are not enough capacity for volume[uuid: {0}] storage migration, required capacity: {1}, current available physical capacity: {2}",
+    "zh_CN": "",
+    "arguments": [
+      "volumeUuid",
+      "volumeVO.getActualSize()",
+      "dstPsInv.getAvailablePhysicalCapacity()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/sharedblock/migration/SblkToSblkMigrateVolumeFlow.java"
+  },
+  {
+    "raw": "data on source ps[uuid: %s] has been discarded, not support rollback",
+    "en_US": "data on source ps[uuid: {0}] has been discarded, not support rollback",
+    "zh_CN": "源主存储[uuid:{0}]上的数据已经被清理，无法回滚",
+    "arguments": [
+      "srcPsUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/sharedblock/migration/SblkToSblkRollbackMigrateVolumeFlow.java"
+  }
+]

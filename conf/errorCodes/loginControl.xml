@@ -1,0 +1,33 @@
+<error>
+    <prefix>LOGIN_CONTROL</prefix>
+
+    <code>
+        <id>1000</id>
+        <description>Stale password</description>
+    </code>
+
+    <code>
+        <id>1001</id>
+        <description>Repeated historical password</description>
+    </code>
+
+    <code>
+        <id>1002</id>
+        <description>Target is locked</description>
+    </code>
+
+    <code>
+        <id>1003</id>
+        <description>Wrong captcha</description>
+    </code>
+
+    <code>
+        <id>1004</id>
+        <description>Request refused</description>
+    </code>
+
+    <code>
+        <id>1005</id>
+        <description>Missing captcha</description>
+    </code>
+</error>

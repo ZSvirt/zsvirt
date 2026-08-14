@@ -1,0 +1,262 @@
+[
+  {
+    "raw": "unsupported constraint parameter: can not be null",
+    "en_US": "unsupported constraint parameter: can not be null",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/resourceattribute/ResourceAttributeApiInterceptor.java"
+  },
+  {
+    "raw": "field[deleteConstraints[x]] is mandatory, can not be null",
+    "en_US": "field[deleteConstraints[x]] is mandatory, can not be null",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/resourceattribute/ResourceAttributeApiInterceptor.java"
+  },
+  {
+    "raw": "duplicated constraint id[%s]",
+    "en_US": "duplicated constraint id[{0}]",
+    "zh_CN": "",
+    "arguments": [
+      "id"
+    ],
+    "fileName": "src/main/java/org/zstack/resourceattribute/ResourceAttributeApiInterceptor.java"
+  },
+  {
+    "raw": "invalid constraint id%s",
+    "en_US": "invalid constraint id{0}",
+    "zh_CN": "",
+    "arguments": [
+      "notFoundIds"
+    ],
+    "fileName": "src/main/java/org/zstack/resourceattribute/ResourceAttributeApiInterceptor.java"
+  },
+  {
+    "raw": "constraint id %s is not belong to resource attribute key %s",
+    "en_US": "constraint id {0} is not belong to resource attribute key {1}",
+    "zh_CN": "",
+    "arguments": [
+      "tuple.get(0, Integer.class)",
+      "keyUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/resourceattribute/ResourceAttributeApiInterceptor.java"
+  },
+  {
+    "raw": "invalid resource type[%s]",
+    "en_US": "invalid resource type[{0}]",
+    "zh_CN": "",
+    "arguments": [
+      "requiredTypes"
+    ],
+    "fileName": "src/main/java/org/zstack/resourceattribute/ResourceAttributeApiInterceptor.java"
+  },
+  {
+    "raw": "failed to create resource attribute value",
+    "en_US": "failed to create resource attribute value",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/resourceattribute/ResourceAttributeBase.java"
+  },
+  {
+    "raw": "invalid constraint id[%s]",
+    "en_US": "invalid constraint id[{0}]",
+    "zh_CN": "",
+    "arguments": [
+      "id"
+    ],
+    "fileName": "src/main/java/org/zstack/resourceattribute/ResourceAttributeBase.java"
+  },
+  {
+    "raw": "failed to remove resource type %s in attribute key[%s]: resources already attached",
+    "en_US": "failed to remove resource type {0} in attribute key[{1}]: resources already attached",
+    "zh_CN": "",
+    "arguments": [
+      "resourceRelatedTypes",
+      "self.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/resourceattribute/ResourceAttributeBase.java"
+  },
+  {
+    "raw": "invalid value[%s]: enum constraint",
+    "en_US": "invalid value[{0}]: enum constraint",
+    "zh_CN": "",
+    "arguments": [
+      "context.value"
+    ],
+    "fileName": "src/main/java/org/zstack/resourceattribute/ResourceAttributeBase.java"
+  },
+  {
+    "raw": "unsupported resource type[%s]",
+    "en_US": "unsupported resource type[{0}]",
+    "zh_CN": "",
+    "arguments": [
+      "item.getResourceType()"
+    ],
+    "fileName": "src/main/java/org/zstack/resourceattribute/ResourceAttributeBase.java"
+  },
+  {
+    "raw": "duplicate resource attribute key name[%s]",
+    "en_US": "duplicate resource attribute key name[{0}]",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getName()"
+    ],
+    "fileName": "src/main/java/org/zstack/resourceattribute/ResourceAttributeManager.java"
+  },
+  {
+    "raw": "constraint can not be null",
+    "en_US": "constraint can not be null",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/resourceattribute/ResourceAttributeManager.java"
+  },
+  {
+    "raw": "unsupported constraints type[%s]",
+    "en_US": "unsupported constraints type[{0}]",
+    "zh_CN": "",
+    "arguments": [
+      "type"
+    ],
+    "fileName": "src/main/java/org/zstack/resourceattribute/ResourceAttributeManager.java"
+  },
+  {
+    "raw": "unsupported constraints type[%s]: \u0027option\u0027 and \u0027enum\u0027 can not exist simultaneously",
+    "en_US": "unsupported constraints type[{0}]: \u0027option\u0027 and \u0027enum\u0027 can not exist simultaneously",
+    "zh_CN": "",
+    "arguments": [
+      "type"
+    ],
+    "fileName": "src/main/java/org/zstack/resourceattribute/ResourceAttributeManager.java"
+  },
+  {
+    "raw": "unsupported constraints type[%s]: \u0027option\u0027 or \u0027enum\u0027 parameter can not be empty",
+    "en_US": "unsupported constraints type[{0}]: \u0027option\u0027 or \u0027enum\u0027 parameter can not be empty",
+    "zh_CN": "",
+    "arguments": [
+      "type"
+    ],
+    "fileName": "src/main/java/org/zstack/resourceattribute/ResourceAttributeManager.java"
+  },
+  {
+    "raw": "unsupported constraints type[%s]: \u0027option\u0027 or \u0027enum\u0027 parameter[%s] is duplicated",
+    "en_US": "unsupported constraints type[{0}]: \u0027option\u0027 or \u0027enum\u0027 parameter[{1}] is duplicated",
+    "zh_CN": "",
+    "arguments": [
+      "type",
+      "parameter"
+    ],
+    "fileName": "src/main/java/org/zstack/resourceattribute/ResourceAttributeManager.java"
+  },
+  {
+    "raw": "no resource type[%s] found in tag system",
+    "en_US": "no resource type[{0}] found in tag system",
+    "zh_CN": "标签系统中不存在[{0}]资源类型",
+    "arguments": [
+      "msg.getResourceType()"
+    ],
+    "fileName": "src/main/java/org/zstack/tag/TagApiInterceptor.java"
+  },
+  {
+    "raw": "tag[uuid:%s] is an inherent system tag, can not be removed",
+    "en_US": "tag[uuid:{0}] is an inherent system tag, can not be removed",
+    "zh_CN": "固有系统标签[uuid:{0}]禁止移除",
+    "arguments": [
+      "msg.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/tag/TagApiInterceptor.java"
+  },
+  {
+    "raw": "The argument :\u0027resourceType\u0027 doesn\u0027t match uuid",
+    "en_US": "The argument :\u0027resourceType\u0027 doesn\u0027t match uuid",
+    "zh_CN": "参数: 资源类型（resourceType）与uuid不匹配",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/tag/TagApiInterceptor.java"
+  },
+  {
+    "raw": "permission denied. The system tag[uuid: %s] refer to a resource not belonging to the account[uuid: %s]",
+    "en_US": "permission denied. The system tag[uuid: {0}] refer to a resource not belonging to the account[uuid: {1}]",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getUuid()",
+      "msg.getSession().getAccountUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/tag/TagApiInterceptor.java"
+  },
+  {
+    "raw": "permission denied. The user tag[uuid: %s] refer to a resource not belonging to the account[uuid: %s]",
+    "en_US": "permission denied. The user tag[uuid: {0}] refer to a resource not belonging to the account[uuid: {1}]",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getUuid()",
+      "msg.getSession().getAccountUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/tag/TagApiInterceptor.java"
+  },
+  {
+    "raw": "permission denied. The tag pattern[uuid: %s] refer to a resource not belonging to the account[uuid: %s]",
+    "en_US": "permission denied. The tag pattern[uuid: {0}] refer to a resource not belonging to the account[uuid: {1}]",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getUuid()",
+      "msg.getSession().getAccountUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/tag/TagApiInterceptor.java"
+  },
+  {
+    "raw": "Duplicated Tag[tag:%s, type:%s, resourceType:%s, resourceUuid:%s]",
+    "en_US": "Duplicated Tag[tag:{0}, type:{1}, resourceType:{2}, resourceUuid:{3}]",
+    "zh_CN": "标签[tag:{0}, type:{1}, resourceType:{2}, resourceUuid:{3}]重复",
+    "arguments": [
+      "tag",
+      "type",
+      "resourceType",
+      "resourceUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/tag/TagManagerImpl.java"
+  },
+  {
+    "raw": "failed to create resource config",
+    "en_US": "failed to create resource config",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/tag/TagManagerImpl.java"
+  },
+  {
+    "raw": "no system tag matches[%s] for resourceType[%s]",
+    "en_US": "no system tag matches[{0}] for resourceType[{1}]",
+    "zh_CN": "没有系统标签[{0}]与资源类型[{1}]匹配",
+    "arguments": [
+      "tag",
+      "resourceType"
+    ],
+    "fileName": "src/main/java/org/zstack/tag/TagManagerImpl.java"
+  },
+  {
+    "raw": "validate system tag [%s] for resourceType[%s] failed",
+    "en_US": "validate system tag [{0}] for resourceType[{1}] failed",
+    "zh_CN": "验证ResourceType[{1}]的系统标记[{0}]失败",
+    "arguments": [
+      "tag",
+      "resourceType"
+    ],
+    "fileName": "src/main/java/org/zstack/tag/TagManagerImpl.java"
+  },
+  {
+    "raw": "no system tag matches %s",
+    "en_US": "no system tag matches {0}",
+    "zh_CN": "没有找到匹配{0}的系统标签",
+    "arguments": [
+      "tag"
+    ],
+    "fileName": "src/main/java/org/zstack/tag/TagManagerImpl.java"
+  },
+  {
+    "raw": "tag[%s] is only for admin",
+    "en_US": "tag[{0}] is only for admin",
+    "zh_CN": "标记[{0}]仅适用于管理员",
+    "arguments": [
+      "tag"
+    ],
+    "fileName": "src/main/java/org/zstack/tag/TagManagerImpl.java"
+  }
+]

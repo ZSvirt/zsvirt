@@ -1,0 +1,19 @@
+[
+  {
+    "raw": "xdragon host not support create vm using an iso image.",
+    "en_US": "xdragon host not support create vm using an iso image.",
+    "zh_CN": "神龙服务器不支持使用ISO镜像创建虚拟机。",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/xdragon/XDragonFilterExtensionPoint.java"
+  },
+  {
+    "raw": "cluster[uuid:%s] hypervisorType is not %s",
+    "en_US": "cluster[uuid:{0}] hypervisorType is not {1}",
+    "zh_CN": "集群[uuid：{0}]管理程序类型不是{1}",
+    "arguments": [
+      "msg.getClusterUuid()",
+      "XDragonConstant.HYPERVISOR_TYPE"
+    ],
+    "fileName": "src/main/java/org/zstack/xdragon/XDragonHostFactory.java"
+  }
+]

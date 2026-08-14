@@ -1,0 +1,201 @@
+[
+  {
+    "raw": "no connected host found in the cluster[uuid:%s]",
+    "en_US": "no connected host found in the cluster[uuid:{0}]",
+    "zh_CN": "cluster[uuid:{0}]不存在已连接的物理机",
+    "arguments": [
+      "clusterUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/smp/KvmBackend.java"
+  },
+  {
+    "raw": "cannot find any connected host to perform the operation, it seems all KVM hosts in the clusters attached with the shared mount point storage[uuid:%s] are disconnected",
+    "en_US": "cannot find any connected host to perform the operation, it seems all KVM hosts in the clusters attached with the shared mount point storage[uuid:{0}] are disconnected",
+    "zh_CN": "",
+    "arguments": [
+      "self.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/smp/KvmBackend.java"
+  },
+  {
+    "raw": "vm[uuid:%s] is not Running, Paused or Stopped, current state[%s]",
+    "en_US": "vm[uuid:{0}] is not Running, Paused or Stopped, current state[{1}]",
+    "zh_CN": "云主机[uuid:{0}]不是运行中、已暂停或者已停止状态，现在的状态是[{1}]",
+    "arguments": [
+      "vol.getVmInstanceUuid()",
+      "state"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/smp/KvmBackend.java"
+  },
+  {
+    "raw": "the volume[uuid;%s] is attached to a VM[uuid:%s] which is in state of %s, cannot do the snapshot merge",
+    "en_US": "the volume[uuid;{0}] is attached to a VM[uuid:{1}] which is in state of {2}, cannot do the snapshot merge",
+    "zh_CN": "云盘[uuid;{0}] 挂载到处于{2}状态的云主机，不能合并快照",
+    "arguments": [
+      "volume.getUuid()",
+      "volume.getVmInstanceUuid()",
+      "state"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/smp/KvmBackend.java"
+  },
+  {
+    "raw": "the image[uuid:%s, name: %s] is not available to download on any backup storage:\\n1. check if image is in status of Deleted\\n2. check if the backup storage on which the image is shown as Ready is attached to the zone[uuid:%s]",
+    "en_US": "the image[uuid:{0}, name: {1}] is not available to download on any backup storage:\\n1. check if image is in status of Deleted\\n2. check if the backup storage on which the image is shown as Ready is attached to the zone[uuid:{2}]",
+    "zh_CN": "",
+    "arguments": [
+      "imgInv.getUuid()",
+      "imgInv.getName()",
+      "self.getZoneUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/smp/KvmBackend.java"
+  },
+  {
+    "raw": "cannot find backup storage[uuid:%s]",
+    "en_US": "cannot find backup storage[uuid:{0}]",
+    "zh_CN": "找不到镜像服务器[uuid:{0}]",
+    "arguments": [
+      "backupStorageUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/smp/KvmBackend.java"
+  },
+  {
+    "raw": "hosts[uuid:%s] have the same mount path, but actually mount different storage.",
+    "en_US": "hosts[uuid:{0}] have the same mount path, but actually mount different storage.",
+    "zh_CN": "物理机[uuid:{0}]有相同挂载路径，但是实际上挂载在不同的存储上",
+    "arguments": [
+      "ret.firstAccessHostUuids"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/smp/KvmBackend.java"
+  },
+  {
+    "raw": "operation error, because:%s",
+    "en_US": "operation error, because:{0}",
+    "zh_CN": "操作错误，因为{0}",
+    "arguments": [
+      "rsp.error"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/smp/KvmBackend.java"
+  },
+  {
+    "raw": "host[uuid:%s] might mount storage which is different from SMP[uuid:%s], please check it",
+    "en_US": "host[uuid:{0}] might mount storage which is different from SMP[uuid:{1}], please check it",
+    "zh_CN": "物理机[uuid：{0}]可能装载与SMP[uuid：{1}]不同的存储，请检查",
+    "arguments": [
+      "msg.getHostUuid()",
+      "msg.getPrimaryStorageUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/smp/KvmBackend.java"
+  },
+  {
+    "raw": "why volume[uuid:%s, installPath:%s] not in directory %s",
+    "en_US": "why volume[uuid:{0}, installPath:{1}] not in directory {2}",
+    "zh_CN": "为什么卷[uuid：{0}，InstallPath：{1}]不在目录{2}中",
+    "arguments": [
+      "cmd.volumeUuid",
+      "msg.getVolume().getInstallPath()",
+      "cmd.srcDir"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/smp/KvmBackend.java"
+  },
+  {
+    "raw": "the shared mount point primary storage[uuid:%s, name:%s] cannot find any available host in attached clusters for instantiating the volume",
+    "en_US": "the shared mount point primary storage[uuid:{0}, name:{1}] cannot find any available host in attached clusters for instantiating the volume",
+    "zh_CN": "",
+    "arguments": [
+      "self.getUuid()",
+      "self.getName()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/smp/SMPPrimaryStorageBase.java"
+  },
+  {
+    "raw": "the SMP primary storage[uuid:%s, name:%s] has not attached to any clusters, or no hosts in the attached clusters are connected",
+    "en_US": "the SMP primary storage[uuid:{0}, name:{1}] has not attached to any clusters, or no hosts in the attached clusters are connected",
+    "zh_CN": "",
+    "arguments": [
+      "self.getUuid()",
+      "self.getName()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/smp/SMPPrimaryStorageBase.java"
+  },
+  {
+    "raw": "not supported operation",
+    "en_US": "not supported operation",
+    "zh_CN": "不支持的操作",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/storage/primary/smp/SMPPrimaryStorageBase.java"
+  },
+  {
+    "raw": "cannot find proper hypervisorType for primary storage[uuid:%s] to handle image format or volume format[%s]",
+    "en_US": "cannot find proper hypervisorType for primary storage[uuid:{0}] to handle image format or volume format[{1}]",
+    "zh_CN": "对主存储[uuid:{0}]来说不能发现合适的管理程序类型来处理镜像格式或云盘格式[{1}]",
+    "arguments": [
+      "psUuid",
+      "imageFormat"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/smp/SMPPrimaryStorageBase.java"
+  },
+  {
+    "raw": "cannot find available host for operation on primary storage[uuid:%s].",
+    "en_US": "cannot find available host for operation on primary storage[uuid:{0}].",
+    "zh_CN": "",
+    "arguments": [
+      "self.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/smp/SMPPrimaryStorageBase.java"
+  },
+  {
+    "raw": "host where vm[uuid:%s] locate is not Connected.",
+    "en_US": "host where vm[uuid:{0}] locate is not Connected.",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getVmInstanceUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/smp/SMPPrimaryStorageBase.java"
+  },
+  {
+    "raw": "volume[uuid:%s] has reference volume[%s], can not change volume type before flatten them and their descendants",
+    "en_US": "volume[uuid:{0}] has reference volume[{1}], can not change volume type before flatten them and their descendants",
+    "zh_CN": "",
+    "arguments": [
+      "volumeUuid",
+      "infos.toString()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/smp/SMPPrimaryStorageBase.java"
+  },
+  {
+    "raw": "the SMP primary storage[uuid:%s] is not attached to any clusters, and cannot expunge the root volume[uuid:%s] of the VM[uuid:%s]",
+    "en_US": "the SMP primary storage[uuid:{0}] is not attached to any clusters, and cannot expunge the root volume[uuid:{1}] of the VM[uuid:{2}]",
+    "zh_CN": "",
+    "arguments": [
+      "psUuid",
+      "vmUuid",
+      "volumeUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/smp/SMPPrimaryStorageFactory.java"
+  },
+  {
+    "raw": "cannot find a Connected host to execute command for smp primary storage[uuid:%s]",
+    "en_US": "cannot find a Connected host to execute command for smp primary storage[uuid:{0}]",
+    "zh_CN": "找不到一个已连接状态的物理机为SMP主存储[uuid:{0}]执行命令",
+    "arguments": [
+      "pri.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/smp/SMPPrimaryStorageFactory.java"
+  },
+  {
+    "raw": "cannot find a host which has Connected host-SMP connection to execute command for smp primary storage[uuid:%s]",
+    "en_US": "cannot find a host which has Connected host-SMP connection to execute command for smp primary storage[uuid:{0}]",
+    "zh_CN": "找不到一个和SMP主存储[uuid:{0}]处于已连接状态的物理机为其执行命令",
+    "arguments": [
+      "pri.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/smp/SMPPrimaryStorageFactory.java"
+  },
+  {
+    "raw": " the url contains an invalid folder[/dev or /proc or /sys]",
+    "en_US": " the url contains an invalid folder[/dev or /proc or /sys]",
+    "zh_CN": "URL包含了一个无效的目录[/dev or /proc or /sys]",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/storage/primary/smp/SharedMountPointApiInterceptor.java"
+  }
+]

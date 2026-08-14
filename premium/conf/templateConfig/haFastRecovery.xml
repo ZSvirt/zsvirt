@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templateConfig>
+    <config>
+        <templateName>HaFastRecovery</templateName>
+        <category>ha</category>
+        <name>host.check.interval</name>
+        <defaultValue>1</defaultValue>
+    </config>
+
+    <config>
+        <templateName>HaFastRecovery</templateName>
+        <category>ha</category>
+        <name>host.check.maxAttempts</name>
+        <defaultValue>1</defaultValue>
+    </config>
+
+    <config>
+        <templateName>HaFastRecovery</templateName>
+        <category>ha</category>
+        <name>host.check.successInterval</name>
+        <defaultValue>1</defaultValue>
+    </config>
+
+    <config>
+        <templateName>HaFastRecovery</templateName>
+        <category>ha</category>
+        <name>host.check.successTimes</name>
+        <defaultValue>2</defaultValue>
+    </config>
+
+    <config>
+        <templateName>HaFastRecovery</templateName>
+        <category>ha</category>
+        <name>host.check.successRatio</name>
+        <defaultValue>0.5</defaultValue>
+    </config>
+
+    <config>
+        <templateName>HaFastRecovery</templateName>
+        <category>ha</category>
+        <name>host.selfFencer.interval</name>
+        <defaultValue>1</defaultValue>
+    </config>
+
+    <config>
+        <templateName>HaFastRecovery</templateName>
+        <category>ha</category>
+        <name>host.selfFencer.maxAttempts</name>
+        <defaultValue>1</defaultValue>
+    </config>
+
+    <config>
+        <templateName>HaFastRecovery</templateName>
+        <category>ha</category>
+        <name>host.selfFencer.storageChecker.timeout</name>
+        <defaultValue>5</defaultValue>
+    </config>
+
+    <config>
+        <templateName>HaFastRecovery</templateName>
+        <category>ha</category>
+        <name>neverStopVm.gc.maxRetryIntervalTime</name>
+        <defaultValue>2</defaultValue>
+    </config>
+
+    <config>
+        <templateName>HaFastRecovery</templateName>
+        <category>ha</category>
+        <name>neverStopVm.scan.interval</name>
+        <defaultValue>3</defaultValue>
+    </config>
+
+    <config>
+        <templateName>HaFastRecovery</templateName>
+        <category>ha</category>
+        <name>neverStopVm.retry.delay</name>
+        <defaultValue>2</defaultValue>
+    </config>
+
+    <config>
+        <templateName>HaFastRecovery</templateName>
+        <category>ha</category>
+        <name>self.fencer.strategy</name>
+        <defaultValue>Force</defaultValue>
+    </config>
+    
+    <config>
+        <templateName>HaFastRecovery</templateName>
+        <category>kvm</category>
+        <name>enable.host.tcp.connection.check</name>
+        <defaultValue>true</defaultValue>
+    </config>
+
+    <config>
+        <templateName>HaFastRecovery</templateName>
+        <category>host</category>
+        <name>ping.maxFailure</name>
+        <defaultValue>1</defaultValue>
+    </config>
+
+    <config>
+        <templateName>HaFastRecovery</templateName>
+        <category>kvm</category>
+        <name>testSshPortOpenTimeout</name>
+        <defaultValue>5</defaultValue>
+    </config>
+
+    <config>
+        <templateName>HaFastRecovery</templateName>
+        <category>kvm</category>
+        <name>install.host.shutdown.hook</name>
+        <defaultValue>true</defaultValue>
+    </config>
+
+</templateConfig>

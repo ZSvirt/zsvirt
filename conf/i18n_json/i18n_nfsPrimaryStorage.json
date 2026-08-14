@@ -1,0 +1,450 @@
+[
+  {
+    "raw": "there has been a nfs primary storage having url as %s in zone[uuid:%s]",
+    "en_US": "there has been a nfs primary storage having url as {0} in zone[uuid:{1}]",
+    "zh_CN": "数据中心[uuid:{1}]内已经存在 url 为 {0} 的 NFS 主存储",
+    "arguments": [
+      "url",
+      "zoneUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/nfs/NfsApiParamChecker.java"
+  },
+  {
+    "raw": " the url contains an invalid folder[/dev or /proc or /sys]",
+    "en_US": " the url contains an invalid folder[/dev or /proc or /sys]",
+    "zh_CN": "URL包含了一个无效的目录[/dev or /proc or /sys]",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/storage/primary/nfs/NfsApiParamChecker.java"
+  },
+  {
+    "raw": "found multiple CIDR",
+    "en_US": "found multiple CIDR",
+    "zh_CN": "返现多个CIDR",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/storage/primary/nfs/NfsApiParamChecker.java"
+  },
+  {
+    "raw": "invalid CIDR: %s",
+    "en_US": "invalid CIDR: {0}",
+    "zh_CN": "无效CIDR: {0}",
+    "arguments": [
+      "cidr"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/nfs/NfsApiParamChecker.java"
+  },
+  {
+    "raw": "IP address[%s] is not in CIDR[%s]",
+    "en_US": "IP address[{0}] is not in CIDR[{1}]",
+    "zh_CN": "IP地址[{0}]没有在CIDR[{1}]内",
+    "arguments": [
+      "ipAddr",
+      "cidr"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/nfs/NfsApiParamChecker.java"
+  },
+  {
+    "raw": "there are %s running VMs on the NFS primary storage, please stop them and try again:\\n%s\\n",
+    "en_US": "there are {0} running VMs on the NFS primary storage, please stop them and try again:\\n{1}\\n",
+    "zh_CN": "",
+    "arguments": [
+      "vms.size()",
+      "StringUtils.join(vms, \"\\n\")"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/nfs/NfsApiParamChecker.java"
+  },
+  {
+    "raw": "cannot find usable backend",
+    "en_US": "cannot find usable backend",
+    "zh_CN": "无法找到可用的NFS主存储后端",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/storage/primary/nfs/NfsPrimaryStorage.java"
+  },
+  {
+    "raw": "no usable backend found",
+    "en_US": "no usable backend found",
+    "zh_CN": "无法找到可用的NFS主存储后端",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/storage/primary/nfs/NfsPrimaryStorage.java"
+  },
+  {
+    "raw": "no host in Connected status to which nfs primary storage[uuid:%s, name:%s] attached found to revert volume[uuid:%s] to snapshot[uuid:%s, name:%s]",
+    "en_US": "no host in Connected status to which nfs primary storage[uuid:{0}, name:{1}] attached found to revert volume[uuid:{2}] to snapshot[uuid:{3}, name:{4}]",
+    "zh_CN": "",
+    "arguments": [
+      "self.getUuid()",
+      "self.getName()",
+      "msg.getVolume().getUuid()",
+      "msg.getSnapshot().getUuid()",
+      "msg.getSnapshot().getName()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/nfs/NfsPrimaryStorage.java"
+  },
+  {
+    "raw": "no host in Connected status to which nfs primary storage[uuid:%s, name:%s] attached found to revert volume[uuid:%s] to image[uuid:%s]",
+    "en_US": "no host in Connected status to which nfs primary storage[uuid:{0}, name:{1}] attached found to revert volume[uuid:{2}] to image[uuid:{3}]",
+    "zh_CN": "",
+    "arguments": [
+      "self.getUuid()",
+      "self.getName()",
+      "msg.getVolume().getUuid()",
+      "msg.getVolume().getRootImageUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/nfs/NfsPrimaryStorage.java"
+  },
+  {
+    "raw": "vm[uuid:%s] is not Running, Paused or Stopped, current state is %s",
+    "en_US": "vm[uuid:{0}] is not Running, Paused or Stopped, current state is {1}",
+    "zh_CN": "虚拟机[uuid:{0}]不是运行中、已暂停或者已停止状态，现在的状态是{1}",
+    "arguments": [
+      "vol.getVmInstanceUuid()",
+      "state"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/nfs/NfsPrimaryStorage.java"
+  },
+  {
+    "raw": "primary storage[uuid:%s] doesn\u0027t attach to any cluster",
+    "en_US": "primary storage[uuid:{0}] doesn\u0027t attach to any cluster",
+    "zh_CN": "主存储[uuid:{0}]没有挂载到任何集群",
+    "arguments": [
+      "self.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/nfs/NfsPrimaryStorage.java"
+  },
+  {
+    "raw": "the NFS primary storage[uuid:%s, name:%s] cannot find any usable host to create the data volume[uuid:%s, name:%s]",
+    "en_US": "the NFS primary storage[uuid:{0}, name:{1}] cannot find any usable host to create the data volume[uuid:{2}, name:{3}]",
+    "zh_CN": "",
+    "arguments": [
+      "self.getUuid()",
+      "self.getName()",
+      "msg.getVolume().getUuid()",
+      "msg.getVolume().getName()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/nfs/NfsPrimaryStorage.java"
+  },
+  {
+    "raw": "the NFS primary storage[uuid:%s, name:%s] has not attached to any clusters, or no hosts in the attached clusters are connected",
+    "en_US": "the NFS primary storage[uuid:{0}, name:{1}] has not attached to any clusters, or no hosts in the attached clusters are connected",
+    "zh_CN": "",
+    "arguments": [
+      "self.getUuid()",
+      "self.getName()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/nfs/NfsPrimaryStorage.java"
+  },
+  {
+    "raw": "cannot find available host for operation on primary storage[uuid:%s].",
+    "en_US": "cannot find available host for operation on primary storage[uuid:{0}].",
+    "zh_CN": "",
+    "arguments": [
+      "self.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/nfs/NfsPrimaryStorage.java"
+  },
+  {
+    "raw": "host where vm[uuid:%s] locate is not Connected.",
+    "en_US": "host where vm[uuid:{0}] locate is not Connected.",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getVmInstanceUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/nfs/NfsPrimaryStorage.java"
+  },
+  {
+    "raw": "volume[uuid:%s] has reference volume[%s], can not change volume type before flatten them and their descendants",
+    "en_US": "volume[uuid:{0}] has reference volume[{1}], can not change volume type before flatten them and their descendants",
+    "zh_CN": "",
+    "arguments": [
+      "volumeUuid",
+      "infos.toString()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/nfs/NfsPrimaryStorage.java"
+  },
+  {
+    "raw": "the NFS primary storage[uuid:%s, name:%s] cannot find hosts in attached clusters to perform the operation",
+    "en_US": "the NFS primary storage[uuid:{0}, name:{1}] cannot find hosts in attached clusters to perform the operation",
+    "zh_CN": "NFS主存储[uuid:{0}, name:{1}]不能找到主机挂载到集群，执行此操作",
+    "arguments": [
+      "self.getUuid()",
+      "self.getName()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/nfs/NfsPrimaryStorage.java"
+  },
+  {
+    "raw": "no host found for volume[uuid:%s]",
+    "en_US": "no host found for volume[uuid:{0}]",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getVolume().getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/nfs/NfsPrimaryStorage.java"
+  },
+  {
+    "raw": "the NFS primary storage[uuid:%s] is not attached to any clusters, and cannot expunge the root volume[uuid:%s] of the VM[uuid:%s]",
+    "en_US": "the NFS primary storage[uuid:{0}] is not attached to any clusters, and cannot expunge the root volume[uuid:{1}] of the VM[uuid:{2}]",
+    "zh_CN": "",
+    "arguments": [
+      "psUuid",
+      "vmUuid",
+      "volumeUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/nfs/NfsPrimaryStorageFactory.java"
+  },
+  {
+    "raw": "cannot find a connected host in cluster which ps [uuid: %s] attached",
+    "en_US": "cannot find a connected host in cluster which ps [uuid: {0}] attached",
+    "zh_CN": "在PS[uuid：{0}]连接的集群中找不到已连接的主机",
+    "arguments": [
+      "pri.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/nfs/NfsPrimaryStorageFactory.java"
+  },
+  {
+    "raw": "cannot find a Connected host to execute command for nfs primary storage[uuid:%s]",
+    "en_US": "cannot find a Connected host to execute command for nfs primary storage[uuid:{0}]",
+    "zh_CN": "对nfs主存储[uuid:{0}]来说不能发现一个可连接的主机执行命令",
+    "arguments": [
+      "pri.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/nfs/NfsPrimaryStorageFactory.java"
+  },
+  {
+    "raw": "cannot find a host which has Connected host-NFS connection to execute command for nfs primary storage[uuid:%s]",
+    "en_US": "cannot find a host which has Connected host-NFS connection to execute command for nfs primary storage[uuid:{0}]",
+    "zh_CN": "",
+    "arguments": [
+      "pri.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/nfs/NfsPrimaryStorageFactory.java"
+  },
+  {
+    "raw": "cannot find proper hypervisorType for primary storage[uuid:%s] to handle image format or volume format[%s]",
+    "en_US": "cannot find proper hypervisorType for primary storage[uuid:{0}] to handle image format or volume format[{1}]",
+    "zh_CN": "对主存储[uuid:{0}]来说不能发现合适的管理程序类型来处理镜像格式或云盘格式[{1}]",
+    "arguments": [
+      "psUuid",
+      "imageFormat"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/nfs/NfsPrimaryStorageFactory.java"
+  },
+  {
+    "raw": "unable to attach a primary storage[uuid:%s, name:%s] to cluster[uuid:%s]. Kvm host in the cluster has qemu-img with version[%s]; but the primary storage has attached to another cluster that has kvm host which has qemu-img with version[%s]. qemu-img version greater than %s is incompatible with versions less than %s, this will causes volume snapshot operation to fail. Please avoid attaching a primary storage to clusters that have different Linux distributions, in order to prevent qemu-img version mismatch",
+    "en_US": "unable to attach a primary storage[uuid:{0}, name:{1}] to cluster[uuid:{2}]. Kvm host in the cluster has qemu-img with version[{3}]; but the primary storage has attached to another cluster that has kvm host which has qemu-img with version[{4}]. qemu-img version greater than {5} is incompatible with versions less than {6}, this will causes volume snapshot operation to fail. Please avoid attaching a primary storage to clusters that have different Linux distributions, in order to prevent qemu-img version mismatch",
+    "zh_CN": "",
+    "arguments": [
+      "inv.getUuid()",
+      "inv.getName()",
+      "clusterUuid",
+      "versionInCluster",
+      "otherVersion",
+      "QCOW3_QEMU_IMG_VERSION",
+      "QCOW3_QEMU_IMG_VERSION"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/nfs/NfsPrimaryStorageKVMBackend.java"
+  },
+  {
+    "raw": "unable to create folder[installUrl:%s] on kvm host[uuid:%s, ip:%s], because %s",
+    "en_US": "unable to create folder[installUrl:{0}] on kvm host[uuid:{1}, ip:{2}], because {3}",
+    "zh_CN": "无法在KVM主机[uuid：{1}，IP：{2}]上创建文件夹[InstallUrl：{0}]，原因是{3}",
+    "arguments": [
+      "cmd.getInstallUrl()",
+      "host.getUuid()",
+      "host.getManagementIp()",
+      "rsp.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/nfs/NfsPrimaryStorageKVMBackend.java"
+  },
+  {
+    "raw": "no host in is Connected or primary storage[uuid:%s] attach no cluster",
+    "en_US": "no host in is Connected or primary storage[uuid:{0}] attach no cluster",
+    "zh_CN": "没有主机处于Connected状态，或主存储[uuid:{0}]没有挂载到任何集群",
+    "arguments": [
+      "inv.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/nfs/NfsPrimaryStorageKVMBackend.java"
+  },
+  {
+    "raw": "failed to ping nfs primary storage[uuid:%s] from host[uuid:%s],because %s. disconnect this host-ps connection",
+    "en_US": "failed to ping nfs primary storage[uuid:{0}] from host[uuid:{1}],because {2}. disconnect this host-ps connection",
+    "zh_CN": "",
+    "arguments": [
+      "psInv.getUuid()",
+      "huuid",
+      "reply.isSuccess() ? rsp.getError() : reply.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/nfs/NfsPrimaryStorageKVMBackend.java"
+  },
+  {
+    "raw": "The chosen host[uuid:%s] to perform storage migration is lost",
+    "en_US": "The chosen host[uuid:{0}] to perform storage migration is lost",
+    "zh_CN": "准备存储迁移的主机[uuid:{0}]失联了",
+    "arguments": [
+      "msg.getHostUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/nfs/NfsPrimaryStorageKVMBackend.java"
+  },
+  {
+    "raw": "%s",
+    "en_US": "{0}",
+    "zh_CN": "{0}",
+    "arguments": [
+      "rsp.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/nfs/NfsPrimaryStorageKVMBackend.java"
+  },
+  {
+    "raw": "failed to check existence of %s on nfs primary storage[uuid:%s], %s",
+    "en_US": "failed to check existence of {0} on nfs primary storage[uuid:{1}], {2}",
+    "zh_CN": "检查nfs主存储中是否存在{0}失败",
+    "arguments": [
+      "installPath",
+      "inv.getUuid()",
+      "rsp.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/nfs/NfsPrimaryStorageKVMBackend.java"
+  },
+  {
+    "raw": "unable to attach a primary storage to cluster. Kvm host[uuid:%s, name:%s] in cluster has qemu-img with version[%s]; but the primary storage has attached to a cluster that has kvm host[uuid:%s], which has qemu-img with version[%s]. qemu-img version greater than %s is incompatible with versions less than %s, this will causes volume snapshot operation to fail. Please avoid attaching a primary storage to clusters that have different Linux distributions, in order to prevent qemu-img version mismatch",
+    "en_US": "unable to attach a primary storage to cluster. Kvm host[uuid:{0}, name:{1}] in cluster has qemu-img with version[{2}]; but the primary storage has attached to a cluster that has kvm host[uuid:{3}], which has qemu-img with version[{4}]. qemu-img version greater than {5} is incompatible with versions less than {6}, this will causes volume snapshot operation to fail. Please avoid attaching a primary storage to clusters that have different Linux distributions, in order to prevent qemu-img version mismatch",
+    "zh_CN": "",
+    "arguments": [
+      "context.getInventory().getUuid()",
+      "context.getInventory().getName()",
+      "mine",
+      "e.getKey()",
+      "version",
+      "QCOW3_QEMU_IMG_VERSION",
+      "QCOW3_QEMU_IMG_VERSION"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/nfs/NfsPrimaryStorageKVMBackend.java"
+  },
+  {
+    "raw": "unable to create empty volume[uuid:%s,  name:%s] on kvm host[uuid:%s, ip:%s], because %s",
+    "en_US": "unable to create empty volume[uuid:{0},  name:{1}] on kvm host[uuid:{2}, ip:{3}], because {4}",
+    "zh_CN": "不能在主机[uuid:{2}, ip:{3}]上创建空云盘[uuid:{0},  name:{1}]，因为{4}",
+    "arguments": [
+      "volume.getUuid()",
+      "volume.getName()",
+      "host.getUuid()",
+      "host.getManagementIp()",
+      "rsp.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/nfs/NfsPrimaryStorageKVMBackend.java"
+  },
+  {
+    "raw": "failed to delete bits[%s] on nfs primary storage[uuid:%s], %s, will clean up installPath, pinv.getUuid(), rsp.getError()",
+    "en_US": "failed to delete bits[{0}] on nfs primary storage[uuid:{1}], {2}, will clean up installPath, pinv.getUuid(), rsp.getError()",
+    "zh_CN": "",
+    "arguments": [
+      "installPath",
+      "pinv.getUuid()",
+      "rsp.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/nfs/NfsPrimaryStorageKVMBackend.java"
+  },
+  {
+    "raw": "failed to revert volume[uuid:%s] to snapshot[uuid:%s] on kvm host[uuid:%s, ip:%s], %s",
+    "en_US": "failed to revert volume[uuid:{0}] to snapshot[uuid:{1}] on kvm host[uuid:{2}, ip:{3}], {4}",
+    "zh_CN": "回滚在主机[uuid:{2}, ip:{3}]上的云盘[uuid:{0}]到快照[uuid:{1}]的状态失败，{4}",
+    "arguments": [
+      "vol.getUuid()",
+      "sinv.getUuid()",
+      "host.getUuid()",
+      "host.getManagementIp()",
+      "rsp.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/nfs/NfsPrimaryStorageKVMBackend.java"
+  },
+  {
+    "raw": "failed to revert volume[uuid:%s] to image[uuid:%s] on kvm host[uuid:%s, ip:%s], %s",
+    "en_US": "failed to revert volume[uuid:{0}] to image[uuid:{1}] on kvm host[uuid:{2}, ip:{3}], {4}",
+    "zh_CN": "回滚在主机[uuid:{2}, ip:{3}]上的云盘[uuid:{0}]到镜像[uuid:{1}]，{4}",
+    "arguments": [
+      "vol.getUuid()",
+      "vol.getRootImageUuid()",
+      "host.getUuid()",
+      "host.getManagementIp()",
+      "rsp.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/nfs/NfsPrimaryStorageKVMBackend.java"
+  },
+  {
+    "raw": "fails to create root volume[uuid:%s] from cached image[path:%s] because %s",
+    "en_US": "fails to create root volume[uuid:{0}] from cached image[path:{1}] because {2}",
+    "zh_CN": "从镜像[path:{1}]创建云盘失败，因为{2}",
+    "arguments": [
+      "volume.getUuid()",
+      "imageCache.getImageUuid()",
+      "rsp.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/nfs/NfsPrimaryStorageKVMBackend.java"
+  },
+  {
+    "raw": "no hosts in the cluster[uuid:%s] are connected",
+    "en_US": "no hosts in the cluster[uuid:{0}] are connected",
+    "zh_CN": "集群[uuid：{0}]中没有连接任何主机",
+    "arguments": [
+      "clusterUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/nfs/NfsPrimaryStorageKVMBackend.java"
+  },
+  {
+    "raw": "why volume[uuid:%s, installPath:%s] not in directory %s",
+    "en_US": "why volume[uuid:{0}, installPath:{1}] not in directory {2}",
+    "zh_CN": "为什么卷[uuid：{0}，InstallPath：{1}]不在目录{2}中",
+    "arguments": [
+      "cmd.volumeUuid",
+      "msg.getVolume().getInstallPath()",
+      "cmd.srcDir"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/nfs/NfsPrimaryStorageKVMBackend.java"
+  },
+  {
+    "raw": "unable to create empty snapshot volume[name:%s, installpath: %s] on kvm host[uuid:%s, ip:%s], because %s",
+    "en_US": "unable to create empty snapshot volume[name:{0}, installpath: {1}] on kvm host[uuid:{2}, ip:{3}], because {4}",
+    "zh_CN": "",
+    "arguments": [
+      "scmd.getName()",
+      "scmd.getInstallUrl()",
+      "host.getUuid()",
+      "host.getManagementIp()",
+      "rsp.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/nfs/NfsPrimaryStorageKVMBackend.java"
+  },
+  {
+    "raw": "operation error, because:%s",
+    "en_US": "operation error, because:{0}",
+    "zh_CN": "操作错误，因为{0}",
+    "arguments": [
+      "rsp.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/nfs/NfsPrimaryStorageKVMBackend.java"
+  },
+  {
+    "raw": "failed to download[%s] from SftpBackupStorage[hostname:%s] to nfs primary storage[uuid:%s, path:%s], %s",
+    "en_US": "failed to download[{0}] from SftpBackupStorage[hostname:{1}] to nfs primary storage[uuid:{2}, path:{3}], {4}",
+    "zh_CN": "从Sftp镜像服务器[hostname:{1}] 下载[{0}]到nfs主存储[uuid:{2}, path:{3}]失败，{4}",
+    "arguments": [
+      "backupStorageInstallPath",
+      "greply.getHostname()",
+      "pinv.getUuid()",
+      "primaryStorageInstallPath",
+      "rsp.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/nfs/NfsPrimaryToSftpBackupKVMBackend.java"
+  },
+  {
+    "raw": "failed to upload bits from nfs primary storage[uuid:%s, path:%s] to SFTP backup storage[hostname:%s, path: %s], %s",
+    "en_US": "failed to upload bits from nfs primary storage[uuid:{0}, path:{1}] to SFTP backup storage[hostname:{2}, path: {3}], {4}",
+    "zh_CN": "从nfs主存储[uuid:{0}, path:{1}]上传数据到STFP镜像服务器[hostname:{2}, path: {3}]失败，{4}",
+    "arguments": [
+      "pinv.getUuid()",
+      "primaryStorageInstallPath",
+      "hostname",
+      "backupStorageInstallPath",
+      "rsp.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/nfs/NfsPrimaryToSftpBackupKVMBackend.java"
+  }
+]

@@ -1,0 +1,40 @@
+{
+  "ZStackTemplateFormatVersion" : "2018-06-18",
+  "Description": "Creates a VM with LNMP installed:\nThis template creates a VM with LNMP installed. Prerequisites:\nThe instance offering, image, and network are created. Make sure that the network can access the Internet, and cloudinit is installed for the image. Otherwise, the VM may fail to be created or the LNMP may not work properly after creation",
+  "Parameters" : {
+    "imageUuid": {
+      "Type" : "String",
+      "Label": "Image",
+      "Description": "The image for creating a VM"
+    },
+    "instanceOfferingUuid": {
+      "Type": "String",
+      "Label": "Instance Offering",
+      "Description": "The instance offering for creating a VM"
+    },
+    "l3NetworkUuid": {
+      "Type": "String",
+      "Label": "Network",
+      "Description": "The L3 network for creating a VM"
+    }
+  },
+  "Resources" : {
+    "WebServer1": {
+      "Type": "Cloud::Resource::VmInstance",
+      "Properties": {
+        "name" : "vm",
+        "imageUuid" : {"Ref": "imageUuid"},
+        "instanceOfferingUuid":  {"Ref": "instanceOfferingUuid"},
+        "l3NetworkUuids": [{"Ref": "l3NetworkUuid"}],
+        "systemTags": [{"Fn::Join": ["::", ["userdata", {"Fn::Base64": "#cloud-config\nusers:\n - name: root\n   shell: /bin/bash\n   groups: root\n   sudo: ['ALL=(ALL) NOPASSWD:ALL']\n   ssh-authorized-keys:\n       - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDfggLATk3JkUnnk73OQzoWNw3xPWmoQMV5zmFVzA0aQrXvhOM1jI7mrb/7JU2S+Kw6mqPZyAU/Mh7XG9Jl8DHw72Deis8EVbo2jp9vE5ttfuv4+tooZ6JoRMSC8GopidwdYal7cz6VOSc82ZArGueULs31jXE3rR16OzWKSG1U/Tlmp9WDejlrwWY0+Og08XpNEec2qdRzoWyG0ryXJCmD+vlBIq+ZuLATLefPRMn4fNVTN3RfgD4iQ/GbZktI+PpgZiFGLUm3Vrp23IrEsI7cRK3WMegdMJUkBasGNRN0uwO69so3yAn/Me6toXfwbNh/LXJOFHvDZ9nklql2vp43 root@10.0.121.175\nwrite_files:\n - path: /tmp/ZStack_config\n   content: |\n       Hello,world!\nhostname: koven-test\ndisable_root: false\nchpasswd:\n  list: |\n      root:password\n  expire: False\nruncmd:\n - curl http://soft.vpser.net/lnmp/lnmp1.4.tar.gz -o lnmp1.4.tar.gz && tar zxf lnmp1.4.tar.gz && cd lnmp1.4 && echo \"\"|./install.sh lnmp"}]]}]
+      }
+    }
+  },
+
+  "Outputs": {
+    "VmInstance": {
+      "Description" : "print vm instance",
+      "Value" : {"Ref": "WebServer1"}
+    }
+  }
+}

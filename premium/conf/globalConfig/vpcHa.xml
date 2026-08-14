@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<globalConfig xmlns="http://zstack.org/schema/zstack">
+	<config>
+		<name>keepalived.interval</name>
+		<description>the interval in second keepalived will send heartbeat message</description>
+		<defaultValue>5</defaultValue>
+		<category>vpcHa</category>
+        <type>java.lang.Integer</type>
+	</config>
+
+	<config>
+		<name>configure.firewall.with.iptables</name>
+		<description>use iptables directly instead of Vyos firewall configuration</description>
+		<defaultValue>false</defaultValue>
+		<category>vpcHa</category>
+		<type>java.lang.Boolean</type>
+	</config>
+
+	<config>
+		<name>tc.for.vipqos</name>
+		<description>use linux tc for qos policy</description>
+		<defaultValue>true</defaultValue>
+		<category>vpcHa</category>
+		<type>java.lang.Boolean</type>
+	</config>
+</globalConfig>

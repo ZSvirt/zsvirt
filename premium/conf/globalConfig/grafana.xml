@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<globalConfig xmlns="http://zstack.org/schema/zstack">
+    <config>
+        <category>grafana</category>
+        <name>grafana.admin.password</name>
+        <description>the password of grafana admin user</description>
+        <defaultValue>password</defaultValue>
+        <type>java.lang.String</type>
+    </config>
+</globalConfig>

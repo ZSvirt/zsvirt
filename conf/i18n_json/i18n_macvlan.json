@@ -1,0 +1,104 @@
+[
+  {
+    "raw": "failed to realize bridge for l2VlanNetwork[uuid:%s, name:%s] on kvm host[uuid:%s], %s",
+    "en_US": "failed to realize bridge for l2VlanNetwork[uuid:{0}, name:{1}] on kvm host[uuid:{2}], {3}",
+    "zh_CN": "",
+    "arguments": [
+      "l2vlan.getUuid()",
+      "l2vlan.getName()",
+      "hostUuid",
+      "rsp.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/macvlan/KVMRealizeL2VlanMacVlanBackend.java"
+  },
+  {
+    "raw": "failed to check vlan interface[%s] for l2VlanNetwork[uuid:%s, name:%s] on kvm host[uuid:%s], %s",
+    "en_US": "failed to check vlan interface[{0}] for l2VlanNetwork[uuid:{1}, name:{2}] on kvm host[uuid:{3}], {4}",
+    "zh_CN": "",
+    "arguments": [
+      "cmd.getPhysicalInterfaceName() + \".\" + cmd.getVlan()",
+      "l2vlan.getUuid()",
+      "l2vlan.getName()",
+      "hostUuid",
+      "rsp.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/macvlan/KVMRealizeL2VlanMacVlanBackend.java"
+  },
+  {
+    "raw": "only %s support macvlan",
+    "en_US": "only {0} support macvlan",
+    "zh_CN": "",
+    "arguments": [
+      "VmMacVlanNicConstant.MACVLAN_L2_NETWORK_TYPES"
+    ],
+    "fileName": "src/main/java/org/zstack/macvlan/VmMacVlanNicApiInterceptor.java"
+  },
+  {
+    "raw": "could not attach network service to l3[uuid:%s], because l2[uuid:%s, vSwitchType:%s] not support any l3 network service for public basic l3network",
+    "en_US": "could not attach network service to l3[uuid:{0}], because l2[uuid:{1}, vSwitchType:{2}] not support any l3 network service for public basic l3network",
+    "zh_CN": "",
+    "arguments": [
+      "l3NetworkVO.getUuid()",
+      "l3NetworkVO.getL2NetworkUuid()",
+      "vSwitch"
+    ],
+    "fileName": "src/main/java/org/zstack/macvlan/VmMacVlanNicApiInterceptor.java"
+  },
+  {
+    "raw": "could not attach network service to l3[uuid:%s], because l2[uuid:%s, vSwitchType:%s] only support vrouter network provider for vpc l3network",
+    "en_US": "could not attach network service to l3[uuid:{0}], because l2[uuid:{1}, vSwitchType:{2}] only support vrouter network provider for vpc l3network",
+    "zh_CN": "",
+    "arguments": [
+      "l3NetworkVO.getUuid()",
+      "l3NetworkVO.getL2NetworkUuid()",
+      "vSwitch"
+    ],
+    "fileName": "src/main/java/org/zstack/macvlan/VmMacVlanNicApiInterceptor.java"
+  },
+  {
+    "raw": "could not attach network service to l3[uuid:%s], because l2[uuid:%s, vSwitchType:%s] only support vrouter network provider for private basic l3network",
+    "en_US": "could not attach network service to l3[uuid:{0}], because l2[uuid:{1}, vSwitchType:{2}] only support vrouter network provider for private basic l3network",
+    "zh_CN": "",
+    "arguments": [
+      "l3NetworkVO.getUuid()",
+      "l3NetworkVO.getL2NetworkUuid()",
+      "vSwitch"
+    ],
+    "fileName": "src/main/java/org/zstack/macvlan/VmMacVlanNicApiInterceptor.java"
+  },
+  {
+    "raw": "could not attach network service to l3[uuid:%s], because l2[uuid:%s, vSwitchType:%s] only support loadbalancer for private basic l3network",
+    "en_US": "could not attach network service to l3[uuid:{0}], because l2[uuid:{1}, vSwitchType:{2}] only support loadbalancer for private basic l3network",
+    "zh_CN": "",
+    "arguments": [
+      "l3NetworkVO.getUuid()",
+      "l3NetworkVO.getL2NetworkUuid()",
+      "vSwitch"
+    ],
+    "fileName": "src/main/java/org/zstack/macvlan/VmMacVlanNicApiInterceptor.java"
+  },
+  {
+    "raw": "only kvm hosts support l2 which vSwitchType is MacVlan",
+    "en_US": "only kvm hosts support l2 which vSwitchType is MacVlan",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/macvlan/VmMacVlanNicApiInterceptor.java"
+  },
+  {
+    "raw": "can not create %s with physical interface:[%s] which was already been used by another vSwitch type.",
+    "en_US": "can not create {0} with physical interface:[{1}] which was already been used by another vSwitch type.",
+    "zh_CN": "无法创建物理接口为[{1}]的{0}，该接口已由另一个vSwitch类型使用。",
+    "arguments": [
+      "l2Vo.getvSwitchType()",
+      "l2Vo.getPhysicalInterface()"
+    ],
+    "fileName": "src/main/java/org/zstack/macvlan/VmMacVlanNicApiInterceptor.java"
+  },
+  {
+    "raw": "unable to find an available mac address after re-try 5 times, too many collisions",
+    "en_US": "unable to find an available mac address after re-try 5 times, too many collisions",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/macvlan/VmMacVlanNicFactory.java"
+  }
+]

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<requirementCategory xmlns="http://zstack.org/schema/zstack">
+    <documentId>zone</documentId>
+    <title>zone</title>
+    <scope>all zone related functionalities. zone is logic resource that is the first level resource which has multiple sub resources</scope>
+
+    <req>
+        <goal>create zone</goal>
+        <title>create</title>
+        <api>
+            <requestClass>org.zstack.header.zone.APICreateZoneMsg</requestClass>
+            <responseClass>org.zstack.header.zone.APICreateZoneEvent</responseClass>
+        </api>
+    </req>
+
+    <req>
+        <goal>delete zone</goal>
+        <title>delete</title>
+        <details>
+            deleting a zone will cause its all sub-resources to be deleted as well. it may fail if any sub-resources in the state that cannot be deleted
+        </details>
+        <api>
+            <requestClass>org.zstack.header.zone.APIDeleteZoneMsg</requestClass>
+            <responseClass>org.zstack.header.zone.APIDeleteZoneEvent</responseClass>
+        </api>
+    </req>
+
+    <req>
+        <goal>change zone state</goal>
+        <title>change state</title>
+        <details>
+            zone has two states: Enabled and Disabled.
+            Enabled means resources in this zone is avaiable to manipulate where Disabled means no operation can be applied.
+            currently, zone state won't effect any API, they are reserved for future.
+            state changing of zone will cascade to its sub-resources: cluster and host. for example, disable a zone will disable
+            all clusters and hosts which belong to this zone. However, if any sub-resources in the situation that its state cannot be
+            changed, ancestral state changing of zone will fail
+        </details>
+        <api>
+            <requestClass>org.zstack.header.zone.APIChangeZoneStateMsg</requestClass>
+            <responseClass>org.zstack.header.zone.APIChangeZoneStateEvent</responseClass>
+        </api>
+    </req>
+
+</requirementCategory>

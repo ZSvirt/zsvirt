@@ -1,0 +1,527 @@
+[
+  {
+    "raw": "operation failure, because the poolName[poolName:%s] can not include unprintable ascii characters.",
+    "en_US": "operation failure, because the poolName[poolName:{0}] can not include unprintable ascii characters.",
+    "zh_CN": "操作失败，因为pool名称[poolName:{0}]不能包含中文和特殊字符",
+    "arguments": [
+      "msg.getPoolName()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/ceph/CephApiInterceptor.java"
+  },
+  {
+    "raw": "creation failure, duplicate poolName[%s]. There has been a pool[uuid:%s] with the same name existing.",
+    "en_US": "creation failure, duplicate poolName[{0}]. There has been a pool[uuid:{1}] with the same name existing.",
+    "zh_CN": "创建失败，重复的池名称[{0}]。已经有一个相同名称的扩展池[uuid:{1}]存在",
+    "arguments": [
+      "msg.getPoolName()",
+      "duplicatePoolUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/ceph/CephApiInterceptor.java"
+  },
+  {
+    "raw": "Ceph pool[uuid:%s] with this name is already added into ZStack and used elsewhere, cannot reuse the ceph pool.",
+    "en_US": "Ceph pool[uuid:{0}] with this name is already added into ZStack and used elsewhere, cannot reuse the ceph pool.",
+    "zh_CN": "池名称为此的扩展池[uuid:{0}]已经被添加进 ZStack 了，已做它用，不能复用该扩展池",
+    "arguments": [
+      "duplicatePoolUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/ceph/CephApiInterceptor.java"
+  },
+  {
+    "raw": "cannot add ceph primary storage, there has been some ceph primary storage using mon[hostnames:%s]",
+    "en_US": "cannot add ceph primary storage, there has been some ceph primary storage using mon[hostnames:{0}]",
+    "zh_CN": "无法添加分布式存储，一定有某些分布式存储使用了mon[物理机名: {0}]",
+    "arguments": [
+      "existing"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/ceph/CephApiInterceptor.java"
+  },
+  {
+    "raw": "Cannot add same host[%s] in mons",
+    "en_US": "Cannot add same host[{0}] in mons",
+    "zh_CN": "在mon中无法添加相同的物理机[{0}]",
+    "arguments": [
+      "uri.getHostname()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/ceph/CephApiInterceptor.java"
+  },
+  {
+    "raw": "Adding the same Mon node is not allowed",
+    "en_US": "Adding the same Mon node is not allowed",
+    "zh_CN": "添加相同的Mon节点不被允许",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/storage/ceph/CephApiInterceptor.java"
+  },
+  {
+    "raw": "hostname[%s] is neither an IPv4 address nor a valid hostname",
+    "en_US": "hostname[{0}] is neither an IPv4 address nor a valid hostname",
+    "zh_CN": "物理机名[{0}]不是一个IPv4的地址，而是一个非法的物理机名",
+    "arguments": [
+      "msg.getHostname()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/ceph/CephApiInterceptor.java"
+  },
+  {
+    "raw": "invalid monUrl[%s]. A valid url is in format of %s",
+    "en_US": "invalid monUrl[{0}]. A valid url is in format of {1}",
+    "zh_CN": "无效的monURL[{0}]。有效URL的格式为{1}",
+    "arguments": [
+      "monUrl",
+      "MON_URL_FORMAT"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/ceph/CephApiInterceptor.java"
+  },
+  {
+    "raw": "dataVolumePoolName can be null but cannot be an empty string",
+    "en_US": "dataVolumePoolName can be null but cannot be an empty string",
+    "zh_CN": "DataVolumePoolName可以为空，但不能为空字符串",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/storage/ceph/CephApiInterceptor.java"
+  },
+  {
+    "raw": "rootVolumePoolName can be null but cannot be an empty string",
+    "en_US": "rootVolumePoolName can be null but cannot be an empty string",
+    "zh_CN": "RootVolumePoolName可以为空，但不能为空字符串",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/storage/ceph/CephApiInterceptor.java"
+  },
+  {
+    "raw": "imageCachePoolName can be null but cannot be an empty string",
+    "en_US": "imageCachePoolName can be null but cannot be an empty string",
+    "zh_CN": "ImageCachePoolName可以为空，但不能为空字符串",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/storage/ceph/CephApiInterceptor.java"
+  },
+  {
+    "raw": "cannot add ceph backup storage, there has been some ceph backup storage using mon[hostnames:%s]",
+    "en_US": "cannot add ceph backup storage, there has been some ceph backup storage using mon[hostnames:{0}]",
+    "zh_CN": "无法添加Ceph镜像服务器监控节点，已经有某个Ceph镜像服务器监控节点使用mon[物理机名: {0}]",
+    "arguments": [
+      "existing"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/ceph/CephApiInterceptor.java"
+  },
+  {
+    "raw": "poolName can be null but cannot be an empty string",
+    "en_US": "poolName can be null but cannot be an empty string",
+    "zh_CN": "PoolName可以为空，但不能为空字符串",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/storage/ceph/CephApiInterceptor.java"
+  },
+  {
+    "raw": "poolName is required when importImages is true",
+    "en_US": "poolName is required when importImages is true",
+    "zh_CN": "当importImages为真的时候必须填写池名",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/storage/ceph/CephApiInterceptor.java"
+  },
+  {
+    "raw": "The problem may be caused by an incorrect user name or password or SSH port or unstable network environment",
+    "en_US": "The problem may be caused by an incorrect user name or password or SSH port or unstable network environment",
+    "zh_CN": "该问题可能是由不正确的用户名、密码、SSH端口或者不稳定的网络环境引起的",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/storage/ceph/CephMonBase.java"
+  },
+  {
+    "raw": "operation error, because:%s",
+    "en_US": "operation error, because:{0}",
+    "zh_CN": "操作错误，因为{0}",
+    "arguments": [
+      "ret.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/ceph/CephMonBase.java"
+  },
+  {
+    "raw": "all ceph mons are Disconnected in ceph backup storage[uuid:%s]",
+    "en_US": "all ceph mons are Disconnected in ceph backup storage[uuid:{0}]",
+    "zh_CN": "所有在Ceph镜像服务器监控节点[uuid:{0}]的监控节点都处于失联状态",
+    "arguments": [
+      "self.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/ceph/backup/CephBackupStorageBase.java"
+  },
+  {
+    "raw": "CephMon[hostname:%s] not found on backup storage[uuid:%s]",
+    "en_US": "CephMon[hostname:{0}] not found on backup storage[uuid:{1}]",
+    "zh_CN": "在备份存储[uuid：{1}]上找不到cephmon[物理机名：{0}]",
+    "arguments": [
+      "msg.getHostname()",
+      "msg.getBackupStorageUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/ceph/backup/CephBackupStorageBase.java"
+  },
+  {
+    "raw": "unable to connect to the ceph backup storage[uuid:%s], failed to connect all ceph monitors.",
+    "en_US": "unable to connect to the ceph backup storage[uuid:{0}], failed to connect all ceph monitors.",
+    "zh_CN": "",
+    "arguments": [
+      "self.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/ceph/backup/CephBackupStorageBase.java"
+  },
+  {
+    "raw": "there is another CEPH backup storage[name:%s, uuid:%s] with the same FSID[%s], you cannot add the same CEPH setup as two different backup storage",
+    "en_US": "there is another CEPH backup storage[name:{0}, uuid:{1}] with the same FSID[{2}], you cannot add the same CEPH setup as two different backup storage",
+    "zh_CN": "",
+    "arguments": [
+      "otherCeph.getName()",
+      "otherCeph.getUuid()",
+      "fsId"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/ceph/backup/CephBackupStorageBase.java"
+  },
+  {
+    "raw": "image[uuid: %s] is not on backup storage[uuid:%s, name:%s]",
+    "en_US": "image[uuid: {0}] is not on backup storage[uuid:{1}, name:{2}]",
+    "zh_CN": "镜像[uuid：{0}]不在备份存储[uuid：{1}，名称：{2}]上",
+    "arguments": [
+      "msg.getImageUuid()",
+      "self.getUuid()",
+      "self.getName()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/ceph/backup/CephBackupStorageBase.java"
+  },
+  {
+    "raw": "unable to add mon to ceph backup storage",
+    "en_US": "unable to add mon to ceph backup storage",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/storage/ceph/backup/CephBackupStorageBase.java"
+  },
+  {
+    "raw": "ceph backup storage do not support calculate image hash",
+    "en_US": "ceph backup storage do not support calculate image hash",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/storage/ceph/backup/CephBackupStorageBase.java"
+  },
+  {
+    "raw": "cannot update status of the ceph backup storage mon[uuid:%s], it has been deleted.This error can be ignored",
+    "en_US": "cannot update status of the ceph backup storage mon[uuid:{0}], it has been deleted.This error can be ignored",
+    "zh_CN": "",
+    "arguments": [
+      "uuid"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/ceph/backup/CephBackupStorageMonBase.java"
+  },
+  {
+    "raw": "Ceph bs[uuid\u003d%s] pool name not found",
+    "en_US": "Ceph bs[uuid\u003d{0}] pool name not found",
+    "zh_CN": "找不到Ceph BS[uuid\u003d{0}]池名称",
+    "arguments": [
+      "getSelf().getBackupStorageUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/ceph/backup/CephBackupStorageMonBase.java"
+  },
+  {
+    "raw": "delete volume chain error, continue to delete",
+    "en_US": "delete volume chain error, continue to delete",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/storage/ceph/primary/CephDeleteVolumeChainGC.java"
+  },
+  {
+    "raw": "the backup storage[uuid:%s, name:%s, fsid:%s] is not in the same ceph cluster with the primary storage[uuid:%s, name:%s, fsid:%s]",
+    "en_US": "the backup storage[uuid:{0}, name:{1}, fsid:{2}] is not in the same ceph cluster with the primary storage[uuid:{3}, name:{4}, fsid:{5}]",
+    "zh_CN": "",
+    "arguments": [
+      "backupStorage.getUuid()",
+      "backupStorage.getName()",
+      "bsFsid",
+      "self.getUuid()",
+      "self.getName()",
+      "getSelf().getFsid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/ceph/primary/CephPrimaryStorageBase.java"
+  },
+  {
+    "raw": "fsid is not same between ps[%s] and bs[%s], create template is forbidden.",
+    "en_US": "fsid is not same between ps[{0}] and bs[{1}], create template is forbidden.",
+    "zh_CN": "在主存储和镜像服务器中fsid不是一样的，禁止创建模版。",
+    "arguments": [
+      "psUuid",
+      "bsUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/ceph/primary/CephPrimaryStorageBase.java"
+  },
+  {
+    "raw": "all ceph mons of primary storage[uuid:%s] are not in Connected state",
+    "en_US": "all ceph mons of primary storage[uuid:{0}] are not in Connected state",
+    "zh_CN": "分布式存储[uuid:{0}]所有的监控节点都不是已连接状态",
+    "arguments": [
+      "self.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/ceph/primary/CephPrimaryStorageBase.java"
+  },
+  {
+    "raw": "all monitors cannot execute http call[%s]",
+    "en_US": "all monitors cannot execute http call[{0}]",
+    "zh_CN": "所有的监控节点都无法执行http call[{0}]",
+    "arguments": [
+      "path"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/ceph/primary/CephPrimaryStorageBase.java"
+  },
+  {
+    "raw": "unable to connect to the ceph primary storage[uuid:%s], failed to connect all ceph monitors.",
+    "en_US": "unable to connect to the ceph primary storage[uuid:{0}], failed to connect all ceph monitors.",
+    "zh_CN": "",
+    "arguments": [
+      "self.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/ceph/primary/CephPrimaryStorageBase.java"
+  },
+  {
+    "raw": "ceph primary storage[uuid:%s] may have been deleted.",
+    "en_US": "ceph primary storage[uuid:{0}] may have been deleted.",
+    "zh_CN": "分布式存储[uuid:{0}]可能已经被删除",
+    "arguments": [
+      "self.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/ceph/primary/CephPrimaryStorageBase.java"
+  },
+  {
+    "raw": "the fsid returned by mons are mismatching, it seems the mons belong to different ceph clusters:\\n",
+    "en_US": "the fsid returned by mons are mismatching, it seems the mons belong to different ceph clusters:\\n",
+    "zh_CN": "监控节点返回的fsid不匹配，似乎监控节点属于不同的ceph集群",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/storage/ceph/primary/CephPrimaryStorageBase.java"
+  },
+  {
+    "raw": "there is another CEPH primary storage[name:%s, uuid:%s] with the same FSID[%s], you cannot add the same CEPH setup as two different primary storage",
+    "en_US": "there is another CEPH primary storage[name:{0}, uuid:{1}] with the same FSID[{2}], you cannot add the same CEPH setup as two different primary storage",
+    "zh_CN": "",
+    "arguments": [
+      "otherCeph.getName()",
+      "otherCeph.getUuid()",
+      "fsId"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/ceph/primary/CephPrimaryStorageBase.java"
+  },
+  {
+    "raw": "the ceph primary storage[uuid:%s, name:%s] is down, as one mon[uuid:%s] reports an operation failure[%s]",
+    "en_US": "the ceph primary storage[uuid:{0}, name:{1}] is down, as one mon[uuid:{2}] reports an operation failure[{3}]",
+    "zh_CN": "",
+    "arguments": [
+      "self.getUuid()",
+      "self.getName()",
+      "mon.getSelf().getUuid()",
+      "res.error"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/ceph/primary/CephPrimaryStorageBase.java"
+  },
+  {
+    "raw": "unable to connect mons",
+    "en_US": "unable to connect mons",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/storage/ceph/primary/CephPrimaryStorageBase.java"
+  },
+  {
+    "raw": "unable to add mon to ceph primary storage",
+    "en_US": "unable to add mon to ceph primary storage",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/storage/ceph/primary/CephPrimaryStorageBase.java"
+  },
+  {
+    "raw": "the mon[ip:%s] returns a fsid[%s] different from the current fsid[%s] of the cep cluster,are you adding a mon not belonging to current cluster mistakenly?",
+    "en_US": "the mon[ip:{0}] returns a fsid[{1}] different from the current fsid[{2}] of the cep cluster,are you adding a mon not belonging to current cluster mistakenly?",
+    "zh_CN": "",
+    "arguments": [
+      "base.getSelf().getHostname()",
+      "fsid",
+      "getSelf().getFsid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/ceph/primary/CephPrimaryStorageBase.java"
+  },
+  {
+    "raw": "%s",
+    "en_US": "{0}",
+    "zh_CN": "{0}",
+    "arguments": [
+      "rsp.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/ceph/primary/CephPrimaryStorageBase.java"
+  },
+  {
+    "raw": "operation error, because: failed to get response",
+    "en_US": "operation error, because: failed to get response",
+    "zh_CN": "操作错误，原因：无法获取响应",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/storage/ceph/primary/CephPrimaryStorageBase.java"
+  },
+  {
+    "raw": "backing up snapshots to backup storage is a depreciated feature, which will be removed in future version",
+    "en_US": "backing up snapshots to backup storage is a depreciated feature, which will be removed in future version",
+    "zh_CN": "将快照备份到备份存储是一项过时的功能，在未来版本中将被删除",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/storage/ceph/primary/CephPrimaryStorageBase.java"
+  },
+  {
+    "raw": "cannot reinit rootvolume [%s] because image [%s] has been deleted and imagecache cannot be found",
+    "en_US": "cannot reinit rootvolume [{0}] because image [{1}] has been deleted and imagecache cannot be found",
+    "zh_CN": "无法重新初始化RootVolume[{0}]，因为镜像[{1}]已被删除并且找不到ImageCache",
+    "arguments": [
+      "volume.getUuid()",
+      "volume.getRootImageUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/ceph/primary/CephPrimaryStorageBase.java"
+  },
+  {
+    "raw": "cannot find backupstorage to download image [%s] to primarystorage [%s] due to lack of Ready and accessible image",
+    "en_US": "cannot find backupstorage to download image [{0}] to primarystorage [{1}] due to lack of Ready and accessible image",
+    "zh_CN": "",
+    "arguments": [
+      "volume.getRootImageUuid()",
+      "getSelf().getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/ceph/primary/CephPrimaryStorageBase.java"
+  },
+  {
+    "raw": "allocated url not found",
+    "en_US": "allocated url not found",
+    "zh_CN": "未找到分配的URL",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/storage/ceph/primary/CephPrimaryStorageBase.java"
+  },
+  {
+    "raw": "invalid allocated url:%s",
+    "en_US": "invalid allocated url:{0}",
+    "zh_CN": "分配的URL无效：{0}",
+    "arguments": [
+      "allocatedUrl"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/ceph/primary/CephPrimaryStorageBase.java"
+  },
+  {
+    "raw": "cannot find any Connected ceph mon for the primary storage[uuid:%s]",
+    "en_US": "cannot find any Connected ceph mon for the primary storage[uuid:{0}]",
+    "zh_CN": "无法为分布式存储[uuid:{0}]找到一台处于Connected状态的的监控节点",
+    "arguments": [
+      "vol.getPrimaryStorageUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/ceph/primary/CephPrimaryStorageFactory.java"
+  },
+  {
+    "raw": "not support take volumes snapshots on multiple ps when including ceph",
+    "en_US": "not support take volumes snapshots on multiple ps when including ceph",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/storage/ceph/primary/CephPrimaryStorageFactory.java"
+  },
+  {
+    "raw": "ceph pool conflict, the ceph pool specified by the instance offering is %s, and the ceph pool specified in the creation parameter is %s",
+    "en_US": "ceph pool conflict, the ceph pool specified by the instance offering is {0}, and the ceph pool specified in the creation parameter is {1}",
+    "zh_CN": "Ceph池冲突，由实例提供的Ceph池指定为{0}，而在创建参数中指定的Ceph池为{1}",
+    "arguments": [
+      "targetCephPoolName",
+      "cephPoolName"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/ceph/primary/CephPrimaryStorageFactory.java"
+  },
+  {
+    "raw": "ceph pool conflict, the ceph pool specified by the disk offering is %s, and the ceph pool specified in the creation parameter is %s",
+    "en_US": "ceph pool conflict, the ceph pool specified by the disk offering is {0}, and the ceph pool specified in the creation parameter is {1}",
+    "zh_CN": "Ceph池冲突，磁盘产品指定的Ceph池为{0}，而创建参数中指定的Ceph池为{1}",
+    "arguments": [
+      "targetCephPoolName",
+      "cephPoolName"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/ceph/primary/CephPrimaryStorageFactory.java"
+  },
+  {
+    "raw": "get rootVolume[%s] rbd image watchers fail, %s",
+    "en_US": "get rootVolume[{0}] rbd image watchers fail, {1}",
+    "zh_CN": "查询云盘[{0}] rbd image watchers失败，{1}",
+    "arguments": [
+      "rootVolume.getInstallPath()",
+      "reply.getError().getDetails()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/ceph/primary/CephPrimaryStorageFactory.java"
+  },
+  {
+    "raw": "rootVolume[%s] is already in use(ceph rbd image[%s] already has watchers), in order to prevent brain splitting, Starting VM is prohibited.",
+    "en_US": "rootVolume[{0}] is already in use(ceph rbd image[{1}] already has watchers), in order to prevent brain splitting, Starting VM is prohibited.",
+    "zh_CN": "云盘[{0}]正在使用中(ceph rbd 镜像[{1}]存在watchers)，为了防止云主机脑裂，禁止启动云主机",
+    "arguments": [
+      "msg.getVolumeUuid()",
+      "installPath"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/ceph/primary/CephPrimaryStorageFactory.java"
+  },
+  {
+    "raw": "cannot find cephPrimaryStorage pool[poolName\u003d%s]",
+    "en_US": "cannot find cephPrimaryStorage pool[poolName\u003d{0}]",
+    "zh_CN": "找不到CephPrimaryStorage池[PoolName\u003d{0}]",
+    "arguments": [
+      "poolName"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/ceph/primary/CephPrimaryStorageFactory.java"
+  },
+  {
+    "raw": "cephPrimaryStorage pool[poolName\u003d%s] available virtual capacity not enough for size %s",
+    "en_US": "cephPrimaryStorage pool[poolName\u003d{0}] available virtual capacity not enough for size {1}",
+    "zh_CN": "CephPrimary存储池[PoolName\u003d{0}]可用虚拟容量不足，无法满足大小{1}",
+    "arguments": [
+      "poolName",
+      "volumeSize"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/ceph/primary/CephPrimaryStorageFactory.java"
+  },
+  {
+    "raw": "cannot allocate pool for primaryStorage[%s], purpose: %s",
+    "en_US": "cannot allocate pool for primaryStorage[{0}], purpose: {1}",
+    "zh_CN": "无法为主存储[{0}]分配池，目的：{1}",
+    "arguments": [
+      "psUuid",
+      "purpose"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/ceph/primary/CephPrimaryStorageFactory.java"
+  },
+  {
+    "raw": "cannot update status of the ceph primary storage mon[uuid:%s], it has been deleted.This error can be ignored",
+    "en_US": "cannot update status of the ceph primary storage mon[uuid:{0}], it has been deleted.This error can be ignored",
+    "zh_CN": "",
+    "arguments": [
+      "uuid"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/ceph/primary/CephPrimaryStorageMonBase.java"
+  },
+  {
+    "raw": "Ceph ps[uuid\u003d%s] root pool name not found",
+    "en_US": "Ceph ps[uuid\u003d{0}] root pool name not found",
+    "zh_CN": "找不到Ceph PS[uuid\u003d{0}]根池名称",
+    "arguments": [
+      "primaryStorageUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/ceph/primary/CephPrimaryStorageMonBase.java"
+  },
+  {
+    "raw": "invalid uri, correct example is ceph://$POOLNAME/$VOLUMEUUID or volume://$VOLUMEUUID or volumeSnapshotReuse://$SNAPSHOTUUID",
+    "en_US": "invalid uri, correct example is ceph://$POOLNAME/$VOLUMEUUID or volume://$VOLUMEUUID or volumeSnapshotReuse://$SNAPSHOTUUID",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/storage/ceph/primary/CephRequiredUrlParser.java"
+  },
+  {
+    "raw": "required ceph pool[uuid:%s] cannot satisfy conditions [availableSize \u003e %s bytes], current available size %s",
+    "en_US": "required ceph pool[uuid:{0}] cannot satisfy conditions [availableSize \u003e {1} bytes], current available size {2}",
+    "zh_CN": "",
+    "arguments": [
+      "poolUuid",
+      "size",
+      "originAvailableCapacity"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/ceph/primary/capacity/CephOsdGroupCapacityHelper.java"
+  },
+  {
+    "raw": "cannot find ceph pool [%s] related osdgroup",
+    "en_US": "cannot find ceph pool [{0}] related osdgroup",
+    "zh_CN": "找不到Ceph池[{0}]相关的OSDGroup",
+    "arguments": [
+      "poolUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/ceph/primary/capacity/CephOsdGroupCapacityHelper.java"
+  }
+]

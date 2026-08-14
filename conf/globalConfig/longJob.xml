@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<globalConfig xmlns="http://zstack.org/schema/zstack">
+    <config>
+        <category>longJob</category>
+        <name>longJob.api.timeout</name>
+        <description>timeout of api related message or cmd timeout when using long job</description>
+        <defaultValue>259200</defaultValue>
+        <type>java.lang.Long</type>
+    </config>
+</globalConfig>

@@ -1,0 +1,130 @@
+# CentOS
+CentOS 5:
+  vmwType: '107'
+  vmwOsName: centos64Guest
+CentOS 6:
+  vmwType: '107'
+  vmwOsName: centos6_64Guest
+CentOS 7:
+  vmwType: '107'
+  vmwOsName: centos7_64Guest
+CentOS 8:
+  vmwType: '107'
+  vmwOsName: centos8_64Guest
+
+# Debian
+Debian 7:
+  vmwType: '96'
+  vmwOsName: debian7_64Guest
+Debian 8:
+  vmwType: '96'
+  vmwOsName: debian8_64Guest
+Debian 9:
+  vmwType: '96'
+  vmwOsName: debian9_64Guest
+Debian 10:
+  vmwType: '96'
+  vmwOsName: debian10_64Guest
+Debian 11:
+  vmwType: '96'
+  vmwOsName: debian11_64Guest
+
+# Fedora
+Fedora:
+  vmwType: '101'
+  vmwOsName: fedora64Guest
+
+# Kylin
+Kylin 4:
+  vmwType: '101'
+  vmwOsName: otherLinux64Guest
+Kylin 7:
+  vmwType: '101'
+  vmwOsName: other3xLinux64Guest
+Kylin 10:
+  vmwType: '101'
+  vmwOsName: other4xLinux64Guest
+
+# Linux
+Linux:
+  vmwType: '101'
+  vmwOsName: otherLinux64Guest
+
+# OpenEuler
+openEuler 20.03:
+  vmwType: '107'
+  vmwOsName: centos8_64Guest
+
+# RHEL
+RHEL 5:
+  vmwType: '80'
+  vmwOsName: rhel5_64Guest
+RHEL 6:
+  vmwType: '80'
+  vmwOsName: rhel6_64Guest
+RHEL 7:
+  vmwType: '80'
+  vmwOsName: rhel7_64Guest
+RHEL 8:
+  vmwType: '80'
+  vmwOsName: rhel8_64Guest
+
+# Ubuntu
+Ubuntu 16:
+  vmwType: '94'
+  vmwOsName: ubuntu64Guest
+Ubuntu 18:
+  vmwType: '94'
+  vmwOsName: ubuntu64Guest
+Ubuntu 20:
+  vmwType: '94'
+  vmwOsName: ubuntu64Guest
+Ubuntu 22:
+  vmwType: '94'
+  vmwOsName: ubuntu64Guest
+
+# UOS
+UOS 20:
+  vmwType: '95'
+  vmwOsName: debian10Guest
+
+# Windows
+# Generic (use Windows Server 2003)
+Windows:
+  vmwType: '70'
+  vmwOsName: winNetStandard64Guest
+# Windows XP use x86 as default
+Windows xp:
+  vmwType: '67'
+  vmwOsName: winXPProGuest
+Windows 7:
+  vmwType: '105'
+  vmwOsName: windows7_64Guest
+Windows 8:
+  vmwType: '113'
+  vmwOsName: windows8_64Guest
+Windows 10:
+  vmwType: '120'
+  vmwOsName: windows9_64Guest
+WindowsServer 2008:
+  vmwType: '77'
+  vmwOsName: windows7Server64Guest
+WindowsServer 2012:
+  vmwType: '115'
+  vmwOsName: windows8Server64Guest
+WindowsServer 2016:
+  vmwType: '116'
+  vmwOsName: windows9Server64Guest
+WindowsServer 2019:
+  vmwType: '116'
+  vmwOsName: windows9Server64Guest
+
+#FreeBSD
+FreeBSD:
+  vmwType: '78'
+  vmwOsName: freebsd64Guest
+
+# Other
+Other:
+  vmwType: '102'
+  vmwOsName: otherGuest64

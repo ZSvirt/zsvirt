@@ -1,0 +1,355 @@
+[
+  {
+    "raw": "uuid [%s] already exists",
+    "en_US": "uuid [{0}] already exists",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/sns/SNSApiInterceptor.java"
+  },
+  {
+    "raw": "smtpServer cannot null",
+    "en_US": "smtpServer cannot null",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/sns/SNSApiInterceptor.java"
+  },
+  {
+    "raw": "smtpPort cannot null",
+    "en_US": "smtpPort cannot null",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/sns/SNSApiInterceptor.java"
+  },
+  {
+    "raw": "username cannot null",
+    "en_US": "username cannot null",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/sns/SNSApiInterceptor.java"
+  },
+  {
+    "raw": "password cannot null",
+    "en_US": "password cannot null",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/sns/SNSApiInterceptor.java"
+  },
+  {
+    "raw": "platformUuid and endpointUuid cannot be empty together",
+    "en_US": "platformUuid and endpointUuid cannot be empty together",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/sns/SNSApiInterceptor.java"
+  },
+  {
+    "raw": "cannot test connection, Because all parameters is null",
+    "en_US": "cannot test connection, Because all parameters is null",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/sns/SNSApiInterceptor.java"
+  },
+  {
+    "raw": "can not create snmp platform with same address[%s:%s]",
+    "en_US": "can not create snmp platform with same address[{0}:{1}]",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getSnmpAddress()",
+      "msg.getSnmpPort()"
+    ],
+    "fileName": "src/main/java/org/zstack/sns/SNSApiInterceptor.java"
+  },
+  {
+    "raw": "can not add same email address to endpoint[uuid:%s]",
+    "en_US": "can not add same email address to endpoint[uuid:{0}]",
+    "zh_CN": "无法将同一电子邮件地址添加到终结点[uuid：{0}]",
+    "arguments": [
+      "msg.getApplicationEndpointUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/sns/SNSApiInterceptor.java"
+  },
+  {
+    "raw": "cannot update email address to %s, which is already exists in endpoint[uuid:%s]",
+    "en_US": "cannot update email address to {0}, which is already exists in endpoint[uuid:{1}]",
+    "zh_CN": "无法将电子邮件地址更新为{0}，该地址已存在于终结点[uuid：{1}]中",
+    "arguments": [
+      "msg.getEmailAddress()",
+      "msg.getApplicationEndpointUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/sns/SNSApiInterceptor.java"
+  },
+  {
+    "raw": "phone number [%s] already exists",
+    "en_US": "phone number [{0}] already exists",
+    "zh_CN": "电话号码[{0}]已存在",
+    "arguments": [
+      "msg.getPhoneNumber()"
+    ],
+    "fileName": "src/main/java/org/zstack/sns/SNSApiInterceptor.java"
+  },
+  {
+    "raw": "invalid phone number[%s], sms number is like +86-18654321234",
+    "en_US": "invalid phone number[{0}], sms number is like +86-18654321234",
+    "zh_CN": "电话号码[{0}]无效，短信号码类似于+86-18654321234",
+    "arguments": [
+      "number"
+    ],
+    "fileName": "src/main/java/org/zstack/sns/SNSApiInterceptor.java"
+  },
+  {
+    "raw": "invalid url[%s]",
+    "en_US": "invalid url[{0}]",
+    "zh_CN": "无效的url[{0}]",
+    "arguments": [
+      "url"
+    ],
+    "fileName": "src/main/java/org/zstack/sns/SNSApiInterceptor.java"
+  },
+  {
+    "raw": "[%s] is not a legal ip",
+    "en_US": "[{0}] is not a legal ip",
+    "zh_CN": "[{0}]不是合法的IP",
+    "arguments": [
+      "host"
+    ],
+    "fileName": "src/main/java/org/zstack/sns/SNSApiInterceptor.java"
+  },
+  {
+    "raw": "invalid phone number[%s], the DingDing phone number is like +86-12388889999",
+    "en_US": "invalid phone number[{0}], the DingDing phone number is like +86-12388889999",
+    "zh_CN": "无效的手机号码[{0}], 钉钉手机号码格式应当为 +86-12388889999",
+    "arguments": [
+      "n"
+    ],
+    "fileName": "src/main/java/org/zstack/sns/SNSApiInterceptor.java"
+  },
+  {
+    "raw": "username and password must either absent at all or present with each other",
+    "en_US": "username and password must either absent at all or present with each other",
+    "zh_CN": "用户名和密码要么同时为空要么同时不为空",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/sns/SNSApiInterceptor.java"
+  },
+  {
+    "raw": "can not create sns email endpoint without any email address",
+    "en_US": "can not create sns email endpoint without any email address",
+    "zh_CN": "无法在没有任何电子邮件地址的情况下创建SNS电子邮件端点",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/sns/SNSApiInterceptor.java"
+  },
+  {
+    "raw": "invalid email address[%s]",
+    "en_US": "invalid email address[{0}]",
+    "zh_CN": "无效的email地址[{0}]",
+    "arguments": [
+      "errorEmails"
+    ],
+    "fileName": "src/main/java/org/zstack/sns/SNSApiInterceptor.java"
+  },
+  {
+    "raw": "phone number[%s] already exists",
+    "en_US": "phone number[{0}] already exists",
+    "zh_CN": "手机号码[{0}]已存在",
+    "arguments": [
+      "msg.getPhoneNumber()"
+    ],
+    "fileName": "src/main/java/org/zstack/sns/SNSApiInterceptor.java"
+  },
+  {
+    "raw": "userId [%s] already exists",
+    "en_US": "userId [{0}] already exists",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getUserId()"
+    ],
+    "fileName": "src/main/java/org/zstack/sns/SNSApiInterceptor.java"
+  },
+  {
+    "raw": "the operation is not permitted for the system application platform",
+    "en_US": "the operation is not permitted for the system application platform",
+    "zh_CN": "禁止对该应用平台进行当前操作",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/sns/SNSApplicationPlatformBase.java"
+  },
+  {
+    "raw": "cannot find the SNSTopic[uuid:%s], it may have been deleted",
+    "en_US": "cannot find the SNSTopic[uuid:{0}], it may have been deleted",
+    "zh_CN": "找不到SNS主题[uuid:{0}], 它可能已经被删除",
+    "arguments": [
+      "msg.getTopicUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/sns/SNSManagerImpl.java"
+  },
+  {
+    "raw": "cannot find the endpointType",
+    "en_US": "cannot find the endpointType",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getEndpointType()"
+    ],
+    "fileName": "src/main/java/org/zstack/sns/SNSManagerImpl.java"
+  },
+  {
+    "raw": "cannot find SNSApplicationPlatform[uuid:%s], it may have been deleted",
+    "en_US": "cannot find SNSApplicationPlatform[uuid:{0}], it may have been deleted",
+    "zh_CN": "找不到SNS应用平台[uuid:{0}], 它可能已经被删除",
+    "arguments": [
+      "msg.getApplicationPlatformUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/sns/SNSManagerImpl.java"
+  },
+  {
+    "raw": "cannot find SNSApplicationEndpoint[uuid:%s], it may have been deleted",
+    "en_US": "cannot find SNSApplicationEndpoint[uuid:{0}], it may have been deleted",
+    "zh_CN": "找不到SNS应用接收终端[uuid:{0}], 它可能已经被删除",
+    "arguments": [
+      "msg.getApplicationEndpointUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/sns/SNSManagerImpl.java"
+  },
+  {
+    "raw": "the topic is not subscribed by any endpoints",
+    "en_US": "the topic is not subscribed by any endpoints",
+    "zh_CN": "当前主题并未被任何应用终端订阅",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/sns/SNSTopicBase.java"
+  },
+  {
+    "raw": "application platform is disabled",
+    "en_US": "application platform is disabled",
+    "zh_CN": "应用平台被不可用",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/sns/SNSTopicBase.java"
+  },
+  {
+    "raw": "application endpoint is disabled",
+    "en_US": "application endpoint is disabled",
+    "zh_CN": "应用接收端被禁用",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/sns/SNSTopicBase.java"
+  },
+  {
+    "raw": "failed to send messages to DingTalk. status: %s, body: %s",
+    "en_US": "failed to send messages to DingTalk. status: {0}, body: {1}",
+    "zh_CN": "向DingTalk发送消息失败。状态：{0}，正文：{1}",
+    "arguments": [
+      "rsp.getStatusCode()",
+      "rsp.getBody()"
+    ],
+    "fileName": "src/main/java/org/zstack/sns/platform/dingtalk/SNSDingTalkEndpoint.java"
+  },
+  {
+    "raw": "cannot connect SMTP server[server: %s, port: %s] in 15 seconds",
+    "en_US": "cannot connect SMTP server[server: {0}, port: {1}] in 15 seconds",
+    "zh_CN": "在15秒内无法连接到SMTP服务器[server: {0}, port: {1}]",
+    "arguments": [
+      "smtpServer",
+      "smtpPort"
+    ],
+    "fileName": "src/main/java/org/zstack/sns/platform/email/SNSEmailApplicationPlatform.java"
+  },
+  {
+    "raw": "SMTP server validation error: %s",
+    "en_US": "SMTP server validation error: {0}",
+    "zh_CN": "SMTP服务器验证错误: {0}",
+    "arguments": [
+      "e.getMessage()"
+    ],
+    "fileName": "src/main/java/org/zstack/sns/platform/email/SNSEmailApplicationPlatform.java"
+  },
+  {
+    "raw": "no subject",
+    "en_US": "no subject",
+    "zh_CN": "没有主题",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/sns/platform/email/SNSEmailApplicationPlatform.java"
+  },
+  {
+    "raw": "The problem may be caused by an incorrect user name or password or email permission denied",
+    "en_US": "The problem may be caused by an incorrect user name or password or email permission denied",
+    "zh_CN": "导致操作失败的原因可能是不正确的用户名、密码或邮件访问权限不足",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/sns/platform/email/SNSEmailPlatformFactory.java"
+  },
+  {
+    "raw": "Couldn\u0027t connect to host, port: %s, %d. The problem may be caused by an incorrect smtpServer or smtpPort",
+    "en_US": "Couldn\u0027t connect to host, port: {0}, {1}. The problem may be caused by an incorrect smtpServer or smtpPort",
+    "zh_CN": "连接{0}:{1}超时，导致原因可能是不正确的邮件服务器和邮件服务器端口",
+    "arguments": [
+      "smtpServer",
+      "smtpPort"
+    ],
+    "fileName": "src/main/java/org/zstack/sns/platform/email/SNSEmailPlatformFactory.java"
+  },
+  {
+    "raw": "failed to send messages to FeiShu. status: %s, body: %s",
+    "en_US": "failed to send messages to FeiShu. status: {0}, body: {1}",
+    "zh_CN": "",
+    "arguments": [
+      "rsp.getStatusCode()",
+      "rsp.getBody()"
+    ],
+    "fileName": "src/main/java/org/zstack/sns/platform/feishu/SNSFeiShuEndpoint.java"
+  },
+  {
+    "raw": "HTTP POST failure. status: %s, body: %s",
+    "en_US": "HTTP POST failure. status: {0}, body: {1}",
+    "zh_CN": "HTTP POST失败，状态码: {0}, body: {1}",
+    "arguments": [
+      "rsp.getStatusCode()",
+      "rsp.getBody()"
+    ],
+    "fileName": "src/main/java/org/zstack/sns/platform/http/SNSHttpEndpoint.java"
+  },
+  {
+    "raw": "failed to send messages to Microsoft Teams. status: %s, body: %s",
+    "en_US": "failed to send messages to Microsoft Teams. status: {0}, body: {1}",
+    "zh_CN": "未能将消息发送到Microsoft Teams。状态：{0}，正文：{1}",
+    "arguments": [
+      "rsp.getStatusCode()",
+      "rsp.getBody()"
+    ],
+    "fileName": "src/main/java/org/zstack/sns/platform/microsoftteams/SNSMicrosoftTeamsEndpoint.java"
+  },
+  {
+    "raw": "the endpoint is disabled",
+    "en_US": "the endpoint is disabled",
+    "zh_CN": "通知终端不可用",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/sns/platform/snmp/SNSSnmpApplicationPlatform.java"
+  },
+  {
+    "raw": "failed to send messages to WeCom. status: %s, body: %s",
+    "en_US": "failed to send messages to WeCom. status: {0}, body: {1}",
+    "zh_CN": "",
+    "arguments": [
+      "rsp.getStatusCode()",
+      "rsp.getBody()"
+    ],
+    "fileName": "src/main/java/org/zstack/sns/platform/wecom/SNSWeComEndpoint.java"
+  },
+  {
+    "raw": "only HTTP endpoint can subscribe API topic, the endpoint[type:%s] is not a HTTP endpoint",
+    "en_US": "only HTTP endpoint can subscribe API topic, the endpoint[type:{0}] is not a HTTP endpoint",
+    "zh_CN": "仅HTTP通知终端可以订阅API通知主题，当前通知终端[type:{0}]不是一个HTTP通知终端",
+    "arguments": [
+      "endpoint.getType()"
+    ],
+    "fileName": "src/main/java/org/zstack/sns/system/SNSApiTopicManagerImpl.java"
+  },
+  {
+    "raw": "API topic cannot be deleted",
+    "en_US": "API topic cannot be deleted",
+    "zh_CN": "API通知主题无法被删除",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/sns/system/SNSApiTopicManagerImpl.java"
+  },
+  {
+    "raw": "system alarm topic cannot be deleted",
+    "en_US": "system alarm topic cannot be deleted",
+    "zh_CN": "系统警报通知主题不能被删除",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/sns/system/SNSSystemAlarmTopicManagerImpl.java"
+  }
+]

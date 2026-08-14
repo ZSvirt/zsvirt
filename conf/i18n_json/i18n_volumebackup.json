@@ -1,0 +1,676 @@
+[
+  {
+    "raw": "bandWidth must be a positive number",
+    "en_US": "bandWidth must be a positive number",
+    "zh_CN": "带宽必须为正数",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/storage/backup/CreateVmBackupJob.java"
+  },
+  {
+    "raw": "missing \u0027retentionType\u0027 in job parameters",
+    "en_US": "missing \u0027retentionType\u0027 in job parameters",
+    "zh_CN": "parameters中缺少retentionType参数",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/storage/backup/CreateVmBackupJob.java"
+  },
+  {
+    "raw": "missing \u0027retentionValue\u0027 in job parameters",
+    "en_US": "missing \u0027retentionValue\u0027 in job parameters",
+    "zh_CN": "parameter中缺少retentionValue参数",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/storage/backup/CreateVmBackupJob.java"
+  },
+  {
+    "raw": "missing \u0027backupStorageUuids\u0027 in job parameters",
+    "en_US": "missing \u0027backupStorageUuids\u0027 in job parameters",
+    "zh_CN": "parameter中缺少backupStorageUuids参数",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/storage/backup/CreateVmBackupJob.java"
+  },
+  {
+    "raw": "job parameter \u0027backupStorageUuids\u0027 is empty",
+    "en_US": "job parameter \u0027backupStorageUuids\u0027 is empty",
+    "zh_CN": "parameter中backupStorageUuids为空",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/storage/backup/CreateVmBackupJob.java"
+  },
+  {
+    "raw": "unexpected backup storage uuid: %s",
+    "en_US": "unexpected backup storage uuid: {0}",
+    "zh_CN": "错误的镜像服务器uuid: {0}",
+    "arguments": [
+      "bsUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/backup/CreateVmBackupJob.java"
+  },
+  {
+    "raw": "missing \u0027remoteRetentionType\u0027 in job parameters",
+    "en_US": "missing \u0027remoteRetentionType\u0027 in job parameters",
+    "zh_CN": "作业参数中缺少“ RemoteRetentionType ”",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/storage/backup/CreateVmBackupJob.java"
+  },
+  {
+    "raw": "missing \u0027remoteRetentionValue\u0027 in job parameters",
+    "en_US": "missing \u0027remoteRetentionValue\u0027 in job parameters",
+    "zh_CN": "作业参数中缺少“ RemoteRetentionValue ”",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/storage/backup/CreateVmBackupJob.java"
+  },
+  {
+    "raw": "missing job parameters",
+    "en_US": "missing job parameters",
+    "zh_CN": "缺少parameters参数",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/storage/backup/CreateVmBackupJob.java"
+  },
+  {
+    "raw": "No available backup storage found, skip this job",
+    "en_US": "No available backup storage found, skip this job",
+    "zh_CN": "找不到可用的备份存储，请跳过此作业",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/storage/backup/CreateVmBackupJob.java"
+  },
+  {
+    "raw": "volume[uuid:%s] is deleted, state change is not allowed",
+    "en_US": "volume[uuid:{0}] is deleted, state change is not allowed",
+    "zh_CN": "卷[uuid：{0}]已删除，不允许更改状态",
+    "arguments": [
+      "getTargetResourceUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/backup/CreateVmBackupJob.java"
+  },
+  {
+    "raw": "database backup[uuid%s] has not been exported from backupStorage[uuid:%s]",
+    "en_US": "database backup[uuid{0}] has not been exported from backupStorage[uuid:{1}]",
+    "zh_CN": "数据库备份[uuid{0}]尚未从备份存储[uuid：{1}]中导出",
+    "arguments": [
+      "msg.getDatabaseBackupUuid()",
+      "msg.getBackupStorageUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/backup/DatabaseBackupApiInterceptor.java"
+  },
+  {
+    "raw": "database backup[uuid%s] has been exported from backupStorage[uuid:%s]",
+    "en_US": "database backup[uuid{0}] has been exported from backupStorage[uuid:{1}]",
+    "zh_CN": "数据库备份[uuid{0}]已从备份存储[uuid：{1}]中导出",
+    "arguments": [
+      "msg.getDatabaseBackupUuid()",
+      "msg.getBackupStorageUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/backup/DatabaseBackupApiInterceptor.java"
+  },
+  {
+    "raw": "do not allow cover database from backup",
+    "en_US": "do not allow cover database from backup",
+    "zh_CN": "不允许从备份中覆盖数据库",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/storage/backup/DatabaseBackupApiInterceptor.java"
+  },
+  {
+    "raw": "installPath and bsUrl are both need",
+    "en_US": "installPath and bsUrl are both need",
+    "zh_CN": "InstallPath和BSURL都是必需",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/storage/backup/DatabaseBackupApiInterceptor.java"
+  },
+  {
+    "raw": "databaseBackup[uuid:%s] is not Enabled and Ready",
+    "en_US": "databaseBackup[uuid:{0}] is not Enabled and Ready",
+    "zh_CN": "DatabaseBackup[uuid：{0}]未启用且未就绪",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/storage/backup/DatabaseBackupApiInterceptor.java"
+  },
+  {
+    "raw": "illegal url[%s], correct example is ssh://username:password@hostname[:sshPort]/path",
+    "en_US": "illegal url[{0}], correct example is ssh://username:password@hostname[:sshPort]/path",
+    "zh_CN": "非法URL[{0}]，正确示例为SSH：//username：password@hostname[：sshport]/path",
+    "arguments": [
+      "url"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/backup/DatabaseBackupApiInterceptor.java"
+  },
+  {
+    "raw": "database backup[uuid:%s] is not Enabled and Ready",
+    "en_US": "database backup[uuid:{0}] is not Enabled and Ready",
+    "zh_CN": "数据库备份[uuid：{0}]未启用且未就绪",
+    "arguments": [
+      "self.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/backup/DatabaseBackupBase.java"
+  },
+  {
+    "raw": "One of the backup storage[uuids: %s, %s] is in the state of %s, can not do sync operation",
+    "en_US": "One of the backup storage[uuids: {0}, {1}] is in the state of {2}, can not do sync operation",
+    "zh_CN": "镜像服务器[uuid: {0}]处于状态{1}, 无法执行同步操作",
+    "arguments": [
+      "msg.getDstBackupStorageUuid()",
+      "msg.getSrcBackupStorageUuid()",
+      "BackupStorageState.Disabled.toString()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/backup/DatabaseBackupBase.java"
+  },
+  {
+    "raw": "database backup[uuid:%s] not found in backup storage[uuid:%s]",
+    "en_US": "database backup[uuid:{0}] not found in backup storage[uuid:{1}]",
+    "zh_CN": "未在备份存储[uuid：{1}]中找到数据库备份[uuid：{0}]",
+    "arguments": [
+      "msg.getDatabaseBackupUuid()",
+      "msg.getSrcBackupStorageUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/backup/DatabaseBackupBase.java"
+  },
+  {
+    "raw": "sync task failed.",
+    "en_US": "sync task failed.",
+    "zh_CN": "同步失败",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/storage/backup/DatabaseBackupBase.java"
+  },
+  {
+    "raw": "unexpected task status: %s",
+    "en_US": "unexpected task status: {0}",
+    "zh_CN": "错误的任务状态{0}",
+    "arguments": [
+      "reply.getStatus()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/backup/DatabaseBackupBase.java"
+  },
+  {
+    "raw": "database backup [uuid:%s] is not existed yet",
+    "en_US": "database backup [uuid:{0}] is not existed yet",
+    "zh_CN": "数据库备份[uuid：{0}]尚不存在",
+    "arguments": [
+      "msg.getDatabaseBackupUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/backup/DatabaseBackupManagerImpl.java"
+  },
+  {
+    "raw": "backup storage[uuid:%s] is not enabled and connected",
+    "en_US": "backup storage[uuid:{0}] is not enabled and connected",
+    "zh_CN": "备份存储[uuid：{0}]未启用和连接",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/storage/backup/DatabaseBackupManagerImpl.java"
+  },
+  {
+    "raw": "not pass the restore security check:\\n%s",
+    "en_US": "not pass the restore security check:\\n{0}",
+    "zh_CN": "未通过还原安全检查：\\n{0}",
+    "arguments": [
+      "result.getStderr()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/backup/DatabaseBackupManagerImpl.java"
+  },
+  {
+    "raw": "cannot get free port to listen",
+    "en_US": "cannot get free port to listen",
+    "zh_CN": "无法获取空闲端口以进行侦听",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/storage/backup/DatabaseBackupManagerImpl.java"
+  },
+  {
+    "raw": "database backup version[%s] is not match currently version[%s]",
+    "en_US": "database backup version[{0}] is not match currently version[{1}]",
+    "zh_CN": "数据库备份版本[{0}]与当前版本[{1}]不匹配",
+    "arguments": [
+      "version",
+      "dbVersion"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/backup/DatabaseBackupManagerImpl.java"
+  },
+  {
+    "raw": "cannot ssh peer node via sshkey, please check connection",
+    "en_US": "cannot ssh peer node via sshkey, please check connection",
+    "zh_CN": "无法通过SSHKEY进行SSH对等节点，请检查连接",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/storage/backup/MultiDatabaseRecoverChecker.java"
+  },
+  {
+    "raw": "please stop other node first!",
+    "en_US": "please stop other node first!",
+    "zh_CN": "请先停止其他节点！",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/storage/backup/SingleDatabaseRecoverChecker.java"
+  },
+  {
+    "raw": "current backup storage state[%s] doesn\u0027t allow to proceed message[%s], allowed states are %s",
+    "en_US": "current backup storage state[{0}] doesn\u0027t allow to proceed message[{1}], allowed states are {2}",
+    "zh_CN": "当前镜像服务器状态[{0}]不能处理消息[{1}]，仅当镜像服务器处于{2}时才能处理该消息",
+    "arguments": [
+      "currentState",
+      "msgName",
+      "checker.getStatesForOperation(msgName)"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/backup/VolumeBackupApiInterceptor.java"
+  },
+  {
+    "raw": "Unexpected backup storage[type:%s,uuid:%s]",
+    "en_US": "Unexpected backup storage[type:{0},uuid:{1}]",
+    "zh_CN": "错误的镜像服务器[type:{0}, uuid:{1}]",
+    "arguments": [
+      "bsType",
+      "bsUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/backup/VolumeBackupApiInterceptor.java"
+  },
+  {
+    "raw": "Can not create volume backup for shareable volume[uuid:%s]",
+    "en_US": "Can not create volume backup for shareable volume[uuid:{0}]",
+    "zh_CN": "无法给共享云盘[uuid:{0}]创建云盘备份",
+    "arguments": [
+      "msg.getVolumeUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/backup/VolumeBackupApiInterceptor.java"
+  },
+  {
+    "raw": "Failed to create volume backup for volume[uuid:%s], because it is not attached to any vm",
+    "en_US": "Failed to create volume backup for volume[uuid:{0}], because it is not attached to any vm",
+    "zh_CN": "无法给云盘[uuid:{0}]创建云盘备份，因为它未加载到虚拟机上",
+    "arguments": [
+      "msg.getVolumeUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/backup/VolumeBackupApiInterceptor.java"
+  },
+  {
+    "raw": "Failed to create volume backup for volume[uuid:%s], because the vm is not in state[%s, %s]",
+    "en_US": "Failed to create volume backup for volume[uuid:{0}], because the vm is not in state[{1}, {2}]",
+    "zh_CN": "无法给云盘[uuid:{0}]创建云盘备份，因为加载到的虚拟机并不处于以下状态[{1}, {2}]",
+    "arguments": [
+      "msg.getVolumeUuid()",
+      "VmInstanceState.Running.toString()",
+      "VmInstanceState.Paused.toString()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/backup/VolumeBackupApiInterceptor.java"
+  },
+  {
+    "raw": "Failed to create volume backup for volume[uuid:%s], because its attached volume is not in state[%s, %s]",
+    "en_US": "Failed to create volume backup for volume[uuid:{0}], because its attached volume is not in state[{1}, {2}]",
+    "zh_CN": "无法给云盘[uuid:{0}]创建云盘备份，因为加载到的虚拟机并不处于以下状态[{1}, {2}]",
+    "arguments": [
+      "msg.getVolumeUuid()",
+      "VmInstanceState.Running.toString()",
+      "VmInstanceState.Paused.toString()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/backup/VolumeBackupApiInterceptor.java"
+  },
+  {
+    "raw": "Volume[uuid:%s] is not root volume",
+    "en_US": "Volume[uuid:{0}] is not root volume",
+    "zh_CN": "卷[uuid：{0}]不是根卷",
+    "arguments": [
+      "msg.getVolumeUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/backup/VolumeBackupApiInterceptor.java"
+  },
+  {
+    "raw": "Failed to create backups for VM[uuid:%s], because it is not in state[%s, %s]",
+    "en_US": "Failed to create backups for VM[uuid:{0}], because it is not in state[{1}, {2}]",
+    "zh_CN": "无法为VM[uuid：{0}]创建备份，因为它未处于状态[{1}，{2}]",
+    "arguments": [
+      "t.get(0)",
+      "VmInstanceState.Running.toString()",
+      "VmInstanceState.Paused.toString()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/backup/VolumeBackupApiInterceptor.java"
+  },
+  {
+    "raw": "The resource[uuid: %s] has already created a cdp task, cannot create the backup job at the same time.",
+    "en_US": "The resource[uuid: {0}] has already created a cdp task, cannot create the backup job at the same time.",
+    "zh_CN": "资源[uuid：{0}]已创建CDP任务，无法同时创建备份作业。",
+    "arguments": [
+      "msg.getVolumeUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/backup/VolumeBackupApiInterceptor.java"
+  },
+  {
+    "raw": "No volume backup found for group uuid: %s",
+    "en_US": "No volume backup found for group uuid: {0}",
+    "zh_CN": "未找到组uuid为{0}的卷备份",
+    "arguments": [
+      "groupUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/backup/VolumeBackupApiInterceptor.java"
+  },
+  {
+    "raw": "root volume backup of group[uuid:%s] not found",
+    "en_US": "root volume backup of group[uuid:{0}] not found",
+    "zh_CN": "未找到组[uuid：{0}]的根卷备份",
+    "arguments": [
+      "groupUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/backup/VolumeBackupApiInterceptor.java"
+  },
+  {
+    "raw": "Current vm[uuid: %s] of the volume[uuid: %s] is no longer the vm[uuid: %s] that was used for backup",
+    "en_US": "Current vm[uuid: {0}] of the volume[uuid: {1}] is no longer the vm[uuid: {2}] that was used for backup",
+    "zh_CN": "卷[uuid：{1}]的当前虚拟机[uuid：{0}]不再是用于备份的虚拟机[UuId：{2}]",
+    "arguments": [
+      "expectVmUuid",
+      "rootVolumeInfo.get(0)",
+      "rootVolumeInfo.get(1)"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/backup/VolumeBackupApiInterceptor.java"
+  },
+  {
+    "raw": "could not create vm, because at least one of field (l3NetworkUuids,zoneUuid,clusterUuid,hostUuid) should be set",
+    "en_US": "could not create vm, because at least one of field (l3NetworkUuids,zoneUuid,clusterUuid,hostUuid) should be set",
+    "zh_CN": "无法创建VM，因为至少应设置字段（l3NetworkUuids、zoneUuid、clusterUuid、hostUuid）中的一个",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/storage/backup/VolumeBackupApiInterceptor.java"
+  },
+  {
+    "raw": "instanceOfferingUuid or cpuNum and memorySize must be set",
+    "en_US": "instanceOfferingUuid or cpuNum and memorySize must be set",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/storage/backup/VolumeBackupApiInterceptor.java"
+  },
+  {
+    "raw": "cannot specify primary storage which attached different cluster.",
+    "en_US": "cannot specify primary storage which attached different cluster.",
+    "zh_CN": "无法指定连接到其他集群的主存储。",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/storage/backup/VolumeBackupApiInterceptor.java"
+  },
+  {
+    "raw": "cannot create vm from volume backup[uuid:%s] which is not root volume backup",
+    "en_US": "cannot create vm from volume backup[uuid:{0}] which is not root volume backup",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getBackupUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/backup/VolumeBackupApiInterceptor.java"
+  },
+  {
+    "raw": "either instanceOfferingUuid or cpuNum and memorySize must be specified",
+    "en_US": "either instanceOfferingUuid or cpuNum and memorySize must be specified",
+    "zh_CN": "创建虚拟机时，必须指定实例规格 UUID 或 CPU核数和内存大小",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/storage/backup/VolumeBackupApiInterceptor.java"
+  },
+  {
+    "raw": "volume backup[uuid:%s] is in state %s, cannot revert volume to it",
+    "en_US": "volume backup[uuid:{0}] is in state {1}, cannot revert volume to it",
+    "zh_CN": "云盘备份[uuid:{0}]处于{1}状态，无法用于恢复云盘",
+    "arguments": [
+      "backupUuid",
+      "state"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/backup/VolumeBackupApiInterceptor.java"
+  },
+  {
+    "raw": "original volume for backup[uuid:%s] has been deleted, cannot revert volume to it",
+    "en_US": "original volume for backup[uuid:{0}] has been deleted, cannot revert volume to it",
+    "zh_CN": "云盘备份[uuid:{0}]已经被删除，无法用于恢复云盘",
+    "arguments": [
+      "backupUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/backup/VolumeBackupApiInterceptor.java"
+  },
+  {
+    "raw": "original volume[uuid:%s] for backup[uuid:%s] is no longer attached to vm[uuid:%s]",
+    "en_US": "original volume[uuid:{0}] for backup[uuid:{1}] is no longer attached to vm[uuid:{2}]",
+    "zh_CN": "原始卷[uuid：{0}]（用于备份[uuid：{1}]）不再连接到虚拟机[uuid：{2}]",
+    "arguments": [
+      "volUuid",
+      "backupUuid",
+      "expectVmUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/backup/VolumeBackupApiInterceptor.java"
+  },
+  {
+    "raw": "VM not found with volume backup[uuid:%s]",
+    "en_US": "VM not found with volume backup[uuid:{0}]",
+    "zh_CN": "找不到和云盘备份[uuid:{0}]对应的虚拟机",
+    "arguments": [
+      "backupUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/backup/VolumeBackupApiInterceptor.java"
+  },
+  {
+    "raw": "VM is not in stopped state: %s",
+    "en_US": "VM is not in stopped state: {0}",
+    "zh_CN": "当前虚拟机状态并不是停止状态：{0}",
+    "arguments": [
+      "vmState"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/backup/VolumeBackupApiInterceptor.java"
+  },
+  {
+    "raw": "No available backup storage found",
+    "en_US": "No available backup storage found",
+    "zh_CN": "没有可用的镜像服务器",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/storage/backup/VolumeBackupApiInterceptor.java"
+  },
+  {
+    "raw": "The vm is creating a backup job, cannot enable the cdp task at the same time.",
+    "en_US": "The vm is creating a backup job, cannot enable the cdp task at the same time.",
+    "zh_CN": "虚拟机正在创建备份任务，无法同时启用 CDP 任务",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/storage/backup/VolumeBackupApiInterceptor.java"
+  },
+  {
+    "raw": "cannot find volume backup[uuid:%s]",
+    "en_US": "cannot find volume backup[uuid:{0}]",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getBackupUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/backup/VolumeBackupApiInterceptor.java"
+  },
+  {
+    "raw": "the cluster of vm[%s] is not in the same cluster as the primaryStorage[%s]",
+    "en_US": "the cluster of vm[{0}] is not in the same cluster as the primaryStorage[{1}]",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getVmInstanceUuid()",
+      "msg.getPrimaryStorageUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/backup/VolumeBackupApiInterceptor.java"
+  },
+  {
+    "raw": "Operation not supported on shared volume",
+    "en_US": "Operation not supported on shared volume",
+    "zh_CN": "共享云盘不支持该操作",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/storage/backup/VolumeBackupKvmBackend.java"
+  },
+  {
+    "raw": "No VM found for volume[uuid:%s]",
+    "en_US": "No VM found for volume[uuid:{0}]",
+    "zh_CN": "找不到和云盘[uuid:{0}]对应的虚拟机",
+    "arguments": [
+      "volumeVO.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/backup/VolumeBackupKvmBackend.java"
+  },
+  {
+    "raw": "No VM found with root volume uuid: %s",
+    "en_US": "No VM found with root volume uuid: {0}",
+    "zh_CN": "找不到根卷uuid为{0}的虚拟机",
+    "arguments": [
+      "msg.getRootVolumeUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/backup/VolumeBackupKvmBackend.java"
+  },
+  {
+    "raw": "%s",
+    "en_US": "{0}",
+    "zh_CN": "{0}",
+    "arguments": [
+      "returnValue.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/backup/VolumeBackupKvmBackend.java"
+  },
+  {
+    "raw": "failed to create image from backup %s",
+    "en_US": "failed to create image from backup {0}",
+    "zh_CN": "无法从备份{0}创建镜像",
+    "arguments": [
+      "vos.stream().filter( vo -\u003e !succeedUuids.contains(vo.getUuid())).map(VolumeBackupVO::getUuid).collect(Collectors.toList())"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/backup/VolumeBackupManagerImpl.java"
+  },
+  {
+    "raw": "sync volume backup metadata file in image store[uuid:%s] meet I/O error: %s",
+    "en_US": "sync volume backup metadata file in image store[uuid:{0}] meet I/O error: {1}",
+    "zh_CN": "同步卷备份元数据文件（位于镜像存储[uuid：{0}]中）遇到I/O错误：{1}",
+    "arguments": [
+      "msg.getImageStoreUuid()",
+      "e.getMessage()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/backup/VolumeBackupManagerImpl.java"
+  },
+  {
+    "raw": "Current vm[uuid: %s] of the backup volume is no longer the vm[uuid: %s] that was used for backup",
+    "en_US": "Current vm[uuid: {0}] of the backup volume is no longer the vm[uuid: {1}] that was used for backup",
+    "zh_CN": "备份卷的当前虚拟机[uuid：{0}]不再是用于备份的虚拟机[uuid：{1}]",
+    "arguments": [
+      "volumeVmUuid",
+      "backupUuid",
+      "backupVmUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/backup/VolumeBackupManagerImpl.java"
+  },
+  {
+    "raw": "No VolumeBackupFactory of type[%s] found",
+    "en_US": "No VolumeBackupFactory of type[{0}] found",
+    "zh_CN": "未找到类型为[{0}]的VolumeBackupFactory",
+    "arguments": [
+      "hypervisorType"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/backup/VolumeBackupManagerImpl.java"
+  },
+  {
+    "raw": "One of the backup storage[uuid: %s] is in the state of %s, can not do sync operation",
+    "en_US": "One of the backup storage[uuid: {0}] is in the state of {1}, can not do sync operation",
+    "zh_CN": "镜像服务器[uuid: {0}]处于状态{1}, 无法执行同步操作",
+    "arguments": [
+      "msg.getBackupStorageUuid()",
+      "BackupStorageState.Disabled.toString()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/backup/VolumeBackupManagerImpl.java"
+  },
+  {
+    "raw": "Volume backup[uuid:%s] not found on backup storage[uuid:%s]",
+    "en_US": "Volume backup[uuid:{0}] not found on backup storage[uuid:{1}]",
+    "zh_CN": "在镜像服务器[uuid:{1}]上找不到云盘备份[uuid:{0}]",
+    "arguments": [
+      "struct.getBackupUuid()",
+      "struct.getBackupStorageUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/backup/VolumeBackupManagerImpl.java"
+  },
+  {
+    "raw": "volume backup[uuid:%s] not found in backup storage[uuid:%s]",
+    "en_US": "volume backup[uuid:{0}] not found in backup storage[uuid:{1}]",
+    "zh_CN": "在镜像服务器[uuid:{1}]上找不到云盘备份[uuid:{0}]",
+    "arguments": [
+      "backupUuid",
+      "srcBackupStorageUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/backup/VolumeBackupManagerImpl.java"
+  },
+  {
+    "raw": "No volume backups found with group uuid: %s",
+    "en_US": "No volume backups found with group uuid: {0}",
+    "zh_CN": "未找到组uuid为{0}的卷备份",
+    "arguments": [
+      "groupUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/backup/VolumeBackupManagerImpl.java"
+  },
+  {
+    "raw": "Root volume missing within group uuid: %s",
+    "en_US": "Root volume missing within group uuid: {0}",
+    "zh_CN": "组uuid中缺少根卷：{0}",
+    "arguments": [
+      "groupUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/backup/VolumeBackupManagerImpl.java"
+  },
+  {
+    "raw": "Multiple root volumes found within group uuid: %s",
+    "en_US": "Multiple root volumes found within group uuid: {0}",
+    "zh_CN": "在组uuid中找到多个根卷：{0}",
+    "arguments": [
+      "groupUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/backup/VolumeBackupManagerImpl.java"
+  },
+  {
+    "raw": "No permission to volume backups within group uuid: %s",
+    "en_US": "No permission to volume backups within group uuid: {0}",
+    "zh_CN": "对组uuid{0}中的卷备份没有权限",
+    "arguments": [
+      "groupUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/backup/VolumeBackupManagerImpl.java"
+  },
+  {
+    "raw": "Volume backup[uuid:%s] not found on any backup storage",
+    "en_US": "Volume backup[uuid:{0}] not found on any backup storage",
+    "zh_CN": "未在任何备份存储上找到卷备份[uuid：{0}]",
+    "arguments": [
+      "vo.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/backup/VolumeBackupManagerImpl.java"
+  },
+  {
+    "raw": "[%s] is not a standard cidr, do you mean [%s]?",
+    "en_US": "[{0}] is not a standard cidr, do you mean [{1}]?",
+    "zh_CN": "[{0}]不是一个标准的cidr, 是否指定的是[{1}]",
+    "arguments": [
+      "cidr",
+      "fmtCidr"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/backup/VolumeBackupManagerImpl.java"
+  },
+  {
+    "raw": "degree [%s] should be a positive number",
+    "en_US": "degree [{0}] should be a positive number",
+    "zh_CN": "度[{0}]应为正数",
+    "arguments": [
+      "degree"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/backup/VolumeBackupManagerImpl.java"
+  },
+  {
+    "raw": "invalid type[%s], should be [nfs, sshfs, nbd]",
+    "en_US": "invalid type[{0}], should be [nfs, sshfs, nbd]",
+    "zh_CN": "类型[{0}]无效，应为[NFS，sshfs，NBD]",
+    "arguments": [
+      "type"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/backup/VolumeBackupManagerImpl.java"
+  },
+  {
+    "raw": "invalid url[%s], should be hostname:/path",
+    "en_US": "invalid url[{0}], should be hostname:/path",
+    "zh_CN": "URL[{0}]无效，应为hostname：/path",
+    "arguments": [
+      "url"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/backup/VolumeBackupManagerImpl.java"
+  },
+  {
+    "raw": "generate volume backup metadata file on image store[uuid:%s] failure, because IO error: %s",
+    "en_US": "generate volume backup metadata file on image store[uuid:{0}] failure, because IO error: {1}",
+    "zh_CN": "在镜像存储[uuid:{0}] 上生成卷备份元数据文件出现 IO 错误: {1}",
+    "arguments": [
+      "inv.getUuid()",
+      "e.getMessage()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/backup/VolumeBackupMetadataMaker.java"
+  },
+  {
+    "raw": "volume backup metadata operation failure, because %s",
+    "en_US": "volume backup metadata operation failure, because {0}",
+    "zh_CN": "卷备份元数据操作失败，原因是{0}",
+    "arguments": [
+      "rsp.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/backup/VolumeBackupMetadataMaker.java"
+  }
+]

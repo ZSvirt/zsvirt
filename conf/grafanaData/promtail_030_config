@@ -1,0 +1,228 @@
+server:
+  http_listen_port: ${PROMTAIL_PORT}
+  grpc_listen_port: 0
+
+positions:
+  filename: /var/lib/zstack/positions.yaml
+
+clients:
+${LOKI_API_URL}
+
+scrape_configs:
+- job_name: mn-1
+  static_configs:
+  - targets:
+    - localhost
+    labels:
+      management: mnlogs
+      instance: ${LOCAL_IP}
+      __path__: ${ZSTACK_HOME}/apache-tomcat/logs/management-server.log
+- job_name: mn-2
+  static_configs:
+  - targets:
+    - localhost
+    labels:
+      management: ui
+      instance: ${LOCAL_IP}
+      __path__: ${ZSTACK_HOME}/apache-tomcat/logs/zstack-ui.log
+- job_name: mn-3
+  static_configs:
+  - targets:
+    - localhost
+    labels:
+      management: api
+      instance: ${LOCAL_IP}
+      __path__: ${ZSTACK_HOME}/apache-tomcat/logs/zstack-api.log
+- job_name: mn-4
+  static_configs:
+  - targets:
+    - localhost
+    labels:
+      management: deploy
+      instance: ${LOCAL_IP}
+      __path__: /var/log/zstack/deploy.log*
+
+- job_name: host-1
+  static_configs:
+  - targets:
+    - localhost
+    labels:
+      host: kvmagent
+      instance: ${LOCAL_IP}
+      __path__: /var/log/zstack/zstack-kvmagent.log
+- job_name: host-2
+  static_configs:
+  - targets:
+    - localhost
+    labels:
+      host: zstack-cli
+      instance: ${LOCAL_IP}
+      __path__: /var/log/zstack/zstack-cli
+- job_name: host-3
+  static_configs:
+  - targets:
+    - localhost
+    labels:
+      host: zstack-ctl
+      instance: ${LOCAL_IP}
+      __path__: /var/log/zstack/zstack-ctl.log
+- job_name: host-4
+  static_configs:
+  - targets:
+    - localhost
+    labels:
+      host: zstack.log
+      instance: ${LOCAL_IP}
+      __path__: /var/log/zstack/zstack.log
+- job_name: host-5
+  static_configs:
+  - targets:
+    - localhost
+    labels:
+      host: zstack-tui
+      instance: ${LOCAL_IP}
+      __path__: /var/log/zstack/zstack_tui.log
+- job_name: host-6
+  static_configs:
+  - targets:
+    - localhost
+    labels:
+      host: zsn-agent
+      instance: ${LOCAL_IP}
+      __path__: /var/log/zstack/zsn-agent/zsn-agent.log
+- job_name: host-7
+  static_configs:
+  - targets:
+    - localhost
+    labels:
+      host: zstack-console-proxy
+      instance: ${LOCAL_IP}
+      __path__: /var/log/zstack/zstack-console-proxy.log
+- job_name: host-8
+  static_configs:
+  - targets:
+    - localhost
+    labels:
+      host: ha
+      instance: ${LOCAL_IP}
+      __path__: /var/log/zstack/ha.log
+- job_name: ps-1
+  static_configs:
+  - targets:
+    - localhost
+    labels:
+      ps: zsblk-agent
+      instance: ${LOCAL_IP}
+      __path__: /var/log/zstack/zsblk-agent/zsblk-agent.log
+- job_name: ps-2
+  static_configs:
+  - targets:
+    - localhost
+    labels:
+      ps: ceph-primarystorage
+      instance: ${LOCAL_IP}
+      __path__: /var/log/zstack/ceph-primarystorage.log
+- job_name: bs-1
+  static_configs:
+  - targets:
+    - localhost
+    labels:
+      bs: zstack-store
+      instance: ${LOCAL_IP}
+      __path__: /var/log/zstack/zstack-store/zstore.log
+- job_name: bs-2
+  static_configs:
+  - targets:
+    - localhost
+    labels:
+      bs: ceph-backupstorage
+      instance: ${LOCAL_IP}
+      __path__: /var/log/zstack/ceph-backupstorage.log
+- job_name: bs-3
+  static_configs:
+  - targets:
+    - localhost
+    labels:
+      bs: zstack-sftpbackupstorage
+      instance: ${LOCAL_IP}
+      __path__: /var/log/zstack/zstack-sftpbackupstorage.log
+- job_name: baremetal-1
+  static_configs:
+  - targets:
+    - localhost
+    labels:
+      baremetal: zstack-baremetalpxeserver
+      instance: ${LOCAL_IP}
+      __path__: /var/log/zstack/zstack-baremetalpxeserver.log
+- job_name: baremetal-2
+  static_configs:
+  - targets:
+    - localhost
+    labels:
+      baremetal: dnsmasq
+      instance: ${LOCAL_IP}
+      __path__: /var/log/zstack/baremetal/dnsmasq.log
+- job_name: mini-1
+  static_configs:
+  - targets:
+    - localhost
+    labels:
+      mini: mini-fencer
+      instance: ${LOCAL_IP}
+      __path__: /var/log/zstack/mini-fencer.log
+- job_name: system-1
+  static_configs:
+  - targets:
+    - localhost
+    labels:
+      system: message
+      instance: ${LOCAL_IP}
+      __path__: /var/log/messages
+- job_name: system-2
+  static_configs:
+  - targets:
+    - localhost
+    labels:
+      system: history
+      instance: ${LOCAL_IP}
+      __path__: /var/log/history.d/history
+- job_name: system-3
+  static_configs:
+  - targets:
+    - localhost
+    labels:
+      system: dmesg
+      instance: ${LOCAL_IP}
+      __path__: /var/log/dmesg
+- job_name: system-4
+  static_configs:
+  - targets:
+    - localhost
+    labels:
+      system: mariadb
+      instance: ${LOCAL_IP}
+      __path__: /var/log/mariadb/mariadb.log
+- job_name: system-5
+  static_configs:
+  - targets:
+    - localhost
+    labels:
+      system: sa
+      instance: ${LOCAL_IP}
+      __path__: /var/log/sa/sar*
+- job_name: system-6
+  static_configs:
+  - targets:
+    - localhost
+    labels:
+      system: yum
+      instance: ${LOCAL_IP}
+      __path__: /var/log/yum.log*
+- job_name: system-7
+  static_configs:
+  - targets:
+    - localhost
+    labels:
+      system: qemu
+      instance: ${LOCAL_IP}
+      __path__: /var/log/libvirt/qemu/*.log

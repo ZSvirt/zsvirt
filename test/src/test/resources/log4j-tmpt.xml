@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+    <Appenders>
+        <RollingFile name="RollingFile" fileName="{managementLogName}"
+            filePattern="${log-path}/management-server-%d{yyyy-MM-dd}-%i.log" >
+            <PatternLayout>
+                <pattern>%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p [%c{1}] (%t) %m%n</pattern>
+            </PatternLayout>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="150 MB" />
+            </Policies>
+            <DefaultRolloverStrategy max="20"/>
+        </RollingFile>
+
+        <Async name="Async" ignoreExceptions="false" bufferSize="512">
+            <AppenderRef ref="RollingFile" />
+        </Async>
+
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout>
+                <pattern>%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p [%c{1}] (%t) %m%n</pattern>
+            </PatternLayout>
+        </Console>
+    </Appenders>
+
+    <Loggers>
+        <Logger name="org.zstack" level="DEBUG" />
+
+        <Logger name="org.zstack.utils" level="TRACE" />
+
+        <Logger name="org.zstack.core.rest" level="TRACE" />
+
+        <Logger name="org.zstack.core.cloudbus" level="TRACE" />
+
+        <Logger name="org.springframework" level="WARN" />
+
+        <Logger name="org.hibernate" level="WARN" />
+
+        <Logger name="org.zstack.drs" level="TRACE" />
+
+        <Root level="WARN" additivity="false">
+            <AppenderRef ref="Async"/>
+            <AppenderRef ref="Console"/>
+        </Root>
+    </Loggers>
+</Configuration>

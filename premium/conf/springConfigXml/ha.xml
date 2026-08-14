@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+    xmlns:tx="http://www.springframework.org/schema/tx" xmlns:zstack="http://zstack.org/schema/zstack"
+        xmlns:util="http://www.springframework.org/schema/util"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+        http://www.springframework.org/schema/aop
+        http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+        http://www.springframework.org/schema/tx
+        http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+        http://www.springframework.org/schema/util
+        http://www.springframework.org/schema/util/spring-util-3.0.xsd
+        http://zstack.org/schema/zstack
+        http://zstack.org/schema/zstack/plugin.xsd"
+    default-init-method="init" default-destroy-method="destroy">
+
+    <bean id="VmHAExecutor" class="org.zstack.ha.VmHAExecutorImpl"/>
+    
+    <bean id="HaKvmFactory" class="org.zstack.ha.HaKvmFactory" >
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.ha.HaHypervisorFactory" />
+        </zstack:plugin>
+    </bean>
+
+    <util:list id="UpdateHostStatusPrimaryStorages">
+        <value>SharedBlock</value>
+        <value>NFS</value>
+        <value>Ceph</value>
+        <value>BlockStorage</value>
+        <value>Addon</value>
+    </util:list>
+
+    <bean id="HaInterceptor" class="org.zstack.ha.HaInterceptor" >
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.apimediator.ApiMessageInterceptor" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="HaManager" class="org.zstack.ha.HaManagerImpl" >
+        <property name="updateHostStatusPrimaryStorages" ref="UpdateHostStatusPrimaryStorages"/>
+
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.Component" />
+            <zstack:extension interface="org.zstack.header.Service" />
+            <zstack:extension interface="org.zstack.ha.HaCompletionCacher" />
+            <zstack:extension interface="org.zstack.header.host.HostAfterConnectedExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.storage.primary.PrimaryStorageAttachExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.host.OrderVmBeforeMigrationDuringHostMaintenanceExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.storage.primary.PrimaryStorageDetachExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.storage.primary.PrimaryStorageDeleteExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.managementnode.ManagementNodeReadyExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.vm.VmHaExtensionPoint" />
+            <zstack:extension interface="org.zstack.ha.HostScanExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.storage.primary.UpdatePrimaryStorageExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.vm.VmInstanceMigrateExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.cluster.ClusterUpdateOSExtensionPoint" />
+            <zstack:extension interface="org.zstack.network.service.virtualrouter.AfterAcquireVirtualRouterExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.managementnode.PrepareDbInitialValueExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.vm.VmInstanceStartNewCreatedVmExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.vm.VmInstanceStartExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.vm.VmInstanceStopExtensionPoint" />
+            <zstack:extension interface="org.zstack.kvm.KVMDestroyVmExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.vm.BeforeStartNewCreatedVmExtensionPoint" />
+            <zstack:extension interface="org.zstack.compute.vm.BeforeStopVmOnHypervisorExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.vm.KvmReportVmShutdownEventExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.vm.VmInstanceCreateExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.vm.ApplianceVmInstanceCreateExtensionPoint"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="HaKvmHostSiblingChecker" class="org.zstack.ha.HaKvmHostSiblingChecker" >
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.ha.HaHostChecker" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="HaProgressNotification" class="org.zstack.ha.sns.HaProgressNotification" >
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.Component" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="KvmFencerManager" class="org.zstack.ha.fencers.KvmFencerManager" >
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.vm.VmInstanceStartExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="HostBusinessNicKvmFencer" class="org.zstack.ha.fencers.HostBusinessNicKvmFencer" />
+    <bean id="FileSystemKvmFencer" class="org.zstack.ha.fencers.FileSystemKvmFencer" />
+    <bean id="CephKvmFencer" class="org.zstack.ha.fencers.CephKvmFencer" />
+	<bean id="IscsiHostHeartbeatChecker" class="org.zstack.storage.primary.iscsi.IscsiHostHeartbeatChecker" >
+		<zstack:plugin>
+			<zstack:extension interface="org.zstack.ha.HaHostChecker" />
+		</zstack:plugin>
+	</bean>
+
+	<bean id="CbdHostHeartbeatChecker" class="org.zstack.storage.primary.cbd.CbdHostHeartbeatChecker" >
+		<zstack:plugin>
+			<zstack:extension interface="org.zstack.ha.HaHostChecker" />
+		</zstack:plugin>
+	</bean>
+</beans>

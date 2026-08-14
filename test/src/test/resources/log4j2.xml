@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+    <properties>
+        <property name="filters">org.apache.catalina,org.apache.tomcat,sun.reflect,javax.servlet.http,java.lang.reflect,org.codehaus.groovy,org.junit.runners,org.apache.maven.surefire,groovy.lang,org.eclipse.jetty,org.springframework.web</property>
+    </properties>
+
+    <Appenders>
+        <RollingFile name="RollingFile" fileName="management-server.log"
+                     filePattern="./management-server-%i.log" >
+            <PatternLayout>
+                <pattern>%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p [%c{1}] %X{api,task} (%t) %m%n</pattern>
+            </PatternLayout>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="200 MB" />
+            </Policies>
+            <DefaultRolloverStrategy max="1">
+                <Delete basePath="${sys:catalina.home}/logs/" maxDepth="1">
+                    <IfFileName glob="management-server-*.log.gz">
+                        <IfAny>
+                        </IfAny>
+                    </IfFileName>
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingFile>
+
+        <RollingFile name="DiskCapacityLogger" fileName="disk-capacity.log"
+                     filePattern="disk-capacity-%d{yyyy-MM-dd}-%i.log" >
+            <PatternLayout>
+                <pattern>%highlight{%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p [%c{1}] (%t) %m%xEx{filters(${filters})}%n}{FATAL
+                    =red,ERROR=red,WARN=Yellow,INFO=blue,DEBUG=white,TRACE=white}</pattern>
+            </PatternLayout>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="150 MB" />
+            </Policies>
+            <DefaultRolloverStrategy max="20"/>
+        </RollingFile>
+
+        <RollingFile name="DiskCapacityLoggerDetails" fileName="disk-capacity-details.log"
+                     filePattern="disk-capacity-details-%d{yyyy-MM-dd}-%i.log" >
+            <PatternLayout>
+                <pattern>%highlight{%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p [%c{1}] (%t) %m%xEx{filters(${filters})}%n}{FATAL
+                    =red,ERROR=red,WARN=Yellow,INFO=blue,DEBUG=white,TRACE=white}</pattern>
+            </PatternLayout>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="150 MB" />
+            </Policies>
+            <DefaultRolloverStrategy max="20"/>
+        </RollingFile>
+
+        <RollingFile name="ApiRequestLogger" fileName="zstack-api.log"
+                     filePattern="zstack-api-%d{yyyy-MM-dd}-%i.log" >
+            <PatternLayout>
+                <pattern>%highlight{%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p [%c{1}] (%t) %m%xEx{filters(${filters})}%n}{FATAL
+                    =red,ERROR=red,WARN=Yellow,INFO=blue,DEBUG=white,TRACE=white}</pattern>
+            </PatternLayout>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="150 MB" />
+            </Policies>
+            <DefaultRolloverStrategy max="20">
+                <Delete basePath="${sys:catalina.home}/logs/" maxDepth="1">
+                    <IfFileName glob="zstack-api-*.log.gz">
+                        <IfAny>
+                        </IfAny>
+                    </IfFileName>
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingFile>
+
+        <Async name="Async" ignoreExceptions="false" bufferSize="512">
+            <AppenderRef ref="RollingFile" />
+        </Async>
+
+        <Console name="Console" target="SYSTEM_OUT" ignoreExceptions="false">
+            <PatternLayout>
+                <pattern>%highlight{%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p [%c{1}] %X{api,} %m%xEx{filters(${filters})}%n}{FATAL=red,ERROR=red,WARN=Yellow,INFO=blue,DEBUG=white,TRACE=white}</pattern>
+            </PatternLayout>
+        </Console>
+
+        <Rewrite name="Rewrite">
+            <MaskSensitiveInfoRewritePolicy />
+            <AppenderRef ref="RollingFile"/>
+            <AppenderRef ref="Console"/>
+        </Rewrite>
+    </Appenders>
+
+    <Loggers>
+        <Logger name="org.zstack.storage.primary.DiskCapacityTracer" level="DEBUG" additivity="TRUE">
+            <AppenderRef ref="DiskCapacityLogger" level="DEBUG" />
+        </Logger>
+
+        <Logger name="org.zstack.storage.primary.DiskCapacityTracerDetails" level="DEBUG" additivity="TRUE">
+            <AppenderRef ref="DiskCapacityLoggerDetails" level="DEBUG" />
+        </Logger>
+
+        <Logger name="api.request" level="TRACE" additivity="TRUE">
+            <AppenderRef ref="ApiRequestLogger" level="TRACE" />
+        </Logger>
+
+        <Logger name="org.zstack" level="DEBUG" />
+
+        <Logger name="org.zstack.zwatch" level="TRACE" />
+
+        <Logger name="org.zstack.utils" level="TRACE" />
+
+        <Logger name="org.zstack.core.timeout" level="TRACE" />
+
+        <Logger name="org.zstack.query" level="TRACE" />
+
+        <Logger name="org.zstack.compute.vm" level="TRACE" />
+
+        <Logger name="org.zstack.compute.allocator" level="TRACE" />
+
+        <Logger name="org.zstack.storage.primary" level="TRACE" />
+
+        <Logger name="org.zstack.portal.apimediator" level="TRACE" />
+
+        <Logger name="org.zstack.core.rest" level="TRACE" />
+
+        <Logger name="org.zstack.core.workflow" level="TRACE" />
+
+        <Logger name="org.zstack.core.db" level="TRACE" />
+
+        <Logger name="org.zstack.identity" level="DEBUG" />
+
+        <Logger name="org.zstack.cassandra" level="TRACE" />
+
+        <Logger name="org.zstack.core.cloudbus" level="TRACE" />
+
+        <Logger name="org.zstack.core.thread" level="TRACE" />
+
+        <Logger name="org.zstack.billing" level="TRACE" />
+
+        <Logger name="org.zstack.zql" level="TRACE" />
+
+        <Logger name="org.springframework" level="WARN" />
+
+        <Logger name="org.zstack.core.defer" level="TRACE" />
+
+        <Logger name="org.zstack.rest" level="TRACE" />
+
+        <Logger name="org.zstack.login" level="TRACE" />
+
+        <Logger name="org.hibernate.stat" level="DEBUG"/>
+
+        <Logger name="org.zstack.core.progress" level="TRACE" />
+
+        <Logger name="org.zstack.woodpecker" level="DEBUG"/>
+
+        <!--
+        <Logger name="com.datastax.driver.core" level="TRACE" />
+        -->
+
+        <Logger name="org.zstack.drs" level="TRACE" />
+
+        <!--
+        <Logger name="org.zstack.core.log" level="TRACE"/>
+        -->
+
+        <Logger name="org.zstack.core.ansible" level="TRACE"/>
+
+        <Logger name="org.zstack.kvm" level="TRACE"/>
+
+        <Logger name="org.springframework.data.cassandra.core" level="TRACE" />
+
+        <Logger name="org.zstack.zwatch.namespace" level="TRACE"/>
+
+        <Logger name="org.zstack.vmware" level="TRACE"/>
+
+        <Logger name="org.hibernate" level="WARN">
+            <AppenderRef ref="RollingFile" />
+            <AppenderRef ref="Console"/>
+        </Logger>
+
+        <Logger name="org.apache.tomcat" level="DEBUG" />
+
+        <Logger name="org.zstack.testlib.util.Retry" level="INFO" />
+
+        <Root level="WARN" additivity="false">
+            <AppenderRef ref="Rewrite"/>
+        </Root>
+    </Loggers>
+</Configuration>

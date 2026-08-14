@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:zstack="http://zstack.org/schema/zstack"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+         http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+         http://www.springframework.org/schema/aop
+         http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+         http://www.springframework.org/schema/tx
+     	 http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+     	 http://zstack.org/schema/zstack 
+         http://zstack.org/schema/zstack/plugin.xsd"
+	default-init-method="init" default-destroy-method="destroy">
+
+	<bean id="SNSCascadeExtension" class="org.zstack.sns.SNSCascadeExtension" >
+		<zstack:plugin>
+			<zstack:extension interface="org.zstack.core.cascade.CascadeExtensionPoint" />
+		</zstack:plugin>
+	</bean>
+
+	<bean id="SystemAlarmTopicFactory" class="org.zstack.sns.system.SystemAlarmTopicFactory" >
+		<zstack:plugin>
+			<zstack:extension interface="org.zstack.sns.SNSTopicFactory" />
+		</zstack:plugin>
+	</bean>
+
+	<bean id="SNSApiInterceptor" class="org.zstack.sns.SNSApiInterceptor" >
+		<zstack:plugin>
+			<zstack:extension interface="org.zstack.header.apimediator.ApiMessageInterceptor" />
+		</zstack:plugin>
+	</bean>
+
+	<bean id="SNSManager" class="org.zstack.sns.SNSManagerImpl" >
+		<zstack:plugin>
+			<zstack:extension interface="org.zstack.header.Component" />
+			<zstack:extension interface="org.zstack.header.Service" />
+			<zstack:extension interface="org.zstack.header.managementnode.PrepareDbInitialValueExtensionPoint" />
+			<zstack:extension interface="org.zstack.header.identity.ReportQuotaExtensionPoint"/>
+		</zstack:plugin>
+	</bean>
+
+	<bean id="SNSEmailPlatformFactory" class="org.zstack.sns.platform.email.SNSEmailPlatformFactory" >
+		<zstack:plugin>
+			<zstack:extension interface="org.zstack.sns.SNSApplicationPlatformFactory" />
+			<zstack:extension interface="org.zstack.sns.SNSApplicationEndpointFactory" />
+		</zstack:plugin>
+	</bean>
+
+	<bean id="SNSHttpEndpointFactory" class="org.zstack.sns.platform.http.SNSHttpEndpointFactory" >
+		<zstack:plugin>
+			<zstack:extension interface="org.zstack.sns.SNSApplicationEndpointFactory" />
+		</zstack:plugin>
+	</bean>
+
+	<bean id="SNSSystemHttpEndpointFactory" class="org.zstack.sns.platform.http.SNSSystemHttpEndpointFactory" >
+		<zstack:plugin>
+			<zstack:extension interface="org.zstack.sns.SNSApplicationEndpointFactory" />
+		</zstack:plugin>
+	</bean>
+
+	<bean id="SNSSystemPlatformFactory" class="org.zstack.sns.platform.system.SNSSystemPlatformFactory" >
+		<zstack:plugin>
+			<zstack:extension interface="org.zstack.sns.SNSApplicationPlatformFactory" />
+		</zstack:plugin>
+	</bean>
+
+	<bean id="SNSDingTalkEndpointFactory" class="org.zstack.sns.platform.dingtalk.SNSDingTalkEndpointFactory" >
+		<zstack:plugin>
+			<zstack:extension interface="org.zstack.sns.SNSApplicationEndpointFactory" />
+		</zstack:plugin>
+	</bean>
+
+	<bean id="SNSWeComEndpointFactory" class="org.zstack.sns.platform.wecom.SNSWeComEndpointFactory" >
+		<zstack:plugin>
+			<zstack:extension interface="org.zstack.sns.SNSApplicationEndpointFactory" />
+		</zstack:plugin>
+	</bean>
+
+	<bean id="SNSFeiShuEndpointFactory" class="org.zstack.sns.platform.feishu.SNSFeiShuEndpointFactory" >
+		<zstack:plugin>
+			<zstack:extension interface="org.zstack.sns.SNSApplicationEndpointFactory" />
+		</zstack:plugin>
+	</bean>
+
+	<bean id="SNSTeamsTalkEndpointFactory" class="org.zstack.sns.platform.microsoftteams.SNSMicrosoftTeamsEndpointFactory" >
+		<zstack:plugin>
+			<zstack:extension interface="org.zstack.sns.SNSApplicationEndpointFactory" />
+		</zstack:plugin>
+	</bean>
+
+	<bean id="SNSSystemTopicManager" class="org.zstack.sns.system.SNSApiTopicManagerImpl" >
+		<zstack:plugin>
+			<zstack:extension interface="org.zstack.header.Component" />
+			<zstack:extension interface="org.zstack.sns.BeforeSubscribeTopicExtensionPoint" />
+			<zstack:extension interface="org.zstack.sns.BeforeUnsubscribeTopicExtensionPoint" />
+			<zstack:extension interface="org.zstack.header.managementnode.PrepareDbInitialValueExtensionPoint" />
+			<zstack:extension interface="org.zstack.sns.BeforeDeleteSNSTopicExtensionPoint" />
+		</zstack:plugin>
+	</bean>
+
+	<bean id="SNSSystemAlarmTopicManager" class="org.zstack.sns.system.SNSSystemAlarmTopicManagerImpl" >
+		<zstack:plugin>
+			<zstack:extension interface="org.zstack.header.managementnode.PrepareDbInitialValueExtensionPoint" />
+			<zstack:extension interface="org.zstack.sns.BeforeDeleteSNSTopicExtensionPoint" />
+			<zstack:extension interface="org.zstack.header.Component" />
+		</zstack:plugin>
+	</bean>
+
+	<bean id="SNSSnmpEndpointFactory" class="org.zstack.sns.platform.snmp.SNSSnmpEndpointFactory" >
+		<zstack:plugin>
+			<zstack:extension interface="org.zstack.sns.SNSApplicationEndpointFactory" />
+		</zstack:plugin>
+	</bean>
+
+	<bean id="SNSSnmpPlatformFactory" class="org.zstack.sns.platform.snmp.SNSSnmpPlatformFactory" >
+		<zstack:plugin>
+			<zstack:extension interface="org.zstack.sns.SNSApplicationPlatformFactory" />
+		</zstack:plugin>
+	</bean>
+
+	<bean id="SyncApplicationEndpointTask" class="org.zstack.sns.SyncApplicationEndpointConnectionStatusTask">
+		<zstack:plugin>
+			<zstack:extension interface="org.zstack.header.managementnode.ManagementNodeReadyExtensionPoint"/>
+		</zstack:plugin>
+	</bean>
+</beans>

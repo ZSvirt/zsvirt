@@ -1,0 +1,165 @@
+# key is "ovf:id" in tag "OperatingSystemSection" from OVF template
+# value is guest operating system parameters:
+#    osType:    Operating system name
+#    platform:  Operating system platform, 'Windows', 'Linux', and 'Other'
+#    arch:      System architecture, 'x86' or 'x64'. 
+#               If some "ovf:id" can correspond to the OS of x86 architecture or x64, fill 'x86_64'
+# data source: https://wiki.abiquo.com/display/doc/Guest+operating+system+definition+for+VMware
+
+# Linux
+'79':
+  osType: RHEL
+  platform: Linux
+  arch: x86
+'80':
+  osType: RHEL
+  platform: Linux
+  arch: x64
+'84':
+  osType: SLES
+  platform: Linux
+  arch: x86
+'85':
+  osType: SLES
+  platform: Linux
+  arch: x64
+'93':
+  osType: UBUNTU
+  platform: Linux
+  arch: x86
+'94':
+  osType: UBUNTU
+  platform: Linux
+  arch: x64
+'95':
+  osType: DEBIAN
+  platform: Linux
+  arch: x86
+'96':
+  osType: DEBIAN
+  platform: Linux
+  arch: x64
+'100':
+  osType: DEBIAN
+  platform: Linux
+  arch: x86_64
+'106':
+  osType: CENTOS
+  platform: Linux
+  arch: x86
+'107':
+  osType: CENTOS
+  platform: Linux
+  arch: x64
+'108':
+  osType: ORACLE_ENTERPRISE
+  platform: Linux
+  arch: x86
+'109':
+  osType: ORACLE_ENTERPRISE
+  platform: Linux
+  arch: x64
+'36':
+  osType: GENERIC
+  platform: Linux
+  arch: x86
+'101':
+  osType: GENERIC
+  platform: Linux
+  arch: x64
+
+# Windows
+'69':
+  osType: WINDOWS_SERVER_2003
+  platform: Windows
+  arch: x86
+'70':
+  osType: WINDOWS_SERVER_2003
+  platform: Windows
+  arch: x64
+'76':
+  osType: WINDOWS_SERVER_2008
+  platform: Windows
+  arch: x86
+'77':
+  osType: WINDOWS_SERVER_2008
+  platform: Windows
+  arch: x64
+'103':
+  osType: WINDOWS_SERVER_2008_R2
+  platform: Windows
+  arch: x64
+'115':
+  osType: WINDOWS_SERVER_2012_R2
+  platform: Windows
+  arch: x64
+'116':
+  osType: WINDOWS_SERVER_2016
+  platform: Windows
+  arch: x64
+'58':
+  osType: WINDOWS_2000
+  platform: Windows
+  arch: x86
+'67':
+  osType: WINDOWS_XP # or windows NT / 95 / 98 / older version
+  platform: Windows
+  arch: x86
+'71':
+  osType: WINDOWS_XP # or windows NT / 95 / 98 / older version
+  platform: Windows
+  arch: x64
+'73':
+  osType: WINDOWS_VISTA
+  platform: Windows
+  arch: x86
+'74':
+  osType: WINDOWS_VISTA
+  platform: Windows
+  arch: x64
+'105':
+  osType: WINDOWS_7
+  platform: Windows
+  arch: x86_64 # both x86 and x64
+'111':
+  osType: WINDOWS_8_SERVER # equals to WINDOWS_SERVER_2012
+  platform: Windows
+  arch: x86
+'112':
+  osType: WINDOWS_8_SERVER # equals to WINDOWS_SERVER_2012
+  platform: Windows
+  arch: x64
+'113':
+  osType: WINDOWS_8 # or WINDOWS_81
+  platform: Windows
+  arch: x86
+'114':
+  osType: WINDOWS_8 # or WINDOWS_81
+  platform: Windows
+  arch: x64
+'119':
+  osType: WINDOWS_10
+  platform: Windows
+  arch: x86
+'120':
+  osType: WINDOWS_10
+  platform: Windows
+  arch: x64
+
+# Other: FreeBSD
+'42':
+  osType: FREEBSD
+  platform: FreeBSD
+  arch: x86
+'78':
+  osType: FREEBSD
+  platform: FreeBSD
+  arch: x64
+'1':
+  osType: OTHER
+  platform: Other
+  arch: x86
+'102':
+  osType: OTHER
+  platform: Other
+  arch: x64

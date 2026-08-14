@@ -1,0 +1,48 @@
+<error>
+    <prefix>SoftwarePackage</prefix>
+
+    <code>
+        <id>1000</id>
+        <description>General Error</description>
+    </code>
+
+    <code>
+        <id>1101</id>
+        <description>Unsupported Software Type</description>
+    </code>
+
+    <code>
+        <id>1121</id>
+        <description>Insufficient Capacity for Backup Storage</description>
+    </code>
+
+    <code>
+        <id>1122</id>
+        <description>Invalid Backup Storage for Package</description>
+    </code>
+
+    <code>
+        <id>1131</id>
+        <description>Invalid Install Path</description>
+    </code>
+
+    <code>
+        <id>1132</id>
+        <description>Invalid Software Package</description>
+    </code>
+
+    <code>
+        <id>1133</id>
+        <description>Invalid Upload Session</description>
+    </code>
+
+    <code>
+        <id>1300</id>
+        <description>Shell Execution Errors</description>
+    </code>
+
+    <code>
+        <id>1901</id>
+        <description>Failed to upload software package</description>
+    </code>
+</error>

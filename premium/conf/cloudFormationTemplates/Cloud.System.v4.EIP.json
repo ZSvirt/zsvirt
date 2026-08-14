@@ -1,0 +1,61 @@
+{
+    "ZStackTemplateFormatVersion": "2018-06-18",
+    "Description": "Creates an EIP:\nThis template creates an EIP and then attaches it to a VM. Prerequisites:\nThe instance offering, image, private network, and public network are created. Make sure that the networks are working as expected. Otherwise, the EIP may fail to be created or fail to work properly after creation",
+    "Parameters": {
+        "InstanceOfferingUuid": {
+            "Type": "String",
+            "Label": "Instance Offering",
+            "Description": "The instance offering for creating a VM"
+        },
+        "ImageUuid":{
+            "Type": "String",
+            "Label": "Image",
+            "Description": "The image for creating a VM. Choose an image excluding ISO"
+        },
+        "FlatNetworkUuid":{
+            "Type": "String",
+            "Label": "Private Network",
+            "Description" : "The private network for creating a VM"
+        },
+        "PublicNetworkUuid":{
+            "Type": "String",
+            "Label": "Public Network",
+            "Description" : "The public network for creating EIP"
+        }
+    },
+    "Resources": {
+        "VmInstance": {
+            "Type": "Cloud::Resource::VmInstance",
+            "Properties": {
+                "name": {"Fn::Join":["-",[{"Ref":"Cloud::StackName"},"VM"]]},
+                "instanceOfferingUuid": {"Ref":"InstanceOfferingUuid"},
+                "imageUuid":{"Ref":"ImageUuid"},
+                "l3NetworkUuids":[{"Ref":"FlatNetworkUuid"}]
+            }
+        },
+        "VIP": {
+            "Type": "Cloud::Resource::Vip",
+            "Description": "For EIP",
+            "Properties": {
+                "name": {"Fn::Join":["-",[{"Ref":"Cloud::StackName"},"VIP"]]},
+                "l3NetworkUuid":{"Ref":"PublicNetworkUuid"}
+            }
+        },
+        "EIP":{
+            "Type": "Cloud::Resource::Eip",
+            "Properties": {
+                "name": {"Fn::Join":["-",[{"Ref":"Cloud::StackName"},"EIP"]]},
+                "vipUuid":{"Fn::GetAtt":["VIP","uuid"]},
+                "vmNicUuid":{"Fn::GetAtt":[{"Fn::Select":[0,{"Fn::GetAtt":["VmInstance","vmNics"]}]},"uuid"]}
+            }
+        }
+    },
+    "Outputs": {
+        "VmInstance": {
+            "Value": {
+                "Ref": "VmInstance"
+            }
+        }
+    }
+}
+

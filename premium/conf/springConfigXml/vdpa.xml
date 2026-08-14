@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:zstack="http://zstack.org/schema/zstack"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+         http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+         http://zstack.org/schema/zstack
+         http://zstack.org/schema/zstack/plugin.xsd"
+       default-init-method="init" default-destroy-method="destroy">
+
+    <bean id="VmVdpaNicFactory" class="org.zstack.compute.vdpa.VmVdpaNicFactory">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.vm.VmInstanceNicFactory" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="VmVdpaNicManager" class="org.zstack.compute.vdpa.VmVdpaNicManagerImpl">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.Component" />
+            <zstack:extension interface="org.zstack.header.Service" />
+            <zstack:extension interface="org.zstack.header.vdpa.VmVdpaNicManager" />
+            <zstack:extension interface="org.zstack.kvm.KvmPreAttachNicExtensionPoint" />
+            <zstack:extension interface="org.zstack.kvm.KvmPreDetachNicExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.vm.ReleaseNetworkServiceOnDetachingNicExtensionPoint" order="-1"/>
+            <zstack:extension interface="org.zstack.header.vm.PreVmInstantiateResourceExtensionPoint" />
+            <zstack:extension interface="org.zstack.kvm.KVMStartVmExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.vm.VmInstanceMigrateExtensionPoint"/>
+            <zstack:extension interface="org.zstack.kvm.KVMHostConnectExtensionPoint" order="1"/>
+            <zstack:extension interface="org.zstack.compute.host.PostHostConnectExtensionPoint" />
+            <zstack:extension interface="org.zstack.kvm.KvmHostAgentDeploymentExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="VmVdpaNicApiInterceptor" class="org.zstack.compute.vdpa.VmVdpaNicApiInterceptor">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.apimediator.ApiMessageInterceptor"/>
+            <zstack:extension interface="org.zstack.header.apimediator.GlobalApiMessageInterceptor" />
+            <zstack:extension interface="org.zstack.tag.ValidateSystemTagExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="VmVdpaNicKvmBackend" class="org.zstack.compute.vdpa.VmVdpaNicKvmBackend">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.compute.vdpa.VmVdpaNicHypervisorBackend" />
+        </zstack:plugin>
+    </bean>
+
+
+    <bean id="KVMRealizeL2VlanOvsDpdkBackend" class="org.zstack.compute.vdpa.KVMRealizeL2VlanOvsDpdkBackend">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.network.l2.L2NetworkRealizationExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="KVMRealizeL2NoVlanOvsDpdkBackend" class="org.zstack.compute.vdpa.KVMRealizeL2NoVlanOvsDpdkBackend">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.network.l2.L2NetworkRealizationExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+</beans>

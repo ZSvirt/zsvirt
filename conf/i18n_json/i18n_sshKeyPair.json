@@ -1,0 +1,104 @@
+[
+  {
+    "raw": "The sshKeyPair already upload",
+    "en_US": "The sshKeyPair already upload",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/sshkeypair/SshKeyPairAPIInterceptor.java"
+  },
+  {
+    "raw": "The sshKeyPair[uuid:%s] was in using.",
+    "en_US": "The sshKeyPair[uuid:{0}] was in using.",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getSshKeyPairUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/sshkeypair/SshKeyPairAPIInterceptor.java"
+  },
+  {
+    "raw": "The sshKeyPair[uuid:%s] was already attached on vm[uuid:].",
+    "en_US": "The sshKeyPair[uuid:{0}] was already attached on vm[uuid:].",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getSshKeyPairUuid()",
+      "msg.getVmInstanceUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/sshkeypair/SshKeyPairAPIInterceptor.java"
+  },
+  {
+    "raw": "The sshKeyPair[uuid:%s] was not attached on vm[uuid:%s].",
+    "en_US": "The sshKeyPair[uuid:{0}] was not attached on vm[uuid:{1}].",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getSshKeyPairUuid()",
+      "msg.getVmInstanceUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/sshkeypair/SshKeyPairAPIInterceptor.java"
+  },
+  {
+    "raw": "The vmInstance[uuid:%s] not in running state.",
+    "en_US": "The vmInstance[uuid:{0}] not in running state.",
+    "zh_CN": "",
+    "arguments": [
+      "vmInstanceVO.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/sshkeypair/SshKeyPairAPIInterceptor.java"
+  },
+  {
+    "raw": "resource types %s are not supported to attach sshKeyPair, allowed types are %s",
+    "en_US": "resource types {0} are not supported to attach sshKeyPair, allowed types are {1}",
+    "zh_CN": "",
+    "arguments": [
+      "type",
+      "ALLOW_RESOURCE_TYPES"
+    ],
+    "fileName": "src/main/java/org/zstack/sshkeypair/SshKeyPairAPIInterceptor.java"
+  },
+  {
+    "raw": "operation error, because: %s",
+    "en_US": "operation error, because: {0}",
+    "zh_CN": "",
+    "arguments": [
+      "rsp.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/sshkeypair/SshKeyPairBase.java"
+  },
+  {
+    "raw": "unable to find sshKeyPair[uuid\u003d%s]",
+    "en_US": "unable to find sshKeyPair[uuid\u003d{0}]",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getSshKeyPairUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/sshkeypair/SshKeyPairManagerImpl.java"
+  },
+  {
+    "raw": "Cannot generate sshKeyPair, error: %s",
+    "en_US": "Cannot generate sshKeyPair, error: {0}",
+    "zh_CN": "",
+    "arguments": [
+      "e.toString()"
+    ],
+    "fileName": "src/main/java/org/zstack/sshkeypair/SshKeyPairManagerImpl.java"
+  },
+  {
+    "raw": "failed to load the public key: %s, err: %s",
+    "en_US": "failed to load the public key: {0}, err: {1}",
+    "zh_CN": "",
+    "arguments": [
+      "keyContent",
+      "e.toString()"
+    ],
+    "fileName": "src/main/java/org/zstack/sshkeypair/SshKeyPairManagerImpl.java"
+  },
+  {
+    "raw": "ssh key pair[uuid:%s] can not associated to vm[uuid:%s] due to the key not found",
+    "en_US": "ssh key pair[uuid:{0}] can not associated to vm[uuid:{1}] due to the key not found",
+    "zh_CN": "",
+    "arguments": [
+      "uuid",
+      "vmUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/sshkeypair/SshKeyPairManagerImpl.java"
+  }
+]

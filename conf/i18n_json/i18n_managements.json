@@ -1,0 +1,37 @@
+[
+  {
+    "raw": "zsha2 tools not available",
+    "en_US": "zsha2 tools not available",
+    "zh_CN": "未找到 ZSha2 工具",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/managements/compute/ha2/ZSha2Client.java"
+  },
+  {
+    "raw": "HA environment not installed",
+    "en_US": "HA environment not installed",
+    "zh_CN": "管理节点的 HA 的环境未安装",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/managements/compute/ha2/ZSha2Client.java"
+  },
+  {
+    "raw": "failed to get status on peer status",
+    "en_US": "failed to get status on peer status",
+    "zh_CN": "获取到另一个管理节点的状态失败",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/managements/compute/ha2/ZSha2Client.java"
+  },
+  {
+    "raw": "failed to get zsha2 status",
+    "en_US": "failed to get zsha2 status",
+    "zh_CN": "获取 ZSha2 状态失败",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/managements/compute/ha2/ZSha2Client.java"
+  },
+  {
+    "raw": "failed to parse zsha2 status",
+    "en_US": "failed to parse zsha2 status",
+    "zh_CN": "解析 ZSha2 状态输出内容失败",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/managements/compute/ha2/ZSha2Client.java"
+  }
+]

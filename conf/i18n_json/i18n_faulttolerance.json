@@ -1,0 +1,603 @@
+[
+  {
+    "raw": "pvm[uuid:%s] and svm[uuid:%s] volume number not matches, do not allowed to start",
+    "en_US": "pvm[uuid:{0}] and svm[uuid:{1}] volume number not matches, do not allowed to start",
+    "zh_CN": "",
+    "arguments": [
+      "group.getPrimaryVmInstanceUuid()",
+      "group.getSecondaryVmInstanceUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/faulttolerance/FaultToleranceApiInterceptor.java"
+  },
+  {
+    "raw": "volume with index: %d, of pvm[uuid:%s] and svm[uuid:%s] have different size, do not allowed to start",
+    "en_US": "volume with index: {0}, of pvm[uuid:{1}] and svm[uuid:{2}] have different size, do not allowed to start",
+    "zh_CN": "",
+    "arguments": [
+      "i",
+      "group.getPrimaryVmInstanceUuid()",
+      "group.getSecondaryVmInstanceUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/faulttolerance/FaultToleranceApiInterceptor.java"
+  },
+  {
+    "raw": "volume with index: %d, of pvm[uuid:%s] and svm[uuid:%s]\u0027s cache volume have different size, do not allowed to start",
+    "en_US": "volume with index: {0}, of pvm[uuid:{1}] and svm[uuid:{2}]\u0027s cache volume have different size, do not allowed to start",
+    "zh_CN": "",
+    "arguments": [
+      "i",
+      "group.getPrimaryVmInstanceUuid()",
+      "group.getSecondaryVmInstanceUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/faulttolerance/FaultToleranceApiInterceptor.java"
+  },
+  {
+    "raw": "image[uuid:%s] is still used by fault tolerance vm[uuid:%s]",
+    "en_US": "image[uuid:{0}] is still used by fault tolerance vm[uuid:{1}]",
+    "zh_CN": "容错虚拟机[uuid：{1}]仍在使用镜像[uuid：{0}]",
+    "arguments": [
+      "msg.getUuid()",
+      "faultToleranceVmGroupUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/faulttolerance/FaultToleranceApiInterceptor.java"
+  },
+  {
+    "raw": "could not delete l3 network[uuid:%s]. Fault tolerance vm[%s] in states[%s, %s] still using it. Stop related fault tolerance vms before delete l3 network",
+    "en_US": "could not delete l3 network[uuid:{0}]. Fault tolerance vm[{1}] in states[{2}, {3}] still using it. Stop related fault tolerance vms before delete l3 network",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getL3NetworkUuid()",
+      "String.join(\",\", vmInstanceUuids)",
+      "VmInstanceState.Paused",
+      "VmInstanceState.Running"
+    ],
+    "fileName": "src/main/java/org/zstack/faulttolerance/FaultToleranceApiInterceptor.java"
+  },
+  {
+    "raw": "Can not fail-over vm[uuid:%s], please enable ft in GlobalConfig",
+    "en_US": "Can not fail-over vm[uuid:{0}], please enable ft in GlobalConfig",
+    "zh_CN": "无法对VM[uuid：{0}]进行故障转移，请在GlobalConfig中启用FT",
+    "arguments": [
+      "msg.getFaultToleranceVmUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/faulttolerance/FaultToleranceApiInterceptor.java"
+  },
+  {
+    "raw": "Can not fail-over vm[uuid:%s], please confirm it is a fault tolerance vm group",
+    "en_US": "Can not fail-over vm[uuid:{0}], please confirm it is a fault tolerance vm group",
+    "zh_CN": "无法对VM[uuid：{0}]进行故障转移，请确认它是容错VM组",
+    "arguments": [
+      "msg.getFaultToleranceVmUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/faulttolerance/FaultToleranceApiInterceptor.java"
+  },
+  {
+    "raw": "Can not fail-over vm[uuid:%s], because fault tolerance vm group is not in status of [%s, %s]",
+    "en_US": "Can not fail-over vm[uuid:{0}], because fault tolerance vm group is not in status of [{1}, {2}]",
+    "zh_CN": "无法对VM[uuid：{0}]进行故障转移，因为容错VM组的状态不是[{1}，{2}]",
+    "arguments": [
+      "msg.getFaultToleranceVmUuid()",
+      "FaultToleranceStatus.Protected",
+      "FaultToleranceStatus.Unknown"
+    ],
+    "fileName": "src/main/java/org/zstack/faulttolerance/FaultToleranceApiInterceptor.java"
+  },
+  {
+    "raw": "Can not maintain host, because ft vms[%s] are under recovering",
+    "en_US": "Can not maintain host, because ft vms[{0}] are under recovering",
+    "zh_CN": "无法维护主机，因为正在恢复FT VM[{0}]",
+    "arguments": [
+      "Joiner.on(\",\").join(vmUuids)"
+    ],
+    "fileName": "src/main/java/org/zstack/faulttolerance/FaultToleranceApiInterceptor.java"
+  },
+  {
+    "raw": "current operation[api:%s] is not supported when ft vm[uuid:%s, state:%s] is not stopped",
+    "en_US": "current operation[api:{0}] is not supported when ft vm[uuid:{1}, state:{2}] is not stopped",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getClass()",
+      "msg.getVmInstanceUuid()",
+      "state"
+    ],
+    "fileName": "src/main/java/org/zstack/faulttolerance/FaultToleranceApiInterceptor.java"
+  },
+  {
+    "raw": "Can not set vm level to %s, please enable ft in GlobalConfig",
+    "en_US": "Can not set vm level to {0}, please enable ft in GlobalConfig",
+    "zh_CN": "无法将VM级别设置为{0}，请在GlobalConfig中启用FT",
+    "arguments": [
+      "VmHaLevel.FaultTolerance.toString()"
+    ],
+    "fileName": "src/main/java/org/zstack/faulttolerance/FaultToleranceApiInterceptor.java"
+  },
+  {
+    "raw": "can not update ft vm[uuid:%s] cpu number, need to stop both of the vms",
+    "en_US": "can not update ft vm[uuid:{0}] cpu number, need to stop both of the vms",
+    "zh_CN": "无法更新FT VM[uuid：{0}]CPU编号，需要停止两个VM",
+    "arguments": [
+      "msg.getVmInstanceUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/faulttolerance/FaultToleranceApiInterceptor.java"
+  },
+  {
+    "raw": "can not update ft vm[uuid:%s] memory size, need to stop both of the vms",
+    "en_US": "can not update ft vm[uuid:{0}] memory size, need to stop both of the vms",
+    "zh_CN": "无法更新FT VM[uuid：{0}]内存大小，需要停止两个VM",
+    "arguments": [
+      "msg.getVmInstanceUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/faulttolerance/FaultToleranceApiInterceptor.java"
+  },
+  {
+    "raw": "can not update ft vm[uuid:%s] platform, need to stop both of the vms",
+    "en_US": "can not update ft vm[uuid:{0}] platform, need to stop both of the vms",
+    "zh_CN": "无法更新FT VM[uuid：{0}]平台，需要停止两个VM",
+    "arguments": [
+      "msg.getVmInstanceUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/faulttolerance/FaultToleranceApiInterceptor.java"
+  },
+  {
+    "raw": "current operation is not supported on ft group vm[uuid:%s]",
+    "en_US": "current operation is not supported on ft group vm[uuid:{0}]",
+    "zh_CN": "FT组VM[uuid：{0}]不支持当前操作",
+    "arguments": [
+      "vmInstanceUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/faulttolerance/FaultToleranceApiInterceptor.java"
+  },
+  {
+    "raw": "current operation is not supported on ft primary vm[uuid:%s]",
+    "en_US": "current operation is not supported on ft primary vm[uuid:{0}]",
+    "zh_CN": "FT主VM[uuid：{0}]不支持当前操作",
+    "arguments": [
+      "vmInstanceUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/faulttolerance/FaultToleranceApiInterceptor.java"
+  },
+  {
+    "raw": "current operation is not supported on ft secondary vm[uuid:%s]",
+    "en_US": "current operation is not supported on ft secondary vm[uuid:{0}]",
+    "zh_CN": "FT辅助虚拟机[uuid：{0}]不支持当前操作",
+    "arguments": [
+      "vmInstanceUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/faulttolerance/FaultToleranceApiInterceptor.java"
+  },
+  {
+    "raw": "current operation is not supported on secondary vm[uuid:%s]",
+    "en_US": "current operation is not supported on secondary vm[uuid:{0}]",
+    "zh_CN": "辅助虚拟机[uuid：{0}]不支持当前操作",
+    "arguments": [
+      "msg.getVmInstanceUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/faulttolerance/FaultToleranceApiInterceptor.java"
+  },
+  {
+    "raw": "can not migrate FT primary vm",
+    "en_US": "can not migrate FT primary vm",
+    "zh_CN": "无法迁移FT主虚拟机",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/faulttolerance/FaultToleranceApiInterceptor.java"
+  },
+  {
+    "raw": "can not migrate FT secondary vm",
+    "en_US": "can not migrate FT secondary vm",
+    "zh_CN": "无法迁移FT辅助虚拟机",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/faulttolerance/FaultToleranceApiInterceptor.java"
+  },
+  {
+    "raw": "Missing CPU/memory settings",
+    "en_US": "Missing CPU/memory settings",
+    "zh_CN": "缺少CPU/内存设置",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/faulttolerance/FaultToleranceApiInterceptor.java"
+  },
+  {
+    "raw": "Unexpected CPU/memory settings",
+    "en_US": "Unexpected CPU/memory settings",
+    "zh_CN": "意外的CPU/内存设置",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/faulttolerance/FaultToleranceApiInterceptor.java"
+  },
+  {
+    "raw": "instance offering[uuid:%s] is Disabled, can\u0027t create vm from it",
+    "en_US": "instance offering[uuid:{0}] is Disabled, can\u0027t create vm from it",
+    "zh_CN": "计算规格[uuid:{0}]没有被启用，不能根据该规格创建虚拟机",
+    "arguments": [
+      "instanceOfferingUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/faulttolerance/FaultToleranceApiInterceptor.java"
+  },
+  {
+    "raw": "instance offering[uuid:%s, type:%s] is not UserVm type, can\u0027t create vm from it",
+    "en_US": "instance offering[uuid:{0}, type:{1}] is not UserVm type, can\u0027t create vm from it",
+    "zh_CN": "计算规格[uuid:{0}, type:{1}]不是UserVm类型，不能通过它创建虚拟机",
+    "arguments": [
+      "instanceOfferingUuid",
+      "ivo.getType()"
+    ],
+    "fileName": "src/main/java/org/zstack/faulttolerance/FaultToleranceApiInterceptor.java"
+  },
+  {
+    "raw": "Failed to create ft vm, please enable ft in GlobalConfig",
+    "en_US": "Failed to create ft vm, please enable ft in GlobalConfig",
+    "zh_CN": "无法创建FT VM，请在GlobalConfig中启用FT",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/faulttolerance/FaultToleranceApiInterceptor.java"
+  },
+  {
+    "raw": "Ft network is not set",
+    "en_US": "Ft network is not set",
+    "zh_CN": "未设置FT网络",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/faulttolerance/FaultToleranceApiInterceptor.java"
+  },
+  {
+    "raw": "Not allowed same mac [%s]",
+    "en_US": "Not allowed same mac [{0}]",
+    "zh_CN": "不允许存在相同的MAC地址[{0}]",
+    "arguments": [
+      "duplicateMac.get()"
+    ],
+    "fileName": "src/main/java/org/zstack/faulttolerance/FaultToleranceApiInterceptor.java"
+  },
+  {
+    "raw": "image[uuid:%s] is Disabled, can\u0027t create vm from it",
+    "en_US": "image[uuid:{0}] is Disabled, can\u0027t create vm from it",
+    "zh_CN": "镜像[uuid:{0}]没被启用，不能根据该镜像创建虚拟机",
+    "arguments": [
+      "msg.getImageUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/faulttolerance/FaultToleranceApiInterceptor.java"
+  },
+  {
+    "raw": "image[uuid:%s] is not ready yet, can\u0027t create vm from it",
+    "en_US": "image[uuid:{0}] is not ready yet, can\u0027t create vm from it",
+    "zh_CN": "镜像[uuid：{0}]尚未就绪，无法从中创建VM",
+    "arguments": [
+      "msg.getImageUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/faulttolerance/FaultToleranceApiInterceptor.java"
+  },
+  {
+    "raw": "image[uuid:%s] is of mediaType: %s, only RootVolumeTemplate can be used to create vm",
+    "en_US": "image[uuid:{0}] is of mediaType: {1}, only RootVolumeTemplate can be used to create vm",
+    "zh_CN": "镜像[uuid：{0}]的媒体类型为：{1}，只能使用RootVolumeTemplate创建VM",
+    "arguments": [
+      "msg.getImageUuid()",
+      "imgFormat"
+    ],
+    "fileName": "src/main/java/org/zstack/faulttolerance/FaultToleranceApiInterceptor.java"
+  },
+  {
+    "raw": "image[uuid:%s] is of format: %s, only %s can be used to create vm",
+    "en_US": "image[uuid:{0}] is of format: {1}, only {2} can be used to create vm",
+    "zh_CN": "镜像[uuid：{0}]的格式为：{1}，只有{2}可用于创建VM",
+    "arguments": [
+      "msg.getImageUuid()",
+      "imageFileFmt",
+      "ImageConstant.QCOW2_FORMAT_STRING"
+    ],
+    "fileName": "src/main/java/org/zstack/faulttolerance/FaultToleranceApiInterceptor.java"
+  },
+  {
+    "raw": "image[uuid:%s] is system image, can\u0027t be used to create user vm",
+    "en_US": "image[uuid:{0}] is system image, can\u0027t be used to create user vm",
+    "zh_CN": "镜像[uuid:{0}] 是系统镜像，不能使用它创建用户虚拟机",
+    "arguments": [
+      "msg.getImageUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/faulttolerance/FaultToleranceApiInterceptor.java"
+  },
+  {
+    "raw": "disk offerings[uuids:%s] are Disabled, can not create vm from it",
+    "en_US": "disk offerings[uuids:{0}] are Disabled, can not create vm from it",
+    "zh_CN": "硬盘规格[uuids:{0}]没有被启用，不能使用它创建虚拟机",
+    "arguments": [
+      "diskUuids"
+    ],
+    "fileName": "src/main/java/org/zstack/faulttolerance/FaultToleranceApiInterceptor.java"
+  },
+  {
+    "raw": "Can\u0027t add same uuid in the l3Network,uuid: %s",
+    "en_US": "Can\u0027t add same uuid in the l3Network,uuid: {0}",
+    "zh_CN": "不能添加相同uuid[{0}]的三层网络",
+    "arguments": [
+      "duplicateElements.get(0)"
+    ],
+    "fileName": "src/main/java/org/zstack/faulttolerance/FaultToleranceApiInterceptor.java"
+  },
+  {
+    "raw": "l3Network[uuid:%s] is Disabled, can not create vm on it",
+    "en_US": "l3Network[uuid:{0}] is Disabled, can not create vm on it",
+    "zh_CN": "三层网络[uuid：{0}]没有被启用，不能在这上面创建虚拟机",
+    "arguments": [
+      "l3Uuid"
+    ],
+    "fileName": "src/main/java/org/zstack/faulttolerance/FaultToleranceApiInterceptor.java"
+  },
+  {
+    "raw": "l3Network[uuid:%s] is system network, can not create user vm on it",
+    "en_US": "l3Network[uuid:{0}] is system network, can not create user vm on it",
+    "zh_CN": "三层网络[uuid：{0}]是系统网络，不能在这上面创建虚拟机",
+    "arguments": [
+      "l3Uuid"
+    ],
+    "fileName": "src/main/java/org/zstack/faulttolerance/FaultToleranceApiInterceptor.java"
+  },
+  {
+    "raw": "zone[uuid:%s] is specified but it\u0027s Disabled, can not create vm from it",
+    "en_US": "zone[uuid:{0}] is specified but it\u0027s Disabled, can not create vm from it",
+    "zh_CN": "数据中心[uuid：{0}]虽然被指定了但是处于未启用状态，不能从这上面创建虚拟机",
+    "arguments": [
+      "msg.getZoneUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/faulttolerance/FaultToleranceApiInterceptor.java"
+  },
+  {
+    "raw": "cluster[uuid:%s] is specified but it\u0027s Disabled, can not create vm from it",
+    "en_US": "cluster[uuid:{0}] is specified but it\u0027s Disabled, can not create vm from it",
+    "zh_CN": "集群[uuid：{0}]虽然被指定了但是处于未启用状态，不能从这上面创建虚拟机",
+    "arguments": [
+      "msg.getClusterUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/faulttolerance/FaultToleranceApiInterceptor.java"
+  },
+  {
+    "raw": "host[uuid:%s] is specified but it\u0027s Disabled, can not create vm from it",
+    "en_US": "host[uuid:{0}] is specified but it\u0027s Disabled, can not create vm from it",
+    "zh_CN": "主机[uuid：{0}]虽然被指定了但是处于未启用状态，不能从这上面创建虚拟机",
+    "arguments": [
+      "msg.getHostUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/faulttolerance/FaultToleranceApiInterceptor.java"
+  },
+  {
+    "raw": "host[uuid:%s] is specified but its connection status is %s, can not create vm from it",
+    "en_US": "host[uuid:{0}] is specified but its connection status is {1}, can not create vm from it",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getHostUuid()",
+      "connectionState"
+    ],
+    "fileName": "src/main/java/org/zstack/faulttolerance/FaultToleranceApiInterceptor.java"
+  },
+  {
+    "raw": "there are more than one L3 network specified in l3NetworkUuids, but defaultL3NetworkUuid is null",
+    "en_US": "there are more than one L3 network specified in l3NetworkUuids, but defaultL3NetworkUuid is null",
+    "zh_CN": "在三层网络uuid列表中指定了多个三层网络，但是默认的三层网络的uuid为空",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/faulttolerance/FaultToleranceApiInterceptor.java"
+  },
+  {
+    "raw": "defaultL3NetworkUuid[uuid:%s] is not in l3NetworkUuids%s",
+    "en_US": "defaultL3NetworkUuid[uuid:{0}] is not in l3NetworkUuids{1}",
+    "zh_CN": "默认的三层网络的uuid是[uuid：{0}]，不在三层网络uuid列表{1}中",
+    "arguments": [
+      "msg.getDefaultL3NetworkUuid()",
+      "msg.getL3NetworkUuids()"
+    ],
+    "fileName": "src/main/java/org/zstack/faulttolerance/FaultToleranceApiInterceptor.java"
+  },
+  {
+    "raw": "failed to allocate port on host[uuid: %s]",
+    "en_US": "failed to allocate port on host[uuid: {0}]",
+    "zh_CN": "无法在主机[uuid：{0}]上分配端口",
+    "arguments": [
+      "hostUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/faulttolerance/FaultToleranceGroupVmFactory.java"
+  },
+  {
+    "raw": "allocated port num less than requested on host[uuid: %s]",
+    "en_US": "allocated port num less than requested on host[uuid: {0}]",
+    "zh_CN": "主机[uuid：{0}]上分配的端口号小于请求的端口号",
+    "arguments": [
+      "hostUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/faulttolerance/FaultToleranceGroupVmFactory.java"
+  },
+  {
+    "raw": "could not get hostUuid of primary vm[uuid:%s]",
+    "en_US": "could not get hostUuid of primary vm[uuid:{0}]",
+    "zh_CN": "无法获取主虚拟机[uuid：{0}]的Hostuuid",
+    "arguments": [
+      "smsg.getPrimaryVmInstanceUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/faulttolerance/FaultToleranceGroupVmFactory.java"
+  },
+  {
+    "raw": "can not start secondary vm, because primary vm is still stopped",
+    "en_US": "can not start secondary vm, because primary vm is still stopped",
+    "zh_CN": "无法启动辅助虚拟机，因为主虚拟机仍处于停止状态",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/faulttolerance/FaultToleranceGroupVmFactory.java"
+  },
+  {
+    "raw": "Can not migrate ft secondary vm[uuid:%s]",
+    "en_US": "Can not migrate ft secondary vm[uuid:{0}]",
+    "zh_CN": "无法迁移FT辅助虚拟机[uuid：{0}]",
+    "arguments": [
+      "vm.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/faulttolerance/FaultToleranceGroupVmFactory.java"
+  },
+  {
+    "raw": "Can not migrate ft primary vm[uuid:%s]",
+    "en_US": "Can not migrate ft primary vm[uuid:{0}]",
+    "zh_CN": "无法迁移FT主虚拟机[uuid：{0}]",
+    "arguments": [
+      "vm.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/faulttolerance/FaultToleranceGroupVmFactory.java"
+  },
+  {
+    "raw": "Current ft vm is in unknown status, can not stop it, please try to fail-over it manually",
+    "en_US": "Current ft vm is in unknown status, can not stop it, please try to fail-over it manually",
+    "zh_CN": "当前FT虚拟机处于未知状态，无法停止，请尝试手动故障转移",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/faulttolerance/FaultToleranceGroupVmInstanceBase.java"
+  },
+  {
+    "raw": "unable to start the vm[uuid:%s]. It doesn\u0027t have any nic, please attach a nic and try again",
+    "en_US": "unable to start the vm[uuid:{0}]. It doesn\u0027t have any nic, please attach a nic and try again",
+    "zh_CN": "",
+    "arguments": [
+      "self.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/faulttolerance/FaultToleranceGroupVmInstanceBase.java"
+  },
+  {
+    "raw": "an other fault tolerance gc task is running, cancel the new task and wait return",
+    "en_US": "an other fault tolerance gc task is running, cancel the new task and wait return",
+    "zh_CN": "其他容错GC任务正在运行，请取消新任务并等待返回",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/faulttolerance/FaultToleranceManagerImpl.java"
+  },
+  {
+    "raw": "can not create secondary vm, because primary vm is stopped",
+    "en_US": "can not create secondary vm, because primary vm is stopped",
+    "zh_CN": "无法创建辅助虚拟机，因为主虚拟机已停止",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/faulttolerance/FaultToleranceManagerImpl.java"
+  },
+  {
+    "raw": "created svm found, report error for this start secondary vm request",
+    "en_US": "created svm found, report error for this start secondary vm request",
+    "zh_CN": "找到已创建的SVM，报告此启动辅助虚拟机请求的错误",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/faulttolerance/FaultToleranceManagerImpl.java"
+  },
+  {
+    "raw": "could not failover vm[uuid:%s]. Related fault tolerance vm group not exists",
+    "en_US": "could not failover vm[uuid:{0}]. Related fault tolerance vm group not exists",
+    "zh_CN": "无法对虚拟机[uuid：{0}]进行故障切换。相关容错云主机组不存在",
+    "arguments": [
+      "vmInstanceUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/faulttolerance/FaultToleranceManagerImpl.java"
+  },
+  {
+    "raw": "pvm[uuid:%s] not exists",
+    "en_US": "pvm[uuid:{0}] not exists",
+    "zh_CN": "PVM[uuid：{0}]不存在",
+    "arguments": [
+      "group.getPrimaryVmInstanceUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/faulttolerance/FaultToleranceManagerImpl.java"
+  },
+  {
+    "raw": "could not failover. Primary vm is unknown but no fault tolerance network address available",
+    "en_US": "could not failover. Primary vm is unknown but no fault tolerance network address available",
+    "zh_CN": "无法进行故障转移。主云主机未知，但没有可用的容错网络地址",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/faulttolerance/FaultToleranceManagerImpl.java"
+  },
+  {
+    "raw": "could not failover. Secondary vm is unknown but no fault tolerance network address available",
+    "en_US": "could not failover. Secondary vm is unknown but no fault tolerance network address available",
+    "zh_CN": "无法进行故障转移。辅助云主机未知，但没有可用的容错网络地址",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/faulttolerance/FaultToleranceManagerImpl.java"
+  },
+  {
+    "raw": "unexpected exception",
+    "en_US": "unexpected exception",
+    "zh_CN": "意外异常",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/faulttolerance/FaultToleranceManagerImpl.java"
+  },
+  {
+    "raw": "cannot found available ip from current ft network. Check whether global config[category:ft name:fault.tolerance.network.cidr] is correctly set, and confirm that host[uuid:%s] own ip address in the CIDR",
+    "en_US": "cannot found available ip from current ft network. Check whether global config[category:ft name:fault.tolerance.network.cidr] is correctly set, and confirm that host[uuid:{0}] own ip address in the CIDR",
+    "zh_CN": "",
+    "arguments": [
+      "hostUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/faulttolerance/FaultToleranceManagerImpl.java"
+  },
+  {
+    "raw": "can not start secondary vm, because primary vm is stopped",
+    "en_US": "can not start secondary vm, because primary vm is stopped",
+    "zh_CN": "无法启动辅助云主机，因为主云主机已停止",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/faulttolerance/FaultToleranceManagerImpl.java"
+  },
+  {
+    "raw": "not fault tolerance vm port found",
+    "en_US": "not fault tolerance vm port found",
+    "zh_CN": "未找到容错VM端口",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/faulttolerance/FaultToleranceManagerImpl.java"
+  },
+  {
+    "raw": "failed to allocate port of nic[uuid: %s] on host[uuid: %s]",
+    "en_US": "failed to allocate port of nic[uuid: {0}] on host[uuid: {1}]",
+    "zh_CN": "无法分配主机[uuid：{1}]上的NIC[uuid：{0}]的端口",
+    "arguments": [
+      "nicUuid",
+      "pvm.getHostUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/faulttolerance/FaultToleranceManagerImpl.java"
+  },
+  {
+    "raw": "allocated port num less than requested of nic[uuid: %s] on host[uuid: %s]",
+    "en_US": "allocated port num less than requested of nic[uuid: {0}] on host[uuid: {1}]",
+    "zh_CN": "分配的端口数小于主机[uuid：{1}]上的NIC[uuid：{0}]请求的端口数",
+    "arguments": [
+      "nicUuid",
+      "pvm.getHostUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/faulttolerance/FaultToleranceManagerImpl.java"
+  },
+  {
+    "raw": "cannot find the image[uuid:%s] in any connected backup storage attached to the zone[uuid:%s]. check below:\\n1. if the backup storage is attached to the zone where the VM[name: %s, uuid:%s] is in\\n2. if the backup storage is in connected status, if not, try reconnecting it",
+    "en_US": "cannot find the image[uuid:{0}] in any connected backup storage attached to the zone[uuid:{1}]. check below:\\n1. if the backup storage is attached to the zone where the VM[name: {2}, uuid:{3}] is in\\n2. if the backup storage is in connected status, if not, try reconnecting it",
+    "zh_CN": "",
+    "arguments": [
+      "imageUuid",
+      "spec.getVmInventory().getZoneUuid()",
+      "spec.getVmInventory().getName()",
+      "spec.getVmInventory().getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/faulttolerance/FaultToleranceVmImageSelectBackupStorageFlow.java"
+  },
+  {
+    "raw": "cannot find the image[uuid:%s] in any connected backup storage. check below:\\n1. if the backup storage is attached to the zone where the VM[name: %s, uuid:%s] is in\\n2. if the backup storage is in connected status, if not, try reconnecting it",
+    "en_US": "cannot find the image[uuid:{0}] in any connected backup storage. check below:\\n1. if the backup storage is attached to the zone where the VM[name: {1}, uuid:{2}] is in\\n2. if the backup storage is in connected status, if not, try reconnecting it",
+    "zh_CN": "",
+    "arguments": [
+      "imageUuid",
+      "spec.getVmInventory().getName()",
+      "spec.getVmInventory().getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/faulttolerance/FaultToleranceVmImageSelectBackupStorageFlow.java"
+  },
+  {
+    "raw": "no backup storage attached to the zone[uuid:%s] contains the ISO[uuid:%s]",
+    "en_US": "no backup storage attached to the zone[uuid:{0}] contains the ISO[uuid:{1}]",
+    "zh_CN": "在数据中心 {0} 中找不到存放 ISO 镜像 {1} 的镜像存储",
+    "arguments": [
+      "zoneUuid",
+      "isoImageUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/faulttolerance/FaultToleranceVmImageSelectBackupStorageFlow.java"
+  },
+  {
+    "raw": "missing fault tolerance vm group",
+    "en_US": "missing fault tolerance vm group",
+    "zh_CN": "缺少容错VM组",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/faulttolerance/ShadowVmCloneTagsFlow.java"
+  },
+  {
+    "raw": "fault tolerance vms can not be created on the host primary VM on",
+    "en_US": "fault tolerance vms can not be created on the host primary VM on",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/faulttolerance/ShadowVmHostAllocatorFilterExtensionPoint.java"
+  }
+]

@@ -1,0 +1,63 @@
+<error>
+    <prefix>ZCE-X</prefix>
+
+    <code>
+        <id>1000</id>
+        <description>ZCE-X generic error</description>
+    </code>
+
+    <code>
+        <id>1001</id>
+        <description>Failed to connect ZCE-X server</description>
+    </code>
+
+    <code>
+        <id>1002</id>
+        <description>Authorization fails in ZCE-X server</description>
+    </code>
+
+    <code>
+        <id>1003</id>
+        <description>ZCE-X API operation fail</description>
+    </code>
+
+    <code>
+        <id>1004</id>
+        <description>ZCE-X Token Related Errors</description>
+    </code>
+
+    <code>
+        <id>1005</id>
+        <description>ZCE-X Alert Platform Related Errors</description>
+    </code>
+
+    <code>
+        <id>3001</id>
+        <description>ZCE-X Tools Not Found In Host</description>
+    </code>
+
+    <code>
+        <id>3002</id>
+        <description>ZCE-X Configuration File Not Found In Host</description>
+    </code>
+
+    <code>
+        <id>3003</id>
+        <description>ZCE-X Config Error</description>
+    </code>
+
+    <code>
+        <id>4001</id>
+        <description>ZCE-X Token Already Exists</description>
+    </code>
+
+    <code>
+        <id>4002</id>
+        <description>ZCE-X Token Is Missing</description>
+    </code>
+
+    <code>
+        <id>5001</id>
+        <description>Missing ZCE-X License</description>
+    </code>
+</error>

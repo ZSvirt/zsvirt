@@ -1,0 +1,60 @@
+[
+  {
+    "raw": "resources has inconsistent resourceTypes. Details: %s",
+    "en_US": "resources has inconsistent resourceTypes. Details: {0}",
+    "zh_CN": "资源具有不一致的资源类型。详细信息：{0}",
+    "arguments": [
+      "typeByResourceUuids.toString()"
+    ],
+    "fileName": "src/main/java/org/zstack/resourceconfig/ResourceConfig.java"
+  },
+  {
+    "raw": "cannot find resource[uuid: %s]",
+    "en_US": "cannot find resource[uuid: {0}]",
+    "zh_CN": "找不到资源[uuid：{0}]",
+    "arguments": [
+      "resourceUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/resourceconfig/ResourceConfig.java"
+  },
+  {
+    "raw": "ResourceConfig [category:%s, name:%s] cannot bind to resourceType: %s",
+    "en_US": "ResourceConfig [category:{0}, name:{1}] cannot bind to resourceType: {2}",
+    "zh_CN": "资源配置[类别：{0}，名称：{1}]无法绑定资源类型：{2}",
+    "arguments": [
+      "globalConfig.getCategory()",
+      "globalConfig.getName()",
+      "resourceType"
+    ],
+    "fileName": "src/main/java/org/zstack/resourceconfig/ResourceConfig.java"
+  },
+  {
+    "raw": "no global config[category:%s, name:%s] found",
+    "en_US": "no global config[category:{0}, name:{1}] found",
+    "zh_CN": "找不到全局配置[类别：{0}，名称：{1}]",
+    "arguments": [
+      "msg.getCategory()",
+      "identity"
+    ],
+    "fileName": "src/main/java/org/zstack/resourceconfig/ResourceConfigApiInterceptor.java"
+  },
+  {
+    "raw": "global config[category:%s, name:%s] cannot bind resource",
+    "en_US": "global config[category:{0}, name:{1}] cannot bind resource",
+    "zh_CN": "全局配置[类别：{0}，名称：{1}]无法绑定资源",
+    "arguments": [
+      "msg.getCategory()",
+      "identity"
+    ],
+    "fileName": "src/main/java/org/zstack/resourceconfig/ResourceConfigApiInterceptor.java"
+  },
+  {
+    "raw": "account has no access to the resource[uuid: %s]",
+    "en_US": "account has no access to the resource[uuid: {0}]",
+    "zh_CN": "账号没有访问资源[uuid:{0}]的权限",
+    "arguments": [
+      "msg.getResourceUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/resourceconfig/ResourceConfigApiInterceptor.java"
+  }
+]

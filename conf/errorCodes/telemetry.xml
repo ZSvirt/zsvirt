@@ -1,0 +1,73 @@
+<error>
+    <prefix>TELEMETRY</prefix>
+
+    <code>
+        <id>1000</id>
+        <description>Telemetry general error</description>
+    </code>
+
+    <code>
+        <id>1301</id>
+        <description>Failed to import certificate</description>
+    </code>
+
+    <code>
+        <id>2000</id>
+        <description>Telemetry consent related error</description>
+    </code>
+
+    <code>
+        <id>2001</id>
+        <description>User consent is required before enabling telemetry</description>
+    </code>
+
+    <code>
+        <id>2002</id>
+        <description>Telemetry is already enabled</description>
+    </code>
+
+    <code>
+        <id>2003</id>
+        <description>telemetry.consent.granted.at must be updated via the dedicated consent API</description>
+    </code>
+
+    <code>
+        <id>2004</id>
+        <description>Telemetry global config is read-only after initialization</description>
+    </code>
+
+    <code>
+        <id>3000</id>
+        <description>Telemetry collection related error</description>
+    </code>
+
+    <code>
+        <id>3001</id>
+        <description>Failed to collect telemetry data</description>
+    </code>
+
+    <code>
+        <id>4000</id>
+        <description>Telemetry upload related error</description>
+    </code>
+
+    <code>
+        <id>4001</id>
+        <description>Telemetry Cloud is unreachable</description>
+    </code>
+
+    <code>
+        <id>4002</id>
+        <description>Failed to upload telemetry daily report</description>
+    </code>
+
+    <code>
+        <id>4003</id>
+        <description>Invalid check-update response from Telemetry Cloud</description>
+    </code>
+
+    <code>
+        <id>4004</id>
+        <description>Invalid version field in check-update response</description>
+    </code>
+</error>

@@ -1,0 +1,254 @@
+:toc:
+
+= ZStack Cloud 权限认证模块：登录认证功能
+
+ZStack作为基础软件，实际生产环境中碰到很多客户要求需要对接各种认证系统
+
+为了解决认证接入过程碰到的问题，我们尝试提供了通用CAS，OAuth2的模块支持，但是依然没办法避免需要定制化开发的境遇。为了简化登录认证功能的接入，需要针对登录认证模块做一次代码重新设计，来解决目前碰到的问题。
+
+== 需求总览
+
+从需求上，登陆模块的架构设计，主要来源于如下五个需求点：
+
+[options="header",cols="1,2,2"]
+|===
+| 编号 | 需求 | 解释
+| F1 | 提供标准接口开发登录认证功能 | 避免总是要重写一个新的API，实际上大部分接口只有认证步骤实现不同，登录用户等步骤都是相同的
+| F2 | 简化附加认证的接入方式 | 安全需求以及适配增多，附加认证等的接入入口不统一，不便于维护
+|  F3  |         提升可配置性         | 对于标准的接入，比如oauth2，cas，提供标准的接入配置，修改配置立即可用
+|  F4  |         降低开发难度         |  对于第三方用户的接入逻辑，提供标准的抽象，用来保存用户对应关系
+|  F5  |         更多调试日志         | 增加更多trace日志，便于分析整个认证流程还有附加认证逻辑的运行情况
+|  F6  |         API使用方式不明确         | 增加接口获取登陆某个用户需要什么认证信息 |
+|===
+
+基于上面这些要求，软件质量上需要满足以下几点（重要性顺序）：
+
+[options="header",cols="1,2,2"]
+|===
+|   目标   | 具体需求  | 备注
+|  功能性  | 1. 针对标准协议提供标准接口/配置 +
+2. 接入足够简单，比如实现一个Java接口或者改一下配置文件 +
+3. 对接iam1/iam2的能力足够充分 |
+| 可操作性 | 1. 针对dev或者是用户的要求，接口简单并提供文档，配置简化 |
+| 可维护性 | 1. 针对异常情况，可以通过详细的调试日志找到问题原因 +
+2. 选择附加认证的方式可灵活配置 |
+|===
+
+== 架构限制
+
+架构的具体限制如下：
+
+1. 对接自研的登录逻辑，需要了解登录的代码抽象，实现用户的对应关系
+2. 针对第三方认证，如果使用附加认证逻辑，登录操作会变得很复杂，需要对各个附加认证的插件有了解
+3. 针对新增的API没有限制一定要使用这个框架，需要在Review的时候关注实现
+
+== 业务场景
+
+[plantuml,align=center]
+....
+skinparam ranksep 20
+skinparam dpi 150
+skinparam arrowThickness 0.7
+skinparam packageTitleAlignment left
+skinparam usecaseBorderThickness 0.4
+skinparam defaultFontSize 12
+skinparam rectangleBorderThickness 1
+
+User --> (提供认证方式)
+User --> (提供测试用户)
+User --> (投入生产使用)
+....
+
+== 技术场景
+
+[plantuml,align=center]
+....
+skinparam ranksep 20
+skinparam dpi 150
+skinparam arrowThickness 0.7
+skinparam packageTitleAlignment left
+skinparam usecaseBorderThickness 0.4
+skinparam defaultFontSize 12
+skinparam rectangleBorderThickness 1
+
+Dev --> (根据通用认证接口实现新的认证逻辑)
+Dev --> (修改spring配置，增加新的实现)
+Dev --> (通过integration test登录认证测试用户)
+....
+
+== 设计思路
+
+=== 通用的登录认证逻辑
+
+[options="header",cols="1,2,2,2"]
+|===
+|   目标   | 场景  | 解决方法 | 备注
+|  通用API  | 提供标准参数 | 提供标准参数和概念，username，password，loginType，properties四个参数 | 用户名，密码，认证方式和配置项是我们要求的几个参数。其中用户名和密码实际上对应的是用户id和密文，针对认证都是需要输入的，同时为了API能够找到对应的需要使用的认证方式，还会要求指定对应的认证方式，如果需要传递额外参数，则使用properties传入
+| 通用内部抽象 | 增加额外的验证步骤，收集登录数据等 | 详细见 <<loginPhase,登录流程>> |
+|===
+
+整个 [#loginPhase]#登录流程# 被划分为四个阶段
+
+- pre login phase: 前期认证阶段，在验证用户名密码之前如果需要做一些提前检查或者是统计数据等，在前期认证阶段处理。
+
+- login phase: 认证阶段，实现对应的认证方法，比如校验用户名密码，使用API获取第三方认证结果等，并要求返回对应ZStack系统的用户信息。
+
+- additional login phase: 附加认证阶段，实现对应的二次/附加认证逻辑，比如短信验证码，图片验证码等。
+
+- login result process phase: 认证结果处理阶段，登录成功/失败后的处理逻辑，比如需要增加数据统计，包括增加登录过于频繁限制等等。
+
+基于流程上的抽象，核心的接口设计如下：
+
+登录接口：
+
+[source,java]
+----
+public interface LoginBackend {
+    LoginType getLoginType();
+
+    void login(LoginContext loginContext, ReturnValueCompletion<LoginSessionInfo> completion);
+
+    boolean authenticate(String username, String password);
+
+    String getUserIdByName(String username);
+
+    void collectUserInfoIntoContext(LoginContext loginContext);
+
+    List<AdditionalAuthFeature> getRequiredAdditionalAuthFeature();
+}
+----
+
+每个认证模块需要实现 `LoginBackend` 接口，包括指定认证类型，实现登录逻辑，提供用户名密码正确性校验，通过用户名获取用户id，以及指定需要启用的附加认证特性等。
+
+其中 `LoginContext` 在整个登录认证流程中起到传递上下文的作用，负责转换信息以及适配各种通用附加认证逻辑。
+
+拓展接口：
+
+[source,java]
+----
+public interface LoginAuthExtensionPoint {
+    ErrorCode beforeExecuteLogin(LoginContext loginContext);
+
+    ErrorCode postLogin(LoginContext loginContext, LoginSessionInfo info);
+
+    void afterLoginSuccess(LoginContext loginContext, LoginSessionInfo info);
+
+    void afterLoginFailure(LoginContext loginContext, LoginSessionInfo info, ErrorCode errorCode);
+
+    AdditionalAuthFeature getAdditionalAuthFeature();
+
+    LoginAuthenticationProcedureDesc getAdditionalAuthDesc(LoginContext loginContext);
+}
+----
+
+提供在登录认证生命周期中的各种hook
+
+并且要求提供一个`AdditionalAuthFeature`，来表示自己提供的是什么类型的认证特性，Backend通过设置对应的特性来决定这个登陆方式需要使用哪种拓展功能。
+
+通过 `LoginAuthenticationProcedureDesc` 描述针对某个 `LoginContext` 需要什么认证方式，处于安全考虑，这个描述只根据功能是否启用来返回内容，避免通过API发起用户的枚举攻击。
+
+这里面包含两个部分，分别是 `LoginContext` 的传递和 `LoginSessionInfo`。在登录认证后，会加入 `LoginSessionInfo` 用来表示用户在ZStack中对应的账户/用户信息，并作为最终session使用的依据。
+
+note::
+单独提供一个 `LoginSessionInfo` 类型，并且用于session登录，是为了适用于认证后用户信息和登录参数不完全匹配的情况，比如共享账户，子账户等，发生变化的情况，在context中保留原始参数，info中保存实际结果。
+
+== Building Block View
+
+从结构上，登录逻辑的构成如下图所示：
+
+[plantuml,align=center]
+....
+skinparam ranksep 20
+skinparam dpi 150
+skinparam arrowThickness 0.7
+skinparam packageTitleAlignment left
+skinparam usecaseBorderThickness 0.4
+skinparam defaultFontSize 12
+skinparam rectangleBorderThickness 1
+
+component ZStack {
+    component LoginManagerImpl
+    component LoginBackend.
+    component LoginBackend.2
+    component AdditionalAuthFeatures
+}
+
+API - [LoginManagerImpl]
+[LoginManagerImpl] ..> [LoginBackend.1] : find matched backend
+[LoginBackend.1] <...> [AdditionalAuthFeatures] : negotiate additional auth features
+[LoginBackend.1] ..> [Database] : login verification
+
+[LoginManagerImpl] ..> [LoginBackend.2] : find matched backend
+[LoginBackend.2] <...> [AdditionalAuthFeatures] : negotiate additional auth features
+[LoginBackend.2] ..> HTTP : login verification
+....
+
+== 运行时视角
+
+对于几个核心的组件，做一个简单的介绍：
+
+`LoginManagerImpl` 是ZStack的服务，负责获取API消息，并组织整个登录流程
+
+`LoginBackend` 每个登录API都会找到一个对应的LoginBackend的实现来进行登录
+
+`AdditionalAuthFeatures` 每个LoginBackend会协商出自己适用的附加认证特性，并应用在登录流程里面
+
+运行时功能工作的步骤主要如下：
+
+1. 用户发起登录认证API请求，请求通过 `CloudBus` 转送到 `LoginManagerImpl`
+2. `LoginManagerImpl` 根据登录认证API要求的认证类型从内存中找到对应的 `LoginBackend` 对象
+3. 根据 `LoginBackend` 对象提供的 `AdditionalAuthFeatures` 信息，匹配到对应的提供 `AdditionalAuthFeatures` 的 `LoginAuthExtensionPoint` 实现
+4. 根据收集到的 `LoginAuthExtensionPoint` 和 `LoginBackend` 按照几个阶段执行，参考 <<loginPhase,登录流程>>
+
+== 部署视角
+
+这一节，主要针对新增登录认证方式做一下介绍
+
+1. 针对开发完毕的代码，编译出对应的jar包，需要import core和header两个依赖。
+2. 配置pom.xml，包括aspectj的编译等等
+3. 将编译好的bean包放到ZStack环境里
+4. 修改spring配置，增加新的bean依赖
+5. 启动管理节点并测试
+
+== 通用设计概念
+
+1. 模型，使用了分层模型，针对不同的登录方式做了分层，整体的登录流程使用统一的抽象
+2. 支持插件式开发，增加新的登录类型就能拓展
+3. 无缝升级，对旧的逻辑做了兼容，实现了对应的backend，并且API参数上也做了兼容
+4. 多管理节点下使用问题，认证逻辑不受多MN限制，具体问题取决于backend自己的实现以及backend的具体依赖(比如backend使用的认证方式需要和单个节点绑定，那么需要注意多管理节点的配置问题)
+5. 数据面的改动，无，主要是控制面模型的设计和拓展
+6. 故障模型，登录的主要流程都有对应的抽象，其任意错误都会返回统一的登录失败以及详细原因，根据原因进行对应的处理即可
+7. 批量操作的场景，无，单个登录API调用
+8. API兼容性，新增的API可以适配所有登录backend，旧的API使用内部消息登录兼容
+9. 新增API所有用户都可以使用，因为是登录API所以没有过多限制
+10. 易用性，这是测试的指标，针对这部分，主要困难在部署部分，需要做更多简化
+11. 是否产生额外资源: 暂时没有，不允许保存用户关联关系
+12. 大规模，大并发，登录API因为是同步消息，所以如果接入的认证卡住了，会影响管理节点的同步消息调用，需要设置一个很短的超时
+13. 最少的外部依赖，暂时没有外部依赖
+14. 功能架构的兼容性，目前抽象的模型和流程里面保留了最简单的几个逻辑，如果需要修改或者升级，在保留已有流程的情况下是没有什么影响的
+15. 运维点：登录失败的时候如何分析问题，不过因为是第三方开发部署，所以开发插件的时候如果提供详细的报错，那么就能够知道是啥问题了
+16. 没有新资源加入全局搜索
+
+== 重要架构决定
+
+== 质量要求
+
+== 技术风险/债务
+
+[options="header",cols="1,2,2"]
+|===
+| 编号 | 风险 | 解释
+| R1 | 已有的基于ZStack开发的登陆接口 | 如果是非ZStack开发的登陆接口，会出现附加认证不可用的情况，需要更换为新接口
+| R2 | Bad 2-Step verification | 目前的2-Step实现上并不是先通过登陆获取一个非用户session的方式进行下一步操作，而是接口上必须要总是附带用户名密码，使用上需要单独了解，暂时没有抽象到统一登陆流程里
+|===
+
+== 术语表
+
+[options="header",cols="1,2,2"]
+|===
+| 编号 | 术语 | 解释
+| T1 | loginType | 登陆/认证类型，常见的是Account/IAM2
+| T2 | username | 用户名，用户登陆的唯一标识，对使用者来说可以用任意字符串作为用户名，可以识别唯一用户即可
+|  T3  |         password         | 密码，用户登录的验证标识，对开发者来说可以用任意字符串作为密码，可以识别唯一用户即可
+|  T4  |         properties         |  属性，用户登录的额外参数
+|===

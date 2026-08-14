@@ -1,0 +1,9 @@
+<error>
+    <prefix>L3</prefix>
+
+    <code>
+        <id>1000</id>
+        <description>Unable to allocate an ip address from L3Network</description>
+    </code>
+</error>
+

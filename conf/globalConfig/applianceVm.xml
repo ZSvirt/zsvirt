@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<globalConfig xmlns="http://zstack.org/schema/zstack">
+    <config>
+        <name>connect.timeout</name>
+        <description>A timeout in seconds. Management server will connect to appliance vm agent after appliance vm starts successfully on hypervisor, if management server fails to connect to the agent after a period defined by this value, the appliance vm will be considered as failed to start and will be destroyed</description>
+        <defaultValue>300</defaultValue>
+        <category>applianceVm</category>
+        <type>java.lang.Integer</type>
+    </config>
+
+    <config>
+        <name>ssh.timeout</name>
+        <description>A timeout in seconds. Management server will try to ssh in appliance vm after it starts successfully on hypervisor; if management server fails to login during period defined by this configure, the appliance vm will be considered as failed to start and will be destroyed</description>
+        <defaultValue>300</defaultValue>
+        <category>applianceVm</category>
+        <type>java.lang.Integer</type>
+    </config>
+
+    <config>
+        <name>agent.deployOnStart</name>
+        <description>A boolean value. When set to true, management server will deploy appliance vm agent every time an appliance vm being created/started/reboot, using ansible. The appliance vm image has agent built in by default, so in most of time this value never needs setting to true, as it will significantly increase boot time of appliance vm; however, in case you have a new agent needed deploying in an existing appliance vm, set this value to true and reboot appliance vm will do the work.</description>
+        <defaultValue>false</defaultValue>
+        <category>applianceVm</category>
+        <type>java.lang.Boolean</type>
+    </config>
+
+    <config>
+        <category>applianceVm</category>
+        <name>bootstrapinfo.timeout</name>
+        <description>The default timeout value for bootstrapinfo socket </description>
+        <defaultValue>300</defaultValue>
+        <type>java.lang.Integer</type>
+    </config>
+
+    <config>
+        <category>applianceVm</category>
+        <name>deletion.timeout</name>
+        <description>The default timeout value for applianceVm deletion message timeout, by seconds </description>
+        <defaultValue>3600</defaultValue>
+        <type>java.lang.Long</type>
+    </config>
+
+    <config>
+        <category>applianceVm</category>
+        <name>applianceVmNuma</name>
+        <description>whether appliance vm uses numa structure</description>
+        <type>java.lang.Boolean</type>
+        <defaultValue>true</defaultValue>
+    </config>
+
+    <config>
+        <name>auto.rollback</name>
+        <description>auto delete applianceVm when created failed, auto stop applianceVm when start/reboot failed.</description>
+        <defaultValue>true</defaultValue>
+        <category>applianceVm</category>
+        <type>java.lang.Boolean</type>
+    </config>
+
+    <config>
+        <name>enableAbnormalFileReporter</name>
+        <description>enable abnormal file reporter to report abnormal files in applianceVm</description>
+        <defaultValue>true</defaultValue>
+        <category>applianceVm</category>
+        <type>java.lang.Boolean</type>
+    </config>
+
+    <config>
+        <name>abnormalFileMaxSize</name>
+        <description>the max size of abnormal file that will not report abnormal files in applianceVm</description>
+        <defaultValue>100</defaultValue>
+        <category>applianceVm</category>
+        <type>java.lang.Long</type>
+    </config>
+</globalConfig>

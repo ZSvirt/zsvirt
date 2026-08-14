@@ -1,0 +1,1088 @@
+[
+  {
+    "raw": "l2Network[uuid:%s] has attached to cluster[uuid:%s], can\u0027t attach again",
+    "en_US": "l2Network[uuid:{0}] has attached to cluster[uuid:{1}], can\u0027t attach again",
+    "zh_CN": "不能再次挂载二层网络[uuid:{0}]，因为已经挂载到集群[uuid:{1}]上了",
+    "arguments": [
+      "msg.getL2NetworkUuid()",
+      "msg.getClusterUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l2/L2NetworkApiInterceptor.java"
+  },
+  {
+    "raw": "could not attach l2 network, because there is another network [uuid:%s] on physical interface [%s] with different vswitch type",
+    "en_US": "could not attach l2 network, because there is another network [uuid:{0}] on physical interface [{1}] with different vswitch type",
+    "zh_CN": "",
+    "arguments": [
+      "otherL2s.get(0)",
+      "l2.getPhysicalInterface()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l2/L2NetworkApiInterceptor.java"
+  },
+  {
+    "raw": "l2Network[uuid:%s] has not attached to cluster[uuid:%s]",
+    "en_US": "l2Network[uuid:{0}] has not attached to cluster[uuid:{1}]",
+    "zh_CN": "二层网络[uuid:{0}]没有挂载到集群上[uuid:{1}]",
+    "arguments": [
+      "msg.getL2NetworkUuid()",
+      "msg.getClusterUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l2/L2NetworkApiInterceptor.java"
+  },
+  {
+    "raw": "type[%s] should be attached to all host",
+    "en_US": "type[{0}] should be attached to all host",
+    "zh_CN": "",
+    "arguments": [
+      "l2Type"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l2/L2NetworkApiInterceptor.java"
+  },
+  {
+    "raw": "could not attach l2Network[uuid:%s] to host[uuid:%s] which is in the premaintenance or maintenance state",
+    "en_US": "could not attach l2Network[uuid:{0}] to host[uuid:{1}] which is in the premaintenance or maintenance state",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getL2NetworkUuid()",
+      "msg.getHostUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l2/L2NetworkApiInterceptor.java"
+  },
+  {
+    "raw": "invalid json format, causes: %s",
+    "en_US": "invalid json format, causes: {0}",
+    "zh_CN": "无效的JSON格式，原因：{0}",
+    "arguments": [
+      "e.getMessage()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l2/L2NetworkApiInterceptor.java"
+  },
+  {
+    "raw": "l2Network[uuid:%s] has not attached to cluster of host[uuid:%s]",
+    "en_US": "l2Network[uuid:{0}] has not attached to cluster of host[uuid:{1}]",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getL2NetworkUuid()",
+      "msg.getHostUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l2/L2NetworkApiInterceptor.java"
+  },
+  {
+    "raw": "l2Network[uuid:%s] has not attached to host[uuid:%s]",
+    "en_US": "l2Network[uuid:{0}] has not attached to host[uuid:{1}]",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getL2NetworkUuid()",
+      "msg.getHostUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l2/L2NetworkApiInterceptor.java"
+  },
+  {
+    "raw": "unsupported l2Network type[%s]",
+    "en_US": "unsupported l2Network type[{0}]",
+    "zh_CN": "不支持的网络类型[{0}]",
+    "arguments": [
+      "msg.getType()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l2/L2NetworkApiInterceptor.java"
+  },
+  {
+    "raw": "unsupported vSwitch type[%s]",
+    "en_US": "unsupported vSwitch type[{0}]",
+    "zh_CN": "不支持的vSwitch类型[{0}]",
+    "arguments": [
+      "msg.getvSwitchType()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l2/L2NetworkApiInterceptor.java"
+  },
+  {
+    "raw": "l2 network[type:%s] does not support update virtual network id",
+    "en_US": "l2 network[type:{0}] does not support update virtual network id",
+    "zh_CN": "",
+    "arguments": [
+      "l2.getType()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l2/L2NetworkApiInterceptor.java"
+  },
+  {
+    "raw": "cannot update virtual network id for l2Network[uuid:%s] because it only supports an L2Network that is exclusively attached to a kvm cluster",
+    "en_US": "cannot update virtual network id for l2Network[uuid:{0}] because it only supports an L2Network that is exclusively attached to a kvm cluster",
+    "zh_CN": "",
+    "arguments": [
+      "l2.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l2/L2NetworkApiInterceptor.java"
+  },
+  {
+    "raw": "there\u0027s no host in cluster[uuid: %s], but hostParams is set",
+    "en_US": "there\u0027s no host in cluster[uuid: {0}], but hostParams is set",
+    "zh_CN": "",
+    "arguments": [
+      "clusterUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l2/L2NetworkHostUtils.java"
+  },
+  {
+    "raw": "hostUuid can not be null in HostParam",
+    "en_US": "hostUuid can not be null in HostParam",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/network/l2/L2NetworkHostUtils.java"
+  },
+  {
+    "raw": "host[uuid: %s] is not in cluster[uuid: %s]",
+    "en_US": "host[uuid: {0}] is not in cluster[uuid: {1}]",
+    "zh_CN": "",
+    "arguments": [
+      "hostParam.getHostUuid()",
+      "clusterUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l2/L2NetworkHostUtils.java"
+  },
+  {
+    "raw": "hostUuid in HostParam is inconsistent with the hostUuid in APIMsg",
+    "en_US": "hostUuid in HostParam is inconsistent with the hostUuid in APIMsg",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/network/l2/L2NetworkHostUtils.java"
+  },
+  {
+    "raw": "physical interface can not be null in HostParam",
+    "en_US": "physical interface can not be null in HostParam",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/network/l2/L2NetworkHostUtils.java"
+  },
+  {
+    "raw": "unsupported l2Network provider type[%s]",
+    "en_US": "unsupported l2Network provider type[{0}]",
+    "zh_CN": "",
+    "arguments": [
+      "hostParam.getL2ProviderType()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l2/L2NetworkHostUtils.java"
+  },
+  {
+    "raw": "unable to find L2Network[uuid:%s], it may have been deleted",
+    "en_US": "unable to find L2Network[uuid:{0}], it may have been deleted",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getL2NetworkUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l2/L2NetworkManagerImpl.java"
+  },
+  {
+    "raw": "unable to create l2network[name:%s, type:%s], %s",
+    "en_US": "unable to create l2network[name:{0}, type:{1}], {2}",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getName()",
+      "msg.getType()",
+      "e.getMessage()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l2/L2NetworkManagerImpl.java"
+  },
+  {
+    "raw": "attach l2 network[uuid:%s] to cluster[uuid:%s] failed:%s",
+    "en_US": "attach l2 network[uuid:{0}] to cluster[uuid:{1}] failed:{2}",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getL2NetworkUuid()",
+      "msg.getClusterUuid()",
+      "reply.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l2/L2NoVlanNetwork.java"
+  },
+  {
+    "raw": "attach l2 network[uuid:%s] to host[uuid:%s] failed:%s",
+    "en_US": "attach l2 network[uuid:{0}] to host[uuid:{1}] failed:{2}",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getL2NetworkUuid()",
+      "msg.getHostUuid()",
+      "reply.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l2/L2NoVlanNetwork.java"
+  },
+  {
+    "raw": "There has been a l2Network[uuid:%s, name:%s] attached to cluster[uuid:%s] that has physical interface[%s]. Failed to attach l2Network[uuid:%s]",
+    "en_US": "There has been a l2Network[uuid:{0}, name:{1}] attached to cluster[uuid:{2}] that has physical interface[{3}]. Failed to attach l2Network[uuid:{4}]",
+    "zh_CN": "二层网络挂载失败[uuid:{4}]: 二层网络[uuid:{0}, name:{1}]的物理接口[{3}]]已经挂载到集群[uuid:{2}]上",
+    "arguments": [
+      "l2.getUuid()",
+      "l2.getName()",
+      "msg.getClusterUuid()",
+      "l2.getPhysicalInterface()",
+      "tl2.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l2/L2NoVlanNetwork.java"
+  },
+  {
+    "raw": "There has been a L2VlanNetwork[uuid:%s, name:%s] attached to cluster[uuid:%s] that has physical interface[%s], vlan[%s]. Failed to attach L2VlanNetwork[uuid:%s]",
+    "en_US": "There has been a L2VlanNetwork[uuid:{0}, name:{1}] attached to cluster[uuid:{2}] that has physical interface[{3}], vlan[{4}]. Failed to attach L2VlanNetwork[uuid:{5}]",
+    "zh_CN": "二层网络挂载失败[uuid:{5}]: 二层网络[uuid:{0}, name:{1}]的物理接口[{3}], vlan[{4}]已经挂载到集群[uuid:{2}]上",
+    "arguments": [
+      "vl2.getUuid()",
+      "vl2.getName()",
+      "msg.getClusterUuid()",
+      "vl2.getPhysicalInterface()",
+      "vl2.getVlan()",
+      "tl2.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l2/L2NoVlanNetwork.java"
+  },
+  {
+    "raw": "cannot find ip range that has ip[%s] in l3Network[uuid:%s]",
+    "en_US": "cannot find ip range that has ip[{0}] in l3Network[uuid:{1}]",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getRequiredIp()",
+      "msg.getL3NetworkUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l3/AbstractIpAllocatorStrategy.java"
+  },
+  {
+    "raw": "IP allocator strategy[%s] failed, because %s",
+    "en_US": "IP allocator strategy[{0}] failed, because {1}",
+    "zh_CN": "",
+    "arguments": [
+      "strategyType",
+      "reason"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l3/L3BasicNetwork.java"
+  },
+  {
+    "raw": "could not delete ip address, because it\u0027s used by vmnic[uuid:%s]",
+    "en_US": "could not delete ip address, because it\u0027s used by vmnic[uuid:{0}]",
+    "zh_CN": "",
+    "arguments": [
+      "vo.getVmNicUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l3/L3NetworkApiInterceptor.java"
+  },
+  {
+    "raw": "could not reserve ip range, because start ip[%s] is not valid ip address",
+    "en_US": "could not reserve ip range, because start ip[{0}] is not valid ip address",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getStartIp()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l3/L3NetworkApiInterceptor.java"
+  },
+  {
+    "raw": "could not reserve ip range, because end ip[%s] is not valid ip address",
+    "en_US": "could not reserve ip range, because end ip[{0}] is not valid ip address",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getEndIp()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l3/L3NetworkApiInterceptor.java"
+  },
+  {
+    "raw": "could not reserve ip range, because end ip[%s] is not ipv4 address",
+    "en_US": "could not reserve ip range, because end ip[{0}] is not ipv4 address",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getEndIp()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l3/L3NetworkApiInterceptor.java"
+  },
+  {
+    "raw": "could not reserve ip range, because end ip[%s] is not ipv6 address",
+    "en_US": "could not reserve ip range, because end ip[{0}] is not ipv6 address",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getEndIp()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l3/L3NetworkApiInterceptor.java"
+  },
+  {
+    "raw": "could not reserve ip range, because end ip[%s] is less than start ip[%s]",
+    "en_US": "could not reserve ip range, because end ip[{0}] is less than start ip[{1}]",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getEndIp()",
+      "msg.getStartIp()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l3/L3NetworkApiInterceptor.java"
+  },
+  {
+    "raw": "could not reserve ip range, because there is no ipv4 range",
+    "en_US": "could not reserve ip range, because there is no ipv4 range",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/network/l3/L3NetworkApiInterceptor.java"
+  },
+  {
+    "raw": "could not reserve ip range, because there is no ipv6 range",
+    "en_US": "could not reserve ip range, because there is no ipv6 range",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/network/l3/L3NetworkApiInterceptor.java"
+  },
+  {
+    "raw": "could not reserve ip range, because reserve ip is not in ip range[%s]",
+    "en_US": "could not reserve ip range, because reserve ip is not in ip range[{0}]",
+    "zh_CN": "",
+    "arguments": [
+      "ipv6Ranges.get(0).getNetworkCidr()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l3/L3NetworkApiInterceptor.java"
+  },
+  {
+    "raw": "could not reserve ip range, because new range [%s:%s] is overlapped with old range [%s:%s]",
+    "en_US": "could not reserve ip range, because new range [{0}:{1}] is overlapped with old range [{2}:{3}]",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getStartIp()",
+      "msg.getEndIp()",
+      "reserveRange.getStartIp()",
+      "reserveRange.getEndIp()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l3/L3NetworkApiInterceptor.java"
+  },
+  {
+    "raw": "could not set mtu because l2 network[uuid:%s] of l3 network [uuid:%s] mtu can not be bigger than the novlan network",
+    "en_US": "could not set mtu because l2 network[uuid:{0}] of l3 network [uuid:{1}] mtu can not be bigger than the novlan network",
+    "zh_CN": "",
+    "arguments": [
+      "l2VO.getUuid()",
+      "msg.getL3NetworkUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l3/L3NetworkApiInterceptor.java"
+  },
+  {
+    "raw": "can not delete the last normal ip range because there is still has address pool",
+    "en_US": "can not delete the last normal ip range because there is still has address pool",
+    "zh_CN": "无法删除最后一个正常IP范围，因为仍有地址池",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/network/l3/L3NetworkApiInterceptor.java"
+  },
+  {
+    "raw": "you must update system and category both",
+    "en_US": "you must update system and category both",
+    "zh_CN": "必须同时更行system属性和category属性",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/network/l3/L3NetworkApiInterceptor.java"
+  },
+  {
+    "raw": "no ip range in l3[%s]",
+    "en_US": "no ip range in l3[{0}]",
+    "zh_CN": "没有IP在三层网络范围中",
+    "arguments": [
+      "msg.getL3NetworkUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l3/L3NetworkApiInterceptor.java"
+  },
+  {
+    "raw": "ip[%s] is not in the cidr of ip range[uuid:%s, cidr:%s] which l3 network[%s] attached",
+    "en_US": "ip[{0}] is not in the cidr of ip range[uuid:{1}, cidr:{2}] which l3 network[{3}] attached",
+    "zh_CN": "IP[{0}]没有在三层网络[{3}]的CIDR的IP范围内[uuid:{1}, cidr:{2}]",
+    "arguments": [
+      "msg.getRouterInterfaceIp()",
+      "ipr.getUuid()",
+      "ipr.getNetworkCidr()",
+      "msg.getL3NetworkUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l3/L3NetworkApiInterceptor.java"
+  },
+  {
+    "raw": "ip[%s] in ip range[uuid:%s, startIp:%s, endIp:%s] which l3 network[%s] attached, this is not allowed",
+    "en_US": "ip[{0}] in ip range[uuid:{1}, startIp:{2}, endIp:{3}] which l3 network[{4}] attached, this is not allowed",
+    "zh_CN": "IP[{0}]在三层网络[{4}]绑定的IP范围内[uuid:{1}, startIp:{2}, endIp:{3}]，这是不被允许的",
+    "arguments": [
+      "msg.getRouterInterfaceIp()",
+      "ipr.getUuid()",
+      "ipr.getStartIp()",
+      "ipr.getEndIp()",
+      "msg.getL3NetworkUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l3/L3NetworkApiInterceptor.java"
+  },
+  {
+    "raw": "invalid IP[%s]",
+    "en_US": "invalid IP[{0}]",
+    "zh_CN": "错误的IP值[{0}]",
+    "arguments": [
+      "msg.getIp()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l3/L3NetworkApiInterceptor.java"
+  },
+  {
+    "raw": "ipRangeUuid and l3NetworkUuid cannot both be null; you must set either one.",
+    "en_US": "ipRangeUuid and l3NetworkUuid cannot both be null; you must set either one.",
+    "zh_CN": "IP段和L3的uuid不能都为空，您必须选择一个填上",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/network/l3/L3NetworkApiInterceptor.java"
+  },
+  {
+    "raw": "could not get free ip with start[ip:%s],because l3Network[uuid:%s] is dual stack",
+    "en_US": "could not get free ip with start[ip:{0}],because l3Network[uuid:{1}] is dual stack",
+    "zh_CN": "无法使用start[IP：{0}]获取可用IP，因为L3Network[uuid：{1}]是双堆栈",
+    "arguments": [
+      "msg.getStart()",
+      "msg.getL3NetworkUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l3/L3NetworkApiInterceptor.java"
+  },
+  {
+    "raw": "could not get free ip with start[ip:%s],because start[ip:%s] is not a correct ipv4 address",
+    "en_US": "could not get free ip with start[ip:{0}],because start[ip:{1}] is not a correct ipv4 address",
+    "zh_CN": "无法使用start[IP：{0}]获取可用IP，因为start[IP：{1}]不是正确的IPv4地址",
+    "arguments": [
+      "msg.getStart()",
+      "msg.getStart()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l3/L3NetworkApiInterceptor.java"
+  },
+  {
+    "raw": "could not get free ip with start[ip:%s],because start[ip:%s] is not a correct ipv6 address",
+    "en_US": "could not get free ip with start[ip:{0}],because start[ip:{1}] is not a correct ipv6 address",
+    "zh_CN": "无法使用start[IP：{0}]获取可用IP，因为start[IP：{1}]不是正确的IPv6地址",
+    "arguments": [
+      "msg.getStart()",
+      "msg.getStart()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l3/L3NetworkApiInterceptor.java"
+  },
+  {
+    "raw": "%s is not a valid ipv6 address",
+    "en_US": "{0} is not a valid ipv6 address",
+    "zh_CN": "{0}不是有效的IPv6地址",
+    "arguments": [
+      "msg.getGateway()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l3/L3NetworkApiInterceptor.java"
+  },
+  {
+    "raw": "[startIp %s, endIp %s, prefixLen %d, gateway %s] is not a valid ipv6 range",
+    "en_US": "[startIp {0}, endIp {1}, prefixLen {2}, gateway {3}] is not a valid ipv6 range",
+    "zh_CN": "IPv6地址段{0}-{1}/{2}, 网关{3}不是有效的IPv6地址段",
+    "arguments": [
+      "msg.getStartIp()",
+      "msg.getEndIp()",
+      "msg.getPrefixLen()",
+      "msg.getGateway()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l3/L3NetworkApiInterceptor.java"
+  },
+  {
+    "raw": "can not add ip range, because ipv6 address pool is not supported",
+    "en_US": "can not add ip range, because ipv6 address pool is not supported",
+    "zh_CN": "无法添加IP范围，因为不支持IPv6地址池",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/network/l3/L3NetworkApiInterceptor.java"
+  },
+  {
+    "raw": "ip range prefix length is out of range [%d - %d] ",
+    "en_US": "ip range prefix length is out of range [{0} - {1}] ",
+    "zh_CN": "IPv6地址前缀长度不在有效范围内[{0}-{1}]",
+    "arguments": [
+      "IPv6Constants.IPV6_PREFIX_LEN_MIN",
+      "IPv6Constants.IPV6_PREFIX_LEN_MAX"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l3/L3NetworkApiInterceptor.java"
+  },
+  {
+    "raw": "can not add ip range, because system network doesn\u0027t support ipv6 yet",
+    "en_US": "can not add ip range, because system network doesn\u0027t support ipv6 yet",
+    "zh_CN": "无法添加IP范围，因为系统网络尚不支持IPv6",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/network/l3/L3NetworkApiInterceptor.java"
+  },
+  {
+    "raw": "addressMode[%s] is different from L3Netowork address mode[%s]",
+    "en_US": "addressMode[{0}] is different from L3Netowork address mode[{1}]",
+    "zh_CN": "地址模式[{0}]和三层网络的地址模式[{1}]不同",
+    "arguments": [
+      "ipr.getAddressMode()",
+      "rangeVOS.get(0).getAddressMode()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l3/L3NetworkApiInterceptor.java"
+  },
+  {
+    "raw": "ipv6 prefix length must be %d for Stateless-DHCP or SLAAC",
+    "en_US": "ipv6 prefix length must be {0} for Stateless-DHCP or SLAAC",
+    "zh_CN": "Stateless-DHCP or SLAAC地址模式IPv6网络前缀长度必须是{0}",
+    "arguments": [
+      "IPv6Constants.IPV6_STATELESS_PREFIX_LEN"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l3/L3NetworkApiInterceptor.java"
+  },
+  {
+    "raw": "new ip range [startip :%s, endip :%s] is overlaped with old ip range[startip :%s, endip :%s]",
+    "en_US": "new ip range [startip :{0}, endip :{1}] is overlaped with old ip range[startip :{2}, endip :{3}]",
+    "zh_CN": "新的IP地址段[{0}-{1}]和旧的IP地址段[{2}-{3}]冲突",
+    "arguments": [
+      "ipr.getStartIp()",
+      "ipr.getEndIp()",
+      "r.getStartIp()",
+      "r.getEndIp()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l3/L3NetworkApiInterceptor.java"
+  },
+  {
+    "raw": "new network CIDR [%s] is different from old network cidr [%s]",
+    "en_US": "new network CIDR [{0}] is different from old network cidr [{1}]",
+    "zh_CN": "同一三层网络上不能加载多个CIDR。",
+    "arguments": [
+      "r.getNetworkCidr()",
+      "ipr.getNetworkCidr()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l3/L3NetworkApiInterceptor.java"
+  },
+  {
+    "raw": "%s is not an allowed network cidr, because it doesn\u0027t have usable ip range",
+    "en_US": "{0} is not an allowed network cidr, because it doesn\u0027t have usable ip range",
+    "zh_CN": "{0}是不允许的无类别域间路由，因为它不支持可用的IP段",
+    "arguments": [
+      "msg.getNetworkCidr()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l3/L3NetworkApiInterceptor.java"
+  },
+  {
+    "raw": "the gateway[%s] is not in the subnet %s",
+    "en_US": "the gateway[{0}] is not in the subnet {1}",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getGateway()",
+      "subnet.getCidrSignature()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l3/L3NetworkApiInterceptor.java"
+  },
+  {
+    "raw": "%s is not a valid network cidr",
+    "en_US": "{0} is not a valid network cidr",
+    "zh_CN": "{0}不是有效的无类别域间路由",
+    "arguments": [
+      "msg.getNetworkCidr()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l3/L3NetworkApiInterceptor.java"
+  },
+  {
+    "raw": "ipRangeUuids, L3NetworkUuids, zoneUuids must have at least one be none-empty list, or all is set to true",
+    "en_US": "ipRangeUuids, L3NetworkUuids, zoneUuids must have at least one be none-empty list, or all is set to true",
+    "zh_CN": "ipRangeUuids, L3NetworkUuids, zoneUuids 至少一个不是为空列表，或者全部不为空",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/network/l3/L3NetworkApiInterceptor.java"
+  },
+  {
+    "raw": "all the specified L3 networks are IPAM disabled, cannot get ip address capacity",
+    "en_US": "all the specified L3 networks are IPAM disabled, cannot get ip address capacity",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/network/l3/L3NetworkApiInterceptor.java"
+  },
+  {
+    "raw": "unsupported l3network type[%s]",
+    "en_US": "unsupported l3network type[{0}]",
+    "zh_CN": "不支持的三层网络类型[{0}]",
+    "arguments": [
+      "msg.getType()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l3/L3NetworkApiInterceptor.java"
+  },
+  {
+    "raw": "%s is not a valid domain name",
+    "en_US": "{0} is not a valid domain name",
+    "zh_CN": "{0}不是有效的域名",
+    "arguments": [
+      "msg.getDnsDomain()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l3/L3NetworkApiInterceptor.java"
+  },
+  {
+    "raw": "not valid combination of system and category,only %s are valid",
+    "en_US": "not valid combination of system and category,only {0} are valid",
+    "zh_CN": "",
+    "arguments": [
+      "L3NetworkCategory.validCombination"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l3/L3NetworkApiInterceptor.java"
+  },
+  {
+    "raw": "l3 network [uuid %s: name %s] is not a public network, address pool range can not be added",
+    "en_US": "l3 network [uuid {0}: name {1}] is not a public network, address pool range can not be added",
+    "zh_CN": "三层网络[uuid{0}：名称{1}]不是公用网络，无法添加地址池范围",
+    "arguments": [
+      "l3Vo.getUuid()",
+      "l3Vo.getName()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l3/L3NetworkApiInterceptor.java"
+  },
+  {
+    "raw": "the IP range[%s ~ %s] contains D class addresses which are for multicast",
+    "en_US": "the IP range[{0} ~ {1}] contains D class addresses which are for multicast",
+    "zh_CN": "这个IP段[{0} ~ {1}]包含了D类的组播地址",
+    "arguments": [
+      "ipr.getStartIp()",
+      "ipr.getEndIp()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l3/L3NetworkApiInterceptor.java"
+  },
+  {
+    "raw": "the IP range[%s ~ %s] contains E class addresses which are reserved",
+    "en_US": "the IP range[{0} ~ {1}] contains E class addresses which are reserved",
+    "zh_CN": "这个IP段[{0} ~ {1}]包含了E类的保留地址",
+    "arguments": [
+      "ipr.getStartIp()",
+      "ipr.getEndIp()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l3/L3NetworkApiInterceptor.java"
+  },
+  {
+    "raw": "the IP range[%s ~ %s] contains link local addresses which are reserved",
+    "en_US": "the IP range[{0} ~ {1}] contains link local addresses which are reserved",
+    "zh_CN": "这个IP段[{0} ~ {1}]包含了本地的保留地址",
+    "arguments": [
+      "ipr.getStartIp()",
+      "ipr.getEndIp()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l3/L3NetworkApiInterceptor.java"
+  },
+  {
+    "raw": "the gateway[%s] is not in the subnet %s/%s",
+    "en_US": "the gateway[{0}] is not in the subnet {1}/{2}",
+    "zh_CN": "网关[{0}]不在子网{1}/{2}",
+    "arguments": [
+      "ipr.getGateway()",
+      "ipr.getStartIp()",
+      "ipr.getNetmask()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l3/L3NetworkApiInterceptor.java"
+  },
+  {
+    "raw": "ip allocation can not contain network address or broadcast address",
+    "en_US": "ip allocation can not contain network address or broadcast address",
+    "zh_CN": "ip 地址分配不能包含网络地址或广播的地址",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/network/l3/L3NetworkApiInterceptor.java"
+  },
+  {
+    "raw": "start ip[%s] is not a IPv4 address",
+    "en_US": "start ip[{0}] is not a IPv4 address",
+    "zh_CN": "开始的ip[{0}] 不是IPV4的地址",
+    "arguments": [
+      "ipr.getStartIp()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l3/L3NetworkApiInterceptor.java"
+  },
+  {
+    "raw": "end ip[%s] is not a IPv4 address",
+    "en_US": "end ip[{0}] is not a IPv4 address",
+    "zh_CN": "结束的ip[{0}] 不是IPV4的地址",
+    "arguments": [
+      "ipr.getEndIp()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l3/L3NetworkApiInterceptor.java"
+  },
+  {
+    "raw": "gateway[%s] is not a IPv4 address",
+    "en_US": "gateway[{0}] is not a IPv4 address",
+    "zh_CN": "网关[{0}]不是IPV4的地址",
+    "arguments": [
+      "ipr.getGateway()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l3/L3NetworkApiInterceptor.java"
+  },
+  {
+    "raw": "netmask[%s] is not a netmask, and the IP range netmask cannot be 0.0.0.0",
+    "en_US": "netmask[{0}] is not a netmask, and the IP range netmask cannot be 0.0.0.0",
+    "zh_CN": "子网掩码[{0}]不是子网掩码，并且IP段的子网掩码不能是0.0.0.0",
+    "arguments": [
+      "ipr.getNetmask()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l3/L3NetworkApiInterceptor.java"
+  },
+  {
+    "raw": "start ip[%s] is behind end ip[%s]",
+    "en_US": "start ip[{0}] is behind end ip[{1}]",
+    "zh_CN": "起始ip[{0}]在尾ip[{1}]后",
+    "arguments": [
+      "ipr.getStartIp()",
+      "ipr.getEndIp()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l3/L3NetworkApiInterceptor.java"
+  },
+  {
+    "raw": "overlap with ip range[uuid:%s, start ip:%s, end ip: %s]",
+    "en_US": "overlap with ip range[uuid:{0}, start ip:{1}, end ip: {2}]",
+    "zh_CN": "重叠的IP段[uuid:{0}, 起始ip:{1}, 尾ip: {2}]",
+    "arguments": [
+      "r.getUuid()",
+      "r.getStartIp()",
+      "r.getEndIp()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l3/L3NetworkApiInterceptor.java"
+  },
+  {
+    "raw": "multiple CIDR on the same L3 network is not allowed. There has been a IP range[uuid:%s, CIDR:%s], the new IP range[CIDR:%s] is not in the CIDR with the existing one",
+    "en_US": "multiple CIDR on the same L3 network is not allowed. There has been a IP range[uuid:{0}, CIDR:{1}], the new IP range[CIDR:{2}] is not in the CIDR with the existing one",
+    "zh_CN": "",
+    "arguments": [
+      "r.getUuid()",
+      "rcidr",
+      "cidr"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l3/L3NetworkApiInterceptor.java"
+  },
+  {
+    "raw": "the endip[%s] is not in the subnet %s/%s",
+    "en_US": "the endip[{0}] is not in the subnet {1}/{2}",
+    "zh_CN": "IP段结束地址不在子网{1}/{2}范围内",
+    "arguments": [
+      "ipr.getEndIp()",
+      "ipr.getStartIp()",
+      "ipr.getNetmask()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l3/L3NetworkApiInterceptor.java"
+  },
+  {
+    "raw": "gateway[%s] can not be part of range[%s, %s]",
+    "en_US": "gateway[{0}] can not be part of range[{1}, {2}]",
+    "zh_CN": "网关[{0}]不能是IP段[{1}, {2}]的一部分",
+    "arguments": [
+      "ipr.getGateway()",
+      "ipr.getStartIp()",
+      "ipr.getEndIp()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l3/L3NetworkApiInterceptor.java"
+  },
+  {
+    "raw": "new add ip range gateway %s is different from old gateway %s",
+    "en_US": "new add ip range gateway {0} is different from old gateway {1}",
+    "zh_CN": "新ip段的网关地址{0}和已有ip段的网关地址{1}冲突",
+    "arguments": [
+      "ipr.getGateway()",
+      "r.getGateway()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l3/L3NetworkApiInterceptor.java"
+  },
+  {
+    "raw": "IPAM is disabled for L3 network[uuid:%s], cannot add ip range",
+    "en_US": "IPAM is disabled for L3 network[uuid:{0}], cannot add ip range",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getL3NetworkUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l3/L3NetworkApiInterceptor.java"
+  },
+  {
+    "raw": "adding normal ip range must specify gateway ip address",
+    "en_US": "adding normal ip range must specify gateway ip address",
+    "zh_CN": "添加正常IP范围必须指定网关IP地址",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/network/l3/L3NetworkApiInterceptor.java"
+  },
+  {
+    "raw": "dns[%s] is not a IP address",
+    "en_US": "dns[{0}] is not a IP address",
+    "zh_CN": "dns地址[{0}]不是有效的IP地址",
+    "arguments": [
+      "msg.getDns()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l3/L3NetworkApiInterceptor.java"
+  },
+  {
+    "raw": "there has been a DNS[%s] on L3 network[uuid:%s]",
+    "en_US": "there has been a DNS[{0}] on L3 network[uuid:{1}]",
+    "zh_CN": "在三层网络[uuid:{1}]上已经存在一个DNS[{0}]",
+    "arguments": [
+      "msg.getDns()",
+      "msg.getL3NetworkUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l3/L3NetworkApiInterceptor.java"
+  },
+  {
+    "raw": "nexthop[%s] is not a IPv4 address",
+    "en_US": "nexthop[{0}] is not a IPv4 address",
+    "zh_CN": "下一跳{0}不是有效的IP地址",
+    "arguments": [
+      "msg.getNexthop()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l3/L3NetworkApiInterceptor.java"
+  },
+  {
+    "raw": "there has been a hostroute for prefix[%s] on L3 network[uuid:%s]",
+    "en_US": "there has been a hostroute for prefix[{0}] on L3 network[uuid:{1}]",
+    "zh_CN": "三层网络{1}已配置主机路由{0}",
+    "arguments": [
+      "msg.getPrefix()",
+      "msg.getL3NetworkUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l3/L3NetworkApiInterceptor.java"
+  },
+  {
+    "raw": "prefix [%s] is not a IPv4 network cidr",
+    "en_US": "prefix [{0}] is not a IPv4 network cidr",
+    "zh_CN": "网络段{0}不是合法的网络段",
+    "arguments": [
+      "msg.getL3NetworkUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l3/L3NetworkApiInterceptor.java"
+  },
+  {
+    "raw": "there is no hostroute for prefix[%s] on L3 network[uuid:%s]",
+    "en_US": "there is no hostroute for prefix[{0}] on L3 network[uuid:{1}]",
+    "zh_CN": "三层网络{1}没有主机路由{0}",
+    "arguments": [
+      "msg.getPrefix()",
+      "msg.getL3NetworkUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l3/L3NetworkApiInterceptor.java"
+  },
+  {
+    "raw": "Unable to find L3Network[uuid:%s], it may have been deleted",
+    "en_US": "Unable to find L3Network[uuid:{0}], it may have been deleted",
+    "zh_CN": "",
+    "arguments": [
+      "l3NetworkUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l3/L3NetworkManagerImpl.java"
+  },
+  {
+    "raw": "message[%s] is not AllocateIpMsg",
+    "en_US": "message[{0}] is not AllocateIpMsg",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getClass()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l3/StaticIpAllocatorStrategy.java"
+  },
+  {
+    "raw": "IP allocation of l3Network[uuid:%s] enabled, cannot allocate static ip",
+    "en_US": "IP allocation of l3Network[uuid:{0}] enabled, cannot allocate static ip",
+    "zh_CN": "",
+    "arguments": [
+      "amsg.getL3NetworkUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l3/StaticIpAllocatorStrategy.java"
+  },
+  {
+    "raw": "requiredIp cannot be null",
+    "en_US": "requiredIp cannot be null",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/network/l3/StaticIpAllocatorStrategy.java"
+  },
+  {
+    "raw": "ip version mismatch, requiredIp[%s] is %s, but ipVersion in message is %s",
+    "en_US": "ip version mismatch, requiredIp[{0}] is {1}, but ipVersion in message is {2}",
+    "zh_CN": "",
+    "arguments": [
+      "amsg.getRequiredIp()",
+      "ipVersion",
+      "amsg.getIpVersion()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l3/StaticIpAllocatorStrategy.java"
+  },
+  {
+    "raw": "invalid requiredIp[%s]",
+    "en_US": "invalid requiredIp[{0}]",
+    "zh_CN": "",
+    "arguments": [
+      "amsg.getRequiredIp()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l3/StaticIpAllocatorStrategy.java"
+  },
+  {
+    "raw": "netmask must be set when no ip range is found for l3Network[uuid:%s]",
+    "en_US": "netmask must be set when no ip range is found for l3Network[uuid:{0}]",
+    "zh_CN": "",
+    "arguments": [
+      "amsg.getL3NetworkUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l3/StaticIpAllocatorStrategy.java"
+  },
+  {
+    "raw": "netmask[%s] is not valid",
+    "en_US": "netmask[{0}] is not valid",
+    "zh_CN": "",
+    "arguments": [
+      "amsg.getNetmask()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l3/StaticIpAllocatorStrategy.java"
+  },
+  {
+    "raw": "netmask error, expect: %s, got: %s",
+    "en_US": "netmask error, expect: {0}, got: {1}",
+    "zh_CN": "",
+    "arguments": [
+      "ipr.getNetmask()",
+      "amsg.getNetmask()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l3/StaticIpAllocatorStrategy.java"
+  },
+  {
+    "raw": "prefix length[%d] is out of range [%d - %d]",
+    "en_US": "prefix length[{0}] is out of range [{1} - {2}]",
+    "zh_CN": "",
+    "arguments": [
+      "amsg.getPrefixLength()",
+      "IPv6Constants.IPV6_PREFIX_LEN_MIN",
+      "IPv6Constants.IPV6_PREFIX_LEN_MAX"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l3/StaticIpAllocatorStrategy.java"
+  },
+  {
+    "raw": "prefix length error, expect: %s, got: %s",
+    "en_US": "prefix length error, expect: {0}, got: {1}",
+    "zh_CN": "",
+    "arguments": [
+      "ipr.getPrefixLen()",
+      "amsg.getPrefixLength()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l3/StaticIpAllocatorStrategy.java"
+  },
+  {
+    "raw": "gateway error, expect: %s, got: %s",
+    "en_US": "gateway error, expect: {0}, got: {1}",
+    "zh_CN": "",
+    "arguments": [
+      "ipr.getGateway()",
+      "amsg.getGateway()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l3/StaticIpAllocatorStrategy.java"
+  },
+  {
+    "raw": "ip[%s] has been occupied by other usedIp[uuid:%s]",
+    "en_US": "ip[{0}] has been occupied by other usedIp[uuid:{1}]",
+    "zh_CN": "",
+    "arguments": [
+      "ip",
+      "conflictIp.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l3/StaticIpAllocatorStrategy.java"
+  },
+  {
+    "raw": "unable to find NetworkServiceDhcpBackend[provider type: %s]",
+    "en_US": "unable to find NetworkServiceDhcpBackend[provider type: {0}]",
+    "zh_CN": "",
+    "arguments": [
+      "providerType"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/DhcpExtension.java"
+  },
+  {
+    "raw": "L3Network [uuid: %s] provide type null",
+    "en_US": "L3Network [uuid: {0}] provide type null",
+    "zh_CN": "三层网络{0}后端为空",
+    "arguments": [
+      "msg.getL3NetworkUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/HostRouteExtension.java"
+  },
+  {
+    "raw": "L3Network [uuid: %s] does not have host route service",
+    "en_US": "L3Network [uuid: {0}] does not have host route service",
+    "zh_CN": "三层网络{0}没有主机路由功能",
+    "arguments": [
+      "msg.getL3NetworkUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/HostRouteExtension.java"
+  },
+  {
+    "raw": "network service for provider[uuid:%s] must be specified",
+    "en_US": "network service for provider[uuid:{0}] must be specified",
+    "zh_CN": "服务提供器[uuid:{0}]的网络服务必须被指定",
+    "arguments": [
+      "puuid"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/NetworkServiceApiInterceptor.java"
+  },
+  {
+    "raw": "cannot find network service provider[uuid:%s] or it provides no services",
+    "en_US": "cannot find network service provider[uuid:{0}] or it provides no services",
+    "zh_CN": "无法找到网络服务提供器[uuid:{0}]或它没有提供任何服务",
+    "arguments": [
+      "puuid"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/NetworkServiceApiInterceptor.java"
+  },
+  {
+    "raw": "network service provider[uuid:%s] doesn\u0027t provide services%s",
+    "en_US": "network service provider[uuid:{0}] doesn\u0027t provide services{1}",
+    "zh_CN": "网络服务提供器[uuid:{0}]无法提供服务{1}",
+    "arguments": [
+      "puuid",
+      "notSupported"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/NetworkServiceApiInterceptor.java"
+  },
+  {
+    "raw": "there has been a network service[%s] attached to L3 network[uuid:%s]",
+    "en_US": "there has been a network service[{0}] attached to L3 network[uuid:{1}]",
+    "zh_CN": "已经有一个网络服务[{0}]被挂载到三层网络[uuid:{1}]",
+    "arguments": [
+      "type",
+      "msg.getL3NetworkUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/NetworkServiceApiInterceptor.java"
+  },
+  {
+    "raw": "there are not enough IPs for allocation when attaching the DHCP service to L3 network[uuid:%s].",
+    "en_US": "there are not enough IPs for allocation when attaching the DHCP service to L3 network[uuid:{0}].",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getL3NetworkUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/NetworkServiceApiInterceptor.java"
+  },
+  {
+    "raw": "networkServices cannot be empty",
+    "en_US": "networkServices cannot be empty",
+    "zh_CN": "网络服务(networkServices)不能为空",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/network/service/NetworkServiceApiInterceptor.java"
+  },
+  {
+    "raw": "unable to detach network service provider[uuid:%s, name:%s, type:%s] to l2network[uuid:%s, name:%s, type:%s], %s",
+    "en_US": "unable to detach network service provider[uuid:{0}, name:{1}, type:{2}] to l2network[uuid:{3}, name:{4}, type:{5}], {6}",
+    "zh_CN": "",
+    "arguments": [
+      "vo.getUuid()",
+      "vo.getName()",
+      "vo.getType()",
+      "l2vo.getUuid()",
+      "l2vo.getName()",
+      "l2vo.getType()",
+      "e.getMessage()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/NetworkServiceManagerImpl.java"
+  },
+  {
+    "raw": "unable to attach network service provider[uuid:%s, name:%s, type:%s] to l2network[uuid:%s, name:%s, type:%s], %s",
+    "en_US": "unable to attach network service provider[uuid:{0}, name:{1}, type:{2}] to l2network[uuid:{3}, name:{4}, type:{5}], {6}",
+    "zh_CN": "",
+    "arguments": [
+      "vo.getUuid()",
+      "vo.getName()",
+      "vo.getType()",
+      "l2vo.getUuid()",
+      "l2vo.getName()",
+      "l2vo.getType()",
+      "e.getMessage()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/NetworkServiceManagerImpl.java"
+  },
+  {
+    "raw": "Failed to apply network service[%s] to vm[uuid: %s]",
+    "en_US": "Failed to apply network service[{0}] to vm[uuid: {1}]",
+    "zh_CN": "",
+    "arguments": [
+      "ns.getNetworkServiceType()",
+      "spec.getVmInventory().getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/NetworkServiceManagerImpl.java"
+  },
+  {
+    "raw": "L3Network[uuid:%s] doesn\u0027t have network service[type:%s] enabled or no provider provides this network service",
+    "en_US": "L3Network[uuid:{0}] doesn\u0027t have network service[type:{1}] enabled or no provider provides this network service",
+    "zh_CN": "三层网络[uuid:{0}]上没有网络服务[type:{1}]被启用或没有服务提供器提供该网络服务",
+    "arguments": [
+      "l3NetworkUuid",
+      "serviceType"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/NetworkServiceManagerImpl.java"
+  }
+]

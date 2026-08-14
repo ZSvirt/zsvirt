@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx" xmlns:zstack="http://zstack.org/schema/zstack"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+    http://www.springframework.org/schema/aop
+    http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+    http://www.springframework.org/schema/tx
+    http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+    http://zstack.org/schema/zstack
+    http://zstack.org/schema/zstack/plugin.xsd"
+       default-init-method="init" default-destroy-method="destroy">
+
+    <bean id="CephBackupStorageFactory" class="org.zstack.storage.ceph.backup.CephBackupStorageFactory">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.storage.backup.BackupStorageFactory"/>
+            <zstack:extension interface="org.zstack.storage.ceph.CephCapacityUpdateExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.Component"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="CephBackupStorageMetaDataMaker" class="org.zstack.storage.ceph.backup.CephBackupStorageMetaDataMaker">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.image.AddImageExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.image.ExpungeImageExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.storage.backup.AddBackupStorageExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.image.CreateTemplateExtensionPoint"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="CephPrimaryStorageImageStoreFactory"
+          class="org.zstack.storage.primary.imagestore.ceph.CephPrimaryStorageImageStoreFactory">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.storage.primary.PrimaryStorageFactory"/>
+            <zstack:extension interface="org.zstack.storage.ceph.CephCapacityUpdateExtensionPoint"/>
+            <zstack:extension interface="org.zstack.kvm.KVMStartVmExtensionPoint"/>
+            <zstack:extension interface="org.zstack.kvm.KVMAttachVolumeExtensionPoint"/>
+            <zstack:extension interface="org.zstack.kvm.KVMDetachVolumeExtensionPoint"/>
+            <zstack:extension interface="org.zstack.kvm.KVMConvertVolumeExtensionPoint" />
+            <zstack:extension interface="org.zstack.kvm.KVMPreAttachIsoExtensionPoint"/>
+            <zstack:extension
+                    interface="org.zstack.header.storage.snapshot.CreateTemplateFromVolumeSnapshotExtensionPoint"/>
+            <zstack:extension interface="org.zstack.kvm.KvmSetupSelfFencerExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.Component"/>
+            <zstack:extension interface="org.zstack.storage.snapshot.PostMarkRootVolumeAsSnapshotExtension"/>
+            <zstack:extension interface="org.zstack.header.host.HostResizeVolumeExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.storage.snapshot.BeforeTakeLiveSnapshotsOnVolumes" order="90"/>
+            <zstack:extension interface="org.zstack.header.vm.VmInstanceCreateExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.volume.CreateDataVolumeExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.configuration.userconfig.InstanceOfferingUserConfigValidator" />
+            <zstack:extension interface="org.zstack.header.configuration.userconfig.DiskOfferingUserConfigValidator" />
+            <zstack:extension interface="org.zstack.storage.snapshot.MarkRootVolumeAsSnapshotExtension" />
+            <zstack:extension interface="org.zstack.header.vm.PreVmInstantiateResourceExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.storage.primary.PSCapacityExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.storage.primary.RecalculatePrimaryStorageCapacityExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="CephCommitImageBackupStorageSelector"
+          class="org.zstack.storage.primary.imagestore.ceph.CephCommitImageBackupStorageSelector">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.storage.primary.CommitImageBackupStorageSelector"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="CephSnapshotProtector" class="org.zstack.storage.ceph.primary.CephSnapshotProtector">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.storage.snapshot.VolumeSnapshotDeletionProtector"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="CephApiInterceptor" class="org.zstack.storage.ceph.CephApiInterceptor">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.apimediator.ApiMessageInterceptor"/>
+            <zstack:extension interface="org.zstack.header.apimediator.GlobalApiMessageInterceptor" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="CephKvmExtension" class="org.zstack.storage.ceph.primary.CephKvmExtension">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.kvm.KVMHostConnectExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.host.HostConnectionReestablishExtensionPoint"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="CephImageCacheCleaner" class="org.zstack.storage.ceph.primary.CephImageCacheCleaner">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.managementnode.ManagementNodeReadyExtensionPoint"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="CephTrashCleaner" class="org.zstack.storage.ceph.primary.CephTrashCleaner">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.managementnode.ManagementNodeReadyExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="CephBackupStoragePrimaryStorageExtension" class="org.zstack.storage.ceph.backup.CephBackupStoragePrimaryStorageExtension">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.storage.backup.BackupStoragePrimaryStorageExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.allocator.BackupStorageAllocatorFilterExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="PrimaryStorageToBackupStorageMediatorExtensionPoint" class="org.zstack.storage.primary.imagestore.ceph.PrimaryStorageToBackupStorageMediatorExtension">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.storage.primary.PrimaryStorageToBackupStorageMediatorExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="CephVmImageChangeExtension" class="org.zstack.storage.ceph.CephVmImageChangeExtension">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.vm.ChangeVmImageExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="ChangeVolumeDeletionPolicyOnCephExtension" class="org.zstack.storage.ceph.primary.CephChangeVolumeProcessingMethodExtension">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.storage.volume.ChangeVolumeProcessingMethodExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="XskyLicenseInfoFactory" class="org.zstack.storage.primary.license.XskyLicenseInfoFactory">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.storage.primary.PrimaryStorageLicenseInfoFactory" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="OpenSourceCephPrimaryCapacityUpdater" class="org.zstack.storage.ceph.primary.capacity.OpenSourceCephPrimaryCapacityUpdater">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.storage.ceph.primary.capacity.CephPrimaryCapacityUpdater"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="XSKYCephPrimaryCapacityBaseUpdater" class="org.zstack.storage.ceph.primary.capacity.XSKYCephPrimaryCapacityBaseUpdater">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.storage.ceph.primary.capacity.CephPrimaryCapacityUpdater"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="SandStoneCephPrimaryCapacityBaseUpdater" class="org.zstack.storage.ceph.primary.capacity.SandStoneCephPrimaryCapacityBaseUpdater">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.storage.ceph.primary.capacity.CephPrimaryCapacityUpdater"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="ZStoneCephPrimaryCapacityBaseUpdater" class="org.zstack.storage.ceph.primary.capacity.ZStoneCephPrimaryCapacityBaseUpdater">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.storage.ceph.primary.capacity.CephPrimaryCapacityUpdater"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="CephHostHeartbeatChecker" class="org.zstack.storage.primary.ceph.CephHostHeartbeatChecker" >
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.ha.HaHostChecker" />
+            <zstack:extension interface="org.zstack.storage.ceph.primary.CephPrimaryStorageMonAfterModifiedExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="CephPrimaryStoragePreallocationFactory"
+          class="org.zstack.storage.primary.preallocation.CephPrimaryStoragePreallocationFactory">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.storage.primary.preallocation.PreallocationFactory"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="CephStorageAttachKvmClusterMetric"
+          class="org.zstack.storage.ceph.primary.CephStorageAttachKvmClusterMetric">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.storage.primary.StorageAttachClusterMetric"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="CephVolumeSnapshotAfterDeleteExtension" class="org.zstack.storage.ceph.primary.CephVolumeSnapshotAfterDeleteExtension">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.storage.snapshot.VolumeSnapshotAfterDeleteExtensionPoint"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="PoolUsageCollector" class="org.zstack.storage.ceph.primary.PoolUsageReport">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.managementnode.ManagementNodeReadyExtensionPoint" order="-2"/>
+        </zstack:plugin>
+    </bean>
+</beans>

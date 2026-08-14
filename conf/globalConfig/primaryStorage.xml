@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<globalConfig xmlns="http://zstack.org/schema/zstack">
+	<config>
+		<name>imageCache.garbageCollector.interval</name>
+		<description>The interval primary storage scans orphan image cache, in seconds</description>
+		<defaultValue>86400</defaultValue>
+        <category>primaryStorage</category>
+		<type>java.lang.Integer</type>
+		<validatorRegularExpression>^/(.*)</validatorRegularExpression>
+	</config>
+
+    <config>
+        <name>primarystorage.delete.bits.garbageCollector.interval</name>
+        <description>The interval primary storage delete bits which should be cleaned up, in seconds</description>
+        <defaultValue>600</defaultValue>
+        <category>primaryStorage</category>
+        <type>java.lang.Long</type>
+    </config>
+
+    <config>
+        <name>primarystorage.delete.bits.times</name>
+        <description>Primary storage delete bits garbage collector execute times</description>
+        <defaultValue>50</defaultValue>
+        <category>primaryStorage</category>
+        <type>java.lang.Integer</type>
+    </config>
+
+    <config>
+        <name>primarystorage.delete.bits.garbage.on</name>
+        <description>If primary storage delete bits garbage collector work on</description>
+        <defaultValue>true</defaultValue>
+        <category>primaryStorage</category>
+        <type>java.lang.Boolean</type>
+    </config>
+
+    <config>
+        <name>primarystorage.auto.delete.trash.interval</name>
+        <description>Primary storage auto delete trash period, in seconds</description>
+        <defaultValue>0</defaultValue>
+        <category>primaryStorage</category>
+        <type>java.lang.Long</type>
+    </config>
+
+	<config>
+		<name>reservedCapacity</name>
+		<description>The reserved capacity on all primary storage</description>
+		<defaultValue>1G</defaultValue>
+        <category>primaryStorage</category>
+	</config>
+
+    <config>
+        <name>ping.interval</name>
+        <description>The interval management server sends ping command to primary storage, in seconds</description>
+        <defaultValue>60</defaultValue>
+        <type>java.lang.Integer</type>
+        <category>primaryStorage</category>
+    </config>
+
+    <config>
+        <name>ping.parallelismDegree</name>
+        <description>The max number of primary storage management server sends ping commands in parallel</description>
+        <defaultValue>50</defaultValue>
+        <type>java.lang.Integer</type>
+        <category>primaryStorage</category>
+    </config>
+
+    <config>
+        <name>trash.expiration.time</name>
+        <description>Volume that have been in trash more than expiration time in seconds will be automatically deleted.</description>
+        <defaultValue>604800</defaultValue>
+        <type>java.lang.Integer</type>
+        <category>primaryStorage</category>
+    </config>
+
+    <config>
+        <name>primarystorage.host.status.refresh.interval</name>
+        <category>primaryStorage</category>
+        <description>The interval to refresh ps and host connection status, in seconds</description>
+        <defaultValue>60</defaultValue>
+        <type>java.lang.Integer</type>
+    </config>
+</globalConfig>

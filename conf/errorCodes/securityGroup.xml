@@ -1,0 +1,45 @@
+<error>
+    <prefix>SG</prefix>
+
+    <code>
+        <id>1000</id>
+        <description>Unable to add vm's nic to security group</description>
+    </code>
+
+    <code>
+        <id>1001</id>
+        <description>Resource does not exist</description>
+    </code>
+
+    <code>
+        <id>1002</id>
+        <description>Duplicate security group rules</description>
+    </code>
+
+    <code>
+        <id>1003</id>
+        <description>Rule fields conflict</description>
+    </code>
+
+    <code>
+        <id>1004</id>
+        <description>Rule fields are not supported</description>
+    </code>
+
+    <code>
+        <id>1005</id>
+        <description>Rule's port field is invalid</description>
+    </code>
+
+    <code>
+        <id>1006</id>
+        <description>Rule's port field is invalid</description>
+    </code>
+
+    <code>
+        <id>2000</id>
+        <description>Rule check ok</description>
+    </code>
+
+</error>
+

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<globalConfig xmlns="http://zstack.org/schema/zstack">
+    <config>
+        <name>Test</name>
+        <description>Test Description</description>
+        <defaultValue>1000</defaultValue>
+        <category>Test</category>
+    </config>
+    <config>
+        <name>Test2</name>
+        <description>Test Description</description>
+        <defaultValue>2000</defaultValue>
+        <type>java.lang.Integer</type>
+    </config>
+    <config>
+        <name>Test3</name>
+        <description>Test Description</description>
+        <defaultValue>2000</defaultValue>
+        <type>java.lang.Integer</type>
+        <category>Test</category>
+    </config>
+    <config>
+        <name>Test4</name>
+        <description>Test Description</description>
+        <defaultValue>hello</defaultValue>
+        <validatorRegularExpression>^hello$</validatorRegularExpression>
+        <category>Test</category>
+    </config>
+    <config>
+        <name>TestString</name>
+        <description>Test Description</description>
+        <defaultValue>hello</defaultValue>
+        <category>Test</category>
+    </config>
+    <config>
+        <name>TestBoolean</name>
+        <description>Test Description</description>
+        <defaultValue>false</defaultValue>
+        <type>java.lang.Boolean</type>
+        <category>Test</category>
+    </config>
+    <config>
+        <name>TestBorder</name>
+        <description>Test Description</description>
+        <defaultValue>10</defaultValue>
+        <type>java.lang.Integer</type>
+        <category>Test</category>
+    </config>
+</globalConfig>

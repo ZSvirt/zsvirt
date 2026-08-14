@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx" xmlns:zstack="http://zstack.org/schema/zstack"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+    http://www.springframework.org/schema/aop
+    http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+    http://www.springframework.org/schema/tx
+    http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+    http://zstack.org/schema/zstack
+    http://zstack.org/schema/zstack/plugin.xsd"
+       default-init-method="init" default-destroy-method="destroy">
+
+    <bean id="L2VxlanNetworkPoolFactory" class="org.zstack.network.l2.vxlan.vxlanNetworkPool.VxlanNetworkPoolFactory">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.Component"/>
+            <zstack:extension interface="org.zstack.header.network.l2.L2NetworkFactory"/>
+            <zstack:extension interface="org.zstack.header.apimediator.GlobalApiMessageInterceptor" />
+        </zstack:plugin>
+    </bean>
+
+
+    <bean id="L2VxlanNetworkFactory" class="org.zstack.network.l2.vxlan.vxlanNetwork.VxlanNetworkFactory">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.Component"/>
+            <zstack:extension interface="org.zstack.header.network.l2.L2NetworkFactory"/>
+            <zstack:extension interface="org.zstack.header.vm.VmInstanceMigrateExtensionPoint" order="9999"/>
+            <zstack:extension interface="org.zstack.network.l2.L2NetworkDefaultMtu"/>
+            <zstack:extension interface="org.zstack.header.network.l2.L2NetworkGetVniExtensionPoint" />
+            <zstack:extension interface="org.zstack.network.l2.L2NetworkCascadeFilterExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="RandomVniAllocatorStrategy" class="org.zstack.network.l2.vxlan.vxlanNetworkPool.RandomVniAllocatorStrategy">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.network.l2.vxlan.vxlanNetworkPool.VniAllocatorStrategy" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="InstantiateVxlanNetworkForNewCreatedVmExtension"
+          class="org.zstack.network.l2.vxlan.vxlanNetwork.InstantiateVxlanNetworkForNewCreatedVmExtension">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.vm.PreVmInstantiateResourceExtensionPoint"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="VxlanPoolApiInterceptor" class="org.zstack.network.l2.vxlan.vxlanNetworkPool.VxlanPoolApiInterceptor">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.apimediator.ApiMessageInterceptor" />
+            <zstack:extension interface="org.zstack.header.apimediator.GlobalApiMessageInterceptor"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="L2VxlanNetworkPool" class="org.zstack.network.l2.vxlan.vxlanNetworkPool.VxlanNetworkPool">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.network.l2.L2Network" />
+            <zstack:extension interface="org.zstack.network.l2.vxlan.vxlanNetworkPool.L2VxlanNetworkPoolManager" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="VxlanNetwork" class="org.zstack.network.l2.vxlan.vxlanNetwork.VxlanNetwork">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.identity.ReportQuotaExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="VxlanNetworkChecker" class="org.zstack.network.l2.vxlan.vxlanNetworkPool.VxlanNetworkCheckerImpl" />
+
+    <bean id="KVMConnectExtensionForVxlanNetwork" class="org.zstack.network.l2.vxlan.vxlanNetworkPool.KVMConnectExtensionForVxlanNetwork">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.kvm.KVMHostConnectExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.host.HostConnectionReestablishExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
+
+    <bean id="KVMRealizeL2VxlanNetworkBackend" class="org.zstack.network.l2.vxlan.vxlanNetworkPool.KVMRealizeL2VxlanNetworkBackend">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.network.l2.L2NetworkRealizationExtensionPoint" />
+            <zstack:extension interface="org.zstack.kvm.KVMCompleteNicInformationExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.vm.InstantiateResourceOnAttachingNicExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="KVMRealizeL2VxlanNetworkPoolBackend" class="org.zstack.network.l2.vxlan.vxlanNetworkPool.KVMRealizeL2VxlanNetworkPoolBackend">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.network.l2.L2NetworkRealizationExtensionPoint" />
+            <zstack:extension interface="org.zstack.kvm.KVMCompleteNicInformationExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="VtepCascadeExtension" class="org.zstack.network.l2.vxlan.vtep.VtepCascadeExtension">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.core.cascade.CascadeExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="RemoteVtepCascadeExtension" class="org.zstack.network.l2.vxlan.vtep.RemoteVtepCascadeExtension">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.core.cascade.CascadeExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
+
+</beans>

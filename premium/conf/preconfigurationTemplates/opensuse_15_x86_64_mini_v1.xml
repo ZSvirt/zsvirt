@@ -1,0 +1,88 @@
+<?xml version="1.0"?>
+<!DOCTYPE profile SYSTEM "/usr/share/autoinstall/dtd/profile.dtd">
+<profile xmlns="http://www.suse.com/1.0/yast2ns" xmlns:config="http://www.suse.com/1.0/configns">
+    <configure>
+        {{ REPO_URL }}
+        {{ NETWORK_CFGS }}
+
+        <scripts>
+            <pre-scripts config:type="list">
+                <script>
+                    <filename>pre_install.sh</filename>
+                    <source> <![CDATA[
+                    #!bin/sh
+
+                    # NECESSARY: PRE SCRIPTS FOR ZSTACK
+                    {{ PRE_SCRIPTS }}
+                        ]]>
+                    </source>
+                </script>
+            </pre-scripts>
+
+            <post-scripts config:type="list">
+                <script>
+                    <filename>zstack_post_install.sh</filename>
+                    <source> <![CDATA[
+                    #!bin/sh
+                    systemctl enable sshd
+
+                    # NECESSARY: POST SCRIPTS FOR ZSTACK
+                    {{ POST_SCRIPTS }}
+                        ]]>
+                    </source>
+                </script>
+            </post-scripts>
+        </scripts>
+
+        <users config:type="list">
+            <user>
+                <username>{{ USERNAME }}</username>
+                <user_password>{{ PASSWORD }}</user_password>
+                <encrypted config:type="boolean">true</encrypted>
+            </user>
+        </users>
+    </configure>
+
+    <install>
+        <general>
+            <mode>
+                <confirm config:type="boolean">{{ FORCE_INSTALL }}</confirm>
+                <forceboot config:type="boolean">false</forceboot>
+            </mode>
+            <proposals config:type="list">
+                <proposal>partitions_proposal</proposal>
+                <proposal>timezone_proposal</proposal>
+                <proposal>software_proposal</proposal>
+            </proposals>
+        </general>
+
+        <timezone>
+            <hwclock>UTC</hwclock>
+            <timezone>Asia/Shanghai</timezone>
+        </timezone>
+        <keyboard>
+            <keymap>english-us</keymap>
+        </keyboard>
+        <language>en_US</language>
+
+        <partitioning config:type="list">
+            <drive>
+                <initialize config:type="boolean">true</initialize>
+                <use>all</use>
+            </drive>
+        </partitioning>
+
+        <software>
+            <kernel>kernel-default</kernel>
+            <patterns config:type="list">
+                <pattern>minimal_base</pattern>
+            </patterns>
+
+            <packages config:type="list">
+                <package>iputils</package>
+                <package>man</package>
+                <package>vim</package>
+            </packages>
+        </software>
+    </install>
+</profile>

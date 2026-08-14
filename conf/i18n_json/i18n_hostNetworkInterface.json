@@ -1,0 +1,25 @@
+[
+  {
+    "raw": "could not change lldp mode for the interfaces of different hosts",
+    "en_US": "could not change lldp mode for the interfaces of different hosts",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/network/hostNetworkInterface/lldp/LldpApiInterceptor.java"
+  },
+  {
+    "raw": "could not get interface lldp info which is not in receive mode",
+    "en_US": "could not get interface lldp info which is not in receive mode",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/network/hostNetworkInterface/lldp/LldpApiInterceptor.java"
+  },
+  {
+    "raw": "operation error, because %s",
+    "en_US": "operation error, because {0}",
+    "zh_CN": "操作错误，因为{0}",
+    "arguments": [
+      "rsp.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/hostNetworkInterface/lldp/LldpManagerImpl.java"
+  }
+]

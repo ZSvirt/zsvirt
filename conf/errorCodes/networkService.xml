@@ -1,0 +1,14 @@
+<error>
+    <prefix>NWS</prefix>
+
+    <code>
+        <id>1000</id>
+        <description>Unable to attach a network service provider to L2Network</description>
+    </code>
+
+    <code>
+        <id>1001</id>
+        <description>Unable to detach a network service provider from L2Network</description>
+    </code>
+</error>
+

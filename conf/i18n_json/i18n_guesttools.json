@@ -1,0 +1,417 @@
+[
+  {
+    "raw": "could not migrate primary storage, because vm[uuid:%s] attached vf nic but guesttools not running",
+    "en_US": "could not migrate primary storage, because vm[uuid:{0}] attached vf nic but guesttools not running",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getVmInstanceUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/guesttools/GuestToolsApiInterceptor.java"
+  },
+  {
+    "raw": "could not change vf nic ha state, because guesttools not running.",
+    "en_US": "could not change vf nic ha state, because guesttools not running.",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/guesttools/GuestToolsApiInterceptor.java"
+  },
+  {
+    "raw": "could not migrate vm[uuid:%s], because vf nic is attached but guesttools not running",
+    "en_US": "could not migrate vm[uuid:{0}], because vf nic is attached but guesttools not running",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getVmUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/guesttools/GuestToolsApiInterceptor.java"
+  },
+  {
+    "raw": "unable to set vm hostname. the vm[uuid:%s] do not have default L3 network",
+    "en_US": "unable to set vm hostname. the vm[uuid:{0}] do not have default L3 network",
+    "zh_CN": "无法设置虚拟机主机名。VM[uuid：{0}]没有默认的三层网络",
+    "arguments": [
+      "vmUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/guesttools/GuestToolsApiInterceptor.java"
+  },
+  {
+    "raw": "conflict hostname, there has been a VM[uuid:%s] having hostname[%s] on L3 network[uuid:%s]",
+    "en_US": "conflict hostname, there has been a VM[uuid:{0}] having hostname[{1}] on L3 network[uuid:{2}]",
+    "zh_CN": "主机名冲突，在三层网络[uuid：{2}]上存在主机名为[{1}]的虚拟机[uuid：{0}]",
+    "arguments": [
+      "sameTag.getResourceUuid()",
+      "hostname",
+      "defaultL3uuid"
+    ],
+    "fileName": "src/main/java/org/zstack/guesttools/GuestToolsApiInterceptor.java"
+  },
+  {
+    "raw": "update vm[uuid:%s] network config failed, because vm not running.",
+    "en_US": "update vm[uuid:{0}] network config failed, because vm not running.",
+    "zh_CN": "更新VM[uuid：{0}]网络配置失败，因为VM未运行。",
+    "arguments": [
+      "msg.getVmInstanceUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/guesttools/GuestToolsApiInterceptor.java"
+  },
+  {
+    "raw": "update vm[uuid:%s] network config failed, because the vm type %s is not supported.",
+    "en_US": "update vm[uuid:{0}] network config failed, because the vm type {1} is not supported.",
+    "zh_CN": "更新VM[uuid：{0}]网络配置失败，因为不支持VM类型{1}。",
+    "arguments": [
+      "msg.getVmInstanceUuid()",
+      "vm.getType()"
+    ],
+    "fileName": "src/main/java/org/zstack/guesttools/GuestToolsApiInterceptor.java"
+  },
+  {
+    "raw": "update vm[uuid:%s] network config failed, because the guesttools version is too low for this feature.",
+    "en_US": "update vm[uuid:{0}] network config failed, because the guesttools version is too low for this feature.",
+    "zh_CN": "更新VM[uuid：{0}]网络配置失败，因为GuestTools版本太低，无法使用此功能。",
+    "arguments": [
+      "msg.getVmInstanceUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/guesttools/GuestToolsApiInterceptor.java"
+  },
+  {
+    "raw": "update vm[uuid:%s] network config failed, because guesttools not running.",
+    "en_US": "update vm[uuid:{0}] network config failed, because guesttools not running.",
+    "zh_CN": "更新VM[uuid：{0}]网络配置失败，因为guestTools未运行。",
+    "arguments": [
+      "msg.getVmInstanceUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/guesttools/GuestToolsApiInterceptor.java"
+  },
+  {
+    "raw": "cannot attach guest-tools iso to vm[uuid:%s] because it\u0027s hypervisor type is not supported",
+    "en_US": "cannot attach guest-tools iso to vm[uuid:{0}] because it\u0027s hypervisor type is not supported",
+    "zh_CN": "无法为虚拟机[uuid:{0}]挂载增强工具镜像，因为其虚拟化层目前不支持增强工具",
+    "arguments": [
+      "msg.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/guesttools/GuestToolsApiInterceptor.java"
+  },
+  {
+    "raw": "cannot attach guest-tools iso to vm[uuid:%s] because it\u0027s not running",
+    "en_US": "cannot attach guest-tools iso to vm[uuid:{0}] because it\u0027s not running",
+    "zh_CN": "无法为虚拟机[uuid:{0}]挂载增强工具镜像，因为它目前并未处于运行状态",
+    "arguments": [
+      "msg.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/guesttools/GuestToolsApiInterceptor.java"
+  },
+  {
+    "raw": "cannot attach guest-tools iso to vm[uuid:%s] because it\u0027s not user vm",
+    "en_US": "cannot attach guest-tools iso to vm[uuid:{0}] because it\u0027s not user vm",
+    "zh_CN": "无法为虚拟机[uuid:{0}]挂载增强工具镜像，因为它不是用户虚拟机",
+    "arguments": [
+      "msg.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/guesttools/GuestToolsApiInterceptor.java"
+  },
+  {
+    "raw": "cannot attach guest-tools iso to vm[uuid:%s] because it has no cdrom",
+    "en_US": "cannot attach guest-tools iso to vm[uuid:{0}] because it has no cdrom",
+    "zh_CN": "无法为虚拟机[uuid:{0}挂载增强工具镜像，因为它没有配备光驱",
+    "arguments": [
+      "msg.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/guesttools/GuestToolsApiInterceptor.java"
+  },
+  {
+    "raw": "cannot get guest-tools info from vm[uuid:%s] because it\u0027s not running",
+    "en_US": "cannot get guest-tools info from vm[uuid:{0}] because it\u0027s not running",
+    "zh_CN": "无法从虚拟机[uuid:{0}]内部获取增强工具信息，因为它目前并未处于运行状态",
+    "arguments": [
+      "vmUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/guesttools/GuestToolsApiInterceptor.java"
+  },
+  {
+    "raw": "cannot get guest-tools info from vm[uuid:%s] because it\u0027s not user vm",
+    "en_US": "cannot get guest-tools info from vm[uuid:{0}] because it\u0027s not user vm",
+    "zh_CN": "无法从虚拟机[uuid:{0}]内部获取增强工具信息，因为它不是用户虚拟机",
+    "arguments": [
+      "vmUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/guesttools/GuestToolsApiInterceptor.java"
+  },
+  {
+    "raw": "invalid debug parameter: %s",
+    "en_US": "invalid debug parameter: {0}",
+    "zh_CN": "无效的调试参数：{0}",
+    "arguments": [
+      "invalidSet"
+    ],
+    "fileName": "src/main/java/org/zstack/guesttools/GuestToolsApiInterceptor.java"
+  },
+  {
+    "raw": "can not update guest tools state for vm [uuid:%s] because vm is deleted",
+    "en_US": "can not update guest tools state for vm [uuid:{0}] because vm is deleted",
+    "zh_CN": "无法更新VM[uuid：{0}]的来宾工具状态，因为VM已删除",
+    "arguments": [
+      "msg.getVmInstanceUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/guesttools/GuestToolsApiInterceptor.java"
+  },
+  {
+    "raw": "can not update guest tools state for vm[uuid:%s] because it\u0027s not user vm",
+    "en_US": "can not update guest tools state for vm[uuid:{0}] because it\u0027s not user vm",
+    "zh_CN": "无法更新VM[uuid：{0}]的来宾工具状态，因为它不是用户VM",
+    "arguments": [
+      "msg.getVmInstanceUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/guesttools/GuestToolsApiInterceptor.java"
+  },
+  {
+    "raw": "cannot clone vm with custom specification, because the advanced license is not purchased or expired",
+    "en_US": "cannot clone vm with custom specification, because the advanced license is not purchased or expired",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/guesttools/GuestToolsApiInterceptor.java"
+  },
+  {
+    "raw": "vm[uuid:%s] has no guest tools installed, custom specification is not supported",
+    "en_US": "vm[uuid:{0}] has no guest tools installed, custom specification is not supported",
+    "zh_CN": "",
+    "arguments": [
+      "vmUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/guesttools/GuestToolsApiInterceptor.java"
+  },
+  {
+    "raw": "custom specification need guest tools version \u003e\u003d [%s], but got [%s] on vm[uuid:%s]",
+    "en_US": "custom specification need guest tools version \u003e\u003d [{0}], but got [{1}] on vm[uuid:{2}]",
+    "zh_CN": "",
+    "arguments": [
+      "GuestToolsConstant.CUSTOM_SPECIFICATION_SUPPORT_VERSION_FOR_WINDOWS",
+      "toolsState.getVersion()",
+      "vmUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/guesttools/GuestToolsApiInterceptor.java"
+  },
+  {
+    "raw": "qgaStateChange failed for vm[uuid:%s]",
+    "en_US": "qgaStateChange failed for vm[uuid:{0}]",
+    "zh_CN": "",
+    "arguments": [
+      "vmVo.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/guesttools/GuestToolsManagerImpl.java"
+  },
+  {
+    "raw": "cannot get latest guest-tools for vm[uuid:%s] because it\u0027s hypervisor type is not supported",
+    "en_US": "cannot get latest guest-tools for vm[uuid:{0}] because it\u0027s hypervisor type is not supported",
+    "zh_CN": "无法为虚拟机[uuid:{0}获取最新可用的增强工具镜像，因为其虚拟化层目前不支持增强工具",
+    "arguments": [
+      "msg.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/guesttools/GuestToolsManagerImpl.java"
+  },
+  {
+    "raw": "cannot get latest guest-tools for vm[uuid:%s] because it\u0027s not running or volume recovering.",
+    "en_US": "cannot get latest guest-tools for vm[uuid:{0}] because it\u0027s not running or volume recovering.",
+    "zh_CN": "无法获取VM[uuid：{0}]的最新来宾工具，因为它未运行或卷正在恢复。",
+    "arguments": [
+      "msg.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/guesttools/GuestToolsManagerImpl.java"
+  },
+  {
+    "raw": "cannot get latest guest-tools for vm[uuid:%s] because it\u0027s not user vm",
+    "en_US": "cannot get latest guest-tools for vm[uuid:{0}] because it\u0027s not user vm",
+    "zh_CN": "无法为虚拟机[uuid:{0}]获取最新可用的增强工具镜像，因为它不是用户虚拟机",
+    "arguments": [
+      "msg.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/guesttools/GuestToolsManagerImpl.java"
+  },
+  {
+    "raw": "no proper guest tools iso found in management node[uuid:%s] for host[uuid:%s]",
+    "en_US": "no proper guest tools iso found in management node[uuid:{0}] for host[uuid:{1}]",
+    "zh_CN": "无法在管理节点[uuid:{0}]上为主机[uuid:{1}]寻找到合适的增强工具 ISO",
+    "arguments": [
+      "Platform.getManagementServerId()",
+      "msg.getHostUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/guesttools/GuestToolsManagerImpl.java"
+  },
+  {
+    "raw": "failed to check guest tools on host[uuid:%s]",
+    "en_US": "failed to check guest tools on host[uuid:{0}]",
+    "zh_CN": "无法检查主机 {0} 的 VM-Tools",
+    "arguments": [
+      "host.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/guesttools/GuestToolsManagerImpl.java"
+  },
+  {
+    "raw": "failed to set vm[uuid: %s, name: %s] hostname, because qga state is not running and there is no dhcp service",
+    "en_US": "failed to set vm[uuid: {0}, name: {1}] hostname, because qga state is not running and there is no dhcp service",
+    "zh_CN": "无法设置VM[uuid：{0}，名称：{1}]主机名，因为QGA状态未在运行，并且没有DHCP服务",
+    "arguments": [
+      "vm.getUuid()",
+      "vm.getName()"
+    ],
+    "fileName": "src/main/java/org/zstack/guesttools/GuestToolsManagerImpl.java"
+  },
+  {
+    "raw": "the platform of vm custom specification[%s] is not consistent with the platform in source vm[%s]",
+    "en_US": "the platform of vm custom specification[{0}] is not consistent with the platform in source vm[{1}]",
+    "zh_CN": "",
+    "arguments": [
+      "spec.getPlatform()",
+      "vmPlatform"
+    ],
+    "fileName": "src/main/java/org/zstack/guesttools/advanced/VmCustomSpecificationUtils.java"
+  },
+  {
+    "raw": "the custom specification[uuid:%s] not found",
+    "en_US": "the custom specification[uuid:{0}] not found",
+    "zh_CN": "",
+    "arguments": [
+      "spec.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/guesttools/advanced/VmCustomSpecificationUtils.java"
+  },
+  {
+    "raw": "unsupported platform[%s], only [Windows, Linux] are supported",
+    "en_US": "unsupported platform[{0}], only [Windows, Linux] are supported",
+    "zh_CN": "",
+    "arguments": [
+      "spec.getPlatform()"
+    ],
+    "fileName": "src/main/java/org/zstack/guesttools/advanced/VmCustomSpecificationUtils.java"
+  },
+  {
+    "raw": "unsupported domain mode[%s], only [Domain, WorkGroup] are supported",
+    "en_US": "unsupported domain mode[{0}], only [Domain, WorkGroup] are supported",
+    "zh_CN": "",
+    "arguments": [
+      "spec.getDomainMode()"
+    ],
+    "fileName": "src/main/java/org/zstack/guesttools/advanced/VmCustomSpecificationUtils.java"
+  },
+  {
+    "raw": "%s name is required",
+    "en_US": "{0} name is required",
+    "zh_CN": "",
+    "arguments": [
+      "spec.getDomainMode()"
+    ],
+    "fileName": "src/main/java/org/zstack/guesttools/advanced/VmCustomSpecificationUtils.java"
+  },
+  {
+    "raw": "root password is required when generating SID",
+    "en_US": "root password is required when generating SID",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/guesttools/advanced/VmCustomSpecificationUtils.java"
+  },
+  {
+    "raw": "generateSID should be set when joining domain",
+    "en_US": "generateSID should be set when joining domain",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/guesttools/advanced/VmCustomSpecificationUtils.java"
+  },
+  {
+    "raw": "domain username is required",
+    "en_US": "domain username is required",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/guesttools/advanced/VmCustomSpecificationUtils.java"
+  },
+  {
+    "raw": "organization[%s] format is invalid, it should be like OU\u003dxxx[,OU\u003dxxx],DC\u003dxxx[,DC\u003dxxx]",
+    "en_US": "organization[{0}] format is invalid, it should be like OU\u003dxxx[,OU\u003dxxx],DC\u003dxxx[,DC\u003dxxx]",
+    "zh_CN": "",
+    "arguments": [
+      "spec.getOrganization()"
+    ],
+    "fileName": "src/main/java/org/zstack/guesttools/advanced/VmCustomSpecificationUtils.java"
+  },
+  {
+    "raw": "failed to get guest tools info from vm[uuid:%s], because:%s",
+    "en_US": "failed to get guest tools info from vm[uuid:{0}], because:{1}",
+    "zh_CN": "无法从虚拟机[uuid:{0}]内部获取增强工具信息 :{1}",
+    "arguments": [
+      "vmUuid",
+      "rsp.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/guesttools/kvm/GuestToolsOnKvmBackend.java"
+  },
+  {
+    "raw": "failed to detach guest tools in vm[uuid:%s]",
+    "en_US": "failed to detach guest tools in vm[uuid:{0}]",
+    "zh_CN": "无法从虚拟机 {0} 中卸载 VM-Tools",
+    "arguments": [
+      "vm.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/guesttools/kvm/GuestToolsOnKvmBackend.java"
+  },
+  {
+    "raw": "%s",
+    "en_US": "{0}",
+    "zh_CN": "{0}",
+    "arguments": [
+      "rsp.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/guesttools/kvm/GuestToolsOnKvmBackend.java"
+  },
+  {
+    "raw": "failed to download guest tools iso because no kvm host[uuid:%s] found",
+    "en_US": "failed to download guest tools iso because no kvm host[uuid:{0}] found",
+    "zh_CN": "KVM主机[uuid:{0}]不存在，无法为其下载增强工具 ISO",
+    "arguments": [
+      "host.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/guesttools/kvm/GuestToolsOnKvmBackend.java"
+  },
+  {
+    "raw": "no available cdrom device for vm[uuid:%s] to attach guest-tools",
+    "en_US": "no available cdrom device for vm[uuid:{0}] to attach guest-tools",
+    "zh_CN": "",
+    "arguments": [
+      "vm.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/guesttools/kvm/GuestToolsOnKvmBackend.java"
+  },
+  {
+    "raw": "failed to attach guest tools iso to vm[uuid:%s], because:%s",
+    "en_US": "failed to attach guest tools iso to vm[uuid:{0}], because:{1}",
+    "zh_CN": "无法为虚拟机[uuid:{0}]挂载增强工具镜像，因为:{1}",
+    "arguments": [
+      "vm.getUuid()",
+      "rsp.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/guesttools/kvm/GuestToolsOnKvmBackend.java"
+  },
+  {
+    "raw": "failed to detach guest tools iso from vm[uuid:%s], because:%s",
+    "en_US": "failed to detach guest tools iso from vm[uuid:{0}], because:{1}",
+    "zh_CN": "无法从VM[uuid：{0}]分离来宾工具ISO，因为：{1}",
+    "arguments": [
+      "vm.getUuid()",
+      "rsp.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/guesttools/kvm/GuestToolsOnKvmBackend.java"
+  },
+  {
+    "raw": "failed to get guest tools state from prometheus: [metric\u003d%s]",
+    "en_US": "failed to get guest tools state from prometheus: [metric\u003d{0}]",
+    "zh_CN": "无法从 Prometheus 获取 metric 等于 {0} 的 VM-Tools 状态",
+    "arguments": [
+      "metricName"
+    ],
+    "fileName": "src/main/java/org/zstack/guesttools/kvm/GuestToolsOnKvmBackend.java"
+  },
+  {
+    "raw": "can not be here",
+    "en_US": "can not be here",
+    "zh_CN": "不能在这里。",
+    "arguments": [
+      "errCode"
+    ],
+    "fileName": "src/main/java/org/zstack/guesttools/pvpanic/PVPanicCrashStrategyManagerImpl.java"
+  }
+]

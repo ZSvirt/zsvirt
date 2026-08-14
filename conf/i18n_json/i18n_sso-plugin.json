@@ -1,0 +1,231 @@
+[
+  {
+    "raw": "SSO client type[%s] not support for DeleteSSOClientAction",
+    "en_US": "SSO client type[{0}] not support for DeleteSSOClientAction",
+    "zh_CN": "",
+    "arguments": [
+      "type"
+    ],
+    "fileName": "src/main/java/org/zstack/sso/SSOApiInterceptor.java"
+  },
+  {
+    "raw": "casClient[uuid:%s, name:%s] has been deleted",
+    "en_US": "casClient[uuid:{0}, name:{1}] has been deleted",
+    "zh_CN": "",
+    "arguments": [
+      "self.getUuid()",
+      "self.getResourceName()"
+    ],
+    "fileName": "src/main/java/org/zstack/sso/cas/compute/CasAccountSource.java"
+  },
+  {
+    "raw": "unable to find CAS client[uuid\u003d%s]",
+    "en_US": "unable to find CAS client[uuid\u003d{0}]",
+    "zh_CN": "",
+    "arguments": [
+      "vo.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/sso/cas/compute/CasAccountSourceFactory.java"
+  },
+  {
+    "raw": "duplicate CAS server[serverName\u003d%s]",
+    "en_US": "duplicate CAS server[serverName\u003d{0}]",
+    "zh_CN": "",
+    "arguments": [
+      "spec.getServerName()"
+    ],
+    "fileName": "src/main/java/org/zstack/sso/cas/compute/CasAccountSourceFactory.java"
+  },
+  {
+    "raw": "url is error, clientUuid is miss",
+    "en_US": "url is error, clientUuid is miss",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/sso/cas/filter/CasLoginFilter.java"
+  },
+  {
+    "raw": " missing cas client, please create cas client before sso",
+    "en_US": " missing cas client, please create cas client before sso",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/sso/cas/filter/CasLoginFilter.java"
+  },
+  {
+    "raw": "failed to find account for CAS user[name\u003d%s]",
+    "en_US": "failed to find account for CAS user[name\u003d{0}]",
+    "zh_CN": "",
+    "arguments": [
+      "token.username"
+    ],
+    "fileName": "src/main/java/org/zstack/sso/cas/service/CasLoginIAM1.java"
+  },
+  {
+    "raw": "multiple accounts found for CAS user[name\u003d%s]",
+    "en_US": "multiple accounts found for CAS user[name\u003d{0}]",
+    "zh_CN": "",
+    "arguments": [
+      "token.username"
+    ],
+    "fileName": "src/main/java/org/zstack/sso/cas/service/CasLoginIAM1.java"
+  },
+  {
+    "raw": "oAuth2Client[uuid:%s, name:%s] has been deleted",
+    "en_US": "oAuth2Client[uuid:{0}, name:{1}] has been deleted",
+    "zh_CN": "",
+    "arguments": [
+      "self.getUuid()",
+      "self.getResourceName()"
+    ],
+    "fileName": "src/main/java/org/zstack/sso/oauth2/compute/OAuth2AccountSource.java"
+  },
+  {
+    "raw": "redirectUrl is error, %s",
+    "en_US": "redirectUrl is error, {0}",
+    "zh_CN": "",
+    "arguments": [
+      "redirectUrl"
+    ],
+    "fileName": "src/main/java/org/zstack/sso/oauth2/compute/OAuth2AccountSource.java"
+  },
+  {
+    "raw": "unable to find OAuth2 client[uuid\u003d%s]",
+    "en_US": "unable to find OAuth2 client[uuid\u003d{0}]",
+    "zh_CN": "",
+    "arguments": [
+      "vo.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/sso/oauth2/compute/OAuth2AccountSourceFactory.java"
+  },
+  {
+    "raw": "duplicate oauth2 server[authorizationUrl\u003d%s]",
+    "en_US": "duplicate oauth2 server[authorizationUrl\u003d{0}]",
+    "zh_CN": "",
+    "arguments": [
+      "spec.getAuthorizationUrl()"
+    ],
+    "fileName": "src/main/java/org/zstack/sso/oauth2/compute/OAuth2AccountSourceFactory.java"
+  },
+  {
+    "raw": "multiple accounts found for OAuth2 user[sub\u003d%s]",
+    "en_US": "multiple accounts found for OAuth2 user[sub\u003d{0}]",
+    "zh_CN": "",
+    "arguments": [
+      "token.sub"
+    ],
+    "fileName": "src/main/java/org/zstack/sso/oauth2/service/OAuth2LoginIAM1.java"
+  },
+  {
+    "raw": "failed to find account for OAuth2 user[name\u003d%s], maybe logging in for the first time",
+    "en_US": "failed to find account for OAuth2 user[name\u003d{0}], maybe logging in for the first time",
+    "zh_CN": "",
+    "arguments": [
+      "token.username"
+    ],
+    "fileName": "src/main/java/org/zstack/sso/oauth2/service/OAuth2LoginIAM1.java"
+  },
+  {
+    "raw": "multiple accounts found for OAuth2 user[AccountVO.username\u003d%s]",
+    "en_US": "multiple accounts found for OAuth2 user[AccountVO.username\u003d{0}]",
+    "zh_CN": "",
+    "arguments": [
+      "token.username"
+    ],
+    "fileName": "src/main/java/org/zstack/sso/oauth2/service/OAuth2LoginIAM1.java"
+  },
+  {
+    "raw": "there was an error, reason:  token response is null",
+    "en_US": "there was an error, reason:  token response is null",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/sso/oauth2/service/OAuth2ManagerImpl.java"
+  },
+  {
+    "raw": "there was an error, reason:  %s is null",
+    "en_US": "there was an error, reason:  {0} is null",
+    "zh_CN": "",
+    "arguments": [
+      "AuthGolabalProperty.OAUTH2_GET_TOKEN_USERINFO"
+    ],
+    "fileName": "src/main/java/org/zstack/sso/oauth2/service/OAuth2ManagerImpl.java"
+  },
+  {
+    "raw": "response has error : %s",
+    "en_US": "response has error : {0}",
+    "zh_CN": "",
+    "arguments": [
+      "e"
+    ],
+    "fileName": "src/main/java/org/zstack/sso/oauth2/service/OAuth2ManagerImpl.java"
+  },
+  {
+    "raw": "failed to send response to oauth server",
+    "en_US": "failed to send response to oauth server",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/sso/oauth2/service/OAuth2ManagerImpl.java"
+  },
+  {
+    "raw": "get code response has error : %s",
+    "en_US": "get code response has error : {0}",
+    "zh_CN": "",
+    "arguments": [
+      "e"
+    ],
+    "fileName": "src/main/java/org/zstack/sso/oauth2/service/OAuth2ManagerImpl.java"
+  },
+  {
+    "raw": "error requesting token in clientUuid[%s], reason: %s",
+    "en_US": "error requesting token in clientUuid[{0}], reason: {1}",
+    "zh_CN": "",
+    "arguments": [
+      "clientUuid",
+      "rsp.getBody()"
+    ],
+    "fileName": "src/main/java/org/zstack/sso/oauth2/service/OAuth2ManagerImpl.java"
+  },
+  {
+    "raw": "HTTP ERROR, status code: %s, body: %s",
+    "en_US": "HTTP ERROR, status code: {0}, body: {1}",
+    "zh_CN": "",
+    "arguments": [
+      "rsp.getStatusCode()",
+      "rsp.getBody()"
+    ],
+    "fileName": "src/main/java/org/zstack/sso/oauth2/service/OAuth2ManagerImpl.java"
+  },
+  {
+    "raw": "failed to post %s with unexpected status code %s",
+    "en_US": "failed to post {0} with unexpected status code {1}",
+    "zh_CN": "",
+    "arguments": [
+      "url",
+      "e.getStatusCode()"
+    ],
+    "fileName": "src/main/java/org/zstack/sso/oauth2/service/OAuth2ManagerImpl.java"
+  },
+  {
+    "raw": "failed to post %s with IO error",
+    "en_US": "failed to post {0} with IO error",
+    "zh_CN": "",
+    "arguments": [
+      "url"
+    ],
+    "fileName": "src/main/java/org/zstack/sso/oauth2/service/OAuth2ManagerImpl.java"
+  },
+  {
+    "raw": "unable to find oAuth2Token[userUuid\u003d%s]",
+    "en_US": "unable to find oAuth2Token[userUuid\u003d{0}]",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getSession().getAccountUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/sso/service/SSOManagerImpl.java"
+  },
+  {
+    "raw": "not support",
+    "en_US": "not support",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/sso/service/compute/SSOAccountSource.java"
+  }
+]

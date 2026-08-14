@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<globalConfig xmlns="http://zstack.org/schema/zstack">
+    <config>
+        <name>check.management.callback</name>
+        <description>check agent nmap management callback port before ansible deploy</description>
+        <defaultValue>true</defaultValue>
+        <category>ansible</category>
+        <type>java.lang.Boolean</type>
+    </config>
+
+    <config>
+        <name>enable.ansible.cache.system.info</name>
+        <description>use ansible cache to speedup ansible operate</description>
+        <defaultValue>true</defaultValue>
+        <category>ansible</category>
+        <type>java.lang.Boolean</type>
+    </config>
+
+</globalConfig>

@@ -1,0 +1,59 @@
+[
+  {
+    "raw": "InfoSecEncryptDriver encrypt failed",
+    "en_US": "InfoSecEncryptDriver encrypt failed",
+    "zh_CN": "InfoSecEncryptDriver 加密失败",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/testlib/premium/crypto/EncryptDriverSimulator.java"
+  },
+  {
+    "raw": "InfoSecEncryptDriver decrypt failed",
+    "en_US": "InfoSecEncryptDriver decrypt failed",
+    "zh_CN": "InfoSecEncryptDriver 解密失败",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/testlib/premium/crypto/EncryptDriverSimulator.java"
+  },
+  {
+    "raw": "encrypt data[%s] or algType[%s] is null",
+    "en_US": "encrypt data[{0}] or algType[{1}] is null",
+    "zh_CN": "",
+    "arguments": [
+      "data",
+      "algType"
+    ],
+    "fileName": "src/main/java/org/zstack/testlib/premium/crypto/EncryptDriverSimulator.java"
+  },
+  {
+    "raw": "illegal argument %s",
+    "en_US": "illegal argument {0}",
+    "zh_CN": "",
+    "arguments": [
+      "algType"
+    ],
+    "fileName": "src/main/java/org/zstack/testlib/premium/crypto/EncryptDriverSimulator.java"
+  },
+  {
+    "raw": "failed to decrypt data",
+    "en_US": "failed to decrypt data",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/testlib/premium/crypto/EncryptDriverSimulator.java"
+  },
+  {
+    "raw": "fail to decrypt cipher text",
+    "en_US": "fail to decrypt cipher text",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/testlib/premium/crypto/SecurityMachineSimulator.java"
+  },
+  {
+    "raw": "failed to parse MS envelope: %s, %s",
+    "en_US": "failed to parse MS envelope: {0}, {1}",
+    "zh_CN": "",
+    "arguments": [
+      "e.getMessage()",
+      "cipherText"
+    ],
+    "fileName": "src/main/java/org/zstack/testlib/premium/crypto/SecurityMachineSimulator.java"
+  }
+]

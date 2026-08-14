@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<globalConfig xmlns="http://zstack.org/schema/zstack">
+    <config>
+        <category>loadBalancer</category>
+        <name>connectionIdleTimeout</name>
+        <description>The timeout that triggers the load balancer terminates both server/client side connection if no data is transferred, in seconds. [Default] 60s</description>
+        <defaultValue>60</defaultValue>
+        <type>java.lang.Long</type>
+    </config>
+
+    <config>
+        <category>loadBalancer</category>
+        <name>healthyThreshold</name>
+        <description>The number of consecutive health checks successes required before moving the instance to the Healthy state. [Default] 2</description>
+        <defaultValue>2</defaultValue>
+        <type>java.lang.Long</type>
+    </config>
+
+    <config>
+        <category>loadBalancer</category>
+        <name>healthCheckTarget</name>
+        <description>The instance being checked. The protocol is either TCP, HTTP, HTTPS, or SSL. The range of valid ports is one (1) through 65535. [Default] TCP:default</description>
+        <defaultValue>tcp:default</defaultValue>
+    </config>
+
+    <config>
+        <category>loadBalancer</category>
+        <name>healthCheckTimeout</name>
+        <description>The amount of time, in seconds, during which no response means a failed health check.</description>
+        <defaultValue>2</defaultValue>
+        <type>java.lang.Long</type>
+    </config>
+
+    <config>
+        <category>loadBalancer</category>
+        <name>healthCheckInterval</name>
+        <description>The approximate interval, in seconds, between health checks of an individual instance.</description>
+        <defaultValue>5</defaultValue>
+        <type>java.lang.Long</type>
+    </config>
+
+    <config>
+        <category>loadBalancer</category>
+        <name>unhealthyThreshold</name>
+        <description>The number of consecutive health check failures required before moving the instance to the Unhealthy state.</description>
+        <defaultValue>6</defaultValue>
+        <type>java.lang.Long</type>
+    </config>
+
+    <config>
+        <category>loadBalancer</category>
+        <name>maxConnection</name>
+        <description>The number of max concurrent connections.</description>
+        <defaultValue>200000</defaultValue>
+        <type>java.lang.Long</type>
+    </config>
+
+    <config>
+        <category>loadBalancer</category>
+        <name>Nbprocess</name>
+        <description>The number of processes for load balancer.</description>
+        <defaultValue>1</defaultValue>
+        <type>java.lang.Long</type>
+    </config>
+
+    <config>
+        <category>loadBalancer</category>
+        <name>balancerAlgorithm</name>
+        <description>The algorithm used to select a server when doing load balancing. Options are roundrobin, weightroundrobin, leastconn and source</description>
+        <defaultValue>roundrobin</defaultValue>
+    </config>
+
+    <config>
+        <name>loadBalancer.num</name>
+        <description>default quota for loadBalancer.num</description>
+        <defaultValue>20</defaultValue>
+        <category>quota</category>
+        <type>java.lang.Long</type>
+    </config>
+
+    <config>
+        <category>loadBalancer</category>
+        <name>httpMode</name>
+        <description>When mode http is turned on, HAProxy processes HTTP protocol for each request and response passing through. to choose from http-keep-alive,http-server-close,http-tunnel,httpclose,forceclose</description>
+        <defaultValue>http-server-close</defaultValue>
+        <type>java.lang.String</type>
+    </config>
+
+    <config>
+        <name>listener.num</name>
+        <description>default quota for listener.num</description>
+        <defaultValue>20</defaultValue>
+        <category>quota</category>
+        <type>java.lang.Long</type>
+    </config>
+
+    <config>
+        <category>loadBalancer</category>
+        <name>aclMaxCount</name>
+        <description>The number of max access-control-list groups for one listener.</description>
+        <defaultValue>50</defaultValue>
+        <type>java.lang.Long</type>
+    </config>
+
+    <config>
+        <category>loadBalancer</category>
+        <name>redirectRuleMaxCount</name>
+        <description>The number of max redirect access-control-list groups for one listener.</description>
+        <defaultValue>40</defaultValue>
+        <type>java.lang.Long</type>
+    </config>
+</globalConfig>

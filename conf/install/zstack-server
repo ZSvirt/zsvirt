@@ -1,0 +1,66 @@
+#!/bin/sh
+
+# the following is chkconfig init header
+#
+# zstack-server:  zstack server daemon
+#
+# chkconfig: 345 97 03
+# description:  This is a daemon instructed by zstack management server \
+#               to perform zstack related operations\
+#               zstack server was launched by apache-tomcat
+#               See http://zstack.org
+#
+# processname: /usr/bin/java org.apache.catalina.startup.Bootstrap start
+# pidfile: /var/run/zstack/zstackserver.pid
+#
+
+pidfile='/var/run/zstack/zstack-server.pid'
+TOMCAT_PATH="/usr/local/zstack/root/apache-tomcat"
+zstack_app=${ZSTACK_HOME-"$TOMCAT_PATH/webapps/zstack"}
+
+which zstack-ctl &>/dev/null
+if [ $? -ne 0 ]; then
+    echo "Does not find zstack-ctl. Can not execute zstack-server service."
+    exit 1
+fi
+
+check_status() {
+    ZSTACK_HOME=$zstack_app HOME=`echo ~root` zstack-ctl status
+}
+
+stop_zstack(){
+    ZSTACK_HOME=$zstack_app HOME=`echo ~root` zstack-ctl stop
+}
+
+start_zstack(){
+    ZSTACK_HOME=$zstack_app HOME=`echo ~root` zstack-ctl start
+}
+
+
+if [ $# -eq 0 ]; then
+    echo "usage: $0
+[start|stop|restart|status]"
+    exit 1
+fi
+
+if [ "$@" = "status" ]; then
+    check_status
+elif [ "$@" = "start" ]; then
+    start_zstack
+elif [ "$@" = "stop" ]; then
+    stop_zstack
+elif [ "$@" = "restart" ]; then
+    stop_zstack
+    start_zstack
+else
+    echo "Not support service: $@. Please use [start|stop|restart|status]"
+    exit 1
+fi
+
+if [ $? -eq 0 ]; then
+    echo "$@ zstack service .... SUCCESS"
+    exit 0
+else
+    echo "$@ zstack service .... FAILED"
+    exit 1
+fi

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<globalConfig xmlns="http://zstack.org/schema/zstack">
+    <config>
+        <name>deleteL2.bridge</name>
+        <description>Physically delete l2Network bridge</description>
+        <defaultValue>true</defaultValue>
+        <category>l2Network</category>
+        <type>java.lang.Boolean</type>
+    </config>
+</globalConfig>

@@ -1,0 +1,1237 @@
+[
+  {
+    "raw": "could not get candidate vmnic, because both load balancer uuid and server group uuid are not specified",
+    "en_US": "could not get candidate vmnic, because both load balancer uuid and server group uuid are not specified",
+    "zh_CN": "无法获取候选vmnic，因为未指定负载平衡器uuid和服务器组uuid",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "could not get candidate l3 network, because both load balancer uuid and server group uuid are not specified",
+    "en_US": "could not get candidate l3 network, because both load balancer uuid and server group uuid are not specified",
+    "zh_CN": "无法获取候选三层网络，因为未指定负载平衡器uuid和服务器组uuid",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "could not detach vm nic to load balancer listener[uuid:%s], because default server group for listener has been deleted",
+    "en_US": "could not detach vm nic to load balancer listener[uuid:{0}], because default server group for listener has been deleted",
+    "zh_CN": "无法将VM NIC与负载平衡器侦听器[uuid：{0}]分离，因为已删除侦听器的默认服务器组",
+    "arguments": [
+      "msg.getListenerUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "the vip[uuid:%s] has been occupied other network service entity[%s]",
+    "en_US": "the vip[uuid:{0}] has been occupied other network service entity[{1}]",
+    "zh_CN": "虚拟IP[uuid:{0}]已经被其他网络服务占用",
+    "arguments": [
+      "msg.getVipUuid()",
+      "useForList.toString()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "Load balancer VIP [%s] cannot be the first or the last IP of the CIDR with the public address pool type",
+    "en_US": "Load balancer VIP [{0}] cannot be the first or the last IP of the CIDR with the public address pool type",
+    "zh_CN": "负载平衡器VIP[{0}]不能是具有公共地址池类型的CIDR的第一个或最后一个IP",
+    "arguments": [
+      "vipVO.getIp()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "operation failure, not support the ip version %d",
+    "en_US": "operation failure, not support the ip version {0}",
+    "zh_CN": "操作失败，不支持IPv{0}",
+    "arguments": [
+      "ipVer"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "operation failure, duplicate/overlap ip entry in %s of accesscontrol list group:%s",
+    "en_US": "operation failure, duplicate/overlap ip entry in {0} of accesscontrol list group:{1}",
+    "zh_CN": "操作失败，在访问控制组：{1}中有重复/重叠ip{0}",
+    "arguments": [
+      "ips",
+      "acl.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "operation failure, ip format only supports ip/iprange/cidr, but find %s",
+    "en_US": "operation failure, ip format only supports ip/iprange/cidr, but find {0}",
+    "zh_CN": "操作失败，只支持IP地址/IP段/IP网络格式的参数，不支持{0}",
+    "arguments": [
+      "ips"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "ip range[%s, %s] is overlap with start ip:%s, end ip: %s of access-control-list group:%s",
+    "en_US": "ip range[{0}, {1}] is overlap with start ip:{2}, end ip: {3} of access-control-list group:{4}",
+    "zh_CN": "ip段[{0}, {1}]和访问控制列表组：{4}中的ip段[{2},{3}]重叠",
+    "arguments": [
+      "startIp",
+      "endIp",
+      "NetworkUtils.longToIpv4String(r.lowerEndpoint())",
+      "NetworkUtils.longToIpv4String(r.upperEndpoint())",
+      "acl.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "Invalid rule expression, the detail: %s",
+    "en_US": "Invalid rule expression, the detail: {0}",
+    "zh_CN": "规则表达式无效，详细信息：{0}",
+    "arguments": [
+      "e.getMessage()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "Can\u0027t attach the type access-control-list group[%s] whose ip version is different with LoadBalancer[%s]",
+    "en_US": "Can\u0027t attach the type access-control-list group[{0}] whose ip version is different with LoadBalancer[{1}]",
+    "zh_CN": "负载均衡器[{1}]不能添加IP版本不一致的访问控制列表组[{0}]",
+    "arguments": [
+      "aclUuids",
+      "lbUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "domian[%s], url[%s] duplicate/overlap redirect rule with access-control-list group:%s",
+    "en_US": "domian[{0}], url[{1}] duplicate/overlap redirect rule with access-control-list group:{2}",
+    "zh_CN": "域[{0}]，URL[{1}]与访问控制列表组{2}重复/重叠重定向规则",
+    "arguments": [
+      "aclEntry.getDomain()",
+      "aclEntry.getUrl()",
+      "acl.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "access-control-list groups[uuid:%s] use to redirect, but there some access-control-list not has redirect rule but ip entry",
+    "en_US": "access-control-list groups[uuid:{0}] use to redirect, but there some access-control-list not has redirect rule but ip entry",
+    "zh_CN": "Access-Control-List组[uuid：{0}]用于重定向，但某些Access-Control-List没有重定向规则，只有IP条目",
+    "arguments": [
+      "msg.getAclUuids()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "redirect access-control-list groups[uuid:%s] cannot only attach to load balancer listener, must assign server group",
+    "en_US": "redirect access-control-list groups[uuid:{0}] cannot only attach to load balancer listener, must assign server group",
+    "zh_CN": "重定向访问控制列表组[uuid：{0}]不能仅连接到负载平衡器侦听器，必须分配服务器组",
+    "arguments": [
+      "msg.getAclUuids()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "access-control-list groups[uuid:%s] attach to load balancer listener[uuid:%s] not https or http",
+    "en_US": "access-control-list groups[uuid:{0}] attach to load balancer listener[uuid:{1}] not https or http",
+    "zh_CN": "访问控制列表组[uuid：{0}]连接到负载平衡器侦听器[uuid：{1}]而不是HTTPS或HTTP",
+    "arguments": [
+      "msg.getAclUuids()",
+      "msg.getListenerUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "access-control-list groups[uuid:%s] has no redirect rule",
+    "en_US": "access-control-list groups[uuid:{0}] has no redirect rule",
+    "zh_CN": "访问控制列表组[uuid：{0}]没有重定向规则",
+    "arguments": [
+      "msg.getAclUuids()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "access-control-list groups[uuid:%s] has attach to another load balancer listener[uuid:%s]",
+    "en_US": "access-control-list groups[uuid:{0}] has attach to another load balancer listener[uuid:{1}]",
+    "zh_CN": "访问控制列表组[uuid：{0}]已连接到另一个负载平衡器侦听器[uuid：{1}]",
+    "arguments": [
+      "msg.getAclUuids()",
+      "msg.getListenerUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "the load balancer listener[uuid:%s] can\u0027t  attach more than %d redirect rule access-control-list groups",
+    "en_US": "the load balancer listener[uuid:{0}] can\u0027t  attach more than {1} redirect rule access-control-list groups",
+    "zh_CN": "负载平衡器侦听器[uuid：{0}]无法附加{1}个以上的重定向规则访问控制列表组",
+    "arguments": [
+      "msg.getListenerUuid()",
+      "LoadBalancerGlobalConfig.ACL_REDIRECT_MAX_COUNT.value(Long.class)"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "load balancer listener [uuid:%s] had redirect rule of access-control-list groups[uuid:%s]",
+    "en_US": "load balancer listener [uuid:{0}] had redirect rule of access-control-list groups[uuid:{1}]",
+    "zh_CN": "负载平衡器侦听器[uuid：{0}]具有访问控制列表组的重定向规则[uuid：{1}]",
+    "arguments": [
+      "msg.getListenerUuid()",
+      "redireRuleExistAclUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "access-control-list groups[uuid:%s] use to %s, but there some access-control-list not has ip entry but redirect rule",
+    "en_US": "access-control-list groups[uuid:{0}] use to {1}, but there some access-control-list not has ip entry but redirect rule",
+    "zh_CN": "访问控制列表组[uuid：{0}]用于{1}，但某些访问控制列表没有IP条目，但有重定向规则",
+    "arguments": [
+      "msg.getAclType()",
+      "msg.getAclUuids()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "the access-control-list groups[uuid:%s] are already on the load balancer listener[uuid:%s]",
+    "en_US": "the access-control-list groups[uuid:{0}] are already on the load balancer listener[uuid:{1}]",
+    "zh_CN": "负载均衡监听器[uuid:{1}]已经添加了访问控制列表组[uuid:{0}]",
+    "arguments": [
+      "existingAcls",
+      "msg.getListenerUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "the load balancer listener[uuid:%s] just only attach the %s type access-control-list group",
+    "en_US": "the load balancer listener[uuid:{0}] just only attach the {1} type access-control-list group",
+    "zh_CN": "负载均衡监听器[uuid:{0}]只能以{1}方式添加访问控制列表组",
+    "arguments": [
+      "msg.getListenerUuid()",
+      "type.toString()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "the load balancer listener[uuid:%s] can\u0027t  attach more than %d access-control-list groups",
+    "en_US": "the load balancer listener[uuid:{0}] can\u0027t  attach more than {1} access-control-list groups",
+    "zh_CN": "负载均衡监听器[uuid:{0}]最多只能添加{1}个访问控制列表组",
+    "arguments": [
+      "msg.getListenerUuid()",
+      "LoadBalancerGlobalConfig.ACL_MAX_COUNT.value(Long.class)"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "server group[%s] not attach to load balancer listener[%s]",
+    "en_US": "server group[{0}] not attach to load balancer listener[{1}]",
+    "zh_CN": "服务器组[{0}]未连接到负载平衡器侦听器[{1}]",
+    "arguments": [
+      "msg.getServerGroupUuids()",
+      "msg.getListenerUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "acl[%s] not attach to load balancer listener[%s]",
+    "en_US": "acl[{0}] not attach to load balancer listener[{1}]",
+    "zh_CN": "ACL[{0}]未附加到负载平衡器侦听器[{1}]",
+    "arguments": [
+      "msg.getAclUuid()",
+      "msg.getListenerUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "could not attach vm nic to load balancer listener, because the vm nic[uuid:%s] are already on the default server group [uuid:%s]",
+    "en_US": "could not attach vm nic to load balancer listener, because the vm nic[uuid:{0}] are already on the default server group [uuid:{1}]",
+    "zh_CN": "无法将VM NIC附加到负载平衡器侦听器，因为VM NIC[uuid：{0}]已位于默认服务器组[uuid：{1}]上",
+    "arguments": [
+      "nicUuid",
+      "groupVO.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "Can\u0027t attach more than %d access-control-list groups to a listener",
+    "en_US": "Can\u0027t attach more than {0} access-control-list groups to a listener",
+    "zh_CN": "一个监听器加载的访问控制组不能超过{0}",
+    "arguments": [
+      "LoadBalancerGlobalConfig.ACL_MAX_COUNT.value(Long.class)"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "l4[%s] loadBalancer listener[%s] doesn\u0027t support assigning session persistence state",
+    "en_US": "l4[{0}] loadBalancer listener[{1}] doesn\u0027t support assigning session persistence state",
+    "zh_CN": "L4[{0}]LoadBalancer侦听器[{1}]不支持分配会话持久性状态",
+    "arguments": [
+      "msg.getProtocol()",
+      "msg.getName()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "invalid redirect status [%s], it only support %s",
+    "en_US": "invalid redirect status [{0}], it only support {1}",
+    "zh_CN": "",
+    "arguments": [
+      "httpRedirectHttps",
+      "validRedirectValues"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "invalid status code [%s], it only support %s",
+    "en_US": "invalid status code [{0}], it only support {1}",
+    "zh_CN": "",
+    "arguments": [
+      "statusCode",
+      "validCodeValues"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "invalid session persistence status [%s], it only support %s",
+    "en_US": "invalid session persistence status [{0}], it only support {1}",
+    "zh_CN": "",
+    "arguments": [
+      "seessionPersistence",
+      "validPersistenceValues"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "loadBalancer[%s] listener[%s] %s algorithm doesn\u0027t support assigning session persistence state except assigning disable explicitly",
+    "en_US": "loadBalancer[{0}] listener[{1}] {2} algorithm doesn\u0027t support assigning session persistence state except assigning disable explicitly",
+    "zh_CN": "LoadBalancer[{0}]Listener[{1}]{2}算法不支持分配会话持久性状态，但显式分配Disable时除外",
+    "arguments": [
+      "msg.getLoadBalancerUuid()",
+      "msg.getName()",
+      "algorithm"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "loadBalancer[%s] listener[%s] %s algorithm doesn\u0027t support assigning session persistence state except assigning iphash explicitly",
+    "en_US": "loadBalancer[{0}] listener[{1}] {2} algorithm doesn\u0027t support assigning session persistence state except assigning iphash explicitly",
+    "zh_CN": "LoadBalancer[{0}]Listener[{1}]{2}算法不支持分配会话持久性状态，但显式分配IPHASH除外",
+    "arguments": [
+      "msg.getLoadBalancerUuid()",
+      "msg.getName()",
+      "algorithm"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "invalid session persistence type[%s], it only support %s",
+    "en_US": "invalid session persistence type[{0}], it only support {1}",
+    "zh_CN": "会话持久性类型[{0}]无效，它仅支持{1}",
+    "arguments": [
+      "enableSession",
+      "Arrays.toString(LoadBalancerSessionPersistence.values())"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "invalid session idle timeout[%s], it must be the number between[%s~%s] ",
+    "en_US": "invalid session idle timeout[{0}], it must be the number between[{1}~{2}] ",
+    "zh_CN": "会话空闲超时[{0}]无效，它必须是介于[{1}~{2}]之间的数字",
+    "arguments": [
+      "timeout",
+      "LoadBalancerConstants.SESSION_IDLE_TIMEOUT_MIN",
+      "LoadBalancerConstants.SESSION_IDLE_TIMEOUT_MAX"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "invalid session cookie name[%s], it must be shorter than [%s] characters",
+    "en_US": "invalid session cookie name[{0}], it must be shorter than [{1}] characters",
+    "zh_CN": "会话Cookie名称[{0}]无效，必须少于[{1}]个字符",
+    "arguments": [
+      "cookieName",
+      "COOKIE_NAME_MAX"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "invalid session cookie name[%s], it must only contains letters, numbers and underscores",
+    "en_US": "invalid session cookie name[{0}], it must only contains letters, numbers and underscores",
+    "zh_CN": "会话Cookie名称[{0}]无效，它只能包含字母、数字和下划线",
+    "arguments": [
+      "cookieName"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "loadBalancer[%s] listener[%s] doesn\u0027t support assigning idle timeout and cookie name at the same time",
+    "en_US": "loadBalancer[{0}] listener[{1}] doesn\u0027t support assigning idle timeout and cookie name at the same time",
+    "zh_CN": "LoadBalancer[{0}]Listener[{1}]不支持同时分配空闲超时和Cookie名称",
+    "arguments": [
+      "msg.getLoadBalancerUuid()",
+      "msg.getName()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "loadBalancer[%s] listener[%s] doesn\u0027t support assigning idle timeout and cookie name, it must specify session persistence",
+    "en_US": "loadBalancer[{0}] listener[{1}] doesn\u0027t support assigning idle timeout and cookie name, it must specify session persistence",
+    "zh_CN": "LoadBalancer[{0}]Listener[{1}]不支持分配空闲超时和Cookie名称，它必须指定会话持久性",
+    "arguments": [
+      "msg.getLoadBalancerUuid()",
+      "msg.getName()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "loadBalancer[%s] listener[%s] doesn\u0027t support assigning idle timeout and cookie name when the session persistence is disabled",
+    "en_US": "loadBalancer[{0}] listener[{1}] doesn\u0027t support assigning idle timeout and cookie name when the session persistence is disabled",
+    "zh_CN": "禁用会话持久性时，LoadBalancer[{0}]Listener[{1}]不支持分配空闲超时和Cookie名称",
+    "arguments": [
+      "msg.getLoadBalancerUuid()",
+      "msg.getName()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "loadBalancer[%s] listener[%s] doesn\u0027t support assigning session persistence rewrite without assigning cookie name",
+    "en_US": "loadBalancer[{0}] listener[{1}] doesn\u0027t support assigning session persistence rewrite without assigning cookie name",
+    "zh_CN": "LoadBalancer[{0}]侦听器[{1}]不支持在不分配Cookie名称的情况下分配会话持久性重写",
+    "arguments": [
+      "msg.getLoadBalancerUuid()",
+      "msg.getName()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "loadBalancer[%s] listener[%s] doesn\u0027t support assigning session persistence idle timeout without assigning rewrite mode",
+    "en_US": "loadBalancer[{0}] listener[{1}] doesn\u0027t support assigning session persistence idle timeout without assigning rewrite mode",
+    "zh_CN": "LoadBalancer[{0}]侦听器[{1}]不支持在不分配重写模式的情况下分配会话持久性空闲超时",
+    "arguments": [
+      "msg.getLoadBalancerUuid()",
+      "msg.getName()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "loadBalancer[%s] listener[%s] doesn\u0027t support assigning session persistence cookieName without assigning insert mode",
+    "en_US": "loadBalancer[{0}] listener[{1}] doesn\u0027t support assigning session persistence cookieName without assigning insert mode",
+    "zh_CN": "LoadBalancer[{0}]侦听器[{1}]不支持在不分配插入模式的情况下分配会话持久性CookieName",
+    "arguments": [
+      "msg.getLoadBalancerUuid()",
+      "msg.getName()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "loadBalancer[%s] listener[%s] doesn\u0027t support assigning session persistence rewrite when the http mode is http-tunnel",
+    "en_US": "loadBalancer[{0}] listener[{1}] doesn\u0027t support assigning session persistence rewrite when the http mode is http-tunnel",
+    "zh_CN": "当HTTP模式为HTTP隧道时，LoadBalancer[{0}]Listener[{1}]不支持分配会话持久性重写",
+    "arguments": [
+      "msg.getLoadBalancerUuid()",
+      "msg.getName()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "loadBalancer[%s] listener[%s] doesn\u0027t support assigning other session persistence when the source balancer algorithm is source",
+    "en_US": "loadBalancer[{0}] listener[{1}] doesn\u0027t support assigning other session persistence when the source balancer algorithm is source",
+    "zh_CN": "当源平衡器算法为源时，LoadBalancer[{0}]侦听器[{1}]不支持分配其他会话持久性",
+    "arguments": [
+      "msg.getLoadBalancerUuid()",
+      "msg.getName()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "loadBalancer[%s] listener[%s] doesn\u0027t support assigning session persistence iphash",
+    "en_US": "loadBalancer[{0}] listener[{1}] doesn\u0027t support assigning session persistence iphash",
+    "zh_CN": "LoadBalancer[{0}]侦听器[{1}]不支持分配会话持久性IPHASH",
+    "arguments": [
+      "msg.getLoadBalancerUuid()",
+      "msg.getName()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "invalid max connection[%s], %s is larger than upper threshold %d",
+    "en_US": "invalid max connection[{0}], {1} is larger than upper threshold {2}",
+    "zh_CN": "非法的最大连接数标签[{0}]，因为其值{1}大于上限值{2}",
+    "arguments": [
+      "tag",
+      "s",
+      "LoadBalancerConstants.MAX_CONNECTION_LIMIT"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "conflict loadBalancerPort[%s], a listener[uuid:%s] has used that port",
+    "en_US": "conflict loadBalancerPort[{0}], a listener[uuid:{1}] has used that port",
+    "zh_CN": "冲突的负载均衡器端口(loadBalancerPort)[{0}]，一个监听器[uuid:{1}]已经使用了该端口",
+    "arguments": [
+      "msg.getLoadBalancerPort()",
+      "luuid"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "loadbalancer listener with type %s does not need certificate",
+    "en_US": "loadbalancer listener with type {0} does not need certificate",
+    "zh_CN": "[{0}]类型证书不需要证书",
+    "arguments": [
+      "vo.getProtocol()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "loadbalancer listener [uuid:%s] already had certificate[uuid:%s]",
+    "en_US": "loadbalancer listener [uuid:{0}] already had certificate[uuid:{1}]",
+    "zh_CN": "LoadBalancer侦听器[uuid：{0}]已具有证书[uuid：{1}]",
+    "arguments": [
+      "msg.getListenerUuid()",
+      "msg.getCertificateUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "certificate [uuid:%s] is not added to loadbalancer listener [uuid:%s]",
+    "en_US": "certificate [uuid:{0}] is not added to loadbalancer listener [uuid:{1}]",
+    "zh_CN": "证书[uuid:{0}]未添加到负载均衡监听器[uuid:{1}]",
+    "arguments": [
+      "msg.getCertificateUuid()",
+      "msg.getListenerUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "healthCheck target [%s] error, it must be \u0027default\u0027 or number between[1~65535] ",
+    "en_US": "healthCheck target [{0}] error, it must be \u0027default\u0027 or number between[1~65535] ",
+    "zh_CN": "健康检查端口[{0}]错误,值必须是\u0027default\u0027或者数字[1~65535]",
+    "arguments": [
+      "target"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "could not assign redirect port or status code without specifying http redirect https",
+    "en_US": "could not assign redirect port or status code without specifying http redirect https",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "could not support protocols other than HTTP when specifying http redirect https",
+    "en_US": "could not support protocols other than HTTP when specifying http redirect https",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "l4[%s] loadBalancer listener[%s] doesn\u0027t support modifying session persistence state",
+    "en_US": "l4[{0}] loadBalancer listener[{1}] doesn\u0027t support modifying session persistence state",
+    "zh_CN": "L4[{0}]LoadBalancer侦听器[{1}]不支持修改会话持久性状态",
+    "arguments": [
+      "listener.getProtocol()",
+      "listener.getName()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "could not support both HTTP redirect HTTPS and session persistence at the same time",
+    "en_US": "could not support both HTTP redirect HTTPS and session persistence at the same time",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "listener[%s] can not modifying session persistence rewrite when the http mode is http-tunnel",
+    "en_US": "listener[{0}] can not modifying session persistence rewrite when the http mode is http-tunnel",
+    "zh_CN": "当HTTP模式为HTTP隧道时，侦听器[{0}]无法修改会话持久性重写",
+    "arguments": [
+      "msg.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "listener[%s] can not modifying httpMode http-tunnel when the session persistence is rewrite",
+    "en_US": "listener[{0}] can not modifying httpMode http-tunnel when the session persistence is rewrite",
+    "zh_CN": "重写会话持久性时，侦听器[{0}]无法修改httpmode HTTP-tunnel",
+    "arguments": [
+      "msg.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "listener[%s] changes session persistence to iphash, it must specify source balancer algorithm",
+    "en_US": "listener[{0}] changes session persistence to iphash, it must specify source balancer algorithm",
+    "zh_CN": "侦听器[{0}]将会话持久性更改为IPHASH，它必须指定源平衡器算法",
+    "arguments": [
+      "msg.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "listener[%s] modifies session persistence, it must specify balancer algorithm",
+    "en_US": "listener[{0}] modifies session persistence, it must specify balancer algorithm",
+    "zh_CN": "侦听器[{0}]修改会话持久性，它必须指定平衡器算法",
+    "arguments": [
+      "msg.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "listener[%s] %s algorithm doesn\u0027t support modifying session persistence except assigning iphash explicitly",
+    "en_US": "listener[{0}] {1} algorithm doesn\u0027t support modifying session persistence except assigning iphash explicitly",
+    "zh_CN": "侦听器[{0}]{1}算法不支持修改会话持久性，除非显式分配IPHASH",
+    "arguments": [
+      "msg.getUuid()",
+      "msg.getBalancerAlgorithm()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "listener[%s] %s algorithm doesn\u0027t support modifying session persistence except assigning disable explicitly",
+    "en_US": "listener[{0}] {1} algorithm doesn\u0027t support modifying session persistence except assigning disable explicitly",
+    "zh_CN": "侦听器[{0}]{1}算法不支持修改会话持久性，除非显式指定禁用",
+    "arguments": [
+      "msg.getUuid()",
+      "msg.getBalancerAlgorithm()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "listener[%s] doesn\u0027t support modifying idle timeout and cookie name, it must specify session persistence",
+    "en_US": "listener[{0}] doesn\u0027t support modifying idle timeout and cookie name, it must specify session persistence",
+    "zh_CN": "侦听器[{0}]不支持修改空闲超时和cookie名称，它必须指定会话持久性",
+    "arguments": [
+      "msg.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "listener[%s] doesn\u0027t support modifying idle timeout when the session persistence is not insert",
+    "en_US": "listener[{0}] doesn\u0027t support modifying idle timeout when the session persistence is not insert",
+    "zh_CN": "当会话持久性不是INSERT时，侦听器[{0}]不支持修改空闲超时",
+    "arguments": [
+      "msg.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "listener[%s] doesn\u0027t support modifying cookie name when the session persistence is not rewrite",
+    "en_US": "listener[{0}] doesn\u0027t support modifying cookie name when the session persistence is not rewrite",
+    "zh_CN": "侦听器[{0}]不支持在会话持久性未重写时修改cookie名称",
+    "arguments": [
+      "msg.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "listener[%s] doesn\u0027t support modifying session rewrite without modifying cookie name",
+    "en_US": "listener[{0}] doesn\u0027t support modifying session rewrite without modifying cookie name",
+    "zh_CN": "侦听器[{0}]不支持在不修改Cookie名称的情况下修改会话重写",
+    "arguments": [
+      "msg.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "invalid session idle timeout[%s], it must be the number between[%s~%s]",
+    "en_US": "invalid session idle timeout[{0}], it must be the number between[{1}~{2}]",
+    "zh_CN": "会话空闲超时[{0}]无效，它必须是介于[{1}~{2}]之间的数字",
+    "arguments": [
+      "timeout",
+      "LoadBalancerConstants.SESSION_IDLE_TIMEOUT_MIN",
+      "LoadBalancerConstants.SESSION_IDLE_TIMEOUT_MAX"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "the http health check protocol must be specified its healthy checking parameter healthCheckURI",
+    "en_US": "the http health check protocol must be specified its healthy checking parameter healthCheckURI",
+    "zh_CN": "http类型的健康检查必须提供healthCheckURI参数",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "the http health check protocol\u0027s expecting code [%s] is invalidate",
+    "en_US": "the http health check protocol\u0027s expecting code [{0}] is invalidate",
+    "zh_CN": "http健康检查协议的expeting-code参数非法",
+    "arguments": [
+      "msg.getHealthCheckHttpCode()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "the listener with protocol [%s] doesn\u0027t support select security policy",
+    "en_US": "the listener with protocol [{0}] doesn\u0027t support select security policy",
+    "zh_CN": "具有协议[{0}]的侦听器不支持选择安全策略",
+    "arguments": [
+      "listenerVO.getProtocol()",
+      "msg.getHealthCheckProtocol()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "the listener with protocol [%s] doesn\u0027t support this health check:[%s]",
+    "en_US": "the listener with protocol [{0}] doesn\u0027t support this health check:[{1}]",
+    "zh_CN": "[{0}]类型的监听器不支持此类型[{1}]的健康检查",
+    "arguments": [
+      "listenerVO.getProtocol()",
+      "msg.getHealthCheckProtocol()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "the http health check protocol must be specified its healthy checking parameters including healthCheckMethod and healthCheckURI",
+    "en_US": "the http health check protocol must be specified its healthy checking parameters including healthCheckMethod and healthCheckURI",
+    "zh_CN": "http类型的健康检查协议必须提供healthCheckMethod和healthCheckURI参数",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "could not allow to delete default serverGroup[uuid:%s]",
+    "en_US": "could not allow to delete default serverGroup[uuid:{0}]",
+    "zh_CN": "无法允许删除默认服务器组[uuid：{0}]",
+    "arguments": [
+      "msg.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "could not add backend server vmnic to serverGroup[uuid:%s],because vmnic uuid is null",
+    "en_US": "could not add backend server vmnic to serverGroup[uuid:{0}],because vmnic uuid is null",
+    "zh_CN": "无法将后端服务器vmnic添加到ServerGroup[uuid：{0}]，因为vmnic uuid为空",
+    "arguments": [
+      "msg.getServerGroupUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "could not add backend server vmnic[uuid:%s] to serverGroup[uuid:%s],because vmnic uuid is not exist",
+    "en_US": "could not add backend server vmnic[uuid:{0}] to serverGroup[uuid:{1}],because vmnic uuid is not exist",
+    "zh_CN": "无法将后端服务器vmnic[uuid：{0}]添加到ServerGroup[uuid：{1}]，因为vmnic uuid不存在",
+    "arguments": [
+      "vmNic.get(\"uuid\")",
+      "msg.getServerGroupUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "could not add backend server vmnic to serverGroup[uuid:%s] ,because vmnic weight[%s] not a correct number",
+    "en_US": "could not add backend server vmnic to serverGroup[uuid:{0}] ,because vmnic weight[{1}] not a correct number",
+    "zh_CN": "无法将后端服务器vmnic添加到ServerGroup[uuid：{0}]，因为vmnic权重[{1}]不是正确的数字",
+    "arguments": [
+      "vmNic.get(\"weight\")"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "L3 networks[uuids:%s] of the vm nics has no network service[%s] enabled",
+    "en_US": "L3 networks[uuids:{0}] of the vm nics has no network service[{1}] enabled",
+    "zh_CN": "云主机网卡的三层网络没有可用的网络服务",
+    "arguments": [
+      "l3Uuids",
+      "LoadBalancerConstants.LB_NETWORK_SERVICE_TYPE_STRING"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "the vm nics[uuid:%s] are already on the load balancer servegroup [uuid:%s]",
+    "en_US": "the vm nics[uuid:{0}] are already on the load balancer servegroup [uuid:{1}]",
+    "zh_CN": "VM NIC[uuid：{0}]已位于负载平衡器ServerGroup[uuid：{1}]上",
+    "arguments": [
+      "existingNics",
+      "msg.getServerGroupUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "could not add backend server vmnic to serverGroup [uuid:%s], because vmnic ip [ipAddress:%s] is repeated",
+    "en_US": "could not add backend server vmnic to serverGroup [uuid:{0}], because vmnic ip [ipAddress:{1}] is repeated",
+    "zh_CN": "无法将后端服务器vmnic添加到ServerGroup[uuid：{0}]，因为vmnic IP[IPAddress：{1}]重复",
+    "arguments": [
+      "msg.getServerGroupUuid()",
+      "vmNicIps"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "could not add vm nic [uuid:%s] to server group [uuid:%s] because listener [uuid:%s] attached this server group already the nic to be added",
+    "en_US": "could not add vm nic [uuid:{0}] to server group [uuid:{1}] because listener [uuid:{2}] attached this server group already the nic to be added",
+    "zh_CN": "",
+    "arguments": [
+      "vmNicUuids",
+      "msg.getServerGroupUuid()",
+      "listenerVO.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "could not add backend server ip to serverGroup [uuid:%s], because ip [ipAddress:%s] is repeated",
+    "en_US": "could not add backend server ip to serverGroup [uuid:{0}], because ip [ipAddress:{1}] is repeated",
+    "zh_CN": "无法将后端服务器IP添加到ServerGroup[uuid：{0}]，因为IP[IPAddress：{1}]重复",
+    "arguments": [
+      "msg.getServerGroupUuid()",
+      "server.get(\"ipAddress\")"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "invalid  weight[serverIp:%s,weight:%s], weight is not in the range [%d, %d]",
+    "en_US": "invalid  weight[serverIp:{0},weight:{1}], weight is not in the range [{2}, {3}]",
+    "zh_CN": "权重[服务器IP：{0}，权重：{1}]无效，权重不在范围[{2}，{3}]内",
+    "arguments": [
+      "server.get(\"ipAddress\")",
+      "serverIpWeight",
+      "LoadBalancerConstants.BALANCER_WEIGHT_MIN",
+      "LoadBalancerConstants.BALANCER_WEIGHT_MAX"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "the server ips [uuid:%s] are already on the load balancer servegroup [uuid:%s]",
+    "en_US": "the server ips [uuid:{0}] are already on the load balancer servegroup [uuid:{1}]",
+    "zh_CN": "服务器IP[uuid：{0}]已在负载平衡器ServerGroup[uuid：{1}]上",
+    "arguments": [
+      "existingServerIps",
+      "msg.getServerGroupUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "vmnics are all not in servergroup [%s]",
+    "en_US": "vmnics are all not in servergroup [{0}]",
+    "zh_CN": "VMNIC均不在ServerGroup[{0}]中",
+    "arguments": [
+      "msg.getServerGroupUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "serverips are all not in servergroup [%s]",
+    "en_US": "serverips are all not in servergroup [{0}]",
+    "zh_CN": "ServerIP全部不在ServerGroup[{0}]中",
+    "arguments": [
+      "msg.getServerGroupUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "loadbalacerServerGroup [%s] is non-existent",
+    "en_US": "loadbalacerServerGroup [{0}] is non-existent",
+    "zh_CN": "LoadBalacerServerGroup[{0}]不存在",
+    "arguments": [
+      "msg.getServerGroupUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "vmnic or ip is null",
+    "en_US": "vmnic or ip is null",
+    "zh_CN": "vmnic或IP为空",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "could not add server group[uuid:%s} to listener [uuid:%s] because it is already added ",
+    "en_US": "could not add server group[uuid:{0}} to listener [uuid:{1}] because it is already added ",
+    "zh_CN": "无法将服务器组[uuid：{0}}添加到侦听器[uuid：{1}]，因为它已添加",
+    "arguments": [
+      "msg.getServerGroupUuid()",
+      "msg.getlistenerUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "could not add server group[uuid:%s} to listener [uuid:%s] because nic [uuid:%s] is already added",
+    "en_US": "could not add server group[uuid:{0}} to listener [uuid:{1}] because nic [uuid:{2}] is already added",
+    "zh_CN": "无法将服务器组[uuid：{0}}添加到侦听器[uuid：{1}]，因为已经添加了NIC[uuid：{2}]",
+    "arguments": [
+      "msg.getServerGroupUuid()",
+      "msg.getlistenerUuid()",
+      "nicUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "could not add server group[uuid:%s} to listener [uuid:%s] because server ip [%s] is already added",
+    "en_US": "could not add server group[uuid:{0}} to listener [uuid:{1}] because server ip [{2}] is already added",
+    "zh_CN": "无法将服务器组[uuid：{0}}添加到侦听器[uuid：{1}]，因为已添加服务器IP[{2}]",
+    "arguments": [
+      "msg.getServerGroupUuid()",
+      "msg.getlistenerUuid()",
+      "ipAddress"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "could not  remove server groups[uuid:%s} from listener [uuid:%s] because it has enable HTTP redirect HTTPS",
+    "en_US": "could not  remove server groups[uuid:{0}} from listener [uuid:{1}] because it has enable HTTP redirect HTTPS",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getServerGroupUuid()",
+      "msg.getListenerUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "could not remove server group[uuid:%s} from listener [uuid:%s] because it is not added",
+    "en_US": "could not remove server group[uuid:{0}} from listener [uuid:{1}] because it is not added",
+    "zh_CN": "由于未添加服务器组[uuid：{1}]，因此无法将其从侦听器[uuid：{1}]中删除",
+    "arguments": [
+      "msg.getServerGroupUuid()",
+      "msg.getListenerUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "loadbalacerUuid [%s] is non-existent",
+    "en_US": "loadbalacerUuid [{0}] is non-existent",
+    "zh_CN": "LoadBalaceRuuid[{0}]不存在",
+    "arguments": [
+      "loadBalancerUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "could not find loadBalancer with serverGroup [uuid:%s]",
+    "en_US": "could not find loadBalancer with serverGroup [uuid:{0}]",
+    "zh_CN": "找不到ServerGroup为[uuid：{0}]的LoadBalancer",
+    "arguments": [
+      "msg.getServerGroupUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "could not update backend server vmnic of serverGroup,because serverGroup[uuid:%s] don not have vmnic [uuid:%s] ",
+    "en_US": "could not update backend server vmnic of serverGroup,because serverGroup[uuid:{0}] don not have vmnic [uuid:{1}] ",
+    "zh_CN": "无法更新ServerGroup的后端服务器vmnic，因为ServerGroup[uuid：{0}]没有vmnic[uuid：{1}]",
+    "arguments": [
+      "msg.getServerGroupUuid()",
+      "vmNic.containsKey(\"uuid\")"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "invalid balancer weight[vimNic:%s,weight:%s], weight is not in the range [%d, %d]",
+    "en_US": "invalid balancer weight[vimNic:{0},weight:{1}], weight is not in the range [{2}, {3}]",
+    "zh_CN": "无效的平衡器重量[vimnic：{0}，重量：{1}]，重量不在范围[{2}，{3}]内",
+    "arguments": [
+      "vmNic.get(\"uuid\")",
+      "vmNicWeight",
+      "LoadBalancerConstants.BALANCER_WEIGHT_MIN",
+      "LoadBalancerConstants.BALANCER_WEIGHT_MAX"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "could not change backend server vmnic to serverGroup[uuid:%s] ,because vmnic weight[%s] not a correct number",
+    "en_US": "could not change backend server vmnic to serverGroup[uuid:{0}] ,because vmnic weight[{1}] not a correct number",
+    "zh_CN": "无法将后端服务器vmnic更改为ServerGroup[uuid：{0}]，因为vmnic权重[{1}]不是正确的数字",
+    "arguments": [
+      "vmNic.get(\"weight\")"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "invalid balancer weight[vimNic:%s], weight is null",
+    "en_US": "invalid balancer weight[vimNic:{0}], weight is null",
+    "zh_CN": "平衡器权重[vimnic：{0}]无效，权重为空",
+    "arguments": [
+      "vmNic.get(\"uuid\")"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "could not update backend server vmnic of serverGroup[uuid:%s],because vmnic uuid is null",
+    "en_US": "could not update backend server vmnic of serverGroup[uuid:{0}],because vmnic uuid is null",
+    "zh_CN": "无法更新ServerGroup[uuid：{0}]的后端服务器vmnic，因为vmnic uuid为空",
+    "arguments": [
+      "msg.getServerGroupUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "could not update backend server ip of serverGroup,because serverGroup[uuid:%s] don not have ip [ipAddress:%s] ",
+    "en_US": "could not update backend server ip of serverGroup,because serverGroup[uuid:{0}] don not have ip [ipAddress:{1}] ",
+    "zh_CN": "无法更新ServerGroup的后端服务器IP，因为ServerGroup[uuid：{0}]没有IP[IP地址：{1}]",
+    "arguments": [
+      "msg.getServerGroupUuid()",
+      "ipAddress"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "invalid balancer weight[serverIp:%s,weight:%s], weight is not in the range [%d, %d]",
+    "en_US": "invalid balancer weight[serverIp:{0},weight:{1}], weight is not in the range [{2}, {3}]",
+    "zh_CN": "无效的平衡器权重[服务器IP：{0}，权重：{1}]，权重不在范围[{2}，{3}]内",
+    "arguments": [
+      "server.get(\"ipAddress\")",
+      "serverIpWeight",
+      "LoadBalancerConstants.BALANCER_WEIGHT_MIN",
+      "LoadBalancerConstants.BALANCER_WEIGHT_MAX"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "could not add backend server ip to serverGroup[uuid:%s] ,because vmnic weight[%s] not a correct number",
+    "en_US": "could not add backend server ip to serverGroup[uuid:{0}] ,because vmnic weight[{1}] not a correct number",
+    "zh_CN": "无法将后端服务器IP添加到ServerGroup[uuid：{0}]，因为vmnic权重[{1}]不是正确的数字",
+    "arguments": [
+      "server.get(\"weight\")"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "invalid balancer weight[serverIp:%s], weight is null",
+    "en_US": "invalid balancer weight[serverIp:{0}], weight is null",
+    "zh_CN": "无效的平衡器权重[ServerIP：{0}]，权重为空",
+    "arguments": [
+      "server.get(\"ipAddress\")"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "could not add backend server ip to serverGroup [uuid:%s], because ip [ipAddress:%s] is invalid",
+    "en_US": "could not add backend server ip to serverGroup [uuid:{0}], because ip [ipAddress:{1}] is invalid",
+    "zh_CN": "无法将后端服务器IP添加到ServerGroup[uuid：{0}]，因为IP[IPAddress：{1}]无效",
+    "arguments": [
+      "msg.getServerGroupUuid()",
+      "serverIps"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "could not add server ip to share load balancer server group",
+    "en_US": "could not add server ip to share load balancer server group",
+    "zh_CN": "无法将服务器IP添加到共享负载平衡器服务器组",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "could not change backendserver, beacause vmincs and serverips is null",
+    "en_US": "could not change backendserver, beacause vmincs and serverips is null",
+    "zh_CN": "无法更改后端服务器，因为VMINCS和ServerIPS为空",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerApiInterceptor.java"
+  },
+  {
+    "raw": "can not get service providerType for load balancer listener [uuid:%s]",
+    "en_US": "can not get service providerType for load balancer listener [uuid:{0}]",
+    "zh_CN": "无法获取负载平衡器侦听器[uuid：{0}]的Service ProviderType",
+    "arguments": [
+      "struct.listenerUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerBase.java"
+  },
+  {
+    "raw": "service provider type mismatching. The load balancer[uuid:%s] is provided by the service provider[type:%s], but new service provider is [type: %s]",
+    "en_US": "service provider type mismatching. The load balancer[uuid:{0}] is provided by the service provider[type:{1}], but new service provider is [type: {2}]",
+    "zh_CN": "",
+    "arguments": [
+      "self.getUuid()",
+      "self.getProviderType()",
+      "providerType"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerBase.java"
+  },
+  {
+    "raw": "there is listener with same port [%s] and same load balancer [uuid:%s]",
+    "en_US": "there is listener with same port [{0}] and same load balancer [uuid:{1}]",
+    "zh_CN": "存在具有相同端口[{0}]和相同负载平衡器[uuid：{1}]的侦听器",
+    "arguments": [
+      "msg.getLoadBalancerPort()",
+      "msg.getLoadBalancerUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerBase.java"
+  },
+  {
+    "raw": "invalid health checking parameters[%s], the format is method:URI:code, for example, GET:/index.html:http_2xx",
+    "en_US": "invalid health checking parameters[{0}], the format is method:URI:code, for example, GET:/index.html:http_2xx",
+    "zh_CN": "无效的健康检查参数[{0}]，正确格式：method:URI:code，例如 GET:/index.html:http_2xx",
+    "arguments": [
+      "param"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerBase.java"
+  },
+  {
+    "raw": "cannot find the load balancer[uuid:%s]",
+    "en_US": "cannot find the load balancer[uuid:{0}]",
+    "zh_CN": "无法找到负载均衡器[uuid:{0}]",
+    "arguments": [
+      "msg.getLoadBalancerUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerManagerImpl.java"
+  },
+  {
+    "raw": "cannot delete the system tag[%s]. The load balancer plugin relies on it, you can only update it",
+    "en_US": "cannot delete the system tag[{0}]. The load balancer plugin relies on it, you can only update it",
+    "zh_CN": "无法删除系统标签[{0}]。负载均衡器插件依赖于该标签，该标签只能被更新",
+    "arguments": [
+      "tag.getTag()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerManagerImpl.java"
+  },
+  {
+    "raw": "nic[uuid:%s] not found. Please correct your system tag[%s] of loadbalancer",
+    "en_US": "nic[uuid:{0}] not found. Please correct your system tag[{1}] of loadbalancer",
+    "zh_CN": "找不到网卡[uuid:{0}]。请检查负载均衡器的系统标签[{1}]",
+    "arguments": [
+      "nicUuid",
+      "systemTag"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerManagerImpl.java"
+  },
+  {
+    "raw": "invalid balancer weight[%s], %s is not in the range [%d, %d]",
+    "en_US": "invalid balancer weight[{0}], {1} is not in the range [{2}, {3}]",
+    "zh_CN": "无效的权重值[{0}], {1}不在允许范围[{2}, {3}]中",
+    "arguments": [
+      "systemTag",
+      "s",
+      "LoadBalancerConstants.BALANCER_WEIGHT_MIN",
+      "LoadBalancerConstants.BALANCER_WEIGHT_MAX"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerManagerImpl.java"
+  },
+  {
+    "raw": "invalid balancer weight[%s], %s is not a number",
+    "en_US": "invalid balancer weight[{0}], {1} is not a number",
+    "zh_CN": "无效的权重值[{0}], {1}不是一个数字",
+    "arguments": [
+      "systemTag",
+      "s"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerManagerImpl.java"
+  },
+  {
+    "raw": "invalid balance algorithm[%s], valid algorithms are %s",
+    "en_US": "invalid balance algorithm[{0}], valid algorithms are {1}",
+    "zh_CN": "无效的均衡算法[{0}]，有效的为[{1}]",
+    "arguments": [
+      "algorithm",
+      "LoadBalancerConstants.BALANCE_ALGORITHMS"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerManagerImpl.java"
+  },
+  {
+    "raw": "invalid unhealthy threshold[%s], %s is not a number",
+    "en_US": "invalid unhealthy threshold[{0}], {1} is not a number",
+    "zh_CN": "无效的不健康阈值[{0}]，[{1}]不是一个数字",
+    "arguments": [
+      "systemTag",
+      "s"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerManagerImpl.java"
+  },
+  {
+    "raw": "invalid healthy threshold[%s], %s is not a number",
+    "en_US": "invalid healthy threshold[{0}], {1} is not a number",
+    "zh_CN": "无效的健康阈值[{0}]，[{1}]不是一个数字",
+    "arguments": [
+      "systemTag",
+      "s"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerManagerImpl.java"
+  },
+  {
+    "raw": "invalid healthy timeout[%s], %s is not a number",
+    "en_US": "invalid healthy timeout[{0}], {1} is not a number",
+    "zh_CN": "无效的健康超时[{0}]，[{1}]不是一个数字",
+    "arguments": [
+      "systemTag",
+      "s"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerManagerImpl.java"
+  },
+  {
+    "raw": "invalid connection idle timeout[%s], %s is not a number",
+    "en_US": "invalid connection idle timeout[{0}], {1} is not a number",
+    "zh_CN": "无效的连接空闲超时[{0}]，[{1}]不是一个数字",
+    "arguments": [
+      "systemTag",
+      "s"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerManagerImpl.java"
+  },
+  {
+    "raw": "invalid health check interval[%s], %s is not a number",
+    "en_US": "invalid health check interval[{0}], {1} is not a number",
+    "zh_CN": "无效的健康检查间隔[{0}]，[{1}]不是一个数字",
+    "arguments": [
+      "systemTag",
+      "s"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerManagerImpl.java"
+  },
+  {
+    "raw": "invalid max connection[%s], %s is not a number",
+    "en_US": "invalid max connection[{0}], {1} is not a number",
+    "zh_CN": "无效的最大连接[{0}]，[{1}]不是一个数字",
+    "arguments": [
+      "systemTag",
+      "s"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerManagerImpl.java"
+  },
+  {
+    "raw": "invalid process number[%s], %s is not a number",
+    "en_US": "invalid process number[{0}], {1} is not a number",
+    "zh_CN": "进程编号[{0}]无效，{1}不是数字",
+    "arguments": [
+      "systemTag",
+      "s"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerManagerImpl.java"
+  },
+  {
+    "raw": "invalid health target[%s], the format is targetCheckProtocol:port, for example, tcp:default",
+    "en_US": "invalid health target[{0}], the format is targetCheckProtocol:port, for example, tcp:default",
+    "zh_CN": "无效的健康检查目标[{0}]，格式为[目标检查协议(targetCheckProtocol):端口(port)], 例如[tcp:default]",
+    "arguments": [
+      "systemTag"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerManagerImpl.java"
+  },
+  {
+    "raw": "invalid health target[%s], the target checking protocol[%s] is invalid, valid protocols are %s",
+    "en_US": "invalid health target[{0}], the target checking protocol[{1}] is invalid, valid protocols are {2}",
+    "zh_CN": "无效的健康检查目标[{0}]，目标检查协议无效[{1}]，有效的为[{2}]",
+    "arguments": [
+      "systemTag",
+      "protocol",
+      "LoadBalancerConstants.HEALTH_CHECK_TARGET_PROTOCOLS"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerManagerImpl.java"
+  },
+  {
+    "raw": "invalid invalid health target[%s], port[%s] is not in the range of [1, 65535]",
+    "en_US": "invalid invalid health target[{0}], port[{1}] is not in the range of [1, 65535]",
+    "zh_CN": "无效的无效健康检查目标[{0}]，端口[{1}]不在范围[1, 65535]内",
+    "arguments": [
+      "systemTag",
+      "port"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerManagerImpl.java"
+  },
+  {
+    "raw": "invalid invalid health target[%s], port[%s] is not a number",
+    "en_US": "invalid invalid health target[{0}], port[{1}] is not a number",
+    "zh_CN": "无效的健康检查目标[{0}]，端口[{1}]不是一个数字",
+    "arguments": [
+      "systemTag",
+      "port"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerManagerImpl.java"
+  },
+  {
+    "raw": "invalid balancer weight for nic:%s, %d is not in the range [%d, %d]",
+    "en_US": "invalid balancer weight for nic:{0}, {1} is not in the range [{2}, {3}]",
+    "zh_CN": "无效的网卡:{0}权重值{1}，不在有效范围[{2}, {3}]内",
+    "arguments": [
+      "nicUuid",
+      "weight",
+      "LoadBalancerConstants.BALANCER_WEIGHT_MIN",
+      "LoadBalancerConstants.BALANCER_WEIGHT_MAX"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/lb/LoadBalancerWeightOperator.java"
+  }
+]

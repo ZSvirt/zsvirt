@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<globalConfig xmlns="http://zstack.org/schema/zstack">
+    <config>
+        <category>portForwarding</category>
+        <name>snatInboundTraffic</name>
+        <description>A boolean value indicating whether source nat inbound traffic of vip which has port forwarding rule to guest gateway IP. This is typically useful when a vm has multiple nics, and each nic has port forwarding rules attached. Don't change this if a vm only has one nic that has port forwarding rules</description>
+        <defaultValue>false</defaultValue>
+        <type>java.lang.Boolean</type>
+    </config>
+
+    <config>
+        <name>portForwarding.num</name>
+        <description>default quota for port forwarding</description>
+        <defaultValue>20</defaultValue>
+        <category>quota</category>
+        <type>java.lang.Long</type>
+    </config>
+</globalConfig>

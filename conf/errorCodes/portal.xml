@@ -1,0 +1,19 @@
+<error>
+    <prefix>PORTAL</prefix>
+
+    <code>
+        <id>1000</id>
+        <description>No service defines this API message</description>
+    </code>
+
+    <code>
+        <id>1001</id>
+        <description>A required field is missed in API message</description>
+    </code>
+
+    <code>
+        <id>1002</id>
+        <description>Management server is not ready to serve API message</description>
+    </code>
+</error>
+

@@ -1,0 +1,95 @@
+{
+    "ZStackTemplateFormatVersion": "2018-06-18",
+    "Description": "Creates a load balancer:\nThis template creates a load balancer with 3 backend VMs attached. Prerequisites:\nThe instance offering, image, private network, and public network are created. Make sure that the networks are working as expected. Otherwise, the load balancer may fail to be created or fail to work properly after creation.",
+    "Parameters": {
+        "InstanceOfferingUuid": {
+            "Type": "String",
+            "Label": "Instance Offering",
+            "Description": "The instance offering for creating a VM."
+        },
+        "ImageUuid":{
+            "Type": "String",
+            "Label": "Image",
+            "Description": "The image for creating a VM. Choose an image excluding ISO."
+        },
+        "FlatNetworkUuid":{
+            "Type": "String",
+            "Label": "Private Network",
+            "Description" : "The private network for creating a VM."
+        },
+        "PublicNetworkUuid":{
+            "Type": "String",
+            "Label": "Public Network",
+            "Description" : "The public network for creating load balancer."
+        }
+    },
+    "Resources": {
+        "VmInstance-1": {
+            "Type": "Cloud::Resource::VmInstance",
+            "Properties": {
+                "name": {"Fn::Join":["-",[{"Ref":"Cloud::StackName"}, {"Ref":"Cloud::StackUuid"},{"Ref":"Cloud::AccountUuid"},{"Ref":"Cloud::AccountName"},"VM-1"]]},
+                "instanceOfferingUuid": {"Ref":"InstanceOfferingUuid"},
+                "imageUuid":{"Ref":"ImageUuid"},
+                "l3NetworkUuids":[{"Ref":"FlatNetworkUuid"}]
+            }
+        },
+        "VmInstance-2": {
+            "Type": "Cloud::Resource::VmInstance",
+            "Properties": {
+                "name": {"Fn::Join":["-",[{"Ref":"Cloud::StackName"}, {"Ref":"Cloud::StackUuid"},{"Ref":"Cloud::AccountUuid"},{"Ref":"Cloud::AccountName"},"VM-2"]]},
+                "instanceOfferingUuid": {"Ref":"InstanceOfferingUuid"},
+                "imageUuid":{"Ref":"ImageUuid"},
+                "l3NetworkUuids":[{"Ref":"FlatNetworkUuid"}]
+            }
+        },
+        "VmInstance-3": {
+            "Type": "Cloud::Resource::VmInstance",
+            "Properties": {
+                "name": {"Fn::Join":["-",[{"Ref":"Cloud::StackName"}, {"Ref":"Cloud::StackUuid"},{"Ref":"Cloud::AccountUuid"},{"Ref":"Cloud::AccountName"},"VM-3"]]},
+                "instanceOfferingUuid": {"Ref":"InstanceOfferingUuid"},
+                "imageUuid":{"Ref":"ImageUuid"},
+                "l3NetworkUuids":[{"Ref":"FlatNetworkUuid"}]
+            }
+        },
+        "VIP": {
+            "Type": "Cloud::Resource::Vip",
+            "Properties": {
+                "name": {"Fn::Join":["-",[{"Ref":"Cloud::StackName"}, {"Ref":"Cloud::StackUuid"},{"Ref":"Cloud::AccountUuid"},{"Ref":"Cloud::AccountName"},"VIP"]]},
+                "l3NetworkUuid":{"Ref":"PublicNetworkUuid"}
+            }
+        },
+        "LoadBalancer":{
+            "Type": "Cloud::Resource::LoadBalancer",
+            "Properties": {
+                "name": {"Fn::Join":["-",[{"Ref":"Cloud::StackName"}, {"Ref":"Cloud::StackUuid"},{"Ref":"Cloud::AccountUuid"},{"Ref":"Cloud::AccountName"},"LoadBalancer"]]},
+                "vipUuid":{"Fn::GetAtt":["VIP","uuid"]}
+            }
+        },
+        "LoadBalancerListener-1":{
+            "Type":"Cloud::Resource::LoadBalancerListener",
+            "Properties": {
+                "name": {"Fn::Join":["-",[{"Ref":"Cloud::StackName"}, {"Ref":"Cloud::StackUuid"},{"Ref":"Cloud::AccountUuid"},{"Ref":"Cloud::AccountName"},"LoadBalancer-listener-1"]]},
+                "loadBalancerUuid":{"Fn::GetAtt":["LoadBalancer","uuid"]},
+                "instancePort": 22,
+                "loadBalancerPort": 22,
+                "protocol":"tcp",
+                "systemTags":["balancerAlgorithm::roundrobin"]
+            }
+        },
+        "AddVmNicToLoadBalancer":{
+            "Type":"Cloud::Action::AddVmNicToLoadBalancer",
+            "Properties": {
+                "listenerUuid":{"Fn::GetAtt":["LoadBalancerListener-1","uuid"]},
+                "vmNicUuids":[{"Fn::GetAtt":[{"Fn::Select":[0,{"Fn::GetAtt":["VmInstance-1","vmNics"]}]},"uuid"]}, {"Fn::GetAtt":[{"Fn::Select":[0,{"Fn::GetAtt":["VmInstance-2","vmNics"]}]},"uuid"]}, {"Fn::GetAtt":[{"Fn::Select":[0,{"Fn::GetAtt":["VmInstance-3","vmNics"]}]},"uuid"]}]
+            }
+        }
+    },
+    "Outputs": {
+        "VmInstance": {
+            "Value": {
+                "Ref": "LoadBalancer"
+            }
+        }
+    }
+}
+

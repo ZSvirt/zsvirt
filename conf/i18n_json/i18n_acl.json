@@ -1,0 +1,123 @@
+[
+  {
+    "raw": "not support the ip version %d",
+    "en_US": "not support the ip version {0}",
+    "zh_CN": "不支持的IP版本{0}",
+    "arguments": [
+      "ipVer"
+    ],
+    "fileName": "src/main/java/org/zstack/acl/AccessControlListApiInterceptor.java"
+  },
+  {
+    "raw": "%s duplicate/overlap ip entry with access-control-list group:%s",
+    "en_US": "{0} duplicate/overlap ip entry with access-control-list group:{1}",
+    "zh_CN": "{0}中有和访问控制组{1}里的ip重复/重叠",
+    "arguments": [
+      "ips",
+      "acl.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/acl/AccessControlListApiInterceptor.java"
+  },
+  {
+    "raw": "ip format only supports ip/iprange/cidr, but find %s",
+    "en_US": "ip format only supports ip/iprange/cidr, but find {0}",
+    "zh_CN": "只支持IP地址/IP段/IP网络的格式，不支持{0}",
+    "arguments": [
+      "ips"
+    ],
+    "fileName": "src/main/java/org/zstack/acl/AccessControlListApiInterceptor.java"
+  },
+  {
+    "raw": "ip range[%s, %s] is overlap with [%s, %s] in access-control-list group:%s",
+    "en_US": "ip range[{0}, {1}] is overlap with [{2}, {3}] in access-control-list group:{4}",
+    "zh_CN": "IP段[{0}，{1}]和访问控制组：{4}里的[{2}, {3}]有重叠的ip",
+    "arguments": [
+      "startIp",
+      "endIp",
+      "NetworkUtils.longToIpv4String(r.lowerEndpoint())",
+      "NetworkUtils.longToIpv4String(r.upperEndpoint())",
+      "acl.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/acl/AccessControlListApiInterceptor.java"
+  },
+  {
+    "raw": "Invalid rule expression, the detail: %s",
+    "en_US": "Invalid rule expression, the detail: {0}",
+    "zh_CN": "规则表达式无效，详细信息：{0}",
+    "arguments": [
+      "e.getMessage()"
+    ],
+    "fileName": "src/main/java/org/zstack/acl/AccessControlListApiInterceptor.java"
+  },
+  {
+    "raw": "the access-control-list groups[%s] already own redirect rule, can not add IP Entry",
+    "en_US": "the access-control-list groups[{0}] already own redirect rule, can not add IP Entry",
+    "zh_CN": "访问控制列表组[{0}]已拥有重定向规则，无法添加IP条目",
+    "arguments": [
+      "acl.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/acl/AccessControlListApiInterceptor.java"
+  },
+  {
+    "raw": "the access-control-list groups[%s] can\u0027t be added more than %d ip entries",
+    "en_US": "the access-control-list groups[{0}] can\u0027t be added more than {1} ip entries",
+    "zh_CN": "访问控制组[{0}]最多只能添加{1}ip组",
+    "arguments": [
+      "acl.getUuid()",
+      "AccessControlListConstants.MAX_ENTRY_COUNT_PER_GROUP"
+    ],
+    "fileName": "src/main/java/org/zstack/acl/AccessControlListApiInterceptor.java"
+  },
+  {
+    "raw": "the access-control-list groups[%s] already own redirect rule, can not add ip entry",
+    "en_US": "the access-control-list groups[{0}] already own redirect rule, can not add ip entry",
+    "zh_CN": "访问控制列表组[{0}]已拥有重定向规则，无法添加IP条目",
+    "arguments": [
+      "acl.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/acl/AccessControlListApiInterceptor.java"
+  },
+  {
+    "raw": "the access-control-list groups[%s] already own ip entry, can not add redirect rule",
+    "en_US": "the access-control-list groups[{0}] already own ip entry, can not add redirect rule",
+    "zh_CN": "访问控制列表组[{0}]已拥有IP条目，无法添加重定向规则",
+    "arguments": [
+      "acl.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/acl/AccessControlListApiInterceptor.java"
+  },
+  {
+    "raw": "the access-control-list groups[%s] already own one redirect rule, can not add redirect rule",
+    "en_US": "the access-control-list groups[{0}] already own one redirect rule, can not add redirect rule",
+    "zh_CN": "访问控制列表组[{0}]已拥有一个重定向规则，无法添加重定向规则",
+    "arguments": [
+      "acl.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/acl/AccessControlListApiInterceptor.java"
+  },
+  {
+    "raw": "domain and url can not both empty",
+    "en_US": "domain and url can not both empty",
+    "zh_CN": "域和URL不能同时为空",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/acl/AccessControlListApiInterceptor.java"
+  },
+  {
+    "raw": "domain[%s] is not validate domain",
+    "en_US": "domain[{0}] is not validate domain",
+    "zh_CN": "域[{0}]不是验证域",
+    "arguments": [
+      "msg.getDomain()"
+    ],
+    "fileName": "src/main/java/org/zstack/acl/AccessControlListApiInterceptor.java"
+  },
+  {
+    "raw": "url[%s] is not validate url",
+    "en_US": "url[{0}] is not validate url",
+    "zh_CN": "URL[{0}]不是验证URL",
+    "arguments": [
+      "msg.getUrl()"
+    ],
+    "fileName": "src/main/java/org/zstack/acl/AccessControlListApiInterceptor.java"
+  }
+]

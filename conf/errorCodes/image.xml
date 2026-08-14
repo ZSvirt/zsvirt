@@ -1,0 +1,14 @@
+<error>
+    <prefix>IMG</prefix>
+
+    <code>
+        <id>1000</id>
+        <description>Unable to create an image from vm's volume</description>
+    </code>
+
+    <code>
+        <id>1001</id>
+        <description>upload image interrupted</description>
+    </code>
+</error>
+

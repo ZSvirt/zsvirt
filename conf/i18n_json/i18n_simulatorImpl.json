@@ -1,0 +1,25 @@
+[
+  {
+    "raw": "set to disconnected",
+    "en_US": "set to disconnected",
+    "zh_CN": "设置为断开连接",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/simulator/SimulatorHost.java"
+  },
+  {
+    "raw": "on purpose",
+    "en_US": "on purpose",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/simulator/SimulatorSecurityGroupBackend.java"
+  },
+  {
+    "raw": "host where vm[uuid:%s] locate is not Connected.",
+    "en_US": "host where vm[uuid:{0}] locate is not Connected.",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getVmInstanceUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/simulator/storage/primary/SimulatorPrimaryStorage.java"
+  }
+]

@@ -1,0 +1,9 @@
+[
+  {
+    "raw": "the url is null, please config the YunShan NSP.",
+    "en_US": "the url is null, please config the YunShan NSP.",
+    "zh_CN": "URL为空，请配置云山NSP。",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/yunshan/util/YunshanClient.java"
+  }
+]

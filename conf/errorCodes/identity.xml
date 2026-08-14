@@ -1,0 +1,74 @@
+<error>
+    <prefix>ID</prefix>
+
+    <code>
+        <id>1000</id>
+        <description>Unable to authenticate a user</description>
+    </code>
+
+    <code>
+        <id>1001</id>
+        <description>The session is invalid, either wrong session id or the session has been expired</description>
+    </code>
+
+    <code>
+        <id>1002</id>
+        <description>The user doesn't have permission to perform the operation</description>
+    </code>
+
+    <code>
+        <id>1003</id>
+        <description>The user exceeds a quota of a resource</description>
+    </code>
+
+    <code>
+        <id>1004</id>
+        <description>Invalid quota operation</description>
+    </code>
+
+    <code>
+        <id>1005</id>
+        <description>The user has to change initial password</description>
+    </code>
+
+    <code>
+        <id>1006</id>
+        <description>Max number of active sessions exceeded</description>
+    </code>
+
+    <code>
+        <id>1007</id>
+        <description>The user is disabled</description>
+    </code>
+
+    <code>
+        <id>2000</id>
+        <description>Addition authentication error</description>
+    </code>
+
+    <code>
+        <id>2001</id>
+        <description>The user has to login by addition authentication</description>
+    </code>
+
+    <code>
+        <id>2002</id>
+        <description>Fail to authenticate a user due to addition authentication</description>
+    </code>
+
+    <code>
+        <id>2003</id>
+        <description>Fail to authenticate a user due to remote authentication server error</description>
+    </code>
+
+    <code>
+        <id>3001</id>
+        <description>Invalid Role Policy</description>
+    </code>
+
+    <code>
+        <id>3002</id>
+        <description>Role is being used</description>
+    </code>
+</error>
+

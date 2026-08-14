@@ -1,0 +1,34 @@
+<error>
+    <prefix>PS</prefix>
+
+    <code>
+        <id>1000</id>
+        <description>Unable to allocate a primary storage that has available space for required volume</description>
+    </code>
+
+    <code>
+        <id>1001</id>
+        <description>Unable to attach a primary storage to cluster</description>
+    </code>
+
+    <code>
+        <id>1002</id>
+        <description>Unable to detach a primary storage from cluster</description>
+    </code>
+
+    <code>
+        <id>1003</id>
+        <description>The primary storage is disconnected</description>
+    </code>
+
+    <code>
+        <id>1004</id>
+        <description>The primary storage type does not support set qos</description>
+    </code>
+
+    <code>
+        <id>1005</id>
+        <description>The primary storage is already taken over</description>
+    </code>
+</error>
+

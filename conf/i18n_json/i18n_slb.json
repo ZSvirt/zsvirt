@@ -1,0 +1,380 @@
+[
+  {
+    "raw": "could not create slb instance because there is no load balancer slb group [uuid:%s]",
+    "en_US": "could not create slb instance because there is no load balancer slb group [uuid:{0}]",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getSlbGroupUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/slb/SlbApiInterceptor.java"
+  },
+  {
+    "raw": "could not create slb instance because there is no slb offering configured for slb group [uuid:%s]",
+    "en_US": "could not create slb instance because there is no slb offering configured for slb group [uuid:{0}]",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getSlbGroupUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/slb/SlbApiInterceptor.java"
+  },
+  {
+    "raw": "could not create slb instance because image uuid of slb offering [uuid:%s] is null",
+    "en_US": "could not create slb instance because image uuid of slb offering [uuid:{0}] is null",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getSlbGroupUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/slb/SlbApiInterceptor.java"
+  },
+  {
+    "raw": "could not create slb instance because image [uuid:%s] is deleted",
+    "en_US": "could not create slb instance because image [uuid:{0}] is deleted",
+    "zh_CN": "",
+    "arguments": [
+      "slbOfferingVO.getImageUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/slb/SlbApiInterceptor.java"
+  },
+  {
+    "raw": "could not create slb group because invalid front l3 network type %s",
+    "en_US": "could not create slb group because invalid front l3 network type {0}",
+    "zh_CN": "无法创建SLB组，因为前端三层网络类型{0}无效",
+    "arguments": [
+      "frontL3.getCategory()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/slb/SlbApiInterceptor.java"
+  },
+  {
+    "raw": "could not create slb group, because front network doesn\u0027t support ipv6 yet",
+    "en_US": "could not create slb group, because front network doesn\u0027t support ipv6 yet",
+    "zh_CN": "无法创建SLB组，因为前端网络尚不支持IPv6",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/network/service/slb/SlbApiInterceptor.java"
+  },
+  {
+    "raw": "could not execute the api operation. front network [uuid:%s] cidr [%s] is overlapped with management l3 network[uuid:%s] cidr [%s]",
+    "en_US": "could not execute the api operation. front network [uuid:{0}] cidr [{1}] is overlapped with management l3 network[uuid:{2}] cidr [{3}]",
+    "zh_CN": "",
+    "arguments": [
+      "frontL3Uuid",
+      "frontL3Cidr",
+      "mgmtL3Uuid",
+      "mgmtL3Cidr"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/slb/SlbApiInterceptor.java"
+  },
+  {
+    "raw": "could not create slb group, because backend network doesn\u0027t support ipv6 yet",
+    "en_US": "could not create slb group, because backend network doesn\u0027t support ipv6 yet",
+    "zh_CN": "无法创建SLB组，因为后端网络尚不支持IPv6",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/network/service/slb/SlbApiInterceptor.java"
+  },
+  {
+    "raw": "could not execute the api operation. backend network [uuid:%s] cidr [%s] is overlapped with frond l3 network[uuid:%s] cidr [%s]",
+    "en_US": "could not execute the api operation. backend network [uuid:{0}] cidr [{1}] is overlapped with frond l3 network[uuid:{2}] cidr [{3}]",
+    "zh_CN": "",
+    "arguments": [
+      "uuid",
+      "backendL3Cidr",
+      "frontL3Uuid",
+      "frontL3Cidr"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/slb/SlbApiInterceptor.java"
+  },
+  {
+    "raw": "could not execute the api operation. backend network [uuid:%s] cidr [%s] is overlapped with management l3 network[uuid:%s] cidr [%s]",
+    "en_US": "could not execute the api operation. backend network [uuid:{0}] cidr [{1}] is overlapped with management l3 network[uuid:{2}] cidr [{3}]",
+    "zh_CN": "",
+    "arguments": [
+      "uuid",
+      "backendL3Cidr",
+      "mgmtL3Uuid",
+      "mgmtL3Cidr"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/slb/SlbApiInterceptor.java"
+  },
+  {
+    "raw": "could not execute the api operation. frontend network [uuid:%s] is not connected vpc router",
+    "en_US": "could not execute the api operation. frontend network [uuid:{0}] is not connected vpc router",
+    "zh_CN": "",
+    "arguments": [
+      "frontL3.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/slb/SlbApiInterceptor.java"
+  },
+  {
+    "raw": "could not execute the api operation. backend network [uuid:%s] must be vpc network because frond l3 network is vpc network",
+    "en_US": "could not execute the api operation. backend network [uuid:{0}] must be vpc network because frond l3 network is vpc network",
+    "zh_CN": "",
+    "arguments": [
+      "uuid"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/slb/SlbApiInterceptor.java"
+  },
+  {
+    "raw": "could not execute the api operation. backend network [uuid:%s] is not connected vpc router",
+    "en_US": "could not execute the api operation. backend network [uuid:{0}] is not connected vpc router",
+    "zh_CN": "",
+    "arguments": [
+      "uuid"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/slb/SlbApiInterceptor.java"
+  },
+  {
+    "raw": "could not execute the api operation. backend network [uuid:%s] is connected vpc router [uuid:%s] while front network is connected to vpc router[uuid:%s]",
+    "en_US": "could not execute the api operation. backend network [uuid:{0}] is connected vpc router [uuid:{1}] while front network is connected to vpc router[uuid:{2}]",
+    "zh_CN": "",
+    "arguments": [
+      "uuid",
+      "backendVrUuids.get(0)",
+      "frontVrUuids.get(0)"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/slb/SlbApiInterceptor.java"
+  },
+  {
+    "raw": "could not execute the api operation. backend network [uuid:%s] must be private flat network because frond l3 network is private flat network",
+    "en_US": "could not execute the api operation. backend network [uuid:{0}] must be private flat network because frond l3 network is private flat network",
+    "zh_CN": "",
+    "arguments": [
+      "uuid"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/slb/SlbApiInterceptor.java"
+  },
+  {
+    "raw": "could not execute the api operation. backend network [uuid:%s] is connected vpc router [uuid:%s] which is not connect to front network[uuid:%s]",
+    "en_US": "could not execute the api operation. backend network [uuid:{0}] is connected vpc router [uuid:{1}] which is not connect to front network[uuid:{2}]",
+    "zh_CN": "",
+    "arguments": [
+      "backendL3Uuids.get(0)",
+      "firstBackendVrUuids.get(0)",
+      "frontL3Uuid"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/slb/SlbApiInterceptor.java"
+  },
+  {
+    "raw": "could not execute the api operation. backend network [uuid:%s] must be vpc network because other backend network is vpc network",
+    "en_US": "could not execute the api operation. backend network [uuid:{0}] must be vpc network because other backend network is vpc network",
+    "zh_CN": "",
+    "arguments": [
+      "uuid"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/slb/SlbApiInterceptor.java"
+  },
+  {
+    "raw": "could not execute the api operation. backend network [uuid:%s] is connected vpc router [uuid:%s] while other backend network is connected to vpc router[uuid:%s]",
+    "en_US": "could not execute the api operation. backend network [uuid:{0}] is connected vpc router [uuid:{1}] while other backend network is connected to vpc router[uuid:{2}]",
+    "zh_CN": "",
+    "arguments": [
+      "uuid",
+      "bVrUuids.get(0)",
+      "firstBackendVrUuids.get(0)"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/slb/SlbApiInterceptor.java"
+  },
+  {
+    "raw": "could not execute the api operation. backend network [uuid:%s] can not be vpc network because other backend network is not vpc network",
+    "en_US": "could not execute the api operation. backend network [uuid:{0}] can not be vpc network because other backend network is not vpc network",
+    "zh_CN": "",
+    "arguments": [
+      "uuid"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/slb/SlbApiInterceptor.java"
+  },
+  {
+    "raw": "could not create slb group because invalid deploy type %s",
+    "en_US": "could not create slb group because invalid deploy type {0}",
+    "zh_CN": "无法创建SLB组，因为部署类型{0}无效",
+    "arguments": [
+      "msg.getDeployType()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/slb/SlbApiInterceptor.java"
+  },
+  {
+    "raw": "could not create slb group because invalid backend type %s",
+    "en_US": "could not create slb group because invalid backend type {0}",
+    "zh_CN": "无法创建SLB组，因为后端类型{0}无效",
+    "arguments": [
+      "msg.getBackendType()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/slb/SlbApiInterceptor.java"
+  },
+  {
+    "raw": "can not attach l3 network [uuid:%s] to SLB instance, because ipv4 address[%s] format error",
+    "en_US": "can not attach l3 network [uuid:{0}] to SLB instance, because ipv4 address[{1}] format error",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getL3NetworkUuid()",
+      "ip4"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/slb/SlbApiInterceptor.java"
+  },
+  {
+    "raw": "can not attach l3 network [uuid:%s] to SLB instance, because ipv4 netmask[%s] format error",
+    "en_US": "can not attach l3 network [uuid:{0}] to SLB instance, because ipv4 netmask[{1}] format error",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getL3NetworkUuid()",
+      "ip4"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/slb/SlbApiInterceptor.java"
+  },
+  {
+    "raw": "can not attach l3 network [uuid:%s] to SLB instance, because ip address and netmask must be set in systemTag",
+    "en_US": "can not attach l3 network [uuid:{0}] to SLB instance, because ip address and netmask must be set in systemTag",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getL3NetworkUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/slb/SlbApiInterceptor.java"
+  },
+  {
+    "raw": "can not attach l3 network [uuid:%s] to SLB instance, because ipv6 address[%s] format error",
+    "en_US": "can not attach l3 network [uuid:{0}] to SLB instance, because ipv6 address[{1}] format error",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getL3NetworkUuid()",
+      "map.get(VmSystemTags.STATIC_IP_TOKEN)"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/slb/SlbApiInterceptor.java"
+  },
+  {
+    "raw": "can not attach l3 network [uuid:%s] to SLB instance, because ipv6 prefix[%s] format error",
+    "en_US": "can not attach l3 network [uuid:{0}] to SLB instance, because ipv6 prefix[{1}] format error",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getL3NetworkUuid()",
+      "prefix"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/slb/SlbApiInterceptor.java"
+  },
+  {
+    "raw": "can not attach l3 network [uuid:%s] to SLB instance, because ip address and prefix must be set in systemTag",
+    "en_US": "can not attach l3 network [uuid:{0}] to SLB instance, because ip address and prefix must be set in systemTag",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getL3NetworkUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/slb/SlbApiInterceptor.java"
+  },
+  {
+    "raw": "can not detach front end l3 network [uuid:%s] from SLB instance",
+    "en_US": "can not detach front end l3 network [uuid:{0}] from SLB instance",
+    "zh_CN": "无法从SLB实例分离前端三层网络[uuid：{0}]",
+    "arguments": [
+      "frontL3Uuid",
+      "slbVO.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/slb/SlbApiInterceptor.java"
+  },
+  {
+    "raw": "can not detach management l3 network [uuid:%s] from SLB instance",
+    "en_US": "can not detach management l3 network [uuid:{0}] from SLB instance",
+    "zh_CN": "无法从SLB实例分离管理三层网络[uuid：{0}]",
+    "arguments": [
+      "slbVO.getManagementNetworkUuid()",
+      "slbVO.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/slb/SlbApiInterceptor.java"
+  },
+  {
+    "raw": "can not detach nic [uuid:%s] from SLB instance, because it is the last backend l3 network nic",
+    "en_US": "can not detach nic [uuid:{0}] from SLB instance, because it is the last backend l3 network nic",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getVmNicUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/slb/SlbApiInterceptor.java"
+  },
+  {
+    "raw": "can not create load balancer because vip [uuid:%s] has attached other network service [%s]",
+    "en_US": "can not create load balancer because vip [uuid:{0}] has attached other network service [{1}]",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getVipUuid()",
+      "vipVO.getServicesTypes()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/slb/SlbApiInterceptor.java"
+  },
+  {
+    "raw": "can not create load balancer because vip [uuid:%s] has attached to vpc router [%s]",
+    "en_US": "can not create load balancer because vip [uuid:{0}] has attached to vpc router [{1}]",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getVipUuid()",
+      "vrUuids"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/slb/SlbApiInterceptor.java"
+  },
+  {
+    "raw": "can not create load balancer because invalid slb group [uuid:%s]",
+    "en_US": "can not create load balancer because invalid slb group [uuid:{0}]",
+    "zh_CN": "无法创建负载平衡器，因为SLB组[uuid：{0}]无效",
+    "arguments": [
+      "slbGroupUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/slb/SlbApiInterceptor.java"
+  },
+  {
+    "raw": "could not add backend server vmnic to serverGroup[uuid:%s],because vmnic uuid is null",
+    "en_US": "could not add backend server vmnic to serverGroup[uuid:{0}],because vmnic uuid is null",
+    "zh_CN": "无法将后端服务器vmnic添加到ServerGroup[uuid：{0}]，因为vmnic uuid为空",
+    "arguments": [
+      "msg.getServerGroupUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/slb/SlbApiInterceptor.java"
+  },
+  {
+    "raw": "could not add vmnic to load balancer server  group because l3 network [uuid:%s] is connected any vpc router",
+    "en_US": "could not add vmnic to load balancer server  group because l3 network [uuid:{0}] is connected any vpc router",
+    "zh_CN": "",
+    "arguments": [
+      "uuid"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/slb/SlbApiInterceptor.java"
+  },
+  {
+    "raw": "could not add vmnic to load balancer server  group because l3 network[uuid:%s] is connected to different vpc router",
+    "en_US": "could not add vmnic to load balancer server  group because l3 network[uuid:{0}] is connected to different vpc router",
+    "zh_CN": "",
+    "arguments": [
+      "uuid"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/slb/SlbApiInterceptor.java"
+  },
+  {
+    "raw": "could not add vmnic to load balancer server  group because l3 network is not connected slb instance",
+    "en_US": "could not add vmnic to load balancer server  group because l3 network is not connected slb instance",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/network/service/slb/SlbApiInterceptor.java"
+  },
+  {
+    "raw": "can not find nic of slb instance [uuid:%s] which is attached to slb group front l3 network [uuid:%s]",
+    "en_US": "can not find nic of slb instance [uuid:{0}] which is attached to slb group front l3 network [uuid:{1}]",
+    "zh_CN": "",
+    "arguments": [
+      "slbInstance.getUuid()",
+      "frontL3Uuid"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/slb/SlbCreatePublicVipFlow.java"
+  },
+  {
+    "raw": "failed to create vip%s on virtual router[uuid:%s], because %s",
+    "en_US": "failed to create vip{0} on virtual router[uuid:{1}], because {2}",
+    "zh_CN": "未能在云路由[uuid:{1}]上创建VIP{0}，因为{2}",
+    "arguments": [
+      "tos",
+      "vr.getUuid()",
+      "ret.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/slb/SlbVmSyncVipFlow.java"
+  },
+  {
+    "raw": "can not find slb vm instance",
+    "en_US": "can not find slb vm instance",
+    "zh_CN": "找不到SLB虚拟机实例",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/network/service/slb/SlbVyosBackend.java"
+  }
+]

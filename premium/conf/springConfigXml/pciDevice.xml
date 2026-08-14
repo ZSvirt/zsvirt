@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:zstack="http://zstack.org/schema/zstack"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+         http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+         http://www.springframework.org/schema/aop
+         http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+         http://www.springframework.org/schema/tx 
+     	 http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+     	 http://zstack.org/schema/zstack 
+         http://zstack.org/schema/zstack/plugin.xsd"
+	default-init-method="init" default-destroy-method="destroy">
+    
+    <bean id="PciDeviceManager" class="org.zstack.pciDevice.PciDeviceManager" >
+    	<zstack:plugin>
+			<zstack:extension interface="org.zstack.header.Component" />
+			<zstack:extension interface="org.zstack.header.Service" />
+			<zstack:extension interface="org.zstack.kvm.KVMStartVmAddonExtensionPoint"/>
+			<zstack:extension interface="org.zstack.header.identity.ReportQuotaExtensionPoint" />
+			<zstack:extension interface="org.zstack.compute.vm.VmCapabilitiesExtensionPoint"/>
+			<zstack:extension interface="org.zstack.kvm.KVMHostConnectExtensionPoint" order="2"/>
+			<zstack:extension interface="org.zstack.compute.host.PostHostConnectExtensionPoint" order="-2"/>
+			<zstack:extension interface="org.zstack.header.vm.VmReleaseResourceExtensionPoint"/>
+			<zstack:extension interface="org.zstack.header.vm.PreVmInstantiateResourceExtensionPoint"/>
+			<zstack:extension interface="org.zstack.header.vm.PostVmInstantiateResourceExtensionPoint"/>
+			<zstack:extension interface="org.zstack.header.apimediator.GlobalApiMessageInterceptor" />
+			<zstack:extension interface="org.zstack.header.identity.AddtionalResourceTypeExtensionPoint"/>
+			<zstack:extension interface="org.zstack.header.vm.VmInstanceMigrateExtensionPoint"/>
+			<zstack:extension interface="org.zstack.header.vm.VmAbnormalLifeCycleExtensionPoint"/>
+			<zstack:extension interface="org.zstack.ha.HaHostDeviceExtensionPoint"/>
+			<zstack:extension interface="org.zstack.pciDevice.PciDeviceManagerInterface"/>
+			<zstack:extension interface="org.zstack.header.vm.KvmReportVmShutdownEventExtensionPoint"/>
+			<zstack:extension interface="org.zstack.network.hostNetworkInterface.HostNetworkCandidateFilterExtensionPoint" />
+		</zstack:plugin>
+    </bean>
+
+	<bean id="SriovPciDeviceFactory" class="org.zstack.pciDevice.virtual.sr_iov.SriovPciDeviceFactory" >
+		<zstack:plugin>
+			<zstack:extension interface="org.zstack.pciDevice.virtual.VirtualPciDeviceFactory" />
+			<zstack:extension interface="org.zstack.network.hostNetworkInterface.HostNetworkInterfaceUpdateExtensionPoint" />
+		</zstack:plugin>
+	</bean>
+
+	<bean id="MdevDeviceFactory" class="org.zstack.pciDevice.virtual.vfio_mdev.MdevDeviceFactory" >
+		<zstack:plugin>
+			<zstack:extension interface="org.zstack.pciDevice.virtual.VirtualPciDeviceFactory" />
+		</zstack:plugin>
+	</bean>
+
+	<bean id="PciDeviceKvmBackend" class="org.zstack.pciDevice.KvmPciDeviceBackend.PciDeviceKvmBackend" >
+		<zstack:plugin>
+			<zstack:extension interface="org.zstack.pciDevice.PciDeviceBackend" />
+			<zstack:extension interface="org.zstack.header.host.HostConnectionReestablishExtensionPoint" />
+			<zstack:extension interface="org.zstack.header.tag.FormTagExtensionPoint"/>
+		</zstack:plugin>
+	</bean>
+
+	<bean id="GpuDeviceFactory" class="org.zstack.pciDevice.gpu.GpuDeviceFactory" >
+		<zstack:plugin>
+			<zstack:extension interface="org.zstack.header.Component"/>
+			<zstack:extension interface="org.zstack.pciDevice.PciDeviceTypeFactory" />
+		</zstack:plugin>
+	</bean>
+
+	<bean id="DefaultPciDeviceFactory" class="org.zstack.pciDevice.DefaultPciDeviceFactory" >
+		<zstack:plugin>
+			<zstack:extension interface="org.zstack.pciDevice.PciDeviceTypeFactory" />
+		</zstack:plugin>
+	</bean>
+
+	<bean id="EthernetFactory" class="org.zstack.pciDevice.ethernet.EthernetFactory" >
+		<zstack:plugin>
+			<zstack:extension interface="org.zstack.pciDevice.PciDeviceTypeFactory" />
+		</zstack:plugin>
+	</bean>
+
+
+	<bean id="PageTableExtensionBackend" class="org.zstack.pciDevice.KvmPciDeviceBackend.PageTableExtensionBackend" >
+		<zstack:plugin>
+			<zstack:extension interface="org.zstack.header.tag.FormTagExtensionPoint"/>
+		</zstack:plugin>
+	</bean>
+
+	<bean id="PciDeviceApiInterceptor" class="org.zstack.pciDevice.PciDeviceApiInterceptor" >
+		<zstack:plugin>
+			<zstack:extension interface="org.zstack.header.apimediator.ApiMessageInterceptor" />
+			<zstack:extension interface="org.zstack.header.storage.snapshot.group.MemorySnapshotValidatorExtensionPoint"/>
+		</zstack:plugin>
+	</bean>
+
+	<bean id="PciDeviceCascadeExtension" class="org.zstack.pciDevice.PciDeviceCascadeExtension" >
+		<zstack:plugin>
+			<zstack:extension interface="org.zstack.core.cascade.CascadeExtensionPoint"/>
+		</zstack:plugin>
+	</bean>
+
+	<bean id="PciHostChangeStateExtension" class="org.zstack.pciDevice.PciHostChangeStateExtension" >
+		<zstack:plugin>
+			<zstack:extension interface="org.zstack.header.host.HostChangeStateExtensionPoint"/>
+		</zstack:plugin>
+	</bean>
+
+	<bean id="PciSpecificationApiInterceptor" class="org.zstack.pciDevice.specification.PciSpecificationApiInterceptor" >
+		<zstack:plugin>
+			<zstack:extension interface="org.zstack.header.apimediator.ApiMessageInterceptor" />
+            <zstack:extension interface="org.zstack.header.apimediator.GlobalApiMessageInterceptor"/>
+		</zstack:plugin>
+	</bean>
+
+	<bean id="PciSpecificationManager" class="org.zstack.pciDevice.specification.PciSpecificationManagerImpl" >
+		<zstack:plugin>
+			<zstack:extension interface="org.zstack.header.Component" />
+			<zstack:extension interface="org.zstack.header.Service" />
+			<zstack:extension interface="org.zstack.header.identity.AddtionalResourceTypeExtensionPoint"/>
+		</zstack:plugin>
+	</bean>
+
+	<bean id="MdevDeviceApiInterceptor" class="org.zstack.pciDevice.virtual.vfio_mdev.MdevDeviceApiInterceptor" >
+		<zstack:plugin>
+			<zstack:extension interface="org.zstack.header.apimediator.ApiMessageInterceptor" />
+            <zstack:extension interface="org.zstack.header.apimediator.GlobalApiMessageInterceptor"/>
+		</zstack:plugin>
+	</bean>
+
+	<bean id="MdevDeviceManager" class="org.zstack.pciDevice.virtual.vfio_mdev.MdevDeviceManagerImpl" >
+		<zstack:plugin>
+			<zstack:extension interface="org.zstack.header.Component" />
+			<zstack:extension interface="org.zstack.header.Service" />
+			<zstack:extension interface="org.zstack.compute.vm.VmCapabilitiesExtensionPoint"/>
+			<zstack:extension interface="org.zstack.compute.host.PostHostConnectExtensionPoint" order="10" />
+			<zstack:extension interface="org.zstack.kvm.KVMStartVmAddonExtensionPoint"/>
+			<zstack:extension interface="org.zstack.header.vm.VmReleaseResourceExtensionPoint"/>
+			<zstack:extension interface="org.zstack.header.vm.PreVmInstantiateResourceExtensionPoint"/>
+			<zstack:extension interface="org.zstack.header.vm.PostVmInstantiateResourceExtensionPoint"/>
+			<zstack:extension interface="org.zstack.header.apimediator.GlobalApiMessageInterceptor" />
+			<zstack:extension interface="org.zstack.header.identity.AddtionalResourceTypeExtensionPoint"/>
+			<zstack:extension interface="org.zstack.header.vm.VmAbnormalLifeCycleExtensionPoint"/>
+			<zstack:extension interface="org.zstack.header.vm.VmInstanceMigrateExtensionPoint"/>
+			<zstack:extension interface="org.zstack.ha.HaHostDeviceExtensionPoint"/>
+		</zstack:plugin>
+	</bean>
+
+	<bean id="MdevDeviceHostChangeStateExtension" class="org.zstack.pciDevice.virtual.vfio_mdev.MdevDeviceHostChangeStateExtension" >
+		<zstack:plugin>
+			<zstack:extension interface="org.zstack.header.host.HostChangeStateExtensionPoint"/>
+		</zstack:plugin>
+	</bean>
+
+	<bean id="MdevDeviceCascadeExtension" class="org.zstack.pciDevice.virtual.vfio_mdev.MdevDeviceCascadeExtension" >
+		<zstack:plugin>
+			<zstack:extension interface="org.zstack.core.cascade.CascadeExtensionPoint"/>
+		</zstack:plugin>
+	</bean>
+
+	<bean id="PciDeviceFilterFlow" class="org.zstack.pciDevice.PciDeviceFilterFlow">
+		<zstack:plugin>
+			<zstack:extension interface="org.zstack.header.allocator.HostAllocatorFilterExtensionPoint" />
+		</zstack:plugin>
+	</bean>
+
+	<bean id="PciDeviceReserveFlow" class="org.zstack.pciDevice.PciDeviceReserveFlow">
+		<zstack:plugin>
+			<zstack:extension interface="org.zstack.header.vm.VmInstanceBeforeStartExtensionPoint" />
+			<zstack:extension interface="org.zstack.header.allocator.HostAllocatorReserveExtensionPoint" />
+			<zstack:extension interface="org.zstack.compute.vm.CleanUpAfterVmFailedToStartExtensionPoint" />
+			<zstack:extension interface="org.zstack.compute.vm.CleanUpAfterVmChangeImageExtensionPoint" />
+		</zstack:plugin>
+	</bean>
+
+	<bean id="MdevDeviceFilterFlow" class="org.zstack.pciDevice.virtual.vfio_mdev.MdevDeviceFilterFlow">
+		<zstack:plugin>
+			<zstack:extension interface="org.zstack.header.allocator.HostAllocatorFilterExtensionPoint" />
+		</zstack:plugin>
+	</bean>
+
+	<bean id="MdevDeviceReserveFlow" class="org.zstack.pciDevice.virtual.vfio_mdev.MdevDeviceReserveFlow">
+		<zstack:plugin>
+			<zstack:extension interface="org.zstack.header.vm.VmInstanceBeforeStartExtensionPoint" />
+			<zstack:extension interface="org.zstack.header.allocator.HostAllocatorReserveExtensionPoint" />
+			<zstack:extension interface="org.zstack.compute.vm.CleanUpAfterVmFailedToStartExtensionPoint" />
+		</zstack:plugin>
+	</bean>
+</beans>

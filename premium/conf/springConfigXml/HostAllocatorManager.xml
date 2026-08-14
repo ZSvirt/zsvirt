@@ -1,0 +1,447 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx" xmlns:zstack="http://zstack.org/schema/zstack"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+    http://www.springframework.org/schema/aop
+    http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+    http://www.springframework.org/schema/tx 
+    http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+    http://www.springframework.org/schema/util
+    http://www.springframework.org/schema/util/spring-util-3.0.xsd
+    http://zstack.org/schema/zstack 
+    http://zstack.org/schema/zstack/plugin.xsd"
+       default-init-method="init" default-destroy-method="destroy">
+
+    <bean id="HostCpuOverProvisioningManager" class="org.zstack.compute.allocator.HostCpuOverProvisioningManagerImpl"/>
+
+    <bean id="HostCapacityOverProvisioningManager"
+          class="org.zstack.compute.allocator.HostCapacityOverProvisioningManagerImpl"/>
+
+    <util:list id="SimulatorBackupStorageMetric">
+        <value>SimulatorPrimaryStorage</value>
+    </util:list>
+
+    <util:list id="SftpBackupStorageMetric">
+        <value>NFS</value>
+        <value>SharedMountPoint</value>
+        <value>LocalStorage</value>
+        <value>Addon</value>
+    </util:list>
+
+    <util:list id="ImageStoreBackupStorageMetric">
+        <value>NFS</value>
+        <value>SharedMountPoint</value>
+        <value>LocalStorage</value>
+        <value>SharedBlock</value>
+        <value>Ceph</value>
+        <value>ZSES</value>
+        <value>BlockStorage</value>
+        <value>AliyunNAS</value>
+        <value>MiniStorage</value>
+        <value>Addon</value>
+    </util:list>
+
+    <util:list id="AliyunEBSMetric">
+        <value>AliyunEBS</value>
+    </util:list>
+
+    <util:list id="CephMetric">
+        <value>Ceph</value>
+    </util:list>
+
+    <util:list id="VCenterMetric">
+        <value>VCenter</value>
+    </util:list>
+
+    <util:map id="BackupStoragePrimaryStorageMetrics" value-type="java.util.List">
+        <entry key="SftpBackupStorage" value-ref="SftpBackupStorageMetric"/>
+        <entry key="Ceph" value-ref="CephMetric"/>
+        <entry key="ImageStoreBackupStorage" value-ref="ImageStoreBackupStorageMetric"/>
+        <entry key="AliyunEBS" value-ref="AliyunEBSMetric"/>
+        <entry key="SimulatorBackupStorage" value-ref="SimulatorBackupStorageMetric"/>
+        <entry key="VCenter" value-ref="VCenterMetric"/>
+    </util:map>
+
+    <bean id="HostAllocatorManager" class="org.zstack.compute.allocator.HostAllocatorManagerImpl">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.Component"/>
+            <zstack:extension interface="org.zstack.header.Service"/>
+            <zstack:extension interface="org.zstack.header.vm.VmAbnormalLifeCycleExtensionPoint"/>
+        </zstack:plugin>
+
+        <property name="backupStoragePrimaryStorageMetrics" ref="BackupStoragePrimaryStorageMetrics"/>
+    </bean>
+
+    <bean id="HostCapacityReserveManager" class="org.zstack.compute.allocator.HostCapacityReserveManagerImpl">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.Component"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="HostAllocatorApiInterceptor" class="org.zstack.compute.allocator.HostAllocatorApiInterceptor">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.apimediator.ApiMessageInterceptor"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="ResourceBindingClusterCollector" class="org.zstack.compute.allocator.ResourceBindingClusterCollector">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.allocator.ResourceBindingCollector"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="ResourceBindingHostCollector" class="org.zstack.compute.allocator.ResourceBindingHostCollector">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.allocator.ResourceBindingCollector"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="LeastVmPreferredHostAllocatorStrategyFactory"
+          class="org.zstack.compute.allocator.LeastVmPreferredHostAllocatorStrategyFactory">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.Component"/>
+            <zstack:extension interface="org.zstack.header.allocator.HostAllocatorStrategyFactory"/>
+            <zstack:extension interface="org.zstack.header.host.HostAllocateExtensionPoint"/>
+        </zstack:plugin>
+
+        <property name="producerNames">
+            <list>
+                <value>org.zstack.compute.allocator.AttachedL2NetworkAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.DesignatedHostAllocatorProducer</value>
+                <value>org.zstack.compute.allocator.HostStateAndHypervisorAllocatorProducer</value>
+            </list>
+        </property>
+        <property name="allocatorFlowNames">
+            <list>
+                <value>org.zstack.compute.allocator.DesignatedHostAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.QuotaAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.BackupStorageSelectPrimaryStorageAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.HostStateAndHypervisorAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.ImageBackupStorageAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.HostCapacityAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.AttachedVolumePrimaryStorageAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.HostPrimaryStorageAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.AvoidHostAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.TagAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.ResourceBindingAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.FilterFlow</value>
+            </list>
+        </property>
+        <property name="sortFlowNames">
+            <list>
+                <value>org.zstack.compute.allocator.PrimaryStoragePrioritySortFlow</value>
+                <value>org.zstack.compute.vmscheduling.VmSchedulingRuleSortFlow</value>
+                <value>org.zstack.compute.allocator.SoftAvoidHostSortFlow</value>
+                <value>org.zstack.compute.allocator.LeastVmPreferredSortFlow</value>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="StoppedVmAwareLeastVmPreferredHostAllocatorStrategyFactory"
+          class="org.zstack.compute.allocator.StoppedVmAwareLeastVmPreferredHostAllocatorStrategyFactory">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.Component"/>
+            <zstack:extension interface="org.zstack.header.allocator.HostAllocatorStrategyFactory"/>
+            <zstack:extension interface="org.zstack.header.host.HostAllocateExtensionPoint"/>
+        </zstack:plugin>
+
+        <property name="producerNames">
+            <list>
+                <value>org.zstack.compute.allocator.AttachedL2NetworkAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.DesignatedHostAllocatorProducer</value>
+                <value>org.zstack.compute.allocator.HostStateAndHypervisorAllocatorProducer</value>
+            </list>
+        </property>
+        <property name="allocatorFlowNames">
+            <list>
+                <value>org.zstack.compute.allocator.DesignatedHostAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.QuotaAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.BackupStorageSelectPrimaryStorageAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.HostStateAndHypervisorAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.ImageBackupStorageAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.HostCapacityAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.AttachedVolumePrimaryStorageAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.HostPrimaryStorageAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.AvoidHostAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.TagAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.ResourceBindingAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.FilterFlow</value>
+            </list>
+        </property>
+        <property name="sortFlowNames">
+            <list>
+                <value>org.zstack.compute.allocator.PrimaryStoragePrioritySortFlow</value>
+                <value>org.zstack.compute.vmscheduling.VmSchedulingRuleSortFlow</value>
+                <value>org.zstack.compute.allocator.SoftAvoidHostSortFlow</value>
+                <value>org.zstack.compute.allocator.StoppedVmAwareLeastVmPreferredSortFlow</value>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="DefaultHostAllocatorStrategyFactory"
+          class="org.zstack.compute.allocator.DefaultHostAllocatorStrategyFactory">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.Component"/>
+            <zstack:extension interface="org.zstack.header.allocator.HostAllocatorStrategyFactory"/>
+        </zstack:plugin>
+
+        <property name="producerNames">
+            <list>
+                <value>org.zstack.compute.allocator.AttachedL2NetworkAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.DesignatedHostAllocatorProducer</value>
+                <value>org.zstack.compute.allocator.HostStateAndHypervisorAllocatorProducer</value>
+            </list>
+        </property>
+        <property name="allocatorFlowNames">
+            <list>
+                <value>org.zstack.compute.allocator.DesignatedHostAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.QuotaAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.BackupStorageSelectPrimaryStorageAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.HostStateAndHypervisorAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.ImageBackupStorageAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.HostCapacityAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.HostPrimaryStorageAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.AvoidHostAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.TagAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.ResourceBindingAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.FilterFlow</value>
+            </list>
+        </property>
+        <property name="sortFlowNames">
+            <list>
+                <value>org.zstack.compute.allocator.PrimaryStoragePrioritySortFlow</value>
+                <value>org.zstack.compute.vmscheduling.VmSchedulingRuleSortFlow</value>
+                <value>org.zstack.compute.allocator.SoftAvoidHostSortFlow</value>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="DesignatedHostAllocatorStrategyFactory"
+          class="org.zstack.compute.allocator.DesignatedHostAllocatorStrategyFactory">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.Component"/>
+            <zstack:extension interface="org.zstack.header.allocator.HostAllocatorStrategyFactory"/>
+        </zstack:plugin>
+
+        <property name="producerNames">
+            <list>
+                <value>org.zstack.compute.allocator.AttachedL2NetworkAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.DesignatedHostAllocatorProducer</value>
+                <value>org.zstack.compute.allocator.HostStateAndHypervisorAllocatorProducer</value>
+            </list>
+        </property>
+        <property name="allocatorFlowNames">
+            <list>
+                <value>org.zstack.compute.allocator.DesignatedHostAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.QuotaAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.BackupStorageSelectPrimaryStorageAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.ImageBackupStorageAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.HostStateAndHypervisorAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.HostCapacityAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.HostPrimaryStorageAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.AvoidHostAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.TagAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.ResourceBindingAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.FilterFlow</value>
+                <value>org.zstack.compute.allocator.LastHostAllocatorFlow</value>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="LastHostPreferredAllocatorStrategyFactory"
+          class="org.zstack.compute.allocator.LastHostPreferredAllocatorStrategyFactory">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.Component"/>
+            <zstack:extension interface="org.zstack.header.allocator.HostAllocatorStrategyFactory"/>
+        </zstack:plugin>
+
+        <property name="producerNames">
+            <list>
+                <value>org.zstack.compute.allocator.AttachedL2NetworkAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.DesignatedHostAllocatorProducer</value>
+                <value>org.zstack.compute.allocator.HostStateAndHypervisorAllocatorProducer</value>
+            </list>
+        </property>
+        <property name="allocatorFlowNames">
+            <list>
+                <value>org.zstack.compute.allocator.DesignatedHostAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.QuotaAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.BackupStorageSelectPrimaryStorageAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.HostStateAndHypervisorAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.HostCapacityAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.AttachedVolumePrimaryStorageAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.HostPrimaryStorageAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.AvoidHostAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.TagAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.ResourceBindingAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.FilterFlow</value>
+                <value>org.zstack.compute.allocator.LastHostAllocatorFlow</value>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="MigrateVmHostAllocatorStrategyFactory"
+          class="org.zstack.compute.allocator.MigrateVmHostAllocatorStrategyFactory">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.Component"/>
+            <zstack:extension interface="org.zstack.header.allocator.HostAllocatorStrategyFactory"/>
+        </zstack:plugin>
+
+        <property name="producerNames">
+            <list>
+                <value>org.zstack.compute.allocator.AttachedL2NetworkAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.DesignatedHostAllocatorProducer</value>
+                <value>org.zstack.compute.allocator.HostStateAndHypervisorAllocatorProducer</value>
+            </list>
+        </property>
+        <property name="allocatorFlowNames">
+            <list>
+                <value>org.zstack.compute.allocator.HostStateAndHypervisorAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.BackupStorageSelectPrimaryStorageAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.HostCapacityAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.AttachedVolumePrimaryStorageAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.DesignatedHostAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.HostPrimaryStorageAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.AvoidHostAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.HostOsVersionAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.TagAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.ResourceBindingAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.FilterFlow</value>
+                <value>org.zstack.compute.host.HostCpuFunctionFilterFlow</value>
+            </list>
+        </property>
+        <property name="sortFlowNames">
+            <list>
+                <value>org.zstack.compute.allocator.PrimaryStoragePrioritySortFlow</value>
+                <value>org.zstack.compute.vmscheduling.VmSchedulingRuleSortFlow</value>
+                <value>org.zstack.compute.allocator.SoftAvoidHostSortFlow</value>
+                <value>org.zstack.compute.allocator.LeastVmPreferredSortFlow</value>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="MinimumCPUUsageHostAllocatorStrategyFactory"
+          class="org.zstack.pluginpremium.compute.allocator.MinimumCPUUsageHostAllocatorStrategyFactory">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.Component"/>
+            <zstack:extension interface="org.zstack.header.allocator.HostAllocatorStrategyFactory"/>
+            <zstack:extension interface="org.zstack.header.managementnode.ManagementNodeReadyExtensionPoint"/>
+        </zstack:plugin>
+
+        <property name="producerNames">
+            <list>
+                <value>org.zstack.compute.allocator.AttachedL2NetworkAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.DesignatedHostAllocatorProducer</value>
+                <value>org.zstack.compute.allocator.HostStateAndHypervisorAllocatorProducer</value>
+            </list>
+        </property>
+        <property name="allocatorFlowNames">
+            <list>
+                <value>org.zstack.compute.allocator.DesignatedHostAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.BackupStorageSelectPrimaryStorageAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.HostStateAndHypervisorAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.ImageBackupStorageAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.HostCapacityAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.AttachedVolumePrimaryStorageAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.HostPrimaryStorageAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.AvoidHostAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.TagAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.ResourceBindingAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.FilterFlow</value>
+            </list>
+        </property>
+        <property name="sortFlowNames">
+            <list>
+                <value>org.zstack.compute.allocator.PrimaryStoragePrioritySortFlow</value>
+                <value>org.zstack.compute.vmscheduling.VmSchedulingRuleSortFlow</value>
+                <value>org.zstack.compute.allocator.SoftAvoidHostSortFlow</value>
+                <value>org.zstack.pluginpremium.compute.allocator.MinimumCPUUsageSortFlow</value>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="MinimumMemoryUsageHostAllocatorStrategyFactory"
+          class="org.zstack.pluginpremium.compute.allocator.MinimumMemoryUsageHostAllocatorStrategyFactory">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.Component"/>
+            <zstack:extension interface="org.zstack.header.allocator.HostAllocatorStrategyFactory"/>
+            <zstack:extension interface="org.zstack.header.managementnode.ManagementNodeReadyExtensionPoint"/>
+        </zstack:plugin>
+
+        <property name="producerNames">
+            <list>
+                <value>org.zstack.compute.allocator.AttachedL2NetworkAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.DesignatedHostAllocatorProducer</value>
+                <value>org.zstack.compute.allocator.HostStateAndHypervisorAllocatorProducer</value>
+            </list>
+        </property>
+        <property name="allocatorFlowNames">
+            <list>
+                <value>org.zstack.compute.allocator.DesignatedHostAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.QuotaAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.BackupStorageSelectPrimaryStorageAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.HostStateAndHypervisorAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.ImageBackupStorageAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.HostCapacityAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.AttachedVolumePrimaryStorageAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.HostPrimaryStorageAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.AvoidHostAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.TagAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.ResourceBindingAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.FilterFlow</value>
+            </list>
+        </property>
+        <property name="sortFlowNames">
+            <list>
+                <value>org.zstack.compute.allocator.PrimaryStoragePrioritySortFlow</value>
+                <value>org.zstack.compute.vmscheduling.VmSchedulingRuleSortFlow</value>
+                <value>org.zstack.compute.allocator.SoftAvoidHostSortFlow</value>
+                <value>org.zstack.pluginpremium.compute.allocator.MinimumMemoryUsageSortFlow</value>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="MaxInstancePerHostHostAllocatorStrategyFactory"
+          class="org.zstack.pluginpremium.compute.allocator.MaxInstancePerHostHostAllocatorStrategyFactory">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.Component"/>
+            <zstack:extension interface="org.zstack.header.allocator.HostAllocatorStrategyFactory"/>
+            <zstack:extension interface="org.zstack.header.managementnode.ManagementNodeReadyExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.host.HostAllocateExtensionPoint" />
+        </zstack:plugin>
+
+        <property name="producerNames">
+            <list>
+                <value>org.zstack.compute.allocator.AttachedL2NetworkAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.DesignatedHostAllocatorProducer</value>
+                <value>org.zstack.compute.allocator.HostStateAndHypervisorAllocatorProducer</value>
+            </list>
+        </property>
+        <property name="allocatorFlowNames">
+            <list>
+                <value>org.zstack.compute.allocator.DesignatedHostAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.BackupStorageSelectPrimaryStorageAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.HostStateAndHypervisorAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.ImageBackupStorageAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.HostCapacityAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.AttachedVolumePrimaryStorageAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.HostPrimaryStorageAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.AvoidHostAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.TagAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.ResourceBindingAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.FilterFlow</value>
+                <value>org.zstack.pluginpremium.compute.allocator.MaxInstancePerHostAllocatorFlow</value>
+            </list>
+        </property>
+        <property name="sortFlowNames">
+            <list>
+                <value>org.zstack.compute.allocator.PrimaryStoragePrioritySortFlow</value>
+                <value>org.zstack.compute.vmscheduling.VmSchedulingRuleSortFlow</value>
+                <value>org.zstack.compute.allocator.SoftAvoidHostSortFlow</value>
+            </list>
+        </property>
+    </bean>
+</beans>

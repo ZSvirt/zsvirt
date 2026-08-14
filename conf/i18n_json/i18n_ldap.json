@@ -1,0 +1,216 @@
+[
+  {
+    "raw": "Cannot connect to LDAP/AD server",
+    "en_US": "Cannot connect to LDAP/AD server",
+    "zh_CN": "无法连接到 LDAP/AD 服务器",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/ldap/LdapApiInterceptor.java"
+  },
+  {
+    "raw": "the ldap uid has already been bound to account[uuid\u003d%s]",
+    "en_US": "the ldap uid has already been bound to account[uuid\u003d{0}]",
+    "zh_CN": "该 LDAP 服务器中的用户已经绑定了账户[UUID\u003d{0}]",
+    "arguments": [
+      "msg.getAccountUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/ldap/LdapApiInterceptor.java"
+  },
+  {
+    "raw": "failed to bind admin to ldap users",
+    "en_US": "failed to bind admin to ldap users",
+    "zh_CN": "系统管理员不能绑定 LDAP 服务器中的用户",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/ldap/LdapApiInterceptor.java"
+  },
+  {
+    "raw": "account[uuid\u003d%s] is binding to non-LDAP third party account source",
+    "en_US": "account[uuid\u003d{0}] is binding to non-LDAP third party account source",
+    "zh_CN": "账户 {0} 已经绑定了其它第三方用户服务器",
+    "arguments": [
+      "msg.getAccountUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/ldap/LdapApiInterceptor.java"
+  },
+  {
+    "raw": "No LDAP server is currently enabled",
+    "en_US": "No LDAP server is currently enabled",
+    "zh_CN": "当前未启用任何 LDAP 服务器。请添加 LDAP 服务器后，使用 UpdateGlobalConfig 来启用 LDAP 服务器功能",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/ldap/LdapManagerImpl.java"
+  },
+  {
+    "raw": "GlobalConfig[%s] is invalid: LdapServer[uuid\u003d%s] is not exists",
+    "en_US": "GlobalConfig[{0}] is invalid: LdapServer[uuid\u003d{1}] is not exists",
+    "zh_CN": "LDAP 服务器配置错误: LDAP 服务器 \"{1}\" 不存在。请检查名称为 \"{0}\" 的全局配置",
+    "arguments": [
+      "LdapGlobalConfig.CURRENT_LDAP_SERVER_UUID.getName()",
+      "errorableValue.result"
+    ],
+    "fileName": "src/main/java/org/zstack/ldap/LdapManagerImpl.java"
+  },
+  {
+    "raw": "Login validation failed in LDAP",
+    "en_US": "Login validation failed in LDAP",
+    "zh_CN": "LDAP 登录验证失败",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/ldap/LdapManagerImpl.java"
+  },
+  {
+    "raw": "The ldapUid does not have a binding account.",
+    "en_US": "The ldapUid does not have a binding account.",
+    "zh_CN": "该 LDAP 用户未绑定任何账户",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/ldap/LdapManagerImpl.java"
+  },
+  {
+    "raw": "Account[uuid:%s] Not Found!!!",
+    "en_US": "Account[uuid:{0}] Not Found!!!",
+    "zh_CN": "未找到帐户[uuid：{0}]！",
+    "arguments": [
+      "vo.getAccountUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/ldap/LdapManagerImpl.java"
+  },
+  {
+    "raw": "failed to login: account is disabled",
+    "en_US": "failed to login: account is disabled",
+    "zh_CN": "登录失败: 账户已被禁用",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/ldap/LdapManagerImpl.java"
+  },
+  {
+    "raw": "ldapServer[uuid\u003d%s, name\u003d%s] has been deleted",
+    "en_US": "ldapServer[uuid\u003d{0}, name\u003d{1}] has been deleted",
+    "zh_CN": "LDAP服务器 {0} （名称为{1}）已被删除",
+    "arguments": [
+      "self.getUuid()",
+      "self.getResourceName()"
+    ],
+    "fileName": "src/main/java/org/zstack/ldap/compute/LdapAccountSource.java"
+  },
+  {
+    "raw": "The LDAP server[url\u003d%s,base\u003d%s] already exists",
+    "en_US": "The LDAP server[url\u003d{0},base\u003d{1}] already exists",
+    "zh_CN": "LDAP 服务器[URL\u003d{0}, 起始DN\u003d{1}]已存在",
+    "arguments": [
+      "spec.getUrl()",
+      "spec.getBaseDn()"
+    ],
+    "fileName": "src/main/java/org/zstack/ldap/compute/LdapAccountSourceFactory.java"
+  },
+  {
+    "raw": "all ldap account importing attempt is failed. ldapServerUuid\u003d%s",
+    "en_US": "all ldap account importing attempt is failed. ldapServerUuid\u003d{0}",
+    "zh_CN": "所有导入第三方用户服务器 {0} 的尝试都失败了",
+    "arguments": [
+      "importSpec.getSourceUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/ldap/compute/LdapSyncHelper.java"
+  },
+  {
+    "raw": "all ldap account unbinding attempt is failed. ldapServerUuid\u003d%s",
+    "en_US": "all ldap account unbinding attempt is failed. ldapServerUuid\u003d{0}",
+    "zh_CN": "所有解绑第三方用户服务器 {0} 的尝试都失败了",
+    "arguments": [
+      "importSpec.getSourceUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/ldap/compute/LdapSyncHelper.java"
+  },
+  {
+    "raw": "not support",
+    "en_US": "not support",
+    "zh_CN": "不是支持",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/ldap/compute/LdapSyncLongJob.java"
+  },
+  {
+    "raw": "query ldap entry fail, %s",
+    "en_US": "query ldap entry fail, {0}",
+    "zh_CN": "查询LDAP条目失败，{0}",
+    "arguments": [
+      "e.toString()"
+    ],
+    "fileName": "src/main/java/org/zstack/ldap/driver/LdapEntryContextMapper.java"
+  },
+  {
+    "raw": "query ldap entry[filter\u003d%s] fail, because %s",
+    "en_US": "query ldap entry[filter\u003d{0}] fail, because {1}",
+    "zh_CN": "查询 LDAP 条目 [筛选器：{0}] 失败，原因是 {1}",
+    "arguments": [
+      "filter",
+      "errorMessage"
+    ],
+    "fileName": "src/main/java/org/zstack/ldap/driver/LdapUtil.java"
+  },
+  {
+    "raw": "user[%s] is not exists on LDAP/AD server[address\u003d%s, baseDN\u003d%s]",
+    "en_US": "user[{0}] is not exists on LDAP/AD server[address\u003d{1}, baseDN\u003d{2}]",
+    "zh_CN": "LDAP 服务器 [URL\u003d{1}, 基础DN\u003d{2}] 中用户 [DN\u003d{0}] 不存在",
+    "arguments": [
+      "fullDn",
+      "ldap.getUrl()",
+      "ldap.getBase()"
+    ],
+    "fileName": "src/main/java/org/zstack/ldap/driver/LdapUtil.java"
+  },
+  {
+    "raw": "failed to find dn[%s] on LDAP/AD server[address\u003d%s, baseDN\u003d%s]: %s",
+    "en_US": "failed to find dn[{0}] on LDAP/AD server[address\u003d{1}, baseDN\u003d{2}]: {3}",
+    "zh_CN": "在 LDAP 服务器[URL\u003d{1}, 基础DN\u003d{2}] 中查找用户 [DN\u003d{0}] 失败, 原因是{3}",
+    "arguments": [
+      "fullDn",
+      "String.join(\", \", context.getLdapContextSource().getUrls())",
+      "context.getLdapContextSource().getBaseLdapPathAsString()",
+      "e.getMessage()"
+    ],
+    "fileName": "src/main/java/org/zstack/ldap/driver/LdapUtil.java"
+  },
+  {
+    "raw": "More than one ldap search result",
+    "en_US": "More than one ldap search result",
+    "zh_CN": "查询到的 LDAP 条目不唯一",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/ldap/driver/LdapUtil.java"
+  },
+  {
+    "raw": "failed to query LDAP/AD server[uuid\u003d%s] with filter[%s]: %s",
+    "en_US": "failed to query LDAP/AD server[uuid\u003d{0}] with filter[{1}]: {2}",
+    "zh_CN": "用过滤器 [{1}] 查询 LDAP 服务器 [UUID\u003d{0}] 失败, 原因是 {2}",
+    "arguments": [
+      "ldap.getUuid()",
+      "filter",
+      "e.getMessage()"
+    ],
+    "fileName": "src/main/java/org/zstack/ldap/driver/LdapUtil.java"
+  },
+  {
+    "raw": "Cannot connect to LDAP/AD server, Invalid Credentials, please checkout User DN and password",
+    "en_US": "Cannot connect to LDAP/AD server, Invalid Credentials, please checkout User DN and password",
+    "zh_CN": "无法连接到 LDAP/AD 服务器，凭据无效，请签出用户 DN 和密码",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/ldap/driver/LdapUtil.java"
+  },
+  {
+    "raw": "Cannot connect to LDAP/AD server, communication false, please checkout IP, port and Base DN",
+    "en_US": "Cannot connect to LDAP/AD server, communication false, please checkout IP, port and Base DN",
+    "zh_CN": "无法连接到 LDAP/AD 服务器，通信错误，请检查 IP、端口和基本 DN",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/ldap/driver/LdapUtil.java"
+  },
+  {
+    "raw": "LDAP connection has been closed unexpected",
+    "en_US": "LDAP connection has been closed unexpected",
+    "zh_CN": "LDAP 服务连接意外关闭，请稍后重试",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/ldap/driver/LdapUtil.java"
+  },
+  {
+    "raw": "%s",
+    "en_US": "{0}",
+    "zh_CN": "{0}",
+    "arguments": [
+      "exception.toString()"
+    ],
+    "fileName": "src/main/java/org/zstack/ldap/driver/LdapUtil.java"
+  }
+]

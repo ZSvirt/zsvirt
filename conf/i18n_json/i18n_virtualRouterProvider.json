@@ -1,0 +1,742 @@
+[
+  {
+    "raw": "the virtual router[name:%s, uuid:%s, current state:%s] is not running,and cannot perform required operation. Please retry your operation later once it is running",
+    "en_US": "the virtual router[name:{0}, uuid:{1}, current state:{2}] is not running,and cannot perform required operation. Please retry your operation later once it is running",
+    "zh_CN": "",
+    "arguments": [
+      "self.getName()",
+      "self.getUuid()",
+      "self.getState()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/virtualrouter/VirtualRouter.java"
+  },
+  {
+    "raw": "virtual router[uuid:%s] is in status of %s that cannot make http call to %s",
+    "en_US": "virtual router[uuid:{0}] is in status of {1} that cannot make http call to {2}",
+    "zh_CN": "云路由[uuid:{0}]处于状态{1}中，无法向{2}发送http调用",
+    "arguments": [
+      "self.getUuid()",
+      "getSelf().getStatus()",
+      "msg.getPath()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/virtualrouter/VirtualRouter.java"
+  },
+  {
+    "raw": "virtual router[uuid:%s] has no management nic that cannot make http call to %s",
+    "en_US": "virtual router[uuid:{0}] has no management nic that cannot make http call to {1}",
+    "zh_CN": "虚拟路由器[uuid：{0}]没有无法对{1}进行HTTP调用的管理NIC",
+    "arguments": [
+      "self.getUuid()",
+      "msg.getPath()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/virtualrouter/VirtualRouter.java"
+  },
+  {
+    "raw": "unable to add nic[ip:%s, ip6:%s, mac:%s] to virtual router vm[uuid:%s ip:%s], because %s",
+    "en_US": "unable to add nic[ip:{0}, ip6:{1}, mac:{2}] to virtual router vm[uuid:{3} ip:{4}], because {5}",
+    "zh_CN": "",
+    "arguments": [
+      "info.getIp()",
+      "info.getIp6()",
+      "info.getMac()",
+      "vr.getUuid()",
+      "vr.getManagementNic().getIp()",
+      "rsp.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/virtualrouter/VirtualRouter.java"
+  },
+  {
+    "raw": "could not add server ip to load balancer server group, because share lb has no service provider, please add vmnic first",
+    "en_US": "could not add server ip to load balancer server group, because share lb has no service provider, please add vmnic first",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/network/service/virtualrouter/VirtualRouterApiInterceptor.java"
+  },
+  {
+    "raw": "l3 uuid[:%s] is same to default network of virtual router [uuid:%s]",
+    "en_US": "l3 uuid[:{0}] is same to default network of virtual router [uuid:{1}]",
+    "zh_CN": "L3 uuid[：{0}]与虚拟路由器[uuid：{1}]的默认网络相同",
+    "arguments": [
+      "msg.getDefaultRouteL3NetworkUuid()",
+      "msg.getVmInstanceUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/virtualrouter/VirtualRouterApiInterceptor.java"
+  },
+  {
+    "raw": "l3 uuid[:%s] is not attached to virtual router [uuid:%s]",
+    "en_US": "l3 uuid[:{0}] is not attached to virtual router [uuid:{1}]",
+    "zh_CN": "L3 uuid[：{0}]未连接到虚拟路由器[uuid：{1}]",
+    "arguments": [
+      "msg.getDefaultRouteL3NetworkUuid()",
+      "msg.getVmInstanceUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/virtualrouter/VirtualRouterApiInterceptor.java"
+  },
+  {
+    "raw": "could not set the default network, because l3 uuid[:%s] is management network",
+    "en_US": "could not set the default network, because l3 uuid[:{0}] is management network",
+    "zh_CN": "设置默认网络失败，因为三层网路[:{0}] 是管理网络",
+    "arguments": [
+      "msg.getDefaultRouteL3NetworkUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/virtualrouter/VirtualRouterApiInterceptor.java"
+  },
+  {
+    "raw": "could not set the default network, because l3 uuid[:%s] is not public network",
+    "en_US": "could not set the default network, because l3 uuid[:{0}] is not public network",
+    "zh_CN": "设置默认网络失败，因为三层网路[:{0}] 不是公有网络",
+    "arguments": [
+      "msg.getDefaultRouteL3NetworkUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/virtualrouter/VirtualRouterApiInterceptor.java"
+  },
+  {
+    "raw": "cannot change the default field of a virtual router offering; only admin can do the operation",
+    "en_US": "cannot change the default field of a virtual router offering; only admin can do the operation",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/network/service/virtualrouter/VirtualRouterApiInterceptor.java"
+  },
+  {
+    "raw": "cannot create a virtual router offering with the default field set; only admin can do the operation",
+    "en_US": "cannot create a virtual router offering with the default field set; only admin can do the operation",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/network/service/virtualrouter/VirtualRouterApiInterceptor.java"
+  },
+  {
+    "raw": "management network[uuid:%s] is not in the same zone[uuid:%s] this offering is going to create",
+    "en_US": "management network[uuid:{0}] is not in the same zone[uuid:{1}] this offering is going to create",
+    "zh_CN": "管理网络[uuid:{0}]和将要创建的规格不处于同一个数据中心（zone）[uuid:{1}]中",
+    "arguments": [
+      "msg.getManagementNetworkUuid()",
+      "msg.getZoneUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/virtualrouter/VirtualRouterApiInterceptor.java"
+  },
+  {
+    "raw": "can not create virtual router offering, because management network doesn\u0027t support ipv6 yet",
+    "en_US": "can not create virtual router offering, because management network doesn\u0027t support ipv6 yet",
+    "zh_CN": "无法创建虚拟路由器产品，因为管理网络尚不支持IPv6",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/network/service/virtualrouter/VirtualRouterApiInterceptor.java"
+  },
+  {
+    "raw": "public network[uuid:%s] is not in the same zone[uuid:%s] this offering is going to create",
+    "en_US": "public network[uuid:{0}] is not in the same zone[uuid:{1}] this offering is going to create",
+    "zh_CN": "公共网络[uuid:{0}]和将要创建的规格不处于同一个数据中心（zone）[uuid:{1}]中",
+    "arguments": [
+      "msg.getManagementNetworkUuid()",
+      "msg.getZoneUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/virtualrouter/VirtualRouterApiInterceptor.java"
+  },
+  {
+    "raw": "image[uuid:%s]\u0027s mediaType is %s, the mediaType of a virtual router image must be %s",
+    "en_US": "image[uuid:{0}]\u0027s mediaType is {1}, the mediaType of a virtual router image must be {2}",
+    "zh_CN": "镜像[uuid:{0}]的mediaType为{1}，云路由的mediaType必须为{2}",
+    "arguments": [
+      "msg.getImageUuid()",
+      "type",
+      "ImageMediaType.RootVolumeTemplate"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/virtualrouter/VirtualRouterApiInterceptor.java"
+  },
+  {
+    "raw": "image[uuid:%s] is of format %s, cannot be used for virtual router",
+    "en_US": "image[uuid:{0}] is of format {1}, cannot be used for virtual router",
+    "zh_CN": "镜像[uuid:{0}]的格式为{1}，无法被用于云路由",
+    "arguments": [
+      "msg.getImageUuid()",
+      "format"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/virtualrouter/VirtualRouterApiInterceptor.java"
+  },
+  {
+    "raw": "the L3 network[uuid: %s] has the SNAT service enabled, it cannot be used as a management network",
+    "en_US": "the L3 network[uuid: {0}] has the SNAT service enabled, it cannot be used as a management network",
+    "zh_CN": "三层网络[uuid: {0}]启用了SNAT服务，无法被用作管理网络",
+    "arguments": [
+      "msg.getManagementNetworkUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/virtualrouter/VirtualRouterApiInterceptor.java"
+  },
+  {
+    "raw": "the L3 network[uuid: %s] has the SNAT service enabled, it cannot be used as a public network",
+    "en_US": "the L3 network[uuid: {0}] has the SNAT service enabled, it cannot be used as a public network",
+    "zh_CN": "三层网络[uuid: {0}]启用了SNAT服务，无法被用作公共网络",
+    "arguments": [
+      "msg.getPublicNetworkUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/virtualrouter/VirtualRouterApiInterceptor.java"
+  },
+  {
+    "raw": "the L3 network[uuid: %s] is same network address with [uuid: %s], it cannot be used for virtual router",
+    "en_US": "the L3 network[uuid: {0}] is same network address with [uuid: {1}], it cannot be used for virtual router",
+    "zh_CN": "三层网络[uuid: {0}] 和 网络 [uuid: {1}] 具有相同的网络地址，无法被用于云路由",
+    "arguments": [
+      "msg.getManagementNetworkUuid()",
+      "msg.getPublicNetworkUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/virtualrouter/VirtualRouterApiInterceptor.java"
+  },
+  {
+    "raw": "the management network[uuid:%s] doesn\u0027t have any IP range",
+    "en_US": "the management network[uuid:{0}] doesn\u0027t have any IP range",
+    "zh_CN": "管理网络[uuid:{0}]不包含任何的IP范围",
+    "arguments": [
+      "managementNetworkUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/virtualrouter/VirtualRouterApiInterceptor.java"
+  },
+  {
+    "raw": "the management network[uuid:%s, gateway:%s] is not reachable",
+    "en_US": "the management network[uuid:{0}, gateway:{1}] is not reachable",
+    "zh_CN": "管理网络[uuid:{0}, gateway:{1}]不可抵达",
+    "arguments": [
+      "managementNetworkUuid",
+      "gateway"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/virtualrouter/VirtualRouterApiInterceptor.java"
+  },
+  {
+    "raw": "failed to create VirtualRouterBootstrapIso[%s] on kvm host[uuid:%s, ip:%s] for virtual router[uuid:%s], because %s",
+    "en_US": "failed to create VirtualRouterBootstrapIso[{0}] on kvm host[uuid:{1}, ip:{2}] for virtual router[uuid:{3}], because {4}",
+    "zh_CN": "创建云路由引导镜像（VirtualRouterBootstrapIso）[{0}]失败，该操作是在KVM主机[uuid:{1}, ip:{2}]上为云路由[uuid:{3}]执行的，原因为{4}",
+    "arguments": [
+      "iso.getIsoPath()",
+      "vrSpec.getDestHost().getUuid()",
+      "vrSpec.getDestHost().getManagementIp()",
+      "iso.getVirtualRouterUuid()",
+      "rsp.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/virtualrouter/VirtualRouterKvmBackend.java"
+  },
+  {
+    "raw": "failed to delete VirtualRouterBootstrapIso[%s] on kvm host[uuid:%s] for virtual router[uuid:%s], because %s",
+    "en_US": "failed to delete VirtualRouterBootstrapIso[{0}] on kvm host[uuid:{1}] for virtual router[uuid:{2}], because {3}",
+    "zh_CN": "删除云路由引导镜像（VirtualRouterBootstrapIso）[{0}]失败，该操作是在KVM主机[uuid:{1}]上为云路由[uuid:{2}]执行的，原因为{3}",
+    "arguments": [
+      "iso.getIsoPath()",
+      "hostUuid",
+      "iso.getVirtualRouterUuid()",
+      "rsp.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/virtualrouter/VirtualRouterKvmBackend.java"
+  },
+  {
+    "raw": "cannot create virtual Router vm while virtual router network overlaps with private network in ip ",
+    "en_US": "cannot create virtual Router vm while virtual router network overlaps with private network in ip ",
+    "zh_CN": "当云路由规格的网络和私有网络IP范围有重叠时，无法创建云路由设备",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/network/service/virtualrouter/VirtualRouterManagerImpl.java"
+  },
+  {
+    "raw": "L3Network[uuid:%s, name:%s] requires SNAT service, but default virtual router offering[uuid:%s, name:%s] doesn\u0027t have a public network",
+    "en_US": "L3Network[uuid:{0}, name:{1}] requires SNAT service, but default virtual router offering[uuid:{2}, name:{3}] doesn\u0027t have a public network",
+    "zh_CN": "",
+    "arguments": [
+      "l3Network.getUuid()",
+      "l3Network.getName()",
+      "offering.getUuid()",
+      "offering.getName()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/virtualrouter/VirtualRouterManagerImpl.java"
+  },
+  {
+    "raw": "No virtual router instance offering with uuid:%s is found",
+    "en_US": "No virtual router instance offering with uuid:{0} is found",
+    "zh_CN": "找不到uuid为{0}的虚拟路由器实例产品",
+    "arguments": [
+      "offeringUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/virtualrouter/VirtualRouterManagerImpl.java"
+  },
+  {
+    "raw": "the network of virtual router instance offering with uuid:%s can\u0027t be same with private l3 network uuid:%s",
+    "en_US": "the network of virtual router instance offering with uuid:{0} can\u0027t be same with private l3 network uuid:{1}",
+    "zh_CN": "uuid为{0}的虚拟路由器实例提供的网络不能与uuid为{1}的专用三层网络相同",
+    "arguments": [
+      "offeringUuid",
+      "resourceUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/virtualrouter/VirtualRouterManagerImpl.java"
+  },
+  {
+    "raw": "unable to find a virtual router offering for l3Network[uuid:%s] in zone[uuid:%s], please at least create a default virtual router offering in that zone",
+    "en_US": "unable to find a virtual router offering for l3Network[uuid:{0}] in zone[uuid:{1}], please at least create a default virtual router offering in that zone",
+    "zh_CN": "",
+    "arguments": [
+      "l3Nw.getUuid()",
+      "l3Nw.getZoneUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/virtualrouter/VirtualRouterManagerImpl.java"
+  },
+  {
+    "raw": "Failed to start vr l3[uuid: %s]",
+    "en_US": "Failed to start vr l3[uuid: {0}]",
+    "zh_CN": "",
+    "arguments": [
+      "struct.getL3Network().getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/virtualrouter/VirtualRouterManagerImpl.java"
+  },
+  {
+    "raw": "cannot add ip range, because l3 network[uuid:%s] is management network of virtual router offering",
+    "en_US": "cannot add ip range, because l3 network[uuid:{0}] is management network of virtual router offering",
+    "zh_CN": "",
+    "arguments": [
+      "l3NetworkUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/virtualrouter/VirtualRouterManagerImpl.java"
+  },
+  {
+    "raw": "cannot add ip range, because l3 network[uuid:%s] is management network of virtual router",
+    "en_US": "cannot add ip range, because l3 network[uuid:{0}] is management network of virtual router",
+    "zh_CN": "",
+    "arguments": [
+      "l3NetworkUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/virtualrouter/VirtualRouterManagerImpl.java"
+  },
+  {
+    "raw": "couldn\u0027t add image, because systemTag [%s] includes invalid appliance image type [%s]",
+    "en_US": "couldn\u0027t add image, because systemTag [{0}] includes invalid appliance image type [{1}]",
+    "zh_CN": "",
+    "arguments": [
+      "tag",
+      "type"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/virtualrouter/VirtualRouterManagerImpl.java"
+  },
+  {
+    "raw": "failed tot attach virtual router network services to l3Network[uuid:%s]. When eip is selected, snat must be selected too",
+    "en_US": "failed tot attach virtual router network services to l3Network[uuid:{0}]. When eip is selected, snat must be selected too",
+    "zh_CN": "挂载虚拟路由网络服务到三层网络[uuid:{0}]失败。选中EIP服务时，SNAT服务也必须被选中",
+    "arguments": [
+      "msg.getL3NetworkUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/virtualrouter/VirtualRouterManagerImpl.java"
+  },
+  {
+    "raw": "failed tot attach virtual router network services to l3Network[uuid:%s]. When port forwarding is selected, snat must be selected too",
+    "en_US": "failed tot attach virtual router network services to l3Network[uuid:{0}]. When port forwarding is selected, snat must be selected too",
+    "zh_CN": "挂载虚拟路由网络服务到三层网络[uuid:{0}]失败。选中端口转发服务时，SNAT服务也必须被选中",
+    "arguments": [
+      "msg.getL3NetworkUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/virtualrouter/VirtualRouterManagerImpl.java"
+  },
+  {
+    "raw": "update virtual router [uuid:%s] default network failed, because %s",
+    "en_US": "update virtual router [uuid:{0}] default network failed, because {1}",
+    "zh_CN": "更新虚拟路由器[uuid：{0}]默认网络失败，原因是{1}",
+    "arguments": [
+      "vrUuid",
+      "ret.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/virtualrouter/VirtualRouterManagerImpl.java"
+  },
+  {
+    "raw": "invalid ApplianceVmType %s",
+    "en_US": "invalid ApplianceVmType {0}",
+    "zh_CN": "无效的设备VMType{0}",
+    "arguments": [
+      "ss[1]"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/virtualrouter/VirtualRouterManagerImpl.java"
+  },
+  {
+    "raw": "unable to add dhcp entries to virtual router vm[uuid:%s ip:%s], because %s, dhcp entry[%s]",
+    "en_US": "unable to add dhcp entries to virtual router vm[uuid:{0} ip:{1}], because {2}, dhcp entry[{3}]",
+    "zh_CN": "无法向云路由[uuid:{0} ip:{1}]添加DHCP条目，因为{2}，DHCP条目为[{3}]",
+    "arguments": [
+      "vr.getUuid()",
+      "vr.getManagementNic().getIp()",
+      "rsp.getError()",
+      "JSONObjectUtil.toJsonString(info)"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/virtualrouter/dhcp/VirtualRouterDhcpBackend.java"
+  },
+  {
+    "raw": "no virtual router is configured for vyos dhcp",
+    "en_US": "no virtual router is configured for vyos dhcp",
+    "zh_CN": "没有为VyOS DHCP配置虚拟路由器",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/network/service/virtualrouter/dhcp/VirtualRouterDhcpBackend.java"
+  },
+  {
+    "raw": "unable to program dhcp entries served by virtual router[uuid:%s, ip:%s], %s",
+    "en_US": "unable to program dhcp entries served by virtual router[uuid:{0}, ip:{1}], {2}",
+    "zh_CN": "无法执行由云路由[uuid:{0}, ip:{1}]提供的DHCP条目{2}.",
+    "arguments": [
+      "vr.getUuid()",
+      "vr.getManagementNic().getIp()",
+      "ret.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/virtualrouter/dhcp/VirtualRouterSyncDHCPOnStartFlow.java"
+  },
+  {
+    "raw": "virtual router[uuid:%s, ip:%s] failed to configure dns%s for L3Network[uuid:%s, name:%s], %s",
+    "en_US": "virtual router[uuid:{0}, ip:{1}] failed to configure dns{2} for L3Network[uuid:{3}, name:{4}], {5}",
+    "zh_CN": "云路由[uuid:{0}, ip:{1}]未能为三层网络[uuid:{3}, name:{4}]配置DNS{2}，错误细节: {5}",
+    "arguments": [
+      "vr.getUuid()",
+      "vr.getManagementNic().getIp()",
+      "struct",
+      "l3.getUuid()",
+      "l3.getName()",
+      "ret.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/virtualrouter/dns/VirtualRouterDnsBackend.java"
+  },
+  {
+    "raw": "virtual router[name: %s, uuid: %s] failed to configure dns%s, %s ",
+    "en_US": "virtual router[name: {0}, uuid: {1}] failed to configure dns{2}, {3} ",
+    "zh_CN": "云路由[name: {0}, uuid: {1}]未能配置DNS{2}，错误细节: {3}",
+    "arguments": [
+      "vr.getName()",
+      "vr.getUuid()",
+      "JSONObjectUtil.toJsonString(dns)",
+      "ret.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/virtualrouter/dns/VirtualRouterSyncDnsOnStartFlow.java"
+  },
+  {
+    "raw": "failed to create eip[uuid:%s, name:%s, ip:%s] for vm nic[uuid:%s] on virtual router[uuid:%s], %s",
+    "en_US": "failed to create eip[uuid:{0}, name:{1}, ip:{2}] for vm nic[uuid:{3}] on virtual router[uuid:{4}], {5}",
+    "zh_CN": "无法为虚拟机网卡[uuid:{3}]在云路由[uuid:{4}]上创建EIP[uuid:{0}, name:{1}, ip:{2}]，错误细节: {5}",
+    "arguments": [
+      "struct.getEip().getUuid()",
+      "struct.getEip().getName()",
+      "struct.getVip().getIp()",
+      "struct.getNic().getUuid()",
+      "vr.getUuid()",
+      "ret.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/virtualrouter/eip/VirtualRouterEipBackend.java"
+  },
+  {
+    "raw": "found a virtual router offering[uuid:%s] for L3Network[uuid:%s] in zone[uuid:%s]; however, the network\u0027s public network[uuid:%s] is not the same to EIP[uuid:%s]\u0027s; you may need to use system tag guestL3Network::l3NetworkUuid to specify a particular virtual router offering for the L3Network",
+    "en_US": "found a virtual router offering[uuid:{0}] for L3Network[uuid:{1}] in zone[uuid:{2}]; however, the network\u0027s public network[uuid:{3}] is not the same to EIP[uuid:{4}]\u0027s; you may need to use system tag guestL3Network::l3NetworkUuid to specify a particular virtual router offering for the L3Network",
+    "zh_CN": "",
+    "arguments": [
+      "offering.getUuid()",
+      "l3inv.getUuid()",
+      "l3inv.getZoneUuid()",
+      "struct.getVip().getL3NetworkUuid()",
+      "struct.getEip().getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/virtualrouter/eip/VirtualRouterEipBackend.java"
+  },
+  {
+    "raw": "failed to remove eip[uuid:%s, name:%s, ip:%s] for vm nic[uuid:%s] on virtual router[uuid:%s], %s",
+    "en_US": "failed to remove eip[uuid:{0}, name:{1}, ip:{2}] for vm nic[uuid:{3}] on virtual router[uuid:{4}], {5}",
+    "zh_CN": "未能在云路由[uuid:{4}]上为虚拟机网卡[uuid:{3}]移除EIP[uuid:{0}, name:{1}, ip:{2}]，错误细节: {5}",
+    "arguments": [
+      "struct.getEip().getUuid()",
+      "struct.getEip().getName()",
+      "struct.getVip().getIp()",
+      "struct.getNic().getUuid()",
+      "vr.getUuid()",
+      "ret.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/virtualrouter/eip/VirtualRouterEipBackend.java"
+  },
+  {
+    "raw": "failed to sync eip on virtual router[uuid:%s], %s",
+    "en_US": "failed to sync eip on virtual router[uuid:{0}], {1}",
+    "zh_CN": "未能在云路由[uuid:{0}]上同步EIP，错误细节: {1}",
+    "arguments": [
+      "vr.getUuid()",
+      "ret.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/virtualrouter/eip/VirtualRouterSyncEipOnStartFlow.java"
+  },
+  {
+    "raw": "ha group extension point nil",
+    "en_US": "ha group extension point nil",
+    "zh_CN": "HA组扩展点Nil",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/network/service/virtualrouter/ha/VirtualRouterHaBackendImpl.java"
+  },
+  {
+    "raw": "new add vm nics[uuids:%s] and attached vmnics are not on the same vrouter, they are on vrouters[uuids:%s]",
+    "en_US": "new add vm nics[uuids:{0}] and attached vmnics are not on the same vrouter, they are on vrouters[uuids:{1}]",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getVmNicUuids()",
+      "vrUuids"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/virtualrouter/lb/VirtualRouterLoadBalancerBackend.java"
+  },
+  {
+    "raw": "new add vm nics[uuids:%s] and peer l3s[uuids:%s] of loadbalancer[uuid: %s]\u0027s vip are not on the same vrouter, they are on vrouters[uuids:%s]",
+    "en_US": "new add vm nics[uuids:{0}] and peer l3s[uuids:{1}] of loadbalancer[uuid: {2}]\u0027s vip are not on the same vrouter, they are on vrouters[uuids:{3}]",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getVmNicUuids()",
+      "peerL3NetworkUuids",
+      "msg.getLoadBalancerUuid()",
+      "vrUuids"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/virtualrouter/lb/VirtualRouterLoadBalancerBackend.java"
+  },
+  {
+    "raw": "vmnic must be specified for share loadbalancer",
+    "en_US": "vmnic must be specified for share loadbalancer",
+    "zh_CN": "必须为Share LoadBalancer指定vmnic",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/network/service/virtualrouter/lb/VirtualRouterLoadBalancerBackend.java"
+  },
+  {
+    "raw": "cannot find virtual router for load balancer [uuid:%s]",
+    "en_US": "cannot find virtual router for load balancer [uuid:{0}]",
+    "zh_CN": "未能为负载均衡器[uuid:{0}]找到云路由",
+    "arguments": [
+      "struct.getLb().getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/virtualrouter/lb/VirtualRouterLoadBalancerBackend.java"
+  },
+  {
+    "raw": "operation error, because:%s",
+    "en_US": "operation error, because:{0}",
+    "zh_CN": "操作错误，因为{0}",
+    "arguments": [
+      "ret.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/virtualrouter/lifecycle/VirtualRouterDeployAgentFlow.java"
+  },
+  {
+    "raw": "guest l3Network[uuid:%s, name:%s] needs SNAT service provided by virtual router, but public l3Network[uuid:%s] of virtual router offering[uuid: %s, name:%s] is the same to this guest l3Network",
+    "en_US": "guest l3Network[uuid:{0}, name:{1}] needs SNAT service provided by virtual router, but public l3Network[uuid:{2}] of virtual router offering[uuid: {3}, name:{4}] is the same to this guest l3Network",
+    "zh_CN": "用户三层网络[uuid:{0}, name:{1}]需要云路由提供的SNAT服务，但是云路由规格[uuid: {3}, name:{4}]的公共三层网络[uuid:{2}]与该客户三层网络相同",
+    "arguments": [
+      "guestL3.getUuid()",
+      "guestL3.getName()",
+      "offering.getPublicNetworkUuid()",
+      "offering.getUuid()",
+      "offering.getName()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/virtualrouter/nat/VirtualRouterSnatBackend.java"
+  },
+  {
+    "raw": "virtual router[name: %s, uuid: %s] failed to sync snat%s, %s",
+    "en_US": "virtual router[name: {0}, uuid: {1}] failed to sync snat{2}, {3}",
+    "zh_CN": "云路由[name: {0}, uuid: {1}]未能同步SNAT{2}，错误细节: {3}",
+    "arguments": [
+      "vr.getName()",
+      "vr.getUuid()",
+      "JSONObjectUtil.toJsonString(snatInfo)",
+      "ret.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/virtualrouter/nat/VirtualRouterSyncSNATOnStartFlow.java"
+  },
+  {
+    "raw": "failed to create port forwarding rule[vip ip: %s, private ip: %s, vip start port: %s, vip end port: %s, private start port: %s, private end port: %s], because %s",
+    "en_US": "failed to create port forwarding rule[vip ip: {0}, private ip: {1}, vip start port: {2}, vip end port: {3}, private start port: {4}, private end port: {5}], because {6}",
+    "zh_CN": "无法创建端口转发规则[vip ip: {0}, private ip: {1}, vip start port: {2}, vip end port: {3}, private start port: {4}, private end port: {5}]，错误细节: {6}",
+    "arguments": [
+      "to.getVipIp()",
+      "to.getPrivateIp()",
+      "to.getVipPortStart()",
+      "to.getVipPortEnd()",
+      "to.getPrivatePortStart()",
+      "to.getPrivatePortEnd()",
+      "ret.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/virtualrouter/portforwarding/ApplyPortforwardingRuleOnVirtualRouterVmFlow.java"
+  },
+  {
+    "raw": "failed to revoke port forwarding rules %s, because %s",
+    "en_US": "failed to revoke port forwarding rules {0}, because {1}",
+    "zh_CN": "未能解除端口转发规则{0}，原因: {1}",
+    "arguments": [
+      "JSONObjectUtil.toJsonString(to)",
+      "ret.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/virtualrouter/portforwarding/ReleasePortForwardingRuleOnVirtualRouterVmFlow.java"
+  },
+  {
+    "raw": "found a virtual router offering[uuid:%s] for L3Network[uuid:%s] in zone[uuid:%s]; however, the network\u0027s public network[uuid:%s] is not the same to PortForwarding rule[uuid:%s]\u0027s; you may need to use system tag guestL3Network::l3NetworkUuid to specify a particular virtual router offering for the L3Network",
+    "en_US": "found a virtual router offering[uuid:{0}] for L3Network[uuid:{1}] in zone[uuid:{2}]; however, the network\u0027s public network[uuid:{3}] is not the same to PortForwarding rule[uuid:{4}]\u0027s; you may need to use system tag guestL3Network::l3NetworkUuid to specify a particular virtual router offering for the L3Network",
+    "zh_CN": "",
+    "arguments": [
+      "offering.getUuid()",
+      "struct.getGuestL3Network().getUuid()",
+      "struct.getGuestL3Network().getZoneUuid()",
+      "struct.getVip().getL3NetworkUuid()",
+      "struct.getRule().getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/virtualrouter/portforwarding/VirtualRouterPortForwardingBackend.java"
+  },
+  {
+    "raw": "virtual router doesn\u0027t support port forwarding range redirection, the vipPortStart must be equals to privatePortStart and vipPortEnd must be equals to privatePortEnd;but this rule rule has a mismatching range: vip port[%s, %s], private port[%s, %s]",
+    "en_US": "virtual router doesn\u0027t support port forwarding range redirection, the vipPortStart must be equals to privatePortStart and vipPortEnd must be equals to privatePortEnd;but this rule rule has a mismatching range: vip port[{0}, {1}], private port[{2}, {3}]",
+    "zh_CN": "",
+    "arguments": [
+      "rule.getVipPortStart()",
+      "rule.getVipPortEnd()",
+      "rule.getPrivatePortStart()",
+      "rule.getPrivatePortEnd()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/virtualrouter/portforwarding/VirtualRouterPortForwardingBackend.java"
+  },
+  {
+    "raw": "failed to add portforwardings on virtual router[uuid:%s], %s",
+    "en_US": "failed to add portforwardings on virtual router[uuid:{0}], {1}",
+    "zh_CN": "在云路由[uuid:{0}]添加端口转发失败，{1}",
+    "arguments": [
+      "vrVO.getUuid()",
+      "ret.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/virtualrouter/portforwarding/VirtualRouterPortForwardingBackend.java"
+  },
+  {
+    "raw": "failed to revoke port forwardings on virtual router[uuid:%s], %s",
+    "en_US": "failed to revoke port forwardings on virtual router[uuid:{0}], {1}",
+    "zh_CN": "取消在云路由[uuid:{0}]上端口转发服务失败，{1}",
+    "arguments": [
+      "vrVO.getUuid()",
+      "ret.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/virtualrouter/portforwarding/VirtualRouterPortForwardingBackend.java"
+  },
+  {
+    "raw": "failed to sync port forwarding rules served by virtual router[name: %s, uuid: %s], because %s",
+    "en_US": "failed to sync port forwarding rules served by virtual router[name: {0}, uuid: {1}], because {2}",
+    "zh_CN": "未能同步由云路由[name: {0}, uuid: {1}]提供的端口转发规则，因为: {2}",
+    "arguments": [
+      "vr.getName()",
+      "vr.getUuid()",
+      "ret.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/virtualrouter/portforwarding/VirtualRouterSyncPortForwardingRulesOnStartFlow.java"
+  },
+  {
+    "raw": "failed to sync vips[ips: %s] on virtual router[uuid:%s] for attaching nic[uuid: %s, ip: %s], because %s",
+    "en_US": "failed to sync vips[ips: {0}] on virtual router[uuid:{1}] for attaching nic[uuid: {2}, ip: {3}], because {4}",
+    "zh_CN": "",
+    "arguments": [
+      "vips.stream().map(VipTO::getIp).collect(Collectors.toList())",
+      "nic.getVmInstanceUuid()",
+      "nic.getUuid()",
+      "nic.getIp()",
+      "ret.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/virtualrouter/vip/VirtualRouterVipBackend.java"
+  },
+  {
+    "raw": "failed to remove vip%s, because %s",
+    "en_US": "failed to remove vip{0}, because {1}",
+    "zh_CN": "未能移除VIP{0}，因为{1}",
+    "arguments": [
+      "tos",
+      "ret.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/virtualrouter/vip/VirtualRouterVipBaseBackend.java"
+  },
+  {
+    "raw": "failed to create vip%s on virtual router[uuid:%s], because %s",
+    "en_US": "failed to create vip{0} on virtual router[uuid:{1}], because {2}",
+    "zh_CN": "未能在云路由[uuid:{1}]上创建VIP{0}，因为{2}",
+    "arguments": [
+      "tos",
+      "vr.getUuid()",
+      "ret.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/virtualrouter/vip/VirtualRouterVipBaseBackend.java"
+  },
+  {
+    "raw": "virtual router[uuid:%s, state:%s] is not running",
+    "en_US": "virtual router[uuid:{0}, state:{1}] is not running",
+    "zh_CN": "云路由[uuid:{0}, state:{1}]没有运行",
+    "arguments": [
+      "vrUuid",
+      "vrState"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/virtualrouter/vip/VirtualRouterVipBaseBackend.java"
+  },
+  {
+    "raw": "found a virtual router offering[uuid:%s] for L3Network[uuid:%s] in zone[uuid:%s]; however, the network\u0027s public network[uuid:%s] is not the same to VIP[uuid:%s]\u0027s; you may need to use system tag guestL3Network::l3NetworkUuid to specify a particular virtual router offering for the L3Network",
+    "en_US": "found a virtual router offering[uuid:{0}] for L3Network[uuid:{1}] in zone[uuid:{2}]; however, the network\u0027s public network[uuid:{3}] is not the same to VIP[uuid:{4}]\u0027s; you may need to use system tag guestL3Network::l3NetworkUuid to specify a particular virtual router offering for the L3Network",
+    "zh_CN": "",
+    "arguments": [
+      "offering.getUuid()",
+      "s.getL3Network().getUuid()",
+      "s.getL3Network().getZoneUuid()",
+      "self.getL3NetworkUuid()",
+      "self.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/virtualrouter/vip/VirtualRouterVipBaseBackend.java"
+  },
+  {
+    "raw": "failed to change nic[ip:%s, mac:%s] firewall default action of virtual router vm[uuid:%s], because %s",
+    "en_US": "failed to change nic[ip:{0}, mac:{1}] firewall default action of virtual router vm[uuid:{2}], because {3}",
+    "zh_CN": "修改云路由[uuid:{2}]的网卡[ip:{0}, mac:{1}]的默认防火墙规则失败，因为{3}",
+    "arguments": [
+      "nic.getIp()",
+      "nic.getMac()",
+      "nic.getVmInstanceUuid()",
+      "rsp.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/virtualrouter/vyos/VyosChangePrivateL3FirewallDefaultActionExtensionPoint.java"
+  },
+  {
+    "raw": "the SSH port is not open after %s seconds. Failed to login the virtual router[ip:%s]",
+    "en_US": "the SSH port is not open after {0} seconds. Failed to login the virtual router[ip:{1}]",
+    "zh_CN": "",
+    "arguments": [
+      "timeoutInSeconds",
+      "mgmtNicIp"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/virtualrouter/vyos/VyosConfigSshFlow.java"
+  },
+  {
+    "raw": "unable to ssh in to the virtual router[%s] after configure ssh",
+    "en_US": "unable to ssh in to the virtual router[{0}] after configure ssh",
+    "zh_CN": "配置SSH后，无法通过SSH连接到虚拟路由器[{0}]",
+    "arguments": [
+      "mgmtNicIp"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/virtualrouter/vyos/VyosConfigSshFlow.java"
+  },
+  {
+    "raw": "vyos init command failed, because:%s",
+    "en_US": "vyos init command failed, because:{0}",
+    "zh_CN": "vyos init命令失败，原因是：{0}",
+    "arguments": [
+      "ret.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/virtualrouter/vyos/VyosConnectFlow.java"
+  },
+  {
+    "raw": "virtual router deploy agent failed, because %s",
+    "en_US": "virtual router deploy agent failed, because {0}",
+    "zh_CN": "",
+    "arguments": [
+      "errors.get(errors.size() - 1)"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/virtualrouter/vyos/VyosDeployAgentFlow.java"
+  },
+  {
+    "raw": "unable to start dhcp server on virtual router vm[uuid:%s], because %s",
+    "en_US": "unable to start dhcp server on virtual router vm[uuid:{0}], because {1}",
+    "zh_CN": "无法在虚拟路由器VM[uuid：{0}]上启动DHCP服务器，因为{1}",
+    "arguments": [
+      "nic.getVmInstanceUuid()",
+      "rsp.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/virtualrouter/vyos/VyosDhcpBackend.java"
+  },
+  {
+    "raw": "unable to stop dhcp server on virtual router vm[uuid:%s], because %s",
+    "en_US": "unable to stop dhcp server on virtual router vm[uuid:{0}], because {1}",
+    "zh_CN": "无法停止虚拟路由器VM[uuid：{0}]上的DHCP服务器，因为{1}",
+    "arguments": [
+      "nic.getVmInstanceUuid()",
+      "rsp.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/virtualrouter/vyos/VyosDhcpBackend.java"
+  }
+]

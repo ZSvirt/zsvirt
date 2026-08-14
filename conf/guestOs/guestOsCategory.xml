@@ -1,0 +1,479 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<category xmlns="http://zstack.org/schema/zstack">
+    <osInfo>
+        <platform>Linux</platform>
+        <name>CentOS</name>
+        <version>5</version>
+        <osRelease>CentOS 5</osRelease>
+    </osInfo>
+    <osInfo>
+        <platform>Linux</platform>
+        <name>CentOS</name>
+        <version>6</version>
+        <osRelease>CentOS 6</osRelease>
+    </osInfo>
+    <osInfo>
+        <platform>Linux</platform>
+        <name>CentOS</name>
+        <version>7</version>
+        <osRelease>CentOS 7</osRelease>
+    </osInfo>
+    <osInfo>
+        <platform>Linux</platform>
+        <name>CentOS</name>
+        <version>8</version>
+        <osRelease>CentOS 8</osRelease>
+    </osInfo>
+    <osInfo>
+        <platform>Linux</platform>
+        <name>CentOS</name>
+        <version>9</version>
+        <osRelease>CentOS 9</osRelease>
+    </osInfo>
+    <osInfo>
+        <platform>Linux</platform>
+        <name>CentOS Stream</name>
+        <version>9</version>
+        <osRelease>CentOS Stream 9</osRelease>
+    </osInfo>
+    <osInfo>
+        <platform>Linux</platform>
+        <name>RedHat</name>
+        <version>5</version>
+        <osRelease>RHEL 5</osRelease>
+    </osInfo>
+    <osInfo>
+        <platform>Linux</platform>
+        <name>RedHat</name>
+        <version>6</version>
+        <osRelease>RHEL 6</osRelease>
+    </osInfo>
+    <osInfo>
+        <platform>Linux</platform>
+        <name>RedHat</name>
+        <version>7</version>
+        <osRelease>RHEL 7</osRelease>
+    </osInfo>
+    <osInfo>
+        <platform>Linux</platform>
+        <name>RedHat</name>
+        <version>8</version>
+        <osRelease>RHEL 8</osRelease>
+    </osInfo>
+    <osInfo>
+        <platform>Linux</platform>
+        <name>RedHat</name>
+        <version>9</version>
+        <osRelease>RHEL 9</osRelease>
+    </osInfo>
+    <osInfo>
+        <platform>Linux</platform>
+        <name>RedHat</name>
+        <version>10</version>
+        <osRelease>RHEL 10</osRelease>
+    </osInfo>
+    <osInfo>
+        <platform>Linux</platform>
+        <name>Ubuntu</name>
+        <version>14</version>
+        <osRelease>Ubuntu 14</osRelease>
+    </osInfo>
+    <osInfo>
+        <platform>Linux</platform>
+        <name>Ubuntu</name>
+        <version>16</version>
+        <osRelease>Ubuntu 16</osRelease>
+    </osInfo>
+    <osInfo>
+        <platform>Linux</platform>
+        <name>Ubuntu</name>
+        <version>18</version>
+        <osRelease>Ubuntu 18</osRelease>
+    </osInfo>
+    <osInfo>
+        <platform>Linux</platform>
+        <name>Ubuntu</name>
+        <version>20</version>
+        <osRelease>Ubuntu 20</osRelease>
+    </osInfo>
+    <osInfo>
+        <platform>Linux</platform>
+        <name>Ubuntu</name>
+        <version>22</version>
+        <osRelease>Ubuntu 22</osRelease>
+    </osInfo>
+    <osInfo>
+        <platform>Linux</platform>
+        <name>Ubuntu</name>
+        <version>24</version>
+        <osRelease>Ubuntu 24</osRelease>
+    </osInfo>
+    <osInfo>
+        <platform>Linux</platform>
+        <name>Debian</name>
+        <version>7</version>
+        <osRelease>Debian 7</osRelease>
+    </osInfo>
+    <osInfo>
+        <platform>Linux</platform>
+        <name>Debian</name>
+        <version>8</version>
+        <osRelease>Debian 8</osRelease>
+    </osInfo>
+    <osInfo>
+        <platform>Linux</platform>
+        <name>Debian</name>
+        <version>9</version>
+        <osRelease>Debian 9</osRelease>
+    </osInfo>
+    <osInfo>
+        <platform>Linux</platform>
+        <name>Debian</name>
+        <version>10</version>
+        <osRelease>Debian 10</osRelease>
+    </osInfo>
+    <osInfo>
+        <platform>Linux</platform>
+        <name>Debian</name>
+        <version>11</version>
+        <osRelease>Debian 11</osRelease>
+    </osInfo>
+    <osInfo>
+        <platform>Linux</platform>
+        <name>Debian</name>
+        <version>12</version>
+        <osRelease>Debian 12</osRelease>
+    </osInfo>
+    <osInfo>
+        <platform>Linux</platform>
+        <name>Debian</name>
+        <version>13</version>
+        <osRelease>Debian 13</osRelease>
+    </osInfo>
+    <osInfo>
+        <platform>Linux</platform>
+        <name>Fedora</name>
+        <version></version>
+        <osRelease>Fedora</osRelease>
+    </osInfo>
+    <osInfo>
+        <platform>Linux</platform>
+        <name>Fedora</name>
+        <version>42</version>
+        <osRelease>Fedora 42</osRelease>
+    </osInfo>
+    <osInfo>
+        <platform>Linux</platform>
+        <name>Kylin</name>
+        <version>4</version>
+        <osRelease>Kylin 4</osRelease>
+    </osInfo>
+    <osInfo>
+        <platform>Linux</platform>
+        <name>Kylin</name>
+        <version>V7</version>
+        <osRelease>Kylin V7</osRelease>
+    </osInfo>
+    <osInfo>
+        <platform>Linux</platform>
+        <name>Kylin</name>
+        <version>V10</version>
+        <osRelease>Kylin V10</osRelease>
+    </osInfo>
+    <osInfo>
+        <platform>Linux</platform>
+        <name>NeoKylin</name>
+        <version>V7</version>
+        <osRelease>NeoKylin V7</osRelease>
+    </osInfo>
+    <osInfo>
+        <platform>Linux</platform>
+        <name>NeoKylin</name>
+        <version>V7Update6</version>
+        <osRelease>NeoKylin V7 Update6</osRelease>
+    </osInfo>
+    <osInfo>
+        <platform>Linux</platform>
+        <name>Kylin</name>
+        <version>11</version>
+        <osRelease>Kylin 11</osRelease>
+    </osInfo>
+    <osInfo>
+        <platform>Linux</platform>
+        <name>UOS</name>
+        <version>20</version>
+        <osRelease>UOS 20</osRelease>
+    </osInfo>
+    <osInfo>
+        <platform>Linux</platform>
+        <name>openEuler</name>
+        <version>20.03</version>
+        <osRelease>openEuler 20.03</osRelease>
+    </osInfo>
+    <osInfo>
+        <platform>Linux</platform>
+        <name>openEuler</name>
+        <version>22.03</version>
+        <osRelease>openEuler 22.03</osRelease>
+    </osInfo>
+    <osInfo>
+        <platform>Linux</platform>
+        <name>openEuler</name>
+        <version>24.03</version>
+        <osRelease>openEuler 24.03</osRelease>
+    </osInfo>
+    <osInfo>
+        <platform>Linux</platform>
+        <name>SUSE</name>
+        <version>SLES11</version>
+        <osRelease>SUSE Linux Enterprise Server 11</osRelease>
+    </osInfo>
+    <osInfo>
+        <platform>Linux</platform>
+        <name>SUSE</name>
+        <version>SLES12</version>
+        <osRelease>SUSE Linux Enterprise Server 12</osRelease>
+    </osInfo>
+    <osInfo>
+        <platform>Linux</platform>
+        <name>SUSE</name>
+        <version>SLES15</version>
+        <osRelease>SUSE Linux Enterprise Server 15</osRelease>
+    </osInfo>
+    <osInfo>
+        <platform>Linux</platform>
+        <name>SUSE</name>
+        <version>Leap11</version>
+        <osRelease>openSUSE Leap 11</osRelease>
+    </osInfo>
+    <osInfo>
+        <platform>Linux</platform>
+        <name>SUSE</name>
+        <version>Leap12</version>
+        <osRelease>openSUSE Leap 12</osRelease>
+    </osInfo>
+    <osInfo>
+        <platform>Linux</platform>
+        <name>SUSE</name>
+        <version>Leap15</version>
+        <osRelease>openSUSE Leap 15</osRelease>
+    </osInfo>
+    <osInfo>
+        <platform>Linux</platform>
+        <name>SUSE</name>
+        <version>SLED11</version>
+        <osRelease>SUSE Linux Enterprise Desktop 11</osRelease>
+    </osInfo>
+    <osInfo>
+        <platform>Linux</platform>
+        <name>SUSE</name>
+        <version>SLED12</version>
+        <osRelease>SUSE Linux Enterprise Desktop 12</osRelease>
+    </osInfo>
+    <osInfo>
+        <platform>Linux</platform>
+        <name>Rocky</name>
+        <version>8</version>
+        <osRelease>Rocky Linux 8</osRelease>
+    </osInfo>
+    <osInfo>
+        <platform>Linux</platform>
+        <name>Rocky</name>
+        <version>9</version>
+        <osRelease>Rocky Linux 9</osRelease>
+    </osInfo>
+    <osInfo>
+        <platform>Linux</platform>
+        <name>Anolis</name>
+        <version>7</version>
+        <osRelease>Anolis OS 7</osRelease>
+    </osInfo>
+    <osInfo>
+        <platform>Linux</platform>
+        <name>Anolis</name>
+        <version>8</version>
+        <osRelease>Anolis OS 8</osRelease>
+    </osInfo>
+    <osInfo>
+        <platform>Linux</platform>
+        <name>AlmaLinux</name>
+        <version>9</version>
+        <osRelease>AlmaLinux 9</osRelease>
+    </osInfo>
+    <osInfo>
+        <platform>Linux</platform>
+        <name>AlmaLinux</name>
+        <version>10</version>
+        <osRelease>AlmaLinux 10</osRelease>
+    </osInfo>
+    <osInfo>
+        <platform>Linux</platform>
+        <name>Linux</name>
+        <version></version>
+        <osRelease>Linux</osRelease>
+    </osInfo>
+    <osInfo>
+        <platform>Linux</platform>
+        <name>Oracle</name>
+        <version>7</version>
+        <osRelease>Oracle Linux 7</osRelease>
+    </osInfo>
+    <osInfo>
+        <platform>Linux</platform>
+        <name>Oracle</name>
+        <version>8</version>
+        <osRelease>Oracle Linux 8</osRelease>
+    </osInfo>
+    <osInfo>
+        <platform>Linux</platform>
+        <name>Oracle</name>
+        <version>9</version>
+        <osRelease>Oracle Linux 9</osRelease>
+    </osInfo>
+    <osInfo>
+        <platform>Linux</platform>
+        <name>Oracle</name>
+        <version>10</version>
+        <osRelease>Oracle Linux 10</osRelease>
+    </osInfo>
+    <osInfo>
+        <platform>Linux</platform>
+        <name>Rocky Linux</name>
+        <version>8</version>
+        <osRelease>Rocky Linux 8</osRelease>
+    </osInfo>
+    <osInfo>
+        <platform>Linux</platform>
+        <name>Rocky Linux</name>
+        <version>9</version>
+        <osRelease>Rocky Linux 9</osRelease>
+    </osInfo>
+    <osInfo>
+        <platform>Linux</platform>
+        <name>Rocky Linux</name>
+        <version>10</version>
+        <osRelease>Rocky Linux 10</osRelease>
+    </osInfo>
+    <osInfo>
+        <platform>Linux</platform>
+        <name>AlmaLinux</name>
+        <version>9</version>
+        <osRelease>AlmaLinux 9</osRelease>
+    </osInfo>
+    <osInfo>
+        <platform>Linux</platform>
+        <name>Amazon</name>
+        <version>2023</version>
+        <osRelease>Amazon Linux 2023</osRelease>
+    </osInfo>
+    <osInfo>
+        <platform>Linux</platform>
+        <name>Linux</name>
+        <version></version>
+        <osRelease>Other Kernel ≥ 4.20 or Hygon Linux</osRelease>
+    </osInfo>
+
+    <osInfo>
+        <platform>Windows</platform>
+        <name>Windows</name>
+        <version>4.0</version>
+        <osRelease>Windows NT 4.0</osRelease>
+    </osInfo>
+    <osInfo>
+        <platform>Windows</platform>
+        <name>Windows</name>
+        <version>2003</version>
+        <osRelease>WindowsServer 2003</osRelease>
+    </osInfo>
+    <osInfo>
+        <platform>Windows</platform>
+        <name>Windows</name>
+        <version>2008</version>
+        <osRelease>WindowsServer 2008</osRelease>
+    </osInfo>
+    <osInfo>
+        <platform>Windows</platform>
+        <name>Windows</name>
+        <version>2012</version>
+        <osRelease>WindowsServer 2012</osRelease>
+    </osInfo>
+    <osInfo>
+        <platform>Windows</platform>
+        <name>Windows</name>
+        <version>2016</version>
+        <osRelease>WindowsServer 2016</osRelease>
+    </osInfo>
+    <osInfo>
+        <platform>Windows</platform>
+        <name>Windows</name>
+        <version>2019</version>
+        <osRelease>WindowsServer 2019</osRelease>
+    </osInfo>
+    <osInfo>
+        <platform>Windows</platform>
+        <name>Windows</name>
+        <version>2022</version>
+        <osRelease>WindowsServer 2022</osRelease>
+    </osInfo>
+    <osInfo>
+        <platform>Windows</platform>
+        <name>Windows</name>
+        <version>2025</version>
+        <osRelease>WindowsServer 2025</osRelease>
+    </osInfo>
+    <osInfo>
+        <platform>Windows</platform>
+        <name>Windows</name>
+        <version>7</version>
+        <osRelease>Windows 7</osRelease>
+    </osInfo>
+    <osInfo>
+        <platform>Windows</platform>
+        <name>Windows</name>
+        <version>8</version>
+        <osRelease>Windows 8</osRelease>
+    </osInfo>
+    <osInfo>
+        <platform>Windows</platform>
+        <name>Windows</name>
+        <version>10</version>
+        <osRelease>Windows 10</osRelease>
+    </osInfo>
+    <osInfo>
+        <platform>Windows</platform>
+        <name>Windows</name>
+        <version>11</version>
+        <osRelease>Windows 11</osRelease>
+    </osInfo>
+    <osInfo>
+        <platform>Windows</platform>
+        <name>Windows</name>
+        <version>xp</version>
+        <osRelease>Windows xp</osRelease>
+    </osInfo>
+    <osInfo>
+        <platform>Windows</platform>
+        <name>Windows</name>
+        <version></version>
+        <osRelease>Windows</osRelease>
+    </osInfo>
+
+    <osInfo>
+        <platform>Other</platform>
+        <name>FreeBSD</name>
+        <version></version>
+        <osRelease>FreeBSD</osRelease>
+    </osInfo>
+    <osInfo>
+        <platform>Other</platform>
+        <name>Solaris</name>
+        <version>10</version>
+        <osRelease>Solaris 10</osRelease>
+    </osInfo>
+    <osInfo>
+        <platform>Other</platform>
+        <name>Other</name>
+        <version></version>
+        <osRelease>Other</osRelease>
+    </osInfo>
+</category>

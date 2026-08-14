@@ -1,0 +1,161 @@
+= 无锁架构
+
+== 前言
+
+在 IaaS（Infrastructure as a Service，即基础设施即服务）软件里许多任务要顺序的执行；例如，当一个起动虚拟机的任务正在运行时，一个结束些虚拟机的任务则必有等待之前的开始任务结束才行。另一方面，一些任务以需要并发的同时运行；例如，在同一主机上 20 个创建虚拟机的任务能同时运行。同步和并行在一个分布式系统中是不好控的并且常常需要一个同步软件。针对这个挑战，ZStack 提供了一个基于队列的无锁架构，允许任务很容易的来控制它们的并行级别，从一个同步到 N 个并行都行。
+
+== 动机
+
+一个好的 IasS 软件在任务的同步及并行上需要有精细的控制。大多数情况下，任务之间有依赖关系需要以某一顺序来执行；例如，一个删除卷的任务不能被执行，如果另一个在此卷上做快照备份的任务正在执行中。有时，任务要并发执行来提升性能；例如，在同一台主机上十个创建虚拟机的任务同时执行一点问题也没有。当然，没有正常的控制，并行任务也会损坏系统；例如，1000 个同时执行的创建虚拟机的任务虽不会使系统挂掉但至少导致系统有段时间没有响应。这种同步开发问题在多线程环境是很复杂的，在分布式环境就显得更加复杂了。
+
+== 问题
+
+教科书告诉我们，锁和信号量是同步和并行的答案；在分布式系统中，处理同步和并行的最直接的想法是，使用某种分布式的协调软件，像 Apache ZooKeeper ，或者在 Redis 之上构建的类似软件。 分布式协调软件的使用概况，例如， ZooKeeper，像下面这样：
+
+[plantuml,align=center]
+....
+skinparam ranksep 20
+skinparam dpi 150
+skinparam arrowThickness 0.7
+skinparam packageTitleAlignment left
+skinparam usecaseBorderThickness 0.4
+skinparam defaultFontSize 12
+skinparam rectangleBorderThickness 1
+
+rectangle "Management Node 1" as mn1 {
+    (Virtual Machine Service 1)  as vm1 #Orange
+    (Host Service 1) as host1 #LightGreen
+}
+
+rectangle "Management Node 2" as mn2 {
+    (Virtual Machine Service 2) as vm2 #Orange
+    (Host Service 2) as host2 #LightGreen
+}
+
+rectangle "ZooKeeper Coordination Service"  as z1 #White
+
+vm1 -[#Black]-> z1 : Please lock VM1 for me
+vm2 -[#Black]-> z1 : I need to lock VM1 too
+....
+
+问题是，对于锁或信号量， *线程需要等待其它线程释放它们正在使用的锁或信号量*。在 xref:scalability_secrets_part_1_asynchronous_architecture.adoc[] 一文中，我们解释了，ZStack 是一种异步软件，线程不会因等待其它线程的完成而阻塞；因此，锁和信号量不是可行的选项。同时，我们也关心使用分布式协调软件的复杂性和拓展性，想象一下，一个满载 100,000 个需要锁的任务的系统，这既不容易，也不易拓展。
+
+[QUOTE]
+. 同步的 vs 同步化的
+____
+在 xref:scalability_secrets_part_1_asynchronous_architecture.adoc[] 一文中， 我们讨论了 同步的 vs. 异步的，在本文中，我们将会讨论 同步的 vs. 并行的。“同步的”和“同步化的”有时候是可互换的使用，但是它们是不同的。在我们的场景中，“同步的”是在讨论，关于执行一个任务是否会阻塞线程的问题；“同步化的”是在讨论，关于一个任务是否排它的执行的问题。如果一个任务在完成前，一直占据一个线程的所有时间，这就是一个同步的任务；如果一个任务不能和其它任务在同一时间执行，这就是一个同步化的任务。
+____
+
+=== 无锁架构的基础
+使用一致性哈希算法，来保证同一个服务实例能够处理所有到达同一资源的消息，这就是无锁架构的基础。通过这种方法聚集到达某一节点的消息，可以减少从分布式系统到多线程环境的同步，并行化的复杂性 (更多细节见 xref:stateless_services.adoc[])。
+
+=== 工作队列：传统解决方案
+
+[NOTE]
+. 注意
+====
+在深入了解细节之前，请注意，我们即将要谈论的队列，和在 xref:stateless_services.adoc[] 一文中提到的 RabbitMQ 消息队列，没有任何关联。消息队列是 RabbitMQ 的术语；ZStack 的队列则是内部数据结构。
+====
+
+在 ZStack 中的任务是由消息驱动的，聚合消息让相关的任务可以在同样的节点执行，减轻了经典的线程池并发编程的压力。为了避免锁竞争，ZStack 使用工作队列替代锁和信号量。同步化的任务可以一个接一个的执行，它们由基于内存的工作队列维护：
+
+[NOTE]
+. 注意
+====
+工作队列可以同时执行同步化的和并行的任务。如果并行级别为 1，那么队列就是同步化的；如果并行级别大于 1，那么队列是并行的；如果并行级别为 0，那么队列就是无限并行的。
+====
+
+=== 基于内存的同步队列
+在 ZStack 中有两种工作队列；一种是同步队列，任务返回结果才认定为结束 (通常使用 Java Runnable 接口来实现):
+
+[source,java]
+----
+thdf.syncSubmit(new SyncTask<Object>() {
+    @Override
+    public String getSyncSignature() {
+        return "api.worker";
+    }
+
+    @Override
+    public int getSyncLevel() {
+        return apiWorkerNum;
+    }
+
+    @Override
+    public String getName() {
+        return "api.worker";
+    }
+
+    @Override
+    public Object call() throws Exception {
+        if (msg.getClass() == APIIsReadyToGoMsg.class) {
+            handle((APIIsReadyToGoMsg) msg);
+        } else {
+            try {
+                dispatchMessage((APIMessage) msg);
+            } catch (Throwable t) {
+                bus.logExceptionWithMessageDump(msg, t);
+                bus.replyErrorByMessageType(msg, errf.throwableToInternalError(t));
+            }
+        }
+
+        /* When method call() returns, the next task will be proceeded immediately */
+
+        return null;
+    }
+});
+----
+
+[CAUTION]
+. 强调
+====
+在同步队列中，工作线程继续读取下个 Runnable，只要前一个 Runnable.run() 方法返回结果，并且直接队列为空了才返回线程池。因为任务在执行时会取得工作线程，队列是同步的 .
+====
+
+=== 基于内存的异步队列
+另一种是异常工作队列，当它发出一个完成通知才认为结束 :
+
+[source,java]
+----
+thdf.chainSubmit(new ChainTask(msg) {
+    @Override
+    public String getName() {
+        return String.format("start-vm-%s", self.getUuid());
+    }
+
+    @Override
+    public String getSyncSignature() {
+        return syncThreadName;
+    }
+
+    @Override
+    public void run(SyncTaskChain chain) {
+        startVm(msg, chain);
+        /* the next task will be proceeded only after startVm() method calls chain.next() */
+    }
+});
+----
+
+[CAUTION]
+. 强调
+====
+在异步队列中，ChainTask.run(SyncTaskChain chain) 方法可能在做一些异步 操作后立即返回；例如，发送消息和一个注册的回调函数 . 在 run() 方法返回值后，工作线程回到线程池中；但是，之前的任务可能还没完成，没有任务能够被处理，直到之前的任务发出一个通知（如调用 SyncTaskChain.next()）。因为任务不会阻塞工作线程等待其完成，队列是异步的。
+====
+
+=== 基于数据库的异步队列
+
+基于内存的工作队列简单快速，它满足了在单一管理节点 99% 的同步和并行的需要 ; 然而，与创建资源相关的任务，可能需要在不同管理节点之间做同步。一致性哈希环基于资源 UUID 来工作，如果资源未被创建，它将无法得知哪个节点应该处理这个创建的工作。在大多数情况下，如果要创建的资源不依赖于其它未完成的任务，ZStack 会选择，此创建任务的提交者所在的本地节点，来完成这个工作。不幸的是，这些不间断的任务依赖于名为虚拟路由 VM 的特殊资源； 例如，如果使用同样的 L3 网络的多个用户 VM，由运行于不同管理节点的任务创建而成，同时在 L3 网络上并无虚拟路由 VM，那么创建虚拟路由 VM 的任务则可能由多个管理节点提交。在这种情况下，由于存在分布式同步的问题，ZStack 使用基于数据库的作业队列，这样来自不同管理节点的任务就可以实现全局同步。
+
+数据库作业队列只有异步的形式；也就是说，只有前一个任务发出一个完成通知后，下一个任务才能执行。
+
+[NOTE]
+. 注意
+由于任务存储在数据库之中，所以数据库作业队列的速度比较慢；幸运的是，只有创建虚拟路由 VM 的任务需要它。
+
+== 局限性
+虽然基于无锁架构的队列可以处理 99.99% 的时间同步，但是有一个争用条件从一致的散列算法中产生：一个新加入的节点将分担一部分相邻节点的工作量，这就是一致的散列环的扩张的结果。
+
+在这个例子中，在三个节点加入后，以前的目标定位从节点 2 转到了节点 3；在此期间，如果对于资源的一个旧任务依旧工作在节点 2 上，但是对于相同资源的任务提交到节点 3，这就会造成争用状态。然而，这种状况并不是你想像中的那么坏。首先，冲突任务很少地存在规则的系统中，比如，一个健全的 UI 不允许你阻止一个正在运行的 VM。然后，每一个 ZStack 资源都有状态，一个开始就处于问题状态的任务会出现错误；比如，如果一个 VM 是停止状态，一个附加任务量的任务就会立刻出错。第三，代理--大多数任务的传送地，有额外的附加机制；比如，虚拟路由器代理会同步所有的修改 DHCP 配置文件的请求，即使我们已经有了虚拟路由器在管理节点端的工作队列。最后，提前规划你的操作是持续管理云的关键；操作团队可以在推出云之前快速产生足够的管理节点；如果他们真的需要动态添加一个新的节点，这样做的时候，工作量还是比较小的。
+
+== 总结
+在这篇文章里，展示了建立在基于内存工作队列和基于数据库的无锁结构。没有涉及复杂的分布式协作软件，ZStack 尽可能地在争用条件下的屏蔽任务中配合提升性能。

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<globalConfig xmlns="http://zstack.org/schema/zstack">
+    <config>
+        <category>volumeSnapshot</category>
+        <name>incrementalSnapshot.maxNum</name>
+        <description>The length of a volume snapshot chain. When the lenght of a volume snapshot chain reaches this value, the next volume snapshot will be a full snapshot</description>
+        <defaultValue>64</defaultValue>
+        <type>java.lang.Integer</type>
+    </config>
+
+    <config>
+        <category>volumeSnapshot</category>
+        <name>delete.parallelismDegree</name>
+        <description>The max snapshots that can be concurrently deleted</description>
+        <defaultValue>1</defaultValue>
+        <type>java.lang.Integer</type>
+    </config>
+
+    <config>
+        <category>volumeSnapshot</category>
+        <name>backup.parallelismDegree</name>
+        <description>The max snapshots the can be concurrently backup</description>
+        <defaultValue>5</defaultValue>
+        <type>java.lang.Integer</type>
+    </config>
+
+    <config>
+        <name>snapshot.volume.num</name>
+        <description>default quota for snapshot.volume.num</description>
+        <defaultValue>200</defaultValue>
+        <category>quota</category>
+        <type>java.lang.Long</type>
+    </config>
+
+    <config>
+        <name>snapshot.before.revertvolume</name>
+        <description>auto snapshot befort revert volume</description>
+        <defaultValue>false</defaultValue>
+        <category>volumeSnapshot</category>
+        <type>java.lang.Boolean</type>
+    </config>
+
+</globalConfig>

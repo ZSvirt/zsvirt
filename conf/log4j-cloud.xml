@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/"
+                     debug="false">
+
+    <!-- ================================= -->
+    <!-- Preserve messages in a local file -->
+    <!-- ================================= -->
+
+    <!-- A regular appender FIXME implement code that will close/reopen logs
+        on SIGHUP by logrotate FIXME make the paths configurable using the build
+        system -->
+    <appender name="FILE" class="org.apache.log4j.rolling.RollingFileAppender">
+        <paramIn name="Append" value="true"/>
+        <paramIn name="Threshold" value="TRACE"/>
+        <rollingPolicy name="FILE"
+                       class="org.apache.log4j.rolling.TimeBasedRollingPolicy">
+            <paramIn name="FileNamePattern" value="management-server.%d{yyyy-MM-dd}.gz"/>
+            <paramIn name="ActiveFileName" value="/var/log/zstack/management-server.log"/>
+        </rollingPolicy>
+        <layout class="org.apache.log4j.EnhancedPatternLayout">
+            <paramIn name="ConversionPattern" value="%d{ISO8601} %-5p [%c{3}] (%t) %m%n"/>
+        </layout>
+    </appender>
+
+    <appender name="CONSOLE" class="org.apache.log4j.ConsoleAppender">
+        <paramIn name="Threshold" value="TRACE"/>
+        <paramIn name="Target" value="System.out"/>
+        <layout class="org.apache.log4j.PatternLayout">
+            <paramIn name="ConversionPattern" value="%-5p [%c{3}] (%t) %m%n"/>
+        </layout>
+    </appender>
+
+    <logger name="org.zstack">
+        <level value="DEBUG"/>
+    </logger>
+
+    <logger name="org.zstack.utils">
+        <level value="TRACE"/>
+    </logger>
+
+    <logger name="org.zstack.compute.host">
+        <level value="DEBUG"/>
+    </logger>
+
+    <logger name="org.zstack.core.rest">
+        <level value="TRACE"/>
+    </logger>
+
+    <logger name="org.zstack.core.cloudbus">
+        <level value="TRACE"/>
+    </logger>
+
+    <logger name="org.zstack.search">
+        <level value="DEBUG"/>
+    </logger>
+
+    <logger name="org.springframework">
+        <level value="WARN"/>
+    </logger>
+
+    <logger name="org.hibernate">
+        <level value="WARN"/>
+    </logger>
+    <!-- ======================= -->
+    <!-- Setup the Root category -->
+    <!-- ======================= -->
+
+    <root>
+        <level value="WARN"/>
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="FILE"/>
+    </root>
+
+</log4j:configuration>

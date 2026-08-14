@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<indexes xmlns="http://zstack.org/schema/zstack">
+    <default.analyzer.name>Ngram_analyzer</default.analyzer.name>
+
+    <analyzerDef name="Ngram_analyzer">
+        <analyzer factory="org.apache.lucene.analysis.core.KeywordTokenizerFactory"/>
+        <filter factory="org.apache.lucene.analysis.miscellaneous.ASCIIFoldingFilterFactory"/>
+        <filter factory="org.apache.lucene.analysis.core.LowerCaseFilterFactory"/>
+        <filter factory="org.apache.lucene.analysis.ngram.NGramFilterFactory">
+            <param name="minGramSize" value="1"/>
+            <param name="maxGramSize" value="32"/>
+        </filter>
+    </analyzerDef>
+    <analyzerDef name="Keyword_analyzer">
+        <analyzer factory="org.apache.lucene.analysis.core.KeywordTokenizerFactory"/>
+        <filter factory="org.apache.lucene.analysis.miscellaneous.ASCIIFoldingFilterFactory"/>
+        <filter factory="org.apache.lucene.analysis.core.LowerCaseFilterFactory"/>
+    </analyzerDef>
+
+    <index name="org.zstack.header.storage.primary.PrimaryStorageAO" baseClass="true">
+        <prop name="name"/>
+    </index>
+    <index name="org.zstack.header.storage.primary.PrimaryStorageVO" baseClass="false">
+        <prop name="name"/>
+    </index>
+    <index name="org.zstack.header.cluster.ClusterAO" baseClass="true">
+        <prop name="name"/>
+    </index>
+    <index name="org.zstack.header.cluster.ClusterVO" baseClass="false">
+        <prop name="name"/>
+    </index>
+    <index name="org.zstack.header.configuration.DiskOfferingAO" baseClass="true">
+        <prop name="name"/>
+    </index>
+    <index name="org.zstack.header.configuration.DiskOfferingVO" baseClass="false">
+        <prop name="name"/>
+    </index>
+    <index name="org.zstack.header.configuration.InstanceOfferingAO" baseClass="true">
+        <prop name="name"/>
+    </index>
+    <index name="org.zstack.header.configuration.InstanceOfferingVO" baseClass="false">
+        <prop name="name"/>
+    </index>
+    <index name="org.zstack.header.host.HostAO" baseClass="true">
+        <prop name="name"/>
+    </index>
+    <index name="org.zstack.header.host.HostVO" baseClass="false">
+        <prop name="name"/>
+    </index>
+    <index name="org.zstack.header.image.ImageAO" baseClass="true">
+        <prop name="name"/>
+    </index>
+    <index name="org.zstack.header.image.ImageVO" baseClass="false">
+        <prop name="name"/>
+    </index>
+    <index name="org.zstack.header.network.l2.L2NetworkAO" baseClass="true">
+        <prop name="name"/>
+    </index>
+    <index name="org.zstack.header.network.l2.L2NetworkVO" baseClass="false">
+        <prop name="name"/>
+    </index>
+    <index name="org.zstack.header.network.l2.L2VlanNetworkVO" baseClass="false">
+        <prop name="name"/>
+    </index>
+    <index name="org.zstack.header.network.l3.L3NetworkAO" baseClass="true">
+        <prop name="name"/>
+    </index>
+    <index name="org.zstack.header.network.l3.L3NetworkVO" baseClass="false">
+        <prop name="name"/>
+    </index>
+    <index name="org.zstack.header.storage.backup.BackupStorageAO" baseClass="true">
+        <prop name="name"/>
+    </index>
+    <index name="org.zstack.header.storage.backup.BackupStorageVO" baseClass="false">
+        <prop name="name"/>
+    </index>
+    <index name="org.zstack.header.vm.VmInstanceAO" baseClass="true">
+        <prop name="name"/>
+    </index>
+    <index name="org.zstack.header.vm.VmInstanceVO" baseClass="false">
+        <prop name="name"/>
+    </index>
+    <index name="org.zstack.header.volume.VolumeAO" baseClass="true">
+        <prop name="name"/>
+    </index>
+    <index name="org.zstack.header.volume.VolumeVO" baseClass="false">
+        <prop name="name"/>
+    </index>
+    <index name="org.zstack.network.service.eip.EipVO" baseClass="false">
+        <prop name="name"/>
+    </index>
+    <index name="org.zstack.network.service.lb.LoadBalancerListenerVO" baseClass="false">
+        <prop name="name"/>
+    </index>
+    <index name="org.zstack.network.service.lb.LoadBalancerVO" baseClass="false">
+        <prop name="name"/>
+    </index>
+    <index name="org.zstack.network.securitygroup.SecurityGroupVO" baseClass="false">
+        <prop name="name"/>
+    </index>
+    <index name="org.zstack.network.service.vip.VipVO" baseClass="false">
+        <prop name="name"/>
+    </index>
+    <index name="org.zstack.autoscaling.group.AutoScalingGroupVO" baseClass="false">
+        <prop name="name"/>
+    </index>
+    <index name="org.zstack.header.baremetal.chassis.BaremetalChassisVO" baseClass="false">
+        <prop name="name"/>
+    </index>
+    <index name="org.zstack.header.baremetal.instance.BaremetalInstanceVO" baseClass="false">
+        <prop name="name"/>
+    </index>
+    <index name="org.zstack.header.baremetal.preconfiguration.PreconfigurationTemplateVO" baseClass="false">
+        <prop name="name"/>
+    </index>
+    <index name="org.zstack.header.baremetal.pxeserver.BaremetalPxeServerVO" baseClass="false">
+        <prop name="name"/>
+    </index>
+    <index name="org.zstack.header.cloudformation.ResourceStackVO" baseClass="false">
+        <prop name="name"/>
+    </index>
+    <index name="org.zstack.header.cloudformation.StackTemplateVO" baseClass="false">
+        <prop name="name"/>
+    </index>
+    <index name="org.zstack.header.affinitygroup.AffinityGroupVO" baseClass="false">
+        <prop name="name"/>
+    </index>
+    <index name="org.zstack.pciDevice.PciDeviceOfferingVO" baseClass="false">
+        <prop name="name"/>
+    </index>
+    <index name="org.zstack.vrouterRoute.VRouterRouteTableVO" baseClass="false">
+        <prop name="name"/>
+    </index>
+    <index name="org.zstack.storage.device.iscsi.IscsiServerVO" baseClass="false">
+        <prop name="name"/>
+    </index>
+    <index name="org.zstack.storage.device.nvme.NvmeServerVO" baseClass="false">
+        <prop name="name"/>
+    </index>
+    <index name="org.zstack.header.vpc.ha.VpcHaGroupVO" baseClass="false">
+        <prop name="name"/>
+    </index>
+    <index name="org.zstack.ipsec.IPsecConnectionVO" baseClass="false">
+        <prop name="name"/>
+    </index>
+    <index name="org.zstack.appliancevm.ApplianceVmVO" baseClass="false">
+        <prop name="name"/>
+    </index>
+    <index name="org.zstack.storage.ceph.backup.CephBackupStorageVO" baseClass="false">
+        <prop name="name"/>
+    </index>
+    <index name="org.zstack.storage.ceph.primary.CephPrimaryStorageVO" baseClass="false">
+        <prop name="name"/>
+    </index>
+    <index name="org.zstack.kvm.KVMHostVO" baseClass="false">
+        <prop name="name"/>
+    </index>
+    <index name="org.zstack.storage.backup.sftp.SftpBackupStorageVO" baseClass="false">
+        <prop name="name"/>
+    </index>
+    <index name="org.zstack.network.service.virtualrouter.VirtualRouterVmVO" baseClass="false">
+        <prop name="name"/>
+    </index>
+    <index name="org.zstack.network.service.virtualrouter.VirtualRouterOfferingVO" baseClass="false">
+        <prop name="name"/>
+    </index>
+    <index name="org.zstack.network.l2.vxlan.vxlanNetwork.VxlanNetworkVO" baseClass="false">
+        <prop name="name"/>
+    </index>
+    <index name="org.zstack.network.l2.vxlan.vxlanNetworkPool.VxlanNetworkPoolVO" baseClass="false">
+        <prop name="name"/>
+    </index>
+    <index name="org.zstack.network.l2.virtualSwitch.header.L2VirtualSwitchNetworkVO" baseClass="false">
+        <prop name="name"/>
+    </index>
+    <index name="org.zstack.network.l2.virtualSwitch.header.PortGroupVO" baseClass="false">
+        <prop name="name"/>
+    </index>
+    <index name="org.zstack.storage.backup.imagestore.ImageStoreBackupStorageVO" baseClass="false">
+        <prop name="name"/>
+    </index>
+    <index name="org.zstack.storage.primary.sharedblock.SharedBlockGroupVO" baseClass="false">
+        <prop name="name"/>
+    </index>
+    <index name="org.zstack.header.vpc.VpcRouterVmVO" baseClass="false">
+        <prop name="name"/>
+    </index>
+    <index name="org.zstack.xdragon.XDragonHostVO" baseClass="false">
+        <prop name="name"/>
+    </index>
+    <index name="org.zstack.network.service.portforwarding.PortForwardingRuleVO" baseClass="false">
+        <prop name="name"/>
+    </index>
+    <index name="org.zstack.header.protocol.RouterAreaVO" baseClass="false">
+        <prop name="areaId"/>
+    </index>
+    <index name="org.zstack.storage.device.fibreChannel.FiberChannelStorageVO" baseClass="false">
+        <prop name="name"/>
+    </index>
+    <index name="org.zstack.zwatch.alarm.AlarmVO" baseClass="false">
+        <prop name="name"/>
+    </index>
+    <index name="org.zstack.zwatch.alarm.EventSubscriptionVO" baseClass="false">
+        <prop name="name"/>
+    </index>
+    <index name="org.zstack.zwatch.alarm.sns.SNSTextTemplateVO" baseClass="false">
+        <prop name="name"/>
+    </index>
+    <index name="org.zstack.header.identity.AccountVO" baseClass="false">
+        <prop name="name"/>
+    </index>
+    <index name="org.zstack.header.identity.role.RoleVO" baseClass="false">
+        <prop name="name"/>
+    </index>
+    <index name="org.zstack.iam1.entity.accounts.AccountGroupVO" baseClass="false">
+        <prop name="name"/>
+    </index>
+</indexes>

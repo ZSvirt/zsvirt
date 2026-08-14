@@ -1,0 +1,1926 @@
+-- ----------------------------------------------------
+-- CLOUD-MIB.MIB
+--
+-- This file defines MIB objects for Cloud module
+-- ----------------------------------------------------
+CLOUD-MIB DEFINITIONS ::= BEGIN
+
+IMPORTS
+    MODULE-IDENTITY,
+    NOTIFICATION-TYPE,
+    OBJECT-TYPE,
+    Counter32,
+    Gauge32,
+    IpAddress,
+    Integer32,
+    Unsigned32
+        FROM SNMPv2-SMI
+    DisplayString
+        FROM SNMPv2-TC
+    enterprises
+        FROM SNMPv2-SMI;
+
+-- 1.3.6.1.4.1.60687
+zstack MODULE-IDENTITY
+    LAST-UPDATED "202512170000Z"
+    ORGANIZATION "www.zstack.io"
+    CONTACT-INFO "software@zstack.io"
+    DESCRIPTION
+    "MIB objects for Cloud"
+    REVISION   "202512170000Z"
+    DESCRIPTION
+    "Added Info labels"
+    REVISION   "202308110000Z"
+    DESCRIPTION
+    "Initial version"
+    ::= { enterprises 60687 }
+
+
+
+--
+-- defines IDENTIFIER of Cloud
+--
+
+-- 1.3.6.1.4.1.60687.1
+products        OBJECT IDENTIFIER ::= { zstack 1 }
+-- 1.3.6.1.4.1.60687.1.1
+cloud             OBJECT IDENTIFIER ::= { products 1 }
+-- 1.3.6.1.4.1.60687.1.2
+alerts   OBJECT IDENTIFIER ::= { cloud 1 }
+
+clusterAlertPrefix  OBJECT IDENTIFIER ::= { alerts 0 }
+clusterAlarmObjects OBJECT IDENTIFIER ::= { alerts 1 }
+clusterEventObjects OBJECT IDENTIFIER ::= { alerts 2 }
+
+-- 1.3.6.1.4.1.60687.1.1.101
+kvmHost OBJECT IDENTIFIER ::= { cloud 101 }
+
+--
+-- ZStack/kvmHost Table
+--
+-- 1.3.6.1.4.1.60687.1.1.101.101
+kvmHostTable OBJECT-TYPE
+    SYNTAX     SEQUENCE OF KVMHostEntry
+    MAX-ACCESS not-accessible
+    STATUS     current
+    DESCRIPTION
+        "A table of KVM hosts in cloud"
+    ::= { kvmHost 101 }
+
+-- 1.3.6.1.4.1.60687.1.1.101.1
+kvmHostEntry OBJECT-TYPE
+    SYNTAX     KVMHostEntry
+    MAX-ACCESS not-accessible
+    STATUS     current
+    DESCRIPTION
+        "A row describing a kvm host"
+    ::= { kvmHostTable 1 }
+
+KVMHostEntry ::= SEQUENCE {
+    uuid                            DisplayString,
+    name                            DisplayString,
+    managementIp                    DisplayString,
+    cpuAllIdleUtilization           DisplayString,
+    cpuAllUsedUtilization           DisplayString,
+    cpuAverageIdleUtilization       DisplayString,
+    cpuAverageSystemUtilization     DisplayString,
+    cpuAverageUsedUtilization       DisplayString,
+    cpuAverageUserUtilization       DisplayString,
+    cpuAverageWaitUtilization       DisplayString,
+    diskAllFreeCapacityInBytes      DisplayString,
+    diskAllFreeCapacityInPercent    DisplayString,
+    diskAllReadBytes                DisplayString,
+    diskAllReadOps                  DisplayString,
+    diskAllUsedCapacityInBytes      DisplayString,
+    diskAllUsedCapacityInPercent    DisplayString,
+    diskAllWriteBytes               DisplayString,
+    diskAllWriteOps                 DisplayString,
+    diskRootUsedCapacityInBytes     DisplayString,
+    diskRootUsedCapacityInPercent   DisplayString,
+    diskTotalCapacityInBytes        DisplayString,
+    diskTransUsedCapacityInBytes    DisplayString,
+    diskTransUsedCapacityInPercent  DisplayString,
+    diskZStackUsedCapacityInBytes   DisplayString,
+    diskZStackUsedCapacityInPercent DisplayString,
+    ipmiStatus                      DisplayString,
+    memoryFreeBytes                 DisplayString,
+    memoryFreeInPercent             DisplayString,
+    memoryUsedBytes                 DisplayString,
+    memoryUsedInPercent             DisplayString,
+    networkAllInBytes               DisplayString,
+    networkAllInErrors              DisplayString,
+    networkAllInPackets             DisplayString,
+    networkAllOutBytes              DisplayString,
+    networkAllOutErrors             DisplayString,
+    networkAllOutPackets            DisplayString,
+    networkConntrackCount           DisplayString,
+    networkConntrackInPercent       DisplayString
+}
+
+uuid OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "the uuid of kvmhost"
+    ::= { kvmHostEntry 0 }
+
+name OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "the name of kvmhost"
+    ::= { kvmHostEntry 1 }
+
+managementIp OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "the management IP of kvmhost"
+    ::= { kvmHostEntry 2 }
+
+cpuAllIdleUtilization OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "the cpuAllIdleUtilization of kvmhost"
+    ::= { kvmHostEntry 3 }
+
+cpuAllUsedUtilization OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "the cpuAllUsedUtilization of kvmhost"
+    ::= { kvmHostEntry 4 }
+
+cpuAverageIdleUtilization OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "the cpuAverageIdleUtilization of kvmhost"
+    ::= { kvmHostEntry 5 }
+
+cpuAverageSystemUtilization OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "the cpuAverageSystemUtilization of kvmhost"
+    ::= { kvmHostEntry 6 }
+
+cpuAverageUsedUtilization OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "the cpuAverageUsedUtilization of kvmhost"
+    ::= { kvmHostEntry 7 }
+
+cpuAverageUserUtilization OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "the cpuAverageUserUtilization of kvmhost"
+    ::= { kvmHostEntry 8 }
+
+cpuAverageWaitUtilization OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "the cpuAverageUserUtilization of kvmhost"
+    ::= { kvmHostEntry 9 }
+
+diskAllFreeCapacityInBytes OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "the diskAllFreeCapacityInBytes of kvmhost"
+    ::= { kvmHostEntry 10 }
+
+diskAllFreeCapacityInPercent OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "the diskAllFreeCapacityInPercent of kvmhost"
+    ::= { kvmHostEntry 11 }
+
+diskAllReadBytes OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "the diskAllReadBytes of kvmhost"
+    ::= { kvmHostEntry 12 }
+
+diskAllReadOps OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "the diskAllReadOps of kvmhost"
+    ::= { kvmHostEntry 13 }
+
+diskAllUsedCapacityInBytes OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "the diskAllUsedCapacityInBytes of kvmhost"
+    ::= { kvmHostEntry 14 }
+
+diskAllUsedCapacityInPercent OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "the diskAllUsedCapacityInPercent of kvmhost"
+    ::= { kvmHostEntry 15 }
+
+diskAllWriteBytes OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "the diskAllWriteBytes of kvmhost"
+    ::= { kvmHostEntry 16 }
+
+diskAllWriteOps OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "the diskAllWriteOps of kvmhost"
+    ::= { kvmHostEntry 17 }
+
+diskRootUsedCapacityInBytes OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "the diskRootUsedCapacityInBytes of kvmhost"
+    ::= { kvmHostEntry 18 }
+
+diskRootUsedCapacityInPercent OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "the diskRootUsedCapacityInPercent of kvmhost"
+    ::= { kvmHostEntry 19 }
+
+diskTotalCapacityInBytes OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "the diskTotalCapacityInBytes of kvmhost"
+    ::= { kvmHostEntry 20 }
+
+diskTransUsedCapacityInBytes OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "the diskTransUsedCapacityInBytes of kvmhost"
+    ::= { kvmHostEntry 21 }
+
+diskTransUsedCapacityInPercent OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "the diskTransUsedCapacityInPercent of kvmhost"
+    ::= { kvmHostEntry 22 }
+
+diskZStackUsedCapacityInBytes OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "the diskZStackUsedCapacityInBytes of kvmhost"
+    ::= { kvmHostEntry 23 }
+
+diskZStackUsedCapacityInPercent OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "the diskZStackUsedCapacityInPercent of kvmhost"
+    ::= { kvmHostEntry 24 }
+
+ipmiStatus OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "the ipmiStatus of kvmhost"
+    ::= { kvmHostEntry 25 }
+
+memoryFreeBytes OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "the memoryFreeBytes of kvmhost"
+    ::= { kvmHostEntry 26 }
+
+memoryFreeInPercent OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "the memoryFreeInPercent of kvmhost"
+    ::= { kvmHostEntry 27 }
+
+memoryUsedBytes OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "the memoryUsedBytes of kvmhost"
+    ::= { kvmHostEntry 28 }
+
+memoryUsedInPercent OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "the memoryUsedInPercent of kvmhost"
+    ::= { kvmHostEntry 29 }
+
+networkAllInBytes OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "the networkAllInBytes of kvmhost"
+    ::= { kvmHostEntry 30 }
+
+networkAllInErrors OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "the networkAllInErrors of kvmhost"
+    ::= { kvmHostEntry 31 }
+
+networkAllInPackets OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "the networkAllInPackets of kvmhost"
+    ::= { kvmHostEntry 32 }
+
+networkAllOutBytes OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "the networkAllOutBytes of kvmhost"
+    ::= { kvmHostEntry 33 }
+
+networkAllOutErrors OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "the networkAllOutErrors of kvmhost"
+    ::= { kvmHostEntry 34 }
+
+networkAllOutPackets OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "the networkAllOutPackets of kvmhost"
+    ::= { kvmHostEntry 35 }
+
+networkConntrackCount OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "the networkConntrackCount of kvmhost"
+    ::= { kvmHostEntry 36 }
+
+networkConntrackInPercent OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "the networkConntrackInPercent of kvmhost"
+    ::= { kvmHostEntry 37 }
+
+--
+-- snmp notification define
+--
+
+alarmUuid OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS accessible-for-notify
+    STATUS     current
+    DESCRIPTION
+        "the uuid of alarm"
+    ::= { clusterAlarmObjects 1 }
+
+alarmResourceType OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS accessible-for-notify
+    STATUS     current
+    DESCRIPTION
+        "the resource type of alarm"
+    ::= { clusterAlarmObjects 2 }
+
+alarmCondition OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS accessible-for-notify
+    STATUS     current
+    DESCRIPTION
+        "the condition of alarm"
+    ::= { clusterAlarmObjects 3 }
+
+alarmDuration OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS accessible-for-notify
+    STATUS     current
+    DESCRIPTION
+        "the duration of alarm"
+    ::= { clusterAlarmObjects 4 }
+
+alarmPreviousStatus OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS accessible-for-notify
+    STATUS     current
+    DESCRIPTION
+        "the previous status of alarm"
+    ::= { clusterAlarmObjects 5 }
+
+alarmCurrentMetricValue OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS accessible-for-notify
+    STATUS     current
+    DESCRIPTION
+        "the current metric value of alarm"
+    ::= { clusterAlarmObjects 6 }
+
+alarmResourceUuid OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS accessible-for-notify
+    STATUS     current
+    DESCRIPTION
+        "the resource uuid of alarm"
+    ::= { clusterAlarmObjects 7 }
+
+alarmResourceName OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS accessible-for-notify
+    STATUS     current
+    DESCRIPTION
+        "the resource name of alarm"
+    ::= { clusterAlarmObjects 8 }
+
+alarmEmergencyLevel OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS accessible-for-notify
+    STATUS     current
+    DESCRIPTION
+        "the emergency level of alarm"
+    ::= { clusterAlarmObjects 9 }
+
+alarmLabels OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS accessible-for-notify
+    STATUS     current
+    DESCRIPTION
+        "the labels of alarm"
+    ::= { clusterAlarmObjects 10 }
+
+alarmTriggerTime OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS accessible-for-notify
+    STATUS     current
+    DESCRIPTION
+        "the trigger time of alarm"
+    ::= { clusterAlarmObjects 11 }
+
+clusterAlarm NOTIFICATION-TYPE
+    OBJECTS {
+        alarmUuid,
+        alarmResourceType,
+        alarmCondition,
+        alarmDuration,
+        alarmPreviousStatus,
+        alarmCurrentMetricValue,
+        alarmResourceUuid,
+        alarmResourceName,
+        alarmEmergencyLevel,
+        alarmLabels,
+        alarmTriggerTime
+    }
+    STATUS  current
+    DESCRIPTION
+        "cloud alarm notification object"
+    ::= { clusterAlertPrefix 1 }
+
+eventName OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS accessible-for-notify
+    STATUS     current
+    DESCRIPTION
+        "the name of event"
+    ::= { clusterEventObjects 1 }
+
+eventResourceType OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS accessible-for-notify
+    STATUS     current
+    DESCRIPTION
+        "the resource type of event"
+    ::= { clusterEventObjects 2 }
+
+eventEmergencyLevel OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS accessible-for-notify
+    STATUS     current
+    DESCRIPTION
+        "the emergency level of event"
+    ::= { clusterEventObjects 3 }
+
+eventResourceUuid OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS accessible-for-notify
+    STATUS     current
+    DESCRIPTION
+        "the resource uuid of event"
+    ::= { clusterEventObjects 4 }
+
+eventResourceName OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS accessible-for-notify
+    STATUS     current
+    DESCRIPTION
+        "the resource name of event"
+    ::= { clusterEventObjects 5 }
+
+eventTriggerTime OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS accessible-for-notify
+    STATUS     current
+    DESCRIPTION
+        "the trigger time of event"
+    ::= { clusterEventObjects 6 }
+
+eventSubscriptionUuid OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS accessible-for-notify
+    STATUS     current
+    DESCRIPTION
+        "the subscription uuid of event"
+    ::= { clusterEventObjects 7 }
+
+eventLabels OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS accessible-for-notify
+    STATUS     current
+    DESCRIPTION
+        "the labels of event"
+    ::= { clusterEventObjects 8 }
+
+eventError OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS accessible-for-notify
+    STATUS     current
+    DESCRIPTION
+        "the error of event"
+    ::= { clusterEventObjects 9 }
+
+clusterEvent NOTIFICATION-TYPE
+    OBJECTS {
+        eventName,
+        eventResourceType,
+        eventEmergencyLevel,
+        eventResourceUuid,
+        eventResourceName,
+        eventTriggerTime,
+        eventSubscriptionUuid,
+        eventLabels,
+        eventError
+    }
+    STATUS  current
+    DESCRIPTION
+        "cloud event notification object"
+    ::= { clusterAlertPrefix 2 }
+
+-- 1.3.6.1.4.1.60687.1.1.102
+primaryStorage OBJECT IDENTIFIER ::= { cloud 102 }
+
+-- 1.3.6.1.4.1.60687.1.1.102.1
+primaryStorageTable OBJECT-TYPE
+    SYNTAX     SEQUENCE OF PrimaryStorageEntry
+    MAX-ACCESS not-accessible
+    STATUS     current
+    DESCRIPTION
+        "A table of primary storage in the cloud"
+    ::= { primaryStorage 1 }
+
+-- 1.3.6.1.4.1.60687.1.1.102.1.1
+primaryStorageEntry OBJECT-TYPE
+    SYNTAX     PrimaryStorageEntry
+    MAX-ACCESS not-accessible
+    STATUS     current
+    DESCRIPTION
+        "A row describing a primary storage"
+    ::= { primaryStorageTable 1 }
+
+PrimaryStorageEntry ::= SEQUENCE {
+    uuid                                  DisplayString,
+    name                                  DisplayString,
+    availableCapacityInBytes              DisplayString,
+    availableCapacityPercent              DisplayString,
+    availablePhysicalCapacityInBytes      DisplayString,
+    availablePhysicalCapacityPercent      DisplayString,
+    dataVolumeCount                       DisplayString,
+    PoolAvailableCapacityInPercent        DisplayString,
+    PoolUsedCapacityInPercent             DisplayString,
+    PoolVirtualAvailableCapacityInPercent DisplayString,
+    rootVolumeCount                       DisplayString,
+    snapshotCount                         DisplayString,
+    totalPhysicalCapacityInBytes          DisplayString,
+    usedCapacityInBytes                   DisplayString,
+    usedCapacityPercent                   DisplayString,
+    usedPhysicalCapacityInBytes           DisplayString,
+    usedPhysicalCapacityPercent           DisplayString,
+}
+
+uuid OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "the UUID of primary storage"
+    ::= { primaryStorageEntry 0 }
+
+name OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "the name of primary storage"
+    ::= { primaryStorageEntry 1 }
+
+availableCapacityInBytes OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "the available capacity in bytes of primary storage"
+    ::= { primaryStorageEntry 2 }
+
+availableCapacityPercent OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "the available capacity percentage of primary storage"
+    ::= { primaryStorageEntry 3 }
+
+availablePhysicalCapacityInBytes OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "the available physical capacity in bytes of primary storage"
+    ::= { primaryStorageEntry 4 }
+
+availablePhysicalCapacityPercent OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "the available physical capacity percentage of primary storage"
+    ::= { primaryStorageEntry 5 }
+
+dataVolumeCount OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "the count of data volumes in primary storage"
+    ::= { primaryStorageEntry 6 }
+
+PoolAvailableCapacityInPercent OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "the available capacity percentage in the pool of primary storage"
+    ::= { primaryStorageEntry 7 }
+
+PoolUsedCapacityInPercent OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "the used capacity percentage in the pool of primary storage"
+    ::= { primaryStorageEntry 8 }
+
+PoolVirtualAvailableCapacityInPercent OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "the virtual available capacity percentage in the pool of primary storage"
+    ::= { primaryStorageEntry 9 }
+
+rootVolumeCount OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "the count of root volumes in primary storage"
+    ::= { primaryStorageEntry 10 }
+
+snapshotCount OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "the count of snapshots in primary storage"
+    ::= { primaryStorageEntry 11 }
+
+totalPhysicalCapacityInBytes OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "the total physical capacity in bytes of primary storage"
+    ::= { primaryStorageEntry 12 }
+
+usedCapacityInBytes OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "the used capacity in bytes of primary storage"
+    ::= { primaryStorageEntry 13 }
+
+usedCapacityPercent OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "the used capacity percentage of primary storage"
+    ::= { primaryStorageEntry 14 }
+
+usedPhysicalCapacityInBytes OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "the used physical capacity in bytes of primary storage"
+    ::= { primaryStorageEntry 15 }
+
+usedPhysicalCapacityPercent OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "the used physical capacity percentage of primary storage"
+    ::= { primaryStorageEntry 16 }
+
+-- 1.3.6.1.4.1.60687.1.1.103
+backupStorage OBJECT IDENTIFIER ::= { cloud 103 }
+
+-- 1.3.6.1.4.1.60687.1.1.103.1
+backupStorageTable OBJECT-TYPE
+    SYNTAX     SEQUENCE OF BackupStorageEntry
+    MAX-ACCESS not-accessible
+    STATUS     current
+    DESCRIPTION
+        "A table of backup storage in the cloud"
+    ::= { backupStorage 1 }
+
+-- 1.3.6.1.4.1.60687.1.1.103.1.1
+backupStorageEntry OBJECT-TYPE
+    SYNTAX     BackupStorageEntry
+    MAX-ACCESS not-accessible
+    STATUS     current
+    DESCRIPTION
+        "A row describing a backup storage"
+    ::= { backupStorageTable 1 }
+
+BackupStorageEntry ::= SEQUENCE {
+    uuid                                 DisplayString,
+    name                                 DisplayString,
+    availableCapacityInBytes             DisplayString,
+    availableCapacityPercent             DisplayString,
+    cpuAllIdleUtilization                DisplayString,
+    cpuAllUsedUtilization                DisplayString,
+    cpuAverageUsedUtilization            DisplayString,
+    cpuAverageUserUtilization            DisplayString,
+    cpuAverageWaitUtilization            DisplayString,
+    cpuAverageSystemUtilization          DisplayString,
+    cpuAverageIdleUtilization            DisplayString,
+    diskAllReadBytes                     DisplayString,
+    diskAllReadOps                       DisplayString,
+    diskAllWriteBytes                    DisplayString,
+    diskAllWriteOps                      DisplayString,
+    memoryFreeBytes                      DisplayString,
+    memoryFreeInPercent                  DisplayString,
+    memoryUsedBytes                      DisplayString,
+    memoryUsedInPercent                  DisplayString,
+    networkAllInBytes                    DisplayString,
+    networkAllInErrors                   DisplayString,
+    networkAllInPackets                  DisplayString,
+    NetworkAllOutBytes                   DisplayString,
+    NetworkAllOutErrors                  DisplayString,
+    networkAllOutPackets                 DisplayString,
+    usedCapacityInBytes                  DisplayString,
+    usedCapacityPercent                  DisplayString,
+}
+
+uuid OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "UUID of the backup storage"
+    ::= { backupStorageEntry 0 }
+
+name OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Name of the backup storage"
+    ::= { backupStorageEntry 1 }
+
+availableCapacityInBytes OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Available capacity in bytes of the backup storage"
+    ::= { backupStorageEntry 2 }
+
+availableCapacityPercent OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Available capacity percentage of the backup storage"
+    ::= { backupStorageEntry 3 }
+
+cpuAllIdleUtilization OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "CPU all idle utilization of the backup storage"
+    ::= { backupStorageEntry 4 }
+
+cpuAllUsedUtilization OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "CPU all used utilization of the backup storage"
+    ::= { backupStorageEntry 5 }
+
+cpuAverageUsedUtilization OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Average CPU used utilization of the backup storage"
+    ::= { backupStorageEntry 6 }
+
+cpuAverageUserUtilization OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Average CPU user utilization of the backup storage"
+    ::= { backupStorageEntry 7 }
+
+cpuAverageWaitUtilization OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Average CPU wait utilization of the backup storage"
+    ::= { backupStorageEntry 8 }
+
+cpuAverageSystemUtilization OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Average CPU system utilization of the backup storage"
+    ::= { backupStorageEntry 9 }
+
+cpuAverageIdleUtilization OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Average CPU idle utilization of the backup storage"
+    ::= { backupStorageEntry 10 }
+
+diskAllReadBytes OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Disk all read bytes of the backup storage"
+    ::= { backupStorageEntry 11 }
+
+diskAllReadOps OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Disk all read operations of the backup storage"
+    ::= { backupStorageEntry 12 }
+
+diskAllWriteBytes OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Disk all write bytes of the backup storage"
+    ::= { backupStorageEntry 13 }
+
+diskAllWriteOps OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Disk all write operations of the backup storage"
+    ::= { backupStorageEntry 14 }
+
+memoryFreeBytes OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Free memory bytes of the backup storage"
+    ::= { backupStorageEntry 15 }
+
+memoryFreeInPercent OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Free memory percentage of the backup storage"
+    ::= { backupStorageEntry 16 }
+
+memoryUsedBytes OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Used memory bytes of the backup storage"
+    ::= { backupStorageEntry 17 }
+
+memoryUsedInPercent OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Used memory percentage of the backup storage"
+    ::= { backupStorageEntry 18 }
+
+networkAllInBytes OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Network all incoming bytes of the backup storage"
+    ::= { backupStorageEntry 19 }
+
+networkAllInErrors OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Network all incoming errors of the backup storage"
+    ::= { backupStorageEntry 20 }
+
+networkAllInPackets OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Network all incoming packets of the backup storage"
+    ::= { backupStorageEntry 21 }
+
+NetworkAllOutBytes OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Network all outgoing bytes of the backup storage"
+    ::= { backupStorageEntry 22 }
+
+NetworkAllOutErrors OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Network all outgoing errors of the backup storage"
+    ::= { backupStorageEntry 23 }
+
+networkAllOutPackets OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Network all outgoing packets of the backup storage"
+    ::= { backupStorageEntry 24 }
+
+usedCapacityInBytes OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Used capacity in bytes of the backup storage"
+    ::= { backupStorageEntry 25 }
+
+usedCapacityPercent OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Used capacity percentage of the backup storage"
+    ::= { backupStorageEntry 26 }
+
+-- 1.3.6.1.4.1.60687.1.1.104
+vm OBJECT IDENTIFIER ::= { cloud 104 }
+
+-- 1.3.6.1.4.1.60687.1.1.104.1
+vmTable OBJECT-TYPE
+    SYNTAX     SEQUENCE OF VmEntry
+    MAX-ACCESS not-accessible
+    STATUS     current
+    DESCRIPTION
+        "A table of virtual machines in the cloud"
+    ::= { vm 1 }
+
+-- 1.3.6.1.4.1.60687.1.1.104.1.1
+vmEntry OBJECT-TYPE
+    SYNTAX     VmEntry
+    MAX-ACCESS not-accessible
+    STATUS     current
+    DESCRIPTION
+        "A row describing a virtual machine"
+    ::= { vmTable 1 }
+
+VmEntry ::= SEQUENCE {
+    uuid                                         DisplayString,
+    name                                         DisplayString,
+    defaultIpv4                                  DisplayString,
+    CPUAllIdleUtilization                        DisplayString,
+    cpuAllUsedUtilization                        DisplayString,
+    cpuAverageUsedUtilization                    DisplayString,
+    CPUOccupiedByVm                              DisplayString,
+    DiskAllFreeCapacityInBytes                   DisplayString,
+    DiskAllFreeCapacityInPercent                 DisplayString,
+    DiskAllReadBytes                             DisplayString,
+    DiskAllReadOps                               DisplayString,
+    DiskAllUsedCapacityInBytes                   DisplayString,
+    DiskAllUsedCapacityInPercent                 DisplayString,
+    DiskAllWriteBytes                            DisplayString,
+    DiskAllWriteOps                              DisplayString,
+    MemoryFreeBytes                              DisplayString,
+    MemoryFreeInPercent                          DisplayString,
+    MemoryOccupiedByVm                           DisplayString,
+    MemoryUsedBytes                              DisplayString,
+    memoryUsedInPercent                          DisplayString,
+    networkAllInBytes                            DisplayString,
+    networkAllInErrors                           DisplayString,
+    networkAllInPackets                          DisplayString,
+    NetworkAllOutBytes                           DisplayString,
+    NetworkAllOutErrors                          DisplayString,
+    networkAllOutPackets                         DisplayString,
+    OperatingSystemCPUAverageIdleUtilization     DisplayString,
+    OperatingSystemCPUAverageSystemUtilization   DisplayString,
+    OperatingSystemCPUAverageUsedUtilization     DisplayString,
+    OperatingSystemCPUAverageUserUtilization     DisplayString,
+    OperatingSystemCPUAverageWaitUtilization     DisplayString,
+    OperatingSystemMemoryAvailableBytes          DisplayString,
+    OperatingSystemMemoryFreeBytes               DisplayString,
+    OperatingSystemMemoryFreePercent             DisplayString,
+    OperatingSystemMemoryTotalBytes              DisplayString,
+    OperatingSystemMemoryUsedBytes               DisplayString,
+    OperatingSystemMemoryUsedPercent             DisplayString,
+}
+
+uuid OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "UUID of the VM"
+    ::= { vmEntry 0 }
+
+name OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Name of the VM"
+    ::= { vmEntry 1 }
+
+defaultIpv4 OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Default IPv4 address of the VM"
+    ::= { vmEntry 2 }
+
+cpuAllIdleUtilization OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "CPU all idle utilization of the VM"
+    ::= { vmEntry 3 }
+
+cpuAllUsedUtilization OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "CPU all used utilization of the VM"
+    ::= { vmEntry 4 }
+
+cpuAverageUsedUtilization OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Average CPU used utilization of the VM"
+    ::= { vmEntry 5 }
+
+cpuOccupiedByVm OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "CPU occupied by the VM"
+    ::= { vmEntry 6 }
+
+diskAllFreeCapacityInBytes OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Disk all free capacity in bytes of the VM"
+    ::= { vmEntry 7 }
+
+diskAllFreeCapacityInPercent OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Disk all free capacity percentage of the VM"
+    ::= { vmEntry 8 }
+
+diskAllReadBytes OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Disk all read bytes of the VM"
+    ::= { vmEntry 9 }
+
+diskAllReadOps OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Disk all read operations of the VM"
+    ::= { vmEntry 10 }
+
+diskAllUsedCapacityInBytes OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Disk all used capacity in bytes of the VM"
+    ::= { vmEntry 11 }
+
+diskAllUsedCapacityInPercent OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Disk all used capacity percentage of the VM"
+    ::= { vmEntry 12 }
+
+diskAllWriteBytes OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Disk all write bytes of the VM"
+    ::= { vmEntry 13 }
+
+diskAllWriteOps OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Disk all write operations of the VM"
+    ::= { vmEntry 14 }
+
+memoryFreeBytes OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Free memory bytes of the VM"
+    ::= { vmEntry 15 }
+
+memoryFreeInPercent OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Free memory percentage of the VM"
+    ::= { vmEntry 16 }
+
+memoryOccupiedByVm OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Memory occupied by the VM"
+    ::= { vmEntry 17 }
+
+memoryUsedBytes OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Used memory bytes of the VM"
+    ::= { vmEntry 18 }
+
+memoryUsedInPercent OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Used memory percentage of the VM"
+    ::= { vmEntry 19 }
+
+networkAllInBytes OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Network all incoming bytes of the VM"
+    ::= { vmEntry 20 }
+
+networkAllInErrors OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Network all incoming errors of the VM"
+    ::= { vmEntry 21 }
+
+networkAllInPackets OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Network all incoming packets of the VM"
+    ::= { vmEntry 22 }
+
+networkAllOutBytes OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Network all outgoing bytes of the VM"
+    ::= { vmEntry 23 }
+
+networkAllOutErrors OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Network all outgoing errors of the VM"
+    ::= { vmEntry 24 }
+
+networkAllOutPackets OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Network all outgoing packets of the VM"
+    ::= { vmEntry 25 }
+
+operatingSystemCPUAverageIdleUtilization OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Operating system CPU average idle utilization of the VM"
+    ::= { vmEntry 26 }
+
+operatingSystemCPUAverageSystemUtilization OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Operating system CPU average system utilization of the VM"
+    ::= { vmEntry 27 }
+
+operatingSystemCPUAverageUsedUtilization OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Operating system CPU average used utilization of the VM"
+    ::= { vmEntry 28 }
+
+operatingSystemCPUAverageUserUtilization OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Operating system CPU average user utilization of the VM"
+    ::= { vmEntry 29 }
+
+operatingSystemCPUAverageWaitUtilization OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Operating system CPU average wait utilization of the VM"
+    ::= { vmEntry 30 }
+
+operatingSystemMemoryAvailableBytes OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Operating system memory available bytes of the VM"
+    ::= { vmEntry 31 }
+
+operatingSystemMemoryFreeBytes OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Operating system memory free bytes of the VM"
+    ::= { vmEntry 32 }
+
+operatingSystemMemoryFreePercent OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Operating system memory free percentage of the VM"
+    ::= { vmEntry 33 }
+
+operatingSystemMemoryTotalBytes OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Operating system memory total bytes of the VM"
+    ::= { vmEntry 34 }
+
+operatingSystemMemoryUsedBytes OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Operating system memory used bytes of the VM"
+    ::= { vmEntry 35 }
+
+operatingSystemMemoryUsedPercent OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Operating system memory used percentage of the VM"
+    ::= { vmEntry 36 }
+
+-- 1.3.6.1.4.1.60687.1.1.105
+vRouter OBJECT IDENTIFIER ::= { cloud 105 }
+
+-- 1.3.6.1.4.1.60687.1.1.105.1
+vRouterTable OBJECT-TYPE
+    SYNTAX     SEQUENCE OF VRouterEntry
+    MAX-ACCESS not-accessible
+    STATUS     current
+    DESCRIPTION
+        "A table of virtual routers in the cloud"
+    ::= { vRouter 1 }
+
+-- 1.3.6.1.4.1.60687.1.1.105.1.1
+vRouterEntry OBJECT-TYPE
+    SYNTAX     VRouterEntry
+    MAX-ACCESS not-accessible
+    STATUS     current
+    DESCRIPTION
+        "A row describing a virtual router"
+    ::= { vRouterTable 1 }
+
+VRouterEntry ::= SEQUENCE {
+    uuid                                         DisplayString,
+    name                                         DisplayString,
+    defaultIpv4                                  DisplayString,
+    cpuAllIdleUtilization                        DisplayString,
+    cpuAllUsedUtilization                        DisplayString,
+    cpuAverageUsedUtilization                    DisplayString,
+    diskAllFreeCapacityInBytes                   DisplayString,
+    diskAllFreeCapacityInPercent                 DisplayString,
+    diskAllReadBytes                             DisplayString,
+    diskAllReadOps                               DisplayString,
+    diskAllUsedCapacityInBytes                   DisplayString,
+    diskAllUsedCapacityInPercent                 DisplayString,
+    diskAllWriteBytes                            DisplayString,
+    diskAllWriteOps                              DisplayString,
+    memoryFreeBytes                              DisplayString,
+    memoryFreeInPercent                          DisplayString,
+    memoryOccupiedByVRouter                      DisplayString,
+    memoryUsedBytes                              DisplayString,
+    memoryUsedInPercent                          DisplayString,
+    networkAllInBytes                            DisplayString,
+    networkAllInErrors                           DisplayString,
+    networkAllInPackets                          DisplayString,
+    networkAllOutBytes                           DisplayString,
+    networkAllOutErrors                          DisplayString,
+    networkAllOutPackets                         DisplayString,
+    operatingSystemCPUAverageIdleUtilization     DisplayString,
+    operatingSystemCPUAverageSystemUtilization   DisplayString,
+    operatingSystemCPUAverageUsedUtilization     DisplayString,
+    operatingSystemCPUAverageUserUtilization     DisplayString,
+    operatingSystemCPUAverageWaitUtilization     DisplayString,
+    operatingSystemMemoryAvailableBytes          DisplayString,
+    operatingSystemMemoryFreeBytes               DisplayString,
+    operatingSystemMemoryFreePercent             DisplayString,
+    operatingSystemMemoryTotalBytes              DisplayString,
+    operatingSystemMemoryUsedBytes               DisplayString,
+    operatingSystemMemoryUsedPercent             DisplayString,
+    pvPanicEnableInDomainXML                     DisplayString,
+    vRouterCPUAverageIdleUtilization             DisplayString,
+    vRouterCPUAverageSystemUtilization           DisplayString,
+    vRouterCPUAverageUsedUtilization             DisplayString,
+    vRouterCPUAverageUserUtilization             DisplayString,
+    vRouterCPUAverageWaitUtilization             DisplayString,
+    vRouterDiskAllFreeCapacityInBytes            DisplayString,
+    vRouterDiskAllFreeCapacityInPercent          DisplayString,
+    vRouterDiskAllUsedCapacityInBytes            DisplayString,
+    vRouterDiskAllUsedCapacityInPercent          DisplayString,
+    vRouterMemoryAvailableBytes                  DisplayString,
+    vRouterMemoryFreeBytes                       DisplayString,
+    vRouterMemoryFreePercent                     DisplayString,
+    vRouterMemoryTotalBytes                      DisplayString,
+    vRouterMemoryUsedBytes                       DisplayString,
+    vRouterMemoryUsedPercent                     DisplayString,
+    zWatchAgentFeaturePvpanic                    DisplayString,
+}
+
+uuid OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "UUID of the vRouter"
+    ::= { vRouterEntry 0 }
+
+name OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Name of the vRouter"
+    ::= { vRouterEntry 1 }
+
+defaultIpv4 OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Default IPv4 address of the vRouter"
+    ::= { vRouterEntry 2 }
+
+cpuAllIdleUtilization OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "CPU all idle utilization of the vRouter"
+    ::= { vRouterEntry 3 }
+
+cpuAllUsedUtilization OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "CPU all used utilization of the vRouter"
+    ::= { vRouterEntry 4 }
+
+cpuAverageUsedUtilization OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "CPU average used utilization of the vRouter"
+    ::= { vRouterEntry 5 }
+
+diskAllFreeCapacityInBytes OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Disk all free capacity in bytes of the vRouter"
+    ::= { vRouterEntry 6 }
+
+diskAllFreeCapacityInPercent OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Disk all free capacity percentage of the vRouter"
+    ::= { vRouterEntry 7 }
+
+diskAllReadBytes OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Disk all read bytes of the vRouter"
+    ::= { vRouterEntry 8 }
+
+diskAllReadOps OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Disk all read ops of the vRouter"
+    ::= { vRouterEntry 9 }
+
+diskAllUsedCapacityInBytes OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Disk all used capacity in bytes of the vRouter"
+    ::= { vRouterEntry 10 }
+
+diskAllUsedCapacityInPercent OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Disk all used capacity percentage of the vRouter"
+    ::= { vRouterEntry 11 }
+
+diskAllWriteBytes OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Disk all write bytes of the vRouter"
+    ::= { vRouterEntry 12 }
+
+diskAllWriteOps OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Disk all write ops of the vRouter"
+    ::= { vRouterEntry 13 }
+
+memoryFreeBytes OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Memory free bytes of the vRouter"
+    ::= { vRouterEntry 14 }
+
+memoryFreeInPercent OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Memory free percentage of the vRouter"
+    ::= { vRouterEntry 15 }
+
+memoryOccupiedByVRouter OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Memory occupied by the vRouter"
+    ::= { vRouterEntry 16 }
+
+memoryUsedBytes OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Memory used bytes of the vRouter"
+    ::= { vRouterEntry 17 }
+
+memoryUsedInPercent OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Memory used percentage of the vRouter"
+    ::= { vRouterEntry 18 }
+
+networkAllInBytes OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Network all in bytes of the vRouter"
+    ::= { vRouterEntry 19 }
+
+networkAllInErrors OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Network all in errors of the vRouter"
+    ::= { vRouterEntry 20 }
+
+networkAllInPackets OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Network all in packets of the vRouter"
+    ::= { vRouterEntry 21 }
+
+networkAllOutBytes OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Network all out bytes of the vRouter"
+    ::= { vRouterEntry 22 }
+
+networkAllOutErrors OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Network all out errors of the vRouter"
+    ::= { vRouterEntry 23 }
+
+networkAllOutPackets OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Network all out packets of the vRouter"
+    ::= { vRouterEntry 24 }
+
+operatingSystemCPUAverageIdleUtilization OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Operating system CPU average idle utilization of the vRouter"
+    ::= { vRouterEntry 25 }
+
+operatingSystemCPUAverageSystemUtilization OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Operating system CPU average system utilization of the vRouter"
+    ::= { vRouterEntry 26 }
+
+operatingSystemCPUAverageUsedUtilization OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Operating system CPU average used utilization of the vRouter"
+    ::= { vRouterEntry 27 }
+
+operatingSystemCPUAverageUserUtilization OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Operating system CPU average user utilization of the vRouter"
+    ::= { vRouterEntry 28 }
+
+operatingSystemCPUAverageWaitUtilization OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Operating system CPU average wait utilization of the vRouter"
+    ::= { vRouterEntry 29 }
+
+operatingSystemMemoryAvailableBytes OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Operating system memory available bytes of the vRouter"
+    ::= { vRouterEntry 30 }
+
+operatingSystemMemoryFreeBytes OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Operating system memory free bytes of the vRouter"
+    ::= { vRouterEntry 31 }
+
+operatingSystemMemoryFreePercent OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Operating system memory free percentage of the vRouter"
+    ::= { vRouterEntry 32 }
+
+operatingSystemMemoryTotalBytes OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Operating system memory total bytes of the vRouter"
+    ::= { vRouterEntry 33 }
+
+operatingSystemMemoryUsedBytes OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Operating system memory used bytes of the vRouter"
+    ::= { vRouterEntry 34 }
+
+operatingSystemMemoryUsedPercent OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "Operating system memory used percentage of the vRouter"
+    ::= { vRouterEntry 35 }
+
+pvPanicEnableInDomainXML OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "PV panic enable in domain XML of the vRouter"
+    ::= { vRouterEntry 36 }
+
+vRouterCPUAverageIdleUtilization OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "vRouter CPU average idle utilization"
+    ::= { vRouterEntry 37 }
+
+vRouterCPUAverageSystemUtilization OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "vRouter CPU average system utilization"
+    ::= { vRouterEntry 38 }
+
+vRouterCPUAverageUsedUtilization OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "vRouter CPU average used utilization"
+    ::= { vRouterEntry 39 }
+
+vRouterCPUAverageUserUtilization OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "vRouter CPU average user utilization"
+    ::= { vRouterEntry 40 }
+
+vRouterCPUAverageWaitUtilization OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "vRouter CPU average wait utilization"
+    ::= { vRouterEntry 41 }
+
+vRouterDiskAllFreeCapacityInBytes OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "vRouter disk all free capacity in bytes"
+    ::= { vRouterEntry 42 }
+
+vRouterDiskAllFreeCapacityInPercent OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "vRouter disk all free capacity percentage"
+    ::= { vRouterEntry 43 }
+
+vRouterDiskAllUsedCapacityInBytes OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "vRouter disk all used capacity in bytes"
+    ::= { vRouterEntry 44 }
+
+vRouterDiskAllUsedCapacityInPercent OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "vRouter disk all used capacity percentage"
+    ::= { vRouterEntry 45 }
+
+vRouterMemoryAvailableBytes OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "vRouter memory available bytes"
+    ::= { vRouterEntry 46 }
+
+vRouterMemoryFreeBytes OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "vRouter memory free bytes"
+    ::= { vRouterEntry 47 }
+
+vRouterMemoryFreePercent OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "vRouter memory free percentage"
+    ::= { vRouterEntry 48 }
+
+vRouterMemoryTotalBytes OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "vRouter memory total bytes"
+    ::= { vRouterEntry 49 }
+
+vRouterMemoryUsedBytes OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "vRouter memory used bytes"
+    ::= { vRouterEntry 50 }
+
+vRouterMemoryUsedPercent OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "vRouter memory used percentage"
+    ::= { vRouterEntry 51 }
+
+zWatchAgentFeaturePvpanic OBJECT-TYPE
+    SYNTAX     DisplayString
+    MAX-ACCESS read-only
+    STATUS     current
+    DESCRIPTION
+        "zWatch Agent feature PV panic"
+    ::= { vRouterEntry 52 }
+
+END

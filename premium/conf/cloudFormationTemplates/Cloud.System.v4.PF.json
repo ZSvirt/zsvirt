@@ -1,0 +1,64 @@
+{
+    "ZStackTemplateFormatVersion": "2018-06-18",
+    "Description": "Creates port forwarding:\nThis template creates port forwarding and then maps port 100 from the public network IP to port 22 of the VM. Prerequisites:\nThe instance offering, image, private network, and public network are created. Make sure that the networks are working as expected. Otherwise, the port forwarding may fail to be created or fail to work properly after creation",
+    "Parameters": {
+        "InstanceOfferingUuid": {
+            "Type": "String",
+            "Label": "Instance Offering",
+            "Description": "The instance offering for creating a VM"
+        },
+        "ImageUuid":{
+            "Type": "String",
+            "Label": "Image",
+            "Description": "The image for creating a VM. Choose an image excluding ISO"
+        },
+        "FlatNetworkUuid":{
+            "Type": "String",
+            "Label": "Private Network",
+            "Description" : "The private network for creating a VM"
+        },
+        "PublicNetworkUuid":{
+            "Type": "String",
+            "Label": "Public Network",
+            "Description" : "The public network for creating port forwarding"
+        }
+    },
+    "Resources": {
+        "VmInstance": {
+            "Type": "Cloud::Resource::VmInstance",
+            "Properties": {
+                "name": {"Fn::Join":["-",[{"Ref":"Cloud::StackName"}, "VM"]]},
+                "instanceOfferingUuid": {"Ref":"InstanceOfferingUuid"},
+                "imageUuid":{"Ref":"ImageUuid"},
+                "l3NetworkUuids":[{"Ref":"FlatNetworkUuid"}]
+            }
+        },
+        "VIP": {
+            "Type": "Cloud::Resource::Vip",
+            "Properties": {
+                "name": {"Fn::Join":["-",[{"Ref":"Cloud::StackName"}, "VIP"]]},
+                "l3NetworkUuid":{"Ref":"PublicNetworkUuid"}
+            }
+        },
+        "PortForwardingRule":{
+            "Type": "Cloud::Resource::PortForwardingRule",
+            "Properties": {
+                "name": {"Fn::Join":["-",[{"Ref":"Cloud::StackName"}, "PortForwarding"]]},
+                "vipUuid":{"Fn::GetAtt":["VIP","uuid"]},
+                "vmNicUuid":{"Fn::GetAtt":[{"Fn::Select":[0,{"Fn::GetAtt":["VmInstance","vmNics"]}]},"uuid"]},
+                "vipPortStart":100,
+                "vipPortEnd":100,
+                "privatePortStart":22,
+                "privatePortEnd":22,
+                "protocolType":"TCP"
+            }
+        }
+    },
+    "Outputs": {
+        "VmInstance": {
+            "Value": {
+                "Ref": "VmInstance"
+            }
+        }
+    }
+}

@@ -1,0 +1,46 @@
+#cloud-config
+autoinstall:
+  {{ REPO_URL }}
+  version: 1
+  identity: {hostname: localhost, password: {{ PASSWORD }},
+      realname: {{ USERNAME }}, username: {{ USERNAME }}}
+  keyboard: {layout: us, toggle: null, variant: ''}
+  locale: en_US.UTF-8
+  ssh:
+    install-server: true
+  ### Static network configuration
+  {{ NETWORK_CFGS }}
+  storage:
+    grub:
+      reorder_uefi: False
+    swap:
+      size: 0
+    config:
+    - {ptable: gpt, path: /dev/sda, preserve: false, name: '', grub_device: false,
+      type: disk, id: disk-sda, wipe: superblock-recursive}
+    - {device: disk-sda, size: 536870912, wipe: superblock, flag: boot, number: 1,
+      preserve: false, grub_device: true, type: partition, id: partition-sda1}
+    - {fstype: fat32, volume: partition-sda1, preserve: false, type: format, id: format-2}
+    - {device: disk-sda, size: 1073741824, wipe: superblock, flag: linux, number: 2,
+      preserve: false, grub_device: false, type: partition, id: partition-sda2}
+    - {fstype: ext4, volume: partition-sda2, preserve: false, type: format, id: format-0}
+    - {device: disk-sda, size: -1, flag: linux, number: 3, preserve: false,
+      grub_device: false, type: partition, id: partition-sda3}
+    - name: vg-0
+      devices: [partition-sda3]
+      preserve: false
+      type: lvm_volgroup
+      id: lvm-volgroup-vg-0
+    - {name: lv-root, volgroup: lvm-volgroup-vg-0, size: 100%, preserve: false,
+      type: lvm_partition, id: lvm-partition-lv-root}
+    - {fstype: ext4, volume: lvm-partition-lv-root, preserve: false, type: format,
+      id: format-1}
+    - {device: format-1, path: /, type: mount, id: mount-2}
+    - {device: format-0, path: /boot, type: mount, id: mount-1}
+    - {device: format-2, path: /boot/efi, type: mount, id: mount-3}
+
+  {{ FORCE_INSTALL }}
+  early-commands:
+    - {{ PRE_SCRIPTS }}
+  late-commands:
+    - {{ POST_SCRIPTS }}

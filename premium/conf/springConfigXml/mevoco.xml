@@ -1,0 +1,515 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:zstack="http://zstack.org/schema/zstack"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+    http://www.springframework.org/schema/util
+    http://www.springframework.org/schema/util/spring-util-3.0.xsd
+    http://zstack.org/schema/zstack
+    http://zstack.org/schema/zstack/plugin.xsd"
+       default-init-method="init" default-destroy-method="destroy">
+
+    <util:list id="SupportSharedVolumePrimaryStorage">
+        <value>Ceph</value>
+        <value>SharedBlock</value>
+        <value>Addon</value>
+    </util:list>
+
+    <bean id="MevocoVmInstanceBaseFactory" class="org.zstack.compute.vm.MevocoVmInstanceBaseFactory">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.Component"/>
+            <zstack:extension interface="org.zstack.header.vm.VmInstanceBaseExtensionFactory" />
+        </zstack:plugin>
+        <property name="changeVmPasswdFlowElements">
+            <list>
+                <value>org.zstack.compute.vm.ChangeVmPasswordFlow</value>
+            </list>
+        </property>
+        <property name="changeVmImageFlowElements">
+            <list>
+                <value>org.zstack.compute.vm.VmImageSelectBackupStorageFlow</value>
+                <value>org.zstack.compute.vm.VmAllocateHostFlow</value>
+                <value>org.zstack.compute.vm.VmAllocatePrimaryStorageFlow</value>
+                <value>org.zstack.compute.vm.VmAllocateVolumeFlow</value>
+                <value>org.zstack.compute.vm.VmInstantiateResourceForChangeImageFlow</value>
+                <value>org.zstack.compute.vm.ChangeVmImageFlow</value>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="MevocoManager" class="org.zstack.mevoco.MevocoManagerImpl">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.Component"/>
+            <zstack:extension interface="org.zstack.header.Service"/>
+            <zstack:extension interface="org.zstack.header.identity.ReportQuotaExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.image.AddImageExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.host.HostAfterConnectedExtensionPoint"/>
+            <zstack:extension interface="org.zstack.kvm.KVMStartVmExtensionPoint"/>
+            <zstack:extension interface="org.zstack.kvm.KVMAttachVolumeExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.vm.ChangeInstanceOfferingExtensionPoint"/>
+            <zstack:extension interface="org.zstack.kvm.KvmPreAttachNicExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.vm.VmAttachVolumeExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.vm.VmDetachVolumeExtensionPoint"/>
+            <zstack:extension interface="org.zstack.kvm.KVMConvertVolumeExtensionPoint" />
+            <zstack:extension interface="org.zstack.kvm.KVMDetachVolumeExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.vm.BeforeGetNextVolumeDeviceIdExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.vm.BuildVolumeSpecExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.vm.VmReleaseResourceExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.volume.PreInstantiateVolumeExtensionPoint"/>
+            <zstack:extension interface="org.zstack.core.cloudbus.MarshalReplyMessageExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.volume.CreateDataVolumeExtensionPoint" />
+            <zstack:extension interface="org.zstack.kvm.KVMBeforeAsyncJsonPostExtensionPoint" />
+            <zstack:extension interface="org.zstack.kvm.KvmHostAgentDeploymentExtensionPoint" />
+            <zstack:extension interface="org.zstack.kvm.KVMHostConnectExtensionPoint" />
+            <zstack:extension interface="org.zstack.kvm.KVMHostAddSshFileMd5CheckerExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.volume.GetVmUuidFromShareableVolumeExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.identity.ForceLogoutSessionExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.volume.CreateQcow2VolumeProvisioningStrategyExtensionPoint" />
+            <zstack:extension interface="org.zstack.kvm.KVMPreUpdateNicExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.managementnode.ManagementNodeReadyExtensionPoint" />
+        </zstack:plugin>
+
+        <property name="supportSharedVolumePrimaryStorage" ref="SupportSharedVolumePrimaryStorage"/>
+    </bean>
+
+    <bean id="VmMevecoApiInterceptor" class="org.zstack.compute.vm.VmMevocoApiInterceptor">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.apimediator.ApiMessageInterceptor"/>
+            <zstack:extension interface="org.zstack.header.apimediator.GlobalApiMessageInterceptor"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="VmMevocoApiAssigner" class="org.zstack.compute.vm.VmMevocoComplementApiInterceptor">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.apimediator.GlobalApiMessageInterceptor"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="VolumeMevocoApiInterceptor" class="org.zstack.storage.volume.VolumeMevocoApiInterceptor">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.apimediator.ApiMessageInterceptor"/>
+            <zstack:extension interface="org.zstack.header.apimediator.GlobalApiMessageInterceptor"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="ImageMevocoApiInterceptor" class="org.zstack.image.ImageMevocoApiInterceptor">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.apimediator.ApiMessageInterceptor"/>
+            <zstack:extension interface="org.zstack.header.apimediator.GlobalApiMessageInterceptor"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="MevocoVmFactory" class="org.zstack.compute.vm.MevocoVmFactory">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.vm.VmInstanceFactory"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="MevocoVmManagerImpl" class="org.zstack.compute.vm.MevocoVmManagerImpl">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.Component" />
+            <zstack:extension interface="org.zstack.compute.vm.VmInstanceExtensionManager" />
+            <zstack:extension interface="org.zstack.header.vm.BeforeVmInstanceStopExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.vm.VmIpChangedExtensionPoint"/>
+        </zstack:plugin>
+        <property name="createVmFromVolumeWorkFlowElements">
+            <list>
+                <value>org.zstack.compute.vm.CheckIfCreateTemporaryTemplateFlow</value>
+                <value>org.zstack.compute.vm.CreateTemplateFromVolumeFlow</value>
+                <value>org.zstack.compute.vm.CreateVmFromTemplateFlow</value>
+                <value>org.zstack.compute.vm.DeleteTemplateFlow</value>
+            </list>
+        </property>
+        <property name="createVmFromSnapshotWorkFlowElements">
+            <list>
+                <value>org.zstack.compute.vm.CheckIfCreateTemporaryTemplateFlow</value>
+                <value>org.zstack.compute.vm.CreateRootTemplateFromVolumeSnapshotFlow</value>
+                <value>org.zstack.compute.vm.CreateVmFromTemplateFlow</value>
+                <value>org.zstack.compute.vm.DeleteTemplateFlow</value>
+            </list>
+        </property>
+        <property name="createVmFromSnapshotGroupWorkFlowElements">
+            <list>
+                <value>org.zstack.compute.vm.CheckDataVolumeLocationFlow</value>
+                <value>org.zstack.compute.vm.CheckIfCreateTemporaryTemplateFlow</value>
+                <value>org.zstack.compute.vm.CreateRootTemplateFromVolumeSnapshotFlow</value>
+                <value>org.zstack.compute.vm.CreateDataVolumeFromVolumeSnapshotGroupFlow</value>
+                <value>org.zstack.compute.vm.CreateVmFromTemplateFlow</value>
+                <value>org.zstack.compute.vm.AttachDataVolumeInOrderFlow</value>
+                <value>org.zstack.compute.vm.StartVmInstanceFlow</value>
+                <value>org.zstack.compute.vm.DeleteTemplateFlow</value>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="MevocoHostBaseFactory" class="org.zstack.compute.host.MevocoHostBaseFactory">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.host.HostBaseExtensionFactory"/>
+            <zstack:extension interface="org.zstack.compute.host.MigrateNetworkExtensionPoint"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="MevocoHostManager" class="org.zstack.compute.host.MevocoHostManagerImpl">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.Component" />
+            <zstack:extension interface="org.zstack.compute.host.HostExtensionManager" />
+            <zstack:extension interface="org.zstack.compute.host.PostHostConnectExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.host.HostAfterConnectedExtensionPoint" />
+            <zstack:extension interface="org.zstack.network.l3.ServiceTypeExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="VmClockSyncExtension" class="org.zstack.compute.vm.KvmUserVmClockSyncExtension">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.Component" />
+            <zstack:extension interface="org.zstack.header.vm.VmInstanceStartNewCreatedVmExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.vm.VmInstanceStartExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.vm.VmInstanceMigrateExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.host.HostAfterConnectedExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.vm.VmInstanceResumeExtensionPoint"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="HostMevocoApiInterceptor" class="org.zstack.compute.host.HostMevocoApiInterceptor">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.apimediator.ApiMessageInterceptor"/>
+            <zstack:extension interface="org.zstack.header.apimediator.GlobalApiMessageInterceptor"/>
+        </zstack:plugin>
+    </bean>
+
+
+    <bean id="HostSecurityLevelAllocatorFilterExtensionPoint" class="org.zstack.compute.host.HostSecurityLevelAllocatorFilterExtensionPoint">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.allocator.HostAllocatorFilterExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="HostManagementNodeRecoverExtensionPoint" class="org.zstack.compute.host.HostManagementNodeRecoverExtension">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.backup.ManagementNodeRecoverExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="PrimaryStorageManagementNodeRecoverExtensionPoint" class="org.zstack.storage.primary.PrimaryStorageManagementNodeRecoverExtension">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.backup.ManagementNodeRecoverExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="MevocoVolumeFactory" class="org.zstack.mevoco.MevocoVolumeFactoryImpl">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.Component"/>
+            <zstack:extension interface="org.zstack.storage.volume.VolumeFactory"/>
+            <zstack:extension interface="org.zstack.header.vm.GetAttachableVolumeExtensionPoint"/>
+            <zstack:extension interface="org.zstack.kvm.KVMStartVmExtensionPoint" />
+            <zstack:extension interface="org.zstack.kvm.KVMAttachVolumeExtensionPoint" />
+            <zstack:extension interface="org.zstack.kvm.KVMConvertVolumeExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="MevocoImageFactory" class="org.zstack.image.MevocoImageFactory">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.image.DefaultImageFactory"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="MevocoImageManagerImpl" class="org.zstack.image.MevocoImageManagerImpl">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.image.ImageExtensionManager"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="FilterVmAttachedVolumeExtension" class="org.zstack.storage.volume.FilterVmAttachedVolumeExtension">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.volume.VolumeGetAttachableVmExtensionPoint"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="MessageReplayerImpl" class="org.zstack.message.MessageReplayerImpl">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.message.MessageReplayer"/>
+        </zstack:plugin>
+    </bean>
+
+
+    <!--
+        <bean id="CollectdManager" class="org.zstack.monitoring.CollectdManagerImpl">
+            <zstack:plugin>
+                <zstack:extension interface="org.zstack.header.Component"/>
+                <zstack:extension interface="org.zstack.monitoring.KvmAgentDeployedExtensionPoint"/>
+            </zstack:plugin>
+        </bean>
+
+        <bean id="KvmAgentManager" class="org.zstack.monitoring.KvmAgentManager">
+            <zstack:plugin>
+                <zstack:extension interface="org.zstack.header.Component"/>
+                <zstack:extension interface="org.zstack.kvm.KVMHostConnectExtensionPoint"/>
+            </zstack:plugin>
+        </bean>
+
+        <bean id="KairosdbManager" class="org.zstack.monitoring.KairosdbManagerImpl">
+            <zstack:plugin>
+                <zstack:extension interface="org.zstack.header.Component"/>
+                <zstack:extension interface="org.zstack.header.Service"/>
+            </zstack:plugin>
+        </bean>
+
+        <bean id="KairosdbApiInterceptor" class="org.zstack.monitoring.KairosdbApiInterceptor">
+            <zstack:plugin>
+                <zstack:extension interface="org.zstack.header.apimediator.ApiMessageInterceptor"/>
+            </zstack:plugin>
+        </bean>
+    -->
+    <bean id="VolumeQosUpgradeExtension" class="org.zstack.storage.volume.VolumeQosUpgradeExtension">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.Component"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="HostXfsFragReader" class="org.zstack.compute.host.HostXfsFragReader">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.Component"/>
+            <zstack:extension interface="org.zstack.header.managementnode.ManagementNodeReadyExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.host.HostDeleteExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.volume.VolumeDeletionExtensionPoint"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="ShareableVolumeAttachedJudger" class="org.zstack.mevoco.ShareableVolumeAttachedJudger">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.volume.VolumeAttachedJudger"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="pauseWorldApiInterceptor" class="org.zstack.mevoco.PauseWorldApiInterceptor">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.apimediator.GlobalApiMessageInterceptor"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="MevocoKVMAttachL2NoVlanNetworkBackend" class="org.zstack.compute.host.MevocoKVMAttachL2NoVlanNetworkBackend">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.network.l2.L2NetworkAttachClusterExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="MevocoKVMAttachL2VlanNetworkBackend" class="org.zstack.compute.host.MevocoKVMAttachL2VlanNetworkBackend">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.network.l2.L2NetworkAttachClusterExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="MevocoVmNicQosConfigBackend" class="org.zstack.compute.vm.MevocoVmNicQosConfigBackend">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.compute.vm.VmNicQosConfigBackend"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="MevocoVmDnsBackend" class="org.zstack.compute.vm.MevocoVmDnsBackend">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.compute.vm.VmDnsBackend"/>
+            <zstack:extension interface="org.zstack.header.vm.VmPlatformChangedExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="DeleteDuplicateVolumeGcExtension" class="org.zstack.storage.volume.DeleteDuplicateVolumeGcExtension">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.managementnode.ManagementNodeReadyExtensionPoint" order="-1"/>
+            <zstack:extension interface="org.zstack.header.Component" order="-1"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="KvmUserVmVirtIODriverExtension" class="org.zstack.compute.vm.KvmUserVmVirtIODriverExtension">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.Component" />
+            <zstack:extension interface="org.zstack.kvm.KVMStartVmAddonExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.vm.PreVmInstantiateResourceExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="SchedulerSnapshotUpgradeExtension" class="org.zstack.scheduler.snapshot.SchedulerSnapshotUpgradeExtension">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.managementnode.ManagementNodeReadyExtensionPoint" order="-1"/>
+            <zstack:extension interface="org.zstack.header.Component" order="-1"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="VmCdRomMemorySnapshotGroupExtension" class="org.zstack.storage.memorySnapshot.VmCdRomMemorySnapshotGroupExtension">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.storage.memorySnapshot.MemorySnapshotResourceExtensionPoint"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="VmMemorySnapshotGroupExtension" class="org.zstack.storage.memorySnapshot.VmMemorySnapshotGroupExtension">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.storage.memorySnapshot.MemorySnapshotResourceExtensionPoint"/>
+            <zstack:extension interface="org.zstack.storage.memorySnapshot.ResourceMetadataBuilder"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="MemoryVolumeMigrationExtensionPoint" class="org.zstack.storage.memorySnapshot.MemoryVolumeMigrationExtensionPoint">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.storage.migration.StorageMigrationExtensionPoint"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="VmNicMemorySnapshotGroupExtension" class="org.zstack.storage.memorySnapshot.VmNicMemorySnapshotGroupExtension">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.storage.memorySnapshot.MemorySnapshotResourceExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.storage.snapshot.group.MemorySnapshotValidatorExtensionPoint"/>
+            <zstack:extension interface="org.zstack.storage.memorySnapshot.ResourceMetadataBuilder"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="VolumeMemorySnapshotGroupExtension" class="org.zstack.storage.memorySnapshot.VolumeMemorySnapshotGroupExtension">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.storage.memorySnapshot.MemorySnapshotResourceExtensionPoint"/>
+            <zstack:extension interface="org.zstack.storage.memorySnapshot.ResourceMetadataBuilder"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="VmGuestToolsExtension" class="org.zstack.guesttools.VmGuestToolsExtension">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.storage.memorySnapshot.MemorySnapshotResourceExtensionPoint"/>
+            <zstack:extension interface="org.zstack.storage.memorySnapshot.ResourceMetadataBuilder"/>
+            <zstack:extension interface="org.zstack.guesttools.UpdateGuestToolsState"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="CoreMemorySnapshotConfigs" class="org.zstack.storage.memorySnapshot.CoreMemorySnapshotConfigs">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.managementnode.ManagementNodeReadyExtensionPoint"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="MemorySnapshotGroupValidator" class="org.zstack.storage.memorySnapshot.MemorySnapshotGroupValidator">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.apimediator.GlobalApiMessageInterceptor" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="MemorySnapshotLifeCycleExtensionPoint" class="org.zstack.storage.memorySnapshot.MemorySnapshotLifeCycleExtensionPoint">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.storage.snapshot.VolumeSnapshotCreationExtensionPoint"/>
+            <zstack:extension interface="org.zstack.storage.snapshot.group.RevertVmFromSnapShotGroupExtension"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="VmIoThreadPinExtension" class="org.zstack.storage.volume.VmIoThreadPinExtension">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.kvm.KVMStartVmExtensionPoint" />
+            <zstack:extension interface="org.zstack.kvm.KVMAttachVolumeExtensionPoint" />
+            <zstack:extension interface="org.zstack.kvm.KVMConvertVolumeExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.vm.VmDetachVolumeExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="HostNetworkInterfaceCarrierActiveAllocatorFlow" class="org.zstack.compute.host.HostNetworkInterfaceStateAllocatorFlow" >
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.allocator.HostAllocatorFilterExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="CephBlockPrimaryStorageManager" class="org.zstack.storage.primary.imagestore.ceph.CephBlockPrimaryStorageManagerImpl">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.Component" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="XskyPrimaryStorageBackendFactory" class="org.zstack.storage.volume.block.XskyPrimaryStorageBackendFactory">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.Component" />
+            <zstack:extension interface="org.zstack.storage.volume.block.BlockPrimaryStorageFactory"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="XskyBlockVolumeFactory" class="org.zstack.storage.volume.block.XskyBlockVolumeFactory">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.storage.volume.block.BlockVolumeFactory"/>
+            <zstack:extension interface="org.zstack.header.storage.snapshot.AfterUpdateVolumeSnapshotExtensionPoint"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="ExternalPrimaryStoragePreallocationFactory" class="org.zstack.storage.primary.preallocation.ExternalPrimaryStoragePreallocationFactory" >
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.storage.primary.preallocation.PreallocationFactory" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="ExponBlockVolumeFactory" class="org.zstack.storage.volume.block.expon.ExponBlockVolumeFactory">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.storage.volume.block.BlockVolumeFactory"/>
+            <zstack:extension interface="org.zstack.header.storage.snapshot.AfterUpdateVolumeSnapshotExtensionPoint"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="ExponPrimaryStorageBackendFactory" class="org.zstack.storage.volume.block.expon.ExponPrimaryStorageBackendFactory">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.storage.addon.primary.BlockExternalPrimaryStorageFactory" />
+            <zstack:extension interface="org.zstack.header.vm.VmAttachVolumeExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.vm.VmDetachVolumeExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="SpiceTlsConfigItem" class="org.zstack.mevoco.SpiceTlsConfigItem">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.mevoco.QemuConfigItemOperator" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="CgroupDeviceAclConfigItem" class="org.zstack.mevoco.CgroupDeviceAclConfigItem">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.mevoco.QemuConfigItemOperator" />
+        </zstack:plugin>
+    </bean>
+
+    <import resource="storageMigration.xml" />
+
+    <bean id="FstabDeviceToUuidUpdaterExtension" class="org.zstack.storage.primary.FstabDeviceToUuidUpdaterExtension">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.managementnode.ManagementNodeReadyExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="MevocoVmHostFileAutoCompleter" class="org.zstack.compute.vm.vmfiles.MevocoVmHostFileAutoCompleter">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.apimediator.GlobalApiMessageInterceptor"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="VmUuidDirectResolver" class="org.zstack.compute.vm.metadata.resolver.VmUuidDirectResolver"/>
+    <bean id="VolumeUuidToVmUuidResolver" class="org.zstack.compute.vm.metadata.resolver.VolumeUuidToVmUuidResolver"/>
+    <bean id="VolumeUuidsToVmUuidResolver" class="org.zstack.compute.vm.metadata.resolver.VolumeUuidsToVmUuidResolver"/>
+    <bean id="SnapshotUuidToVmUuidResolver" class="org.zstack.compute.vm.metadata.resolver.SnapshotUuidToVmUuidResolver"/>
+    <bean id="SnapshotGroupUuidToVmUuidResolver" class="org.zstack.compute.vm.metadata.resolver.SnapshotGroupUuidToVmUuidResolver"/>
+    <bean id="NicUuidToVmUuidResolver" class="org.zstack.compute.vm.metadata.resolver.NicUuidToVmUuidResolver"/>
+    <bean id="ResourceUuidToVmUuidResolver" class="org.zstack.compute.vm.metadata.resolver.ResourceUuidToVmUuidResolver"/>
+    <bean id="SystemTagUuidToVmUuidResolver" class="org.zstack.compute.vm.metadata.resolver.SystemTagUuidToVmUuidResolver"/>
+
+    <bean id="VmMetadataUpdateInterceptor" class="org.zstack.compute.vm.metadata.dirty.VmMetadataUpdateInterceptor">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.Component"/>
+            <zstack:extension interface="org.zstack.header.managementnode.ManagementNodeReadyExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.vm.VmInstanceStartExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.vm.VmInstanceStartNewCreatedVmExtensionPoint"/>
+            <zstack:extension interface="org.zstack.longjob.LongJobExtensionPoint"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="VmMetadataDirtyMarker" class="org.zstack.compute.vm.metadata.dirty.VmMetadataDirtyMarker">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.Component"/>
+            <zstack:extension interface="org.zstack.header.managementnode.ManagementNodeChangeListener"/>
+            <zstack:extension interface="org.zstack.header.managementnode.ManagementNodeReadyExtensionPoint"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="VmMetadataMaintenanceManager" class="org.zstack.compute.vm.metadata.dirty.VmMetadataMaintenanceManager">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.Component"/>
+            <zstack:extension interface="org.zstack.header.managementnode.ManagementNodeReadyExtensionPoint"/>
+        </zstack:plugin>
+    </bean>
+</beans>

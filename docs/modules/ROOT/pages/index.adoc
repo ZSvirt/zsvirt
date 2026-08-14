@@ -1,0 +1,34 @@
+= 下一代开源云计算引擎：ZStack Cloud
+:icons: font
+
+架构总览::
+* xref:overview.adoc[]
+
+架构核心::
+* xref:core:index.adoc[]
+** xref:core:in-process-microservice.adoc[]
+** xref:core:stateless_services.adoc[]
+** xref:core:scalability_secrets_part_1_asynchronous_architecture.adoc[]
+** xref:core:message.adoc[]
+
+关于如何开发::
+* xref:contribute/index.adoc[]
+** xref:contribute/commit_msg.adoc[]
+
+关于 Longjob::
+* xref:longjob:index.adoc[]
+** xref:longjob:cancel.adoc[]
+
+关于测试::
+* xref:test:index.adoc[]
+** xref:test:integration-test/index.adoc[]
+** 测试框架介绍与使用
+*** xref:test:integration-test/usages/write-test-case.adoc[]
+*** xref:test:integration-test/usages/test-suite.adoc[]
+*** xref:test:integration-test/usages/cookbook.adoc[]
+*** xref:test:integration-test/usages/run-tests.adoc[]
+*** xref:test:integration-test/usages/get-all-test.adoc[]
+** 测试框架原理
+*** xref:test:integration-test/principles/intro.adoc[]
+*** xref:test:integration-test/principles/deep_dive.adoc[]
+** xref:test:junit/index.adoc[]

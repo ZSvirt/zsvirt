@@ -1,0 +1,73 @@
+[
+  {
+    "raw": "expon request failed, code %s, message: %s.",
+    "en_US": "expon request failed, code {0}, message: {1}.",
+    "zh_CN": "",
+    "arguments": [
+      "rsp.getRetCode()",
+      "rsp.getMessage()"
+    ],
+    "fileName": "src/main/java/org/zstack/expon/ExponApiHelper.java"
+  },
+  {
+    "raw": "cannot find volume[name:%s] after copy snapshot",
+    "en_US": "cannot find volume[name:{0}] after copy snapshot",
+    "zh_CN": "",
+    "arguments": [
+      "name"
+    ],
+    "fileName": "src/main/java/org/zstack/expon/ExponApiHelper.java"
+  },
+  {
+    "raw": "not supported protocol[%s]",
+    "en_US": "not supported protocol[{0}]",
+    "zh_CN": "",
+    "arguments": [
+      "v.getProtocol()"
+    ],
+    "fileName": "src/main/java/org/zstack/expon/ExponStorageController.java"
+  },
+  {
+    "raw": "not supported protocol[%s] for active",
+    "en_US": "not supported protocol[{0}] for active",
+    "zh_CN": "",
+    "arguments": [
+      "protocol"
+    ],
+    "fileName": "src/main/java/org/zstack/expon/ExponStorageController.java"
+  },
+  {
+    "raw": "not supported protocol[%s] for deactivate",
+    "en_US": "not supported protocol[{0}] for deactivate",
+    "zh_CN": "",
+    "arguments": [
+      "protocol"
+    ],
+    "fileName": "src/main/java/org/zstack/expon/ExponStorageController.java"
+  },
+  {
+    "raw": "no pool found",
+    "en_US": "no pool found",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/expon/ExponStorageController.java"
+  },
+  {
+    "raw": "no available pool with enough space[%d] and healthy status",
+    "en_US": "no available pool with enough space[{0}] and healthy status",
+    "zh_CN": "",
+    "arguments": [
+      "v.getSize()"
+    ],
+    "fileName": "src/main/java/org/zstack/expon/ExponStorageController.java"
+  },
+  {
+    "raw": "unsupported protocol %s",
+    "en_US": "unsupported protocol {0}",
+    "zh_CN": "不支持的协议{0}",
+    "arguments": [
+      "protocol.name()"
+    ],
+    "fileName": "src/main/java/org/zstack/expon/ExponStorageController.java"
+  }
+]

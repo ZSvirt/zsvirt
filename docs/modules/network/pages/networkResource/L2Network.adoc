@@ -1,0 +1,59 @@
+= 二层网络
+
+目前支持的网络类型有: NoVlan网络, Vlan网络，VxLan网络，硬件VxLan网络
+
+
+[NOTE]
+NoVlan网络和Vlan网络，有两种虚拟交换机类型，默认类型是Linux bridge. OVS DPDK在高性能网络章节介绍
+
+
+== NoVlan网络
+创建NoVan网络需要指定网卡名称。集群内的物理机必须使用相同的网卡名称。
+
+image::l2/createNoVlan.png[]
+
+NoVlan网络的云主机数据路径如下所示：
+
+image::l2/noVlanDataPath.svg[]
+如图所示，云主机的流量经过虚拟接口到达物理服务器，虚拟交换机不加VLAN标签，然后经过eth0发送出去。
+
+== Vlan网络
+
+创建VLAN网络需要指定VlanID和网卡名称。
+
+image::l2/createVlanNetwork.jpg[]
+
+Vlan网络的云主机数据路径如下所示：
+
+image::l2/vlanDataPath.svg[]
+如图所示，云主机的流量经过虚拟接口到达物理服务器，虚拟交换机给流量打上打上VLAN标签，然后经过eth0发送出去。
+
+== VxLan Pool
+
+VxLan Pool定义一组VxLan网络的公共属性:
+
+* 使用的vni范围
+* VTEP CIDR. ZStack云平台会根据VTEP CIDR 在物理机机上选择匹配这个CIDR的网卡地址作为VxLan网络的VTEP地址
+
+image::l2/createVxlanPool.png[]
+[NOTE]
+SDN类型默认情况是软件, 也就是VxLAN的封装，解封装由物理机服务器完成。
+SDN类型类型为硬件，请参考对接ZStack对接SDN控制器章节。
+
+
+== VxLan网络
+
+VxLan可以带来很多Vlan网络不具备的优势：
+
+* 解决Vlan网络数量不足的局限性，满足大数据中心的多租户的隔离需求。
+* 解决在数据中心创建大二层网络的需求，方便云主机可以在数据中心灵活部署，迁移。
+
+创建VxLan网络必须选择一个VxLan Pool, 而且必须是SDN类型为软件的VxLan Pool.
+
+image::l2/createVxlanNetwork.png[]
+
+VxLan网络的云主机数据路径如下所示：
+
+image::l2/vxLanDataPath.svg[]
+
+如图所示，根据VxLanPool选择eth0作为VxLan网络的VTEP地址，然后创建VXLAN100的子接口，然后把这个子接口和云主机的虚拟后加入同一个虚拟交换机

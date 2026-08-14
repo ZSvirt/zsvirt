@@ -1,0 +1,33 @@
+<error>
+    <prefix>DRS</prefix>
+
+    <code>
+        <id>1000</id>
+        <description>DRS general error</description>
+    </code>
+
+    <code>
+        <id>1001</id>
+        <description>DRS is already existing in this cluster</description>
+    </code>
+
+    <code>
+        <id>1002</id>
+        <description>DRS is disabled in this cluster</description>
+    </code>
+
+    <code>
+        <id>1003</id>
+        <description>DRS is not supported in this cluster</description>
+    </code>
+
+    <code>
+        <id>1004</id>
+        <description>Failed to execute cluster DRS migration tasks or actions</description>
+    </code>
+
+    <code>
+        <id>1005</id>
+        <description>DRS advice is not prepared</description>
+    </code>
+</error>

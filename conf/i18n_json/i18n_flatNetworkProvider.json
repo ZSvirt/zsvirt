@@ -1,0 +1,329 @@
+[
+  {
+    "raw": "could not get dhcp4 server ip for l3 network [uuid:%s]",
+    "en_US": "could not get dhcp4 server ip for l3 network [uuid:{0}]",
+    "zh_CN": "无法获取三层网络[uuid：{0}]的DHCP4服务器IP",
+    "arguments": [
+      "msg.getL3NetworkUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/flat/DhcpApply.java"
+  },
+  {
+    "raw": "could not get dhcp6 server ip for l3 network [uuid:%s]",
+    "en_US": "could not get dhcp6 server ip for l3 network [uuid:{0}]",
+    "zh_CN": "无法获取三层网络[uuid：{0}]的DHCP6服务器IP",
+    "arguments": [
+      "msg.getL3NetworkUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/flat/DhcpApply.java"
+  },
+  {
+    "raw": "Session/account uuid is not valid.",
+    "en_US": "Session/account uuid is not valid.",
+    "zh_CN": "会话/帐户uuid无效。",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/network/service/flat/FlatApiInterceptor.java"
+  },
+  {
+    "raw": "the account[uuid:%s] has no access to the resource[uuid:%s, type:L3NetworkVO]",
+    "en_US": "the account[uuid:{0}] has no access to the resource[uuid:{1}, type:L3NetworkVO]",
+    "zh_CN": "帐户[uuid：{0}]无权访问资源[uuid：{1}，类型：L3NetworkVO]",
+    "arguments": [
+      "accountUuid",
+      "msg.getL3NetworkUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/flat/FlatApiInterceptor.java"
+  },
+  {
+    "raw": "change dhcp server ip to [%s], but got [%s]",
+    "en_US": "change dhcp server ip to [{0}], but got [{1}]",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getDhcpv6ServerIp()",
+      "dhcpIp"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/flat/FlatDhcpBackend.java"
+  },
+  {
+    "raw": "l3 network uuid cannot be null",
+    "en_US": "l3 network uuid cannot be null",
+    "zh_CN": "三层网络的uuid不能为空",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/network/service/flat/FlatDhcpBackend.java"
+  },
+  {
+    "raw": "cannot configure DHCP for vm[uuid:%s] on the destination host[uuid:%s]",
+    "en_US": "cannot configure DHCP for vm[uuid:{0}] on the destination host[uuid:{1}]",
+    "zh_CN": "无法为目标主机[uuid:{1}]上的虚拟机[uuid:{0}]配置DHCP",
+    "arguments": [
+      "inv.getUuid()",
+      "destHostUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/flat/FlatDhcpBackend.java"
+  },
+  {
+    "raw": "minimum ip range prefix length of flat network is %d",
+    "en_US": "minimum ip range prefix length of flat network is {0}",
+    "zh_CN": "三层网络的最小IP范围前缀长度为{0}",
+    "arguments": [
+      "IPv6Constants.IPV6_PREFIX_LEN_MIN_DNSMASQ"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/flat/FlatDhcpBackend.java"
+  },
+  {
+    "raw": "DHCP server ip [%s] is not a IPv4 address",
+    "en_US": "DHCP server ip [{0}] is not a IPv4 address",
+    "zh_CN": "DHCP服务器地址[{0}]不是一个正确的IPv4地址",
+    "arguments": [
+      "dhcpServerIp"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/flat/FlatDhcpBackend.java"
+  },
+  {
+    "raw": "DHCP server ip [%s] is not in the cidr [%s]",
+    "en_US": "DHCP server ip [{0}] is not in the cidr [{1}]",
+    "zh_CN": "DHCP服务器地址[{0}]不在网络段[{1}]的范围内",
+    "arguments": [
+      "dhcpServerIp",
+      "inv.getNetworkCidr()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/flat/FlatDhcpBackend.java"
+  },
+  {
+    "raw": "DHCP server ip [%s] is not a IPv6 address",
+    "en_US": "DHCP server ip [{0}] is not a IPv6 address",
+    "zh_CN": "DHCP服务器地址[{0}]不是一个正确的IPv6地址",
+    "arguments": [
+      "dhcpServerIp"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/flat/FlatDhcpBackend.java"
+  },
+  {
+    "raw": "DHCP server ip [%s] is already existed in l3 network [%s]",
+    "en_US": "DHCP server ip [{0}] is already existed in l3 network [{1}]",
+    "zh_CN": "三层网络[{1}]已经配置了DHCP服务器地址[{0}]",
+    "arguments": [
+      "entry.getKey()",
+      "inv.getL3NetworkUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/flat/FlatDhcpBackend.java"
+  },
+  {
+    "raw": "DHCP server ip [%s] can not be equaled to gateway ip",
+    "en_US": "DHCP server ip [{0}] can not be equaled to gateway ip",
+    "zh_CN": "DHCP服务器地址[{0}]不能等于网关地址",
+    "arguments": [
+      "dhcpServerIp"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/flat/FlatDhcpBackend.java"
+  },
+  {
+    "raw": "DHCP server ip [%s] can not be configured to system l3",
+    "en_US": "DHCP server ip [{0}] can not be configured to system l3",
+    "zh_CN": "系统网络不能配置DHCP服务器地址[{0}]",
+    "arguments": [
+      "dhcpServerIp"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/flat/FlatDhcpBackend.java"
+  },
+  {
+    "raw": "could not delete ip address, because ip [%s] is dhcp server ip",
+    "en_US": "could not delete ip address, because ip [{0}] is dhcp server ip",
+    "zh_CN": "",
+    "arguments": [
+      "vo.getIp()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/flat/FlatDhcpBackend.java"
+  },
+  {
+    "raw": "could not set dhcp v4 server ip, because there is no ipv4 range",
+    "en_US": "could not set dhcp v4 server ip, because there is no ipv4 range",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/network/service/flat/FlatDhcpBackend.java"
+  },
+  {
+    "raw": "could not set dhcp v4 server ip, because ip[%s] is not the cidr of l3 [%s]",
+    "en_US": "could not set dhcp v4 server ip, because ip[{0}] is not the cidr of l3 [{1}]",
+    "zh_CN": "",
+    "arguments": [
+      "dhcpIp",
+      "ipv4Ranges.get(0).getNetworkCidr()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/flat/FlatDhcpBackend.java"
+  },
+  {
+    "raw": "could not set dhcp v6 server ip, because there is no ipv6 range",
+    "en_US": "could not set dhcp v6 server ip, because there is no ipv6 range",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/network/service/flat/FlatDhcpBackend.java"
+  },
+  {
+    "raw": "could not set dhcp v6 server ip, because ip[%s] is not the cidr of l3 [%s]",
+    "en_US": "could not set dhcp v6 server ip, because ip[{0}] is not the cidr of l3 [{1}]",
+    "zh_CN": "",
+    "arguments": [
+      "dhcpIp",
+      "ipv6Ranges.get(0).getNetworkCidr()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/flat/FlatDhcpBackend.java"
+  },
+  {
+    "raw": "either [service] or [networkServices] must be provided",
+    "en_US": "either [service] or [networkServices] must be provided",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/network/service/flat/FlatDhcpBackend.java"
+  },
+  {
+    "raw": "could change dhcp server ip, because flat dhcp is not enabled",
+    "en_US": "could change dhcp server ip, because flat dhcp is not enabled",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/network/service/flat/FlatDhcpBackend.java"
+  },
+  {
+    "raw": "could change dhcp server ip, because %s is not the owner of l3 network[uuid:%s]",
+    "en_US": "could change dhcp server ip, because {0} is not the owner of l3 network[uuid:{1}]",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getSession().getAccountUuid()",
+      "msg.getL3NetworkUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/flat/FlatDhcpBackend.java"
+  },
+  {
+    "raw": "could change dhcp v4 server ip, because there is no ipv4 range",
+    "en_US": "could change dhcp v4 server ip, because there is no ipv4 range",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/network/service/flat/FlatDhcpBackend.java"
+  },
+  {
+    "raw": "could set dhcp v4 server ip, because ip[%s] is not the cidr of l3 [%s]",
+    "en_US": "could set dhcp v4 server ip, because ip[{0}] is not the cidr of l3 [{1}]",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getDhcpServerIp()",
+      "ipv4Ranges.get(0).getNetworkCidr()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/flat/FlatDhcpBackend.java"
+  },
+  {
+    "raw": "could change dhcp v6 server ip, because there is no ipv6 range",
+    "en_US": "could change dhcp v6 server ip, because there is no ipv6 range",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/network/service/flat/FlatDhcpBackend.java"
+  },
+  {
+    "raw": "could set dhcp v6 server ip, because ip[%s] is not the cidr of l3 [%s]",
+    "en_US": "could set dhcp v6 server ip, because ip[{0}] is not the cidr of l3 [{1}]",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getDhcpv6ServerIp()",
+      "ipv6Ranges.get(0).getNetworkCidr()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/flat/FlatDhcpBackend.java"
+  },
+  {
+    "raw": "could set dhcp server ip, because ip[%s] is used",
+    "en_US": "could set dhcp server ip, because ip[{0}] is used",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getDhcpServerIp()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/flat/FlatDhcpBackend.java"
+  },
+  {
+    "raw": "could set dhcp v6 server ip, because ip[%s] is used",
+    "en_US": "could set dhcp v6 server ip, because ip[{0}] is used",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getDhcpServerIp()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/flat/FlatDhcpBackend.java"
+  },
+  {
+    "raw": "failed to allocate DHCP server IP for L3 network[uuid:%s]",
+    "en_US": "failed to allocate DHCP server IP for L3 network[uuid:{0}]",
+    "zh_CN": "",
+    "arguments": [
+      "l3VO.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/flat/FlatDhcpBackend.java"
+  },
+  {
+    "raw": "cannot find bridge name for L3 network[%s]",
+    "en_US": "cannot find bridge name for L3 network[{0}]",
+    "zh_CN": "",
+    "arguments": [
+      "struct.getL3NetworkUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/flat/FlatDhcpBackend.java"
+  },
+  {
+    "raw": "operation error, because:%s",
+    "en_US": "operation error, because:{0}",
+    "zh_CN": "操作错误，因为{0}",
+    "arguments": [
+      "rsp.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/flat/FlatDhcpBackend.java"
+  },
+  {
+    "raw": "could not attach eip because there is no gateway for nic[uuid:%s]",
+    "en_US": "could not attach eip because there is no gateway for nic[uuid:{0}]",
+    "zh_CN": "",
+    "arguments": [
+      "nicUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/flat/FlatEipApiInterceptor.java"
+  },
+  {
+    "raw": "could not attach eip because ipv6 eip can ONLY be attached to flat network",
+    "en_US": "could not attach eip because ipv6 eip can ONLY be attached to flat network",
+    "zh_CN": "无法附加EIP，因为IPv6 EIP只能附加到三层网络",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/network/service/flat/FlatEipApiInterceptor.java"
+  },
+  {
+    "raw": "L2Network where vip\u0027s L3Network based hasn\u0027t attached the cluster where vmNic[uuid:%s] located",
+    "en_US": "L2Network where vip\u0027s L3Network based hasn\u0027t attached the cluster where vmNic[uuid:{0}] located",
+    "zh_CN": "",
+    "arguments": [
+      "vmNicUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/flat/FlatEipApiInterceptor.java"
+  },
+  {
+    "raw": "can not bound more than 1 %s eip to a vm nic[uuid:%s] of flat ",
+    "en_US": "can not bound more than 1 {0} eip to a vm nic[uuid:{1}] of flat ",
+    "zh_CN": "无法将1个以上的{0}EIP绑定到平面的VM NIC[uuid：{1}]",
+    "arguments": [
+      "version",
+      "vmNicUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/flat/FlatEipApiInterceptor.java"
+  },
+  {
+    "raw": "unable to apply the EIP operation for the the vm[uuid:%s, state:%s], because cannot find the VM\u0027s hostUUid",
+    "en_US": "unable to apply the EIP operation for the the vm[uuid:{0}, state:{1}], because cannot find the VM\u0027s hostUUid",
+    "zh_CN": "无法为虚拟机[uuid:{0}, state:{1}]应用EIP操作，因为无法找到该虚拟机的主机uuid(hostUuid)",
+    "arguments": [
+      "vmUuid",
+      "vm.getState()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/flat/FlatEipBackend.java"
+  },
+  {
+    "raw": "host[uuid:%s] is not connected",
+    "en_US": "host[uuid:{0}] is not connected",
+    "zh_CN": "主机[uuid:{0}]未连接",
+    "arguments": [
+      "struct.getHostUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/flat/FlatUserdataBackend.java"
+  }
+]

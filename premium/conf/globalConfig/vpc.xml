@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<globalConfig xmlns="http://zstack.org/schema/zstack">
+    <config>
+        <category>vpc</category>
+        <name>zsnp.timeout</name>
+        <description>the ageing time of zsnp, it doesn't take effect to new create router, only does to reconnect</description>
+        <type>java.lang.Long</type>
+        <defaultValue>960</defaultValue>
+    </config>
+    <config>
+        <category>vpc</category>
+        <name>configure.firewall.with.iptables</name>
+        <description>use iptables directly instead of Vyos firewall configuration</description>
+        <type>java.lang.Boolean</type>
+        <defaultValue>false</defaultValue>
+    </config>
+    <config>
+        <name>tc.for.vipqos</name>
+        <description>use linux tc for qos policy</description>
+        <defaultValue>true</defaultValue>
+        <category>vpc</category>
+        <type>java.lang.Boolean</type>
+    </config>
+</globalConfig>

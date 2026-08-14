@@ -1,0 +1,50 @@
+{
+  "ZStackTemplateFormatVersion" : "2018-06-18",
+  "Description": "Creates a MySQL HA cluster:\nThis template creates a MySQL HA cluster. Prerequisites:\nThe instance offering, image, and network are created. Make sure that the network can access the Internet, and cloudinit is installed for the image. Otherwise, the cluster may fail to be created.",
+  "Parameters" : {
+    "imageUuid": {
+      "Type" : "String",
+      "Label": "Image",
+      "DefaultValue": "CentOS cloudinit image is recommended."
+    },
+    "instanceOfferingUuid": {
+      "Type": "String",
+      "Label": "Instance Offering",
+      "Description": "The instance offering for creating a VM."
+    },
+    "l3NetworkUuid": {
+      "Type": "String",
+      "Label": "Network",
+      "Description": "The network for creating a VM. Make sure that the network supports the Userdata service and can access the Internet."
+    }
+  },
+  "Resources" : {
+    "MysqlMaster": {
+      "Type": "Cloud::Resource::VmInstance",
+      "Properties": {
+        "name" : "Mysql-Master",
+        "imageUuid" : {"Ref": "imageUuid"},
+        "instanceOfferingUuid":  {"Ref": "instanceOfferingUuid"},
+        "l3NetworkUuids": [{"Ref": "l3NetworkUuid"}],
+        "systemTags": [{"Fn::Join": ["::", ["userdata", {"Fn::Base64": "#cloud-config\nusers:\n - name: test\n   shell: /bin/bash\n   groups: users\n   sudo: ['ALL=(ALL) NOPASSWD:ALL']\n   ssh-authorized-keys:\n    - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDOlUcg+wZenYhtdkd9pVOA9ZHxfltq2YU2/hkk7oot4x++p8se4svRx3P4tOs9K7ueVtW5RZwlAUDoY3sh8RvBdwTdCm/pbNJCv/sip1as7+LwXKKlM0OIWgdgKnR+6yuykLwh6GOaFjHgbQaxfz5F++tRVI8qejJfU7H1nTAy7P0nrS9FtMQXBWE0jdGAnwGHYQbE86A2EpPSDgpTeL3NG2ZmKpRO2DWrY82/BJEJAbwRpbUlXH/KMNa3chhB0NHkFRcwi0qVXFozBvrbNRZO1l/ya7mQCD0YOpstXVm19AGzFM0j/1pcir3CQsO7bQvVZRi4rfYgIv/HjJ2e1Frr root@10-0-211-214\npackages:\n - mariadb\n - mariadb-server\n\nwrite_files:\n - path: /etc/my.cnf\n   content: |\n    [mysqld]\n    log-bin=mysql-bin\n    server-id=111\n    datadir=/var/lib/mysql\n    socket=/var/lib/mysql/mysql.sock\n    symbolic-links=0\n\n    [mysqld_safe]\n    log-error=/var/log/mariadb/mariadb.log\n    pid-file=/var/run/mariadb/mariadb.pid\n    !includedir /etc/my.cnf.d\n - path: /tmp/mysql-setting.sh\n   content: |\n    iptables -F\n    service mariadb start\n    mysql -uroot -e  \"GRANT REPLICATION SLAVE ON *.* to 'mysync'@'%' identified by 'q123456'\"\n    mysql -uroot -e  \"grant SUPER ON *.* TO mysync\"\nruncmd:\n - [ bash, /tmp/mysql-setting.sh]"}]]}]
+      }
+    },
+    "MysqlSlave": {
+      "Type": "Cloud::Resource::VmInstance",
+      "Properties": {
+        "name" : "Mysql-Slave",
+        "imageUuid" : {"Ref": "imageUuid"},
+        "instanceOfferingUuid":  {"Ref": "instanceOfferingUuid"},
+        "l3NetworkUuids": [{"Ref": "l3NetworkUuid"}],
+        "systemTags": [{"Fn::Join": ["::", ["userdata", {"Fn::Join" : ["", ["#cloud-config\nusers:\n - name: test\n   shell: /bin/bash\n   groups: users\n   sudo: ['ALL=(ALL) NOPASSWD:ALL']\n   ssh-authorized-keys:\n    - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDOlUcg+wZenYhtdkd9pVOA9ZHxfltq2YU2/hkk7oot4x++p8se4svRx3P4tOs9K7ueVtW5RZwlAUDoY3sh8RvBdwTdCm/pbNJCv/sip1as7+LwXKKlM0OIWgdgKnR+6yuykLwh6GOaFjHgbQaxfz5F++tRVI8qejJfU7H1nTAy7P0nrS9FtMQXBWE0jdGAnwGHYQbE86A2EpPSDgpTeL3NG2ZmKpRO2DWrY82/BJEJAbwRpbUlXH/KMNa3chhB0NHkFRcwi0qVXFozBvrbNRZO1l/ya7mQCD0YOpstXVm19AGzFM0j/1pcir3CQsO7bQvVZRi4rfYgIv/HjJ2e1Frr root@10-0-211-214\npackages:\n - mariadb\n - mariadb-server\n\nwrite_files:\n - path: /etc/my.cnf\n   content: |\n    [mysqld]\n    log-bin=mysql-bin\n    server-id=222\n    datadir=/var/lib/mysql\n    socket=/var/lib/mysql/mysql.sock\n    symbolic-links=0\n\n    [mysqld_safe]\n    log-error=/var/log/mariadb/mariadb.log\n    pid-file=/var/run/mariadb/mariadb.pid\n    !includedir /etc/my.cnf.d\n - path: /tmp/mysql-setting.sh\n   content: |\n    service mariadb start\n    while true\n    do\n        m=`mysql -umysync -pq123456 -h",{"Fn::GetAtt":[{"Fn::Select":[0,{"Fn::GetAtt":["MysqlMaster","vmNics"]}]},"ip"]}," -e 'show master status'` || echo 'Wait master start'\n        mmm=`echo $m | grep 'Position'` || echo 'Wait master start'\n        if [ \"${mmm}\" != \"\" ];then\n            break\n        fi\n        sleep 30\n    done\n    sleep 30\n    mm=`mysql -umysync -pq123456 -h",{"Fn::GetAtt":[{"Fn::Select":[0,{"Fn::GetAtt":["MysqlMaster","vmNics"]}]},"ip"]} , " -e 'show master status'`\n    logfile=`echo $mm | awk '{print $5}'`\n    pos=`echo $mm | awk '{print $6}'`\n    mysql -uroot -e  \"change master to master_host='", {"Fn::GetAtt":[{"Fn::Select":[0,{"Fn::GetAtt":["MysqlMaster","vmNics"]}]},"ip"]}, "',master_user='mysync',master_password='q123456',master_log_file='${logfile}',master_log_pos=${pos}\"\n    mysql -uroot -e  \"start slave\"\nruncmd:\n - [ bash, -xe, /tmp/mysql-setting.sh]"]]}]]}]
+      },
+      "DependsOn":{"Ref":"MysqlMaster"}
+    }
+  },
+  "Outputs": {
+    "VmInstance": {
+      "Description" : "print vm instance",
+      "Value" : {"Ref": "MysqlSlave"}
+    }
+  }
+}

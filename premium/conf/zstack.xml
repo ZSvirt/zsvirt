@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+    http://www.springframework.org/schema/aop
+    http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+    http://www.springframework.org/schema/context
+    http://www.springframework.org/schema/context/spring-context-3.0.xsd
+    http://www.springframework.org/schema/tx
+    http://www.springframework.org/schema/tx/spring-tx-3.0.xsd"
+       default-init-method="init" default-destroy-method="destory">
+
+    <context:annotation-config/>
+    <context:spring-configured/>
+    <aop:aspectj-autoproxy/>
+    <tx:annotation-driven transaction-manager="transactionManager" mode="aspectj"/>
+
+    <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="systemPropertiesModeName" value="SYSTEM_PROPERTIES_MODE_OVERRIDE"/>
+        <property name="locations">
+            <list>
+                <value>classpath:zstack.properties</value>
+            </list>
+        </property>
+        <property name="ignoreUnresolvablePlaceholders" value="true"/>
+    </bean>
+
+    <bean id="messageSource" class="org.zstack.core.i18n.DeployModeI18nMessageSource">
+        <property name="defaultEncoding" value="UTF-8"></property>
+        <property name="alwaysUseMessageFormat" value="true"></property>
+    </bean>
+
+    <import resource="springConfigXml/AccountManager.xml"/>
+    <import resource="springConfigXml/acl.xml"/>
+    <import resource="springConfigXml/agentManager.xml"/>
+    <import resource="springConfigXml/ansibleFacade.xml"/>
+    <import resource="springConfigXml/ApiMediator.xml"/>
+    <import resource="springConfigXml/apimediator.xml"/>
+    <import resource="springConfigXml/ApplianceVmFacade.xml"/>
+    <import resource="springConfigXml/Aspect.xml"/>
+    <import resource="springConfigXml/baremetal.xml"/>
+    <import resource="springConfigXml/BackupStorageManager.xml"/>
+    <import resource="springConfigXml/billing.xml"/>
+    <import resource="springConfigXml/blockPrimaryStorage.xml"/>
+    <import resource="springConfigXml/core.xml"/>
+    <import resource="springConfigXml/storageDevice.xml"/>
+    <import resource="springConfigXml/CascadeFacade.xml"/>
+    <import resource="springConfigXml/ceph.xml"/>
+    <import resource="springConfigXml/CloudBus.xml"/>
+    <import resource="springConfigXml/ClusterManager.xml"/>
+    <import resource="springConfigXml/ConfigurationManager.xml"/>
+    <import resource="springConfigXml/ConsoleManager.xml"/>
+    <import resource="springConfigXml/DatabaseFacade.xml"/>
+    <import resource="springConfigXml/debug.xml"/>
+    <import resource="springConfigXml/eip.xml"/>
+    <import resource="springConfigXml/encrypt.xml"/>
+    <import resource="springConfigXml/encryptPremium.xml"/>
+    <import resource="springConfigXml/Error.xml"/>
+    <import resource="springConfigXml/flatNetworkProvider.xml"/>
+    <import resource="springConfigXml/gc.xml"/>
+    <import resource="springConfigXml/GlobalConfigFacade.xml"/>
+    <import resource="springConfigXml/resourceConfig.xml"/>
+    <import resource="springConfigXml/TemplateConfigFacade.xml"/>
+    <import resource="springConfigXml/ha.xml"/>
+    <import resource="springConfigXml/HostAllocatorManager.xml"/>
+    <import resource="springConfigXml/HostManager.xml"/>
+    <import resource="springConfigXml/ImageManager.xml"/>
+    <import resource="springConfigXml/imagestore.xml"/>
+    <import resource="springConfigXml/CbtBackupStorage.xml"/>
+    <import resource="springConfigXml/jmx.xml"/>
+    <import resource="springConfigXml/JobQueueFacade.xml"/>
+    <import resource="springConfigXml/jsonlabel.xml"/>
+    <import resource="springConfigXml/keyValueFacade.xml"/>
+    <import resource="springConfigXml/Kvm.xml"/>
+    <import resource="springConfigXml/lb.xml"/>
+    <import resource="springConfigXml/accountImport.xml"/>
+    <import resource="springConfigXml/LdapManagerImpl.xml"/>
+    <import resource="springConfigXml/localStorage.xml"/>
+    <import resource="springConfigXml/vhost.xml"/>
+    <import resource="springConfigXml/iscsi.xml"/>
+    <import resource="springConfigXml/expon.xml"/>
+    <import resource="springConfigXml/zbs.xml"/>
+    <import resource="springConfigXml/cbd.xml"/>
+    <import resource="springConfigXml/ExternalPrimaryStorage.xml"/>
+    <import resource="springConfigXml/ExternalBackupStorage.xml"/>
+    <import resource="springConfigXml/ManagementNodeManager.xml"/>
+    <import resource="springConfigXml/mediator.xml"/>
+    <import resource="springConfigXml/mevoco.xml"/>
+    <import resource="springConfigXml/NetworkManager.xml"/>
+    <import resource="springConfigXml/NetworkService.xml"/>
+    <import resource="springConfigXml/NfsPrimaryStorage.xml"/>
+    <import resource="springConfigXml/PortForwarding.xml"/>
+    <import resource="springConfigXml/PrimaryStorageManager.xml"/>
+    <import resource="springConfigXml/ProgressBar.xml"/>
+    <import resource="springConfigXml/QueryFacade.xml"/>
+    <import resource="springConfigXml/SearchFacade.xml"/>
+    <import resource="springConfigXml/RESTFacade.xml"/>
+    <import resource="springConfigXml/SchedulerFacade.xml"/>
+    <import resource="springConfigXml/Progress.xml"/>
+    <import resource="springConfigXml/SecurityGroupManager.xml"/>
+    <import resource="springConfigXml/SftpBackupStorage.xml"/>
+    <import resource="springConfigXml/sharedMountPointPrimaryStorage.xml"/>
+    <import resource="springConfigXml/tag.xml"/>
+    <import resource="springConfigXml/resourceAttributes.xml"/>
+    <import resource="springConfigXml/ThreadFacade.xml"/>
+    <import resource="springConfigXml/validation.xml"/>
+    <import resource="springConfigXml/vip.xml"/>
+    <import resource="springConfigXml/VirtualRouter.xml"/>
+    <import resource="springConfigXml/VmInstanceManager.xml"/>
+    <import resource="springConfigXml/VolumeManager.xml"/>
+    <import resource="springConfigXml/volumeSnapshot.xml"/>
+    <import resource="springConfigXml/ZoneManager.xml"/>
+    <import resource="springConfigXml/vyos.xml"/>
+    <import resource="springConfigXml/ipsec.xml"/>
+    <import resource="springConfigXml/virtualRouterHa.xml"/>
+    <import resource="springConfigXml/rest.xml"/>
+    <import resource="springConfigXml/eventlog.xml"/>
+    <import resource="springConfigXml/vxlan.xml"/>
+    <import resource="springConfigXml/webhook.xml"/>
+    <import resource="springConfigXml/vrouterRoute.xml"/>
+    <import resource="springConfigXml/pciDevice.xml"/>
+    <import resource="springConfigXml/zwatch.xml"/>
+    <import resource="springConfigXml/zwatchDB.xml"/>
+    <import resource="springConfigXml/sns.xml"/>
+    <import resource="springConfigXml/externalService.xml"/>
+    <import resource="springConfigXml/cronJob.xml"/>
+    <import resource="springConfigXml/prometheus.xml"/>
+    <import resource="springConfigXml/monitoring.xml"/>
+    <import resource="springConfigXml/storageMigration.xml"/>
+    <import resource="springConfigXml/vpc.xml"/>
+    <import resource="springConfigXml/usbDevice.xml"/>
+    <import resource="springConfigXml/upgradeHack.xml"/>
+    <import resource="springConfigXml/affinityGroup.xml"/>
+    <import resource="springConfigXml/LongJobManager.xml" />
+    <import resource="springConfigXml/vipQos.xml"/>
+    <import resource="springConfigXml/sharedblock.xml"/>
+    <import resource="springConfigXml/autoscaling.xml"/>
+    <import resource="springConfigXml/volumeBackup.xml"/>
+    <import resource="springConfigXml/imageReplicator.xml"/>
+    <import resource="springConfigXml/xdragon.xml"/>
+    <import resource="springConfigXml/cloudformation.xml"/>
+    <import resource="springConfigXml/TwoFactorAuthentication.xml"/>
+    <import resource="springConfigXml/crypto.xml"/>
+    <import resource="springConfigXml/captcha.xml"/>
+    <import resource="springConfigXml/log.xml"/>
+    <import resource="springConfigXml/cpuPinning.xml" />
+    <import resource="springConfigXml/LoginControl.xml"/>
+    <import resource="springConfigXml/identity.xml"/>
+    <import resource="springConfigXml/databaseBackup.xml" />
+    <import resource="springConfigXml/accessKey.xml" />
+    <import resource="springConfigXml/tag2.xml" />
+    <import resource="springConfigXml/routeProtocol.xml" />
+    <import resource="springConfigXml/mevocoClusterManager.xml" />
+    <import resource="springConfigXml/vpcHa.xml" />
+    <import resource="springConfigXml/LogConfiguration.xml"/>
+    <import resource="springConfigXml/Log4j2Configuration.xml"/>
+    <import resource="springConfigXml/grafana.xml"/>
+    <import resource="springConfigXml/guesttools.xml"/>
+    <import resource="springConfigXml/drs.xml"/>
+    <import resource="springConfigXml/sriov.xml" />
+    <import resource="springConfigXml/vdpa.xml"/>
+    <import resource="springConfigXml/vHostUser.xml"/>
+    <import resource="springConfigXml/ovs.xml"/>
+    <import resource="springConfigXml/NetworkPlugin.xml" />
+    <import resource="springConfigXml/vmNuma.xml" />
+    <import resource="springConfigXml/ovf.xml"/>
+    <import resource="springConfigXml/sso.xml"/>
+    <import resource="springConfigXml/cas.xml"/>
+    <import resource="springConfigXml/vmSchedulingRule.xml"/>
+    <import resource="springConfigXml/directoryManager.xml"/>
+    <import resource="springConfigXml/mttyDevice.xml"/>
+    <import resource="springConfigXml/upgrade.xml"/>
+    <import resource="springConfigXml/bonding.xml"/>
+    <import resource="springConfigXml/macVlan.xml"/>
+    <import resource="springConfigXml/sshKeyPair.xml"/>
+    <import resource="springConfigXml/snmp.xml"/>
+    <import resource="springConfigXml/zopsPlugin.xml"/>
+    <import resource="springConfigXml/memoryBalloon.xml"/>
+    <import resource="springConfigXml/zsv.xml"/>
+    <import resource="springConfigXml/telemetry.xml"/>
+    <import resource="springConfigXml/virtualSwitch.xml"/>
+    <import resource="springConfigXml/HostNetworkManager.xml"/>
+    <import resource="springConfigXml/iam1/iam1-ensemble.xml"/>
+    <import resource="springConfigXml/iam1/iam1-accounts.xml"/>
+    <import resource="springConfigXml/managements/managements-ha2.xml"/>
+    <import resource="springConfigXml/agents/softwarePackagePlugin.xml"/>
+    <import resource="springConfigXml/agents/zmigratePlugin.xml"/>
+</beans>

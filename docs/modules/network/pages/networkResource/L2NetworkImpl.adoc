@@ -1,0 +1,282 @@
+= 二层网络的实现
+
+== 概述
+
+二层网络代码入口在 `L2NetworkManagerImpl`，继承了 `AbstractService`，向ZStack CloudBus模块注册一个模块 `network.l2`.
+所以二层网络的处理消息会发给 `L2NetworkManagerImpl`
+[source,java]
+----
+/* 注册模块: network.l2 */
+@Override
+public String getId() {
+    return bus.makeLocalServiceId(L2NetworkConstant.SERVICE_ID);
+}
+
+@Override
+public boolean start() {
+    populateExtensions();
+    return true;
+}
+----
+
+如上所示，`L2NetworkManagerImpl` 还是实现了 `start` 方法，在ZStack管理节点启动时候，进行一些初始化操作。
+在这个方法里面，通过类扫描，初始化了两个Map, `l2NetworkFactories` 和 `realizationExts`
+[source,java]
+----
+private void populateExtensions() {
+    for (L2NetworkFactory f : pluginRgty.getExtensionList(L2NetworkFactory.class)) {
+        L2NetworkFactory old = l2NetworkFactories.get(f.getType().toString());
+        if (old != null) {
+            throw new CloudRuntimeException(String.format("duplicate L2NetworkFactory[%s, %s] for type[%s]",
+                    f.getClass().getName(), old.getClass().getName(), f.getType()));
+        }
+        l2NetworkFactories.put(f.getType().toString(), f);
+    }
+
+    for (L2NetworkRealizationExtensionPoint extp : pluginRgty.getExtensionList(L2NetworkRealizationExtensionPoint.class)) {
+        Map<HypervisorType, L2NetworkRealizationExtensionPoint> map = realizationExts.get(extp.getSupportedL2NetworkType());
+        if (map == null) {
+            map = new HashMap<HypervisorType, L2NetworkRealizationExtensionPoint>(1);
+            realizationExts.put(extp.getSupportedL2NetworkType(), map);
+        }
+        map.put(extp.getSupportedHypervisorType(), extp);
+    }
+----
+
+`l2NetworkFactories` 保存不同类型网络的 `L2NetworkFactory`。目前的网络有: NoVlan, Vlan, VxlanNetworkPool, VxlanNetwork等，每个类型的网络都有一个工厂类，实现创建二层网络。
+对比 `Openstack`, `l2NetworkFactories` 类似 `Neutron type driver`, 它将不同类型的配置信息保存到数据库。
+
+`realizationExts`  保存不同类型网络在物理机上的实现方法： `L2NetworkRealizationExtensionPoint`。对比 `Openstack`，它类似与 `Neutron mech driver`.
+每个 `L2NetworkRealizationExtensionPoint` 的类称为一个backend, 它有两个属性: 网络类型, 物理机hypervisor类型。`L2NetworkRealizationExtensionPoint` 主要包含了3个方法:check, realize, delete
+
+`Neutron ML2` 信息可参考 https://docs.openstack.org/neutron/pike/admin/config-ml2.html[ML2 plug-in]
+
+[source,java]
+----
+public interface L2NetworkRealizationExtensionPoint {
+    void realize(L2NetworkInventory l2Network, String hostUuid, Completion completion);
+    void check(L2NetworkInventory l2Network, String hostUuid, Completion completion);
+    void delete(L2NetworkInventory l2Network, String hostUuid, Completion completion);
+}
+----
+
+通过这两个接口类，可以添加新的网络类型，或者为已有网络类型添加新的实现方法。添加新的网络类型，必然需要增加新的 `L2NetworkRealizationExtensionPoint`
+
+以NoVlan，Vlan，VxLan为例，下图描述了它们之间的关系
+
+image::l2/l2NetworkImpl.svg[]
+
+
+== 创建二层网络
+
+用户在UI创建二层网络的时候，`L2NetworkManagerImpl`会收到 `APICreateL2NetworkMsg` 消息，根据网络类型选择不同的工厂类，创建二层网络
+
+如下创建二层网络的主要代码
+[source,java]
+----
+private void handle(APICreateL2NetworkMsg msg) {
+    L2NetworkType type = L2NetworkType.valueOf(msg.getType());
+    VSwitchType vSwitchType = VSwitchType.valueOf(msg.getvSwitchType());
+    L2NetworkFactory factory = getL2NetworkFactory(type);
+    L2NetworkVO vo = new L2NetworkVO();
+    if (msg.getResourceUuid() != null) {
+        vo.setUuid(msg.getResourceUuid());
+    } else {
+        vo.setUuid(Platform.getUuid());
+    }
+    vo.setDescription(msg.getDescription());
+    vo.setName(msg.getName());
+    vo.setPhysicalInterface(msg.getPhysicalInterface());
+    vo.setType(type.toString());
+    vo.setvSwitchType(vSwitchType.toString());
+    vo.setZoneUuid(msg.getZoneUuid());
+    vo.setAccountUuid(msg.getSession().getAccountUuid());
+    factory.createL2Network(vo, msg, new ReturnValueCompletion<L2NetworkInventory>(msg) {
+        @Override
+        public void success(L2NetworkInventory returnValue) {
+            tagMgr.createTagsFromAPICreateMessage(msg, returnValue.getUuid(), L2NetworkVO.class.getSimpleName());
+            APICreateL2NetworkEvent evt = new APICreateL2NetworkEvent(msg.getId());
+            evt.setInventory(returnValue);
+            bus.publish(evt);
+        }
+
+        @Override
+        public void fail(ErrorCode errorCode) {
+            APICreateL2NetworkEvent evt = new APICreateL2NetworkEvent(msg.getId());
+            evt.setError(errorCode);
+            bus.publish(evt);
+        }
+    });
+
+}
+----
+
+以vlan类型的网络为例，创建二层网络，仅仅保存数据库就结束了。如果是对接硬件SDN, 请参考对接SDN章节。
+[source,java]
+----
+@Override
+public void createL2Network(L2NetworkVO ovo, APICreateL2NetworkMsg msg, ReturnValueCompletion completion) {
+    APICreateL2VlanNetworkMsg amsg = (APICreateL2VlanNetworkMsg) msg;
+    L2VlanNetworkVO vo = new L2VlanNetworkVO(ovo);
+    vo.setVlan(amsg.getVlan());
+    vo = dbf.persistAndRefresh(vo);
+    L2VlanNetworkInventory inv = L2VlanNetworkInventory.valueOf(vo);
+    String info = String.format("successfully create L2VlanNetwork, %s", JSONObjectUtil.toJsonString(inv));
+    logger.debug(info);
+    completion.success(inv);
+}
+----
+
+== 二层网络加载集群
+创建二层网络以后，只有加载到集群，集群中的物理机才创建对应的二层网络。
+
+二层网络加载集群, `L2NetworkManagerImpl` 会收到 `APIAttachL2NetworkToClusterMsg`。以为vlan网络加载到集群为例，主要业务逻辑如下
+主要有两个步骤：
+
+* 检查物理机上是否存储Vlan网络需要的接口名称
+* 在物理机上创建二层网络
+
+[source,java]
+----
+private void prepareL2NetworkOnHosts(final List<HostInventory> hosts, final Completion completion) {
+        FlowChain chain = FlowChainBuilder.newSimpleFlowChain();
+        chain.setName(String.format("prepare-l2-%s-on-hosts", self.getUuid()));
+        chain.then(new NoRollbackFlow() {
+            @Override
+            public void run(final FlowTrigger trigger, Map data) {
+                List<CheckNetworkPhysicalInterfaceMsg> cmsgs = new ArrayList<CheckNetworkPhysicalInterfaceMsg>();
+                for (HostInventory h : hosts) {
+                    CheckNetworkPhysicalInterfaceMsg cmsg = new CheckNetworkPhysicalInterfaceMsg();
+                    cmsg.setHostUuid(h.getUuid());
+                    cmsg.setPhysicalInterface(self.getPhysicalInterface());
+                    bus.makeTargetServiceIdByResourceUuid(cmsg, HostConstant.SERVICE_ID, h.getUuid());
+                    cmsgs.add(cmsg);
+                }
+
+                if (cmsgs.isEmpty()) {
+                    trigger.next();
+                    return;
+                }
+
+                bus.send(cmsgs, new CloudBusListCallBack(trigger) {
+                    @Override
+                    public void run(List<MessageReply> replies) {
+                        for (MessageReply r : replies) {
+                            if (!r.isSuccess()) {
+                                trigger.fail(r.getError());
+                                return;
+                            }
+                        }
+
+                        trigger.next();
+                    }
+                });
+            }
+        }).then(new NoRollbackFlow() {
+            private void realize(final Iterator<HostInventory> it, final FlowTrigger trigger) {
+                if (!it.hasNext()) {
+                    trigger.next();
+                    return;
+                }
+
+                HostInventory host = it.next();
+                realizeNetwork(host.getUuid(), host.getHypervisorType(), new Completion(trigger) {
+                    @Override
+                    public void success() {
+                        realize(it, trigger);
+                    }
+
+                    @Override
+                    public void fail(ErrorCode errorCode) {
+                        trigger.fail(errorCode);
+                    }
+                });
+            }
+
+            @Override
+            public void run(FlowTrigger trigger, Map data) {
+                realize(hosts.iterator(), trigger);
+            }
+        }).then(new NoRollbackFlow() {
+            String __name__ = "after-l2-network-attached";
+
+            private void after(final Iterator<HostInventory> it, final FlowTrigger trigger) {
+                if (!it.hasNext()) {
+                    trigger.next();
+                    return;
+                }
+
+                HostInventory host = it.next();
+                afterAttachNetwork(host.getUuid(), host.getHypervisorType(), new Completion(trigger) {
+                    @Override
+                    public void success() {
+                        after(it, trigger);
+                    }
+
+                    @Override
+                    public void fail(ErrorCode errorCode) {
+                        trigger.fail(errorCode);
+                    }
+                });
+            }
+
+            @Override
+            public void run(FlowTrigger trigger, Map data) {
+                after(hosts.iterator(), trigger);
+            }
+        }).done(new FlowDoneHandler(completion) {
+            @Override
+            public void handle(Map data) {
+                completion.success();
+            }
+        }).error(new FlowErrorHandler(completion) {
+            @Override
+            public void handle(ErrorCode errCode, Map data) {
+                completion.fail(errCode);
+            }
+        }).start();
+    }
+----
+
+在集群添加物理机的时候，集群中的二层网络也会加载到物理机上。
+
+== 二层网络卸载集群
+二层网络加载集群, `L2NetworkManagerImpl` 会收到 `APIDetachL2NetworkFromClusterMsg`。以为vlan网络从集群卸载为例，主要业务逻辑如下
+
+[source,java]
+----
+private void deleteL2Bridge(List<String> clusterUuids, Completion completion) {
+    List<HostVO> hosts = Q.New(HostVO.class)
+            .in(HostVO_.clusterUuid, clusterUuids)
+            .list();
+    List<ErrorCode> errs = new ArrayList<>();
+    new While<>(hosts).step((host,compl) -> {
+        HostInventory hostInv = HostInventory.valueOf(host);
+            L2NetworkInventory l2Inv = getSelfInventory();
+
+            L2NetworkRealizationExtensionPoint ext = l2Mgr.getRealizationExtension(l2Inv, hostInv);
+        ext.delete(getSelfInventory(), host.getUuid(), new Completion(compl){
+            @Override
+            public void success() {
+                compl.done();
+            }
+
+            @Override
+            public void fail(ErrorCode errorCode) {
+                errs.add(errorCode);
+                compl.done();
+            }
+
+        });
+    },10).run((new WhileDoneCompletion(completion) {
+        @Override
+        public void done(ErrorCodeList errorCodeList) {
+            if (errs.size() > 0) {
+                logger.debug(String.format("delete bridge fail [error is %s ], but ignore", errs.get(0).toString()));
+            }
+            completion.success();
+
+        }
+    }));
+}
+----

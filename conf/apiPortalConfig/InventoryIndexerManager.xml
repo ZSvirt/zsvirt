@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+<?xml version="1.0" encoding="UTF-8"?>
+<servicePortalConfig xmlns="http://zstack.org/schema/zstack">
+	<targetServiceId>
+		Optional.
+		The spring bean name which handles api message listed in this file.
+		This is a global option that can be overrided by targetServiceId property of each api 
+		message
+	</targetServiceId>
+	
+	<targetServiceRouter>
+		Optional.
+		The spring bean name or class name that implements ApimessageRouter interface which works
+		out target service id for message. The value will first be treated as spring bean name, if
+		zstack fails to retrieve such bean, it will be treated as class name then an instance will be
+		created from this class. The class identified by this value must have a zero-argument constructor,
+		otherwise an exception will be raised. This is a global option that can be overrided by targetServiceRouter
+		property of each api message
+	</targetServiceRouter>
+	
+	<interceptor>
+		Optional.
+		The spring bean name or class name that implements ApimessageInterceptor interface which intercepts
+		api message before it being route to target service. The value will first be treated as spring bean name, if
+		zstack fails to retrieve such bean, it will be treated as class name then an instance will be
+		created from this class. The class identified by this value must have a zero-argument constructor,
+		otherwise an exception will be raised. This is a global option that can be overrided by targetServiceRouter
+		property of each api message
+	</interceptor>
+	
+	<message>
+		<class>
+			Mandatory.
+			The canonical name of api message class. e.g org.zstack.header.zone.APIChangeZoneStateMsg
+		</class>
+		<targetServiceId>
+			Optional.
+			target service id which overrides global setting
+		</<targetServiceId>
+		<targetServiceRouter>
+			Optional.
+			target service router that overrides global setting
+		</targetServiceRouter>
+		<interceptor> Optional.interceptor 1 </interceptor>
+		<interceptor> Optional.interceptor 2 </interceptor>
+		<interceptor> Optional.interceptor N </interceptor>
+	</message>
+</servicePortalConfig>
+	
+	NOTE: 1. For each message, either targetServiceId or targetServiceRouter must be set. It can be inherited from global setting
+	         or from message's own property. An exception will be raised if both targetServiceId and targetServiceRouter are omitted
+	         
+	      2. A message can have multiple interceptors constructing a interceptor chain, each interceptor in chain is invoked in order of
+	         they present. If message has interceptor property set, the global interceptor is ignored. You can list global interceptor
+	         in message's interceptor list in case you want global interceptor to join message's interceptor chain. If global interceptor
+	         present but message has no interceptor property set, the global interceptor is the only interceptor in message's interceptor chain.
+-->
+
+<servicePortalConfig xmlns="http://zstack.org/schema/zstack">
+	<targetServiceId>InventoryIndexManager</targetServiceId>
+	
+	<message>
+		<class>org.zstack.header.search.APIDeleteSearchIndexMsg</class>
+	</message>
+	
+	<message>
+		<class>org.zstack.header.search.APICreateSearchIndexMsg</class>
+	</message>
+	
+	<message>
+		<class>org.zstack.header.query.APIGenerateInventoryQueryDetailsMsg</class>
+		<targetServiceId>QueryFacade</targetServiceId>
+	</message>
+	
+</servicePortalConfig>

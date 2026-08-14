@@ -1,0 +1,8 @@
+<error>
+    <prefix>SEARCH</prefix>
+
+    <code>
+        <id>1000</id>
+        <description>Search module disabled</description>
+    </code>
+</error>

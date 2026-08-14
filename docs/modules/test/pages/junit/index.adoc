@@ -1,0 +1,92 @@
+# JUnit 测试框架
+:xrefstyle: full
+:source-highlighter: highlightjs
+
+## 介绍
+
+JUnit 是一个开源的 Java 语言的单元测试框架，专门针对 Java 设计，使用最广泛。JUnit 是 Java 生态事实上的单元测试的标准框架。
+
+JUnit 的详细介绍可以参考网络上的资料，这里主要介绍 ZStack 如何使用 JUnit。
+
+## 使用指南
+
+ZStack 对 JUnit 的使用相对较少，这是因为 JUnit 对于云这样一个复杂的、充满状态的系统的测试是很力不从心的，详见 xref:test:index.adoc#why-so-many-test-framwork[为什么存在不同的测试框架]。
+
+需要注意的是新编写的 JUnit 测试用例不会再 PR 系统运行测试用例的时候自动运行，而是需要手动注册到 `JUnitTestSuite`，例如：
+
+[source,java]
+----
+include::example$symlink_to_JUnitTestSuite.groovy[lines=18..28]
+...
+----
+
+## 运行测试用例
+
+在 `test` 目录下直接运行对应的 test case 即可，例如：
+
+[source,bash]
+----
+⚡ root@ut1 (/var/ftp/zstack-repos/zstack/test) [master] mvn test -Dtest=NetworkUtilsCase <.>
+
+[INFO] Scanning for projects...
+[WARNING]
+[WARNING] Some problems were encountered while building the effective model for org.zstack:test:jar:4.3.0
+...       <.>
+[WARNING]
+[INFO]
+[INFO] ------------------------------------------------------------------------
+[INFO] Building test 4.3.0
+[INFO] ------------------------------------------------------------------------
+[INFO]
+[INFO] --- maven-resources-plugin:2.5:copy-resources (copy-conf) @ test ---
+[debug] execute contextualize
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] Copying 404 resources
+[INFO]
+[INFO] --- jacoco-maven-plugin:0.8.6:prepare-agent (prepare-agent) @ test ---
+[INFO] Skipping JaCoCo execution because property jacoco.skip is set.  <.>
+[INFO] argLine set to empty
+[INFO]
+...      <.>
+[INFO] Copying 542 resources
+[INFO]
+[INFO] --- maven-compiler-plugin:3.6.1:testCompile (default-testCompile) @ test ---
+[INFO] Nothing to compile - all classes are up to date    <.>
+[INFO]
+[INFO] --- aspectj-maven-plugin:1.10:test-compile (default) @ test ---
+[INFO] No modifications found skipping aspectJ compile
+[INFO]
+[INFO] --- maven-surefire-plugin:2.18:test (default-test) @ test ---
+[INFO] Surefire report directory: /var/ftp/zstack-repos/zstack/test/target/surefire-reports
+
+-------------------------------------------------------
+ T E S T S
+-------------------------------------------------------
+Running org.zstack.test.unittest.utils.NetworkUtilsCase
+2022-02-17 17:53:51,676 DEBUG [NetworkUtils] {} get Cidrs from startIp:[10.75.0.1], endId: [10.75.0.255]
+2022-02-17 17:53:51,686 DEBUG [NetworkUtils] {} cidrs: [10.75.0.0/24]
+2022-02-17 17:53:51,695 DEBUG [NetworkUtils] {} get Cidrs from startIp:[10.75.0.1], endId: [10.75.0.255]
+2022-02-17 17:53:51,695 DEBUG [NetworkUtils] {} cidrs: [10.75.0.1/32, 10.75.0.2/31, 10.75.0.4/30, 10.75.0.8/29, 10.75.0.16/28, 10.75.0.32/27, 10.75.0.64/26, 10.75.0.128/25]
+Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.584 sec - in org.zstack.test.unittest.utils.NetworkUtilsCase
+
+Results :
+
+
+
+
+Tests run: 3, Failures: 0, Errors: 0, Skipped: 0
+
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time: 5.584s      <.>
+[INFO] Finished at: Thu Feb 17 17:53:51 CST 2022
+[INFO] Final Memory: 28M/481M
+[INFO] ------------------------------------------------------------------------
+----
+<.> 运行 `NetworkUtilsCase`
+<.> 中间省略
+<.> 因为环境变量配置了 `skipJacoco=true` 因此跳过了 `jacoco`
+<.> 中间省略
+<.> 假设开发者没有更改 `test` 的代码，自动跳过编译
+<.> 可以看到只需 5s 即可完成测试

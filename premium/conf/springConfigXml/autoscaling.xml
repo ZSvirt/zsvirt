@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+    xmlns:tx="http://www.springframework.org/schema/tx" xmlns:zstack="http://zstack.org/schema/zstack"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+    http://www.springframework.org/schema/aop
+    http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+    http://www.springframework.org/schema/tx 
+    http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+    http://zstack.org/schema/zstack 
+    http://zstack.org/schema/zstack/plugin.xsd"
+    default-init-method="init" default-destroy-method="destroy">
+
+    <bean id="AutoScalingManagerImpl" class="org.zstack.autoscaling.AutoScalingManagerImpl">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.Component" />
+            <zstack:extension interface="org.zstack.header.Service" />
+            <zstack:extension interface="org.zstack.header.managementnode.ManagementNodeReadyExtensionPoint" />
+            <zstack:extension interface="org.zstack.compute.affinityGroup.DeleteAffinityGroupExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="ScalingGroupVmInstanceFactory" class="org.zstack.autoscaling.group.instance.ScalingGroupVmInstanceFactory">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.autoscaling.group.instance.ScalingGroupInstanceFactory" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="AutoScalingAddingNewInstanceRuleFactory" class="org.zstack.autoscaling.group.rule.AutoScalingAddingNewInstanceRuleFactory">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.autoscaling.group.rule.AutoScalingRuleFactory" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="AutoScalingRemovalInstanceRuleFactory" class="org.zstack.autoscaling.group.rule.AutoScalingRemovalInstanceRuleFactory">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.autoscaling.group.rule.AutoScalingRuleFactory" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="AutoScalingRuleManagerImpl" class="org.zstack.autoscaling.group.rule.AutoScalingRuleManagerImpl">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.Component" />
+            <zstack:extension interface="org.zstack.scheduler.autoscalinggroup.TakeAutoScalingSchedulerJobExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="AutoScalingRuleVmInstanceAlarmManager" class="org.zstack.autoscaling.group.rule.trigger.AutoScalingRuleVmInstanceAlarmManager">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.autoscaling.group.activity.action.AutoScalingCreateInstancesActionExtensionPoint" />
+            <zstack:extension interface="org.zstack.autoscaling.group.activity.action.AutoScalingGroupRemoveInstancesActionExtensionPoint"/>
+            <zstack:extension interface="org.zstack.autoscaling.group.AutoScalingGroupStateChangedExtensionPoint"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="AutoScalingGroupVmInstanceHealthManagerImpl" class="org.zstack.autoscaling.group.instance.vm.AutoScalingGroupVmInstanceHealthManagerImpl">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.Component" />
+            <zstack:extension interface="org.zstack.header.managementnode.ManagementNodeReadyExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="AutoScalingInterceptor" class="org.zstack.autoscaling.AutoScalingInterceptor">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.apimediator.ApiMessageInterceptor" />
+            <zstack:extension interface="org.zstack.header.apimediator.GlobalApiMessageInterceptor" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="AutoScalingRuleCascadeExtension" class="org.zstack.autoscaling.group.rule.AutoScalingRuleCascadeExtension">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.core.cascade.CascadeExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="AutoScalingGroupInstanceCascadeExtension" class="org.zstack.autoscaling.group.instance.AutoScalingGroupInstanceCascadeExtension">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.core.cascade.CascadeExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="AutoScalingGroupActivityCascadeExtension" class="org.zstack.autoscaling.group.activity.AutoScalingGroupActivityCascadeExtension">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.core.cascade.CascadeExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="AutoScalingGroupCascadeExtension" class="org.zstack.autoscaling.group.AutoScalingGroupCascadeExtension">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.core.cascade.CascadeExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="AutoScalingTemplateCascadeExtension" class="org.zstack.autoscaling.template.AutoScalingTemplateCascadeExtension">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.core.cascade.CascadeExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="AutoScalingRuleAlarmTriggerFactory" class="org.zstack.autoscaling.group.rule.trigger.AutoScalingRuleAlarmTriggerFactory">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.autoscaling.group.rule.trigger.AutoScalingRuleTriggerFactory" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="AutoScalingRuleSchedulerJobTriggerFactory" class="org.zstack.autoscaling.group.rule.trigger.AutoScalingRuleSchedulerJobTriggerFactory">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.autoscaling.group.rule.trigger.AutoScalingRuleTriggerFactory" />
+        </zstack:plugin>
+    </bean>
+
+</beans>

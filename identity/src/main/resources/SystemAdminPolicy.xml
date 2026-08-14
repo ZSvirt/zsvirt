@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<policy xmlns="http://zstack.org/schema/zstack">
+	<statement>
+		<effect>allow</effect>
+		<role>.*</role>
+	</statement>
+</policy>

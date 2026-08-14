@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<globalConfig xmlns="http://zstack.org/schema/zstack">
+    <config>
+        <category>cluster</category>
+        <name>update.os.parallelismDegree</name>
+        <description>The maximum count of cluster that can update operating system at the same time</description>
+        <defaultValue>10</defaultValue>
+        <type>java.lang.Integer</type>
+    </config>
+</globalConfig>

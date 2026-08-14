@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<globalConfig xmlns="http://zstack.org/schema/zstack">
+    <config>
+        <name>enable.fc.device.scan</name>
+        <description>auto scan sg(SCSI/ATAPI/ATA) devices</description>
+        <defaultValue>true</defaultValue>
+        <category>storageDevice</category>
+        <type>java.lang.Boolean</type>
+    </config>
+
+    <config>
+        <name>enable.nvme.device.scan</name>
+        <description>auto scan NVMe-oF devices</description>
+        <defaultValue>true</defaultValue>
+        <category>storageDevice</category>
+        <type>java.lang.Boolean</type>
+    </config>
+
+    <config>
+        <name>enable.multipath</name>
+        <description>enable means to enable multipath, disable means to close multipath, and ignore means to make no changes to the current configuration</description>
+        <defaultValue>enable</defaultValue>
+        <category>storageDevice</category>
+        <type>java.lang.String</type>
+    </config>
+
+    <config>
+        <name>enable.localraid</name>
+        <description>enable raid scan and selftest</description>
+        <defaultValue>false</defaultValue>
+        <category>storageDevice</category>
+        <type>java.lang.Boolean</type>
+    </config>
+
+    <config>
+        <name>serverAttachToCluster.retryTimes</name>
+        <description>iscsi server attach to cluster max retry times</description>
+        <defaultValue>3</defaultValue>
+        <category>storageDevice</category>
+        <type>java.lang.Integer</type>
+    </config>
+
+    <config>
+        <name>allow.differentIscsiConfig</name>
+        <description>allow different iscsi server configure on different hosts</description>
+        <defaultValue>false</defaultValue>
+        <category>storageDevice</category>
+        <type>java.lang.Boolean</type>
+    </config>
+
+    <config>
+        <name>multipath.blacklist</name>
+        <description>blacklist of multipath, for example: [{device:[{vendor:"IBM"}, {product:"3S42"}]}, {wwid:"36001405913ad48768b84db39bbcc5cb0"}], and empty string means to make no changes to the current configuration</description>
+        <defaultValue></defaultValue>
+        <category>storageDevice</category>
+        <type>java.lang.String</type>
+    </config>
+</globalConfig>

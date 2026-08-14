@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<globalConfig xmlns="http://zstack.org/schema/zstack">
+    <config>
+        <name>ping.interval</name>
+        <description>The interval management server sends ping command to backup storage, in seconds</description>
+        <defaultValue>60</defaultValue>
+        <type>java.lang.Integer</type>
+        <category>backupStorage</category>
+    </config>
+
+    <config>
+        <name>ping.parallelismDegree</name>
+        <description>The max number of backup storage management server sends ping commands in parallel</description>
+        <defaultValue>50</defaultValue>
+        <type>java.lang.Integer</type>
+        <category>backupStorage</category>
+    </config>
+
+    <config>
+        <name>reservedCapacity</name>
+        <description>Reserved capcacity on every backup storage</description>
+        <defaultValue>1G</defaultValue>
+        <category>backupStorage</category>
+    </config>
+
+    <config>
+        <category>backupStorage</category>
+        <name>connection.autoReconnectOnError</name>
+        <description>A boolean value indicating whether management server automatically starts a reconnect if a backup storage ping command fails</description>
+        <defaultValue>true</defaultValue>
+        <type>java.lang.Boolean</type>
+    </config>
+
+    <config>
+        <category>backupStorage</category>
+        <name>connection.autoReconnectOnError.maxAttemptsNum</name>
+        <description>the number of continuous connect failures that do not auto reconnect backup storage again. 0 means never stop.</description>
+        <defaultValue>0</defaultValue>
+        <type>java.lang.Integer</type>
+    </config>
+
+    <config>
+        <category>backupStorage</category>
+        <name>ping.maxFailure</name>
+        <description>The maximum count of ping failure before reconnecting backup storage</description>
+        <defaultValue>3</defaultValue>
+        <type>java.lang.Integer</type>
+    </config>
+
+    <config>
+        <category>backupStorage</category>
+        <name>ping.sleepPeriodAfterFailure</name>
+        <description>The sleep period before retrying the next backup storage ping after a ping failure</description>
+        <defaultValue>1</defaultValue>
+        <type>java.lang.Integer</type>
+    </config>
+</globalConfig>

@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:zstack="http://zstack.org/schema/zstack"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+         http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+         http://www.springframework.org/schema/aop
+         http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+         http://www.springframework.org/schema/tx 
+     	 http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+     	 http://zstack.org/schema/zstack 
+         http://zstack.org/schema/zstack/plugin.xsd"
+	default-init-method="init" default-destroy-method="destroy">
+    
+    <bean id="UsbDeviceManager" class="org.zstack.usbDevice.UsbDeviceManager" >
+    	<zstack:plugin>
+			<zstack:extension interface="org.zstack.header.Service" />
+			<zstack:extension interface="org.zstack.header.Component" />
+			<zstack:extension interface="org.zstack.kvm.KVMStartVmAddonExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.apimediator.GlobalApiMessageInterceptor"/>
+			<zstack:extension interface="org.zstack.compute.vm.VmCapabilitiesExtensionPoint"/>
+			<zstack:extension interface="org.zstack.header.vm.VmInstanceMigrateExtensionPoint"/>
+			<zstack:extension interface="org.zstack.ha.HaHostDeviceExtensionPoint" />
+			<zstack:extension interface="org.zstack.header.vm.PreVmInstantiateResourceExtensionPoint" />
+		</zstack:plugin>
+    </bean>
+
+	<bean id="UsbDeviceKvmBackend" class="org.zstack.usbDevice.KvmUsbDeviceBackend.UsbDeviceKvmBackend" >
+		<zstack:plugin>
+			<zstack:extension interface="org.zstack.usbDevice.UsbDeviceBackend" />
+			<zstack:extension interface="org.zstack.kvm.KVMHostConnectExtensionPoint" />
+			<zstack:extension interface="org.zstack.header.host.HostConnectionReestablishExtensionPoint" />
+			<zstack:extension interface="org.zstack.header.host.HostAfterConnectedExtensionPoint" />
+		</zstack:plugin>
+	</bean>
+
+	<bean id="UsbDeviceApiInterceptor" class="org.zstack.usbDevice.UsbDeviceApiInterceptor" >
+		<zstack:plugin>
+			<zstack:extension interface="org.zstack.header.apimediator.ApiMessageInterceptor" />
+			<zstack:extension interface="org.zstack.header.apimediator.GlobalApiMessageInterceptor" />
+			<zstack:extension interface="org.zstack.header.storage.snapshot.group.MemorySnapshotValidatorExtensionPoint"/>
+		</zstack:plugin>
+	</bean>
+
+	<bean id="UsbDeviceCascadeExtension" class="org.zstack.usbDevice.UsbDeviceCascadeExtension" >
+		<zstack:plugin>
+			<zstack:extension interface="org.zstack.core.cascade.CascadeExtensionPoint"/>
+		</zstack:plugin>
+	</bean>
+
+	<bean id="UsbDeviceReserveFlow" class="org.zstack.usbDevice.UsbDeviceReserveFlow" >
+		<zstack:plugin>
+			<zstack:extension interface="org.zstack.header.allocator.HostAllocatorReserveExtensionPoint"/>
+		</zstack:plugin>
+	</bean>
+
+	<bean id="UsbDeviceAllocatorFactory" class="org.zstack.usbDevice.UsbDeviceAllocatorFactory">
+		<zstack:plugin>
+			<zstack:extension interface="org.zstack.header.Component"/>
+			<zstack:extension interface="org.zstack.header.allocator.HostAllocatorStrategyFactory"/>
+			<zstack:extension interface="org.zstack.header.allocator.HostAllocatorFilterExtensionPoint"/>
+			<zstack:extension interface="org.zstack.header.allocator.HostAllocatorStrategyExtensionPoint"/>
+		</zstack:plugin>
+
+		<property name="producerNames">
+			<list>
+				<value>org.zstack.compute.allocator.AttachedL2NetworkAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.DesignatedHostAllocatorProducer</value>
+                <value>org.zstack.compute.allocator.HostStateAndHypervisorAllocatorProducer</value>
+			</list>
+		</property>
+		<property name="allocatorFlowNames">
+			<list>
+				<value>org.zstack.compute.allocator.BackupStorageSelectPrimaryStorageAllocatorFlow</value>
+				<value>org.zstack.compute.allocator.DesignatedHostAllocatorFlow</value>
+				<value>org.zstack.compute.allocator.HostStateAndHypervisorAllocatorFlow</value>
+				<value>org.zstack.compute.allocator.HostCapacityAllocatorFlow</value>
+				<value>org.zstack.compute.allocator.AttachedVolumePrimaryStorageAllocatorFlow</value>
+				<value>org.zstack.compute.allocator.ImageBackupStorageAllocatorFlow</value>
+				<value>org.zstack.compute.allocator.HostPrimaryStorageAllocatorFlow</value>
+				<value>org.zstack.compute.allocator.AvoidHostAllocatorFlow</value>
+				<value>org.zstack.compute.allocator.TagAllocatorFlow</value>
+				<value>org.zstack.compute.allocator.FilterFlow</value>
+			</list>
+		</property>
+		<property name="sortFlowNames">
+			<list>
+				<value>org.zstack.compute.allocator.PrimaryStoragePrioritySortFlow</value>
+                <value>org.zstack.compute.vmscheduling.VmSchedulingRuleSortFlow</value>
+				<value>org.zstack.compute.allocator.LeastVmPreferredSortFlow</value>
+			</list>
+		</property>
+	</bean>
+</beans>

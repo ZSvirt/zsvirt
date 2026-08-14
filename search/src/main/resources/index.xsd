@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns="http://zstack.org/schema/zstack"
+            xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            targetNamespace="http://zstack.org/schema/zstack" elementFormDefault="qualified"
+            attributeFormDefault="unqualified">
+    <xsd:element name="indexes">
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element name="default.analyzer.name" type="xsd:string"/>
+                <xsd:element name="analyzerDef" type="analyzerDefType" maxOccurs="unbounded" minOccurs="0"/>
+                <xsd:element name="index" type="indexType" maxOccurs="unbounded" minOccurs="0"/>
+            </xsd:sequence>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:complexType name="analyzerDefType">
+        <xsd:sequence>
+            <xsd:element name="analyzer">
+                <xsd:complexType>
+                    <xsd:attribute name="factory" type="xsd:string" use="required"/>
+                </xsd:complexType>
+            </xsd:element>
+            <xsd:element name="filter" minOccurs="0" maxOccurs="unbounded" type="filterType"/>
+        </xsd:sequence>
+        <xsd:attribute name="name" type="xsd:string" use="required"/>
+    </xsd:complexType>
+
+    <xsd:complexType name="filterType">
+        <xsd:sequence>
+            <xsd:element name="param" maxOccurs="unbounded" minOccurs="0">
+                <xsd:complexType>
+                    <xsd:attribute name="name" type="xsd:string" use="required"/>
+                    <xsd:attribute name="value" type="xsd:string" use="required"/>
+                </xsd:complexType>
+            </xsd:element>
+        </xsd:sequence>
+        <xsd:attribute name="factory" type="xsd:string" use="required"/>
+    </xsd:complexType>
+
+    <xsd:complexType name="indexType">
+        <xsd:sequence>
+            <xsd:element name="prop" maxOccurs="unbounded" minOccurs="0">
+                <xsd:complexType>
+                    <xsd:attribute name="name" type="xsd:string" use="required"/>
+                    <xsd:attribute name="analyzer" type="xsd:string"/>
+                </xsd:complexType>
+            </xsd:element>
+        </xsd:sequence>
+        <xsd:attribute name="name" type="xsd:string" use="required"/>
+        <xsd:attribute name="baseClass" type="xsd:boolean" use="required"/>
+    </xsd:complexType>
+</xsd:schema>

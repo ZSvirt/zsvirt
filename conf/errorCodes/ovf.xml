@@ -1,0 +1,39 @@
+<error>
+    <prefix>OVF</prefix>
+
+    <code>
+        <id>1001</id>
+        <description>Failed to parse OVF template XML text</description>
+    </code>
+
+    <code>
+        <id>1002</id>
+        <description>OVF template XML is invalid</description>
+    </code>
+
+    <code>
+        <id>1003</id>
+        <description>Failed to parse image info JSON text</description>
+    </code>
+
+    <code>
+        <id>1004</id>
+        <description>Image info is invalid</description>
+    </code>
+
+    <code>
+        <id>1005</id>
+        <description>Long job has been manually cancelled</description>
+    </code>
+
+    <code>
+        <id>2001</id>
+        <description>Upload image long job suspended</description>
+    </code>
+
+    <code>
+        <id>2002</id>
+        <description>Upload image long job failed</description>
+    </code>
+</error>
+

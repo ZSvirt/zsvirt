@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<globalConfig xmlns="http://zstack.org/schema/zstack">
+    <config>
+        <name>configure.ip.with.hostname</name>
+        <description>configure hostname if configure ip address by qga</description>
+        <defaultValue>false</defaultValue>
+        <category>guestTools</category>
+        <type>java.lang.Boolean</type>
+    </config>
+    <config>
+        <name>push.network.config.via.qga</name>
+        <description>automatically push network configuration to VM via QGA</description>
+        <defaultValue>true</defaultValue>
+        <category>guestTools</category>
+        <type>java.lang.Boolean</type>
+    </config>
+</globalConfig>

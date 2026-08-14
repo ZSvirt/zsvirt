@@ -1,0 +1,418 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<character xmlns="http://zstack.org/schema/zstack">
+    <!-- aarch64 -->
+    <osInfo>
+        <architecture>aarch64</architecture>
+        <platform>Linux</platform>
+        <osRelease>Kylin 4</osRelease>
+        <acpi>false</acpi>
+    </osInfo>
+
+    <!-- loongarch64 -->
+    <osInfo>
+        <architecture>loongarch64</architecture>
+        <platform>Linux</platform>
+        <osRelease>Kylin 4</osRelease>
+        <acpi>false</acpi>
+    </osInfo>
+
+    <!-- x86_64 -->
+    <osInfo>
+        <architecture>x86_64</architecture>
+        <platform>Linux</platform>
+        <osRelease>Other Kernel ≥ 4.20 or Hygon Linux</osRelease>
+        <hygonTag>false</hygonTag>
+    </osInfo>
+    <osInfo>
+        <architecture>x86_64</architecture>
+        <platform>Linux</platform>
+        <osRelease>CentOS 5</osRelease>
+    </osInfo>
+    <osInfo>
+        <architecture>x86_64</architecture>
+        <platform>Linux</platform>
+        <osRelease>CentOS 6</osRelease>
+    </osInfo>
+    <osInfo>
+        <architecture>x86_64</architecture>
+        <platform>Linux</platform>
+        <osRelease>CentOS 7</osRelease>
+    </osInfo>
+    <osInfo>
+        <architecture>x86_64</architecture>
+        <platform>Linux</platform>
+        <osRelease>CentOS 8</osRelease>
+    </osInfo>
+    <osInfo>
+        <architecture>x86_64</architecture>
+        <platform>Linux</platform>
+        <osRelease>CentOS 9</osRelease>
+    </osInfo>
+    <osInfo>
+        <architecture>x86_64</architecture>
+        <platform>Linux</platform>
+        <osRelease>CentOS Stream 9</osRelease>
+    </osInfo>
+    <osInfo>
+        <architecture>x86_64</architecture>
+        <platform>Linux</platform>
+        <osRelease>RHEL 5</osRelease>
+    </osInfo>
+    <osInfo>
+        <architecture>x86_64</architecture>
+        <platform>Linux</platform>
+        <osRelease>RHEL 6</osRelease>
+    </osInfo>
+    <osInfo>
+        <architecture>x86_64</architecture>
+        <platform>Linux</platform>
+        <osRelease>RHEL 7</osRelease>
+    </osInfo>
+    <osInfo>
+        <architecture>x86_64</architecture>
+        <platform>Linux</platform>
+        <osRelease>RHEL 8</osRelease>
+    </osInfo>
+    <osInfo>
+        <architecture>x86_64</architecture>
+        <platform>Linux</platform>
+        <osRelease>RHEL 9</osRelease>
+    </osInfo>
+    <osInfo>
+        <architecture>x86_64</architecture>
+        <platform>Linux</platform>
+        <osRelease>RHEL 10</osRelease>
+    </osInfo>
+    <osInfo>
+        <architecture>x86_64</architecture>
+        <platform>Linux</platform>
+        <osRelease>Ubuntu 14</osRelease>
+    </osInfo>
+    <osInfo>
+        <architecture>x86_64</architecture>
+        <platform>Linux</platform>
+        <osRelease>Ubuntu 16</osRelease>
+    </osInfo>
+    <osInfo>
+        <architecture>x86_64</architecture>
+        <platform>Linux</platform>
+        <osRelease>Ubuntu 18</osRelease>
+    </osInfo>
+    <osInfo>
+        <architecture>x86_64</architecture>
+        <platform>Linux</platform>
+        <osRelease>Ubuntu 20</osRelease>
+    </osInfo>
+    <osInfo>
+        <architecture>x86_64</architecture>
+        <platform>Linux</platform>
+        <osRelease>Ubuntu 22</osRelease>
+    </osInfo>
+    <osInfo>
+        <architecture>x86_64</architecture>
+        <platform>Linux</platform>
+        <osRelease>Ubuntu 24</osRelease>
+    </osInfo>
+    <osInfo>
+        <architecture>x86_64</architecture>
+        <platform>Linux</platform>
+        <osRelease>Debian 7</osRelease>
+    </osInfo>
+    <osInfo>
+        <architecture>x86_64</architecture>
+        <platform>Linux</platform>
+        <osRelease>Debian 8</osRelease>
+    </osInfo>
+    <osInfo>
+        <architecture>x86_64</architecture>
+        <platform>Linux</platform>
+        <osRelease>Debian 9</osRelease>
+    </osInfo>
+    <osInfo>
+        <architecture>x86_64</architecture>
+        <platform>Linux</platform>
+        <osRelease>Debian 10</osRelease>
+    </osInfo>
+    <osInfo>
+        <architecture>x86_64</architecture>
+        <platform>Linux</platform>
+        <osRelease>Debian 11</osRelease>
+    </osInfo>
+    <osInfo>
+        <architecture>x86_64</architecture>
+        <platform>Linux</platform>
+        <osRelease>Debian 12</osRelease>
+    </osInfo>
+    <osInfo>
+        <architecture>x86_64</architecture>
+        <platform>Linux</platform>
+        <osRelease>Debian 13</osRelease>
+    </osInfo>
+    <osInfo>
+        <architecture>x86_64</architecture>
+        <platform>Linux</platform>
+        <osRelease>Fedora</osRelease>
+    </osInfo>
+    <osInfo>
+        <architecture>x86_64</architecture>
+        <platform>Linux</platform>
+        <osRelease>Fedora 42</osRelease>
+    </osInfo>
+    <osInfo>
+        <architecture>x86_64</architecture>
+        <platform>Linux</platform>
+        <osRelease>Kylin 4</osRelease>
+    </osInfo>
+    <osInfo>
+        <architecture>x86_64</architecture>
+        <platform>Linux</platform>
+        <osRelease>Kylin V7</osRelease>
+    </osInfo>
+    <osInfo>
+        <architecture>x86_64</architecture>
+        <platform>Linux</platform>
+        <osRelease>Kylin V10</osRelease>
+    </osInfo>
+    <osInfo>
+        <architecture>x86_64</architecture>
+        <platform>Linux</platform>
+        <osRelease>NeoKylin V7</osRelease>
+    </osInfo>
+    <osInfo>
+        <architecture>x86_64</architecture>
+        <platform>Linux</platform>
+        <osRelease>NeoKylin V7 Update6</osRelease>
+    </osInfo>
+    <osInfo>
+        <architecture>x86_64</architecture>
+        <platform>Linux</platform>
+        <osRelease>Kylin 11</osRelease>
+    </osInfo>
+    <osInfo>
+        <architecture>x86_64</architecture>
+        <platform>Linux</platform>
+        <osRelease>UOS 20</osRelease>
+    </osInfo>
+    <osInfo>
+        <architecture>x86_64</architecture>
+        <platform>Linux</platform>
+        <osRelease>openEuler 20.03</osRelease>
+    </osInfo>
+    <osInfo>
+        <architecture>x86_64</architecture>
+        <platform>Linux</platform>
+        <osRelease>openEuler 22.03</osRelease>
+    </osInfo>
+    <osInfo>
+        <architecture>x86_64</architecture>
+        <platform>Linux</platform>
+        <osRelease>openEuler 24.03</osRelease>
+    </osInfo>
+    <osInfo>
+        <architecture>x86_64</architecture>
+        <platform>Linux</platform>
+        <osRelease>SUSE Linux Enterprise Server 11</osRelease>
+    </osInfo>
+    <osInfo>
+        <architecture>x86_64</architecture>
+        <platform>Linux</platform>
+        <osRelease>SUSE Linux Enterprise Server 12</osRelease>
+    </osInfo>
+    <osInfo>
+        <architecture>x86_64</architecture>
+        <platform>Linux</platform>
+        <osRelease>SUSE Linux Enterprise Server 15</osRelease>
+    </osInfo>
+    <osInfo>
+        <architecture>x86_64</architecture>
+        <platform>Linux</platform>
+        <osRelease>openSUSE Leap 11</osRelease>
+    </osInfo>
+    <osInfo>
+        <architecture>x86_64</architecture>
+        <platform>Linux</platform>
+        <osRelease>openSUSE Leap 12</osRelease>
+    </osInfo>
+    <osInfo>
+        <architecture>x86_64</architecture>
+        <platform>Linux</platform>
+        <osRelease>openSUSE Leap 15</osRelease>
+    </osInfo>
+    <osInfo>
+        <architecture>x86_64</architecture>
+        <platform>Linux</platform>
+        <osRelease>SUSE Linux Enterprise Desktop 11</osRelease>
+    </osInfo>
+    <osInfo>
+        <architecture>x86_64</architecture>
+        <platform>Linux</platform>
+        <osRelease>SUSE Linux Enterprise Desktop 12</osRelease>
+    </osInfo>
+    <osInfo>
+        <architecture>x86_64</architecture>
+        <platform>Linux</platform>
+        <osRelease>Rocky Linux 8</osRelease>
+    </osInfo>
+    <osInfo>
+        <architecture>x86_64</architecture>
+        <platform>Linux</platform>
+        <osRelease>Rocky Linux 9</osRelease>
+    </osInfo>
+    <osInfo>
+        <architecture>x86_64</architecture>
+        <platform>Linux</platform>
+        <osRelease>Anolis OS 7</osRelease>
+    </osInfo>
+    <osInfo>
+        <architecture>x86_64</architecture>
+        <platform>Linux</platform>
+        <osRelease>Anolis OS 8</osRelease>
+    </osInfo>
+    <osInfo>
+        <architecture>x86_64</architecture>
+        <platform>Linux</platform>
+        <osRelease>AlmaLinux 9</osRelease>
+    </osInfo>
+    <osInfo>
+        <architecture>x86_64</architecture>
+        <platform>Linux</platform>
+        <osRelease>AlmaLinux 10</osRelease>
+    </osInfo>
+    <osInfo>
+        <architecture>x86_64</architecture>
+        <platform>Linux</platform>
+        <osRelease>Oracle Linux 7</osRelease>
+    </osInfo>
+    <osInfo>
+        <architecture>x86_64</architecture>
+        <platform>Linux</platform>
+        <osRelease>Oracle Linux 8</osRelease>
+    </osInfo>
+    <osInfo>
+        <architecture>x86_64</architecture>
+        <platform>Linux</platform>
+        <osRelease>Oracle Linux 9</osRelease>
+    </osInfo>
+    <osInfo>
+        <architecture>x86_64</architecture>
+        <platform>Linux</platform>
+        <osRelease>Oracle Linux 10</osRelease>
+    </osInfo>
+    <osInfo>
+        <architecture>x86_64</architecture>
+        <platform>Linux</platform>
+        <osRelease>SUSE Linux 12</osRelease>
+    </osInfo>
+    <osInfo>
+        <architecture>x86_64</architecture>
+        <platform>Linux</platform>
+        <osRelease>SUSE Linux 15</osRelease>
+    </osInfo>
+    <osInfo>
+        <architecture>x86_64</architecture>
+        <platform>Linux</platform>
+        <osRelease>Rocky Linux 8</osRelease>
+    </osInfo>
+    <osInfo>
+        <architecture>x86_64</architecture>
+        <platform>Linux</platform>
+        <osRelease>Rocky Linux 9</osRelease>
+    </osInfo>
+    <osInfo>
+        <architecture>x86_64</architecture>
+        <platform>Linux</platform>
+        <osRelease>Rocky Linux 10</osRelease>
+    </osInfo>
+    <osInfo>
+        <architecture>x86_64</architecture>
+        <platform>Linux</platform>
+        <osRelease>AlmaLinux 9</osRelease>
+    </osInfo>
+    <osInfo>
+        <architecture>x86_64</architecture>
+        <platform>Linux</platform>
+        <osRelease>Linux</osRelease>
+    </osInfo>
+    <osInfo>
+        <architecture>x86_64</architecture>
+        <platform>Windows</platform>
+        <osRelease>WindowsServer 2003</osRelease>
+    </osInfo>
+    <osInfo>
+        <architecture>x86_64</architecture>
+        <platform>Windows</platform>
+        <osRelease>WindowsServer 2008</osRelease>
+    </osInfo>
+    <osInfo>
+        <architecture>x86_64</architecture>
+        <platform>Windows</platform>
+        <osRelease>WindowsServer 2012</osRelease>
+    </osInfo>
+    <osInfo>
+        <architecture>x86_64</architecture>
+        <platform>Windows</platform>
+        <osRelease>Windows NT 4.0</osRelease>
+        <cpuModel>pentium</cpuModel>
+        <nicDriver>pcnet</nicDriver>
+    </osInfo>
+    <osInfo>
+        <architecture>x86_64</architecture>
+        <platform>Windows</platform>
+        <osRelease>WindowsServer 2016</osRelease>
+    </osInfo>
+    <osInfo>
+        <architecture>x86_64</architecture>
+        <platform>Windows</platform>
+        <osRelease>WindowsServer 2019</osRelease>
+        <hygonTag>false</hygonTag>
+    </osInfo>
+    <osInfo>
+        <architecture>x86_64</architecture>
+        <platform>Windows</platform>
+        <osRelease>WindowsServer 2022</osRelease>
+        <hygonTag>false</hygonTag>
+    </osInfo>
+    <osInfo>
+        <architecture>x86_64</architecture>
+        <platform>Windows</platform>
+        <osRelease>WindowsServer 2025</osRelease>
+        <hygonTag>false</hygonTag>
+    </osInfo>
+    <osInfo>
+        <architecture>x86_64</architecture>
+        <platform>Windows</platform>
+        <osRelease>Windows 7</osRelease>
+    </osInfo>
+    <osInfo>
+        <architecture>x86_64</architecture>
+        <platform>Windows</platform>
+        <osRelease>Windows 8</osRelease>
+    </osInfo>
+    <osInfo>
+        <architecture>x86_64</architecture>
+        <platform>Windows</platform>
+        <osRelease>Windows 10</osRelease>
+        <hygonTag>false</hygonTag>
+    </osInfo>
+    <osInfo>
+        <architecture>x86_64</architecture>
+        <platform>Windows</platform>
+        <osRelease>Windows 11</osRelease>
+    </osInfo>
+    <osInfo>
+        <architecture>x86_64</architecture>
+        <platform>Windows</platform>
+        <osRelease>Windows xp</osRelease>
+    </osInfo>
+    <osInfo>
+        <architecture>x86_64</architecture>
+        <platform>Windows</platform>
+        <osRelease>Windows</osRelease>
+    </osInfo>
+    <osInfo>
+        <architecture>x86_64</architecture>
+        <platform>Other</platform>
+        <osRelease>Solaris 10</osRelease>
+        <x2apic>false</x2apic>
+    </osInfo>
+</character>

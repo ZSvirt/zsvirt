@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<globalConfig xmlns="http://zstack.org/schema/zstack">
+    <config>
+        <name>coverDatabase.allow</name>
+        <description>whether enables cover database from database backup</description>
+        <category>databaseBackup</category>
+        <defaultValue>true</defaultValue>
+        <type>java.lang.Boolean</type>
+    </config>
+</globalConfig>

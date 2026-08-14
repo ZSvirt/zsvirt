@@ -1,0 +1,57 @@
+[
+  {
+    "raw": "expire policy: %s is not valid",
+    "en_US": "expire policy: {0} is not valid",
+    "zh_CN": "无效的过期策略:{0}",
+    "arguments": [
+      "msg.getExpirePolicy()"
+    ],
+    "fileName": "src/main/java/org/zstack/daho/core/DahoApiInterceptor.java"
+  },
+  {
+    "raw": "vlanId[%s] has been existed!",
+    "en_US": "vlanId[{0}] has been existed!",
+    "zh_CN": "VlanId[{0}]已存在！",
+    "arguments": [
+      "msg.getVlan()"
+    ],
+    "fileName": "src/main/java/org/zstack/daho/core/DahoApiInterceptor.java"
+  },
+  {
+    "raw": "parameters [accountUuid] only can be used by admin user!",
+    "en_US": "parameters [accountUuid] only can be used by admin user!",
+    "zh_CN": "参数[accountUuid]必须被admin用户设置",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/daho/core/DahoApiInterceptor.java"
+  },
+  {
+    "raw": "no accountUuid found, please check the login session!",
+    "en_US": "no accountUuid found, please check the login session!",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/daho/core/DahoSdkImpl.java"
+  },
+  {
+    "raw": "no current used key/secret for daho!",
+    "en_US": "no current used key/secret for daho!",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/daho/core/DahoSdkImpl.java"
+  },
+  {
+    "raw": "create daho vll task failed!",
+    "en_US": "create daho vll task failed!",
+    "zh_CN": "创建daho vll任务失败",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/daho/core/DahoSdkImpl.java"
+  },
+  {
+    "raw": "no aliyun account found for accountUuid: %s",
+    "en_US": "no aliyun account found for accountUuid: {0}",
+    "zh_CN": "找不到当前账户{0}对应的阿里云账户",
+    "arguments": [
+      "msg.getAccountUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/daho/core/DahoSdkImpl.java"
+  }
+]

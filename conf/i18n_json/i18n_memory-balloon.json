@@ -1,0 +1,12 @@
+[
+  {
+    "raw": "no data of %s found on host[%s]",
+    "en_US": "no data of {0} found on host[{1}]",
+    "zh_CN": "",
+    "arguments": [
+      "HostNamespace.MemoryUsedInPercent.toString()",
+      "hostUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/memory/MemoryBalloonManagerImpl.java"
+  }
+]

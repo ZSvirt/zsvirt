@@ -1,0 +1,57 @@
+<error>
+    <prefix>vmSchedulingRule</prefix>
+    <code>
+        <id>3001</id>
+        <description>The VM scheduling group has already had a VM Exclusive from Each Other scheduling policy attached. Attaching another one is not allowed.</description>
+    </code>
+
+    <code>
+        <id>3002</id>
+        <description>The VM scheduling group has already had a VM Affinitive to Each Other scheduling policy attached. Attaching a VM Exclusive from Each Other scheduling policy is not allowed.</description>
+    </code>
+
+    <code>
+        <id>3003</id>
+        <description>The VM scheduling group has already had a VM Affinitive to Each Other scheduling policy attached. Attaching another one is not allowed.</description>
+    </code>
+
+    <code>
+        <id>3004</id>
+        <description>The VM scheduling group has already had a VM Exclusive from Each Other scheduling policy attached. Attaching a VM Affinitive to Each Other scheduling policy is not allowed.</description>
+    </code>
+
+    <code>
+        <id>3005</id>
+        <description>The VM scheduling group has already had a VMs Affinitive to Hosts scheduling policy attached. You cannot attach another one to the group again.</description>
+    </code>
+
+    <code>
+        <id>3006</id>
+        <description>The VM scheduling group has already had a VMs Exclusive from Hosts scheduling policy attached. You cannot attach a VMs Affinitive to Hosts scheduling policy to the group.</description>
+    </code>
+
+    <code>
+        <id>3007</id>
+        <description>The VM scheduling group has already had a VMs Affinitive to Hosts scheduling policy attached. You cannot attach a VMs Exclusive from Hosts scheduling policy to the group.</description>
+    </code>
+
+    <code>
+        <id>3008</id>
+        <description>The VM scheduling group has already had a VM Exclusive from Each Other scheduling policy attached. The number of hosts available for the VM instances in the scheduling group to run is less than that of the VM instances in the group. You cannot attach a VMs Affinitive to Hosts scheduling policy to the group.</description>
+    </code>
+
+    <code>
+        <id>3009</id>
+        <description>The VM scheduling group has already had a VMs Affinitive to Hosts scheduling policy attached. The number of hosts available for the VM instances in the scheduling group to run is less than that of the VM instances in the group. You cannot attach a VM Exclusive from Each Other scheduling policy to the group again.</description>
+    </code>
+
+    <code>
+        <id>3010</id>
+        <description>The VM scheduling group has already had a VM Exclusive from Each Other scheduling policy attached. The number of hosts available for the VM instances in the scheduling group to run is less than that of the VM instances in the group. You cannot attach a VMs Exclusive from Hosts scheduling policy to the group.</description>
+    </code>
+
+    <code>
+        <id>3011</id>
+        <description>The VM scheduling group has already had a VMs Exclusive from Hosts scheduling policy attached. The number of hosts available for the VM instances in the scheduling group to run is less than that of the VM instances in the group. You cannot attach a VM Exclusive from Each Other scheduling policy to the group.</description>
+    </code>
+</error>

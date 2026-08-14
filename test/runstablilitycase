@@ -1,0 +1,1 @@
+mvn test -Dtest=TestCaseStabilityTest -Dcases=$1 -Dtimes=$2

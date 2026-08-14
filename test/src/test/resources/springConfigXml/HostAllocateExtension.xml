@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:zstack="http://zstack.org/schema/zstack"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+         http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+         http://zstack.org/schema/zstack
+         http://zstack.org/schema/zstack/plugin.xsd"
+       default-init-method="init" default-destroy-method="destory">
+    <bean id="HostAllocateExtension" class="org.zstack.test.integration.kvm.hostallocator.HostAllocateExtension">
+        <zstack:plugin>
+            <zstack:extension
+                    interface="org.zstack.header.host.HostAllocateExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+</beans>

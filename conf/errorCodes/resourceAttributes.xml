@@ -1,0 +1,38 @@
+<error>
+    <prefix>ATTRIBUTE</prefix>
+
+    <code>
+        <id>1000</id>
+        <description>Tag generic error</description>
+    </code>
+
+    <code>
+        <id>1001</id>
+        <description>Duplicated resource attribute</description>
+    </code>
+
+    <code>
+        <id>1002</id>
+        <description>Unsupported resource type</description>
+    </code>
+
+    <code>
+        <id>1003</id>
+        <description>Remove resource type not allowed</description>
+    </code>
+
+    <code>
+        <id>1101</id>
+        <description>Unsupported constraints</description>
+    </code>
+
+    <code>
+        <id>1102</id>
+        <description>Invalid constraints id</description>
+    </code>
+
+    <code>
+        <id>1200</id>
+        <description>Invalid value</description>
+    </code>
+</error>

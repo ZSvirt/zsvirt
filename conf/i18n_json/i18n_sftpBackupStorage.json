@@ -1,0 +1,156 @@
+[
+  {
+    "raw": "SftpBackupStorage doesn\u0027t support scheme[%s] in url[%s]",
+    "en_US": "SftpBackupStorage doesn\u0027t support scheme[{0}] in url[{1}]",
+    "zh_CN": "Sftp镜像服务器不支持在url[{1}]里包含scheme[{0}]",
+    "arguments": [
+      "scheme",
+      "url"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/backup/sftp/SftpBackupStorage.java"
+  },
+  {
+    "raw": "failed to download image[url: %s] on backup storage[uuid: %s], because: %s",
+    "en_US": "failed to download image[url: {0}] on backup storage[uuid: {1}], because: {2}",
+    "zh_CN": "无法下载镜像[URL：{0}]（在备份存储[uuid：{1}]上），原因是：{2}",
+    "arguments": [
+      "url",
+      "self.getUuid()",
+      "ret.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/backup/sftp/SftpBackupStorage.java"
+  },
+  {
+    "raw": "fail to cancel download image, because %s",
+    "en_US": "fail to cancel download image, because {0}",
+    "zh_CN": "无法取消下载镜像，因为{0}",
+    "arguments": [
+      "rsp.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/backup/sftp/SftpBackupStorage.java"
+  },
+  {
+    "raw": "the uuid of sftpBackupStorage agent changed[expected:%s, actual:%s], it\u0027s most likely the agent was manually restarted. Issue a reconnect to sync the status",
+    "en_US": "the uuid of sftpBackupStorage agent changed[expected:{0}, actual:{1}], it\u0027s most likely the agent was manually restarted. Issue a reconnect to sync the status",
+    "zh_CN": "",
+    "arguments": [
+      "self.getUuid()",
+      "ret.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/backup/sftp/SftpBackupStorage.java"
+  },
+  {
+    "raw": "unable to connect to SimpleHttpBackupStorage[url:%s], because %s",
+    "en_US": "unable to connect to SimpleHttpBackupStorage[url:{0}], because {1}",
+    "zh_CN": "无法连接到SimpleHttpBackupStorage[url:{0}]，因为{1}",
+    "arguments": [
+      "url",
+      "rsp.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/backup/sftp/SftpBackupStorage.java"
+  },
+  {
+    "raw": "operation error, because:%s",
+    "en_US": "operation error, because:{0}",
+    "zh_CN": "操作错误，因为{0}",
+    "arguments": [
+      "rsp.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/backup/sftp/SftpBackupStorage.java"
+  },
+  {
+    "raw": "sftp backup storage do not support calculate image hash",
+    "en_US": "sftp backup storage do not support calculate image hash",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/storage/backup/sftp/SftpBackupStorage.java"
+  },
+  {
+    "raw": "Please stop the vm before create volume template to sftp backup storage %s",
+    "en_US": "Please stop the vm before create volume template to sftp backup storage {0}",
+    "zh_CN": "请在创建SFTP备份存储{0}的卷模板之前停止虚拟机",
+    "arguments": [
+      "bsUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/backup/sftp/SftpBackupStorageApiInterceptor.java"
+  },
+  {
+    "raw": "hostname[%s] is neither an IPv4 address nor a valid hostname",
+    "en_US": "hostname[{0}] is neither an IPv4 address nor a valid hostname",
+    "zh_CN": "主机名[{0}]不是一个IPv4的地址，而是一个非法的主机名",
+    "arguments": [
+      "msg.getHostname()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/backup/sftp/SftpBackupStorageApiInterceptor.java"
+  },
+  {
+    "raw": "duplicate backup storage. There has been a sftp backup storage[hostname:%s] existing",
+    "en_US": "duplicate backup storage. There has been a sftp backup storage[hostname:{0}] existing",
+    "zh_CN": "重复的镜像服务器。已经存在一个镜像服务器[主机名: {0}]",
+    "arguments": [
+      "msg.getHostname()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/backup/sftp/SftpBackupStorageApiInterceptor.java"
+  },
+  {
+    "raw": " the url contains an invalid folder[/dev or /proc or /sys]",
+    "en_US": " the url contains an invalid folder[/dev or /proc or /sys]",
+    "zh_CN": "URL包含了一个无效的目录[/dev or /proc or /sys]",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/storage/backup/sftp/SftpBackupStorageApiInterceptor.java"
+  },
+  {
+    "raw": "invalid url[%s], the url must be an absolute path starting with \u0027/\u0027",
+    "en_US": "invalid url[{0}], the url must be an absolute path starting with \u0027/\u0027",
+    "zh_CN": "无效的url[{0}]，url必须是以\u0027/\u0027开头的绝对路径",
+    "arguments": [
+      "amsg.getUrl()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/backup/sftp/SftpBackupStorageFactory.java"
+  },
+  {
+    "raw": "existing SimpleHttpBackupStorage with hostname[%s] found",
+    "en_US": "existing SimpleHttpBackupStorage with hostname[{0}] found",
+    "zh_CN": "存在主机名为[{0}]的简单http镜像服务器",
+    "arguments": [
+      "hostname"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/backup/sftp/SftpBackupStorageFactory.java"
+  },
+  {
+    "raw": "create image metadata file : %s failed",
+    "en_US": "create image metadata file : {0} failed",
+    "zh_CN": "创建镜像元数据文件: {0}失败",
+    "arguments": [
+      "rsp.getBackupStorageMetaFileName()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/backup/sftp/SftpBackupStorageMetaDataMaker.java"
+  },
+  {
+    "raw": "check image metadata file: %s failed",
+    "en_US": "check image metadata file: {0} failed",
+    "zh_CN": "检查镜像元数据文件: {0}失败",
+    "arguments": [
+      "rsp.getBackupStorageMetaFileName()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/backup/sftp/SftpBackupStorageMetaDataMaker.java"
+  },
+  {
+    "raw": "image metadata file: %s is not exist",
+    "en_US": "image metadata file: {0} is not exist",
+    "zh_CN": "镜像元数据文件: {0}不存在",
+    "arguments": [
+      "rsp.getBackupStorageMetaFileName()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/backup/sftp/SftpBackupStorageMetaDataMaker.java"
+  },
+  {
+    "raw": "delete image metadata file failed: %s",
+    "en_US": "delete image metadata file failed: {0}",
+    "zh_CN": "删除镜像元数据文件失败: {0}",
+    "arguments": [
+      "rsp.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/backup/sftp/SftpBackupStorageMetaDataMaker.java"
+  }
+]

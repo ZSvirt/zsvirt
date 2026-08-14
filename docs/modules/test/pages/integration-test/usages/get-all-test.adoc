@@ -1,0 +1,173 @@
+# 获取全部测试用例
+:source-highlighter: highlightjs
+
+## 介绍
+
+有的时候我们可能想要知道 ZStack Cloud 下的所有测试用例有哪些，可以将本文最后的脚本 <<get_all_cases>> 保存在 ZStack 代码根目录命名为 `get_cases.sh`，并运行即可
+
+[source,json]
+----
+bash get_cases.sh | python -m json.tool <.>
+
+[
+    {
+        "casesList": [
+            {
+                "name": "org.zstack.test.integration.core.branchcascade.AsyncBranchCascadeExtensionPointCase"
+            }
+        ],
+        "testsuite": "BranchCascadeTest",
+        "testsuitename": "test.core.branchcascade.BranchCascadeTest",
+        "testsuitepath": "test"
+    },
+    {
+        "casesList": [
+            {
+                "name": "org.zstack.test.integration.core.trash.DeleteFromDbVolumeTrashCase"
+            },
+            {
+                "name": "org.zstack.test.integration.core.trash.PrimaryStorageTrashCase"
+            },
+            {
+                "name": "org.zstack.test.integration.core.trash.UpgradeOldVersionTrashCase"
+            },
+            {
+                "name": "org.zstack.test.integration.core.trash.BackupStorageTrashCase"
+            }
+        ],
+        "testsuite": "TrashTest",
+        "testsuitename": "test.core.trash.TrashTest",
+        "testsuitepath": "test"
+    },
+... ...  <.>
+}
+
+
+$ bash get_case.sh | python -m json.tool | grep -E '"name"' | wc -l <.>
+1823
+
+----
+<.> 输出为 json 格式，可以通过 `jq` 或者 `python -m json.tool` 来做一下格式化
+<.> 以下省略
+<.> 如果只想知道具体有多少 case，可以执行这个命令来获取
+
+[source#get_all_cases,bash]
+.获取所有测试用例脚本
+----
+#!/usr/bin/env bash
+
+#result of get_suite_name
+suite_names=()
+#result of get_case_name
+case_names=()
+#suite_names
+all_suite_names=()
+#result of get_all_cases_Nearest
+suite_cases_result=()
+
+get_suite_name(){
+    suite_names=()
+    suite_names=$(find $1 -name "*Test.groovy" | grep -v "StabilityTest" | grep -v "/Test.groovy")
+}
+get_case_name(){
+    case_names=()
+    all_groovy_file_tmp=$(find $1 | grep Case\\. | grep -v "StabilityTestCase")
+    case_names=(${all_groovy_file_tmp})
+}
+
+
+get_all_cases_Nearest(){
+    suite=$1
+    suite_package=${suite%/*}
+
+    get_suite_name ${suite_package}
+    other_suites=(${suite_names[@]})
+
+    get_case_name ${suite_package}
+    suite_package_cases=(${case_names[@]})
+
+    suite_cases_result=()
+    for suite_case in ${suite_package_cases[@]}
+    do
+        package_layer=-1
+        nearest_test_suite=null
+        for osuite in ${other_suites[@]}
+        do
+            osuite_package=${osuite%/*}
+            suite_case_package=${suite_case%/*}
+            if [[ ${suite_case_package} != ${osuite_package}* ]]
+            then
+                continue
+            fi
+
+            if [[ ${suite_case_package/${osuite_package}/''} != /* && ${suite_case_package} != ${osuite_package} ]]
+            then
+                continue
+            fi
+
+            deffer_package=${suite_case_package/${osuite_package}/''}
+            differ_package_temp=${deffer_package////''}
+            layer=$[${#deffer_package}-${#differ_package_temp}]
+            if [[ ${package_layer} == -1 || ${package_layer} > ${layer} ]]
+            then
+                package_layer=${layer}
+                nearest_test_suite=${osuite}
+            elif [[ ${package_layer} == ${layer} ]]
+            then
+                echo "Multiple testsuite are not allowed under a package path"
+                exit
+            fi
+        done
+
+        if [[ ${package_layer} == -1 || ${nearest_test_suite} == null ]]
+        then
+            exit
+        fi
+        if [[ ${nearest_test_suite} == ${suite} ]]
+        then
+            suite_cases_result=(${suite_cases_result[@]} ${suite_case})
+        fi
+    done
+}
+
+print_name(){
+    for suite_name in ${all_suite_names[@]}
+    do
+        if [[ ${suite_name%%/*} == 'premium' ]]
+        then
+            testsuitepath='premium/test-premium'
+            repeat_str='/test-premium/src/test/groovy/org/zstack/test/integration'
+        else
+            testsuitepath='test'
+            repeat_str='/src/test/groovy/org/zstack/test/integration'
+        fi
+        suite_uri=${suite_name/${repeat_str}/''}
+        suite_uri=${suite_uri%.*}
+        suite_uri=${suite_uri////.}
+get_all_cases_Nearest ${suite_name}
+        cases_list_json=''
+for case_name in ${suite_cases_result[@]}
+do
+            case_name=${case_name#*groovy/}
+            case_name=${case_name%.*}
+            case_name=${case_name////.}
+cases_list_json=${cases_list_json}"{\"name\":\"${case_name}\"}, "
+done
+        cases_list_json=${cases_list_json%, }
+        suite_list_json=${suite_list_json}"{\"testsuitename\":\"${suite_uri}\", \"casesList\":[${cases_list_json}], \"testsuite\":\"${suite_uri##*.}\", \"testsuitepath\":\"${testsuitepath}\"}, "
+    done
+}
+
+
+echo -n [
+get_suite_name test
+all_suite_names=(${suite_names[@]})
+print_name
+
+get_suite_name premium/test-premium
+all_suite_names=(${suite_names[@]})
+print_name
+suite_list_json=${suite_list_json%, }
+echo -n ${suite_list_json}
+echo ]
+----

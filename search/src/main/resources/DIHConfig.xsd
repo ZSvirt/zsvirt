@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns="http://zstack.org/schema/zstack"
+            xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            targetNamespace="http://zstack.org/schema/zstack" elementFormDefault="qualified"
+            attributeFormDefault="unqualified">
+
+	<xsd:complexType name="field">
+		<xsd:attribute name="name" type="xsd:string" use="required"></xsd:attribute>
+		<xsd:attribute name="column" type="xsd:string"></xsd:attribute>
+	</xsd:complexType>
+
+	<xsd:complexType name="entity">
+		<xsd:sequence>
+			<xsd:sequence maxOccurs="unbounded" minOccurs="0">
+				<xsd:element name="entity" type="entity" />
+			</xsd:sequence>
+			<xsd:sequence maxOccurs="unbounded" minOccurs="0">
+				<xsd:element name="field" type="field" />
+			</xsd:sequence>
+		</xsd:sequence>
+		<xsd:attribute name="parentDeltaQuery" type="xsd:string" use="required"></xsd:attribute>
+		<xsd:attribute name="deltaImportQuery" type="xsd:string" use="required"></xsd:attribute>
+		<xsd:attribute name="deltaQuery" type="xsd:string" use="required"></xsd:attribute>
+		<xsd:attribute name="query" type="xsd:string" use="required"></xsd:attribute>
+		<xsd:attribute name="pk" type="xsd:string" use="required"></xsd:attribute>
+		<xsd:attribute name="name" type="xsd:string" use="required"></xsd:attribute>
+	</xsd:complexType>
+
+	<xsd:element name="dataConfig">
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element name="dataSource">
+					<xsd:complexType>
+						<xsd:attribute name="driver" type="xsd:string" use="required"></xsd:attribute>
+						<xsd:attribute name="url" type="xsd:string"></xsd:attribute>
+						<xsd:attribute name="user" type="xsd:string"></xsd:attribute>
+						<xsd:attribute name="password" type="xsd:string"></xsd:attribute>
+					</xsd:complexType>
+				</xsd:element>
+				<xsd:element name="document">
+					<xsd:complexType>
+						<xsd:sequence maxOccurs="unbounded" minOccurs="0">
+							<xsd:element name="entity" type="entity" />
+						</xsd:sequence>
+					</xsd:complexType>
+				</xsd:element>
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+</xsd:schema>

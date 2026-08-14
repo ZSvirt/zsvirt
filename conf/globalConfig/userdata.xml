@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<globalConfig xmlns="http://zstack.org/schema/zstack">
+	<config>
+		<name>userdata.openServiceByDefault</name>
+        <description>Whether to open the userdata service by default</description>
+		<category>userdata</category>
+		<defaultValue>true</defaultValue>
+		<type>java.lang.Boolean</type>
+	</config>
+</globalConfig>

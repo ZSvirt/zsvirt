@@ -1,0 +1,98 @@
+<error>
+    <prefix>ZMigrate</prefix>
+
+    <code>
+        <id>1000</id>
+        <description>ZMigrate generic error</description>
+    </code>
+
+    <code>
+        <id>2001</id>
+        <description>Failed to create account in ZMigrate</description>
+    </code>
+
+    <code>
+        <id>2002</id>
+        <description>Failed to verify platform connection</description>
+    </code>
+
+    <code>
+        <id>2003</id>
+        <description>Failed to register ZSV to ZMigrate</description>
+    </code>
+
+    <code>
+        <id>2004</id>
+        <description>Failed to verify gateway connection</description>
+    </code>
+
+    <code>
+        <id>2005</id>
+        <description>Failed to register gateway to ZMigrate</description>
+    </code>
+
+    <code>
+        <id>2006</id>
+        <description>Failed to get ZMigrate management server information</description>
+    </code>
+
+    <code>
+        <id>2007</id>
+        <description>Failed to get platform information</description>
+    </code>
+
+    <code>
+        <id>2008</id>
+        <description>Failed to get gateway server information</description>
+    </code>
+
+    <code>
+        <id>2009</id>
+        <description>Failed to get migration jobs</description>
+    </code>
+
+    <code>
+        <id>2010</id>
+        <description>Failed to get licenses from ZMigrate</description>
+    </code>
+
+    <code>
+        <id>2011</id>
+        <description>Failed to get encrypt key</description>
+    </code>
+
+    <code>
+        <id>2012</id>
+        <description>Failed to get gateway hostname</description>
+    </code>
+
+    <code>
+        <id>2013</id>
+        <description>Failed to export activation infos from ZMigrate</description>
+    </code>
+
+    <code>
+        <id>2014</id>
+        <description>Failed to import activation package to ZMigrate</description>
+    </code>
+
+    <code>
+        <id>3000</id>
+        <description>Unexpected ZMigrate VM State</description>
+    </code>
+
+    <code>
+        <id>3001</id>
+        <description>Missing ZMigrate VM</description>
+    </code>
+
+    <code>
+        <id>4000</id>
+        <description>Invalid ZMigrate Config</description>
+    </code>
+
+    <code>
+        <id>4001</id>
+        <description>Invalid ZMigrate Tags</description>
+    </code>
+</error>

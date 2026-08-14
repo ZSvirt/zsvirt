@@ -1,0 +1,23 @@
+<error>
+    <prefix>LONG_JOB</prefix>
+
+    <code>
+        <id>1000</id>
+        <description>long job has been canceled</description>
+    </code>
+
+    <code>
+        <id>1001</id>
+        <description>no cancelable running task, please wait for job to cancel itself off or try again later.</description>
+    </code>
+
+    <code>
+        <id>1002</id>
+        <description>some error interrupt the job, fix error then resume the job or cancel the job if you dont want to continue.</description>
+    </code>
+
+    <code>
+        <id>1003</id>
+        <description>operation is not supported.</description>
+    </code>
+</error>

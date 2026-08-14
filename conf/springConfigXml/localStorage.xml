@@ -1,0 +1,152 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx" xmlns:zstack="http://zstack.org/schema/zstack"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+    http://www.springframework.org/schema/aop
+    http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+    http://www.springframework.org/schema/tx 
+    http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+    http://zstack.org/schema/zstack 
+    http://zstack.org/schema/zstack/plugin.xsd"
+       default-init-method="init" default-destroy-method="destroy">
+
+    <bean id="LocalStorageFactory" class="org.zstack.storage.primary.local.LocalStorageFactory">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.storage.primary.PrimaryStorageFactory"/>
+            <zstack:extension interface="org.zstack.header.Component"/>
+            <zstack:extension interface="org.zstack.header.volume.CreateDataVolumeExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.vm.MarshalVmOperationFlowExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.host.HostDeleteExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.vm.VmAttachVolumeExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.vm.GetAttachableVolumeExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.host.HostMaintenancePolicyExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.query.AddExpandedQueryExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.volume.VolumeGetAttachableVmExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.volume.RecoverDataVolumeExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.vm.RecoverVmExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.vm.VmPreMigrationExtensionPoint"/>
+            <zstack:extension
+                    interface="org.zstack.header.storage.snapshot.CreateTemplateFromVolumeSnapshotExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.host.HostAfterConnectedExtensionPoint"/>
+            <zstack:extension
+                    interface="org.zstack.header.storage.primary.InstantiateDataVolumeOnCreationExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.storage.primary.PrimaryStorageAttachExtensionPoint"/>
+            <zstack:extension interface="org.zstack.storage.snapshot.PostMarkRootVolumeAsSnapshotExtension"/>
+            <zstack:extension interface="org.zstack.header.storage.snapshot.VolumeSnapshotCreationExtensionPoint"/>
+            <zstack:extension interface="org.zstack.compute.vm.VmCapabilitiesExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.storage.primary.PrimaryStorageDetachExtensionPoint"/>
+            <zstack:extension interface="org.zstack.core.trash.CreateRecycleExtensionPoint"/>
+            <zstack:extension interface="org.zstack.core.trash.DeleteRecycleExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.volume.AfterInstantiateVolumeExtensionPoint"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="LocalStorageAllocatorFactory" class="org.zstack.storage.primary.local.LocalStorageAllocatorFactory">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.Component"/>
+            <zstack:extension interface="org.zstack.header.storage.primary.PrimaryStorageAllocatorStrategyFactory"/>
+            <zstack:extension interface="org.zstack.header.allocator.HostAllocatorFilterExtensionPoint"/>
+            <zstack:extension
+                    interface="org.zstack.header.storage.primary.PrimaryStorageAllocatorStrategyExtensionPoint"/>
+            <zstack:extension interface=" org.zstack.header.allocator.HostAllocatorStrategyExtensionPoint"/>
+            <zstack:extension interface="org.zstack.storage.snapshot.SnapshotDeletionExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.storage.primary.PSCapacityExtensionPoint"/>
+        </zstack:plugin>
+
+        <property name="allocatorFlowNames">
+            <list>
+                <value>org.zstack.storage.primary.local.LocalStorageMainAllocatorFlow</value>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="LocalStorageSnapshotDeletionProtector"
+          class="org.zstack.storage.primary.local.LocalStorageSnapshotDeletionProtector">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.storage.snapshot.VolumeSnapshotDeletionProtector"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="LocalStorageKvmSftpBackupStorageMediatorImpl"
+          class="org.zstack.storage.primary.local.LocalStorageKvmSftpBackupStorageMediatorImpl">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.storage.primary.local.LocalStorageBackupStorageMediator"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="LocalStorageImageCleaner" class="org.zstack.storage.primary.local.LocalStorageImageCleaner">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.managementnode.ManagementNodeReadyExtensionPoint"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="LocalStorageKvmFactory" class="org.zstack.storage.primary.local.LocalStorageKvmFactory">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.storage.primary.local.LocalStorageHypervisorFactory"/>
+            <zstack:extension interface="org.zstack.kvm.KVMHostConnectExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.host.FailToAddHostExtensionPoint"/>
+            <zstack:extension interface="org.zstack.kvm.KVMStartVmExtensionPoint"/>
+            <zstack:extension interface="org.zstack.kvm.KVMTakeSnapshotExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="LocalStorageChangeStatusExtension" class="org.zstack.storage.primary.local.LocalStorageChangeStatusExtension">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.storage.primary.PrimaryStorageChangeStateExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="LocalStorageApiInterceptor" class="org.zstack.storage.primary.local.LocalStorageApiInterceptor">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.apimediator.ApiMessageInterceptor"/>
+            <zstack:extension interface="org.zstack.header.apimediator.GlobalApiMessageInterceptor"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="LocalStorageVmMigrationMetric" class="org.zstack.storage.primary.local.LocalStorageVmMigrationMetric">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.compute.vm.VmMigrationMetric"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="LocalStorageVmMigrationHostAllocatorFactory"
+          class="org.zstack.storage.primary.local.LocalStorageVmMigrationHostAllocatorFactory">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.Component"/>
+            <zstack:extension interface="org.zstack.header.allocator.HostAllocatorStrategyFactory"/>
+        </zstack:plugin>
+
+        <property name="producerNames">
+            <list>
+                <value>org.zstack.compute.allocator.AttachedL2NetworkAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.DesignatedHostAllocatorProducer</value>
+                <value>org.zstack.compute.allocator.HostStateAndHypervisorAllocatorProducer</value>
+            </list>
+        </property>
+        <property name="allocatorFlowNames">
+            <list>
+                <value>org.zstack.compute.allocator.DesignatedHostAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.AvoidHostAllocatorFlow</value>
+                <value>org.zstack.storage.primary.local.AllocatePrimaryStorageForVmMigrationFlow</value>
+                <value>org.zstack.compute.allocator.HostStateAndHypervisorAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.HostCapacityAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.AttachedVolumePrimaryStorageAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.HostPrimaryStorageAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.HostOsVersionAllocatorFlow</value>
+            </list>
+        </property>
+        <property name="sortFlowNames">
+            <list>
+                <value>org.zstack.compute.allocator.PrimaryStoragePrioritySortFlow</value>
+                <value>org.zstack.compute.allocator.LeastVmPreferredSortFlow</value>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="LocalHostUsageCollector" class="org.zstack.storage.primary.local.LocalStorageHostUsageReport">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.managementnode.ManagementNodeReadyExtensionPoint" order="-2"/>
+        </zstack:plugin>
+    </bean>
+</beans>

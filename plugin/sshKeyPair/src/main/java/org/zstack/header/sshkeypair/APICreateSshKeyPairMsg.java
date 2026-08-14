@@ -1,0 +1,61 @@
+package org.zstack.header.sshkeypair;
+
+import org.springframework.http.HttpMethod;
+import org.zstack.header.message.APICreateMessage;
+import org.zstack.header.message.APIParam;
+import org.zstack.header.rest.RestRequest;
+import org.zstack.header.tag.TagResourceType;
+import org.zstack.header.volume.VolumeVO;
+import org.zstack.sshkeypair.SshKeyPairConstant;
+
+@TagResourceType(VolumeVO.class)
+@RestRequest(
+        path = "/ssh-key-pair",
+        method = HttpMethod.POST,
+        responseClass = APICreateSshKeyPairEvent.class,
+        parameterName = "params"
+)
+public class APICreateSshKeyPairMsg extends APICreateMessage {
+    @APIParam(maxLength = 255, validRegexValues = SshKeyPairConstant.SSH_KEY_PAIR_NAME_REGEX)
+    private String name;
+
+    @APIParam(maxLength = 2048, required = false)
+    private String description;
+
+    @APIParam(maxLength = 4096)
+    private String publicKey;
+
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getPublicKey() {
+        return publicKey;
+    }
+
+    public void setPublicKey(String publicKey) {
+        this.publicKey = publicKey;
+    }
+
+    public static APICreateSshKeyPairMsg __example__() {
+        APICreateSshKeyPairMsg ret = new APICreateSshKeyPairMsg();
+        ret.name = "ssh-key-pair";
+        ret.description = "description";
+        ret.publicKey = "";
+        return ret;
+    }
+
+}

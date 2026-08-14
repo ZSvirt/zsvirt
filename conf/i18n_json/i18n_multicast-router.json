@@ -1,0 +1,87 @@
+[
+  {
+    "raw": "Rendezvous Point [%s] is not a unicast address",
+    "en_US": "Rendezvous Point [{0}] is not a unicast address",
+    "zh_CN": "",
+    "arguments": [
+      "rpAddress"
+    ],
+    "fileName": "src/main/java/org/zstack/multicast/router/MulticastRouterApiInterceptor.java"
+  },
+  {
+    "raw": "group address [%s] is not a multicast address",
+    "en_US": "group address [{0}] is not a multicast address",
+    "zh_CN": "",
+    "arguments": [
+      "multicastGroup"
+    ],
+    "fileName": "src/main/java/org/zstack/multicast/router/MulticastRouterApiInterceptor.java"
+  },
+  {
+    "raw": "rp address pair [%s: %s] already existed for multicast router [uuid:%s]",
+    "en_US": "rp address pair [{0}: {1}] already existed for multicast router [uuid:{2}]",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getRpAddress()",
+      "msg.getGroupAddress()",
+      "msg.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/multicast/router/MulticastRouterApiInterceptor.java"
+  },
+  {
+    "raw": "rp address tuple [%s : %s] is not existed for multicast router [uuid:%s]",
+    "en_US": "rp address tuple [{0} : {1}] is not existed for multicast router [uuid:{2}]",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getRpAddress()",
+      "msg.getGroupAddress()",
+      "msg.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/multicast/router/MulticastRouterApiInterceptor.java"
+  },
+  {
+    "raw": "multicastRouter[uuid:%s] has not been attached to vpc router",
+    "en_US": "multicastRouter[uuid:{0}] has not been attached to vpc router",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/multicast/router/MulticastRouterManagerImpl.java"
+  },
+  {
+    "raw": "multicast already enabled on vpc router uuid[:%s]",
+    "en_US": "multicast already enabled on vpc router uuid[:{0}]",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getVpcRouterVmUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/multicast/router/MulticastRouterManagerImpl.java"
+  },
+  {
+    "raw": "vpc router for multicast router [uuid:%s] has been deleted",
+    "en_US": "vpc router for multicast router [uuid:{0}] has been deleted",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/multicast/router/MulticastRouterManagerImpl.java"
+  },
+  {
+    "raw": "multicast router [uuid:%s] is not attached to Vpc Router",
+    "en_US": "multicast router [uuid:{0}] is not attached to Vpc Router",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/multicast/router/MulticastRouterManagerImpl.java"
+  },
+  {
+    "raw": "multicast router [uuid:%s] has been delete during enable multilcast on backend",
+    "en_US": "multicast router [uuid:{0}] has been delete during enable multilcast on backend",
+    "zh_CN": "",
+    "arguments": [
+      "vrUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/multicast/router/backend/MulticastRouterVyosBackendImpl.java"
+  }
+]

@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx" xmlns:zstack="http://zstack.org/schema/zstack"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+         http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+         http://www.springframework.org/schema/aop
+         http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+         http://www.springframework.org/schema/tx
+         http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+         http://zstack.org/schema/zstack
+         http://zstack.org/schema/zstack/plugin.xsd"
+       default-init-method="init" default-destroy-method="destroy">
+
+    <bean id="AuthorizationManager" class="org.zstack.identity.AuthorizationManager">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.Component"/>
+            <zstack:extension interface="org.zstack.header.apimediator.GlobalApiMessageInterceptor"/>
+            <zstack:extension interface="org.zstack.header.zql.ZQLQueryExtensionPoint"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="RBACApiInterceptor" class="org.zstack.identity.rbac.RBACApiInterceptor">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.apimediator.ApiMessageInterceptor"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="IdentityZQLExtension" class="org.zstack.identity.IdentityZQLExtension">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.zql.MarshalZQLASTTreeExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.zql.RestrictByExprExtensionPoint"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="RBACManager" class="org.zstack.identity.rbac.RBACManagerImpl">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.Component"/>
+            <zstack:extension interface="org.zstack.header.Service"/>
+            <zstack:extension interface="org.zstack.header.managementnode.PrepareDbInitialValueExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.identity.role.RolePolicyChecker"/>
+            <zstack:extension interface="org.zstack.header.identity.AfterCreateAccountExtensionPoint"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="AccountManager" class="org.zstack.identity.AccountManagerImpl">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.Component" order="9001"/>
+            <zstack:extension interface="org.zstack.header.Service"/>
+            <zstack:extension interface="org.zstack.core.db.SoftDeleteEntityExtensionPoint"/>
+            <zstack:extension interface="org.zstack.core.db.HardDeleteEntityExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.apimediator.ApiMessageInterceptor"/>
+            <zstack:extension interface="org.zstack.header.rest.RestAuthenticationBackend"/>
+            <zstack:extension interface="org.zstack.header.managementnode.PrepareDbInitialValueExtensionPoint" order="9999"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="AccountLoginBackend" class="org.zstack.identity.AccountLoginBackend">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.identity.login.LoginBackend"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="Session" class="org.zstack.identity.Session">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.Component" order="9002"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="AccountSubQueryExtension" class="org.zstack.identity.AccountSubQueryExtension">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.query.MysqlQuerySubQueryExtension"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="DefaultAuthorizationBackend" class="org.zstack.identity.DefaultAuthorizationBackend">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.identity.extension.AuthorizationBackend"/>
+        </zstack:plugin>
+    </bean>
+
+    <!--
+    <bean id="QuotaChecker" class="org.zstack.identity.QuotaChecker">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.apimediator.GlobalApiMessageInterceptor"/>
+        </zstack:plugin>
+    </bean>
+    -->
+
+    <bean id="AccountCascadeExtension" class="org.zstack.identity.AccountCascadeExtension">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.core.cascade.CascadeExtensionPoint"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="AccountInterceptor" class="org.zstack.identity.AccountInterceptor">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.apimediator.GlobalApiMessageInterceptor"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="AccountQuotaUpdateChecker" class="org.zstack.identity.AccountQuotaUpdateChecker"/>
+
+    <bean id="SessionExtensions" class="org.zstack.identity.SessionExtensions">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.identity.PasswordUpdateExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.identity.AfterUpdateAccountExtensionPoint"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="ShareResourceHelper" class="org.zstack.identity.rbac.ShareResourceHelper"/>
+</beans>
+

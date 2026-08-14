@@ -1,0 +1,334 @@
+[
+  {
+    "raw": "Invalid resourceUuid %s",
+    "en_US": "Invalid resourceUuid {0}",
+    "zh_CN": "资源uuid{0}无效",
+    "arguments": [
+      "msg.getResourceUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/ministorage/MiniStorageApiInterceptor.java"
+  },
+  {
+    "raw": "primary storage uuid cannot be null.",
+    "en_US": "primary storage uuid cannot be null.",
+    "zh_CN": "主存储uuid不能为空。",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/storage/primary/ministorage/MiniStorageApiInterceptor.java"
+  },
+  {
+    "raw": "volume[uuid:%s] has been attached some VM(s)[uuid:%s] which are not Stopped and not running on the specific host.",
+    "en_US": "volume[uuid:{0}] has been attached some VM(s)[uuid:{1}] which are not Stopped and not running on the specific host.",
+    "zh_CN": "",
+    "arguments": [
+      "volume.getUuid()",
+      "runningVmUuids.toString()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/ministorage/MiniStorageApiInterceptor.java"
+  },
+  {
+    "raw": "VM[uuid:%s] are not Stopped and not running on the specific host.",
+    "en_US": "VM[uuid:{0}] are not Stopped and not running on the specific host.",
+    "zh_CN": "虚拟机[uuid：{0}]未停止，也未在特定主机上运行。",
+    "arguments": [
+      "msg.getResourceUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/ministorage/MiniStorageApiInterceptor.java"
+  },
+  {
+    "raw": "Fail to %s, because host(s)[uuid:%s] are not enable and not in connected status.",
+    "en_US": "Fail to {0}, because host(s)[uuid:{1}] are not enable and not in connected status.",
+    "zh_CN": "{0}失败，因为主机[uuid：{1}]未启用且未处于连接状态。",
+    "arguments": [
+      "task",
+      "hostUuids"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/ministorage/MiniStorageApiInterceptor.java"
+  },
+  {
+    "raw": "cannot find proper hypervisorType for primary storage[uuid:%s] to handle image format or volume format[%s]",
+    "en_US": "cannot find proper hypervisorType for primary storage[uuid:{0}] to handle image format or volume format[{1}]",
+    "zh_CN": "对主存储[uuid:{0}]来说不能发现合适的管理程序类型来处理镜像格式或云盘格式[{1}]",
+    "arguments": [
+      "psUuid",
+      "imageFormat"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/ministorage/MiniStorageBase.java"
+  },
+  {
+    "raw": "ResourceType [%s] of APIRecoverResourceSplitBrainMsg is invalid.",
+    "en_US": "ResourceType [{0}] of APIRecoverResourceSplitBrainMsg is invalid.",
+    "zh_CN": "ApiRecoverResourceSplitBrainMsg的ResourceType[{0}]无效。",
+    "arguments": [
+      "msg.getResourceType()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/ministorage/MiniStorageBase.java"
+  },
+  {
+    "raw": "the mini storage[uuid:%s, name:%s] cannot find any available host in attached clusters for instantiating the volume",
+    "en_US": "the mini storage[uuid:{0}, name:{1}] cannot find any available host in attached clusters for instantiating the volume",
+    "zh_CN": "",
+    "arguments": [
+      "self.getUuid()",
+      "self.getName()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/ministorage/MiniStorageBase.java"
+  },
+  {
+    "raw": "can not determine which host",
+    "en_US": "can not determine which host",
+    "zh_CN": "无法确定是哪个主机",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/storage/primary/ministorage/MiniStorageBase.java"
+  },
+  {
+    "raw": "the primary storage[uuid:%s, name:%s] has not attached to any clusters, or no hosts in the attached clusters are connected",
+    "en_US": "the primary storage[uuid:{0}, name:{1}] has not attached to any clusters, or no hosts in the attached clusters are connected",
+    "zh_CN": "",
+    "arguments": [
+      "self.getUuid()",
+      "self.getName()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/ministorage/MiniStorageBase.java"
+  },
+  {
+    "raw": "no connected host found, mini storage failed",
+    "en_US": "no connected host found, mini storage failed",
+    "zh_CN": "未找到连接的主机，小型存储失败",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/storage/primary/ministorage/MiniStorageBase.java"
+  },
+  {
+    "raw": "not supported",
+    "en_US": "not supported",
+    "zh_CN": "不支持",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/storage/primary/ministorage/MiniStorageBase.java"
+  },
+  {
+    "raw": "cannot reserve enough space for primary storage[uuid: %s] on host[uuid: %s], not enough physical capacity",
+    "en_US": "cannot reserve enough space for primary storage[uuid: {0}] on host[uuid: {1}], not enough physical capacity",
+    "zh_CN": "无法为主机[uuid：{1}]上的主存储[uuid：{0}]保留足够的空间，物理容量不足",
+    "arguments": [
+      "self.getUuid()",
+      "hostUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/ministorage/MiniStorageBase.java"
+  },
+  {
+    "raw": "host[uuid: %s] of mini primary storage[uuid: %s] doesn\u0027t have enough capacity[current: %s bytes, needed: %s]",
+    "en_US": "host[uuid: {0}] of mini primary storage[uuid: {1}] doesn\u0027t have enough capacity[current: {2} bytes, needed: {3}]",
+    "zh_CN": "",
+    "arguments": [
+      "hostUuid",
+      "self.getUuid()",
+      "ref.getAvailableCapacity()",
+      "size"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/ministorage/MiniStorageBase.java"
+  },
+  {
+    "raw": "the host[uuid:%s] is not connected",
+    "en_US": "the host[uuid:{0}] is not connected",
+    "zh_CN": "主机[uuid:{0}]不是Connected状态",
+    "arguments": [
+      "hostUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/ministorage/MiniStorageDeactivateVolumeGC.java"
+  },
+  {
+    "raw": "no LocalStorageBackupStorageMediator supporting hypervisor[%s] and backup storage type[%s] ",
+    "en_US": "no LocalStorageBackupStorageMediator supporting hypervisor[{0}] and backup storage type[{1}] ",
+    "zh_CN": "没有LocalStorageBackupStorageMediator支持hypervisor[{0}]和镜像服务器类型[{1}]",
+    "arguments": [
+      "hvType",
+      "bsType"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/ministorage/MiniStorageFactory.java"
+  },
+  {
+    "raw": "can not get cluster uuid of volume %s",
+    "en_US": "can not get cluster uuid of volume {0}",
+    "zh_CN": "无法获取卷{0}的集群uuid",
+    "arguments": [
+      "volumeUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/ministorage/MiniStorageImageStoreBackend.java"
+  },
+  {
+    "raw": "no connected host found in the cluster[uuid:%s]",
+    "en_US": "no connected host found in the cluster[uuid:{0}]",
+    "zh_CN": "cluster[uuid:{0}]不存在已连接的主机",
+    "arguments": [
+      "clusterUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/ministorage/MiniStorageKvmBackend.java"
+  },
+  {
+    "raw": "no backup storage can get image[uuid:%s] of volume[uuid:%s]",
+    "en_US": "no backup storage can get image[uuid:{0}] of volume[uuid:{1}]",
+    "zh_CN": "没有备份存储可以获取镜像[uuid：{0}]（属于卷[uuid：{1}]）",
+    "arguments": [
+      "volume.getRootImageUuid()",
+      "volume.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/ministorage/MiniStorageKvmBackend.java"
+  },
+  {
+    "raw": "image[uuid: %s] has no image ref with backup storage[uuid: %s]",
+    "en_US": "image[uuid: {0}] has no image ref with backup storage[uuid: {1}]",
+    "zh_CN": "镜像[uuid：{0}]没有备份存储[uuid：{1}]的镜像引用",
+    "arguments": [
+      "image.getUuid()",
+      "cache.backupStorage.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/ministorage/MiniStorageKvmBackend.java"
+  },
+  {
+    "raw": "%s",
+    "en_US": "{0}",
+    "zh_CN": "{0}",
+    "arguments": [
+      "returnValue.error"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/ministorage/MiniStorageKvmBackend.java"
+  },
+  {
+    "raw": "cannot find backup storage[uuid:%s]",
+    "en_US": "cannot find backup storage[uuid:{0}]",
+    "zh_CN": "找不到镜像服务器[uuid:{0}]",
+    "arguments": [
+      "backupStorageUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/ministorage/MiniStorageKvmBackend.java"
+  },
+  {
+    "raw": "operation error, because:%s",
+    "en_US": "operation error, because:{0}",
+    "zh_CN": "操作错误，因为{0}",
+    "arguments": [
+      "rsp.error"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/ministorage/MiniStorageKvmCommandSender.java"
+  },
+  {
+    "raw": "can not find any available host to resize volume[uuid: %s] on mini storage[uuid: %s]",
+    "en_US": "can not find any available host to resize volume[uuid: {0}] on mini storage[uuid: {1}]",
+    "zh_CN": "",
+    "arguments": [
+      "volume.getUuid()",
+      "volume.getPrimaryStorageUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/ministorage/MiniStorageKvmFactory.java"
+  },
+  {
+    "raw": "volume[uuid:%s] replication is syncing data, please wait until it is finished.",
+    "en_US": "volume[uuid:{0}] replication is syncing data, please wait until it is finished.",
+    "zh_CN": "",
+    "arguments": [
+      "volumeUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/ministorage/MiniStorageKvmFactory.java"
+  },
+  {
+    "raw": "replication network status of volume[uuid:%s] run into StandAlone, but host are all Connected, please recover it first.",
+    "en_US": "replication network status of volume[uuid:{0}] run into StandAlone, but host are all Connected, please recover it first.",
+    "zh_CN": "",
+    "arguments": [
+      "volumeUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/ministorage/MiniStorageKvmFactory.java"
+  },
+  {
+    "raw": "Invalid path string %s",
+    "en_US": "Invalid path string {0}",
+    "zh_CN": "路径字符串{0}无效",
+    "arguments": [
+      "dir"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/ministorage/MiniStorageManagerImpl.java"
+  },
+  {
+    "raw": "Still cache volume exists on ps[uuid:%s] can not update cache volume url",
+    "en_US": "Still cache volume exists on ps[uuid:{0}] can not update cache volume url",
+    "zh_CN": "PS[uuid：{0}]上仍然存在缓存卷，无法更新缓存卷URL",
+    "arguments": [
+      "resourceUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/ministorage/MiniStorageManagerImpl.java"
+  },
+  {
+    "raw": "can not find replication of volume %s on host %s",
+    "en_US": "can not find replication of volume {0} on host {1}",
+    "zh_CN": "在主机{1}上找不到卷{0}的复制",
+    "arguments": [
+      "resourceUuid",
+      "hostUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/ministorage/MiniStoragePathManagerImpl.java"
+  },
+  {
+    "raw": "required cluster %s not attached to primary storage %s for volume %s create",
+    "en_US": "required cluster {0} not attached to primary storage {1} for volume {2} create",
+    "zh_CN": "创建卷{2}所需的集群{0}未连接到主存储{1}",
+    "arguments": [
+      "clusterUuid",
+      "msg.getPrimaryStorageUuid()",
+      "volume.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/ministorage/MiniStoragePlacementManagerImpl.java"
+  },
+  {
+    "raw": "can not find avaliable host on required cluster %s for volume %s create",
+    "en_US": "can not find avaliable host on required cluster {0} for volume {1} create",
+    "zh_CN": "在创建卷{1}所需的集群{0}上找不到可用主机",
+    "arguments": [
+      "clusterUuid",
+      "volume.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/ministorage/MiniStoragePlacementManagerImpl.java"
+  },
+  {
+    "raw": "mini storage volume or replicas required",
+    "en_US": "mini storage volume or replicas required",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/storage/primary/ministorage/MiniStoragePlacementManagerImpl.java"
+  },
+  {
+    "raw": "cannot find an available host to execute command for primary storage[uuid: %s]",
+    "en_US": "cannot find an available host to execute command for primary storage[uuid: {0}]",
+    "zh_CN": "找不到可用于执行主存储[uuid：{0}]命令的主机",
+    "arguments": [
+      "primaryStorageUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/ministorage/MiniStoragePlacementManagerImpl.java"
+  },
+  {
+    "raw": "can not allocate storage sync port on host %s: %s",
+    "en_US": "can not allocate storage sync port on host {0}: {1}",
+    "zh_CN": "无法在主机{0}上分配存储同步端口：{1}",
+    "arguments": [
+      "hostUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/ministorage/MiniStoragePlacementManagerImpl.java"
+  },
+  {
+    "raw": "expect operate on hosts[%s] but only host %s are connected and enabled",
+    "en_US": "expect operate on hosts[{0}] but only host {1} are connected and enabled",
+    "zh_CN": "预期在主机[{0}]上运行，但只有主机{1}已连接并启用",
+    "arguments": [
+      "hostUuids",
+      "finalHostUuids"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/ministorage/MiniStoragePlacementManagerImpl.java"
+  },
+  {
+    "raw": "mini storage[uuid:%s] has to be empty before restoring bits from zbox. please clean it up.",
+    "en_US": "mini storage[uuid:{0}] has to be empty before restoring bits from zbox. please clean it up.",
+    "zh_CN": "从ZBox还原位之前，小型存储[uuid：{0}]必须为空。请把它清理干净。",
+    "arguments": [
+      "msg.getPrimaryStorageUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/ministorage/MiniToZBoxBackupStorageMediator.java"
+  }
+]

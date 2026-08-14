@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:zstack="http://zstack.org/schema/zstack"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+         http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+         http://zstack.org/schema/zstack
+         http://zstack.org/schema/zstack/plugin.xsd"
+       default-init-method="init" default-destroy-method="destroy">
+
+    <bean id="VolumeBackupManager" class="org.zstack.storage.backup.VolumeBackupManagerImpl">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.Component"/>
+            <zstack:extension interface="org.zstack.header.Service"/>
+            <zstack:extension interface="org.zstack.header.identity.ResourceOwnerAfterChangeExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.vm.VmPreMigrationExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.vm.VmBeforeStartOnHypervisorExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.imagestore.ImageStoreReclaimSpaceExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.identity.ReportQuotaExtensionPoint"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="VolumeBackupApiInterceptor" class="org.zstack.storage.backup.VolumeBackupApiInterceptor">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.apimediator.ApiMessageInterceptor"/>
+            <zstack:extension interface="org.zstack.header.apimediator.GlobalApiMessageInterceptor"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="VolumeBackupKvmFactory" class="org.zstack.storage.backup.VolumeBackupKvmFactory">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.storage.backup.VolumeBackupFactory"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="VolumeBackupJobFactory" class="org.zstack.storage.backup.VolumeBackupJobFactory">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.scheduler.SchedulerJobFactory"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="RootVolumeBackupJobFactory" class="org.zstack.storage.backup.RootVolumeBackupJobFactory">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.scheduler.SchedulerJobFactory"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="VmBackupJobFactory" class="org.zstack.storage.backup.VmBackupJobFactory">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.scheduler.SchedulerJobFactory"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="VolumeBackupCascadeExtension" class="org.zstack.storage.backup.VolumeBackupCascadeExtension">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.core.cascade.CascadeExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="SchedulerBackupNotification" class="org.zstack.storage.backup.SchedulerBackupNotification">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.Component" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="VolumeBackupHistoryUpgradeExtension" class="org.zstack.storage.backup.VolumeBackupHistoryUpgradeExtension">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.Component" order="-1"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="VolumeBackupMetadataMaker" class="org.zstack.storage.backup.VolumeBackupMetadataMaker">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.storage.volume.backup.CreateVolumeBackupExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.storage.volume.backup.DeleteVolumeBackupExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.imagestore.ImageStorageContinueConnectExtensionPoint"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="BackupErrorHandler" class="org.zstack.storage.backup.BackupErrorHandlerImpl">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.storage.backup.BackupErrorHandler" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="NvRamVolumeBackupMetadataCollector" class="org.zstack.storage.backup.attachments.NvRamVolumeBackupMetadataCollector">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.volumebackup.VolumeBackupMetadataExtensionPoint"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="TpmVolumeBackupMetadataCollector" class="org.zstack.storage.backup.attachments.TpmVolumeBackupMetadataCollector">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.volumebackup.VolumeBackupMetadataExtensionPoint"/>
+        </zstack:plugin>
+    </bean>
+</beans>

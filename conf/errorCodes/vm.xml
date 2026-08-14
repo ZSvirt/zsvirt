@@ -1,0 +1,105 @@
+<error>
+    <prefix>VM</prefix>
+
+    <code>
+        <id>1000</id>
+        <description>Unable to create a new vm</description>
+    </code>
+
+    <code>
+        <id>1001</id>
+        <description>Unable to start a vm</description>
+    </code>
+
+    <code>
+        <id>1002</id>
+        <description>Unable to stop a vm</description>
+    </code>
+
+    <code>
+        <id>1003</id>
+        <description>Unable to reboot a vm</description>
+    </code>
+
+    <code>
+        <id>1004</id>
+        <description>Unable to destroy a vm</description>
+    </code>
+
+    <code>
+        <id>1005</id>
+        <description>Unable to attach data volume to a vm</description>
+    </code>
+
+    <code>
+        <id>1006</id>
+        <description>Unable to detach data volume from a vm</description>
+    </code>
+
+    <code>
+        <id>1007</id>
+        <description>Unable to attach a network to vm</description>
+    </code>
+
+    <code>
+        <id>1008</id>
+        <description>Unable to migrate a vm</description>
+    </code>
+
+    <code>
+        <id>1009</id>
+        <description>Unable to allocate a mac address for vm's nic</description>
+    </code>
+
+    <code>
+        <id>1010</id>
+        <description>VM is not in state that allows required operation</description>
+    </code>
+    <code>
+        <id>1011</id>
+        <description>An error occurred while change vm password</description>
+    </code>
+    <code>
+        <id>1012</id>
+        <description>Unable to suspend a vm</description>
+    </code>
+    <code>
+        <id>1013</id>
+        <description>Unable to resume a vm</description>
+    </code>
+    <code>
+        <id>1014</id>
+        <description>VM is not in Stopped state, cannot do re-image operation.</description>
+    </code>
+
+    <code>
+        <id>1015</id>
+        <description>Original image media type of VM is ISO, cannot do re-image operation.</description>
+    </code>
+
+    <code>
+        <id>1016</id>
+        <description>Cannot find image cache, cannot do re-image operation.</description>
+    </code>
+
+    <code>
+        <id>1017</id>
+        <description>Cannot get vnc setting.</description>
+    </code>
+
+    <code>
+        <id>1200</id>
+        <description>VM allocation error</description>
+    </code>
+
+    <code>
+        <id>1201</id>
+        <description>Wrong specific host error</description>
+    </code>
+
+    <code>
+        <id>1202</id>
+        <description>Wrong specific primary storage error</description>
+    </code>
+</error>
+

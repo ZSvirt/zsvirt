@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<globalConfig xmlns="http://zstack.org/schema/zstack">
+    <config>
+        <name>deletion.gcInterval</name>
+        <description>the interval to garbage collect stale volumes and snapshots, in seconds</description>
+        <defaultValue>3600</defaultValue>
+        <category>sharedMountPointPrimaryStorage</category>
+        <type>java.lang.Integer</type>
+    </config>
+
+    <config>
+        <name>qcow2.allocation</name>
+        <description>qcow2 allocation policy, can be none, metadata, falloc, full</description>
+        <defaultValue>none</defaultValue>
+        <category>sharedMountPointPrimaryStorage</category>
+        <type>java.lang.String</type>
+    </config>
+</globalConfig>

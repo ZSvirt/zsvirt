@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns="http://zstack.org/schema/zstack"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    targetNamespace="http://zstack.org/schema/zstack" elementFormDefault="qualified"
+    attributeFormDefault="unqualified">
+
+    <xsd:element name="error">
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element name="prefix" type="xsd:string"
+                    minOccurs="1" maxOccurs="1"></xsd:element>
+
+                <xsd:sequence maxOccurs="unbounded" minOccurs="0">
+                    <xsd:element name="code">
+                        <xsd:complexType>
+                            <xsd:sequence>
+                                <xsd:element name="id" type="xsd:int" minOccurs="1" maxOccurs="1"></xsd:element>
+                                <xsd:element name="description" type="xsd:string" minOccurs="1" maxOccurs="1"></xsd:element>
+                                <xsd:element name="elaboration" type="xsd:string"></xsd:element>
+                            </xsd:sequence>
+                        </xsd:complexType>
+                    </xsd:element>
+                </xsd:sequence>
+            </xsd:sequence>
+        </xsd:complexType>
+    </xsd:element>
+
+</xsd:schema>

@@ -1,0 +1,67 @@
+{
+    "ZStackTemplateFormatVersion": "2018-06-18",
+    "Description": "Creates a security group:\nThis template creates a security group and then attaches it to a VM. Prerequisites:\nThe instance offering, image, and private network are created. Make sure that the network is working as expected. Otherwise, the security group may fail to be created or fail to work properly after creation",
+    "Parameters": {
+        "InstanceOfferingUuid": {
+            "Type": "String",
+            "Label": "Instance Offering",
+            "Description": "The instance offering for creating a VM"
+        },
+        "ImageUuid":{
+            "Type": "String",
+            "Label": "Image",
+            "Description": "The image for creating a VM. Choose an image excluding ISO"
+        },
+        "FlatNetworkUuid":{
+            "Type": "String",
+            "Label": "Private Network",
+            "Description" : "The private network for creating a VM"
+        }
+    },
+    "Resources": {
+        "VmInstance": {
+            "Type": "Cloud::Resource::VmInstance",
+            "Properties": {
+                "name": {"Fn::Join":["-",[{"Ref":"Cloud::StackName"}, {"Ref":"Cloud::StackUuid"},{"Ref":"Cloud::AccountUuid"},{"Ref":"Cloud::AccountName"},"VM"]]},
+                "instanceOfferingUuid": {"Ref":"InstanceOfferingUuid"},
+                "imageUuid":{"Ref":"ImageUuid"},
+                "l3NetworkUuids":[{"Ref":"FlatNetworkUuid"}]
+            }
+        },
+        "SecurityGroup": {
+            "Type": "Cloud::Resource::SecurityGroup",
+            "Properties": {
+                "name": {"Fn::Join":["-",[{"Ref":"Cloud::StackName"}, {"Ref":"Cloud::StackUuid"},{"Ref":"Cloud::AccountUuid"},{"Ref":"Cloud::AccountName"},"SG"]]}
+            }
+        },
+        "SecurityGroupRule":{
+            "Type": "Cloud::Resource::SecurityGroupRule",
+            "Properties": {
+                "securityGroupUuid": {"Fn::GetAtt":["SecurityGroup","uuid"]},
+                "rules":[{"type":"Ingress","startPort":22,"endPort":22,"protocol":"TCP","allowedCidr":"0.0.0.0/0"}]
+            }
+        },
+        "AddVmNicToSecurityGroup": {
+            "Type": "Cloud::Action::AddVmNicToSecurityGroup",
+            "Properties": {
+                "securityGroupUuid": {"Fn::GetAtt":["SecurityGroup","uuid"]},
+                "vmNicUuids":[{"Fn::GetAtt":[{"Fn::Select":[0,{"Fn::GetAtt":["VmInstance","vmNics"]}]},"uuid"]}]
+            },
+            "DependsOn":[{"Ref":"AttachSecurityGroupToL3Network"}]
+        },
+        "AttachSecurityGroupToL3Network": {
+            "Type": "Cloud::Action::AttachSecurityGroupToL3Network",
+            "Properties": {
+                "securityGroupUuid": {"Fn::GetAtt":["SecurityGroup","uuid"]},
+                "l3NetworkUuid":{"Ref":"FlatNetworkUuid"}
+            }
+        }
+    },
+    "Outputs": {
+        "VmInstance": {
+            "Value": {
+                "Ref": "VmInstance"
+            }
+        }
+    }
+}

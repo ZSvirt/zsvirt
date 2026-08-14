@@ -1,0 +1,85 @@
+[
+  {
+    "raw": "No factory found for log4j2 appender type:%s.",
+    "en_US": "No factory found for log4j2 appender type:{0}.",
+    "zh_CN": "找不到Log4j2附加器类型的工厂：{0}。",
+    "arguments": [
+      "lstruct.getAppenderType()"
+    ],
+    "fileName": "src/main/java/org/zstack/log4j2/Log4j2LogConfigurationFactory.java"
+  },
+  {
+    "raw": "Unknown log4j2 appender type %s",
+    "en_US": "Unknown log4j2 appender type {0}",
+    "zh_CN": "未知的Log4j2 Appender类型{0}",
+    "arguments": [
+      "lstruct.getAppenderType()"
+    ],
+    "fileName": "src/main/java/org/zstack/log4j2/Log4j2LogConfigurationFactory.java"
+  },
+  {
+    "raw": "facility can not be null",
+    "en_US": "facility can not be null",
+    "zh_CN": "设备不能为空",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/log4j2/appender/syslog/SyslogAppenderProxyFactory.java"
+  },
+  {
+    "raw": "invalid facility %s",
+    "en_US": "invalid facility {0}",
+    "zh_CN": "工具{0}无效",
+    "arguments": [
+      "configuration.facility"
+    ],
+    "fileName": "src/main/java/org/zstack/log4j2/appender/syslog/SyslogAppenderProxyFactory.java"
+  },
+  {
+    "raw": "hostname can not be null",
+    "en_US": "hostname can not be null",
+    "zh_CN": "主机名不能为空",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/log4j2/appender/syslog/SyslogAppenderProxyFactory.java"
+  },
+  {
+    "raw": "port can not be null",
+    "en_US": "port can not be null",
+    "zh_CN": "端口不能为空",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/log4j2/appender/syslog/SyslogAppenderProxyFactory.java"
+  },
+  {
+    "raw": "protocol can not be null",
+    "en_US": "protocol can not be null",
+    "zh_CN": "协议不能为空",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/log4j2/appender/syslog/SyslogAppenderProxyFactory.java"
+  },
+  {
+    "raw": "unsupported protocol %s",
+    "en_US": "unsupported protocol {0}",
+    "zh_CN": "不支持的协议{0}",
+    "arguments": [
+      "configuration.protocol"
+    ],
+    "fileName": "src/main/java/org/zstack/log4j2/appender/syslog/SyslogAppenderProxyFactory.java"
+  },
+  {
+    "raw": "syslog server[address: %s] is not available",
+    "en_US": "syslog server[address: {0}] is not available",
+    "zh_CN": "Syslog服务器[地址：{0}]不可用",
+    "arguments": [
+      "configuration.hostname"
+    ],
+    "fileName": "src/main/java/org/zstack/log4j2/appender/syslog/SyslogAppenderProxyFactory.java"
+  },
+  {
+    "raw": "syslog server[address: %s:%s] is not available",
+    "en_US": "syslog server[address: {0}:{1}] is not available",
+    "zh_CN": "Syslog服务器[地址：{0}：{1}]不可用",
+    "arguments": [
+      "configuration.hostname",
+      "configuration.port"
+    ],
+    "fileName": "src/main/java/org/zstack/log4j2/appender/syslog/SyslogAppenderProxyFactory.java"
+  }
+]

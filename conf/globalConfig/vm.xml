@@ -1,0 +1,449 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<globalConfig xmlns="http://zstack.org/schema/zstack">
+	<config>
+		<name>dataVolume.deleteOnVmDestroy</name>
+		<description>A boolean value indicating whether deleting attached data volumes when destroying a vm. If false, the data volume will be detached and be retained in primary storage</description>
+		<category>vm</category>
+		<defaultValue>false</defaultValue>
+		<type>java.lang.Boolean</type>
+	</config>
+
+	<config>
+		<name>instanceOffering.setNullWhenDeleting</name>
+        <description>whether update instance offering column of VM inventory to NULL when the instance offering is deleted</description>
+		<category>vm</category>
+		<defaultValue>true</defaultValue>
+		<type>java.lang.Boolean</type>
+	</config>
+
+	<config>
+		<name>deletionPolicy</name>
+        <description>the behavior of deleting a vm, options are [Direct, Delay, Never]. Direct: delete the vm from database and directly delete its root volume; Delay: change the vm's state to Destroyed in database; after the period controlled by 'expungePeriod' passes, delete the vm from database and delete it's root volume; Never: delete the vm from database but never delete its root volume</description>
+		<category>vm</category>
+		<defaultValue>Delay</defaultValue>
+	</config>
+
+	<config>
+		<name>expungePeriod</name>
+        <description>the period before a destroyed vm being deleted from database and before its root volume being deleted from primary storage, in seconds</description>
+		<category>vm</category>
+		<defaultValue>604800</defaultValue>
+		<type>java.lang.Long</type>
+	</config>
+
+	<config>
+		<name>expungeInterval</name>
+        <description>the interval the expunging vm task runs, in seconds</description>
+		<category>vm</category>
+		<defaultValue>3600</defaultValue>
+		<type>java.lang.Long</type>
+	</config>
+
+	<config>
+		<name>cleanTraffic</name>
+		<description>switch for clean spoofing traffic from vm</description>
+		<category>vm</category>
+		<defaultValue>false</defaultValue>
+		<type>java.lang.Boolean</type>
+	</config>
+
+	<config>
+		<name>multivNic.support</name>
+		<description>A boolean value indicating whether support to create more than one nics with a L3 network in the a VM. If false, there only no more than one nic can be created for a VM with a L3 Netowrk</description>
+		<category>vm</category>
+		<defaultValue>true</defaultValue>
+		<type>java.lang.Boolean</type>
+	</config>
+
+	<config>
+		<name>spiceStreamingMode</name>
+		<description>config vm streaming mode when use spice</description>
+		<category>vm</category>
+		<defaultValue>off</defaultValue>
+		<type>java.lang.String</type>
+	</config>
+
+	<config>
+		<name>videoType</name>
+		<description>video type for VM. "virtio" supply basic video type. "vga" supply more high resolution for VM. "qxl" supply high performance when use SPICE protocal. "cirrus" mark as deprecated, reserved for compatibility.  Options:[vga, cirrus, qxl, virtio]</description>
+		<category>vm</category>
+		<defaultValue>virtio</defaultValue>
+		<type>java.lang.String</type>
+	</config>
+
+	<config>
+		<name>soundType</name>
+		<description>sound type for VM. "ich6" supply basic sound typen for VM.  Options:[ich6, ich9, ac97]</description>
+		<category>vm</category>
+		<defaultValue>ich6</defaultValue>
+		<type>java.lang.String</type>
+	</config>
+
+	<config>
+		<category>vm</category>
+		<name>numa</name>
+		<description>whether to use numa structure</description>
+		<type>java.lang.Boolean</type>
+		<defaultValue>false</defaultValue>
+	</config>
+
+	<config>
+		<category>vm</category>
+		<name>vm.max.vcpu</name>
+		<description>vm's maximum vcpu number</description>
+		<type>java.lang.Integer</type>
+		<defaultValue>128</defaultValue>
+	</config>
+
+	<config>
+		<name>bootMenu</name>
+		<description>whether to enable boot menu</description>
+		<category>vm</category>
+		<defaultValue>true</defaultValue>
+		<type>java.lang.Boolean</type>
+	</config>
+
+	<config>
+		<name>bootMenuSplashTimeout</name>
+		<description>splash timeout of boot menu in milliseconds</description>
+		<category>vm</category>
+		<defaultValue>3000</defaultValue>
+		<type>java.lang.Integer</type>
+	</config>
+
+	<config>
+		<name>kvmHiddenState</name>
+		<description>hide KVM hypervisor signature to guest</description>
+		<category>vm</category>
+		<defaultValue>false</defaultValue>
+		<type>java.lang.Boolean</type>
+	</config>
+
+	<config>
+		<name>emulateHyperV</name>
+		<description>whether to emulate hyper-v</description>
+		<category>vm</category>
+		<defaultValue>false</defaultValue>
+		<type>java.lang.Boolean</type>
+	</config>
+
+	<config>
+		<name>additionalQmp</name>
+		<description>add an additional qmp socket, disable may cause some features can not work</description>
+		<category>vm</category>
+		<defaultValue>true</defaultValue>
+		<type>java.lang.Boolean</type>
+	</config>
+
+	<config>
+		<category>vm</category>
+		<name>vmPortOff</name>
+		<description>Disable VMWare io port emulation</description>
+		<type>java.lang.Boolean</type>
+		<defaultValue>false</defaultValue>
+	</config>
+
+	<config>
+		<name>pciePortNums</name>
+		<description>PCIe-root-port numbers of VM. On x86-64/q35, it determine the hot-pluggable pci device numbers.</description>
+		<defaultValue>28</defaultValue>
+		<category>vm</category>
+		<type>java.lang.Integer</type>
+	</config>
+
+	<config>
+		<name>vm.totalNum</name>
+		<description>default quota for vm.total number</description>
+		<defaultValue>20</defaultValue>
+		<category>quota</category>
+		<type>java.lang.Long</type>
+	</config>
+	<config>
+		<name>vm.num</name>
+		<description>default quota for vm runnig number</description>
+		<defaultValue>20</defaultValue>
+		<category>quota</category>
+		<type>java.lang.Long</type>
+	</config>
+
+	<config>
+		<name>vm.memorySize</name>
+		<description>default quota for vm.memorySize</description>
+		<defaultValue>85899345920</defaultValue>
+		<category>quota</category>
+		<type>java.lang.Long</type>
+	</config>
+
+	<config>
+		<name>vm.cpuNum</name>
+		<description>default quota for vm.cpuNum</description>
+		<defaultValue>80</defaultValue>
+		<category>quota</category>
+		<type>java.lang.Long</type>
+	</config>
+
+	<config>
+		<name>volume.data.num</name>
+		<description>default quota for volume.data.num</description>
+		<defaultValue>40</defaultValue>
+		<category>quota</category>
+		<type>java.lang.Long</type>
+	</config>
+
+	<config>
+		<name>volume.capacity</name>
+		<description>default quota for volume.capacity</description>
+		<defaultValue>10995116277760</defaultValue>
+		<category>quota</category>
+		<type>java.lang.Long</type>
+	</config>
+
+	<config>
+		<name>vmDefaultCdRomNum</name>
+		<description>create vm default CDROM number</description>
+		<defaultValue>1</defaultValue>
+		<category>vm</category>
+		<type>java.lang.Long</type>
+	</config>
+
+	<config>
+		<name>maximumCdRomNum</name>
+		<description>the maximum number of CDROM in a vm</description>
+		<defaultValue>3</defaultValue>
+		<category>vm</category>
+		<type>java.lang.Long</type>
+	</config>
+
+	<config>
+		<name>chassisAssetTag</name>
+		<description>specify the cloudInit DataSource for ZStack vm instance</description>
+		<defaultValue>Default</defaultValue>
+		<category>vm</category>
+		<type>java.lang.String</type>
+	</config>
+
+	<config>
+		<name>resourceBinding.strategy</name>
+		<description>Strategy of resource binding</description>
+		<defaultValue>Hard</defaultValue>
+		<category>vm</category>
+		<type>java.lang.String</type>
+	</config>
+
+	<config>
+		<name>resourceBinding.Scene</name>
+		<description>Scenarios supported by resource binding</description>
+		<defaultValue>All</defaultValue>
+		<category>vm</category>
+		<type>java.lang.String</type>
+	</config>
+
+	<config>
+		<name>crash.strategy</name>
+		<description>the execution strategy when a vm crashed</description>
+		<defaultValue>None</defaultValue>
+		<category>vm</category>
+		<type>java.lang.String</type>
+	</config>
+
+	<config>
+		<name>crash.rebootThreshold.duration</name>
+		<description>vm crash duration</description>
+		<defaultValue>1800</defaultValue>
+		<category>vm</category>
+		<type>java.lang.Integer</type>
+	</config>
+
+	<config>
+		<name>crash.rebootThreshold.times</name>
+        <description>vm crash threshold in the specified time duration</description>
+		<defaultValue>5</defaultValue>
+		<category>vm</category>
+		<type>java.lang.Integer</type>
+	</config>
+
+	<config>
+		<name>nicMultiQueueNum</name>
+		<description>default num of queues on virtio nic</description>
+		<defaultValue>1</defaultValue>
+		<category>vm</category>
+		<type>java.lang.Integer</type>
+	</config>
+
+	<config>
+		<name>set.unknown.gc.interval</name>
+		<description>unknown gc interval, by seconds</description>
+		<defaultValue>30</defaultValue>
+		<category>vm</category>
+		<type>java.lang.Long</type>
+	</config>
+
+	<config>
+		<name>vm.clock.track</name>
+		<description>set vm clock track guest or host</description>
+		<defaultValue>host</defaultValue>
+		<category>vm</category>
+		<type>java.lang.String</type>
+	</config>
+
+	<config>
+		<name>enable.uefi.secure.boot</name>
+		<description>enable uefi secure boot</description>
+		<defaultValue>false</defaultValue>
+		<category>vm</category>
+		<type>java.lang.Boolean</type>
+	</config>
+
+	<config>
+		<category>vm</category>
+		<name>enable.vm.address.recording</name>
+		<description>enable vm device address record</description>
+		<type>java.lang.Boolean</type>
+		<defaultValue>true</defaultValue>
+	</config>
+
+	<config>
+		<category>vm</category>
+		<name>enable.vm.internal.ip.overwrite</name>
+		<description>enable vm internal ip address overwrite db record</description>
+		<type>java.lang.Boolean</type>
+		<defaultValue>true</defaultValue>
+	</config>
+
+	<config>
+		<category>vm</category>
+		<name>uniqueVmName</name>
+		<description>enable vm name unique</description>
+		<type>java.lang.Boolean</type>
+		<defaultValue>false</defaultValue>
+	</config>
+
+	<config>
+		<category>vm</category>
+		<name>vm.metadata.enabled</name>
+		<description>enable vm metadata</description>
+		<type>java.lang.Boolean</type>
+		<defaultValue>false</defaultValue>
+	</config>
+
+	<config>
+		<category>vm</category>
+		<name>vm.metadata.lastRefreshVersion</name>
+		<description>Last completed upgrade refresh version, prevents duplicate triggers across MNs. Internal use only</description>
+		<type>java.lang.String</type>
+		<defaultValue>5.0.0</defaultValue>
+	</config>
+
+	<config>
+		<category>vm</category>
+		<name>vm.metadata.flush.concurrency</name>
+		<description>Max concurrent metadata flush tasks per management node</description>
+		<type>java.lang.Integer</type>
+		<defaultValue>10</defaultValue>
+	</config>
+
+	<config>
+		<category>vm</category>
+		<name>vm.metadata.flush.pollInterval</name>
+		<description>Metadata dirty poller interval in seconds</description>
+		<type>java.lang.Long</type>
+		<defaultValue>5</defaultValue>
+	</config>
+
+	<config>
+		<category>vm</category>
+		<name>vm.metadata.flush.batchSize</name>
+		<description>Max dirty rows claimed per poll cycle</description>
+		<type>java.lang.Integer</type>
+		<defaultValue>20</defaultValue>
+	</config>
+
+	<config>
+		<category>vm</category>
+		<name>vm.metadata.cleanup.gc.interval</name>
+		<description>Metadata cleanup GC retry interval in hours</description>
+		<type>java.lang.Long</type>
+		<defaultValue>8</defaultValue>
+	</config>
+
+	<config>
+		<category>vm</category>
+		<name>vm.metadata.flush.maxRetry</name>
+		<description>Max flush retry count before marking VM metadata as stale</description>
+		<type>java.lang.Integer</type>
+		<defaultValue>5</defaultValue>
+	</config>
+
+	<config>
+		<category>vm</category>
+		<name>vm.metadata.flush.zombieClaimThreshold</name>
+		<description>Minutes before an uncompleted flush claim is considered zombie and released</description>
+		<type>java.lang.Long</type>
+		<defaultValue>15</defaultValue>
+	</config>
+
+	<config>
+		<category>vm</category>
+		<name>vm.metadata.maintenance.contentDriftInterval</name>
+		<description>Content drift detection interval in seconds. Drift detection is a fallback safety net; the primary mechanism is dirty marking via interceptors.</description>
+		<type>java.lang.Long</type>
+		<defaultValue>86400</defaultValue>
+	</config>
+
+	<config>
+		<category>vm</category>
+		<name>vm.metadata.maintenance.staleRecoveryInterval</name>
+		<description>Stale VM metadata recovery interval in seconds</description>
+		<type>java.lang.Long</type>
+		<defaultValue>600</defaultValue>
+	</config>
+
+	<config>
+		<category>vm</category>
+		<name>vm.metadata.maintenance.staleRecoveryMaxCycles</name>
+		<description>Max stale recovery cycles before entering permanent-stale state</description>
+		<type>java.lang.Integer</type>
+		<defaultValue>10</defaultValue>
+	</config>
+
+	<config>
+		<category>vm</category>
+		<name>vm.metadata.payload.rejectThreshold</name>
+		<description>Max allowed VM metadata payload size in bytes. VMs exceeding this are skipped.</description>
+		<type>java.lang.Long</type>
+		<defaultValue>33554432</defaultValue>
+	</config>
+
+	<config>
+		<category>vm</category>
+		<name>vm.metadata.maintenance.orphanCheckInterval</name>
+		<description>Orphan dirty-row detector interval in seconds. Releases rows claimed by dead management nodes.</description>
+		<type>java.lang.Long</type>
+		<defaultValue>3600</defaultValue>
+	</config>
+
+	<config>
+		<category>vm</category>
+		<name>vm.metadata.maintenance.staleRecoveryBatchSize</name>
+		<description>Max stale VMs processed per recovery cycle</description>
+		<type>java.lang.Integer</type>
+		<defaultValue>10</defaultValue>
+	</config>
+
+	<config>
+		<category>vm</category>
+		<name>vm.metadata.maintenance.contentDriftBatchSize</name>
+		<description>Number of VMs checked per batch during content drift detection</description>
+		<type>java.lang.Integer</type>
+		<defaultValue>10</defaultValue>
+	</config>
+
+	<config>
+		<category>vm</category>
+		<name>vm.metadata.maintenance.contentDriftBatchSleepSec</name>
+		<description>Sleep time in seconds between content drift detection batches to limit DB pressure</description>
+		<type>java.lang.Long</type>
+		<defaultValue>1</defaultValue>
+	</config>
+
+</globalConfig>

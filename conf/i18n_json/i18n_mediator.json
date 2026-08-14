@@ -1,0 +1,81 @@
+[
+  {
+    "raw": "no ip ranges attached with l3 network[uuid:%s]",
+    "en_US": "no ip ranges attached with l3 network[uuid:{0}]",
+    "zh_CN": "在三层网络[uuid:{0}]上没有IP范围被绑定",
+    "arguments": [
+      "l3NetworkUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/mediator/ApiValidator.java"
+  },
+  {
+    "raw": "unable to attach a L3 network. The cidr of l3[%s] to attach overlapped with l3[%s] already attached to vm",
+    "en_US": "unable to attach a L3 network. The cidr of l3[{0}] to attach overlapped with l3[{1}] already attached to vm",
+    "zh_CN": "不能绑定这个三层网络。这个虚拟机上已经绑定的三层网络[{1}]和这个三层网络[{0}]的CIDR存在重叠",
+    "arguments": [
+      "l3NetworkUuid",
+      "vmNicVO.getL3NetworkUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/mediator/ApiValidator.java"
+  },
+  {
+    "raw": "the vm[name:%s, uuid:%s] already has some port forwarding rules%s attached",
+    "en_US": "the vm[name:{0}, uuid:{1}] already has some port forwarding rules{2} attached",
+    "zh_CN": "虚拟机[name:{0}, uuid:{1}] 已经设置了一些端口转发规则{2}",
+    "arguments": [
+      "vm.getName()",
+      "vm.getUuid()",
+      "StringUtils.join(pfStr, \",\")"
+    ],
+    "fileName": "src/main/java/org/zstack/mediator/ApiValidator.java"
+  },
+  {
+    "raw": "the vm[name:%s, uuid:%s] already has some EIPs%s attached",
+    "en_US": "the vm[name:{0}, uuid:{1}] already has some EIPs{2} attached",
+    "zh_CN": "虚拟机[name:{0}, uuid:{1}] 已经配置了弹性IP{2}",
+    "arguments": [
+      "vm.getName()",
+      "vm.getUuid()",
+      "StringUtils.join(eipStr, \",\")"
+    ],
+    "fileName": "src/main/java/org/zstack/mediator/ApiValidator.java"
+  },
+  {
+    "raw": "the vip[uuid:%s] already has bound to other service[%s]",
+    "en_US": "the vip[uuid:{0}] already has bound to other service[{1}]",
+    "zh_CN": "该虚拟IP[uuid:{0}]已经绑定了其他服务",
+    "arguments": [
+      "msg.getVipUuid()",
+      "useForList.toString()"
+    ],
+    "fileName": "src/main/java/org/zstack/mediator/ApiValidator.java"
+  },
+  {
+    "raw": "Current port range[%s, %s] is conflicted with system service port range [%s, %s] with vip[uuid: %s] protocol: %s ",
+    "en_US": "Current port range[{0}, {1}] is conflicted with system service port range [{2}, {3}] with vip[uuid: {4}] protocol: {5} ",
+    "zh_CN": "当前使用的端口范围[{0}, {1}]和虚拟IP[uuid: {4}, 协议: {5}]已经使用的系统服务端口范围[{2}, {3}]冲突",
+    "arguments": [
+      "Long.toString(range.getStart())",
+      "Long.toString(range.getEnd())",
+      "Long.toString(cur.getStart())",
+      "Long.toString(cur.getEnd())",
+      "vipUuid",
+      "protocol"
+    ],
+    "fileName": "src/main/java/org/zstack/mediator/ApiValidator.java"
+  },
+  {
+    "raw": "Current port range[%s, %s] is conflicted with used port range [%s, %s] with vip[uuid: %s] protocol: %s ",
+    "en_US": "Current port range[{0}, {1}] is conflicted with used port range [{2}, {3}] with vip[uuid: {4}] protocol: {5} ",
+    "zh_CN": "当前使用的端口范围[{0}, {1}]和虚拟IP[uuid: {4}, 协议: {5}]已经使用的端口范围[{2}, {3}]冲突",
+    "arguments": [
+      "Long.toString(range.getStart())",
+      "Long.toString(range.getEnd())",
+      "Long.toString(cur.getStart())",
+      "Long.toString(cur.getEnd())",
+      "vipUuid",
+      "protocol"
+    ],
+    "fileName": "src/main/java/org/zstack/mediator/ApiValidator.java"
+  }
+]

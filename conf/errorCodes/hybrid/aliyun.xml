@@ -1,0 +1,107 @@
+<error>
+    <prefix>ALIYUN</prefix>
+
+    <code>
+        <id>1000</id>
+        <description>OpenAPI Return Error</description>
+    </code>
+
+    <code>
+        <id>1001</id>
+        <description>No Such Ecs Id Local</description>
+    </code>
+
+    <code>
+        <id>1002</id>
+        <description>No Such Ecs Id Remote</description>
+    </code>
+
+    <code>
+        <id>1003</id>
+        <description>Invalid ECS Parameters</description>
+    </code>
+
+    <code>
+        <id>1004</id>
+        <description>No Such Instance Offering Uuid</description>
+    </code>
+
+    <code>
+        <id>1005</id>
+        <description>No Such Ecs Image Id Local</description>
+    </code>
+
+    <code>
+        <id>1006</id>
+        <description>Image Size Exceed Than Public Cloud Allowed</description>
+    </code>
+
+    <code>
+        <id>1007</id>
+        <description>Instance Offering not Support By Aliyun</description>
+    </code>
+
+    <code>
+        <id>1008</id>
+        <description>No Instance Type Support In IZone</description>
+    </code>
+
+    <code>
+        <id>1009</id>
+        <description>Invalid aliyun OpenAPI AccessKey/Secret</description>
+    </code>
+
+    <code>
+        <id>1010</id>
+        <description>No oss bucket attach to datacenter</description>
+    </code>
+    <code>
+        <id>1011</id>
+        <description>No such virtual router table</description>
+    </code>
+    <code>
+        <id>1012</id>
+        <description>No such router interface</description>
+    </code>
+    <code>
+        <id>1013</id>
+        <description>No such virtual boarder router</description>
+    </code>
+    <code>
+        <id>1014</id>
+        <description>No such virtual router</description>
+    </code>
+    <code>
+        <id>1015</id>
+        <description>No such ecs vpc</description>
+    </code>
+    <code>
+        <id>1016</id>
+        <description>Router interface not matched</description>
+    </code>
+    <code>
+        <id>1017</id>
+        <description>No such oss bucket found</description>
+    </code>
+    <code>
+        <id>1018</id>
+        <description>not supported identity zone</description>
+    </code>
+    <code>
+        <id>1019</id>
+        <description>Current resource status not support the operation</description>
+    </code>
+    <code>
+        <id>1020</id>
+        <description>Import ecs image task status not "Success"</description>
+    </code>
+    <code>
+        <id>1021</id>
+        <description>Current action is not a support ecs action</description>
+    </code>
+    <code>
+        <id>1022</id>
+        <description>can not find a paired router interface between vbr and vrouter</description>
+    </code>
+</error>
+

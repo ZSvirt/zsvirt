@@ -1,0 +1,94 @@
+[
+  {
+    "raw": "%s is not an API",
+    "en_US": "{0} is not an API",
+    "zh_CN": "{0}不是一个API",
+    "arguments": [
+      "msg.getJobName()"
+    ],
+    "fileName": "src/main/java/org/zstack/longjob/LongJobApiInterceptor.java"
+  },
+  {
+    "raw": "cannot cancel longjob that is succeeded",
+    "en_US": "cannot cancel longjob that is succeeded",
+    "zh_CN": "不能取消已经成功的longjob",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/longjob/LongJobApiInterceptor.java"
+  },
+  {
+    "raw": "cannot cancel longjob that is failed",
+    "en_US": "cannot cancel longjob that is failed",
+    "zh_CN": "不能取消已经失败的longjob",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/longjob/LongJobApiInterceptor.java"
+  },
+  {
+    "raw": "delete longjob only when it\u0027s succeeded, canceled, or failed",
+    "en_US": "delete longjob only when it\u0027s succeeded, canceled, or failed",
+    "zh_CN": "只能删除已经成功、取消、失败的longjob",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/longjob/LongJobApiInterceptor.java"
+  },
+  {
+    "raw": "rerun longjob only when it\u0027s succeeded, canceled, or failed",
+    "en_US": "rerun longjob only when it\u0027s succeeded, canceled, or failed",
+    "zh_CN": "仅在成功、取消或失败时重新运行LongJob",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/longjob/LongJobApiInterceptor.java"
+  },
+  {
+    "raw": "can only resume longjob that is Suspended",
+    "en_US": "can only resume longjob that is Suspended",
+    "zh_CN": "只能恢复挂起的LongJob",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/longjob/LongJobApiInterceptor.java"
+  },
+  {
+    "raw": "%s has no corresponding longjob",
+    "en_US": "{0} has no corresponding longjob",
+    "zh_CN": "{0}没有与之对应的longjob",
+    "arguments": [
+      "jobName"
+    ],
+    "fileName": "src/main/java/org/zstack/longjob/LongJobFactoryImpl.java"
+  },
+  {
+    "raw": "not supported or state is not Canceling",
+    "en_US": "not supported or state is not Canceling",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/longjob/LongJobManagerImpl.java"
+  },
+  {
+    "raw": "not supported",
+    "en_US": "not supported",
+    "zh_CN": "不支持",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/longjob/LongJobManagerImpl.java"
+  },
+  {
+    "raw": "management node is unavailable",
+    "en_US": "management node is unavailable",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/longjob/LongJobManagerImpl.java"
+  },
+  {
+    "raw": "long job[uuid:%s] has been canceled",
+    "en_US": "long job[uuid:{0}] has been canceled",
+    "zh_CN": "长任务 {0} 已被取消",
+    "arguments": [
+      "longJobUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/longjob/LongJobUtils.java"
+  },
+  {
+    "raw": "some error interrupt long job[uuid:%s], analysis the cause to fix it and resume long job if you want to continue.",
+    "en_US": "some error interrupt long job[uuid:{0}], analysis the cause to fix it and resume long job if you want to continue.",
+    "zh_CN": "长任务 {0} 运行出错，请检查原因并恢复运行。",
+    "arguments": [
+      "longJobUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/longjob/LongJobUtils.java"
+  }
+]

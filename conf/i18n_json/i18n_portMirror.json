@@ -1,0 +1,160 @@
+[
+  {
+    "raw": "Invalid parameter [%s], make sure it\u0027s PortMirror Network",
+    "en_US": "Invalid parameter [{0}], make sure it\u0027s PortMirror Network",
+    "zh_CN": "参数[{0}]无效，请确保它是PortMirror网络",
+    "arguments": [
+      "msg.getMirrorNetworkUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/portMirror/PortMirrorApiInterceptor.java"
+  },
+  {
+    "raw": "The network[%s] has been attached with a PortMirror service",
+    "en_US": "The network[{0}] has been attached with a PortMirror service",
+    "zh_CN": "网络[{0}]已附加PortMirror服务",
+    "arguments": [
+      "msg.getMirrorNetworkUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/portMirror/PortMirrorApiInterceptor.java"
+  },
+  {
+    "raw": "The PortMirror service[%s] has not been created",
+    "en_US": "The PortMirror service[{0}] has not been created",
+    "zh_CN": "尚未创建PortMirror服务[{0}]",
+    "arguments": [
+      "msg.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/portMirror/PortMirrorApiInterceptor.java"
+  },
+  {
+    "raw": "The nic[%s, %s] has been mirrored by service[%s]",
+    "en_US": "The nic[{0}, {1}] has been mirrored by service[{2}]",
+    "zh_CN": "NIC[{0}，{1}]已由服务[{2}]镜像",
+    "arguments": [
+      "msg.getSrcEndPoint()",
+      "msg.getDstEndPoint()",
+      "mirror.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/portMirror/PortMirrorApiInterceptor.java"
+  },
+  {
+    "raw": "The nic[%s] can\u0027t been mirrored for service[%s] using",
+    "en_US": "The nic[{0}] can\u0027t been mirrored for service[{1}] using",
+    "zh_CN": "无法使用为服务[{1}]镜像NIC[{0}]",
+    "arguments": [
+      "msg.getSrcEndPoint()",
+      "mirror.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/portMirror/PortMirrorApiInterceptor.java"
+  },
+  {
+    "raw": "The PortMirror service doesn\u0027t support to mirror the nic[%s]",
+    "en_US": "The PortMirror service doesn\u0027t support to mirror the nic[{0}]",
+    "zh_CN": "PortMirror服务不支持镜像网卡[{0}]",
+    "arguments": [
+      "msg.getSrcEndPoint()"
+    ],
+    "fileName": "src/main/java/org/zstack/portMirror/PortMirrorApiInterceptor.java"
+  },
+  {
+    "raw": "The PortMirror service doesn\u0027t support the nic[%s] because of its hypervisor type",
+    "en_US": "The PortMirror service doesn\u0027t support the nic[{0}] because of its hypervisor type",
+    "zh_CN": "由于其虚拟机监控程序类型，PortMirror服务不支持NIC[{0}]",
+    "arguments": [
+      "msg.getDstEndPoint()"
+    ],
+    "fileName": "src/main/java/org/zstack/portMirror/PortMirrorApiInterceptor.java"
+  },
+  {
+    "raw": "The PortMirror service can\u0027t mirror to the nic[%s] that is not a non-default interface of a vm",
+    "en_US": "The PortMirror service can\u0027t mirror to the nic[{0}] that is not a non-default interface of a vm",
+    "zh_CN": "PortMirror服务无法镜像到不是VM的非默认接口的NIC[{0}]",
+    "arguments": [
+      "msg.getDstEndPoint()"
+    ],
+    "fileName": "src/main/java/org/zstack/portMirror/PortMirrorApiInterceptor.java"
+  },
+  {
+    "raw": "The PortMirror service can\u0027t mirror the nic[%s] that is not an interface of any vm",
+    "en_US": "The PortMirror service can\u0027t mirror the nic[{0}] that is not an interface of any vm",
+    "zh_CN": "PortMirror服务无法镜像不是任何VM接口的NIC[{0}]",
+    "arguments": [
+      "msg.getSrcEndPoint()"
+    ],
+    "fileName": "src/main/java/org/zstack/portMirror/PortMirrorApiInterceptor.java"
+  },
+  {
+    "raw": "The PortMirror service can\u0027t mirror the nic[%s]  to nic[%s] because the mirror network[%s] can\u0027t setup the mirror tunnel",
+    "en_US": "The PortMirror service can\u0027t mirror the nic[{0}]  to nic[{1}] because the mirror network[{2}] can\u0027t setup the mirror tunnel",
+    "zh_CN": "PortMirror服务无法将NIC[{0}]镜像到NIC[{1}]，因为镜像网络[{2}]无法设置镜像隧道",
+    "arguments": [
+      "msg.getSrcEndPoint()",
+      "msg.getDstEndPoint()",
+      "vo.getMirrorNetworkUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/portMirror/PortMirrorApiInterceptor.java"
+  },
+  {
+    "raw": "The PortMirror service can\u0027t mirror the nic[%s] to itself",
+    "en_US": "The PortMirror service can\u0027t mirror the nic[{0}] to itself",
+    "zh_CN": "PortMirror服务无法将NIC[{0}]镜像到其自身",
+    "arguments": [
+      "msg.getSrcEndPoint()"
+    ],
+    "fileName": "src/main/java/org/zstack/portMirror/PortMirrorApiInterceptor.java"
+  },
+  {
+    "raw": "The PortMirror service can\u0027t work at the nic with configured Qos",
+    "en_US": "The PortMirror service can\u0027t work at the nic with configured Qos",
+    "zh_CN": "PortMirror服务无法在配置了QoS的NIC上工作",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/portMirror/PortMirrorApiInterceptor.java"
+  },
+  {
+    "raw": "operation error, because:%s",
+    "en_US": "operation error, because:{0}",
+    "zh_CN": "操作错误，因为{0}",
+    "arguments": [
+      "rsp.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/portMirror/PortMirrorKvmBackend.java"
+  },
+  {
+    "raw": "invalid host uuid %s",
+    "en_US": "invalid host uuid {0}",
+    "zh_CN": "",
+    "arguments": [
+      "hostUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/portMirror/PortMirrorManagerImpl.java"
+  },
+  {
+    "raw": "failed to delete portMirror session[%s] from hypervisor, detail: %s",
+    "en_US": "failed to delete portMirror session[{0}] from hypervisor, detail: {1}",
+    "zh_CN": "无法从虚拟机监控程序中删除PortMirror会话[{0}]，详细信息：{1}",
+    "arguments": [
+      "sessionVO.getUuid()",
+      "errorCode.getDetails()"
+    ],
+    "fileName": "src/main/java/org/zstack/portMirror/PortMirrorManagerImpl.java"
+  },
+  {
+    "raw": "failed to release portMirror session[%s] from hypervisor, detail: %s",
+    "en_US": "failed to release portMirror session[{0}] from hypervisor, detail: {1}",
+    "zh_CN": "无法从虚拟机监控程序释放PortMirror会话[{0}]，详细信息：{1}",
+    "arguments": [
+      "sessionVO.getUuid()",
+      "errorCode.getDetails()"
+    ],
+    "fileName": "src/main/java/org/zstack/portMirror/PortMirrorManagerImpl.java"
+  },
+  {
+    "raw": "cannot find internal id of the session[uuid:%s], are there too many sessions in a host???",
+    "en_US": "cannot find internal id of the session[uuid:{0}], are there too many sessions in a host???",
+    "zh_CN": "找不到会话[uuid：{0}]的内部ID，主机中是否有太多会话？？",
+    "arguments": [
+      "vo.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/portMirror/PortMirrorManagerImpl.java"
+  }
+]

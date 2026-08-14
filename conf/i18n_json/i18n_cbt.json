@@ -1,0 +1,122 @@
+[
+  {
+    "raw": "Cbt task not found[uuid: %s]",
+    "en_US": "Cbt task not found[uuid: {0}]",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/cbt/CbtBackupApiInterceptor.java"
+  },
+  {
+    "raw": "Cbt task[uuid: %s] has already enabled, please disable it.",
+    "en_US": "Cbt task[uuid: {0}] has already enabled, please disable it.",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/cbt/CbtBackupApiInterceptor.java"
+  },
+  {
+    "raw": "Unexpected vm[uuid: %s] state: %s, the expected vm state is Running.",
+    "en_US": "Unexpected vm[uuid: {0}] state: {1}, the expected vm state is Running.",
+    "zh_CN": "",
+    "arguments": [
+      "vmUuid",
+      "state"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/cbt/CbtBackupApiInterceptor.java"
+  },
+  {
+    "raw": "The vm[uuid: %s] has already created a backup job, cannot enable the cbt task at the same time.",
+    "en_US": "The vm[uuid: {0}] has already created a backup job, cannot enable the cbt task at the same time.",
+    "zh_CN": "",
+    "arguments": [
+      "vmUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/cbt/CbtBackupApiInterceptor.java"
+  },
+  {
+    "raw": "%s",
+    "en_US": "{0}",
+    "zh_CN": "{0}",
+    "arguments": [
+      "rsp.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/cbt/CbtBackupKvmBackend.java"
+  },
+  {
+    "raw": "cannot find the cbt task[uuid:%s]",
+    "en_US": "cannot find the cbt task[uuid:{0}]",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getCbtTaskUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/cbt/CbtBackupManagerImpl.java"
+  },
+  {
+    "raw": "vm[uuid: %s] is running，please stop it and try again.",
+    "en_US": "vm[uuid: {0}] is running，please stop it and try again.",
+    "zh_CN": "",
+    "arguments": [
+      "vmUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/cbt/CbtBackupManagerImpl.java"
+  },
+  {
+    "raw": "volume[uuid:%s] for vmInstance[uuid: %s] has already been exported.",
+    "en_US": "volume[uuid:{0}] for vmInstance[uuid: {1}] has already been exported.",
+    "zh_CN": "",
+    "arguments": [
+      "entry.getKey()",
+      "vmUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/cbt/CbtBackupManagerImpl.java"
+  },
+  {
+    "raw": "host not found for VM: %s",
+    "en_US": "host not found for VM: {0}",
+    "zh_CN": "找不到VM的主机：{0}",
+    "arguments": [
+      "vmUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/cbt/CbtBackupManagerImpl.java"
+  },
+  {
+    "raw": "VM [uuid: %s] have been protected by task: %s",
+    "en_US": "VM [uuid: {0}] have been protected by task: {1}",
+    "zh_CN": "虚拟机[uuid：{0}]已受任务{1}保护",
+    "arguments": [
+      "vmUuid",
+      "tasks.get(0)"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/cbt/CbtBackupManagerImpl.java"
+  },
+  {
+    "raw": "create cbt volumes failed. details is: %s",
+    "en_US": "create cbt volumes failed. details is: {0}",
+    "zh_CN": "",
+    "arguments": [
+      "reply.getError().getDetails()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/cbt/CbtBackupManagerImpl.java"
+  },
+  {
+    "raw": "No hypervisor type for VM %s",
+    "en_US": "No hypervisor type for VM {0}",
+    "zh_CN": "虚拟机{0}没有虚拟机管理程序类型",
+    "arguments": [
+      "vmUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/cbt/CbtBackupManagerImpl.java"
+  },
+  {
+    "raw": "No CbtBackupFactory of type[%s] found",
+    "en_US": "No CbtBackupFactory of type[{0}] found",
+    "zh_CN": "",
+    "arguments": [
+      "hypervisorType"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/cbt/CbtBackupManagerImpl.java"
+  }
+]

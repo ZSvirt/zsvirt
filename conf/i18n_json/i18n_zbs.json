@@ -1,0 +1,163 @@
+[
+  {
+    "raw": "failed to SSH or zbs-tools was not installed in MDS[%s], you need to check the SSH configuration and dependencies",
+    "en_US": "failed to SSH or zbs-tools was not installed in MDS[{0}], you need to check the SSH configuration and dependencies",
+    "zh_CN": "",
+    "arguments": [
+      "self.getAddr()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/zbs/ZbsMdsBase.java"
+  },
+  {
+    "raw": "failed to get MDS[%s] metadata, you need to check the ZBS configuration",
+    "en_US": "failed to get MDS[{0}] metadata, you need to check the ZBS configuration",
+    "zh_CN": "",
+    "arguments": [
+      "self.getAddr()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/zbs/ZbsMdsBase.java"
+  },
+  {
+    "raw": "operation error, because:%s",
+    "en_US": "operation error, because:{0}",
+    "zh_CN": "操作错误，因为{0}",
+    "arguments": [
+      "error"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/zbs/ZbsMdsBase.java"
+  },
+  {
+    "raw": "%s",
+    "en_US": "{0}",
+    "zh_CN": "{0}",
+    "arguments": [
+      "rsp.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/zbs/ZbsPrimaryStorageMdsBase.java"
+  },
+  {
+    "raw": "not supported protocol[%s]",
+    "en_US": "not supported protocol[{0}]",
+    "zh_CN": "",
+    "arguments": [
+      "v.getProtocol()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/zbs/ZbsStorageController.java"
+  },
+  {
+    "raw": "not supported protocol[%s] for active",
+    "en_US": "not supported protocol[{0}] for active",
+    "zh_CN": "",
+    "arguments": [
+      "protocol"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/zbs/ZbsStorageController.java"
+  },
+  {
+    "raw": "unable to connect to the ZBS primary storage[uuid:%s], failed to connect all MDS",
+    "en_US": "unable to connect to the ZBS primary storage[uuid:{0}], failed to connect all MDS",
+    "zh_CN": "无法连接 ZBS 主存储 [uuid:{0}]: 不能连接所有的 MDS",
+    "arguments": [
+      "self.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/zbs/ZbsStorageController.java"
+  },
+  {
+    "raw": "ZBS primary storage[uuid:%s] may have been deleted",
+    "en_US": "ZBS primary storage[uuid:{0}] may have been deleted",
+    "zh_CN": "",
+    "arguments": [
+      "self.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/zbs/ZbsStorageController.java"
+  },
+  {
+    "raw": "cannot found kvm host[uuid:%s], unable to deploy client",
+    "en_US": "cannot found kvm host[uuid:{0}], unable to deploy client",
+    "zh_CN": "",
+    "arguments": [
+      "h.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/zbs/ZbsStorageController.java"
+  },
+  {
+    "raw": "no MDS is Connected, the following MDS[%s] are not Connected.",
+    "en_US": "no MDS is Connected, the following MDS[{0}] are not Connected.",
+    "zh_CN": "",
+    "arguments": [
+      "notConnectedIps"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/zbs/ZbsStorageController.java"
+  },
+  {
+    "raw": "no available logical pool with enough space[%d]",
+    "en_US": "no available logical pool with enough space[{0}]",
+    "zh_CN": "",
+    "arguments": [
+      "aspec.getSize()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/zbs/ZbsStorageController.java"
+  },
+  {
+    "raw": "unsupported protocol %s",
+    "en_US": "unsupported protocol {0}",
+    "zh_CN": "不支持的协议{0}",
+    "arguments": [
+      "protocol.name()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/zbs/ZbsStorageController.java"
+  },
+  {
+    "raw": "invalid URI syntax: %s",
+    "en_US": "invalid URI syntax: {0}",
+    "zh_CN": "",
+    "arguments": [
+      "e.getMessage()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/zbs/ZbsStorageController.java"
+  },
+  {
+    "raw": "ensure at least one MDS is configured",
+    "en_US": "ensure at least one MDS is configured",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/storage/zbs/ZbsStorageController.java"
+  },
+  {
+    "raw": "do not allow to add duplicate MDS[%s]",
+    "en_US": "do not allow to add duplicate MDS[{0}]",
+    "zh_CN": "",
+    "arguments": [
+      "duplicateMdsInfos.stream().map(MdsInfo::getAddr).distinct().collect(Collectors.joining(\", \"))"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/zbs/ZbsStorageController.java"
+  },
+  {
+    "raw": "not found MDS[%s] of zbs primary storage[uuid:%s] node",
+    "en_US": "not found MDS[{0}] of zbs primary storage[uuid:{1}] node",
+    "zh_CN": "",
+    "arguments": [
+      "mdsAddr",
+      "self.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/zbs/ZbsStorageController.java"
+  },
+  {
+    "raw": "all MDS of ZBS primary storage[uuid:%s] are not in Connected state",
+    "en_US": "all MDS of ZBS primary storage[uuid:{0}] are not in Connected state",
+    "zh_CN": "",
+    "arguments": [
+      "self.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/zbs/ZbsStorageController.java"
+  },
+  {
+    "raw": "all MDS cannot execute http call[%s]",
+    "en_US": "all MDS cannot execute http call[{0}]",
+    "zh_CN": "",
+    "arguments": [
+      "path"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/zbs/ZbsStorageController.java"
+  }
+]

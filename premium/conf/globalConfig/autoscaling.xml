@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<globalConfig xmlns="http://zstack.org/schema/zstack">
+    <config>
+        <category>autoscaling</category>
+        <name>vmNicLoadBalancerListenerHealthCheck.interval</name>
+        <description>the interval to check the status of the vmNic in the loadBalancerListener, in seconds</description>
+        <type>java.lang.Integer</type>
+        <defaultValue>10</defaultValue>
+    </config>
+
+    <config>
+        <category>autoscaling</category>
+        <name>vmNicLoadBalancerListenerHealthCheck.threadNum</name>
+        <description>the number of threads used to check the status of the vmNic in the loadBalancerListener</description>
+        <type>java.lang.Integer</type>
+        <defaultValue>10</defaultValue>
+    </config>
+
+    <config>
+        <category>autoscaling</category>
+        <name>removeUnhealthyInstance.interval</name>
+        <description>the interval to remove unhealthy instance, in seconds</description>
+        <type>java.lang.Integer</type>
+        <defaultValue>30</defaultValue>
+    </config>
+
+    <config>
+        <category>autoscaling</category>
+        <name>removeUnhealthyInstance.threadNum</name>
+        <description>the number of threads used to remove unhealthy instance</description>
+        <type>java.lang.Integer</type>
+        <defaultValue>10</defaultValue>
+    </config>
+
+    <config>
+        <category>autoscaling</category>
+        <name>checkTheNumberOfInstancesInTheGroup.interval</name>
+        <description>the interval to check the number of instances in the group, in seconds</description>
+        <type>java.lang.Integer</type>
+        <defaultValue>20</defaultValue>
+    </config>
+
+    <config>
+        <category>autoscaling</category>
+        <name>autoScalingGroup.activity.retention.amount</name>
+        <description>the number of autoScalingGroup activity log retention by per group</description>
+        <type>java.lang.Long</type>
+        <defaultValue>10000</defaultValue>
+    </config>
+</globalConfig>

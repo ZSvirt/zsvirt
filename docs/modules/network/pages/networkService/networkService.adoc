@@ -1,0 +1,34 @@
+= 网络服务
+
+ZStack平台支持如下类型的网络服务：
+
+* 安全组
+* DHCP
+* UserData
+* 主机路由
+* CentralizedDNS
+* SNAT
+* 弹性IP
+* 端口转发
+* IPSec
+* VipQos
+* 源进源出
+* 防火墙
+* 静态路由表
+* OSPF
+* 组播
+* NetFlow
+* 端口镜像
+
+但是不同类型的网络支持默认的网络服务不同，他们直接的对应关系如图：
+
+image::networkService/networkTotal.svg[]
+
+
+== 网络服务提供者(NetworkServiceProvider)
+
+ZStack平台是一个插件化平台，网络服务和网络服务的实现是分离，实现同一个网络服务根据配置，选择不同的实现方式。
+
+比如扁平网络有弹性IP服务，VPC网路也有弹性IP服务。
+
+用户可以通过cli修改三层网络的网络服务，但是不建议使用。

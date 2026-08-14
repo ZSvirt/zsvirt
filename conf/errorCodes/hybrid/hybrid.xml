@@ -1,0 +1,73 @@
+<error>
+    <prefix>HYBRID</prefix>
+
+    <code>
+        <id>1000</id>
+        <description>no such datacenter</description>
+    </code>
+    <code>
+        <id>1001</id>
+        <description>no such identity zone</description>
+    </code>
+    <code>
+        <id>1002</id>
+        <description>no account found for hybrid</description>
+    </code>
+    <code>
+        <id>1003</id>
+        <description>no such ecs vpc</description>
+    </code>
+    <code>
+        <id>1004</id>
+        <description>no such virtual router</description>
+    </code>
+    <code>
+        <id>1005</id>
+        <description>no such virtual route entry</description>
+    </code>
+    <code>
+        <id>1006</id>
+        <description>no such virtual router interface</description>
+    </code>
+    <code>
+        <id>1007</id>
+        <description>no such virtual border router</description>
+    </code>
+    <code>
+        <id>1008</id>
+        <description>non support virtual router type</description>
+    </code>
+    <code>
+        <id>1009</id>
+        <description>no such connection access point</description>
+    </code>
+    <code>
+        <id>1010</id>
+        <description>no such ecs vswitch</description>
+    </code>
+    <code>
+        <id>1011</id>
+        <description>no such ecs security group</description>
+    </code>
+    <code>
+        <id>1012</id>
+        <description>no such oss bucket</description>
+    </code>
+    <code>
+        <id>1013</id>
+        <description>no such vpn gateway</description>
+    </code>
+    <code>
+        <id>1014</id>
+        <description>no such vpn connection</description>
+    </code>
+    <code>
+        <id>1015</id>
+        <description>no such user vpn gateway</description>
+    </code>
+    <code>
+        <id>1016</id>
+        <description>no such oss domain</description>
+    </code>
+</error>
+

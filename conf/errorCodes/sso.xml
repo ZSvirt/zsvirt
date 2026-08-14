@@ -1,0 +1,12 @@
+<error>
+    <prefix>SSO</prefix>
+    <code>
+        <id>1001</id>
+        <description>invalid SSO token</description>
+    </code>
+
+    <code>
+        <id>2001</id>
+        <description>SSO account not found</description>
+    </code>
+</error>

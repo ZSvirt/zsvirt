@@ -1,0 +1,187 @@
+[
+  {
+    "raw": "invalid ip format [%s]",
+    "en_US": "invalid ip format [{0}]",
+    "zh_CN": "无效的 IP 地址格式 {0}",
+    "arguments": [
+      "ip"
+    ],
+    "fileName": "src/main/java/org/zstack/zsv/ZsvApiInterceptor.java"
+  },
+  {
+    "raw": "volume %s still have snapshot group on vm %s, cannot attach to other vm",
+    "en_US": "volume {0} still have snapshot group on vm {1}, cannot attach to other vm",
+    "zh_CN": "卷{0}在云主机{1}上仍具有快照组，无法连接到其他云主机",
+    "arguments": [
+      "volume.getUuid()",
+      "volume.getLastVmInstanceUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/zsv/ZsvManagerImpl.java"
+  },
+  {
+    "raw": "volume %s still have snapshot group, cannot delete it",
+    "en_US": "volume {0} still have snapshot group, cannot delete it",
+    "zh_CN": "卷{0}仍具有快照组，无法将其删除",
+    "arguments": [
+      "volume.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/zsv/ZsvManagerImpl.java"
+  },
+  {
+    "raw": "detach sharable volume or lun device before operating snapshot group",
+    "en_US": "detach sharable volume or lun device before operating snapshot group",
+    "zh_CN": "在操作快照组之前，需要卸载共享存储和 LUN 设备",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zsv/ZsvManagerImpl.java"
+  },
+  {
+    "raw": "volume[uuid:%s] has been deleted",
+    "en_US": "volume[uuid:{0}] has been deleted",
+    "zh_CN": "硬盘[uuid:{0}]已经被删除了",
+    "arguments": [
+      "volId"
+    ],
+    "fileName": "src/main/java/org/zstack/zsv/snapshotgroup/ZsvBeforeRevertSnapshotGroupFlow.java"
+  },
+  {
+    "raw": "Failed to check SSH keys on host[%s:%d]",
+    "en_US": "Failed to check SSH keys on host[{0}:{1}]",
+    "zh_CN": "无法检查 Host [IP={0}, 端口={1}] 上的 SSH keys",
+    "arguments": [
+      "host.getIp()",
+      "host.getPort()"
+    ],
+    "fileName": "src/main/java/org/zstack/zsv/storage/SSHPasswordlessConfigurator.java"
+  },
+  {
+    "raw": "SSH keys are incomplete on host[%s:%d].",
+    "en_US": "SSH keys are incomplete on host[{0}:{1}].",
+    "zh_CN": "Host [IP={0}, 端口={1}] 上的 SSH keys 数据破损",
+    "arguments": [
+      "host.getIp()",
+      "host.getPort()"
+    ],
+    "fileName": "src/main/java/org/zstack/zsv/storage/SSHPasswordlessConfigurator.java"
+  },
+  {
+    "raw": "Failed to generate SSH keys on host[%s:%d]",
+    "en_US": "Failed to generate SSH keys on host[{0}:{1}]",
+    "zh_CN": "无法在 host [IP={0}, 端口={1}] 上生成 SSH Keys",
+    "arguments": [
+      "host.getIp()",
+      "host.getPort()"
+    ],
+    "fileName": "src/main/java/org/zstack/zsv/storage/SSHPasswordlessConfigurator.java"
+  },
+  {
+    "raw": "failed to check if management node is also compute node, node: %s",
+    "en_US": "failed to check if management node is also compute node, node: {0}",
+    "zh_CN": "无法确认管理节点 [uuid={0}] 是否也是计算节点",
+    "arguments": [
+      "managementNodeUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/zsv/storage/ZsvStorageManager.java"
+  },
+  {
+    "raw": "management node[uuid:%s] must be a compute node",
+    "en_US": "management node[uuid:{0}] must be a compute node",
+    "zh_CN": "管理节点 [uuid={0}] 必须得是计算节点才能执行此操作",
+    "arguments": [
+      "managementNodeUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/zsv/storage/ZsvStorageManager.java"
+  },
+  {
+    "raw": "failed to retrieve host uuid [management uuid:%s]",
+    "en_US": "failed to retrieve host uuid [management uuid:{0}]",
+    "zh_CN": "无法获取管理节点 [uuid={0}] 对应的 Host UUID",
+    "arguments": [
+      "managementNodeUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/zsv/storage/ZsvStorageManager.java"
+  },
+  {
+    "raw": "failed to check if management node is also compute node",
+    "en_US": "failed to check if management node is also compute node",
+    "zh_CN": "无法确认该管理节点是否也是计算节点",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zsv/storage/ZsvStorageManager.java"
+  },
+  {
+    "raw": "Telemetry is already enabled",
+    "en_US": "Telemetry is already enabled",
+    "zh_CN": "Telemetry 用户体验计划已启用",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zsv/telemetry/TelemetryApiInterceptor.java"
+  },
+  {
+    "raw": "User consent is required before enabling telemetry",
+    "en_US": "User consent is required before enabling telemetry",
+    "zh_CN": "启用 Telemetry 用户体验计划前需要用户同意",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zsv/telemetry/TelemetryApiInterceptor.java"
+  },
+  {
+    "raw": "telemetry.consent.granted.at must be updated via %s",
+    "en_US": "telemetry.consent.granted.at must be updated via {0}",
+    "zh_CN": "telemetry.consent.granted.at 必须通过 {0} 更新",
+    "arguments": [
+      "APIUpdateTelemetryConsentMsg.class.getSimpleName()"
+    ],
+    "fileName": "src/main/java/org/zstack/zsv/telemetry/TelemetryGlobalConfigApiInterceptor.java"
+  },
+  {
+    "raw": "telemetry.%s cannot be modified via UpdateGlobalConfig after initialization",
+    "en_US": "telemetry.{0} cannot be modified via UpdateGlobalConfig after initialization",
+    "zh_CN": "初始化后不能通过 UpdateGlobalConfig 修改 telemetry.{0}",
+    "arguments": [
+      "name"
+    ],
+    "fileName": "src/main/java/org/zstack/zsv/telemetry/TelemetryGlobalConfigApiInterceptor.java"
+  },
+  {
+    "raw": "telemetry collect failed: %s",
+    "en_US": "telemetry collect failed: {0}",
+    "zh_CN": "Telemetry 采集失败：{0}",
+    "arguments": [
+      "t.getMessage()"
+    ],
+    "fileName": "src/main/java/org/zstack/zsv/telemetry/TelemetryManager.java"
+  },
+  {
+    "raw": "telemetry upload failed: %s",
+    "en_US": "telemetry upload failed: {0}",
+    "zh_CN": "Telemetry 上传失败：{0}",
+    "arguments": [
+      "t.getMessage()"
+    ],
+    "fileName": "src/main/java/org/zstack/zsv/telemetry/TelemetryManager.java"
+  },
+  {
+    "raw": "telemetry sync report failed: %s",
+    "en_US": "telemetry sync report failed: {0}",
+    "zh_CN": "Telemetry 同步日报失败：{0}",
+    "arguments": [
+      "t.getMessage()"
+    ],
+    "fileName": "src/main/java/org/zstack/zsv/telemetry/TelemetryManager.java"
+  },
+  {
+    "raw": "telemetry delete pending failed: %s",
+    "en_US": "telemetry delete pending failed: {0}",
+    "zh_CN": "Telemetry 删除 pending 失败：{0}",
+    "arguments": [
+      "t.getMessage()"
+    ],
+    "fileName": "src/main/java/org/zstack/zsv/telemetry/TelemetryManager.java"
+  },
+  {
+    "raw": "failed to collect telemetry data: %s",
+    "en_US": "failed to collect telemetry data: {0}",
+    "zh_CN": "采集 Telemetry 数据失败：{0}",
+    "arguments": [
+      "t.getMessage()"
+    ],
+    "fileName": "src/main/java/org/zstack/zsv/telemetry/collect/TelemetryCollector.java"
+  }
+]

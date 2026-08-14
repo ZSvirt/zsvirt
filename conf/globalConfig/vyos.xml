@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<globalConfig xmlns="http://zstack.org/schema/zstack">
+    <config>
+        <category>vyos</category>
+        <name>private.l3.firewall.default.action</name>
+        <description>default action for private l3 network</description>
+        <type>java.lang.String</type>
+        <defaultValue>reject</defaultValue>
+    </config>
+    <config>
+        <category>vyos</category>
+        <name>configure.firewall.with.iptables</name>
+        <description>use iptables directly instead of Vyos firewall configuration</description>
+        <type>java.lang.Boolean</type>
+        <defaultValue>false</defaultValue>
+    </config>
+    <config>
+        <category>vyos</category>
+        <name>auto.restart.ipsec</name>
+        <description>auto restart vpn when ike key expired</description>
+        <type>java.lang.Boolean</type>
+        <defaultValue>false</defaultValue>
+    </config>
+    <config>
+        <category>vyos</category>
+        <name>enable.haproxy.log</name>
+        <description>enable or disable haproxy log</description>
+        <type>java.lang.Boolean</type>
+        <defaultValue>true</defaultValue>
+    </config>
+    <config>
+        <category>vyos</category>
+        <name>enable.vyos.cmd</name>
+        <description>enable or disable vyos command</description>
+        <type>java.lang.Boolean</type>
+        <defaultValue>true</defaultValue>
+    </config>
+</globalConfig>

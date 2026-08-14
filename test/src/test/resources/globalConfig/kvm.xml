@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<globalConfig xmlns="http://zstack.org/schema/zstack">
+    <config>
+        <category>kvm</category>
+        <name>vm.migrationQuantity</name>
+        <description>A value that defines how many vm can be migrated in parallel when putting a KVM host into maintenance mode.</description>
+        <defaultValue>2</defaultValue>
+        <type>java.lang.Integer</type>
+    </config>
+
+    <config>
+        <category>kvm</category>
+        <name>migrate.autoConverge</name>
+        <description>Enable auto converge during live migration.</description>
+        <defaultValue>false</defaultValue>
+        <type>java.lang.Boolean</type>
+    </config>
+
+    <config>
+        <category>kvm</category>
+        <name>migrate.xbzrle</name>
+        <description>Enable xbzrle compress will speed up live migration under write-frequently workload.</description>
+        <defaultValue>true</defaultValue>
+        <type>java.lang.Boolean</type>
+    </config>
+
+    <config>
+        <category>kvm</category>
+        <name>reservedCpu</name>
+        <description>The CPU capacity reserved on all KVM hosts. ZStack KVM agent is a python web server that needs some CPU capacity to run, this value reserve a portion of CPU for the agent as well as other host applications. The value can be overriden by system tag on individual host, cluster and zone level</description>
+        <defaultValue>0</defaultValue>
+    </config>
+
+    <config>
+        <category>kvm</category>
+        <name>reservedMemory</name>
+        <description>The memory capacity reserved on all KVM hosts. ZStack KVM agent is a python web server that needs some memory capacity to run. this value reserves a portion of memory for the agent as well as other host applications. The value can be overriden by system tag on individual host, cluster and zone level</description>
+        <defaultValue>0</defaultValue>
+    </config>
+
+    <config>
+        <category>kvm</category>
+        <name>dataVolume.maxNum</name>
+        <description>Max number of data volumes allowed to attach to single KVM instance</description>
+        <type>java.lang.Integer</type>
+        <defaultValue>24</defaultValue>
+    </config>
+
+    <config>
+        <category>kvm</category>
+        <name>host.syncLevel</name>
+        <description>The number of parallel commands that can be executed on KVM host. A big number may put a host in heavy workload in a busy system. The value must be greater than zero</description>
+        <type>java.lang.Integer</type>
+        <defaultValue>10</defaultValue>
+    </config>
+
+    <config>
+        <category>kvm</category>
+        <name>host.snapshot.syncLevel</name>
+        <description>The number of parallel commands of take snapshot call. A big number may put a host in heavy workload in a busy system. The value must be greater than zero</description>
+        <type>java.lang.Integer</type>
+        <defaultValue>10</defaultValue>
+    </config>
+
+    <config>
+        <category>kvm</category>
+        <name>vm.createConcurrency</name>
+        <description>The number of VMs that can be created concurrently on KVM host.</description>
+        <type>java.lang.Integer</type>
+        <defaultValue>2</defaultValue>
+    </config>
+
+    <config>
+        <category>kvm</category>
+        <name>host.DNSCheckList</name>
+        <description>DNS or IP check list. When adding a KVM host, if all DNS/IP in the list are failed to ping, the adding host will fail.</description>
+        <defaultValue>yahoo.com,google.com,baidu.com</defaultValue>
+    </config>
+
+    <config>
+        <category>kvm</category>
+        <name>host.DNSCheckAliyun</name>
+        <description>DNS or IP check list. When adding a KVM host, if all DNS/IP in the list are failed to ping, the adding host will fail.</description>
+        <defaultValue>mirrors.aliyun.com</defaultValue>
+    </config>
+
+    <config>
+        <category>kvm</category>
+        <name>host.DNSCheck163</name>
+        <description>DNS or IP check list. When adding a KVM host, if all DNS/IP in the list are failed to ping, the adding host will fail.</description>
+        <defaultValue>mirrors.163.com</defaultValue>
+    </config>
+
+    <config>
+        <category>kvm</category>
+        <name>redhat.liveSnapshotOn</name>
+        <description>when set to true, enable the live volume snapshot on RedHat series OS if the libvirt and QEMU versions match the requirement</description>
+        <type>java.lang.Boolean</type>
+        <defaultValue>false</defaultValue>
+    </config>
+
+    <config>
+        <category>kvm</category>
+        <name>vmSyncOnHostPing</name>
+        <description>whether to sync VM states from hosts when host ping tasks execute</description>
+        <type>java.lang.Boolean</type>
+        <defaultValue>false</defaultValue>
+    </config>
+
+    <config>
+        <category>kvm</category>
+        <name>vm.cacheMode</name>
+        <description>disk cache optoin:none,writethrough,writeback</description>
+        <defaultValue>none</defaultValue>
+    </config>
+
+    <config>
+        <category>kvm</category>
+        <name>vm.cpuMode</name>
+        <description>the cpu mode option, which could be used to enable nested virtualization, options are [none, host-model, host-passthrough, Haswell, Haswell-noTSX, Broadwell, Broadwell-noTSX, SandyBridge, IvyBridge, Conroe, Penryn, Nehalem, Westmere, Opteron_G1, Opteron_G2, Opteron_G3, Opteron_G4]. none: not use nested virtualization; host-model/host-passthrough will enable nested virtualization. When using host-passthrough, VM will see same CPU model in Host /proc/cpuinfo. When using host-model or host-passthrough, VM migration might be failed, due to mismatched CPU model. To use nested virtualization, user need to do some pre-configuration. Firstly, the /sys/module/kvm_intel/parameters/nested should be set as 'Y'; Secondly, the /usr/libexec/qemu-kvm binary should support nested feature as well. </description>
+        <type>java.lang.String</type>
+        <defaultValue>none</defaultValue>
+    </config>
+
+    <config>
+        <category>kvm</category>
+        <name>checkHostCpuModelName</name>
+        <description>whether check host cpu model name when migrate vm</description>
+        <type>java.lang.Boolean</type>
+        <defaultValue>false</defaultValue>
+    </config>
+
+    <config>
+        <category>kvm</category>
+        <name>ignoreMsrs</name>
+        <description>whether set ignore_msrs for kvm module</description>
+        <type>java.lang.Boolean</type>
+        <defaultValue>false</defaultValue>
+    </config>
+
+    <config>
+        <category>kvm</category>
+        <name>testSshPortOpenTimeout</name>
+        <description>the total timeout to test if host's ssh port ready when reconnecting hosts, in seconds</description>
+        <type>java.lang.Long</type>
+        <defaultValue>300</defaultValue>
+    </config>
+
+    <config>
+        <category>kvm</category>
+        <name>testSshPortOnConnectTimeout</name>
+        <description>use with testSshPortOpenTimeout, the connect timeout launching a socket connection to hosts' ssh port, in seconds</description>
+        <type>java.lang.Integer</type>
+        <defaultValue>2</defaultValue>
+    </config>
+
+    <config>
+        <category>kvm</category>
+        <name>restartagentwhenfakedead</name>
+        <description>restart agent directly if it might be fake dead</description>
+        <type>java.lang.Boolean</type>
+        <defaultValue>true</defaultValue>
+    </config>
+
+    <config>
+        <category>kvm</category>
+        <name>auto.set.vm.nic.multiqueue</name>
+        <description>auto set vm nic multiqueue, set nic queue number based on number of vm cpu cores when platform is linux</description>
+        <type>java.lang.Boolean</type>
+        <defaultValue>true</defaultValue>
+    </config>
+
+    <config>
+        <category>kvm</category>
+        <name>kvmagent.allow.ports</name>
+        <description>tcp or udp ports allowed by kvmagent, udp port start with 'u' like 'u67', port range can be like this: 1100:1200, multiple port or port range can be separated by ”,“</description>
+        <defaultValue>22,7070,16509,49152:49261,2049,20000:30000,u4789,u8472,7069,9100,9103</defaultValue>
+    </config>
+
+    <config>
+        <category>kvm</category>
+        <name>enable.host.tcp.connection.check</name>
+        <description>Enable host connection check offered by tcp detection.</description>
+        <defaultValue>false</defaultValue>
+        <type>java.lang.Boolean</type>
+    </config>
+
+    <config>
+        <category>kvm</category>
+        <name>connection.server.update.interval</name>
+        <description>Interval for tcp server update its heartbeat time.</description>
+        <defaultValue>1</defaultValue>
+        <type>java.lang.Integer</type>
+    </config>
+
+    <config>
+        <category>kvm</category>
+        <name>host.connection.check.interval</name>
+        <description>Interval to check if sockets from host are out of date.</description>
+        <defaultValue>3</defaultValue>
+        <type>java.lang.Long</type>
+    </config>
+
+    <config>
+        <category>kvm</category>
+        <name>enable.vm.migration.host.cpu.function.check</name>
+        <description>Check whether the CPU function of the dstHost is compatible with the CPU function of the srcHost.</description>
+        <defaultValue>true</defaultValue>
+        <type>java.lang.Boolean</type>
+    </config>
+
+    <config>
+        <category>kvm</category>
+        <name>redirect.vm.log.to.file</name>
+        <description>Redirect vm console log to file</description>
+        <defaultValue>false</defaultValue>
+        <type>java.lang.Boolean</type>
+    </config>
+
+    <config>
+        <category>kvm</category>
+        <name>vm.cpu.hypervisor.feature</name>
+        <description>enable or disable hypervisor feature in guest cpuid</description>
+        <defaultValue>true</defaultValue>
+        <type>java.lang.Boolean</type>
+    </config>
+
+    <config>
+        <category>kvm</category>
+        <name>vm.hyperv.clock.feature</name>
+        <description>Enable or disable hypervclock</description>
+        <defaultValue>true</defaultValue>
+        <type>java.lang.Boolean</type>
+    </config>
+
+    <config>
+        <category>kvm</category>
+        <name>vm.suspend.to.ram</name>
+        <description>Enable vm suspend to ram</description>
+        <defaultValue>false</defaultValue>
+        <type>java.lang.Boolean</type>
+    </config>
+
+    <config>
+        <category>kvm</category>
+        <name>vm.suspend.to.disk</name>
+        <description>Enable vm suspend to disk</description>
+        <defaultValue>false</defaultValue>
+        <type>java.lang.Boolean</type>
+    </config>
+
+    <config>
+        <category>kvm</category>
+        <name>webssh.idleTimeout</name>
+        <description>WebSSH timeout in seconds duration starts counting after the user has stopped interacting.</description>
+        <defaultValue>3600</defaultValue>
+        <type>java.lang.Integer</type>
+    </config>
+</globalConfig>

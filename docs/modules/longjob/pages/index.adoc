@@ -1,0 +1,182 @@
+= ZStack Cloud 长任务架构 LongJob
+
+== 简介
+
+[quote]
+====
+本节内容主要对应 `longjob` 目录
+====
+
+`LongJob` 顾名思义是指长时间运行的任务，可以类比为 VMware SDK 中的 http://vijava.sourceforge.net/vSphereAPIDoc/ver51/ReferenceGuide/vim.Task.html[Task] 对象。这些 API 可以帮助 UI 方便地实现任务管理器，而不用担心页面刷新导致上下文信息丢失。
+
+LongJob interface
+
+[source,java]
+----
+public interface LongJob {
+    void start(LongJobVO job,
+           ReturnValueCompletion<APIEvent> completion);
+
+    default void cancel(LongJobVO job,
+            ReturnValueCompletion<Boolean> completion) {}
+    default void resume(LongJobVO job,
+            ReturnValueCompletion<APIEvent> completion) {}
+    default void clean(LongJobVO job,
+               NoErrorCompletion completion) {}
+    default Class getAuditType() {
+    return null;
+    }
+    default String getAuditResourceUuid() {
+    return null;
+    }
+}
+----
+
+== 任务取消
+
+`cancel` 机制的作者马晋写有一篇 http://confluence.zstack.io/x/mFHVBg[如何实现
+LongJob 取消]，这里做一些总结和补充。
+
+ZStack 管理节点是建立在全异步、无状态的框架之上。ZStack 对外呈现的调用
+接口是一个 `APIMessage`, 而任务的取消逻辑处理的也正是消息处理会涉及的
+几个方面：
+
+. 再次分发为内部消息（可能会发往不同的管理节点）；
+. 执行某个工作流；
+. 执行某个 Agent 请求。
+
+== LongJob::cancel() 的语义
+
+`LongJob` 的 `cancel()` 接口被定义为一个异步接口。其中的 `completion`
+返回值的语义如下定义：
+
+[cols=",",]
+|===
+|`completion.success(true)` | 任务已经被取消。
+|`completion.success(false)` | 原任务已经设置取消标记，会自动回滚。
+|`completion.fail(errCode)` |CancelLongJob API 失败。
+|===
+
+代码 [.spurious-link]##_lst-vm-migrate_##是取消迁移虚拟机的实现：
+
+取消热迁移
+
+[source,java]
+----
+@Override
+public void cancel(LongJobVO job, ReturnValueCompletion<Boolean> completion) {
+    MigrateVmInnerMsg msg = JSONObjectUtil.toObject(job.getJobData(), MigrateVmInnerMsg.class);
+    CancelMigrateVmMsg cmsg = new CancelMigrateVmMsg();
+    cmsg.setCancellationApiId(job.getApiId());
+    cmsg.setUuid(msg.getVmInstanceUuid());
+    bus.makeTargetServiceIdByResourceUuid(cmsg, VmInstanceConstant.SERVICE_ID, cmsg.getVmInstanceUuid());
+    bus.send(cmsg, new CloudBusCallBack(completion) {
+    @Override
+    public void run(MessageReply reply) {
+        if (reply.isSuccess()) {
+        completion.success(false);
+        } else {
+        completion.fail(reply.getError());
+        }
+    }
+    });
+}
+----
+
+== 工作流的取消
+
+虽然正在执行过程中的工作流没法被立即取消，但是我们可以通过 `preCheck`
+接口来检查当前的任务是否已被设置取消标记。工作流在执行每个 `flow` 的时
+候，如果发现已经设置取消标记，则自动报错回滚。
+
+[source,java]
+----
+FlowChain chain = FlowChainBuilder.newShareFlowChain();
+chain.setName("awesome workflow");
+chain.preCheck(data -> buildErrIfCanceled());
+----
+
+=== CancelMessage 和 CancelHostTasksMsg
+
+如果工作流的某一步 `flow` 特别耗时，此时，仅仅通过 `preCheck` 来做自动
+取消显然不能满足时效性。因此，我们可以实现 `LongJob::cancel()` 方法来
+主动取消正在执行的耗时步骤。我们从代码 [.spurious-link]##_lst-vm-migrate_##看到，取消热迁移时
+主动发送了 `CancelMigrateVmMsg` 消息。
+
+[source,java]
+----
+public class CancelMigrateVmMsg extends CancelMessage implements VmInstanceMessage {
+    private String uuid;
+    // other fields omitted.
+}
+
+public abstract class CancelMessage extends NeedReplyMessage {
+    private String cancellationApiId;
+    // other fields omitted.
+}
+----
+
+CancelMigrateVmMsg 继承自 CancelMessage，因此会自动包含字段
+cancellationApiId，保存待取消的 apiId. CancelMigrateVmMsg 会利用
+CancelHostTasksMsg 来做一系列取消操作。后者最终向 agent 发送
+`/job/cancel` 请求，不再赘述。
+
+== HasThreadContext
+
+取消动作需要找到被取消的任务，及其上下文。当前的实现中，通过
+`cancellationApiId` 来完成。它包括两个方面：
+
+. agent 上耗时较长，支持取消的请求，实现 `HasThreadContext` 接口，这 样
+agent 的请求内容中会自动加入相关上下文信息，包括 apiId.
+. `/job/cancel` 收到的唯一参数就是 cancellationApiId.
+
+[source,java]
+----
+public static class DownloadBitsFromNbdCmd extends AgentCommand
+  implements HasThreadContext {
+    @NoLogging
+    private String nbdExportUrl;
+    private String primaryStorageInstallPath;
+    // other fields omitted.
+}
+----
+
+此外，agent 端的进度汇报 `Report.from_spec()` 同样依赖
+`HasThreadContext` 注入的上下文信息。
+
+== TaskDaemon
+
+agent 收到请求后，为了支持后续的 `cancel' 操作，必须记录上下文信息。比
+较推荐的方法是实现一个 `TaskDaemon`, 这样 `/job/cancel` 框架就能通过自
+定义的 `TaskDaemon` 来实现取消、进度汇报等等。同样以取消热迁移为例，如
+代码 [.spurious-link]##_lst-cancel-vm_##：
+
+cancel vm migration
+
+[source,python]
+----
+class MigrateDaemon(plugin.TaskDaemon):
+    def __init__(self, domain):
+    super(MigrateDaemon, self).__init__(cmd, 'MigrateVm', timeout)
+    self.domain = domain
+
+    def _get_percent(self):
+        // omitted.
+
+    def _cancel(self):
+        logger.debug('cancelling vm[uuid:%s] migration' % cmd.vmUuid)
+        self.domain.abortJob()
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        // omitted.
+
+# to do VM migration:
+with MigrateDaemon(self.domain):
+    self.domain.migrateToURI2(...)
+----
+
+其中， `TaskDaemon` 的构造函数用于记录上下文信息并创建相应的
+`TaskDaemon` 对象。其 `__enter__` 方法会自动在框架里记录 `apiId` 以及
+`TaskDaemon` 对象的对应关系。处理 `/job/cancel` 的时候，框架代码只需要
+通过 `cancellationApiId` 找到注册的 `MigrateDaemon` 对象，调用其实现的
+`_cancel` 方法即可。

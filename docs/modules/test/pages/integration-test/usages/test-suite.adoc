@@ -1,0 +1,230 @@
+= Integration 测试框架的 Test Suite
+
+测试用例可以单独执行，也可以放在 test suite 一起执行。test
+suite 的作用是只启动一次 JVM 和 ZStack 环境就运行所有测试用例，大大减少测试时间。例如：
+
+[source,groovy]
+----
+class GetFreeIpTest extends Test {
+    def DOC = """
+
+    Test getting free IPs from a single L3 network with one or two IP ranges
+
+"""
+    @Override
+    void setup() {
+        spring {
+            include("vip.xml")
+        }
+    }
+
+    @Override
+    void environment() {
+    }
+
+    @Override
+    void test() {
+        runSubCases()
+    }
+}
+----
+
+test suite 的整体结构跟测试用例类似，不同点在于：
+
+[arabic]
+. test suite 继承 `Test` 类，测试用例继承 `SubCase` 类
+. test
+suite 的 `environment()` 通常为空，因为各测试用例会自己创建的 `EnvSpec` 对象
+. test suite 在 `test()` 函数中通过 `runSubCases()` 执行一组测试用例
+. test suite 没有 `clean()` 函数
+
+测试用例必须保证跟 test
+suite 加载相同的服务和组件，以保证用例单独执行和在 test
+suite 中执行时 ZStack 运行的组件和服务完全相同。故测试用例应该跟 test
+suite 有相同 `setup()` 函数。
+
+*`runSubCases()` 运行时会自动搜索该 test
+suite 所在 package 以及子 package 的所有测试用例，无需程序员显示指定。*
+
+== 运行 Test Suite
+
+运行 test suite 方法跟运行单个测试用例一样：
+
+[source,shell]
+----
+mvn test -Dtest=GetFreeIpTest
+----
+
+== 指定 Test Suite 输出结果目录
+
+可以使用`-DresultDir` 参数指定 test Suite 输出结果目录，例如：
+
+[source,shell]
+----
+mvn test -Dtest=GetFreeIpTest -DresultDir=/tmp
+----
+
+运行结束后，测试框架会在指定目录建立一个名为 zstack-integration-test-result 的子目录。每个 test
+suite 又有一个以 class 全名命名的子目录，例如 `org_zstack_test_integration_kvm_KvmTest`，其中包含一个 summary 文件，包含该 test
+suite 运行的总体信息，例如：
+
+[source,json]
+----
+{"total":1,"success":0,"failure":1,"passRate":0.0}
+----
+
+以及以每个测试用例 class 全名命名的结果文件，例如 `org_zstack_test_integration_kvm_lifecycle_OneVmBasicLifeCycleCase.failure`:
+
+[source,json]
+----
+{"success":false,"error":"unable to find the nic[ip:193.168.100.55]. Expression: (to !\u003d null). Values: to \u003d null","name":"OneVmBasicLifeCycleCase"}
+----
+
+文件的后缀名表示测试结果：`success` 为成功，`failure` 为失败。
+
+____
+所有文件的内容均为 JSON 格式
+____
+
+== 测试用例间共享 env DSL
+
+相同 test suite 中的测试用例常常需要共享相同的 env
+DSL，则可以通过一个类的 static 函数共享，例如：
+
+[source,groovy]
+----
+class OneVmBasicEnv {
+    def DOC = """
+use:
+1. sftp backup storage
+2. local primary storage
+3. virtual router provider
+4. l2 novlan network
+5. security group
+"""
+
+    static EnvSpec env() {
+        return Test.makeEnv {
+            instanceOffering {
+                name = "instanceOffering"
+                memory = SizeUnit.GIGABYTE.toByte(8)
+                cpu = 4
+            }
+
+            sftpBackupStorage {
+                name = "sftp"
+                url = "/sftp"
+                username = "root"
+                password = "password"
+                hostname = "localhost"
+
+                image {
+                    name = "image1"
+                    url  = "http://zstack.org/download/test.qcow2"
+                }
+
+                image {
+                    name = "vr"
+                    url  = "http://zstack.org/download/vr.qcow2"
+                }
+            }
+
+            zone {
+                name = "zone"
+                description = "test"
+
+                cluster {
+                    name = "cluster"
+                    hypervisorType = "KVM"
+
+                    kvm {
+                        name = "kvm"
+                        managementIp = "localhost"
+                        username = "root"
+                        password = "password"
+                    }
+
+                    attachPrimaryStorage("local")
+                    attachL2Network("l2")
+                }
+
+                localPrimaryStorage {
+                    name = "local"
+                    url = "/local_ps"
+                }
+
+                l2NoVlanNetwork {
+                    name = "l2"
+                    physicalInterface = "eth0"
+
+                    l3Network {
+                        name = "l3"
+
+                        service {
+                            provider = VirtualRouterConstant.PROVIDER_TYPE
+                            types = [NetworkServiceType.DHCP.toString(), NetworkServiceType.DNS.toString()]
+                        }
+
+                        service {
+                            provider = SecurityGroupConstant.SECURITY_GROUP_PROVIDER_TYPE
+                            types = [SecurityGroupConstant.SECURITY_GROUP_NETWORK_SERVICE_TYPE]
+                        }
+
+                        ip {
+                            startIp = "192.168.100.10"
+                            endIp = "192.168.100.100"
+                            netmask = "255.255.255.0"
+                            gateway = "192.168.100.1"
+                        }
+                    }
+
+                    l3Network {
+                        name = "pubL3"
+
+                        ip {
+                            startIp = "12.16.10.10"
+                            endIp = "12.16.10.100"
+                            netmask = "255.255.255.0"
+                            gateway = "12.16.10.1"
+                        }
+                    }
+                }
+
+                virtualRouterOffering {
+                    name = "vr"
+                    memory = SizeUnit.MEGABYTE.toByte(512)
+                    cpu = 2
+                    useManagementL3Network("pubL3")
+                    usePublicL3Network("pubL3")
+                    useImage("vr")
+                }
+
+                attachBackupStorage("sftp")
+            }
+
+            vm {
+                name = "vm"
+                useInstanceOffering("instanceOffering")
+                useImage("image1")
+                useL3Networks("l3")
+            }
+        }
+    }
+}
+
+class OneVmBasicLifeCycleCase extends SubCase {
+    EnvSpec env
+
+    def DOC = """
+test a VM's start/stop/reboot/destroy/recover operations
+"""
+
+    @Override
+    void environment() {
+        env = OneVmBasicEnv.env()
+    }
+----
+
+上例中 `OneVmBasicEnv` 类中包含了一个公共的 env
+DSL，`OneVmBasicLifeCycleCase` 用例在 `environment()` 函数中通过 `OneVmBasicEnv.env()` 构建了一个 EnvSpec 对象。
+

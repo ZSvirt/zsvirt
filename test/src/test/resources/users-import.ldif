@@ -1,0 +1,45 @@
+dn: dc=example,dc=com
+objectClass: domain
+objectClass: top
+dc: example
+
+dn: ou=Users,dc=example,dc=com
+objectClass: organizationalUnit
+objectClass: top
+ou: Users
+
+dn: ou=Groups,dc=example,dc=com
+objectClass: organizationalUnit
+objectClass: top
+ou: Groups
+
+dn: cn=Micha Kops,ou=Users,dc=example,dc=com
+objectClass: inetOrgPerson
+objectClass: organizationalPerson
+objectClass: person
+objectClass: top
+cn: Micha Kops
+sn: Kops
+uid: mkops
+userPassword: password
+entryDN: cn=Micha Kops,ou=Users,dc=example,dc=com
+
+dn: cn=Santa Claus,ou=Users,dc=example,dc=com
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+cn: Santa Claus
+sn: Claus
+uid: sclaus
+userPassword: password
+
+dn: cn=John Steinbeck,ou=Users,dc=example,dc=com
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+cn: John Steinbeck
+sn: Steinbeck
+uid: jsteinbeck
+userPassword: password

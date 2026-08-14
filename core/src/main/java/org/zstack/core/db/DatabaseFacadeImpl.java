@@ -28,6 +28,8 @@ import java.lang.reflect.Field;
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static org.zstack.utils.CollectionDSL.list;
@@ -66,7 +68,7 @@ public class DatabaseFacadeImpl implements DatabaseFacade, Component {
         Field eoSoftDeleteColumn;
         Class eoClass;
         Class voClass;
-        Map<EntityEvent, EntityLifeCycleCallback> listeners = new HashMap<EntityEvent, EntityLifeCycleCallback>();
+        Map<EntityEvent, List<EntityLifeCycleCallback>> listeners = new ConcurrentHashMap<EntityEvent, List<EntityLifeCycleCallback>>();
 
         EntityInfo(Class voClazz) {
             voClass = voClazz;
@@ -438,13 +440,32 @@ public class DatabaseFacadeImpl implements DatabaseFacade, Component {
         }
 
         void installLifeCycleCallback(EntityEvent evt, EntityLifeCycleCallback l) {
-            listeners.put(evt, l);
+            List<EntityLifeCycleCallback> cbs = listeners.get(evt);
+            if (cbs == null) {
+                cbs = new CopyOnWriteArrayList<EntityLifeCycleCallback>();
+                List<EntityLifeCycleCallback> old = listeners.putIfAbsent(evt, cbs);
+                if (old != null) {
+                    cbs = old;
+                }
+            }
+            if (!cbs.contains(l)) {
+                cbs.add(l);
+            }
+        }
+
+        void uninstallLifeCycleCallback(EntityEvent evt, EntityLifeCycleCallback l) {
+            List<EntityLifeCycleCallback> cbs = listeners.get(evt);
+            if (cbs != null) {
+                cbs.remove(l);
+            }
         }
 
         void fireLifeCycleEvent(EntityEvent evt, Object o) {
-            EntityLifeCycleCallback cb = listeners.get(evt);
-            if (cb != null) {
-                cb.entityLifeCycleEvent(evt, o);
+            List<EntityLifeCycleCallback> cbs = listeners.get(evt);
+            if (cbs != null) {
+                for (EntityLifeCycleCallback cb : cbs) {
+                    cb.entityLifeCycleEvent(evt, o);
+                }
             }
         }
     }
@@ -869,6 +890,20 @@ public class DatabaseFacadeImpl implements DatabaseFacade, Component {
         } else {
             for (EntityInfo info : entityInfoMap.values()) {
                 info.installLifeCycleCallback(evt, cb);
+            }
+        }
+    }
+
+    @Override
+    public void uninstallEntityLifeCycleCallback(Class clz, EntityEvent evt, EntityLifeCycleCallback cb) {
+        if (clz != null) {
+            EntityInfo info = entityInfoMap.get(clz);
+            if (info != null) {
+                info.uninstallLifeCycleCallback(evt, cb);
+            }
+        } else {
+            for (EntityInfo info : entityInfoMap.values()) {
+                info.uninstallLifeCycleCallback(evt, cb);
             }
         }
     }

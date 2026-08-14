@@ -1,4 +1,4 @@
-package org.zstack.sdk;
+package org.zstack.sdk.external.service;
 
 
 

@@ -100,4 +100,8 @@ public class ZWatchGlobalConfig {
     @GlobalConfigValidation(min = -1)
     public static GlobalConfig EVENT_RETENTION_THRESHOLD = new GlobalConfig(CATEGORY, "event.retention.threshold");
 
+    @GlobalConfigValidation
+    @GlobalConfigDef(defaultValue = "false", type = Boolean.class, description = "enable resource change notification")
+    public static GlobalConfig RES_NOTIFY_ENABLE = new GlobalConfig(CATEGORY, "resNotify.enable");
+
 }

@@ -10,6 +10,9 @@ import org.zstack.core.externalservice.ExternalServiceCapabilitiesBuilder;
 import org.zstack.core.retry.Retry;
 import org.zstack.core.retry.RetryCondition;
 import org.zstack.header.core.external.service.ExternalServiceCapabilities;
+import org.zstack.header.core.external.service.ExternalServiceConfigurationInventory;
+import org.zstack.header.core.external.service.ExternalServiceConfigurationVO;
+import org.zstack.header.core.external.service.ExternalServiceConfigurationVO_;
 import org.zstack.header.errorcode.ErrorCode;
 import org.zstack.header.exception.CloudRuntimeException;
 import org.zstack.log.server.LogCategory;
@@ -22,8 +25,11 @@ import org.zstack.utils.Utils;
 import org.zstack.utils.gson.JSONObjectUtil;
 import org.zstack.utils.logging.CLogger;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static org.zstack.core.Platform.*;
 
@@ -63,6 +69,7 @@ public class FluentBitServerImpl extends AbstractLocalExternalService implements
         }
 
         loadFluentBitConfiguration();
+        generateExternalConfig(getServiceType());
 
         if (!isNeedToStart()) {
             isReady = true;
@@ -215,6 +222,36 @@ public class FluentBitServerImpl extends AbstractLocalExternalService implements
         logger.info("start fluentbit server");
         sysctl("restart");
         logger.info("finish to start fluentbit server");
+    }
+
+    @Override
+    public void externalConfig(String serviceType) {
+        if (!Objects.equals(serviceType, getServiceType())) {
+            logger.info(String.format("requested external service type %s not equal to current service type %s, skip",
+                    serviceType, getServiceType()));
+            return;
+        }
+
+        generateExternalConfig(serviceType);
+        restartServer();
+    }
+
+    public void generateExternalConfig(String serviceType) {
+        List<ExternalServiceConfigurationVO> vos = Q.New(ExternalServiceConfigurationVO.class)
+                .eq(ExternalServiceConfigurationVO_.serviceType, serviceType)
+                .list();
+
+        List<Map<String, Object>> invs = ExternalServiceConfigurationInventory.valueOf(vos, false).stream()
+                .map(inv -> {
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("uuid", inv.getUuid());
+                    map.put("serviceType", inv.getServiceType());
+                    map.put("configuration", inv.getConfiguration());
+                    return map;
+                })
+                .collect(Collectors.toList());
+
+        FluentBitServiceUnitConfig.generateExternalConfig(invs);
     }
 
     private void prepare() {

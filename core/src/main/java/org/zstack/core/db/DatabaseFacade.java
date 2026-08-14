@@ -84,4 +84,6 @@ public interface DatabaseFacade {
     String getDbVersion();
 
     void installEntityLifeCycleCallback(Class entityClass, EntityEvent evt, EntityLifeCycleCallback cb);
+
+    void uninstallEntityLifeCycleCallback(Class entityClass, EntityEvent evt, EntityLifeCycleCallback cb);
 }

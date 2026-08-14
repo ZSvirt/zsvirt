@@ -6,6 +6,8 @@ import org.zstack.header.vo.ResourceVO;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import java.sql.Timestamp;
@@ -28,6 +30,10 @@ public class AccessKeyVO extends ResourceVO implements OwnedByAccount {
 
     @Column
     private AccessKeyState state;
+
+    @Column
+    @Enumerated(EnumType.STRING)
+    private AccessKeyType type = AccessKeyType.User;
 
     @Column
     private Timestamp createDate;
@@ -94,5 +100,13 @@ public class AccessKeyVO extends ResourceVO implements OwnedByAccount {
 
     public void setState(AccessKeyState state) {
         this.state = state;
+    }
+
+    public AccessKeyType getType() {
+        return type;
+    }
+
+    public void setType(AccessKeyType type) {
+        this.type = type;
     }
 }

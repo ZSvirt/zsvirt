@@ -1,6 +1,6 @@
-package org.zstack.sdk;
+package org.zstack.sdk.external.service;
 
-import org.zstack.sdk.ExternalServiceCapabilities;
+import org.zstack.sdk.external.service.ExternalServiceCapabilities;
 
 public class ExternalServiceInventory  {
 
@@ -26,6 +26,14 @@ public class ExternalServiceInventory  {
     }
     public ExternalServiceCapabilities getCapabilities() {
         return this.capabilities;
+    }
+
+    public java.lang.String serviceType;
+    public void setServiceType(java.lang.String serviceType) {
+        this.serviceType = serviceType;
+    }
+    public java.lang.String getServiceType() {
+        return this.serviceType;
     }
 
 }

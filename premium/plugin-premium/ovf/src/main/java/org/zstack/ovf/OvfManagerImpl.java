@@ -36,6 +36,9 @@ import org.zstack.header.message.Message;
 import org.zstack.header.message.MessageReply;
 import org.zstack.header.message.NeedReplyMessage;
 import org.zstack.header.storage.backup.BackupStorageConstant;
+import org.zstack.header.storage.backup.BackupStorageStatus;
+import org.zstack.header.storage.backup.BackupStorageVO;
+import org.zstack.header.storage.backup.BackupStorageVO_;
 import org.zstack.header.storage.backup.ExportImageFromBackupStorageMsg;
 import org.zstack.header.storage.snapshot.VolumeSnapshotVO;
 import org.zstack.header.storage.snapshot.VolumeSnapshotVO_;
@@ -629,7 +632,7 @@ public class OvfManagerImpl extends AbstractService implements OvfManager {
             reply.setError(operr("ova package[uuid: %s] not found.", msg.getUuid()));
             bus.reply(msg, reply);
             return;
-        } else if (ova.getExportUrl() == null) {
+        } else if (ova.getExportUrl() == null || backupStorageRemoteDeletionUnavailable(ova.getBackupStorageUuid())) {
             dbf.remove(ova);
             bus.reply(msg, reply);
             return;
@@ -650,6 +653,19 @@ public class OvfManagerImpl extends AbstractService implements OvfManager {
                 bus.reply(msg, reply);
             }
         });
+    }
+
+    private boolean backupStorageRemoteDeletionUnavailable(String backupStorageUuid) {
+        BackupStorageStatus status = Q.New(BackupStorageVO.class)
+                .eq(BackupStorageVO_.uuid, backupStorageUuid)
+                .select(BackupStorageVO_.status)
+                .findValue();
+        if (status == null || status == BackupStorageStatus.Disconnected) {
+            logger.debug(String.format("backup storage[uuid:%s] is %s, skip remote image package deletion and remove metadata only",
+                    backupStorageUuid, status == null ? "not found" : status));
+            return true;
+        }
+        return false;
     }
 
     private void handle(APIDeleteImagePackageMsg msg) {

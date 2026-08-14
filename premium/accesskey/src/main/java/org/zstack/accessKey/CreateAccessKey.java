@@ -12,4 +12,6 @@ public interface CreateAccessKey {
     String getAccessKeyID();
 
     String getAccessKeySecret();
+
+    String getAccessKeyType();
 }

@@ -483,4 +483,22 @@
             <zstack:extension interface="org.zstack.header.zql.RestrictByExprExtensionPoint"/>
         </zstack:plugin>
     </bean>
+
+    <bean id="ResNotifyService" class="org.zstack.zwatch.resnotify.ResNotifyService">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.Component" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="ResNotifySubscriptionManager" class="org.zstack.zwatch.resnotify.ResNotifySubscriptionManager">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.Service" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="ResNotifySubscriptionApiInterceptor" class="org.zstack.zwatch.resnotify.ResNotifySubscriptionApiInterceptor">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.apimediator.ApiMessageInterceptor" />
+        </zstack:plugin>
+    </bean>
 </beans>

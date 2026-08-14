@@ -27,6 +27,8 @@ public class APICreateAccessKeyMsg extends APICreateMessage implements APIAudito
     private String AccessKeyID;
     @APIParam(minLength = AccessKeyConstant.ACCESSKEY_SECRET_MIN_LEN, maxLength = AccessKeyConstant.ACCESSKEY_SECRET_LEN, required = false)
     private String AccessKeySecret;
+    @APIParam(validValues = {"User", "System"}, required = false)
+    private String accessKeyType = AccessKeyType.User.toString();
 
     public String getDescription() {
         return description;
@@ -70,9 +72,18 @@ public class APICreateAccessKeyMsg extends APICreateMessage implements APIAudito
         this.AccessKeySecret = accessKeySecret;
     }
 
+    public String getAccessKeyType() {
+        return accessKeyType;
+    }
+
+    public void setAccessKeyType(String accessKeyType) {
+        this.accessKeyType = accessKeyType;
+    }
+
     public static APICreateAccessKeyMsg __example__() {
         APICreateAccessKeyMsg msg = new APICreateAccessKeyMsg();
         msg.setAccountUuid("db517023502d34ef9309e49674af88d0");
+        msg.setAccessKeyType(AccessKeyType.User.toString());
         return msg;
     }
 

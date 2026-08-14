@@ -4,6 +4,7 @@ public class ExternalServiceInventory {
     private String name;
     private String status;
     private ExternalServiceCapabilities capabilities;
+    private String serviceType;
 
     public String getName() {
         return name;
@@ -29,6 +30,14 @@ public class ExternalServiceInventory {
         this.capabilities = capabilities;
     }
 
+    public String getServiceType() {
+        return serviceType;
+    }
+
+    public void setServiceType(String serviceType) {
+        this.serviceType = serviceType;
+    }
+
     public static ExternalServiceInventory __example__() {
         ExternalServiceInventory inv = new ExternalServiceInventory();
         inv.setName("prometheus");
@@ -36,6 +45,7 @@ public class ExternalServiceInventory {
         ExternalServiceCapabilities cap = new ExternalServiceCapabilities();
         cap.setReloadConfig(true);
         inv.setCapabilities(cap);
+        inv.setServiceType("Prometheus2");
         return inv;
     }
 }

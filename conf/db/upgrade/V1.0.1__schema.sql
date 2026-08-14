@@ -84,3 +84,50 @@ CREATE TABLE IF NOT EXISTS `zstack`.`LogServerVO` (
     `createDate` timestamp NOT NULL DEFAULT '1999-12-31 23:59:59',
     PRIMARY KEY  (`uuid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- Feature: External Service Configuration
+
+CREATE TABLE IF NOT EXISTS `zstack`.`ExternalServiceConfigurationVO` (
+    `uuid` varchar(32) NOT NULL UNIQUE,
+    `serviceType` varchar(32) NOT NULL,
+    `configuration` text DEFAULT NULL,
+    `description` varchar(2048) DEFAULT NULL,
+    `lastOpDate` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `createDate` timestamp NOT NULL DEFAULT '1999-12-31 23:59:59',
+    PRIMARY KEY (`uuid`),
+    UNIQUE KEY `ukExternalServiceConfigurationVOServiceType` (`serviceType`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- Feature: System AccessKey | ZSV-12416
+
+CALL ADD_COLUMN('AccessKeyVO', 'type', 'varchar(32)', 0, 'User');
+
+-- Feature: Resource notification webhook | ZSV-12415
+CREATE TABLE IF NOT EXISTS `zstack`.`ResNotifySubscriptionVO` (
+    `uuid` varchar(32) NOT NULL UNIQUE,
+    `name` varchar(255) DEFAULT NULL,
+    `description` varchar(2048) DEFAULT NULL,
+    `resourceTypes` text DEFAULT NULL,
+    `eventTypes` varchar(256) DEFAULT NULL,
+    `type` varchar(32) NOT NULL DEFAULT 'WEBHOOK',
+    `state` varchar(32) NOT NULL DEFAULT 'Enabled',
+    `accountUuid` varchar(32) DEFAULT NULL,
+    `lastOpDate` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `createDate` timestamp NOT NULL DEFAULT '1999-12-31 23:59:59',
+    PRIMARY KEY (`uuid`),
+    UNIQUE KEY `uk_ResNotifySubscriptionVO_name` (`name`),
+    INDEX `idx_ResNotifySubscriptionVO_accountUuid` (`accountUuid`),
+    INDEX `idx_ResNotifySubscriptionVO_type_state` (`type`, `state`),
+    CONSTRAINT `fkResNotifySubscriptionVOResourceVO` FOREIGN KEY (`uuid`) REFERENCES `ResourceVO` (`uuid`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS `zstack`.`ResNotifyWebhookRefVO` (
+    `uuid` varchar(32) NOT NULL UNIQUE,
+    `webhookUrl` text NOT NULL,
+    `secret` varchar(256) DEFAULT NULL,
+    `customHeaders` text,
+    PRIMARY KEY (`uuid`),
+    UNIQUE KEY `uk_ResNotifyWebhookRefVO_webhookUrl` (`webhookUrl`(255)),
+    CONSTRAINT `fk_ResNotifyWebhookRefVO_ResNotifySubscriptionVO`
+        FOREIGN KEY (`uuid`) REFERENCES `ResNotifySubscriptionVO`(`uuid`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;

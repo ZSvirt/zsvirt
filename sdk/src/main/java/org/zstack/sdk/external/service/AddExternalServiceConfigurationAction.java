@@ -1,10 +1,10 @@
-package org.zstack.sdk;
+package org.zstack.sdk.external.service;
 
 import java.util.HashMap;
 import java.util.Map;
 import org.zstack.sdk.*;
 
-public class ReloadExternalServiceAction extends AbstractAction {
+public class AddExternalServiceConfigurationAction extends AbstractAction {
 
     private static final HashMap<String, Parameter> parameterMap = new HashMap<>();
 
@@ -12,7 +12,7 @@ public class ReloadExternalServiceAction extends AbstractAction {
 
     public static class Result {
         public ErrorCode error;
-        public org.zstack.sdk.ReloadExternalServiceResult value;
+        public org.zstack.sdk.external.service.AddExternalServiceConfigurationResult value;
 
         public Result throwExceptionIfError() {
             if (error != null) {
@@ -26,7 +26,19 @@ public class ReloadExternalServiceAction extends AbstractAction {
     }
 
     @Param(required = true, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
-    public java.lang.String name;
+    public java.lang.String externalServiceType;
+
+    @Param(required = true, maxLength = 65535, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
+    public java.lang.String configuration;
+
+    @Param(required = false, maxLength = 2048, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
+    public java.lang.String description;
+
+    @Param(required = false)
+    public java.lang.String resourceUuid;
+
+    @Param(required = false, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
+    public java.util.List tagUuids;
 
     @Param(required = false)
     public java.util.List systemTags;
@@ -60,8 +72,8 @@ public class ReloadExternalServiceAction extends AbstractAction {
             return ret;
         }
         
-        org.zstack.sdk.ReloadExternalServiceResult value = res.getResult(org.zstack.sdk.ReloadExternalServiceResult.class);
-        ret.value = value == null ? new org.zstack.sdk.ReloadExternalServiceResult() : value; 
+        org.zstack.sdk.external.service.AddExternalServiceConfigurationResult value = res.getResult(org.zstack.sdk.external.service.AddExternalServiceConfigurationResult.class);
+        ret.value = value == null ? new org.zstack.sdk.external.service.AddExternalServiceConfigurationResult() : value; 
 
         return ret;
     }
@@ -90,11 +102,11 @@ public class ReloadExternalServiceAction extends AbstractAction {
 
     protected RestInfo getRestInfo() {
         RestInfo info = new RestInfo();
-        info.httpMethod = "PUT";
-        info.path = "/external/services";
+        info.httpMethod = "POST";
+        info.path = "/external/service/configurations";
         info.needSession = true;
         info.needPoll = true;
-        info.parameterName = "reloadExternalService";
+        info.parameterName = "params";
         return info;
     }
 

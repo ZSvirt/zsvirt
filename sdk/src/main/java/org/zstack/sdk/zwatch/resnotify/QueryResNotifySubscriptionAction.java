@@ -1,10 +1,10 @@
-package org.zstack.sdk;
+package org.zstack.sdk.zwatch.resnotify;
 
 import java.util.HashMap;
 import java.util.Map;
 import org.zstack.sdk.*;
 
-public class GetExternalServicesAction extends AbstractAction {
+public class QueryResNotifySubscriptionAction extends QueryAction {
 
     private static final HashMap<String, Parameter> parameterMap = new HashMap<>();
 
@@ -12,7 +12,7 @@ public class GetExternalServicesAction extends AbstractAction {
 
     public static class Result {
         public ErrorCode error;
-        public org.zstack.sdk.GetExternalServicesResult value;
+        public org.zstack.sdk.zwatch.resnotify.QueryResNotifySubscriptionResult value;
 
         public Result throwExceptionIfError() {
             if (error != null) {
@@ -25,23 +25,6 @@ public class GetExternalServicesAction extends AbstractAction {
         }
     }
 
-    @Param(required = false)
-    public java.util.List systemTags;
-
-    @Param(required = false)
-    public java.util.List userTags;
-
-    @Param(required = false)
-    public String sessionId;
-
-    @Param(required = false)
-    public String accessKeyId;
-
-    @Param(required = false)
-    public String accessKeySecret;
-
-    @Param(required = false)
-    public String requestIp;
 
 
     private Result makeResult(ApiResult res) {
@@ -51,8 +34,8 @@ public class GetExternalServicesAction extends AbstractAction {
             return ret;
         }
         
-        org.zstack.sdk.GetExternalServicesResult value = res.getResult(org.zstack.sdk.GetExternalServicesResult.class);
-        ret.value = value == null ? new org.zstack.sdk.GetExternalServicesResult() : value; 
+        org.zstack.sdk.zwatch.resnotify.QueryResNotifySubscriptionResult value = res.getResult(org.zstack.sdk.zwatch.resnotify.QueryResNotifySubscriptionResult.class);
+        ret.value = value == null ? new org.zstack.sdk.zwatch.resnotify.QueryResNotifySubscriptionResult() : value; 
 
         return ret;
     }
@@ -82,7 +65,7 @@ public class GetExternalServicesAction extends AbstractAction {
     protected RestInfo getRestInfo() {
         RestInfo info = new RestInfo();
         info.httpMethod = "GET";
-        info.path = "/external/services";
+        info.path = "/zwatch/resnotify/subscriptions";
         info.needSession = true;
         info.needPoll = false;
         info.parameterName = "";

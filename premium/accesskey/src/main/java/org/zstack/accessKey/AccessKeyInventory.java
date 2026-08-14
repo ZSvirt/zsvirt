@@ -23,6 +23,7 @@ public class AccessKeyInventory {
     @GsonTransient(transientInHttpResponse = false)
     private String AccessKeySecret;
     private AccessKeyState state;
+    private AccessKeyType type;
     private Timestamp createDate;
     private Timestamp lastOpDate;
 
@@ -35,6 +36,7 @@ public class AccessKeyInventory {
         inv.setAccessKeyID(vo.getAccessKeyID());
         inv.setAccessKeySecret(vo.getAccessKeySecret());
         inv.setState(vo.getState());
+        inv.setType(vo.getType());
         inv.setCreateDate(vo.getCreateDate());
         inv.setLastOpDate(vo.getLastOpDate());
         return inv;
@@ -68,6 +70,14 @@ public class AccessKeyInventory {
 
     public void setState(AccessKeyState state) {
         this.state = state;
+    }
+
+    public AccessKeyType getType() {
+        return type;
+    }
+
+    public void setType(AccessKeyType type) {
+        this.type = type;
     }
 
     public String getAccessKeyID() {
@@ -124,6 +134,7 @@ public class AccessKeyInventory {
         inventory.setAccountUuid(StringDSL.createFixedUuid(AccountVO.class));
         inventory.setUserUuid(inventory.getAccountUuid());
         inventory.setState(AccessKeyState.Enabled);
+        inventory.setType(AccessKeyType.User);
         inventory.setAccessKeyID("1234567890abcdedfhij");
         inventory.setAccessKeySecret("1234567890abcdedfhij1234567890abcdedfhij");
         return inventory;

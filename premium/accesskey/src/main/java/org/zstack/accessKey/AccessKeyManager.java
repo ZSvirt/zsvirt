@@ -68,6 +68,15 @@ public class AccessKeyManager extends AbstractService implements RestAuthenticat
         vo.setAccountUuid(msg.getAccountUuid());
         vo.setDescription(msg.getDescription());
         vo.setState(AccessKeyState.Enabled);
+        AccessKeyType accessKeyType = AccessKeyType.User;
+        if (msg.getAccessKeyType() != null) {
+            try {
+                accessKeyType = AccessKeyType.valueOf(msg.getAccessKeyType());
+            } catch (IllegalArgumentException e) {
+                throw new IllegalArgumentException(String.format("invalid accessKeyType: %s", msg.getAccessKeyType()), e);
+            }
+        }
+        vo.setType(accessKeyType);
         /* access key and secret can not include ":" */
         if (msg.getAccessKeyID() != null) {
             vo.setAccessKeyID(msg.getAccessKeyID());

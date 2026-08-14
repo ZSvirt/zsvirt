@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.zstack.core.db.*;
-import org.zstack.core.db.SimpleQuery.Op;
 import org.zstack.core.defer.Defer;
 import org.zstack.core.defer.Deferred;
 import org.zstack.utils.gson.JSONObjectUtil;
@@ -47,9 +46,9 @@ public class JsonLabel {
         lock.lock();
         Defer.defer(lock::unlock);
 
-        SimpleQuery<JsonLabelVO> q = dbf.createQuery(JsonLabelVO.class);
-        q.add(JsonLabelVO_.labelKey, Op.EQ, key);
-        JsonLabelVO vo = q.find();
+        JsonLabelVO vo = Q.New(JsonLabelVO.class)
+                .eq(JsonLabelVO_.labelKey, key)
+                .find();
         return vo == null ? create(key, obj, resourceUuid) : JsonLabelInventory.valueOf(vo);
     }
 

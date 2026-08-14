@@ -21,7 +21,6 @@ import org.zstack.core.config.schema.GuestOsCharacter;
 import org.zstack.core.db.DatabaseFacade;
 import org.zstack.core.db.Q;
 import org.zstack.core.db.SQL;
-import org.zstack.core.db.SimpleQuery;
 import org.zstack.core.thread.AsyncThread;
 import org.zstack.core.thread.PeriodicTask;
 import org.zstack.core.thread.ThreadFacade;
@@ -228,13 +227,13 @@ public class KVMHostFactory extends AbstractService implements HypervisorFactory
         List<String> hostUuids = new ArrayList<String>();
         int start = 0;
         for (int i = 0; i < times; i++) {
-            SimpleQuery<KVMHostVO> q = dbf.createQuery(KVMHostVO.class);
-            q.select(HostVO_.uuid);
-            // disconnected host will be handled by HostManager
-            q.add(HostVO_.status, SimpleQuery.Op.EQ, HostStatus.Connected);
-            q.setLimit(qun);
-            q.setStart(start);
-            List<String> lst = q.listValue();
+            List<String> lst = Q.New(KVMHostVO.class)
+                    .select(HostVO_.uuid)
+                    // disconnected host will be handled by HostManager
+                    .eq(HostVO_.status, HostStatus.Connected)
+                    .limit(qun)
+                    .start(start)
+                    .listValues();
             start += qun;
             for (String huuid : lst) {
                 if (!destMaker.isManagedByUs(huuid)) {

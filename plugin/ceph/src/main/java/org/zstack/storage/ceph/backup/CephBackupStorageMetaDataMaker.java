@@ -7,7 +7,6 @@ import org.zstack.core.cloudbus.CloudBusCallBack;
 import org.zstack.core.db.DatabaseFacade;
 import org.zstack.core.db.Q;
 import org.zstack.core.db.SQL;
-import org.zstack.core.db.SimpleQuery;
 import org.zstack.core.errorcode.ErrorFacade;
 import org.zstack.header.errorcode.ErrorCode;
 import org.zstack.header.identity.AccountConstant;
@@ -100,10 +99,10 @@ public class CephBackupStorageMetaDataMaker implements AddImageExtensionPoint, A
 
 
     protected  String getBackupStorageUuidFromImageInventory(ImageInventory img) {
-        SimpleQuery<ImageBackupStorageRefVO> q = dbf.createQuery(ImageBackupStorageRefVO.class);
-        q.select(ImageBackupStorageRefVO_.backupStorageUuid);
-        q.add(ImageBackupStorageRefVO_.imageUuid, SimpleQuery.Op.EQ, img.getUuid());
-        String backupStorageUuid = q.findValue();
+        String backupStorageUuid = Q.New(ImageBackupStorageRefVO.class)
+                .select(ImageBackupStorageRefVO_.backupStorageUuid)
+                .eq(ImageBackupStorageRefVO_.imageUuid, img.getUuid())
+                .findValue();
         DebugUtils.Assert(backupStorageUuid != null, String.format("cannot find backup storage for image [uuid:%s]", img.getUuid()));
         return backupStorageUuid;
     }
@@ -193,12 +192,12 @@ public class CephBackupStorageMetaDataMaker implements AddImageExtensionPoint, A
     }
 
     protected String getHostnameFromBackupStorage(CephBackupStorageInventory inv) {
-        SimpleQuery<CephBackupStorageMonVO> q = dbf.createQuery(CephBackupStorageMonVO.class);
-        q.select(CephBackupStorageMonVO_.hostname);
-        q.add(CephBackupStorageMonVO_.backupStorageUuid, SimpleQuery.Op.EQ, inv.getUuid());
-        q.add(CephBackupStorageMonVO_.status, SimpleQuery.Op.EQ, MonStatus.Connected);
-        q.setLimit(1);
-        String hostName = q.findValue();
+        String hostName = Q.New(CephBackupStorageMonVO.class)
+                .select(CephBackupStorageMonVO_.hostname)
+                .eq(CephBackupStorageMonVO_.backupStorageUuid, inv.getUuid())
+                .eq(CephBackupStorageMonVO_.status, MonStatus.Connected)
+                .limit(1)
+                .findValue();
         DebugUtils.Assert(hostName!= null, String.format("cannot find hostName for ceph backup storage [uuid:%s]", inv.getUuid()));
         return hostName;
     }
@@ -284,9 +283,9 @@ public class CephBackupStorageMetaDataMaker implements AddImageExtensionPoint, A
 
     private void bakeImageToMetadata(ImageInventory img) {
         setAllImagesSystemTags(Collections.singletonList(img));
-        SimpleQuery<CephBackupStorageVO> query = dbf.createQuery(CephBackupStorageVO.class);
-        query.add(CephBackupStorageVO_.uuid, SimpleQuery.Op.EQ, getBackupStorageUuidFromImageInventory(img));
-        CephBackupStorageVO cephBackupStorageVO = query.find();
+        CephBackupStorageVO cephBackupStorageVO = Q.New(CephBackupStorageVO.class)
+                .eq(CephBackupStorageVO_.uuid, getBackupStorageUuidFromImageInventory(img))
+                .find();
         CephBackupStorageInventory inv = CephBackupStorageInventory.valueOf(cephBackupStorageVO);
 
         BakeImageMetadataMsg msg = new BakeImageMetadataMsg();
@@ -337,9 +336,9 @@ public class CephBackupStorageMetaDataMaker implements AddImageExtensionPoint, A
             return;
         }
         String backupStorageUuid = backupStorage.getBackupStorageInventory().getUuid();
-        SimpleQuery<CephBackupStorageVO> query = dbf.createQuery(CephBackupStorageVO.class);
-        query.add(CephBackupStorageVO_.uuid, SimpleQuery.Op.EQ, backupStorageUuid);
-        CephBackupStorageVO cephBackupStorageVO = query.find();
+        CephBackupStorageVO cephBackupStorageVO = Q.New(CephBackupStorageVO.class)
+                .eq(CephBackupStorageVO_.uuid, backupStorageUuid)
+                .find();
         CephBackupStorageInventory inv = CephBackupStorageInventory.valueOf(cephBackupStorageVO);
 
         BakeImageMetadataMsg msg = new BakeImageMetadataMsg();
@@ -382,9 +381,9 @@ public class CephBackupStorageMetaDataMaker implements AddImageExtensionPoint, A
         }
 
         setAllImagesSystemTags(Collections.singletonList(img));
-        SimpleQuery<CephBackupStorageVO> query = dbf.createQuery(CephBackupStorageVO.class);
-        query.add(CephBackupStorageVO_.uuid, SimpleQuery.Op.EQ, getBackupStorageUuidFromImageInventory(img));
-        CephBackupStorageVO cephBackupStorageVO = query.find();
+        CephBackupStorageVO cephBackupStorageVO = Q.New(CephBackupStorageVO.class)
+                .eq(CephBackupStorageVO_.uuid, getBackupStorageUuidFromImageInventory(img))
+                .find();
         CephBackupStorageInventory inv = CephBackupStorageInventory.valueOf(cephBackupStorageVO);
 
         BakeImageMetadataMsg msg = new BakeImageMetadataMsg();

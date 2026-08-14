@@ -13,7 +13,6 @@ import org.zstack.core.componentloader.PluginRegistry;
 import org.zstack.core.db.DatabaseFacade;
 import org.zstack.core.db.Q;
 import org.zstack.core.db.SQLBatchWithReturn;
-import org.zstack.core.db.SimpleQuery;
 import org.zstack.core.job.Job;
 import org.zstack.core.job.JobContext;
 import org.zstack.core.workflow.SimpleFlowChain;
@@ -29,8 +28,6 @@ import org.zstack.header.network.l3.L3NetworkInventory;
 import org.zstack.header.network.l3.L3NetworkVO;
 import org.zstack.header.network.l3.L3NetworkVO_;
 import org.zstack.header.vm.*;
-import org.zstack.kvm.KVMConstant;
-import org.zstack.kvm.KVMGlobalConfig;
 import org.zstack.resourceconfig.ResourceConfig;
 import org.zstack.resourceconfig.ResourceConfigFacade;
 import org.zstack.tag.TagManager;
@@ -69,10 +66,10 @@ public class CreateApplianceVmJob implements Job {
     public void run(final ReturnValueCompletion<Object> complete) {
         // if syncCreate is set, the name is the unique id for the vm
         if (spec.isSyncCreate()) {
-            SimpleQuery<ApplianceVmVO> q = dbf.createQuery(ApplianceVmVO.class);
-            q.add(ApplianceVmVO_.name, SimpleQuery.Op.EQ, spec.getName());
-            q.add(ApplianceVmVO_.state, SimpleQuery.Op.EQ, VmInstanceState.Running);
-            ApplianceVmVO vo = q.find();
+            ApplianceVmVO vo = Q.New(ApplianceVmVO.class)
+                    .eq(ApplianceVmVO_.name, spec.getName())
+                    .eq(ApplianceVmVO_.state, VmInstanceState.Running)
+                    .find();
             if (vo != null) {
                 complete.success(ApplianceVmInventory.valueOf(vo));
                 return;

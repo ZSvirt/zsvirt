@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.zstack.core.cloudbus.CloudBusCallBack;
 import org.zstack.core.componentloader.PluginRegistry;
-import org.zstack.core.db.SimpleQuery;
+import org.zstack.core.db.Q;
 import org.zstack.core.workflow.FlowChainBuilder;
 import org.zstack.header.core.Completion;
 import org.zstack.header.core.NopeCompletion;
@@ -231,10 +231,10 @@ public class VirtualRouterVipBaseBackend extends VipBaseBackend {
             String vrUuid = vrs.get(0);
 
             logger.debug(String.format("vip already attached to virtual router [uuid:%s]", vrUuid));
-            SimpleQuery<VmInstanceVO> q = dbf.createQuery(VmInstanceVO.class);
-            q.select(VmInstanceVO_.state);
-            q.add(VmInstanceVO_.uuid, SimpleQuery.Op.EQ, vrUuid);
-            VmInstanceState vrState = q.findValue();
+            VmInstanceState vrState = Q.New(VmInstanceVO.class)
+                    .select(VmInstanceVO_.state)
+                    .eq(VmInstanceVO_.uuid, vrUuid)
+                    .findValue();
 
             if (VmInstanceState.Running != vrState) {
                 completion.fail(operr("virtual router[uuid:%s, state:%s] is not running",

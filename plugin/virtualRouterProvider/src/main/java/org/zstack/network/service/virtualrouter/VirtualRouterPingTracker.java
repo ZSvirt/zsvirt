@@ -9,7 +9,6 @@ import org.zstack.core.config.GlobalConfig;
 import org.zstack.core.config.GlobalConfigUpdateExtensionPoint;
 import org.zstack.core.db.DatabaseFacade;
 import org.zstack.core.db.Q;
-import org.zstack.core.db.SimpleQuery;
 import org.zstack.core.tacker.PingTracker;
 import org.zstack.core.thread.AsyncThread;
 import org.zstack.header.managementnode.ManagementNodeChangeListener;
@@ -98,9 +97,9 @@ public class VirtualRouterPingTracker extends PingTracker implements ManagementN
     }
 
     private void trackOurs() {
-        SimpleQuery<VirtualRouterVmVO> q = dbf.createQuery(VirtualRouterVmVO.class);
-        q.select(VirtualRouterVmVO_.uuid);
-        List<String> vrUuids = q.listValue();
+        List<String> vrUuids = Q.New(VirtualRouterVmVO.class)
+                .select(VirtualRouterVmVO_.uuid)
+                .listValues();
         List<String> toTrack = transformAndRemoveNull(vrUuids, arg -> destinationMaker.isManagedByUs(arg) ? arg : null);
 
         untrackAll();

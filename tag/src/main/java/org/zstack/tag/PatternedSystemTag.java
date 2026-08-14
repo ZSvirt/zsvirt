@@ -2,7 +2,6 @@ package org.zstack.tag;
 
 import org.zstack.core.Platform;
 import org.zstack.core.db.Q;
-import org.zstack.core.db.SimpleQuery;
 import org.zstack.core.db.SimpleQuery.Op;
 import org.zstack.header.tag.SystemTagInventory;
 import org.zstack.header.tag.SystemTagVO;
@@ -148,20 +147,21 @@ public class PatternedSystemTag extends SystemTag {
     }
 
     public SystemTagInventory getTagInventory(String resourceUuid) {
-        SimpleQuery<SystemTagVO> q = dbf.createQuery(SystemTagVO.class);
-        q.add(SystemTagVO_.resourceUuid, Op.EQ, resourceUuid);
-        q.add(SystemTagVO_.resourceType, Op.EQ, getResourceClass().getSimpleName());
-        q.add(SystemTagVO_.tag, Op.LIKE, useTagFormat());
-        SystemTagVO vo = q.find();
+        SystemTagVO vo = Q.New(SystemTagVO.class)
+                .eq(SystemTagVO_.resourceUuid, resourceUuid)
+                .eq(SystemTagVO_.resourceType, getResourceClass().getSimpleName())
+                .like(SystemTagVO_.tag, useTagFormat())
+                .find();
         return  vo == null ? null : SystemTagInventory.valueOf(vo);
     }
 
     public List<SystemTagInventory> getTagInventories(List<String> resourceUuids) {
-        SimpleQuery<SystemTagVO> q = dbf.createQuery(SystemTagVO.class);
-        q.add(SystemTagVO_.resourceUuid, Op.IN, resourceUuids);
-        q.add(SystemTagVO_.resourceType, Op.EQ, getResourceClass().getSimpleName());
-        q.add(SystemTagVO_.tag, Op.LIKE, useTagFormat());
-        return SystemTagInventory.valueOf(q.list());
+        List<SystemTagVO> list = Q.New(SystemTagVO.class)
+                .in(SystemTagVO_.resourceUuid, resourceUuids)
+                .eq(SystemTagVO_.resourceType, getResourceClass().getSimpleName())
+                .like(SystemTagVO_.tag, useTagFormat())
+                .list();
+        return SystemTagInventory.valueOf(list);
     }
 
     public List<SystemTagInventory> getTagInventories(String resourceUuid) {
@@ -187,11 +187,11 @@ public class PatternedSystemTag extends SystemTag {
     }
 
     public boolean updateTagByToken(String resourceUuid, String tokenName, String newTag) {
-        SimpleQuery<SystemTagVO> q = dbf.createQuery(SystemTagVO.class);
-        q.add(SystemTagVO_.resourceUuid, Op.EQ, resourceUuid);
-        q.add(SystemTagVO_.resourceType, Op.EQ, getResourceClass().getSimpleName());
-        q.add(SystemTagVO_.tag, Op.LIKE, useTagFormat());
-        SystemTagVO vo = q.find();
+        SystemTagVO vo = Q.New(SystemTagVO.class)
+                .eq(SystemTagVO_.resourceUuid, resourceUuid)
+                .eq(SystemTagVO_.resourceType, getResourceClass().getSimpleName())
+                .like(SystemTagVO_.tag, useTagFormat())
+                .find();
 
         String oldTag = getTokenByResourceUuid(resourceUuid, tokenName);
         if (vo == null || oldTag == null) {

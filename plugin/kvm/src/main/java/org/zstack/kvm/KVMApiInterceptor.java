@@ -3,8 +3,7 @@ package org.zstack.kvm;
 import java.util.Arrays;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.zstack.core.db.DatabaseFacade;
-import org.zstack.core.db.SimpleQuery;
-import org.zstack.core.db.SimpleQuery.Op;
+import org.zstack.core.db.Q;
 import org.zstack.core.errorcode.ErrorFacade;
 import org.zstack.header.apimediator.ApiMessageInterceptionException;
 import org.zstack.header.apimediator.ApiMessageInterceptor;
@@ -40,9 +39,10 @@ public class KVMApiInterceptor implements ApiMessageInterceptor, GlobalApiMessag
 
 
     private void validate(APIAddKVMHostMsg msg) {
-        SimpleQuery<KVMHostVO> q = dbf.createQuery(KVMHostVO.class);
-        q.add(KVMHostVO_.managementIp, Op.EQ, msg.getManagementIp());
-        if (q.isExists()) {
+        boolean exists = Q.New(KVMHostVO.class)
+                .eq(KVMHostVO_.managementIp, msg.getManagementIp())
+                .isExists();
+        if (exists) {
             throw new ApiMessageInterceptionException(argerr("there has been a kvm host having management ip[%s]", msg.getManagementIp()));
         }
     }

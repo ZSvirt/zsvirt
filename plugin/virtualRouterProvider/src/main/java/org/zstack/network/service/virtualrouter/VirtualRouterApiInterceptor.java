@@ -5,8 +5,6 @@ import org.zstack.core.CoreGlobalProperty;
 import org.zstack.core.cloudbus.CloudBus;
 import org.zstack.core.db.DatabaseFacade;
 import org.zstack.core.db.Q;
-import org.zstack.core.db.SimpleQuery;
-import org.zstack.core.db.SimpleQuery.Op;
 import org.zstack.core.errorcode.ErrorFacade;
 import org.zstack.core.upgrade.UpgradeGlobalConfig;
 import org.zstack.header.agent.versioncontrol.AgentVersionVO;
@@ -151,10 +149,10 @@ public class VirtualRouterApiInterceptor implements GlobalApiMessageInterceptor 
         }
 
         if (msg.getImageUuid() != null) {
-            SimpleQuery<ImageVO> q = dbf.createQuery(ImageVO.class);
-            q.select(ImageVO_.mediaType, ImageVO_.format);
-            q.add(ImageVO_.uuid, Op.EQ, msg.getImageUuid());
-            Tuple t = q.findTuple();
+            Tuple t = Q.New(ImageVO.class)
+                    .select(ImageVO_.mediaType, ImageVO_.format)
+                    .eq(ImageVO_.uuid, msg.getImageUuid())
+                    .findTuple();
             ImageMediaType type = t.get(0, ImageMediaType.class);
             String format = t.get(1, String.class);
 
@@ -225,19 +223,19 @@ public class VirtualRouterApiInterceptor implements GlobalApiMessageInterceptor 
             checkIfManagementNetworkReachable(msg.getManagementNetworkUuid());
         }
 
-        SimpleQuery<L3NetworkVO> q = dbf.createQuery(L3NetworkVO.class);
-        q.select(L3NetworkVO_.zoneUuid);
-        q.add(L3NetworkVO_.uuid, Op.EQ, msg.getPublicNetworkUuid());
-        String zoneUuid = q.findValue();
+        String zoneUuid = Q.New(L3NetworkVO.class)
+                .select(L3NetworkVO_.zoneUuid)
+                .eq(L3NetworkVO_.uuid, msg.getPublicNetworkUuid())
+                .findValue();
         if (!zoneUuid.equals(msg.getZoneUuid()))  {
             throw new ApiMessageInterceptionException(argerr("public network[uuid:%s] is not in the same zone[uuid:%s] this offering is going to create",
                             msg.getManagementNetworkUuid(), msg.getZoneUuid()));
         }
 
-        SimpleQuery<ImageVO> imq = dbf.createQuery(ImageVO.class);
-        imq.select(ImageVO_.mediaType, ImageVO_.format);
-        imq.add(ImageVO_.uuid, Op.EQ, msg.getImageUuid());
-        Tuple t = imq.findTuple();
+        Tuple t = Q.New(ImageVO.class)
+                .select(ImageVO_.mediaType, ImageVO_.format)
+                .eq(ImageVO_.uuid, msg.getImageUuid())
+                .findTuple();
 
         ImageMediaType type = t.get(0, ImageMediaType.class);
         if (type != ImageMediaType.RootVolumeTemplate) {
@@ -250,9 +248,9 @@ public class VirtualRouterApiInterceptor implements GlobalApiMessageInterceptor 
             throw new ApiMessageInterceptionException(argerr("image[uuid:%s] is of format %s, cannot be used for virtual router", msg.getImageUuid(), format));
         }
 
-        SimpleQuery<NetworkServiceL3NetworkRefVO> nq = dbf.createQuery(NetworkServiceL3NetworkRefVO.class);
-        nq.add(NetworkServiceL3NetworkRefVO_.l3NetworkUuid, Op.IN, list(msg.getPublicNetworkUuid(), msg.getManagementNetworkUuid()));
-        List<NetworkServiceL3NetworkRefVO> nrefs= nq.list();
+        List<NetworkServiceL3NetworkRefVO> nrefs = Q.New(NetworkServiceL3NetworkRefVO.class)
+                .in(NetworkServiceL3NetworkRefVO_.l3NetworkUuid, list(msg.getPublicNetworkUuid(), msg.getManagementNetworkUuid()))
+                .list();
         for (NetworkServiceL3NetworkRefVO nref : nrefs) {
             if (NetworkServiceType.SNAT.toString().equals(nref.getNetworkServiceType())) {
                 if (nref.getL3NetworkUuid().equals(msg.getManagementNetworkUuid())) {
@@ -271,9 +269,9 @@ public class VirtualRouterApiInterceptor implements GlobalApiMessageInterceptor 
     }
 
     private void checkIfManagementNetworkReachable(String managementNetworkUuid) {
-        SimpleQuery<NormalIpRangeVO> q = dbf.createQuery(NormalIpRangeVO.class);
-        q.add(NormalIpRangeVO_.l3NetworkUuid, Op.EQ, managementNetworkUuid);
-        List<NormalIpRangeVO> iprs = q.list();
+        List<NormalIpRangeVO> iprs = Q.New(NormalIpRangeVO.class)
+                .eq(NormalIpRangeVO_.l3NetworkUuid, managementNetworkUuid)
+                .list();
         if (iprs.isEmpty()) {
             throw new ApiMessageInterceptionException(operr("the management network[uuid:%s] doesn't have any IP range", managementNetworkUuid));
         }

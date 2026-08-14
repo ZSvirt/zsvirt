@@ -4,9 +4,8 @@ import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.zstack.core.db.DatabaseFacade;
+import org.zstack.core.db.Q;
 import org.zstack.core.db.SQL;
-import org.zstack.core.db.SimpleQuery;
-import org.zstack.core.db.SimpleQuery.Op;
 import org.zstack.header.core.Completion;
 import org.zstack.header.core.workflow.FlowTrigger;
 import org.zstack.header.core.workflow.NoRollbackFlow;
@@ -47,12 +46,12 @@ public class VyosIPsecSyncFlow extends NoRollbackFlow {
             trigger.next();
             return;
         }
-        SimpleQuery<NetworkServiceL3NetworkRefVO> q = dbf.createQuery(NetworkServiceL3NetworkRefVO.class);
-        q.select(NetworkServiceL3NetworkRefVO_.l3NetworkUuid);
-        q.add(NetworkServiceL3NetworkRefVO_.l3NetworkUuid, Op.IN, nwServed);
-        q.add(NetworkServiceL3NetworkRefVO_.networkServiceType, Op.EQ, IPsecConstants.IPSEC_NETWORK_SERVICE_TYPE.toString());
-        q.add(NetworkServiceL3NetworkRefVO_.networkServiceProviderUuid, Op.EQ, vyosf.getNetworkServiceProviderUuid());
-        List<String> l3Uuids = q.listValue();
+        List<String> l3Uuids = Q.New(NetworkServiceL3NetworkRefVO.class)
+                .select(NetworkServiceL3NetworkRefVO_.l3NetworkUuid)
+                .in(NetworkServiceL3NetworkRefVO_.l3NetworkUuid, nwServed)
+                .eq(NetworkServiceL3NetworkRefVO_.networkServiceType, IPsecConstants.IPSEC_NETWORK_SERVICE_TYPE.toString())
+                .eq(NetworkServiceL3NetworkRefVO_.networkServiceProviderUuid, vyosf.getNetworkServiceProviderUuid())
+                .listValues();
         if (l3Uuids.isEmpty()) {
             trigger.next();
             return;

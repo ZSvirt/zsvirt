@@ -8,8 +8,7 @@ import org.zstack.core.cascade.CascadeConstant;
 import org.zstack.core.cloudbus.CloudBus;
 import org.zstack.core.cloudbus.CloudBusListCallBack;
 import org.zstack.core.db.DatabaseFacade;
-import org.zstack.core.db.SimpleQuery;
-import org.zstack.core.db.SimpleQuery.Op;
+import org.zstack.core.db.Q;
 import org.zstack.header.configuration.ConfigurationConstant;
 import org.zstack.header.configuration.InstanceOfferingDeletionMsg;
 import org.zstack.header.configuration.InstanceOfferingInventory;
@@ -27,8 +26,6 @@ import java.util.List;
 import static org.zstack.utils.CollectionUtils.transform;
 import static org.zstack.utils.CollectionUtils.transformAndRemoveNull;
 
-/**
- */
 public class VirtualRouterOfferingCascadeExtension extends AbstractAsyncCascadeExtension {
     @Autowired
     private DatabaseFacade dbf;
@@ -74,22 +71,21 @@ public class VirtualRouterOfferingCascadeExtension extends AbstractAsyncCascadeE
             List<L3NetworkInventory> l3s = action.getParentIssuerContext();
             List<String> l3uuids = transformAndRemoveNull(l3s, L3NetworkInventory::getUuid);
 
-            SimpleQuery<VirtualRouterOfferingVO> q = dbf.createQuery(VirtualRouterOfferingVO.class);
-            q.add(VirtualRouterOfferingVO_.publicNetworkUuid, Op.IN, l3uuids);
-            List<VirtualRouterOfferingVO> offeringVOs = q.list();
-
-            q = dbf.createQuery(VirtualRouterOfferingVO.class);
-            q.add(VirtualRouterOfferingVO_.managementNetworkUuid, Op.IN, l3uuids);
-            List<VirtualRouterOfferingVO> lst = q.list();
+            List<VirtualRouterOfferingVO> offeringVOs = Q.New(VirtualRouterOfferingVO.class)
+                    .in(VirtualRouterOfferingVO_.publicNetworkUuid, l3uuids)
+                    .list();
+            List<VirtualRouterOfferingVO> lst = Q.New(VirtualRouterOfferingVO.class)
+                    .in(VirtualRouterOfferingVO_.managementNetworkUuid, l3uuids)
+                    .list();
             offeringVOs.addAll(lst);
             ret = VirtualRouterOfferingInventory.valueOf1(offeringVOs);
         } else if (ImageVO.class.getSimpleName().equals(action.getParentIssuer())) {
             List<String> imgUuids = transformAndRemoveNull(action.getParentIssuerContext(),
                     (ImageDeletionStruct arg) -> arg.getDeleteAll() ? arg.getImage().getUuid() : null);
             if (imgUuids != null && !imgUuids.isEmpty()) {
-                SimpleQuery<VirtualRouterOfferingVO> q = dbf.createQuery(VirtualRouterOfferingVO.class);
-                q.add(VirtualRouterOfferingVO_.imageUuid, Op.IN, imgUuids);
-                List<VirtualRouterOfferingVO> offeringVOs = q.list();
+                List<VirtualRouterOfferingVO> offeringVOs = Q.New(VirtualRouterOfferingVO.class)
+                        .in(VirtualRouterOfferingVO_.imageUuid, imgUuids)
+                        .list();
                 ret = VirtualRouterOfferingInventory.valueOf1(offeringVOs);
             }
         }

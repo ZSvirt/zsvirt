@@ -1,10 +1,7 @@
 package org.zstack.storage.ceph;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.zstack.core.db.DatabaseFacade;
 import org.zstack.core.db.Q;
-import org.zstack.core.db.SimpleQuery;
-import org.zstack.core.db.SimpleQuery.Op;
 import org.zstack.core.errorcode.ErrorFacade;
 import org.zstack.header.apimediator.ApiMessageInterceptionException;
 import org.zstack.header.apimediator.ApiMessageInterceptor;
@@ -35,8 +32,6 @@ public class CephApiInterceptor implements ApiMessageInterceptor, GlobalApiMessa
 
     @Autowired
     private ErrorFacade errf;
-    @Autowired
-    private DatabaseFacade dbf;
 
     private static final String MON_URL_FORMAT = "sshUsername:sshPassword@hostname:[sshPort]/?[monPort=]";
 
@@ -107,10 +102,10 @@ public class CephApiInterceptor implements ApiMessageInterceptor, GlobalApiMessa
     private void checkExistingPrimaryStorage(List<String> monUrls) {
         List<String> hostnames = transformAndRemoveNull(monUrls, url -> new MonUri(url).getHostname());
 
-        SimpleQuery<CephPrimaryStorageMonVO> q = dbf.createQuery(CephPrimaryStorageMonVO.class);
-        q.select(CephPrimaryStorageMonVO_.hostname);
-        q.add(CephPrimaryStorageMonVO_.hostname, Op.IN, hostnames);
-        List<String> existing = q.listValue();
+        List<String> existing = Q.New(CephPrimaryStorageMonVO.class)
+                .select(CephPrimaryStorageMonVO_.hostname)
+                .in(CephPrimaryStorageMonVO_.hostname, hostnames)
+                .listValues();
         if (!existing.isEmpty()) {
             throw new ApiMessageInterceptionException(argerr("cannot add ceph primary storage, there has been some ceph primary storage using mon[hostnames:%s]", existing));
         }
@@ -156,10 +151,10 @@ public class CephApiInterceptor implements ApiMessageInterceptor, GlobalApiMessa
         if (msg.getHostname() != null && !NetworkUtils.isIpv4Address(msg.getHostname()) && !NetworkUtils.isHostname(msg.getHostname())) {
             throw new ApiMessageInterceptionException(argerr("hostname[%s] is neither an IPv4 address nor a valid hostname", msg.getHostname()));
         }
-        SimpleQuery<CephBackupStorageMonVO> q = dbf.createQuery(CephBackupStorageMonVO.class);
-        q.select(CephBackupStorageMonVO_.backupStorageUuid);
-        q.add(CephPrimaryStorageMonVO_.uuid, Op.EQ, msg.getMonUuid());
-        String bsUuid = q.findValue();
+        String bsUuid = Q.New(CephBackupStorageMonVO.class)
+                .select(CephBackupStorageMonVO_.backupStorageUuid)
+                .eq(CephBackupStorageMonVO_.uuid, msg.getMonUuid())
+                .findValue();
         msg.setBackupStorageUuid(bsUuid);
     }
 
@@ -170,10 +165,10 @@ public class CephApiInterceptor implements ApiMessageInterceptor, GlobalApiMessa
             ));
         }
 
-        SimpleQuery<CephPrimaryStorageMonVO> q = dbf.createQuery(CephPrimaryStorageMonVO.class);
-        q.select(CephPrimaryStorageMonVO_.primaryStorageUuid);
-        q.add(CephPrimaryStorageMonVO_.uuid, Op.EQ, msg.getMonUuid());
-        String psUuid = q.findValue();
+        String psUuid = Q.New(CephPrimaryStorageMonVO.class)
+                .select(CephPrimaryStorageMonVO_.primaryStorageUuid)
+                .eq(CephPrimaryStorageMonVO_.uuid, msg.getMonUuid())
+                .findValue();
         msg.setPrimaryStorageUuid(psUuid);
     }
 
@@ -217,10 +212,10 @@ public class CephApiInterceptor implements ApiMessageInterceptor, GlobalApiMessa
     private void checkExistingBackupStorage(List<String> monUrls) {
         List<String> hostnames = transformAndRemoveNull(monUrls, url -> new MonUri(url).getHostname());
 
-        SimpleQuery<CephBackupStorageMonVO> q = dbf.createQuery(CephBackupStorageMonVO.class);
-        q.select(CephBackupStorageMonVO_.hostname);
-        q.add(CephBackupStorageMonVO_.hostname, Op.IN, hostnames);
-        List<String> existing = q.listValue();
+        List<String> existing = Q.New(CephBackupStorageMonVO.class)
+                .select(CephBackupStorageMonVO_.hostname)
+                .in(CephBackupStorageMonVO_.hostname, hostnames)
+                .listValues();
         if (!existing.isEmpty()) {
             throw new ApiMessageInterceptionException(argerr("cannot add ceph backup storage, there has been some ceph backup storage using mon[hostnames:%s]", existing));
         }

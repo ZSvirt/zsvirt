@@ -8,6 +8,7 @@ import org.zstack.accessKey.AccessKeyVO_;
 import org.zstack.accessKey.CreateAccessKeyMsg;
 import org.zstack.accessKey.CreateAccessKeyReply;
 import org.zstack.compute.vm.VmInstanceUtils;
+import org.zstack.header.apimediator.ApiMessageInterceptionException;
 import org.zstack.core.CoreGlobalProperty;
 import org.zstack.core.Platform;
 import org.zstack.core.asyncbatch.While;
@@ -63,6 +64,7 @@ import org.zstack.header.vm.VmInstanceVO;
 import org.zstack.header.vm.VmInstanceVO_;
 import org.zstack.header.vm.VmNicVO;
 import org.zstack.header.vm.VmNicVO_;
+import org.zstack.portal.apimediator.ApiMediator;
 import org.zstack.managements.entity.common.ManagementNodeStatusView;
 import org.zstack.managements.header.PremiumManagementsConstant;
 import org.zstack.managements.header.h2.GetZSha2StatusMsg;
@@ -142,6 +144,8 @@ public class ZMigrateManager extends AbstractService implements
     private ThreadFacade thdf;
     @Autowired
     private ResourceDestinationMaker destinationMaker;
+    @Autowired
+    private ApiMediator apiMediator;
 
     private Supplier<ZMigrateSshClient> sshClientFactory =
             () -> Platform.New(ZMigrateSshClient::new);
@@ -310,6 +314,7 @@ public class ZMigrateManager extends AbstractService implements
 
     static class InstallZMigrateContext {
         String gatewayImageUuid;
+        APICreateVmInstanceMsg createVmMsg;
 
         String mnIps;
         String platformUuidOnZMigrate;
@@ -334,12 +339,25 @@ public class ZMigrateManager extends AbstractService implements
                 trigger.next();
             })
             .build())
-        .then(Flow.of("create-mn-gateway-vm")
+        .then(Flow.of("validate-create-vm-config")
             .handle(trigger -> {
                 APICreateVmInstanceMsg amsg = JSONObjectUtil.toObject(config, APICreateVmInstanceMsg.class);
                 amsg.setResourceUuid(ZMIGRATE_MANAGEMENT_VM_UUID);
                 amsg.setSession(session);
-                CreateVmInstanceMsg cvmsg = VmInstanceUtils.fromAPICreateVmInstanceMsg(amsg);
+                amsg.setImageUuid(context.gatewayImageUuid);
+                try {
+                    context.createVmMsg = (APICreateVmInstanceMsg) apiMediator.getProcesser().process(amsg);
+                } catch (ApiMessageInterceptionException e) {
+                    trigger.fail(err(INVALID_CONFIG, "invalid config for creating zmigrate management vm")
+                            .withCause(e.getError()));
+                    return;
+                }
+                trigger.next();
+            })
+            .build())
+        .then(Flow.of("create-mn-gateway-vm")
+            .handle(trigger -> {
+                CreateVmInstanceMsg cvmsg = VmInstanceUtils.fromAPICreateVmInstanceMsg(context.createVmMsg);
                 List<String> systemTags = cvmsg.getSystemTags() == null ? new ArrayList<>() : new ArrayList<>(cvmsg.getSystemTags());
                 systemTags.removeIf(tag -> Objects.equals(tag, ZMIGRATE_MANAGEMENT.getTagFormat()) || Objects.equals(tag, ZMIGRATE_GATEWAY.getTagFormat()));
                 systemTags.add(ZMIGRATE_MANAGEMENT.getTagFormat());

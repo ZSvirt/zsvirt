@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.transaction.annotation.Transactional;
 import org.zstack.core.db.DatabaseFacade;
 import org.zstack.core.db.Q;
-import org.zstack.core.db.SimpleQuery;
 import org.zstack.core.errorcode.ErrorFacade;
 import org.zstack.header.apimediator.ApiMessageInterceptionException;
 import org.zstack.header.errorcode.ErrorCode;
@@ -86,11 +85,11 @@ public class QuotaUtil {
     }
 
     public Map<String, Quota.QuotaPair> makeQuotaPairs(String accountUuid) {
-        SimpleQuery<QuotaVO> q = dbf.createQuery(QuotaVO.class);
-        q.select(QuotaVO_.name, QuotaVO_.value);
-        q.add(QuotaVO_.identityType, SimpleQuery.Op.EQ, AccountVO.class.getSimpleName());
-        q.add(QuotaVO_.identityUuid, SimpleQuery.Op.EQ, accountUuid);
-        List<Tuple> ts = q.listTuple();
+        List<Tuple> ts = Q.New(QuotaVO.class)
+                .select(QuotaVO_.name, QuotaVO_.value)
+                .eq(QuotaVO_.identityType, AccountVO.class.getSimpleName())
+                .eq(QuotaVO_.identityUuid, accountUuid)
+                .listTuple();
 
         Map<String, Quota.QuotaPair> pairs = new HashMap<>();
         for (Tuple t : ts) {
@@ -106,10 +105,10 @@ public class QuotaUtil {
     }
 
     public AccountType getAccountType(String accountUuid) {
-        SimpleQuery<AccountVO> q = dbf.createQuery(AccountVO.class);
-        q.select(AccountVO_.type);
-        q.add(AccountVO_.uuid, SimpleQuery.Op.EQ, accountUuid);
-        return q.findValue();
+        return Q.New(AccountVO.class)
+                .select(AccountVO_.type)
+                .eq(AccountVO_.uuid, accountUuid)
+                .findValue();
     }
 
     public boolean isAdminAccount(String accountUuid) {

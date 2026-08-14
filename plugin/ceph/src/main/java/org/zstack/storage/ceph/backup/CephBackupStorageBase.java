@@ -14,8 +14,6 @@ import org.zstack.core.cloudbus.CloudBusCallBack;
 import org.zstack.core.db.Q;
 import org.zstack.core.db.SQL;
 import org.zstack.core.db.SQLBatch;
-import org.zstack.core.db.SimpleQuery;
-import org.zstack.core.db.SimpleQuery.Op;
 import org.zstack.core.thread.AsyncThread;
 import org.zstack.core.thread.ChainTask;
 import org.zstack.core.thread.SyncTaskChain;
@@ -1179,8 +1177,8 @@ public class CephBackupStorageBase extends BackupStorageBase {
         cmd.sendCommandUrl = restf.getSendCommandUrl();
 
         SQL.New(ImageBackupStorageRefVO.class)
-                .condAnd(ImageBackupStorageRefVO_.backupStorageUuid, SimpleQuery.Op.EQ, msg.getBackupStorageUuid())
-                .condAnd(ImageBackupStorageRefVO_.imageUuid, SimpleQuery.Op.EQ, msg.getImageInventory().getUuid())
+                .eq(ImageBackupStorageRefVO_.backupStorageUuid, msg.getBackupStorageUuid())
+                .eq(ImageBackupStorageRefVO_.imageUuid, msg.getImageInventory().getUuid())
                 .set(ImageBackupStorageRefVO_.installPath, cmd.installPath)
                 .update();
 
@@ -1491,10 +1489,10 @@ public class CephBackupStorageBase extends BackupStorageBase {
                                 // check if there is another ceph setup having the same fsid
                                 String fsId = set.iterator().next();
 
-                                SimpleQuery<CephBackupStorageVO>  q = dbf.createQuery(CephBackupStorageVO.class);
-                                q.add(CephBackupStorageVO_.fsid, Op.EQ, fsId);
-                                q.add(CephBackupStorageVO_.uuid, Op.NOT_EQ, self.getUuid());
-                                CephBackupStorageVO otherCeph = q.find();
+                                CephBackupStorageVO otherCeph = Q.New(CephBackupStorageVO.class)
+                                        .eq(CephBackupStorageVO_.fsid, fsId)
+                                        .notEq(CephBackupStorageVO_.uuid, self.getUuid())
+                                        .find();
                                 if (otherCeph != null) {
                                     throw new OperationFailureException(
                                             operr("there is another CEPH backup storage[name:%s, uuid:%s] with the same" +
@@ -1911,10 +1909,10 @@ public class CephBackupStorageBase extends BackupStorageBase {
     }
 
     private void handle(APIRemoveMonFromCephBackupStorageMsg msg) {
-        SimpleQuery<CephBackupStorageMonVO> q = dbf.createQuery(CephBackupStorageMonVO.class);
-        q.add(CephBackupStorageMonVO_.hostname, Op.IN, msg.getMonHostnames());
-        q.add(CephBackupStorageMonVO_.backupStorageUuid, Op.EQ, self.getUuid());
-        List<CephBackupStorageMonVO> vos = q.list();
+        List<CephBackupStorageMonVO> vos = Q.New(CephBackupStorageMonVO.class)
+                .in(CephBackupStorageMonVO_.hostname, msg.getMonHostnames())
+                .eq(CephBackupStorageMonVO_.backupStorageUuid, self.getUuid())
+                .list();
 
         if (!vos.isEmpty()) {
             dbf.removeCollection(vos, CephBackupStorageMonVO.class);
@@ -1922,7 +1920,7 @@ public class CephBackupStorageBase extends BackupStorageBase {
 
         String dstHostName = Q.New(CephBackupStorageMonVO.class).select(CephBackupStorageMonVO_.hostname)
                 .eq(CephBackupStorageMonVO_.backupStorageUuid, self.getUuid())
-                .orderBy(CephBackupStorageMonVO_.status, SimpleQuery.Od.ASC)
+                .orderByAsc(CephBackupStorageMonVO_.status)
                 .limit(1).findValue();
 
         if (dstHostName != null) {

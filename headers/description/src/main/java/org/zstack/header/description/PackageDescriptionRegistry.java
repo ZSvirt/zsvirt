@@ -82,10 +82,15 @@ public final class PackageDescriptionRegistry {
     public static void addApiCapabilities(Class<? extends APIMessageDefinition> apiClass, ApiCapabilities capabilities) {
         DebugUtils.Assert(apiClass != null, "api class cannot be null");
         DebugUtils.Assert(capabilities != null, "capabilities cannot be null");
-        DebugUtils.Assert(!apiCapabilitiesByClass.containsKey(apiClass),
-                String.format("API %s already has ApiCapabilities; declare all capabilities in one apis().build()",
-                        apiClass.getName()));
-        apiCapabilitiesByClass.put(apiClass, capabilities);
+
+        ApiCapabilities last = apiCapabilitiesByClass.get(apiClass), next;
+
+        try {
+            next = (last == null) ? capabilities : last.merge(capabilities);
+        } catch (Exception e) {
+            throw new RuntimeException("failed to merge ApiCapabilities for class " + apiClass.getSimpleName(), e);
+        }
+        apiCapabilitiesByClass.put(apiClass, next);
     }
 
     public static void addPackageCapabilities(String packageName, ApiCapabilities capabilities) {

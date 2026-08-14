@@ -93,8 +93,8 @@ public class ErrorCode implements Serializable, Cloneable, OpaqueCollection, I18
     public ErrorCode withException(Throwable e) {
         if (e instanceof OpaqueScripts) {
             withOpaque((OpaqueScripts) e);
-        } else {
-            withOpaque(OPAQUE_KEY_EXCEPTION, e.getCause());
+        } else if (e != null) {
+            withOpaque(OPAQUE_KEY_EXCEPTION, e.getClass().getSimpleName() + ": " + e.getMessage());
         }
         return this;
     }

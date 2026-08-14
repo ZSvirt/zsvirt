@@ -20,6 +20,7 @@
             <zstack:extension interface="org.zstack.header.managementnode.ManagementNodeChangeListener"/>
             <zstack:extension interface="org.zstack.header.managementnode.ManagementNodeReadyExtensionPoint"/>
             <zstack:extension interface="org.zstack.header.vm.VmInstanceStartExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.vm.extension.VmInstancePreStartExtensionPoint" />
             <zstack:extension interface="org.zstack.header.vm.VmInstanceCreateExtensionPoint" />
             <zstack:extension interface="org.zstack.header.configuration.userconfig.InstanceOfferingUserConfigValidator" />
             <zstack:extension interface="org.zstack.header.configuration.userconfig.DiskOfferingUserConfigValidator" />

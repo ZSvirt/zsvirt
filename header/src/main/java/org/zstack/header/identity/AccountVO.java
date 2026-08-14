@@ -31,6 +31,10 @@ public class AccountVO extends ResourceVO {
     @Enumerated(EnumType.STRING)
     private AccountType type;
 
+    @Column(nullable = false, updatable = false)
+    @Enumerated(EnumType.STRING)
+    private AccountSource source = AccountSource.Local;
+
     @Column
     @Enumerated(EnumType.STRING)
     private AccountState state;
@@ -70,6 +74,14 @@ public class AccountVO extends ResourceVO {
 
     public void setType(AccountType type) {
         this.type = type;
+    }
+
+    public AccountSource getSource() {
+        return source;
+    }
+
+    public void setSource(AccountSource source) {
+        this.source = source;
     }
 
     public AccountState getState() {

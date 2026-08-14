@@ -150,6 +150,7 @@
     <bean id="VmInstanceHookManager" class="org.zstack.compute.vm.VmInstanceHookManagerImpl">
         <zstack:plugin>
             <zstack:extension interface="org.zstack.header.vm.VmInstanceStartExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.vm.extension.VmInstancePreStartExtensionPoint" />
             <zstack:extension interface="org.zstack.header.vm.VmInstanceStopExtensionPoint" />
             <zstack:extension interface="org.zstack.header.vm.VmInstanceRebootExtensionPoint" />
             <zstack:extension interface="org.zstack.header.vm.VmInstanceDestroyExtensionPoint" />
@@ -160,6 +161,7 @@
     <bean id="VmHardwareExtensionPoint" class="org.zstack.compute.vm.VmHardwareExtensionPoint">
         <zstack:plugin>
             <zstack:extension interface="org.zstack.header.vm.VmInstanceStartExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.vm.extension.VmInstancePreStartExtensionPoint" />
             <zstack:extension interface="org.zstack.header.vm.VmInstanceStartNewCreatedVmExtensionPoint" />
         </zstack:plugin>
     </bean>

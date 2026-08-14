@@ -14,8 +14,6 @@ import java.sql.Timestamp;
 
 /**
  * Extract from LdapServerVO
- *
- * Created by Wenhao.Zhang on 2024/05/31
  */
 @Entity
 @Table
@@ -26,7 +24,8 @@ public class ThirdPartyAccountSourceVO extends ResourceVO {
     private String description;
 
     /**
-     * ex: "ldap"
+     * ex: "WindowsAD" (exclude "Local")
+     * @see {@link org.zstack.header.identity.AccountSource}
      */
     @Column
     private String type;

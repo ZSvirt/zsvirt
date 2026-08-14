@@ -10,7 +10,6 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.UUID;
 
 @Inventory(mappingVOClass = AccountVO.class)
 @ExpandedQueries({
@@ -23,6 +22,7 @@ public class AccountInventory {
     private String name;
     private String description;
     private String type;
+    private String source;
     private String state;
     private Timestamp createDate;
     private Timestamp lastOpDate;
@@ -33,6 +33,7 @@ public class AccountInventory {
         inv.setName(vo.getName());
         inv.setDescription(vo.getDescription());
         inv.setType(vo.getType().toString());
+        inv.setSource(vo.getSource().toString());
         inv.setState(vo.getState().toString());
         inv.setCreateDate(vo.getCreateDate());
         inv.setLastOpDate(vo.getLastOpDate());
@@ -53,6 +54,14 @@ public class AccountInventory {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public String getSource() {
+        return source;
+    }
+
+    public void setSource(String source) {
+        this.source = source;
     }
 
     public String getDescription() {
@@ -109,6 +118,7 @@ public class AccountInventory {
         account.setName("account1");
         account.setDescription("account1-description");
         account.setType(AccountType.Normal.toString());
+        account.setSource(AccountSource.Local.toString());
         account.setState(AccountState.Enabled.toString());
         account.setCreateDate(new Timestamp(DocUtils.date));
         account.setLastOpDate(new Timestamp(DocUtils.date));

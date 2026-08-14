@@ -22,6 +22,7 @@ import org.zstack.header.core.workflow.FlowTrigger;
 import org.zstack.header.core.workflow.NoRollbackFlow;
 import org.zstack.header.errorcode.ErrorCode;
 import org.zstack.header.errorcode.ErrorCodeList;
+import org.zstack.header.identity.AccountSource;
 import org.zstack.header.identity.AccountType;
 import org.zstack.header.message.MessageReply;
 import org.zstack.identity.imports.AccountImportsConstant;
@@ -84,7 +85,8 @@ public class LdapSyncHelper {
         this.taskSpec = Objects.requireNonNull(spec);
 
         importSpec = new ImportAccountSpec();
-        importSpec.setSourceType(LdapConstant.LOGIN_TYPE);
+        importSpec.setSourceType(AccountSource.fromLdapServerTypeName(
+                taskSpec.getServerType() == null ? null : taskSpec.getServerType().name()).name());
         importSpec.setSourceUuid(spec.sourceUuid);
         importSpec.setSyncCreateStrategy(taskSpec.getCreateAccountStrategy());
         importSpec.setSyncUpdateStrategy(SyncUpdateAccountStateStrategy.from(taskSpec.getCreateAccountStrategy()));
@@ -95,6 +97,7 @@ public class LdapSyncHelper {
 
         progress = new LdapSyncTaskResult()
                 .withLdapServer(importSpec.getSourceUuid())
+                .withSourceType(importSpec.getSourceType())
                 .withExistingRecordCount(Q.New(AccountThirdPartyAccountSourceRefVO.class)
                         .eq(AccountThirdPartyAccountSourceRefVO_.accountSourceUuid, importSpec.getSourceUuid())
                         .count());
@@ -301,7 +304,7 @@ public class LdapSyncHelper {
                 if (accountCount <= 100) {
                     UnbindThirdPartyAccountsSpec spec = new UnbindThirdPartyAccountsSpec();
                     spec.setSourceUuid(importSpec.getSourceUuid());
-                    spec.setSourceType(LdapConstant.LOGIN_TYPE);
+                    spec.setSourceType(importSpec.getSourceType());
                     spec.setAccountUuidList(new ArrayList<>(credentialsAccountMapNeedDelete.values()));
                     spec.setSyncDeleteStrategy(taskSpec.deleteAccountStrategy);
 
@@ -319,7 +322,7 @@ public class LdapSyncHelper {
 
                     UnbindThirdPartyAccountsSpec splitSpec = new UnbindThirdPartyAccountsSpec();
                     splitSpec.setSourceUuid(importSpec.getSourceUuid());
-                    splitSpec.setSourceType(LdapConstant.LOGIN_TYPE);
+                    splitSpec.setSourceType(importSpec.getSourceType());
                     splitSpec.setSyncDeleteStrategy(taskSpec.deleteAccountStrategy);
 
                     Collection<String> accountUuids = transform(entries.subList(count, toIndexExclude), Map.Entry::getValue);
@@ -364,7 +367,7 @@ public class LdapSyncHelper {
         }
 
         account.setCredentials(dn);
-        account.setAccountType(AccountType.ThirdParty);
+        account.setAccountType(AccountType.Normal);
         account.setUsername(username);
         account.setEnable(ldapEntry.isEnable());
         return account;

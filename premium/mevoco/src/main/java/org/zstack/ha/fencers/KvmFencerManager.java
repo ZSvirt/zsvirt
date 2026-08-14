@@ -79,11 +79,6 @@ public class KvmFencerManager implements VmInstanceStartExtensionPoint {
     }
 
     @Override
-    public String preStartVm(VmInstanceInventory inv) {
-        return null;
-    }
-
-    @Override
     public void beforeStartVm(VmInstanceInventory inv) {
         // do-nothing
     }

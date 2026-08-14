@@ -89,7 +89,6 @@ public class OAuth2LoginIAM1 implements OAuth2Login {
 
         List<String> accountList = Q.New(AccountVO.class)
                 .in(AccountVO_.uuid, accountUuidList)
-                .eq(AccountVO_.type, AccountType.ThirdParty)
                 .eq(AccountVO_.name, token.username)
                 .select(AccountVO_.uuid)
                 .listValues();
@@ -147,7 +146,7 @@ public class OAuth2LoginIAM1 implements OAuth2Login {
 
         ImportAccountItem item = new ImportAccountItem();
         item.setAccountUuid(Platform.getUuid());
-        item.setAccountType(AccountType.ThirdParty);
+        item.setAccountType(AccountType.Normal);
         item.setCredentials(token.sub);
         item.setUsername(token.username);
         spec.setAccountList(list(item));

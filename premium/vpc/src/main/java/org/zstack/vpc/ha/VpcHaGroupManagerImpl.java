@@ -908,11 +908,6 @@ public class VpcHaGroupManagerImpl extends AbstractService implements VpcHaGroup
     public void failedToRebootVm(VmInstanceInventory inv, ErrorCode reason) {}
 
     @Override
-    public String preStartVm(VmInstanceInventory inv) {
-        return null;
-    }
-
-    @Override
     public void beforeStartVm(VmInstanceInventory inv) {
         setVirtualRouterHaStatus(inv.getUuid(), ApplianceVmHaStatus.Backup);
     }

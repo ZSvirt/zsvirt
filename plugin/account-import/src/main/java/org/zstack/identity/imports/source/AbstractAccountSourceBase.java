@@ -19,6 +19,7 @@ import org.zstack.header.core.ReturnValueCompletion;
 import org.zstack.header.core.WhileCompletion;
 import org.zstack.header.errorcode.ErrorCode;
 import org.zstack.header.identity.AccountInventory;
+import org.zstack.header.identity.AccountSource;
 import org.zstack.header.identity.AccountState;
 import org.zstack.header.identity.AccountType;
 import org.zstack.header.identity.AccountVO;
@@ -106,7 +107,6 @@ public abstract class AbstractAccountSourceBase {
     }
 
     protected ThirdPartyAccountSourceVO self;
-    public abstract String type();
 
     @MessageSafe
     public void handleMessage(Message msg) {
@@ -344,11 +344,18 @@ public abstract class AbstractAccountSourceBase {
                         "account[uuid=%s] newlyCreate stateInAccountSource=%s stateUpdateTo=%s %s",
                         accountUuid, stateInAccountSource, stateUpdateTo, stateMachine));
 
+                AccountType accountType = context.spec.getAccountType() != null ?
+                        context.spec.getAccountType() : AccountType.Normal;
+                if (accountType == AccountType.ThirdParty) {
+                    accountType = AccountType.Normal;
+                }
+
                 CreateAccountMsg message = new CreateAccountMsg();
                 message.setUuid(accountUuid);
                 message.setName(context.spec.getUsername());
                 message.setPassword(generatePassword());
-                message.setType(context.spec.getAccountType().toString());
+                message.setType(accountType.toString());
+                message.setSource(AccountSource.valueOf(self.getType()).toString());
                 message.setState(stateUpdateTo);
 
                 bus.makeTargetServiceIdByResourceUuid(message, AccountConstant.SERVICE_ID, accountUuid);
@@ -484,7 +491,7 @@ public abstract class AbstractAccountSourceBase {
 
         ImportAccountSpec batch = new ImportAccountSpec();
         batch.setSourceUuid(sourceUuid);
-        batch.setSourceType(this.type());
+        batch.setSourceType(self.getType());
         batch.setCreateIfNotExist(false);
 
         ImportAccountItem spec = new ImportAccountItem();
@@ -702,7 +709,7 @@ public abstract class AbstractAccountSourceBase {
 
         SyncTaskSpec spec = new SyncTaskSpec();
         spec.setSourceUuid(self.getUuid());
-        spec.setSourceType(type());
+        spec.setSourceType(self.getType());
         spec.setCreateAccountStrategy(createStrategy);
         spec.setDeleteAccountStrategy(deleteStrategy);
 
@@ -793,26 +800,18 @@ public abstract class AbstractAccountSourceBase {
 
             @Override
             public void run(FlowTrigger trigger, Map data) {
-                long totalSize = Q.New(AccountThirdPartyAccountSourceRefVO.class)
-                        .eq(AccountThirdPartyAccountSourceRefVO_.accountSourceUuid, self.getUuid())
-                        .count();
+                gatherAccountsForDestroySource(new ReturnValueCompletion<List<String>>(trigger) {
+                    @Override
+                    public void success(List<String> returnValue) {
+                        accountUuidList.addAll(returnValue);
+                        trigger.next();
+                    }
 
-                // All related accounts with "ThirdParty" type will be destroyed
-                SQL.New("select " +
-                                "account.uuid " +
-                        "from " +
-                                "AccountThirdPartyAccountSourceRefVO ref, " +
-                                "AccountVO account " +
-                        "where " +
-                                "ref.accountSourceUuid = :sourceUuid and " +
-                                "ref.accountUuid = account.uuid and " +
-                                "account.type = :accountType",
-                                String.class)
-                        .param("sourceUuid", self.getUuid())
-                        .param("accountType", AccountType.ThirdParty)
-                        .limit(300)
-                        .paginate(totalSize, (List<String> accountUuids) -> accountUuidList.addAll(accountUuids));
-                trigger.next();
+                    @Override
+                    public void fail(ErrorCode errorCode) {
+                        trigger.fail(errorCode);
+                    }
+                });
             }
         }).then(new NoRollbackFlow() {
             String __name__ = "destroy-source";
@@ -904,4 +903,28 @@ public abstract class AbstractAccountSourceBase {
     }
 
     protected abstract void destroySource(Completion completion);
+
+    protected void gatherAccountsForDestroySource(ReturnValueCompletion<List<String>> completion) {
+        long totalSize = Q.New(AccountThirdPartyAccountSourceRefVO.class)
+                .eq(AccountThirdPartyAccountSourceRefVO_.accountSourceUuid, self.getUuid())
+                .count();
+
+        List<String> results = new ArrayList<>((int) totalSize);
+        // Imported accounts (non-local source) bound to this source will be destroyed
+        SQL.New("select " +
+                        "account.uuid " +
+                "from " +
+                        "AccountThirdPartyAccountSourceRefVO ref, " +
+                        "AccountVO account " +
+                "where " +
+                        "ref.accountSourceUuid = :sourceUuid and " +
+                        "ref.accountUuid = account.uuid and " +
+                        "account.source != :localSource",
+                        String.class)
+                .param("sourceUuid", self.getUuid())
+                .param("localSource", AccountSource.Local)
+                .limit(300)
+                .paginate(totalSize, (List<String> accountUuids) -> results.addAll(accountUuids));
+        completion.success(results);
+    }
 }

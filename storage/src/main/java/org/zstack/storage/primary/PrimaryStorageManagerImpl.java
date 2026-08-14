@@ -57,6 +57,7 @@ import org.zstack.header.tag.SystemTagValidator;
 import org.zstack.header.vm.CreateVmInstanceMsg;
 import org.zstack.header.vm.VmInstanceCreateExtensionPoint;
 import org.zstack.header.vm.VmInstanceInventory;
+import org.zstack.header.vm.extension.VmInstancePreStartExtensionPoint;
 import org.zstack.header.vm.VmInstanceStartExtensionPoint;
 import org.zstack.header.vm.*;
 import org.zstack.resourceconfig.*;
@@ -80,6 +81,7 @@ import static org.zstack.utils.CollectionUtils.transformAndRemoveNull;
 
 public class PrimaryStorageManagerImpl extends AbstractService implements PrimaryStorageManager,
         ManagementNodeChangeListener, ManagementNodeReadyExtensionPoint, VmInstanceStartExtensionPoint,
+        VmInstancePreStartExtensionPoint,
         VmInstanceCreateExtensionPoint, InstanceOfferingUserConfigValidator, DiskOfferingUserConfigValidator,
         PrimaryStorageSortExtensionPoint, PrimaryStorageFeatureAllocatorExtensionPoint {
     private static final CLogger logger = Utils.getLogger(PrimaryStorageManager.class);
@@ -1376,7 +1378,7 @@ public class PrimaryStorageManagerImpl extends AbstractService implements Primar
         startPeriodTasks();
     }
 
-    private void checkVmAllVolumePrimaryStorageState(String vmUuid) {
+    private ErrorCode checkVmAllVolumePrimaryStorageState(String vmUuid) {
         String sql = "select uuid from PrimaryStorageVO where uuid in (" +
                 " select distinct(primaryStorageUuid) from VolumeVO" +
                 " where vmInstanceUuid = :vmUuid and primaryStorageUuid is not null)" +
@@ -1386,18 +1388,14 @@ public class PrimaryStorageManagerImpl extends AbstractService implements Primar
                 .param("psState", PrimaryStorageState.Maintenance)
                 .list();
         if (result != null && !result.isEmpty()) {
-            throw new OperationFailureException(argerr("the VM[uuid:%s] volume stored location primary storage is in a state of maintenance", vmUuid));
+            return operr("the VM[uuid:%s] volume stored location primary storage is in a state of maintenance", vmUuid);
         }
+        return null;
     }
 
     @Override
-    public String preStartVm(VmInstanceInventory inv) {
-        try{
-            checkVmAllVolumePrimaryStorageState(inv.getUuid());
-            return null;
-        }catch (Exception e){
-            return e.getMessage();
-        }
+    public ErrorCode preStartVm(VmInstanceInventory inv) {
+        return checkVmAllVolumePrimaryStorageState(inv.getUuid());
     }
 
     @Override

@@ -15,29 +15,38 @@ import org.zstack.header.core.workflow.FlowRollback;
 import org.zstack.header.core.workflow.FlowTrigger;
 import org.zstack.header.core.workflow.NoRollbackFlow;
 import org.zstack.header.errorcode.ErrorCode;
+import org.zstack.header.identity.AccountSource;
 import org.zstack.identity.imports.header.AbstractAccountSourceSpec;
 import org.zstack.identity.imports.entity.ThirdPartyAccountSourceVO;
 import org.zstack.identity.imports.source.AccountSourceFactory;
-import org.zstack.ldap.LdapConstant;
 import org.zstack.ldap.LdapErrors;
+import org.zstack.ldap.entity.LdapServerType;
 import org.zstack.ldap.entity.LdapServerVO;
 import org.zstack.ldap.entity.LdapServerVO_;
 import org.zstack.ldap.header.LdapAccountSourceSpec;
 
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import static org.zstack.core.Platform.err;
+import static org.zstack.utils.CollectionDSL.list;
 
 /**
  * Created by Wenhao.Zhang on 2024/06/03
  */
 public class LdapAccountSourceFactory implements AccountSourceFactory {
+    private static final Set<String> SUPPORTED_TYPES = Collections.unmodifiableSet(new HashSet<>(list(
+            AccountSource.OpenLdap.name(),
+            AccountSource.WindowsAD.name())));
+
     @Autowired
     private DatabaseFacade databaseFacade;
 
     @Override
-    public String type() {
-        return LdapConstant.LOGIN_TYPE;
+    public Set<String> supportedTypes() {
+        return SUPPORTED_TYPES;
     }
 
     @Override
@@ -78,7 +87,7 @@ public class LdapAccountSourceFactory implements AccountSourceFactory {
                 ldapServerVO.setUuid(spec.getUuid());
                 ldapServerVO.setResourceName(spec.getServerName());
                 ldapServerVO.setDescription(spec.getDescription());
-                ldapServerVO.setType(LdapConstant.LOGIN_TYPE);
+                ldapServerVO.setType(resolveSourceType(spec.getServerType()));
                 ldapServerVO.setUrl(spec.getUrl());
                 ldapServerVO.setBase(spec.getBaseDn());
                 ldapServerVO.setUsername(spec.getLogInUserName());
@@ -113,6 +122,10 @@ public class LdapAccountSourceFactory implements AccountSourceFactory {
                 completion.fail(errCode);
             }
         }).start();
+    }
+
+    private static String resolveSourceType(LdapServerType serverType) {
+        return AccountSource.fromLdapServerTypeName(serverType == null ? null : serverType.name()).name();
     }
 
     private ErrorCode checkSameLdapServerExists(LdapAccountSourceSpec spec) {

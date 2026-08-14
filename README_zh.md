@@ -22,7 +22,7 @@
     </a>
     <a href="https://zsvirt.io/docs">
       <img
-        src="https://img.shields.io/badge/产品文档-2563EB?style=flat-square&logo=readthedocs&logoColor=white"
+        src="https://img.shields.io/badge/产品文档-7C3AED?style=flat-square&logo=readthedocs&logoColor=white"
         alt="产品文档"
       >
     </a>
@@ -34,7 +34,7 @@
     </a>
     <a href="https://zsvirt.io/download">
       <img
-        src="https://img.shields.io/badge/下载中心-F97316?style=flat-square&logo=download&logoColor=white"
+        src="https://img.shields.io/badge/下载中心-F97316?style=flat-square&logo=data:image/svg%2Bxml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI%2BPHBhdGggZmlsbD0iI2ZmZiIgZD0iTTUgMjBoMTR2LTJINXYyem0xNC05aC00VjNIOXY4SDVsNyA3IDctN3oiLz48L3N2Zz4%3D"
         alt="下载中心"
       >
     </a>

@@ -49,9 +49,9 @@
 
 ## ZSvirt介绍
 
-ZSvirt 将 [ZStack](https://www.zstack-cloud.com/) 经企业级实践验证的 ZSphere 虚拟化引擎带入开源世界。
+ZSvirt 将 [ZStack](https://www.zstack.io/) 经企业级实践验证的 ZSphere 虚拟化引擎带入开源世界。
 
-依托成熟的基础设施厂商 [ZStack](https://www.zstack-cloud.com/)，ZSvirt 提供轻量、可扩展的虚拟化平台。从高性能家庭实验室到超大规模基础设施，ZSvirt 致力于为用户提供不受厂商锁定限制的自由选择。
+依托成熟的基础设施厂商 [ZStack](https://www.zstack.io/)，ZSvirt 提供轻量、可扩展的虚拟化平台。从高性能家庭实验室到超大规模基础设施，ZSvirt 致力于为用户提供不受厂商锁定限制的自由选择。
 
 ## 产品导览
 

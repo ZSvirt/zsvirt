@@ -18,6 +18,7 @@ import org.zstack.core.log.LogSafeGson;
 import org.zstack.core.progress.TaskTracker;
 import org.zstack.header.Component;
 import org.zstack.header.apimediator.ApiMediatorConstant;
+import org.zstack.header.description.audits.ApiAudits;
 import org.zstack.header.core.ExceptionSafe;
 import org.zstack.header.exception.CloudRuntimeException;
 import org.zstack.header.identity.APILogInReply;
@@ -889,7 +890,8 @@ public class NamespaceEventManagerImpl implements NamespaceEventManager, Compone
     }}).create();
 
     private void processAudit(Bundle b) {
-        if (AuditConstants.API_AUDIT_BLOCK_LIST.contains(b.request.getClass().getName())) {
+        if (ApiAudits.shouldSkipAudit(b.request.getClass())
+                || AuditConstants.API_AUDIT_BLOCK_LIST.contains(b.request.getClass().getName())) {
             return;
         }
 

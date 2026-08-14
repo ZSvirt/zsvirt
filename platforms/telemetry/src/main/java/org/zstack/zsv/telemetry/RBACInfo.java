@@ -45,5 +45,10 @@ public class RBACInfo implements PackageDescription {
                 .inPackage("org.zstack.zsv.telemetry.api")
                 .toService(TelemetryConstant.SERVICE_ID)
                 .build();
+
+        apis()
+                .api(APICheckTelemetryUpdateMsg.class)
+                .skipAudit()
+                .build();
     }
 }

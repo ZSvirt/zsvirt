@@ -44,6 +44,14 @@ public class ThirdPartyAccountSourceInventory  {
         return this.createAccountStrategy;
     }
 
+    public java.util.List updateAccountStrategies;
+    public void setUpdateAccountStrategies(java.util.List updateAccountStrategies) {
+        this.updateAccountStrategies = updateAccountStrategies;
+    }
+    public java.util.List getUpdateAccountStrategies() {
+        return this.updateAccountStrategies;
+    }
+
     public java.lang.String deleteAccountStrategy;
     public void setDeleteAccountStrategy(java.lang.String deleteAccountStrategy) {
         this.deleteAccountStrategy = deleteAccountStrategy;

@@ -30,7 +30,6 @@ import org.zstack.identity.imports.entity.AccountThirdPartyAccountSourceRefVO;
 import org.zstack.identity.imports.entity.AccountThirdPartyAccountSourceRefVO_;
 import org.zstack.identity.imports.entity.SyncCreatedAccountStrategy;
 import org.zstack.identity.imports.entity.SyncDeletedAccountStrategy;
-import org.zstack.identity.imports.entity.SyncUpdateAccountStateStrategy;
 import org.zstack.identity.imports.header.ImportAccountItem;
 import org.zstack.identity.imports.header.ImportAccountResult;
 import org.zstack.identity.imports.header.ImportAccountSpec;
@@ -89,9 +88,6 @@ public class LdapSyncHelper {
                 taskSpec.getServerType() == null ? null : taskSpec.getServerType().name()).name());
         importSpec.setSourceUuid(spec.sourceUuid);
         importSpec.setSyncCreateStrategy(taskSpec.getCreateAccountStrategy());
-        importSpec.setSyncUpdateStrategy(SyncUpdateAccountStateStrategy.from(taskSpec.getCreateAccountStrategy()));
-        importSpec.setCreateIfNotExist(
-                taskSpec.getCreateAccountStrategy() != SyncCreatedAccountStrategy.NoAction);
 
         ldapUtil = Platform.New(LdapUtil::new);
 
@@ -200,7 +196,7 @@ public class LdapSyncHelper {
                     splitSpec.setSourceType(importSpec.getSourceType());
                     splitSpec.setAccountList(importSpec.getAccountList().subList(count, toIndexExclude));
                     splitSpec.setSyncCreateStrategy(importSpec.getSyncCreateStrategy());
-                    splitSpec.setSyncUpdateStrategy(importSpec.getSyncUpdateStrategy());
+                    splitSpec.setSyncUpdateStrategies(importSpec.getSyncUpdateStrategies());
 
                     ImportThirdPartyAccountMsg msg = new ImportThirdPartyAccountMsg();
                     msg.setSpec(splitSpec);

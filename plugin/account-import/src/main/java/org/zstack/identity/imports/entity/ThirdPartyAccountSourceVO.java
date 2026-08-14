@@ -34,6 +34,13 @@ public class ThirdPartyAccountSourceVO extends ResourceVO {
     @Enumerated(value = EnumType.STRING)
     private SyncCreatedAccountStrategy createAccountStrategy;
 
+    /**
+     * support more than one {@link SyncUpdateAccountStrategy}, join by ","
+     * ex: "AccountStateKeepSameWithSource,BindingNormalAccount", or ""
+     */
+    @Column
+    private String updateAccountStrategies = "";
+
     @Column
     @Enumerated(value = EnumType.STRING)
     private SyncDeletedAccountStrategy deleteAccountStrategy;
@@ -71,6 +78,14 @@ public class ThirdPartyAccountSourceVO extends ResourceVO {
 
     public void setCreateAccountStrategy(SyncCreatedAccountStrategy createAccountStrategy) {
         this.createAccountStrategy = createAccountStrategy;
+    }
+
+    public String getUpdateAccountStrategies() {
+        return updateAccountStrategies;
+    }
+
+    public void setUpdateAccountStrategies(String updateAccountStrategies) {
+        this.updateAccountStrategies = updateAccountStrategies;
     }
 
     public SyncDeletedAccountStrategy getDeleteAccountStrategy() {

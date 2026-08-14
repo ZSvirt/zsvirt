@@ -527,6 +527,13 @@ public class AccountManagerImpl extends AbstractService implements AccountManage
         final AccountInventory inv = new SQLBatchWithReturn<AccountInventory>() {
             @Override
             protected AccountInventory scripts() {
+                boolean duplicateName = q(AccountVO.class)
+                        .eq(AccountVO_.name, msg.getName())
+                        .isExists();
+                if (duplicateName) {
+                    throw operr("account name[%s] is duplicate", msg.getName()).toException();
+                }
+
                 AccountVO vo = new AccountVO();
                 if (msg.getUuid() != null) {
                     vo.setUuid(msg.getUuid());

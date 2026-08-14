@@ -34,7 +34,7 @@
     </a>
     <a href="https://zsvirt.io/download">
       <img
-        src="https://img.shields.io/badge/下载-F97316?style=flat-square&logo=download&logoColor=white"
+        src="https://img.shields.io/badge/下载中心-F97316?style=flat-square&logo=download&logoColor=white"
         alt="下载中心"
       >
     </a>

@@ -1,0 +1,750 @@
+[
+  {
+    "raw": "accessKey and keySecret must be set",
+    "en_US": "accessKey and keySecret must be set",
+    "zh_CN": "必须设置 accessKey 和 keySecret",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/aliyun/core/AliyunEbsClient.java"
+  },
+  {
+    "raw": "ocean api endpoint must not be null",
+    "en_US": "ocean api endpoint must not be null",
+    "zh_CN": "ocean API 的 endpoint 不能为空",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/aliyun/core/AliyunEbsClient.java"
+  },
+  {
+    "raw": "accessKey and keySecret must be set!",
+    "en_US": "accessKey and keySecret must be set!",
+    "zh_CN": "必须设置 accessKey 和 keySecret",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/aliyun/core/AliyunNasClient.java"
+  },
+  {
+    "raw": "regionId must be set!",
+    "en_US": "regionId must be set!",
+    "zh_CN": "必须设置 regionId",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/aliyun/core/AliyunNasClient.java"
+  },
+  {
+    "raw": "no current used key/secret for %s!",
+    "en_US": "no current used key/secret for {0}!",
+    "zh_CN": "没有当前使用的 {0} 密钥/密钥对",
+    "arguments": [
+      "type.toString()"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/core/AliyunPluginUtils.java"
+  },
+  {
+    "raw": "Not a valid message!",
+    "en_US": "Not a valid message!",
+    "zh_CN": "不是有效的消息",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/aliyun/core/AliyunStorageSdkIml.java"
+  },
+  {
+    "raw": "%s failed, ErrorCode: %s, ErrorMessage: %s",
+    "en_US": "{0} failed, ErrorCode: {1}, ErrorMessage: {2}",
+    "zh_CN": "{0} 失败，错误代码：{1}，错误消息：{2}",
+    "arguments": [
+      "action",
+      "result.ErrorCode",
+      "result.ErrorMessage"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/core/AliyunStorageSdkIml.java"
+  },
+  {
+    "raw": "Device Not Ready in %d milli seconds",
+    "en_US": "Device Not Ready in {0} milli seconds",
+    "zh_CN": "设备在 {0} 毫秒内未就绪",
+    "arguments": [
+      "15000"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/core/AliyunStorageSdkIml.java"
+  },
+  {
+    "raw": "snapshot task cannot finished in %d milliseconds, now progress is %d, status is %s",
+    "en_US": "snapshot task cannot finished in {0} milliseconds, now progress is {1}, status is {2}",
+    "zh_CN": "快照任务无法在 {0} 毫秒内完成，当前进度为 {1}，状态为 {2}",
+    "arguments": [
+      "msg.getTimeout()",
+      "result.Content.Progress",
+      "result.Content.TaskStatus"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/core/AliyunStorageSdkIml.java"
+  },
+  {
+    "raw": "snapshot task status is finished %s",
+    "en_US": "snapshot task status is finished {0}",
+    "zh_CN": "快照任务状态已完成 {0}",
+    "arguments": [
+      "result.Content.TaskStatus"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/core/AliyunStorageSdkIml.java"
+  },
+  {
+    "raw": "not supported HybridClient",
+    "en_US": "not supported HybridClient",
+    "zh_CN": "不支持的 HybridClient",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/aliyun/core/AliyunStorageSdkIml.java"
+  },
+  {
+    "raw": "arg \u0027endpoint\u0027 must be set in %s type",
+    "en_US": "arg \u0027endpoint\u0027 must be set in {0} type",
+    "zh_CN": "参数 'endpoint' 必须在 {0} 类型中设置",
+    "arguments": [
+      "HybridType.AliyunEBS.toString()"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/core/datacenter/AliyunPrivateDataCenterBase.java"
+  },
+  {
+    "raw": "not supported datacenter [%s] type here!",
+    "en_US": "not supported datacenter [{0}] type here!",
+    "zh_CN": "此处不支持数据中心 [{0}] 类型",
+    "arguments": [
+      "type.toString()"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/core/datacenter/AliyunPrivateDataCenterBase.java"
+  },
+  {
+    "raw": "must indicate zoneId in private aliyun.",
+    "en_US": "must indicate zoneId in private aliyun.",
+    "zh_CN": "必须在私有阿里云中指定 zoneId",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/aliyun/core/identityzone/AliyunPrivateIdentityZoneBase.java"
+  },
+  {
+    "raw": "make ocean api signature string failed: %s",
+    "en_US": "make ocean api signature string failed: {0}",
+    "zh_CN": "生成 ocean API 签名字符串失败：{0}",
+    "arguments": [
+      "e.getMessage()"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/ebs/storage/OceanApi.java"
+  },
+  {
+    "raw": "url(ocean endpoint) must be set for aliyun ebs backupstorage",
+    "en_US": "url(ocean endpoint) must be set for aliyun ebs backupstorage",
+    "zh_CN": "必须为阿里云 EBS 备份存储设置 URL（ocean 端点）",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/aliyun/ebs/storage/backup/AliyunEbsBackupStorageApiInterceptor.java"
+  },
+  {
+    "raw": "couldn\u0027t find domain on such oss: [%s]",
+    "en_US": "couldn\u0027t find domain on such oss: [{0}]",
+    "zh_CN": "",
+    "arguments": [
+      "evo.getOssBucketUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/ebs/storage/backup/AliyunEbsBackupStorageBase.java"
+  },
+  {
+    "raw": "aliyun ebs backup storage do not support to cancel download image",
+    "en_US": "aliyun ebs backup storage do not support to cancel download image",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/aliyun/ebs/storage/backup/AliyunEbsBackupStorageBase.java"
+  },
+  {
+    "raw": "no such object %s found in bucket %s",
+    "en_US": "no such object {0} found in bucket {1}",
+    "zh_CN": "",
+    "arguments": [
+      "objectFile",
+      "ovo.getBucketName()"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/ebs/storage/backup/AliyunEbsBackupStorageBase.java"
+  },
+  {
+    "raw": "couldn\u0027t find such oss bucket: [%s]",
+    "en_US": "couldn\u0027t find such oss bucket: [{0}]",
+    "zh_CN": "",
+    "arguments": [
+      "evo.getOssBucketUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/ebs/storage/backup/AliyunEbsBackupStorageBase.java"
+  },
+  {
+    "raw": "aliyun ebs backup storage do not support calculate image hash",
+    "en_US": "aliyun ebs backup storage do not support calculate image hash",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/aliyun/ebs/storage/backup/AliyunEbsBackupStorageBase.java"
+  },
+  {
+    "raw": "cannot delete oss bucket [%s], Aliyun Ebs BackupStorage [%s] still existed, please delete it first.",
+    "en_US": "cannot delete oss bucket [{0}], Aliyun Ebs BackupStorage [{1}] still existed, please delete it first.",
+    "zh_CN": "",
+    "arguments": [
+      "oss.getUuid()",
+      "evo.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/ebs/storage/backup/AliyunEbsBackupStorageCascadeExtenstion.java"
+  },
+  {
+    "raw": "cannot find device path from volume: %s",
+    "en_US": "cannot find device path from volume: {0}",
+    "zh_CN": "",
+    "arguments": [
+      "vol.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/ebs/storage/primary/AliyunEbsKvmFactory.java"
+  },
+  {
+    "raw": "aliyun ebs not support resize on running vm now.",
+    "en_US": "aliyun ebs not support resize on running vm now.",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/aliyun/ebs/storage/primary/AliyunEbsKvmFactory.java"
+  },
+  {
+    "raw": "iso [%s] has been attached, we can not attach it until detach it",
+    "en_US": "iso [{0}] has been attached, we can not attach it until detach it",
+    "zh_CN": "",
+    "arguments": [
+      "isoUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/ebs/storage/primary/AliyunEbsKvmFactory.java"
+  },
+  {
+    "raw": "url(ocean endpoint) must be set for aliyun ebs primarystorage",
+    "en_US": "url(ocean endpoint) must be set for aliyun ebs primarystorage",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/aliyun/ebs/storage/primary/AliyunEbsPrimaryStorageApiInterceptor.java"
+  },
+  {
+    "raw": "url must starts with http:// or https://, but got %s",
+    "en_US": "url must starts with http:// or https://, but got {0}",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getUrl()"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/ebs/storage/primary/AliyunEbsPrimaryStorageApiInterceptor.java"
+  },
+  {
+    "raw": "panguPartitionUuid or identityZoneUuid must be set.",
+    "en_US": "panguPartitionUuid or identityZoneUuid must be set.",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/aliyun/ebs/storage/primary/AliyunEbsPrimaryStorageApiInterceptor.java"
+  },
+  {
+    "raw": "panguPartitionUuid [%s] not be matched with identityZoneUuid [%s]",
+    "en_US": "panguPartitionUuid [{0}] not be matched with identityZoneUuid [{1}]",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getPanguPartitionUuid()",
+      "msg.getIdentityZoneUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/ebs/storage/primary/AliyunEbsPrimaryStorageApiInterceptor.java"
+  },
+  {
+    "raw": "the aliyun ebs primary storage[uuid:%s, name:%s] cannot find any available host in attached clusters for instantiating the volume",
+    "en_US": "the aliyun ebs primary storage[uuid:{0}, name:{1}] cannot find any available host in attached clusters for instantiating the volume",
+    "zh_CN": "阿里云 EBS 主存储[uuid:{0}, name:{1}] 在附加的集群中找不到可用于实例化卷的可用主机",
+    "arguments": [
+      "self.getUuid()",
+      "self.getName()"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/ebs/storage/primary/AliyunEbsPrimaryStorageBase.java"
+  },
+  {
+    "raw": "cannot find snapshot from image: %s, maybe the image has been deleted",
+    "en_US": "cannot find snapshot from image: {0}, maybe the image has been deleted",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getVolume().getRootImageUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/ebs/storage/primary/AliyunEbsPrimaryStorageBase.java"
+  },
+  {
+    "raw": "ebs primarystorage cannot support decrease size now",
+    "en_US": "ebs primarystorage cannot support decrease size now",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/aliyun/ebs/storage/primary/AliyunEbsPrimaryStorageBase.java"
+  },
+  {
+    "raw": "create snapshot timeout, progress is %d",
+    "en_US": "create snapshot timeout, progress is {0}",
+    "zh_CN": "",
+    "arguments": [
+      "reply1.getProgress()"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/ebs/storage/primary/AliyunEbsPrimaryStorageBase.java"
+  },
+  {
+    "raw": "couldn’t find any BackupStorage that is connected and enabled for commiting volume [uuid:%s]",
+    "en_US": "couldn’t find any BackupStorage that is connected and enabled for commiting volume [uuid:{0}]",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getVolumeUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/ebs/storage/primary/AliyunEbsPrimaryStorageBase.java"
+  },
+  {
+    "raw": "aliyun ebs primarystorage only support aliyun ebs bs, actually get type: %s",
+    "en_US": "aliyun ebs primarystorage only support aliyun ebs bs, actually get type: {0}",
+    "zh_CN": "",
+    "arguments": [
+      "bsvo.getType()"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/ebs/storage/primary/AliyunEbsPrimaryStorageBase.java"
+  },
+  {
+    "raw": "cannot delete identity zone [%s], Aliyun Ebs PrimaryStorage [%s] still existed, please delete it first.",
+    "en_US": "cannot delete identity zone [{0}], Aliyun Ebs PrimaryStorage [{1}] still existed, please delete it first.",
+    "zh_CN": "",
+    "arguments": [
+      "iz.getUuid()",
+      "evo.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/ebs/storage/primary/AliyunEbsPrimaryStorageCascadeExtension.java"
+  },
+  {
+    "raw": "append volumeId: %s, but another volumeId existed in url: %s",
+    "en_US": "append volumeId: {0}, but another volumeId existed in url: {1}",
+    "zh_CN": "",
+    "arguments": [
+      "volumeId",
+      "url"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/ebs/storage/primary/AliyunEbsPrimaryStoragePathMaker.java"
+  },
+  {
+    "raw": "hostUuid [%s] already existed in url: %s",
+    "en_US": "hostUuid [{0}] already existed in url: {1}",
+    "zh_CN": "",
+    "arguments": [
+      "hostUuid",
+      "url"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/ebs/storage/primary/AliyunEbsPrimaryStoragePathMaker.java"
+  },
+  {
+    "raw": "invalid install url: %s",
+    "en_US": "invalid install url: {0}",
+    "zh_CN": "",
+    "arguments": [
+      "url"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/ebs/storage/primary/AliyunEbsPrimaryStoragePathMaker.java"
+  },
+  {
+    "raw": "cannot find devicePath on host: %s",
+    "en_US": "cannot find devicePath on host: {0}",
+    "zh_CN": "",
+    "arguments": [
+      "hostUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/ebs/storage/primary/AliyunEbsPrimaryStoragePathMaker.java"
+  },
+  {
+    "raw": "invalid install path: %s",
+    "en_US": "invalid install path: {0}",
+    "zh_CN": "",
+    "arguments": [
+      "installPath"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/ebs/storage/primary/AliyunEbsPrimaryStoragePathMaker.java"
+  },
+  {
+    "raw": "invalid snapshot install path: %s",
+    "en_US": "invalid snapshot install path: {0}",
+    "zh_CN": "",
+    "arguments": [
+      "installPath"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/ebs/storage/primary/AliyunEbsPrimaryStoragePathMaker.java"
+  },
+  {
+    "raw": "PrimaryStorage [%s] still running, can not delete access group",
+    "en_US": "PrimaryStorage [{0}] still running, can not delete access group",
+    "zh_CN": "",
+    "arguments": [
+      "psUuids.toString()"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/nas/core/AliyunNasApiInterceptor.java"
+  },
+  {
+    "raw": "access group rule [%s] already existed in access group [%s]",
+    "en_US": "access group rule [{0}] already existed in access group [{1}]",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getSourceCidrIp()",
+      "msg.getAccessGroupUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/nas/filesystem/AliyunNasBase.java"
+  },
+  {
+    "raw": "access group [%s] already existed in datacenter [%s]",
+    "en_US": "access group [{0}] already existed in datacenter [{1}]",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getName()",
+      "msg.getDataCenterUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/nas/filesystem/AliyunNasBase.java"
+  },
+  {
+    "raw": "no filesystem [%s] found in region: %s",
+    "en_US": "no filesystem [{0}] found in region: {1}",
+    "zh_CN": "",
+    "arguments": [
+      "self.getFileSystemId()",
+      "regionId"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/nas/filesystem/AliyunNasFileSystemBase.java"
+  },
+  {
+    "raw": "nas filesystem existed in datacenter: %s",
+    "en_US": "nas filesystem existed in datacenter: {0}",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getDataCenterUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/nas/filesystem/AliyunNasFileSystemBase.java"
+  },
+  {
+    "raw": "some primary storage [%s] used this nas, can not delete it until delete the primary storage.",
+    "en_US": "some primary storage [{0}] used this nas, can not delete it until delete the primary storage.",
+    "zh_CN": "",
+    "arguments": [
+      "refs.toString()"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/nas/filesystem/AliyunNasFileSystemBase.java"
+  },
+  {
+    "raw": "mount domain not valid after %d milliseconds, delete it...",
+    "en_US": "mount domain not valid after {0} milliseconds, delete it...",
+    "zh_CN": "",
+    "arguments": [
+      "cmsg.getWait()"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/nas/filesystem/AliyunNasMountTargetBase.java"
+  },
+  {
+    "raw": "no such mount target [%s] in nas: %s",
+    "en_US": "no such mount target [{0}] in nas: {1}",
+    "zh_CN": "",
+    "arguments": [
+      "self.getMountDomain()",
+      "self.getNasFileSystemUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/nas/filesystem/AliyunNasMountTargetBase.java"
+  },
+  {
+    "raw": "there are no nas access group existed, please create at least one",
+    "en_US": "there are no nas access group existed, please create at least one",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/aliyun/nas/filesystem/AliyunNasMountTargetBase.java"
+  },
+  {
+    "raw": "nas mount target [%s] existed in filesystem: %s",
+    "en_US": "nas mount target [{0}] existed in filesystem: {1}",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getMountDomain()",
+      "msg.getNasFSUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/nas/filesystem/AliyunNasMountTargetBase.java"
+  },
+  {
+    "raw": "the access group attached is already: %s",
+    "en_US": "the access group attached is already: {0}",
+    "zh_CN": "",
+    "arguments": [
+      "self.getAccessGroupUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/nas/filesystem/AliyunNasMountTargetBase.java"
+  },
+  {
+    "raw": "no connected host found in the cluster[uuid:%s]",
+    "en_US": "no connected host found in the cluster[uuid:{0}]",
+    "zh_CN": "",
+    "arguments": [
+      "clusterUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/nas/storage/primary/AliyunKvmBackend.java"
+  },
+  {
+    "raw": "AliyunNasAccessGroupVO[%s] is not existed, may be it has been deleted!",
+    "en_US": "AliyunNasAccessGroupVO[{0}] is not existed, may be it has been deleted!",
+    "zh_CN": "",
+    "arguments": [
+      "accessGroupUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/nas/storage/primary/AliyunKvmBackend.java"
+  },
+  {
+    "raw": "EcsVSwitchVO[%s] is not existed, may be it has been deleted!",
+    "en_US": "EcsVSwitchVO[{0}] is not existed, may be it has been deleted!",
+    "zh_CN": "",
+    "arguments": [
+      "vSwitchUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/nas/storage/primary/AliyunKvmBackend.java"
+  },
+  {
+    "raw": "cannot find an available host to operation in primary storage: %s",
+    "en_US": "cannot find an available host to operation in primary storage: {0}",
+    "zh_CN": "",
+    "arguments": [
+      "self.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/nas/storage/primary/AliyunKvmBackend.java"
+  },
+  {
+    "raw": "failed to ping aliyun nas primary storage[uuid:%s] from host[uuid:%s],because %s. disconnect this host-ps connection",
+    "en_US": "failed to ping aliyun nas primary storage[uuid:{0}] from host[uuid:{1}],because {2}. disconnect this host-ps connection",
+    "zh_CN": "从主机[uuid:{1}] ping 阿里云 NAS 主存储[uuid:{0}] 失败，因为 {2}。断开此主机-存储连接",
+    "arguments": [
+      "self.getUuid()",
+      "hostUuid",
+      "rsp.error"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/nas/storage/primary/AliyunKvmBackend.java"
+  },
+  {
+    "raw": "operation error, because:%s",
+    "en_US": "operation error, because:{0}",
+    "zh_CN": "",
+    "arguments": [
+      "rsp.error"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/nas/storage/primary/AliyunKvmBackend.java"
+  },
+  {
+    "raw": "nas primary storage not mounted, please init it first!",
+    "en_US": "nas primary storage not mounted, please init it first!",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/aliyun/nas/storage/primary/AliyunKvmBackend.java"
+  },
+  {
+    "raw": "cannot find any BackupStorageKvmFactory for the type[%s]",
+    "en_US": "cannot find any BackupStorageKvmFactory for the type[{0}]",
+    "zh_CN": "",
+    "arguments": [
+      "bsType"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/nas/storage/primary/AliyunKvmBackend.java"
+  },
+  {
+    "raw": "cannot find host to operate volume: [%s]",
+    "en_US": "cannot find host to operate volume: [{0}]",
+    "zh_CN": "",
+    "arguments": [
+      "vol.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/nas/storage/primary/AliyunKvmBackend.java"
+  },
+  {
+    "raw": "cannot find and host to sync volume size in primary: %s",
+    "en_US": "cannot find and host to sync volume size in primary: {0}",
+    "zh_CN": "",
+    "arguments": [
+      "self.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/nas/storage/primary/AliyunKvmBackend.java"
+  },
+  {
+    "raw": "image [%s] has been deleted, cannot reinit root volume from it",
+    "en_US": "image [{0}] has been deleted, cannot reinit root volume from it",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/aliyun/nas/storage/primary/AliyunKvmBackend.java"
+  },
+  {
+    "raw": "no available host could check mountPath!",
+    "en_US": "no available host could check mountPath!",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/aliyun/nas/storage/primary/AliyunKvmBackend.java"
+  },
+  {
+    "raw": "unable to allocate backup storage specified by uuids: %s, becasue: %s",
+    "en_US": "unable to allocate backup storage specified by uuids: {0}, becasue: {1}",
+    "zh_CN": "",
+    "arguments": [
+      "String.join(\",\", msg.getBackupStorageUuids())",
+      "errorCodes.getCauses().get(0).getDetails()"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/nas/storage/primary/AliyunKvmBackend.java"
+  },
+  {
+    "raw": "No backup storage to commit volume [uuid: %s]",
+    "en_US": "No backup storage to commit volume [uuid: {0}]",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getVolumeUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/nas/storage/primary/AliyunKvmBackend.java"
+  },
+  {
+    "raw": "aliyun nas primarystorage only support imagestore bs, actually get type: %s",
+    "en_US": "aliyun nas primarystorage only support imagestore bs, actually get type: {0}",
+    "zh_CN": "",
+    "arguments": [
+      "bsvo.getType()"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/nas/storage/primary/AliyunKvmBackend.java"
+  },
+  {
+    "raw": "unable to commit backup storage specified by uuids: %s, becasue: %s",
+    "en_US": "unable to commit backup storage specified by uuids: {0}, becasue: {1}",
+    "zh_CN": "",
+    "arguments": [
+      "String.join(\",\", backupStorages.stream().map(BackupStorageInventory::getUuid).collect(Collectors.toList()))",
+      "errorCodes.get(0).getDetails()"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/nas/storage/primary/AliyunKvmBackend.java"
+  },
+  {
+    "raw": "image [uuid:%s] has been deleted",
+    "en_US": "image [uuid:{0}] has been deleted",
+    "zh_CN": "",
+    "arguments": [
+      "imageVO.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/nas/storage/primary/AliyunKvmBackend.java"
+  },
+  {
+    "raw": "the volume[uuid;%s] is attached to a VM[uuid:%s] which is in state of %s, cannot do the snapshot merge",
+    "en_US": "the volume[uuid;{0}] is attached to a VM[uuid:{1}] which is in state of {2}, cannot do the snapshot merge",
+    "zh_CN": "",
+    "arguments": [
+      "volume.getUuid()",
+      "volume.getVmInstanceUuid()",
+      "state"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/nas/storage/primary/AliyunKvmBackend.java"
+  },
+  {
+    "raw": "unable to attach a primary storage to cluster. Kvm host[uuid:%s, name:%s] in cluster has qemu-img with version[%s]; but the primary storage has attached to a cluster that has kvm host[uuid:%s], which has qemu-img with version[%s]. qemu-img version greater than %s is incompatible with versions less than %s, this will causes volume snapshot operation to fail. Please avoid attaching a primary storage to clusters that have different Linux distributions, in order to prevent qemu-img version mismatch",
+    "en_US": "unable to attach a primary storage to cluster. Kvm host[uuid:{0}, name:{1}] in cluster has qemu-img with version[{2}]; but the primary storage has attached to a cluster that has kvm host[uuid:{3}], which has qemu-img with version[{4}]. qemu-img version greater than {5} is incompatible with versions less than {6}, this will causes volume snapshot operation to fail. Please avoid attaching a primary storage to clusters that have different Linux distributions, in order to prevent qemu-img version mismatch",
+    "zh_CN": "",
+    "arguments": [
+      "context.getInventory().getUuid()",
+      "context.getInventory().getName()",
+      "mine",
+      "e.getKey()",
+      "version",
+      "QCOW3_QEMU_IMG_VERSION",
+      "QCOW3_QEMU_IMG_VERSION"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/nas/storage/primary/AliyunKvmFactory.java"
+  },
+  {
+    "raw": "no available host could download imagecache!",
+    "en_US": "no available host could download imagecache!",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/aliyun/nas/storage/primary/AliyunKvmFactory.java"
+  },
+  {
+    "raw": "the aliyun nas primary storage[uuid:%s, name:%s] cannot find any available host in attached clusters for instantiating the volume",
+    "en_US": "the aliyun nas primary storage[uuid:{0}, name:{1}] cannot find any available host in attached clusters for instantiating the volume",
+    "zh_CN": "",
+    "arguments": [
+      "self.getUuid()",
+      "self.getName()"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/nas/storage/primary/AliyunNasPrimaryStorageBase.java"
+  },
+  {
+    "raw": "the aliyun nas primary storage[uuid:%s, name:%s] cannot find any available host in attached clusters for delete bits on primarystorage",
+    "en_US": "the aliyun nas primary storage[uuid:{0}, name:{1}] cannot find any available host in attached clusters for delete bits on primarystorage",
+    "zh_CN": "",
+    "arguments": [
+      "self.getUuid()",
+      "self.getName()"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/nas/storage/primary/AliyunNasPrimaryStorageBase.java"
+  },
+  {
+    "raw": "not support",
+    "en_US": "not support",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/aliyun/nas/storage/primary/AliyunNasPrimaryStorageBase.java"
+  },
+  {
+    "raw": "the AliyunNAS primary storage[uuid:%s, name:%s] has not attached to any clusters, or no hosts in the attached clusters are connected",
+    "en_US": "the AliyunNAS primary storage[uuid:{0}, name:{1}] has not attached to any clusters, or no hosts in the attached clusters are connected",
+    "zh_CN": "",
+    "arguments": [
+      "self.getUuid()",
+      "self.getName()"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/nas/storage/primary/AliyunNasPrimaryStorageBase.java"
+  },
+  {
+    "raw": "the Aliyun Nas primary storage[uuid:%s, name:%s] has not attached to any clusters, or no hosts in the attached clusters are connected",
+    "en_US": "the Aliyun Nas primary storage[uuid:{0}, name:{1}] has not attached to any clusters, or no hosts in the attached clusters are connected",
+    "zh_CN": "",
+    "arguments": [
+      "self.getUuid()",
+      "self.getName()"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/nas/storage/primary/AliyunNasPrimaryStorageBase.java"
+  },
+  {
+    "raw": "failed to check mount path on host: %s",
+    "en_US": "failed to check mount path on host: {0}",
+    "zh_CN": "",
+    "arguments": [
+      "hostUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/nas/storage/primary/AliyunNasPrimaryStorageBase.java"
+  },
+  {
+    "raw": "cannot find a host to cleanup image cache.",
+    "en_US": "cannot find a host to cleanup image cache.",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/aliyun/nas/storage/primary/AliyunNasPrimaryStorageBase.java"
+  },
+  {
+    "raw": "resource[uuid: %s] cannot found",
+    "en_US": "resource[uuid: {0}] cannot found",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getResourceUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/nas/storage/primary/AliyunNasPrimaryStorageBase.java"
+  },
+  {
+    "raw": "cannot find available host for operation on primary storage[uuid:%s].",
+    "en_US": "cannot find available host for operation on primary storage[uuid:{0}].",
+    "zh_CN": "",
+    "arguments": [
+      "self.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/nas/storage/primary/AliyunNasPrimaryStorageBase.java"
+  },
+  {
+    "raw": "host where vm[uuid:%s] locate is not Connected.",
+    "en_US": "host where vm[uuid:{0}] locate is not Connected.",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getVmInstanceUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/nas/storage/primary/AliyunNasPrimaryStorageBase.java"
+  },
+  {
+    "raw": "appName: %s, partitionName: %s is existed in identityZone: %s",
+    "en_US": "appName: {0}, partitionName: {1} is existed in identityZone: {2}",
+    "zh_CN": "",
+    "arguments": [
+      "appName",
+      "partitionName",
+      "vo.getIdentityZoneUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/pangu/AliyunPanguApiInterceptor.java"
+  }
+]

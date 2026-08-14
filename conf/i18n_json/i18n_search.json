@@ -1,0 +1,112 @@
+[
+  {
+    "raw": "condition name[%s] is invalid, no such field on inventory class[%s]",
+    "en_US": "condition name[{0}] is invalid, no such field on inventory class[{1}]",
+    "zh_CN": "条件名[{0}]非法，在清单类里面没有这个阈",
+    "arguments": [
+      "attr",
+      "inventoryClass.getName()"
+    ],
+    "fileName": "src/main/java/org/zstack/query/MysqlQueryBuilderImpl3.java"
+  },
+  {
+    "raw": "condition name[%s] is invalid, field[%s] of inventory[%s] is annotated as @Unqueryable field",
+    "en_US": "condition name[{0}] is invalid, field[{1}] of inventory[{2}] is annotated as @Unqueryable field",
+    "zh_CN": "条件名[{0}]非法，清单[{2}]的值[{1}]不是被标记为@Unqueryable的值",
+    "arguments": [
+      "attr",
+      "attr",
+      "inventoryClass.getName()"
+    ],
+    "fileName": "src/main/java/org/zstack/query/MysqlQueryBuilderImpl3.java"
+  },
+  {
+    "raw": "entity meta class[%s] has no field[%s]",
+    "en_US": "entity meta class[{0}] has no field[{1}]",
+    "zh_CN": "实体元类[{0}]中没有值[{1}]",
+    "arguments": [
+      "info.jpaMetaClass.getName()",
+      "attr"
+    ],
+    "fileName": "src/main/java/org/zstack/query/MysqlQueryBuilderImpl3.java"
+  },
+  {
+    "raw": "field[%s] is not a primitive of the inventory %s; you cannot specify it in the parameter \u0027fields\u0027;valid fields are %s",
+    "en_US": "field[{0}] is not a primitive of the inventory {1}; you cannot specify it in the parameter \u0027fields\u0027;valid fields are {2}",
+    "zh_CN": "值[{1}]不是清单[{0}]的基元类型，不能在参数\u0027fields\u0027中指定",
+    "arguments": [
+      "f",
+      "info.inventoryClass.getSimpleName()",
+      "info.premitiveFieldNames"
+    ],
+    "fileName": "src/main/java/org/zstack/query/MysqlQueryBuilderImpl3.java"
+  },
+  {
+    "raw": "filterName must be formatted as [filterType:condition(s)]",
+    "en_US": "filterName must be formatted as [filterType:condition(s)]",
+    "zh_CN": "FilterName的格式必须为[filterType：条件]",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/query/QueryFacadeImpl.java"
+  },
+  {
+    "raw": "\u0027value\u0027 of query condition %s cannot be null",
+    "en_US": "\u0027value\u0027 of query condition {0} cannot be null",
+    "zh_CN": "查询条件中{0}的\u0027值\u0027不能为空",
+    "arguments": [
+      "JSONObjectUtil.toJsonString(cond)"
+    ],
+    "fileName": "src/main/java/org/zstack/query/QueryFacadeImpl.java"
+  },
+  {
+    "raw": "search module disabled",
+    "en_US": "search module disabled",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zql/ZQL.java"
+  },
+  {
+    "raw": "output from [%s] is empty",
+    "en_US": "output from [{0}] is empty",
+    "zh_CN": "[{0}]的输出为空",
+    "arguments": [
+      "apiStr"
+    ],
+    "fileName": "src/main/java/org/zstack/zql/ast/parser/visitors/ValueVisitor.java"
+  },
+  {
+    "raw": "call action[%s] failed, cause: %s",
+    "en_US": "call action[{0}] failed, cause: {1}",
+    "zh_CN": "调用操作[{0}]失败，原因：{1}",
+    "arguments": [
+      "apiName",
+      "JSONObjectUtil.toJsonString(ob)"
+    ],
+    "fileName": "src/main/java/org/zstack/zql/ast/parser/visitors/ValueVisitor.java"
+  },
+  {
+    "raw": "invalid order by clause, expect direction[asc,desc] but got %s",
+    "en_US": "invalid order by clause, expect direction[asc,desc] but got {0}",
+    "zh_CN": "ORDER BY子句无效，应为方向[ASC，DESC]，但得到{0}",
+    "arguments": [
+      "node.getDirection()"
+    ],
+    "fileName": "src/main/java/org/zstack/zql/ast/visitors/OrderByExprVistor.java"
+  },
+  {
+    "raw": "invalid order by clause, inventory[%s] doesn\u0027t have field[%s]",
+    "en_US": "invalid order by clause, inventory[{0}] doesn\u0027t have field[{1}]",
+    "zh_CN": "ORDER BY子句无效，库存[{0}]没有字段[{1}]",
+    "arguments": [
+      "m.simpleInventoryName()",
+      "f"
+    ],
+    "fileName": "src/main/java/org/zstack/zql/ast/visitors/OrderByVisitor.java"
+  },
+  {
+    "raw": "the field to sum must be specified",
+    "en_US": "the field to sum must be specified",
+    "zh_CN": "必须指定要汇总的字段",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zql/ast/visitors/plugin/SumPlugin.java"
+  }
+]

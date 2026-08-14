@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns="http://zstack.org/schema/zstack"
+            xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            targetNamespace="http://zstack.org/schema/zstack" elementFormDefault="qualified"
+            attributeFormDefault="unqualified">
+
+	<xsd:element name="ErrorCodes">
+		<xsd:complexType>
+			<xsd:sequence maxOccurs="unbounded" minOccurs="0">
+				<xsd:element name="ErrorCode">
+					<xsd:complexType>
+						<xsd:sequence>
+							<xsd:element name="description" type="xsd:string"></xsd:element>
+						</xsd:sequence>
+						<xsd:attribute name="name" type="xsd:string"></xsd:attribute>
+						<xsd:attribute name="code" type="xsd:string"></xsd:attribute>
+					</xsd:complexType>
+				</xsd:element>
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+
+</xsd:schema>

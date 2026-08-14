@@ -1,0 +1,18 @@
+<error>
+    <prefix>VOLUME_SNAPSHOT</prefix>
+
+    <code>
+        <id>1000</id>
+        <description>Snapshot is not in correct status for operation.</description>
+    </code>
+
+    <code>
+        <id>1001</id>
+        <description>Delete error while full snapshot is creating.</description>
+    </code>
+
+    <code>
+        <id>1002</id>
+        <description>Failed to delete volume snapshots in batch.</description>
+    </code>
+</error>

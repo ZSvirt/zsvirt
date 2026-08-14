@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx" xmlns:zstack="http://zstack.org/schema/zstack"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+         http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+         http://www.springframework.org/schema/aop
+         http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+         http://www.springframework.org/schema/tx
+         http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+         http://zstack.org/schema/zstack
+         http://zstack.org/schema/zstack/plugin.xsd"
+       default-init-method="init" default-destroy-method="destroy">
+
+    <bean id="ImageJournalGeneratorImpl" class="org.zstack.imagereplicator.ImageJournalGeneratorImpl" >
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.imagereplicator.ImageJournalGenerator" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="VolumeBackupJournalGeneratorImpl" class="org.zstack.imagereplicator.VolumeBackupJournalGeneratorImpl" >
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.imagereplicator.VolumeBackupJournalGenerator" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="DatabaseBackupJournalGeneratorImpl" class="org.zstack.imagereplicator.DatabaseBackupJournalGeneratorImpl" >
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.imagereplicator.DatabaseBackupJournalGenerator" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="ImageReplicatorImpl" class="org.zstack.imagereplicator.ImageReplicatorImpl" >
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.imagereplicator.ImageReplicator" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="ReplicationGroupManagerImpl" class="org.zstack.imagereplicator.ReplicationGroupManagerImpl" >
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.Component" />
+            <zstack:extension interface="org.zstack.header.Service" />
+            <zstack:extension interface="org.zstack.header.image.AddImageExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.image.CreateTemplateExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.image.ExpungeImageExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.storage.volume.backup.DeleteVolumeBackupExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.storage.database.backup.DeleteDatabaseBackupExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.storage.volume.backup.CreateVolumeBackupExtensionPoint" />
+            <zstack:extension interface="org.zstack.core.cloudbus.MarshalReplyMessageExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.managementnode.ManagementNodeReadyExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.storage.backup.AfterUnpackBackupStorageExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="ReplicationGroupApiInterceptor" class="org.zstack.imagereplicator.ReplicationGroupApiInterceptor">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.apimediator.ApiMessageInterceptor"/>
+        </zstack:plugin>
+    </bean>
+</beans>

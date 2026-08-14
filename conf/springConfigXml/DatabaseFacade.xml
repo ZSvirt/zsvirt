@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx" xmlns:zstack="http://zstack.org/schema/zstack"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+    http://www.springframework.org/schema/aop
+    http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+    http://www.springframework.org/schema/tx 
+    http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+    http://zstack.org/schema/zstack 
+    http://zstack.org/schema/zstack/plugin.xsd"
+       default-init-method="init" default-destroy-method="destroy">
+
+    <bean id="DbDeadlockAspect" class="org.zstack.core.aspect.DbDeadlockAspect" factory-method="aspectOf"/>
+
+    <bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+        <property name="entityManagerFactory" ref="entityManagerFactory"/>
+    </bean>
+
+    <bean id="DbFacadeDataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
+        <property name="driverClass" value="com.mysql.jdbc.Driver"/>
+        <property name="jdbcUrl" value="${DbFacadeDataSource.jdbcUrl:jdbc:mysql://localhost:3306/zstack}"/>
+        <property name="user" value="${DbFacadeDataSource.user:root}"/>
+        <property name="password" value="${DbFacadeDataSource.password:}"/>
+        <property name="initialPoolSize" value="10"/>
+        <property name="maxPoolSize" value="${DbFacadeDataSource.maxPoolSize:100}"/>
+        <property name="idleConnectionTestPeriod" value="${DbFacadeDataSource.idleConnectionTestPeriod:3000}"/>
+        <property name="loginTimeout" value="${DbFacadeDataSource.loginTimeout:300}"/>
+        <property name="connectionCustomizerClassName" value="org.zstack.core.db.TransactionIsolationLevelSetter"/>
+        <property name="numHelperThreads" value="${DbFacadeDataSource.numHelperThreads:15}"/>
+        <property name="acquireIncrement" value="50"/>
+        <property name="maxIdleTime" value="${DbFacadeDataSource.maxIdleTime:3600}"/>
+        <property name="testConnectionOnCheckout" value="${DbFacadeDataSource.testConnectionOnCheckout:true}"/>
+        <property name="connectionTesterClassName" value="${DbFacadeDataSource.connectionTesterClassName:org.zstack.core.db.C3p0ConnectionTester}"/>
+        <!--
+        <property name="maxIdleTime" value="${DbFacadeDataSource.maxIdleTime:3600}" />
+        <property name="unreturnedConnectionTimeout" value="10" />
+        <property name="debugUnreturnedConnectionStackTraces" value="true" />
+        -->
+    </bean>
+
+    <bean id="ExtraDataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
+        <property name="driverClass" value="com.mysql.jdbc.Driver"/>
+        <property name="jdbcUrl" value="${DbFacadeDataSource.jdbcUrl:jdbc:mysql://localhost:3306/zstack}"/>
+        <property name="user" value="${DbFacadeDataSource.user:root}"/>
+        <property name="password" value="${DbFacadeDataSource.password:}"/>
+        <property name="maxPoolSize" value="5"/>
+        <property name="idleConnectionTestPeriod" value="${ExtraDataSource.idleConnectionTestPeriod:3000}"/>
+        <property name="loginTimeout" value="${DbFacadeDataSource.loginTimeout:300}"/>
+        <property name="connectionCustomizerClassName" value="org.zstack.core.db.TransactionIsolationLevelSetter"/>
+        <property name="testConnectionOnCheckout" value="${DbFacadeDataSource.testConnectionOnCheckout:true}"/>
+        <property name="connectionTesterClassName" value="${DbFacadeDataSource.connectionTesterClassName:org.zstack.core.db.C3p0ConnectionTester}"/>
+        <property name="maxIdleTime" value="${ExtraDataSource.maxIdleTime:3600}"/>
+    </bean>
+
+    <bean id="entityManagerFactory"
+          class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+        <property name="persistenceXmlLocation" value="persistence.xml"/>
+        <property name="jpaDialect">
+            <bean class="org.springframework.orm.jpa.vendor.HibernateJpaDialect"/>
+        </property>
+        <property name="jpaVendorAdapter">
+            <bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter"/>
+        </property>
+        <property name="persistenceUnitName" value="zstack.jpa"/>
+        <property name="dataSource" ref="DbFacadeDataSource"/>
+        <property name="jpaProperties">
+            <props>
+                <prop key="hibernate.dialect">org.hibernate.dialect.MySQLInnoDBDialect</prop>
+                <prop key="hibernate.temp.use_jdbc_metadata_defaults">false</prop>
+                <prop key="hibernate.connection.show_sql">false</prop>
+                <prop key="hibernate.hql.bulk_id_strategy">org.zstack.core.db.hibernate.InlineIdsOrClauseBulkIdStrategy2</prop>
+                <!--<prop key="hibernate.search.default.directory_provider">filesystem</prop>-->
+                <prop key="hibernate.search.model_mapping">org.zstack.search.CustomSearchMappingFactory</prop>
+                <prop key="hibernate.search.autoregister_listeners">${Search.autoRegister:true}</prop>
+                <prop key="hibernate.search.default.directory_provider">infinispan</prop>
+                <prop key="hibernate.search.infinispan.configuration_resourcename">searchConfig/default-infinispan.xml</prop>
+                <prop key="hibernate.search.default.exclusive_index_use">${Exclusive.indexUse:false}</prop>
+                <prop key="hibernate.search.default.worker.backend">jgroups</prop>
+                <prop key="hibernate.search.services.jgroups.configurationFile">searchConfig/jgroup-backend-tcp.xml</prop>
+                <!--<prop key="hibernate.search.default.indexBase">${Search.indexBaseDir:/var/lib/zstack/search/indexes}</prop>-->
+                <!--disable automatic index update
+                <prop key="hibernate.search.indexing_strategy">manual</prop> -->
+                <prop key="hibernate.search.default.optimizer.operation_limit.max">1000</prop>
+                <prop key="hibernate.search.default.optimizer.transaction_limit.max">100</prop>
+                <!--.8.2.x infinispan not support async https://issues.redhat.com/browse/ISPN-4065 -->
+                <prop key="hibernate.search.default.worker.execution">sync</prop>
+                <!--<prop key="hibernate.search.default.index_flush_interval">${IndexWorker.flushInterval:1000}</prop>-->
+            </props>
+        </property>
+    </bean>
+
+    <bean id="databaseFacade" class="org.zstack.core.db.DatabaseFacadeImpl">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.Component"/>
+        </zstack:plugin>
+
+        <property name="dataSource" ref="DbFacadeDataSource"/>
+        <property name="extraDataSource" ref="ExtraDataSource"/>
+    </bean>
+
+    <bean id="DbEntityLister" class="org.zstack.core.db.DbEntityListerImpl"/>
+
+    <bean id="ZQLJMX" class = "org.zstack.zql.ZQLJMX">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.Component" />
+        </zstack:plugin>
+    </bean>
+</beans>

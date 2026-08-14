@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<globalConfig xmlns="http://zstack.org/schema/zstack">
+    <config>
+        <name>incrementalBackup.maxNum</name>
+        <description>the maximum numbers of continuous incremental backup</description>
+        <category>volumeBackup</category>
+        <defaultValue>64</defaultValue>
+        <type>java.lang.Integer</type>
+    </config>
+
+    <config>
+        <name>rebackup.stoppedVm</name>
+        <description>when backup scheduler job fail for stopped vm, re-backup once after vm start.</description>
+        <category>volumeBackup</category>
+        <defaultValue>false</defaultValue>
+        <type>java.lang.Boolean</type>
+    </config>
+
+    <config>
+        <name>volume.backup.num</name>
+        <description>default quota for volume.backup.num</description>
+        <defaultValue>20</defaultValue>
+        <category>quota</category>
+        <type>java.lang.Long</type>
+    </config>
+
+    <config>
+        <name>volume.backup.size</name>
+        <description>default quota for volume.backup.size</description>
+        <defaultValue>10995116277760</defaultValue>
+        <category>quota</category>
+        <type>java.lang.Long</type>
+    </config>
+</globalConfig>

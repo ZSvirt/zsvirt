@@ -1,0 +1,119 @@
+<error>
+    <prefix>SYS</prefix>
+
+    <code>
+        <id>1000</id>
+        <description>An internal error happened in system</description>
+    </code>
+
+    <code>
+        <id>1001</id>
+        <description>A message or a operation timeout</description>
+    </code>
+
+    <code>
+        <id>1002</id>
+        <description>Unable to create a resource</description>
+    </code>
+
+    <code>
+        <id>1003</id>
+        <description>A resource can not be found</description>
+    </code>
+
+    <code>
+        <id>1004</id>
+        <description>Unable to delete a resource</description>
+    </code>
+
+    <code>
+        <id>1005</id>
+        <description>Unable to change resource state</description>
+    </code>
+
+    <code>
+        <id>1006</id>
+        <description>An operation failed</description>
+    </code>
+
+    <code>
+        <id>1007</id>
+        <description>One or more API argument is invalid</description>
+    </code>
+
+    <code>
+        <id>1008</id>
+        <description>Unknown message, no service can deal with the message</description>
+    </code>
+
+    <code>
+        <id>1009</id>
+        <description>No route for message</description>
+    </code>
+
+    <code>
+        <id>1010</id>
+        <description>Management server is not ready to serve</description>
+    </code>
+
+    <code>
+        <id>1011</id>
+        <description>The message can not be delivered by Rabbitmq</description>
+    </code>
+
+    <code>
+        <id>1012</id>
+        <description>The management node is unavailable</description>
+    </code>
+
+    <code>
+        <id>1013</id>
+        <description>The resource doesn't have capability to proceed an operation</description>
+    </code>
+
+    <code>
+        <id>1014</id>
+        <description>The operation is not implemented or not supported yet</description>
+    </code>
+
+    <code>
+        <id>1015</id>
+        <description>Cannot make a HTTP request</description>
+    </code>
+
+    <code>
+        <id>1016</id>
+        <description>Cannot do an IO operation(e.g. network IO error, file IO error)</description>
+    </code>
+
+    <code>
+        <id>1017</id>
+        <description>A message or a operation cancelled</description>
+    </code>
+
+    <code>
+        <id>1018</id>
+        <description>Resources are not accessible. Please contact the owner of the resources to grant access to these resources</description>
+    </code>
+
+    <code>
+        <id>1019</id>
+        <description>Operation denied</description>
+    </code>
+
+    <code>
+        <id>1090</id>
+        <description>Multiple reasons</description>
+    </code>
+
+    <code>
+        <id>1091</id>
+        <description>Operation not supported</description>
+    </code>
+
+    <code>
+        <id>2111</id>
+        <description>CloudBus message sending related error</description>
+    </code>
+</error>
+

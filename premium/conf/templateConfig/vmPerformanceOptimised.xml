@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templateConfig>
+    <config>
+        <templateName>VmPerformanceOptimised</templateName>
+        <category>kvm</category>
+        <name>vm.cpuMode</name>
+        <defaultValue>host-passthrough</defaultValue>
+    </config>
+
+    <config>
+        <templateName>VmPerformanceOptimised</templateName>
+        <category>mevoco</category>
+        <name>aio.native</name>
+        <defaultValue>true</defaultValue>
+    </config>
+
+    <config>
+        <templateName>VmPerformanceOptimised</templateName>
+        <category>sharedblock</category>
+        <name>qcow2.allocation</name>
+        <defaultValue>metadata</defaultValue>
+    </config>
+
+    <config>
+        <templateName>VmPerformanceOptimised</templateName>
+        <name>emulateHyperV</name>
+        <category>vm</category>
+        <defaultValue>true</defaultValue>
+    </config>
+
+</templateConfig>

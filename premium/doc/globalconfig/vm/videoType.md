@@ -1,0 +1,91 @@
+
+## Name
+
+```
+videoType(##中文名-必填##)
+```
+
+### Description
+
+```
+video type for VM. "virtio" supply basic video type. "vga" supply more high resolution for VM. "qxl" supply high performance when use SPICE protocal. "cirrus" mark as deprecated, reserved for compatibility.  Options:[vga, cirrus, qxl, virtio]
+```
+
+### 含义
+
+```
+##该条目的作用是什么-必填##
+```
+
+### Type
+
+```
+java.lang.String
+```
+
+### Category
+
+```
+vm
+```
+
+### 取值范围
+
+```
+{cirrus, vga, qxl, virtio}
+```
+
+### 取值范围补充说明
+
+```
+##对取值范围的解读-如无需写：无##
+```
+
+### DefaultValue
+
+```
+virtio
+```
+
+### 默认值补充说明
+
+```
+##对默认值的解读-如无需写：无##
+```
+
+### 支持的资源级配置
+
+||
+|---|
+|org.zstack.header.vm.VmInstanceVO
+|org.zstack.header.cluster.ClusterVO
+
+### 资源粒度说明
+
+```
+##该条目支持的资源粒度-如无需写：无##
+```
+
+### 背景信息
+
+```
+##触发该条目增删改的背景-如无需写：无##
+```
+
+### UI暴露
+
+```
+##该条目是否需UI暴露？-必填##
+```
+
+### CLI手册暴露
+
+```
+##该条目是否需CLI手册暴露？-必填##
+```
+
+## 注意事项
+
+```
+##该条目有哪些注意事项-如无需写：无##
+```

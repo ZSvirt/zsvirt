@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<globalConfig xmlns="http://zstack.org/schema/zstack">
+    <config>
+        <category>billing</category>
+        <name>sampling.interval</name>
+        <description>the interval producing billing samples, in seconds</description>
+        <type>java.lang.Integer</type>
+        <defaultValue>600</defaultValue>
+    </config>
+    <config>
+        <category>billing</category>
+        <name>billing.syncLevel</name>
+        <description>The number of parallel billing calculation request that can be executed on Billing service</description>
+        <type>java.lang.Integer</type>
+        <defaultValue>10</defaultValue>
+    </config>
+    <config>
+        <category>billing</category>
+        <name>billing.generation.interval</name>
+        <description>the interval generate billings, in days</description>
+        <type>java.lang.Integer</type>
+        <defaultValue>1</defaultValue>
+    </config>
+    <config>
+        <category>billing</category>
+        <name>billing.generation.hour.point</name>
+        <description>bill generation time point</description>
+        <type>java.lang.Integer</type>
+        <defaultValue>0</defaultValue>
+    </config>
+    <config>
+        <category>billing</category>
+        <name>billing.generation.resource.sliceSize</name>
+        <description>generate resource bills in batches, the number of resources per batch</description>
+        <type>java.lang.Integer</type>
+        <defaultValue>400</defaultValue>
+    </config>
+    <config>
+        <name>billing.currency.symbol</name>
+        <description>billing currency display symbol, include CNY, USD, EUR, GBP, AUD, HKD, JPY, CHF, CAD, IDR</description>
+        <type>java.lang.String</type>
+        <category>billing</category>
+        <defaultValue>CNY</defaultValue>
+    </config>
+</globalConfig>

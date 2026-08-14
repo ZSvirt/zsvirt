@@ -1,0 +1,5 @@
+* xref:index.adoc[]
+ ** xref:in-process-microservice.adoc[]
+ ** xref:scalability_secrets_part_1_asynchronous_architecture.adoc[]
+ ** xref:stateless_services.adoc[]
+ ** xref:message.adoc[]

@@ -1,0 +1,154 @@
+[
+  {
+    "raw": "shell command failed",
+    "en_US": "shell command failed",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/softwarePackage/ShellCommandUtils.java"
+  },
+  {
+    "raw": "path cannot be null or empty",
+    "en_US": "path cannot be null or empty",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/softwarePackage/ShellCommandUtils.java"
+  },
+  {
+    "raw": "invalid path: %s, %s",
+    "en_US": "invalid path: {0}, {1}",
+    "zh_CN": "",
+    "arguments": [
+      "path",
+      "unzipPath"
+    ],
+    "fileName": "src/main/java/org/zstack/softwarePackage/ShellCommandUtils.java"
+  },
+  {
+    "raw": "invalid path: %s",
+    "en_US": "invalid path: {0}",
+    "zh_CN": "",
+    "arguments": [
+      "path"
+    ],
+    "fileName": "src/main/java/org/zstack/softwarePackage/ShellCommandUtils.java"
+  },
+  {
+    "raw": "filesystem stat failed",
+    "en_US": "filesystem stat failed",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/softwarePackage/ShellCommandUtils.java"
+  },
+  {
+    "raw": "invalid df output",
+    "en_US": "invalid df output",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/softwarePackage/ShellCommandUtils.java"
+  },
+  {
+    "raw": "invalid number format",
+    "en_US": "invalid number format",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/softwarePackage/ShellCommandUtils.java"
+  },
+  {
+    "raw": "Invalid install path detected: %s. Paths must only contain letters, numbers, underscores, dashes, colons, spaces, dots and slashes. Path traversal sequences (.. and //) are not allowed. Path must be absolute. Path must not be root path",
+    "en_US": "Invalid install path detected: {0}. Paths must only contain letters, numbers, underscores, dashes, colons, spaces, dots and slashes. Path traversal sequences (.. and //) are not allowed. Path must be absolute. Path must not be root path",
+    "zh_CN": "创建软件包时，路径包含非法字符。路径只能包含字母、数字、下划线、中划线、冒号、空格、点、斜杠。路径不能包含 .. 或 //。路径必须为绝对路径。路径不能为根路径",
+    "arguments": [
+      "path"
+    ],
+    "fileName": "src/main/java/org/zstack/softwarePackage/SoftwarePackageApiInterceptor.java"
+  },
+  {
+    "raw": "software package [%s] cannot be installed in current state [%s]. Allowed states: %s or %s.",
+    "en_US": "software package [{0}] cannot be installed in current state [{1}]. Allowed states: {2} or {3}.",
+    "zh_CN": "",
+    "arguments": [
+      "softwarePackageVO.getName()",
+      "softwarePackageVO.getStatus()",
+      "Uploaded.toString()",
+      "InstallFailed.toString()"
+    ],
+    "fileName": "src/main/java/org/zstack/softwarePackage/SoftwarePackageApiInterceptor.java"
+  },
+  {
+    "raw": "software package [%s] cannot be uninstalled in current state [%s]. Allowed states: %s.",
+    "en_US": "software package [{0}] cannot be uninstalled in current state [{1}]. Allowed states: {2}.",
+    "zh_CN": "",
+    "arguments": [
+      "softwarePackageVO.getName()",
+      "softwarePackageVO.getStatus()",
+      "allowedStatus"
+    ],
+    "fileName": "src/main/java/org/zstack/softwarePackage/SoftwarePackageApiInterceptor.java"
+  },
+  {
+    "raw": "failed to identify software package type. package: %s, installPath: %s, unzipPath: %s. please verify the package format is correct and a corresponding extension point is registered.",
+    "en_US": "failed to identify software package type. package: {0}, installPath: {1}, unzipPath: {2}. please verify the package format is correct and a corresponding extension point is registered.",
+    "zh_CN": "创建软件包时，无法识别软件包的类型。软件包：{0}, 安装路径：{1}, 解压路径：{2}。请确认软件包的格式正确，并且已注册相应的扩展点。",
+    "arguments": [
+      "finalVo.getName()",
+      "finalVo.getInstallPath()",
+      "finalVo.getUnzipInstallPath()"
+    ],
+    "fileName": "src/main/java/org/zstack/softwarePackage/SoftwarePackagePackageManagerImpl.java"
+  },
+  {
+    "raw": "a non-management node installation of the software package is detected in this environment. to proceed with a new management node-based installation, please first:\\n1. uninstall the existing manually installed components\\n2. ensure the environment is completely clean\\nnote: this installation must be performed exclusively through the management node",
+    "en_US": "a non-management node installation of the software package is detected in this environment. to proceed with a new management node-based installation, please first:\\n1. uninstall the existing manually installed components\\n2. ensure the environment is completely clean\\nnote: this installation must be performed exclusively through the management node",
+    "zh_CN": "创建软件包时，检测到非管理节点安装。要继续使用管理节点进行新安装，请首先：\\n1. 卸载现有的手动安装组件\\n2. 确保环境是干净的\\n注意：此安装必须仅通过管理节点进行",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/softwarePackage/SoftwarePackagePackageManagerImpl.java"
+  },
+  {
+    "raw": "no extension point found for software package type: %s",
+    "en_US": "no extension point found for software package type: {0}",
+    "zh_CN": "",
+    "arguments": [
+      "softwarePackageVO.getType()"
+    ],
+    "fileName": "src/main/java/org/zstack/softwarePackage/SoftwarePackagePackageManagerImpl.java"
+  },
+  {
+    "raw": "software package [uuid:%s] not found",
+    "en_US": "software package [uuid:{0}] not found",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getResourceUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/softwarePackage/UploadSoftwarePackageLongJob.java"
+  },
+  {
+    "raw": "not support",
+    "en_US": "not support",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/softwarePackage/UploadSoftwarePackageLongJob.java"
+  },
+  {
+    "raw": "failed to get software package type",
+    "en_US": "failed to get software package type",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/softwarePackage/UploadSoftwarePackageTracker.java"
+  },
+  {
+    "raw": "upload software package session expired",
+    "en_US": "upload software package session expired",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/softwarePackage/UploadSoftwarePackageTracker.java"
+  },
+  {
+    "raw": "uploading has been inactive more than %d sec",
+    "en_US": "uploading has been inactive more than {0} sec",
+    "zh_CN": "上传镜像任务已处于空闲状态超过 {0} 秒: 已经有很久没有收到新的镜像上传数据了",
+    "arguments": [
+      "maxIdleSecond"
+    ],
+    "fileName": "src/main/java/org/zstack/softwarePackage/UploadSoftwarePackageTracker.java"
+  }
+]

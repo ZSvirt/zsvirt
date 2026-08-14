@@ -1,0 +1,751 @@
+[
+  {
+    "raw": "wrong virtual ID[name:%s], not existing or wrong password",
+    "en_US": "wrong virtual ID[name:{0}], not existing or wrong password",
+    "zh_CN": "错误的virtual ID[名称:{0}], 密码不存在或者密码错误",
+    "arguments": [
+      "loginContext.getUsername()"
+    ],
+    "fileName": "src/main/java/org/zstack/iam2/IAM2LoginBackend.java"
+  },
+  {
+    "raw": "The user[%s] is not a platform user",
+    "en_US": "The user[{0}] is not a platform user",
+    "zh_CN": "用户[{0}]不是平台用户",
+    "arguments": [
+      "oldSession.getUserUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/iam2/IAM2ManagerImpl.java"
+  },
+  {
+    "raw": "There are %d problems with the file. ",
+    "en_US": "There are {0} problems with the file. ",
+    "zh_CN": "文件中包含{0}个错误",
+    "arguments": [
+      "results.size()"
+    ],
+    "fileName": "src/main/java/org/zstack/iam2/IAM2ManagerImpl.java"
+  },
+  {
+    "raw": "fail to load VirtualID info from file. because\\n%s",
+    "en_US": "fail to load VirtualID info from file. because\\n{0}",
+    "zh_CN": "解析文件内容出错，{0}",
+    "arguments": [
+      "e.getMessage()"
+    ],
+    "fileName": "src/main/java/org/zstack/iam2/IAM2ManagerImpl.java"
+  },
+  {
+    "raw": "name cannot be empty. ",
+    "en_US": "name cannot be empty. ",
+    "zh_CN": "名称不能为空",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/iam2/IAM2ManagerImpl.java"
+  },
+  {
+    "raw": "username cannot be empty. ",
+    "en_US": "username cannot be empty. ",
+    "zh_CN": "用户名不能为空",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/iam2/IAM2ManagerImpl.java"
+  },
+  {
+    "raw": "name exceeds max length of string. expected was \u003c\u003d 255, actual was %s. ",
+    "en_US": "name exceeds max length of string. expected was \u003c\u003d 255, actual was {0}. ",
+    "zh_CN": "名称字符数量不能超过255",
+    "arguments": [
+      "cmsg.username.length()"
+    ],
+    "fileName": "src/main/java/org/zstack/iam2/IAM2ManagerImpl.java"
+  },
+  {
+    "raw": "userName[%s] is repeated. ",
+    "en_US": "userName[{0}] is repeated. ",
+    "zh_CN": "用户名[{0}]重复",
+    "arguments": [
+      "cmsg.getUsername()"
+    ],
+    "fileName": "src/main/java/org/zstack/iam2/IAM2ManagerImpl.java"
+  },
+  {
+    "raw": "password cannot be empty. ",
+    "en_US": "password cannot be empty. ",
+    "zh_CN": "密码不能为空",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/iam2/IAM2ManagerImpl.java"
+  },
+  {
+    "raw": "Incorrect password length. expected was \u003e\u003d 6 and \u003c\u003d 255, actual was %s. ",
+    "en_US": "Incorrect password length. expected was \u003e\u003d 6 and \u003c\u003d 255, actual was {0}. ",
+    "zh_CN": "密码长度错误，应该大于等于6个字符，小于等于255字符",
+    "arguments": [
+      "cmsg.password.length()"
+    ],
+    "fileName": "src/main/java/org/zstack/iam2/IAM2ManagerImpl.java"
+  },
+  {
+    "raw": "email format does not match. ",
+    "en_US": "email format does not match. ",
+    "zh_CN": "邮箱格式错误",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/iam2/IAM2ManagerImpl.java"
+  },
+  {
+    "raw": "organization[%s] is not exist. ",
+    "en_US": "organization[{0}] is not exist. ",
+    "zh_CN": "部门[{0}]不存在",
+    "arguments": [
+      "noMatchNames"
+    ],
+    "fileName": "src/main/java/org/zstack/iam2/IAM2ManagerImpl.java"
+  },
+  {
+    "raw": "organization[%s] in line is repeated. ",
+    "en_US": "organization[{0}] in line is repeated. ",
+    "zh_CN": "部门[{0}]出现重复",
+    "arguments": [
+      "repeatNames"
+    ],
+    "fileName": "src/main/java/org/zstack/iam2/IAM2ManagerImpl.java"
+  },
+  {
+    "raw": "organization[%s] is repeated. ",
+    "en_US": "organization[{0}] is repeated. ",
+    "zh_CN": "部门[{0}]出现重复",
+    "arguments": [
+      "repeatNames"
+    ],
+    "fileName": "src/main/java/org/zstack/iam2/IAM2ManagerImpl.java"
+  },
+  {
+    "raw": "project[%s] is not exist. ",
+    "en_US": "project[{0}] is not exist. ",
+    "zh_CN": "项目[{0}]不存在",
+    "arguments": [
+      "noMatchName"
+    ],
+    "fileName": "src/main/java/org/zstack/iam2/IAM2ManagerImpl.java"
+  },
+  {
+    "raw": "fail to build VirtualID info from file. ",
+    "en_US": "fail to build VirtualID info from file. ",
+    "zh_CN": "不能解析文件内容",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/iam2/IAM2ManagerImpl.java"
+  },
+  {
+    "raw": "virtualID[uuid:%s] not in project[uuid:%s]",
+    "en_US": "virtualID[uuid:{0}] not in project[uuid:{1}]",
+    "zh_CN": "VirtualID[uuid：{0}]不在项目[uuid：{1}]中",
+    "arguments": [
+      "resourceUuid",
+      "projectUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/iam2/IAM2ManagerImpl.java"
+  },
+  {
+    "raw": "Can not do operations, because current organization[uuid:%s] is staled, please enable it",
+    "en_US": "Can not do operations, because current organization[uuid:{0}] is staled, please enable it",
+    "zh_CN": "",
+    "arguments": [
+      "self.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/iam2/IAM2OrganizationBase.java"
+  },
+  {
+    "raw": "organization[uuid:%s] is parent of the organization[uuid:%s], cannot set it as a child organization",
+    "en_US": "organization[uuid:{0}] is parent of the organization[uuid:{1}], cannot set it as a child organization",
+    "zh_CN": "部门[uuid:{0}]是部门[uuid:{1}]的上级部门，无法被设置为子部门",
+    "arguments": [
+      "puuid",
+      "self.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/iam2/IAM2OrganizationBase.java"
+  },
+  {
+    "raw": "the project[uuid: %s, name:%s] is in state of %s which disallows the operation[%s]",
+    "en_US": "the project[uuid: {0}, name:{1}] is in state of {2} which disallows the operation[{3}]",
+    "zh_CN": "项目[[uuid: {0}, 名称:{1}]]是{2}状态，不允许执行[{3}]操作",
+    "arguments": [
+      "self.getUuid()",
+      "self.getName()",
+      "self.getState()",
+      "msg.getClass()"
+    ],
+    "fileName": "src/main/java/org/zstack/iam2/IAM2ProjectBase.java"
+  },
+  {
+    "raw": "can not parse the cron expression",
+    "en_US": "can not parse the cron expression",
+    "zh_CN": "无法分析Cron表达式",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/iam2/IAM2ProjectBase.java"
+  },
+  {
+    "raw": "project[name:%s] not existing",
+    "en_US": "project[name:{0}] not existing",
+    "zh_CN": "项目[name:{0}]不存在",
+    "arguments": [
+      "loginContext.getUsername()"
+    ],
+    "fileName": "src/main/java/org/zstack/iam2/IAM2ProjectLoginBackend.java"
+  },
+  {
+    "raw": "no account found for project[uuid:%s, name:%s]",
+    "en_US": "no account found for project[uuid:{0}, name:{1}]",
+    "zh_CN": "未找到项目[uuid：{0}，名称：{1}]的帐户",
+    "arguments": [
+      "puuid",
+      "loginContext.getUsername()"
+    ],
+    "fileName": "src/main/java/org/zstack/iam2/IAM2ProjectLoginBackend.java"
+  },
+  {
+    "raw": "wrong virtual ID[uuid:%s], not existing or wrong password",
+    "en_US": "wrong virtual ID[uuid:{0}], not existing or wrong password",
+    "zh_CN": "错误的virtual ID[uuid:{0}], 密码不存在或者密码错误",
+    "arguments": [
+      "loginContext.getOperatorSession().getUserUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/iam2/IAM2ProjectLoginBackend.java"
+  },
+  {
+    "raw": "virtual ID[name:%s] is disabled",
+    "en_US": "virtual ID[name:{0}] is disabled",
+    "zh_CN": "virtual ID[名称:{0}]不可用",
+    "arguments": [
+      "vid.getName()"
+    ],
+    "fileName": "src/main/java/org/zstack/iam2/IAM2ProjectLoginBackend.java"
+  },
+  {
+    "raw": "virtual ID[name:%s] not belonging to the project[name:%s]",
+    "en_US": "virtual ID[name:{0}] not belonging to the project[name:{1}]",
+    "zh_CN": "virtual ID[名称:{0}]不属于项目[name:{1}]",
+    "arguments": [
+      "vid.getName()",
+      "loginContext.getUsername()"
+    ],
+    "fileName": "src/main/java/org/zstack/iam2/IAM2ProjectLoginBackend.java"
+  },
+  {
+    "raw": "the quota[name:%s] of Account[uuid:%s] can not be %d, otherwise it will exceeds the quota of organization[uuid:%s]",
+    "en_US": "the quota[name:{0}] of Account[uuid:{1}] can not be {2}, otherwise it will exceeds the quota of organization[uuid:{3}]",
+    "zh_CN": "帐户[uuid：{1}]的配额[名称：{0}]不能为{2}，否则将超过组织[uuid：{3}]的配额",
+    "arguments": [
+      "quota.getName()",
+      "quota.getIdentityUuid()",
+      "updatedValue",
+      "organizationUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/iam2/IAM2QuotaUpdateChecker.java"
+  },
+  {
+    "raw": "Can not do operations, because Current virtualID[uuid:%s] is staled, please enable it",
+    "en_US": "Can not do operations, because Current virtualID[uuid:{0}] is staled, please enable it",
+    "zh_CN": "",
+    "arguments": [
+      "self.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/iam2/IAM2VirtualIDBase.java"
+  },
+  {
+    "raw": "only admin and the virtual ID itself can do the update",
+    "en_US": "only admin and the virtual ID itself can do the update",
+    "zh_CN": "只有admin和virtual ID本身可以执行更新操作",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/iam2/IAM2VirtualIDBase.java"
+  },
+  {
+    "raw": "old password is not equal to the original password, cannot update the password of virtual ID[uuid:%s]",
+    "en_US": "old password is not equal to the original password, cannot update the password of virtual ID[uuid:{0}]",
+    "zh_CN": "旧密码不等于原始密码，无法更新虚拟ID[uuid：{0}]的密码",
+    "arguments": [
+      "msg.getVirtualIDUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/iam2/IAM2VirtualIDBase.java"
+  },
+  {
+    "raw": "attribute name cannot be null, value[%s]",
+    "en_US": "attribute name cannot be null, value[{0}]",
+    "zh_CN": "属性不能为null，输入值[{0}]",
+    "arguments": [
+      "attr.getValue()"
+    ],
+    "fileName": "src/main/java/org/zstack/iam2/api/IAM2ApiInterceptor.java"
+  },
+  {
+    "raw": "attribute name[%s] exceed the max length of 2048 chars",
+    "en_US": "attribute name[{0}] exceed the max length of 2048 chars",
+    "zh_CN": "属性名称[{0}]不能超过2048个字符",
+    "arguments": [
+      "attr.getName()"
+    ],
+    "fileName": "src/main/java/org/zstack/iam2/api/IAM2ApiInterceptor.java"
+  },
+  {
+    "raw": "attribute[name:%s] value[%s] exceed the max length of 2048 chars",
+    "en_US": "attribute[name:{0}] value[{1}] exceed the max length of 2048 chars",
+    "zh_CN": "属性[name:{0}] value[{1}]不能超过2048个字符",
+    "arguments": [
+      "attr.getName()",
+      "attr.getValue()"
+    ],
+    "fileName": "src/main/java/org/zstack/iam2/api/IAM2ApiInterceptor.java"
+  },
+  {
+    "raw": "The Organization[uuid: %s] used [name: %s, usedValue: %s] exceeds Request:%s.",
+    "en_US": "The Organization[uuid: {0}] used [name: {1}, usedValue: {2}] exceeds Request:{3}.",
+    "zh_CN": "组织[uuid：{0}]使用的[名称：{1}，UsedValue：{2}]超出请求：{3}。",
+    "arguments": [
+      "msg.getOrganizationUuid()",
+      "msg.getName()",
+      "projectUsed",
+      "msg.getValue()"
+    ],
+    "fileName": "src/main/java/org/zstack/iam2/api/IAM2ApiInterceptor.java"
+  },
+  {
+    "raw": "%s is not a valid value. Valid values are  allow/rejection  xxx to xxx",
+    "en_US": "{0} is not a valid value. Valid values are  allow/rejection  xxx to xxx",
+    "zh_CN": "{0}不是有效值。有效值为允许/拒绝XXX至XXX",
+    "arguments": [
+      "msg.getLoginExpired()"
+    ],
+    "fileName": "src/main/java/org/zstack/iam2/api/IAM2ApiInterceptor.java"
+  },
+  {
+    "raw": "The default organization[%s] cannot be deleted",
+    "en_US": "The default organization[{0}] cannot be deleted",
+    "zh_CN": "无法删除默认组织[{0}]",
+    "arguments": [
+      "msg.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/iam2/api/IAM2ApiInterceptor.java"
+  },
+  {
+    "raw": "duplicate template name[%s]",
+    "en_US": "duplicate template name[{0}]",
+    "zh_CN": "重复的模板名称[{0}]",
+    "arguments": [
+      "msg.getName()"
+    ],
+    "fileName": "src/main/java/org/zstack/iam2/api/IAM2ApiInterceptor.java"
+  },
+  {
+    "raw": "admin is a reserved name, please use another name",
+    "en_US": "admin is a reserved name, please use another name",
+    "zh_CN": "admin是保留名称，请使用其他名称",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/iam2/api/IAM2ApiInterceptor.java"
+  },
+  {
+    "raw": "invalid name[%s], there has been a project or account with the same name",
+    "en_US": "invalid name[{0}], there has been a project or account with the same name",
+    "zh_CN": "无效的名称[{0}],已经存在同名的项目或账户",
+    "arguments": [
+      "msg.getName()"
+    ],
+    "fileName": "src/main/java/org/zstack/iam2/api/IAM2ApiInterceptor.java"
+  },
+  {
+    "raw": "attribute[uuid:%s] is not for any group",
+    "en_US": "attribute[uuid:{0}] is not for any group",
+    "zh_CN": "属性[uuid：{0}]不适用于任何组",
+    "arguments": [
+      "msg.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/iam2/api/IAM2ApiInterceptor.java"
+  },
+  {
+    "raw": "attribute[uuid:%s] is not for any organization",
+    "en_US": "attribute[uuid:{0}] is not for any organization",
+    "zh_CN": "属性[uuid：{0}]不适用于任何组织",
+    "arguments": [
+      "msg.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/iam2/api/IAM2ApiInterceptor.java"
+  },
+  {
+    "raw": "attribute[uuid:%s] is not for any project",
+    "en_US": "attribute[uuid:{0}] is not for any project",
+    "zh_CN": "属性[uuid：{0}]不适用于任何项目",
+    "arguments": [
+      "msg.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/iam2/api/IAM2ApiInterceptor.java"
+  },
+  {
+    "raw": "attribute[uuid:%s] is not for any virtual ID",
+    "en_US": "attribute[uuid:{0}] is not for any virtual ID",
+    "zh_CN": "属性[uuid：{0}]不适用于任何虚拟ID",
+    "arguments": [
+      "msg.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/iam2/api/IAM2ApiInterceptor.java"
+  },
+  {
+    "raw": "retire policy must be deleted before pull the project out of Retired state",
+    "en_US": "retire policy must be deleted before pull the project out of Retired state",
+    "zh_CN": "在将项目从已停用状态拉出之前，必须删除停用策略",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/iam2/api/IAM2ApiInterceptor.java"
+  },
+  {
+    "raw": "login is prohibited because the project is in state of %s",
+    "en_US": "login is prohibited because the project is in state of {0}",
+    "zh_CN": "禁止登录，因为项目处于{0}状态",
+    "arguments": [
+      "state"
+    ],
+    "fileName": "src/main/java/org/zstack/iam2/api/IAM2ApiInterceptor.java"
+  },
+  {
+    "raw": "no quota[name:%s] found",
+    "en_US": "no quota[name:{0}] found",
+    "zh_CN": "未找到配额[名称：{0}]",
+    "arguments": [
+      "name"
+    ],
+    "fileName": "src/main/java/org/zstack/iam2/api/IAM2ApiInterceptor.java"
+  },
+  {
+    "raw": "organization[uuid:%s] is a Company that cannot have parent organization",
+    "en_US": "organization[uuid:{0}] is a Company that cannot have parent organization",
+    "zh_CN": "组织[uuid：{0}]是不能有上级组织的公司",
+    "arguments": [
+      "msg.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/iam2/api/IAM2ApiInterceptor.java"
+  },
+  {
+    "raw": "parent organization[uuid:%s] cannot be a child organization[uuid:%s] of a childOrganization",
+    "en_US": "parent organization[uuid:{0}] cannot be a child organization[uuid:{1}] of a childOrganization",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getUuid()",
+      "msg.getParentUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/iam2/api/IAM2ApiInterceptor.java"
+  },
+  {
+    "raw": "duplicate virtualID name[%s]",
+    "en_US": "duplicate virtualID name[{0}]",
+    "zh_CN": "重复的用户名[{0}]",
+    "arguments": [
+      "msg.getName()"
+    ],
+    "fileName": "src/main/java/org/zstack/iam2/api/IAM2ApiInterceptor.java"
+  },
+  {
+    "raw": "duplicate project name[%s]",
+    "en_US": "duplicate project name[{0}]",
+    "zh_CN": "重复的项目名[{0}]",
+    "arguments": [
+      "msg.getName()"
+    ],
+    "fileName": "src/main/java/org/zstack/iam2/api/IAM2ApiInterceptor.java"
+  },
+  {
+    "raw": "invalid project name[%s], an account or project with the same name exists",
+    "en_US": "invalid project name[{0}], an account or project with the same name exists",
+    "zh_CN": "无效的项目名[{0}]，已有账户或项目使用了相同的名称",
+    "arguments": [
+      "msg.getName()"
+    ],
+    "fileName": "src/main/java/org/zstack/iam2/api/IAM2ApiInterceptor.java"
+  },
+  {
+    "raw": "IAM2OrganizationVO[uuid:%s] is not exists",
+    "en_US": "IAM2OrganizationVO[uuid:{0}] is not exists",
+    "zh_CN": "Iam2OrganizationVO[uuid：{0}]不存在",
+    "arguments": [
+      "msg.getOrganizationUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/iam2/api/IAM2ApiInterceptor.java"
+  },
+  {
+    "raw": "The project[uuid\u003d%s] has been attached to the organization[uuid\u003d%s]",
+    "en_US": "The project[uuid\u003d{0}] has been attached to the organization[uuid\u003d{1}]",
+    "zh_CN": "项目[uuid\u003d{0}]已附加到组织[uuid\u003d{1}]",
+    "arguments": [
+      "refVO.getProjectUuid()",
+      "refVO.getOrganizationUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/iam2/api/IAM2ApiInterceptor.java"
+  },
+  {
+    "raw": "The project[uuid\u003d%s] is not attached",
+    "en_US": "The project[uuid\u003d{0}] is not attached",
+    "zh_CN": "未附加项目[uuid\u003d{0}]",
+    "arguments": [
+      "msg.getProjectUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/iam2/api/IAM2ApiInterceptor.java"
+  },
+  {
+    "raw": "organizations%s are company that cannot be children of other organization",
+    "en_US": "organizations{0} are company that cannot be children of other organization",
+    "zh_CN": "组织{0}类型是子公司，不能设置为其它组织的部门",
+    "arguments": [
+      "uuids"
+    ],
+    "fileName": "src/main/java/org/zstack/iam2/api/IAM2ApiInterceptor.java"
+  },
+  {
+    "raw": "virtual id[uuid: %s] is not in project[uuid: %s]",
+    "en_US": "virtual id[uuid: {0}] is not in project[uuid: {1}]",
+    "zh_CN": "虚拟ID[uuid：{0}]不在项目[uuid：{1}]中",
+    "arguments": [
+      "msg.getVirtualIDUuid()",
+      "msg.getProjectUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/iam2/api/IAM2ApiInterceptor.java"
+  },
+  {
+    "raw": "illegal operation, cannot add Role[%s]",
+    "en_US": "illegal operation, cannot add Role[{0}]",
+    "zh_CN": "非法操作，无法添加角色[{0}]",
+    "arguments": [
+      "IAM2RolePolicyStatementHelper.PROJECT_ADMIN_ROLE_NAME"
+    ],
+    "fileName": "src/main/java/org/zstack/iam2/api/IAM2ApiInterceptor.java"
+  },
+  {
+    "raw": "can not operate stale virtual ids: %s",
+    "en_US": "can not operate stale virtual ids: {0}",
+    "zh_CN": "无法操作无效的用户: {0}",
+    "arguments": [
+      "staleVirtualIDs"
+    ],
+    "fileName": "src/main/java/org/zstack/iam2/api/IAM2ApiInterceptor.java"
+  },
+  {
+    "raw": "attribute[name:%s] is a system attribute that cannot be updated",
+    "en_US": "attribute[name:{0}] is a system attribute that cannot be updated",
+    "zh_CN": "属性[名称：{0}]是一个系统属性，无法被更新",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/iam2/attribute/SystemAttributes.java"
+  },
+  {
+    "raw": "virtual ID[uuid:%s] not existing",
+    "en_US": "virtual ID[uuid:{0}] not existing",
+    "zh_CN": "用户[uuid:{0}]不存在",
+    "arguments": [
+      "inv.getValue()"
+    ],
+    "fileName": "src/main/java/org/zstack/iam2/attribute/organization/OrganizationSupervisor.java"
+  },
+  {
+    "raw": "virtual ID[uuid:%s] not in organization[uuid:%s]",
+    "en_US": "virtual ID[uuid:{0}] not in organization[uuid:{1}]",
+    "zh_CN": "虚拟ID[uuid：{0}]不在组织中[uuid：{1}]",
+    "arguments": [
+      "inv.getValue()",
+      "((IAM2OrganizationAttributeInventory) inv).getOrganizationUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/iam2/attribute/organization/OrganizationSupervisor.java"
+  },
+  {
+    "raw": "organization[uuid:%s] already has a supervisor",
+    "en_US": "organization[uuid:{0}] already has a supervisor",
+    "zh_CN": "组织[uuid:{0}]已经设置了负责人",
+    "arguments": [
+      "oinv.getOrganizationUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/iam2/attribute/organization/OrganizationSupervisor.java"
+  },
+  {
+    "raw": "the project[uuid:%s, name:%s] already has a login expired strategy",
+    "en_US": "the project[uuid:{0}, name:{1}] already has a login expired strategy",
+    "zh_CN": "项目[uuid：{0}，名称：{1}]已有登录过期策略",
+    "arguments": [
+      "pinv.getUuid()",
+      "pinv.getName()"
+    ],
+    "fileName": "src/main/java/org/zstack/iam2/attribute/project/LoginExpired.java"
+  },
+  {
+    "raw": "IAM2ProjectVO[uuid:%s] is not %s, state change is not allowed",
+    "en_US": "IAM2ProjectVO[uuid:{0}] is not {1}, state change is not allowed",
+    "zh_CN": "Iam2ProjectVO[uuid：{0}]不是{1}，不允许更改状态",
+    "arguments": [
+      "projectUuid",
+      "ProjectState.Enabled.toString()"
+    ],
+    "fileName": "src/main/java/org/zstack/iam2/attribute/project/LoginExpired.java"
+  },
+  {
+    "raw": "the project[uuid:%s, name:%s] already has a retire policy",
+    "en_US": "the project[uuid:{0}, name:{1}] already has a retire policy",
+    "zh_CN": "项目[uuid:{0}, name:{1}]已经设置了回收策略",
+    "arguments": [
+      "pinv.getUuid()",
+      "pinv.getName()"
+    ],
+    "fileName": "src/main/java/org/zstack/iam2/attribute/project/Retire.java"
+  },
+  {
+    "raw": "invalid value, no \u0027at\u0027, \u0027after\u0027 or \u0027exceed\u0027 found",
+    "en_US": "invalid value, no \u0027at\u0027, \u0027after\u0027 or \u0027exceed\u0027 found",
+    "zh_CN": "无效的值，找不到关键字no \u0027at\u0027, \u0027after\u0027 or \u0027exceed\u0027",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/iam2/attribute/project/RetirePolicy.java"
+  },
+  {
+    "raw": "invalid value, %s",
+    "en_US": "invalid value, {0}",
+    "zh_CN": "无效的值, {0}",
+    "arguments": [
+      "value"
+    ],
+    "fileName": "src/main/java/org/zstack/iam2/attribute/project/RetirePolicy.java"
+  },
+  {
+    "raw": "invalid means[%s], allowed means are %s",
+    "en_US": "invalid means[{0}], allowed means are {1}",
+    "zh_CN": "无效的回收方法[{0}]，允许的方法是{1}",
+    "arguments": [
+      "ss[0]",
+      "Arrays.asList(Means.values()).toString()"
+    ],
+    "fileName": "src/main/java/org/zstack/iam2/attribute/project/RetirePolicy.java"
+  },
+  {
+    "raw": "invalid date[%s], it should be in format of yyyy-MM-dd HH:mm:ss",
+    "en_US": "invalid date[{0}], it should be in format of yyyy-MM-dd HH:mm:ss",
+    "zh_CN": "无效的日期，日期格式需要符合：yyyy-MM-dd HH:mm:ss",
+    "arguments": [
+      "policyValue"
+    ],
+    "fileName": "src/main/java/org/zstack/iam2/attribute/project/RetirePolicy.java"
+  },
+  {
+    "raw": "invalid time[%s], it should be in format of for example 10m, 1h, 2d",
+    "en_US": "invalid time[{0}], it should be in format of for example 10m, 1h, 2d",
+    "zh_CN": "无效的时间[{0}]，时间格式需要符合例如：10m, 1h, 2d",
+    "arguments": [
+      "policyValue"
+    ],
+    "fileName": "src/main/java/org/zstack/iam2/attribute/project/RetirePolicy.java"
+  },
+  {
+    "raw": "invalid spending value[%s], spending value should between 0 and %f",
+    "en_US": "invalid spending value[{0}], spending value should between 0 and {1}",
+    "zh_CN": "无效的费用[{0}], 费用范围应该在0到{1}之间",
+    "arguments": [
+      "policyValue",
+      "Double.MAX_VALUE"
+    ],
+    "fileName": "src/main/java/org/zstack/iam2/attribute/project/RetirePolicy.java"
+  },
+  {
+    "raw": "invalid spending value[%s], it should be in format of for example 10.001",
+    "en_US": "invalid spending value[{0}], it should be in format of for example 10.001",
+    "zh_CN": "无效的费用[{0}], 费用格式应该符合例如：10.001",
+    "arguments": [
+      "policyValue"
+    ],
+    "fileName": "src/main/java/org/zstack/iam2/attribute/project/RetirePolicy.java"
+  },
+  {
+    "raw": "invalid date or time[%s], it cannot be before current time[%s]",
+    "en_US": "invalid date or time[{0}], it cannot be before current time[{1}]",
+    "zh_CN": "无效的日期或时间，回收时间不能在当前时间之前[{1}]",
+    "arguments": [
+      "policyValue",
+      "dateFormat.format(new Timestamp(System.currentTimeMillis()))"
+    ],
+    "fileName": "src/main/java/org/zstack/iam2/attribute/project/RetirePolicy.java"
+  },
+  {
+    "raw": "virtual ID[uuid:%s] already has admin related attributes, can not add %s",
+    "en_US": "virtual ID[uuid:{0}] already has admin related attributes, can not add {1}",
+    "zh_CN": "",
+    "arguments": [
+      "vid",
+      "attributeName"
+    ],
+    "fileName": "src/main/java/org/zstack/iam2/attribute/virtualid/AbstractAdminAttribute.java"
+  },
+  {
+    "raw": "organiztion ID[uuid:%s] already has opoeration attributes, can not add %s",
+    "en_US": "organiztion ID[uuid:{0}] already has opoeration attributes, can not add {1}",
+    "zh_CN": "",
+    "arguments": [
+      "inv.getValue()",
+      "IAM2_ORGANIZATION_OPERATION.getName()"
+    ],
+    "fileName": "src/main/java/org/zstack/iam2/attribute/virtualid/IAM2OrganizationOperator.java"
+  },
+  {
+    "raw": "virtual id[uuid:%s] already has a project operator attribute",
+    "en_US": "virtual id[uuid:{0}] already has a project operator attribute",
+    "zh_CN": "虚拟ID[uuid：{0}]已具有项目运算符属性",
+    "arguments": [
+      "idinv.getVirtualIDUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/iam2/attribute/virtualid/IAM2ProjectOperator.java"
+  },
+  {
+    "raw": "cannot find zone[uuid:%s]",
+    "en_US": "cannot find zone[uuid:{0}]",
+    "zh_CN": "找不到数据中心[uuid:{0}]",
+    "arguments": [
+      "inv.getValue()"
+    ],
+    "fileName": "src/main/java/org/zstack/iam2/attribute/virtualid/PlatformAdminZoneRelation.java"
+  },
+  {
+    "raw": "project[uuid:%s] already has a project admin",
+    "en_US": "project[uuid:{0}] already has a project admin",
+    "zh_CN": "项目[uuid:{0}]已经设置过项目管理员了",
+    "arguments": [
+      "inv.getValue()"
+    ],
+    "fileName": "src/main/java/org/zstack/iam2/attribute/virtualid/ProjectAdmin.java"
+  },
+  {
+    "raw": "project[uuid:%s] not existing",
+    "en_US": "project[uuid:{0}] not existing",
+    "zh_CN": "项目[uuid:{0}]不存在",
+    "arguments": [
+      "inv.getValue()"
+    ],
+    "fileName": "src/main/java/org/zstack/iam2/attribute/virtualid/ProjectAdmin.java"
+  },
+  {
+    "raw": "the operations[%s] is denied",
+    "en_US": "the operations[{0}] is denied",
+    "zh_CN": "操作[{0}]被拒绝",
+    "arguments": [
+      "deniedApis"
+    ],
+    "fileName": "src/main/java/org/zstack/iam2/rbac/IAM2AuthorizationBackend.java"
+  },
+  {
+    "raw": "since the project starts the force securityGroup, systemtag is required for VM operation",
+    "en_US": "since the project starts the force securityGroup, systemtag is required for VM operation",
+    "zh_CN": "由于项目启动了Force SecurityGroup，因此VM操作需要SystemTag",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/iam2/rbac/IAM2OperationTargetAPIRequestChecker.java"
+  },
+  {
+    "raw": "project of account[uuid:%s] not exists",
+    "en_US": "project of account[uuid:{0}] not exists",
+    "zh_CN": "账户为[uuid:{0}]的项目不存在",
+    "arguments": [
+      "session.getAccountUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/iam2/rbac/IAM2SessionAPIRequestChecker.java"
+  },
+  {
+    "raw": "project[uuid:%s] is retired, reject all operations",
+    "en_US": "project[uuid:{0}] is retired, reject all operations",
+    "zh_CN": "项目[uuid:{0}]已经过期，无法操作",
+    "arguments": [
+      "projectUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/iam2/rbac/IAM2SessionAPIRequestChecker.java"
+  }
+]

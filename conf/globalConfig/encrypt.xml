@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<globalConfig xmlns="http://zstack.org/schema/zstack">
+    <config>
+        <category>encrypt</category>
+        <name>encrypt.algorithm</name>
+        <description>encrypt algorithm used in zstack</description>
+        <defaultValue>xBGEJoGhwep9+o0FpTgW8Q==</defaultValue>
+        <type>java.lang.String</type>
+    </config>
+
+    <config>
+        <category>encrypt</category>
+        <name>encrypt.driver</name>
+        <description>encrypt driver type in zstack</description>
+        <defaultValue>default</defaultValue>
+        <type>java.lang.String</type>
+    </config>
+</globalConfig>

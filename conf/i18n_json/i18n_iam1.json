@@ -1,0 +1,68 @@
+[
+  {
+    "raw": "AccountGroup[uuid:%s, name:%s] has been deleted",
+    "en_US": "AccountGroup[uuid:{0}, name:{1}] has been deleted",
+    "zh_CN": "账号 {0}（名称为 {1}）已经被删除",
+    "arguments": [
+      "vo.getUuid()",
+      "vo.getName()"
+    ],
+    "fileName": "src/main/java/org/zstack/iam1/compute/accounts/AccountGroupBase.java"
+  },
+  {
+    "raw": "failed to move account group[uuid:%s] to it self",
+    "en_US": "failed to move account group[uuid:{0}] to it self",
+    "zh_CN": "不允许将账户组 {0} 移动到它自己下",
+    "arguments": [
+      "current.uuid"
+    ],
+    "fileName": "src/main/java/org/zstack/iam1/compute/accounts/AccountGroupBase.java"
+  },
+  {
+    "raw": "failed to move account group[uuid:%s] to its child group[uuid:%s]",
+    "en_US": "failed to move account group[uuid:{0}] to its child group[uuid:{1}]",
+    "zh_CN": "不允许将账户组 {0} 移动到它的子账户组 {1} 下",
+    "arguments": [
+      "current.uuid",
+      "toUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/iam1/compute/accounts/AccountGroupBase.java"
+  },
+  {
+    "raw": "invalid destination account group[uuid:%s]: not found",
+    "en_US": "invalid destination account group[uuid:{0}]: not found",
+    "zh_CN": "无效的目标账户组 {0}: 未找到",
+    "arguments": [
+      "toUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/iam1/compute/accounts/AccountGroupBase.java"
+  },
+  {
+    "raw": "resources[uuid:%s, type:%s] are not resource ensemble members",
+    "en_US": "resources[uuid:{0}, type:{1}] are not resource ensemble members",
+    "zh_CN": "资源 {0}（类型为 {1}）不是资源组的成员",
+    "arguments": [
+      "invalidUuidList",
+      "resourceType"
+    ],
+    "fileName": "src/main/java/org/zstack/iam1/compute/accounts/AccountGroupInterceptor.java"
+  },
+  {
+    "raw": "unable to find AccountGroup[uuid\u003d%s]",
+    "en_US": "unable to find AccountGroup[uuid\u003d{0}]",
+    "zh_CN": "无法查询到账号组 {0}",
+    "arguments": [
+      "message.getAccountGroupUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/iam1/compute/accounts/AccountGroupManagerImpl.java"
+  },
+  {
+    "raw": "invalid role policy resource: resource[uuid:%s] is not a ensemble master resource",
+    "en_US": "invalid role policy resource: resource[uuid:{0}] is not a ensemble master resource",
+    "zh_CN": "无效的角色权限条目资源: 资源 {0} 不是该资源组中的主资源",
+    "arguments": [
+      "entry.getValue().get(0).uuid"
+    ],
+    "fileName": "src/main/java/org/zstack/iam1/compute/ensemble/EnsembleExtensions.java"
+  }
+]

@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app version="2.5" xmlns="http://java.sun.com/xml/ns/javaee"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+    metadata-complete="true">
+
+    <absolute-ordering />
+    
+    <servlet>
+        <servlet-name>ZStack Dispatcher Servlet</servlet-name>
+        <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+        <init-param>
+            <param-name>contextConfigLocation</param-name>
+            <param-value>/WEB-INF/classes/zstack-servlet-context.xml</param-value>
+        </init-param>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+
+    <context-param>
+        <param-name>contextConfigLocation</param-name>
+        <param-value>/WEB-INF/classes/zstack-servlet-context.xml</param-value>
+    </context-param>
+
+    <!--
+    As it turns out, there is another parameter that you can use to get the desired functionality in a declarative
+    fashion: parentContextKey. Using this, you instruct the ContextLoader to use another class
+    called ContextSingletonBeanFactoryLocator to search for a bean named by the value of parentContextKey,
+    defined in a configuration file whose name matches a certain pattern. By default,
+    this pattern is ‘classpath*:beanRefContext.xml’, meaning all files called beanRefContext on the classpath.
+    (For a plain SingletonBeanFactoryLocator it’s ‘classpath*:beanRefFactory.xml’)
+    -->
+    <context-param>
+        <param-name>parentContextKey</param-name>
+        <param-value>parentContext</param-value>
+    </context-param>
+    
+    <servlet-mapping>
+        <servlet-name>ZStack Dispatcher Servlet</servlet-name>
+        <url-pattern>/</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>default</servlet-name>
+        <url-pattern>/static/*</url-pattern>
+    </servlet-mapping>
+
+    <filter>
+        <filter-name>UrlRewriteFilter</filter-name>
+        <filter-class>org.tuckey.web.filters.urlrewrite.UrlRewriteFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>UrlRewriteFilter</filter-name>
+        <url-pattern>/static/pypi/*</url-pattern>
+        <dispatcher>REQUEST</dispatcher>
+        <dispatcher>FORWARD</dispatcher>
+    </filter-mapping>
+
+    <filter>
+        <filter-name>CASFilter</filter-name>
+        <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+        <init-param>
+            <param-name>targetBeanName</param-name>
+            <param-value>authenticationFilter</param-value>
+        </init-param>
+
+    </filter>
+    <filter-mapping>
+        <filter-name>CASFilter</filter-name>
+        <url-pattern>/sso/cas/*</url-pattern>
+    </filter-mapping>
+
+    <filter>
+        <filter-name>CAS Validation Filter</filter-name>
+        <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+        <init-param>
+            <param-name>targetBeanName</param-name>
+            <param-value>cas20ProxyReceivingTicketValidationFilter</param-value>
+        </init-param>
+
+    </filter>
+
+    <filter-mapping>
+        <filter-name>CAS Validation Filter</filter-name>
+        <url-pattern>/sso/cas/*</url-pattern>
+    </filter-mapping>
+
+    <filter>
+        <filter-name>CAS HttpServletRequest Wrapper Filter</filter-name>
+        <filter-class>org.jasig.cas.client.util.HttpServletRequestWrapperFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>CAS HttpServletRequest Wrapper Filter</filter-name>
+        <url-pattern>/sso/cas/*</url-pattern>
+    </filter-mapping>
+
+
+    <filter>
+        <display-name>CasLoginFilter</display-name>
+        <filter-name>CasLoginFilter</filter-name>
+        <filter-class>org.zstack.sso.cas.filter.CasLoginFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>CasLoginFilter</filter-name>
+        <url-pattern>/sso/cas/*</url-pattern>
+    </filter-mapping>
+
+
+    <!-- NOTE: this listener must be put as the first listener to execute, don't change the order !!! -->
+    <listener>
+        <listener-class>
+            org.zstack.portal.managementnode.BootstrapWebListener
+        </listener-class>
+    </listener>
+
+    <listener>
+        <listener-class>
+            org.zstack.portal.managementnode.BootstrapContextLoaderListener
+        </listener-class>
+    </listener>
+
+    <listener>
+        <listener-class>
+            org.zstack.portal.managementnode.ComponentLoaderWebListener
+        </listener-class>
+    </listener>
+
+</web-app>

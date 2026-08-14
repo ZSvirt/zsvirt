@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns="http://zstack.org/schema/zstack"
+            xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            targetNamespace="http://zstack.org/schema/zstack" elementFormDefault="qualified"
+            attributeFormDefault="unqualified">
+
+	<xsd:element name="globalConfig">
+		<xsd:complexType>
+			<xsd:sequence maxOccurs="unbounded" minOccurs="0">
+				<xsd:element name="config">
+					<xsd:complexType>
+						<xsd:sequence>
+							<xsd:element name="name" type="xsd:string" minOccurs="1"></xsd:element>
+							<xsd:element name="category" type="xsd:string"></xsd:element>
+							<xsd:element name="description" type="xsd:string"></xsd:element>
+							<xsd:element name="type" type="xsd:string"></xsd:element>
+							<xsd:element name="validatorRegularExpression" type="xsd:string"></xsd:element>
+							<xsd:element name="defaultValue" type="xsd:string"></xsd:element>
+							<xsd:element name="value" type="xsd:string"></xsd:element>
+							<xsd:element name="hidden" type="xsd:boolean"></xsd:element>
+						</xsd:sequence>
+					</xsd:complexType>
+				</xsd:element>
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+</xsd:schema>

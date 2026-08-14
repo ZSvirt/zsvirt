@@ -1,0 +1,138 @@
+= LongJob 取消机制
+:imagesdir: ../images
+
+[TIP]
+如果需要对一个 longjob 实现取消，除了本文提到的地方，其他地方毋须改动。
+完整实现最少只要 20 行代码。
+
+== 管理节点
+
+=== LongJob 接口类
+
+==== cancel 接口
+
+大部分情况只要实现 cancel 接口即可。
+
+例如迁移虚拟机的取消实现。
+
+[source,java,indent=0]
+----
+    @Override
+    public void cancel(LongJobVO job, ReturnValueCompletion<Boolean> completion) {
+        MigrateVmInnerMsg msg = JSONObjectUtil.toObject(job.getJobData(), MigrateVmInnerMsg.class);
+        CancelMigrateVmMsg cmsg = new CancelMigrateVmMsg();
+        cmsg.setCancellationApiId(job.getApiId());
+        cmsg.setUuid(msg.getVmInstanceUuid());
+        bus.makeTargetServiceIdByResourceUuid(cmsg, VmInstanceConstant.SERVICE_ID, cmsg.getVmInstanceUuid());
+        bus.send(cmsg, new CloudBusCallBack(completion) {
+            @Override
+            public void run(MessageReply reply) {
+                if (reply.isSuccess()) {
+                    completion.success(false);
+                } else {
+                    completion.fail(reply.getError());
+                }
+            }
+        });
+    }
+----
+
+
+这里需要返回一个 `boolean cancelled`，意为如果取消已经完毕，回滚完毕，则返回
+true（这需要对取消函数进行大量的额外实现，如果对实时性要求不高，可以让原流程自己回滚），
+
+否则返回 false，等待原任务流程自己回滚清理。
+
+如果取消失败了（没有任务能被取消 / 有任务能取消但取消失败了）则 fail。
+
+换种说法解释：
+
+如果 cancel 函数只实现了 cancel 功能，就返回 success(false)
+
+而如果 cancel 函数既实现了 cancel 功能又实现了 clean 功能，则返回
+success(true)
+
+==== clean 接口
+
+如果还想更健壮，需要实现一个 clean 接口来清理可能留下的脏数据， LongJob
+Manager 会在需要时自动执行（现在特指该任务还支持暂停 / 恢复操作时）。
+
+例如 AddImage 的 clean 函数为删除镜像
+
+=== Flow 检查
+
+管理节点的任务如果想要做成 cancellable，在 `FlowChain`
+加一个提前检查即可：
+
+`chain.preCheck(data -> buildErrIfCanceled());`
+
+例如：
+
+[source,java,indent=0]
+----
+include::example$link_to_ImageManagerImpl.java[tag=flow_check]
+----
+
+=== CancelMessage
+
+*CancelHostsTaskMsg*
+
+如果还要更实时精细的取消，则需要往 host 上发消息，该消息会取消该 API
+上所有正在 host 上执行的任务，只需要传一个 ApiId。
+
+image::image-2022-03-01-15-12-27-279.png[]
+
+*CancelJobBackupStorageMsg/CancelJobBackupStorageMsg*
+
+另外还有针对 bs 和 ps（特指 ceph） 的取消消息，逻辑差不多
+
+== Utility
+
+当然，本身 host 执行的任务也是需要 cancellable
+的。以下有两个方法，*此外还需要管理节点的 AgentCmd 实现 HasThreadContext
+接口。*
+
+=== TaskDaemon (推荐)
+
+实现一个 `TaskDaemon` 。并调用。
+
+最重要的参数是 `task_spec`，用来传递任务的上下文，供取消时识别。一般为
+`agent` 收到的 `cmd`。
+
+另一个必填参数是 `task_name`，用来取消时自动打日志用。
+
+另外还有 `timeout`， `report_progress` 等非必填参数。
+
+如果只需要实现取消，则实现 `_cancel` 函数即可。如果还需要实现进度汇报（一般都需要的），还需要实现 `get_percent` 函数。
+
+==== 简单的例子：
+
+image::image-2022-03-01-15-12-52-001.png[]
+
+==== 稍复杂的例子
+
+image::image-2022-03-01-15-13-05-483.png[]
+
+==== 好处
+
+自己控制取消和清理逻辑。
+
+=== traceable_shell (能用但不推荐)
+
+此方法针对 shell 命令的取消。
+
+使用 traceable_shell 来执行 shell 命令，agent 收到取消命令后，会 kill
+该进程和其子进程。
+
+==== 例子
+
+image::image-2022-03-01-15-13-22-809.png[]
+
+==== 好处
+
+简洁
+
+==== 坏处
+
+kill 进程可能过于暴力（虽然会先尝试 kill -15 ），如果 rollback 或者
+clean 逻辑不健壮，会遗留脏数据。

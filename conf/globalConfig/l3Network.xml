@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<globalConfig xmlns="http://zstack.org/schema/zstack">
+    <config>
+        <name>basic.network.enable.ra</name>
+        <description>enable ipv6 RA for basic network</description>
+        <defaultValue>false</defaultValue>
+        <category>l3Network</category>
+        <type>java.lang.Boolean</type>
+    </config>
+</globalConfig>

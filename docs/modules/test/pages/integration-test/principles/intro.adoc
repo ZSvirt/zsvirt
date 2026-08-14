@@ -1,0 +1,316 @@
+= 认识 ZStack 集成测试框架
+:imagesdir: ../../../images/
+
+== 前言
+
+本文主要目的是从 Java 最常用的 JUnit 单元测试框架介绍引入，对 ZStack 提供的集成测试框架进行介绍，通过这篇文章，你将会了解 JUnit 是的工作方式，以及管理节点如何借助这个特性提供了集成测试的基础。基于这个基础，结合 ZStack 控制面代码本身如何进行测试，以及了解设计一个集成测试框架的简单思路。
+
+== 文中框架以及名词介绍
+
+=== JUnit
+
+Junit 是一个 Java 语言的单元测试框架，最直观的可以在 ide 里面运行一下下面的 JUnit 的测试用例
+
+[source,java]
+----
+import org.junit.jupiter.api.*;
+
+public class JunitTest {
+    @BeforeAll
+    public static void setUpClass() throws Exception {
+        System.out.println("setup before first test method");
+        // Code executed before the first test method
+    }
+
+    @BeforeEach
+    public void setUp() throws Exception {
+        System.out.println("setup before each test");
+        // Code executed before each test
+    }
+
+    @Test
+    public void oneThing() {
+        System.out.println("test 1");
+        // Code that tests one thing
+    }
+
+    @Test
+    public void anotherThing() {
+        System.out.println("test 2");
+        // Code that tests another thing
+    }
+
+    @Test
+    public void somethingElse() {
+        System.out.println("test 3");
+        // Code that tests something else
+    }
+
+    @AfterEach
+    public void tearDown() throws Exception {
+        System.out.println("teardown after every test ");
+        // Code executed after each test
+    }
+
+    @AfterAll
+    public static void tearDownClass() throws Exception {
+        System.out.println("teardown after last test ");
+        // Code executed after the last test method
+    }
+}
+----
+
+输出结果为：
+
+[source]
+----
+setup before first test method
+
+setup before each test
+test 2
+teardown after every test
+
+setup before each test
+test 3
+teardown after every test
+
+setup before each test
+test 1
+teardown after every test
+
+teardown after last test
+----
+
+我们可以看到这些注释的功能，通过注释的方式，决定了什么时候会执行哪些方法，因此比如要做一个单元测试，测试一段代码，只需要实现一个 JunitTest 这样的测试类，并将你要测试的方法写好加上 @Test 注释即可，比如修改测试代码如下
+
+[source,java]
+----
+
+import org.junit.jupiter.api.*;
+
+public class JunitTest {
+    @Test
+    public void testEqual() {
+        assert 1 == 1;
+        assert 1 == 2;
+        // Code that tests one thing
+    }
+}
+----
+
+通过 assert，可以判断运行结果是否符合预期，比如 1==1 可以理解成类似 A ==
+A，如果和预期一样，那么就运行通过，但比如 A 和 B 不同的情况 A ==
+B 实际上是 false，就会触发报错
+
+[source,java]
+----
+java.lang.AssertionError
+    at JunitTest.testEqual(JunitTest.java:7)
+    .......
+    at com.intellij.rt.junit.JUnitStarter.main(JUnitStarter.java:58)
+----
+
+通过这两个例子最最最基本的 JUnit 的使用其实就能体现出来了，通过注释控制方法执行顺序，不需要 main 方法也能够方便的进行测试，同时提供了检查输出是否正确的功能。
+
+=== 集成测试
+
+集成测试，也叫组装测试或联合测试。
+在单元测试的基础上，将所有模块按照设计要求（如根据结构图）组装成为子系统或系统，进行集成测试。
+实践表明，一些模块虽然能够单独地工作，但并不能保证连接起来也能正常的工作。
+一些局部反映不出来的问题，在全局上很可能暴露出来。当然对于 ZStack 这样一个由若干子系统构成的复杂系统，免不了会有这样的问题，所以通过有效的集成测试来保证代码基本质量是很有必要的
+
+=== ZStack
+
+本文主要指 ZStack 后端服务，是一个复杂的 Java 应用，里面使用了 spring 和 hibernate，数据库使用的是 mysql，对外则通过 Rest
+API 提供服务，也是集成测试框架需要测试的对象。正常生产环境中通过 tomcat 部署。
+
+== 进一步了解测试对象
+
+请温习 xref:integration-test/index.adoc[]
+
+通过上文我们能了解到对于集成测试框架来说，存在一些不可测试的东西，比如以来 agent 返回的内容等，这部分内容通过 simulator 机制可以进行模拟，这个思路在后面的内容中非常有用，如果测试框架里对真实环境有依赖的内容我们都可以通过模拟的方式处理（即可以模拟成功或者失败，来测试不同情况下的结果），宏观上讲，相当于 ZStack 系统的测试，而不是包括外部真实环境。
+
+== 测试框架都做了什么
+
+首先这是一张很粗略的测试架构
+
+image::image-2022-03-01-14-23-55-596.png[]
+
+测试框架需要
+
+. 启动 zstack
+. 通过 api 测试
+. 模拟以来 agent 的返回
+. 获取测试结果
+
+假设有上面 4 个条件，就能够完成最基本的测试框架了，其他无非是对 2，3，4 步骤进行拓展，比如除了 api 测试之外能增加更多测试手段，除了 agent 模拟之外能够提供更多模拟，测试结果的多样性等。接下来我们拆开四个阶段分别进行简单的分析。
+
+=== 启动 ZStack
+
+这个实际上并不困难，因为 ZStack 本身就可以用 tomcat 启动，所以只要用 servlet 服务器去启动是没啥差别的。当然这里可以延伸一下，在 1.10.4 版本之前，ZStack 还没引入这个目前的测试框架的时候，实际上也有类似的实现，实际上启动 ZStack 并不是最麻烦的步骤，实际上最麻烦的是如何在启动好的 ZStack 上构建一个你能够进行 api 测试的环境，实际上比如创建 zone，cluster 等等测试必须资源很多时候都是重复劳动，在 1.10.4 版本以前，类似 woodpecker，测试环境也是通过 XML 定义的，如下
+
+[source,xml]
+----
+<?xml version="1.0" encoding="UTF-8"?>
+<deployerConfig xmlns="http://zstack.org/schema/zstack">
+
+    <backupStorages>
+        <sftpBackupStorage name="sftp" description="Test"
+            url="nfs://test" />
+    </backupStorages>
+
+    <images>
+        <image name="TestImage" description="Test" mediaType="ISO" format="iso">
+            <backupStorageRef>sftp</backupStorageRef>
+        </image>
+    </images>
+
+    <instanceOfferings>
+        <instanceOffering name="TestInstanceOffering"
+            description="Test" memoryCapacity="3G" cpuNum="1" cpuSpeed="3000" />
+    </instanceOfferings>
+
+    <diskOffering name="RootOffering" description="Test"
+                  diskSize="30G" />
+
+    <vm>
+        <userVm name="TestVm" description="Test">
+            <imageRef>TestImage</imageRef>
+            <instanceOfferingRef>TestInstanceOffering</instanceOfferingRef>
+            <l3NetworkRef>TestL3Network1</l3NetworkRef>
+            <l3NetworkRef>TestL3Network2</l3NetworkRef>
+            <l3NetworkRef>TestL3Network3</l3NetworkRef>
+            <defaultL3NetworkRef>TestL3Network1</defaultL3NetworkRef>
+            <rootDiskOfferingRef>RootOffering</rootDiskOfferingRef>
+        </userVm>
+    </vm>
+
+    <zones>
+        <zone name="Zone1" description="Test">
+            <clusters>
+                <cluster name="Cluster1" description="Test" hypervisorType="KVM">
+                    <hosts>
+                        <kvmHost name="host1" description="Test" managementIp="localhost"
+                            memoryCapacity="8G" cpuNum="4" cpuSpeed="2600" />
+                    </hosts>
+                    <primaryStorageRef>nfs</primaryStorageRef>
+                    <l2NetworkRef>TestL2Network</l2NetworkRef>
+                </cluster>
+            </clusters>
+
+            <l2Networks>
+                <l2NoVlanNetwork name="TestL2Network" description="Test"
+                    physicalInterface="eth0">
+                    <l3Networks>
+                        <l3BasicNetwork name="TestL3Network1" description="Test">
+                            <ipRange name="TestIpRange" description="Test" startIp="10.0.0.100"
+                                endIp="10.10.1.200" gateway="10.0.0.1" netmask="255.0.0.0" />
+                        </l3BasicNetwork>
+                        <l3BasicNetwork name="TestL3Network2" description="Test">
+                            <ipRange name="TestIpRange" description="Test" startIp="10.10.2.100"
+                                endIp="10.20.2.200" gateway="10.10.2.1" netmask="255.0.0.0" />
+                        </l3BasicNetwork>
+                        <l3BasicNetwork name="TestL3Network3" description="Test">
+                            <ipRange name="TestIpRange" description="Test" startIp="10.20.3.100"
+                                endIp="10.30.3.200" gateway="10.20.3.1" netmask="255.0.0.0" />
+                        </l3BasicNetwork>
+                        <l3BasicNetwork name="TestL3Network4" description="Test">
+                            <ipRange name="TestIpRange" description="Test" startIp="10.20.4.100"
+                                     endIp="10.30.4.200" gateway="10.20.4.1" netmask="255.0.0.0" />
+                        </l3BasicNetwork>
+                    </l3Networks>
+                </l2NoVlanNetwork>
+            </l2Networks>
+
+            <backupStorageRef>sftp</backupStorageRef>
+            <primaryStorages>
+                <nfsPrimaryStorage name="nfs" description="Test"
+                    totalCapacity="1T" url="nfs://test" />
+            </primaryStorages>
+        </zone>
+    </zones>
+</deployerConfig>
+----
+
+其实每个测试用例比较独立，可以复用也挺好的，定义起来很直观，但是当时测试框架在代码规模增加开发人员增加的情况下存在一个很严重的问题就是运行性能太差了，不足以满足提交代码立刻运行完所有测试的需求。因为任意一个 case（即使是测试查询 api）也需要重新启动一边管理节点的服务，创建环境，变成了启动环境可能消耗了 80%～90% 的时间，集成到自动化系统的可行性非常有限，可能跑完一轮 case 需要半天。经常会出现测试非常有限的导致 regression 等（这里也突出了集成测试的意义）。
+
+因此在设计新的框架的时候为了解决这个问题，在启动 ZStack 这块方面下了很大的功夫，通过 Groovy 的 DSL 提供定义资源的方式，多个 case 组成 test
+suite 的时候为了避免 Java 服务反复启动，还提供了清理环境的机制，同时方便的将 Case 组成 TestSuite 运行（通过自动扫描）大大缩短了测试的整体时间，使得 patch+集成测试的验证方式变得可行了。
+
+=== 通过 api 测试
+
+这个实际上通过 zstack 提供的 sdk 调用 api 进行测试即可，当然如今的测试框架里面提供了 groovy 的实现使用起来更方便一些
+
+=== 模拟 agent 返回
+
+这里也比较容易，因为 ZStack 的代码所以服务实际上都是通过 RESTFacadeImpl.java 封装好的方法发送各种 http 请求的，所以只要把发送的 agent 信息总是替换成 simulator 的地址就可以了。为了便于测试成功失败的情况，方便的修改 simulator 的返回值也是很重要的，所以 zstack 在 testlib 里面封装了所有的 simulator，以及提供了很多可以直接修改 simulator 的方法，以满足测试需求。
+
+=== 获取测试结果
+
+这里分两种情况
+
+. 单个 case
+. 一组 case（test suite）
+
+单个 case 的话会执行由 @org.junit.Test 标注的逻辑，一组 case 的话，则是在 case 侧实现了一个有 collect 逻辑的 case，这个 case 会搜集一堆 case，运行并收集结果。
+
+== 编写测试用例的便利性问题
+
+基于上面提供的一系列功能，如何提升测试用例的便利性很重要，当然这前提是有一些约定的
+
+比如框架提供了标准的测试用例接口，这里接口的设计实际上有点问题的这里先不深究
+
+[source, java]
+----
+abstract class Test extends ApiHelper implements Retry {
+    ...
+    abstract void setup()
+    abstract void environment()
+    abstract void test()
+    ...
+}
+
+interface Case {
+    void environment()
+    void test()
+    void run()
+    void clean()
+}
+----
+
+最终用户使用的是这样一个 abstract 的 class
+
+[source,java]
+abstract class SubCase extends Test implements Case
+
+需要实现的方法主要是四个
+
+[source, java]
+----
+abstract void setup()
+abstract void environment()
+abstract void test()
+void clean()
+----
+
+类似 JUnit，提供了很多接口，按顺序来说 setup() 最先执行，用来设置 spring 配置（即需要哪些子服务来运行测试），environment 则负责用来通过 groovy
+DSL 定义测试环境，test() 负责调用 environment 中 env 的创建逻辑创建测试资源，并调用 n 个用户定义的 test
+method，delete() 最后调用，用于 case 结束清理环境使用，实际上在单个 case 运行的时候并用不上，因此单个 case 通常需要保留环境给用户 debug 使用，运行 test
+suite 的时候才会生效。
+
+基于这样的约定，使用者很明确每个方法的步骤，所以对于使用的理解上并不会很困难，只要给出一些 example 就能够很顺利的开始使用测试框架了。
+
+== 额外的考虑
+
+当然，前面我们提到了测试框架本身的拓展性，虽然能够很方便的做集成测试，但是有些纯内部逻辑，或者特定的模拟（比如邮箱服务器等），如何便利的做模拟，对测试框架来说也是一个挑战。
+
+因为我们的测试框架本身需要通过 servlet 服务器+Groovy（Java）代码启动一个 zstack，所以如果需要直接使用里面的内部逻辑，可以通过 spring 访问 bean 的方式访问任意一个子模块进行测试（子模块粒度的测试），假设需要模拟邮箱服务器等，也可以通过 mockito 等模拟库来进行模拟。
+
+其次是因为管理节点对服务之间的调用都是通过 CloudBus 进行了，如果要做子模块的 mock，直接通过 CloudBus 的 lifecycle
+mock 即可。
+
+当然如果你需要模拟一个全新的对象，通过代理模式提供一个对象也可以，不过这样需要你对对象的创建逻辑做一些处理，需要修改源代码，使用的时候见仁见智了。
+
+== 总结
+
+上面从很简单的视角总结了一下测试框架解决的问题以及目前测试框架是怎么解决这些问题的，同时结合以前的测试框架，讲了一下目前这个框架设计的重点。下一篇文章将会详细介绍测试框架里面的四个环节具体是怎么设计和考虑的。

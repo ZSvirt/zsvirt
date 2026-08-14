@@ -1,0 +1,40 @@
+[
+  {
+    "raw": "not found hostId for hostUuid[%s] and primaryStorageUuid[%s]",
+    "en_US": "not found hostId for hostUuid[{0}] and primaryStorageUuid[{1}]",
+    "zh_CN": "",
+    "arguments": [
+      "targetHostUuid",
+      "primaryStorageUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/cbd/CbdHostHeartbeatChecker.java"
+  },
+  {
+    "raw": "host %s\u0027s heartbeat is not updated",
+    "en_US": "host {0}\u0027s heartbeat is not updated",
+    "zh_CN": "",
+    "arguments": [
+      "targetHostUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/cbd/CbdHostHeartbeatChecker.java"
+  },
+  {
+    "raw": "host[uuid:%s]\u0027s heartbeat is not updated",
+    "en_US": "host[uuid:{0}]\u0027s heartbeat is not updated",
+    "zh_CN": "",
+    "arguments": [
+      "cmd.targetHostUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/filesystem/AbstractFileSystemHostHeartbeatChecker.java"
+  },
+  {
+    "raw": "shareblock says host %s is offline on %s",
+    "en_US": "shareblock says host {0} is offline on {1}",
+    "zh_CN": "",
+    "arguments": [
+      "cmd.hostUuid",
+      "sentinelHostUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/shareblock/ShareBlockHostHeartbeatChecker.java"
+  }
+]

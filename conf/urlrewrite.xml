@@ -1,0 +1,6 @@
+<urlrewrite>
+    <rule>
+        <from>/static/pypi/(.*)/$</from>
+        <to>/static/pypi/$1/index.html</to>
+    </rule>
+</urlrewrite>

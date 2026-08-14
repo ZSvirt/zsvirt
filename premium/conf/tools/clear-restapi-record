@@ -1,0 +1,15 @@
+#!/bin/bash
+
+set -e
+
+if test $# -ne 2; then
+    echo usage: $(basename "$0") DBPASS N
+    echo
+    echo "Clear record enties that is N (N >= 0) days ago."
+fi
+
+dbpass="$1"
+n=$(echo "$2" | grep -Eo '[[:digit:]]+')
+
+mysql -uzstack -p"$dbpass" zstack_rest \
+  -e "DELETE FROM RestAPIVO where lastOpDate <= DATE_SUB(NOW(), INTERVAL $n DAY)"

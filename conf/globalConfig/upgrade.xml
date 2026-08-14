@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<globalConfig xmlns="http://zstack.org/schema/zstack">
+    <config>
+        <category>upgradeControl</category>
+        <name>grayscaleUpgrade</name>
+        <description>A switch to control grayscale upgrade</description>
+        <defaultValue>false</defaultValue>
+        <type>java.lang.Boolean</type>
+    </config>
+
+    <config>
+        <category>upgradeControl</category>
+        <name>allowedApiListGrayscaleUpgrading</name>
+        <description>Allowed operations when grayscale upgrade</description>
+        <defaultValue>APIRequestConsoleAccessMsg</defaultValue>
+        <type>java.lang.String</type>
+    </config>
+</globalConfig>

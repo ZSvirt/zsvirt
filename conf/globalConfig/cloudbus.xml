@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<globalConfig xmlns="http://zstack.org/schema/zstack">
+    <config>
+        <category>cloudBus</category>
+        <name>statistics.on</name>
+        <description>A boolean value indicating whether enabling message statistics through JMX</description>
+        <defaultValue>false</defaultValue>
+        <type>java.lang.Boolean</type>
+    </config>
+
+    <config>
+        <category>cloudBus</category>
+        <name>managementNodeNotFoundHandler.maxNum</name>
+        <description>the max cache size of error handlers that resend messages to a temporary offline management node</description>
+        <defaultValue>5000</defaultValue>
+        <type>java.lang.Long</type>
+    </config>
+
+    <config>
+        <category>cloudBus</category>
+        <name>managementNodeNotFoundHandler.timeoutInSecs</name>
+        <description>the timeout of error handlers that resend messages to a temporary offline management node lives in the cache, in secs. This value should not be set to
+            a value more than 180 seconds because a temporary management offline is usually very short due to management node heartbeats</description>
+        <defaultValue>180</defaultValue>
+        <type>java.lang.Integer</type>
+    </config>
+</globalConfig>

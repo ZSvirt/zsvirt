@@ -1,0 +1,196 @@
+{
+    "ZStackTemplateFormatVersion": "2018-06-18",
+    "Description": "Creates Vxlan VPC network. This template creates a VPC network. Make sure that the public network and management network are working as expected. Note that the VXLAN VTEP CIDR is required.",
+    "Parameters": {
+        "VrouterImageUrl": {
+            "Type": "String",
+            "Label":"Vrouter image",
+            "Description":"vRtouter image URL",
+            "DefaultValue": "http://cdn.zstack.io/product_downloads/vrouter/3.8.4/r5ed93wpjf/zstack-vrouter-3.8.4.qcow2"
+        },
+        "VmImageUrl": {
+            "Type": "String",
+            "Label": "VM image url",
+            "Description":"VM image url",
+            "DefaultValue": "http://cdn.zstack.io/zstack_repo/latest/zstack-image-1.4.qcow2"
+        },
+        "BackupStorage":{
+            "Type": "CommaDelimitedList",
+            "Label": "BackupStorage UUID",
+            "Description":"BackStorage UUID"
+        },
+        "ManagementNetworkUuid":{
+            "Type": "String",
+            "Label": "Management network",
+            "Description":"You can use public network as management network"
+        },
+        "PublicNetworkUuid":{
+            "Type": "String",
+            "Label": "Public network",
+            "Description":"Public network UUID"
+        },
+        "ZoneUuid":{
+            "Type": "String",
+            "Label": "Zone",
+            "Description":"Zone UUID"
+        },
+        "ClusterUuid":{
+            "Type": "String",
+            "Label": "Cluster",
+            "Description":"Cluster UUID"
+        },
+        "Cidr":{
+            "Type": "String",
+            "Description":"VTEP CIDR. Use the correct CIDR",
+            "DefaultValue":"{10.0.0.0/8}"
+        },
+        "Vni":{
+            "Type": "Number",
+            "DefaultValue":222
+        },
+        "StartVni":{
+            "Type": "Number",
+            "DefaultValue":100
+        },
+        "EndVni":{
+            "Type": "Number",
+            "DefaultValue":300
+        },
+        "StartIp":{
+            "Type": "String",
+            "DefaultValue":"192.168.20.2"
+        },
+        "EndIp":{
+            "Type": "String",
+            "DefaultValue":"192.168.20.200"
+        },
+        "Netmask":{
+            "Type": "String",
+            "DefaultValue":"255.255.255.0"
+        },
+        "Gateway":{
+            "Type": "String",
+            "DefaultValue":"192.168.20.1"
+        }
+    },
+    "Resources": {
+        "VrouterImage": {
+            "Type": "Cloud::Resource::Image",
+            "Properties": {
+                "name": {"Fn::Join":["-",[{"Ref":"Cloud::StackName"}, {"Ref":"Cloud::StackUuid"},{"Ref":"Cloud::AccountUuid"},{"Ref":"Cloud::AccountName"},"Vrouter-Image"]]},
+                "url": {"Ref":"VrouterImageUrl"},
+                "system": true,
+                "format": "qcow2",
+                "backupStorageUuids":{"Ref":"BackupStorage"}
+            }
+        },
+        "VMImage": {
+            "Type": "Cloud::Resource::Image",
+            "Properties": {
+                "name": {"Fn::Join":["-",[{"Ref":"Cloud::StackName"}, "VmImage"]]},
+                "url": {"Ref":"VmImageUrl"},
+                "format": "qcow2",
+                "backupStorageUuids":{"Ref":"BackupStorage"}
+            }
+        },
+        "VirtualRouterOffering":{
+            "Type":"Cloud::Resource::VirtualRouterOffering",
+            "Properties":{
+                "name": {"Fn::Join":["-",[{"Ref":"Cloud::StackName"}, "Vrouter-Offering"]]},
+                "zoneUuid":{"Ref":"ZoneUuid"},
+                "managementNetworkUuid":{"Ref":"ManagementNetworkUuid"},
+                "publicNetworkUuid":{"Ref":"PublicNetworkUuid"},
+                "imageUuid":{"Fn::GetAtt":["VrouterImage", "uuid"]},
+                "cpuNum":2,
+                "memorySize":2147483648
+            }
+        },
+        "VpcVRouter":{
+            "Type":"Cloud::Resource::VpcVRouter",
+            "Properties":{
+                "name": {"Fn::Join":["-",[{"Ref":"Cloud::StackName"}, "VPC-Router"]]},
+                "virtualRouterOfferingUuid":{"Fn::GetAtt":["VirtualRouterOffering","uuid"]}
+            }
+        },
+        "L2VxlanNetworkPool":{
+            "Type":"Cloud::Resource::L2VxlanNetworkPool",
+            "Properties":{
+                "name": {"Fn::Join":["-",[{"Ref":"Cloud::StackName"}, "L2VxlanNetworkPool"]]},
+                "zoneUuid":{"Ref":"ZoneUuid"}
+            }
+        },
+        "VniRange":{
+            "Type":"Cloud::Resource::VniRange",
+            "Properties":{
+                "name": {"Fn::Join":["-",[{"Ref":"Cloud::StackName"}, "VniRange"]]},
+                "startVni":{"Ref":"StartVni"},
+                "endVni":{"Ref":"EndVni"},
+                "l2NetworkUuid":{"Fn::GetAtt":["L2VxlanNetworkPool","uuid"]}
+            }
+        },
+        "L2VxlanNetwork":{
+            "Type":"Cloud::Resource::L2VxlanNetwork",
+            "Properties":{
+                "name": {"Fn::Join":["-",[{"Ref":"Cloud::StackName"}, "L2VxlanNetwork"]]},
+                "poolUuid":{"Fn::GetAtt":["L2VxlanNetworkPool","uuid"]},
+                "zoneUuid":{"Ref":"ZoneUuid"},
+                "vni":{"Ref":"Vni"}
+            }
+        },
+        "VpcL3Network":{
+            "Type":"Cloud::Resource::L3Network",
+            "Properties":{
+                "name": {"Fn::Join":["-",[{"Ref":"Cloud::StackName"}, "VPC-Network"]]},
+                "l2NetworkUuid":{"Fn::GetAtt":["L2VxlanNetwork","uuid"]},
+                "category":"Private",
+                "type":"L3VpcNetwork",
+                "systemTags":["networkservices::VRouter"]
+            }
+        },
+        "AttachL3ToVm":{
+            "Type":"Cloud::Action::AttachL3NetworkToVm",
+            "Properties":{
+                "vmInstanceUuid": {"Fn::GetAtt":["VpcVRouter","uuid"]},
+                "l3NetworkUuid":{"Fn::GetAtt":["VpcL3Network","uuid"]}
+            },
+            "DependsOn":[{"Ref":"AddIpRange"}]
+        },
+        "AddIpRange" :{
+            "Type":"Cloud::Action::AddIpRange",
+            "Properties":{
+                "name": {"Fn::Join":["-",[{"Ref":"Cloud::StackName"}, "iprange"]]},
+                "l3NetworkUuid":{"Fn::GetAtt":["VpcL3Network","uuid"]},
+                "startIp":{"Ref":"StartIp"},
+                "endIp":{"Ref":"EndIp"},
+                "netmask":{"Ref":"Netmask"},
+                "gateway":{"Ref":"Gateway"}
+            }
+        },
+        "AttachL2NetworkToCluster":{
+            "Type":"Cloud::Action::AttachL2NetworkToCluster",
+            "Properties":{
+                "l2NetworkUuid":{"Fn::GetAtt":["L2VxlanNetworkPool","uuid"]},
+                "clusterUuid":{"Ref":"ClusterUuid"},
+                "systemTags":[{"Fn::Join":["::",["l2NetworkUuid",{"Fn::GetAtt":["L2VxlanNetwork","uuid"]},"clusterUuid",{"Ref":"ClusterUuid"},"cidr",{"Ref":"Cidr"}]]}]
+            }
+        },
+        "TestVm":{
+            "Type":"Cloud::Resource::VmInstance",
+            "Properties":{
+                "name": {"Fn::Join":["-",[{"Ref":"Cloud::StackName"}, "TestVm"]]},
+                "cpuNum": 1,
+                "memorySize": 1073741824,
+                "l3NetworkUuids": [{"Fn::GetAtt":["VpcL3Network","uuid"]}],
+                "imageUuid": {"Fn::GetAtt":["VMImage", "uuid"]}
+            },
+            "DependsOn":[{"Ref":"AttachL3ToVm"}]
+        }
+    },
+    "Outputs": {
+        "vpc": {
+            "Value": {
+                "Ref": "VpcL3Network"
+            }
+        }
+    }
+}

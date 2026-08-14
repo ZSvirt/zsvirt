@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<globalConfig xmlns="http://zstack.org/schema/zstack">
+    <config>
+        <name>host.failureWorkerInterval</name>
+        <description>The interval management server retries rules which are failed to apply previously, in seconds</description>
+        <defaultValue>60</defaultValue>
+        <category>securityGroup</category>
+        <type>java.lang.Integer</type>
+    </config>
+
+    <config>
+        <name>host.failureResolvePerTime</name>
+        <description>The number of hosts management server retries rules which are failed to apply previously.</description>
+        <defaultValue>100</defaultValue>
+        <category>securityGroup</category>
+        <type>java.lang.Integer</type>
+    </config>
+
+    <config>
+        <name>refresh.delayInterval</name>
+        <description>A delay in milliseconds. When a vm instance changes state from Unknown to Running, its security group rules will be refreshed. However, when zstack reconnects to a host, all vms on that host will change state from Unknown to Running if vms are really running on host. This may lead to security group on that host to be refreshed may times if there are lots of vm.To avoid this situation, zstack uses a delayed thread to accumulate vm in a time window of 'refresh.delayInterval'. That means, when a vm changes state from Unknown to Running, its security group will be refreshed after 'refresh.delayInterval' milliseconds.
+        </description>
+        <defaultValue>1000</defaultValue>
+        <category>securityGroup</category>
+        <type>java.lang.Long</type>
+    </config>
+
+    <config>
+        <name>ingress.defaultPolicy</name>
+        <description>Default policy for ingress traffic when security group is empty</description>
+        <defaultValue>drop</defaultValue>
+        <category>securityGroup</category>
+    </config>
+
+    <config>
+        <name>egress.defaultPolicy</name>
+        <description>Default policy for egress traffic when security group is empty</description>
+        <defaultValue>accept</defaultValue>
+        <category>securityGroup</category>
+    </config>
+
+    <config>
+        <name>securityGroup.num</name>
+        <description>default quota for securityGroup.num</description>
+        <defaultValue>20</defaultValue>
+        <category>quota</category>
+        <type>java.lang.Long</type>
+    </config>
+</globalConfig>

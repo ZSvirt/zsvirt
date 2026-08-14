@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<globalConfig xmlns="http://zstack.org/schema/zstack">
+    <config>
+        <category>console</category>
+        <name>proxy.idleTimeout</name>
+        <description>The max time an idle console proxy process waits before exiting, in seconds</description>
+        <defaultValue>60</defaultValue>
+        <type>java.lang.Integer</type>
+    </config>
+
+    <config>
+        <category>console</category>
+        <name>proxy.tls.version</name>
+        <description>The tls version proxy to use</description>
+        <defaultValue>NONE</defaultValue>
+        <type>java.lang.String</type>
+    </config>
+
+    <config>
+        <category>console</category>
+        <name>agent.ping.interval</name>
+        <description>The interval to ping console proxy agents, in seconds</description>
+        <defaultValue>60</defaultValue>
+        <type>java.lang.Integer</type>
+    </config>
+
+    <config>
+        <category>console</category>
+        <name>vnc.token.timeout</name>
+        <description>Timeout of VNC token, in seconds</description>
+        <defaultValue>1800</defaultValue>
+        <type>java.lang.Integer</type>
+    </config>
+
+    <config>
+        <category>console</category>
+        <name>vnc.allow.ports</name>
+        <description>tcp or udp ports allowed by vnc, udp port start with 'u' like 'u67', port range can be like this: 1100:1200, multiple port or port range can be separated by ”,“</description>
+        <defaultValue>4900,4901</defaultValue>
+        <type>java.lang.String</type>
+    </config>
+
+    <config>
+        <category>console</category>
+        <name>delete.consoleproxy.gc.delay</name>
+        <description>the delay delete does the next try for a console proxy if the previous delete operation failed, in seconds</description>
+        <type>java.lang.Integer</type>
+        <defaultValue>60</defaultValue>
+    </config>
+</globalConfig>

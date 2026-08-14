@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<globalConfig xmlns="http://zstack.org/schema/zstack">
+	<config>
+		<name>mount.base</name>
+		<description>The path host mounts nfs primary storage, which must be an absolute path</description>
+		<defaultValue>/opt/zstack/nfsprimarystorage</defaultValue>
+		<category>nfsPrimaryStorage</category>
+		<validatorRegularExpression>^/(.*)</validatorRegularExpression>
+	</config>
+
+	<config>
+		<name>deletion.gcInterval</name>
+		<description>the interval to garbage collect stale volumes and snapshots, in seconds</description>
+		<defaultValue>3600</defaultValue>
+		<category>nfsPrimaryStorage</category>
+		<type>java.lang.Integer</type>
+	</config>
+
+	<config>
+		<name>qcow2.allocation</name>
+		<description>qcow2 allocation policy, can be none, metadata, falloc, full</description>
+		<defaultValue>none</defaultValue>
+		<category>nfsPrimaryStorage</category>
+		<type>java.lang.String</type>
+	</config>
+</globalConfig>

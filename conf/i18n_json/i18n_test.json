@@ -1,0 +1,57 @@
+[
+  {
+    "raw": "I should not be in error list %d",
+    "en_US": "I should not be in error list {0}",
+    "zh_CN": "",
+    "arguments": [
+      "item"
+    ],
+    "fileName": "src/test/java/org/zstack/test/TestSafeWhile.java"
+  },
+  {
+    "raw": "I should not be in error list either %d",
+    "en_US": "I should not be in error list either {0}",
+    "zh_CN": "",
+    "arguments": [
+      "item"
+    ],
+    "fileName": "src/test/java/org/zstack/test/TestSafeWhile.java"
+  },
+  {
+    "raw": "on purpose %d",
+    "en_US": "on purpose {0}",
+    "zh_CN": "",
+    "arguments": [
+      "item"
+    ],
+    "fileName": "src/test/java/org/zstack/test/TestSafeWhile.java"
+  },
+  {
+    "raw": "done, on purpose",
+    "en_US": "done, on purpose",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/test/java/org/zstack/test/TestSafeWhile.java"
+  },
+  {
+    "raw": "on purpose",
+    "en_US": "on purpose",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/test/java/org/zstack/test/TestSafeWhile.java"
+  },
+  {
+    "raw": "I should not be errs list",
+    "en_US": "I should not be errs list",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/test/java/org/zstack/test/TestSafeWhile.java"
+  },
+  {
+    "raw": "I should not be errs list either.",
+    "en_US": "I should not be errs list either.",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/test/java/org/zstack/test/TestSafeWhile.java"
+  }
+]

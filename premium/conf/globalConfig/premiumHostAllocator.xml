@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<globalConfig xmlns="http://zstack.org/schema/zstack">
+    <config>
+        <category>premiumHostAllocator</category>
+        <name>minimumCPUUsageHostAllocatorStrategy.collectHostDataDuration</name>
+        <description>Configure the collection of host cpu usage duration</description>
+        <type>java.lang.Integer</type>
+        <defaultValue>600</defaultValue>
+    </config>
+
+    <config>
+        <category>premiumHostAllocator</category>
+        <name>minimumMemoryUsageHostAllocatorStrategy.collectHostDataDuration</name>
+        <description>Configure the collection of host memory usage duration</description>
+        <type>java.lang.Integer</type>
+        <defaultValue>600</defaultValue>
+    </config>
+</globalConfig>

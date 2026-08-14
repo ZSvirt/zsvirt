@@ -1,0 +1,20 @@
+[
+  {
+    "raw": "No factory found for type:%s",
+    "en_US": "No factory found for type:{0}",
+    "zh_CN": "未找到类型为{0}的工厂",
+    "arguments": [
+      "struct.getType()"
+    ],
+    "fileName": "src/main/java/org/zstack/log/LogConfigurationManagerImpl.java"
+  },
+  {
+    "raw": "Unknown log configuration type %s",
+    "en_US": "Unknown log configuration type {0}",
+    "zh_CN": "未知的日志配置类型{0}",
+    "arguments": [
+      "msg.getType()"
+    ],
+    "fileName": "src/main/java/org/zstack/log/LogConfigurationManagerImpl.java"
+  }
+]

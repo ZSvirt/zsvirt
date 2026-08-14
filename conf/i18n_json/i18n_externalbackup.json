@@ -1,0 +1,11 @@
+[
+  {
+    "raw": "Cannot find external backup[uuid:%s], it may have been deleted",
+    "en_US": "Cannot find external backup[uuid:{0}], it may have been deleted",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getExternalBackupUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/externalbackup/ExternalBackupManagerImpl.java"
+  }
+]

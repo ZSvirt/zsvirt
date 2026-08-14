@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<globalConfig xmlns="http://zstack.org/schema/zstack">
+    <config>
+        <category>flatNetworkProvider</category>
+        <name>allow.default.dns</name>
+        <description>If setup ZStack default dns for flat network</description>
+        <defaultValue>false</defaultValue>
+        <type>java.lang.Boolean</type>
+    </config>
+</globalConfig>

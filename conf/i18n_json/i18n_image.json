@@ -1,0 +1,354 @@
+[
+  {
+    "raw": "Failed because management node restarted.",
+    "en_US": "Failed because management node restarted.",
+    "zh_CN": "失败，因为管理节点已重新启动。",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/image/AddImageLongJob.java"
+  },
+  {
+    "raw": "the backup storage[uuid:%s] is not in status of Connected, current status is %s",
+    "en_US": "the backup storage[uuid:{0}] is not in status of Connected, current status is {1}",
+    "zh_CN": "镜像服务器[uuid:{0}]未处于Connected状态，当前状态是{1}",
+    "arguments": [
+      "backupStorageUuid",
+      "bsStatus"
+    ],
+    "fileName": "src/main/java/org/zstack/image/BackupStorageDeleteBitGC.java"
+  },
+  {
+    "raw": "The aarch64 architecture does not support legacy.",
+    "en_US": "The aarch64 architecture does not support legacy.",
+    "zh_CN": "AARCH64体系结构不支持旧版。",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/image/ImageApiInterceptor.java"
+  },
+  {
+    "raw": "volume[uuid:%s] is not Ready, it\u0027s %s",
+    "en_US": "volume[uuid:{0}] is not Ready, it\u0027s {1}",
+    "zh_CN": "云盘[uuid:{0}]未Ready，它现在为{1}",
+    "arguments": [
+      "vol.getUuid()",
+      "vol.getStatus()"
+    ],
+    "fileName": "src/main/java/org/zstack/image/ImageApiInterceptor.java"
+  },
+  {
+    "raw": "volume[uuid:%s] is not Enabled, it\u0027s %s",
+    "en_US": "volume[uuid:{0}] is not Enabled, it\u0027s {1}",
+    "zh_CN": "云盘[uuid:{0}]未Enabled，它现在为{1}",
+    "arguments": [
+      "vol.getUuid()",
+      "vol.getState()"
+    ],
+    "fileName": "src/main/java/org/zstack/image/ImageApiInterceptor.java"
+  },
+  {
+    "raw": "volume snapshot[uuid:%s] is not Ready, it\u0027s %s",
+    "en_US": "volume snapshot[uuid:{0}] is not Ready, it\u0027s {1}",
+    "zh_CN": "卷快照[uuid：{0}]未就绪，它是{1}",
+    "arguments": [
+      "vsvo.getUuid()",
+      "vsvo.getStatus()"
+    ],
+    "fileName": "src/main/java/org/zstack/image/ImageApiInterceptor.java"
+  },
+  {
+    "raw": "volume snapshot[uuid:%s] is not Enabled, it\u0027s %s",
+    "en_US": "volume snapshot[uuid:{0}] is not Enabled, it\u0027s {1}",
+    "zh_CN": "卷快照[uuid：{0}]未启用，它是{1}",
+    "arguments": [
+      "vsvo.getUuid()",
+      "vsvo.getState()"
+    ],
+    "fileName": "src/main/java/org/zstack/image/ImageApiInterceptor.java"
+  },
+  {
+    "raw": "ISO cannot be used as system image",
+    "en_US": "ISO cannot be used as system image",
+    "zh_CN": "ISO不能被作为一个系统标签",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/image/ImageApiInterceptor.java"
+  },
+  {
+    "raw": "unknown format[%s]",
+    "en_US": "unknown format[{0}]",
+    "zh_CN": "未知格式[{0}]",
+    "arguments": [
+      "msg.getFormat()"
+    ],
+    "fileName": "src/main/java/org/zstack/image/ImageApiInterceptor.java"
+  },
+  {
+    "raw": "unsupported image type[%s]",
+    "en_US": "unsupported image type[{0}]",
+    "zh_CN": "不支持的镜像类型[{0}]",
+    "arguments": [
+      "msg.getType()"
+    ],
+    "fileName": "src/main/java/org/zstack/image/ImageApiInterceptor.java"
+  },
+  {
+    "raw": "no backup storage specified in uuids%s is available for adding this image; they are not in status %s or not in state %s, or the uuid is invalid backup storage uuid",
+    "en_US": "no backup storage specified in uuids{0} is available for adding this image; they are not in status {1} or not in state {2}, or the uuid is invalid backup storage uuid",
+    "zh_CN": "镜像服务器uuids{0}不满足添加镜像的条件；它们的状态不同时满足{1}和{2},亦或者是无效的uuid",
+    "arguments": [
+      "msg.getBackupStorageUuids()",
+      "BackupStorageStatus.Connected",
+      "BackupStorageState.Enabled"
+    ],
+    "fileName": "src/main/java/org/zstack/image/ImageApiInterceptor.java"
+  },
+  {
+    "raw": "url must starts with \u0027file:///\u0027, \u0027http://\u0027, \u0027https://\u0027， \u0027ftp://\u0027, \u0027sftp://\u0027 or \u0027/\u0027",
+    "en_US": "url must starts with \u0027file:///\u0027, \u0027http://\u0027, \u0027https://\u0027， \u0027ftp://\u0027, \u0027sftp://\u0027 or \u0027/\u0027",
+    "zh_CN": "url必须以下列格式开头\u0027file:///\u0027, \u0027http://\u0027, \u0027https://\u0027， \u0027ftp://\u0027, \u0027sftp://\u0027 or \u0027/\u0027",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/image/ImageApiInterceptor.java"
+  },
+  {
+    "raw": "absolute path must be used",
+    "en_US": "absolute path must be used",
+    "zh_CN": "必须使用绝对路径",
+    "arguments": [
+      "path"
+    ],
+    "fileName": "src/main/java/org/zstack/image/ImageApiInterceptor.java"
+  },
+  {
+    "raw": "image path [%s] is in black list %s",
+    "en_US": "image path [{0}] is in black list {1}",
+    "zh_CN": "镜像路径[{0}]在黑名单{1}中",
+    "arguments": [
+      "path",
+      "blackList.value()"
+    ],
+    "fileName": "src/main/java/org/zstack/image/ImageApiInterceptor.java"
+  },
+  {
+    "raw": "all images on this server cannot be used",
+    "en_US": "all images on this server cannot be used",
+    "zh_CN": "无法使用此服务器上的所有镜像",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/image/ImageApiInterceptor.java"
+  },
+  {
+    "raw": "image path is not in white list: %s",
+    "en_US": "image path is not in white list: {0}",
+    "zh_CN": "镜像路径不在白名单中：{0}",
+    "arguments": [
+      "whiteList.value()"
+    ],
+    "fileName": "src/main/java/org/zstack/image/ImageApiInterceptor.java"
+  },
+  {
+    "raw": "the image[uuid:%s, name:%s] is not on any backup storage",
+    "en_US": "the image[uuid:{0}, name:{1}] is not on any backup storage",
+    "zh_CN": "镜像[uuid:{0}, 名称:{1}]不在任一镜像服务器上",
+    "arguments": [
+      "self.getUuid()",
+      "self.getName()"
+    ],
+    "fileName": "src/main/java/org/zstack/image/ImageBase.java"
+  },
+  {
+    "raw": "No connected backup storage found for image[uuid:%s, name:%s]",
+    "en_US": "No connected backup storage found for image[uuid:{0}, name:{1}]",
+    "zh_CN": "在所有 Connected 状态的镜像服务器上都找不到镜像[uuid:{0}, name:{1}]",
+    "arguments": [
+      "self.getUuid()",
+      "self.getName()"
+    ],
+    "fileName": "src/main/java/org/zstack/image/ImageBase.java"
+  },
+  {
+    "raw": "detach iso[uuid\u003d%s] from vm failed, errors are %s",
+    "en_US": "detach iso[uuid\u003d{0}] from vm failed, errors are {1}",
+    "zh_CN": "从VM分离ISO[uuid\u003d{0}]失败，错误为{1}",
+    "arguments": [
+      "msg.getImageUuid()",
+      "JSONObjectUtil.toJsonString(errors)"
+    ],
+    "fileName": "src/main/java/org/zstack/image/ImageBase.java"
+  },
+  {
+    "raw": "the image[uuid:%s, name:%s]\u0027s status[%s] is not Deleted on the backup storage[uuid:%s]",
+    "en_US": "the image[uuid:{0}, name:{1}]\u0027s status[{2}] is not Deleted on the backup storage[uuid:{3}]",
+    "zh_CN": "镜像[uuid:{0}, 名称:{1}]的状态[{2}]在镜像服务器[uuid:{3}]上不是Deleled",
+    "arguments": [
+      "self.getUuid()",
+      "self.getName()",
+      "ref.getStatus()",
+      "bsUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/image/ImageBase.java"
+  },
+  {
+    "raw": "the image[uuid:%s, name:%s] is not deleted on any backup storage",
+    "en_US": "the image[uuid:{0}, name:{1}] is not deleted on any backup storage",
+    "zh_CN": "镜像[uuid:{0}, 名称:{1}]未在任一镜像服务器上被删除",
+    "arguments": [
+      "self.getUuid()",
+      "self.getName()"
+    ],
+    "fileName": "src/main/java/org/zstack/image/ImageBase.java"
+  },
+  {
+    "raw": "the image[uuid:%s, name:%s] is not on the backup storage[uuid:%s]",
+    "en_US": "the image[uuid:{0}, name:{1}] is not on the backup storage[uuid:{2}]",
+    "zh_CN": "镜像[uuid:{0}, 名称:{1}]不在镜像服务器[uuid:{2}]上",
+    "arguments": [
+      "self.getUuid()",
+      "self.getName()",
+      "bsUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/image/ImageBase.java"
+  },
+  {
+    "raw": "the image[uuid:%s, name:%s] is not deleted on the backup storage[uuid:%s]",
+    "en_US": "the image[uuid:{0}, name:{1}] is not deleted on the backup storage[uuid:{2}]",
+    "zh_CN": "镜像[uuid:{0}, 名称:{1}]未在镜像服务器[uuid:{2}]上被删除",
+    "arguments": [
+      "self.getUuid()",
+      "self.getName()",
+      "bsUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/image/ImageBase.java"
+  },
+  {
+    "raw": "Cannot find image[uuid:%s], it may have been deleted",
+    "en_US": "Cannot find image[uuid:{0}], it may have been deleted",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getImageUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/image/ImageManagerImpl.java"
+  },
+  {
+    "raw": "only one bootMode system tag is allowed, but %d got",
+    "en_US": "only one bootMode system tag is allowed, but {0} got",
+    "zh_CN": "只允许一个Bootmode系统标记，但{0}获得了",
+    "arguments": [
+      "bootModeCount"
+    ],
+    "fileName": "src/main/java/org/zstack/image/ImageManagerImpl.java"
+  },
+  {
+    "raw": "[%s] specified in system tag [%s] is not a valid boot mode",
+    "en_US": "[{0}] specified in system tag [{1}] is not a valid boot mode",
+    "zh_CN": "系统标记[{1}]中指定的[{0}]不是有效的启动模式",
+    "arguments": [
+      "bootMode",
+      "systemTag"
+    ],
+    "fileName": "src/main/java/org/zstack/image/ImageManagerImpl.java"
+  },
+  {
+    "raw": "Failed to download image[name:%s] on all backup storage%s.",
+    "en_US": "Failed to download image[name:{0}] on all backup storage{1}.",
+    "zh_CN": "",
+    "arguments": [
+      "inv.getName()",
+      "msgData.getBackupStorageUuids()"
+    ],
+    "fileName": "src/main/java/org/zstack/image/ImageManagerImpl.java"
+  },
+  {
+    "raw": "unable to allocate backup storage specified by uuids%s, list errors are: %s",
+    "en_US": "unable to allocate backup storage specified by uuids{0}, list errors are: {1}",
+    "zh_CN": "不能根据[uuids:{0}]分配镜像服务器，错误清单为: {1}",
+    "arguments": [
+      "msgData.getBackupStorageUuids()",
+      "JSONObjectUtil.toJsonString(errs)"
+    ],
+    "fileName": "src/main/java/org/zstack/image/ImageManagerImpl.java"
+  },
+  {
+    "raw": "image [uuid:%s] has been deleted",
+    "en_US": "image [uuid:{0}] has been deleted",
+    "zh_CN": "镜像[uuid:{0}]已经被删除",
+    "arguments": [
+      "imageVO.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/image/ImageManagerImpl.java"
+  },
+  {
+    "raw": "failed to create image from root volume[uuid:%s] on all backup storage, see cause for one of errors",
+    "en_US": "failed to create image from root volume[uuid:{0}] on all backup storage, see cause for one of errors",
+    "zh_CN": "在所有镜像服务器上从云盘[uuid:{0}]创建镜像失败，查看错误原因",
+    "arguments": [
+      "rootVolumeUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/image/ImageManagerImpl.java"
+  },
+  {
+    "raw": "cannot find proper backup storage",
+    "en_US": "cannot find proper backup storage",
+    "zh_CN": "找不到适当的备份存储",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/image/ImageManagerImpl.java"
+  },
+  {
+    "raw": "failed to allocate all backup storage[uuid:%s], a list of error: %s",
+    "en_US": "failed to allocate all backup storage[uuid:{0}], a list of error: {1}",
+    "zh_CN": "镜像服务器[uuid:{0}]分配失败，错误清单:{1}",
+    "arguments": [
+      "msgData.getBackupStorageUuids()",
+      "JSONObjectUtil.toJsonString(errs)"
+    ],
+    "fileName": "src/main/java/org/zstack/image/ImageManagerImpl.java"
+  },
+  {
+    "raw": "failed to create data volume template from volume[uuid:%s] on all backup storage%s. See cause for one of errors",
+    "en_US": "failed to create data volume template from volume[uuid:{0}] on all backup storage{1}. See cause for one of errors",
+    "zh_CN": "在所有镜像服务器[uuid:{1}]上创建云盘[uuid:{0}]的云盘模版失败，查看错误原因",
+    "arguments": [
+      "volumeUuid",
+      "msgData.getBackupStorageUuids()"
+    ],
+    "fileName": "src/main/java/org/zstack/image/ImageManagerImpl.java"
+  },
+  {
+    "raw": "image[uuid:%s] is not on creating, please wait for it to cancel itself.",
+    "en_US": "image[uuid:{0}] is not on creating, please wait for it to cancel itself.",
+    "zh_CN": "镜像[uuid：{0}]未处于创建状态，请等待其自行取消。",
+    "arguments": [
+      "imageUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/image/ImageManagerImpl.java"
+  },
+  {
+    "raw": "volume[uuid:%s] has been deleted. no need to cancel",
+    "en_US": "volume[uuid:{0}] has been deleted. no need to cancel",
+    "zh_CN": "卷[uuid：{0}]已删除。不需要取消。",
+    "arguments": [
+      "volumeUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/image/ImageManagerImpl.java"
+  },
+  {
+    "raw": "architecture %s required",
+    "en_US": "architecture {0} required",
+    "zh_CN": "",
+    "arguments": [
+      "architecture"
+    ],
+    "fileName": "src/main/java/org/zstack/image/ImageManagerImpl.java"
+  },
+  {
+    "raw": "upload session expired",
+    "en_US": "upload session expired",
+    "zh_CN": "上传session失效了",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/image/UploadImageTracker.java"
+  },
+  {
+    "raw": "uploading has been inactive more than %d sec",
+    "en_US": "uploading has been inactive more than {0} sec",
+    "zh_CN": "上传镜像任务已处于空闲状态超过 {0} 秒: 已经有很久没有收到新的镜像上传数据了",
+    "arguments": [
+      "maxIdleSecond"
+    ],
+    "fileName": "src/main/java/org/zstack/image/UploadImageTracker.java"
+  }
+]

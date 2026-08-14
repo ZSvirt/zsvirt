@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx" xmlns:zstack="http://zstack.org/schema/zstack"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+    http://www.springframework.org/schema/aop
+    http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+    http://www.springframework.org/schema/tx
+    http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+    http://zstack.org/schema/zstack
+    http://zstack.org/schema/zstack/plugin.xsd"
+       default-init-method="init" default-destroy-method="destroy">
+
+    <bean id="TicketCascadeExtension" class="org.zstack.ticket.TicketCascadeExtension">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.core.cascade.CascadeExtensionPoint"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="TicketCollectionCascadeExtension" class="org.zstack.ticket.iam2.IAM2TicketCollectionCascadeExtension">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.core.cascade.CascadeExtensionPoint"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="TicketManager" class="org.zstack.ticket.TicketManagerImpl">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.Service"/>
+            <zstack:extension interface="org.zstack.header.Component"/>
+            <zstack:extension interface="org.zstack.header.managementnode.PrepareDbInitialValueExtensionPoint"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="TicketSNSManager" class="org.zstack.ticket.sns.TicketSNSManagerImpl">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.Component"/>
+            <zstack:extension interface="org.zstack.sns.SNSGlobalPropertyExtension" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="IAM2TicketManager" class="org.zstack.ticket.iam2.IAM2TicketManager">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.Component"/>
+            <zstack:extension interface="org.zstack.ticket.TicketFlowCollectionFactory"/>
+            <zstack:extension interface="org.zstack.ticket.TicketCreateSessionFactory"/>
+            <zstack:extension interface="org.zstack.ticket.TicketFactory"/>
+            <zstack:extension interface="org.zstack.ticket.TicketFlowFactory"/>
+            <zstack:extension interface="org.zstack.header.managementnode.PrepareDbInitialValueExtensionPoint"/>
+            <zstack:extension interface="org.zstack.ticket.UpdateIAM2TicketFlowExtensionPoint"/>
+            <zstack:extension interface="org.zstack.ticket.UpdateIAM2TicketFlowCollectionExtensionPoint"/>
+            <zstack:extension interface="org.zstack.ticket.DeleteTicketFlowExtensionPoint"/>
+            <zstack:extension interface="org.zstack.ticket.CreateTicketFlowCollectionExtensionPoint"/>
+            <zstack:extension interface="org.zstack.ticket.DeleteTicketFlowCollectionExtensionPoint"/>
+            <zstack:extension interface="org.zstack.ticket.AddTicketTypeToFlowCollectionExtensionPoint"/>
+            <zstack:extension interface="org.zstack.iam2.RemoveSystemVirtualIDAttributeExtension"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="TicketApiInterceptor" class="org.zstack.ticket.api.TicketApiInterceptor">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.apimediator.ApiMessageInterceptor"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="IAM2TicketApiInterceptor" class="org.zstack.ticket.iam2.api.IAM2TicketApiInterceptor">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.apimediator.ApiMessageInterceptor"/>
+        </zstack:plugin>
+    </bean>
+
+</beans>

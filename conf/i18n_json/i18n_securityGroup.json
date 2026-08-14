@@ -1,0 +1,1019 @@
+[
+  {
+    "raw": "could not change resource owner, because the resource[uuid:%s, type:VmInstance] has already attached security group",
+    "en_US": "could not change resource owner, because the resource[uuid:{0}, type:VmInstance] has already attached security group",
+    "zh_CN": "无法更改资源所有者，因为资源[uuid:{0}, 类型:VmInstance] 已加载安全组",
+    "arguments": [
+      "msg.getResourceUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "invalid security group rule, because security group[uuid:%s] not found",
+    "en_US": "invalid security group rule, because security group[uuid:{0}] not found",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getSecurityGroupUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "invalid security group rule, because remote security group[uuid:%s] not found",
+    "en_US": "invalid security group rule, because remote security group[uuid:{0}] not found",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getRemoteSecurityGroupUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "invalid security group rule, because startPort and endPort must be -1 when protocol is ALL or ICMP",
+    "en_US": "invalid security group rule, because startPort and endPort must be -1 when protocol is ALL or ICMP",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "invalid security group rule, because invalid endPort[%d], endPort must be greater than or equal to startPort[%d]",
+    "en_US": "invalid security group rule, because invalid endPort[{0}], endPort must be greater than or equal to startPort[{1}]",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getEndPort()",
+      "msg.getStartPort()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "invalid security group rule, because startPort[%d] must less than 65535 when protocol is[%s]",
+    "en_US": "invalid security group rule, because startPort[{0}] must less than 65535 when protocol is[{1}]",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getStartPort()",
+      "msg.getProtocol()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "remoteSecurityGroupUuid[%s] and srcIpRange/dstIpRange cannot be set at the same time",
+    "en_US": "remoteSecurityGroupUuid[{0}] and srcIpRange/dstIpRange cannot be set at the same time",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getRemoteSecurityGroupUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "remoteSecurityGroupUuid[%s] and allowedCidr[%s] cannot be set at the same time",
+    "en_US": "remoteSecurityGroupUuid[{0}] and allowedCidr[{1}] cannot be set at the same time",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getRemoteSecurityGroupUuid()",
+      "msg.getAllowedCidr()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "srcIpRange[%s] and dstIpRange[%s] cannot be set at the same time",
+    "en_US": "srcIpRange[{0}] and dstIpRange[{1}] cannot be set at the same time",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getSrcIpRange()",
+      "msg.getDstIpRange()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "srcIpRange cannot be set in Egress rule",
+    "en_US": "srcIpRange cannot be set in Egress rule",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "dstIpRange cannot be set in Ingress rule",
+    "en_US": "dstIpRange cannot be set in Ingress rule",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "dstPortRange cannot be set when rule protocol is ALL or ICMP",
+    "en_US": "dstPortRange cannot be set when rule protocol is ALL or ICMP",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "dstPortRange and startPort/endPort cannot be set at the same time",
+    "en_US": "dstPortRange and startPort/endPort cannot be set at the same time",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "allowCidr and srcIpRange/dstIpRange cannot be set at the same time",
+    "en_US": "allowCidr and srcIpRange/dstIpRange cannot be set at the same time",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "duplicated to rule[uuid:%s] in datebase",
+    "en_US": "duplicated to rule[uuid:{0}] in datebase",
+    "zh_CN": "",
+    "arguments": [
+      "vo.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "could no set vm nic security group, because vm nic[uuid:%s] not found",
+    "en_US": "could no set vm nic security group, because vm nic[uuid:{0}] not found",
+    "zh_CN": "无法设置VM NIC安全组，因为找不到VM NIC[uuid：{0}]",
+    "arguments": [
+      "msg.getVmNicUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "could no set vm nic security group, because the vm nic[uuid:%s] not attached to any security group",
+    "en_US": "could no set vm nic security group, because the vm nic[uuid:{0}] not attached to any security group",
+    "zh_CN": "无法设置VM NIC安全组，因为VM NIC[uuid：{0}]未挂载到任何安全组",
+    "arguments": [
+      "msg.getVmNicUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "could no set vm nic security group, because security group[uuid:%s] not found",
+    "en_US": "could no set vm nic security group, because security group[uuid:{0}] not found",
+    "zh_CN": "无法设置VM NIC安全组，因为找不到安全组[uuid：{0}]",
+    "arguments": [
+      "ao.getSecurityGroupUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "could no set vm nic security group, because invalid priority, priority[%d] cannot be less than 1",
+    "en_US": "could no set vm nic security group, because invalid priority, priority[{0}] cannot be less than 1",
+    "zh_CN": "无法设置VM NIC安全组，因为优先级无效，优先级[{0}]不能小于1",
+    "arguments": [
+      "priority"
+    ],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "could no set vm nic security group, because duplicate priority, both security group %s and %s have priority[%d]",
+    "en_US": "could no set vm nic security group, because duplicate priority, both security group {0} and {1} have priority[{2}]",
+    "zh_CN": "无法设置VM NIC安全组，因为优先级重复，安全组{0}和{1}都具有相同的优先级[{2}]",
+    "arguments": [
+      "aoMap.get(priority)",
+      "ao.getSecurityGroupUuid()",
+      "priority"
+    ],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "could no set vm nic security group, because duplicate security group[uuid:%s]",
+    "en_US": "could no set vm nic security group, because duplicate security group[uuid:{0}]",
+    "zh_CN": "无法设置VM NIC安全组，因为安全组[uuid：{0}]重复",
+    "arguments": [
+      "ao.getSecurityGroupUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "could no set vm nic security group, because security group[uuid:%s] is not owned by account[uuid:%s] or admin",
+    "en_US": "could no set vm nic security group, because security group[uuid:{0}] is not owned by account[uuid:{1}] or admin",
+    "zh_CN": "无法设置 VM NIC 安全组，因为安全组 [uuid:{0}] 不属于帐户[uuid:{1}] 或管理员",
+    "arguments": [
+      "ao.getSecurityGroupUuid()",
+      "vmAccountUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "could no set vm nic security group, because invalid priority, priority expects to start at 1, but [%d]",
+    "en_US": "could no set vm nic security group, because invalid priority, priority expects to start at 1, but [{0}]",
+    "zh_CN": "无法设置VM NIC安全组，因为优先级无效，优先级应从1开始，而不是[{0}]",
+    "arguments": [
+      "priorities[0]"
+    ],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "could no set vm nic security group, because invalid priority, priority[%d] and priority[%d] expected to be consecutive",
+    "en_US": "could no set vm nic security group, because invalid priority, priority[{0}] and priority[{1}] expected to be consecutive",
+    "zh_CN": "无法设置VM NIC安全组，因为优先级无效，优先级[{0}]和优先级[{1}]应是连续的",
+    "arguments": [
+      "priorities[i]",
+      "priorities[i + 1]"
+    ],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "could no set vm nic security group, because admin security group priority[%d] must be higher than users",
+    "en_US": "could no set vm nic security group, because admin security group priority[{0}] must be higher than users",
+    "zh_CN": "无法设置VM NIC安全组，因为管理员安全组优先级[{0}]必须高于用户安全组",
+    "arguments": [
+      "priorities[i + 1]"
+    ],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "could no change security group rule state, because ruleUuids is empty",
+    "en_US": "could no change security group rule state, because ruleUuids is empty",
+    "zh_CN": "无法更改安全组规则状态，因为RuleUIds为空",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "could no change security group rule state, because security group[uuid:%s] not found",
+    "en_US": "could no change security group rule state, because security group[uuid:{0}] not found",
+    "zh_CN": "无法更改安全组规则状态，因为找不到安全组[uuid：{0}]",
+    "arguments": [
+      "msg.getSecurityGroupUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "could no change security group rule state, because security group rule[uuid:%s] not found",
+    "en_US": "could no change security group rule state, because security group rule[uuid:{0}] not found",
+    "zh_CN": "无法更改安全组规则状态，因为找不到安全组规则[uuid：{0}]",
+    "arguments": [
+      "r"
+    ],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "could no change security group rule state, because no security group rule state need to change",
+    "en_US": "could no change security group rule state, because no security group rule state need to change",
+    "zh_CN": "无法更改安全组规则状态，因为没有安全组规则需要修改状态",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "could no change vm nic security policy, because ingress policy and egress policy cannot be both null",
+    "en_US": "could no change vm nic security policy, because ingress policy and egress policy cannot be both null",
+    "zh_CN": "无法更改VM NIC安全策略，因为入口策略和出口策略不能同时为空",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "could no change vm nic security policy, because invalid ingress policy[%s]",
+    "en_US": "could no change vm nic security policy, because invalid ingress policy[{0}]",
+    "zh_CN": "无法更改VM NIC安全策略，因为入口策略[{0}]无效",
+    "arguments": [
+      "msg.getIngressPolicy()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "could no change vm nic security policy, because invalid egress policy[%s]",
+    "en_US": "could no change vm nic security policy, because invalid egress policy[{0}]",
+    "zh_CN": "无法更改VM NIC安全策略，因为出口策略[{0}]无效",
+    "arguments": [
+      "msg.getEgressPolicy()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "could no change vm nic security policy, because vm nic[uuid:%s] not found",
+    "en_US": "could no change vm nic security policy, because vm nic[uuid:{0}] not found",
+    "zh_CN": "无法更改VM NIC安全策略，因为找不到VM NIC[uuid：{0}]",
+    "arguments": [
+      "msg.getVmNicUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "could no change vm nic security policy, because vm nic[uuid:%s] has no security policy",
+    "en_US": "could no change vm nic security policy, because vm nic[uuid:{0}] has no security policy",
+    "zh_CN": "无法更改VM NIC安全策略，因为VM NIC[uuid：{0}]没有安全策略",
+    "arguments": [
+      "msg.getVmNicUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "could not update security group rule priority, because invalid type[%s]",
+    "en_US": "could not update security group rule priority, because invalid type[{0}]",
+    "zh_CN": "无法更新安全组规则优先级，因为类型[{0}]无效",
+    "arguments": [
+      "msg.getType()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "could not update security group rule priority, because security group[uuid:%s] is not exist",
+    "en_US": "could not update security group rule priority, because security group[uuid:{0}] is not exist",
+    "zh_CN": "无法更新安全组规则优先级，因为安全组[uuid：{0}]不存在",
+    "arguments": [
+      "msg.getSecurityGroupUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "could not update security group rule priority, because rules is empty",
+    "en_US": "could not update security group rule priority, because rules is empty",
+    "zh_CN": "无法更新安全组规则优先级，因为规则为空",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "could not update security group rule priority, because security group[uuid:%s] rules size not match",
+    "en_US": "could not update security group rule priority, because security group[uuid:{0}] rules size not match",
+    "zh_CN": "无法更新安全组规则优先级，因为安全组[uuid：{0}]规则大小不匹配",
+    "arguments": [
+      "msg.getSecurityGroupUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "could not update security group rule priority, because rule priority[%d] is invalid",
+    "en_US": "could not update security group rule priority, because rule priority[{0}] is invalid",
+    "zh_CN": "无法更新安全组规则优先级，因为规则优先级[{0}]无效",
+    "arguments": [
+      "ao.getPriority()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "could not update security group rule priority, because priority[%d] has duplicate",
+    "en_US": "could not update security group rule priority, because priority[{0}] has duplicate",
+    "zh_CN": "无法更新安全组规则优先级，因为优先级[{0}]重复",
+    "arguments": [
+      "ao.getPriority()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "could not update security group rule priority, because rule[uuid:%s] not in security group[uuid:%s]",
+    "en_US": "could not update security group rule priority, because rule[uuid:{0}] not in security group[uuid:{1}]",
+    "zh_CN": "无法更新安全组规则优先级，因为规则[uuid：{0}]不在安全组[uuid：{1}]中",
+    "arguments": [
+      "ao.getRuleUuid()",
+      "msg.getSecurityGroupUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "could not update security group rule priority, because priority[%d] not in security group[uuid:%s]",
+    "en_US": "could not update security group rule priority, because priority[{0}] not in security group[uuid:{1}]",
+    "zh_CN": "无法更新安全组规则优先级，因为优先级[{0}]不在安全组[uuid：{1}]中",
+    "arguments": [
+      "ao.getPriority()",
+      "msg.getSecurityGroupUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "could not update security group rule priority, because rule uuid duplicate",
+    "en_US": "could not update security group rule priority, because rule uuid duplicate",
+    "zh_CN": "无法更新安全组规则优先级，因为规则uuid重复",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "could not change security group rule, because security group rule uuid[%s] is not exist",
+    "en_US": "could not change security group rule, because security group rule uuid[{0}] is not exist",
+    "zh_CN": "无法更改安全组规则，因为安全组规则uuid[{0}]不存在",
+    "arguments": [
+      "msg.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "could not change security group rule, because security group rule[%s] is default rule, only the description and status can be set",
+    "en_US": "could not change security group rule, because security group rule[{0}] is default rule, only the description and status can be set",
+    "zh_CN": "无法更改安全组规则，因为安全组规则[{0}]是默认规则，只能设置描述和状态",
+    "arguments": [
+      "msg.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "could not change security group rule, because security group rule[%s] priority cannot be set to default rule priority[%d]",
+    "en_US": "could not change security group rule, because security group rule[{0}] priority cannot be set to default rule priority[{1}]",
+    "zh_CN": "无法更改安全组规则，因为安全组规则[{0}]优先级无法设置为默认规则优先级[{1}]",
+    "arguments": [
+      "msg.getUuid()",
+      "SecurityGroupConstant.DEFAULT_RULE_PRIORITY"
+    ],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "could not change security group rule, because security group %s rules number[%d] is out of max limit[%d]",
+    "en_US": "could not change security group rule, because security group {0} rules number[{1}] is out of max limit[{2}]",
+    "zh_CN": "无法更改安全组规则，因为安全组{0}规则编号[{1}]超出最大限制[{2}]",
+    "arguments": [
+      "vo.getType()",
+      "count.intValue()",
+      "SecurityGroupGlobalConfig.SECURITY_GROUP_RULES_NUM_LIMIT.value(Integer.class)"
+    ],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "could not change security group rule, because the maximum priority of %s rule is [%d]",
+    "en_US": "could not change security group rule, because the maximum priority of {0} rule is [{1}]",
+    "zh_CN": "无法更改安全组规则，因为{0}规则的最高优先级为[{1}]",
+    "arguments": [
+      "vo.getType().toString()",
+      "count.intValue()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "could not change security group rule, because invalid state[%s]",
+    "en_US": "could not change security group rule, because invalid state[{0}]",
+    "zh_CN": "无法更改安全组规则，因为状态[{0}]无效",
+    "arguments": [
+      "msg.getState()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "could not change security group rule, because invalid action[%s]",
+    "en_US": "could not change security group rule, because invalid action[{0}]",
+    "zh_CN": "无法更改安全组规则，因为协议[{0}]无效",
+    "arguments": [
+      "msg.getAction()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "could not change security group rule, because invalid protocol[%s]",
+    "en_US": "could not change security group rule, because invalid protocol[{0}]",
+    "zh_CN": "无法更改安全组规则，因为协议[{0}]无效",
+    "arguments": [
+      "msg.getProtocol()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "could not change security group rule, because srcIpRange[%s] is set, remoteSecurityGroupUuid[%s] must be empty",
+    "en_US": "could not change security group rule, because srcIpRange[{0}] is set, remoteSecurityGroupUuid[{1}] must be empty",
+    "zh_CN": "无法更改安全组规则，因为已设置SrcIPRange[{0}]，RemoteSecurityGroupuuid[{1}]必须为空",
+    "arguments": [
+      "msg.getSrcIpRange()",
+      "msg.getRemoteSecurityGroupUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "could not change security group rule, because security group rule[%s] type is Ingress, dstIpRange[%s] cannot be set",
+    "en_US": "could not change security group rule, because security group rule[{0}] type is Ingress, dstIpRange[{1}] cannot be set",
+    "zh_CN": "无法更改安全组规则，因为安全组规则[{0}]类型为入口，无法设置dstIpRange[{1}]",
+    "arguments": [
+      "msg.getUuid()",
+      "msg.getDstIpRange()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "could not change security group rule, because security group rule[%s] type is Egress, srcIpRange[%s] cannot be set",
+    "en_US": "could not change security group rule, because security group rule[{0}] type is Egress, srcIpRange[{1}] cannot be set",
+    "zh_CN": "无法更改安全组规则，因为安全组规则[{0}]类型为出口，无法设置SrcIPRange[{1}]",
+    "arguments": [
+      "msg.getUuid()",
+      "msg.getSrcIpRange()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "could not change security group rule, because dstIpRange[%s] is set, remoteSecurityGroupUuid[%s] must be empty",
+    "en_US": "could not change security group rule, because dstIpRange[{0}] is set, remoteSecurityGroupUuid[{1}] must be empty",
+    "zh_CN": "无法更改安全组规则，因为已设置dstIpRange[{0}]，RemoteSecurityGroupuuid[{1}]必须为空",
+    "arguments": [
+      "msg.getDstIpRange()",
+      "msg.getRemoteSecurityGroupUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "could not change security group rule, because remote security group[uuid:%s] not found",
+    "en_US": "could not change security group rule, because remote security group[uuid:{0}] not found",
+    "zh_CN": "无法更改安全组规则，因为找不到远程安全组[uuid：{0}]",
+    "arguments": [
+      "msg.getRemoteSecurityGroupUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "could not change security group rule, because remote security group[uuid:%s] is set, srcIpRange and dstIpRange must be empty",
+    "en_US": "could not change security group rule, because remote security group[uuid:{0}] is set, srcIpRange and dstIpRange must be empty",
+    "zh_CN": "无法更改安全组规则，因为已设置远端安全组[uuid：{0}]，SrcIPRange和DstIPRange必须为空",
+    "arguments": [
+      "msg.getRemoteSecurityGroupUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "could not change security group rule, because rule protocol is [%s], dstPortRange cannot be set",
+    "en_US": "could not change security group rule, because rule protocol is [{0}], dstPortRange cannot be set",
+    "zh_CN": "无法更改安全组规则，因为规则协议为[{0}]，无法设置dstPortRange",
+    "arguments": [
+      "msg.getProtocol()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "could not change security group rule, because rule protocol is [%s], dstPortRange cannot be empty",
+    "en_US": "could not change security group rule, because rule protocol is [{0}], dstPortRange cannot be empty",
+    "zh_CN": "无法更改安全组规则，因为规则协议为[{0}]，dstPortRange不能为空",
+    "arguments": [
+      "msg.getProtocol()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "could not change security group rule, because rule protocol is [%s], dstPortRange must be set",
+    "en_US": "could not change security group rule, because rule protocol is [{0}], dstPortRange must be set",
+    "zh_CN": "无法更改安全组规则，因为规则协议为[{0}]，必须设置dstPortRange",
+    "arguments": [
+      "msg.getProtocol()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "could not change security group rule, because rule[%s] is duplicated to rule[uuid:%s] in datebase",
+    "en_US": "could not change security group rule, because rule[{0}] is duplicated to rule[uuid:{1}] in datebase",
+    "zh_CN": "无法更改安全组规则，因为规则[{0}]与数据库中的规则[uuid：{1}]重复",
+    "arguments": [
+      "JSONObjectUtil.toJsonString(sao)",
+      "o.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "invalid ports[%s], port range[%s] number[%d] is out of max limit[%d]",
+    "en_US": "invalid ports[{0}], port range[{1}] number[{2}] is out of max limit[{3}]",
+    "zh_CN": "",
+    "arguments": [
+      "ports",
+      "Arrays.toString(tmpPorts)",
+      "tmpPorts.length",
+      "SecurityGroupConstant.PORT_GROUP_NUMBER_LIMIT"
+    ],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "invalid ports[%s], port duplicate",
+    "en_US": "invalid ports[{0}], port duplicate",
+    "zh_CN": "",
+    "arguments": [
+      "ports"
+    ],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "invalid ports[%s]",
+    "en_US": "invalid ports[{0}]",
+    "zh_CN": "",
+    "arguments": [
+      "ports"
+    ],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "invalid port range[%s]",
+    "en_US": "invalid port range[{0}]",
+    "zh_CN": "",
+    "arguments": [
+      "port"
+    ],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "invalid port[%s]",
+    "en_US": "invalid port[{0}]",
+    "zh_CN": "",
+    "arguments": [
+      "port"
+    ],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "invalid ips[%s], ip number[%d] is out of max limit[%d]",
+    "en_US": "invalid ips[{0}], ip number[{1}] is out of max limit[{2}]",
+    "zh_CN": "",
+    "arguments": [
+      "ips",
+      "ipArray.length",
+      "SecurityGroupConstant.IP_GROUP_NUMBER_LIMIT"
+    ],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "invalid ips[%s], ip duplicate",
+    "en_US": "invalid ips[{0}], ip duplicate",
+    "zh_CN": "",
+    "arguments": [
+      "ips"
+    ],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "invalid ips[%s], ip range cannot be used when specifying multiple ipv6 addresses",
+    "en_US": "invalid ips[{0}], ip range cannot be used when specifying multiple ipv6 addresses",
+    "zh_CN": "",
+    "arguments": [
+      "ips"
+    ],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "invalid ips[%s]",
+    "en_US": "invalid ips[{0}]",
+    "zh_CN": "",
+    "arguments": [
+      "ips"
+    ],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "invalid cidr[%s], ipVersion[%d]",
+    "en_US": "invalid cidr[{0}], ipVersion[{1}]",
+    "zh_CN": "",
+    "arguments": [
+      "ip",
+      "ipVersion"
+    ],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "ipv4 cidr can not be 0.0.0.0/0",
+    "en_US": "ipv4 cidr can not be 0.0.0.0/0",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "ipv6 cidr can not be ::/0",
+    "en_US": "ipv6 cidr can not be ::/0",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "invalid ip range[%s]",
+    "en_US": "invalid ip range[{0}]",
+    "zh_CN": "",
+    "arguments": [
+      "ip"
+    ],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "invalid ip[%s], ipVersion[%d]",
+    "en_US": "invalid ip[{0}], ipVersion[{1}]",
+    "zh_CN": "",
+    "arguments": [
+      "ip",
+      "ipVersion"
+    ],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "security group[uuid:%s] has not attached to l3Network[uuid:%s], can\u0027t detach",
+    "en_US": "security group[uuid:{0}] has not attached to l3Network[uuid:{1}], can\u0027t detach",
+    "zh_CN": "不能卸载安全组[uuid:{0}]到L3[uuid:{1}]网络上，因为还未挂载",
+    "arguments": [
+      "msg.getSecurityGroupUuid()",
+      "msg.getL3NetworkUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "can\u0027t delete rules of different security group",
+    "en_US": "can\u0027t delete rules of different security group",
+    "zh_CN": "无法删除不同安全组的规则",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "can\u0027t delete default rule[uuid:%s]",
+    "en_US": "can\u0027t delete default rule[uuid:{0}]",
+    "zh_CN": "无法删除默认规则[uuid：{0}]",
+    "arguments": [
+      "vo.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "security group[uuid:%s] has attached to l3Network[uuid:%s], can\u0027t attach again",
+    "en_US": "security group[uuid:{0}] has attached to l3Network[uuid:{1}], can\u0027t attach again",
+    "zh_CN": "不能再次挂载安全组[uuid:{0}]到L3[uuid:{1}]网络上，因为已经挂载了",
+    "arguments": [
+      "msg.getSecurityGroupUuid()",
+      "msg.getL3NetworkUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "the L3 network[uuid:%s] doesn\u0027t have the network service type[%s] enabled",
+    "en_US": "the L3 network[uuid:{0}] doesn\u0027t have the network service type[{1}] enabled",
+    "zh_CN": "三层网络[uuid:{0}]没有开启[{1}]类型的网络服务",
+    "arguments": [
+      "msg.getL3NetworkUuid()",
+      "SecurityGroupConstant.SECURITY_GROUP_NETWORK_SERVICE_TYPE"
+    ],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "VM nics[uuids:%s] are not on L3 networks that have been attached to the security group[uuid:%s]",
+    "en_US": "VM nics[uuids:{0}] are not on L3 networks that have been attached to the security group[uuid:{1}]",
+    "zh_CN": "云物理机网卡[uuids:{0}]不在安全组[uuid:{1}]挂载的L3网络上",
+    "arguments": [
+      "wrongUuids",
+      "securityGroupUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "could not add security group rule, because the rules cannot be empty or exceed the max number %d",
+    "en_US": "could not add security group rule, because the rules cannot be empty or exceed the max number {0}",
+    "zh_CN": "无法添加安全组规则，因为规则不能为空或超过最大数量{0}",
+    "arguments": [
+      "SecurityGroupConstant.ONE_API_RULES_MAX_NUM"
+    ],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "could not add security group rule, because duplicate uuid in remoteSecurityGroupUuids: %s",
+    "en_US": "could not add security group rule, because duplicate uuid in remoteSecurityGroupUuids: {0}",
+    "zh_CN": "无法添加安全组规则，因为RemoteSecurityGroupuuid中存在重复的uuid：{0}",
+    "arguments": [
+      "msg.getRemoteSecurityGroupUuids()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "could not add security group rule, because security group[uuid:%s] does not exist",
+    "en_US": "could not add security group rule, because security group[uuid:{0}] does not exist",
+    "zh_CN": "无法添加安全组规则，因为安全组[uuid：{0}]不存在",
+    "arguments": [
+      "uuid"
+    ],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "could not add security group rule, because the remote security group uuid is conflict",
+    "en_US": "could not add security group rule, because the remote security group uuid is conflict",
+    "zh_CN": "无法添加安全组规则，因为远端安全组uuid冲突",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "could not add security group rule, because rule priority must greater than %d or equals %d",
+    "en_US": "could not add security group rule, because rule priority must greater than {0} or equals {1}",
+    "zh_CN": "无法添加安全组规则，因为规则优先级必须大于{0}或等于{1}",
+    "arguments": [
+      "SecurityGroupConstant.DEFAULT_RULE_PRIORITY",
+      "SecurityGroupConstant.LOWEST_RULE_PRIORITY"
+    ],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "could not add security group rule, because invalid rule protocol[%s], valid protocols are %s",
+    "en_US": "could not add security group rule, because invalid rule protocol[{0}], valid protocols are {1}",
+    "zh_CN": "无法添加安全组规则，因为规则协议[{0}]无效，有效协议为{1}",
+    "arguments": [
+      "ao.getProtocol()",
+      "SecurityGroupRuleProtocolType.getAllProtocol()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "could not add security group rule, because invalid rule action[%s], valid actions are %s",
+    "en_US": "could not add security group rule, because invalid rule action[{0}], valid actions are {1}",
+    "zh_CN": "无法添加安全组规则，因为规则动作[{0}]无效，有效动作为{1}",
+    "arguments": [
+      "ao.getAction()",
+      "SecurityGroupRuleAction.getAllAction()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "could not add security group rule, because invalid rule ipVersion[%d], valid ipVersions are %d/%d",
+    "en_US": "could not add security group rule, because invalid rule ipVersion[{0}], valid ipVersions are {1}/{2}",
+    "zh_CN": "无法添加安全组规则，因为规则IPVersion[{0}]无效，有效的IPVersion为{1}/{2}",
+    "arguments": [
+      "ao.getIpVersion()",
+      "IPv6Constants.IPv4",
+      "IPv6Constants.IPv6"
+    ],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "could not add security group rule, because the srcIpRange[%s] is not allowed to set for egress rule",
+    "en_US": "could not add security group rule, because the srcIpRange[{0}] is not allowed to set for egress rule",
+    "zh_CN": "无法添加安全组规则，因为不允许为出口规则设置SrcIPRange[{0}]",
+    "arguments": [
+      "ao.getSrcIpRange()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "could not add security group rule, because the allowedCidr[%s] and dstIpRange[%s] are in conflict",
+    "en_US": "could not add security group rule, because the allowedCidr[{0}] and dstIpRange[{1}] are in conflict",
+    "zh_CN": "无法添加安全组规则，因为AllowedCidr[{0}]和dstIpRange[{1}]冲突",
+    "arguments": [
+      "ao.getAllowedCidr()",
+      "ao.getDstIpRange()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "could not add security group rule, because the ip range[%s] and remoteSecurityGroupUuid[%s] are in conflict",
+    "en_US": "could not add security group rule, because the ip range[{0}] and remoteSecurityGroupUuid[{1}] are in conflict",
+    "zh_CN": "无法添加安全组规则，因为IP范围[{0}]和RemoteSecurityGroupuuid[{1}]冲突",
+    "arguments": [
+      "ao.getDstIpRange()",
+      "ao.getRemoteSecurityGroupUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "could not add security group rule, because the dstIpRange[%s] is not allowed to set for ingress rule",
+    "en_US": "could not add security group rule, because the dstIpRange[{0}] is not allowed to set for ingress rule",
+    "zh_CN": "无法添加安全组规则，因为不允许为入口规则设置dstIpRange[{0}]",
+    "arguments": [
+      "ao.getDstIpRange()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "could not add security group rule, because the allowedCidr[%s] and srcIpRange[%s] are in conflict",
+    "en_US": "could not add security group rule, because the allowedCidr[{0}] and srcIpRange[{1}] are in conflict",
+    "zh_CN": "无法添加安全组规则，因为allowedcidr[{0}]和srciprange[{1}]冲突",
+    "arguments": [
+      "ao.getAllowedCidr()",
+      "ao.getSrcIpRange()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "could not add security group rule, because the protocol type ALL or ICMP cant not set dstPortRange[%s]",
+    "en_US": "could not add security group rule, because the protocol type ALL or ICMP cant not set dstPortRange[{0}]",
+    "zh_CN": "无法添加安全组规则，因为协议类型ALL或ICMP无法设置DstPortRange[{0}]",
+    "arguments": [
+      "ao.getDstPortRange()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "could not add security group rule, because the protocol type ALL or ICMP cant not set startPort or endPort",
+    "en_US": "could not add security group rule, because the protocol type ALL or ICMP cant not set startPort or endPort",
+    "zh_CN": "无法添加安全组规则，因为协议类型ALL或ICMP无法设置StartPort或EndPort",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "could not add security group rule, because invalid rule endPort[%d], endPort must be greater than or equal to startPort[%d]",
+    "en_US": "could not add security group rule, because invalid rule endPort[{0}], endPort must be greater than or equal to startPort[{1}]",
+    "zh_CN": "无法添加安全组规则，因为规则endPort[{0}]无效，endPort必须大于或等于startPort[{1}]",
+    "arguments": [
+      "ao.getEndPort()",
+      "ao.getStartPort()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "could not add security group rule, because dstPortRange[%s] and starPort[%s] are in conflict",
+    "en_US": "could not add security group rule, because dstPortRange[{0}] and starPort[{1}] are in conflict",
+    "zh_CN": "无法添加安全组规则，因为DstPortRange[{0}]和StarPort[{1}]冲突",
+    "arguments": [
+      "ao.getDstPortRange()",
+      "ao.getStartPort()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "could not add security group rule, because the protocol type TCP/UDP must set dstPortRange",
+    "en_US": "could not add security group rule, because the protocol type TCP/UDP must set dstPortRange",
+    "zh_CN": "无法添加安全组规则，因为协议类型TCP/UDP必须设置dstPortRange",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "could not add security group rule, because rule[%s] and rule[%s] are dupilicated",
+    "en_US": "could not add security group rule, because rule[{0}] and rule[{1}] are dupilicated",
+    "zh_CN": "无法添加安全组规则，因为规则[{0}]和规则[{1}]重复",
+    "arguments": [
+      "JSONObjectUtil.toJsonString(newRules.get(i))",
+      "JSONObjectUtil.toJsonString(newRules.get(j))"
+    ],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "could not add security group rule, because rule[%s] is duplicated to rule[uuid:%s] in datebase",
+    "en_US": "could not add security group rule, because rule[{0}] is duplicated to rule[uuid:{1}] in datebase",
+    "zh_CN": "无法添加安全组规则，因为规则[{0}]与数据库中的规则[uuid：{1}]重复",
+    "arguments": [
+      "JSONObjectUtil.toJsonString(sao)",
+      "vo.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "could not add security group rule, because security group %s rules has reached the maximum limit[%d]",
+    "en_US": "could not add security group rule, because security group {0} rules has reached the maximum limit[{1}]",
+    "zh_CN": "无法添加安全组规则，因为安全组{0}规则已达到最大限制[{1}]",
+    "arguments": [
+      "SecurityGroupRuleType.Egress",
+      "SecurityGroupGlobalConfig.SECURITY_GROUP_RULES_NUM_LIMIT.value(Integer.class)"
+    ],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "could not add security group rule, because security group %s rules number[%d] is out of max limit[%d]",
+    "en_US": "could not add security group rule, because security group {0} rules number[{1}] is out of max limit[{2}]",
+    "zh_CN": "无法添加安全组规则，因为安全组{0}规则编号[{1}]超出最大限制[{2}]",
+    "arguments": [
+      "SecurityGroupRuleType.Egress",
+      "(egressRuleCount + toCreateEgressRuleCount)",
+      "SecurityGroupGlobalConfig.SECURITY_GROUP_RULES_NUM_LIMIT.value(Integer.class)"
+    ],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "could not add security group rule, because priority[%d] must be consecutive, the ingress rule maximum priority is [%d]",
+    "en_US": "could not add security group rule, because priority[{0}] must be consecutive, the ingress rule maximum priority is [{1}]",
+    "zh_CN": "无法添加安全组规则，因为优先级[{0}]必须连续，入口规则最大优先级为[{1}]",
+    "arguments": [
+      "msg.getPriority()",
+      "ingressRuleCount"
+    ],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "could not add security group rule, because priority[%d] must be consecutive, the egress rule maximum priority is [%d]",
+    "en_US": "could not add security group rule, because priority[{0}] must be consecutive, the egress rule maximum priority is [{1}]",
+    "zh_CN": "无法添加安全组规则，因为优先级[{0}]必须是连续的，出口规则最大优先级为[{1}]",
+    "arguments": [
+      "msg.getPriority()",
+      "egressRuleCount"
+    ],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupApiInterceptor.java"
+  },
+  {
+    "raw": "the netwotk service[type:%s] not enabled on the l3Network[uuid:%s]",
+    "en_US": "the netwotk service[type:{0}] not enabled on the l3Network[uuid:{1}]",
+    "zh_CN": "未在L3网络[uuid：{1}]上启用网络服务[类型：{0}]",
+    "arguments": [
+      "SecurityGroupConstant.SECURITY_GROUP_NETWORK_SERVICE_TYPE",
+      "l3Uuid"
+    ],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupManagerImpl.java"
+  },
+  {
+    "raw": "failed to chenge rule[uuid:%s] priority, beacuse it\u0027s not found",
+    "en_US": "failed to chenge rule[uuid:{0}] priority, beacuse it\u0027s not found",
+    "zh_CN": "无法更改规则[uuid：{0}]的优先级，因为找不到该优先级",
+    "arguments": [
+      "ao.getRuleUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupManagerImpl.java"
+  },
+  {
+    "raw": "cannot find vm nics[uuids:%s]",
+    "en_US": "cannot find vm nics[uuids:{0}]",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getVmNicUuids()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupManagerImpl.java"
+  },
+  {
+    "raw": "vm nic[uuid:%s] has been attach to security group[uuid:%s]",
+    "en_US": "vm nic[uuid:{0}] has been attach to security group[uuid:{1}]",
+    "zh_CN": "VM NIC[uuid：{0}]已连接到安全组[uuid：{1}]",
+    "arguments": [
+      "ref.getVmNicUuid()",
+      "msg.getSecurityGroupUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupManagerImpl.java"
+  },
+  {
+    "raw": "the netwotk service[type:%s] not enabled on the l3Network[uuid:%s] of nic[uuid:%s]",
+    "en_US": "the netwotk service[type:{0}] not enabled on the l3Network[uuid:{1}] of nic[uuid:{2}]",
+    "zh_CN": "网络服务[类型：{0}]未在NIC[uuid：{2}]的L3网络[uuid：{1}]上启用",
+    "arguments": [
+      "SecurityGroupConstant.SECURITY_GROUP_NETWORK_SERVICE_TYPE",
+      "nic.getL3NetworkUuid()",
+      "nic.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupManagerImpl.java"
+  },
+  {
+    "raw": "security group[uuid:%s] is not owned by account[uuid:%s] or admin",
+    "en_US": "security group[uuid:{0}] is not owned by account[uuid:{1}] or admin",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getSecurityGroupUuid()",
+      "vmAccountUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/network/securitygroup/SecurityGroupManagerImpl.java"
+  }
+]

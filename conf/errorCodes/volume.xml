@@ -1,0 +1,13 @@
+<error>
+    <prefix>VOLUME</prefix>
+
+    <code>
+        <id>1000</id>
+        <description>Unable to deactivate a volume in use</description>
+    </code>
+
+    <code>
+        <id>1001</id>
+        <description>fail to flatten volume</description>
+    </code>
+</error>

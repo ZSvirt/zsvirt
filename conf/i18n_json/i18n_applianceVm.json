@@ -1,0 +1,85 @@
+[
+  {
+    "raw": "there is no available nicType on L3 network [%s]",
+    "en_US": "there is no available nicType on L3 network [{0}]",
+    "zh_CN": "",
+    "arguments": [
+      "l3NetworkVO.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/appliancevm/ApplianceVmAllocateNicFlow.java"
+  },
+  {
+    "raw": "appliance vm[uuid:%s] is in status of %s that cannot make http call to %s",
+    "en_US": "appliance vm[uuid:{0}] is in status of {1} that cannot make http call to {2}",
+    "zh_CN": "系统虚拟机[uuid:{0}]处于{1}状态，无法对[{2}]执行HTTP RPC调用",
+    "arguments": [
+      "self.getUuid()",
+      "getSelf().getStatus()",
+      "msg.getPath()"
+    ],
+    "fileName": "src/main/java/org/zstack/appliancevm/ApplianceVmBase.java"
+  },
+  {
+    "raw": "operation error, because:%s",
+    "en_US": "operation error, because:{0}",
+    "zh_CN": "操作错误，因为{0}",
+    "arguments": [
+      "ret.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/appliancevm/ApplianceVmBase.java"
+  },
+  {
+    "raw": "appliance vm %s stopped",
+    "en_US": "appliance vm {0} stopped",
+    "zh_CN": "应用装置VM{0}已停止",
+    "arguments": [
+      "getSelf().getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/appliancevm/ApplianceVmBase.java"
+  },
+  {
+    "raw": "appliance vm %s reboot",
+    "en_US": "appliance vm {0} reboot",
+    "zh_CN": "应用装置虚拟机{0}重新启动",
+    "arguments": [
+      "getSelf().getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/appliancevm/ApplianceVmBase.java"
+  },
+  {
+    "raw": "appliance vm %s reboot failed",
+    "en_US": "appliance vm {0} reboot failed",
+    "zh_CN": "应用装置虚拟机{0}重新启动失败",
+    "arguments": [
+      "getSelf().getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/appliancevm/ApplianceVmBase.java"
+  },
+  {
+    "raw": "appliance vm %s start failed",
+    "en_US": "appliance vm {0} start failed",
+    "zh_CN": "应用装置VM{0}启动失败",
+    "arguments": [
+      "getSelf().getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/appliancevm/ApplianceVmBase.java"
+  },
+  {
+    "raw": "set appliance bootstrapinfo error, because:%s",
+    "en_US": "set appliance bootstrapinfo error, because:{0}",
+    "zh_CN": "设置装置BootstrapInfo错误，原因：{0}",
+    "arguments": [
+      "rsp.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/appliancevm/ApplianceVmKvmBootstrapFlow.java"
+  },
+  {
+    "raw": "the management nic IP[%s] has been occupied by another device in the data center, we can ping it",
+    "en_US": "the management nic IP[{0}] has been occupied by another device in the data center, we can ping it",
+    "zh_CN": "",
+    "arguments": [
+      "mgmtNic.getIp()"
+    ],
+    "fileName": "src/main/java/org/zstack/appliancevm/ApplianceVmManagementIpChecker.java"
+  }
+]

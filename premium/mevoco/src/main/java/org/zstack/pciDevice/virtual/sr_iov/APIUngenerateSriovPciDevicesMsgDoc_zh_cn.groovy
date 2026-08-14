@@ -1,0 +1,58 @@
+package org.zstack.pciDevice.virtual.sr_iov
+
+import org.zstack.pciDevice.virtual.APIUngenerateVirtualPciDevicesEvent
+
+doc {
+	title "UngenerateSriovPciDevices"
+
+	category "pciDevice"
+
+	desc """虚拟化还原支持SR-IOV的PCI设备"""
+
+	rest {
+		request {
+			url "PUT /v1/pci-devices/{pciDeviceUuid}/actions"
+
+			header (Authorization: 'OAuth the-session-uuid')
+
+			clz APIUngenerateSriovPciDevicesMsg.class
+
+			desc """虚拟化还原支持SR-IOV的PCI设备"""
+
+			params {
+
+				column {
+					name "pciDeviceUuid"
+					enclosedIn "ungenerateSriovPciDevices"
+					desc "PCI UUID"
+					location "url"
+					type "String"
+					optional false
+					since "3.5.0"
+				}
+				column {
+					name "systemTags"
+					enclosedIn ""
+					desc "系统标签"
+					location "body"
+					type "List"
+					optional true
+					since "3.5.0"
+				}
+				column {
+					name "userTags"
+					enclosedIn ""
+					desc "用户标签"
+					location "body"
+					type "List"
+					optional true
+					since "3.5.0"
+				}
+			}
+		}
+
+		response {
+			clz APIUngenerateVirtualPciDevicesEvent.class
+		}
+	}
+}

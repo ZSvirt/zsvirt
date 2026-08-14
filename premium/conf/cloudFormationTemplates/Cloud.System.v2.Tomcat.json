@@ -1,0 +1,121 @@
+{
+  "ZStackTemplateFormatVersion": "2018-06-18",
+  "Description": "Creates a Tomcat application:\nThis template creates a Tomcat application. Prerequisites:\nThe instance offering, image, and network are created. Make sure that the network can access the Internet, and cloudinit is installed for the image. Otherwise, the security group may fail to be created or fail to work properly after creation.",
+  "Parameters": {
+    "imageUuid": {
+      "Type": "String",
+      "Label": "Image",
+      "Description": "CentOS 7.5 cloudinit image is recommended"
+    },
+    "os-user": {
+      "Type": "String",
+      "Label": "os-user",
+      "Description": "Create a non-root user",
+      "DefaultValue": "demo"
+    },
+    "os-user-pw": {
+      "Type": "String",
+      "Label": "os-user password",
+      "Description": "password for non-root user",
+      "DefaultValue": "demo"
+    },
+    "os-user-key": {
+      "Type": "String",
+      "Label": "os-user ssh public key",
+      "Description": "user ssh public key",
+      "DefaultValue": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC+PmqBvrEdUgN/275alDnmFMC5R9ctsIbED+SsEAu6SQQX8VtzNMa1104hZ3BjDpP16SMvo1PVGcHma4MgTDfcNdyiQ3S3j87LtFxRr7UoMxhwy3RgaFzgI3ZVSvTu3XC1xqmkH2Ur69mQta1B3RpwdSX0mSUs5uK65DP7mvJDkCVfLX5hZmt8xuWNrnAvgh+xbBSTvG35OycBk+FiU8HnXnwuVkpxKjfwdSiySZL8SxRrApe5HRO/JyUzgBUn54b+mjoOM+R8GZ1bKNEHNrXTqVzABfR2Ocj0gOJAqZYJi2aTwP3N91yiiucpuxYqu6tYLRCOmi8Cl2TmXA4e5Ejp demo@example.com"
+    },
+    "manager-user": {
+      "Type": "String",
+      "Label": "Tomcat (Host) Manager user",
+      "Description": "Tomcat (Host) Manager user",
+      "DefaultValue": "admin"
+    },
+    "manager-password": {
+      "Type": "String",
+      "Label": "Password for Tomcat (Host) Manager user",
+      "Description": "Password for Tomcat (Host) Manager user"
+    },
+    "instanceOfferingUuid": {
+      "Type": "String",
+      "Label": "Instance Offering",
+      "Description": "The instance offering for creating a VM"
+    },
+    "l3NetworkUuid": {
+      "Type": "String",
+      "Label": "Public Network",
+      "Description": "The network for creating a VM. Make sure that the network supports the Userdata service and can access the Internet"
+    }
+  },
+  "Resources": {
+    "vmInstance-1": {
+      "Type": "Cloud::Resource::VmInstance",
+      "Properties": {
+        "name": {
+          "Fn::Join": ["", [
+            [""], {
+              "Ref": "Cloud::StackName"
+            },
+            "-tomcat"
+          ]]
+        },
+        "imageUuid": {
+          "Ref": "imageUuid"
+        },
+        "instanceOfferingUuid": {
+          "Ref": "instanceOfferingUuid"
+        },
+        "l3NetworkUuids": [{
+          "Ref": "l3NetworkUuid"
+        }],
+        "systemTags": [{
+          "Fn::Join": ["::", ["userdata", {
+            "Fn::Join": ["", ["#cloud-config\n",
+              "ssh_pwauth: true\n",
+              "disable_root: true\n",
+              "users:\n",
+              " - name: ", {
+                "Ref": "os-user"
+              }, "\n",
+              "   shell: /bin/bash\n",
+              "   groups: users\n",
+              "   sudo: ['ALL=(ALL) NOPASSWD:ALL']\n",
+              "   ssh-authorized-keys:\n",
+              "    - ", {
+                "Ref": "os-user-key"
+              }, "\n",
+              "   lock_passwd: false\n",
+              "\n",
+              "write_files:\n",
+              " - path: /tmp/install.sh\n",
+              "   content: |\n",
+              "    chkconfig firewalld off; service firewalld stop; iptables -F\n",
+              "    mkdir /root/repos.backup/; mv /etc/yum.repos.d/* /root/repos.backup/\n",
+              "    #yum-config-manager --add-repo http://mirrors.aliyun.com/repo/Centos-7.repo\n",
+              "    curl https://lug.ustc.edu.cn/wiki/_export/code/mirrors/help/centos?codeblock=3 -o /etc/yum.repos.d/ustc.repo\n",
+              "    yum-config-manager --enable base,updates,extras\n",
+              "    yum install -y tomcat tomcat-admin-webapps\n",
+              "    sed -i '/<\\/tomcat-users>/i <role rolename=\"manager-gui\"/>\\n<role rolename=\"admin-gui\"/>\\n<user username=\"", {
+                "Ref": "manager-user"
+              }, "\" password=\"", {
+                "Ref": "manager-password"
+              }, "\" roles=\"manager-gui,admin-gui\"/>' /usr/share/tomcat/conf/tomcat-users.xml\n",
+              "    systemctl enable tomcat;systemctl restart tomcat\n",
+              "\n",
+              "runcmd:\n",
+              " - echo '", {
+                "Ref": "os-user-pw"
+              }, "'|passwd --stdin ", {
+                "Ref": "os-user"
+              }, "\n",
+              " - [ bash, /tmp/install.sh]\n",
+              "\n",
+              "final_message:\n",
+              " The system is finally up, after $UPTIME seconds"
+            ]]
+          }]]
+        }]
+      }
+    }
+  }
+}

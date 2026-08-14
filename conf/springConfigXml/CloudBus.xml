@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:zstack="http://zstack.org/schema/zstack"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+         http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+         http://www.springframework.org/schema/aop
+         http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+         http://www.springframework.org/schema/tx 
+     	 http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+     	 http://zstack.org/schema/zstack 
+         http://zstack.org/schema/zstack/plugin.xsd"
+	default-init-method="init" default-destroy-method="destroy">
+
+    <bean id="TimeoutManager" class="org.zstack.core.timeout.ApiTimeoutManagerImpl">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.Component"/>
+            <zstack:extension interface="org.zstack.core.config.GlobalConfigInitExtensionPoint"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="Timer" class="org.zstack.core.timeout.TimeHelper"/>
+
+    <bean id="DeadMessageManager" class="org.zstack.core.cloudbus.DeadMessageManagerImpl">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.Component" order="999"/>
+            <zstack:extension interface="org.zstack.header.managementnode.ManagementNodeChangeListener"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="CloudBus3ManagementNodeLifeCycleTracker" class="org.zstack.core.cloudbus.CloudBus3ManagementNodeLifeCycleTracker">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.Component"/>
+            <zstack:extension interface="org.zstack.header.managementnode.ManagementNodeChangeListener"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="CloudBus" class = "org.zstack.core.cloudbus.CloudBusImpl3" depends-on="ThreadFacade,ThreadAspectj">
+    </bean>
+
+    <bean id="CloudBusJMX" class = "org.zstack.core.cloudbus.CloudBusJMX">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.Component" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="EventFacade" class = "org.zstack.core.cloudbus.EventFacadeImpl">
+    	<zstack:plugin>
+		<zstack:extension interface="org.zstack.header.Component" />
+		<zstack:extension interface="org.zstack.header.apimediator.GlobalApiMessageInterceptor" />
+	</zstack:plugin>
+    </bean>
+    
+    <bean id="ResourceDestinationMaker" class="org.zstack.core.cloudbus.ResourceDestinationMakerImpl" />
+    
+    <bean id="MessageIntegrityChecker" class="org.zstack.core.cloudbus.MessageIntegrityChecker">
+    	<zstack:plugin>
+			<zstack:extension interface="org.zstack.header.Component" />
+		</zstack:plugin>
+    </bean>
+</beans>

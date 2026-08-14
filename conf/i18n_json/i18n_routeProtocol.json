@@ -1,0 +1,113 @@
+[
+  {
+    "raw": "[%s] is not formatted as IPv4 address",
+    "en_US": "[{0}] is not formatted as IPv4 address",
+    "zh_CN": "[{0}]的格式不是IPv4地址",
+    "arguments": [
+      "msg.getAreaId()"
+    ],
+    "fileName": "src/main/java/org/zstack/routeProtocol/RouteProtocolApiInterceptor.java"
+  },
+  {
+    "raw": "AreaId[%s] has been created",
+    "en_US": "AreaId[{0}] has been created",
+    "zh_CN": "已创建Area ID[{0}]",
+    "arguments": [
+      "msg.getAreaId()"
+    ],
+    "fileName": "src/main/java/org/zstack/routeProtocol/RouteProtocolApiInterceptor.java"
+  },
+  {
+    "raw": "KeyID \u0026 password must be not null when authentication type is %s",
+    "en_US": "KeyID \u0026 password must be not null when authentication type is {0}",
+    "zh_CN": "当身份验证类型为{0}时，密钥ID和密码不能为Null",
+    "arguments": [
+      "msg.getAreaAuth()"
+    ],
+    "fileName": "src/main/java/org/zstack/routeProtocol/RouteProtocolApiInterceptor.java"
+  },
+  {
+    "raw": "password must be not null when authentication type is %s",
+    "en_US": "password must be not null when authentication type is {0}",
+    "zh_CN": "当身份验证类型为{0}时，密码不能为null",
+    "arguments": [
+      "msg.getAreaAuth()"
+    ],
+    "fileName": "src/main/java/org/zstack/routeProtocol/RouteProtocolApiInterceptor.java"
+  },
+  {
+    "raw": "the length of password is at most than 8Bytes when authentication type is %s",
+    "en_US": "the length of password is at most than 8Bytes when authentication type is {0}",
+    "zh_CN": "当身份验证类型为{0}时，密码长度不超过8个字节",
+    "arguments": [
+      "msg.getAreaAuth()"
+    ],
+    "fileName": "src/main/java/org/zstack/routeProtocol/RouteProtocolApiInterceptor.java"
+  },
+  {
+    "raw": "AreaId[%s] type must be %s",
+    "en_US": "AreaId[{0}] type must be {1}",
+    "zh_CN": "AreaID[{0}]类型必须为{1}",
+    "arguments": [
+      "vo.getAreaId()",
+      "RouterAreaType.Standard.toString()"
+    ],
+    "fileName": "src/main/java/org/zstack/routeProtocol/RouteProtocolApiInterceptor.java"
+  },
+  {
+    "raw": "All the networks should be in the virtual router[%s]",
+    "en_US": "All the networks should be in the virtual router[{0}]",
+    "zh_CN": "所有网络都应位于虚拟路由器[{0}]中",
+    "arguments": [
+      "msg.getvRouterUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/routeProtocol/RouteProtocolApiInterceptor.java"
+  },
+  {
+    "raw": "The network[%s] have been added into the virtual routerArea[%s]",
+    "en_US": "The network[{0}] have been added into the virtual routerArea[{1}]",
+    "zh_CN": "网络[{0}]已添加到虚拟路由器数据中心[{1}]",
+    "arguments": [
+      "vo.getL3NetworkUuid()",
+      "vo.getRouterAreaUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/routeProtocol/RouteProtocolApiInterceptor.java"
+  },
+  {
+    "raw": "The network[%s] have been added into the haGroup[%s]",
+    "en_US": "The network[{0}] have been added into the haGroup[{1}]",
+    "zh_CN": "网络[{0}]已添加到HAG组[{1}]",
+    "arguments": [
+      "vo.getL3NetworkUuid()",
+      "haUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/routeProtocol/RouteProtocolApiInterceptor.java"
+  },
+  {
+    "raw": "Router ID[%s] is not formatted as IPv4 address",
+    "en_US": "Router ID[{0}] is not formatted as IPv4 address",
+    "zh_CN": "路由器ID[{0}]的格式不是IPv4地址",
+    "arguments": [
+      "msg.getRouterId()"
+    ],
+    "fileName": "src/main/java/org/zstack/routeProtocol/RouteProtocolApiInterceptor.java"
+  },
+  {
+    "raw": "Router ID[%s] is not unique in this system",
+    "en_US": "Router ID[{0}] is not unique in this system",
+    "zh_CN": "路由器ID[{0}]在此系统中不唯一",
+    "arguments": [
+      "msg.getRouterId()"
+    ],
+    "fileName": "src/main/java/org/zstack/routeProtocol/RouteProtocolApiInterceptor.java"
+  },
+  {
+    "raw": "operation error, because:%s",
+    "en_US": "operation error, because:{0}",
+    "zh_CN": "操作错误，因为{0}",
+    "arguments": [
+      "rsp.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/routeProtocol/RouteProtocolOspfBackend.java"
+  }
+]

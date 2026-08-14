@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx" xmlns:zstack="http://zstack.org/schema/zstack"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+    http://www.springframework.org/schema/aop
+    http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+    http://www.springframework.org/schema/tx
+    http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+    http://zstack.org/schema/zstack
+    http://zstack.org/schema/zstack/plugin.xsd"
+       default-init-method="init" default-destroy-method="destroy">
+
+    <bean id="BaremetalPxeServerApiInterceptor" class="org.zstack.baremetal.pxeserver.BaremetalPxeServerApiInterceptor">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.apimediator.ApiMessageInterceptor" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="BaremetalPxeServer" class="org.zstack.baremetal.pxeserver.BaremetalPxeServerManagerImpl">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.managementnode.ManagementNodeChangeListener"/>
+            <zstack:extension interface="org.zstack.header.managementnode.ManagementNodeReadyExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.Component" />
+            <zstack:extension interface="org.zstack.header.Service" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="BaremetalPxeServerPingTracker" class="org.zstack.baremetal.pxeserver.BaremetalPxeServerPingTracker">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.Component" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="BaremetalPxeServerCascadeExtension" class="org.zstack.baremetal.pxeserver.BaremetalPxeServerCascadeExtension">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.core.cascade.CascadeExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="BaremetalPxeServerExtensionToZone" class="org.zstack.baremetal.pxeserver.BaremetalPxeServerExtensionToZone">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.zone.ZoneChangeStateExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="BaremetalPxeServerExtensionPointEmitter" class="org.zstack.baremetal.pxeserver.BaremetalPxeServerExtensionPointEmitter">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.Component" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="BaremetalClusterFactory" class="org.zstack.baremetal.cluster.BaremetalClusterFactory">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.cluster.ClusterFactory" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="BaremetalChassisApiInterceptor" class="org.zstack.baremetal.chassis.BaremetalChassisApiInterceptor">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.apimediator.ApiMessageInterceptor" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="BaremetalChassis" class="org.zstack.baremetal.chassis.BaremetalChassisManagerImpl">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.Component" />
+            <zstack:extension interface="org.zstack.header.Service" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="BaremetalChassisCascadeExtension" class="org.zstack.baremetal.chassis.BaremetalChassisCascadeExtension">
+        <zstack:plugin>
+			<zstack:extension interface="org.zstack.core.cascade.CascadeExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="BaremetalChassisExtensionToCluster" class="org.zstack.baremetal.chassis.BaremetalChassisExtensionToCluster">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.cluster.ClusterChangeStateExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="BaremetalChassisExtensionToPxeServer" class="org.zstack.baremetal.chassis.BaremetalChassisExtensionToPxeServer">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.baremetal.pxeserver.BaremetalPxeServerAttachExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.baremetal.pxeserver.BaremetalPxeServerDetachExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
+
+    <bean id="BaremetalInstanceApiInterceptor" class="org.zstack.baremetal.instance.BaremetalInstanceApiInterceptor">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.apimediator.ApiMessageInterceptor" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="BaremetalInstance" class="org.zstack.baremetal.instance.BaremetalInstanceManagerImpl">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.Component" />
+            <zstack:extension interface="org.zstack.header.Service" />
+            <zstack:extension interface="org.zstack.header.apimediator.GlobalApiMessageInterceptor" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="BaremetalInstanceCascadeExtension" class="org.zstack.baremetal.instance.BaremetalInstanceCascadeExtension">
+        <zstack:plugin>
+			<zstack:extension interface="org.zstack.core.cascade.CascadeExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="BaremetalInstanceExtensionToPxeServer" class="org.zstack.baremetal.instance.BaremetalInstanceExtensionToPxeServer">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.baremetal.pxeserver.BaremetalPxeServerAttachExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.baremetal.pxeserver.BaremetalPxeServerDetachExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="BaremetalInstanceDeletionPolicyManager" class="org.zstack.baremetal.instance.BaremetalInstanceDeletionPolicyManagerImpl" />
+
+    <bean id="BaremetalInstanceStaticConfigManager" class="org.zstack.baremetal.instance.BaremetalInstanceStaticConfigManagerImpl">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.managementnode.ManagementNodeReadyExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.managementnode.ManagementNodeChangeListener"/>
+            <zstack:extension interface="org.zstack.header.Component"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="BaremetalNetworkApiInterceptor" class="org.zstack.baremetal.network.BaremetalNetworkApiInterceptor">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.apimediator.ApiMessageInterceptor" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="BaremetalNetwork" class="org.zstack.baremetal.network.BaremetalNetworkManagerImpl">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.Component" />
+            <zstack:extension interface="org.zstack.header.Service" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="BaremetalNoVlanNicFactory" class="org.zstack.baremetal.instance.BaremetalNoVlanNicFactory">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.Component"/>
+            <zstack:extension interface="org.zstack.header.baremetal.network.BaremetalNicFactory"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="BaremetalVlanNicFactory" class="org.zstack.baremetal.instance.BaremetalVlanNicFactory">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.Component"/>
+            <zstack:extension interface="org.zstack.header.baremetal.network.BaremetalNicFactory"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="PreconfigurationApiInterceptor" class="org.zstack.baremetal.preconfiguration.PreconfigurationApiInterceptor">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.apimediator.ApiMessageInterceptor" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="PreconfigurationManager" class="org.zstack.baremetal.preconfiguration.PreconfigurationManagerImpl">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.Component" />
+            <zstack:extension interface="org.zstack.header.Service" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="TemplateCustomParamExtractor" class="org.zstack.baremetal.preconfiguration.TemplateParamExtractor"/>
+</beans>

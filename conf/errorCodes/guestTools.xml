@@ -1,0 +1,33 @@
+<error>
+    <prefix>GT</prefix>
+
+    <code>
+        <id>1000</id>
+        <description>Guest-tools general error</description>
+    </code>
+
+    <code>
+        <id>1001</id>
+        <description>Guest-tools installation error</description>
+    </code>
+
+    <code>
+        <id>1002</id>
+        <description>Guest-tools ISO detach error</description>
+    </code>
+
+    <code>
+        <id>1003</id>
+        <description>Failed to get guest-tools version</description>
+    </code>
+
+    <code>
+        <id>1004</id>
+        <description>Failed to get guest-tools status</description>
+    </code>
+
+    <code>
+        <id>1005</id>
+        <description>No available guest-tools ISO or installation files</description>
+    </code>
+</error>

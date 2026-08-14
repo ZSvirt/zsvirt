@@ -1,0 +1,106 @@
+[
+  {
+    "raw": "the console agent is not connected; it\u0027s mostly like the management node just starts, please wait for the console agent connected, or you can reconnect it manually if disconnected for a long time.",
+    "en_US": "the console agent is not connected; it\u0027s mostly like the management node just starts, please wait for the console agent connected, or you can reconnect it manually if disconnected for a long time.",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/console/AbstractConsoleProxyBackend.java"
+  },
+  {
+    "raw": "cannot find host IP of the vm[uuid:%s], is the vm running???",
+    "en_US": "cannot find host IP of the vm[uuid:{0}], is the vm running???",
+    "zh_CN": "无法找到vm[uuid:{0}]的物理机IP，请确认该vm是否在运行？？？",
+    "arguments": [
+      "vm.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/console/AbstractConsoleProxyBackend.java"
+  },
+  {
+    "raw": "vm[uuid:%s] is not in state of %s, current state is %s",
+    "en_US": "vm[uuid:{0}] is not in state of {1}, current state is {2}",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getVmInstanceUuid()",
+      "consoleAvailableStates",
+      "state"
+    ],
+    "fileName": "src/main/java/org/zstack/console/ConsoleApiInterceptor.java"
+  },
+  {
+    "raw": "establish VNC: unexpected uri: %s",
+    "en_US": "establish VNC: unexpected uri: {0}",
+    "zh_CN": "建立VNC：意外的URI：{0}",
+    "arguments": [
+      "uri.toString()"
+    ],
+    "fileName": "src/main/java/org/zstack/console/ConsoleProxyBase.java"
+  },
+  {
+    "raw": "unable to check console proxy availability, because %s",
+    "en_US": "unable to check console proxy availability, because {0}",
+    "zh_CN": "无法检查控制台代理是否可用，因为{0}",
+    "arguments": [
+      "ret.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/console/ConsoleProxyBase.java"
+  },
+  {
+    "raw": "operation error, because:%s",
+    "en_US": "operation error, because:{0}",
+    "zh_CN": "操作错误，因为{0}",
+    "arguments": [
+      "ret.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/console/ConsoleProxyBase.java"
+  },
+  {
+    "raw": "console proxy[uuid: %s, status: %s] on agent[ip: %s] is not Connected, fail to delete it",
+    "en_US": "console proxy[uuid: {0}, status: {1}] on agent[ip: {2}] is not Connected, fail to delete it",
+    "zh_CN": "",
+    "arguments": [
+      "consoleProxy.getUuid()",
+      "status",
+      "consoleProxy.getAgentIp()"
+    ],
+    "fileName": "src/main/java/org/zstack/console/DeleteConsoleProxyGcJob.java"
+  },
+  {
+    "raw": "Ansible private key not found.",
+    "en_US": "Ansible private key not found.",
+    "zh_CN": "找不到Ansible私钥。",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/console/ManagementServerConsoleProxyBackend.java"
+  },
+  {
+    "raw": "invalid management node UUID[%s]",
+    "en_US": "invalid management node UUID[{0}]",
+    "zh_CN": "",
+    "arguments": [
+      "uuid"
+    ],
+    "fileName": "src/main/java/org/zstack/console/ManagementServerConsoleProxyBackend.java"
+  },
+  {
+    "raw": "there is other process using the port: %s",
+    "en_US": "there is other process using the port: {0}",
+    "zh_CN": "",
+    "arguments": [
+      "stdout"
+    ],
+    "fileName": "src/main/java/org/zstack/console/ManagementServerConsoleProxyBackend.java"
+  },
+  {
+    "raw": "failed to configure consoleProxyOverriddenIp[code:%d] or consoleProxyPort[code:%d]",
+    "en_US": "failed to configure consoleProxyOverriddenIp[code:{0}] or consoleProxyPort[code:{1}]",
+    "zh_CN": "无法配置ConsoleProxyOverriddeNip[代码：{0}]或ConsoleProxyPort[代码：{1}]",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/console/ManagementServerConsoleProxyBackend.java"
+  },
+  {
+    "raw": "failed to reconnect console proxy",
+    "en_US": "failed to reconnect console proxy",
+    "zh_CN": "重连控制台代理失败",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/console/ManagementServerConsoleProxyBackend.java"
+  }
+]

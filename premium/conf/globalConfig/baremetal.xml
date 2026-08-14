@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<globalConfig xmlns="http://zstack.org/schema/zstack">
+    <config>
+        <category>baremetalChassis</category>
+        <name>batch.maxnumber</name>
+        <description>the max number of chassis that can be created in one batch job</description>
+        <defaultValue>500</defaultValue>
+        <type>java.lang.Long</type>
+    </config>
+
+    <config>
+        <category>baremetalInstance</category>
+        <name>deletionPolicy</name>
+        <description>the behavior of deleting a baremetal instance, options are [Direct, Delay]. Direct: delete the baremetal instance from database; Delay: change the bm's state to Destroyed in database; after the period controlled by 'expungePeriod' passes, delete the bm from database.</description>
+        <type>java.lang.String</type>
+        <defaultValue>Delay</defaultValue>
+    </config>
+    <config>
+        <category>baremetalInstance</category>
+        <name>expungePeriod</name>
+        <description>the period before a destroyed baremetal instance being deleted from database, in seconds</description>
+        <type>java.lang.Long</type>
+        <defaultValue>604800</defaultValue>
+    </config>
+    <config>
+        <category>baremetalInstance</category>
+        <name>expungeInterval</name>
+        <description>the interval the expunging baremetal instance task runs, in seconds</description>
+        <defaultValue>3600</defaultValue>
+        <type>java.lang.Long</type>
+    </config>
+
+    <config>
+        <category>baremetalPxeServer</category>
+        <name>ping.interval</name>
+        <description>The interval management server sends ping command to baremetal pxeserver, in seconds</description>
+        <defaultValue>60</defaultValue>
+        <type>java.lang.Integer</type>
+    </config>
+    <config>
+        <category>baremetalPxeServer</category>
+        <name>ping.parallelismDegree</name>
+        <description>The max number of baremetal pxeserver that management server sends ping commands in parallel</description>
+        <defaultValue>50</defaultValue>
+        <type>java.lang.Integer</type>
+    </config>
+    <config>
+        <category>baremetalPxeServer</category>
+        <name>reservedCapacity</name>
+        <description>The reserved capacity on all baremetal pxeserver</description>
+        <defaultValue>1G</defaultValue>
+    </config>
+    <config>
+        <category>baremetalPxeServer</category>
+        <name>pxeserver.allow.ports</name>
+        <description>tcp or udp ports allowed by pxe server, udp port start with 'u' like 'u67', port range can be like this: 1100:1200, multiple port or port range can be separated by ”,“</description>
+        <type>java.lang.String</type>
+        <defaultValue>u67:68,u69,21,6080,7770,7771,7772,7773,9093</defaultValue>
+    </config>
+</globalConfig>

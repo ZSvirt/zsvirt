@@ -1,0 +1,18 @@
+<error>
+    <prefix>VOPS</prefix>
+
+    <code>
+        <id>1000</id>
+        <description>VOps Generic Errors</description>
+    </code>
+
+    <code>
+        <id>1312</id>
+        <description>Http Timed Out</description>
+    </code>
+
+    <code>
+        <id>1315</id>
+        <description>Errors on Remote Vops Agent</description>
+    </code>
+</error>

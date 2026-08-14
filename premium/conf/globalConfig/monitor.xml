@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<globalConfig xmlns="http://zstack.org/schema/zstack">
+    <config>
+        <category>monitoring</category>
+        <name>trigger.recovery.checker.interval</name>
+        <description>the interval to check if triggers are recovered, in seconds</description>
+        <defaultValue>10</defaultValue>
+        <type>java.lang.Integer</type>
+    </config>
+</globalConfig>

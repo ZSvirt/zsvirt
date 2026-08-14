@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<globalConfig xmlns="http://zstack.org/schema/zstack">
+    <config>
+        <category>zwatch</category>
+        <name>evaluation.interval</name>
+        <description>the interval to evaluate alarm rules, in seconds</description>
+        <type>java.lang.Integer</type>
+        <defaultValue>10</defaultValue>
+    </config>
+
+    <config>
+        <category>zwatch</category>
+        <name>evaluation.threadNum</name>
+        <description>the number of threads used to evaluate alarm rules</description>
+        <type>java.lang.Integer</type>
+        <defaultValue>5</defaultValue>
+    </config>
+
+    <config>
+        <category>zwatch</category>
+        <name>alarm.repeatInterval</name>
+        <description>the alarm default repeat interval, in seconds</description>
+        <type>java.lang.Integer</type>
+        <defaultValue>1800</defaultValue>
+    </config>
+
+    <config>
+        <category>zwatch</category>
+        <name>managementServerDirectoriesToMonitor</name>
+        <description>the list of directories to monitor on management servers, multiple directories split by commas</description>
+        <defaultValue>/var/lib/zstack/,{user.home}</defaultValue>
+    </config>
+
+    <config>
+        <category>zwatch</category>
+        <name>scrape.interval</name>
+        <description>the interval that zwatch pulls data from monitoring agents, in seconds</description>
+        <type>java.lang.Integer</type>
+        <defaultValue>20</defaultValue>
+    </config>
+
+    <config>
+        <category>zwatch</category>
+        <name>resolution.defaultAlgorithm.maxSamples</name>
+        <description>the max samples returned by default resolution algorithm when GetMetricData API queries a large time range; it only works if the period field is not set in the API</description>
+        <type>java.lang.Integer</type>
+        <defaultValue>500</defaultValue>
+    </config>
+
+    <config>
+        <category>zwatch</category>
+        <name>countCacheExpireSecTime</name>
+        <description>EventData and AlarmData count cache expiration time secs</description>
+        <type>java.lang.Long</type>
+        <defaultValue>10</defaultValue>
+    </config>
+
+    <config>
+        <category>zwatch</category>
+        <name>minimumCountAmountAllowedAddedToCache</name>
+        <description>The minimum amount allowed to be added to the cache</description>
+        <type>java.lang.Long</type>
+        <defaultValue>150</defaultValue>
+    </config>
+</globalConfig>

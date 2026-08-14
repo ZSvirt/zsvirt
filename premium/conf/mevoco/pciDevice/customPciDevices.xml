@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<pciDevices>
+    <pciDevice>
+        <name>User defined PCI Controller</name>
+        <description>My PCI controller</description>
+        <vendorId>0501</vendorId>
+        <deviceId>1515</deviceId>
+    </pciDevice>
+
+    <!-- ADD NEW CUSTOM PCI DEVICE INFO HERE -->
+</pciDevices>

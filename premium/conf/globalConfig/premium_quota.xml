@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<globalConfig xmlns="http://zstack.org/schema/zstack">
+    <config>
+        <category>quota</category>
+        <name>scheduler.num</name>
+        <description>default quota for scheduler.num</description>
+        <defaultValue>80</defaultValue>
+        <type>java.lang.Long</type>
+    </config>
+
+    <config>
+        <category>quota</category>
+        <name>scheduler.trigger.num</name>
+        <description>default quota for scheduler.trigger.num</description>
+        <defaultValue>80</defaultValue>
+        <type>java.lang.Long</type>
+    </config>
+
+    <config>
+        <category>quota</category>
+        <name>zwatch.alarm.num</name>
+        <description>default quota for zwatch.alarm.num</description>
+        <defaultValue>20</defaultValue>
+        <type>java.lang.Long</type>
+    </config>
+
+    <config>
+        <category>quota</category>
+        <name>zwatch.event.num</name>
+        <description>default quota for zwatch.event.num</description>
+        <defaultValue>20</defaultValue>
+        <type>java.lang.Long</type>
+    </config>
+
+    <config>
+        <category>quota</category>
+        <name>sns.endpoint.num</name>
+        <description>default quota for sns.endpoint.num</description>
+        <defaultValue>20</defaultValue>
+        <type>java.lang.Long</type>
+    </config>
+</globalConfig>

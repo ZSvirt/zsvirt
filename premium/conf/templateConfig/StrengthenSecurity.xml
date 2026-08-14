@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templateConfig>
+    <config>
+        <templateName>StrengthenSecurity</templateName>
+        <category>accessControl</category>
+        <name>enable.request.source.ip.address.check</name>
+        <defaultValue>true</defaultValue>
+    </config>
+
+    <config>
+        <templateName>StrengthenSecurity</templateName>
+        <category>encrypt</category>
+        <name>enable.password.encrypt</name>
+        <defaultValue>LocalEncryption</defaultValue>
+    </config>
+
+    <config>
+        <templateName>StrengthenSecurity</templateName>
+        <category>identity</category>
+        <name>enable.unique.session</name>
+        <defaultValue>true</defaultValue>
+    </config>
+
+    <config>
+        <templateName>StrengthenSecurity</templateName>
+        <category>identity</category>
+        <name>session.timeout</name>
+        <defaultValue>3600</defaultValue>
+    </config>
+
+    <config>
+        <templateName>StrengthenSecurity</templateName>
+        <category>ldap</category>
+        <name>skip.all.ssl.certs.check</name>
+        <defaultValue>true</defaultValue>
+    </config>
+
+    <config>
+        <templateName>StrengthenSecurity</templateName>
+        <category>loginControl</category>
+        <name>login.control</name>
+        <defaultValue>true</defaultValue>
+    </config>
+    <config>
+        <templateName>StrengthenSecurity</templateName>
+        <category>loginControl</category>
+        <name>login.attempts.maximum</name>
+        <defaultValue>3</defaultValue>
+    </config>
+
+    <config>
+        <templateName>StrengthenSecurity</templateName>
+        <category>passwordStrategy</category>
+        <name>enable.force.change.password.period</name>
+        <defaultValue>true</defaultValue>
+    </config>
+    <config>
+        <templateName>StrengthenSecurity</templateName>
+        <category>passwordStrategy</category>
+        <name>force.change.password.period</name>
+        <defaultValue>2592000</defaultValue>
+    </config>
+
+    <config>
+        <templateName>StrengthenSecurity</templateName>
+        <category>passwordStrategy</category>
+        <name>enable.historical.password.compare</name>
+        <defaultValue>true</defaultValue>
+    </config>
+    <config>
+        <templateName>StrengthenSecurity</templateName>
+        <category>passwordStrategy</category>
+        <name>historical.password.num</name>
+        <defaultValue>5</defaultValue>
+    </config>
+
+    <config>
+        <templateName>StrengthenSecurity</templateName>
+        <category>passwordStrategy</category>
+        <name>enable.lock.login.attempts.maximum</name>
+        <defaultValue>true</defaultValue>
+    </config>
+    <config>
+        <templateName>StrengthenSecurity</templateName>
+        <category>passwordStrategy</category>
+        <name>lock.login.attempts.maximum</name>
+        <defaultValue>6</defaultValue>
+    </config>
+    <config>
+        <templateName>StrengthenSecurity</templateName>
+        <category>passwordStrategy</category>
+        <name>lock.login.period</name>
+        <defaultValue>600</defaultValue>
+    </config>
+
+    <config>
+        <templateName>StrengthenSecurity</templateName>
+        <category>passwordStrategy</category>
+        <name>password.strength.check.config</name>
+        <defaultValue>{"checkLowercase":true,"checkNumber":true,"checkSpecialWords":true,"checkUppercase":true,"enabled":true,"maximum":32,"minimum":8}</defaultValue>
+    </config>
+
+    <config>
+        <templateName>StrengthenSecurity</templateName>
+        <category>twofa</category>
+        <name>twofa.enable</name>
+        <defaultValue>false</defaultValue>
+    </config>
+
+    <config>
+        <templateName>StrengthenSecurity</templateName>
+        <category>mevoco</category>
+        <name>vm.console.password.strength.check.config</name>
+        <defaultValue>11111,6-8</defaultValue>
+    </config>
+
+    <config>
+        <templateName>StrengthenSecurity</templateName>
+        <category>mevoco</category>
+        <name>vm.password.strength.check.config</name>
+        <defaultValue>11111,8-18</defaultValue>
+    </config>
+</templateConfig>

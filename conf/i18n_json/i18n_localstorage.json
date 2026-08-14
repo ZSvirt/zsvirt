@@ -1,0 +1,720 @@
+[
+  {
+    "raw": "disk capacity[%s bytes] required",
+    "en_US": "disk capacity[{0} bytes] required",
+    "zh_CN": "",
+    "arguments": [
+      "spec.getDiskSize()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/local/LocalStorageAllocatorFactory.java"
+  },
+  {
+    "raw": "local storage volume[uuid:%s] is not on this host",
+    "en_US": "local storage volume[uuid:{0}] is not on this host",
+    "zh_CN": "",
+    "arguments": [
+      "volume.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/local/LocalStorageAllocatorFactory.java"
+  },
+  {
+    "raw": "To create volume on the local primary storage, you must specify the host that the volume is going to be created using the system tag [%s]",
+    "en_US": "To create volume on the local primary storage, you must specify the host that the volume is going to be created using the system tag [{0}]",
+    "zh_CN": "创建本地主存储硬盘时，必须指定硬盘要创建的虚拟机，请使用系统标签[{0}]指定虚拟机",
+    "arguments": [
+      "LocalStorageSystemTags.DEST_HOST_FOR_CREATING_DATA_VOLUME.getTagFormat()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/local/LocalStorageAllocatorFactory.java"
+  },
+  {
+    "raw": "invalid uri, correct example is file://$URL;hostUuid://$HOSTUUID or volume://$VOLUMEUUID or volumeSnapshotReuse://$SNAPSHOTUUID",
+    "en_US": "invalid uri, correct example is file://$URL;hostUuid://$HOSTUUID or volume://$VOLUMEUUID or volumeSnapshotReuse://$SNAPSHOTUUID",
+    "zh_CN": "URI格式错误，正确格式为file://$URL;hostUuid://$HOSTUUID 或 volume://$VOLUMEUUID 或 volumeSnapshotReuse://$SNAPSHOTUUID",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/storage/primary/local/LocalStorageAllocatorFactory.java"
+  },
+  {
+    "raw": "the volume[uuid:%s] is not on any local primary storage",
+    "en_US": "the volume[uuid:{0}] is not on any local primary storage",
+    "zh_CN": "云盘[uuid:{0}]不在任一本地主存储上",
+    "arguments": [
+      "msg.getVolumeUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/local/LocalStorageApiInterceptor.java"
+  },
+  {
+    "raw": "the volume[uuid:%s] is already on the host[uuid:%s]",
+    "en_US": "the volume[uuid:{0}] is already on the host[uuid:{1}]",
+    "zh_CN": "云盘[uuid:{0}]已经在主机[uuid:{1}]上",
+    "arguments": [
+      "msg.getVolumeUuid()",
+      "msg.getDestHostUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/local/LocalStorageApiInterceptor.java"
+  },
+  {
+    "raw": "the primary storage[uuid:%s] is not found",
+    "en_US": "the primary storage[uuid:{0}] is not found",
+    "zh_CN": "主存储[uuid:{0}]未找到",
+    "arguments": [
+      "msg.getPrimaryStorageUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/local/LocalStorageApiInterceptor.java"
+  },
+  {
+    "raw": "the primary storage[uuid:%s] is disabled or maintenance cold migrate is not allowed",
+    "en_US": "the primary storage[uuid:{0}] is disabled or maintenance cold migrate is not allowed",
+    "zh_CN": "主存储[uuid:{0}]为Disabled或维护状态时不允许冷迁移",
+    "arguments": [
+      "ref.getPrimaryStorageUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/local/LocalStorageApiInterceptor.java"
+  },
+  {
+    "raw": "the dest host[uuid:%s] doesn\u0027t belong to the local primary storage[uuid:%s] where the volume[uuid:%s] locates",
+    "en_US": "the dest host[uuid:{0}] doesn\u0027t belong to the local primary storage[uuid:{1}] where the volume[uuid:{2}] locates",
+    "zh_CN": "目标主机[uuid:{0}]不属于本地主存储[uuid:{1}]，未找到硬盘[uuid:{2}]",
+    "arguments": [
+      "msg.getDestHostUuid()",
+      "ref.getPrimaryStorageUuid()",
+      "msg.getVolumeUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/local/LocalStorageApiInterceptor.java"
+  },
+  {
+    "raw": "the dest host[uuid:%s] doesn\u0027t have enough physical capacity due to the threshold of primary storage[uuid:%s] is %f but available physical capacity is %d",
+    "en_US": "the dest host[uuid:{0}] doesn\u0027t have enough physical capacity due to the threshold of primary storage[uuid:{1}] is {2} but available physical capacity is {3}",
+    "zh_CN": "目标主机[uuid:{0}]没有足够的物理容量，因为主存储[uuid:{1}]的阈值是{2}，可用物理容量是{3}",
+    "arguments": [
+      "msg.getDestHostUuid()",
+      "msg.getPrimaryStorageUuid()",
+      "physicalThreshold",
+      "refVO.getAvailablePhysicalCapacity()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/local/LocalStorageApiInterceptor.java"
+  },
+  {
+    "raw": "the volume[uuid:%s] is not in status of Ready, cannot migrate it",
+    "en_US": "the volume[uuid:{0}] is not in status of Ready, cannot migrate it",
+    "zh_CN": "云盘[uuid:{0}]的状态不是Ready，不能迁移",
+    "arguments": [
+      "msg.getVolumeUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/local/LocalStorageApiInterceptor.java"
+  },
+  {
+    "raw": "the data volume[uuid:%s, name: %s] is still attached to the VM[uuid:%s]. Please detach it before migration",
+    "en_US": "the data volume[uuid:{0}, name: {1}] is still attached to the VM[uuid:{2}]. Please detach it before migration",
+    "zh_CN": "数据云盘[uuid:{0}, name: {1}]还挂载在虚拟机[uuid:{2}]上，请先卸载该硬盘",
+    "arguments": [
+      "vol.getUuid()",
+      "vol.getName()",
+      "vol.getVmInstanceUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/local/LocalStorageApiInterceptor.java"
+  },
+  {
+    "raw": "the volume[uuid:%s] is the root volume of the vm[uuid:%s]. Currently the vm is in state of %s, please stop it before migration",
+    "en_US": "the volume[uuid:{0}] is the root volume of the vm[uuid:{1}]. Currently the vm is in state of {2}, please stop it before migration",
+    "zh_CN": "硬盘[uuid:{0}]是虚拟机[uuid:{1}]的根盘，虚拟机当前状态是{2}，请先停止该虚拟机",
+    "arguments": [
+      "vol.getUuid()",
+      "vol.getVmInstanceUuid()",
+      "vmstate"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/local/LocalStorageApiInterceptor.java"
+  },
+  {
+    "raw": "the volume[uuid:%s] is the root volume of the vm[uuid:%s]. Currently the vm still has %s data volumes attached, please detach them before migration",
+    "en_US": "the volume[uuid:{0}] is the root volume of the vm[uuid:{1}]. Currently the vm still has {2} data volumes attached, please detach them before migration",
+    "zh_CN": "硬盘[uuid:{0}]是虚拟机[uuid:{1}]的根盘，虚拟机当前有{2}个数据盘挂载，请先卸载这些硬盘",
+    "arguments": [
+      "vol.getUuid()",
+      "vol.getVmInstanceUuid()",
+      "count"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/local/LocalStorageApiInterceptor.java"
+  },
+  {
+    "raw": "the volume[uuid:%s] is the root volume of the vm[uuid:%s]. Currently the vm still has ISO attached, please detach it before migration",
+    "en_US": "the volume[uuid:{0}] is the root volume of the vm[uuid:{1}]. Currently the vm still has ISO attached, please detach it before migration",
+    "zh_CN": "硬盘[uuid:{0}]是虚拟机[uuid:{1}]的根盘，虚拟机当前有ISO挂载，迁移前请先卸载该ISO",
+    "arguments": [
+      "vol.getUuid()",
+      "vol.getVmInstanceUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/local/LocalStorageApiInterceptor.java"
+  },
+  {
+    "raw": "The clusterUuid of vm[uuid:%s] cannot be null when migrate the root volume[uuid:%s, name: %s]",
+    "en_US": "The clusterUuid of vm[uuid:{0}] cannot be null when migrate the root volume[uuid:{1}, name: {2}]",
+    "zh_CN": "",
+    "arguments": [
+      "vol.getVmInstanceUuid()",
+      "vol.getUuid()",
+      "vol.getName()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/local/LocalStorageApiInterceptor.java"
+  },
+  {
+    "raw": "The two clusters[uuid:%s,uuid:%s] cannot access each other in l2 network  when migrate the vm[uuid:%s] to another cluster",
+    "en_US": "The two clusters[uuid:{0},uuid:{1}] cannot access each other in l2 network  when migrate the vm[uuid:{2}] to another cluster",
+    "zh_CN": "两个集群[uuid:{0},uuid:{1}]无法在二层网络中互相访问对方，当迁移云主机[uuid:{2}]从其中一个集群到另一个集群时",
+    "arguments": [
+      "originClusterUuid",
+      "clusterUuid",
+      "vol.getVmInstanceUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/local/LocalStorageApiInterceptor.java"
+  },
+  {
+    "raw": "the url[%s] is not an absolute path starting with \u0027/\u0027",
+    "en_US": "the url[{0}] is not an absolute path starting with \u0027/\u0027",
+    "zh_CN": "url[{0}]不是一个以\u0027/\u0027开头的绝对路径",
+    "arguments": [
+      "msg.getUrl()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/local/LocalStorageApiInterceptor.java"
+  },
+  {
+    "raw": " the url contains an invalid folder[/dev or /proc or /sys]",
+    "en_US": " the url contains an invalid folder[/dev or /proc or /sys]",
+    "zh_CN": "URL包含了一个无效的目录[/dev or /proc or /sys]",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/storage/primary/local/LocalStorageApiInterceptor.java"
+  },
+  {
+    "raw": "The clusterUuid of vm cannot be null when migrate the vm",
+    "en_US": "The clusterUuid of vm cannot be null when migrate the vm",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/storage/primary/local/LocalStorageBase.java"
+  },
+  {
+    "raw": "The primary storage[uuid:%s] is disabled cold migrate is not allowed",
+    "en_US": "The primary storage[uuid:{0}] is disabled cold migrate is not allowed",
+    "zh_CN": "主存储[uuid:{0}]Disabled时不允许冷迁移",
+    "arguments": [
+      "msg.getPrimaryStorageUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/local/LocalStorageBase.java"
+  },
+  {
+    "raw": "volume[uuid:%s] is not on the local storage anymore,it may have been deleted",
+    "en_US": "volume[uuid:{0}] is not on the local storage anymore,it may have been deleted",
+    "zh_CN": "硬盘[uuid:{0}]不在本地存储上，可能已被删除",
+    "arguments": [
+      "msg.getVolumeUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/local/LocalStorageBase.java"
+  },
+  {
+    "raw": "local primary storage[uuid:%s] doesn\u0027t have the host[uuid:%s]",
+    "en_US": "local primary storage[uuid:{0}] doesn\u0027t have the host[uuid:{1}]",
+    "zh_CN": "",
+    "arguments": [
+      "self.getUuid()",
+      "msg.getHostUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/local/LocalStorageBase.java"
+  },
+  {
+    "raw": "failed to download image[uuid:%s] to all hosts in the local storage[uuid:%s]. %s",
+    "en_US": "failed to download image[uuid:{0}] to all hosts in the local storage[uuid:{1}]. {2}",
+    "zh_CN": "尝试将镜像[uuid:{0}]下载到本地存储[uuid:{1}]的所有主机中失败。",
+    "arguments": [
+      "msg.getImage().getUuid()",
+      "self.getUuid()",
+      "JSONObjectUtil.toJsonString(ret.errorCodes)"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/local/LocalStorageBase.java"
+  },
+  {
+    "raw": "unable to create the data volume[uuid: %s] on a local primary storage[uuid:%s], because the hostUuid is not specified.",
+    "en_US": "unable to create the data volume[uuid: {0}] on a local primary storage[uuid:{1}], because the hostUuid is not specified.",
+    "zh_CN": "不能在本地主存储[uuid:{1}]上创建云盘[uuid:{0}]，因为物理机uuid没有指定",
+    "arguments": [
+      "msg.getVolumeUuid()",
+      "self.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/local/LocalStorageBase.java"
+  },
+  {
+    "raw": "No Host state is Enabled, Please check the availability of the host",
+    "en_US": "No Host state is Enabled, Please check the availability of the host",
+    "zh_CN": "未启用物理机状态，请检查物理机的可用性",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/storage/primary/local/LocalStorageBase.java"
+  },
+  {
+    "raw": "host[uuid:%s] cannot access local storage[uuid:%s], maybe it is detached",
+    "en_US": "host[uuid:{0}] cannot access local storage[uuid:{1}], maybe it is detached",
+    "zh_CN": "物理机[uuid：{0}]无法访问本地存储[uuid：{1}]，它可能已分离",
+    "arguments": [
+      "hostUuid",
+      "self.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/local/LocalStorageBase.java"
+  },
+  {
+    "raw": "resource[uuid:%s, type: %s] is not on the local primary storage[uuid:%s]",
+    "en_US": "resource[uuid:{0}, type: {1}] is not on the local primary storage[uuid:{2}]",
+    "zh_CN": "资源[uuid：{0}，类型：{1}]不在本地主存储[uuid：{2}]上",
+    "arguments": [
+      "resUuid",
+      "resourceType",
+      "self.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/local/LocalStorageBase.java"
+  },
+  {
+    "raw": "resource[uuid:%s, type: %s] on the local primary storage[uuid:%s] maps to multiple hypervisor%s",
+    "en_US": "resource[uuid:{0}, type: {1}] on the local primary storage[uuid:{2}] maps to multiple hypervisor{3}",
+    "zh_CN": "本地主存储[uuid：{2}]上的资源[uuid：{0}，类型：{1}]映射到多个云主机管理程序{3}",
+    "arguments": [
+      "resUuid",
+      "resourceType",
+      "self.getUuid()",
+      "ret"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/local/LocalStorageBase.java"
+  },
+  {
+    "raw": "cannot attach ISO to a primary storage[uuid:%s] which is disabled",
+    "en_US": "cannot attach ISO to a primary storage[uuid:{0}] which is disabled",
+    "zh_CN": "无法将ISO附加到已禁用的主存储[uuid：{0}]",
+    "arguments": [
+      "self.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/local/LocalStorageBase.java"
+  },
+  {
+    "raw": "host(s)[uuids: %s] volume locate is not Connected.",
+    "en_US": "host(s)[uuids: {0}] volume locate is not Connected.",
+    "zh_CN": "",
+    "arguments": [
+      "disconnectHostUuids"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/local/LocalStorageBase.java"
+  },
+  {
+    "raw": "volume[uuid:%s] has reference volume[%s], can not change volume type before flatten them and their descendants",
+    "en_US": "volume[uuid:{0}] has reference volume[{1}], can not change volume type before flatten them and their descendants",
+    "zh_CN": "硬盘[uuid:{0}]有引用硬盘[uuid:{1}]，不能改变硬盘类型，请先展开该硬盘和它的子硬盘",
+    "arguments": [
+      "volumeUuid",
+      "infos.toString()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/local/LocalStorageBase.java"
+  },
+  {
+    "raw": "There is no LocalStorage primary storage[state\u003d%s,status\u003d%s] on the cluster[%s], when the cluster mounts multiple primary storage, the system uses the local primary storage by default. Check the state/status of primary storage and make sure they have been attached to clusters",
+    "en_US": "There is no LocalStorage primary storage[state\u003d{0},status\u003d{1}] on the cluster[{2}], when the cluster mounts multiple primary storage, the system uses the local primary storage by default. Check the state/status of primary storage and make sure they have been attached to clusters",
+    "zh_CN": "在集群[{2}]里没有LocalStorage主存储[state\u003d{0},status\u003d{1}]，当集群挂载了多个主存储的时候，系统默认的是local主存储。检查主存储的状态并确定是否连接了集群",
+    "arguments": [
+      "PrimaryStorageState.Enabled",
+      "PrimaryStorageStatus.Connected",
+      "clusterUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/local/LocalStorageDefaultAllocateCapacityFlow.java"
+  },
+  {
+    "raw": "the type of primary storage[uuid:%s] chosen is not local storage, check if the resource can be created on other storage when cluster has attached local primary storage",
+    "en_US": "the type of primary storage[uuid:{0}] chosen is not local storage, check if the resource can be created on other storage when cluster has attached local primary storage",
+    "zh_CN": "选择的主存储[uuid：{0}]的类型不是本地存储，请检查当集群有绑定了本地存储的时候，资源是否能被创建在非本地存储中",
+    "arguments": [
+      "psUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/local/LocalStorageDefaultAllocateCapacityFlow.java"
+  },
+  {
+    "raw": "The cluster mounts multiple primary storage[%s(%s), other non-LocalStorage primary storage], primaryStorageUuidForDataVolume cannot be specified %s",
+    "en_US": "The cluster mounts multiple primary storage[{0}({1}), other non-LocalStorage primary storage], primaryStorageUuidForDataVolume cannot be specified {2}",
+    "zh_CN": "集群绑定了多个主存储[{0}({1}), 其他的非LocalStorage主存储]，主存储云盘未进行指定{2}",
+    "arguments": [
+      "requiredPrimaryStorageUuidForDataVolume.getUuid()",
+      "requiredPrimaryStorageUuidForDataVolume.getType()",
+      "LocalStorageConstants.LOCAL_STORAGE_TYPE"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/local/LocalStorageDefaultAllocateCapacityFlow.java"
+  },
+  {
+    "raw": "The cluster[uuid\u003d%s] mounts multiple primary storage[LocalStorage, other non-LocalStorage primary storage], You must specify the primary storage where the root disk is located",
+    "en_US": "The cluster[uuid\u003d{0}] mounts multiple primary storage[LocalStorage, other non-LocalStorage primary storage], You must specify the primary storage where the root disk is located",
+    "zh_CN": "集群[uuid\u003d{0}]绑定了多个主存储[LocalStorage, 其他非LocalStorage主存储]，需要检验下云盘所在的主存储",
+    "arguments": [
+      "spec.getDestHost().getClusterUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/local/LocalStorageDesignatedAllocateCapacityFlow.java"
+  },
+  {
+    "raw": "The cluster[uuid\u003d%s] mounts multiple primary storage[LocalStorage, other non-LocalStorage primary storage], You must specify the primary storage where the data disk is located",
+    "en_US": "The cluster[uuid\u003d{0}] mounts multiple primary storage[LocalStorage, other non-LocalStorage primary storage], You must specify the primary storage where the data disk is located",
+    "zh_CN": "集群[uuid\u003d{0}]绑定了多个主存储[LocalStorage, 其他非LocalStorage主存储]，需要检验下云盘所在的主存储。",
+    "arguments": [
+      "spec.getDestHost().getClusterUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/local/LocalStorageDesignatedAllocateCapacityFlow.java"
+  },
+  {
+    "raw": "no LocalStorageBackupStorageMediator supporting hypervisor[%s] and backup storage type[%s] ",
+    "en_US": "no LocalStorageBackupStorageMediator supporting hypervisor[{0}] and backup storage type[{1}] ",
+    "zh_CN": "没有LocalStorageBackupStorageMediator支持hypervisor[{0}]和镜像服务器类型[{1}]",
+    "arguments": [
+      "hvType",
+      "bsType"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/local/LocalStorageFactory.java"
+  },
+  {
+    "raw": "creation rely on image cache[uuid:%s, locate host uuids: [%s]], cannot create other places.",
+    "en_US": "creation rely on image cache[uuid:{0}, locate host uuids: [{1}]], cannot create other places.",
+    "zh_CN": "创建依赖于镜像缓存[uuid：{0}，定位物理机uuid：[{1}]]，无法创建其他位置。",
+    "arguments": [
+      "imageUuid",
+      "cachedHostUuids"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/local/LocalStorageFactory.java"
+  },
+  {
+    "raw": "local storage doesn\u0027t support live migration for hypervisor[%s]",
+    "en_US": "local storage doesn\u0027t support live migration for hypervisor[{0}]",
+    "zh_CN": "本地存储不支持对虚拟化类型[{0}]进行热迁移",
+    "arguments": [
+      "spec.getVmInventory().getHypervisorType()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/local/LocalStorageFactory.java"
+  },
+  {
+    "raw": "Can\u0027t attach volume to VM, no qualified cluster",
+    "en_US": "Can\u0027t attach volume to VM, no qualified cluster",
+    "zh_CN": "不能加载云盘到云主机上，没有可用集群",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/storage/primary/local/LocalStorageFactory.java"
+  },
+  {
+    "raw": "cannot attach the data volume[uuid:%s] to the vm[uuid:%s]. Both vm\u0027s root volume and the data volume are on local primary storage, but they are on different hosts. The root volume[uuid:%s] is on the host[uuid:%s] but the data volume[uuid: %s] is on the host[uuid: %s]",
+    "en_US": "cannot attach the data volume[uuid:{0}] to the vm[uuid:{1}]. Both vm\u0027s root volume and the data volume are on local primary storage, but they are on different hosts. The root volume[uuid:{2}] is on the host[uuid:{3}] but the data volume[uuid: {4}] is on the host[uuid: {5}]",
+    "zh_CN": "不能加载硬盘[uuid:{0}]到虚拟机[uuid:{1}]上，硬盘和虚拟机的硬盘都位于本地存储，但是它们位于不同的主机上。虚拟机的硬盘位于主机[uuid：{3}]上，硬盘位于主机[uuid：{5}]上",
+    "arguments": [
+      "volume.getUuid()",
+      "vm.getUuid()",
+      "vm.getRootVolumeUuid()",
+      "rootHost",
+      "volume.getUuid()",
+      "dataHost"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/local/LocalStorageFactory.java"
+  },
+  {
+    "raw": "the data volume[name:%s, uuid:%s] is on the local storage[uuid:%s]; however,the host on which the data volume is has been deleted. Unable to recover this volume",
+    "en_US": "the data volume[name:{0}, uuid:{1}] is on the local storage[uuid:{2}]; however,the host on which the data volume is has been deleted. Unable to recover this volume",
+    "zh_CN": "不能恢复硬盘[名称：{0}，uuid：{1}]，硬盘位于本地存储[uuid：{2}]上，但是该硬盘所在的主机已被删除",
+    "arguments": [
+      "vol.getName()",
+      "vol.getUuid()",
+      "vol.getPrimaryStorageUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/local/LocalStorageFactory.java"
+  },
+  {
+    "raw": "unable to recover the vm[uuid:%s, name:%s]. The vm\u0027s root volume is on the local storage[uuid:%s]; however, the host on which the root volume is has been deleted",
+    "en_US": "unable to recover the vm[uuid:{0}, name:{1}]. The vm\u0027s root volume is on the local storage[uuid:{2}]; however, the host on which the root volume is has been deleted",
+    "zh_CN": "不能恢复虚拟机[uuid：{0}，名称：{1}]，虚拟机的硬盘位于本地存储[uuid：{2}]上，但是该硬盘所在的主机已被删除",
+    "arguments": [
+      "vm.getUuid()",
+      "vm.getName()",
+      "psuuid"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/local/LocalStorageFactory.java"
+  },
+  {
+    "raw": "unable to live migrate vm[uuid:%s] with data volumes on local storage. Need detach all data volumes first.",
+    "en_US": "unable to live migrate vm[uuid:{0}] with data volumes on local storage. Need detach all data volumes first.",
+    "zh_CN": "不能对虚拟机[uuid：{0}]进行热迁移，该虚拟机有硬盘位于本地存储上",
+    "arguments": [
+      "vm.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/local/LocalStorageFactory.java"
+  },
+  {
+    "raw": "unable to live migrate vm[uuid:%s] with local storage. Only linux guest is supported. Current platform is [%s]",
+    "en_US": "unable to live migrate vm[uuid:{0}] with local storage. Only linux guest is supported. Current platform is [{1}]",
+    "zh_CN": "不能对虚拟机[uuid：{0}]进行热迁移，该虚拟机有硬盘在本地存储上。仅 Linux 虚拟机支持热迁移, 当前平台为 [{1}]",
+    "arguments": [
+      "vm.getUuid()",
+      "vm.getPlatform()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/local/LocalStorageFactory.java"
+  },
+  {
+    "raw": "unable to live migrate vm[uuid:%s] with ISO on local storage. Need detach all ISO first.",
+    "en_US": "unable to live migrate vm[uuid:{0}] with ISO on local storage. Need detach all ISO first.",
+    "zh_CN": "不能对虚拟机[uuid：{0}]进行热迁移，该虚拟机有ISO位于本地存储上，请先卸载ISO",
+    "arguments": [
+      "vm.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/local/LocalStorageFactory.java"
+  },
+  {
+    "raw": "To create data volume on the local primary storage, you must specify the host that the data volume is going to be created using the system tag [%s]",
+    "en_US": "To create data volume on the local primary storage, you must specify the host that the data volume is going to be created using the system tag [{0}]",
+    "zh_CN": "创建本地存储上的数据盘时，必须指定创建该数据盘的主机，请使用系统标签[{0}]指定创建该数据盘的主机",
+    "arguments": [
+      "LocalStorageSystemTags.DEST_HOST_FOR_CREATING_DATA_VOLUME.getTagFormat()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/local/LocalStorageFactory.java"
+  },
+  {
+    "raw": "the host[uuid:%s] doesn\u0027t belong to the local primary storage[uuid:%s]",
+    "en_US": "the host[uuid:{0}] doesn\u0027t belong to the local primary storage[uuid:{1}]",
+    "zh_CN": "物理机[uuid:{0}] 不属于本地主存储[uuid:{1}]",
+    "arguments": [
+      "hostUuid",
+      "msg.getPrimaryStorageUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/local/LocalStorageFactory.java"
+  },
+  {
+    "raw": "the local primary storage[uuid:%s] has no hosts with enough disk capacity[%s bytes] required by the disk offering[uuid:%s]",
+    "en_US": "the local primary storage[uuid:{0}] has no hosts with enough disk capacity[{1} bytes] required by the disk offering[uuid:{2}]",
+    "zh_CN": "",
+    "arguments": [
+      "psUuid",
+      "msg.getDiskSize()",
+      "diskOffering"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/local/LocalStorageFactory.java"
+  },
+  {
+    "raw": "the image[uuid:%s, name: %s] is not available to download on any backup storage:\\n1. check if image is in status of Deleted\\n2. check if the backup storage on which the image is shown as Ready is attached to the zone[uuid:%s]",
+    "en_US": "the image[uuid:{0}, name: {1}] is not available to download on any backup storage:\\n1. check if image is in status of Deleted\\n2. check if the backup storage on which the image is shown as Ready is attached to the zone[uuid:{2}]",
+    "zh_CN": "镜像[uuid：{0}，名称：{1}]在任意备份存储上不可用：\\n1. 检查镜像是否处于删除状态\\n2. 检查镜像在哪个备份存储上处于就绪状态，该备份存储是否已挂载到该区域[uuid：{2}]",
+    "arguments": [
+      "ispec.getInventory().getUuid()",
+      "ispec.getInventory().getName()",
+      "self.getZoneUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/local/LocalStorageKvmBackend.java"
+  },
+  {
+    "raw": "root image has been deleted, cannot reimage now",
+    "en_US": "root image has been deleted, cannot reimage now",
+    "zh_CN": "系统镜像已经被删除，无法重制云主机",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/storage/primary/local/LocalStorageKvmBackend.java"
+  },
+  {
+    "raw": "the volume[uuid;%s] is attached to a VM[uuid:%s] which is in state of %s, cannot do the snapshot merge",
+    "en_US": "the volume[uuid;{0}] is attached to a VM[uuid:{1}] which is in state of {2}, cannot do the snapshot merge",
+    "zh_CN": "云盘[uuid;{0}] 挂载到处于{2}状态的云主机，不能合并快照",
+    "arguments": [
+      "volume.getUuid()",
+      "volume.getVmInstanceUuid()",
+      "state"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/local/LocalStorageKvmBackend.java"
+  },
+  {
+    "raw": "why volume[uuid:%s, installPath:%s] not in directory %s",
+    "en_US": "why volume[uuid:{0}, installPath:{1}] not in directory {2}",
+    "zh_CN": "为什么卷[uuid：{0}，InstallPath：{1}]不在目录{2}中",
+    "arguments": [
+      "cmd.volumeUuid",
+      "msg.getVolume().getInstallPath()",
+      "cmd.srcDir"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/local/LocalStorageKvmBackend.java"
+  },
+  {
+    "raw": "cannot find flag file [%s] on host [%s], because: %s",
+    "en_US": "cannot find flag file [{0}] on host [{1}], because: {2}",
+    "zh_CN": "找不到标记文件[{0}]（在物理机[{1}]上），因为：{2}",
+    "arguments": [
+      "makeInitializedFilePath()",
+      "hostUuid",
+      "errorCode.getCause().getDetails()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/local/LocalStorageKvmBackend.java"
+  },
+  {
+    "raw": "cannot create flag file [%s] on host [%s], because: %s",
+    "en_US": "cannot create flag file [{0}] on host [{1}], because: {2}",
+    "zh_CN": "无法在物理机[{1}]上创建标志文件[{0}]，因为：{2}",
+    "arguments": [
+      "makeInitializedFilePath()",
+      "hostUuid",
+      "errorCode.getCause().getDetails()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/local/LocalStorageKvmBackend.java"
+  },
+  {
+    "raw": "KVM host[uuid: %s] fails to be added into local primary storage[uuid: %s], %s",
+    "en_US": "KVM host[uuid: {0}] fails to be added into local primary storage[uuid: {1}], {2}",
+    "zh_CN": "本地存储[uuid:{1}]添加物理机[uuid:{0}]失败，{2}",
+    "arguments": [
+      "context.getInventory().getUuid()",
+      "priUuid",
+      "reply.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/local/LocalStorageKvmFactory.java"
+  },
+  {
+    "raw": "unable to create empty snapshot volume[name:%s, installpath: %s] on kvm host[uuid:%s, ip:%s], because %s",
+    "en_US": "unable to create empty snapshot volume[name:{0}, installpath: {1}] on kvm host[uuid:{2}, ip:{3}], because {4}",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getSnapshotName()",
+      "msg.getInstallPath()",
+      "host.getUuid()",
+      "host.getManagementIp()",
+      "errorCode"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/local/LocalStorageKvmFactory.java"
+  },
+  {
+    "raw": "operation error, because:%s",
+    "en_US": "operation error, because:{0}",
+    "zh_CN": "操作错误，因为{0}",
+    "arguments": [
+      "rsp.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/local/LocalStorageKvmMigrateVmFlow.java"
+  },
+  {
+    "raw": "unable to create an empty volume[uuid:%s, name:%s] on the kvm host[uuid:%s]",
+    "en_US": "unable to create an empty volume[uuid:{0}, name:{1}] on the kvm host[uuid:{2}]",
+    "zh_CN": "不能在物理机[uuid:{2}]上创建空云盘[uuid:{0}, name:{1}]",
+    "arguments": [
+      "p.volume.getUuid()",
+      "p.volume.getName()",
+      "dstHostUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/local/LocalStorageKvmMigrateVmFlow.java"
+  },
+  {
+    "raw": "failed to download bits from the SFTP backup storage[hostname:%s, path: %s] to the local primary storage[uuid:%s, path: %s], %s",
+    "en_US": "failed to download bits from the SFTP backup storage[hostname:{0}, path: {1}] to the local primary storage[uuid:{2}, path: {3}], {4}",
+    "zh_CN": "从SFTP镜像服务器[hostname:{0}, path: {1}] 下载到本地存储[uuid:{2}, path: {3}]失败，{4}",
+    "arguments": [
+      "greply.getHostname()",
+      "backupStorageInstallPath",
+      "pinv.getUuid()",
+      "primaryStorageInstallPath",
+      "rsp.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/local/LocalStorageKvmSftpBackupStorageMediatorImpl.java"
+  },
+  {
+    "raw": "failed to upload bits from the local storage[uuid:%s, path:%s] to the SFTP backup storage[hostname:%s, path:%s], %s",
+    "en_US": "failed to upload bits from the local storage[uuid:{0}, path:{1}] to the SFTP backup storage[hostname:{2}, path:{3}], {4}",
+    "zh_CN": "从本地存储[uuid:{0}, path: {1}]上传到SFTP镜像服务器[hostname:{2}, path:{3}]失败, {4}",
+    "arguments": [
+      "pinv.getUuid()",
+      "primaryStorageInstallPath",
+      "r.getHostname()",
+      "backupStorageInstallPath",
+      "rsp.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/local/LocalStorageKvmSftpBackupStorageMediatorImpl.java"
+  },
+  {
+    "raw": "the required host[uuid:%s] cannot satisfy conditions[state: %s, status: %s, size \u003e %s bytes], or doesn\u0027t belong to a local primary storage satisfying conditions[state: %s, status: %s], or its cluster doesn\u0027t attach to any local primary storage",
+    "en_US": "the required host[uuid:{0}] cannot satisfy conditions[state: {1}, status: {2}, size \u003e {3} bytes], or doesn\u0027t belong to a local primary storage satisfying conditions[state: {4}, status: {5}], or its cluster doesn\u0027t attach to any local primary storage",
+    "zh_CN": "不能满足条件[状态：{1}, 状态：{2}, 大小等于{3}字节]的主机[uuid:{0}]，或者该主机不属于满足条件的本地存储[状态：{4}, 状态：{5}]，或者该主机所属的集群没有绑定任何本地存储",
+    "arguments": [
+      "spec.getRequiredHostUuid()",
+      "HostState.Enabled",
+      "HostStatus.Connected",
+      "spec.getSize()",
+      "PrimaryStorageState.Enabled",
+      "PrimaryStorageStatus.Connected"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/local/LocalStorageMainAllocatorFlow.java"
+  },
+  {
+    "raw": "no local primary storage in zone[uuid:%s] can satisfy conditions[state: %s, status: %s] or contain hosts satisfying conditions[state: %s, status: %s, size \u003e %s bytes]",
+    "en_US": "no local primary storage in zone[uuid:{0}] can satisfy conditions[state: {1}, status: {2}] or contain hosts satisfying conditions[state: {3}, status: {4}, size \u003e {5} bytes]",
+    "zh_CN": "没有满足条件的本地存储[状态：{1}, 状态：{2}]或者该本地存储中不能满足条件的主机[状态：{3}, 状态：{4}, 大小等于{5}字节]",
+    "arguments": [
+      "spec.getRequiredZoneUuid()",
+      "PrimaryStorageState.Enabled",
+      "PrimaryStorageStatus.Connected",
+      "HostState.Enabled",
+      "HostStatus.Connected",
+      "spec.getSize()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/local/LocalStorageMainAllocatorFlow.java"
+  },
+  {
+    "raw": "no local primary storage can satisfy conditions[state: %s, status: %s] or contain hosts satisfying conditions[state: %s, status: %s, size \u003e %s bytes]",
+    "en_US": "no local primary storage can satisfy conditions[state: {0}, status: {1}] or contain hosts satisfying conditions[state: {2}, status: {3}, size \u003e {4} bytes]",
+    "zh_CN": "没有满足条件的本地存储[状态：{0}, 状态：{1}]或者该本地存储中不能满足条件主机[状态：{2}, 状态：{3}, 大小等于{4}字节]",
+    "arguments": [
+      "PrimaryStorageState.Enabled",
+      "PrimaryStorageStatus.Connected",
+      "HostState.Enabled",
+      "HostStatus.Connected",
+      "spec.getSize()"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/local/LocalStorageMainAllocatorFlow.java"
+  },
+  {
+    "raw": "{the physical capacity usage of the host[uuid:%s] has exceeded the threshold[%s]}",
+    "en_US": "{the physical capacity usage of the host[uuid:{0}] has exceeded the threshold[{1}]}",
+    "zh_CN": "{物理机[uuid：{0}]的物理容量使用率已超过阈值[{1}]}",
+    "arguments": [
+      "ref.getHostUuid()",
+      "physicalCapacityMgr.getRatio(ref.getPrimaryStorageUuid())"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/local/LocalStorageMainAllocatorFlow.java"
+  },
+  {
+    "raw": "failed allocate localstorage",
+    "en_US": "failed allocate localstorage",
+    "zh_CN": "分配localStorage失败",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/storage/primary/local/LocalStorageMainAllocatorFlow.java"
+  },
+  {
+    "raw": "cannot reserve enough space for primary storage[uuid: %s] on host[uuid: %s], not enough physical capacity",
+    "en_US": "cannot reserve enough space for primary storage[uuid: {0}] on host[uuid: {1}], not enough physical capacity",
+    "zh_CN": "无法为物理机[uuid：{1}]上的主存储[uuid：{0}]保留足够的空间，物理容量不足",
+    "arguments": [
+      "self.getUuid()",
+      "hostUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/local/LocalStorageUtils.java"
+  },
+  {
+    "raw": "host[uuid: %s] of local primary storage[uuid: %s] doesn\u0027t have enough capacity[current: %s bytes, needed: %s]",
+    "en_US": "host[uuid: {0}] of local primary storage[uuid: {1}] doesn\u0027t have enough capacity[current: {2} bytes, needed: {3}]",
+    "zh_CN": "主机[uuid：{0}]上的本地存储[uuid：{1}]没有足够的容量[当前：{2}字节，所需：{3}]",
+    "arguments": [
+      "hostUuid",
+      "self.getUuid()",
+      "ref.getAvailableCapacity()",
+      "size"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/local/LocalStorageUtils.java"
+  },
+  {
+    "raw": "cannot find any host which has resource[uuid:%s]",
+    "en_US": "cannot find any host which has resource[uuid:{0}]",
+    "zh_CN": "找不到任何拥有资源[uuid:{0}]的物理机",
+    "arguments": [
+      "resUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/local/LocalStorageUtils.java"
+  },
+  {
+    "raw": "Resource[uuid:%s] can only be operated on host[uuid:%s], but the host has been deleted",
+    "en_US": "Resource[uuid:{0}] can only be operated on host[uuid:{1}], but the host has been deleted",
+    "zh_CN": "资源[uuid:{0}]只能在物理机[uuid:{0}]上对其操作，但是该物理机已经被删除了",
+    "arguments": [
+      "resUuid",
+      "uuid"
+    ],
+    "fileName": "src/main/java/org/zstack/storage/primary/local/LocalStorageUtils.java"
+  }
+]

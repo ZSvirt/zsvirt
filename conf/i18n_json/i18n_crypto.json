@@ -1,0 +1,897 @@
+[
+  {
+    "raw": "failed to find model for secretResourcePool [%s]",
+    "en_US": "failed to find model for secretResourcePool [{0}]",
+    "zh_CN": "找不到SecretResourcePool[{0}]的原型",
+    "arguments": [
+      "resourceUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/crypto/auth/AbstractCryptoAuthenticationFacade.java"
+  },
+  {
+    "raw": "wrong secret resource pool model, expect %s, actual %s",
+    "en_US": "wrong secret resource pool model, expect {0}, actual {1}",
+    "zh_CN": "机密资源池模型错误，应为{0}，实际为{1}",
+    "arguments": [
+      "setting.resourcePoolType",
+      "model"
+    ],
+    "fileName": "src/main/java/org/zstack/crypto/auth/AbstractCryptoAuthenticationFacade.java"
+  },
+  {
+    "raw": "parseCertificate failed: %s",
+    "en_US": "parseCertificate failed: {0}",
+    "zh_CN": "",
+    "arguments": [
+      "e.getMessage()"
+    ],
+    "fileName": "src/main/java/org/zstack/crypto/auth/AbstractCryptoAuthenticationFacade.java"
+  },
+  {
+    "raw": "failed to parse certificate",
+    "en_US": "failed to parse certificate",
+    "zh_CN": "解析证书失败",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/crypto/auth/AbstractCryptoAuthenticationFacade.java"
+  },
+  {
+    "raw": "account[uuid\u003d%s] and certificate are not matched",
+    "en_US": "account[uuid\u003d{0}] and certificate are not matched",
+    "zh_CN": "",
+    "arguments": [
+      "accountUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/crypto/auth/CryptoAuthenticationHelper.java"
+  },
+  {
+    "raw": "no certificate attach to account[uuid\u003d%s]",
+    "en_US": "no certificate attach to account[uuid\u003d{0}]",
+    "zh_CN": "",
+    "arguments": [
+      "accountUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/crypto/auth/CryptoAuthenticationHelper.java"
+  },
+  {
+    "raw": "wrong authenticationId: %s",
+    "en_US": "wrong authenticationId: {0}",
+    "zh_CN": "",
+    "arguments": [
+      "authenticationId"
+    ],
+    "fileName": "src/main/java/org/zstack/crypto/auth/CryptoAuthenticationHelper.java"
+  },
+  {
+    "raw": "the identity authentication does not specify the resource pool to provide the service",
+    "en_US": "the identity authentication does not specify the resource pool to provide the service",
+    "zh_CN": "身份认证未指定提供服务的资源池",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/crypto/auth/CryptoAuthenticationManagerImpl.java"
+  },
+  {
+    "raw": "failed to connect remote crypto server",
+    "en_US": "failed to connect remote crypto server",
+    "zh_CN": "连接到远程密钥（密评）服务器失败",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/crypto/auth/CryptoAuthenticationManagerImpl.java"
+  },
+  {
+    "raw": "additional authentication server raise an error",
+    "en_US": "additional authentication server raise an error",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/crypto/auth/CryptoAuthenticationManagerImpl.java"
+  },
+  {
+    "raw": "additional authentication failed",
+    "en_US": "additional authentication failed",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/crypto/auth/CryptoAuthenticationManagerImpl.java"
+  },
+  {
+    "raw": "failed to generate credential",
+    "en_US": "failed to generate credential",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/crypto/auth/CryptoAuthenticationManagerImpl.java"
+  },
+  {
+    "raw": "failed to decrypt credential",
+    "en_US": "failed to decrypt credential",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/crypto/auth/CryptoAuthenticationManagerImpl.java"
+  },
+  {
+    "raw": "failed to parse plain text in encryption param to json object: %s, %s",
+    "en_US": "failed to parse plain text in encryption param to json object: {0}, {1}",
+    "zh_CN": "无法将加密参数中的纯文本解析为JSON对象：{0}，{1}",
+    "arguments": [
+      "plainText",
+      "e.getMessage()"
+    ],
+    "fileName": "src/main/java/org/zstack/crypto/auth/CryptoEncryptionParamParser.java"
+  },
+  {
+    "raw": "failed to find certificate info",
+    "en_US": "failed to find certificate info",
+    "zh_CN": "找不到证书信息",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/crypto/auth/MSEnvelopeCryptoAuthenticationFacade.java"
+  },
+  {
+    "raw": "operation not supported",
+    "en_US": "operation not supported",
+    "zh_CN": "不支持的操作",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/crypto/auth/UKeyCryptoAuthenticationFacade.java"
+  },
+  {
+    "raw": "account[uuid\u003d%s] attached to other certificate already",
+    "en_US": "account[uuid\u003d{0}] attached to other certificate already",
+    "zh_CN": "",
+    "arguments": [
+      "struct.accountUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/crypto/ccs/CCSCertificateBase.java"
+  },
+  {
+    "raw": "certificate[uuid\u003d%s] attached to others[uuid\u003d%s] already",
+    "en_US": "certificate[uuid\u003d{0}] attached to others[uuid\u003d{1}] already",
+    "zh_CN": "",
+    "arguments": [
+      "certificateUuid",
+      "self.getAccountCertificateRefs().get(0).getAccountUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/crypto/ccs/CCSCertificateBase.java"
+  },
+  {
+    "raw": "account[uuid\u003d%s] not found",
+    "en_US": "account[uuid\u003d{0}] not found",
+    "zh_CN": "",
+    "arguments": [
+      "accountUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/crypto/ccs/CCSCertificateInterceptor.java"
+  },
+  {
+    "raw": "certificate uuid is empty and UKey system tag does not exist",
+    "en_US": "certificate uuid is empty and UKey system tag does not exist",
+    "zh_CN": "证书uuid为空，且UKEY系统标记不存在",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/crypto/ccs/CCSCertificateInterceptor.java"
+  },
+  {
+    "raw": "account[uuid\u003d%s] does not have any CCS certificate attached",
+    "en_US": "account[uuid\u003d{0}] does not have any CCS certificate attached",
+    "zh_CN": "",
+    "arguments": [
+      "accountUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/crypto/ccs/CCSCertificateInterceptor.java"
+  },
+  {
+    "raw": "account[uuid\u003d%s] already has the certificate[uuid\u003d%s] attached",
+    "en_US": "account[uuid\u003d{0}] already has the certificate[uuid\u003d{1}] attached",
+    "zh_CN": "",
+    "arguments": [
+      "accountUuid",
+      "certificateUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/crypto/ccs/CCSCertificateInterceptor.java"
+  },
+  {
+    "raw": "CCS certificate authentication disabled",
+    "en_US": "CCS certificate authentication disabled",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/crypto/ccs/CCSCertificateInterceptor.java"
+  },
+  {
+    "raw": "wrong crypto authentication id, expect[%s], actual[%s]",
+    "en_US": "wrong crypto authentication id, expect[{0}], actual[{1}]",
+    "zh_CN": "",
+    "arguments": [
+      "expect",
+      "actual"
+    ],
+    "fileName": "src/main/java/org/zstack/crypto/ccs/CCSCertificateInterceptor.java"
+  },
+  {
+    "raw": "wrong crypto authentication id[%s]",
+    "en_US": "wrong crypto authentication id[{0}]",
+    "zh_CN": "",
+    "arguments": [
+      "actual"
+    ],
+    "fileName": "src/main/java/org/zstack/crypto/ccs/CCSCertificateInterceptor.java"
+  },
+  {
+    "raw": "certificate[uuid\u003d%s] not found",
+    "en_US": "certificate[uuid\u003d{0}] not found",
+    "zh_CN": "未找到证书[uuid\u003d{0}]",
+    "arguments": [
+      "msg.getCertificateUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/crypto/ccs/CCSCertificateManagerImpl.java"
+  },
+  {
+    "raw": "failed to find authentication Id: %s",
+    "en_US": "failed to find authentication Id: {0}",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getAuthenticationId()"
+    ],
+    "fileName": "src/main/java/org/zstack/crypto/ccs/CCSCertificateManagerImpl.java"
+  },
+  {
+    "raw": "failed to decrypt cipher text",
+    "en_US": "failed to decrypt cipher text",
+    "zh_CN": "无法解密密文",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/crypto/ccs/CCSCertificateManagerImpl.java"
+  },
+  {
+    "raw": "wrong credential",
+    "en_US": "wrong credential",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/crypto/ccs/CCSCertificateManagerImpl.java"
+  },
+  {
+    "raw": "certificate[uuid\u003d%s] is not within the valid period",
+    "en_US": "certificate[uuid\u003d{0}] is not within the valid period",
+    "zh_CN": "",
+    "arguments": [
+      "certificateUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/crypto/ccs/CCSCertificateManagerImpl.java"
+  },
+  {
+    "raw": "check batch data integrity fail, unsupported resourceType: %s",
+    "en_US": "check batch data integrity fail, unsupported resourceType: {0}",
+    "zh_CN": "检查批处理数据完整性失败，不支持的资源类型：{0}",
+    "arguments": [
+      "msg.getResourceType()"
+    ],
+    "fileName": "src/main/java/org/zstack/crypto/datacrypto/CryptoInterceptor.java"
+  },
+  {
+    "raw": "add integrity resource fail, unsupported resourceType: %s",
+    "en_US": "add integrity resource fail, unsupported resourceType: {0}",
+    "zh_CN": "添加完整性资源失败，不支持的资源类型：{0}",
+    "arguments": [
+      "msg.getResourceType()"
+    ],
+    "fileName": "src/main/java/org/zstack/crypto/datacrypto/CryptoInterceptor.java"
+  },
+  {
+    "raw": "start data protection encryptType[%s] is error",
+    "en_US": "start data protection encryptType[{0}] is error",
+    "zh_CN": "启动数据保护加密类型[{0}]出错",
+    "arguments": [
+      "msg.getEncryptType()"
+    ],
+    "fileName": "src/main/java/org/zstack/crypto/datacrypto/CryptoInterceptor.java"
+  },
+  {
+    "raw": "the snapshot[uuid:%s] is not encrypted",
+    "en_US": "the snapshot[uuid:{0}] is not encrypted",
+    "zh_CN": "快照[uuid：{0}]未加密",
+    "arguments": [
+      "inventory.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/crypto/datacrypto/CryptoManagerImpl.java"
+  },
+  {
+    "raw": "verify volume snapshot[%s] consistency failed",
+    "en_US": "verify volume snapshot[{0}] consistency failed",
+    "zh_CN": "验证卷快照[{0}]一致性失败",
+    "arguments": [
+      "inventory.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/crypto/datacrypto/CryptoManagerImpl.java"
+  },
+  {
+    "raw": "encryption image cache[id:%s] error: %s",
+    "en_US": "encryption image cache[id:{0}] error: {1}",
+    "zh_CN": "加密镜像缓存[ID：{0}]错误：{1}",
+    "arguments": [
+      "inventory.getId()",
+      "exception.getMessage()"
+    ],
+    "fileName": "src/main/java/org/zstack/crypto/datacrypto/CryptoManagerImpl.java"
+  },
+  {
+    "raw": "failed to get image cache[id:%s]: GetImageHashValueReply.hashValue is null",
+    "en_US": "failed to get image cache[id:{0}]: GetImageHashValueReply.hashValue is null",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getResourceUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/crypto/datacrypto/CryptoManagerImpl.java"
+  },
+  {
+    "raw": "verify image cache[%s] consistency failed",
+    "en_US": "verify image cache[{0}] consistency failed",
+    "zh_CN": "验证镜像缓存[{0}]一致性失败",
+    "arguments": [
+      "inventory.getId()"
+    ],
+    "fileName": "src/main/java/org/zstack/crypto/datacrypto/CryptoManagerImpl.java"
+  },
+  {
+    "raw": "nodeType %s integrity file[path:%s] already exists",
+    "en_US": "nodeType {0} integrity file[path:{1}] already exists",
+    "zh_CN": "NodeType{0}完整性文件[路径：{1}]已存在",
+    "arguments": [
+      "msg.getNodeType()",
+      "msg.getPath()"
+    ],
+    "fileName": "src/main/java/org/zstack/crypto/datacrypto/CryptoManagerImpl.java"
+  },
+  {
+    "raw": "invalid nodeType[%s]",
+    "en_US": "invalid nodeType[{0}]",
+    "zh_CN": "节点类型[{0}]无效",
+    "arguments": [
+      "msg.getNodeType()"
+    ],
+    "fileName": "src/main/java/org/zstack/crypto/datacrypto/CryptoManagerImpl.java"
+  },
+  {
+    "raw": "filed to add integrity file[%s.%s], it\u0027s a directory now.",
+    "en_US": "filed to add integrity file[{0}.{1}], it\u0027s a directory now.",
+    "zh_CN": "已归档以添加完整性文件[{0}.{1}]，它现在是一个目录。",
+    "arguments": [
+      "msg.getNodeType()",
+      "msg.getPath()"
+    ],
+    "fileName": "src/main/java/org/zstack/crypto/datacrypto/CryptoManagerImpl.java"
+  },
+  {
+    "raw": "integrity file[%s.%s] is not exists",
+    "en_US": "integrity file[{0}.{1}] is not exists",
+    "zh_CN": "完整性文件[{0}.{1}]不存在",
+    "arguments": [
+      "msg.getNodeType()",
+      "msg.getPath()"
+    ],
+    "fileName": "src/main/java/org/zstack/crypto/datacrypto/CryptoManagerImpl.java"
+  },
+  {
+    "raw": "host %s is not exists",
+    "en_US": "host {0} is not exists",
+    "zh_CN": "物理机{0}不存在",
+    "arguments": [
+      "msg.getNodeUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/crypto/datacrypto/CryptoManagerImpl.java"
+  },
+  {
+    "raw": "Shell fail, because %s",
+    "en_US": "Shell fail, because {0}",
+    "zh_CN": "Shell失败，原因是{0}",
+    "arguments": [
+      "res.getStderr()"
+    ],
+    "fileName": "src/main/java/org/zstack/crypto/datacrypto/CryptoManagerImpl.java"
+  },
+  {
+    "raw": "add integrity file[%s.%s] fail, because %s",
+    "en_US": "add integrity file[{0}.{1}] fail, because {2}",
+    "zh_CN": "添加完整性文件[{0}.{1}]失败，原因是{2}",
+    "arguments": [
+      "msg.getNodeType()",
+      "msg.getPath()",
+      "exception.getMessage()"
+    ],
+    "fileName": "src/main/java/org/zstack/crypto/datacrypto/CryptoManagerImpl.java"
+  },
+  {
+    "raw": "unsupported operation for EncryptColumnIntegrityFactory",
+    "en_US": "unsupported operation for EncryptColumnIntegrityFactory",
+    "zh_CN": "不支持对EncryptColumnIntegrityFactory的操作",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/crypto/datacrypto/integrity/EncryptColumnIntegrityFactory.java"
+  },
+  {
+    "raw": "the shared mount point primary storage[uuid:%s, name:%s] cannot find any available host in attached clusters",
+    "en_US": "the shared mount point primary storage[uuid:{0}, name:{1}] cannot find any available host in attached clusters",
+    "zh_CN": "",
+    "arguments": [
+      "self.getUuid()",
+      "self.getName()"
+    ],
+    "fileName": "src/main/java/org/zstack/crypto/datacrypto/smp/SMPCryptoBase.java"
+  },
+  {
+    "raw": "invalid certificate parameter : %s\u003d%s",
+    "en_US": "invalid certificate parameter : {0}\u003d{1}",
+    "zh_CN": "",
+    "arguments": [
+      "\"Certificate.algorithm\"",
+      "\"null\""
+    ],
+    "fileName": "src/main/java/org/zstack/crypto/datatype/CCSCertificateStruct.java"
+  },
+  {
+    "raw": "originText or certificateText can not be null",
+    "en_US": "originText or certificateText can not be null",
+    "zh_CN": "原始文本或证书文本不能为空",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/crypto/securitymachine/AttachVerifyPair.java"
+  },
+  {
+    "raw": "the security machine [%s] does not exist",
+    "en_US": "the security machine [{0}] does not exist",
+    "zh_CN": "安全计算机[{0}]不存在",
+    "arguments": [
+      "msg.getSecurityMachineUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/crypto/securitymachine/SecurityMachineApiInterceptor.java"
+  },
+  {
+    "raw": "managementIp[%s] is not in IPV4 format",
+    "en_US": "managementIp[{0}] is not in IPV4 format",
+    "zh_CN": "ManagementIP[{0}]不是IPv4格式",
+    "arguments": [
+      "msg.getManagementIp()"
+    ],
+    "fileName": "src/main/java/org/zstack/crypto/securitymachine/SecurityMachineApiInterceptor.java"
+  },
+  {
+    "raw": "failed to connect to the security machine %s[%s], because %s",
+    "en_US": "failed to connect to the security machine {0}[{1}], because {2}",
+    "zh_CN": "无法连接到安全性计算机{0}[{1}]，因为{2}",
+    "arguments": [
+      "msg.getName()",
+      "msg.getManagementIp()",
+      "error"
+    ],
+    "fileName": "src/main/java/org/zstack/crypto/securitymachine/SecurityMachineApiInterceptor.java"
+  },
+  {
+    "raw": "after the crypto function is enabled, at least one security machine should be reserved in the corresponding resource pool",
+    "en_US": "after the crypto function is enabled, at least one security machine should be reserved in the corresponding resource pool",
+    "zh_CN": "启用加密功能后，应在相应的资源池中至少保留一台安全机",
+    "arguments": [
+      "msg.getSecurityMachineUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/crypto/securitymachine/SecurityMachineApiInterceptor.java"
+  },
+  {
+    "raw": "please enable data protection function and try again",
+    "en_US": "please enable data protection function and try again",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/crypto/securitymachine/SecurityMachineApiInterceptor.java"
+  },
+  {
+    "raw": "invalid algType %s, supported types: %s.",
+    "en_US": "invalid algType {0}, supported types: {1}.",
+    "zh_CN": "AlgType{0}无效，支持的类型：{1}。",
+    "arguments": [
+      "msg.getAlgType()",
+      "StringUtils.join(EncryptType.values(), \u0027,\u0027)"
+    ],
+    "fileName": "src/main/java/org/zstack/crypto/securitymachine/SecurityMachineApiInterceptor.java"
+  },
+  {
+    "raw": "the resource pool[%s] specified by data protection does not exist",
+    "en_US": "the resource pool[{0}] specified by data protection does not exist",
+    "zh_CN": "数据保护指定的资源池[{0}]不存在",
+    "arguments": [
+      "poolForProtect"
+    ],
+    "fileName": "src/main/java/org/zstack/crypto/securitymachine/SecurityMachineApiInterceptor.java"
+  },
+  {
+    "raw": "cannot be deleted. after the encryption function is enabled, the number of synced security machines in the resource pool that provides the service is at least 1",
+    "en_US": "cannot be deleted. after the encryption function is enabled, the number of synced security machines in the resource pool that provides the service is at least 1",
+    "zh_CN": "无法删除。启用加密功能后，提供该服务的资源池中同步的安全机器至少为1台",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/crypto/securitymachine/SecurityMachineBase.java"
+  },
+  {
+    "raw": "securityMachine is disabled, failed to detect heartbeat",
+    "en_US": "securityMachine is disabled, failed to detect heartbeat",
+    "zh_CN": "SecurityMachine已禁用，无法检测心跳",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/crypto/securitymachine/SecurityMachineBase.java"
+  },
+  {
+    "raw": "an other connect security machine task is running, cancel the new task and wait return",
+    "en_US": "an other connect security machine task is running, cancel the new task and wait return",
+    "zh_CN": "其他连接安全性计算机任务正在运行，请取消新任务并等待返回",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/crypto/securitymachine/SecurityMachineBase.java"
+  },
+  {
+    "raw": "the crypto function is enabled but the resource pool[%s] for auto login is not set.",
+    "en_US": "the crypto function is enabled but the resource pool[{0}] for auto login is not set.",
+    "zh_CN": "已启用加密功能，但未设置用于自动登录的资源池[{0}]。",
+    "arguments": [
+      "poolForAuth"
+    ],
+    "fileName": "src/main/java/org/zstack/crypto/securitymachine/SecurityMachineHelper.java"
+  },
+  {
+    "raw": "the crypto function is enabled but the resource pool[%s] for data protect is not set.",
+    "en_US": "the crypto function is enabled but the resource pool[{0}] for data protect is not set.",
+    "zh_CN": "已启用加密功能，但未设置数据保护的资源池[{0}]。",
+    "arguments": [
+      "poolForProtect"
+    ],
+    "fileName": "src/main/java/org/zstack/crypto/securitymachine/SecurityMachineHelper.java"
+  },
+  {
+    "raw": "the current state[%s] does not allow manual modification of the state",
+    "en_US": "the current state[{0}] does not allow manual modification of the state",
+    "zh_CN": "当前状态[{0}]不允许手动修改状态",
+    "arguments": [
+      "state.toString()"
+    ],
+    "fileName": "src/main/java/org/zstack/crypto/securitymachine/SecurityMachineHelper.java"
+  },
+  {
+    "raw": "cannot disable all security machines when the crypto function is enabled",
+    "en_US": "cannot disable all security machines when the crypto function is enabled",
+    "zh_CN": "启用加密功能时，无法禁用所有安全计算机",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/crypto/securitymachine/SecurityMachineHelper.java"
+  },
+  {
+    "raw": "check whether the resource pool uuid is set for authentication",
+    "en_US": "check whether the resource pool uuid is set for authentication",
+    "zh_CN": "检查是否为身份验证设置了资源池uuid",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/crypto/securitymachine/SecurityMachineHelper.java"
+  },
+  {
+    "raw": "cannot find model for secretResourcePool [%s]",
+    "en_US": "cannot find model for secretResourcePool [{0}]",
+    "zh_CN": "找不到SecretResourcePool[{0}]的模型",
+    "arguments": [
+      "resourceUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/crypto/securitymachine/SecurityMachineHelper.java"
+  },
+  {
+    "raw": "encrypt data[%s] or algType[%s] is null",
+    "en_US": "encrypt data[{0}] or algType[{1}] is null",
+    "zh_CN": "加密数据[{0}]或AlgType[{1}]为空",
+    "arguments": [
+      "data",
+      "algType"
+    ],
+    "fileName": "src/main/java/org/zstack/crypto/securitymachine/SecurityMachineHelper.java"
+  },
+  {
+    "raw": "unknown encryptType[%s]",
+    "en_US": "unknown encryptType[{0}]",
+    "zh_CN": "未知的加密类型[{0}]",
+    "arguments": [
+      "algType"
+    ],
+    "fileName": "src/main/java/org/zstack/crypto/securitymachine/SecurityMachineHelper.java"
+  },
+  {
+    "raw": "decrypt data[%s] or algType[%s] is null",
+    "en_US": "decrypt data[{0}] or algType[{1}] is null",
+    "zh_CN": "解密数据[{0}]或AlgType[{1}]为空",
+    "arguments": [
+      "data",
+      "algType"
+    ],
+    "fileName": "src/main/java/org/zstack/crypto/securitymachine/SecurityMachineHelper.java"
+  },
+  {
+    "raw": "invalid decrypt algType: %s",
+    "en_US": "invalid decrypt algType: {0}",
+    "zh_CN": "无效的解密AlgType：{0}",
+    "arguments": [
+      "algType"
+    ],
+    "fileName": "src/main/java/org/zstack/crypto/securitymachine/SecurityMachineHelper.java"
+  },
+  {
+    "raw": "no client for security machine[type\u003d%s]",
+    "en_US": "no client for security machine[type\u003d{0}]",
+    "zh_CN": "安全计算机[类型\u003d{0}]没有客户端",
+    "arguments": [
+      "securityMachineType"
+    ],
+    "fileName": "src/main/java/org/zstack/crypto/securitymachine/SecurityMachineManagerImpl.java"
+  },
+  {
+    "raw": "no security machine client factory for security machine[type\u003d%s]",
+    "en_US": "no security machine client factory for security machine[type\u003d{0}]",
+    "zh_CN": "安全计算机[类型\u003d{0}]没有安全计算机客户端工厂",
+    "arguments": [
+      "securityMachineType"
+    ],
+    "fileName": "src/main/java/org/zstack/crypto/securitymachine/SecurityMachineManagerImpl.java"
+  },
+  {
+    "raw": "cannot find SecurityMachine[uuid:%s], it may have been deleted",
+    "en_US": "cannot find SecurityMachine[uuid:{0}], it may have been deleted",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getSecurityMachineUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/crypto/securitymachine/SecurityMachineManagerImpl.java"
+  },
+  {
+    "raw": "there has been a security machine having managementIp[%s]",
+    "en_US": "there has been a security machine having managementIp[{0}]",
+    "zh_CN": "已存在具有ManagementIP[{0}]的安全计算机",
+    "arguments": [
+      "msg.getManagementIp()"
+    ],
+    "fileName": "src/main/java/org/zstack/crypto/securitymachine/SecurityMachineManagerImpl.java"
+  },
+  {
+    "raw": "there is no security machine that can be activated",
+    "en_US": "there is no security machine that can be activated",
+    "zh_CN": "没有可以激活的安全机器。",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/crypto/securitymachine/secretresourcepool/SecretResourcePoolApiInterceptor.java"
+  },
+  {
+    "raw": "invalid token type %s, only supports %s.",
+    "en_US": "invalid token type {0}, only supports {1}.",
+    "zh_CN": "令牌类型{0}无效，仅支持{1}。",
+    "arguments": [
+      "msg.getType()",
+      "StringUtils.join(SecurityMachineKeyType.values(), \u0027,\u0027)"
+    ],
+    "fileName": "src/main/java/org/zstack/crypto/securitymachine/secretresourcepool/SecretResourcePoolApiInterceptor.java"
+  },
+  {
+    "raw": "the identity authentication function is enabled but the corresponding resource pool is not set, please re-enable the function and try again",
+    "en_US": "the identity authentication function is enabled but the corresponding resource pool is not set, please re-enable the function and try again",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getSecretResourcePoolUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/crypto/securitymachine/secretresourcepool/SecretResourcePoolApiInterceptor.java"
+  },
+  {
+    "raw": "cannot delete the resource pool %s when in use",
+    "en_US": "cannot delete the resource pool {0} when in use",
+    "zh_CN": "无法删除正在使用的资源池{0}",
+    "arguments": [
+      "msg.getSecretResourcePoolUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/crypto/securitymachine/secretresourcepool/SecretResourcePoolApiInterceptor.java"
+  },
+  {
+    "raw": "cannot find SecretResourcePool[uuid:%s], it may have been deleted",
+    "en_US": "cannot find SecretResourcePool[uuid:{0}], it may have been deleted",
+    "zh_CN": "",
+    "arguments": [
+      "resourcePoolUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/crypto/securitymachine/secretresourcepool/SecretResourcePoolManagerImpl.java"
+  },
+  {
+    "raw": "failed to connect client",
+    "en_US": "failed to connect client",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/crypto/securitymachine/thirdparty/aisino/AiSiNoSecretResourcePoolApiInterceptor.java"
+  },
+  {
+    "raw": "flkSec securityMachine unhealthy: %s",
+    "en_US": "flkSec securityMachine unhealthy: {0}",
+    "zh_CN": "FlkSec SecurityMachine不正常：{0}",
+    "arguments": [
+      "rsp.getData()"
+    ],
+    "fileName": "src/main/java/org/zstack/crypto/securitymachine/thirdparty/flkSec/FlkSecClient.java"
+  },
+  {
+    "raw": "keyLabel %s and encryptResult %s are inconsistent",
+    "en_US": "keyLabel {0} and encryptResult {1} are inconsistent",
+    "zh_CN": "KeyLabel{0}和EncryptResult{1}不一致",
+    "arguments": [
+      "keyLabel",
+      "sm4EncryptResponse.result"
+    ],
+    "fileName": "src/main/java/org/zstack/crypto/securitymachine/thirdparty/flkSec/FlkSecClient.java"
+  },
+  {
+    "raw": "generate certificate failed",
+    "en_US": "generate certificate failed",
+    "zh_CN": "生成证书失败",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/crypto/securitymachine/thirdparty/flkSec/FlkSecClient.java"
+  },
+  {
+    "raw": "the connection to the security machine %s failed during the process of generating the test key because %s",
+    "en_US": "the connection to the security machine {0} failed during the process of generating the test key because {1}",
+    "zh_CN": "在生成测试密钥的过程中，与安全计算机{0}的连接失败，原因是{1}",
+    "arguments": [
+      "vo.getUuid()",
+      "response.error"
+    ],
+    "fileName": "src/main/java/org/zstack/crypto/securitymachine/thirdparty/flkSec/FlkSecSecretResourcePoolBase.java"
+  },
+  {
+    "raw": "failed to generate dataProtect token for the security machine %s because %s",
+    "en_US": "failed to generate dataProtect token for the security machine {0} because {1}",
+    "zh_CN": "无法为安全计算机{0}生成DataProtect令牌，因为{1}",
+    "arguments": [
+      "vo.getUuid()",
+      "dataProtectTokenRes.error"
+    ],
+    "fileName": "src/main/java/org/zstack/crypto/securitymachine/thirdparty/flkSec/FlkSecSecretResourcePoolBase.java"
+  },
+  {
+    "raw": "failed to generate hmac token for the security machine %s because %s",
+    "en_US": "failed to generate hmac token for the security machine {0} because {1}",
+    "zh_CN": "无法为安全计算机{0}生成HMAC令牌，因为{1}",
+    "arguments": [
+      "vo.getUuid()",
+      "hmacTokenTokenRes.error"
+    ],
+    "fileName": "src/main/java/org/zstack/crypto/securitymachine/thirdparty/flkSec/FlkSecSecretResourcePoolBase.java"
+  },
+  {
+    "raw": "failed to get encrypt result for the security machine %s because %s",
+    "en_US": "failed to get encrypt result for the security machine {0} because {1}",
+    "zh_CN": "无法获取安全性计算机{0}的加密结果，因为{1}",
+    "arguments": [
+      "vo.getUuid()",
+      "encryptRes.error"
+    ],
+    "fileName": "src/main/java/org/zstack/crypto/securitymachine/thirdparty/flkSec/FlkSecSecretResourcePoolBase.java"
+  },
+  {
+    "raw": "the security machine [%s] failed to manually detect synchronization, please confirm whether the security machine has synchronized the key!",
+    "en_US": "the security machine [{0}] failed to manually detect synchronization, please confirm whether the security machine has synchronized the key!",
+    "zh_CN": "安全计算机[{0}]手动检测同步失败，请确认安全计算机是否已同步密钥！",
+    "arguments": [
+      "self.getManagementIp()"
+    ],
+    "fileName": "src/main/java/org/zstack/crypto/securitymachine/thirdparty/flkSec/FlkSecSecurityMachineBase.java"
+  },
+  {
+    "raw": "security machine[uuid:%s] model is not %s",
+    "en_US": "security machine[uuid:{0}] model is not {1}",
+    "zh_CN": "安全计算机[uuid：{0}]型号不是{1}",
+    "arguments": [
+      "msg.getName()",
+      "vo.getModel()"
+    ],
+    "fileName": "src/main/java/org/zstack/crypto/securitymachine/thirdparty/flkSec/FlkSecSecurityMachineFactory.java"
+  },
+  {
+    "raw": "currently does not support the creation of %s resource pools",
+    "en_US": "currently does not support the creation of {0} resource pools",
+    "zh_CN": "当前不支持创建{0}资源池",
+    "arguments": [
+      "msg.getModel()"
+    ],
+    "fileName": "src/main/java/org/zstack/crypto/securitymachine/thirdparty/haitai/HaiTaiSecretResourcePoolApiInterceptor.java"
+  },
+  {
+    "raw": "some services are unavailable, heartbeat detection failed",
+    "en_US": "some services are unavailable, heartbeat detection failed",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/crypto/securitymachine/thirdparty/haitai/HaiTaiSecretResourcePoolBase.java"
+  },
+  {
+    "raw": "secretResourcePool[uuid:%s] model is not %s",
+    "en_US": "secretResourcePool[uuid:{0}] model is not {1}",
+    "zh_CN": "SecretResourcePool[uuid：{0}]模型不是{1}",
+    "arguments": [
+      "msg.getResourceUuid()",
+      "vo.getModel()"
+    ],
+    "fileName": "src/main/java/org/zstack/crypto/securitymachine/thirdparty/haitai/HaiTaiSecretResourcePoolFactory.java"
+  },
+  {
+    "raw": "large file hmac encrypt failed, code: %s, detail: %s",
+    "en_US": "large file hmac encrypt failed, code: {0}, detail: {1}",
+    "zh_CN": "大文件HMAC加密失败，代码：{0}，详细信息：{1}",
+    "arguments": [
+      "agentBasic.INSMGetReturnCode()",
+      "agentBasic.INSMGetErrMsg()"
+    ],
+    "fileName": "src/main/java/org/zstack/crypto/securitymachine/thirdparty/infoSec/InfoSecClient.java"
+  },
+  {
+    "raw": "failed to find secret key",
+    "en_US": "failed to find secret key",
+    "zh_CN": "找不到密钥",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/crypto/securitymachine/thirdparty/infoSec/InfoSecClient.java"
+  },
+  {
+    "raw": "failed to parse secret key, error: %s",
+    "en_US": "failed to parse secret key, error: {0}",
+    "zh_CN": "无法分析密钥，错误：{0}",
+    "arguments": [
+      "e.getMessage()"
+    ],
+    "fileName": "src/main/java/org/zstack/crypto/securitymachine/thirdparty/infoSec/InfoSecClient.java"
+  },
+  {
+    "raw": "cipherText can not be null",
+    "en_US": "cipherText can not be null",
+    "zh_CN": "密文不能为空",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/crypto/securitymachine/thirdparty/infoSec/InfoSecClient.java"
+  },
+  {
+    "raw": "encryptSubjectDN can not be null",
+    "en_US": "encryptSubjectDN can not be null",
+    "zh_CN": "EncryptSubjectDN不能为空",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/crypto/securitymachine/thirdparty/infoSec/InfoSecClient.java"
+  },
+  {
+    "raw": "failed to parse MS Envelope",
+    "en_US": "failed to parse MS Envelope",
+    "zh_CN": "解析MS信封失败",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/crypto/securitymachine/thirdparty/infoSec/InfoSecClient.java"
+  },
+  {
+    "raw": "failed to export secret key",
+    "en_US": "failed to export secret key",
+    "zh_CN": "无法导出密钥",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/crypto/securitymachine/thirdparty/infoSec/InfoSecClient.java"
+  },
+  {
+    "raw": "import secret key fail",
+    "en_US": "import secret key fail",
+    "zh_CN": "导入密钥失败",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/crypto/securitymachine/thirdparty/infoSec/InfoSecClient.java"
+  },
+  {
+    "raw": "failed to generate activated token for the security machine %s because %s",
+    "en_US": "failed to generate activated token for the security machine {0} because {1}",
+    "zh_CN": "无法为安全计算机{0}生成激活的令牌，因为{1}",
+    "arguments": [
+      "vo.getUuid()",
+      "activateTokenRes.error"
+    ],
+    "fileName": "src/main/java/org/zstack/crypto/securitymachine/thirdparty/infoSec/InfoSecSecretResourcePoolBase.java"
+  },
+  {
+    "raw": "failed to generate dataProtect token %s for the security machine %s because %s",
+    "en_US": "failed to generate dataProtect token {0} for the security machine {1} because {2}",
+    "zh_CN": "无法为安全计算机{1}生成DataProtect令牌{0}，因为{2}",
+    "arguments": [
+      "dataProtectTokenName",
+      "vo.getUuid()",
+      "dataProtectTokenRes.error"
+    ],
+    "fileName": "src/main/java/org/zstack/crypto/securitymachine/thirdparty/infoSec/InfoSecSecretResourcePoolBase.java"
+  },
+  {
+    "raw": "failed to generate hmac token %s for the security machine %s because %s",
+    "en_US": "failed to generate hmac token {0} for the security machine {1} because {2}",
+    "zh_CN": "无法为安全计算机{1}生成HMAC令牌{0}，因为{2}",
+    "arguments": [
+      "hmacTokenName",
+      "vo.getUuid()",
+      "hmacTokenTokenRes.error"
+    ],
+    "fileName": "src/main/java/org/zstack/crypto/securitymachine/thirdparty/infoSec/InfoSecSecretResourcePoolBase.java"
+  },
+  {
+    "raw": "failed to parse encrypt public key",
+    "en_US": "failed to parse encrypt public key",
+    "zh_CN": "无法分析加密公钥",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/crypto/securitymachine/thirdparty/infoSec/InfoSecSecretResourcePoolBase.java"
+  }
+]

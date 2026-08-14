@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<globalConfig xmlns="http://zstack.org/schema/zstack">
+    <config>
+        <category>ha</category>
+        <name>enable</name>
+        <description>enable HA or not</description>
+        <type>java.lang.Boolean</type>
+        <defaultValue>true</defaultValue>
+    </config>
+
+    <config>
+        <category>ha</category>
+        <name>host.check.interval</name>
+        <description>the interval to check a failure host, in seconds</description>
+        <type>java.lang.Long</type>
+        <defaultValue>5</defaultValue>
+    </config>
+
+    <config>
+        <category>ha</category>
+        <name>host.check.maxAttempts</name>
+        <description>the max attempts before judging a host as failure</description>
+        <type>java.lang.Integer</type>
+        <defaultValue>12</defaultValue>
+    </config>
+
+    <config>
+        <category>ha</category>
+        <name>host.check.successInterval</name>
+        <description>the interval to check a host if the host is judged as success, in seconds</description>
+        <type>java.lang.Integer</type>
+        <defaultValue>5</defaultValue>
+    </config>
+
+    <config>
+        <category>ha</category>
+        <name>host.check.successTimes</name>
+        <description>the max success check before judging a host as success</description>
+        <type>java.lang.Integer</type>
+        <defaultValue>5</defaultValue>
+    </config>
+
+    <config>
+        <category>ha</category>
+        <name>host.check.successRatio</name>
+        <description>the ratio that host checker must succeed to judge a host as live</description>
+        <type>java.lang.Float</type>
+        <defaultValue>0.5</defaultValue>
+    </config>
+
+    <config>
+        <category>ha</category>
+        <name>host.selfFencer.interval</name>
+        <description>the interval the self-fencer checks health status, in seconds</description>
+        <type>java.lang.Long</type>
+        <defaultValue>5</defaultValue>
+    </config>
+
+    <config>
+        <category>ha</category>
+        <name>host.selfFencer.maxAttempts</name>
+        <description>the max attempts the self-fencer tries before judging the host as networking dead</description>
+        <type>java.lang.Integer</type>
+        <defaultValue>6</defaultValue>
+    </config>
+
+    <config>
+        <category>ha</category>
+        <name>neverStopVm.retry.delay</name>
+        <description>the delay HA does the next try for a never-stop VM if the previous HA failed, in seconds</description>
+        <type>java.lang.Integer</type>
+        <defaultValue>60</defaultValue>
+    </config>
+
+    <config>
+        <category>ha</category>
+        <name>host.selfFencer.storageChecker.timeout</name>
+        <description>the timeout self-fencer check connectivity of the primary storage, in seconds</description>
+        <type>java.lang.Integer</type>
+        <defaultValue>5</defaultValue>
+    </config>
+
+    <config>
+        <category>ha</category>
+        <name>neverStopVm.scan.interval</name>
+        <description>the interval to check a failure NeverStop vm, in seconds</description>
+        <type>java.lang.Long</type>
+        <defaultValue>60</defaultValue>
+    </config>
+
+    <config>
+        <category>ha</category>
+        <name>neverStopVm.notification.times</name>
+        <description>send notification when never stop vm gc executed times over this </description>
+        <type>java.lang.Integer</type>
+        <defaultValue>5</defaultValue>
+    </config>
+
+    <config>
+        <category>ha</category>
+        <name>neverStopVm.gc.maxRetryIntervalTime</name>
+        <description>NeverStopVmGC max retry interval time secs</description>
+        <type>java.lang.Integer</type>
+        <defaultValue>300</defaultValue>
+    </config>
+
+    <config>
+        <category>ha</category>
+        <name>self.fencer.strategy</name>
+        <description>Self fencer strategy. when set to Permissive, self fencer do not kill the vm when storage fails and also do not ha start the vm to any other host.
+        When this strategy set to Force, self fencer do kill the vms and management node will start the vm on suitable host</description>
+        <type>java.lang.String</type>
+        <defaultValue>Force</defaultValue>
+    </config>
+
+    <config>
+        <category>ha</category>
+        <name>allow.slibing.cross.clusters</name>
+        <description>Allow the use of other hosts with the same storage but different clusters to check if the target host is still connected.</description>
+        <type>java.lang.Boolean</type>
+        <defaultValue>true</defaultValue>
+    </config>
+
+    <config>
+        <category>ha</category>
+        <name>vm.ha.strategy</name>
+        <description>VmInstance fencer strategy. this value will override the self.fencer.strategy for special case </description>
+        <type>java.lang.String</type>
+        <defaultValue>Permissive</defaultValue>
+    </config>
+
+    <config>
+        <category>ha</category>
+        <name>vm.ha.level</name>
+        <description>The default High-Availability (HA) state of a newly created VM</description>
+        <type>java.lang.String</type>
+        <defaultValue>None</defaultValue>
+    </config>
+
+    <config>
+        <category>ha</category>
+        <name>notification.timeliness</name>
+        <description>Timeliness of HA notification. Configuration value should between -1 and 5. VM HA process will be notified to system endpoint,
+            Negative value means notification disabled. The lower the value, the more promptly notify. The higher the value,
+            the more expired notification will be ignored.</description>
+        <type>java.lang.Integer</type>
+        <defaultValue>1</defaultValue>
+    </config>
+</globalConfig>

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<globalConfig xmlns="http://zstack.org/schema/zstack">
+    <config>
+        <category>managementServer</category>
+        <name>node.heartbeatInterval</name>
+        <description>The interval management node writes heartbeat to database, in seconds</description>
+        <defaultValue>5</defaultValue>
+        <type>java.lang.Integer</type>
+    </config>
+
+    <config>
+        <category>managementServer</category>
+        <name>node.joinDelay</name>
+        <description>The delay management node reports its join event to other management nodes, in secs. If none zero, a random number will be picked up between 0 to this value and be used as join delay</description>
+        <defaultValue>0</defaultValue>
+        <type>java.lang.Integer</type>
+    </config>
+
+    <config>
+        <name>log.delete.accumulatedFileSize</name>
+        <category>managementServer</category>
+        <defaultValue>-1</defaultValue>
+        <type>java.lang.Integer</type>
+        <description>Maximum retention size of the log, unit: GB</description>
+    </config>
+
+    <config>
+        <name>log.delete.lastModified</name>
+        <category>managementServer</category>
+        <defaultValue>-1</defaultValue>
+        <type>java.lang.Integer</type>
+        <description>Maximum number of days to keep logs</description>
+    </config>
+
+</globalConfig>

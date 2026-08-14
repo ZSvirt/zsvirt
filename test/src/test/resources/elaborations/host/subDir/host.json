@@ -1,0 +1,11 @@
+[
+  {
+    "category": "HOST",
+    "code": "1001",
+    "regex": "host is connecting, ping failed",
+    "message_cn": "物理机正在连接, 不能进行ping操作",
+    "message_en": "host is connecting, cannot ping",
+    "operation_cn": "请等待物理机退出连接中状态",
+    "operation_en": "please wait until quit connecting status"
+  }
+]

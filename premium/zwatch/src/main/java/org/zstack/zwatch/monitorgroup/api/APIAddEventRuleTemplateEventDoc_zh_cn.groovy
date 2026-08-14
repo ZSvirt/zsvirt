@@ -1,0 +1,32 @@
+package org.zstack.zwatch.monitorgroup.api
+
+import org.zstack.header.errorcode.ErrorCode
+import org.zstack.zwatch.monitorgroup.entity.EventRuleTemplateInventory
+
+doc {
+
+	title "添加事件报模板返回"
+
+	field {
+		name "success"
+		desc "请求是否成功"
+		type "boolean"
+		since "3.10.0"
+	}
+	ref {
+		name "error"
+		path "org.zstack.zwatch.monitorgroup.api.APIAddEventRuleTemplateEvent.error"
+		desc "错误码，若不为null，则表示操作失败, 操作成功时该字段为null"
+		type "ErrorCode"
+		since "3.10.0"
+		clz ErrorCode.class
+	}
+	ref {
+		name "inventory"
+		path "org.zstack.zwatch.monitorgroup.api.APIAddEventRuleTemplateEvent.inventory"
+		desc "事件报模板清单"
+		type "EventRuleTemplateInventory"
+		since "3.10.0"
+		clz EventRuleTemplateInventory.class
+	}
+}

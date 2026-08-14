@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<globalConfig xmlns="http://zstack.org/schema/zstack">
+	<config>
+		<name>session.maxConcurrent</name>
+		<description>Max number of sessions management server accepts for every user. When this limit met, new session will be rejected</description>
+		<defaultValue>500</defaultValue>
+		<category>identity</category>
+		<type>java.lang.Integer</type>
+	</config>
+	<config>
+		<name>session.timeout</name>
+		<description>A timeout period assigned to a session. After timeout, the session will be cleaned out.</description>
+		<defaultValue>7200</defaultValue>
+		<category>identity</category>
+		<type>java.lang.Integer</type>
+	</config>
+	<config>
+		<name>session.cleanup.interval</name>
+		<description>The interval management server checks expired sessions, in seconds</description>
+		<defaultValue>3600</defaultValue>
+		<category>identity</category>
+		<type>java.lang.Integer</type>
+	</config>
+	<config>
+		<name>admin.showAllResource</name>
+		<description>A boolean value indicating whether admin account can see resources of user account</description>
+		<defaultValue>true</defaultValue>
+		<category>identity</category>
+		<type>java.lang.Boolean</type>
+	</config>
+	<config>
+		<name>enable.unique.session</name>
+		<description>Force logout session before current login, and only one session exists</description>
+		<defaultValue>false</defaultValue>
+		<category>identity</category>
+	</config>
+</globalConfig>

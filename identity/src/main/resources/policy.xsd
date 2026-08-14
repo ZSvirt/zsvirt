@@ -1,0 +1,30 @@
+<xsd:schema xmlns="http://zstack.org/schema/zstack"
+            xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            targetNamespace="http://zstack.org/schema/zstack" elementFormDefault="qualified"
+            attributeFormDefault="unqualified">
+
+	<xsd:element name="policy">
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:sequence maxOccurs="unbounded" minOccurs="1">
+					<xsd:element name="statement" type="statementType" />
+				</xsd:sequence>
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+
+	<xsd:complexType name="statementType">
+		<xsd:sequence>
+			<xsd:element name="effect" minOccurs="1">
+				<xsd:simpleType>
+					<xsd:restriction base="xsd:string">
+						<xsd:pattern value="((A|a)(L|l)(L|l)(O|o)(W|w)|(D|d)(E|e)(N|n)(Y|y))"/>
+					</xsd:restriction>
+				</xsd:simpleType>
+			</xsd:element>
+			<xsd:sequence maxOccurs="unbounded" minOccurs="1">
+				<xsd:element name="role" type="xsd:string" />
+			</xsd:sequence>
+		</xsd:sequence>
+	</xsd:complexType>
+</xsd:schema>

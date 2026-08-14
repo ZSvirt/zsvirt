@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns="http://zstack.org/schema/zstack"
+            xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            targetNamespace="http://zstack.org/schema/zstack" elementFormDefault="qualified"
+            attributeFormDefault="unqualified">
+
+    <xsd:import namespace="http://www.springframework.org/schema/beans"/>
+    <xsd:element name="plugin">
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:sequence maxOccurs="unbounded" minOccurs="0">
+                    <xsd:element name="extension">
+                        <xsd:complexType>
+                            <xsd:attribute name="interface" type="xsd:string"></xsd:attribute>
+                            <xsd:attribute name="instance-ref" type="xsd:string"></xsd:attribute>
+                            <xsd:attribute name="order" type="xsd:string"></xsd:attribute>
+                        </xsd:complexType>
+                    </xsd:element>
+                </xsd:sequence>
+            </xsd:sequence>
+        </xsd:complexType>
+    </xsd:element>
+</xsd:schema>

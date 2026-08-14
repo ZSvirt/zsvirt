@@ -1,0 +1,79 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:zstack="http://zstack.org/schema/zstack"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+         http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+         http://www.springframework.org/schema/aop
+         http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+         http://www.springframework.org/schema/tx
+         http://www.springframework.org/schema/tx/spring-tx-2.0.xsd
+         http://zstack.org/schema/zstack
+         http://zstack.org/schema/zstack/plugin.xsd"
+       default-init-method="init" default-destroy-method="destroy">
+
+    <bean id="BlockPrimaryStorageFactory" class=" org.zstack.storage.primary.block.BlockPrimaryStorageFactory">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.storage.primary.PrimaryStorageFactory" />
+            <zstack:extension interface="org.zstack.header.storage.snapshot.CreateTemplateFromVolumeSnapshotExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.storage.primary.PrimaryStorageAttachExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.storage.primary.PrimaryStorageDetachExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.storage.primary.RecalculatePrimaryStorageCapacityExtensionPoint" />
+            <zstack:extension interface="org.zstack.storage.primary.block.BackupStorageBlockKvmFactory" />
+            <zstack:extension interface="org.zstack.kvm.KVMStartVmExtensionPoint" />
+            <zstack:extension interface="org.zstack.kvm.KVMHostConnectExtensionPoint" />
+            <zstack:extension interface="org.zstack.kvm.KVMAttachVolumeExtensionPoint" />
+            <zstack:extension interface="org.zstack.kvm.KVMDetachVolumeExtensionPoint" />
+            <zstack:extension interface="org.zstack.kvm.KVMConvertVolumeExtensionPoint" />
+            <zstack:extension interface="org.zstack.kvm.KvmSetupSelfFencerExtensionPoint" />
+            <zstack:extension interface="org.zstack.kvm.KVMPingAgentNoFailureExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.volume.ResizeVolumeExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.vm.VmAttachVolumeExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.vm.VmInstanceMigrateExtensionPoint" />
+            <zstack:extension interface="org.zstack.storage.snapshot.MarkRootVolumeAsSnapshotExtension" />
+            <zstack:extension interface="org.zstack.storage.volume.ChangeVolumeInstallPathExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.volume.OverwriteVolumeExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.storage.snapshot.BeforeTakeLiveSnapshotsOnVolumes"/>
+            <zstack:extension interface="org.zstack.header.vm.PreVmInstantiateResourceExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.Component" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="BlockPrimaryStorageManagerImpl" class="org.zstack.storage.primary.block.BlockPrimaryStorageManagerImpl">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.Service" />
+            <zstack:extension interface="org.zstack.header.Component" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="BlockPrimaryStorageHostInitiatorCascadeExtension" class="org.zstack.storage.primary.block.BlockPrimaryStorageHostInitiatorCascadeExtension">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.core.cascade.CascadeExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="BlockPrimaryStorageCascadeExtension" class="org.zstack.storage.primary.block.BlockPrimaryStorageCascadeExtension">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.core.cascade.CascadeExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="HaBlockHostChecker" class="org.zstack.storage.primary.block.HaBlockHostChecker">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.ha.HaHostChecker" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="XStorDeviceImpl" class="org.zstack.storage.primary.block.vendor.xstor.XStorDeviceImpl">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.storage.primary.block.BlockPrimaryStorageDeviceBackend" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="BlockPrimaryStorageImageCacheCleaner" class="org.zstack.storage.primary.block.BlockPrimaryStorageImageCacheCleaner">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.managementnode.ManagementNodeReadyExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+</beans>

@@ -1,0 +1,415 @@
+[
+  {
+    "raw": "no executor found for resourceUuid[%s]",
+    "en_US": "no executor found for resourceUuid[{0}]",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getResourceUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/core/CoreManagerImpl.java"
+  },
+  {
+    "raw": "Multiple errors",
+    "en_US": "Multiple errors",
+    "zh_CN": "多重错误触发，详情请查看 causes",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/core/Platform.java"
+  },
+  {
+    "raw": "failed to run ansible: failed to find target host",
+    "en_US": "failed to run ansible: failed to find target host",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/core/ansible/AnsibleFacadeImpl.java"
+  },
+  {
+    "raw": "failed to run ansible",
+    "en_US": "failed to run ansible",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/core/ansible/AnsibleFacadeImpl.java"
+  },
+  {
+    "raw": "User name or password or port number may be problematic",
+    "en_US": "User name or password or port number may be problematic",
+    "zh_CN": "用户名、密码或者端口可能是错误的",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/core/ansible/AnsibleRunner.java"
+  },
+  {
+    "raw": "fail to create new File[%s]",
+    "en_US": "fail to create new File[{0}]",
+    "zh_CN": "无法创建新文件[{0}]",
+    "arguments": [
+      "hostsFile"
+    ],
+    "fileName": "src/main/java/org/zstack/core/ansible/PrepareAnsible.java"
+  },
+  {
+    "raw": "cannot check md5sum of files in the folder[%s]",
+    "en_US": "cannot check md5sum of files in the folder[{0}]",
+    "zh_CN": "",
+    "arguments": [
+      "srcFolder"
+    ],
+    "fileName": "src/main/java/org/zstack/core/ansible/SshFolderMd5Checker.java"
+  },
+  {
+    "raw": "cannot check md5sum of files in the folder[%s] on the host[ip:%s]",
+    "en_US": "cannot check md5sum of files in the folder[{0}] on the host[ip:{1}]",
+    "zh_CN": "",
+    "arguments": [
+      "dstFolder",
+      "hostname"
+    ],
+    "fileName": "src/main/java/org/zstack/core/ansible/SshFolderMd5Checker.java"
+  },
+  {
+    "raw": "unable to deliver the message; the destination service[%s] is dead; please use rabbitmqctl to check if the queue is existing and if any consumers on that queue",
+    "en_US": "unable to deliver the message; the destination service[{0}] is dead; please use rabbitmqctl to check if the queue is existing and if any consumers on that queue",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getServiceId()"
+    ],
+    "fileName": "src/main/java/org/zstack/core/cloudbus/CloudBusImpl2.java"
+  },
+  {
+    "raw": "management node[uuid:%s] is no ready",
+    "en_US": "management node[uuid:{0}] is no ready",
+    "zh_CN": "",
+    "arguments": [
+      "Platform.getManagementServerId()"
+    ],
+    "fileName": "src/main/java/org/zstack/core/cloudbus/CloudBusImpl2.java"
+  },
+  {
+    "raw": "No route found for the reply[%s], the service[id:%s] waiting for this reply may have been quit. %s",
+    "en_US": "No route found for the reply[{0}], the service[id:{1}] waiting for this reply may have been quit. {2}",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getClass().getName()",
+      "msg.getServiceId()",
+      "wire.dumpMessage(msg)"
+    ],
+    "fileName": "src/main/java/org/zstack/core/cloudbus/CloudBusImpl2.java"
+  },
+  {
+    "raw": "No route found for the message[%s], the service[id:%s] may not be running. Checking Spring xml to make sure you have loaded it. Message dump:\\n %s",
+    "en_US": "No route found for the message[{0}], the service[id:{1}] may not be running. Checking Spring xml to make sure you have loaded it. Message dump:\\n {2}",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getClass().getName()",
+      "msg.getServiceId()",
+      "wire.dumpMessage(msg)"
+    ],
+    "fileName": "src/main/java/org/zstack/core/cloudbus/CloudBusImpl2.java"
+  },
+  {
+    "raw": "the message becomes a dead letter; the possible reason is the service[%s] it sends to has been dead",
+    "en_US": "the message becomes a dead letter; the possible reason is the service[{0}] it sends to has been dead",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getServiceId()"
+    ],
+    "fileName": "src/main/java/org/zstack/core/cloudbus/CloudBusImpl2.java"
+  },
+  {
+    "raw": "message is not in correct JSON mediaType",
+    "en_US": "message is not in correct JSON mediaType",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/core/cloudbus/CloudBusImpl2.java"
+  },
+  {
+    "raw": "management node[uuid:%s] is unavailable",
+    "en_US": "management node[uuid:{0}] is unavailable",
+    "zh_CN": "",
+    "arguments": [
+      "mgmtNodeId"
+    ],
+    "fileName": "src/main/java/org/zstack/core/cloudbus/CloudBusImpl2.java"
+  },
+  {
+    "raw": "HTTP ERROR, status code: %s, body: %s",
+    "en_US": "HTTP ERROR, status code: {0}, body: {1}",
+    "zh_CN": "HTTP错误，状态代码：{0}，正文：{1}",
+    "arguments": [
+      "rsp.getStatusCode()",
+      "rsp.getBody()"
+    ],
+    "fileName": "src/main/java/org/zstack/core/cloudbus/CloudBusImpl3.java"
+  },
+  {
+    "raw": "for webhooks with type[%s], the field opaque cannot be null",
+    "en_US": "for webhooks with type[{0}], the field opaque cannot be null",
+    "zh_CN": "对于[{0}]类型的webhooks，opaque字段不能为null",
+    "arguments": [
+      "EventFacade.WEBHOOK_TYPE"
+    ],
+    "fileName": "src/main/java/org/zstack/core/cloudbus/EventFacadeImpl.java"
+  },
+  {
+    "raw": "do not allow skip verification",
+    "en_US": "do not allow skip verification",
+    "zh_CN": "不允许跳过验证",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/core/config/GlobalConfig.java"
+  },
+  {
+    "raw": "Unable to find GlobalConfig[category: %s, name: %s]",
+    "en_US": "Unable to find GlobalConfig[category: {0}, name: {1}]",
+    "zh_CN": "无法找到全局变量[category:{0}, name:{1}]",
+    "arguments": [
+      "msg.getCategory()",
+      "msg.getName()"
+    ],
+    "fileName": "src/main/java/org/zstack/core/config/GlobalConfigFacadeImpl.java"
+  },
+  {
+    "raw": "taskInfo was not found",
+    "en_US": "taskInfo was not found",
+    "zh_CN": "未找到TaskInfo",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/core/debug/DebugManagerImpl.java"
+  },
+  {
+    "raw": "encryption error",
+    "en_US": "encryption error",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/core/encrypt/EncryptFacadeImpl.java"
+  },
+  {
+    "raw": "non file or jsoncontent input",
+    "en_US": "non file or jsoncontent input",
+    "zh_CN": "非文件或JSON内容输入",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/core/errorcode/ElaborationManagerImpl.java"
+  },
+  {
+    "raw": "file or jsoncontent cannot both nonempty",
+    "en_US": "file or jsoncontent cannot both nonempty",
+    "zh_CN": "文件或JSONContent不能同时为非空",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/core/errorcode/ElaborationManagerImpl.java"
+  },
+  {
+    "raw": "unable to scan folder",
+    "en_US": "unable to scan folder",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/core/errorcode/ElaborationManagerImpl.java"
+  },
+  {
+    "raw": "%s is not existed or is empty folder",
+    "en_US": "{0} is not existed or is empty folder",
+    "zh_CN": "{0}不存在或为空文件夹",
+    "arguments": [
+      "filename"
+    ],
+    "fileName": "src/main/java/org/zstack/core/errorcode/ElaborationManagerImpl.java"
+  },
+  {
+    "raw": "elaboration code must be number!",
+    "en_US": "elaboration code must be number!",
+    "zh_CN": "精化代码必须为数字！",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/core/errorcode/ElaborationManagerImpl.java"
+  },
+  {
+    "raw": "%s: %s",
+    "en_US": "{0}: {1}",
+    "zh_CN": "{0}: {1}",
+    "arguments": [
+      "returnValue.get(0).getContent()",
+      "returnValue.get(0).getReason()"
+    ],
+    "fileName": "src/main/java/org/zstack/core/errorcode/ElaborationManagerImpl.java"
+  },
+  {
+    "raw": "input args \u0027regex\u0027 or \u0027category\u0027 must be set",
+    "en_US": "input args \u0027regex\u0027 or \u0027category\u0027 must be set",
+    "zh_CN": "必须设置输入参数“ regex ”或“ category ”",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/core/errorcode/ElaborationManagerImpl.java"
+  },
+  {
+    "raw": "service[%s] has been registered",
+    "en_US": "service[{0}] has been registered",
+    "zh_CN": "服务(service)[{0}]已经被注册",
+    "arguments": [
+      "service.getName()"
+    ],
+    "fileName": "src/main/java/org/zstack/core/externalservice/ExternalServiceManagerImpl.java"
+  },
+  {
+    "raw": "service[%s] is not registered",
+    "en_US": "service[{0}] is not registered",
+    "zh_CN": "服务[{0}]未注册",
+    "arguments": [
+      "msg.getName()"
+    ],
+    "fileName": "src/main/java/org/zstack/core/externalservice/ExternalServiceManagerImpl.java"
+  },
+  {
+    "raw": "service[%s] does not support reload config",
+    "en_US": "service[{0}] does not support reload config",
+    "zh_CN": "服务[{0}]不支持重新加载配置",
+    "arguments": [
+      "msg.getName()"
+    ],
+    "fileName": "src/main/java/org/zstack/core/externalservice/ExternalServiceManagerImpl.java"
+  },
+  {
+    "raw": "service[%s] is not running",
+    "en_US": "service[{0}] is not running",
+    "zh_CN": "服务[{0}]未运行",
+    "arguments": [
+      "msg.getName()"
+    ],
+    "fileName": "src/main/java/org/zstack/core/externalservice/ExternalServiceManagerImpl.java"
+  },
+  {
+    "raw": "cannot trigger a finished GC job[uuid:%s, name:%s]",
+    "en_US": "cannot trigger a finished GC job[uuid:{0}, name:{1}]",
+    "zh_CN": "无法触发一个完成过的GC任务",
+    "arguments": [
+      "vo.getUuid()",
+      "vo.getName()"
+    ],
+    "fileName": "src/main/java/org/zstack/core/gc/GarbageCollectorManagerImpl.java"
+  },
+  {
+    "raw": "management node[id:%s] becomes unavailable, job[name:%s, id:%s] is not restartable",
+    "en_US": "management node[id:{0}] becomes unavailable, job[name:{1}, id:{2}] is not restartable",
+    "zh_CN": "",
+    "arguments": [
+      "mgmtId",
+      "e.getName()",
+      "e.getId()"
+    ],
+    "fileName": "src/main/java/org/zstack/core/job/JobQueueFacadeImpl2.java"
+  },
+  {
+    "raw": "unknown product plugin name: %s",
+    "en_US": "unknown product plugin name: {0}",
+    "zh_CN": "",
+    "arguments": [
+      "pluginDriver.name()"
+    ],
+    "fileName": "src/main/java/org/zstack/core/plugin/PluginManager.java"
+  },
+  {
+    "raw": "plugin[%s] name, productKey and vendor cannot be null",
+    "en_US": "plugin[{0}] name, productKey and vendor cannot be null",
+    "zh_CN": "插件[{0}]名称、产品密钥和供应商不能为空",
+    "arguments": [
+      "pluginDriver.getClass()"
+    ],
+    "fileName": "src/main/java/org/zstack/core/plugin/PluginManager.java"
+  },
+  {
+    "raw": "parameter apiId[%s] is not a valid uuid.",
+    "en_US": "parameter apiId[{0}] is not a valid uuid.",
+    "zh_CN": "参数apiId[{0}]不是一个有效的uuid",
+    "arguments": [
+      "msg.getApiId()"
+    ],
+    "fileName": "src/main/java/org/zstack/core/progress/ProgressApiInterceptor.java"
+  },
+  {
+    "raw": "http timeout",
+    "en_US": "http timeout",
+    "zh_CN": "HTTP 超时",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/core/rest/AsyncResponseFetcher.java"
+  },
+  {
+    "raw": "failed to %s to %s: IO Error",
+    "en_US": "failed to {0} to {1}: IO Error",
+    "zh_CN": "",
+    "arguments": [
+      "http2.getMethod().toString().toLowerCase()",
+      "http2.getPath()"
+    ],
+    "fileName": "src/main/java/org/zstack/core/rest/RESTFacadeImpl.java"
+  },
+  {
+    "raw": "failed to %s to %s, status code: %s, response body: %s",
+    "en_US": "failed to {0} to {1}, status code: {2}, response body: {3}",
+    "zh_CN": "访问{1}时执行{0}方法失败，状态码: {2}，响应体: {3}",
+    "arguments": [
+      "method.toString().toLowerCase()",
+      "url",
+      "rsp.getStatusCode()",
+      "rsp.getBody()"
+    ],
+    "fileName": "src/main/java/org/zstack/core/rest/RESTFacadeImpl.java"
+  },
+  {
+    "raw": "unable to echo %s in %sms",
+    "en_US": "unable to echo {0} in {1}ms",
+    "zh_CN": "无法在{1}ms内返回{0}",
+    "arguments": [
+      "url",
+      "finalTimeout"
+    ],
+    "fileName": "src/main/java/org/zstack/core/rest/RESTFacadeImpl.java"
+  },
+  {
+    "raw": "an operation[%s] fails after retrying %s times with the interval %s seconds",
+    "en_US": "an operation[{0}] fails after retrying {1} times with the interval {2} seconds",
+    "zh_CN": "在重试{1}次间隔时间为{2}后操作[{0}]失败",
+    "arguments": [
+      "__name__",
+      "times",
+      "interval"
+    ],
+    "fileName": "src/main/java/org/zstack/core/retry/Retry.java"
+  },
+  {
+    "raw": "failed to run salt state[%s] on system[%s], failed after %s retries",
+    "en_US": "failed to run salt state[{0}] on system[{1}], failed after {2} retries",
+    "zh_CN": "重试{2}次之后，在系统[{1}]上运行加盐状态[{0}]失败",
+    "arguments": [
+      "stateName",
+      "targetIp",
+      "retry"
+    ],
+    "fileName": "src/main/java/org/zstack/core/salt/SaltRunner.java"
+  },
+  {
+    "raw": "scp is not found on system[%s], unable to setup salt",
+    "en_US": "scp is not found on system[{0}], unable to setup salt",
+    "zh_CN": "在系统[{0}]上找不到SCP，无法设置销售",
+    "arguments": [
+      "targetIp"
+    ],
+    "fileName": "src/main/java/org/zstack/core/salt/SaltSetupMinionJob.java"
+  },
+  {
+    "raw": "task failed due to cancelled",
+    "en_US": "task failed due to cancelled",
+    "zh_CN": "任务被取消了",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/core/thread/DispatchQueueImpl.java"
+  },
+  {
+    "raw": "api timeout cannot be set smaller than %s",
+    "en_US": "api timeout cannot be set smaller than {0}",
+    "zh_CN": "API超时不能设置为小于{0}",
+    "arguments": [
+      "ApiTimeoutGlobalProperty.MINIMAL_TIMEOUT"
+    ],
+    "fileName": "src/main/java/org/zstack/core/timeout/ApiTimeoutManagerImpl.java"
+  },
+  {
+    "raw": "Invalid url[%s]",
+    "en_US": "Invalid url[{0}]",
+    "zh_CN": "无效的URL[{0}]",
+    "arguments": [
+      "url"
+    ],
+    "fileName": "src/main/java/org/zstack/core/webhook/WebhookApiInterceptor.java"
+  }
+]

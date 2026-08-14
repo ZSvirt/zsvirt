@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns="http://zstack.org/schema/zstack"
+            xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            targetNamespace="http://zstack.org/schema/zstack" elementFormDefault="qualified"
+            attributeFormDefault="unqualified">
+
+    <xsd:element name="requirementCategory">
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element name="scope" type="xsd:string" />
+                <xsd:element name="title" type="xsd:string" />
+                <xsd:element name="documentId" type="xsd:string" />
+                <xsd:sequence maxOccurs="unbounded" minOccurs="0">
+                    <xsd:element name="req">
+                        <xsd:complexType>
+                            <xsd:sequence>
+                                <xsd:element name="prerequisite" type="xsd:string" />
+                                <xsd:element name="goal" type="xsd:string" />
+                                <xsd:element name="details" type="xsd:string" />
+                                <xsd:element name="title" type="xsd:string" />
+                                <xsd:sequence maxOccurs="unbounded" minOccurs="0">
+                                    <xsd:element name="subResource" type="xsd:string" />
+                                </xsd:sequence>
+                                <xsd:sequence maxOccurs="unbounded" minOccurs="0">
+                                    <xsd:element name="relationalResource" type="xsd:string" />
+                                </xsd:sequence>
+                                <xsd:sequence maxOccurs="unbounded" minOccurs="0">
+                                    <xsd:element name="api">
+                                        <xsd:complexType>
+                                            <xsd:sequence>
+                                                <xsd:element name="requestClass" type="xsd:string" />
+                                                <xsd:element name="responseClass" type="xsd:string" />
+                                            </xsd:sequence>
+                                        </xsd:complexType>
+                                    </xsd:element>
+                                </xsd:sequence>
+                                <xsd:element name="other" type="xsd:string" />
+                            </xsd:sequence>
+                        </xsd:complexType>
+                    </xsd:element>
+                </xsd:sequence>
+            </xsd:sequence>
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="requirement-specification">
+        <xsd:complexType>
+            <xsd:sequence>
+                <xsd:element name="req_spec">
+                    <xsd:complexType>
+                        <xsd:sequence>
+                            <xsd:element name="scope" type="xsd:string"/>
+                            <xsd:element name="node_order" type="xsd:string"/>
+                            <xsd:sequence maxOccurs="unbounded" minOccurs="0">
+                                <xsd:element name="requirement" >
+                                    <xsd:complexType>
+                                        <xsd:sequence>
+                                            <xsd:element name="docid" type="xsd:string"/>
+                                            <xsd:element name="title" type="xsd:string"/>
+                                            <xsd:element name="node_order" type="xsd:string"/>
+                                            <xsd:element name="description" type="xsd:string"/>
+                                        </xsd:sequence>
+                                    </xsd:complexType>
+                                </xsd:element>
+                            </xsd:sequence>
+                        </xsd:sequence>
+                        <xsd:attribute name="title" type="xsd:string"></xsd:attribute>
+                        <xsd:attribute name="doc_id" type="xsd:string"></xsd:attribute>
+                    </xsd:complexType>
+                </xsd:element>
+            </xsd:sequence>
+        </xsd:complexType>
+    </xsd:element>
+
+</xsd:schema>

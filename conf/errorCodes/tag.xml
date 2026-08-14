@@ -1,0 +1,19 @@
+<error>
+    <prefix>TAG</prefix>
+
+    <code>
+        <id>1000</id>
+        <description>Tag generic error</description>
+    </code>
+
+    <code>
+        <id>1001</id>
+        <description>Duplicated tag.</description>
+    </code>
+
+    <code>
+        <id>1002</id>
+        <description>Tag quota exceeded.</description>
+    </code>
+</error>
+

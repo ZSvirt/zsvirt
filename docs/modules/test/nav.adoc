@@ -1,0 +1,12 @@
+* xref:index.adoc[]
+ ** xref:integration-test/index.adoc[]
+ ** 测试框架介绍与使用
+  *** xref:integration-test/usages/write-test-case.adoc[]
+  *** xref:integration-test/usages/test-suite.adoc[]
+  *** xref:integration-test/usages/cookbook.adoc[]
+  *** xref:integration-test/usages/run-tests.adoc[]
+  *** xref:integration-test/usages/get-all-test.adoc[]
+ ** 测试框架原理
+  *** xref:integration-test/principles/intro.adoc[]
+  *** xref:integration-test/principles/deep_dive.adoc[]
+ ** xref:junit/index.adoc[]

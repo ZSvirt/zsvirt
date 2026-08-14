@@ -1,0 +1,88 @@
+
+## Name
+
+```
+ssh.timeout(##中文名-必填##)
+```
+
+### Description
+
+```
+A timeout in seconds. Management server will try to ssh in appliance vm after it starts successfully on hypervisor; if management server fails to login during period defined by this configure, the appliance vm will be considered as failed to start and will be destroyed
+```
+
+### 含义
+
+```
+##该条目的作用是什么-必填##
+```
+
+### Type
+
+```
+java.lang.Integer
+```
+
+### Category
+
+```
+applianceVm
+```
+
+### 取值范围
+
+```
+[0, 2147483647]
+```
+
+### 取值范围补充说明
+
+```
+##对取值范围的解读-如无需写：无##
+```
+
+### DefaultValue
+
+```
+300
+```
+
+### 默认值补充说明
+
+```
+##对默认值的解读-如无需写：无##
+```
+
+### 支持的资源级配置
+
+
+
+### 资源粒度说明
+
+```
+##该条目支持的资源粒度-如无需写：无##
+```
+
+### 背景信息
+
+```
+##触发该条目增删改的背景-如无需写：无##
+```
+
+### UI暴露
+
+```
+##该条目是否需UI暴露？-必填##
+```
+
+### CLI手册暴露
+
+```
+##该条目是否需CLI手册暴露？-必填##
+```
+
+## 注意事项
+
+```
+##该条目有哪些注意事项-如无需写：无##
+```

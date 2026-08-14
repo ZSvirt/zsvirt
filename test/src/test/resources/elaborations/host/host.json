@@ -1,0 +1,13 @@
+[
+  {
+    "category": "HOST",
+    "code": "1001",
+    "regex": "host is connecting, ping failed",
+    "message_cn": "物理机正在连接, 不能进行ping操作"
+  },
+  {
+    "category": "VM",
+    "code": "1005",
+    "regex": "unable to connect to KVM[ip:%s, username:root, sshPort:%s] to check the management node connectivity,please check if username/password is wrong; null"
+  }
+]

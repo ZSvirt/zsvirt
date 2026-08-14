@@ -1,0 +1,477 @@
+[
+  {
+    "raw": "cannot find such ResourceStackVO by uuid [%s]",
+    "en_US": "cannot find such ResourceStackVO by uuid [{0}]",
+    "zh_CN": "无法通过uuid[{0}]找到此类ResourceStackVO",
+    "arguments": [
+      "msg.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/cloudformation/CloudFormationInterceptor.java"
+  },
+  {
+    "raw": "restart resource stack only support %s status!",
+    "en_US": "restart resource stack only support {0} status!",
+    "zh_CN": "重新启动资源堆栈仅支持{0}状态！",
+    "arguments": [
+      "validStatus"
+    ],
+    "fileName": "src/main/java/org/zstack/cloudformation/CloudFormationInterceptor.java"
+  },
+  {
+    "raw": "expect %s status!",
+    "en_US": "expect {0} status!",
+    "zh_CN": "预期{0}状态！",
+    "arguments": [
+      "validStatus"
+    ],
+    "fileName": "src/main/java/org/zstack/cloudformation/CloudFormationInterceptor.java"
+  },
+  {
+    "raw": "templateContent and templateUuid mustn\u0027t both be empty!",
+    "en_US": "templateContent and templateUuid mustn\u0027t both be empty!",
+    "zh_CN": "TemplateContent和TemplateUuid不能同时为空！",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/cloudformation/CloudFormationInterceptor.java"
+  },
+  {
+    "raw": "templateContent and url mustn\u0027t both be empty or both be set!",
+    "en_US": "templateContent and url mustn\u0027t both be empty or both be set!",
+    "zh_CN": "TemplateContent和URL不能同时为空或同时设置！",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/cloudformation/CloudFormationInterceptor.java"
+  },
+  {
+    "raw": "only admin could enable/disable system StackTemplate",
+    "en_US": "only admin could enable/disable system StackTemplate",
+    "zh_CN": "只有管理员才能启用/禁用系统堆栈模板",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/cloudformation/CloudFormationInterceptor.java"
+  },
+  {
+    "raw": "templateContent and uuid mustn\u0027t both be empty or both be set!",
+    "en_US": "templateContent and uuid mustn\u0027t both be empty or both be set!",
+    "zh_CN": "TemplateContent和uuid不能同时为空或同时设置！",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/cloudformation/CloudFormationInterceptor.java"
+  },
+  {
+    "raw": "no stackUuid found for the vmInstance[%s]",
+    "en_US": "no stackUuid found for the vmInstance[{0}]",
+    "zh_CN": "找不到VMInstance[{0}]stackUuid",
+    "arguments": [
+      "msg.getVmInstanceUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/cloudformation/CloudFormationManagerImpl.java"
+  },
+  {
+    "raw": "ResourceStackVO: [%s] has been deleted...",
+    "en_US": "ResourceStackVO: [{0}] has been deleted...",
+    "zh_CN": "ResourceStackVO：[{0}]已被删除..",
+    "arguments": [
+      "msg.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/cloudformation/CloudFormationManagerImpl.java"
+  },
+  {
+    "raw": "ResourceStackVO [%s] already been deleted!",
+    "en_US": "ResourceStackVO [{0}] already been deleted!",
+    "zh_CN": "ResourceStackVO[{0}]已被删除！",
+    "arguments": [
+      "uuid"
+    ],
+    "fileName": "src/main/java/org/zstack/cloudformation/CloudFormationManagerImpl.java"
+  },
+  {
+    "raw": "template [%s] chosen is disabled",
+    "en_US": "template [{0}] chosen is disabled",
+    "zh_CN": "所选模板[{0}]已禁用",
+    "arguments": [
+      "template.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/cloudformation/CloudFormationManagerImpl.java"
+  },
+  {
+    "raw": "templateContent must be set!",
+    "en_US": "templateContent must be set!",
+    "zh_CN": "必须设置TemplateContent！",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/cloudformation/CloudFormationManagerImpl.java"
+  },
+  {
+    "raw": "cannot find parameters for %s, which is %s type, please check parameters",
+    "en_US": "cannot find parameters for {0}, which is {1} type, please check parameters",
+    "zh_CN": "找不到{1}类型的{0}的参数，请检查参数",
+    "arguments": [
+      "p.getParamName()",
+      "p.getResourceType()"
+    ],
+    "fileName": "src/main/java/org/zstack/cloudformation/CloudFormationManagerImpl.java"
+  },
+  {
+    "raw": "StackTemplateVO has been deleted...",
+    "en_US": "StackTemplateVO has been deleted...",
+    "zh_CN": "StackTemplateVo已被删除..",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/cloudformation/CloudFormationManagerImpl.java"
+  },
+  {
+    "raw": "cannot delete or update system template: %s",
+    "en_US": "cannot delete or update system template: {0}",
+    "zh_CN": "无法删除或更新系统模板：{0}",
+    "arguments": [
+      "vo.getName()"
+    ],
+    "fileName": "src/main/java/org/zstack/cloudformation/CloudFormationManagerImpl.java"
+  },
+  {
+    "raw": "content must be set by templateContent or url!",
+    "en_US": "content must be set by templateContent or url!",
+    "zh_CN": "必须通过TemplateContent或URL设置内容！",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/cloudformation/CloudFormationManagerImpl.java"
+  },
+  {
+    "raw": "get null content input",
+    "en_US": "get null content input",
+    "zh_CN": "获取空内容输入",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/cloudformation/CloudFormationManagerImpl.java"
+  },
+  {
+    "raw": "invalid cloudformation template version: %s",
+    "en_US": "invalid cloudformation template version: {0}",
+    "zh_CN": "CloudFormation模板版本无效：{0}",
+    "arguments": [
+      "result.getTemplateVersion()"
+    ],
+    "fileName": "src/main/java/org/zstack/cloudformation/CloudFormationManagerImpl.java"
+  },
+  {
+    "raw": "StackTemplateVO: [%s] has been deleted...",
+    "en_US": "StackTemplateVO: [{0}] has been deleted...",
+    "zh_CN": "StackTemplateVo：[{0}]已删除..",
+    "arguments": [
+      "msg.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/cloudformation/CloudFormationManagerImpl.java"
+  },
+  {
+    "raw": "[cloudformation] filterName must be cloudformation:true or cloudformation:false",
+    "en_US": "[cloudformation] filterName must be cloudformation:true or cloudformation:false",
+    "zh_CN": "[cloudFormation]FilterName必须为cloudFormation：true或cloudFormat：false",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/cloudformation/CloudFormationManagerImpl.java"
+  },
+  {
+    "raw": "get null element in template content",
+    "en_US": "get null element in template content",
+    "zh_CN": "获取模板内容中的空元素",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/cloudformation/CloudFormationUtils.java"
+  },
+  {
+    "raw": "template must contain [ZStackTemplateFormatVersion]",
+    "en_US": "template must contain [ZStackTemplateFormatVersion]",
+    "zh_CN": "模板必须包含[ZStackTemplateFormatVersion]",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/cloudformation/CloudFormationUtils.java"
+  },
+  {
+    "raw": "invalid ZStackTemplateFormatVersion: [%s, expected: %s]",
+    "en_US": "invalid ZStackTemplateFormatVersion: [{0}, expected: {1}]",
+    "zh_CN": "无效的ZStackTemplateFormatVersion：[{0}，应为：{1}]",
+    "arguments": [
+      "result.getTemplateVersion()",
+      "CloudFormationConstant.version"
+    ],
+    "fileName": "src/main/java/org/zstack/cloudformation/CloudFormationUtils.java"
+  },
+  {
+    "raw": "cannot find l2_bridge_name of l2[%s] from systemTag",
+    "en_US": "cannot find l2_bridge_name of l2[{0}] from systemTag",
+    "zh_CN": "在系统标记中找不到L2[{0}]的L 2_Bridge_名称",
+    "arguments": [
+      "l2Uuid"
+    ],
+    "fileName": "src/main/java/org/zstack/cloudformation/VmPortMonitorTask.java"
+  },
+  {
+    "raw": "cannot find default ip on vm[%s]",
+    "en_US": "cannot find default ip on vm[{0}]",
+    "zh_CN": "在云主机[{0}]上找不到默认IP",
+    "arguments": [
+      "vm.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/cloudformation/VmPortMonitorTask.java"
+  },
+  {
+    "raw": "cannot find resource of properties set before!",
+    "en_US": "cannot find resource of properties set before!",
+    "zh_CN": "找不到以前设置的属性的资源！",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/cloudformation/template/CloudFormationCreator.java"
+  },
+  {
+    "raw": "invalid dynamic variables, which must contained ${: %s",
+    "en_US": "invalid dynamic variables, which must contained ${: {0}",
+    "zh_CN": "动态变量无效，必须包含${：{0}",
+    "arguments": [
+      "value"
+    ],
+    "fileName": "src/main/java/org/zstack/cloudformation/template/CloudFormationCreator.java"
+  },
+  {
+    "raw": "verb must contain \u0027::\u0027!",
+    "en_US": "verb must contain \u0027::\u0027!",
+    "zh_CN": "谓词必须包含“：:”！",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/cloudformation/template/CloudFormationCreator.java"
+  },
+  {
+    "raw": "need List for resource [%s] output here, but got %s.",
+    "en_US": "need List for resource [{0}] output here, but got {1}.",
+    "zh_CN": "此处需要资源[{0}]输出的列表，但获得了{1}。",
+    "arguments": [
+      "t[0]",
+      "last.getClass().getName()"
+    ],
+    "fileName": "src/main/java/org/zstack/cloudformation/template/CloudFormationCreator.java"
+  },
+  {
+    "raw": "Some actions are invalid",
+    "en_US": "Some actions are invalid",
+    "zh_CN": "某些操作无效",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/cloudformation/template/CloudFormationCreator.java"
+  },
+  {
+    "raw": "no root element found, please check your cfn formation!",
+    "en_US": "no root element found, please check your cfn formation!",
+    "zh_CN": "找不到根元素，请检查您的CFN结构！",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/cloudformation/template/CloudFormationDecoder.java"
+  },
+  {
+    "raw": "Wrong json format, causes: %s",
+    "en_US": "Wrong json format, causes: {0}",
+    "zh_CN": "错误的JSON格式，导致：{0}",
+    "arguments": [
+      "e.getMessage()"
+    ],
+    "fileName": "src/main/java/org/zstack/cloudformation/template/CloudFormationDecoder.java"
+  },
+  {
+    "raw": "CfnRootDecoder\u0027s weight must between 0-100, 0 means decode first, default is 50",
+    "en_US": "CfnRootDecoder\u0027s weight must between 0-100, 0 means decode first, default is 50",
+    "zh_CN": "cfnRootDecoder的权重必须介于0-100之间，0表示先解码，默认值为50",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/cloudformation/template/decoder/AbstractCfnRootDecoder.java"
+  },
+  {
+    "raw": "Condition key: %s only support 1 element in the json object of value, but got %d elements!",
+    "en_US": "Condition key: {0} only support 1 element in the json object of value, but got {1} elements!",
+    "zh_CN": "",
+    "arguments": [
+      "key",
+      "es.size()"
+    ],
+    "fileName": "src/main/java/org/zstack/cloudformation/template/decoder/ConditionDecoder.java"
+  },
+  {
+    "raw": "Value must be boolean in \u0027Condition\u0027 field",
+    "en_US": "Value must be boolean in \u0027Condition\u0027 field",
+    "zh_CN": "“条件”字段中的值必须为布尔值",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/cloudformation/template/decoder/ConditionDecoder.java"
+  },
+  {
+    "raw": "Only support ZStack Template Functions in \u0027Condition\u0027 field!",
+    "en_US": "Only support ZStack Template Functions in \u0027Condition\u0027 field!",
+    "zh_CN": "仅支持“条件”字段中的ZStack模板函数！",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/cloudformation/template/decoder/ConditionDecoder.java"
+  },
+  {
+    "raw": "Condition body cannot support json null or array!",
+    "en_US": "Condition body cannot support json null or array!",
+    "zh_CN": "条件体不支持JSON NULL或数组！",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/cloudformation/template/decoder/ConditionDecoder.java"
+  },
+  {
+    "raw": "cannot find such msg: %s for create",
+    "en_US": "cannot find such msg: {0} for create",
+    "zh_CN": "无法为创建找到这样的消息：{0}",
+    "arguments": [
+      "msg"
+    ],
+    "fileName": "src/main/java/org/zstack/cloudformation/template/decoder/DecoderUtils.java"
+  },
+  {
+    "raw": "Mapping value body cannot support json array!",
+    "en_US": "Mapping value body cannot support json array!",
+    "zh_CN": "映射值主体不支持JSON数组！",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/cloudformation/template/decoder/MappingDecoder.java"
+  },
+  {
+    "raw": "Mapping value body cannot support null!",
+    "en_US": "Mapping value body cannot support null!",
+    "zh_CN": "映射值正文不能支持Null！",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/cloudformation/template/decoder/MappingDecoder.java"
+  },
+  {
+    "raw": "mappingName must be found in result, or it is invalid cfn json.",
+    "en_US": "mappingName must be found in result, or it is invalid cfn json.",
+    "zh_CN": "必须在结果中找到MappingName，否则它是无效的CFN JSON。",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/cloudformation/template/decoder/MappingDecoder.java"
+  },
+  {
+    "raw": "Output body cannot support json null!",
+    "en_US": "Output body cannot support json null!",
+    "zh_CN": "输出正文不支持JSON NULL！",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/cloudformation/template/decoder/OutputDecoder.java"
+  },
+  {
+    "raw": "Description in Outputs must be String type!",
+    "en_US": "Description in Outputs must be String type!",
+    "zh_CN": "输出中的描述必须是字符串类型！",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/cloudformation/template/decoder/OutputDecoder.java"
+  },
+  {
+    "raw": "Mapping body cannot support non map value!",
+    "en_US": "Mapping body cannot support non map value!",
+    "zh_CN": "映射体不支持非映射值！",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/cloudformation/template/decoder/OutputDecoder.java"
+  },
+  {
+    "raw": "Mapping body cannot support json null!",
+    "en_US": "Mapping body cannot support json null!",
+    "zh_CN": "映射体不支持JSON NULL！",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/cloudformation/template/decoder/OutputDecoder.java"
+  },
+  {
+    "raw": "paramName must be found in result, or it is invalid cfn json.",
+    "en_US": "paramName must be found in result, or it is invalid cfn json.",
+    "zh_CN": "必须在结果中找到ParamName，否则它是无效的CFN JSON。",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/cloudformation/template/decoder/ParameterDecoder.java"
+  },
+  {
+    "raw": "Parameters root body must be json object!",
+    "en_US": "Parameters root body must be json object!",
+    "zh_CN": "参数根体必须是JSON对象！",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/cloudformation/template/decoder/PreParameterDecoder.java"
+  },
+  {
+    "raw": "Resource %s cannot depends on itself, please check %s in Resource [%s]",
+    "en_US": "Resource {0} cannot depends on itself, please check {1} in Resource [{2}]",
+    "zh_CN": "资源{0}不能依赖自身，请检查资源[{2}]中的{1}",
+    "arguments": [
+      "resource.getResourceName()",
+      "e.getKey()",
+      "resource.getResourceName()"
+    ],
+    "fileName": "src/main/java/org/zstack/cloudformation/template/decoder/ResourceDecoder.java"
+  },
+  {
+    "raw": "Resource value body cannot support null!",
+    "en_US": "Resource value body cannot support null!",
+    "zh_CN": "资源值体不能支持null！",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/cloudformation/template/decoder/ResourceDecoder.java"
+  },
+  {
+    "raw": "resourceName must be found in result, or it is invalid cfn json.",
+    "en_US": "resourceName must be found in result, or it is invalid cfn json.",
+    "zh_CN": "ResourceName必须在结果中找到，或者它是无效的CFN JSON。",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/cloudformation/template/decoder/ResourceDecoder.java"
+  },
+  {
+    "raw": "Parameters body cannot support null!",
+    "en_US": "Parameters body cannot support null!",
+    "zh_CN": "参数体不支持NULL！",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/cloudformation/template/decoder/ResourceDecoder.java"
+  },
+  {
+    "raw": "Mappings root body must be json object!",
+    "en_US": "Mappings root body must be json object!",
+    "zh_CN": "映射根体必须是JSON对象！",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/cloudformation/template/decoder/ResourceDecoder.java"
+  },
+  {
+    "raw": "Resource Type must be String!",
+    "en_US": "Resource Type must be String!",
+    "zh_CN": "资源类型必须是字符串！",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/cloudformation/template/decoder/ResourceDecoder.java"
+  },
+  {
+    "raw": "Resource root body must be json object!",
+    "en_US": "Resource root body must be json object!",
+    "zh_CN": "资源根体必须是JSON对象！",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/cloudformation/template/decoder/ResourceDecoder.java"
+  },
+  {
+    "raw": "cannot find condition[%s] in \u0027Conditions\u0027",
+    "en_US": "cannot find condition[{0}] in \u0027Conditions\u0027",
+    "zh_CN": "在“条件”中找不到条件[{0}]",
+    "arguments": [
+      "cond"
+    ],
+    "fileName": "src/main/java/org/zstack/cloudformation/template/function/IfTemplateFunction.java"
+  },
+  {
+    "raw": "expect \u0027true\u0027, \u0027false\u0027 or an other Condition, current Conditions include: %s, but got %s",
+    "en_US": "expect \u0027true\u0027, \u0027false\u0027 or an other Condition, current Conditions include: {0}, but got {1}",
+    "zh_CN": "应为“ true ”、“ false ”或其他条件，当前条件包括：{0}，但得到了{1}",
+    "arguments": [
+      "keys",
+      "e.getAsString()"
+    ],
+    "fileName": "src/main/java/org/zstack/cloudformation/template/function/OrTemplateFunction.java"
+  },
+  {
+    "raw": "expect \u0027true\u0027, \u0027false\u0027 for the object, but got %s",
+    "en_US": "expect \u0027true\u0027, \u0027false\u0027 for the object, but got {0}",
+    "zh_CN": "该对象应为“ true ”和“ false ”，但得到了{0}",
+    "arguments": [
+      "e.getAsString()"
+    ],
+    "fileName": "src/main/java/org/zstack/cloudformation/template/function/OrTemplateFunction.java"
+  },
+  {
+    "raw": "Fn::Select out of range, please check your json file!",
+    "en_US": "Fn::Select out of range, please check your json file!",
+    "zh_CN": "FN：:选择超出范围，请检查您的JSON文件！",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/cloudformation/template/function/SelectTemplateFunction.java"
+  },
+  {
+    "raw": "only functions can in Function, but found %s",
+    "en_US": "only functions can in Function, but found {0}",
+    "zh_CN": "只能在函数中使用函数，但找到了{0}",
+    "arguments": [
+      "e.getKey()"
+    ],
+    "fileName": "src/main/java/org/zstack/cloudformation/template/function/TemplateFunctionUtils.java"
+  },
+  {
+    "raw": "element is null!",
+    "en_US": "element is null!",
+    "zh_CN": "元素为空！",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/cloudformation/template/function/TemplateFunctionUtils.java"
+  }
+]

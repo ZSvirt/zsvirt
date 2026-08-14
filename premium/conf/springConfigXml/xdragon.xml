@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:zstack="http://zstack.org/schema/zstack"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+
+
+
+
+    http://zstack.org/schema/zstack
+    http://zstack.org/schema/zstack/plugin.xsd"
+       default-init-method="init" default-destroy-method="destroy">
+
+
+    <bean id="XDragonHostFactory" class="org.zstack.xdragon.XDragonHostFactory">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.host.HypervisorFactory" />
+            <zstack:extension interface="org.zstack.compute.host.HostPriorityCaculator" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="StorageDeviceXDragonBackend" class="org.zstack.xdragon.StorageDeviceXDragonBackend">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.storage.device.StorageDeviceBackend"/>
+            <zstack:extension interface="org.zstack.kvm.KVMStartVmAddonExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="PciDeviceXDragonBackend" class="org.zstack.xdragon.PciDeviceXDragonBackend" >
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.pciDevice.PciDeviceBackend" />
+            <zstack:extension interface="org.zstack.header.host.HostConnectionReestablishExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.tag.FormTagExtensionPoint"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="UsbDeviceXDragonBackend" class="org.zstack.xdragon.UsbDeviceXDragonBackend" >
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.usbDevice.UsbDeviceBackend" />
+            <zstack:extension interface="org.zstack.kvm.KVMHostConnectExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.host.HostConnectionReestablishExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="XDragonHostReconnectTaskFactory" class="org.zstack.xdragon.XDragonHostReconnectTaskFactory">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.compute.host.HostReconnectTaskFactory" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="SharedBlockImageStoreXDragonFactory"  class="org.zstack.xdragon.SharedBlockImageStoreXDragonFactory">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.storage.primary.sharedblock.SharedBlockHypervisorFactory" />
+            <zstack:extension interface="org.zstack.kvm.KVMHostConnectExtensionPoint" />
+<!--            <zstack:extension interface="org.zstack.kvm.KVMPingAgentNoFailureExtensionPoint"/>-->
+            <!--zstack:extension interface="org.zstack.header.host.HostAfterMaintenanceExtensionPoint" /-->
+        </zstack:plugin>
+    </bean>
+
+    <bean id="XDragonSecurityGroupBackend" class="org.zstack.xdragon.XDragonSecurityGroupBackend">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.network.securitygroup.SecurityGroupHypervisorBackend" />
+            <zstack:extension interface="org.zstack.header.host.HostAfterConnectedExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="XDragonConsoleHypervisorBackend" class="org.zstack.xdragon.XDragonConsoleHypervisorBackend">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.console.ConsoleHypervisorBackend"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="XDragonRealizeL2NoVlanNetworkBackend" class="org.zstack.xdragon.XDragonRealizeL2NoVlanNetworkBackend">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.network.l2.L2NetworkRealizationExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="XDragonRealizeL2VlanNetworkBackend" class="org.zstack.xdragon.XDragonRealizeL2VlanNetworkBackend">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.network.l2.L2NetworkRealizationExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="XDragonRealizeL2VxlanNetworkBackend" class="org.zstack.xdragon.XDragonRealizeL2VxlanNetworkBackend">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.network.l2.L2NetworkRealizationExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="XDragonRealizeL2VxlanNetworkPoolBackend" class="org.zstack.xdragon.XDragonRealizeL2VxlanNetworkPoolBackend">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.network.l2.L2NetworkRealizationExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="XDragonHostConnectExtensionPoint" class="org.zstack.xdragon.XDragonHostConnectExtensionPoint">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.kvm.KVMHostConnectExtensionPoint" order="-9"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="XDragonFilterExtensionPoint" class="org.zstack.xdragon.XDragonFilterExtensionPoint">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.allocator.HostAllocatorFilterExtensionPoint"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="XDragonStartInstanceExtensionPoint" class="org.zstack.xdragon.XDragonStartInstanceExtensionPoint">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.kvm.KVMStartVmExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.vm.PreVmInstantiateResourceExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="LocalStorageXDragonFactory" class="org.zstack.xdragon.LocalStorageXDragonFactory">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.storage.primary.local.LocalStorageHypervisorFactory"/>
+            <!--zstack:extension interface="org.zstack.kvm.KVMHostConnectExtensionPoint"/-->
+        </zstack:plugin>
+    </bean>
+</beans>

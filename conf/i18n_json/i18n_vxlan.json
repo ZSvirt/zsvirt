@@ -1,0 +1,267 @@
+[
+  {
+    "raw": "cannot configure vxlan network for vm[uuid:%s] on the destination host[uuid:%s]",
+    "en_US": "cannot configure vxlan network for vm[uuid:{0}] on the destination host[uuid:{1}]",
+    "zh_CN": "无法为云主机[uuid:{0}]在目标主机[uuid:{1}]上配置VXLAN网络",
+    "arguments": [
+      "inv.getUuid()",
+      "destHostUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l2/vxlan/vxlanNetwork/VxlanNetworkFactory.java"
+  },
+  {
+    "raw": "cannot allocate vni[%s] in l2Network[uuid:%s], out of vni range",
+    "en_US": "cannot allocate vni[{0}] in l2Network[uuid:{1}], out of vni range",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getRequiredVni()",
+      "msg.getL2NetworkUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l2/vxlan/vxlanNetworkPool/AbstractVniAllocatorStrategy.java"
+  },
+  {
+    "raw": "cannot allocate vni[%s] in l2Network[uuid:%s], duplicate with l2Network[uuid:%s]",
+    "en_US": "cannot allocate vni[{0}] in l2Network[uuid:{1}], duplicate with l2Network[uuid:{2}]",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getRequiredVni()",
+      "msg.getL2NetworkUuid()",
+      "duplicate"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l2/vxlan/vxlanNetworkPool/AbstractVniAllocatorStrategy.java"
+  },
+  {
+    "raw": "find multiple vtep ips[%s] for one host[uuid:%s], need to delete host and add again",
+    "en_US": "find multiple vtep ips[{0}] for one host[uuid:{1}], need to delete host and add again",
+    "zh_CN": "在一个主机[uuid:{1}]发现多个VTEP IP，需要删除主机在进行添加",
+    "arguments": [
+      "vtepIps",
+      "hostUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l2/vxlan/vxlanNetworkPool/KVMRealizeL2VxlanNetworkBackend.java"
+  },
+  {
+    "raw": "failed to find vtep on host[uuid: %s], please re-attach vxlanpool[uuid: %s] to cluster.",
+    "en_US": "failed to find vtep on host[uuid: {0}], please re-attach vxlanpool[uuid: {1}] to cluster.",
+    "zh_CN": "无法在主机[uuid：{0}]上找到VTEP，请将vxlanpool[uuid：{1}]重新挂接到集群。",
+    "arguments": [
+      "hostUuid",
+      "l2vxlan.getPoolUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l2/vxlan/vxlanNetworkPool/KVMRealizeL2VxlanNetworkBackend.java"
+  },
+  {
+    "raw": "failed to create bridge[%s] for l2Network[uuid:%s, type:%s, vni:%s] on kvm host[uuid:%s], because %s",
+    "en_US": "failed to create bridge[{0}] for l2Network[uuid:{1}, type:{2}, vni:{3}] on kvm host[uuid:{4}], because {5}",
+    "zh_CN": "为二层网络[uuid:{1}, type:{2}, vni:{3}]在KVM主机[uuid:{4}]上创建网桥[{0}]失败，错误细节: {5}",
+    "arguments": [
+      "cmd.getBridgeName()",
+      "l2Network.getUuid()",
+      "l2Network.getType()",
+      "l2vxlan.getVni()",
+      "hostUuid",
+      "rsp.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l2/vxlan/vxlanNetworkPool/KVMRealizeL2VxlanNetworkBackend.java"
+  },
+  {
+    "raw": "failed to update bridge[%s] for l2Network[uuid:%s, name:%s] on kvm host[uuid: %s], %s",
+    "en_US": "failed to update bridge[{0}] for l2Network[uuid:{1}, name:{2}] on kvm host[uuid: {3}], {4}",
+    "zh_CN": "",
+    "arguments": [
+      "cmd.getBridgeName()",
+      "newL2Network.getUuid()",
+      "newL2Network.getName()",
+      "hostUuid",
+      "rsp.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l2/vxlan/vxlanNetworkPool/KVMRealizeL2VxlanNetworkBackend.java"
+  },
+  {
+    "raw": "failed to check cidr[%s] for l2VxlanNetwork[uuid:%s, name:%s] on kvm host[uuid:%s], %s",
+    "en_US": "failed to check cidr[{0}] for l2VxlanNetwork[uuid:{1}, name:{2}] on kvm host[uuid:{3}], {4}",
+    "zh_CN": "为KVM主机[uuid:{3}]上的L2 VXLAN 网络[uuid:{1}, name:{2}]检查CIDR[{0}]失败，错误细节: {4}",
+    "arguments": [
+      "cmd.getCidr()",
+      "l2vxlan.getUuid()",
+      "l2vxlan.getName()",
+      "hostUuid",
+      "rsp.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l2/vxlan/vxlanNetworkPool/KVMRealizeL2VxlanNetworkBackend.java"
+  },
+  {
+    "raw": "failed to delete bridge[%s] for l2Network[uuid:%s, type:%s, vni:%s] on kvm host[uuid:%s], because %s",
+    "en_US": "failed to delete bridge[{0}] for l2Network[uuid:{1}, type:{2}, vni:{3}] on kvm host[uuid:{4}], because {5}",
+    "zh_CN": "无法删除KVM主机[uuid：{4}]上的二层网络[uuid：{1}，类型：{2}，VNI：{3}]的网桥[{0}]，因为{5}",
+    "arguments": [
+      "cmd.getBridgeName()",
+      "l2Network.getUuid()",
+      "l2Network.getType()",
+      "l2vxlan.getVni()",
+      "hostUuid",
+      "rsp.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l2/vxlan/vxlanNetworkPool/KVMRealizeL2VxlanNetworkBackend.java"
+  },
+  {
+    "raw": "failed to check cidr[%s] for l2VxlanNetworkPool[uuid:%s, name:%s] on kvm host[uuid:%s], %s",
+    "en_US": "failed to check cidr[{0}] for l2VxlanNetworkPool[uuid:{1}, name:{2}] on kvm host[uuid:{3}], {4}",
+    "zh_CN": "检查在kvm主机[uuid:{3}]上的l2VxlanNetworkPool[uuid:{1}, name:{2}]的CIDR[{0}]失败，{4}",
+    "arguments": [
+      "cmd.getCidr()",
+      "vxlanPool.getUuid()",
+      "vxlanPool.getName()",
+      "hostUuid",
+      "rsp.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l2/vxlan/vxlanNetworkPool/KVMRealizeL2VxlanNetworkPoolBackend.java"
+  },
+  {
+    "raw": "failed to realize vxlan network pool[uuid:%s, type:%s] on kvm host[uuid:%s], because %s",
+    "en_US": "failed to realize vxlan network pool[uuid:{0}, type:{1}] on kvm host[uuid:{2}], because {3}",
+    "zh_CN": "无法在KVM物理机[uuid：{2}]上实现VXLAN网络池[uuid：{0}，类型：{1}]，因为{3}",
+    "arguments": [
+      "l2Network.getUuid()",
+      "l2Network.getType()",
+      "hostUuid",
+      "rsp.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l2/vxlan/vxlanNetworkPool/KVMRealizeL2VxlanNetworkPoolBackend.java"
+  },
+  {
+    "raw": "vni[%s] for vxlan is invalid",
+    "en_US": "vni[{0}] for vxlan is invalid",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getVirtualNetworkId()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l2/vxlan/vxlanNetworkPool/VxlanNetworkCheckerImpl.java"
+  },
+  {
+    "raw": "cannot allocate vni[%s] in vxlan network[uuid:%s] which is already allocated",
+    "en_US": "cannot allocate vni[{0}] in vxlan network[uuid:{1}] which is already allocated",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getVirtualNetworkId()",
+      "msg.getL2NetworkUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l2/vxlan/vxlanNetworkPool/VxlanNetworkCheckerImpl.java"
+  },
+  {
+    "raw": "need to input one system tag like : [%s]",
+    "en_US": "need to input one system tag like : [{0}]",
+    "zh_CN": "需要输入一个系统标签，格式为：[{0}]",
+    "arguments": [
+      "VxlanSystemTags.VXLAN_POOL_CLUSTER_VTEP_CIDR.getTagFormat()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l2/vxlan/vxlanNetworkPool/VxlanNetworkCheckerImpl.java"
+  },
+  {
+    "raw": "wrong system tag [%s], should be like : [%s]",
+    "en_US": "wrong system tag [{0}], should be like : [{1}]",
+    "zh_CN": "错误的系统标签[{0}]，格式应该为：[{1}]",
+    "arguments": [
+      "tag",
+      "VxlanSystemTags.VXLAN_POOL_CLUSTER_VTEP_CIDR.getTagFormat()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l2/vxlan/vxlanNetworkPool/VxlanNetworkCheckerImpl.java"
+  },
+  {
+    "raw": "wrong cidr format in system tag [%s]",
+    "en_US": "wrong cidr format in system tag [{0}]",
+    "zh_CN": "系统标签[{0}]中的cidr格式错误",
+    "arguments": [
+      "tag"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l2/vxlan/vxlanNetworkPool/VxlanNetworkCheckerImpl.java"
+  },
+  {
+    "raw": "overlap vni range with %s [%s]",
+    "en_US": "overlap vni range with {0} [{1}]",
+    "zh_CN": "与{0}[{1}]的vni范围重叠",
+    "arguments": [
+      "inv.getType()",
+      "overlappedPool"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l2/vxlan/vxlanNetworkPool/VxlanNetworkCheckerImpl.java"
+  },
+  {
+    "raw": "vxlan network pool doesn\u0027t support create l3 network",
+    "en_US": "vxlan network pool doesn\u0027t support create l3 network",
+    "zh_CN": "vxlan network pool不支持创建三层网络",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/network/l2/vxlan/vxlanNetworkPool/VxlanNetworkCheckerImpl.java"
+  },
+  {
+    "raw": "Vni allocator strategy[%s] returns nothing, because no vni is available in this VxlanNetwork[name:%s, uuid:%s]",
+    "en_US": "Vni allocator strategy[{0}] returns nothing, because no vni is available in this VxlanNetwork[name:{1}, uuid:{2}]",
+    "zh_CN": "",
+    "arguments": [
+      "strategyType",
+      "self.getName()",
+      "self.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l2/vxlan/vxlanNetworkPool/VxlanNetworkPool.java"
+  },
+  {
+    "raw": "Cannot find L2NetworkClusterRefVO item for l2NetworkUuid[%s] clusterUuid[%s]",
+    "en_US": "Cannot find L2NetworkClusterRefVO item for l2NetworkUuid[{0}] clusterUuid[{1}]",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getL2NetworkUuid()",
+      "msg.getClusterUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l2/vxlan/vxlanNetworkPool/VxlanNetworkPool.java"
+  },
+  {
+    "raw": "ip[%s] l2NetworkUuid[%s] clusterUuid[%s] exist",
+    "en_US": "ip[{0}] l2NetworkUuid[{1}] clusterUuid[{2}] exist",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getRemoteVtepIp()",
+      "msg.getL2NetworkUuid()",
+      "msg.getClusterUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l2/vxlan/vxlanNetworkPool/VxlanNetworkPool.java"
+  },
+  {
+    "raw": "ip[%s] l2NetworkUuid[%s] clusterUuid[%s] ip exist in local vtep",
+    "en_US": "ip[{0}] l2NetworkUuid[{1}] clusterUuid[{2}] ip exist in local vtep",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getRemoteVtepIp()",
+      "msg.getL2NetworkUuid()",
+      "msg.getClusterUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l2/vxlan/vxlanNetworkPool/VxlanPoolApiInterceptor.java"
+  },
+  {
+    "raw": "%s:is not ipv4",
+    "en_US": "{0}:is not ipv4",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getRemoteVtepIp()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l2/vxlan/vxlanNetworkPool/VxlanPoolApiInterceptor.java"
+  },
+  {
+    "raw": "vxlan vtep address for host [uuid : %s] and pool [uuid : %s] pair already existed",
+    "en_US": "vxlan vtep address for host [uuid : {0}] and pool [uuid : {1}] pair already existed",
+    "zh_CN": "物理机[uuid : {0}]在vxlan资源池[uuid : {1}]中隧道端点地址已经配置",
+    "arguments": [
+      "msg.getHostUuid()",
+      "msg.getPoolUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l2/vxlan/vxlanNetworkPool/VxlanPoolApiInterceptor.java"
+  },
+  {
+    "raw": "unable create vni range, because l2 uuid[%s] is not vxlan network pool",
+    "en_US": "unable create vni range, because l2 uuid[{0}] is not vxlan network pool",
+    "zh_CN": "无法创建VNI范围，因为L2 uuid[{0}]不是VXLAN网络池",
+    "arguments": [
+      "msg.getL2NetworkUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/l2/vxlan/vxlanNetworkPool/VxlanPoolApiInterceptor.java"
+  }
+]

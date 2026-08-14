@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<globalConfig xmlns="http://zstack.org/schema/zstack">
+    <config>
+        <category>eip</category>
+        <name>snatInboundTraffic</name>
+        <description>A boolean value indicating whether source nat inbound traffic of EIP to guest gateway IP. This is typically useful when a vm has multiple nics, and each nic has an EIP attached. Don't change this if a vm only has one EIP</description>
+        <defaultValue>false</defaultValue>
+        <type>java.lang.Boolean</type>
+    </config>
+
+    <config>
+        <name>eip.num</name>
+        <description>default quota for eip.num</description>
+        <defaultValue>20</defaultValue>
+        <category>quota</category>
+        <type>java.lang.Long</type>
+    </config>
+</globalConfig>

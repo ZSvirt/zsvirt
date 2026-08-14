@@ -1,0 +1,73 @@
+[
+  {
+    "raw": "no service configuration file declares message: %s",
+    "en_US": "no service configuration file declares message: {0}",
+    "zh_CN": "",
+    "arguments": [
+      "JSONObjectUtil.toJsonString(message)"
+    ],
+    "fileName": "src/main/java/org/zstack/portal/apimediator/ApiMediatorImpl.java"
+  },
+  {
+    "raw": "management node[uuid:%s] is not ready yet",
+    "en_US": "management node[uuid:{0}] is not ready yet",
+    "zh_CN": "",
+    "arguments": [
+      "fnodeId"
+    ],
+    "fileName": "src/main/java/org/zstack/portal/apimediator/ApiMediatorImpl.java"
+  },
+  {
+    "raw": "resourceUuid[%s] is not a valid uuid. A valid uuid is a UUID(v4 recommended) with \u0027-\u0027 stripped. see http://en.wikipedia.org/wiki/Universally_unique_identifier for format of UUID, the regular expression uses to validate a UUID is \u0027[0-9a-f]{8}[0-9a-f]{4}[1-5][0-9a-f]{3}[89ab][0-9a-f]{3}[0-9a-f]{12}\u0027",
+    "en_US": "resourceUuid[{0}] is not a valid uuid. A valid uuid is a UUID(v4 recommended) with \u0027-\u0027 stripped. see http://en.wikipedia.org/wiki/Universally_unique_identifier for format of UUID, the regular expression uses to validate a UUID is \u0027[0-9a-f]{8}[0-9a-f]{4}[1-5][0-9a-f]{3}[89ab][0-9a-f]{3}[0-9a-f]{12}\u0027",
+    "zh_CN": "",
+    "arguments": [
+      "cmsg.getResourceUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/portal/apimediator/ApiMediatorImpl.java"
+  },
+  {
+    "raw": "invalid value[%s] of field[%s]",
+    "en_US": "invalid value[{0}] of field[{1}]",
+    "zh_CN": "",
+    "arguments": [
+      "uuid",
+      "f.getName()"
+    ],
+    "fileName": "src/main/java/org/zstack/portal/apimediator/PortApiValidator.java"
+  },
+  {
+    "raw": "invalid field[%s] for %s, resource[uuid:%s, type:%s] not found",
+    "en_US": "invalid field[{0}] for {1}, resource[uuid:{2}, type:{3}] not found",
+    "zh_CN": "",
+    "arguments": [
+      "f.getName()",
+      "msg.getClass().getSimpleName()",
+      "uuid",
+      "resourceType.getSimpleName()"
+    ],
+    "fileName": "src/main/java/org/zstack/portal/apimediator/PortApiValidator.java"
+  },
+  {
+    "raw": "invalid field[%s] for %s, resource[uuids:%s, type:%s] not found",
+    "en_US": "invalid field[{0}] for {1}, resource[uuids:{2}, type:{3}] not found",
+    "zh_CN": "",
+    "arguments": [
+      "f.getName()",
+      "msg.getClass().getSimpleName()",
+      "uuidList",
+      "CollectionUtils.transform(resourceTypes, Class::getSimpleName)"
+    ],
+    "fileName": "src/main/java/org/zstack/portal/apimediator/PortApiValidator.java"
+  },
+  {
+    "raw": "invalid value %s of field[%s]",
+    "en_US": "invalid value {0} of field[{1}]",
+    "zh_CN": "",
+    "arguments": [
+      "tuple.get(0, String.class)",
+      "f.getName()"
+    ],
+    "fileName": "src/main/java/org/zstack/portal/apimediator/PortApiValidator.java"
+  }
+]

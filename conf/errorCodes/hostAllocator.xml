@@ -1,0 +1,13 @@
+<error>
+    <prefix>HOST_ALLOCATION</prefix>
+
+    <code>
+        <id>1001</id>
+        <description>No available host found</description>
+    </code>
+    <code>
+        <id>1002</id>
+        <description>No available nic found</description>
+    </code>
+</error>
+

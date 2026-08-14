@@ -1,0 +1,888 @@
+[
+  {
+    "raw": "Network [uuid: %s] does\u0027t not have IPsec service",
+    "en_US": "Network [uuid: {0}] does\u0027t not have IPsec service",
+    "zh_CN": "网络[uuid: {0}]没有IPsec服务",
+    "arguments": [
+      "l3NetworkUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/ipsec/IPsecApiInterceptor.java"
+  },
+  {
+    "raw": "the remote CIDR[%s] is same to existed cidrs",
+    "en_US": "the remote CIDR[{0}] is same to existed cidrs",
+    "zh_CN": "远程CIDR[{0}]与现有的CIDR相同",
+    "arguments": [
+      "rcidr"
+    ],
+    "fileName": "src/main/java/org/zstack/ipsec/IPsecApiInterceptor.java"
+  },
+  {
+    "raw": "the remote CIDR[%s] and remote CIDR[%s] are overlaped",
+    "en_US": "the remote CIDR[{0}] and remote CIDR[{1}] are overlaped",
+    "zh_CN": "远程的CIDR[{0}]和远端CIDR[{1}]存在覆盖",
+    "arguments": [
+      "rcidr",
+      "tempCidr"
+    ],
+    "fileName": "src/main/java/org/zstack/ipsec/IPsecApiInterceptor.java"
+  },
+  {
+    "raw": "the CIDR[%s] of local router and remote CIDR[%s] are overlaped",
+    "en_US": "the CIDR[{0}] of local router and remote CIDR[{1}] are overlaped",
+    "zh_CN": "本地路由的CIDR[{0}]和远端CIDR存在覆盖",
+    "arguments": [
+      "lcidr",
+      "tempCidr"
+    ],
+    "fileName": "src/main/java/org/zstack/ipsec/IPsecApiInterceptor.java"
+  },
+  {
+    "raw": "all networks in same IPsecConnection should be same type",
+    "en_US": "all networks in same IPsecConnection should be same type",
+    "zh_CN": "在相同的IPsec连接中的所有连接应该是相同类型",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/ipsec/IPsecApiInterceptor.java"
+  },
+  {
+    "raw": "IPsecConnection can ONLY have 1 network for %s",
+    "en_US": "IPsecConnection can ONLY have 1 network for {0}",
+    "zh_CN": "IPsec连接只能有一个网络服务",
+    "arguments": [
+      "L3NetworkConstant.L3_BASIC_NETWORK_TYPE"
+    ],
+    "fileName": "src/main/java/org/zstack/ipsec/IPsecApiInterceptor.java"
+  },
+  {
+    "raw": "L3Network [uuid: %s] has not been attached to vpc router",
+    "en_US": "L3Network [uuid: {0}] has not been attached to vpc router",
+    "zh_CN": "三层网络[uuid:{0}]还没有绑定VPC路由",
+    "arguments": [
+      "l3Uuid"
+    ],
+    "fileName": "src/main/java/org/zstack/ipsec/IPsecApiInterceptor.java"
+  },
+  {
+    "raw": "all networks in same IPsecConnection must be attached to same VPC router",
+    "en_US": "all networks in same IPsecConnection must be attached to same VPC router",
+    "zh_CN": "在相同的IPsec连接中的所有网络必须绑定在相同的VPC路由",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/ipsec/IPsecApiInterceptor.java"
+  },
+  {
+    "raw": "there is no master vpc for ha group %s",
+    "en_US": "there is no master vpc for ha group {0}",
+    "zh_CN": "高可用性组{0}没有主VPC",
+    "arguments": [
+      "vrUuids.toArray()[0]"
+    ],
+    "fileName": "src/main/java/org/zstack/ipsec/IPsecApiInterceptor.java"
+  },
+  {
+    "raw": "there is a vpc[%s] using old ipsec plugin, upgrade it to create ipsec",
+    "en_US": "there is a vpc[{0}] using old ipsec plugin, upgrade it to create ipsec",
+    "zh_CN": "存在使用旧IPSec插件的VPC[{0}]，请升级该插件以创建IPSec",
+    "arguments": [
+      "masterUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/ipsec/IPsecApiInterceptor.java"
+  },
+  {
+    "raw": "there already have ipsec connection[uuid:%s, name:%s] with the same vrouter and peerAddress",
+    "en_US": "there already have ipsec connection[uuid:{0}, name:{1}] with the same vrouter and peerAddress",
+    "zh_CN": "",
+    "arguments": [
+      "tuples.get(0).get(0, String.class)",
+      "tuples.get(0).get(1, String.class)"
+    ],
+    "fileName": "src/main/java/org/zstack/ipsec/IPsecApiInterceptor.java"
+  },
+  {
+    "raw": "the vip[uuid:%s] has been used for %s",
+    "en_US": "the vip[uuid:{0}] has been used for {1}",
+    "zh_CN": "虚拟IP[uuid:{0}]已经用作网络服务 {1}",
+    "arguments": [
+      "msg.getVipUuid()",
+      "useForList.toString()"
+    ],
+    "fileName": "src/main/java/org/zstack/ipsec/IPsecApiInterceptor.java"
+  },
+  {
+    "raw": "the peerAddress[%s] cannot be the same to the VIP address",
+    "en_US": "the peerAddress[{0}] cannot be the same to the VIP address",
+    "zh_CN": "对端地址[{0}]不能和虚拟IP地址相同",
+    "arguments": [
+      "msg.getPeerAddress()"
+    ],
+    "fileName": "src/main/java/org/zstack/ipsec/IPsecApiInterceptor.java"
+  },
+  {
+    "raw": "the peerAddress[%s] is not an IPv4 address",
+    "en_US": "the peerAddress[{0}] is not an IPv4 address",
+    "zh_CN": "对端地址[{0}]不是一个IPv4地址",
+    "arguments": [
+      "msg.getPeerAddress()"
+    ],
+    "fileName": "src/main/java/org/zstack/ipsec/IPsecApiInterceptor.java"
+  },
+  {
+    "raw": "the authKey cannot contain white space and special characters of \u0027\\\"`\\\\",
+    "en_US": "the authKey cannot contain white space and special characters of \u0027\\\"`\\\\",
+    "zh_CN": "验证码不能包含空格和以下字符:\u0027\\\"`\\\\",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/ipsec/IPsecApiInterceptor.java"
+  },
+  {
+    "raw": "Ipsec VIP [%s] cannot be the first or the last IP of the CIDR with the public address pool type",
+    "en_US": "Ipsec VIP [{0}] cannot be the first or the last IP of the CIDR with the public address pool type",
+    "zh_CN": "IPSec VIP[{0}]不能是具有公用地址池类型的CIDR的第一个或最后一个IP",
+    "arguments": [
+      "vipVO.getIp()"
+    ],
+    "fileName": "src/main/java/org/zstack/ipsec/IPsecApiInterceptor.java"
+  },
+  {
+    "raw": "L3 network [%s] can not be attached to ipsec [uuid :%s]twice",
+    "en_US": "L3 network [{0}] can not be attached to ipsec [uuid :{1}]twice",
+    "zh_CN": "三层网络[{0}]不能绑定IPsec[uuid :{1}]两次",
+    "arguments": [
+      "l3NetworkUuid",
+      "msg.getIPsecConnectionUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/ipsec/IPsecApiInterceptor.java"
+  },
+  {
+    "raw": "must include l3 networks in APIAttachL3NetworksToIPsecConnectionMsg",
+    "en_US": "must include l3 networks in APIAttachL3NetworksToIPsecConnectionMsg",
+    "zh_CN": "参数中缺少三层网络的uuid",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/ipsec/IPsecApiInterceptor.java"
+  },
+  {
+    "raw": "L3 network [%s] is not vpc network, can not be attached or detached to ipsec",
+    "en_US": "L3 network [{0}] is not vpc network, can not be attached or detached to ipsec",
+    "zh_CN": "三层网络[{0}]不是VPC网络，不能绑定或解绑IPsec",
+    "arguments": [
+      "l3NetworkUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/ipsec/IPsecApiInterceptor.java"
+  },
+  {
+    "raw": "L3 network [%s] is not be attached to ipsec [uuid :%s]",
+    "en_US": "L3 network [{0}] is not be attached to ipsec [uuid :{1}]",
+    "zh_CN": "三层网络[{0}]不能绑定IPsec[uuid :{1}]",
+    "arguments": [
+      "l3NetworkUuid",
+      "msg.getIPsecConnectionUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/ipsec/IPsecApiInterceptor.java"
+  },
+  {
+    "raw": "Cidr [%s] is already in the Cidrs of ipsec [uuid :%s]",
+    "en_US": "Cidr [{0}] is already in the Cidrs of ipsec [uuid :{1}]",
+    "zh_CN": "CIDR[{0}]已经在IPsec[uuid :{1}]的CIDR中",
+    "arguments": [
+      "cidr",
+      "msg.getIPsecConnectionUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/ipsec/IPsecApiInterceptor.java"
+  },
+  {
+    "raw": "Cidr [%s] is not in Cidrs of ipsec [uuid :%s]",
+    "en_US": "Cidr [{0}] is not in Cidrs of ipsec [uuid :{1}]",
+    "zh_CN": "CIDR[{0}]没有在IPsec[uuid :{1}]的CIDR中",
+    "arguments": [
+      "cidr",
+      "msg.getIPsecConnectionUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/ipsec/IPsecApiInterceptor.java"
+  },
+  {
+    "raw": "can not change state because ipsec [uuid:%s] status is not ready",
+    "en_US": "can not change state because ipsec [uuid:{0}] status is not ready",
+    "zh_CN": "不能修改IPsec的状态，因为IPsec的状态没有准备",
+    "arguments": [
+      "msg.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/ipsec/IPsecApiInterceptor.java"
+  },
+  {
+    "raw": "could not reconnect this ipsec [uuid:%s], please upgrade ipsec version",
+    "en_US": "could not reconnect this ipsec [uuid:{0}], please upgrade ipsec version",
+    "zh_CN": "无法重新连接此IPSec[uuid：{0}]，请升级IPSec版本",
+    "arguments": [
+      "msg.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/ipsec/IPsecApiInterceptor.java"
+  },
+  {
+    "raw": "cannot find the IPsecconnection[uuid:%s], it may have been deleted",
+    "en_US": "cannot find the IPsecconnection[uuid:{0}], it may have been deleted",
+    "zh_CN": "未找到IPsec连接[uuid:{0}],它可能会被删除了",
+    "arguments": [
+      "msg.getIPsecConnectionUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/ipsec/IPsecManagerImpl.java"
+  },
+  {
+    "raw": "Current port range[%s, %s] is conflicted with used port range [%s, %s] with vip[uuid: %s] protocol: UDP",
+    "en_US": "Current port range[{0}, {1}] is conflicted with used port range [{2}, {3}] with vip[uuid: {4}] protocol: UDP",
+    "zh_CN": "当前的端口范围以UDP使用的端口范围冲突了",
+    "arguments": [
+      "Long.toString(range2.getStart())",
+      "Long.toString(range2.getEnd())",
+      "Long.toString(cur.getStart())",
+      "Long.toString(cur.getEnd())",
+      "msg.getVipUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/ipsec/IPsecManagerImpl.java"
+  },
+  {
+    "raw": "cidr[%s] of attached L3Network [uuid:%s] is overlapped with ipsec [uuid:%s] remote cidr[%s]",
+    "en_US": "cidr[{0}] of attached L3Network [uuid:{1}] is overlapped with ipsec [uuid:{2}] remote cidr[{3}]",
+    "zh_CN": "已绑定在三层网络[uuid:{1}]的CIDR与IPSec[uuid:{2}]远程CIDR存在重叠",
+    "arguments": [
+      "cidr",
+      "l3Inv.getUuid()",
+      "uuid",
+      "rCidr"
+    ],
+    "fileName": "src/main/java/org/zstack/ipsec/IPsecManagerImpl.java"
+  },
+  {
+    "raw": "%s",
+    "en_US": "{0}",
+    "zh_CN": "{0}",
+    "arguments": [
+      "e.getMessage()"
+    ],
+    "fileName": "src/main/java/org/zstack/ipsec/IPsecconnectionBase.java"
+  },
+  {
+    "raw": "create ipsec to ha route failed, because %s",
+    "en_US": "create ipsec to ha route failed, because {0}",
+    "zh_CN": "创建IPSec到HA路由失败，因为{0}",
+    "arguments": [
+      "errorCode.getDescription()"
+    ],
+    "fileName": "src/main/java/org/zstack/ipsec/vyos/VyosCreateIPsecFlow.java"
+  },
+  {
+    "raw": "delete ipsec from ha group failed because %s",
+    "en_US": "delete ipsec from ha group failed because {0}",
+    "zh_CN": "从HA组中删除IPSec失败，原因是{0}",
+    "arguments": [
+      "errorCode.getDescription()"
+    ],
+    "fileName": "src/main/java/org/zstack/ipsec/vyos/VyosDeleteIPsecFlow.java"
+  },
+  {
+    "raw": "the remoteCidr[%s] is overlaped with VirtualRouter interface cidr[%s]",
+    "en_US": "the remoteCidr[{0}] is overlaped with VirtualRouter interface cidr[{1}]",
+    "zh_CN": "RemoteCidR[{0}]与VirtualRouter接口CIDR[{1}]重叠",
+    "arguments": [
+      "rcidr",
+      "cidr"
+    ],
+    "fileName": "src/main/java/org/zstack/ipsec/vyos/VyosIPsecBackend.java"
+  },
+  {
+    "raw": "vyos doesn\u0027t support aes-192 as IkeEncryptionAlgorithm, available options aes-128, aes-256, 3des",
+    "en_US": "vyos doesn\u0027t support aes-192 as IkeEncryptionAlgorithm, available options aes-128, aes-256, 3des",
+    "zh_CN": "vyos不支持aes-192作为密钥交换加密算法，可用选择为aes-128, aes-256, 3des",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/ipsec/vyos/VyosIPsecBackend.java"
+  },
+  {
+    "raw": "vyos doesn\u0027t support aes-192 as PolicyEncryptionAlgorithm, available options aes-128, aes-256, 3des",
+    "en_US": "vyos doesn\u0027t support aes-192 as PolicyEncryptionAlgorithm, available options aes-128, aes-256, 3des",
+    "zh_CN": "vyos不支持aes-192作为加密算法协议，可用选择为aes-128, aes-256, 3des",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/ipsec/vyos/VyosIPsecBackend.java"
+  },
+  {
+    "raw": "vyos doesn\u0027t support %d as Ike DhGroup ",
+    "en_US": "vyos doesn\u0027t support {0} as Ike DhGroup ",
+    "zh_CN": "vyos不支持[{0}]作为Ike DhGroup",
+    "arguments": [
+      "msg.getIkeDhGroup()"
+    ],
+    "fileName": "src/main/java/org/zstack/ipsec/vyos/VyosIPsecBackend.java"
+  },
+  {
+    "raw": "apply to ha group failed, because %s",
+    "en_US": "apply to ha group failed, because {0}",
+    "zh_CN": "应用到HA组失败，原因是{0}",
+    "arguments": [
+      "errorCode.getDescription()"
+    ],
+    "fileName": "src/main/java/org/zstack/ipsec/vyos/VyosIPsecBackend.java"
+  },
+  {
+    "raw": "update ipsec version failed, because:vpc[%s] not exist",
+    "en_US": "update ipsec version failed, because:vpc[{0}] not exist",
+    "zh_CN": "更新IPSec版本失败，因为：VPC[{0}]不存在",
+    "arguments": [
+      "vrUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/ipsec/vyos/VyosIPsecBackend.java"
+  },
+  {
+    "raw": "sync to ha group failed, because:%s",
+    "en_US": "sync to ha group failed, because:{0}",
+    "zh_CN": "与高可用性组同步失败，原因：{0}",
+    "arguments": [
+      "errorCode.getDescription()"
+    ],
+    "fileName": "src/main/java/org/zstack/ipsec/vyos/VyosIPsecBackend.java"
+  },
+  {
+    "raw": "could not delete vm nic [uuid:%s], because vm[uuid:%s] type is appliance vm, please use API APIDetachL3NetworkFromVm",
+    "en_US": "could not delete vm nic [uuid:{0}], because vm[uuid:{1}] type is appliance vm, please use API APIDetachL3NetworkFromVm",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getUuid()",
+      "vmInstanceUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/vpc/VpcApiInterceptor.java"
+  },
+  {
+    "raw": "could not update nic[uuid: %s] state, due to management nic not support",
+    "en_US": "could not update nic[uuid: {0}] state, due to management nic not support",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getVmNicUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/vpc/VpcApiInterceptor.java"
+  },
+  {
+    "raw": "management network can not be detached",
+    "en_US": "management network can not be detached",
+    "zh_CN": "管理网络无法分离",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/vpc/VpcApiInterceptor.java"
+  },
+  {
+    "raw": "default route network can not be detached",
+    "en_US": "default route network can not be detached",
+    "zh_CN": "无法分离默认路由网络",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/vpc/VpcApiInterceptor.java"
+  },
+  {
+    "raw": "original public network can not be detached",
+    "en_US": "original public network can not be detached",
+    "zh_CN": "原有公网不能脱离",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/vpc/VpcApiInterceptor.java"
+  },
+  {
+    "raw": "could not detach l3 network to vpc router[uuid:%s] because its state is not running or stopped",
+    "en_US": "could not detach l3 network to vpc router[uuid:{0}] because its state is not running or stopped",
+    "zh_CN": "无法将三层网络与VPC路由器[uuid：{0}]分离，因为其状态未运行或已停止",
+    "arguments": [
+      "vpc.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/vpc/VpcApiInterceptor.java"
+  },
+  {
+    "raw": "could not detach l3 network to vpc router[uuid:%s] becaus the states of the master and slave are inconsistent",
+    "en_US": "could not detach l3 network to vpc router[uuid:{0}] becaus the states of the master and slave are inconsistent",
+    "zh_CN": "无法将三层网络与VPC路由器[uuid：{0}]分离，因为主设备和从设备的状态不一致",
+    "arguments": [
+      "vpc.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/vpc/VpcApiInterceptor.java"
+  },
+  {
+    "raw": "l3 network[uuid:%s] can not detach from vpc vrouter[uuid:%s] since network services attached vips[%s] still used in l3",
+    "en_US": "l3 network[uuid:{0}] can not detach from vpc vrouter[uuid:{1}] since network services attached vips[{2}] still used in l3",
+    "zh_CN": "",
+    "arguments": [
+      "l3NetworkVO.getUuid()",
+      "vmInstanceVO.getUuid()",
+      "vipPeerVOs.stream().map(VipPeerL3NetworkRefVO::getVipUuid).collect(Collectors.toList())"
+    ],
+    "fileName": "src/main/java/org/zstack/vpc/VpcApiInterceptor.java"
+  },
+  {
+    "raw": "vpc l3 network[uuid:%s] can not detach from vpc vrouter[uuid:%s] since vm nics[%s] still used in l3",
+    "en_US": "vpc l3 network[uuid:{0}] can not detach from vpc vrouter[uuid:{1}] since vm nics[{2}] still used in l3",
+    "zh_CN": "",
+    "arguments": [
+      "l3NetworkVO.getUuid()",
+      "vmInstanceVO.getUuid()",
+      "vmNicVOS.stream().map(ResourceVO::getUuid).collect(Collectors.toList())"
+    ],
+    "fileName": "src/main/java/org/zstack/vpc/VpcApiInterceptor.java"
+  },
+  {
+    "raw": "virtual router offering[uuid: %s] is not enabled",
+    "en_US": "virtual router offering[uuid: {0}] is not enabled",
+    "zh_CN": "云路由规格[uuid: {0}]是不可用的",
+    "arguments": [
+      "msg.getVirtualRouterOfferingUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/vpc/VpcApiInterceptor.java"
+  },
+  {
+    "raw": "only vpc l3 network can attach to vpc vrouter",
+    "en_US": "only vpc l3 network can attach to vpc vrouter",
+    "zh_CN": "只有VPC三层网络可以绑定到VPC云路由",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/vpc/VpcApiInterceptor.java"
+  },
+  {
+    "raw": "Vpc network [uuid:%s] already attached to vpc router [uuid:%s]",
+    "en_US": "Vpc network [uuid:{0}] already attached to vpc router [uuid:{1}]",
+    "zh_CN": "VPC网络[uuid：{0}]已连接到VPC路由器[uuid：{1}]",
+    "arguments": [
+      "msg.getL3NetworkUuid()",
+      "vmNics.get(0).getVmInstanceUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/vpc/VpcApiInterceptor.java"
+  },
+  {
+    "raw": "a vpc can have only one vpc network for the community-source license, please apply an enterprise license",
+    "en_US": "a vpc can have only one vpc network for the community-source license, please apply an enterprise license",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/vpc/VpcApiInterceptor.java"
+  },
+  {
+    "raw": "could not attached l3 network to vpc router[uuid:%s] because its state is not running or stopped",
+    "en_US": "could not attached l3 network to vpc router[uuid:{0}] because its state is not running or stopped",
+    "zh_CN": "无法将三层网络连接到VPC路由器[uuid：{0}]，因为其状态未运行或已停止",
+    "arguments": [
+      "msg.getVmInstanceUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/vpc/VpcApiInterceptor.java"
+  },
+  {
+    "raw": "could not attached l3 network to vpc router[uuid:%s] because both its state and it peer state is not running or stopped",
+    "en_US": "could not attached l3 network to vpc router[uuid:{0}] because both its state and it peer state is not running or stopped",
+    "zh_CN": "无法将三层网络连接到VPC路由器[uuid：{0}]，因为其状态和对等状态均未运行或已停止",
+    "arguments": [
+      "msg.getVmInstanceUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/vpc/VpcApiInterceptor.java"
+  },
+  {
+    "raw": "no ip ranges attached with l3 network[uuid:%s]",
+    "en_US": "no ip ranges attached with l3 network[uuid:{0}]",
+    "zh_CN": "在三层网络[uuid:{0}]上没有IP范围被绑定",
+    "arguments": [
+      "l3NetworkVO.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/vpc/VpcApiInterceptor.java"
+  },
+  {
+    "raw": "public network[uuid: %s] vip[uuid: %s, ip: %s] peer with l3network[uuid: %s] not on vpc vr[uuid: %s]",
+    "en_US": "public network[uuid: {0}] vip[uuid: {1}, ip: {2}] peer with l3network[uuid: {3}] not on vpc vr[uuid: {4}]",
+    "zh_CN": "在VPC云路由[uuid: {4}]上，三层网络[uuid: {3}]没有和公有网络[uuid: {0}]虚拟IP[uuid: {1}, ip: {2}]同阶",
+    "arguments": [
+      "vip.getL3NetworkUuid()",
+      "vip.getUuid()",
+      "vip.getIp()",
+      "msg.getL3NetworkUuid()",
+      "vmInstanceVO.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/vpc/VpcApiInterceptor.java"
+  },
+  {
+    "raw": "the gateway[ip:%s] of l3[uuid:%s] has been occupied",
+    "en_US": "the gateway[ip:{0}] of l3[uuid:{1}] has been occupied",
+    "zh_CN": "三层网络[uuid:{1}]的网关[uuid:{0}]已经被占用",
+    "arguments": [
+      "gateways",
+      "msg.getL3NetworkUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/vpc/VpcApiInterceptor.java"
+  },
+  {
+    "raw": "the static ip[%s] specified in message not equals to gateway ips[%s] of l3 network[uuid:%s]",
+    "en_US": "the static ip[{0}] specified in message not equals to gateway ips[{1}] of l3 network[uuid:{2}]",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getStaticIp()",
+      "gateways",
+      "l3NetworkVO.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/vpc/VpcApiInterceptor.java"
+  },
+  {
+    "raw": "l3 network [uuid:%s] must be attached first, because there is vip on that l3 network",
+    "en_US": "l3 network [uuid:{0}] must be attached first, because there is vip on that l3 network",
+    "zh_CN": "",
+    "arguments": [
+      "vipL3Uuid"
+    ],
+    "fileName": "src/main/java/org/zstack/vpc/VpcApiInterceptor.java"
+  },
+  {
+    "raw": "dns[%s] is not a IP address",
+    "en_US": "dns[{0}] is not a IP address",
+    "zh_CN": "dns地址[{0}]不是有效的IP地址",
+    "arguments": [
+      "msg.getDns()"
+    ],
+    "fileName": "src/main/java/org/zstack/vpc/VpcApiInterceptor.java"
+  },
+  {
+    "raw": "dns address [%s] is not added to vpc router [uuid:%s]",
+    "en_US": "dns address [{0}] is not added to vpc router [uuid:{1}]",
+    "zh_CN": "dns地址[{0}]未添加到vpc路由[uuid:{1}]",
+    "arguments": [
+      "msg.getDns()",
+      "msg.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/vpc/VpcApiInterceptor.java"
+  },
+  {
+    "raw": "could not add ip range to l3 network[uuid:%s], because it\u0027s overlap with cidr [%s] of vRouter [uuid:%s]",
+    "en_US": "could not add ip range to l3 network[uuid:{0}], because it\u0027s overlap with cidr [{1}] of vRouter [uuid:{2}]",
+    "zh_CN": "无法将IP范围添加到三层网络[uuid：{0}]，因为它与VRouter[uuid：{2}]的CIDR[{1}]重叠",
+    "arguments": [
+      "ipr.getL3NetworkUuid()",
+      "ipRangeVO.getNetworkCidr()",
+      "uuid"
+    ],
+    "fileName": "src/main/java/org/zstack/vpc/VpcApiInterceptor.java"
+  },
+  {
+    "raw": "could not add ipv6 range to l3 network[uuid:%s], because it\u0027s overlap with cidr [%s] of vRouter [uuid:%s]",
+    "en_US": "could not add ipv6 range to l3 network[uuid:{0}], because it\u0027s overlap with cidr [{1}] of vRouter [uuid:{2}]",
+    "zh_CN": "无法将IPv6范围添加到三层网络[uuid：{0}]，因为它与VRouter[uuid：{2}]的CIDR[{1}]重叠",
+    "arguments": [
+      "ipr.getL3NetworkUuid()",
+      "ipRangeVO.getNetworkCidr()",
+      "uuid"
+    ],
+    "fileName": "src/main/java/org/zstack/vpc/VpcApiInterceptor.java"
+  },
+  {
+    "raw": "can not get connections of distributed routing to virtual router %s",
+    "en_US": "can not get connections of distributed routing to virtual router {0}",
+    "zh_CN": "不能获取分布式路由到云路由的连接",
+    "arguments": [
+      "msg.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/vpc/VpcManagerImpl.java"
+  },
+  {
+    "raw": "can not set state of distributed routing to virtual router %s",
+    "en_US": "can not set state of distributed routing to virtual router {0}",
+    "zh_CN": "不能设置分布式路由到云路由的状态",
+    "arguments": [
+      "vrinv.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/vpc/VpcManagerImpl.java"
+  },
+  {
+    "raw": "not support to get the service %s state to virtual router %s",
+    "en_US": "not support to get the service {0} state to virtual router {1}",
+    "zh_CN": "路由器 {1} 不支持网络功能{0}",
+    "arguments": [
+      "msg.getNetworkService()",
+      "msg.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/vpc/VpcManagerImpl.java"
+  },
+  {
+    "raw": "can not get state of distributed routing to virtual router %s",
+    "en_US": "can not get state of distributed routing to virtual router {0}",
+    "zh_CN": "获取路由器 {0} 分布式路由的状态失败",
+    "arguments": [
+      "vrinv.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/vpc/VpcManagerImpl.java"
+  },
+  {
+    "raw": "operation error, because:%s",
+    "en_US": "operation error, because:{0}",
+    "zh_CN": "操作错误，因为{0}",
+    "arguments": [
+      "rsp.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/vpc/VpcManagerImpl.java"
+  },
+  {
+    "raw": "not support to update the service %s state to virtual router %s",
+    "en_US": "not support to update the service {0} state to virtual router {1}",
+    "zh_CN": "路由器 {1} 不支持更新网络功能{0}",
+    "arguments": [
+      "msg.getNetworkService()",
+      "msg.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/vpc/VpcManagerImpl.java"
+  },
+  {
+    "raw": "virtual router offering[uuid:%s, name:%s] doesn\u0027t have a public network",
+    "en_US": "virtual router offering[uuid:{0}, name:{1}] doesn\u0027t have a public network",
+    "zh_CN": "",
+    "arguments": [
+      "offering.getUuid()",
+      "offering.getName()"
+    ],
+    "fileName": "src/main/java/org/zstack/vpc/VpcManagerImpl.java"
+  },
+  {
+    "raw": "vpc l3 network must attach a vpc vrouter first before do anything related to vrouter(like start/stop vm, create lb, etc.)",
+    "en_US": "vpc l3 network must attach a vpc vrouter first before do anything related to vrouter(like start/stop vm, create lb, etc.)",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/vpc/VpcManagerImpl.java"
+  },
+  {
+    "raw": "dns address [%s] has bean added to vpc router [uuid:%s]",
+    "en_US": "dns address [{0}] has bean added to vpc router [uuid:{1}]",
+    "zh_CN": "在路由器[uuid:{1}]上已经存在一个DNS[{0}]",
+    "arguments": [
+      "msg.getDns()",
+      "msg.getVpcRouterUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/vpc/VpcManagerImpl.java"
+  },
+  {
+    "raw": "can not detach nic from vpc vr[uuid:%s]",
+    "en_US": "can not detach nic from vpc vr[uuid:{0}]",
+    "zh_CN": "不能从VPC云路由[uuid:{0}]解绑网卡",
+    "arguments": [
+      "vpcUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/vpc/VpcVRouterFactory.java"
+  },
+  {
+    "raw": "there is no ip range for l3 network[uuid:%s]",
+    "en_US": "there is no ip range for l3 network[uuid:{0}]",
+    "zh_CN": "三层网络[uuid：{0}]没有IP范围",
+    "arguments": [
+      "l3.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/vpc/VpcVRouterFactory.java"
+  },
+  {
+    "raw": "the gateway[ip:%s] of l3[uuid:%s] has been occupied on vpc vr[uuid: %s]",
+    "en_US": "the gateway[ip:{0}] of l3[uuid:{1}] has been occupied on vpc vr[uuid: {2}]",
+    "zh_CN": "在VPC的云路由[uuid: {2}]上，三层网络[uuid:{1}]的网关[uuid:{0}]已经被占用",
+    "arguments": [
+      "ip.getGateway()",
+      "l3.getUuid()",
+      "vm.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/vpc/VpcVRouterFactory.java"
+  },
+  {
+    "raw": "unable to ssh in to the vpc router[%s], the ssh port seems not open",
+    "en_US": "unable to ssh in to the vpc router[{0}], the ssh port seems not open",
+    "zh_CN": "无法通过SSH连接到VPC路由器[{0}]，SSH端口似乎未打开",
+    "arguments": [
+      "mgmtNicIp"
+    ],
+    "fileName": "src/main/java/org/zstack/vpc/VpcVyosDeployZsnAgentFlow.java"
+  },
+  {
+    "raw": "the SSH port is not open after %s seconds. Failed to login the vpc router[ip:%s]",
+    "en_US": "the SSH port is not open after {0} seconds. Failed to login the vpc router[ip:{1}]",
+    "zh_CN": "",
+    "arguments": [
+      "timeoutInSeconds",
+      "mgmtNicIp"
+    ],
+    "fileName": "src/main/java/org/zstack/vpc/VpcVyosDeployZsnAgentFlow.java"
+  },
+  {
+    "raw": "Could not update this network service, due to vpc [uuid:%s] is not support update network service version",
+    "en_US": "Could not update this network service, due to vpc [uuid:{0}] is not support update network service version",
+    "zh_CN": "无法更新此网络服务，因为VPC[uuid：{0}]不支持更新网络服务版本",
+    "arguments": [
+      "msg.getVirtualRouterUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/vpc/ha/VpcHaGroupApiInterceptor.java"
+  },
+  {
+    "raw": "Could not update this network service, due to vpc [uuid:%s] used old kernel version:[%s]",
+    "en_US": "Could not update this network service, due to vpc [uuid:{0}] used old kernel version:[{1}]",
+    "zh_CN": "无法更新此网络服务，因为VPC[uuid：{0}]使用了旧内核版本：[{1}]",
+    "arguments": [
+      "msg.getVirtualRouterUuid()",
+      "vo.getKernelVersion()"
+    ],
+    "fileName": "src/main/java/org/zstack/vpc/ha/VpcHaGroupApiInterceptor.java"
+  },
+  {
+    "raw": "Could not apply snat with non-default public network, due to multi snat feature is disabled",
+    "en_US": "Could not apply snat with non-default public network, due to multi snat feature is disabled",
+    "zh_CN": "无法使用非默认公用网络应用SNAT，因为多SNAT功能已禁用",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/vpc/ha/VpcHaGroupApiInterceptor.java"
+  },
+  {
+    "raw": "Could not apply snat with this L3Network, due to l3 network [uuid:%s] is not public network",
+    "en_US": "Could not apply snat with this L3Network, due to l3 network [uuid:{0}] is not public network",
+    "zh_CN": "无法对此三层网络应用SNAT，因为三层网络[uuid：{0}]不是公共网络",
+    "arguments": [
+      "msg.getL3NetworkUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/vpc/ha/VpcHaGroupApiInterceptor.java"
+  },
+  {
+    "raw": "Could not apply snat with this L3Network, due to l3 network [uuid:%s] is not attached to vpc router",
+    "en_US": "Could not apply snat with this L3Network, due to l3 network [uuid:{0}] is not attached to vpc router",
+    "zh_CN": "无法对此三层网络应用SNAT，因为三层网络[uuid：{0}]未连接到VPC路由器",
+    "arguments": [
+      "msg.getL3NetworkUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/vpc/ha/VpcHaGroupApiInterceptor.java"
+  },
+  {
+    "raw": "invalid monitor ip address [%s]",
+    "en_US": "invalid monitor ip address [{0}]",
+    "zh_CN": "仲裁地址[{0}]错误",
+    "arguments": [
+      "ip"
+    ],
+    "fileName": "src/main/java/org/zstack/vpc/ha/VpcHaGroupApiInterceptor.java"
+  },
+  {
+    "raw": "vpcHaRouter [uuid:%s] is deleted",
+    "en_US": "vpcHaRouter [uuid:{0}] is deleted",
+    "zh_CN": "高可用组[uuid:{0}]被删除了",
+    "arguments": [
+      "vpcVo.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/vpc/ha/VpcHaGroupApiInterceptor.java"
+  },
+  {
+    "raw": "there is no master router of router [uuid:%s]",
+    "en_US": "there is no master router of router [uuid:{0}]",
+    "zh_CN": "路由器[uuid:{0}]的高可用组没有主路由器",
+    "arguments": [
+      "msg.getVmInstanceUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/vpc/ha/VpcHaGroupApiInterceptor.java"
+  },
+  {
+    "raw": "there are more than 2 vpc routers attached to haGroup [uuid:%s]",
+    "en_US": "there are more than 2 vpc routers attached to haGroup [uuid:{0}]",
+    "zh_CN": "高可用组[uuid:{0}]的路由器数量已经超过2",
+    "arguments": [
+      "haUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/vpc/ha/VpcHaGroupApiInterceptor.java"
+  },
+  {
+    "raw": "ha group management l3 and public l3 networks[uuid:%s] are different from offering l3 networks [uuid:%s]",
+    "en_US": "ha group management l3 and public l3 networks[uuid:{0}] are different from offering l3 networks [uuid:{1}]",
+    "zh_CN": "高可用组的管理网，公网组合[uuid:{0}]和云路由规格的三层网络[uuid:{1}]不同",
+    "arguments": [
+      "l3Uuids",
+      "offeringL3Uuids"
+    ],
+    "fileName": "src/main/java/org/zstack/vpc/ha/VpcHaGroupApiInterceptor.java"
+  },
+  {
+    "raw": "vpc router l3 networks [uuid:%s] are different from ha group l3 networks [uuid:%s], !!! please delete this router and recreate it",
+    "en_US": "vpc router l3 networks [uuid:{0}] are different from ha group l3 networks [uuid:{1}], !!! please delete this router and recreate it",
+    "zh_CN": "",
+    "arguments": [
+      "vpcL3Uuids",
+      "vpcHaGroupL3Uuids"
+    ],
+    "fileName": "src/main/java/org/zstack/vpc/ha/VpcHaGroupApiInterceptor.java"
+  },
+  {
+    "raw": "vpc router has been attached to ha group [uuid:%s]",
+    "en_US": "vpc router has been attached to ha group [uuid:{0}]",
+    "zh_CN": "vpc路由器不在高可用组[uuid:{0}]中",
+    "arguments": [
+      "oldHaUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/vpc/ha/VpcHaGroupApiInterceptor.java"
+  },
+  {
+    "raw": "vpc ha group [uuid:%s] is not existed",
+    "en_US": "vpc ha group [uuid:{0}] is not existed",
+    "zh_CN": "高可用组[uuid:{0}]不存在",
+    "arguments": [
+      "haUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/vpc/ha/VpcHaGroupApiInterceptor.java"
+  },
+  {
+    "raw": "there are more than 1 vpc routers attached to haGroup [uuid:%s]",
+    "en_US": "there are more than 1 vpc routers attached to haGroup [uuid:{0}]",
+    "zh_CN": "高可用组[uuid:{0}]的路由器数量已经超过1",
+    "arguments": [
+      "haUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/vpc/ha/VpcHaGroupApiInterceptor.java"
+  },
+  {
+    "raw": "vpc router [uuid:%s] can not be upgraded to ha router because it public network is same to management network",
+    "en_US": "vpc router [uuid:{0}] can not be upgraded to ha router because it public network is same to management network",
+    "zh_CN": "",
+    "arguments": [
+      "haUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/vpc/ha/VpcHaGroupApiInterceptor.java"
+  },
+  {
+    "raw": "create affinityGroup for ha group [uuid:%s] failed",
+    "en_US": "create affinityGroup for ha group [uuid:{0}] failed",
+    "zh_CN": "高可用组[uuid:{0}]创建亲和组失败",
+    "arguments": [
+      "ha.getName()"
+    ],
+    "fileName": "src/main/java/org/zstack/vpc/ha/VpcHaGroupManagerImpl.java"
+  },
+  {
+    "raw": "virtualrouter %s [uuid: %s ] of VPC HA group %s [uuid: %s] haStatus changed from %s to %s",
+    "en_US": "virtualrouter {0} [uuid: {1} ] of VPC HA group {2} [uuid: {3}] haStatus changed from {4} to {5}",
+    "zh_CN": "VPC高可用性组{2}[uuid：{3}]的VirtualRouter{0}[uuid：{1}]的高可用性状态已从{4}更改为{5}",
+    "arguments": [
+      "vrName",
+      "vrUuid",
+      "vpcHaGroupName",
+      "vpcHaGroupUuid",
+      "old",
+      "status"
+    ],
+    "fileName": "src/main/java/org/zstack/vpc/ha/VpcHaGroupManagerImpl.java"
+  },
+  {
+    "raw": "ha group uuid nil",
+    "en_US": "ha group uuid nil",
+    "zh_CN": "高可用性组uuid无",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/vpc/ha/VpcHaGroupVpcVrImpl.java"
+  },
+  {
+    "raw": "VR[uuid: %s] not running",
+    "en_US": "VR[uuid: {0}] not running",
+    "zh_CN": "VR[uuid：{0}]未运行",
+    "arguments": [
+      "struct.getVmInstanceUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/vpc/ha/vpcHaGc/VpcHaGcManagerImpl.java"
+  },
+  {
+    "raw": "VR[uuid: %s] not connected",
+    "en_US": "VR[uuid: {0}] not connected",
+    "zh_CN": "VR[uuid：{0}]未连接",
+    "arguments": [
+      "struct.getVmInstanceUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/vpc/ha/vpcHaGc/VpcHaGcManagerImpl.java"
+  },
+  {
+    "raw": "failed to enable ha on virtual router[uuid:%s], %s",
+    "en_US": "failed to enable ha on virtual router[uuid:{0}], {1}",
+    "zh_CN": "路由器[uuid:{0}]打开高可用功能失败，{1}",
+    "arguments": [
+      "vrUuid",
+      "ret.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/vpc/ha/vyos/vyosVpcHaRouterBackendManagerImpl.java"
+  }
+]

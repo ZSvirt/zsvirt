@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx" xmlns:zstack="http://zstack.org/schema/zstack"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+         http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+         http://www.springframework.org/schema/aop
+         http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+         http://www.springframework.org/schema/tx
+         http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+         http://zstack.org/schema/zstack
+         http://zstack.org/schema/zstack/plugin.xsd"
+       default-init-method="init" default-destroy-method="destroy">
+
+    <bean id="VmVfNicManager" class="org.zstack.compute.sriov.VmVfNicManagerImpl">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.Component" />
+            <zstack:extension interface="org.zstack.header.Service" />
+            <zstack:extension interface="org.zstack.header.sriov.VmVfNicManager" />
+            <zstack:extension interface="org.zstack.kvm.KVMStartVmExtensionPoint" />
+            <zstack:extension interface="org.zstack.kvm.KvmPreAttachNicExtensionPoint" />
+            <zstack:extension interface="org.zstack.kvm.KvmPreDetachNicExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.vm.VmReleaseResourceExtensionPoint" order="-2"/>
+            <zstack:extension interface="org.zstack.header.vm.PreVmInstantiateResourceExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.vm.ReleaseNetworkServiceOnDetachingNicExtensionPoint" order="-1"/>
+            <zstack:extension interface="org.zstack.header.vm.FilterVmNicChangeableL3NetworkExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.host.AfterSyncPciDeviceExtensionPoint" />
+            <zstack:extension interface="org.zstack.compute.vm.VmNicPrepareResourceExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.vm.VmFailToAttachL3NetworkExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.vm.VmInstanceMigrateExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.host.HostAfterConnectedExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.vm.PostVmInstantiateResourceExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.vm.VmDetachNicExtensionPoint"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="VmVfNicApiInterceptor" class="org.zstack.compute.sriov.VmVfNicApiInterceptor">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.apimediator.ApiMessageInterceptor"/>
+            <zstack:extension interface="org.zstack.header.apimediator.GlobalApiMessageInterceptor" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="VmVfNicFactory" class="org.zstack.compute.sriov.VmVfNicFactory">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.vm.VmInstanceNicFactory" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="VmVfNicFilterFlow" class="org.zstack.compute.sriov.VmVfNicFilterFlow">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.allocator.HostAllocatorFilterExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="VmVfNicReserveFlow" class="org.zstack.compute.sriov.VmVfNicReserveFlow">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.allocator.HostAllocatorReserveExtensionPoint" />
+            <zstack:extension interface="org.zstack.compute.vm.CleanUpAfterVmFailedToStartExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="VmVfNicKvmBackend" class="org.zstack.compute.sriov.VmVfNicKvmBackend">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.compute.sriov.VmVfNicHypervisorBackend" />
+            <zstack:extension interface="org.zstack.header.vm.VmInstanceStartNewCreatedVmExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.vm.VmInstanceStartExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.vm.VmInstanceStopExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.vm.VmInstanceMigrateExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.vm.VmInstanceAttachNicExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.vm.VmDetachNicExtensionPoint" />
+            <zstack:extension interface="org.zstack.compute.host.PostHostConnectExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+</beans>

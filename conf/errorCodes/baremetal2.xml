@@ -1,0 +1,8 @@
+<error>
+    <prefix>BM</prefix>
+    <code>
+        <id>1001</id>
+        <description>nginx connection error, check the nginx configuration and upstream server, as well as if the agent is installed</description>
+    </code>
+</error>
+

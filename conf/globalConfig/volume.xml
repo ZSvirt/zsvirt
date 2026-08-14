@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<globalConfig xmlns="http://zstack.org/schema/zstack">
+	<config>
+		<name>diskOffering.setNullWhenDeleting</name>
+        <description>whether update disk offering column of volume inventory to NULL when the disk offering is deleted</description>
+		<category>volume</category>
+		<defaultValue>true</defaultValue>
+		<type>java.lang.Boolean</type>
+	</config>
+
+	<config>
+		<name>deletionPolicy</name>
+        <description>the behavior of deleting a data volume, options are [Direct, Delay, Never]. Direct: delete the volume from database and primary storage; Delay: change the volume's state to Deleted in database; after the period controlled by 'expungePeriod' passes, delete the volume from database and primary storage; Never: delete the volume from database but from the primary storage</description>
+		<category>volume</category>
+		<defaultValue>Delay</defaultValue>
+	</config>
+
+	<config>
+		<name>expungePeriod</name>
+        <description>the period before a deleted data volume being deleted from database and primary storage, in seconds</description>
+		<category>volume</category>
+		<defaultValue>259200</defaultValue>
+		<type>java.lang.Long</type>
+	</config>
+
+	<config>
+		<name>expungeInterval</name>
+        <description>the interval the expunging data volume task runs, in seconds</description>
+		<category>volume</category>
+		<defaultValue>3600</defaultValue>
+		<type>java.lang.Long</type>
+	</config>
+
+    <config>
+        <name>refreshVolumeSizeInterval</name>
+        <description>the interval the task to scan the volumes which need refresh size periodical, in seconds</description>
+        <category>volume</category>
+        <defaultValue>3600</defaultValue>
+        <type>java.lang.Long</type>
+    </config>
+
+	<config>
+		<name>auto.snapshot.before.change</name>
+		<description>create snapshot automatically before volume change</description>
+		<category>volume</category>
+		<defaultValue>false</defaultValue>
+		<type>java.lang.Boolean</type>
+	</config>
+
+	<config>
+		<name>refreshVolumeSize.scope</name>
+		<description>sync volume size scope, options are [AllActive, Monitored, None]. AllActive: sync all active volumes, Monitored: sync all monitored volumes</description>
+		<category>volume</category>
+		<defaultValue>AllActive</defaultValue>
+	</config>
+
+	<config>
+		<name>refreshVolumeSize.hostCountPerBatch</name>
+		<description>the host count for per batching refresh volumes</description>
+		<category>volume</category>
+		<defaultValue>10</defaultValue>
+		<type>java.lang.Integer</type>
+	</config>
+
+</globalConfig>

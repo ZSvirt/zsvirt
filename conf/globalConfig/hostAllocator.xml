@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<globalConfig xmlns="http://zstack.org/schema/zstack">
+    <config>
+        <name>reservedCapacity.zoneLevel</name>
+        <description>whether enables host capacity reserve on zone level</description>
+        <category>hostAllocator</category>
+        <defaultValue>true</defaultValue>
+        <type>java.lang.Boolean</type>
+    </config>
+
+    <config>
+        <name>reservedCapacity.clusterLevel</name>
+        <description>whether enables host capacity reserve on clsuter level</description>
+        <category>hostAllocator</category>
+        <defaultValue>true</defaultValue>
+        <type>java.lang.Boolean</type>
+    </config>
+
+    <config>
+        <name>reservedCapacity.hostLevel</name>
+        <description>whether enables host capacity reserve on host level</description>
+        <category>hostAllocator</category>
+        <defaultValue>true</defaultValue>
+        <type>java.lang.Boolean</type>
+    </config>
+
+    <config>
+        <name>usePagination</name>
+        <description>enable pagination when allocating hosts</description>
+        <category>hostAllocator</category>
+        <defaultValue>true</defaultValue>
+        <type>java.lang.Boolean</type>
+    </config>
+
+    <config>
+        <name>paginationLimit</name>
+        <description>allocation limit when pagination is enabled</description>
+        <category>hostAllocator</category>
+        <defaultValue>500</defaultValue>
+        <type>java.lang.Integer</type>
+    </config>
+
+    <config>
+        <name>hostAllocator.concurrent</name>
+        <description>allow host allocator run concurrently</description>
+        <category>hostAllocator</category>
+        <defaultValue>false</defaultValue>
+        <type>java.lang.Boolean</type>
+    </config>
+
+    <config>
+        <name>hostAllocator.checkHostMem</name>
+        <description>whether check vm memory size with host physical memory size</description>
+        <category>hostAllocator</category>
+        <defaultValue>true</defaultValue>
+        <type>java.lang.Boolean</type>
+    </config>
+
+</globalConfig>

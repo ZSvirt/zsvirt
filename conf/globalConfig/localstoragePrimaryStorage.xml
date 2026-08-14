@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<globalConfig xmlns="http://zstack.org/schema/zstack">
+	<config>
+		<name>liveMigrationWithStorage.allow</name>
+		<description>Enable to do live migration on local storage primary storage.</description>
+		<defaultValue>true</defaultValue>
+		<category>localStoragePrimaryStorage</category>
+		<type>java.lang.Boolean</type>
+	</config>
+	<config>
+		<name>qcow2.allocation</name>
+		<description>qcow2 allocation policy, can be none, metadata, falloc, full</description>
+		<defaultValue>none</defaultValue>
+		<category>localStoragePrimaryStorage</category>
+		<type>java.lang.String</type>
+	</config>
+</globalConfig>

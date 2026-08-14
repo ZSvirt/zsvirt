@@ -1,0 +1,486 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+    xmlns:tx="http://www.springframework.org/schema/tx" xmlns:zstack="http://zstack.org/schema/zstack"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
+         http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+         http://www.springframework.org/schema/aop
+         http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+         http://www.springframework.org/schema/tx
+          http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+          http://zstack.org/schema/zstack 
+         http://zstack.org/schema/zstack/plugin.xsd"
+    default-init-method="init" default-destroy-method="destroy">
+
+    <bean id="SNSAlarmActionFactory" class="org.zstack.zwatch.alarm.sns.SNSActionFactory" >
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.Component" />
+            <zstack:extension interface="org.zstack.header.Service" />
+            <zstack:extension interface="org.zstack.zwatch.alarm.AlarmActionFactory" />
+            <zstack:extension interface="org.zstack.sns.AfterDeleteSNSTopicExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="ZQLReturnWithExtension" class="org.zstack.zwatch.ZQLReturnWithExtension" >
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.zql.ReturnWithExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="SNSZQLExtension" class="org.zstack.zwatch.alarm.sns.SNSZQLExtension">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.zql.MarshalZQLASTTreeExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.zql.RestrictByExprExtensionPoint"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="SNSTextTemplateApiInterceptor" class="org.zstack.zwatch.alarm.sns.SNSTextTemplateApiInterceptor" >
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.apimediator.ApiMessageInterceptor" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="ZWatchCascadeExtension" class="org.zstack.zwatch.ZWatchCascadeExtension" >
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.core.cascade.CascadeExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="AlarmApiInterceptor" class="org.zstack.zwatch.alarm.AlarmApiInterceptor" >
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.apimediator.ApiMessageInterceptor" />
+            <zstack:extension interface="org.zstack.header.apimediator.GlobalApiMessageInterceptor"/>
+        </zstack:plugin>
+    </bean>
+
+
+    <bean id="EmailTextTemplateFactory" class="org.zstack.zwatch.alarm.sns.template.email.EmailTextTemplateFactory" >
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.zwatch.alarm.sns.TextTemplateFactory" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="HttpTextTemplateFactory" class="org.zstack.zwatch.alarm.sns.template.http.HttpTextTemplateFactory" >
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.zwatch.alarm.sns.TextTemplateFactory" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="SystemHttpTextTemplateFactory" class="org.zstack.zwatch.alarm.sns.template.system.SystemHttpTextTemplateFactory" >
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.zwatch.alarm.sns.TextTemplateFactory" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="DingTalkTextTemplateFactory" class="org.zstack.zwatch.alarm.sns.template.dingtalk.DingTalkTextTemplateFactory" >
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.zwatch.alarm.sns.TextTemplateFactory" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="WeComTextTemplateFactory" class="org.zstack.zwatch.alarm.sns.template.wecom.WeComTextTemplateFactory" >
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.zwatch.alarm.sns.TextTemplateFactory" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="FeiShuTextTemplateFactory" class="org.zstack.zwatch.alarm.sns.template.feishu.FeiShuTextTemplateFactory" >
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.zwatch.alarm.sns.TextTemplateFactory" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="MicrosoftTeamsTextTemplateFactory" class="org.zstack.zwatch.alarm.sns.template.microsoftteams.MicrosoftTeamsTextTemplateFactory" >
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.zwatch.alarm.sns.TextTemplateFactory" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="AliyunSmsTextTemplateFactory" class="org.zstack.zwatch.alarm.sns.template.aliyunsms.AliyunSmsTextTemplateFactory" >
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.zwatch.alarm.sns.TextTemplateFactory" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="SnmpTextTemplateFactory" class="org.zstack.zwatch.alarm.sns.template.snmp.SnmpTextTemplateFactory" >
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.zwatch.alarm.sns.TextTemplateFactory" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="AlarmManager" class="org.zstack.zwatch.alarm.AlarmManagerImpl" >
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.Component" />
+            <zstack:extension interface="org.zstack.header.Service" />
+            <zstack:extension interface="org.zstack.header.managementnode.ManagementNodeReadyExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.identity.ReportQuotaExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.managementnode.ManagementNodeChangeListener"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="VolumeAlarmExtension" class="org.zstack.zwatch.alarm.VolumeAlarmExtension" >
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.volume.RefreshVolumeSizeExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+    
+    <bean id="RuleManager" class="org.zstack.zwatch.ruleengine.RuleManagerImpl" >
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.Component" />
+         </zstack:plugin>
+    </bean>
+
+    <bean id="NamespaceEventManager" class="org.zstack.zwatch.namespace.NamespaceEventManagerImpl" >
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.Component" />
+        </zstack:plugin>
+
+        <constructor-arg ref="MigrateDBEventDatabaseDriver"/>
+    </bean>
+
+    <bean id="ZWatchApiInterceptor" class="org.zstack.zwatch.api.ZWatchApiInterceptor" >
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.apimediator.ApiMessageInterceptor" />
+            <zstack:extension interface="org.zstack.header.apimediator.GlobalApiMessageInterceptor" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="ZWatchManager" class="org.zstack.zwatch.ZWatchManagerImpl" >
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.Component" />
+            <zstack:extension interface="org.zstack.header.Service" />
+            <zstack:extension interface="org.zstack.header.host.HostAfterConnectedExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.vm.VmInstanceAttachNicExtensionPoint" />
+        </zstack:plugin>
+
+        <constructor-arg ref="MigrateDBEventDatabaseDriver"/>
+    </bean>
+
+	<bean id="HostHwStatusMonitor" class="org.zstack.zwatch.host.HostHwStatusMonitor">
+		<zstack:plugin>
+			<zstack:extension interface="org.zstack.header.Component" order="-100"/>
+			<zstack:extension interface="org.zstack.header.managementnode.ManagementNodeReadyExtensionPoint" />
+			<zstack:extension
+					interface="org.zstack.header.managementnode.ManagementNodeChangeListener" />
+		</zstack:plugin>
+	</bean>
+
+	<bean id="CustomNamespace" class="org.zstack.zwatch.namespace.CustomNamespace">
+		<constructor-arg ref="PrometheusDatabaseDriver"/>
+	</bean>
+
+    <bean id="VmNamespace" class="org.zstack.zwatch.namespace.VmNamespace">
+        <constructor-arg ref="PrometheusDatabaseDriver"/>
+    </bean>
+
+    <bean id="BaremetalVmNamespace" class="org.zstack.zwatch.namespace.BaremetalVmNamespace">
+        <constructor-arg ref="PrometheusDatabaseDriver"/>
+    </bean>
+
+    <bean id="SchedulerNamespace" class="org.zstack.zwatch.namespace.SchedulerNamespace">
+        <constructor-arg ref="PrometheusDatabaseDriver"/>
+    </bean>
+
+    <bean id="HostNamespace" class="org.zstack.zwatch.namespace.HostNamespace">
+        <constructor-arg ref="PrometheusDatabaseDriver"/>
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.Component" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="PrimaryStorageNamespace" class="org.zstack.zwatch.namespace.PrimaryStorageNamespace">
+        <constructor-arg ref="PrometheusDatabaseDriver"/>
+    </bean>
+
+    <bean id="IdentityNamespace" class="org.zstack.zwatch.namespace.IdentityNamespace">
+        <constructor-arg ref="PrometheusDatabaseDriver"/>
+    </bean>
+
+    <bean id="VolumeNamespace" class="org.zstack.zwatch.namespace.VolumeNamespace">
+        <constructor-arg ref="PrometheusDatabaseDriver"/>
+    </bean>
+
+    <bean id="VRouterNamespace" class="org.zstack.zwatch.namespace.VRouterNamespace">
+        <constructor-arg ref="PrometheusDatabaseDriver"/>
+    </bean>
+
+    <bean id="KVMHostNamespace" class="org.zstack.zwatch.namespace.KVMHostNamespace">
+        <constructor-arg ref="PrometheusDatabaseDriver"/>
+    </bean>
+
+    <bean id="XDragonHostNamespace" class="org.zstack.zwatch.namespace.XDragonHostNamespace">
+        <constructor-arg ref="PrometheusDatabaseDriver"/>
+    </bean>
+
+    <bean id="VipNamespace" class="org.zstack.zwatch.namespace.VipNamespace">
+        <constructor-arg ref="PrometheusDatabaseDriver"/>
+    </bean>
+
+    <bean id="IPsecNamespace" class="org.zstack.zwatch.namespace.IPsecNamespace">
+        <constructor-arg ref="PrometheusDatabaseDriver"/>
+    </bean>
+
+    <bean id="ClusterNamespace" class="org.zstack.zwatch.namespace.ClusterNamespace">
+        <constructor-arg ref="PrometheusDatabaseDriver"/>
+    </bean>
+
+    <bean id="LoadBalancerNamespace" class="org.zstack.zwatch.namespace.LoadBalancerNamespace">
+        <constructor-arg ref="PrometheusDatabaseDriver"/>
+    </bean>
+
+    <bean id="SystemNamespace" class="org.zstack.zwatch.namespace.SystemNamespace">
+        <constructor-arg ref="PrometheusDatabaseDriver"/>
+
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.Component" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="L3NetworkNamespace" class="org.zstack.zwatch.namespace.L3NetworkNamespace">
+        <constructor-arg ref="PrometheusDatabaseDriver"/>
+    </bean>
+
+    <bean id="ManagementNodeExporter" class="org.zstack.zwatch.prometheus.ManagementNodeExporter">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.premium.externalservice.prometheus.PreparePrometheusConfigExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="ImageNamespace" class="org.zstack.zwatch.namespace.ImageNamespace">
+        <constructor-arg ref="MysqlDatabaseDriver"/>
+    </bean>
+
+    <bean id="BackupStorageNamespace" class="org.zstack.zwatch.namespace.BackupStorageNamespace">
+        <constructor-arg ref="PrometheusDatabaseDriver"/>
+    </bean>
+
+    <bean id="ManagementNodeNamespace" class="org.zstack.zwatch.namespace.ManagementNodeNamespace">
+        <constructor-arg ref="PrometheusDatabaseDriver"/>
+    </bean>
+
+    <bean id="RestNameSpace" class="org.zstack.zwatch.namespace.RestNamespace">
+        <constructor-arg ref="PrometheusDatabaseDriver"/>
+    </bean>
+
+    <bean id="MonitorNamespace" class="org.zstack.zwatch.namespace.MonitorNamespace">
+        <constructor-arg ref="PrometheusDatabaseDriver"/>
+    </bean>
+
+    <bean id="SNSNamespace" class="org.zstack.zwatch.namespace.SNSNamespace">
+        <constructor-arg ref="PrometheusDatabaseDriver"/>
+    </bean>
+
+    <bean id="ThirdpartyAlertNamespace" class="org.zstack.zwatch.namespace.ThirdpartyAlertNamespace">
+        <constructor-arg ref="PrometheusDatabaseDriver"/>
+    </bean>
+
+    <bean id="RestEvent" class="org.zstack.zwatch.namespace.event.RestEvent">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.rest.RestAPIExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="PrometheusMonitorEvent" class="org.zstack.zwatch.namespace.event.PrometheusMonitorEvent">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.premium.externalservice.prometheus.PrometheusDriverExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="VmCountNamespace" class="org.zstack.zwatch.namespace.VmCountNamespace">
+        <constructor-arg ref="MysqlDatabaseDriver"/>
+    </bean>
+
+    <bean id="HaNamespace" class="org.zstack.zwatch.namespace.HaNamespace">
+        <constructor-arg ref="PrometheusDatabaseDriver"/>
+    </bean>
+
+    <bean id="MigrateDBEventDatabaseDriver" class="org.zstack.zwatch.migratedb.MigrateDBEventDatabaseDriver">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.managementnode.ManagementNodeReadyExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.Component" order="100"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="PrometheusStaticConfigManager" class="org.zstack.zwatch.prometheus.PrometheusStaticConfigManagerImpl">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.managementnode.ManagementNodeReadyExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.managementnode.ManagementNodeChangeListener"/>
+            <zstack:extension interface="org.zstack.header.Component"/>
+        </zstack:plugin>
+    </bean>
+
+	<bean id="CollectdHostConfig" class="org.zstack.zwatch.prometheus.CollectdHostConfig">
+		<zstack:plugin>
+			<zstack:extension interface="org.zstack.zwatch.prometheus.HostConfigExtensionPoint"/>
+		</zstack:plugin>
+	</bean>
+
+	<bean id="IpmiHostConfig" class="org.zstack.zwatch.prometheus.IpmiHostConfig">
+		<zstack:plugin>
+			<zstack:extension interface="org.zstack.zwatch.prometheus.HostConfigExtensionPoint"/>
+		</zstack:plugin>
+	</bean>
+
+    <bean id="PrometheusDatabaseDriver" class="org.zstack.zwatch.prometheus.PrometheusDatabaseDriver">
+        <zstack:plugin>
+            <!-- the driver must be loaded before PrometheusFactory-->
+            <zstack:extension interface="org.zstack.header.Component" order="100"/>
+            <zstack:extension interface="org.zstack.premium.externalservice.prometheus.PreparePrometheusConfigExtensionPoint"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="MysqlDatabaseDriver" class="org.zstack.zwatch.mysql.MysqlDatabaseDriver">
+        <zstack:plugin>
+            <!-- the driver must be loaded before PrometheusFactory-->
+            <zstack:extension interface="org.zstack.header.Component" order="100"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="SimulatorEventDatabaseDriver" class="org.zstack.zwatch.driver.SimulatorEventDatabaseDriver" />
+
+    <bean id="DefaultResolution" class="org.zstack.zwatch.datatype.DefaultResolution" />
+
+    <bean id="SystemAlarmManager" class="org.zstack.zwatch.alarm.system.SystemAlarmManagerImpl" >
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.managementnode.PrepareDbInitialValueExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.apimediator.GlobalApiMessageInterceptor" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="KvmHostScrape" class="org.zstack.zwatch.prometheus.KvmHostScrape" >
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.premium.externalservice.prometheus.PreparePrometheusConfigExtensionPoint" />
+            <zstack:extension interface="org.zstack.kvm.KVMHostConnectExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.host.HostDeleteExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.managementnode.ManagementNodeReadyExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="ImageStoreScrape" class="org.zstack.zwatch.prometheus.ImageStoreScrape" >
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.premium.externalservice.prometheus.PreparePrometheusConfigExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.imagestore.ImageStorageContinueConnectExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.storage.backup.BackupStorageDeleteExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.managementnode.ManagementNodeReadyExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
+	<bean id="IpmiExporterScrape" class="org.zstack.zwatch.prometheus.IpmiExporterScrape" >
+		<zstack:plugin>
+			<zstack:extension interface="org.zstack.premium.externalservice.prometheus.PreparePrometheusConfigExtensionPoint" />
+		</zstack:plugin>
+	</bean>
+
+    <bean id="VirtualRouterScrape" class="org.zstack.zwatch.prometheus.VirtualRouterScrape" >
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.premium.externalservice.prometheus.PreparePrometheusConfigExtensionPoint" />
+            <zstack:extension interface="org.zstack.network.service.virtualrouter.vyos.VyosPostCreateFlowExtensionPoint" />
+            <zstack:extension interface="org.zstack.network.service.virtualrouter.vyos.VyosPostRebootFlowExtensionPoint" />
+            <zstack:extension interface="org.zstack.network.service.virtualrouter.vyos.VyosPostStartFlowExtensionPoint" />
+            <zstack:extension interface="org.zstack.network.service.virtualrouter.vyos.VyosPostReconnectFlowExtensionPoint" />
+            <zstack:extension interface="org.zstack.network.service.virtualrouter.vyos.VyosPostDestroyFlowExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="BaremetalPxeServerScrape" class="org.zstack.zwatch.prometheus.BaremetalPxeServerScrape" >
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.premium.externalservice.prometheus.PreparePrometheusConfigExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.Component"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="PrometheusCollector" class="org.zstack.zwatch.prometheus.PrometheusCollector" >
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.Component" />
+            <zstack:extension interface="org.zstack.header.managementnode.ManagementNodeReadyExtensionPoint"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="DefaultAlarmFactory" class="org.zstack.zwatch.alarm.DefaultAlarmFactory">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.zwatch.alarm.AlarmFactory"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="AverageAlarmFactory" class="org.zstack.zwatch.alarm.AverageAlarmFactory">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.zwatch.alarm.AlarmFactory"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="HostNetworkMetricDeviceLetterInDbFilter" class="org.zstack.zwatch.namespace.HostNetworkMetricDeviceLetterInDbFilter">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.zwatch.datatype.HostNetworkMetricFilter"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="LongJobAuditExtension" class="org.zstack.zwatch.namespace.LongJobAuditExtension">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.longjob.LongJobExtensionPoint"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="ManagementNamespaceExtension" class="org.zstack.zwatch.prometheus.ManagementNamespaceExtension">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.core.cloudbus.CloudBusExtensionPoint"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="MetricPushManager" class="org.zstack.zwatch.metricpusher.MetricPushManagerImpl" >
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.Service" />
+            <zstack:extension interface="org.zstack.header.managementnode.ManagementNodeReadyExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="ThirdpartyAlertManager" class="org.zstack.zwatch.thirdparty.ThirdpartyAlertManagerImpl" >
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.Component" />
+            <zstack:extension interface="org.zstack.header.Service" />
+            <zstack:extension interface="org.zstack.header.managementnode.ManagementNodeReadyExtensionPoint" />
+            <zstack:extension interface="org.zstack.sns.SNSPublishExtension" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="XSKYFactory" class="org.zstack.zwatch.thirdparty.xsky.XSKYFactory" >
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.zwatch.thirdparty.ThirdpartyFactory" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="MonitorGroupManagerImpl" class="org.zstack.zwatch.monitorgroup.MonitorGroupManagerImpl" >
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.Component" />
+            <zstack:extension interface="org.zstack.header.Service" />
+            <zstack:extension interface="org.zstack.header.managementnode.ManagementNodeReadyExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="ActiveAlarmManagerImpl" class="org.zstack.zwatch.alarm.activealarm.ActiveAlarmManagerImpl" >
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.Component" />
+            <zstack:extension interface="org.zstack.header.Service" />
+            <zstack:extension interface="org.zstack.header.managementnode.ManagementNodeReadyExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="MonitorGroupApiInterceptor" class="org.zstack.zwatch.monitorgroup.MonitorGroupApiInterceptor" >
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.apimediator.ApiMessageInterceptor" />
+            <zstack:extension interface="org.zstack.header.apimediator.GlobalApiMessageInterceptor"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="XSKYPlatformBase" class="org.zstack.zwatch.thirdparty.xsky.XSKYPlatformBase" >
+        <zstack:plugin>
+                <zstack:extension interface="org.zstack.header.Component" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="ZWatchAlertZQLExtension" class="org.zstack.zwatch.migratedb.ZWatchAlertZQLExtension">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.zql.MarshalZQLASTTreeExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.zql.RestrictByExprExtensionPoint"/>
+        </zstack:plugin>
+    </bean>
+</beans>

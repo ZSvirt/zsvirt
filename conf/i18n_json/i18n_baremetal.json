@@ -1,0 +1,718 @@
+[
+  {
+    "raw": "IPMI Address %s is not valid",
+    "en_US": "IPMI Address {0} is not valid",
+    "zh_CN": "IPMI地址{0}是无效的",
+    "arguments": [
+      "address"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal/chassis/BaremetalChassisApiInterceptor.java"
+  },
+  {
+    "raw": "Failed to reach the bare-metal chassis, please make sure: 1. the IPMI connection is active; 2. the IPMI Address, Port, Username and Password are correct; 3. IPMI Over LAN is enabled in BIOS.",
+    "en_US": "Failed to reach the bare-metal chassis, please make sure: 1. the IPMI connection is active; 2. the IPMI Address, Port, Username and Password are correct; 3. IPMI Over LAN is enabled in BIOS.",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/baremetal/chassis/BaremetalChassisApiInterceptor.java"
+  },
+  {
+    "raw": "Baremetal Chassis of IPMI address %s and IPMI port %d has already been created.",
+    "en_US": "Baremetal Chassis of IPMI address {0} and IPMI port {1} has already been created.",
+    "zh_CN": "IPMI地址为{0}，端口为{1}的裸金属设备已经被创建",
+    "arguments": [
+      "address",
+      "port"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal/chassis/BaremetalChassisApiInterceptor.java"
+  },
+  {
+    "raw": "Cluster[uuid:%s] does not exists.",
+    "en_US": "Cluster[uuid:{0}] does not exists.",
+    "zh_CN": "集群[uuid:{0}]不存在",
+    "arguments": [
+      "msg.getClusterUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal/chassis/BaremetalChassisApiInterceptor.java"
+  },
+  {
+    "raw": "Cluster[uuid:%s] is not a baremetal cluster.",
+    "en_US": "Cluster[uuid:{0}] is not a baremetal cluster.",
+    "zh_CN": "集群[uuid:{0}]不是一个裸金属集群",
+    "arguments": [
+      "msg.getClusterUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal/chassis/BaremetalChassisApiInterceptor.java"
+  },
+  {
+    "raw": "Cluster[uuid:%s] is not Enabled.",
+    "en_US": "Cluster[uuid:{0}] is not Enabled.",
+    "zh_CN": "集群[uuid:{0}]处于停用状态",
+    "arguments": [
+      "msg.getClusterUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal/chassis/BaremetalChassisApiInterceptor.java"
+  },
+  {
+    "raw": "IPMI Address and Port %s:%d already exists.",
+    "en_US": "IPMI Address and Port {0}:{1} already exists.",
+    "zh_CN": "IPMI地址为{0}，端口为{1}的裸金属设备已经存在",
+    "arguments": [
+      "address",
+      "port"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal/chassis/BaremetalChassisApiInterceptor.java"
+  },
+  {
+    "raw": "no usable baremetal pxeserver attached to cluster[uuid:%s]",
+    "en_US": "no usable baremetal pxeserver attached to cluster[uuid:{0}]",
+    "zh_CN": "裸金属集群[uuid:{0}]中没有可用的部署服务器",
+    "arguments": [
+      "clusterUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal/chassis/BaremetalChassisApiInterceptor.java"
+  },
+  {
+    "raw": "baremetal chassis[uuid:%s] is supposed to using pxeserver[uuid:%s], but it was pxeserver[uuid:%s] that actually handled the DHCP request",
+    "en_US": "baremetal chassis[uuid:{0}] is supposed to using pxeserver[uuid:{1}], but it was pxeserver[uuid:{2}] that actually handled the DHCP request",
+    "zh_CN": "裸金属设备[uuid:{0}]应当由部署服务器[uuid:{1}]提供DHCP服务，但实际情况是部署服务器[uuid:{2}]提供的DHCP服务",
+    "arguments": [
+      "chassis.getUuid()",
+      "chassis.getPxeServerUuid()",
+      "cmd.content"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal/chassis/BaremetalChassisManagerImpl.java"
+  },
+  {
+    "raw": "License not found, please apply addon license for product baremetal.",
+    "en_US": "License not found, please apply addon license for product baremetal.",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/baremetal/chassis/BaremetalChassisManagerImpl.java"
+  },
+  {
+    "raw": "Hijacked detected. Your license[%s] permits %s baremetal chassis, but we detect there are %s in the database. You can either delete additional chassis or apply a new license.",
+    "en_US": "Hijacked detected. Your license[{0}] permits {1} baremetal chassis, but we detect there are {2} in the database. You can either delete additional chassis or apply a new license.",
+    "zh_CN": "",
+    "arguments": [
+      "licMgr.getLicenseType()",
+      "allowedChassisNum",
+      "currChassisNum"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal/chassis/BaremetalChassisManagerImpl.java"
+  },
+  {
+    "raw": "Insufficient baremetal chassis number licensed. You can either delete additional chassis or apply a new license.",
+    "en_US": "Insufficient baremetal chassis number licensed. You can either delete additional chassis or apply a new license.",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/baremetal/chassis/BaremetalChassisManagerImpl.java"
+  },
+  {
+    "raw": "failed to delete baremetal chassis %s",
+    "en_US": "failed to delete baremetal chassis {0}",
+    "zh_CN": "无法删除裸机机箱{0}",
+    "arguments": [
+      "msg.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal/chassis/BaremetalChassisManagerImpl.java"
+  },
+  {
+    "raw": "Failed to remotely power on baremetal chassis[uuid:%s]",
+    "en_US": "Failed to remotely power on baremetal chassis[uuid:{0}]",
+    "zh_CN": "无法远程启动裸金属设备[uuid:{0}]",
+    "arguments": [
+      "bmc.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal/chassis/BaremetalChassisManagerImpl.java"
+  },
+  {
+    "raw": "Failed to remotely power reset baremetal chassis[uuid:%s]",
+    "en_US": "Failed to remotely power reset baremetal chassis[uuid:{0}]",
+    "zh_CN": "无法远程重启裸金属设备[uuid:{0}]",
+    "arguments": [
+      "bmc.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal/chassis/BaremetalChassisManagerImpl.java"
+  },
+  {
+    "raw": "Failed to remotely pxe boot chassis[uuid:%s]",
+    "en_US": "Failed to remotely pxe boot chassis[uuid:{0}]",
+    "zh_CN": "无法远程设置裸金属设备[uuid:{0}]从网卡启动",
+    "arguments": [
+      "bmc.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal/chassis/BaremetalChassisManagerImpl.java"
+  },
+  {
+    "raw": "failed to connect to chassis [uuid:%s], please check ipmi connection.",
+    "en_US": "failed to connect to chassis [uuid:{0}], please check ipmi connection.",
+    "zh_CN": "无法连接到裸金属设备[uuid:{0}], 请确认IPMI连接可用",
+    "arguments": [
+      "bmc.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal/chassis/BaremetalChassisManagerImpl.java"
+  },
+  {
+    "raw": "fail to load chassis info from file, because: %s",
+    "en_US": "fail to load chassis info from file, because: {0}",
+    "zh_CN": "无法从文件中读取裸金属设备信息，因为：{0}",
+    "arguments": [
+      "e.getMessage()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal/chassis/BaremetalChassisManagerImpl.java"
+  },
+  {
+    "raw": "Baremetal chassis[uuid:%s] does not exist",
+    "en_US": "Baremetal chassis[uuid:{0}] does not exist",
+    "zh_CN": "裸机机箱[uuid：{0}]不存在",
+    "arguments": [
+      "msg.getChassisUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal/instance/BaremetalInstanceApiInterceptor.java"
+  },
+  {
+    "raw": "Baremetal chassis[uuid:%s] is not Enabled or Available, please choose another one.",
+    "en_US": "Baremetal chassis[uuid:{0}] is not Enabled or Available, please choose another one.",
+    "zh_CN": "裸金属设备[uuid:{0}]被停用或者已被分配，请重新选择",
+    "arguments": [
+      "chassis.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal/instance/BaremetalInstanceApiInterceptor.java"
+  },
+  {
+    "raw": "no corresponding pxeserver, please inspect baremetal chassis[uuid:%s] again",
+    "en_US": "no corresponding pxeserver, please inspect baremetal chassis[uuid:{0}] again",
+    "zh_CN": "裸金属设备[uuid:{0}]没有关联部署服务器，请重新获取硬件信息",
+    "arguments": [
+      "chassis.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal/instance/BaremetalInstanceApiInterceptor.java"
+  },
+  {
+    "raw": "No hardware info found for baremetal chassis[uuid:%s], please choose another one.",
+    "en_US": "No hardware info found for baremetal chassis[uuid:{0}], please choose another one.",
+    "zh_CN": "裸金属设备[uuid:{0}]硬件信息未知，请重新选择",
+    "arguments": [
+      "chassis.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal/instance/BaremetalInstanceApiInterceptor.java"
+  },
+  {
+    "raw": "baremetal pxeserver[uuid:%s] is neither Enabled nor Connected, please check",
+    "en_US": "baremetal pxeserver[uuid:{0}] is neither Enabled nor Connected, please check",
+    "zh_CN": "Baremetal Pxeserver[uuid：{0}]既未启用也未连接，请检查",
+    "arguments": [
+      "chassis.getPxeServerUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal/instance/BaremetalInstanceApiInterceptor.java"
+  },
+  {
+    "raw": "Mac address %s is invalid. It should be like 6c:b3:11:1b:0b:1e",
+    "en_US": "Mac address {0} is invalid. It should be like 6c:b3:11:1b:0b:1e",
+    "zh_CN": "MAC地址{0}不合法",
+    "arguments": [
+      "mac"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal/instance/BaremetalInstanceApiInterceptor.java"
+  },
+  {
+    "raw": "Baremetal chassis[uuid:%s] doesn\u0027t have nic with mac address %s",
+    "en_US": "Baremetal chassis[uuid:{0}] doesn\u0027t have nic with mac address {1}",
+    "zh_CN": "裸金属设备[uuid:{0}]硬件信息中未发现MAC地址为{1}的网卡",
+    "arguments": [
+      "chassis.getUuid()",
+      "mac"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal/instance/BaremetalInstanceApiInterceptor.java"
+  },
+  {
+    "raw": "duplicated bm bonding uuid detacted",
+    "en_US": "duplicated bm bonding uuid detacted",
+    "zh_CN": "已分离重复的BM绑定uuid",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/baremetal/instance/BaremetalInstanceApiInterceptor.java"
+  },
+  {
+    "raw": "Baremetal Bonding does not exist",
+    "en_US": "Baremetal Bonding does not exist",
+    "zh_CN": "裸机焊接不存在",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/baremetal/instance/BaremetalInstanceApiInterceptor.java"
+  },
+  {
+    "raw": "duplicated l3 network uuid detacted",
+    "en_US": "duplicated l3 network uuid detacted",
+    "zh_CN": "已分离重复的三层网络uuid",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/baremetal/instance/BaremetalInstanceApiInterceptor.java"
+  },
+  {
+    "raw": "the selected l3 network doesn\u0027t exist",
+    "en_US": "the selected l3 network doesn\u0027t exist",
+    "zh_CN": "选定的三层网络不存在",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/baremetal/instance/BaremetalInstanceApiInterceptor.java"
+  },
+  {
+    "raw": "the selected l3 network cannot be assigned to chassis[uuid:%s]",
+    "en_US": "the selected l3 network cannot be assigned to chassis[uuid:{0}]",
+    "zh_CN": "无法将选定的三层网络分配给机箱[uuid：{0}]",
+    "arguments": [
+      "chassis.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal/instance/BaremetalInstanceApiInterceptor.java"
+  },
+  {
+    "raw": "only iso image is supported in zstack baremetal service",
+    "en_US": "only iso image is supported in zstack baremetal service",
+    "zh_CN": "目前仅支持为裸机部署ISO镜像",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/baremetal/instance/BaremetalInstanceApiInterceptor.java"
+  },
+  {
+    "raw": "only ImageStoreBackupStorage is supported in zstack baremetal service",
+    "en_US": "only ImageStoreBackupStorage is supported in zstack baremetal service",
+    "zh_CN": "目前仅支持从镜像仓库中为裸机选择ISO镜像",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/baremetal/instance/BaremetalInstanceApiInterceptor.java"
+  },
+  {
+    "raw": "image platform cannot be null",
+    "en_US": "image platform cannot be null",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/baremetal/instance/BaremetalInstanceApiInterceptor.java"
+  },
+  {
+    "raw": "cannot recover baremetal instance that\u0027s not in Destroyed state",
+    "en_US": "cannot recover baremetal instance that\u0027s not in Destroyed state",
+    "zh_CN": "只能恢复处于Destroyed状态的裸金属主机",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/baremetal/instance/BaremetalInstanceApiInterceptor.java"
+  },
+  {
+    "raw": "cannot expunge baremetal instance that\u0027s not in Destroyed state",
+    "en_US": "cannot expunge baremetal instance that\u0027s not in Destroyed state",
+    "zh_CN": "只能彻底删除处于Destroyed状态的裸金属主机",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/baremetal/instance/BaremetalInstanceApiInterceptor.java"
+  },
+  {
+    "raw": "failed to allocate baremetal pxeserver, make sure there is a pxeserver with enough available capacity attached on cluster[uuid:%s]",
+    "en_US": "failed to allocate baremetal pxeserver, make sure there is a pxeserver with enough available capacity attached on cluster[uuid:{0}]",
+    "zh_CN": "分配部署服务器失败，请确认裸金属集群[uuid:{0}]中所挂载的部署服务器拥有足够的剩余存储空间用于保存镜像缓存",
+    "arguments": [
+      "self.getClusterUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal/instance/BaremetalInstanceBase.java"
+  },
+  {
+    "raw": "Failed to remotely power %s baremetal chassis[uuid:%s]",
+    "en_US": "Failed to remotely power {0} baremetal chassis[uuid:{1}]",
+    "zh_CN": "无法远程启动{0}裸机机箱[uuid：{1}]",
+    "arguments": [
+      "reboot ? \"reset\" : \"on\"",
+      "bmc.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal/instance/BaremetalInstanceBase.java"
+  },
+  {
+    "raw": "Failed to remotely power off baremetal chassis[uuid:%s]",
+    "en_US": "Failed to remotely power off baremetal chassis[uuid:{0}]",
+    "zh_CN": "无法远程关闭裸金属设备[uuid:{0}]",
+    "arguments": [
+      "bmc.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal/instance/BaremetalInstanceBase.java"
+  },
+  {
+    "raw": "there are bm instances using ip address allocated from l2[uuid:%s]",
+    "en_US": "there are bm instances using ip address allocated from l2[uuid:{0}]",
+    "zh_CN": "存在使用从L2[uuid：{0}]分配的IP地址的BM实例",
+    "arguments": [
+      "msg.getL2NetworkUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal/instance/BaremetalInstanceManagerImpl.java"
+  },
+  {
+    "raw": "there are bm instances using ip address allocated from l3[uuid:%s]",
+    "en_US": "there are bm instances using ip address allocated from l3[uuid:{0}]",
+    "zh_CN": "存在使用从L3[uuid：{0}]分配的IP地址的BM实例",
+    "arguments": [
+      "msg.getL3NetworkUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal/instance/BaremetalInstanceManagerImpl.java"
+  },
+  {
+    "raw": "there are bm instances using ip address allocated from ip range[uuid:%s]",
+    "en_US": "there are bm instances using ip address allocated from ip range[uuid:{0}]",
+    "zh_CN": "存在使用从IP范围[uuid：{0}]分配的IP地址的BM实例",
+    "arguments": [
+      "msg.getIpRangeUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal/instance/BaremetalInstanceManagerImpl.java"
+  },
+  {
+    "raw": "creating bm bonding is only allowed before creating bm instance",
+    "en_US": "creating bm bonding is only allowed before creating bm instance",
+    "zh_CN": "只能在创建BM实例之前创建BM绑定",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/baremetal/network/BaremetalNetworkApiInterceptor.java"
+  },
+  {
+    "raw": "bond name %s already exists",
+    "en_US": "bond name {0} already exists",
+    "zh_CN": "结合名称{0}已存在",
+    "arguments": [
+      "msg.getName()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal/network/BaremetalNetworkApiInterceptor.java"
+  },
+  {
+    "raw": "Slave address %s is invalid. It should be like 6c:b3:11:1b:0b:1e,6c:b3:11:1b:0b:1f",
+    "en_US": "Slave address {0} is invalid. It should be like 6c:b3:11:1b:0b:1e,6c:b3:11:1b:0b:1f",
+    "zh_CN": "从属地址{0}无效。它应该类似于6C：B3:11:1B:0B:1E，6C：B3:11:1B:0B:1F",
+    "arguments": [
+      "slave"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal/network/BaremetalNetworkApiInterceptor.java"
+  },
+  {
+    "raw": "mac address %s does not belong to chassis[uuid:%s]",
+    "en_US": "mac address {0} does not belong to chassis[uuid:{1}]",
+    "zh_CN": "MAC地址{0}不属于机箱[uuid：{1}]",
+    "arguments": [
+      "slave",
+      "msg.getChassisUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal/network/BaremetalNetworkApiInterceptor.java"
+  },
+  {
+    "raw": "mac address %s is already a bond slave",
+    "en_US": "mac address {0} is already a bond slave",
+    "zh_CN": "MAC地址{0}已是绑定从属地址",
+    "arguments": [
+      "slave"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal/network/BaremetalNetworkApiInterceptor.java"
+  },
+  {
+    "raw": "cannot update predefined preconfiguration templates",
+    "en_US": "cannot update predefined preconfiguration templates",
+    "zh_CN": "无法更新预定义的预配置模板",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/baremetal/preconfiguration/PreconfigurationApiInterceptor.java"
+  },
+  {
+    "raw": "cannot delete predefined preconfiguration templates",
+    "en_US": "cannot delete predefined preconfiguration templates",
+    "zh_CN": "无法删除预定义的预配置模板",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/baremetal/preconfiguration/PreconfigurationApiInterceptor.java"
+  },
+  {
+    "raw": "cannot change state of predefined preconfiguration templates",
+    "en_US": "cannot change state of predefined preconfiguration templates",
+    "zh_CN": "无法更改预定义的预配置模板的状态",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/baremetal/preconfiguration/PreconfigurationApiInterceptor.java"
+  },
+  {
+    "raw": "cannot find PreconfigurationTemplateVO[uuid:%s], it may have been deleted",
+    "en_US": "cannot find PreconfigurationTemplateVO[uuid:{0}], it may have been deleted",
+    "zh_CN": "找不到PreConfigurationTemplateVo[uuid：{0}]，它可能已被删除",
+    "arguments": [
+      "msg.getTemplateUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal/preconfiguration/PreconfigurationManagerImpl.java"
+  },
+  {
+    "raw": "PXE Server DHCP Range Netmask %s is invalid.",
+    "en_US": "PXE Server DHCP Range Netmask {0} is invalid.",
+    "zh_CN": "部署服务器DHCP服务子网掩码{0}非法",
+    "arguments": [
+      "netmask"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal/pxeserver/BaremetalPxeServerApiInterceptor.java"
+  },
+  {
+    "raw": "PXE Server DHCP Range Start %s and Range Stop %s do not belong to the same subnet.",
+    "en_US": "PXE Server DHCP Range Start {0} and Range Stop {1} do not belong to the same subnet.",
+    "zh_CN": "部署服务器DHCP地址区间起始IP{0}和结束IP{1}不属于一个子网内",
+    "arguments": [
+      "begin",
+      "end"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal/pxeserver/BaremetalPxeServerApiInterceptor.java"
+  },
+  {
+    "raw": "PXE Server with hostname %s already exists.",
+    "en_US": "PXE Server with hostname {0} already exists.",
+    "zh_CN": "地址为{0}的部署服务器已经存在",
+    "arguments": [
+      "msg.getHostname()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal/pxeserver/BaremetalPxeServerApiInterceptor.java"
+  },
+  {
+    "raw": "storagePath should be an absolute path",
+    "en_US": "storagePath should be an absolute path",
+    "zh_CN": "部署服务器的存储路径必须是绝对路径",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/baremetal/pxeserver/BaremetalPxeServerApiInterceptor.java"
+  },
+  {
+    "raw": "failed to connect to %s, please check network connection between zstack management node and baremetal pxeserver",
+    "en_US": "failed to connect to {0}, please check network connection between zstack management node and baremetal pxeserver",
+    "zh_CN": "请检查管理节点与部署服务器{0}之间的网络连接",
+    "arguments": [
+      "msg.getHostname()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal/pxeserver/BaremetalPxeServerApiInterceptor.java"
+  },
+  {
+    "raw": "no local repo found under /opt/zstack-dvd of %s, please download zstack iso and create local repo first",
+    "en_US": "no local repo found under /opt/zstack-dvd of {0}, please download zstack iso and create local repo first",
+    "zh_CN": "部署服务器{0}中缺少使用ZStack ISO创建的本地源",
+    "arguments": [
+      "msg.getHostname()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal/pxeserver/BaremetalPxeServerApiInterceptor.java"
+  },
+  {
+    "raw": "PXE Server DHCP Interface %s does not exists, or it does not have an IP address.",
+    "en_US": "PXE Server DHCP Interface {0} does not exists, or it does not have an IP address.",
+    "zh_CN": "部署服务器DHCP接口{0}不存在，或者它没有IP地址",
+    "arguments": [
+      "msg.getDhcpInterface()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal/pxeserver/BaremetalPxeServerApiInterceptor.java"
+  },
+  {
+    "raw": "%s ~ %s cannot connect to dhcp interface %s",
+    "en_US": "{0} ~ {1} cannot connect to dhcp interface {2}",
+    "zh_CN": "{0} ~ {1} 无法连通DHCP监听网卡{2}",
+    "arguments": [
+      "msg.getDhcpRangeBegin()",
+      "msg.getDhcpRangeEnd()",
+      "msg.getDhcpInterface()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal/pxeserver/BaremetalPxeServerApiInterceptor.java"
+  },
+  {
+    "raw": "cluster[uuid:%s] and pxeserver[uuid:%s] don\u0027t belong to one zone",
+    "en_US": "cluster[uuid:{0}] and pxeserver[uuid:{1}] don\u0027t belong to one zone",
+    "zh_CN": "裸金属集群[uuid:{0}]和部署服务器[uuid:{1}]不属于同一个数据中心",
+    "arguments": [
+      "msg.getClusterUuid()",
+      "msg.getPxeServerUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal/pxeserver/BaremetalPxeServerApiInterceptor.java"
+  },
+  {
+    "raw": "cluster[uuid:%s] is not baremetal cluster",
+    "en_US": "cluster[uuid:{0}] is not baremetal cluster",
+    "zh_CN": "集群[uuid:{0}]不是一个裸金属集群",
+    "arguments": [
+      "msg.getClusterUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal/pxeserver/BaremetalPxeServerApiInterceptor.java"
+  },
+  {
+    "raw": "baremetal pxeserver[uuid:%s] already attached to cluster[uuid:%s]",
+    "en_US": "baremetal pxeserver[uuid:{0}] already attached to cluster[uuid:{1}]",
+    "zh_CN": "部署服务器[uuid:{0}]已经挂载到裸金属集群[uuid:{1}]，无需再次挂载",
+    "arguments": [
+      "msg.getPxeServerUuid()",
+      "msg.getClusterUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal/pxeserver/BaremetalPxeServerApiInterceptor.java"
+  },
+  {
+    "raw": "baremetal pxeserver[uuid:%s] is not compatible with baremetal instances in cluster[uuid:%s], existing nic ip %s is out of pxeserver dhcp range %s ~ %s.",
+    "en_US": "baremetal pxeserver[uuid:{0}] is not compatible with baremetal instances in cluster[uuid:{1}], existing nic ip {2} is out of pxeserver dhcp range {3} ~ {4}.",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getPxeServerUuid()",
+      "msg.getClusterUuid()",
+      "ip",
+      "begin",
+      "end"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal/pxeserver/BaremetalPxeServerApiInterceptor.java"
+  },
+  {
+    "raw": "baremetal pxeserver[uuid: %s] not attached to cluster[uuid: %s]",
+    "en_US": "baremetal pxeserver[uuid: {0}] not attached to cluster[uuid: {1}]",
+    "zh_CN": "部署服务器[uuid:{0}]没有挂载到裸金属集群[uuid:{1}]",
+    "arguments": [
+      "msg.getPxeServerUuid()",
+      "msg.getClusterUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal/pxeserver/BaremetalPxeServerApiInterceptor.java"
+  },
+  {
+    "raw": "failed to init configs on baremetal pxeserver[uuid:%s]",
+    "en_US": "failed to init configs on baremetal pxeserver[uuid:{0}]",
+    "zh_CN": "部署服务器[uuid:{0}]初始化配置失败",
+    "arguments": [
+      "self.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal/pxeserver/BaremetalPxeServerBase.java"
+  },
+  {
+    "raw": "failed to create bm instance configs on baremetal pxeserver[uuid:%s]",
+    "en_US": "failed to create bm instance configs on baremetal pxeserver[uuid:{0}]",
+    "zh_CN": "在部署服务器[uuid:{0}]上创建裸金属主机相关配置失败",
+    "arguments": [
+      "self.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal/pxeserver/BaremetalPxeServerBase.java"
+  },
+  {
+    "raw": "failed to delete bm instance configs on baremetal pxeserver[uuid:%s]",
+    "en_US": "failed to delete bm instance configs on baremetal pxeserver[uuid:{0}]",
+    "zh_CN": "在部署服务器[uuid:{0}]上删除裸金属主机相关配置失败",
+    "arguments": [
+      "self.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal/pxeserver/BaremetalPxeServerBase.java"
+  },
+  {
+    "raw": "failed to create bm instance novnc proxy on baremetal pxeserver[uuid:%s]",
+    "en_US": "failed to create bm instance novnc proxy on baremetal pxeserver[uuid:{0}]",
+    "zh_CN": "在部署服务器[uuid:{0}]上创建裸金属主机NoVNC代理失败",
+    "arguments": [
+      "self.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal/pxeserver/BaremetalPxeServerBase.java"
+  },
+  {
+    "raw": "failed to delete bm instance novnc proxy on baremetal pxeserver[uuid:%s]",
+    "en_US": "failed to delete bm instance novnc proxy on baremetal pxeserver[uuid:{0}]",
+    "zh_CN": "在部署服务器[uuid:{0}]上删除裸金属主机NoVNC代理失败",
+    "arguments": [
+      "self.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal/pxeserver/BaremetalPxeServerBase.java"
+  },
+  {
+    "raw": "failed to create bm instance nginx proxy on baremetal pxeserver[uuid:%s]",
+    "en_US": "failed to create bm instance nginx proxy on baremetal pxeserver[uuid:{0}]",
+    "zh_CN": "在部署服务器[uuid:{0}]上创建裸金属主机Nginx代理失败",
+    "arguments": [
+      "self.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal/pxeserver/BaremetalPxeServerBase.java"
+  },
+  {
+    "raw": "failed to delete bm instance nginx proxy on baremetal pxeserver[uuid:%s]",
+    "en_US": "failed to delete bm instance nginx proxy on baremetal pxeserver[uuid:{0}]",
+    "zh_CN": "在部署服务器[uuid:{0}]上删除裸金属主机Nginx代理失败",
+    "arguments": [
+      "self.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal/pxeserver/BaremetalPxeServerBase.java"
+  },
+  {
+    "raw": "failed to start baremetal pxeserver[uuid:%s]",
+    "en_US": "failed to start baremetal pxeserver[uuid:{0}]",
+    "zh_CN": "启动部署服务器[uuid:{0}]失败",
+    "arguments": [
+      "self.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal/pxeserver/BaremetalPxeServerBase.java"
+  },
+  {
+    "raw": "failed to stop baremetal pxeserver[uuid:%s]",
+    "en_US": "failed to stop baremetal pxeserver[uuid:{0}]",
+    "zh_CN": "停止部署服务器[uuid:{0}]失败",
+    "arguments": [
+      "self.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal/pxeserver/BaremetalPxeServerBase.java"
+  },
+  {
+    "raw": "failed to create dhcp config of chassis[uuid:%s] on pxeserver[uuid:%s]",
+    "en_US": "failed to create dhcp config of chassis[uuid:{0}] on pxeserver[uuid:{1}]",
+    "zh_CN": "无法在Pxeserver[uuid：{1}]上创建机箱[uuid：{0}]的DHCP配置",
+    "arguments": [
+      "msg.getChassisUuid()",
+      "self.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal/pxeserver/BaremetalPxeServerBase.java"
+  },
+  {
+    "raw": "failed to delete dhcp config of chassis[uuid:%s] on pxeserver[uuid:%s]",
+    "en_US": "failed to delete dhcp config of chassis[uuid:{0}] on pxeserver[uuid:{1}]",
+    "zh_CN": "无法删除机箱[uuid：{0}]（在Pxeserver[uuid：{1}]上）的DHCP配置",
+    "arguments": [
+      "msg.getChassisUuid()",
+      "self.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal/pxeserver/BaremetalPxeServerBase.java"
+  },
+  {
+    "raw": "the uuid of baremtal pxeserver agent changed[expected:%s, actual:%s], it\u0027s most likely the agent was manually restarted. Issue a reconnect to sync the status",
+    "en_US": "the uuid of baremtal pxeserver agent changed[expected:{0}, actual:{1}], it\u0027s most likely the agent was manually restarted. Issue a reconnect to sync the status",
+    "zh_CN": "",
+    "arguments": [
+      "self.getUuid()",
+      "ret.uuid"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal/pxeserver/BaremetalPxeServerBase.java"
+  },
+  {
+    "raw": "operation error, because:%s",
+    "en_US": "operation error, because:{0}",
+    "zh_CN": "操作错误，因为{0}",
+    "arguments": [
+      "ret.error"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal/pxeserver/BaremetalPxeServerBase.java"
+  },
+  {
+    "raw": "unable to connect to baremetal pxeserver[url:%s], because %s",
+    "en_US": "unable to connect to baremetal pxeserver[url:{0}], because {1}",
+    "zh_CN": "连接部署服务器[uuid:{0}]失败，因为: {1}",
+    "arguments": [
+      "url",
+      "rsp.error"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal/pxeserver/BaremetalPxeServerBase.java"
+  },
+  {
+    "raw": "failed to mount baremetal cache of image[uuid:%s]",
+    "en_US": "failed to mount baremetal cache of image[uuid:{0}]",
+    "zh_CN": "挂载裸金属镜像缓存[uuid:{0}]失败",
+    "arguments": [
+      "cache.getImageUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal/pxeserver/BaremetalPxeServerBase.java"
+  },
+  {
+    "raw": "no enough space left in baremetal image cache for image[uuid:%s]",
+    "en_US": "no enough space left in baremetal image cache for image[uuid:{0}]",
+    "zh_CN": "部署服务器存储路径剩余空间不足",
+    "arguments": [
+      "msg.getImageUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal/pxeserver/BaremetalPxeServerBase.java"
+  },
+  {
+    "raw": "unsupported backup storage type for baremetal",
+    "en_US": "unsupported backup storage type for baremetal",
+    "zh_CN": "裸金属管理所不支持的镜像服务器类型",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/baremetal/pxeserver/BaremetalPxeServerBase.java"
+  },
+  {
+    "raw": "%s",
+    "en_US": "{0}",
+    "zh_CN": "{0}",
+    "arguments": [
+      "ret.error"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal/pxeserver/BaremetalPxeServerBase.java"
+  }
+]

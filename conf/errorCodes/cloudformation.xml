@@ -1,0 +1,7 @@
+<error>
+    <prefix>CFM</prefix>
+    <code>
+        <id>1000</id>
+        <description>Operate action failed</description>
+    </code>
+</error>

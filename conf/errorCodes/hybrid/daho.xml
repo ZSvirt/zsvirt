@@ -1,0 +1,16 @@
+<error>
+    <prefix>DAHO</prefix>
+
+    <code>
+        <id>1000</id>
+        <description>DAHO API Return Error</description>
+    </code>
+    <code>
+        <id>1001</id>
+        <description>Invalid DAHO Key Secret</description>
+    </code>
+    <code>
+        <id>1002</id>
+        <description>Generate DAHO AK Signature Failed</description>
+    </code>
+</error>

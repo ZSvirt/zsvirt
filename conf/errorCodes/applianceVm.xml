@@ -1,0 +1,14 @@
+<error>
+    <prefix>APPLIANCE_VM</prefix>
+
+    <code>
+        <id>1000</id>
+        <description>The management nic IP has been occupied</description>
+    </code>
+
+    <code>
+        <id>1001</id>
+        <description>Unable to start appliance VM for some reason</description>
+    </code>
+</error>
+

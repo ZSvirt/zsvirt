@@ -1,0 +1,75 @@
+[
+  {
+    "raw": "unable to support third party account source of type[%s]",
+    "en_US": "unable to support third party account source of type[{0}]",
+    "zh_CN": "",
+    "arguments": [
+      "type"
+    ],
+    "fileName": "src/main/java/org/zstack/identity/imports/AccountImportsManager.java"
+  },
+  {
+    "raw": "third party user[credentials\u003d%s] has already binding to other account",
+    "en_US": "third party user[credentials\u003d{0}] has already binding to other account",
+    "zh_CN": "",
+    "arguments": [
+      "credentials"
+    ],
+    "fileName": "src/main/java/org/zstack/identity/imports/source/AbstractAccountSourceBase.java"
+  },
+  {
+    "raw": "invalid account spec: accountUuid is null",
+    "en_US": "invalid account spec: accountUuid is null",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/identity/imports/source/AbstractAccountSourceBase.java"
+  },
+  {
+    "raw": "invalid account spec: failed to find account[uuid\u003d%s]",
+    "en_US": "invalid account spec: failed to find account[uuid\u003d{0}]",
+    "zh_CN": "",
+    "arguments": [
+      "accountSpec.getAccountUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/identity/imports/source/AbstractAccountSourceBase.java"
+  },
+  {
+    "raw": "account[uuid\u003d%s] has already binding other third party source",
+    "en_US": "account[uuid\u003d{0}] has already binding other third party source",
+    "zh_CN": "",
+    "arguments": [
+      "accountUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/identity/imports/source/AbstractAccountSourceBase.java"
+  },
+  {
+    "raw": "failed to import account from source[uuid\u003d%s, type\u003d%s]",
+    "en_US": "failed to import account from source[uuid\u003d{0}, type\u003d{1}]",
+    "zh_CN": "从 {1} 类型的源 {0} 导入账户失败",
+    "arguments": [
+      "spec.getSourceUuid()",
+      "spec.getSourceType()"
+    ],
+    "fileName": "src/main/java/org/zstack/identity/imports/source/AbstractAccountSourceBase.java"
+  },
+  {
+    "raw": "failed to unbinding accounts from source[uuid\u003d%s, type\u003d%s]",
+    "en_US": "failed to unbinding accounts from source[uuid\u003d{0}, type\u003d{1}]",
+    "zh_CN": "{1} 类型的源 {0} 解绑账户失败",
+    "arguments": [
+      "self.getUuid()",
+      "self.getType()"
+    ],
+    "fileName": "src/main/java/org/zstack/identity/imports/source/AbstractAccountSourceBase.java"
+  },
+  {
+    "raw": "failed to delete source[uuid\u003d%s, type\u003d%s]",
+    "en_US": "failed to delete source[uuid\u003d{0}, type\u003d{1}]",
+    "zh_CN": "删除 {1} 类型的账户源 {0} 失败",
+    "arguments": [
+      "self.getUuid()",
+      "self.getType()"
+    ],
+    "fileName": "src/main/java/org/zstack/identity/imports/source/AbstractAccountSourceBase.java"
+  }
+]

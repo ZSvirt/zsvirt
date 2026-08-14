@@ -1,0 +1,31 @@
+#!/bin/bash
+
+baseDir=`dirname $0`
+libDir=$baseDir/lib
+confDir=$baseDir/conf
+
+errExit() {
+    echo "$@"
+    exit 1
+}
+
+buildClassPath() {
+    jarList=`ls $libDir`
+    for jar in $jarList
+    do
+        jarPath=$libDir/$jar
+        classPath=$jarPath:$classPath
+    done
+    classPath=$classPath:$confDir
+}
+
+run() {
+    java -cp $classPath org.zstack.portal.main.Main "$@"
+}
+
+main() {
+    buildClassPath
+    run "$@"
+}
+
+main "$@"

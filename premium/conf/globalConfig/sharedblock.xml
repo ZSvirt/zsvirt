@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<globalConfig xmlns="http://zstack.org/schema/zstack">
+    <config>
+        <name>deletion.gcInterval</name>
+        <description>the interval to garbage collect stale volumes and snapshots, in seconds</description>
+        <defaultValue>3600</defaultValue>
+        <category>sharedblock</category>
+        <type>java.lang.Integer</type>
+    </config>
+
+    <config>
+        <name>snapshot.shrink</name>
+        <description>shrink snapshot after taken</description>
+        <defaultValue>true</defaultValue>
+        <category>sharedblock</category>
+        <type>java.lang.Boolean</type>
+    </config>
+
+    <config>
+        <name>snapshot.compare</name>
+        <description>compare snapshot after shrink, it is recommend to enable if shrink enabled</description>
+        <defaultValue>true</defaultValue>
+        <category>sharedblock</category>
+        <type>java.lang.Boolean</type>
+    </config>
+
+    <config>
+        <name>qcow2.allocation</name>
+        <description>qcow2 allocation policy, can be none, metadata</description>
+        <defaultValue>none</defaultValue>
+        <category>sharedblock</category>
+        <type>java.lang.String</type>
+    </config>
+
+    <config>
+        <name>qcow2.cluster.size</name>
+        <description>qcow2 cluster size, must be power of 2 and between 512 to 2097152, units in bytes</description>
+        <defaultValue>2097152</defaultValue>
+        <category>sharedblock</category>
+        <type>java.lang.Integer</type>
+    </config>
+
+    <config>
+        <name>fencer.check.io</name>
+        <description>if enabled, fencer will also check additional io (read operation) to determine sharedblock is invalid and vm is in error</description>
+        <defaultValue>false</defaultValue>
+        <category>sharedblock</category>
+        <type>java.lang.Boolean</type>
+    </config>
+
+    <config>
+        <name>disable.host.when.storage.failure</name>
+        <description>disable host when any shared block storage failure in this host</description>
+        <defaultValue>false</defaultValue>
+        <category>sharedblock</category>
+        <type>java.lang.Boolean</type>
+    </config>
+
+    <config>
+        <name>fail.if.multipath.no.path</name>
+        <description>I/O fail if all paths of multipath device used by sharedblock unavailable, ZStack fencer may work not well if set false</description>
+        <defaultValue>true</defaultValue>
+        <category>sharedblock</category>
+        <type>java.lang.Boolean</type>
+    </config>
+
+    <config>
+        <name>thin.provisioning.initialize.size</name>
+        <description>thin provisioning initialize size, must greater than 1073741824</description>
+        <defaultValue>5368709120</defaultValue>
+        <category>sharedblock</category>
+        <type>java.lang.Long</type>
+    </config>
+
+    <config>
+        <name>thin.provisioning.volume.utilization.percent</name>
+        <description>thin provisioning volume utilization percent, if volume write amount exceed the percent, volume will be auto extended</description>
+        <defaultValue>85</defaultValue>
+        <category>sharedblock</category>
+        <type>java.lang.Long</type>
+    </config>
+
+    <config>
+        <name>thin.provisioning.volume.freespace</name>
+        <description>thin provisioning volume freespace, if volume free space less than the configure value, volume will be auto extended</description>
+        <defaultValue>5368709120</defaultValue>
+        <category>sharedblock</category>
+        <type>java.lang.Long</type>
+    </config>
+
+    <config>
+        <name>thin.provisioning.volume.increment</name>
+        <description>thin provisioning volume increment size, the volume will auto extend with with value each time</description>
+        <defaultValue>5368709120</defaultValue>
+        <category>sharedblock</category>
+        <type>java.lang.Long</type>
+    </config>
+
+    <config>
+        <name>enable.lvmetad</name>
+        <description>enable lvmetad, it may corrupt metadata if wrongly use</description>
+        <defaultValue>false</defaultValue>
+        <category>sharedblock</category>
+        <type>java.lang.Boolean</type>
+    </config>
+
+    <config>
+        <name>lockhelper.max.times</name>
+        <description>maxmium times for lockhelper find locked but not used volumes</description>
+        <defaultValue>6</defaultValue>
+        <category>sharedblock</category>
+        <type>java.lang.Long</type>
+    </config>
+
+    <config>
+        <name>lockhelper.protection.period</name>
+        <description>protection period to prevent automatic unlocking of lv after activation</description>
+        <defaultValue>1800</defaultValue>
+        <category>sharedblock</category>
+        <type>java.lang.Integer</type>
+    </config>
+
+    <config>
+        <name>lockhelper.scan.interval</name>
+        <description>scan interval in seccond for lockhelper</description>
+        <defaultValue>15</defaultValue>
+        <category>sharedblock</category>
+        <type>java.lang.Long</type>
+    </config>
+
+    <config>
+        <name>sblk.agent.verbose.log</name>
+        <description>enable verbose log for zstack-sharedblock-agent</description>
+        <defaultValue>false</defaultValue>
+        <category>sharedblock</category>
+        <type>java.lang.String</type>
+    </config>
+
+    <config>
+        <name>heartbeat.io.timeout</name>
+        <description>sharedblock storage heartbeat io timeout, unit is second</description>
+        <defaultValue>20</defaultValue>
+        <category>sharedblock</category>
+        <type>java.lang.Long</type>
+    </config>
+
+    <config>
+        <name>max.actual.size.factor</name>
+        <description>factor of maximum allowed actual size between virtual size, only change it if you know what you are doing</description>
+        <defaultValue>3</defaultValue>
+        <category>sharedblock</category>
+        <type>java.lang.Long</type>
+    </config>
+
+    <config>
+        <name>device.allocate.strategy</name>
+        <description>the strategy to allocate device for new shared block volume.</description>
+        <defaultValue>none</defaultValue>
+        <category>sharedblock</category>
+        <type>java.lang.String</type>
+    </config>
+
+    <config>
+        <name>volume.instantiate.sync.level</name>
+        <description>the sync level of instantiating volume on shared block primary storage.</description>
+        <defaultValue>10</defaultValue>
+        <category>sharedblock</category>
+        <type>java.lang.Integer</type>
+    </config>
+
+    <config>
+        <name>volume.activate.sync.level</name>
+        <description>the sync level of activating volume on shared block primary storage.</description>
+        <defaultValue>10</defaultValue>
+        <category>sharedblock</category>
+        <type>java.lang.Integer</type>
+    </config>
+
+    <config>
+        <name>discard.volume.when.deleting</name>
+        <description>always means always issuing discards to PVs when deleting LV, never means not issuing discards and auto means that if discards are relatively fast, then discards will be issued.</description>
+        <defaultValue>never</defaultValue>
+        <category>sharedblock</category>
+        <type>java.lang.String</type>
+    </config>
+</globalConfig>

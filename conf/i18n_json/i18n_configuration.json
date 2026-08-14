@@ -1,0 +1,82 @@
+[
+  {
+    "raw": "unsupported instance offering type[%s]",
+    "en_US": "unsupported instance offering type[{0}]",
+    "zh_CN": "不被支持的计算规格类型[{0}]",
+    "arguments": [
+      "msg.getType()"
+    ],
+    "fileName": "src/main/java/org/zstack/configuration/ConfigurationApiInterceptor.java"
+  },
+  {
+    "raw": "cpu num[%s] is less than 1",
+    "en_US": "cpu num[{0}] is less than 1",
+    "zh_CN": "cpu数量[{0}]少于1",
+    "arguments": [
+      "msg.getCpuNum()"
+    ],
+    "fileName": "src/main/java/org/zstack/configuration/ConfigurationApiInterceptor.java"
+  },
+  {
+    "raw": "memory size[%s bytes] is less than 16M, no modern operating system is likely able to boot with such small memory size",
+    "en_US": "memory size[{0} bytes] is less than 16M, no modern operating system is likely able to boot with such small memory size",
+    "zh_CN": "内存大小[{0} bytes]少于16M，没有一个现代操作系统能够在如此小的内存里被引导",
+    "arguments": [
+      "msg.getMemorySize()"
+    ],
+    "fileName": "src/main/java/org/zstack/configuration/ConfigurationApiInterceptor.java"
+  },
+  {
+    "raw": "reserved memory size[%s bytes] is greater than memory size[%s bytes]",
+    "en_US": "reserved memory size[{0} bytes] is greater than memory size[{1} bytes]",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getReservedMemorySize()",
+      "msg.getMemorySize()"
+    ],
+    "fileName": "src/main/java/org/zstack/configuration/ConfigurationApiInterceptor.java"
+  },
+  {
+    "raw": "unsupported host allocation strategy[%s]",
+    "en_US": "unsupported host allocation strategy[{0}]",
+    "zh_CN": "不被支持的主机分配策略[{0}]",
+    "arguments": [
+      "msg.getAllocatorStrategy()"
+    ],
+    "fileName": "src/main/java/org/zstack/configuration/ConfigurationApiInterceptor.java"
+  },
+  {
+    "raw": "unsupported primary storage allocation strategy[%s]",
+    "en_US": "unsupported primary storage allocation strategy[{0}]",
+    "zh_CN": "不被支持的主存储分配策略[{0}]",
+    "arguments": [
+      "msg.getAllocationStrategy()"
+    ],
+    "fileName": "src/main/java/org/zstack/configuration/ConfigurationApiInterceptor.java"
+  },
+  {
+    "raw": "Already have one userdata systemTag for instanceOffering[uuid: %s].",
+    "en_US": "Already have one userdata systemTag for instanceOffering[uuid: {0}].",
+    "zh_CN": "实例[uuid：{0}]已有一个用户数据系统标记。",
+    "arguments": [
+      "resourceUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/configuration/ConfigurationManagerImpl.java"
+  },
+  {
+    "raw": "Already have one userdata systemTag for diskOffering[uuid: %s].",
+    "en_US": "Already have one userdata systemTag for diskOffering[uuid: {0}].",
+    "zh_CN": "DiskOffering[uuid：{0}]已有一个UserData系统标记。",
+    "arguments": [
+      "resourceUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/configuration/ConfigurationManagerImpl.java"
+  },
+  {
+    "raw": "Shouldn\u0027t be more than one systemTag for one instanceOffering.",
+    "en_US": "Shouldn\u0027t be more than one systemTag for one instanceOffering.",
+    "zh_CN": "对于一个实例提供，不应超过一个系统标记。",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/configuration/ConfigurationManagerImpl.java"
+  }
+]

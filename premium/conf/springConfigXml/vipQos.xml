@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:zstack="http://zstack.org/schema/zstack"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+         http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+         http://www.springframework.org/schema/aop
+         http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+         http://www.springframework.org/schema/tx
+     	 http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+     	 http://zstack.org/schema/zstack 
+         http://zstack.org/schema/zstack/plugin.xsd"
+	default-init-method="init" default-destroy-method="destroy">
+    
+    <bean id="VyosVipQosBackend" class="org.zstack.network.service.vipQos.vyos.VyosVipQosBackend" >
+    	<zstack:plugin>
+            <zstack:extension interface="org.zstack.network.service.vipQos.VipQosBackend" />
+			<zstack:extension interface="org.zstack.network.service.virtualrouter.vyos.VyosPostCreateFlowExtensionPoint" />
+			<zstack:extension interface="org.zstack.network.service.virtualrouter.vyos.VyosPostRebootFlowExtensionPoint" />
+			<zstack:extension interface="org.zstack.network.service.virtualrouter.vyos.VyosPostStartFlowExtensionPoint" />
+			<zstack:extension interface="org.zstack.network.service.virtualrouter.vyos.VyosProvisionConfigFlowExtensionPoint" />
+			<zstack:extension interface="org.zstack.network.service.vip.AfterAcquireVipExtensionPoint" />
+			<zstack:extension interface="org.zstack.header.network.service.VirtualRouterHaGetCallbackExtensionPoint" />
+		</zstack:plugin>
+	</bean>
+
+	<bean id="FlatVipQosBackend" class="org.zstack.network.service.vipQos.flat.FlatVipQosBackend" >
+		<zstack:plugin>
+			<zstack:extension interface="org.zstack.network.service.vipQos.VipQosBackend" />
+			<zstack:extension interface="org.zstack.header.network.service.AfterApplyFlatEipExtensionPoint" />
+			<zstack:extension interface="org.zstack.header.managementnode.PrepareDbInitialValueExtensionPoint" />
+		</zstack:plugin>
+	</bean>
+
+	<bean id="VipQosManager" class="org.zstack.network.service.vipQos.VipQosManagerImpl" >
+	<zstack:plugin>
+		<zstack:extension interface="org.zstack.header.Component" />
+		<zstack:extension interface="org.zstack.header.Service" />
+	</zstack:plugin>
+	</bean>
+
+	<bean id="VipQosApiInterceptor" class="org.zstack.network.service.vipQos.VipQosApiInterceptor" >
+		<zstack:plugin>
+			<zstack:extension interface="org.zstack.header.apimediator.ApiMessageInterceptor" />
+		</zstack:plugin>
+	</bean>
+
+</beans>

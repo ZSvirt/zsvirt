@@ -1,0 +1,168 @@
+[
+  {
+    "raw": "failed to config time sources \u0027%s\u0027 in %s, because:%s, raw: %s",
+    "en_US": "failed to config time sources \u0027{0}\u0027 in {1}, because:{2}, raw: {3}",
+    "zh_CN": "",
+    "arguments": [
+      "sourceConfig",
+      "hostname",
+      "res.getStderr()",
+      "res.getExecutionLog()"
+    ],
+    "fileName": "src/main/java/org/zstack/zops/AbstractHostBackend.java"
+  },
+  {
+    "raw": "%s is unreachable from %s, because:%s",
+    "en_US": "{0} is unreachable from {1}, because:{2}",
+    "zh_CN": "",
+    "arguments": [
+      "targetHostname",
+      "hostname",
+      "res.getStderr()"
+    ],
+    "fileName": "src/main/java/org/zstack/zops/AbstractHostBackend.java"
+  },
+  {
+    "raw": "failed to check is %s reachable from %s, because:%s",
+    "en_US": "failed to check is {0} reachable from {1}, because:{2}",
+    "zh_CN": "",
+    "arguments": [
+      "targetHostname",
+      "hostname",
+      "ex.getMessage()"
+    ],
+    "fileName": "src/main/java/org/zstack/zops/AbstractHostBackend.java"
+  },
+  {
+    "raw": "%s failed to check ceph health status, because: %s",
+    "en_US": "{0} failed to check ceph health status, because: {1}",
+    "zh_CN": "",
+    "arguments": [
+      "hostname",
+      "res.getStderr()"
+    ],
+    "fileName": "src/main/java/org/zstack/zops/AbstractHostBackend.java"
+  },
+  {
+    "raw": "failed to get chrony sources, because:%s",
+    "en_US": "failed to get chrony sources, because:{0}",
+    "zh_CN": "",
+    "arguments": [
+      "res.getStderr()"
+    ],
+    "fileName": "src/main/java/org/zstack/zops/AbstractHostBackend.java"
+  },
+  {
+    "raw": "failed to get %s\u0027s chrony sources, because:%s",
+    "en_US": "failed to get {0}\u0027s chrony sources, because:{1}",
+    "zh_CN": "",
+    "arguments": [
+      "hostname",
+      "ex.getMessage()"
+    ],
+    "fileName": "src/main/java/org/zstack/zops/AbstractHostBackend.java"
+  },
+  {
+    "raw": "failed to synchronize chrony server in %s, because:%s, raw: %s",
+    "en_US": "failed to synchronize chrony server in {0}, because:{1}, raw: {2}",
+    "zh_CN": "",
+    "arguments": [
+      "hostname",
+      "res.getStderr()",
+      "res.getExecutionLog()"
+    ],
+    "fileName": "src/main/java/org/zstack/zops/AbstractHostBackend.java"
+  },
+  {
+    "raw": "fail to check is %s reachable from host %s, because %s is not managed by us",
+    "en_US": "fail to check is {0} reachable from host {1}, because {2} is not managed by us",
+    "zh_CN": "",
+    "arguments": [
+      "targetHostname",
+      "hostname",
+      "hostname"
+    ],
+    "fileName": "src/main/java/org/zstack/zops/ExternalHostBackend.java"
+  },
+  {
+    "raw": "fail to delete old chrony server in zstack.properties in %s, because:%s",
+    "en_US": "fail to delete old chrony server in zstack.properties in {0}, because:{1}",
+    "zh_CN": "",
+    "arguments": [
+      "hostname",
+      "res.getStderr()"
+    ],
+    "fileName": "src/main/java/org/zstack/zops/ManagementNodeBackend.java"
+  },
+  {
+    "raw": "fail to config chrony %s server in zstack.properties in %s, because:%s",
+    "en_US": "fail to config chrony {0} server in zstack.properties in {1}, because:{2}",
+    "zh_CN": "",
+    "arguments": [
+      "chronyServer",
+      "hostname",
+      "res.getStderr()"
+    ],
+    "fileName": "src/main/java/org/zstack/zops/ManagementNodeBackend.java"
+  },
+  {
+    "raw": "%s is not a valid ip address",
+    "en_US": "{0} is not a valid ip address",
+    "zh_CN": "",
+    "arguments": [
+      "sourceHostname"
+    ],
+    "fileName": "src/main/java/org/zstack/zops/ZOpsApiInterceptor.java"
+  },
+  {
+    "raw": "internal and external chrony servers cannot be null at the same time",
+    "en_US": "internal and external chrony servers cannot be null at the same time",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zops/ZOpsApiInterceptor.java"
+  },
+  {
+    "raw": "%s is not a valid ip address or domain name",
+    "en_US": "{0} is not a valid ip address or domain name",
+    "zh_CN": "",
+    "arguments": [
+      "targetHostname"
+    ],
+    "fileName": "src/main/java/org/zstack/zops/ZOpsApiInterceptor.java"
+  },
+  {
+    "raw": "%s cannot be set as external chrony server!",
+    "en_US": "{0} cannot be set as external chrony server!",
+    "zh_CN": "",
+    "arguments": [
+      "chronyServer"
+    ],
+    "fileName": "src/main/java/org/zstack/zops/ZOpsManagerImpl.java"
+  },
+  {
+    "raw": "%s is unreachable from %s",
+    "en_US": "{0} is unreachable from {1}",
+    "zh_CN": "",
+    "arguments": [
+      "networkReachablePair.getTargetHostname()",
+      "networkReachablePair.getSourceHostname()"
+    ],
+    "fileName": "src/main/java/org/zstack/zops/ZOpsManagerImpl.java"
+  },
+  {
+    "raw": "ZStone not support update chrony server online yet!",
+    "en_US": "ZStone not support update chrony server online yet!",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zops/ZOpsManagerImpl.java"
+  },
+  {
+    "raw": "ceph status is unhealthy, please check your environment first! %s",
+    "en_US": "ceph status is unhealthy, please check your environment first! {0}",
+    "zh_CN": "",
+    "arguments": [
+      "info.getDetail()"
+    ],
+    "fileName": "src/main/java/org/zstack/zops/ZOpsManagerImpl.java"
+  }
+]

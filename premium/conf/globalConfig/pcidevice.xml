@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<globalConfig xmlns="http://zstack.org/schema/zstack">
+    <config>
+        <category>pciDevice</category>
+        <name>iommuEnabled</name>
+        <description>default iommu state when host iommu state not specified by system tag, it should always set by false</description>
+        <type>java.lang.Boolean</type>
+        <defaultValue>false</defaultValue>
+    </config>
+    <config>
+        <category>pciDevice</category>
+        <name>hotPlugEnabled</name>
+        <description>support to attach/detach PCI devices to/from VM instance when the VM instance's state is RUNNING. disable this function via to set it false.</description>
+        <type>java.lang.Boolean</type>
+        <defaultValue>true</defaultValue>
+    </config>
+    <config>
+        <name>pci.num</name>
+        <description>default quota for generic pci.num</description>
+        <defaultValue>20</defaultValue>
+        <category>quota</category>
+        <type>java.lang.Long</type>
+    </config>
+    <config>
+        <name>gpu.num</name>
+        <description>default quota for gpu.num</description>
+        <defaultValue>20</defaultValue>
+        <category>quota</category>
+        <type>java.lang.Long</type>
+    </config>
+</globalConfig>

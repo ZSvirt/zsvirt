@@ -1,0 +1,34 @@
+<error>
+    <prefix>MANAGEMENTS</prefix>
+
+    <code>
+        <id>1000</id>
+        <description>General error</description>
+    </code>
+
+    <code>
+        <id>2000</id>
+        <description>ZSphere (ZStack) HA2 related error</description>
+    </code>
+
+    <code>
+        <id>2001</id>
+        <description>Missing ZSphere HA2 tools</description>
+    </code>
+
+    <code>
+        <id>2101</id>
+        <description>Failed to get ZSphere HA2 status</description>
+    </code>
+
+    <code>
+        <id>2102</id>
+        <description>Failed to parse ZSphere HA2 status</description>
+    </code>
+
+    <code>
+        <id>2103</id>
+        <description>HA environment not installed</description>
+    </code>
+</error>
+

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<globalConfig xmlns="http://zstack.org/schema/zstack">
+    <config>
+        <category>quota</category>
+        <name>affinitygroup.num</name>
+        <description>default quota for affinitygroup.num</description>
+        <type>java.lang.Long</type>
+        <defaultValue>20</defaultValue>
+    </config>
+</globalConfig>

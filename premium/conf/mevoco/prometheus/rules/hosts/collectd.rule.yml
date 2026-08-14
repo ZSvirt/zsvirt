@@ -1,0 +1,69 @@
+groups:
+- name: collectd
+  rules:
+  - record: collectd:collectd_virt_virt_cpu_total
+    expr: irate(collectd_virt_virt_cpu_total[10m]) / 1e+07
+  - record: collectd:collectd_virt_virt_vcpu
+    expr: irate(collectd_virt_virt_vcpu[10m]) / 1e+07
+  - record: collectd:collectd_virt_memory
+    expr: collectd_virt_memory
+  - record: collectd:collectd_disk_disk_octets_read
+    expr: irate(collectd_disk_disk_octets_0[10m])
+  - record: collectd:collectd_disk_disk_octets_write
+    expr: irate(collectd_disk_disk_octets_1[10m])
+  - record: collectd:collectd_disk_disk_ops_read
+    expr: irate(collectd_disk_disk_ops_0[10m])
+  - record: collectd:collectd_disk_disk_ops_write
+    expr: irate(collectd_disk_disk_ops_1[10m])
+  - record: collectd:collectd_disk_disk_time_read
+    expr: irate(collectd_disk_disk_time_0[10m])
+  - record: collectd:collectd_disk_disk_time_write
+    expr: irate(collectd_disk_disk_time_1[10m])
+  - record: collectd:collectd_interface_if_errors_rx
+    expr: irate(collectd_interface_if_errors_0[10m])
+  - record: collectd:collectd_interface_if_errors_tx
+    expr: irate(collectd_interface_if_errors_1[10m])
+  - record: collectd:collectd_interface_if_octets_rx
+    expr: irate(collectd_interface_if_octets_0[10m])
+  - record: collectd:collectd_interface_if_octets_tx
+    expr: irate(collectd_interface_if_octets_1[10m])
+  - record: collectd:collectd_interface_if_packets_rx
+    expr: irate(collectd_interface_if_packets_0[10m])
+  - record: collectd:collectd_interface_if_packets_tx
+    expr: irate(collectd_interface_if_packets_1[10m])
+  - record: collectd:collectd_memory
+    expr: collectd_memory
+  - record: collectd:collectd_cpu_percent
+    expr: collectd_cpu_percent
+  - record: collectd:wmi_cpu_time_total
+    expr: wmi_cpu_time_total
+  - record: collectd:collectd_virt_disk_octets_read
+    expr: irate(collectd_virt_disk_octets_0[10m])
+  - record: collectd:collectd_virt_disk_octets_write
+    expr: irate(collectd_virt_disk_octets_1[10m])
+  - record: collectd:collectd_virt_disk_ops_read
+    expr: irate(collectd_virt_disk_ops_0[10m])
+  - record: collectd:collectd_virt_disk_ops_write
+    expr: irate(collectd_virt_disk_ops_1[10m])
+  - record: collectd:collectd_virt_if_dropped_read
+    expr: irate(collectd_virt_if_dropped_0[10m])
+  - record: collectd:collectd_virt_if_dropped_write
+    expr: irate(collectd_virt_if_dropped_1[10m])
+  - record: collectd:collectd_virt_if_errors_rx
+    expr: irate(collectd_virt_if_errors_0[10m])
+  - record: collectd:collectd_virt_if_errors_tx
+    expr: irate(collectd_virt_if_errors_1[10m])
+  - record: collectd:collectd_virt_if_octets_rx
+    expr: irate(collectd_virt_if_octets_0[10m])
+  - record: collectd:collectd_virt_if_octets_tx
+    expr: irate(collectd_virt_if_octets_1[10m])
+  - record: collectd:collectd_virt_if_packets_rx
+    expr: irate(collectd_virt_if_packets_0[10m])
+  - record: collectd:collectd_virt_if_packets_tx
+    expr: irate(collectd_virt_if_packets_1[10m])
+  - expr: node_filesystem_free_bytes
+    record: node_filesystem_free
+  - expr: node_filesystem_avail_bytes
+    record: node_filesystem_avail
+  - expr: node_filesystem_size_bytes
+    record: node_filesystem_size

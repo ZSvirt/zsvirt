@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:zstack="http://zstack.org/schema/zstack"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+    http://zstack.org/schema/zstack
+    http://zstack.org/schema/zstack/plugin.xsd"
+       default-init-method="init" default-destroy-method="destroy">
+
+    <bean id="TicketValidator"  class="org.jasig.cas.client.validation.Cas20ServiceTicketValidator">
+        <constructor-arg index="0" value="${casServerUrlPrefix:http://localHost:8080}" />
+    </bean>
+
+    <bean name="authenticationFilter" id="authenticationFilter"
+          class="org.jasig.cas.client.authentication.AuthenticationFilter">
+        <property name="casServerLoginUrl" value="${casServerLoginUrl:http://localHost:8080}"/>
+        <property name="serverName" value="${serverName:http://localHost:8080}"/>
+    </bean>
+
+    <bean name="cas20ProxyReceivingTicketValidationFilter" id="cas20ProxyReceivingTicketValidationFilter"
+          class="org.jasig.cas.client.validation.Cas20ProxyReceivingTicketValidationFilter">
+        <property name="serverName" value="${serverName:http://localHost:8080}"/>
+        <property name="ticketValidator" ref ="TicketValidator"/>
+        <property name="millisBetweenCleanUps" value="360000"/>
+    </bean>
+</beans>

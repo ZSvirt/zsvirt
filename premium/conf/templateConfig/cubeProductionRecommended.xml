@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templateConfig>
+    <config>
+        <templateName>CubeProductionRecommended</templateName>
+        <category>kvm</category>
+        <name>reservedMemory</name>
+        <defaultValue>16G</defaultValue>
+    </config>
+
+    <config>
+        <templateName>CubeProductionRecommended</templateName>
+        <category>host</category>
+        <name>cpu.overProvisioning.ratio</name>
+        <defaultValue>4</defaultValue>
+    </config>
+
+    <config>
+        <templateName>CubeProductionRecommended</templateName>
+        <category>mevoco</category>
+        <name>overProvisioning.memory</name>
+        <defaultValue>1.0</defaultValue>
+    </config>
+
+    <config>
+        <templateName>CubeProductionRecommended</templateName>
+        <category>encrypt</category>
+        <name>enable.password.encrypt</name>
+        <defaultValue>LocalEncryption</defaultValue>
+    </config>
+
+    <config>
+        <templateName>CubeProductionRecommended</templateName>
+        <category>primaryStorage</category>
+        <name>reservedCapacity</name>
+        <defaultValue>200G</defaultValue>
+    </config>
+
+    <config>
+        <templateName>CubeProductionRecommended</templateName>
+        <category>mevoco</category>
+        <name>threshold.primaryStorage.physicalCapacity</name>
+        <defaultValue>0.8</defaultValue>
+    </config>
+
+    <config>
+        <templateName>CubeProductionRecommended</templateName>
+        <category>mevoco</category>
+        <name>overProvisioning.primaryStorage</name>
+        <defaultValue>1.0</defaultValue>
+    </config>
+
+    <config>
+        <templateName>CubeProductionRecommended</templateName>
+        <category>sharedblock</category>
+        <name>qcow2.allocation</name>
+        <defaultValue>none</defaultValue>
+    </config>
+
+    <config>
+        <templateName>CubeProductionRecommended</templateName>
+        <category>localStoragePrimaryStorage</category>
+        <name>liveMigrationWithStorage.allow</name>
+        <defaultValue>true</defaultValue>
+    </config>
+
+    <config>
+        <templateName>CubeProductionRecommended</templateName>
+        <category>backupStorage</category>
+        <name>reservedCapacity</name>
+        <defaultValue>200G</defaultValue>
+    </config>
+
+    <config>
+        <templateName>CubeProductionRecommended</templateName>
+        <category>mevoco</category>
+        <name>deleteTempImages</name>
+        <defaultValue>true</defaultValue>
+    </config>
+
+    <config>
+        <templateName>CubeProductionRecommended</templateName>
+        <category>ha</category>
+        <name>enable</name>
+        <defaultValue>true</defaultValue>
+    </config>
+
+    <config>
+        <templateName>CubeProductionRecommended</templateName>
+        <category>ha</category>
+        <name>allow.slibing.cross.clusters</name>
+        <defaultValue>true</defaultValue>
+    </config>
+
+    <config>
+        <templateName>CubeProductionRecommended</templateName>
+        <category>kvm</category>
+        <name>vm.cpuMode</name>
+        <defaultValue>host-passthrough</defaultValue>
+    </config>
+
+    <config>
+        <templateName>CubeProductionRecommended</templateName>
+        <name>emulateHyperV</name>
+        <category>vm</category>
+        <defaultValue>true</defaultValue>
+    </config>
+
+    <config>
+        <templateName>CubeProductionRecommended</templateName>
+        <category>ha</category>
+        <name>self.fencer.strategy</name>
+        <defaultValue>Force</defaultValue>
+    </config>
+
+    <config>
+        <templateName>CubeProductionRecommended</templateName>
+        <category>mevoco</category>
+        <name>aio.native</name>
+        <defaultValue>true</defaultValue>
+    </config>
+
+    <config>
+        <templateName>CubeProductionRecommended</templateName>
+        <category>quota</category>
+        <name>snapshot.volume.num</name>
+        <defaultValue>5</defaultValue>
+    </config>
+
+    <config>
+        <templateName>CubeProductionRecommended</templateName>
+        <category>zwatch</category>
+        <name>thirdpartyAlert.enable</name>
+        <defaultValue>true</defaultValue>
+    </config>
+
+    <config>
+        <templateName>CubeProductionRecommended</templateName>
+        <category>prometheus</category>
+        <name>storage.local.retention</name>
+        <defaultValue>3</defaultValue>
+    </config>
+
+</templateConfig>

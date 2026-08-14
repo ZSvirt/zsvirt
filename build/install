@@ -1,0 +1,11 @@
+#!/bin/sh
+deployTarget=~/zstack-deployment
+
+cd ../
+mvn -DskipTests clean install
+cd -
+mvn assembly:single
+rm -rf $deployTarget
+mkdir -p $deployTarget
+cp -r target/build-0.1.0-zstack/zstack/ $deployTarget
+echo "Successfully installed zstack to $deployTarget"

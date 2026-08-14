@@ -1,0 +1,108 @@
+<error>
+    <prefix>KP</prefix>
+
+    <code>
+        <id>1000</id>
+        <description>ok</description>
+    </code>
+
+    <code>
+        <id>1001</id>
+        <description>invalid content</description>
+    </code>
+
+    <code>
+        <id>1002</id>
+        <description>internal error</description>
+    </code>
+
+    <code>
+        <id>1500</id>
+        <description>backend unavailable</description>
+    </code>
+
+    <code>
+        <id>1506</id>
+        <description>socket not found</description>
+    </code>
+
+    <code>
+        <id>1507</id>
+        <description>socket not socket</description>
+    </code>
+
+    <code>
+        <id>1700</id>
+        <description>kmip connect failed</description>
+    </code>
+
+    <code>
+        <id>1701</id>
+        <description>kmip timeout</description>
+    </code>
+
+    <code>
+        <id>1702</id>
+        <description>kmip tls handshake failed</description>
+    </code>
+
+    <code>
+        <id>1703</id>
+        <description>kmip cert invalid</description>
+    </code>
+
+    <code>
+        <id>1704</id>
+        <description>kmip operation failed</description>
+    </code>
+
+    <code>
+        <id>1600</id>
+        <description>root key sha256 mismatch</description>
+    </code>
+
+    <code>
+        <id>1601</id>
+        <description>root key sha256 file missing</description>
+    </code>
+
+    <code>
+        <id>1602</id>
+        <description>zip data required</description>
+    </code>
+
+    <code>
+        <id>1603</id>
+        <description>checksum mismatch</description>
+    </code>
+
+    <code>
+        <id>1604</id>
+        <description>password invalid</description>
+    </code>
+
+    <code>
+        <id>1605</id>
+        <description>root key extension missing</description>
+    </code>
+
+    <code>
+        <id>1900</id>
+        <description>name duplicate</description>
+    </code>
+
+    <code>
+        <id>1901</id>
+        <description>uuid duplicate</description>
+    </code>
+
+    <code>
+        <id>2000</id>
+        <description>TPM related errors</description>
+    </code>
+
+    <code>
+        <id>2101</id>
+        <description>TPM already attached key provider</description>
+    </code>
+</error>

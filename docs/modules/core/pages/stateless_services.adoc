@@ -1,0 +1,192 @@
+= 无状态服务
+
+每个 ZStack 服务都是无状态的，让服务高可用以及横向拓展（scale out）可以很简单，只需要启动剩余的服务实例，然后进行负载均衡即可。此外，ZStack 将所有的服务打包到名为管理节点（management node）的单个进程，它让部署和管理变得超级简单。
+
+== 动机
+
+在 xref:scalability_secrets_part_1_asynchronous_architecture.adoc[ZStack 的伸缩性秘密武器——异步架构]一文中， 我们已经详细解释了异步架构，它让单个 ZStack 管理节点能胜任大多数的云端工作负载。然而，当用户希望建立高可用的生产环境，或者处理超级大的并发工作负载的时候，一个管理节点是不够的。解决方案是，构建一个分布式的系统，这样工作负载可以延展到每一个单一管理节点。这种增加新节点来拓展整个系统的容量的方式称为link:http://en.wikipedia.org/wiki/Scalability[横向拓展（scale out)].
+
+== 问题
+
+设计一个分布式的系统并不容易。一个分布式的系统，特别是一个有状态的系统，必须处理一致性，可用性，以及分区容忍性（请查看 link:http://en.wikipedia.org/wiki/CAP_theorem[CAP 理论（CAP theorem）]），所有这些都很复杂。相反，一个无状态的分布式系统，在某种程度上摆脱了这种复杂性。首先，因为在节点之间无需状态共享，系统自然保持了一致性；其次，由于节点之间是类似的，当系统遇到一个分区问题通常也是 OK 的。鉴于此，一个分布式的系统，通常更倾向于保持无状态而不是有状态。但是，设计一个无状态的分布式系统也是很困难的，同时，常常比设计有状态的分布式系统更加困难。提升了消息总线（message bus）和数据库优势的 ZStack，构建了一个包含了无状态服务的无状态分布式系统。
+
+由于无状态服务是保证整个系统无状态的根基，在讨论它是什么之前，让我们先了解下什么是“状态”。在 ZStack 里面，资源，如主机，虚拟机，镜像，以及用户，都是由单个服务管理的；当系统中存在多余一个服务实例的时候，资源会被划分为不同的实例。例如，假如有 10,000 个虚拟机和两个虚拟机服务实例，理想的情况下，每个实例将会管理 5000 个虚拟机：
+
+.图中的 RabbitMQ 在最新的架构中已经变成自研的 CloudBus
+image::image-2022-03-03-16-28-36-007.png[]
+
+由于存在两个服务实例，在向虚拟机发送请求之前，请求者必须知道哪一个实例正在管理虚拟机；否则，它将无法知道将请求发往何处。像 *哪个服务实例正在管理什么资源*  的认知，正是我们正在谈论的状态。如果服务是有状态的，状态也就显现在服务之中。请求者需要在某个地方咨询这些状态。当服务实例的数目发生变化的时候，服务需要交换状态，例如，当一个新的服务实例加入，或者当前的服务实例脱离的时候。
+
+image::image-2022-03-03-16-41-20-894.png[]
+
+状态交换是让人担忧的，它很容易导致错误，常常会限制系统的可拓展性。为了让系统更可靠，同时更易于横向拓展，理想的方式是，通过彼此分隔状态来让服务保持无状态（查看 http://en.zstack.io/blog/stateless-clustering.html#:~:text=Service%20Statelessness%20Principle[服务无状态原则（Service Statelessness Principle)]。 有了无状态的服务，请求者不再需要询问何处发送请求；当新的服务实例加入，或者旧的服务实例脱离的时候，服务也不再需要交换状态。
+
+[NOTE]
+====
+.备注
+在接下来的内容中，为了简单起见，术语“服务”和“服务实例”交换着使用。
+====
+
+== 服务和管理节点
+
+服务，通过中央消息总线（central message bus）--CloudBus，来彼此通讯，它们是 ZStack 中的“第一等公民”。
+
+[plantuml]
+....
+skinparam monochrome true
+skinparam ranksep 20
+skinparam dpi 150
+skinparam arrowThickness 0.7
+skinparam packageTitleAlignment left
+skinparam usecaseBorderThickness 0.4
+skinparam defaultFontSize 12
+skinparam rectangleBorderThickness 1
+
+[Compute Service] --> (CloudBus)
+[Image Service] --> (CloudBus)
+ [Network Service] --> (CloudBus)
+(CloudBus) <-- [Storage Service]
+(CloudBus) <-- [Console Service]
+(CloudBus) <-- [Configuration Service]
+....
+
+不像通常的微服务架构，其每个服务都在单独的进程或单独的机器上运行，ZStack 将所有的服务打包到一个名为管理节点的单一进程。对于这个号称 进程中的微服务（in-process microservices）架构，我们有充分的理由，你可以参看 xref:in-process-microservice.adoc[进程中的微服务架构（The In-Process Microservices Architecture）]。 一个管理节点是一个完整功能的 ZStack 软件。由于包含了无状态服务，管理节点没有共享状态，但是有心跳记录，以及一致性哈希算法环（consistent hashing ring）--接下来我们将详细介绍。 心跳用来监控管理节点的“健康”（译者注：即此管理节点是否存活，是否正常运转），只要一个管理节点在给定的间隔内停止更新心跳，其它的管理节点将会驱除它，同时开始接管它所管理的资源。
+
+[plantuml]
+....
+skinparam monochrome true
+skinparam ranksep 20
+skinparam dpi 150
+skinparam arrowThickness 0.7
+skinparam packageTitleAlignment left
+skinparam usecaseBorderThickness 0.4
+skinparam defaultFontSize 12
+skinparam rectangleBorderThickness 1
+
+node node1
+node node2
+node node3
+node nodeN
+database MySQL
+
+(CloudBus) <-- node1
+(CloudBus) <-- node2
+(CloudBus) <-- node3
+(CloudBus) <-- nodeN
+
+node1 --> MySQL
+node2 --> MySQL
+node3 --> MySQL
+nodeN --> MySQL
+....
+
+== 无状态服务
+
+实现无状态服务的核心技术，特别是对于 ZStack 的业务逻辑，就是一致性哈希算法（consistent hashing algorithm）。在启动的时候，每个管理节点都会被分配一个 http://en.wikipedia.org/wiki/Universally_unique_identifier[UUID（version 4 UUID）]（管理节点 UUID），它会和服务名一起，在消息总线上注册一个服务队列。例如，管理节点可能注册如下所示的服务队列 :
+
+----
+zstack.message.ansible.3694776ab31a45709259254a018913ca
+zstack.message.api.portal
+zstack.message.applianceVm.3694776ab31a45709259254a018913ca
+zstack.message.cloudbus.3694776ab31a45709259254a018913ca
+zstack.message.cluster.3694776ab31a45709259254a018913ca
+zstack.message.configuration.3694776ab31a45709259254a018913ca
+zstack.message.console.3694776ab31a45709259254a018913ca
+zstack.message.eip.3694776ab31a45709259254a018913ca
+zstack.message.globalConfig.3694776ab31a45709259254a018913ca
+zstack.message.host.3694776ab31a45709259254a018913ca
+zstack.message.host.allocator.3694776ab31a45709259254a018913ca
+zstack.message.identity.3694776ab31a45709259254a018913ca
+zstack.message.image.3694776ab31a45709259254a018913ca
+zstack.message.managementNode.3694776ab31a45709259254a018913ca
+zstack.message.network.l2.3694776ab31a45709259254a018913ca
+zstack.message.network.l2.vlan.3694776ab31a45709259254a018913ca
+zstack.message.network.l3.3694776ab31a45709259254a018913ca
+zstack.message.network.service.3694776ab31a45709259254a018913ca
+zstack.message.portForwarding.3694776ab31a45709259254a018913ca
+zstack.message.query.3694776ab31a45709259254a018913ca
+zstack.message.securityGroup.3694776ab31a45709259254a018913ca
+zstack.message.snapshot.volume.3694776ab31a45709259254a018913ca
+zstack.message.storage.backup.3694776ab31a45709259254a018913ca
+----
+
+[TIP]
+.提示
+你应该注意到，所有队列都以同样的 UUID 结尾，那是管理节点的 UUID。
+
+资源，如主机，容量，虚拟机，也是通过 UUID 来标识的。消息，常常和资源相关联，是在服务间传递的。在发送消息之前，发送者必须选择基于资源的 UUID 的接收者服务，这时，一致性哈希算法就开始登场了。
+
+一致性哈希（Consistent hashing）是一种特别的哈希，当哈希表调整大小的时候，就会用到一致性哈希，其中只有一部分键（key）需要重新映射。关于一致性哈希的更多内容，更详细的请参阅 这里。在 ZStack 之中，管理节点由一致性哈希环组成，如下所示：
+
+image::image-2022-03-03-17-27-02-342.png[]
+
+每个管理节点都维护一份一致性哈希环的拷贝，这个环包含了系统中所有管理节点的 UUID。当管理节点加入或者脱离的时候，生命周期事件（lifecycle event）就会通过消息总线广播到其它节点，这样使得这些节点扩展或者收缩环，以呈现当前系统的状态。当发送消息的时候，发送者服务将使用资源的 UUID，通过哈希的方式得出目标管理节点的 UUID。例如，发送 VM 的 UUID 为 `932763162d054c04adaab6ab498c9139` 的 `StartVmInstanceMsg`，伪代码如下：
+
+[source,java]
+----
+msg = new StartVmInstanceMsg();
+destinationManagementNodeUUID = consistent_hashing_algorithm("932763162d054c04adaab6ab498c9139");
+msg.setServiceId("vmInstance." + destinationManagementNodeUUID);
+cloudBus.send(msg)
+----
+
+
+如果有一个稳定的环，那么包含同样资源 UUID 的消息就总是会路由到某个管理节点上同样的服务，这就是 ZStack 无锁架构的基础（参阅 ZStack 的伸缩性秘密（第三部分）：无锁架构（Stack's Scalability Secrets Part 3: Lock-free Architecture）。
+
+image::image-2022-03-03-17-30-05-510.png[]
+
+当一致性哈希环收缩或释放的时候，由于一致性哈希的特性，只有少数节点受到轻微影响。
+
+[NOTE]
+====
+由于一致性哈希环，发送者无需知道哪一个服务实例即将处理消息；取而代之的是，这将会被处理掉。服务无需维护和交换，关于它们正在管理什么资源的信息；它们所需要做的就是，处理即将到来的消息，因为环能够保证消息找到正确的服务实例。这就是服务如何变得超级简单和保持无状态的。
+====
+
+
+除包含资源 UUID 的消息之外（如 StartVmInstanceMsg， DownloadImageMsg），也有一类无资源 UUID 的消息，通常是创建型的消息（如 CreateVolumeMsg）和非资源消息（如 AllocateHostMsg）--它们不会操控单独的资源。考虑到这些消息可以发送到任意管理节点的服务，它们可能被故意发送到本地的管理节点，由于发送者和接收者在同样的节点，当发送者发送消息的时候，接收者当然也是可达的。
+
+
+对 API 消息（例如：APIStartVmInstanceMsg）来说，有一个特殊的处理，它们总是发送一个众所周知的服务 ID `api.portal` 。在消息总线上，一个全局的队列被叫做 `zstack.message.api.portal` ，它被所有的管理节点 API 服务所共享，消息服务 ID `api.portal` 将会自动对其中的一个 API 服务做负载均衡，这个服务还会路由转发消息到正确的目的地，并使用了一致性哈希环（consistent hashing ring）。通过这种做法，ZStack 隐藏了来自 API 客户端消息路由转发的细节，并简化了写一个 ZStack API 客户端的工作。
+
+[source,java]
+----
+msg = new APICreateVmInstanceMsg()
+msg.setServiceId("api.portal")
+cloudBus.send(msg)
+----
+
+[plantuml]
+....
+skinparam monochrome true
+skinparam ranksep 20
+skinparam dpi 150
+skinparam arrowThickness 0.7
+skinparam packageTitleAlignment left
+skinparam usecaseBorderThickness 0.4
+skinparam defaultFontSize 12
+skinparam rectangleBorderThickness 1
+
+rectangle Node1 {
+    [API Portal Queue]
+    [Load Balancing]
+}
+
+rectangle Node2 {
+    [Consistent Hashing]
+}
+
+rectangle Node3 {
+    [Processing Service]
+}
+actor "API Message" as msg
+
+msg --> [API Portal Queue]
+[API Portal Queue] --> [Load Balancing]
+[Load Balancing] --> [Consistent Hashing] : CloudBus
+
+[Consistent Hashing] --> [Processing Service] : CloudBus
+....
+
+== 总结
+
+在这篇文章中，我们证明了 ZStack 构建伸缩性的分布式系统。因为管理节点共享的信息比较少，很容易建立一个大的集群，可能有几十个甚至几百个管理节点。然而实际上，在私有云方面，两个管理节点可以有很好的扩展性；在公共云方面，管理员能根据工作量创建一个管理节点。依靠异步架构和无状态的服务，ZStack 能够处理大量的并发任务，现有的 IaaS 软件则不能处理。

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<globalConfig xmlns="http://zstack.org/schema/zstack">
+    <config>
+        <name>vxlan.num</name>
+        <description>default quota for vxlan.num</description>
+        <defaultValue>8</defaultValue>
+        <category>quota</category>
+        <type>java.lang.Long</type>
+    </config>
+    <config>
+        <name>cluster.lazyAttach</name>
+        <description>don't attach vxlan environment to hosts until be used</description>
+        <defaultValue>false</defaultValue>
+        <category>vxlan</category>
+        <type>java.lang.Boolean</type>
+    </config>
+</globalConfig>

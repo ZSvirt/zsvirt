@@ -1,0 +1,53 @@
+package org.zstack.test.integration.core
+
+import org.zstack.core.Platform
+import org.zstack.header.errorcode.ErrorCode
+import org.zstack.header.errorcode.SysErrors
+import org.zstack.testlib.EnvSpec
+import org.zstack.testlib.SubCase
+
+class ElaborationReconnectHostCase extends SubCase {
+    EnvSpec env
+
+    @Override
+    void clean() {
+        env.delete()
+    }
+
+    @Override
+    void setup() {
+        INCLUDE_CORE_SERVICES = false
+    }
+
+    @Override
+    void environment() {
+        env = new EnvSpec()
+    }
+
+    @Override
+    void test() {
+        testElaboration()
+    }
+
+
+    void testElaboration() {
+        def err = Platform.operr("the physical capacity usage of the host[uuid:%s] has exceeded the threshold[%s].", "8e2c058a66c44f39be101ca652f9d25f","0.92") as ErrorCode
+        assert err.elaboration != null
+        assert err.elaboration.trim() == "错误信息: 物理机[uuid:8e2c058a66c44f39be101ca652f9d25f]的己用容量超过了阈值[0.92]"
+
+        def err1 = Platform.operr("failed to create bridge") as ErrorCode
+        assert err1.elaboration == null
+
+        def err2 = Platform.err(SysErrors.OPERATION_ERROR, err1, "failed to download image[uuid:%s] to all hosts in the local storage[uuid:%s]. %s", "9b4a6426b58655be92238c5dd3ad0608" , "631d2407d5864798a2b27699449ecc29", null) as ErrorCode
+        assert err2.getElaboration() == null
+
+        def err3 = Platform.err(SysErrors.OPERATION_ERROR, err2, "failed to download image[uuid:%s] to all hosts in the local storage[uuid:%s]. %s", "9b4a6426b58655be92238c5dd3ad0608" , "631d2407d5864798a2b27699449ecc29", null) as ErrorCode
+        assert err3.getElaboration() == null
+
+        def err4 = Platform.err(SysErrors.OPERATION_ERROR, err , "failed to download image[uuid:%s] to all hosts in the local storage[uuid:%s]. %s", "9b4a6426b58655be92238c5dd3ad0608" , "631d2407d5864798a2b27699449ecc29", null) as ErrorCode
+        assert err4.getElaboration() != null
+        assert err4.elaboration.trim() == "错误信息: 物理机[uuid:8e2c058a66c44f39be101ca652f9d25f]的己用容量超过了阈值[0.92]"
+    }
+
+}
+

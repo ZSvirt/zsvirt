@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<globalConfig xmlns="http://zstack.org/schema/zstack">
+    <config>
+        <name>vm.port.check.interval</name>
+        <description>interval to scan vm port status, by seconds</description>
+        <category>cloudformation</category>
+        <defaultValue>60</defaultValue>
+        <type>java.lang.Integer</type>
+    </config>
+</globalConfig>

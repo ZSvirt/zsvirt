@@ -1,0 +1,604 @@
+= Integration 测试框架 Cookbooks
+:imagesdir: ../../images
+:source-highlighter: rouge
+:experimental: true
+
+
+[#how_to_debug]
+== 如何 Debug Case
+
+debug 一般有两种模式：打印 log 或者打断点、
+
+log：运行完的case除了屏幕打印外，更重要的是查看management-server.log 这个log。找到最后出错的地方后，通常利用 Case.groovy 来搜索能快速找到出错的行
+
+断点：设置开发机的环境变量后，通过 IDEA 的 remote debug 模式。如下:
+
+设置 alias::
+
+将下面的内容保存到 `.bashrc` 中
+[source,bash]
+----
+alias mvndebug='mvn -Dmaven.surefire.debug="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005 -Xnoagent -Djava.compiler=NONE"'
+----
+然后通过命令 `mvndebug test -Dtest=TestUserDefinedVmXmlCase` 来运行 case，这里我们用了默认的 5005 端口，此时 case 会停在等待连接上。
+
+image::image-2022-03-01-11-38-29-626.png[]
+
+远程连接::
+
+在 IDEA 中打开 menu:Run[Edit Configurations]，点击左上角的 btn:[+] 选择 btn:[Remote JVM Debug] 按照下面的参数配置远程 debugger：
+
+image::image-2022-03-01-11-24-04-574.png[]
+
+设置断点::
+
+在自己需要调试的地方用 IDEA 设置断点（点击代码行号）：
+
+image::image-2022-03-01-11-39-42-479.png[]
+
+IDEA 支持非常丰富的调试选项、条件断点、通过断点来控制断点等，具体参考 IDEA 的调试文档。
+
+开始调试::
+
+在 IDEA 中点击 menu:Run[Debug 'dev1']（dev1 根据你在设置远程 debugger 时填写的名字来显示），或者点击 menu:Run[Debug] 会显示出所有可以用的 Debug Profile。
+
+[NOTE]
+.常见错误
+====
+* 需要注意如果有类似下面的报错，可能是 iptables 或者网络设置问题
+
+image::image-2022-03-01-11-43-34-184.png[]
+
+可以试试在运行 case 的机器上执行 `iptables -I INPUT -p tcp --dport 5005 -j ACCEPT`
+
+
+* 如果断电没有停下来，或者 IDEA 在跳转中跳到了 .class 上，说明两边代码不一致，或者断点位置问题，一般不需要怀疑 remote debug 本身机制是否有问题。
+====
+
+正常的话，显示下面的界面，也就说明运行到了你打断点的地方，更多的 IDEA 调试技巧和说明可以查阅 IDEA 的文档
+
+image::image-2022-03-01-11-47-03-435.png[]
+
+[NOTE]
+.这个和 debug 真正运行的 ZStack 管理节点有合异同？
+====
+debug 运行中的 ZStack 管理节点使用方法也是类似的，只是启动管理节点前通过 `zstack-ctl setenv CATALINA_OPTS=-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5005 -Xnoagent -Djava.compiler=NONE` 配置一下环境变量即可，debug 完成后注意通过 `zstack-ctl setenv CATALINA_OPTS=` 将环境变量清除。
+====
+
+== 如何在 env DSL 定义资源的时候指定其 UUID
+
+可以通过 `resourceUuid` 参数为 env DSL 定义的资源指定 UUID，例如：
+
+[source,groovy]
+----
+env = env {
+    zone {
+        resourceUuid = "14d087f6d59a4d639094e6c2c9032161"
+        name = "zone1"
+    }
+}
+----
+
+== 如何进行级联创建
+
+在某些情况下，我们需要进行资源的级联创建，尤其在 VCenter 和混合云中，我们有大量的 sync 操作 (同步外部资源)。例如：
+在添加一个远程的 DataCenter 时，我们需要把该 DataCenter 下的所有 VPC 全部同步过来，而在同步每个 VPC 时，又需要把该 VPC 下的所有 VRouter 同步过来，同样的，在同步 VRouter 时，我们需要同步该 VRouter 下的所有 RouterInterface 以及 RouteEntry 等。
+此时，我们要测试程序自动进行级联创建，但又需要传入 VPC、VRouter、RouterInterface 以及 RouteEntry 的相关参数以便模拟。因此我们**不能写成**以下形式 (简化起见，我们只关注 VPC 和 VRouter)：
+
+[source,groovy]
+----
+            DataCenterSpec dcSpec = dataCenter {
+                regionId = "cn-hangzhou"
+                type = "aliyun"
+                description = "createEcsEnv test"
+                dcName = "Test-Region-Name"
+                vpc = ecsVpc {
+                    vpcName = "Test-Vpc-Name"
+                    description = "Test-Vpc"
+                    cidrBlock = "192.168.0.0/16"
+                    vpcId = "Test-Vpc-Id"
+                    VRouterId = "Test-VRouter-Id"
+                    vrouter = vRouter {
+                        vrId = "Test-VRouter-Id"
+                        vRouterName = "Test-VRouter-Name"
+                        description = "Test-VRouter"
+                    }
+                }
+                postCreate {
+                    attachToOssBucket(ossSpeck.inventory.uuid)
+                }
+            }
+----
+
+写成以上形式会报错，其一是因为测试程序在创建 VRouter 时，缺少 vpcUuid。在创建 VPC 时，又缺少 dataCenterUuid。其二是因为 vRouter 和 VPC 的创建应该由业务逻辑自行完成，而不是用户手工创建
+为解决级联创建的问题，我们引入参数”onlyDefine”，默认值为 false。当需要级联创建时，我们只需把以上代码修改为
+
+[source,groovy]
+----
+            DataCenterSpec dcSpec = dataCenter {
+                regionId = "cn-hangzhou"
+                type = "aliyun"
+                description = "createEcsEnv test"
+                dcName = "Test-Region-Name"
+                vpc = ecsVpc {
+                    onlyDefine = true   // 只需在这里设置 true 即可
+                    vpcName = "Test-Vpc-Name"
+                    description = "Test-Vpc"
+                    cidrBlock = "192.168.0.0/16"
+                    vpcId = "Test-Vpc-Id"
+                    VRouterId = "Test-VRouter-Id"
+                    vrouter = vRouter {
+                        onlyDefine = true    // 只需在这里设置 true 即可
+                        vrId = "Test-VRouter-Id"
+                        vRouterName = "Test-VRouter-Name"
+                        description = "Test-VRouter"
+                    }
+                }
+                postCreate {
+                    attachToOssBucket(ossSpeck.inventory.uuid)
+                }
+            }
+----
+
+然后，在相应的 Spec 文件中，我们定义一个 define 函数，如：
+
+[source,groovy]
+----
+(in EcsVpcSpec.groovy)
+    @Override
+    SpecID define(String uuid) {
+        inventory = new EcsVpcInventory()
+        inventory.uuid = uuid
+        inventory.vpcName = vpcName
+        inventory.ecsVpcId = vpcId
+        inventory.cidrBlock = cidrBlock
+        inventory.description = description
+        inventory.vRouterId = VRouterId
+        inventory.status = "Available"
+
+        return id(inventory.vpcName, inventory.uuid)
+    }
+----
+
+以及
+
+[source,groovy]
+----
+(in VRouterSpec.groovy)
+    @Override
+    SpecID define(String uuid) {
+        inventory = new VpcVirtualRouterInventory()
+        inventory.uuid = uuid
+        inventory.vRouterName = vRouterName
+        inventory.description = description
+        inventory.vrId = vrId
+        return id(inventory.vRouterName, inventory.uuid)
+    }
+----
+
+如此以来，测试程序就创建出了相应的 inventory，以便 simulator 使用，而不会去尝试写数据库。(写数据库操作应该由业务逻辑自行完成)
+测试程序在创建 dataCenter 的时候，若要同步 VPC，那么会发出一个 SyncVpcPropertyMsg，测试程序捕捉到后，可以对其进行如下模拟，此时由于 inventory 己经被 define 了，所以该 simulator 可以通过
+
+[source,groovy]
+----
+(in VRouterSpec.groovy)
+    private void setupSimulator() {
+        message(SyncVpcPropertyMsg.class) { SyncVpcPropertyMsg msg, CloudBus bus ->
+            SyncVpcPropertyReply reply = new SyncVpcPropertyReply()
+            def property = new EcsVpcProperty()
+            property.ecsVpcId = inventory.ecsVpcId
+            property.status = inventory.status
+            property.vpcName = inventory.vpcName
+            property.cidrBlock = inventory.cidrBlock
+            property.vRouterId = inventory.vRouterId
+            property.description = inventory.description
+            reply.setVpcs(Arrays.asList(property))
+            bus.reply(msg, reply)
+        }
+    }
+----
+
+== 如何在获得 env DSL 中定义的资源的 spec
+
+env DSL 中定义的资源可以通过名字和 UUID 两种方式引用。例如：
+
+[source,groovy]
+----
+    @Override
+    void test() {
+        // envSpec 为 env DSL 创建的 EnvSpec 对象
+        envSpec.create {
+            DiskOfferingSpec diskOfferingSpec = envSpec.specByName("diskOffering")
+            ZoneSpec zone = envSpec.specsByUuid("14d087f6d59a4d639094e6c2c9032161")
+        }
+    }
+----
+
+env
+DSL 描述资源时应该为每个资源赋予一个全局唯一的名字，以保证通过 `specByName()` 能引用到正确的资源。使用 `specsByUuid()` 引用资源时应保证该资源在 env
+DSL 中使用了 `resourceUuid` 参数指定 UUID。
+
+每个资源的 spec 对象都包含一个 `inventory` 字段，对应该资源在 SDK 中的 inventory 类，例如 `ZoneSpec.inventory` 类型为 `org.zstack.sdk.ZoneInventory`。
+
+____
+注意：SDK 中的 inventory 类命名跟 ZStack header
+package 中的 inventory 类命名一样，因为 SDK 是通过 ZStack 源码生成的。在写测试用时，应注意不要错误的 import 了 header
+package 中的 inventory 类而引发类型错误。测试用例应该只使用 SDK 中的 inventory 类。
+____
+
+== 如何获取已加载的组件
+
+可以通过 `bean()` 函数获得加载的 ZStack 组件，例如：
+
+[source,groovy]
+----
+@Override
+void test() {
+    ErrorFacade errf = bean(ErrorFacade.class)
+    DatabaseFacade dbf = bean(DatabaseFacade.class)
+}
+----
+
+== DatabaseFacade.findByUuid() 快捷函数
+
+可以通过 `dbFindByUuid()` 函数方便的通过 UUID 查询一个资源的数据库 VO 对象，例如：
+
+[source,groovy]
+----
+void testStartVm() {
+    VmInstanceVO vmvo = dbFindByUuid(cmd.vmInstanceUuid, VmInstanceVO.class)
+    assert vmvo.state = VmInstanceState.Running
+}
+----
+
+相当于：
+
+[source,groovy]
+----
+void testStartVm() {
+    DatabaseFacade dbf = bean(DatabaseFacade.class)
+    VmInstanceVO vmvo = dbf.findByUuid(cmd.vmInstanceUuid, VmInstanceVO.class)
+    assert vmvo.state = VmInstanceState.Running
+}
+----
+
+== 如何清理加载的 simulator/message 的 handler
+
+可以直接调用下列函数清除前面测试函数加载的 simulator 或 message 加载的 handler:
+
+[source,groovy]
+----
+// env 为 EnvSpec 对象
+
+env.cleanSimulatorAndMessageHandlers()
+env.cleanSimulatorHandlers()
+env.cleanAfterSimulatorHandlers()
+env.cleanMessageHandlers()
+----
+
+== JSON 快捷函数
+
+可以直接使用 `json()` 函数将 json 字符串转换成对象：
+
+[source,groovy]
+----
+        env.afterSimulator(FlatUserdataBackend.RELEASE_USER_DATA) { rsp, HttpEntity<String> e ->
+            cmd = json(e.body, FlatUserdataBackend.ReleaseUserdataCmd.class)
+            return rsp
+        }
+----
+
+== 应该在哪里修改 Global Config
+
+当一个 case 需要修改 global
+config 时，只能在 `EnvSpec.create()` 函数后的 \{}中，因为当 create 函数执行时会重置所有 global
+config 到默认值。例如：
+
+[source,groovy]
+----
+  @Override
+    void test() {
+        env.create {
+            // Global Config 必须在这里修改
+            // make the interval very long, we use api to trigger the job to test
+            ImageGlobalConfig.DELETION_GARBAGE_COLLECTION_INTERVAL.updateValue(TimeUnit.DAYS.toSeconds(1))
+
+            testImageGCWhenBackupStorageDisconnect()
+
+            env.recreate("image")
+
+            testImageGCCancelledAfterBackupStorageDeleted()
+        }
+    }
+----
+
+== 如何重建一个被删除的资源，该资源是用 `environment()` 构造的
+
+有时候我们测试用例会删除一些资源做测试，而这些资源又是 `environment()` 构造的包含在 `EnvSpec` 对象中的资源。当用例中后面的测试函数需要用到这些资源时，重建是件非常麻烦的事情，这时可以用 `EnvSpec.recreate()` 函数重建该资源，例如：
+
+[source,groovy]
+----
+    @Override
+    void test() {
+        env.create {
+            testGCSuccess()
+            testGCCancelledAfterHostDeleted()
+
+            // 这里 testGCCancelledAfterHostDeleted() 删除了名为 kvm 的 host，我们
+            // 用 env.recreate() 重建它供 testGCCancelledAfterPrimaryStorageDeleted() 使用
+            env.recreate("kvm")
+
+            testGCCancelledAfterPrimaryStorageDeleted()
+        }
+    }
+----
+
+`EnvSpec.recreate()` 会重建资源以及它的子资源。
+
+== 获得一个资源的 inventory 对象
+
+可以直接通过 `EnvSpec.inventoryByName()` 获得一个已创建资源的 inventory 对象 (org.zstack.sdk.xxxInventory,
+例如 org.zstack.sdk.ImageInventory)。举例：
+
+[source,groovy]
+----
+/*
+EnvSpec env = env {
+        zone {
+            name = "zone"
+        }
+
+        sftpBackupStorage {
+            name = "sftp"
+            url = "/sftp"
+
+            image {
+                name = "image"
+                url = "http://zstack.org/download/image.qcow2"
+            }
+        }
+}
+*/
+
+ImageInventory image = env.inventoryByName("image")
+----
+
+== 使用 `retryInSecs` 和 `retryInMillis` 检验异步操作结果
+
+当某些操作异步执行时（例如删除虚拟机后，归还磁盘容量的就是异步操作），我们需要等待一段时间确保异步操作完成再检验结果，可以使用 `retryInXxx` 函数不断检测异步操作是否完成，具体使用方式见下例：
+
+[source,groovy]
+----
+    boolean ret = retryInSecs(3, 1) {
+        // 在这里执行操作结果检测
+        // 检测成功返回 true，则 retryInSecs 会直接返回 true，表示检测成功；
+        // 返回 false，retryInSecs 会 sleep 指定 interval 后（第二个参数，这里为 1s）后再次执行该检测函数。
+        // 如果在指定间隔时间（第一个参数，这里为 3s) 检测函数都返回 false，retryInSecs 返回 false，表示检测失败
+        return true
+    }
+----
+
+同样可以用 `retryInMillis()` 进行毫秒级的循环检测。
+
+== 查看失败 case log
+
+Test Suite 运行时会将失败 case 的 log 以及当时的 DB
+dump 保存到 `zstack-integration-test-result/TEST-SUITE-DIR/failureLogs/CASE-NAME` 目录，例如
+
+....
+[root@localhost:/root/zstack/test]# ls zstack-integration-test-result/org_zstack_test_integration_network_NetworkTest/failureLogs/org_zstack_test_integration_network_vxlanNetwork_OneVxlanNetworkLifeCycleCase/
+case.log  dbdump.sql
+....
+
+== 获取 Test Suite 测试用例列表
+
+运行 test suite 时指定`-Dlist` 参数可以获取测试用例列表，例如：
+
+[source,shell]
+----
+mvn test -Dtest=KvmTest -Dlist
+----
+
+列表输出在对应 test suite 结果目录的 `cases` 文件中，例如：
+
+[source,shell]
+----
+[root@localhost:/root/zstack/test]# cat zstack-integration-test-result/org_zstack_test_integration_kvm_KvmTest/cases
+org.zstack.test.integration.kvm.host.HostStateCase
+org.zstack.test.integration.kvm.status.MaintainHostCase
+org.zstack.test.integration.kvm.vm.VmConsoleCase
+org.zstack.test.integration.kvm.hostallocator.LeastVmPreferredAllocatorCase
+org.zstack.test.integration.kvm.vm.VmGCCase
+org.zstack.test.integration.kvm.vm.OneVmBasicLifeCycleCase
+org.zstack.test.integration.kvm.globalconfig.KvmGlobalConfigCase
+org.zstack.test.integration.kvm.vm.UpdateVmCase
+org.zstack.test.integration.kvm.status.DBOnlyCase
+org.zstack.test.integration.kvm.capacity.CheckHostCapacityWhenAddHostCase
+----
+
+== 使用`-Dapipath` 参数打印 API 调用的 call graph
+
+在运行一个测试用例时指定`-Dapipath` 参数可以打印出用例运行中所有 API（不包含读 API，例如 query/get
+API）引发的消息和 HTTP RPC call，从而对每个 API 的 call
+graph 有个大致的了解。例如：
+
+[source,shell]
+----
+mvn  test -Dtest=OneVmBasicLifeCycleCase -Dapipath
+----
+
+用例运行成功并退出后，call
+graph 文件生成在 `zstack-integration-test-result/apipath` 目录：
+
+....
+[root@localhost:/root/zstack/test/zstack-integration-test-result/apipath]# ls
+org_zstack_sdk_AddImageAction                         org_zstack_sdk_CreateDiskOfferingAction           org_zstack_sdk_DestroyVmInstanceAction
+org_zstack_sdk_AddIpRangeAction                       org_zstack_sdk_CreateInstanceOfferingAction       org_zstack_sdk_RebootVmInstanceAction
+org_zstack_sdk_AddKVMHostAction                       org_zstack_sdk_CreateL2NoVlanNetworkAction        org_zstack_sdk_RecoverVmInstanceAction
+org_zstack_sdk_AddLocalPrimaryStorageAction           org_zstack_sdk_CreateL3NetworkAction              org_zstack_sdk_StartVmInstanceAction
+org_zstack_sdk_AddSftpBackupStorageAction             org_zstack_sdk_CreateVirtualRouterOfferingAction  org_zstack_sdk_StopVmInstanceAction
+org_zstack_sdk_AttachNetworkServiceToL3NetworkAction  org_zstack_sdk_CreateVmInstanceAction
+org_zstack_sdk_CreateClusterAction                    org_zstack_sdk_CreateZoneAction
+
+[root@localhost:/root/zstack/test/zstack-integration-test-result/apipath]# cat org_zstack_sdk_CreateVmInstanceAction
+(Message) org.zstack.header.vm.APICreateVmInstanceMsg --->
+(Message) org.zstack.header.vm.StartNewCreatedVmInstanceMsg --->
+(Message) org.zstack.header.allocator.DesignatedAllocateHostMsg --->
+(Message) org.zstack.header.storage.primary.AllocatePrimaryStorageMsg --->
+(Message) org.zstack.header.volume.CreateVolumeMsg --->
+(Message) org.zstack.header.network.l3.AllocateIpMsg --->
+(Message) org.zstack.header.volume.InstantiateRootVolumeMsg --->
+(Message) org.zstack.header.storage.primary.InstantiateRootVolumeFromTemplateOnPrimaryStorageMsg --->
+(Message) org.zstack.header.storage.primary.AllocatePrimaryStorageMsg --->
+(Message) org.zstack.storage.backup.sftp.GetSftpBackupStorageDownloadCredentialMsg --->
+(Message) org.zstack.network.service.virtualrouter.CreateVirtualRouterVmMsg --->
+(Message) org.zstack.appliancevm.StartNewCreatedApplianceVmMsg --->
+(Message) org.zstack.header.allocator.DesignatedAllocateHostMsg --->
+(Message) org.zstack.header.storage.primary.AllocatePrimaryStorageMsg --->
+(Message) org.zstack.header.volume.CreateVolumeMsg --->
+(Message) org.zstack.header.network.l3.AllocateIpMsg --->
+(Message) org.zstack.header.network.l3.AllocateIpMsg --->
+(Message) org.zstack.header.volume.InstantiateRootVolumeMsg --->
+(Message) org.zstack.header.storage.primary.InstantiateRootVolumeFromTemplateOnPrimaryStorageMsg --->
+(Message) org.zstack.header.storage.primary.AllocatePrimaryStorageMsg --->
+(Message) org.zstack.storage.backup.sftp.GetSftpBackupStorageDownloadCredentialMsg --->
+(Message) org.zstack.header.vm.CreateVmOnHypervisorMsg --->
+(HttpRPC) [url:http://localhost:8989/vm/start, cmd: org.zstack.kvm.KVMAgentCommands$StartVmCmd] --->
+(Message) org.zstack.appliancevm.ApplianceVmRefreshFirewallMsg --->
+(HttpRPC) [url:http://localhost:8989/appliancevm/refreshfirewall, cmd: org.zstack.appliancevm.ApplianceVmCommands$RefreshFirewallCmd] --->
+(Message) org.zstack.appliancevm.ApplianceVmRefreshFirewallMsg --->
+(HttpRPC) [url:http://localhost:8989/appliancevm/refreshfirewall, cmd: org.zstack.appliancevm.ApplianceVmCommands$RefreshFirewallCmd] --->
+(HttpRPC) [url:http://localhost:8989/init, cmd: org.zstack.network.service.virtualrouter.VirtualRouterCommands$InitCommand] --->
+(Message) org.zstack.header.vm.CreateVmOnHypervisorMsg --->
+(HttpRPC) [url:http://localhost:8989/vm/start, cmd: org.zstack.kvm.KVMAgentCommands$StartVmCmd] --->
+(Message) org.zstack.network.securitygroup.RefreshSecurityGroupRulesOnVmMsg
+....
+
+== 新的测试用例应该加到哪儿
+
+新的测试用例都应该加到 `test/src/test/groovy/org/zstack/test/integration/` 目录，目前已定义如下几大类 test
+suite：
+
+[arabic]
+. *org.zstack.test.integration.configuration.ConfigurationTest.groovy*:
++
+所有配置相关的测试，包括 instance offering, disk offering，global
+config 的通用 API
+. *org.zstack.test.integration.kvm.KvmTest.groovy*:
++
+所有跟 zone、cluster、host、host allocator、vm 相关的通用测试
+. *org.zstack.test.integration.network.NetworkTest.groovy*:
++
+除网络服务外（例如 eip）的所有跟 l2、l3 网络，ip range 相关的测试
+. *org.zstack.test.integration.networkservice.provider.NetworkServiceProviderTest.groovy*:
++
+所有跟网络服务 (eip，dhcp 等）相关的测试
+. *org.zstack.test.integration.storage.StorageTest.groovy*:
++
+所有跟存储相关的测试，包括 primary storage、backup
+storage、volume、volume snapshot
+
+下图包含所有已定义测试目录分类：
+
+....
+└── org
+    └── zstack
+        └── test
+            └── integration
+                ├── configuration
+                │   ├── ConfigurationTest.groovy
+                │   ├── diskoffering
+                │   └── instanceoffering
+                ├── kvm
+                │   ├── Env.groovy
+                │   ├── hostallocator
+                │   ├── KvmTest.groovy
+                │   └── lifecycle
+                │       └── OneVmBasicLifeCycleCase.groovy
+                ├── network
+                │   ├── l2network
+                │   ├── l3network
+                │   │   └── getfreeip
+                │   │       ├── OneL3OneIpRangeNoIpUsed.groovy
+                │   │       ├── OneL3OneIpRangeSomeIpUsed.groovy
+                │   │       └── OneL3TwoIpRanges.groovy
+                │   └── NetworkTest.groovy
+                ├── networkservice
+                │   └── provider
+                │       ├── flat
+                │       │   ├── dhcp
+                │       │   │   └── OneVmDhcp.groovy
+                │       │   ├── eip
+                │       │   ├── Env.groovy
+                │       │   └── userdata
+                │       │       └── OneVmUserdata.groovy
+                │       ├── NetworkServiceProviderTest.groovy
+                │       ├── securitygroup
+                │       └── virtualrouter
+                │           ├── dhcp
+                │           ├── dns
+                │           ├── eip
+                │           ├── lb
+                │           ├── portforwarding
+                │           ├── snat
+                │           └── VirtualRouterProviderTest.groovy
+                └── storage
+                    ├── backup
+                    │   ├── ceph
+                    │   └── sftp
+                    ├── primary
+                    │   ├── ceph
+                    │   ├── local
+                    │   ├── nfs
+                    │   └── smp
+                    ├── StorageTest.groovy
+                    ├── volume
+                    └── volumesnapshot
+....
+
+
+== 一些特殊的单元测试
+
+//TODO(weiw): 应该链接接到 runMavenProfile 的说明，此外应当把 confluence 链接做替换
+
+=== 生成sdk
+
+* zstack的ut框架是基于java sdk来使用的，所以只有生成了sdk才可以运行单元测试
+* sdk也可以提供给外部开发者使用
+* sdk全自动化生成，分两步走
+. 任何api请求及返回的变动，请执行 `./runMavenProfile sdk`，注意生成的sdk位置在 `sdk/src/main/java/org/zstack/sdk/` ， 重新编译sdk工程生效
+. 在上一步之后，若有新增的api，请执行 `./runMavenProfile apihelper`，此时会生成一个文件到 `tests/testlib-simple/src/main/java/org/zstack/testlib/ApiHelper.groovy`
+，重新编译 testlib-simple 工程生效
+* 其它版本的sdk请参考 runMavenProfile 脚本，如python版本sdk `./runMavenProfile pysdk`
+
+=== 生成api文档
+
+* api文档：对该api请求及响应的各字段进行解释
+* ./runMavenProfile doc   生成zstack下的所有API的文档
+* ./runMavenProfile docpremium  生成premium下的所有API的文档
+* 最终在API相同的package下面会生成APIxxxMsgDoc_zh_cn.groovy文件，部分字段会自动生成，没有生成的字段请开发者务必填写清楚，版本号格式为
+x.x.x (如3.9.0)
+
+=== 生成 markdown
+
+* markdown 文档：
+以 markdown 的形式解释每个 api 的各字段、响应请求，以及示范用例。是给用户及开发者看的文档，全自动化生成。最终的展现见： https://www.zstack.io/help/dev_manual/dev_guide/4.1.html#c4_1_1
+* `./runMavenProfile md` 生成 zstack 下的所有 API 的 markdown 文档
+* `./runMavenProfile mdpremium` 生成 premium 下的所有 API 的 markdown 文档
+* 以上文档默认都生成在 /root/zstack-markdown 下
+* 生成的规则依据通过每个 APIxxxMsg.java 文件的 api 文档以及 example
+，其中 api 文档就是上面生成的 APIxxxDoc_zh_cn.groovy 文件
+
+=== 生成 i18n
+
+* i18n 用于多语种翻译，会根据 zstack.properties 里面的’locale’
+配置进行自动转换
+* `./runMavenProfile i18njson` 以及 `./runMavenProfile i18n`， 参考 http://confluence.zstack.io/pages/viewpage.action?pageId=77605535[ZStack i18n（国际化）模块梳理] 和 http://confluence.zstack.io/pages/viewpage.action?pageId=42599576#id-2.6ErrorCode%E5%92%8Ci18n%E6%94%AF%E6%8C%81-i18n%E6%94%AF%E6%8C%81[ErrorCode和i18n支持]
+
+=== 更多
+
+* 黑名单：有些 case 可能暂时不稳定，我们需要把它放入黑名单中，避免影响 test
+suite 以及 pr 系统的成功率
+** 不稳定的 Case 放在 blackList.ut
+** 不稳定的 test suite 放在 blackList.test
+* 参考 runMavenProfile 中的函数

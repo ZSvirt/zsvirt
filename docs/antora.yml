@@ -1,0 +1,15 @@
+name: zstack
+title: zstack
+version: master
+#start_page: ROOT:inline-text-formatting.adoc
+#asciidoc:
+#  attributes:
+#    source-language: asciidoc@
+#    table-caption: false
+nav:
+- modules/ROOT/nav.adoc
+- modules/core/nav.adoc
+- modules/identity/nav.adoc
+- modules/network/nav.adoc
+- modules/longjob/nav.adoc
+- modules/test/nav.adoc

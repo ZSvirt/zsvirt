@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<globalConfig xmlns="http://zstack.org/schema/zstack">
+    <config>
+        <category>host</category>
+        <name>load.all</name>
+        <description>A boolean value indicating whether management server connects all hosts during boot. Management server will connect hosts when booting up or other management node die. When total number of hosts is small, for example several hundreds, setting this to true can significantly reduce management server boot time; however if there are a large number of hosts, for example tens of thousands, setting this to true will make management server very busy; instead, setting it to false and use another global config 'load.parallelismDegree'</description>
+        <defaultValue>true</defaultValue>
+        <type>java.lang.Boolean</type>
+    </config>
+    <config>
+        <category>host</category>
+        <name>connection.autoReconnectOnError</name>
+        <description>A boolean value indicating whether management server automatically starts a reconnect if a host ping command fails</description>
+        <defaultValue>true</defaultValue>
+        <type>java.lang.Boolean</type>
+    </config>
+    <config>
+        <category>host</category>
+        <name>load.parallelismDegree</name>
+        <description>The max hosts management server connects in parallel, when management server boots up or takes over another dead management server's hosts. It only effects when 'load.simultaneous' set to false.</description>
+        <defaultValue>100</defaultValue>
+        <type>java.lang.Integer</type>
+    </config>
+    <config>
+        <category>host</category>
+        <name>ping.parallelismDegree</name>
+        <description>The max hosts management server sends ping command to host in parallel</description>
+        <defaultValue>100</defaultValue>
+        <type>java.lang.Integer</type>
+    </config>
+    <config>
+        <category>host</category>
+        <name>ping.interval</name>
+        <description>The interval management server sends ping command to host, in seconds</description>
+        <defaultValue>60</defaultValue>
+        <type>java.lang.Integer</type>
+    </config>
+    <config>
+        <category>host</category>
+        <name>ping.maxFailure</name>
+        <description>The maximum count of ping failure before reconnecting host</description>
+        <defaultValue>3</defaultValue>
+        <type>java.lang.Integer</type>
+    </config>
+    <config>
+        <category>host</category>
+        <name>ping.sleepPeriodAfterFailure</name>
+        <description>The sleep period before retrying the next ping after a ping failure</description>
+        <defaultValue>1</defaultValue>
+        <type>java.lang.Integer</type>
+    </config>
+    <config>
+	<category>host</category>
+	<name>ping.timeout</name>
+	<description>The timeout value of agent ping, in seconds</description>
+	<defaultValue>10</defaultValue>
+	<type>java.lang.Integer</type>
+    </config>
+    <config>
+        <category>host</category>
+        <name>maintenanceMode.ignoreError</name>
+        <description>A boolean value indicating whether management server ignores errors that happen during host enters maintenance mode. The errors are, for example, failing to stop a vm that had failed to migrate; stopping a vm which is in Unknown state. When setting to true, some vm may still run on the host which has entered maintenance mode.</description>
+        <defaultValue>false</defaultValue>
+        <type>java.lang.Boolean</type>
+    </config>
+    <config>
+        <category>host</category>
+        <name>cpu.overProvisioning.ratio</name>
+        <description>The over provisioning ratio for CPU number</description>
+        <defaultValue>10</defaultValue>
+        <type>java.lang.Integer</type>
+    </config>
+    <config>
+        <category>host</category>
+        <name>reconnectAllOnBoot</name>
+        <description>Whether to reconnect all hosts when the management node starts</description>
+        <defaultValue>true</defaultValue>
+        <type>java.lang.Boolean</type>
+    </config>
+    <config>
+        <category>host</category>
+        <name>update.os.parallelismDegree</name>
+        <description>The maximum count of host that can update operating system at the same time</description>
+        <defaultValue>10</defaultValue>
+        <type>java.lang.Integer</type>
+    </config>
+    <config>
+        <category>host</category>
+        <name>add.batchLimit</name>
+        <description>The maximum count of host that can batch add host once time</description>
+        <defaultValue>500</defaultValue>
+        <type>java.lang.Integer</type>
+    </config>
+    <config>
+        <category>host</category>
+        <name>host.maintenance.policy</name>
+        <description>the behavior of maintain a host, options are [JustMigrate, StopVmOnMigrationFailure]. JustMigrate: just try to migrate all vm on the host, if there is any migration failure, host will fail to change to maintenance state; StopVmOnMigrationFailure: when migrate vm from current host fail, try to stop vm on the host.</description>
+        <defaultValue>StopVmOnMigrationFailure</defaultValue>
+        <type>java.lang.String</type>
+    </config>
+    <config>
+        <category>host</category>
+        <name>connection.autoReconnectOnError.maxAttemptsNum</name>
+        <description>the number of continuous connect failures that do not auto reconnect host again. 0 means never stop.</description>
+        <defaultValue>0</defaultValue>
+        <type>java.lang.Integer</type>
+    </config>
+    <config>
+        <category>host</category>
+        <name>reportHostCapacityInterval</name>
+        <description>The interval report host capacity, in minutes</description>
+        <defaultValue>30</defaultValue>
+        <type>java.lang.Integer</type>
+    </config>
+    <config>
+        <category>host</category>
+        <name>host.port.allocate.start.port</name>
+        <description>start port for host port allocation</description>
+        <defaultValue>10000</defaultValue>
+        <type>java.lang.Integer</type>
+    </config>
+    <config>
+        <category>host</category>
+        <name>host.power.refresh.interval</name>
+        <description>The interval to refresh host power status, in seconds</description>
+        <defaultValue>30</defaultValue>
+        <type>java.lang.Integer</type>
+    </config>
+
+    <config>
+        <category>host</category>
+        <name>sync.host.hw.monitor.interval</name>
+        <description>The interval to sync host hw monitor, in seconds</description>
+        <defaultValue>60</defaultValue>
+        <type>java.lang.Integer</type>
+    </config>
+
+</globalConfig>

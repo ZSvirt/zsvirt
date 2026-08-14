@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+    xmlns:tx="http://www.springframework.org/schema/tx" xmlns:zstack="http://zstack.org/schema/zstack"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+    http://www.springframework.org/schema/aop
+    http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+    http://www.springframework.org/schema/tx 
+    http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+    http://zstack.org/schema/zstack 
+    http://zstack.org/schema/zstack/plugin.xsd"
+    default-init-method="init" default-destroy-method="destroy">
+
+    <bean id="BillingManager" class="org.zstack.billing.BillingManagerImpl">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.Component" />
+            <zstack:extension interface="org.zstack.header.Service" />
+            <zstack:extension interface="org.zstack.header.identity.ResourceOwnerAfterChangeExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.vm.VmJustBeforeDeleteFromDbExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.vm.VmJustAfterDeleteFromDbExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.managementnode.ManagementNodeReadyExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.volume.CreateDataVolumeExtensionPoint" />
+            <zstack:extension interface="org.zstack.identity.TakeOverResourceExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.configuration.userconfig.InstanceOfferingUserConfigValidator" />
+            <zstack:extension interface="org.zstack.header.configuration.userconfig.DiskOfferingUserConfigValidator" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="VmSpendingCalculator" class="org.zstack.billing.spendingcalculator.vm.VmSpendingCalculator">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.billing.spendingcalculator.SpendingCalculator" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="RootVolumeSpendingCalculator" class="org.zstack.billing.spendingcalculator.volume.root.RootVolumeSpendingCalculator">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.billing.spendingcalculator.SpendingCalculator" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="VolumeSpendingCalculator" class="org.zstack.billing.spendingcalculator.volume.data.VolumeSpendingCalculator">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.billing.spendingcalculator.SpendingCalculator" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="SnapShotSpendingCalculator" class="org.zstack.billing.spendingcalculator.snapshot.SnapShotSpendingCalculator">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.billing.spendingcalculator.SpendingCalculator" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="BillingApiInterceptor" class="org.zstack.billing.BillingApiInterceptor">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.apimediator.ApiMessageInterceptor" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="BillingUpgradeExtension" class="org.zstack.billing.BillingUpgradeExtension">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.managementnode.ManagementNodeReadyExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="GpuSpendingCalculator" class="org.zstack.billing.spendingcalculator.pcidevice.PciDeviceSpendingCalculator">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.billing.spendingcalculator.SpendingCalculator" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="VmNicBandwidthSpendingCalculator" class="org.zstack.billing.spendingcalculator.vmnic.VmNicBandwidthSpendingCalculator">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.billing.spendingcalculator.SpendingCalculator" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="VipBandwidthSpendingCalculator" class="org.zstack.billing.spendingcalculator.vip.VipBandwidthSpendingCalculator">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.billing.spendingcalculator.SpendingCalculator" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="DataVolumeBillingGenerator" class="org.zstack.billing.generator.volume.data.DataVolumeBillingGenerator">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.billing.generator.BillingGenerator" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="DataVolumeBillingSpendingCalculator" class="org.zstack.billing.generator.volume.data.DataVolumeBillingSpendingCalculator">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.billing.generator.BillingSpendingCalculator" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="RootVolumeBillingGenerator" class="org.zstack.billing.generator.volume.root.RootVolumeBillingGenerator">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.billing.generator.BillingGenerator" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="RootVolumeBillingSpendingCalculator" class="org.zstack.billing.generator.volume.root.RootVolumeBillingSpendingCalculator">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.billing.generator.BillingSpendingCalculator" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="PciDeviceBillingGenerator" class="org.zstack.billing.generator.pcidevice.PciDeviceBillingGenerator">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.billing.generator.BillingGenerator" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="PciDeviceBillingSpendingCalculator" class="org.zstack.billing.generator.pcidevice.PciDeviceBillingSpendingCalculator">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.billing.generator.BillingSpendingCalculator" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="VmBillingGenerator" class="org.zstack.billing.generator.vm.VmBillingGenerator">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.billing.generator.BillingGenerator" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="VmBillingSpendingCalculator" class="org.zstack.billing.generator.vm.VmBillingSpendingCalculator">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.billing.generator.BillingSpendingCalculator" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="PubIpVipBandwidthBillingGenerator" class="org.zstack.billing.generator.pubip.vip.PubIpVipBandwidthBillingGenerator">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.billing.generator.BillingGenerator" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="PubIpVipBandwidthBillingSpendingCalculator" class="org.zstack.billing.generator.pubip.vip.PubIpVipBandwidthBillingSpendingCalculator">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.billing.generator.BillingSpendingCalculator" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="PubIpVmNicBandwidthBillingGenerator" class="org.zstack.billing.generator.pubip.vmnic.PubIpVmNicBandwidthBillingGenerator">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.billing.generator.BillingGenerator" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="PubIpVmNicBandwidthBillingSpendingCalculator" class="org.zstack.billing.generator.pubip.vmnic.PubIpVmNicBandwidthBillingSpendingCalculator">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.billing.generator.BillingSpendingCalculator" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="DataVolumeCreateUsageExtensionPoint" class="org.zstack.billing.spendingcalculator.volume.data.DataVolumeCreateUsageExtensionPoint">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.billing.ResourceCreateUsageExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="RootVolumeCreateUsageExtensionPoint" class="org.zstack.billing.spendingcalculator.volume.root.RootVolumeCreateUsageExtensionPoint">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.billing.ResourceCreateUsageExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="VmCpuPriceExtension" class="org.zstack.billing.table.VmCpuPriceExtension">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.billing.table.PriceExtension" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="VmMemoryPriceExtension" class="org.zstack.billing.table.VmMemoryPriceExtension">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.billing.table.PriceExtension" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="PubIpVipBandwidthInPriceExtension" class="org.zstack.billing.table.PubIpVipBandwidthInPriceExtension">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.billing.table.PriceExtension" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="PubIpVipBandwidthOutPriceExtension" class="org.zstack.billing.table.PubIpVipBandwidthOutPriceExtension">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.billing.table.PriceExtension" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="PubIpVmNicBandwidthInPriceExtension" class="org.zstack.billing.table.PubIpVmNicBandwidthInPriceExtension">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.billing.table.PriceExtension" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="PubIpVmNicBandwidthOutPriceExtension" class="org.zstack.billing.table.PubIpVmNicBandwidthOutPriceExtension">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.billing.table.PriceExtension" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="DataVolumePriceExtension" class="org.zstack.billing.table.DataVolumePriceExtension">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.billing.table.PriceExtension" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="RootVolumePriceExtension" class="org.zstack.billing.table.RootVolumePriceExtension">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.billing.table.PriceExtension" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="PciDevicePriceExtension" class="org.zstack.billing.table.PciDevicePriceExtension">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.billing.table.PriceExtension" />
+        </zstack:plugin>
+    </bean>
+</beans>

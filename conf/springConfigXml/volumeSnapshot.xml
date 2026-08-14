@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx" xmlns:zstack="http://zstack.org/schema/zstack"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+         http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+         http://www.springframework.org/schema/aop
+         http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+         http://www.springframework.org/schema/tx 
+         http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+         http://zstack.org/schema/zstack
+         http://zstack.org/schema/zstack/plugin.xsd"
+       default-init-method="init" default-destroy-method="destroy">
+
+    <bean id="VolumeSnapshotManager" class="org.zstack.storage.snapshot.VolumeSnapshotManagerImpl">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.Component"/>
+            <zstack:extension interface="org.zstack.header.Service"/>
+            <zstack:extension interface="org.zstack.header.volume.VolumeBeforeExpungeExtensionPoint"/>
+            <zstack:extension interface="org.zstack.core.cloudbus.MarshalReplyMessageExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.identity.ResourceOwnerAfterChangeExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.identity.ReportQuotaExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.vm.AfterReimageVmInstanceExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.vm.VmJustBeforeDeleteFromDbExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.volume.VolumeJustBeforeDeleteFromDbExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.volume.OverwriteVolumeExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.volume.FlattenVolumeExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.storage.backup.CleanUpVmBackupExtensionPoint"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="VolumeSnapshotApiInterceptor" class="org.zstack.storage.snapshot.VolumeSnapshotApiInterceptor">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.apimediator.ApiMessageInterceptor"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="VolumeSnapshotCascadeExtension" class="org.zstack.storage.snapshot.VolumeSnapshotCascadeExtension">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.core.cascade.CascadeExtensionPoint"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="L3NetworkMemorySnapshotGroupReference" class="org.zstack.storage.snapshot.group.L3NetworkMemorySnapshotGroupReference">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.storage.snapshot.group.MemorySnapshotGroupReferenceFactory" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="VolumeMemorySnapshotGroupReferenceFactory" class="org.zstack.storage.snapshot.group.VolumeMemorySnapshotGroupReferenceFactory">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.storage.snapshot.group.MemorySnapshotGroupReferenceFactory"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="L2NetworkMemorySnapshotGroupReference" class="org.zstack.storage.snapshot.group.L2NetworkMemorySnapshotGroupReference">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.storage.snapshot.group.MemorySnapshotGroupReferenceFactory" />
+        </zstack:plugin>
+    </bean>
+</beans>

@@ -1,0 +1,89 @@
+[
+  {
+    "raw": "you can only update token name",
+    "en_US": "you can only update token name",
+    "zh_CN": "您只能更新令牌名称",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/tag2/Tag2ApiInterceptor.java"
+  },
+  {
+    "raw": "cannot update simple tag pattern format",
+    "en_US": "cannot update simple tag pattern format",
+    "zh_CN": "无法更新简单标记模式格式",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/tag2/Tag2ApiInterceptor.java"
+  },
+  {
+    "raw": "simple tag pattern has no tokens",
+    "en_US": "simple tag pattern has no tokens",
+    "zh_CN": "简单标记模式没有标记",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/tag2/Tag2ApiInterceptor.java"
+  },
+  {
+    "raw": "illegal tag uuids %s, tag type must be simple,",
+    "en_US": "illegal tag uuids {0}, tag type must be simple,",
+    "zh_CN": "标记uuid{0}非法，标记类型必须简单。",
+    "arguments": [
+      "sub"
+    ],
+    "fileName": "src/main/java/org/zstack/tag2/Tag2ApiInterceptor.java"
+  },
+  {
+    "raw": "Invalid color specification[%s], must like #FF00FF",
+    "en_US": "Invalid color specification[{0}], must like #FF00FF",
+    "zh_CN": "颜色规范[{0}]无效，必须类似于#FF00FF",
+    "arguments": [
+      "color"
+    ],
+    "fileName": "src/main/java/org/zstack/tag2/Tag2ApiInterceptor.java"
+  },
+  {
+    "raw": "Get format[%s], format must like that name::{tokenName1}::{tokenName2} ... ::{tokenNameN} or {tokenName1}::{tokenName2} ... ::{tokenNameN} Name cannot contain \u0027{}:\u0027",
+    "en_US": "Get format[{0}], format must like that name::{tokenName1}::{tokenName2} ... ::{tokenNameN} or {tokenName1}::{tokenName2} ... ::{tokenNameN} Name cannot contain \u0027{}:\u0027",
+    "zh_CN": "获取格式[{0}]，格式必须类似于名称::{tokenName1}::{tokenName2} ... ::{tokenNameN} 或 {tokenName1}::{tokenName2} ... ::{tokenNameN} 名称不能包含 \u0027{}:\u0027",
+    "arguments": [
+      "format"
+    ],
+    "fileName": "src/main/java/org/zstack/tag2/Tag2ApiInterceptor.java"
+  },
+  {
+    "raw": "all tokens %s must be specify",
+    "en_US": "all tokens {0} must be specify",
+    "zh_CN": "必须指定所有令牌{0}",
+    "arguments": [
+      "formatTokens"
+    ],
+    "fileName": "src/main/java/org/zstack/tag2/Tag2ApiInterceptor.java"
+  },
+  {
+    "raw": "resource[uuids:%s] is not owned by account[uuid:%s]",
+    "en_US": "resource[uuids:{0}] is not owned by account[uuid:{1}]",
+    "zh_CN": "资源[uuid：{0}]不归帐户[uuid：{1}]所有",
+    "arguments": [
+      "invalidUuids",
+      "expectAccountUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/tag2/Tag2ApiInterceptor.java"
+  },
+  {
+    "raw": "you already has a tag which [name:%s, color:%s]",
+    "en_US": "you already has a tag which [name:{0}, color:{1}]",
+    "zh_CN": "",
+    "arguments": [
+      "newTag.getName()",
+      "newTag.getColor()"
+    ],
+    "fileName": "src/main/java/org/zstack/tag2/Tag2ManagerImpl.java"
+  },
+  {
+    "raw": "resource[uuid:%s] has been attached %d tags, cannot attach any more",
+    "en_US": "resource[uuid:{0}] has been attached {1} tags, cannot attach any more",
+    "zh_CN": "",
+    "arguments": [
+      "resourceUuid",
+      "attachedCount"
+    ],
+    "fileName": "src/main/java/org/zstack/tag2/TagPatternBase.java"
+  }
+]

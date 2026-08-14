@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<globalConfig xmlns="http://zstack.org/schema/zstack">
+	<config>
+		<name>twofa.enable</name>
+		<description>A boolean value indicating whether two factor authentication is enabled </description>
+		<defaultValue>false</defaultValue>
+		<category>twofa</category>
+        <type>java.lang.Boolean</type>
+	</config>
+</globalConfig>

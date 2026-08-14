@@ -1,0 +1,51 @@
+[
+  {
+    "raw": "invalid mdsUrl[%s], the sshUsername:sshPassword part is invalid. A valid mdsUrl is in format of %s",
+    "en_US": "invalid mdsUrl[{0}], the sshUsername:sshPassword part is invalid. A valid mdsUrl is in format of {1}",
+    "zh_CN": "",
+    "arguments": [
+      "url",
+      "MDS_URL_FORMAT"
+    ],
+    "fileName": "src/main/java/org/zstack/cbd/MdsUri.java"
+  },
+  {
+    "raw": "invalid mdsUrl[%s]. SSH username and password must be separated by \u0027:\u0027 and cannot be empty. A valid monUrl format is %s",
+    "en_US": "invalid mdsUrl[{0}]. SSH username and password must be separated by \u0027:\u0027 and cannot be empty. A valid monUrl format is {1}",
+    "zh_CN": "",
+    "arguments": [
+      "url",
+      "MDS_URL_FORMAT"
+    ],
+    "fileName": "src/main/java/org/zstack/cbd/MdsUri.java"
+  },
+  {
+    "raw": "invalid mdsUrl[%s], hostname cannot be null. A valid mdsUrl is in format of %s",
+    "en_US": "invalid mdsUrl[{0}], hostname cannot be null. A valid mdsUrl is in format of {1}",
+    "zh_CN": "",
+    "arguments": [
+      "url",
+      "MDS_URL_FORMAT"
+    ],
+    "fileName": "src/main/java/org/zstack/cbd/MdsUri.java"
+  },
+  {
+    "raw": "invalid mdsUrl[%s], the ssh port is greater than 65535 or smaller than 1. A valid mdsUrl is in format of %s",
+    "en_US": "invalid mdsUrl[{0}], the ssh port is greater than 65535 or smaller than 1. A valid mdsUrl is in format of {1}",
+    "zh_CN": "",
+    "arguments": [
+      "url",
+      "MDS_URL_FORMAT"
+    ],
+    "fileName": "src/main/java/org/zstack/cbd/MdsUri.java"
+  },
+  {
+    "raw": "operation error, because:%s",
+    "en_US": "operation error, because:{0}",
+    "zh_CN": "操作错误，因为{0}",
+    "arguments": [
+      "rsp.error"
+    ],
+    "fileName": "src/main/java/org/zstack/cbd/kvm/KvmCbdNodeServer.java"
+  }
+]

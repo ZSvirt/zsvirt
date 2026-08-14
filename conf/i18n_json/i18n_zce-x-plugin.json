@@ -1,0 +1,545 @@
+[
+  {
+    "raw": "field[adminToken] of message[APIAddZceXMsg] is mandatory when ZSphere and ZCE-X management node is not on the same host",
+    "en_US": "field[adminToken] of message[APIAddZceXMsg] is mandatory when ZSphere and ZCE-X management node is not on the same host",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zcex/ZceXApiInterceptor.java"
+  },
+  {
+    "raw": "the url[%s] is not an absolute path starting with \u0027/\u0027",
+    "en_US": "the url[{0}] is not an absolute path starting with \u0027/\u0027",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getUrl()"
+    ],
+    "fileName": "src/main/java/org/zstack/zcex/ZceXApiInterceptor.java"
+  },
+  {
+    "raw": "field[managementIp] and field[uuid] can not be null on the same time",
+    "en_US": "field[managementIp] and field[uuid] can not be null on the same time",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zcex/ZceXApiInterceptor.java"
+  },
+  {
+    "raw": "field[managementIp] and field[uuid] can not be set on the same time",
+    "en_US": "field[managementIp] and field[uuid] can not be set on the same time",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zcex/ZceXApiInterceptor.java"
+  },
+  {
+    "raw": "field[otherManagementIp] of message[APIAddZceXMsg] is invalid: ZceXVO.managementIp and otherManagementIp must be different",
+    "en_US": "field[otherManagementIp] of message[APIAddZceXMsg] is invalid: ZceXVO.managementIp and otherManagementIp must be different",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zcex/ZceXApiInterceptor.java"
+  },
+  {
+    "raw": "field[otherStorageIp] of message[APIAddZceXMsg] is invalid: ZceXVO.managementIp, otherManagementIp and otherStorageIp must be different",
+    "en_US": "field[otherStorageIp] of message[APIAddZceXMsg] is invalid: ZceXVO.managementIp, otherManagementIp and otherStorageIp must be different",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zcex/ZceXApiInterceptor.java"
+  },
+  {
+    "raw": "invalid package status. only Installed, InitializeFailed or Initialized packages can be initialized",
+    "en_US": "invalid package status. only Installed, InitializeFailed or Initialized packages can be initialized",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zcex/ZceXApiInterceptor.java"
+  },
+  {
+    "raw": "failed to find active ceph cluster",
+    "en_US": "failed to find active ceph cluster",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zcex/ZceXManager.java"
+  },
+  {
+    "raw": "failed to connect to ZCE-X[%s]",
+    "en_US": "failed to connect to ZCE-X[{0}]",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getManagementIp()"
+    ],
+    "fileName": "src/main/java/org/zstack/zcex/ZceXManager.java"
+  },
+  {
+    "raw": "access-token is invalid",
+    "en_US": "access-token is invalid",
+    "zh_CN": "访问令牌无效",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zcex/ZceXManager.java"
+  },
+  {
+    "raw": "no management node is available to communicate with ZCE-X: xms-cli is missing",
+    "en_US": "no management node is available to communicate with ZCE-X: xms-cli is missing",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zcex/ZceXManager.java"
+  },
+  {
+    "raw": "ZceXVO with management ip[%s] already exists",
+    "en_US": "ZceXVO with management ip[{0}] already exists",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getManagementIp()"
+    ],
+    "fileName": "src/main/java/org/zstack/zcex/ZceXManager.java"
+  },
+  {
+    "raw": "failed to create alert platform from ZCE-X[uuid\u003d%s]",
+    "en_US": "failed to create alert platform from ZCE-X[uuid\u003d{0}]",
+    "zh_CN": "创建 ZCE-X 告警平台失败",
+    "arguments": [
+      "msg.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/zcex/ZceXManager.java"
+  },
+  {
+    "raw": "cannot find management node by managementIp %s",
+    "en_US": "cannot find management node by managementIp {0}",
+    "zh_CN": "",
+    "arguments": [
+      "context.managementIp"
+    ],
+    "fileName": "src/main/java/org/zstack/zcex/ZceXManager.java"
+  },
+  {
+    "raw": "SSH passwordless setup failed: %s",
+    "en_US": "SSH passwordless setup failed: {0}",
+    "zh_CN": "",
+    "arguments": [
+      "e.getMessage()"
+    ],
+    "fileName": "src/main/java/org/zstack/zcex/ZceXManager.java"
+  },
+  {
+    "raw": "failed to generate ZCE-X env config from template",
+    "en_US": "failed to generate ZCE-X env config from template",
+    "zh_CN": "生成 ZCE-X 环境配置文件失败",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zcex/ZceXManager.java"
+  },
+  {
+    "raw": "failed to generate admin token",
+    "en_US": "failed to generate admin token",
+    "zh_CN": "生成 ZCE-X 管理员令牌失败",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zcex/ZceXManager.java"
+  },
+  {
+    "raw": "no token found with zceX[uuid:%s]",
+    "en_US": "no token found with zceX[uuid:{0}]",
+    "zh_CN": "",
+    "arguments": [
+      "zceX.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/zcex/ZceXManager.java"
+  },
+  {
+    "raw": "install.sh not found: %s. install.sh has been manually deleted. please re-upload the installation package",
+    "en_US": "install.sh not found: {0}. install.sh has been manually deleted. please re-upload the installation package",
+    "zh_CN": "未找到 install.sh: {0}. install.sh 可能被手动删除, 需要重新上传安装包",
+    "arguments": [
+      "installPath"
+    ],
+    "fileName": "src/main/java/org/zstack/zcex/ZceXManager.java"
+  },
+  {
+    "raw": "failed to install distributed storage",
+    "en_US": "failed to install distributed storage",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zcex/ZceXManager.java"
+  },
+  {
+    "raw": "cannot find management node %s",
+    "en_US": "cannot find management node {0}",
+    "zh_CN": "",
+    "arguments": [
+      "softwarePackageVO.getManagementNodeUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/zcex/ZceXManager.java"
+  },
+  {
+    "raw": "cleanup.sh not found: %s. the cleanup.sh has been manually deleted.",
+    "en_US": "cleanup.sh not found: {0}. the cleanup.sh has been manually deleted.",
+    "zh_CN": "",
+    "arguments": [
+      "installPath"
+    ],
+    "fileName": "src/main/java/org/zstack/zcex/ZceXManager.java"
+  },
+  {
+    "raw": "init config not found for software package: %s",
+    "en_US": "init config not found for software package: {0}",
+    "zh_CN": "",
+    "arguments": [
+      "softwarePackageVO.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/zcex/ZceXManager.java"
+  },
+  {
+    "raw": "failed to check if management node is also compute node, node: %s",
+    "en_US": "failed to check if management node is also compute node, node: {0}",
+    "zh_CN": "",
+    "arguments": [
+      "managementNodeUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/zcex/ZceXManager.java"
+  },
+  {
+    "raw": "management node[uuid:%s] must be a compute node",
+    "en_US": "management node[uuid:{0}] must be a compute node",
+    "zh_CN": "",
+    "arguments": [
+      "managementNodeUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/zcex/ZceXManager.java"
+  },
+  {
+    "raw": "failed to retrieve host uuid [management uuid:%s]",
+    "en_US": "failed to retrieve host uuid [management uuid:{0}]",
+    "zh_CN": "",
+    "arguments": [
+      "managementNodeUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/zcex/ZceXManager.java"
+  },
+  {
+    "raw": "failed to generate conf",
+    "en_US": "failed to generate conf",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zcex/ZceXManager.java"
+  },
+  {
+    "raw": "failed to cleanup env",
+    "en_US": "failed to cleanup env",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zcex/ZceXManager.java"
+  },
+  {
+    "raw": "failed to uninstall distributed storage on hosts",
+    "en_US": "failed to uninstall distributed storage on hosts",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zcex/ZceXManager.java"
+  },
+  {
+    "raw": "failed to get cluster from ZCE-X",
+    "en_US": "failed to get cluster from ZCE-X",
+    "zh_CN": "获取 ZCE-X 集群失败",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zcex/client/ZceXHttpClient.java"
+  },
+  {
+    "raw": "no cluster exists in ZCE-X",
+    "en_US": "no cluster exists in ZCE-X",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zcex/client/ZceXHttpClient.java"
+  },
+  {
+    "raw": "failed to get licenses from ZCE-X",
+    "en_US": "failed to get licenses from ZCE-X",
+    "zh_CN": "获取 ZCE-X 许可证失败",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zcex/client/ZceXHttpClient.java"
+  },
+  {
+    "raw": "failed to get hosts from ZCE-X",
+    "en_US": "failed to get hosts from ZCE-X",
+    "zh_CN": "获取 ZCE-X 主机失败",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zcex/client/ZceXHttpClient.java"
+  },
+  {
+    "raw": "failed to get pools from ZCE-X",
+    "en_US": "failed to get pools from ZCE-X",
+    "zh_CN": "获取 ZCE-X 存储池失败",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zcex/client/ZceXHttpClient.java"
+  },
+  {
+    "raw": "failed to get version from ZCE-X",
+    "en_US": "failed to get version from ZCE-X",
+    "zh_CN": "获取 ZCE-X 版本失败",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zcex/client/ZceXHttpClient.java"
+  },
+  {
+    "raw": "failed to get users from ZCE-X",
+    "en_US": "failed to get users from ZCE-X",
+    "zh_CN": "获取 ZCE-X 用户失败",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zcex/client/ZceXHttpClient.java"
+  },
+  {
+    "raw": "invalid token for ZCE-X server",
+    "en_US": "invalid token for ZCE-X server",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zcex/client/ZceXHttpClient.java"
+  },
+  {
+    "raw": "failed to get ZCE-X version: missing version file",
+    "en_US": "failed to get ZCE-X version: missing version file",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zcex/client/ZceXLocalClient.java"
+  },
+  {
+    "raw": "failed to get ZCE-X version: read error",
+    "en_US": "failed to get ZCE-X version: read error",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zcex/client/ZceXLocalClient.java"
+  },
+  {
+    "raw": "failed to update expiration time with ZCE-X configuration file[%s]",
+    "en_US": "failed to update expiration time with ZCE-X configuration file[{0}]",
+    "zh_CN": "",
+    "arguments": [
+      "XMS_CLI_CONFIG_PATH"
+    ],
+    "fileName": "src/main/java/org/zstack/zcex/client/ZceXLocalClient.java"
+  },
+  {
+    "raw": "xms-cli env config file[%s] already exists. You must check and manually delete this file and trying again",
+    "en_US": "xms-cli env config file[{0}] already exists. You must check and manually delete this file and trying again",
+    "zh_CN": "",
+    "arguments": [
+      "XMS_INSTALL_ENV_PATH"
+    ],
+    "fileName": "src/main/java/org/zstack/zcex/client/ZceXLocalClient.java"
+  },
+  {
+    "raw": "failed to write xms-cli env config file to temp file",
+    "en_US": "failed to write xms-cli env config file to temp file",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zcex/client/ZceXLocalClient.java"
+  },
+  {
+    "raw": "failed to write ZCE-X cluster config file",
+    "en_US": "failed to write ZCE-X cluster config file",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zcex/client/ZceXLocalClient.java"
+  },
+  {
+    "raw": "xms-cli temporary admin token does not exist",
+    "en_US": "xms-cli temporary admin token does not exist",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zcex/client/ZceXLocalClient.java"
+  },
+  {
+    "raw": "failed to read xms-cli temporary admin token: %s",
+    "en_US": "failed to read xms-cli temporary admin token: {0}",
+    "zh_CN": "",
+    "arguments": [
+      "e.getMessage()"
+    ],
+    "fileName": "src/main/java/org/zstack/zcex/client/ZceXLocalClient.java"
+  },
+  {
+    "raw": "failed to install ZCE-X cluster by %s",
+    "en_US": "failed to install ZCE-X cluster by {0}",
+    "zh_CN": "",
+    "arguments": [
+      "XMS_SDS_FORMATION_EXE_PATH"
+    ],
+    "fileName": "src/main/java/org/zstack/zcex/client/ZceXLocalClient.java"
+  },
+  {
+    "raw": "xms-cli does not exist",
+    "en_US": "xms-cli does not exist",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zcex/client/ZceXLocalClient.java"
+  },
+  {
+    "raw": "admin_token already exists. You must confirm that the current admin_token is no longer in use, delete the token by command \u0027xms-cli access-token delete\u0027, and try again",
+    "en_US": "admin_token already exists. You must confirm that the current admin_token is no longer in use, delete the token by command \u0027xms-cli access-token delete\u0027, and try again",
+    "zh_CN": "admin_token 已经存在。请确认当前的 admin_token 不再使用，并通过 \u0027xms-cli access-token delete\u0027 删除它，然后重试",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zcex/client/ZceXLocalClient.java"
+  },
+  {
+    "raw": "failed to login ZCE-X when creating access token",
+    "en_US": "failed to login ZCE-X when creating access token",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zcex/client/ZceXLocalClient.java"
+  },
+  {
+    "raw": "failed to create ZCE-X access token",
+    "en_US": "failed to create ZCE-X access token",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zcex/client/ZceXLocalClient.java"
+  },
+  {
+    "raw": "xms-cli returns invalid access_token",
+    "en_US": "xms-cli returns invalid access_token",
+    "zh_CN": "xms-cli 返回的访问令牌无效",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zcex/client/ZceXLocalClient.java"
+  },
+  {
+    "raw": "failed to get license content",
+    "en_US": "failed to get license content",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zcex/client/ZceXLocalClient.java"
+  },
+  {
+    "raw": "failed to read license bytes: %s",
+    "en_US": "failed to read license bytes: {0}",
+    "zh_CN": "",
+    "arguments": [
+      "e.getMessage()"
+    ],
+    "fileName": "src/main/java/org/zstack/zcex/client/ZceXLocalClient.java"
+  },
+  {
+    "raw": "failed to extract ZCE-X license content from tarball",
+    "en_US": "failed to extract ZCE-X license content from tarball",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zcex/client/ZceXLocalClient.java"
+  },
+  {
+    "raw": "No enc license file (for ZCE-X server) found in tarball. Skip updating license and continue",
+    "en_US": "No enc license file (for ZCE-X server) found in tarball. Skip updating license and continue",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zcex/client/ZceXLocalClient.java"
+  },
+  {
+    "raw": "failed to write zce-x-license.tar.gz: %s",
+    "en_US": "failed to write zce-x-license.tar.gz: {0}",
+    "zh_CN": "",
+    "arguments": [
+      "e.getMessage()"
+    ],
+    "fileName": "src/main/java/org/zstack/zcex/client/ZceXLocalClient.java"
+  },
+  {
+    "raw": "failed to login ZCE-X when updating license",
+    "en_US": "failed to login ZCE-X when updating license",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zcex/client/ZceXLocalClient.java"
+  },
+  {
+    "raw": "failed to update ZCE-X license",
+    "en_US": "failed to update ZCE-X license",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zcex/client/ZceXLocalClient.java"
+  },
+  {
+    "raw": "failed to login ZCE-X when getting license content",
+    "en_US": "failed to login ZCE-X when getting license content",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zcex/client/ZceXLocalClient.java"
+  },
+  {
+    "raw": "failed to list ZCE-X clusters",
+    "en_US": "failed to list ZCE-X clusters",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zcex/client/ZceXLocalClient.java"
+  },
+  {
+    "raw": "access token is empty",
+    "en_US": "access token is empty",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zcex/client/ZceXLocalClient.java"
+  },
+  {
+    "raw": "failed to create template file: %s",
+    "en_US": "failed to create template file: {0}",
+    "zh_CN": "",
+    "arguments": [
+      "e.getMessage()"
+    ],
+    "fileName": "src/main/java/org/zstack/zcex/client/ZceXLocalClient.java"
+  },
+  {
+    "raw": "failed to get ZCE-X version",
+    "en_US": "failed to get ZCE-X version",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zcex/client/ZceXSshClient.java"
+  },
+  {
+    "raw": "ZCE-X third party alert platform is already existing",
+    "en_US": "ZCE-X third party alert platform is already existing",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zcex/compute/ZceXAlertManager.java"
+  },
+  {
+    "raw": "ZCE-X token is not existing",
+    "en_US": "ZCE-X token is not existing",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zcex/compute/ZceXAlertManager.java"
+  },
+  {
+    "raw": "ZCE-X Storage",
+    "en_US": "ZCE-X Storage",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zcex/compute/ZceXAlertManager.java"
+  },
+  {
+    "raw": "failed to get ZCE-X license: no ZCE-X found with uuid[%s]",
+    "en_US": "failed to get ZCE-X license: no ZCE-X found with uuid[{0}]",
+    "zh_CN": "",
+    "arguments": [
+      "addition.resourceUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/zcex/compute/ZceXLicenseFactory.java"
+  },
+  {
+    "raw": "more than one ZCE-X found. You should specify the target ZCE-X for uploading the license by field monitorIp",
+    "en_US": "more than one ZCE-X found. You should specify the target ZCE-X for uploading the license by field monitorIp",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zcex/compute/ZceXLicenseFactory.java"
+  },
+  {
+    "raw": "only one ZCE-X can be specified for uploading the license by field monitorIp",
+    "en_US": "only one ZCE-X can be specified for uploading the license by field monitorIp",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zcex/compute/ZceXLicenseFactory.java"
+  },
+  {
+    "raw": "failed to get ZCE-X license: no ZCE-X found with ip[%s]",
+    "en_US": "failed to get ZCE-X license: no ZCE-X found with ip[{0}]",
+    "zh_CN": "",
+    "arguments": [
+      "addition.monitors.get(0)"
+    ],
+    "fileName": "src/main/java/org/zstack/zcex/compute/ZceXLicenseFactory.java"
+  },
+  {
+    "raw": "failed to get ZCE-X license: no token",
+    "en_US": "failed to get ZCE-X license: no token",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zcex/compute/ZceXLicenseFactory.java"
+  }
+]

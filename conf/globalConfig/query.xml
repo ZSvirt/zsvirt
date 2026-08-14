@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<globalConfig xmlns="http://zstack.org/schema/zstack">
+    <config>
+        <category>query</category>
+        <name>batchQuery.debug</name>
+        <description>print batch query statistics in log</description>
+        <defaultValue>false</defaultValue>
+        <type>java.lang.Boolean</type>
+    </config>
+
+    <config>
+        <category>query</category>
+        <name>zql.returnWith.concurrency</name>
+        <description>zql return with concurrency</description>
+        <defaultValue>10</defaultValue>
+        <type>java.lang.Integer</type>
+    </config>
+
+    <config>
+        <category>query</category>
+        <name>slow.zql.cost.time</name>
+        <description>slow zql cost time in seconds, slow zql text will be logged in mn log.</description>
+        <defaultValue>10</defaultValue>
+        <type>java.lang.Integer</type>
+    </config>
+
+    <config>
+        <category>query</category>
+        <name>zql.statistics.on</name>
+        <description>enable zql statistics</description>
+        <defaultValue>false</defaultValue>
+        <type>java.lang.Boolean</type>
+    </config>
+</globalConfig>

@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="warn" monitorInterval="30">
+    <Appenders>
+        <RollingFile name="RollingFile" fileName="${sys:catalina.home}/logs/management-server.log"
+                     filePattern="${sys:catalina.home}/logs/management-server-%d{yyyy-MM-dd}-%i.log.gz">
+            <PatternLayout>
+                <pattern>%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p [%c{1}] %X{api,task} (%t) %m%n</pattern>
+            </PatternLayout>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="450 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="50">
+                <Delete basePath="${sys:catalina.home}/logs/" maxDepth="1">
+                    <IfFileName glob="management-server-*.log.gz">
+                        <IfAny>
+                        </IfAny>
+                    </IfFileName>
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingFile>
+
+        <RollingFile name="ApiRequestLogger" fileName="${sys:catalina.home}/logs/zstack-api.log"
+                     filePattern="${sys:catalina.home}/logs/zstack-api-%d{yyyy-MM-dd}-%i.log.gz" >
+            <PatternLayout>
+                <pattern>%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p [%c{1}] (%t) %m%n</pattern>
+            </PatternLayout>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="150 MB" />
+            </Policies>
+            <DefaultRolloverStrategy max="50">
+                <Delete basePath="${sys:catalina.home}/logs/" maxDepth="1">
+                    <IfFileName glob="zstack-api-*.log.gz">
+                        <IfAny>
+                        </IfAny>
+                    </IfFileName>
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingFile>
+
+        <RollingFile name="DiskCapacityLogger" fileName="${sys:catalina.home}/logs/zstack-disk-capacity.log"
+                     filePattern="${sys:catalina.home}/logs/zstack-disk-capacity-%d{yyyy-MM-dd}-%i.log.gz">
+            <PatternLayout>
+                <pattern>%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p [%c{1}] (%t) %m%n</pattern>
+            </PatternLayout>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="150 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="50"/>
+        </RollingFile>
+
+        <RollingFile name="DiskCapacityLoggerDetails"
+                     fileName="${sys:catalina.home}/logs/zstack-disk-capacity-details.log"
+                     filePattern="${sys:catalina.home}/logs/zstack-disk-capacity-details-%d{yyyy-MM-dd}-%i.log.gz">
+            <PatternLayout>
+                <pattern>%d{yyyy-MM-dd HH:mm:ss,SSS} %-5p [%c{1}] (%t) %m%n</pattern>
+            </PatternLayout>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="150 MB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="50"/>
+        </RollingFile>
+
+        <Async name="Async" ignoreExceptions="false" bufferSize="512">
+            <AppenderRef ref="RollingFile"/>
+        </Async>
+        <Rewrite name="Rewrite">
+            <MaskSensitiveInfoRewritePolicy/>
+            <AppenderRef ref="Async"/>
+        </Rewrite>
+    </Appenders>
+
+    <Loggers>
+        <Logger name="org.zstack.storage.primary.DiskCapacityTracer" level="DEBUG" additivity="TRUE">
+            <AppenderRef ref="DiskCapacityLogger" level="DEBUG"/>
+        </Logger>
+
+        <Logger name="org.zstack.storage.primary.DiskCapacityTracerDetails" level="DEBUG" additivity="TRUE">
+            <AppenderRef ref="DiskCapacityLoggerDetails" level="DEBUG"/>
+        </Logger>
+
+        <Logger name="api.request" level="TRACE" additivity="TRUE">
+            <AppenderRef ref="ApiRequestLogger" level="TRACE" />
+        </Logger>
+
+        <Logger name="org.zstack" level="debug"/>
+
+        <Logger name="org.zstack.utils" level="trace"/>
+        <Logger name="org.zstack.utils.string.StringSimilarity" level="INFO"/>
+        <Logger name="org.zstack.utils.HTTP" level="debug"/>
+
+        <Logger name="org.zstack.core.rest" level="trace"/>
+
+        <Logger name="org.zstack.core.cloudbus" level="trace"/>
+
+        <Logger name="org.springframework" level="warn"/>
+
+        <Logger name="org.zstack.core.workflow" level="TRACE"/>
+
+        <!--
+                <Logger name="org.zstack.billing" level="TRACE" />
+        -->
+
+        <Logger name="org.zstack.zwatch.prometheus.ProgressMonitorHelper" level="INFO"/>
+
+        <Logger name="org.zstack.header.rest.TimeoutRestTemplate" level="INFO"/>
+
+        <Logger name="org.hibernate" level="warn"/>
+
+        <Logger name="org.zstack.storage.primary" level="TRACE" />
+
+        <Root level="warn" additivity="false">
+            <AppenderRef ref="Rewrite"/>
+        </Root>
+    </Loggers>
+</Configuration>

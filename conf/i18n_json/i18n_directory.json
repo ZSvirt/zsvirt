@@ -1,0 +1,84 @@
+[
+  {
+    "raw": "resources %s has already been bound to directory uuid[%s] , multiple paths are not supported",
+    "en_US": "resources {0} has already been bound to directory uuid[{1}] , multiple paths are not supported",
+    "zh_CN": "资源{0}已绑定到目录uuid[{1}]，不支持多个路径",
+    "arguments": [
+      "list",
+      "msg.getDirectoryUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/directory/DirectoryApiInterceptor.java"
+  },
+  {
+    "raw": "resource types %s are not supported by directory, allowed types are %s",
+    "en_US": "resource types {0} are not supported by directory, allowed types are {1}",
+    "zh_CN": "目录不支持资源类型{0}，允许的类型为{1}",
+    "arguments": [
+      "list",
+      "ALLOW_RESOURCE_TYPES"
+    ],
+    "fileName": "src/main/java/org/zstack/directory/DirectoryApiInterceptor.java"
+  },
+  {
+    "raw": "name contains unsupported characters, name can only contain Chinese characters, English letters, numbers, spaces, and the following characters: ()（）【】@._-+ ",
+    "en_US": "name contains unsupported characters, name can only contain Chinese characters, English letters, numbers, spaces, and the following characters: ()（）【】@._-+ ",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/directory/DirectoryApiInterceptor.java"
+  },
+  {
+    "raw": "circular dependency detected, directory %s and directory %s will cause circular dependency",
+    "en_US": "circular dependency detected, directory {0} and directory {1} will cause circular dependency",
+    "zh_CN": "检测到循环依赖，目录{0}和目录{1}将导致循环依赖",
+    "arguments": [
+      "msg.getDirectoryUuid()",
+      "msg.getTargetParentUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/directory/DirectoryBase.java"
+  },
+  {
+    "raw": "unable to find directory[uuid\u003d%s]",
+    "en_US": "unable to find directory[uuid\u003d{0}]",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getDirectoryUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/directory/DirectoryManagerImpl.java"
+  },
+  {
+    "raw": "duplicate directory name, directory[uuid: %s] with name %s already exists",
+    "en_US": "duplicate directory name, directory[uuid: {0}] with name {1} already exists",
+    "zh_CN": "已存在名称为{1}的重复目录名、目录[uuid：{0}]",
+    "arguments": [
+      "list.get(0).getUuid()",
+      "msg.getName()"
+    ],
+    "fileName": "src/main/java/org/zstack/directory/DirectoryManagerImpl.java"
+  },
+  {
+    "raw": "fail to create directory, directories are up to four levels",
+    "en_US": "fail to create directory, directories are up to four levels",
+    "zh_CN": "创建目录失败，目录最多有四层",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/directory/DirectoryManagerImpl.java"
+  },
+  {
+    "raw": "the type of directory %s is not supported, the supported directory types are %s",
+    "en_US": "the type of directory {0} is not supported, the supported directory types are {1}",
+    "zh_CN": "不支持目录{0}的类型，支持的目录类型为{1}",
+    "arguments": [
+      "msg.getType()",
+      "DIRECTORY_TYPES"
+    ],
+    "fileName": "src/main/java/org/zstack/directory/DirectoryManagerImpl.java"
+  },
+  {
+    "raw": "all resources zoneUuid must be consistent with the directory zoneUuid[%s]",
+    "en_US": "all resources zoneUuid must be consistent with the directory zoneUuid[{0}]",
+    "zh_CN": "所有资源的zoneuuid必须与目录zoneuuid[{0}]一致",
+    "arguments": [
+      "vo.getZoneUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/directory/VmDirectoryChecker.java"
+  }
+]

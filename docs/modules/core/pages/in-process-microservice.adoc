@@ -1,0 +1,382 @@
+= 进程内微服务架构
+:imagesdir: ../images
+
+//TODO(weiw):需要补充内链
+
+为了应对诸如惊人的操作开销、重复的努力、可测试性等微服务通常面临的挑战，以及获得诸如代码解耦，易于横向扩展等微服务带来的好处，ZStack 将所有服务包含在单个进程中，称为管理节点，构建一个进程内的微服务架构。
+
+==   动机
+
+构建一个 IaaS 软件是很难的，这是一个已经从市场上现存的 IaaS 软件获得的教训。作为一个集成软件，IaaS 软件通常需要去管理复杂的各种各样的子系统（如：虚拟机管理器 hypervisor，存储，网络，身份验证等）并且需要组织协调多个子系统间的交互。例如，创建虚拟机操作将涉及到虚拟机管理模块，存储模块，网络模块的合作。由于大多数 IaaS 软件通常对架构考虑不够全面就急于开始解决一个具体问题，它们的实现通常会演变成：
+
+[plantuml]
+....
+<style>
+footer {
+    FontSize 30
+    Margin 20
+}
+</style>
+
+skinparam monochrome true
+skinparam ranksep 20
+skinparam dpi 150
+skinparam arrowThickness 0.7
+skinparam packageTitleAlignment left
+skinparam usecaseBorderThickness 0.4
+skinparam defaultFontSize 12
+skinparam rectangleBorderThickness 1
+
+[VM Manager] as vm
+[Primary Storage Manager] as ps
+[Host Manager]  as host
+[Snapshot Manager] as snap
+[L2 Network Manager] as l2
+[L3 Network Manager] as l3
+[Volume Manager] as vol
+[Backup Storage Manager] as bs
+[Identity Manager] as id
+
+ps --> id
+vm --> id
+bs --> id
+vol --> id
+snap ---> id
+l2 ---> id
+l3 --> id
+host ---> vm
+vm ---> host
+vm ---> ps
+vm ---> l2
+bs --> ps
+ps --> bs
+vol --> ps
+vol --> bs
+l3 --> l2
+l2 --> l3
+l2 ---> host
+snap ---> host
+snap ---> vol
+vol ---> ps
+vol ---> bs
+
+footer The organic growth of monilithic IaaS software
+....
+
+随着一个软件的不断成长，这个铁板一块的架构（monolithic architecture）将最终变为一团乱麻，以至于没有人可以修改这个系统的代码，除非把整个系统从头构建。这种铁板一块的编程问题是微服务可以介入的完美场合。通过划分整个系统的功能为一个个小的、专一的、独立的服务，并定义服务之间交互的规则，微服务可以帮助转换一个复杂笨重的软件，从紧耦合的、网状拓扑架构，变成一个松耦合的、星状拓扑的架构。
+
+[plantuml]
+....
+skinparam monochrome true
+skinparam ranksep 20
+skinparam dpi 150
+skinparam arrowThickness 0.7
+skinparam packageTitleAlignment left
+skinparam usecaseBorderThickness 0.4
+skinparam defaultFontSize 12
+skinparam rectangleBorderThickness 1
+
+cloud "    CloudBus    " as CloudBus
+
+[Compute Service] --> CloudBus
+[Image Service] --> CloudBus
+ [Network Service] --> CloudBus
+ [Snapshot Service] --> CloudBus
+CloudBus <-- [Storage Service]
+CloudBus <-- [Console Service]
+CloudBus <-- [Configuration Service]
+CloudBus <-- [L3 network Service]
+....
+
+因为服务在微服务中是编译独立的，添加或者删除服务将不会影响整个系统的架构（当然，移除某些服务会导致功能的缺失）。
+
+[quote]
+.微服务远比我们已经讨论的内容更多
+____
+微服务的确有很多引入注目的优点，尤其是在一个的开发运维流程（DevOps process）中，当涉及到一个大机构的很多团队时。我们不打算讨论微服务的所有支持和反对意见，我们确定你可以在网上找到大量的相关文章，我们主要介绍一些我们认为对 IaaS 软件影响深远的特性。
+____
+
+==   问题
+
+虽然微服务可以解耦合架构，但这是有代价的。阅读 http://highscalability.com/blog/2014/4/8/microservices-not-a-free-lunch.html[Microservices - Not A
+Free Lunch!] 和 https://rclayton.silvrback.com/failing-at-microservices[Failing at Microservices]
+会对这句话有更深的理解。在这里，我们重点强调一些我们认为对 IaaS 软件影响重大的事情。
+
+=== 难以定义服务的边界和重复做功
+
+创建微服务架构的挑战之一是决定应该把哪一部分的代码定义为服务，一些是非常明显的，比如说，处理主机部分的逻辑代码可以被定义为一个服务。然而，管理数据库交互的代码非常难以决定应不应该被定义为服务。数据库服务可以使得整个架构更加清晰明了，但是这样会导致严重的性能下降。通常，类似于这样的代码可以被定义为库，库可以被各个服务调用。鉴于所有服务一般在互相隔离的目录下开发和维护，创建一个给不同的单一的软件提供接口的虚拟的库，要求开发者必须具有良好的和各个不同组的开发者沟通协调的能力。综上，服务很容易重复造轮子和导致不必要的重复做功。
+
+=== 软件难以部署、升级和维护
+
+服务，尤其是那些分散在不同进程和机器上的，是难以部署和升级的。用户通常必须花费几天甚至几周的时间去部署一个完整的可运行的系统，并且对于升级一个已经构建好的稳定的系统感到害怕。尽管一些类似 puppet 的配置管理软件一定程度上缓解了这个问题，可是用户依旧需要克服陡峭的学习曲线去掌握这些配置工具，仅仅是为了部署或者升级一个软件。管理一个云是非常困难的，但努力不应该被浪费在管理这些原本应该使生活更轻松的软件上。
+
+[quote]
+.服务的数量确实很重要
+____
+IaaS 软件通常有许许多多的服务。拿著名的 openstack 举个例子，为了完成一个基础的安装你将需要：Nova, Cinder, Neutron, Horizon, Keystone, Glance。除了 nova 是在每台主机都需要部署的，如果你想要 4 个实例（instances），并且每个服务运行在不同机器上，你需要去操纵 20 台服务器。虽然这种人造的案例将不太可能真实地发生，它依旧揭示了管理相互隔离的服务的挑战。
+____
+
+=== 零散的配置
+
+运行在不同服务器上的服务，分别维护着它们散乱在系统各个角落的配置副本。在系统范围更新配置的操作通常由临时特定的脚本完成，这会导致由不一致的配置产生的令人费解的失败。
+
+=== 额外的监控努力
+
+为了跟踪系统的健康状况，用户必须付出额外的努力去监控每一个服务实例。这些监控软件，要么由第三方工具搭建，要么服务自身维护，仍然受到和微服务面临的问题所类似的问题的困扰，因为它们仍然是以分布式的方式工作的软件。
+
+=== 插件杀手
+
+插件这个词在微服务的世界中很少被听到，因为每个服务都是运行在不同进程中一个很小的功能单元（function
+unit）；传统的插件模式（参考 The Versatile Plugin
+System）目标是把不同的功能单元相互挂在一起，这在微服务看来是不可能的，甚至是反设计模式的。然而，对于一些很自然的，要在功能单元间强加紧密依赖的业务逻辑，微服务可能会让事情变得非常糟糕，因为缺乏插件支持，修改业务逻辑可能引发一连串服务的修改。
+
+== 所有的服务都在一个进程
+
+意识到上述的所有问题，以及这么一个事实，即一个可以正常工作的 IaaS 软件必须和所有的编排服务一起运行之后，ZStack 把所有服务封装在单一进程中，称之为管理节点。除去一些微服务已经带来的如解耦架构的优点外，进程内的微服务还给了我们很多额外的好处：
+
+=== 简洁的依赖
+
+因为所有服务都运行在同一进程内，软件只需要一份支持软件（如：`database library`, `message library`）的拷贝；升级或改变支持库跟我们对一个单独的二进制应用程序所做的一样简单。
+
+=== 高可用，负载均衡和监控
+
+服务可以专注于它们的业务逻辑，而不受各种来自于高可用、负载均衡、监控的干扰，这一切只由管理节点关心；更进一步，状态可以从服务中分离以创建无状态服务，详见 xref:stateless_services.adoc[]。
+
+=== 中心化的配置
+
+由于在一个进程中，所有的服务共享一份配置文件——zstack.properties；用户不需要去管理各种各样的分散在不同机器上的配置文件。
+
+=== 易于部署、升级、维护和横向扩展
+
+部署，升级或者维护一个单一的管理节点跟部署升级一个单一的应用程序一样容易。横向扩展服务只需要简单的增加管理节点。
+
+=== 插件友好
+
+因为运行在一个单一的进程中，插件可以很容易地被创建，和给传统的单进程应用程序添加插件一样。
+
+[quote]
+.进程内的微服务并不是一个新发明
+____
+早在 90 年代，微软在 COM（Component Object Model）中把 server 定义为远程、本地和进程内三种。这些 https://msdn.microsoft.com/en-us/library/windows/desktop/ms693345%28v=vs.85%29.aspx[进程内] 的服务是一些 DLLs，被应用程序在同一进程空间内加载，属于进程内的微服务。Peter Kriens 在四年前就 http://www.infoq.com/news/2014/07/uservices-defined[声称] 已经定义了一种总是在同一进程内通信的服务，OSGi µservices。
+____
+
+
+== 服务样例
+
+在微服务中，一个服务通常是一个可重复的业务活动的逻辑表示，是无关联的、松耦合的、自包含的，而且对服务的消费者而言是一个“黑盒子”。简单来说，一个传统的微服务通常只关心特定的业务逻辑，有自己的 API 和配置方法，并能像一个独立的应用程序一样运行。尽管 ZStack 的服务共享同一块进程空间，它们拥有这些特点中的绝大多数。ZStack 很大程度上是一个使用强类型语言 java 编写的项目，但是在各个编排服务之间没有编译依赖性，例如：计算服务（包含 VM 服务、主机服务、区域服务、集群服务）并不依赖于存储服务（包含磁盘服务、基础存储服务、备份存储服务、磁盘快照服务等），虽然这些服务在业务流程中是紧密耦合的。
+
+在源代码中，一个 ZStack 的服务并不比一个作为一个独立的 jar 文件构建的 maven 模块多任何东西。每一个服务可以定义自己的 APIs、错误码、全局配置，全局属性和系统标签。例如 KVM 的主机服务拥有自己的 APIs（如下所示）和各种各样的允许用户自己定义配置的方式。
+
+[source,xml]
+----
+<?xml version="1.0" encoding="UTF-8"?>
+<service xmlns="http://zstack.org/schema/zstack">
+    <id>host</id>
+    <message>
+        <name>org.zstack.kvm.APIAddKVMHostMsg</name>
+        <interceptor>HostApiInterceptor</interceptor>
+        <interceptor>KVMApiInterceptor</interceptor>
+    </message>
+</service>
+----
+
+=== 通过全局配置来配置
+
+[NOTE]
+.备注
+====
+这里只简单展示一小部分，用户可以使用 API 去更新 / 获取全局配置，在这里展示一下全局配置的视图。
+====
+
+[source, xml]
+----
+<?xml version="1.0" encoding="UTF-8"?>
+<globalConfig xmlns="http://zstack.org/schema/zstack">
+    <config>
+        <category>kvm</category>
+        <name>vm.migrationQuantity</name>
+        <description>A value that defines how many vm can be migrated in parallel when putting a KVM host into maintenance mode.</description>
+        <defaultValue>2</defaultValue>
+        <type>java.lang.Integer</type>
+    </config>
+
+    <config>
+        <category>kvm</category>
+        <name>reservedMemory</name>
+        <description>The memory capacity reserved on all KVM hosts. ZStack KVM agent is a python web server that needs some memory capacity to run. this value reserves a portion of memory for the agent as well as other host applications. The value can be overridden by system tag on individual host, cluster and zone level</description>
+        <defaultValue>512M</defaultValue>
+    </config>
+</globalConfig>
+----
+
+=== 通过全局属性配置
+
+[NOTE]
+.备注
+以下代码对应 zstack.properties 文件夹中相应的属性
+
+[source,java]
+----
+@GlobalPropertyDefinition
+public class KVMGlobalProperty {
+    @GlobalProperty(name="KvmAgent.agentPackageName", defaultValue = "kvmagent-0.6.tar.gz")
+    public static String AGENT_PACKAGE_NAME;
+    @GlobalProperty(name="KvmAgent.agentUrlRootPath", defaultValue = "")
+    public static String AGENT_URL_ROOT_PATH;
+    @GlobalProperty(name="KvmAgent.agentUrlScheme", defaultValue = "http")
+    public static String AGENT_URL_SCHEME;
+}
+----
+
+=== 通过系统标签配置
+
+[NOTE]
+.备注
+以下代码对应数据库中相应的系统标签。
+
+[source,java]
+----
+@TagDefinition
+public class KVMSystemTags {
+    public static final String QEMU_IMG_VERSION_TOKEN = "version";
+    public static PatternedSystemTag QEMU_IMG_VERSION = new PatternedSystemTag(String.format("qemu-img::version::%s", QEMU_IMG_VERSION_TOKEN), HostVO.class);
+
+    public static final String LIBVIRT_VERSION_TOKEN = "version";
+    public static PatternedSystemTag LIBVIRT_VERSION = new PatternedSystemTag(String.format("libvirt::version::%s", LIBVIRT_VERSION_TOKEN), HostVO.class);
+
+    public static final String HVM_CPU_FLAG_TOKEN = "flag";
+    public static PatternedSystemTag HVM_CPU_FLAG = new PatternedSystemTag(String.format("hvm::%s", HVM_CPU_FLAG_TOKEN), HostVO.class);
+}
+----
+
+=== 载入服务
+
+在 Spring 中使用 xml 配置作为 bean 的服务，例如，kvm 的部分声明类似于：
+
+[source,xml]
+----
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+    xmlns:tx="http://www.springframework.org/schema/tx" xmlns:zstack="http://zstack.org/schema/zstack"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+    http://www.springframework.org/schema/aop
+    http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+    http://www.springframework.org/schema/tx
+    http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+    http://zstack.org/schema/zstack
+    http://zstack.org/schema/zstack/plugin.xsd"
+    default-init-method="init" default-destroy-method="destroy">
+
+    <bean id="KvmHostReserveExtension" class="org.zstack.kvm.KvmHostReserveExtension">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.Component" />
+            <zstack:extension interface="org.zstack.header.allocator.HostReservedCapacityExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="KVMHostFactory" class="org.zstack.kvm.KVMHostFactory">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.host.HypervisorFactory" />
+            <zstack:extension interface="org.zstack.header.Component" />
+            <zstack:extension interface="org.zstack.header.managementnode.ManagementNodeChangeListener" />
+            <zstack:extension interface="org.zstack.header.volume.MaxDataVolumeNumberExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="KVMSecurityGroupBackend" class="org.zstack.kvm.KVMSecurityGroupBackend">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.network.securitygroup.SecurityGroupHypervisorBackend" />
+            <zstack:extension interface="org.zstack.kvm.KVMHostConnectExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="KVMConsoleHypervisorBackend" class="org.zstack.kvm.KVMConsoleHypervisorBackend">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.console.ConsoleHypervisorBackend"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="KVMApiInterceptor" class="org.zstack.kvm.KVMApiInterceptor">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.apimediator.ApiMessageInterceptor"/>
+        </zstack:plugin>
+    </bean>
+</beans>
+----
+
+管理节点，作为所有服务的容器，将在启动阶段读取它们的 XML 配置文件，载入每一个服务。
+
+== 与传统微服务的对比
+
+我们用一张图开始这节的内容：
+
+image::inprocess-microservices.png[]
+
+在上图中，`management node` 作为一个独立的进程是所有微服务的容器，用于管理微服务的生命周期，提供统一的服务监控和HA（高可靠）等功能。图中的每一个深蓝色方块都是一个独立的服务，根据功能的不同，在逻辑上归为：计算服务、存储服务、网络服务以及其它服务。虽然运行在同一进程中，所有服务在代码逻辑上仍然高度松耦合，服务之间通过外部消息总线通信，跟运行在独立进程中的微服务类似。
+
+在传统微服务架构中，诸如 “API Gateway”、“Self Registration”、“Client-side Discovery”、“Server-side Discovery” 这样的功能在 ZStack 的微服务架构中都能找到，有些实现的还更为简单精巧。让人头疼的监控、高可靠、配置等诸多问题则不复存在，一切都由管理节点进程代为处理，开发人员只需要专心实现服务的业务逻辑即可。
+
+=== 要么没有，要么全有
+
+我曾在多次技术交流中给国内主流公有云、互联网公司的技术团队讲解这个设计，收获的最多的一个问题是：如果某个服务存在性能瓶颈，在这个架构中无法对单一服务进行横向扩展。凑巧的是，提出这个问题的朋友都是来自 OpenStack 技术团队，可见“能够对单服务横向扩展”是 OpenStack 宣称的一个架构优势。
+
+是的，在这个架构中，进程一旦启动就会加载所有服务，你不能选择性的加载一部分服务，要么没有，要么全有。你也不能对特定服务进行单独横向扩展，只能横向扩展管理节点进程，这样所有的服务都会获得相同程度的扩展。这听起来似乎不灵活也不合理，我已经听见你在心里这么说了。在后面的章节中，你会发现在 ZStack 架构中，运行特定服务和横向扩张特定服务其实都可以通过更改 XML 配置实现，但我不建议用户这么做，原因如下：
+
+==== 核心服务缺一不可
+
+任何软件都存在一组核心模块 / 服务，缺少任何一个都会导致整个系统不工作，IaaS 亦然。目前为止，ZStack 绝大多数服务都是核心服务，例如虚拟机服务、物理机服务、主存储服务、镜像服务等；一些非核心服务，例如搜索服务，虽然不加载也不会影响整体功能，但会极大的损伤用户体验，甚至导致某些外围组件（例如 UI）不工作。这些服务缺一不可，单独部署除了增加运维的复杂度外，并不能带来任何好处。
+
+____
+永远不要低估微服务集群的运维复杂度，OpenStack 就是是个鲜明的例子。
+____
+
+==== 扩展节点即扩展服务
+
+当某个服务存在热点时，只需要扩展多个管理节点就能产生多份该服务的实例用于分担压力。虽然扩展节点也会同时生成其它服务的实例，但它们不会占用任何资源（如果服务不活跃），这后面的**线程模型**一节会介绍。也就是说，新增加的管理节点资源可以只被忙碌的服务消耗，其它服务虽然拥有实例，但并不做任何事情。不用担心会产生 link:https://en.wikipedia.org/wiki/Starvation_(computer_science)[Starvation] 问题，在后面的章节你会看到 ZStack 是全异步架构，没有资源会被阻塞忙等待。
+
+==== 横向扩展，你可能永远不需要
+
+还记得在上一章中我们为 ZStack 设定的架构目标吗？要能够单节点管理数万物理机、百万级虚拟机，同时响应数万并发 API，我相信这个性能指标世界上绝大多数公有云做不到。所以如果你是私有云和混合云，排除高可靠的因素，你可能永远不需要部署第二个管理节点。即使你是公有云，两个管理节点或许永远满足你对单套环境性能要求。既然如此，干嘛还纠结要横向扩展某个特定服务？
+
+=== 还是不一样
+
+进程内微服务架构只是仿造微服务架构来解耦合代码，实现业务逻辑的高度模块化和自治化，但它并不是真正的微服务架构，它们之间最大的区别是：_ 微服务架构是动态的，而进程内微服务架构是静态的 _。
+
+微服务架构中的服务实例通常运行在虚拟机或容器之中。实例的数量会根据系统负载情况动态变化，弹性扩展。大量的服务实例的生命周期可能是短暂的，在负载降低时会被销毁，在负载上升时又再次被创建。与之相比，进程内微服务架构中的服务实例是静态的，它们的生命周期和数量都与管理节点进程绑定，一旦创建就一直运行。而 IaaS 的特性又决定管理员通常会预先创建足够多的管理节点来应对可能的负载，服务实例的数量很少会动态调整，即使有，规模也是非常小的。
+
+这种动与静的区别导致两种架构管理服务的方式非常不同，相比之下，进程内微服务架构更为简单直接，而简单带来稳定。
+
+____
+从动态和静态的角度，进程内微服务架构更类似于传统的分布式 SOA 系统，服务实例运行在固定的位置（IP、端口），实例数量变动不频繁，服务间预先知道对方信息并能容易的进行相互调用。
+____
+
+=== 线程池模型
+
+很多人在见到进程内微服务架构后的第一发印象是：每个服务有一个独立的线程循环处理请求，有活就干，没活就 sleep 等待。所以他们的接下来的问题就是：如果这个服务线程崩溃了怎么办？
+
+产生这种想法多是受传统微服务架构的影响，因为在这种架构中，每个服务实例是运行在单独进程中的，必须有 HA 机制来保证服务挂掉后能自动恢复。于是在看到进程内微服务架构时，他们把进程映射想象成了线程。
+
+实际上，在进程内微服务架构中，除了管理节点的心跳线程，没有任何一个服务独占线程，相反，它们共享同一个线程池，如下图所示：
+
+image::threadpool.png[]
+
+在不工作的时候，服务只是躺在进程地址空间内的代码，除了代码段和数据结构所占用的内存外，不占用任何资源。当一个任务发生时（通常被一个消息或一个 HTTP 请求触发），对应的服务才会从线程池中获取一个线程执行业务逻辑。当一切完成后，线程被归还给线程池，准备响应下一个服务。所以服务不会崩溃，它们只会在需要的时候被触发，按需向线程池申请资源。
+
+当然，管理节点进程是可能崩溃的，这时所有的服务同时崩溃，整个系统不再工作，除非部署了多个管理节点做高可靠。
+
+____
+*为什么心跳享有独立的线程？*
+
+管理节点的心跳线程用于周期性的更新数据库以告知其它管理节点它还健康的活着。为了避免在一个繁忙系统中，心跳代码不能按时从线程池中获取线程，造成其它节点误判该节点已经死亡而导致错误的接管，我们为心跳分配了独占线程以排除系统的干扰。除此之外，心跳线程还享有独立的数据库连接，原因同上。
+____
+
+=== 小结
+
+在这一节中，我们介绍了 ZStack 进程内微服务架构的总体设计，以及与传统微服务架构比较的一些异同点。需要再次强调的是，ZStack 的设计目标是一款能够被成千上万家企业使用的软件产品，我们期望所有的用户都可以自己部署运维私有云、混合云。纯粹的微服务架构并不适合用于打造软件产品，前期门槛和后期运维成本都太高。采用单一进程
++ 微服务的方式，是 ZStack 解决 IaaS 软件部署运维困难的第一个努力。
+
+== 总结
+
+在这篇文章中，我们演示了 ZStack 的进程内微服务架构。通过使用它，ZStack 拥有一个非常干净的，松耦合的代码结构，这是创建一个强壮 IaaS 软件的基础。

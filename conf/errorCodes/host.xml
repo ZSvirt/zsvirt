@@ -1,0 +1,69 @@
+<error>
+    <prefix>HOST</prefix>
+
+    <code>
+        <id>1000</id>
+        <description>Unable to add host</description>
+    </code>
+
+    <code>
+        <id>1001</id>
+        <description>Unable to put host to maintenance mode</description>
+    </code>
+
+    <code>
+        <id>1002</id>
+        <description>Unable to reconnect host</description>
+    </code>
+
+    <code>
+        <id>1003</id>
+        <description>An error happened when connecting to host</description>
+    </code>
+
+    <code>
+        <id>1004</id>
+        <description>Unable to allocate a host for vm</description>
+    </code>
+
+    <code>
+        <id>1005</id>
+        <description>Failed to start vm on hypervisor</description>
+    </code>
+
+    <code>
+        <id>1006</id>
+        <description>Failed to stop vm on hypervisor</description>
+    </code>
+
+    <code>
+        <id>1007</id>
+        <description>Failed to reboot vm on hypervisor</description>
+    </code>
+
+    <code>
+        <id>1008</id>
+        <description>Failed to destroy vm on hypervisor</description>
+    </code>
+
+    <code>
+        <id>1009</id>
+        <description>Failed to migrate vm on hypervisor</description>
+    </code>
+
+    <code>
+        <id>1010</id>
+        <description>This host is disconnected, cannot perform the required operation</description>
+    </code>
+
+    <code>
+        <id>1011</id>
+        <description>Unable to perform an operation on the host, however, the failure is eligible for garbage collector</description>
+    </code>
+
+    <code>
+        <id>1012</id>
+        <description>The host password has been changed</description>
+    </code>
+</error>
+

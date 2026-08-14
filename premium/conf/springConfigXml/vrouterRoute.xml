@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:zstack="http://zstack.org/schema/zstack"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+         http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+         http://www.springframework.org/schema/aop
+         http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+         http://www.springframework.org/schema/tx 
+     	 http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+     	 http://zstack.org/schema/zstack 
+         http://zstack.org/schema/zstack/plugin.xsd"
+	default-init-method="init" default-destroy-method="destroy">
+    
+    <bean id="VyosRouteBackend" class="org.zstack.vrouterRoute.vyos.VyosRouteBackend" >
+    	<zstack:plugin>
+			<zstack:extension interface="org.zstack.vrouterRoute.VRouterRouteBackend" />
+			<zstack:extension interface="org.zstack.network.service.virtualrouter.vyos.VyosPostCreateFlowExtensionPoint" />
+			<zstack:extension interface="org.zstack.network.service.virtualrouter.vyos.VyosPostRebootFlowExtensionPoint" />
+			<zstack:extension interface="org.zstack.network.service.virtualrouter.vyos.VyosPostStartFlowExtensionPoint" />
+			<zstack:extension interface="org.zstack.network.service.virtualrouter.vyos.VyosProvisionConfigFlowExtensionPoint" />
+			<zstack:extension interface="org.zstack.header.network.service.VirtualRouterHaGetCallbackExtensionPoint" />
+		</zstack:plugin>
+    </bean>
+
+    <bean id="VRouterRouteManagerImpl" class="org.zstack.vrouterRoute.VRouterRouteManagerImpl" >
+    	<zstack:plugin>
+		<zstack:extension interface="org.zstack.header.Component" />
+		<zstack:extension interface="org.zstack.header.Service" />
+			<zstack:extension interface="org.zstack.appliancevm.ApplianceVmSyncConfigToHaGroupExtensionPoint"/>
+	</zstack:plugin>
+    </bean>
+
+	<bean id="VRouterRouteTableServiceImpl" class="org.zstack.vrouterRoute.VRouterRouteTableServiceImpl" >
+		<zstack:plugin>
+			<zstack:extension interface="org.zstack.vrouterRoute.RouteTableServiceFactory" />
+		</zstack:plugin>
+	</bean>
+
+    <bean id="VRouterRouteApiInterceptor" class="org.zstack.vrouterRoute.VRouterRouteApiInterceptor" >
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.apimediator.ApiMessageInterceptor" />
+        </zstack:plugin>
+    </bean>
+
+	<bean id="VRouterRouteTableCascadeExtension" class="org.zstack.vrouterRoute.VRouterRouteTableCascadeExtension" >
+		<zstack:plugin>
+			<zstack:extension interface="org.zstack.core.cascade.CascadeExtensionPoint" />
+		</zstack:plugin>
+	</bean>
+</beans>

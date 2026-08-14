@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<template>
+    <config>
+        <name>ProductionRecommended</name>
+        <type>system</type>
+        <description>The recommended configuration for production environments</description>
+    </config>
+
+    <config>
+        <name>VmPerformanceOptimised</name>
+        <type>system</type>
+        <description>To improve the vmInstance performance</description>
+    </config>
+
+    <config>
+        <name>HaFastRecovery</name>
+        <type>system</type>
+        <description>For faster recovery by high availability</description>
+    </config>
+
+    <config>
+        <name>StrengthenSecurity</name>
+        <type>system</type>
+        <description>Strengthen the platform security</description>
+    </config>
+
+    <config>
+        <name>CubeProductionRecommended</name>
+        <type>system</type>
+        <description>The recommended configuration for Cube production environments</description>
+    </config>
+</template>

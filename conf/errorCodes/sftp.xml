@@ -1,0 +1,9 @@
+<error>
+    <prefix>BS.SFTP</prefix>
+
+    <code>
+        <id>1000</id>
+        <description>Unable to reconnect to sftp backup storage</description>
+    </code>
+</error>
+

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:zstack="http://zstack.org/schema/zstack"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+         http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+         http://www.springframework.org/schema/aop
+         http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+
+
+         http://zstack.org/schema/zstack
+         http://zstack.org/schema/zstack/plugin.xsd"
+       default-init-method="init" default-destroy-method="destory">
+
+	<aop:config>
+		<aop:aspect id="CloudBusAdvice" ref="CloudBusAopProxy">
+			<aop:pointcut expression="execution(public void org.zstack.core.cloudbus.CloudBus+.send(org.zstack.header.message.Message)) and args(msg)" id="sendSignleMessage"/>
+			<aop:around pointcut-ref="sendSignleMessage" method="singleMessageAdvice"/>
+			
+			<aop:pointcut expression="execution(public void org.zstack.core.cloudbus.CloudBus+.send(org.zstack.header.message.NeedReplyMessage, org.zstack.core.cloudbus.CloudBusCallBack)) and args(msg,callback)" id="sendCallbackSignleMessage"/>
+			<aop:around pointcut-ref="sendCallbackSignleMessage" method="singleCallbackMessageAdvice"/>
+			
+			<aop:pointcut expression="execution(public void org.zstack.core.cloudbus.CloudBus+.send(*)) and args(msgs)" id="sendListMessage"/>
+			<aop:around pointcut-ref="sendListMessage" method="listMessageAdvice"/>
+			
+			<aop:pointcut expression="execution(public * org.zstack.core.cloudbus.CloudBus+.call(org.zstack.header.message.NeedReplyMessage)) and args(msg)" id="callSignleMessage"/>
+			<aop:around pointcut-ref="callSignleMessage" method="singleMessageAdvice"/>
+			
+			<aop:pointcut expression="execution(public * org.zstack.core.cloudbus.CloudBus+.call(*)) and args(msgs)" id="callMultiMessage"/>
+			<aop:around pointcut-ref="callMultiMessage" method="listMessageAdvice"/>
+		</aop:aspect>
+	</aop:config>
+
+	<bean id="CloudBusAopProxy" class="org.zstack.test.integration.core.cloudbus.CloudBusAopProxy" />
+
+	<bean id="ManInTheMiddleService" class="org.zstack.test.integration.core.cloudbus.ManInTheMiddleService">
+		<zstack:plugin>
+			<zstack:extension interface="org.zstack.header.Component" />
+		</zstack:plugin>
+	</bean>
+</beans>

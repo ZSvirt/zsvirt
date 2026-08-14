@@ -1,0 +1,97 @@
+= ZStack Cloud 测试框架
+:source-highlighter: rouge
+
+== 简介
+
+[quote]
+====
+本节内容主要对应 `test` 目录。
+====
+
+ZStack 管理节点代码中包含三种测试：
+
+. `test/src/test/java` 目录下的 Java 编写的测试用例，现已弃用
+. `src/test/groovy/org/zstack/test/integration` 目录下的 Groovy 编写的集成测试用例，是目前管理节点代码最重要的质量保障，使用 ZStack 集成测试框架，详见 xref:integration-test/index.adoc[]
+. `src/test/groovy/org/zstack/test/unittest` 目录下的 Groovy 编写的单元测试用例，对于逻辑复杂但内聚无依赖，或依赖比较简单的测试可用，使用 JUnit 测试框架，详见 xref:junit/index.adoc[]
+
+[#why-so-many-test-framwork]
+== 为什么存在不同的测试框架
+
+[#why-not-junit]
+=== 为什么 JUnit 不是 ZStack 开发者的最爱
+
+首先说为什么已经有了 junit 框架，ZStack 还要再“造轮子”：
+
+在传统的 Java 项目中，后端研发一般会使用 JUnit 来保证代码质量。 JUnit 实用有效，但 JUnit 的设计定位和使用方法，也决定了它的局限性：
+
+*1. 不适合API接口、功能级别的测试*
+
+举个例子，现在有这么一个方法
+
+[source,java]
+----
+VmInstanceManager.createVmInstance(VmInstanceSpec spec) {
+    Host host = allocateHost(spec);
+    PrimaryStorage ps = allocatePrimaryStorage(spec);
+    Volume volume = allocateVolume(spec);
+    Nic nic = allocateNic(spec);
+    VmInstance vm = createOnHypervisor(spec, host, ps, volume, nic);
+}
+----
+
+我们可以使用 JUnit 分别测试上述五个关键方法（allocateHost，allocatePrimaryStorage，allocateVolume，allocateNic，createOnHypervisor）。 但是想要测试整个创建流程（createVmInstance），即使只测试一个最基础的场景，也需要在测试用例中mock整个流程中调用的所有外部方法的返回值，其中的工作量极大。
+
+所以常见的做法是在 createVmInstance 方法的 JUnit 测试用例中，mock 上述五个关键方法的返回值。 但很有可能 mock 的返回值错误(与实际执行时不匹配)，或者测试场景不完全，最终导致代码在实际执行时没有正常工作。
+
+*2. 不适合复杂场景测试*
+
+*3. 不适合并发测试*
+
+总而言之，JUnit适合细粒度的、单元的，类、函数级别的测试。 如果开发者期望做更上层、更系统、更复杂的测试，JUnit就显得力不从心了。
+
+[TIP]
+====
+对于能通过 JUnit 测试的代码，应当首选 JUnit 测试，详见 xref:junit/index.adoc[]
+====
+
+=== Java 编写的测试框架怎么了
+
+Java 是个非常工程化但同时比较 verbose、语法糖相对比较少的的语言。ZStack 最开始的测试框架基于 `JUnit` 并编写了大量的用例，但出于 <<why-not-junit>> 离得原因以及提升开发者效率的考虑，ZStack Cloud 开发最终放弃了原先的 Java 编写的基于 `JUnit` 测试，测试代码全部转向到 `Groovy` 语言。
+
+=== 基于模拟器的 Integration Test 框架简介
+
+ZStack Integration Test 实际上是指：针对 ZStack 管理节点的API，功能，场景测试。
+
+[NOTE]
+====
+有的时候我们也会在口语上称 ZStack Integration Test 为单元测试。
+====
+
+ZStack项目主要由三部分组成：ZStack管理节点（核心，主要代码），ZStack Agent（kvm agent，存储agent，云路由agent等等），ZStack UI。如图所示：
+
+image::image-2022-02-18-09-39-35-771.png[]
+
+ZStack 单元测试在执行一个 API 调用时，API 调用会真正的下发到 ZStack 管理节点，ZStack 管理节点也会真实的执行本次 API 调用。与真实环境中调用 API 相比，唯一的区别就是： ZStack单元测试会自动 mock Agent http 返回（http 返回值可在 TestCase 中自定义）。所以依赖 ZStack 单元测试，研发可以简单轻松地完成 ZStack 管理节点测试工作：
+
+ * 测试 API 调用是否执行成功
+ * 测试某个功能点，某个复杂的场景是否正常工作，以及复杂场景组合测试
+ * 并发测试
+ * 构建问题场景，复现 BUG，包括高并发下数据库死锁问题
+ * 针对PR，回归测试
+
+这里就不详细描述 ZStack 单元测试功能和实现细节了，详细可以阅读 xref:integration-test/index.adoc[]
+
+== 基于模拟器的 Integration Test 框架的优点
+
+. 支持模拟管理节点真实运行环境，针对功能测试 (而非 junit)
+
+. 可以方便快捷地构造测试用例执行依赖环境，测试用例执行完成后，系统自动清理环境
+
+. 清晰简洁的测试流程，新增 TestCase 成本低且利于维护
+
+. 管理节点服务启动后，可以连续执行一组测试用例
+
+. TestCase 可以按照组的方式组合，利于测试集成系统并发执行每组测试用例
+
+. 支持 TestCase 稳定性检测
+

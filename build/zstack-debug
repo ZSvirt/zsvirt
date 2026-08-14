@@ -1,0 +1,32 @@
+#!/bin/bash
+
+baseDir=`dirname $0`
+libDir=$baseDir/lib
+confDir=$baseDir/conf
+
+errExit() {
+    echo "$@"
+    exit 1
+}
+
+buildClassPath() {
+    jarList=`ls $libDir`
+    for jar in $jarList
+    do
+        jarPath=$libDir/$jar
+        classPath=$jarPath:$classPath
+    done
+    classPath=$classPath:$confDir
+}
+
+run() {
+	javaOptitons="-Xdebug -Xms256m -Xmx512m -XX:+HeapDumpOnOutOfMemoryError -Xrunjdwp:transport=dt_socket,address=8787,server=y,suspend=y"
+    java $javaOptions -cp $classPath org.zstack.portal.main.Main "$@"
+}
+
+main() {
+    buildClassPath
+    run "$@"
+}
+
+main "$@"

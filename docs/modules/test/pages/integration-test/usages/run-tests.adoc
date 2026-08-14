@@ -1,0 +1,224 @@
+= 运行测试用例
+:source-highlighter: highlightjs
+:imagesdir: ../../images
+:xrefstyle: full
+
+== 简介
+
+首先你需要一个运行测试的环境，这个环境建议通过 ZStack ISO 专家模式来安装，然后克隆代码并按照下面的说明运行。
+
+[NOTE]
+====
+. 不要在自己运行 ZStack 管理节点的环境跑单元测试，因为单元测试会自动清空数据库
+. 需要保证这个环境有运行的 MySQL 数据库，数据库的默认密码为空，需要修改的话可以在 `src/test/resources/zstack.properties` 修改
+====
+
+最常见的运行集成测试的命令莫过于下面几种：
+
+[source,bash]
+----
+cd test; <.>
+mvn test -Dtest=FutureCompletionCase -DskipJacoco=true <.>
+mvn test -Dtest=SharedBlockTest  <.>
+./runstablilitycase org.zstack.test.integration.zwatch.AlarmAnyCase 100 <.>
+----
+<.> 下面的命令都应该在 test 目录下运行，如果是 `premium` 项目则在 `test-premium` 下运行
+<.> 运行单个 Case，并跳过 Jacoco，跳过 Jacoco 可以一定程度提升运行速度，推荐设置，或者在环境变量里配置，详见 <<skip_jacoco>>
+<.> 运行一个 Test Suite（什么是 Test Suite 参考 xref:integration-test/usages/test-suite.adoc[]）
+<.> 运行稳定性测试，将对应 Case 运行 100 遍，详见 <<stability>>
+
+== 参数说明
+
+|===
+| 参致名称 | 作用范围 | 介绍 | 猷认值 | 示例
+
+|caseFilePath
+|test suite
+| 指定 subCaseCollectionStrategy 中 D esignated 需要 读取的文件路径
+| 默认默认値，需要手动指定
+|mvn test -Dtest=ZStackTest -DsubCaseCollectionStrategy=Designated -DcaseFilePath=/home/runcase/cases.txt
+
+|caseResultShellPath
+|test suite
+| 相当于在每个 case 跑完后执行： suite_name=suiteName case_name=caseName result=result sh caseResultShellPath suiteName 为当前 suite 名称，caseName 为当前 case 名称，result 为当前 case 执行结果，timeout 和 skip 的也会执行
+| 默认不生效
+|mvn test -Dtest=ZStackTest -DcaseResultShellPath=/homeAest.sh
+
+|cases
+|stability test
+| 指定 stability test 执行选择的目标 case 列表 ・需要输入 case 完整包名 ・多个 case 之间以逗号分隔 • premium 中 casef 吏用- Dtest=PremiumTestCaseStabilityTest
+| 默认默认值，需要手动指定
+|mvn test -Dtest=StabilityTestCase -Dcases=org.zstack.test.integration.kvm.vm.OneVmBasicLifeCycleCase, org.zstack.test.integration.core.MustPassCase -Dtimes=2
+
+|clean
+|case
+|test case 执行完成后，自动清理环境
+|false
+|mvn test -Dtest=OneVmBasicLifeCycleCase -Dclean
+
+|msgTimeoutMins
+|case test suite stability test
+| 配置 msg 超肘时间
+|・debug 模式下默认值为 30 分 钟 ・正常模式下默认为 25 秒
+|mvn test -Dtest=OneVmBasicLifeCycleCase -DmsgTimeoutMins=60
+
+|skipJacoco
+|case test suite stability test
+| 跳过 Jacoco 逻辑，详见 <<skip_jacoco>>
+|false
+|mvn test -Dtest=OneVmBasicLifeCycleCase -DskipJacoco=true
+
+|skipMNExit
+|case
+|case 测试逻辑执行完成后，是否跳过 MN 退出流程
+|true
+|mvn test -Dtest=OneVmBasicLifeCycleCase -DskipMNExit=false
+
+|subCaseCollectionStrategy
+|test suite
+| 指定 test suite 执行选择目标 case 列表的策略 ・Nearest：仅选择只属于当前 test suite 下面的 test case • MostComplete：选择在 test suite 下面的 test case ・Designated：从文件中读取并运行属于 test suite 的 case （—个 test case 可能会属于多个 test suite）
+|Nearest
+| 运行 zstack 所有 test case mvn test -Dtest=ZStackTest -DsubCaseCollectionStrategy=MostComplete mvn test -Dtest=ZStackTest -DsubCaseCollectionStrategy=Nearest mvn test -Dtest=ZStackTest -DsubCaseCollectionStrategy=Designated -DcaseFilePath=/home/runcase/cases.txt
+
+|suiteTimeoutSecs
+|test suite
+| 配 Stest suite 超时时间，单位为秒 , 幵始跑 case 时 生效
+| 默认不生效，无限制
+|mvn test -Dtest=ZStackTest -DsuiteTimeoutSecs=1800
+
+|times
+|stability test
+| 指定 stability test 执行次数
+|1
+|mvn test -Dtest=StabilityTestCase -Dcases=org.zstack.test.integration.kvm.vm.OneVmBasicLifeCycleCase, -Dtimes=50
+
+|===
+
+[#skip_jacoco]
+== 跳过 jacoco
+
+默认会通过 jacoco 生成测试覆盖数据，会占用更多的资源，可以通过下面的方式跳过：
+
+配置环境变量（在 shell 直接运行或者配置到 .bashrc）::
+export skipJacoco=true
+
+命令行参数指定::
+mvn test -Dtest=xxxCase -DskipJacoco=true
+
+如果两种都设置了，会以命令行中指定的 `-DskipJacoco` 为准
+
+想避免 IDE 提示 skipJacoco 为 UnresolvedMavenProperty（红色波浪线），可以在 IDEA 中这样设置：
+
+image::image-2022-02-18-11-00-51-807.png[]
+
+image::image-2022-02-18-11-01-03-051.png[]
+
+[#stability]
+== 运行稳定性测试
+
+很多时候，一个 Case 运行一遍可能是“可以通过”的，但是当运行的次数足够多的话，可能会暴露出一些竞争、不稳定的问题，这个在业界成为 flaky test，这一问题非常普遍，例如 Google 的很多文章也介绍了他们解决 flakey test 遇到的困难和方法 https://testing.googleblog.com/2016/05/flaky-tests-at-google-and-how-we.html[Flaky Tests at Google and How We Mitigate Them]， https://abseil.io/resources/swe_at_google.2.pdf[《Software Engineering at Google》 第 218 页，Case Study: Flaky Tests Are Expensive]
+
+ZStack 采取了几个机制减轻 flaky test 的影响：
+
+[plantuml]
+....
+@startuml
+skinparam monochrome true
+skinparam ranksep 20
+skinparam dpi 150
+skinparam arrowThickness 0.7
+skinparam packageTitleAlignment left
+skinparam usecaseBorderThickness 0.4
+skinparam defaultFontSize 12
+skinparam rectangleBorderThickness 1
+
+new_case as "提交新用例"
+
+modify_case as "修改原有用例"
+
+rectangle 100_times as "自动运行该 case 100 次"
+
+rectangle all_success as "全部运行通过"
+
+rectangle join as "进入仓库"
+
+daily_run as "平时提交 PR 触发测试"
+
+rectangle once_fail as "某一个 case fail 了"
+
+rectangle run_many_times as "自动反复 fail case 运行多次"
+
+rectangle analyse as "自动分析 case fail 率"
+
+rectangle fail as "认定失败"
+
+rectangle success as "认定成功"
+
+
+new_case --> 100_times
+modify_case --> 100_times
+100_times --> all_success
+all_success --> join
+
+
+daily_run --> once_fail
+once_fail --> run_many_times
+run_many_times --> analyse
+analyse --> fail: fail 率高于一定比例
+analyse --> success: fail 率低于一定比例
+@enduml
+....
+
+ZStack 提供了脚本来方便开发者在本地反复运行同一个 case:
+
+[source,bash]
+----
+./runstablilitycase org.zstack.test.integration.zwatch.AlarmAnyCase 100
+----
+
+运行结束后，会自动打印这样一行字：
+
+[source,bash]
+----
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0
+
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time: 21:39.088s
+[INFO] Finished at: Fri Feb 18 10:17:42 CST 2022
+[INFO] Final Memory: 35M/1808M
+[INFO] ------------------------------------------------------------------------
+
+
+run `grep -E 'stability test|a sub case|start cleanup for case class' management-server.log` to get detailed information
+----
+
+此时可以运行上面提示的命令来查看 case 的运行情况，例如：
+
+[source,bash]
+----
+$ grep -E 'stability test|a sub case|start cleanup for case class' management-server.log
+
+...
+
+2022-02-18 10:17:29,223 INFO  [AlarmAnyCase] {} (main) start cleanup for case class org.zstack.test.integration.zwatch.AlarmAnyCase
+2022-02-18 10:17:30,224 INFO  [StabilityTestPremium.] {} (main) stability test, a sub case [class org.zstack.test.integration.zwatch.AlarmAnyCase] test pass, current execution times is 99, spend time is 9 secs
+2022-02-18 10:17:30,245 INFO  [StabilityTestPremium.] {} (main) stability test, a sub case [class org.zstack.test.integration.zwatch.AlarmAnyCase] start running, current execution times is 100
+2022-02-18 10:17:39,201 INFO  [AlarmAnyCase] {} (main) start cleanup for case class org.zstack.test.integration.zwatch.AlarmAnyCase
+2022-02-18 10:17:40,188 INFO  [StabilityTestPremium.] {} (main) stability test, a sub case [class org.zstack.test.integration.zwatch.AlarmAnyCase] test pass, current execution times is 100, spend time is 9 secs  <.>
+2022-02-18 10:17:40,188 INFO  [StabilityTestPremium.] {} (main) stability test finished
+2022-02-18 10:17:40,188 INFO  [StabilityTestPremium.] {} (main) start cleanup for case class org.zstack.testlib.premium.StabilityTestPremium$1
+2022-02-18 10:17:40,200 INFO  [PremiumTestCaseStabilityTest] {} (main) a sub case[class org.zstack.test.integration.stabilisation.PremiumStabilityTestCase] of suite[class org.zstack.test.integration.stabilisation.PremiumTestCaseStabilityTest] completes without any error
+2022-02-18 10:17:40,207 INFO  [PremiumTestCaseStabilityTest] {} (main) write test result of a sub case[class org.zstack.test.integration.stabilisation.PremiumStabilityTestCase] of suite[class org.zstack.test.integration.stabilisation.PremiumTestCaseStabilityTest] to org_zstack_test_integration_stabilisation_PremiumStabilityTestCase.1011618.success
+----
+<.> 可以看到 case 运行了 100 次，都成功了，第 100 次运行花了 9s
+
+[CAUTION]
+====
+新 case 建议在本地运行 200 次以上再提交！
+====
+
+== 如何调试 case？
+
+参考 xref:integration-test/usages/cookbook.adoc#how_to_debug[如何 Debug Case]

@@ -1,0 +1,31 @@
+[
+  {
+    "raw": "Select %s strategy, you must set %s",
+    "en_US": "Select {0} strategy, you must set {1}",
+    "zh_CN": "选择策略{0}，你必须设置{1}",
+    "arguments": [
+      "HostAllocatorConstant.MAX_INSTANCE_PER_HOST_HOST_ALLOCATOR_STRATEGY_TYPE",
+      "HostAllocatorSystemTags.MAX_INSTANCE_PER_HOST_TOKEN"
+    ],
+    "fileName": "src/main/java/org/zstack/pluginpremium/compute/allocator/MaxInstancePerHostHostAllocatorStrategyFactory.java"
+  },
+  {
+    "raw": "%s must be a number",
+    "en_US": "{0} must be a number",
+    "zh_CN": "{0}必须是一个数字",
+    "arguments": [
+      "HostAllocatorSystemTags.MAX_INSTANCE_PER_HOST_TOKEN"
+    ],
+    "fileName": "src/main/java/org/zstack/pluginpremium/compute/allocator/MaxInstancePerHostHostAllocatorStrategyFactory.java"
+  },
+  {
+    "raw": "Incorrect %s settings, valid value is %s",
+    "en_US": "Incorrect {0} settings, valid value is {1}",
+    "zh_CN": "不正确的设置{0}，有效的值是{1}",
+    "arguments": [
+      "HostAllocatorSystemTags.MINIMUM_MEMORY_USAGE_HOST_ALLOCATOR_STRATEGY_MODE_TOKEN",
+      "modes"
+    ],
+    "fileName": "src/main/java/org/zstack/pluginpremium/compute/allocator/MinimumMemoryUsageHostAllocatorStrategyFactory.java"
+  }
+]

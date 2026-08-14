@@ -1,0 +1,44 @@
+<error>
+    <prefix>LDAP</prefix>
+
+    <code>
+        <id>1000</id>
+        <description>LDAP/AD general error</description>
+    </code>
+
+    <code>
+        <id>1001</id>
+        <description>Failed to add the same LDAP/AD server: The server already exists</description>
+    </code>
+
+    <code>
+        <id>1002</id>
+        <description>Failed to find entry on LDAP/AD server</description>
+    </code>
+
+    <code>
+        <id>1006</id>
+        <description>Test LDAP/AD server connection failed</description>
+    </code>
+
+    <code>
+        <id>1007</id>
+        <description>Failed to find specific LDAP/AD server</description>
+    </code>
+
+    <code>
+        <id>1008</id>
+        <description>Failed to bind ldap user to the specific account</description>
+    </code>
+
+    <code>
+        <id>1009</id>
+        <description>No LDAP/AD server is currently enabled</description>
+    </code>
+
+    <code>
+        <id>1010</id>
+        <description>Failed to sync users from LDAP/AD server</description>
+    </code>
+</error>
+

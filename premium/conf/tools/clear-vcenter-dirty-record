@@ -1,0 +1,36 @@
+#!/bin/bash
+
+set -e
+
+echo "Risky operation. Back up your database before running this script. Continue? [y/Y/N]:"
+read input
+if [ "$input" != "y" ] && [ "$input" != "Y" ]; then
+    echo "Cancelled"
+    exit 1
+fi
+
+if test $# -ne 1; then
+    echo usage: $(basename "$0") DBPASS
+    echo
+fi
+
+dbpass="$1"
+
+mysql -uzstack -p"$dbpass" zstack \
+  -e "
+      DELETE FROM ResourceVO WHERE uuid IN (SELECT uuid FROM VmInstanceVO WHERE hypervisorType = 'ESX' AND hostUuid is null AND lastHostUuid is null AND rootVolumeUUid is null AND imageUuid is null AND (clusterUuid NOT IN (select uuid from ClusterVO) OR clusterUuid is null));
+      DELETE FROM AccountResourceRefVO WHERE resourceUuid IN (SELECT uuid FROM VmInstanceVO WHERE hypervisorType = 'ESX' AND hostUuid is null AND lastHostUuid is null AND rootVolumeUUid is null AND imageUuid is null AND (clusterUuid NOT IN (select uuid from ClusterVO) OR clusterUuid is null));
+      DELETE FROM VmInstanceVO WHERE hypervisorType = 'ESX' AND hostUuid is null AND lastHostUuid is null AND rootVolumeUUid is null AND imageUuid is null AND (clusterUuid NOT IN (select uuid from ClusterVO) OR clusterUuid is null);
+      DELETE FROM ResourceVO WHERE uuid IN (SELECT uuid FROM VolumeVO WHERE format = 'vmtx' AND primaryStorageUuid not IN (SELECT uuid FROM PrimaryStorageVO));
+      DELETE FROM AccountResourceRefVO WHERE resourceUuid IN (SELECT uuid FROM VolumeVO WHERE format = 'vmtx' AND primaryStorageUuid not IN (SELECT uuid FROM PrimaryStorageVO));
+      DELETE FROM VolumeVO WHERE format = 'vmtx' AND primaryStorageUuid not IN (SELECT uuid FROM PrimaryStorageVO);
+      DELETE FROM ResourceVO WHERE uuid IN (SELECT uuid FROM ImageVO WHERE format = 'vmtx' AND md5sum is null AND uuid not IN (SELECT imageUuid FROM ImageBackupStorageRefVO));
+      DELETE FROM AccountResourceRefVO WHERE resourceUuid IN (SELECT uuid FROM ImageVO WHERE format = 'vmtx' AND md5sum is null AND uuid not IN (SELECT imageUuid FROM ImageBackupStorageRefVO));
+      DELETE FROM ImageVO WHERE format = 'vmtx' AND md5sum is null AND uuid not IN (SELECT imageUuid FROM ImageBackupStorageRefVO);"
+
+if [ $? -eq 0 ]; then
+    echo "successfully deleted."
+else
+    echo "Failed"
+    exit 1
+fi

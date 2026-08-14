@@ -1,0 +1,108 @@
+[
+  {
+    "raw": "account have no vips",
+    "en_US": "account have no vips",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/network/service/vip/VipApiInterceptor.java"
+  },
+  {
+    "raw": "vip can not be accessed by this account",
+    "en_US": "vip can not be accessed by this account",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/network/service/vip/VipApiInterceptor.java"
+  },
+  {
+    "raw": "cannot delete ip, because ip[%s] is a vip",
+    "en_US": "cannot delete ip, because ip[{0}] is a vip",
+    "zh_CN": "",
+    "arguments": [
+      "ip.getIp()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/vip/VipApiInterceptor.java"
+  },
+  {
+    "raw": "system vip can not be deleted by API message",
+    "en_US": "system vip can not be deleted by API message",
+    "zh_CN": "API消息无法删除系统VIP",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/network/service/vip/VipApiInterceptor.java"
+  },
+  {
+    "raw": "unsupported ip allocation strategy[%s]",
+    "en_US": "unsupported ip allocation strategy[{0}]",
+    "zh_CN": "不支持的ip分配策略[{0}]",
+    "arguments": [
+      "msg.getAllocatorStrategy()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/vip/VipApiInterceptor.java"
+  },
+  {
+    "raw": "requiredIp[%s] is not in valid IPv4 mediaType",
+    "en_US": "requiredIp[{0}] is not in valid IPv4 mediaType",
+    "zh_CN": "请求的ip[{0}]不是有效的IPv4地址",
+    "arguments": [
+      "msg.getRequiredIp()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/vip/VipApiInterceptor.java"
+  },
+  {
+    "raw": "there is already a vip[%s] on l3Network[uuid:%s]",
+    "en_US": "there is already a vip[{0}] on l3Network[uuid:{1}]",
+    "zh_CN": "已有一个vip[{0}]在三层网络[uuid:{1}]上",
+    "arguments": [
+      "msg.getRequiredIp()",
+      "msg.getL3NetworkUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/vip/VipApiInterceptor.java"
+  },
+  {
+    "raw": "required ip address [%s] is already used",
+    "en_US": "required ip address [{0}] is already used",
+    "zh_CN": "所需的IP地址[{0}]已被使用",
+    "arguments": [
+      "msg.getRequiredIp()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/vip/VipApiInterceptor.java"
+  },
+  {
+    "raw": "could not create vip, because can not determine the vip version",
+    "en_US": "could not create vip, because can not determine the vip version",
+    "zh_CN": "无法创建VIP，因为无法确定VIP版本",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/network/service/vip/VipApiInterceptor.java"
+  },
+  {
+    "raw": "cannot find the vip[name:%s, uuid:%s, ip:%s], it may have been deleted",
+    "en_US": "cannot find the vip[name:{0}, uuid:{1}, ip:{2}], it may have been deleted",
+    "zh_CN": "",
+    "arguments": [
+      "self.getName()",
+      "self.getUuid()",
+      "self.getIp()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/vip/VipBase.java"
+  },
+  {
+    "raw": "service provider of the vip[uuid:%s, name:%s, ip: %s] has been set to %s",
+    "en_US": "service provider of the vip[uuid:{0}, name:{1}, ip: {2}] has been set to {3}",
+    "zh_CN": "vip[uuid:{0}, name:{1}, ip: {2}]的服务提供器已经被设置成[{3}]",
+    "arguments": [
+      "self.getUuid()",
+      "self.getName()",
+      "self.getIp()",
+      "self.getServiceProvider()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/vip/VipBase.java"
+  },
+  {
+    "raw": "cannot find the vip[uuid:%s], it may have been deleted",
+    "en_US": "cannot find the vip[uuid:{0}], it may have been deleted",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getVipUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/vip/VipManagerImpl.java"
+  }
+]

@@ -1,0 +1,161 @@
+[
+  {
+    "raw": "billing is disabled",
+    "en_US": "billing is disabled",
+    "zh_CN": "已禁用计费",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/billing/BillingApiInterceptor.java"
+  },
+  {
+    "raw": "the start date must be greater than the end date",
+    "en_US": "the start date must be greater than the end date",
+    "zh_CN": "开始时间必须早于结束时间",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/billing/BillingApiInterceptor.java"
+  },
+  {
+    "raw": "resourceType and resourceUuid cannot be empty at the same time",
+    "en_US": "resourceType and resourceUuid cannot be empty at the same time",
+    "zh_CN": "ResourceType和Resourceuuid不能同时为空",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/billing/BillingApiInterceptor.java"
+  },
+  {
+    "raw": "resourceName[%s] is invalid",
+    "en_US": "resourceName[{0}] is invalid",
+    "zh_CN": "资源名称[{0}]无效",
+    "arguments": [
+      "resourceName"
+    ],
+    "fileName": "src/main/java/org/zstack/billing/BillingApiInterceptor.java"
+  },
+  {
+    "raw": "the minimal resource unit is megabyte, cannot be byte",
+    "en_US": "the minimal resource unit is megabyte, cannot be byte",
+    "zh_CN": "资源的最小单位必须为MB，而不是byte",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/billing/BillingApiInterceptor.java"
+  },
+  {
+    "raw": "price must be 0 and 999999999.99",
+    "en_US": "price must be 0 and 999999999.99",
+    "zh_CN": "价格必须为0和999999999.99",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/billing/BillingApiInterceptor.java"
+  },
+  {
+    "raw": "gpu price must be bound to gpu uuid empty",
+    "en_US": "gpu price must be bound to gpu uuid empty",
+    "zh_CN": "GPU类型的价格必须绑定一个GPU设备",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/billing/BillingApiInterceptor.java"
+  },
+  {
+    "raw": "gpu price must be bound to gpu uuid %s",
+    "en_US": "gpu price must be bound to gpu uuid {0}",
+    "zh_CN": "GPU类型的价格必须绑定一个正确的GPU设备{0}",
+    "arguments": [
+      "price.getSystemTags()"
+    ],
+    "fileName": "src/main/java/org/zstack/billing/BillingApiInterceptor.java"
+  },
+  {
+    "raw": "The account[uuid\u003d%s] has attach price table",
+    "en_US": "The account[uuid\u003d{0}] has attach price table",
+    "zh_CN": "帐户[uuid\u003d{0}]具有附加价格表",
+    "arguments": [
+      "msg.getAccountUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/billing/BillingApiInterceptor.java"
+  },
+  {
+    "raw": "This priceTable[uuid\u003d%s] is not allowed to delete",
+    "en_US": "This priceTable[uuid\u003d{0}] is not allowed to delete",
+    "zh_CN": "不允许删除此价格表[uuid\u003d{0}]",
+    "arguments": [
+      "msg.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/billing/BillingApiInterceptor.java"
+  },
+  {
+    "raw": "accountUuid/tableUuid only one of them is allowed to be set",
+    "en_US": "accountUuid/tableUuid only one of them is allowed to be set",
+    "zh_CN": "Accountuuid/Tableuuid只允许设置其中一个",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/billing/BillingApiInterceptor.java"
+  },
+  {
+    "raw": "endDateInLong is not allowed to be negative",
+    "en_US": "endDateInLong is not allowed to be negative",
+    "zh_CN": "EndDateInLong不允许为负数",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/billing/BillingApiInterceptor.java"
+  },
+  {
+    "raw": "endDateInLong and setEndDateInLongBaseOnCurrentTime are not allowed to set at the same time",
+    "en_US": "endDateInLong and setEndDateInLongBaseOnCurrentTime are not allowed to set at the same time",
+    "zh_CN": "不允许同时设置EndDateInLong和SetEndDateInLongBaseOnCurrentTime",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/billing/BillingApiInterceptor.java"
+  },
+  {
+    "raw": "endDateInLong is set, no modification allowed",
+    "en_US": "endDateInLong is set, no modification allowed",
+    "zh_CN": "EndDateInLong已设置，不允许修改",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/billing/BillingApiInterceptor.java"
+  },
+  {
+    "raw": "endDateInLong cannot be earlier than dateInLong",
+    "en_US": "endDateInLong cannot be earlier than dateInLong",
+    "zh_CN": "EndDateInlong不能早于DateInlong",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/billing/BillingApiInterceptor.java"
+  },
+  {
+    "raw": "billing is enable, This operation is only allowed in the disabled state",
+    "en_US": "billing is enable, This operation is only allowed in the disabled state",
+    "zh_CN": "计费已启用，只有在禁用状态下才能执行此操作",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/billing/BillingApiInterceptor.java"
+  },
+  {
+    "raw": "priceKeyName is null",
+    "en_US": "priceKeyName is null",
+    "zh_CN": "PriceKeyName为空",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/billing/BillingManagerImpl.java"
+  },
+  {
+    "raw": "dateInLong is less than %s",
+    "en_US": "dateInLong is less than {0}",
+    "zh_CN": "DateInLong小于{0}",
+    "arguments": [
+      "currentPriceVO.getDateInLong()"
+    ],
+    "fileName": "src/main/java/org/zstack/billing/BillingManagerImpl.java"
+  },
+  {
+    "raw": "please set the correct priceUserConfig, for example: priceUserConfig:{\\nrootVolume:{\\npriceKeyName:\\\"priceKeyName\\\"}}",
+    "en_US": "please set the correct priceUserConfig, for example: priceUserConfig:{\\nrootVolume:{\\npriceKeyName:\\\"priceKeyName\\\"}}",
+    "zh_CN": "请设置正确的priceUserConfig，例如：priceUserConfig：{\\nRootVolume：{\\nPriceKeyName：\\“ priceKeyName\\”}}",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/billing/BillingManagerImpl.java"
+  },
+  {
+    "raw": "please set the correct priceUserConfig, for example: priceUserConfig:{\\nvolume:{\\npriceKeyName:\\\"priceKeyName\\\"}}",
+    "en_US": "please set the correct priceUserConfig, for example: priceUserConfig:{\\nvolume:{\\npriceKeyName:\\\"priceKeyName\\\"}}",
+    "zh_CN": "请设置正确的priceUserConfig，例如：priceUserConfig：{\\nVolume：{\\nPriceKeyName：\\“ priceKeyName\\”}}",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/billing/BillingManagerImpl.java"
+  },
+  {
+    "raw": "unsupported billing resource type [%s]",
+    "en_US": "unsupported billing resource type [{0}]",
+    "zh_CN": "不支持的计费资源类型[{0}]",
+    "arguments": [
+      "resourceType"
+    ],
+    "fileName": "src/main/java/org/zstack/billing/ResourceSpendingHelper.java"
+  }
+]

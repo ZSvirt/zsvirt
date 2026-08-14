@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<globalConfig xmlns="http://zstack.org/schema/zstack">
+    <config>
+        <name>reclaim.interval</name>
+        <description>reclaim image store interval in seconds, 0 means disabled</description>
+        <category>imagestore</category>
+        <defaultValue>604800</defaultValue>
+        <type>java.lang.Long</type>
+    </config>
+
+    <config>
+        <name>max.capacity</name>
+        <description>size of max capacity</description>
+        <category>imagestore</category>
+        <defaultValue>0</defaultValue>
+        <type>java.lang.Long</type>
+    </config>
+
+    <config>
+        <name>zstore.allow.ports</name>
+        <description>tcp or udp ports allowed by zstore, udp port start with 'u' like 'u67', port range can be like this: 1100:1200, multiple port or port range can be separated by ”,“</description>
+        <category>imagestore</category>
+        <defaultValue>8000,8001,8002,9104,10001:10500</defaultValue>
+        <type>java.lang.String</type>
+    </config>
+
+    <config>
+        <name>imageStore.syncLevel</name>
+        <description>imageStore queue Operation</description>
+        <defaultValue>16</defaultValue>
+        <category>imagestore</category>
+        <type>java.lang.Long</type>
+    </config>
+
+    <config>
+        <name>blob.upload.concurrency</name>
+        <description>concurrency when upload blobs of single image to imagestore</description>
+        <defaultValue>4</defaultValue>
+        <category>imagestore</category>
+        <type>java.lang.Integer</type>
+    </config>
+
+    <config>
+        <name>blob.download.concurrency</name>
+        <description>concurrency when download blobs of single image from imagestore</description>
+        <defaultValue>4</defaultValue>
+        <category>imagestore</category>
+        <type>java.lang.Integer</type>
+    </config>
+</globalConfig>

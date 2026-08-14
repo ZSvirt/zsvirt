@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<globalConfig xmlns="http://zstack.org/schema/zstack">
+    <config>
+        <category>mevoco</category>
+        <name>hostAllocatorStrategy</name>
+        <description>global host allocator strategy</description>
+        <defaultValue>LeastVmPreferredHostAllocatorStrategy</defaultValue>
+    </config>
+
+    <config>
+        <category>mevoco</category>
+        <name>distributeImage</name>
+        <description>whether to destribute images to primary storage cache after they are added</description>
+        <type>java.lang.Boolean</type>
+        <defaultValue>true</defaultValue>
+    </config>
+
+    <config>
+        <category>mevoco</category>
+        <name>distributeImage.concurrency</name>
+        <description>the number of images that can be distrubuted in parallel</description>
+        <type>java.lang.Integer</type>
+        <defaultValue>2</defaultValue>
+    </config>
+
+
+    <config>
+        <category>mevoco</category>
+        <name>vm.consoleMode</name>
+        <description>console mode for VM transport protocol. When set to spice, enable the spice protocol connection for VM. Options:[vnc, spice]</description>
+        <type>java.lang.String</type>
+        <defaultValue>vnc</defaultValue>
+    </config>
+
+    <config>
+        <category>mevoco</category>
+        <name>apiRetry.vm</name>
+        <description>the retry times when a VM related API fails</description>
+        <type>java.lang.Integer</type>
+        <defaultValue>0</defaultValue>
+    </config>
+
+    <config>
+        <category>mevoco</category>
+        <name>apiRetry.interval.vm</name>
+        <description>the sleep time before retrying a failed VM related API, in second</description>
+        <type>java.lang.Integer</type>
+        <defaultValue>3</defaultValue>
+    </config>
+
+    <config>
+        <category>mevoco</category>
+        <name>aio.native</name>
+        <description>enable qemu native aio, it can set only if cache is none</description>
+        <type>java.lang.Boolean</type>
+        <defaultValue>false</defaultValue>
+    </config>
+
+    <config>
+        <name>qcow2.cluster.size</name>
+        <description>qcow2 cluster size, must be power of 2 and between 512 to 2097152, units in bytes</description>
+        <defaultValue>2097152</defaultValue>
+        <category>mevoco</category>
+        <type>java.lang.Integer</type>
+    </config>
+
+    <config>
+        <name>deleteTempImages</name>
+        <description>delete temp images after VMs are cloned, created from volume or recovered from backup.</description>
+        <defaultValue>true</defaultValue>
+        <category>mevoco</category>
+        <type>java.lang.Boolean</type>
+    </config>
+
+    <config>
+        <name>xfsFragScrape.interval</name>
+        <description>the interval to scrap xfs fragmentation, in hours</description>
+        <type>java.lang.Integer</type>
+        <category>mevoco</category>
+        <defaultValue>12</defaultValue>
+    </config>
+
+    <config>
+        <name>xfsVolumeDetect.size</name>
+        <description>the threshold size to scrape volume xfs fragmentation, in GiB</description>
+        <type>java.lang.Integer</type>
+        <category>mevoco</category>
+        <defaultValue>100</defaultValue>
+    </config>
+
+    <config>
+        <name>license.scrape.interval</name>
+        <description>the interval to scrap license info, in second</description>
+        <type>java.lang.Integer</type>
+        <category>mevoco</category>
+        <defaultValue>3600</defaultValue>
+    </config>
+
+    <config>
+        <name>enableSpiceChannelSupportTLS</name>
+        <description>spice channel supports TLS encrypted transmission data. Options:[main, display, inputs, cursor, playback, record, smartcard, usbredir]</description>
+        <category>mevoco</category>
+        <defaultValue>0</defaultValue>
+        <type>java.lang.Integer</type>
+    </config>
+
+    <config>
+        <name>enableCgroupDeviceAcl</name>
+        <description>enable cgroup device acl in qemu configuration</description>
+        <category>mevoco</category>
+        <defaultValue>0</defaultValue>
+        <type>java.lang.Integer</type>
+    </config>
+
+    <config>
+        <category>mevoco</category>
+        <name>enable.security.level</name>
+        <description>Enable security level</description>
+        <type>java.lang.Boolean</type>
+        <defaultValue>false</defaultValue>
+    </config>
+
+    <config>
+        <category>mevoco</category>
+        <name>pause.world</name>
+        <description>reject all scheduler job, ha and api which is not read only</description>
+        <type>java.lang.Boolean</type>
+        <defaultValue>false</defaultValue>
+    </config>
+
+    <config>
+        <category>mevoco</category>
+        <name>vm.windows.auto.attach.virtio.driver.format</name>
+        <description>the format of the virtio dirver installer is attached to a new created windows virtio vm</description>
+        <type>java.lang.String</type>
+        <defaultValue>VFD</defaultValue>
+    </config>
+
+</globalConfig>

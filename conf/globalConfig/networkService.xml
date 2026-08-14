@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<globalConfig xmlns="http://zstack.org/schema/zstack">
+    <config>
+        <name>defaultDhcpMtu.l2NoVlanNetwork</name>
+        <description>Default mtu for l2NoVlanNetwork.</description>
+        <defaultValue>1500</defaultValue>
+        <category>networkService</category>
+        <type>java.lang.Integer</type>
+    </config>
+    <config>
+        <name>defaultDhcpMtu.l2VlanNetwork</name>
+        <description>Default mtu for l2VlanNetwork.</description>
+        <defaultValue>1500</defaultValue>
+        <category>networkService</category>
+        <type>java.lang.Integer</type>
+    </config>
+    <config>
+        <name>defaultDhcpMtu.l2VxlanNetwork</name>
+        <description>Default mtu for l2VxlanNetwork.</description>
+        <defaultValue>1450</defaultValue>
+        <category>networkService</category>
+        <type>java.lang.Integer</type>
+    </config>
+    <config>
+        <name>defaultDhcpMtu.dummyNetwork</name>
+        <description>Default mtu for unknown network type.</description>
+        <defaultValue>1500</defaultValue>
+        <category>networkService</category>
+        <type>java.lang.Integer</type>
+    </config>
+    <config>
+        <name>l3.num</name>
+        <description>default quota for l3.num</description>
+        <defaultValue>20</defaultValue>
+        <category>quota</category>
+        <type>java.lang.Long</type>
+    </config>
+    <config>
+        <name>enableVHostUser</name>
+        <description>use vHostUser instead of vDpa</description>
+        <defaultValue>false</defaultValue>
+        <category>networkService</category>
+        <type>java.lang.Boolean</type>
+    </config>
+</globalConfig>

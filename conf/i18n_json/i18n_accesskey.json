@@ -1,0 +1,32 @@
+[
+  {
+    "raw": "No permission to modify the AccessKey for current account",
+    "en_US": "No permission to modify the AccessKey for current account",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/accessKey/AccessKeyApiInterceptor.java"
+  },
+  {
+    "raw": "If a specified Accesskey is expected, the AccesskeyId and the AccesskeySecret must be provided at the same time.",
+    "en_US": "If a specified Accesskey is expected, the AccesskeyId and the AccesskeySecret must be provided at the same time.",
+    "zh_CN": "如果需要指定的AccessKey，则必须同时提供AccessKeyId和AccessKeySecret。",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/accessKey/AccessKeyApiInterceptor.java"
+  },
+  {
+    "raw": "Access key ID and secret cannot contain \u0027:\u0027",
+    "en_US": "Access key ID and secret cannot contain \u0027:\u0027",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/accessKey/AccessKeyApiInterceptor.java"
+  },
+  {
+    "raw": "The number of access keys for account[uuid\u003d%s] has exceeded the maximum limit",
+    "en_US": "The number of access keys for account[uuid\u003d{0}] has exceeded the maximum limit",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getAccountUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/accessKey/AccessKeyApiInterceptor.java"
+  }
+]

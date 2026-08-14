@@ -1,0 +1,208 @@
+[
+  {
+    "raw": "vmNic[uuid:%s] is not attached to vmInstance, cannot get attachable eips",
+    "en_US": "vmNic[uuid:{0}] is not attached to vmInstance, cannot get attachable eips",
+    "zh_CN": "vmnic[uuid：{0}]未连接到VMInstance，无法获取可连接的EIP",
+    "arguments": [
+      "msg.getVmNicUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/eip/EipApiInterceptor.java"
+  },
+  {
+    "raw": "either eipUuid or vipUuid must be set",
+    "en_US": "either eipUuid or vipUuid must be set",
+    "zh_CN": "eipUuid或vipUuid必须有一个被指定",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/network/service/eip/EipApiInterceptor.java"
+  },
+  {
+    "raw": "eip[uuid:%s] is not in state of Enabled, cannot get attachable vm nic",
+    "en_US": "eip[uuid:{0}] is not in state of Enabled, cannot get attachable vm nic",
+    "zh_CN": "eip[uuid:{0}]没有被启用，无法获取可挂载的虚拟机网卡",
+    "arguments": [
+      "msg.getEipUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/eip/EipApiInterceptor.java"
+  },
+  {
+    "raw": "ip [uuid:%s] is attached to vm nic [%s]",
+    "en_US": "ip [uuid:{0}] is attached to vm nic [{1}]",
+    "zh_CN": "IP地址[uuid:{0}]已经绑定到网卡[{1}]",
+    "arguments": [
+      "guestIpUuid",
+      "vmNicUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/eip/EipApiInterceptor.java"
+  },
+  {
+    "raw": "eip[uuid:%s] has attached to another vm nic[uuid:%s], can\u0027t attach again",
+    "en_US": "eip[uuid:{0}] has attached to another vm nic[uuid:{1}], can\u0027t attach again",
+    "zh_CN": "eip[uuid:{0}]已经被挂载到另外一台虚拟机网卡[uuid:{1}]，无法再次挂载",
+    "arguments": [
+      "msg.getEipUuid()",
+      "vmNicUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/eip/EipApiInterceptor.java"
+  },
+  {
+    "raw": "eip[uuid: %s] can only be attached when state is %s, current state is %s",
+    "en_US": "eip[uuid: {0}] can only be attached when state is {1}, current state is {2}",
+    "zh_CN": "eip[uuid:{0}]只有在状态(state)为{1}的情况下可以被挂载，当前状态是{2}",
+    "arguments": [
+      "msg.getEipUuid()",
+      "EipState.Enabled",
+      "state"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/eip/EipApiInterceptor.java"
+  },
+  {
+    "raw": "guest l3Network of vm nic[uuid:%s] and vip l3Network of EIP[uuid:%s] are the same network",
+    "en_US": "guest l3Network of vm nic[uuid:{0}] and vip l3Network of EIP[uuid:{1}] are the same network",
+    "zh_CN": "虚拟机网卡[uuid:{0}]的客户三层网络，和EIP[uuid:{1}]的虚拟ip 三层网络是同一个网络",
+    "arguments": [
+      "msg.getVmNicUuid()",
+      "msg.getEipUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/eip/EipApiInterceptor.java"
+  },
+  {
+    "raw": "Ip address [uuid:%s] is not belonged to nic [uuid:%s]",
+    "en_US": "Ip address [uuid:{0}] is not belonged to nic [uuid:{1}]",
+    "zh_CN": "IP地址[uuid:{0}]没有绑定到网卡[uuid:{1}]",
+    "arguments": [
+      "msg.getEipUuid()",
+      "msg.getVmNicUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/eip/EipApiInterceptor.java"
+  },
+  {
+    "raw": "eip[uuid:%s] has not attached to any vm nic",
+    "en_US": "eip[uuid:{0}] has not attached to any vm nic",
+    "zh_CN": "eip[uuid:{0}]还没有被挂载到任意虚拟机网卡",
+    "arguments": [
+      "msg.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/eip/EipApiInterceptor.java"
+  },
+  {
+    "raw": "vip ipVersion [%d] is different from guestIp ipVersion [%d].",
+    "en_US": "vip ipVersion [{0}] is different from guestIp ipVersion [{1}].",
+    "zh_CN": "虚拟IP的协议号[{0}]和网卡的IP协议号[{1}]不同",
+    "arguments": [
+      "vipIp.getIpVersion()",
+      "guestIp.getIpVersion()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/eip/EipApiInterceptor.java"
+  },
+  {
+    "raw": "Vip[%s] is in the guest ip range [%s, %s]",
+    "en_US": "Vip[{0}] is in the guest ip range [{1}, {2}]",
+    "zh_CN": "虚拟IP[{0}]和网卡的IP不能在相同地址段[{1}-{2}]",
+    "arguments": [
+      "vipIp.getIp()",
+      "guestRange.getStartIp()",
+      "guestRange.getEndIp()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/eip/EipApiInterceptor.java"
+  },
+  {
+    "raw": "the vm[uuid:%s] that the EIP is about to attach is already on the public network[uuid:%s] from which the vip[uuid:%s, name:%s, ip:%s] comes",
+    "en_US": "the vm[uuid:{0}] that the EIP is about to attach is already on the public network[uuid:{1}] from which the vip[uuid:{2}, name:{3}, ip:{4}] comes",
+    "zh_CN": "",
+    "arguments": [
+      "vmUuid",
+      "vip.getL3NetworkUuid()",
+      "vip.getUuid()",
+      "vip.getName()",
+      "vip.getIp()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/eip/EipApiInterceptor.java"
+  },
+  {
+    "raw": "vip[uuid:%s] has been occupied other network service entity[%s]",
+    "en_US": "vip[uuid:{0}] has been occupied other network service entity[{1}]",
+    "zh_CN": "vip[uuid:{0}]已经被其他网络服务实体[{1}]占用",
+    "arguments": [
+      "msg.getVipUuid()",
+      "useForList.toString()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/eip/EipApiInterceptor.java"
+  },
+  {
+    "raw": "eip can not be created on system vip",
+    "en_US": "eip can not be created on system vip",
+    "zh_CN": "无法在系统VIP上创建EIP",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/network/service/eip/EipApiInterceptor.java"
+  },
+  {
+    "raw": "vip[uuid:%s] is not in state[%s], current state is %s",
+    "en_US": "vip[uuid:{0}] is not in state[{1}], current state is {2}",
+    "zh_CN": "vip[uuid:{0}]不处于状态[{1}]中，当前状态[{2}]",
+    "arguments": [
+      "msg.getVipUuid()",
+      "VipState.Enabled",
+      "vip.getState()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/eip/EipApiInterceptor.java"
+  },
+  {
+    "raw": "guest l3Network of vm nic[uuid:%s] and vip l3Network of vip[uuid: %s] are the same network",
+    "en_US": "guest l3Network of vm nic[uuid:{0}] and vip l3Network of vip[uuid: {1}] are the same network",
+    "zh_CN": "虚拟机网卡[uuid:{0}]的客户三层网络和虚拟IP[uuid:{1}]的虚拟IP 三层网络是同一个网络",
+    "arguments": [
+      "msg.getVmNicUuid()",
+      "msg.getVipUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/eip/EipApiInterceptor.java"
+  },
+  {
+    "raw": "vm state[%s] is not allowed to operate eip, maybe you should wait the vm process complete",
+    "en_US": "vm state[{0}] is not allowed to operate eip, maybe you should wait the vm process complete",
+    "zh_CN": "虚拟机状态[{0}]不允许进行弹性IP操作，你可能需要等待虚拟机操作完成",
+    "arguments": [
+      "state.toString()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/eip/EipApiInterceptor.java"
+  },
+  {
+    "raw": "vmNic uuid[%s] is not allowed add eip, because vmNic exist portForwarding with allowedCidr rule",
+    "en_US": "vmNic uuid[{0}] is not allowed add eip, because vmNic exist portForwarding with allowedCidr rule",
+    "zh_CN": "不允许vmnic uuid[{0}]添加EIP，因为vmnic存在具有AllowedCIDR规则的端口转发",
+    "arguments": [
+      "vmNicUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/eip/EipApiInterceptor.java"
+  },
+  {
+    "raw": "cannot find Eip guest ip: %s in vmNic ips :%s",
+    "en_US": "cannot find Eip guest ip: {0} in vmNic ips :{1}",
+    "zh_CN": "在vmnic IP{1}中找不到EIP来宾IP{0}",
+    "arguments": [
+      "eip.getGuestIp()",
+      "nicIps"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/eip/EipManagerImpl.java"
+  },
+  {
+    "raw": "eip [uuid:%s] is deleted",
+    "en_US": "eip [uuid:{0}] is deleted",
+    "zh_CN": "已删除EIP[uuid：{0}]",
+    "arguments": [
+      "struct.getEip().getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/eip/EipManagerImpl.java"
+  },
+  {
+    "raw": "unable to attach the L3 network[uuid:%s, name:%s] to the vm[uuid:%s, name:%s], because the L3 network is providing EIP to one of the vm\u0027s nic",
+    "en_US": "unable to attach the L3 network[uuid:{0}, name:{1}] to the vm[uuid:{2}, name:{3}], because the L3 network is providing EIP to one of the vm\u0027s nic",
+    "zh_CN": "",
+    "arguments": [
+      "l3.getUuid()",
+      "l3.getName()",
+      "vm.getUuid()",
+      "vm.getName()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/eip/EipManagerImpl.java"
+  }
+]

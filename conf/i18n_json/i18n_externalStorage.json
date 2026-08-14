@@ -1,0 +1,24 @@
+[
+  {
+    "raw": "external primary storage[uuid:%s, name:%s] returns unhealthy status: %s",
+    "en_US": "external primary storage[uuid:{0}, name:{1}] returns unhealthy status: {2}",
+    "zh_CN": "",
+    "arguments": [
+      "extPs.getUuid()",
+      "extPs.getName()",
+      "returnValue.getHealthy()"
+    ],
+    "fileName": "src/main/java/org/zstack/externalStorage/primary/kvm/ExternalPrimaryStorageKvmFactory.java"
+  },
+  {
+    "raw": "find active clients for volume[uuid:%s, installPath %s, client:%s]",
+    "en_US": "find active clients for volume[uuid:{0}, installPath {1}, client:{2}]",
+    "zh_CN": "",
+    "arguments": [
+      "vol.getUuid()",
+      "vol.getInstallPath()",
+      "client.getManagerIp()"
+    ],
+    "fileName": "src/main/java/org/zstack/externalStorage/primary/kvm/ExternalPrimaryStorageKvmFactory.java"
+  }
+]

@@ -1,0 +1,18 @@
+<error>
+    <prefix>IAM1</prefix>
+
+    <code>
+        <id>1000</id>
+        <description>IAM1 general error</description>
+    </code>
+
+    <code>
+        <id>2001</id>
+        <description>Move account group to a wrong place</description>
+    </code>
+
+    <code>
+        <id>3001</id>
+        <description>The specific resource is not a resource ensemble member</description>
+    </code>
+</error>

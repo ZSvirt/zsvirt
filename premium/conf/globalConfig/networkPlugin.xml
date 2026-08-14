@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<globalConfig xmlns="http://zstack.org/schema/zstack">
+    <config>
+        <category>networkPlugin</category>
+        <name>gratuitousARP.interval</name>
+        <description>the interval to send gratuitousARP, in seconds</description>
+        <defaultValue>5</defaultValue>
+        <type>java.lang.Integer</type>
+    </config>
+</globalConfig>

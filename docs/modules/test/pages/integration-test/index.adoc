@@ -1,0 +1,240 @@
+= 管理节点基于模拟器的 Integration Test 框架
+//:source-highlighter: rouge
+:imagesdir: ../../images
+
+== 前言
+
+作为产品型的 IaaS 项目，ZStack 非常重视测试，我们要求每个功能、用户场景都有对应的测试用例覆盖。ZStack 的测试有多种维度，本文介绍后端 Java 开发人员使用的基于模拟器的 Integration
+Test 框架。
+
+ZStack 的运行过程中，实际上是管理节点进程 (Java 编写) 通过 HTTP
+PRC 调用控制部署在数据中心各物理设备上的 Agent（Python 或 Golang 编写），如下图：
+
+image::image-2022-02-18-09-39-35-771.png[]
+
+在 Integreation Test 中，我们用模拟器（通过内嵌的 Jetty
+Server）实现所有 Agent HTTP
+RPC 接口，每个用例的 JVM 进程就是一个自包含的 ZStack 环境，如图：
+
+image::image-2022-02-18-13-10-36-327.png[]
+
+== 实例
+
+先看一个实际 https://github.com/zstackio/zstack/blob/master/test/src/test/groovy/org/zstack/test/integration/kvm/lifecycle/OneVmBasicLifeCycleCase.groovy[例子]：
+
+[source, groovy]
+----
+package org.zstack.test.integration.kvm.lifecycle
+
+import org.springframework.http.HttpEntity
+import org.zstack.header.vm.VmInstanceState
+import org.zstack.header.vm.VmInstanceVO
+import org.zstack.kvm.KVMAgentCommands
+import org.zstack.kvm.KVMConstant
+import org.zstack.sdk.VmInstanceInventory
+import org.zstack.test.integration.kvm.OneVmBasicEnv
+import org.zstack.testlib.EnvSpec
+import org.zstack.testlib.SubCase
+import org.zstack.testlib.VmSpec
+import org.zstack.utils.gson.JSONObjectUtil
+
+class OneVmBasicLifeCycleCase extends SubCase {
+    EnvSpec env
+
+    def DOC = """
+test a VM's start/stop/reboot/destroy/recover operations
+"""
+
+    @Override
+    void setup() {
+        spring {
+            sftpBackupStorage()
+            localStorage()
+            virtualRouter()
+            securityGroup()
+            kvm()
+        }
+    }
+
+    @Override
+    void environment() {
+        env = OneVmBasicEnv.env()
+    }
+
+    @Override
+    void test() {
+        env.create {
+            testStopVm()
+            testStartVm()
+            testRebootVm()
+            testDestroyVm()
+            testRecoverVm()
+        }
+    }
+
+    void testRecoverVm() {
+        VmSpec spec = env.specByName("vm")
+
+        VmInstanceInventory inv = recoverVmInstance {
+            uuid = spec.inventory.uuid
+        }
+
+        assert inv.state == VmInstanceState.Stopped.toString()
+
+        // confirm the vm can start after being recovered
+        testStartVm()
+    }
+
+    void testDestroyVm() {
+        VmSpec spec = env.specByName("vm")
+
+        KVMAgentCommands.DestroyVmCmd cmd = null
+
+        env.afterSimulator(KVMConstant.KVM_DESTROY_VM_PATH) { rsp, HttpEntity<String> e ->
+            cmd = JSONObjectUtil.toObject(e.body, KVMAgentCommands.DestroyVmCmd.class)
+            return rsp
+        }
+
+        destroyVmInstance {
+            uuid = spec.inventory.uuid
+        }
+
+        assert cmd != null
+        assert cmd.uuid == spec.inventory.uuid
+        VmInstanceVO vmvo = dbFindByUuid(cmd.uuid, VmInstanceVO.class)
+        assert vmvo.state == VmInstanceState.Destroyed
+    }
+
+    void testRebootVm() {
+        // reboot = stop + start
+        VmSpec spec = env.specByName("vm")
+
+        KVMAgentCommands.StartVmCmd startCmd = null
+        KVMAgentCommands.StopVmCmd stopCmd = null
+
+        env.afterSimulator(KVMConstant.KVM_STOP_VM_PATH) { rsp, HttpEntity<String> e ->
+            stopCmd = JSONObjectUtil.toObject(e.body, KVMAgentCommands.StopVmCmd.class)
+            return rsp
+        }
+
+        env.afterSimulator(KVMConstant.KVM_START_VM_PATH) { rsp, HttpEntity<String> e ->
+            startCmd = JSONObjectUtil.toObject(e.body, KVMAgentCommands.StartVmCmd.class)
+            return rsp
+        }
+
+        VmInstanceInventory inv = rebootVmInstance {
+            uuid = spec.inventory.uuid
+        }
+
+        assert startCmd != null
+        assert startCmd.vmInstanceUuid == spec.inventory.uuid
+        assert stopCmd != null
+        assert stopCmd.uuid == spec.inventory.uuid
+        assert inv.state == VmInstanceState.Running.toString()
+    }
+
+    void testStartVm() {
+        VmSpec spec = env.specByName("vm")
+
+        KVMAgentCommands.StartVmCmd cmd = null
+
+        env.afterSimulator(KVMConstant.KVM_START_VM_PATH) { rsp, HttpEntity<String> e ->
+            cmd = JSONObjectUtil.toObject(e.body, KVMAgentCommands.StartVmCmd.class)
+            return rsp
+        }
+
+        VmInstanceInventory inv = startVmInstance {
+            uuid = spec.inventory.uuid
+        }
+
+        assert cmd != null
+        assert cmd.vmInstanceUuid == spec.inventory.uuid
+        assert inv.state == VmInstanceState.Running.toString()
+
+        VmInstanceVO vmvo = dbFindByUuid(cmd.vmInstanceUuid, VmInstanceVO.class)
+        assert vmvo.state == VmInstanceState.Running
+        assert cmd.vmInternalId == vmvo.internalId
+        assert cmd.vmName == vmvo.name
+        assert cmd.memory == vmvo.memorySize
+        assert cmd.cpuNum == vmvo.cpuNum
+        //TODO: test socketNum, cpuOnSocket
+        assert cmd.rootVolume.installPath == vmvo.rootVolumes.installPath
+        assert cmd.useVirtio
+        vmvo.vmNics.each { nic ->
+            KVMAgentCommands.NicTO to = cmd.nics.find { nic.mac == it.mac }
+            assert to != null: "unable to find the nic[mac:${nic.mac}]"
+            assert to.deviceId == nic.deviceId
+            assert to.useVirtio
+            assert to.nicInternalName == nic.internalName
+        }
+    }
+
+    void testStopVm() {
+        VmSpec spec = env.specByName("vm")
+
+        KVMAgentCommands.StopVmCmd cmd = null
+
+        env.afterSimulator(KVMConstant.KVM_STOP_VM_PATH) { rsp, HttpEntity<String> e ->
+            cmd = JSONObjectUtil.toObject(e.body, KVMAgentCommands.StopVmCmd.class)
+            return rsp
+        }
+
+        VmInstanceInventory inv = stopVmInstance {
+            uuid = spec.inventory.uuid
+        }
+
+        assert inv.state == VmInstanceState.Stopped.toString()
+
+        assert cmd != null
+        assert cmd.uuid == spec.inventory.uuid
+
+        def vmvo = dbFindByUuid(cmd.uuid, VmInstanceVO.class)
+        assert vmvo.state == VmInstanceState.Stopped
+    }
+
+    @Override
+    void clean() {
+        env.delete()
+    }
+}
+----
+
+ZStack 的 Integreation
+Test 使用 groovy 编写，通过 JUnit 运行。运行如下命令可以执行该 case：
+
+[source,shell]
+----
+cd /root/zstack/test
+mvn test -Dtest=OneVmBasicLifeCycleCase
+----
+
+== 依赖环境
+
+在运行任何 Integration Test，开发者的开发环境需要满足如下条件：
+
+[arabic]
+. 从 github 上获得一份 ZStack 源代码
+. 系统中安装了 Mariadb 数据库（或 mysql）并运行，且**数据库 root 用户的密码为空**
++
+____
+Integreation
+Test 启动时会部署 ZStack 数据库，需要使用到数据库 root 用户，默认使用空密码，此项可以通过配置文件改变
+____
+. [.line-through]#系统中已安装了 rabbitmq 并运行，*rabbitmq 的 guest 用户使用默认密码*#（ZStack 目前已经没有 RabbitMQ 的依赖）
+
+我们强烈建议开发者使用一个干净的 CentOS 或者通过专家模式安装一个 ZStack ISO 作为开发环境，**不要**把 Integration
+Test 和运行 ZStack 的试验环境放在同一台机器，Integration
+Test 运行时部署数据库的操作会导致试验环境的 ZStack 数据库丢失。
+
+其余更详细的内容可以参考：
+
+使用相关::
+* xref:integration-test/usages/write-test-case.adoc[]
+* xref:integration-test/usages/test-suite.adoc[]
+* xref:integration-test/usages/run-tests.adoc[]
+* xref:integration-test/usages/cookbook.adoc[]
+* xref:integration-test/usages/get-all-test.adoc[]
+
+原理相关::
+* xref:integration-test/principles/intro.adoc[]
+* xref:integration-test/principles/deep_dive.adoc[]

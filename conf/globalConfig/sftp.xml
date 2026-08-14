@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<globalConfig xmlns="http://zstack.org/schema/zstack">
+    <config>
+        <name>sftp.allow.ports</name>
+        <description>tcp or udp ports allowed by kvmagent, udp port start with 'u' like 'u67', port range can be like this: 1100:1200, multiple port or port range can be separated by ","</description>
+        <defaultValue>7171</defaultValue>
+        <category>sftp</category>
+        <type>java.lang.String</type>
+    </config>
+</globalConfig>

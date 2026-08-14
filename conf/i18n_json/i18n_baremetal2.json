@@ -1,0 +1,1827 @@
+[
+  {
+    "raw": "bond name %s has been existed",
+    "en_US": "bond name {0} has been existed",
+    "zh_CN": "债券名称{0}已存在",
+    "arguments": [
+      "msg.getName()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/chassis/BareMetal2ChassisApiInterceptor.java"
+  },
+  {
+    "raw": "nic with mac:%s has been bonded",
+    "en_US": "nic with mac:{0} has been bonded",
+    "zh_CN": "已绑定具有MAC：{0}的NIC",
+    "arguments": [
+      "mac"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/chassis/BareMetal2ChassisApiInterceptor.java"
+  },
+  {
+    "raw": "cannot find the cluster of baremetal2 chassis[uuid:%s], maybe it doesn\u0027t exist",
+    "en_US": "cannot find the cluster of baremetal2 chassis[uuid:{0}], maybe it doesn\u0027t exist",
+    "zh_CN": "",
+    "arguments": [
+      "chassisUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/chassis/BareMetal2ChassisApiInterceptor.java"
+  },
+  {
+    "raw": "there is no baremetal2 gateway found in cluster[uuid:%s]",
+    "en_US": "there is no baremetal2 gateway found in cluster[uuid:{0}]",
+    "zh_CN": "在集群[uuid：{0}]中找不到BareMetal2网关",
+    "arguments": [
+      "clusterUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/chassis/BareMetal2ChassisApiInterceptor.java"
+  },
+  {
+    "raw": "there is no usable baremetal2 gateway found in cluster[uuid:%s]",
+    "en_US": "there is no usable baremetal2 gateway found in cluster[uuid:{0}]",
+    "zh_CN": "在集群[uuid：{0}]中找不到可用的Baremetal2网关",
+    "arguments": [
+      "clusterUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/chassis/BareMetal2ChassisApiInterceptor.java"
+  },
+  {
+    "raw": "there is no baremetal2 provision network found in cluster[uuid:%s]",
+    "en_US": "there is no baremetal2 provision network found in cluster[uuid:{0}]",
+    "zh_CN": "在集群[uuid：{0}]中找不到BareMetal2配置网络",
+    "arguments": [
+      "clusterUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/chassis/BareMetal2ChassisApiInterceptor.java"
+  },
+  {
+    "raw": "baremetal2 provision network[uuid:%s] is not usable, make sure it\u0027s Enabled",
+    "en_US": "baremetal2 provision network[uuid:{0}] is not usable, make sure it\u0027s Enabled",
+    "zh_CN": "",
+    "arguments": [
+      "provisionNetworkUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/chassis/BareMetal2ChassisApiInterceptor.java"
+  },
+  {
+    "raw": "wrong baremetal2 chassis hardware info format: %s",
+    "en_US": "wrong baremetal2 chassis hardware info format: {0}",
+    "zh_CN": "错误的Baremetal2机箱硬件信息格式：{0}",
+    "arguments": [
+      "hardwareInfo"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/chassis/BareMetal2ChassisHardwareInfoSyncer.java"
+  },
+  {
+    "raw": "the cpu architecture of the chassis[arch:%s] and the cluster[arch:%s] don\u0027t match",
+    "en_US": "the cpu architecture of the chassis[arch:{0}] and the cluster[arch:{1}] don\u0027t match",
+    "zh_CN": "机箱[arch：{0}]和集群[arch：{1}]的CPU体系结构不匹配",
+    "arguments": [
+      "info.architecture",
+      "clusterArchitecture"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/chassis/BareMetal2ChassisHardwareInfoSyncer.java"
+  },
+  {
+    "raw": "only baremetal2 chassis with boot mode %s is supported",
+    "en_US": "only baremetal2 chassis with boot mode {0} is supported",
+    "zh_CN": "仅支持引导模式为{0}的BareMetal2机箱",
+    "arguments": [
+      "BareMetal2GlobalProperty.BAREMETAL2_SUPPORTED_BOOT_MODE"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/chassis/BareMetal2ChassisHardwareInfoSyncer.java"
+  },
+  {
+    "raw": "wrong baremetal2 chassis nic hardware info format: %s",
+    "en_US": "wrong baremetal2 chassis nic hardware info format: {0}",
+    "zh_CN": "错误的Baremetal2机箱NIC硬件信息格式：{0}",
+    "arguments": [
+      "hardwareInfo"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/chassis/BareMetal2ChassisHardwareInfoSyncer.java"
+  },
+  {
+    "raw": "there must be one and only one provision nic in a baremetal2 chassis",
+    "en_US": "there must be one and only one provision nic in a baremetal2 chassis",
+    "zh_CN": "Baremetal2机箱中必须有且只有一个配置NIC",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/baremetal2/chassis/BareMetal2ChassisHardwareInfoSyncer.java"
+  },
+  {
+    "raw": "wrong baremetal2 chassis disk hardware info format: %s",
+    "en_US": "wrong baremetal2 chassis disk hardware info format: {0}",
+    "zh_CN": "错误的Baremetal2机箱磁盘硬件信息格式：{0}",
+    "arguments": [
+      "hardwareInfo"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/chassis/BareMetal2ChassisHardwareInfoSyncer.java"
+  },
+  {
+    "raw": "other chassis has nics with the same mac address, which is impossible",
+    "en_US": "other chassis has nics with the same mac address, which is impossible",
+    "zh_CN": "其他机箱具有相同MAC地址的NIC，这是不可能的",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/baremetal2/chassis/BareMetal2ChassisHardwareInfoSyncer.java"
+  },
+  {
+    "raw": "BareMetal2 Chassis[uuid:%s] doesn\u0027t exist or is disabled",
+    "en_US": "BareMetal2 Chassis[uuid:{0}] doesn\u0027t exist or is disabled",
+    "zh_CN": "Baremetal2机箱[uuid：{0}]不存在或已禁用",
+    "arguments": [
+      "msg.getClusterUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/chassis/BareMetal2ChassisManagerImpl.java"
+  },
+  {
+    "raw": "no available baremetal2 chassis found",
+    "en_US": "no available baremetal2 chassis found",
+    "zh_CN": "找不到可用的Baremetal2机箱",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/baremetal2/chassis/BareMetal2ChassisManagerImpl.java"
+  },
+  {
+    "raw": "no available baremetal2 chassis found in baremetal2 clusters[uuids:%s]",
+    "en_US": "no available baremetal2 chassis found in baremetal2 clusters[uuids:{0}]",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getRequiredClusterUuids()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/chassis/BareMetal2ChassisManagerImpl.java"
+  },
+  {
+    "raw": "Cannot find BareMetal2 Chassis[uuid:%s], it may have been deleted",
+    "en_US": "Cannot find BareMetal2 Chassis[uuid:{0}], it may have been deleted",
+    "zh_CN": "",
+    "arguments": [
+      "cmsg.getChassisUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/chassis/BareMetal2ChassisManagerImpl.java"
+  },
+  {
+    "raw": "License not found, please apply addon license for product elastic-baremetal.",
+    "en_US": "License not found, please apply addon license for product elastic-baremetal.",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/baremetal2/chassis/BareMetal2ChassisManagerImpl.java"
+  },
+  {
+    "raw": "Hijacked detected. Your license[%s] permits %s elastic-baremetal chassis, but we detect there are %s in the database. You can either delete additional chassis or apply a new license.",
+    "en_US": "Hijacked detected. Your license[{0}] permits {1} elastic-baremetal chassis, but we detect there are {2} in the database. You can either delete additional chassis or apply a new license.",
+    "zh_CN": "",
+    "arguments": [
+      "licMgr.getLicenseType()",
+      "allowedChassisNum",
+      "currChassisNum"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/chassis/BareMetal2ChassisManagerImpl.java"
+  },
+  {
+    "raw": "Insufficient elastic-baremetal chassis number licensed. You can either delete additional chassis or apply a new license.",
+    "en_US": "Insufficient elastic-baremetal chassis number licensed. You can either delete additional chassis or apply a new license.",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/baremetal2/chassis/BareMetal2ChassisManagerImpl.java"
+  },
+  {
+    "raw": "not supported",
+    "en_US": "not supported",
+    "zh_CN": "不支持",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/baremetal2/chassis/BatchAddBareMetal2ChassisJob.java"
+  },
+  {
+    "raw": "Bare Metal IPMI 2 Chassis %s:%d already exists",
+    "en_US": "Bare Metal IPMI 2 Chassis {0}:{1} already exists",
+    "zh_CN": "裸机IPMI 2机箱{0}：{1}已存在",
+    "arguments": [
+      "address",
+      "port"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/chassis/ipmi/BareMetal2IpmiChassisApiInterceptor.java"
+  },
+  {
+    "raw": "IPMI Address %s is not valid",
+    "en_US": "IPMI Address {0} is not valid",
+    "zh_CN": "IPMI地址{0}是无效的",
+    "arguments": [
+      "address"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/chassis/ipmi/BareMetal2IpmiChassisApiInterceptor.java"
+  },
+  {
+    "raw": "Failed to reach the baremetal2 chassis, please make sure: 1. the IPMI connection is active; 2. the IPMI Address, Port, Username and Password are correct; 3. IPMI Over LAN is enabled in BIOS.",
+    "en_US": "Failed to reach the baremetal2 chassis, please make sure: 1. the IPMI connection is active; 2. the IPMI Address, Port, Username and Password are correct; 3. IPMI Over LAN is enabled in BIOS.",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/baremetal2/chassis/ipmi/BareMetal2IpmiChassisApiInterceptor.java"
+  },
+  {
+    "raw": "BareMetal2 Chassis of IPMI address %s and IPMI port %d has already been created.",
+    "en_US": "BareMetal2 Chassis of IPMI address {0} and IPMI port {1} has already been created.",
+    "zh_CN": "已创建IPMI地址为{0}、IPMI端口为{1}的BareMetal2机箱。",
+    "arguments": [
+      "address",
+      "port"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/chassis/ipmi/BareMetal2IpmiChassisApiInterceptor.java"
+  },
+  {
+    "raw": "Baremetal Chassis of IPMI address %s and IPMI port %d has already been created.",
+    "en_US": "Baremetal Chassis of IPMI address {0} and IPMI port {1} has already been created.",
+    "zh_CN": "IPMI地址为{0}，端口为{1}的裸金属设备已经被创建",
+    "arguments": [
+      "address",
+      "port"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/chassis/ipmi/BareMetal2IpmiChassisApiInterceptor.java"
+  },
+  {
+    "raw": "Cluster[uuid:%s] does not exists.",
+    "en_US": "Cluster[uuid:{0}] does not exists.",
+    "zh_CN": "集群[uuid:{0}]不存在",
+    "arguments": [
+      "msg.getClusterUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/chassis/ipmi/BareMetal2IpmiChassisApiInterceptor.java"
+  },
+  {
+    "raw": "Cluster[uuid:%s] is not a BareMetal2 Cluster.",
+    "en_US": "Cluster[uuid:{0}] is not a BareMetal2 Cluster.",
+    "zh_CN": "集群[uuid：{0}]不是BareMetal2集群。",
+    "arguments": [
+      "msg.getClusterUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/chassis/ipmi/BareMetal2IpmiChassisApiInterceptor.java"
+  },
+  {
+    "raw": "Cluster[uuid:%s] is not Enabled.",
+    "en_US": "Cluster[uuid:{0}] is not Enabled.",
+    "zh_CN": "集群[uuid:{0}]处于停用状态",
+    "arguments": [
+      "msg.getClusterUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/chassis/ipmi/BareMetal2IpmiChassisApiInterceptor.java"
+  },
+  {
+    "raw": "no usable baremetal2 gateway in cluster[uuid:%s]",
+    "en_US": "no usable baremetal2 gateway in cluster[uuid:{0}]",
+    "zh_CN": "集群[uuid：{0}]中没有可用的Baremetal2网关",
+    "arguments": [
+      "clusterUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/chassis/ipmi/BareMetal2IpmiChassisApiInterceptor.java"
+  },
+  {
+    "raw": "failed to power on baremetal2 ipmi chassis[uuid:%s]",
+    "en_US": "failed to power on baremetal2 ipmi chassis[uuid:{0}]",
+    "zh_CN": "无法打开BareMetal2 IPMI机箱[uuid：{0}]",
+    "arguments": [
+      "self.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/chassis/ipmi/BareMetal2IpmiChassisBase.java"
+  },
+  {
+    "raw": "failed to power off baremetal2 ipmi chassis[uuid:%s]",
+    "en_US": "failed to power off baremetal2 ipmi chassis[uuid:{0}]",
+    "zh_CN": "无法关闭BareMetal2 IPMI机箱[uuid：{0}]",
+    "arguments": [
+      "self.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/chassis/ipmi/BareMetal2IpmiChassisBase.java"
+  },
+  {
+    "raw": "failed to power reset baremetal2 ipmi chassis[uuid:%s]",
+    "en_US": "failed to power reset baremetal2 ipmi chassis[uuid:{0}]",
+    "zh_CN": "无法重新启动BareMetal2 IPMI机箱[uuid：{0}]",
+    "arguments": [
+      "self.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/chassis/ipmi/BareMetal2IpmiChassisBase.java"
+  },
+  {
+    "raw": "Failed to remotely ipxe boot chassis[uuid:%s]",
+    "en_US": "Failed to remotely ipxe boot chassis[uuid:{0}]",
+    "zh_CN": "无法远程IPXE引导机箱[uuid：{0}]",
+    "arguments": [
+      "self.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/chassis/ipmi/BareMetal2IpmiChassisBase.java"
+  },
+  {
+    "raw": "fail to load baremetal2 ipmi chassis info from file, because: %s",
+    "en_US": "fail to load baremetal2 ipmi chassis info from file, because: {0}",
+    "zh_CN": "无法从文件加载BareMetal2 IPMI机箱信息，原因是：{0}",
+    "arguments": [
+      "e.getMessage()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/chassis/ipmi/BareMetal2IpmiChassisFactory.java"
+  },
+  {
+    "raw": "the api message\u0027s chassis type is ipmi, but it\u0027s not an APICreateBareMetal2ChassisHardwareInfoMsg",
+    "en_US": "the api message\u0027s chassis type is ipmi, but it\u0027s not an APICreateBareMetal2ChassisHardwareInfoMsg",
+    "zh_CN": "API消息的机箱类型为IPMI，但它不是APICreateBareMetal2ChassisHardwareInfoMsg",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/baremetal2/chassis/ipmi/BareMetal2IpmiChassisFactory.java"
+  },
+  {
+    "raw": "received hardware info for unknown baremetal2 chassis[ipmi_addr:%s, ipmi_port:%d]",
+    "en_US": "received hardware info for unknown baremetal2 chassis[ipmi_addr:{0}, ipmi_port:{1}]",
+    "zh_CN": "收到未知Baremetal2机箱的硬件信息[IPMI_地址：{0}，IPMI_端口：{1}]",
+    "arguments": [
+      "imsg.getIpmiAddress()",
+      "imsg.getIpmiPort()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/chassis/ipmi/BareMetal2IpmiChassisFactory.java"
+  },
+  {
+    "raw": "cluster type and hypervisor type should all be baremetal2 or all not",
+    "en_US": "cluster type and hypervisor type should all be baremetal2 or all not",
+    "zh_CN": "集群类型和虚拟机管理程序类型应全部为BareMetal2或全部为非BareMetal2",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/baremetal2/cluster/BareMetal2ClusterFactory.java"
+  },
+  {
+    "raw": "the architecture must be set when create new baremetal2 clusters",
+    "en_US": "the architecture must be set when create new baremetal2 clusters",
+    "zh_CN": "创建新的Baremetal2集群时必须设置体系结构",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/baremetal2/cluster/BareMetal2ClusterFactory.java"
+  },
+  {
+    "raw": "do not add host into baremetal2 cluster",
+    "en_US": "do not add host into baremetal2 cluster",
+    "zh_CN": "不要将主机添加到BareMetal2集群中",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/baremetal2/cluster/BareMetal2ClusterFactory.java"
+  },
+  {
+    "raw": "l2 network should not have the same interface name with provision network that\u0027s already attached to the cluster",
+    "en_US": "l2 network should not have the same interface name with provision network that\u0027s already attached to the cluster",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/baremetal2/cluster/BareMetal2ClusterFactory.java"
+  },
+  {
+    "raw": "Can not attach third-party ceph with token into aarch64 cluster.",
+    "en_US": "Can not attach third-party ceph with token into aarch64 cluster.",
+    "zh_CN": "无法使用令牌将第三方 分布式存储 附加到Aarch64集群。",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/baremetal2/cluster/CephStorageAttachBm2ClusterMetric.java"
+  },
+  {
+    "raw": "Can not attach local storage into baremetal2 cluster.",
+    "en_US": "Can not attach local storage into baremetal2 cluster.",
+    "zh_CN": "无法将本地存储连接到BareMetal2集群。",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/baremetal2/cluster/LocalStorageAttachBm2ClusterMetric.java"
+  },
+  {
+    "raw": "failed to delete convert volume to chassis local disk configurations in gateway[uuid:%s] for baremetal2 instance[uuid:%s]",
+    "en_US": "failed to delete convert volume to chassis local disk configurations in gateway[uuid:{0}] for baremetal2 instance[uuid:{1}]",
+    "zh_CN": "",
+    "arguments": [
+      "self.getUuid()",
+      "msg.getInstanceUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/gateway/BareMetal2Gateway.java"
+  },
+  {
+    "raw": "baremetal2 instance[uuid:%s] is not connected, cannot detach provision nic from bonding",
+    "en_US": "baremetal2 instance[uuid:{0}] is not connected, cannot detach provision nic from bonding",
+    "zh_CN": "",
+    "arguments": [
+      "bm.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/gateway/BareMetal2Gateway.java"
+  },
+  {
+    "raw": "failed to detach provision nic to bonding on baremetal2 instance[uuid:%s] through gateway[uuid:%s], because %s",
+    "en_US": "failed to detach provision nic to bonding on baremetal2 instance[uuid:{0}] through gateway[uuid:{1}], because {2}",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getInstanceUuid()",
+      "self.getUuid()",
+      "ret.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/gateway/BareMetal2Gateway.java"
+  },
+  {
+    "raw": "baremetal2 instance[uuid:%s] not connected, cannot attach provision nic to bond",
+    "en_US": "baremetal2 instance[uuid:{0}] not connected, cannot attach provision nic to bond",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getInstanceUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/gateway/BareMetal2Gateway.java"
+  },
+  {
+    "raw": "failed to attach provision nic to bonding on baremetal2 instance[uuid:%s] through gateway[uuid:%s], because %s",
+    "en_US": "failed to attach provision nic to bonding on baremetal2 instance[uuid:{0}] through gateway[uuid:{1}], because {2}",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getInstanceUuid()",
+      "self.getUuid()",
+      "ret.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/gateway/BareMetal2Gateway.java"
+  },
+  {
+    "raw": "chassis:%s disk does not have wwn info, please inspect chassis and try again",
+    "en_US": "chassis:{0} disk does not have wwn info, please inspect chassis and try again",
+    "zh_CN": "机箱：{0}磁盘没有WWN信息，请检查机箱并重试",
+    "arguments": [
+      "chassis.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/gateway/BareMetal2Gateway.java"
+  },
+  {
+    "raw": "convert image data to local disk failed",
+    "en_US": "convert image data to local disk failed",
+    "zh_CN": "将图像数据转换到本地磁盘失败",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/baremetal2/gateway/BareMetal2Gateway.java"
+  },
+  {
+    "raw": "baremetal2 instance[uuid:%s] convert volume failed on baremetal2 chassis[uuid:%s] , timeout after %s minutes ",
+    "en_US": "baremetal2 instance[uuid:{0}] convert volume failed on baremetal2 chassis[uuid:{1}] , timeout after {2} minutes ",
+    "zh_CN": "Baremetal2实例[uuid：{0}]转换卷在Baremetal2机箱[uuid：{1}]上失败，{2}分钟后超时",
+    "arguments": [
+      "instanceVO.getUuid()",
+      "chassis.getUuid()",
+      "BareMetal2GlobalConfig.CONVERT_VOLUME_TO_LOCAL_DISK_TIMEOUT.value(Integer.class)"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/gateway/BareMetal2Gateway.java"
+  },
+  {
+    "raw": "%s",
+    "en_US": "{0}",
+    "zh_CN": "{0}",
+    "arguments": [
+      "e.getMessage()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/gateway/BareMetal2Gateway.java"
+  },
+  {
+    "raw": "failed to prepare provision network in gateway[uuid:%s], because %s",
+    "en_US": "failed to prepare provision network in gateway[uuid:{0}], because {1}",
+    "zh_CN": "无法在网关[uuid：{0}]中准备设置网络，因为{1}",
+    "arguments": [
+      "self.getUuid()",
+      "ret.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/gateway/BareMetal2Gateway.java"
+  },
+  {
+    "raw": "failed to destroy provision network in gateway[uuid:%s], because %s",
+    "en_US": "failed to destroy provision network in gateway[uuid:{0}], because {1}",
+    "zh_CN": "无法销毁网关[uuid：{0}]中的设置网络，因为{1}",
+    "arguments": [
+      "self.getUuid()",
+      "ret.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/gateway/BareMetal2Gateway.java"
+  },
+  {
+    "raw": "no provision nic found for baremetal2 instance[uuid:%s]",
+    "en_US": "no provision nic found for baremetal2 instance[uuid:{0}]",
+    "zh_CN": "未找到BareMetal2实例[uuid：{0}]的配置NIC",
+    "arguments": [
+      "msg.getInstanceUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/gateway/BareMetal2Gateway.java"
+  },
+  {
+    "raw": "failed to create provision configurations for baremetal2 instance[uuid:%s] in gateway[uuid:%s], because %s",
+    "en_US": "failed to create provision configurations for baremetal2 instance[uuid:{0}] in gateway[uuid:{1}], because {2}",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getInstanceUuid()",
+      "self.getUuid()",
+      "ret.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/gateway/BareMetal2Gateway.java"
+  },
+  {
+    "raw": "failed to delete provision configurations for baremetal2 instance[uuid:%s] in gateway[uuid:%s], because %s",
+    "en_US": "failed to delete provision configurations for baremetal2 instance[uuid:{0}] in gateway[uuid:{1}], because {2}",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getInstanceUuid()",
+      "self.getUuid()",
+      "ret.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/gateway/BareMetal2Gateway.java"
+  },
+  {
+    "raw": "failed to create console proxy for baremetal2 instance[uuid:%s] in gateway[uuid:%s], because %s",
+    "en_US": "failed to create console proxy for baremetal2 instance[uuid:{0}] in gateway[uuid:{1}], because {2}",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getInstanceUuid()",
+      "self.getUuid()",
+      "ret.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/gateway/BareMetal2Gateway.java"
+  },
+  {
+    "raw": "failed to change default network from l3[uuid:%s] to l3[uuid:%s] for baremetal2 instance[uuid:%s], because %s",
+    "en_US": "failed to change default network from l3[uuid:{0}] to l3[uuid:{1}] for baremetal2 instance[uuid:{2}], because {3}",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getOldDefaultL3Uuid()",
+      "msg.getNewDefaultL3Uuid()",
+      "msg.getInstanceUuid()",
+      "ret.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/gateway/BareMetal2Gateway.java"
+  },
+  {
+    "raw": "failed to ping baremetal2 instance[uuid:%s] through gateway[uuid:%s], because %s",
+    "en_US": "failed to ping baremetal2 instance[uuid:{0}] through gateway[uuid:{1}], because {2}",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getInstanceUuid()",
+      "msg.getGatewayUuid()",
+      "ret.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/gateway/BareMetal2Gateway.java"
+  },
+  {
+    "raw": "failed to change the password of baremetal2 instance[uuid:%s] through gateway[uuid:%s], because %s",
+    "en_US": "failed to change the password of baremetal2 instance[uuid:{0}] through gateway[uuid:{1}], because {2}",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getInstanceUuid()",
+      "msg.getGatewayUuid()",
+      "ret.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/gateway/BareMetal2Gateway.java"
+  },
+  {
+    "raw": "failed to power on baremetal2 chassis[uuid:%s] using ipmitool",
+    "en_US": "failed to power on baremetal2 chassis[uuid:{0}] using ipmitool",
+    "zh_CN": "无法使用ipmitool打开Baremetal2机箱[uuid：{0}]的电源",
+    "arguments": [
+      "chassis.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/gateway/BareMetal2Gateway.java"
+  },
+  {
+    "raw": "failed to power off baremetal2 chassis[uuid:%s] using ipmitool",
+    "en_US": "failed to power off baremetal2 chassis[uuid:{0}] using ipmitool",
+    "zh_CN": "无法使用ipmitool关闭Baremetal2机箱[uuid：{0}]的电源",
+    "arguments": [
+      "chassis.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/gateway/BareMetal2Gateway.java"
+  },
+  {
+    "raw": "failed to power off baremetal2 instance[uuid:%s] by bm agent, because %s",
+    "en_US": "failed to power off baremetal2 instance[uuid:{0}] by bm agent, because {1}",
+    "zh_CN": "",
+    "arguments": [
+      "bm.getUuid()",
+      "ret.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/gateway/BareMetal2Gateway.java"
+  },
+  {
+    "raw": "baremetal2 chassis[uuid:%s] is still not POWER_OFF %d seconds later",
+    "en_US": "baremetal2 chassis[uuid:{0}] is still not POWER_OFF {1} seconds later",
+    "zh_CN": "Baremetal2机箱[uuid：{0}]在{1}秒后仍未关闭电源_。",
+    "arguments": [
+      "chassis.getUuid()",
+      "timeout"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/gateway/BareMetal2Gateway.java"
+  },
+  {
+    "raw": "vmInstanceUuids is empty",
+    "en_US": "vmInstanceUuids is empty",
+    "zh_CN": "VMInstanceUuids为空",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/baremetal2/gateway/BareMetal2Gateway.java"
+  },
+  {
+    "raw": "the baremetal2 gateway[uuid:%s, status:%s] is not Connected",
+    "en_US": "the baremetal2 gateway[uuid:{0}, status:{1}] is not Connected",
+    "zh_CN": "Baremetal2网关[uuid：{0}，状态：{1}]未连接",
+    "arguments": [
+      "self.getUuid()",
+      "self.getStatus()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/gateway/BareMetal2Gateway.java"
+  },
+  {
+    "raw": "baremetal2 instance[uuid:%s] not connected, cannot attach nic to it",
+    "en_US": "baremetal2 instance[uuid:{0}] not connected, cannot attach nic to it",
+    "zh_CN": "BareMetal2实例[uuid：{0}]未连接，无法将NIC连接到该实例",
+    "arguments": [
+      "bmUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/gateway/BareMetal2Gateway.java"
+  },
+  {
+    "raw": "failed to attach nic[uuid:%s] to baremetal2 instance[uuid:%s] through gateway[uuid:%s], because %s",
+    "en_US": "failed to attach nic[uuid:{0}] to baremetal2 instance[uuid:{1}] through gateway[uuid:{2}], because {3}",
+    "zh_CN": "",
+    "arguments": [
+      "nicUuid",
+      "bmUuid",
+      "gatewayUuid",
+      "ret.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/gateway/BareMetal2Gateway.java"
+  },
+  {
+    "raw": "baremetal2 instance[uuid:%s] is not connected, cannot detach nic from it",
+    "en_US": "baremetal2 instance[uuid:{0}] is not connected, cannot detach nic from it",
+    "zh_CN": "BareMetal2实例[uuid：{0}]未连接，无法将NIC与其分离",
+    "arguments": [
+      "bmUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/gateway/BareMetal2Gateway.java"
+  },
+  {
+    "raw": "failed to detach nic[uuid:%s] from baremetal2 instance[uuid:%s] through gateway[uuid:%s], because %s",
+    "en_US": "failed to detach nic[uuid:{0}] from baremetal2 instance[uuid:{1}] through gateway[uuid:{2}], because {3}",
+    "zh_CN": "",
+    "arguments": [
+      "nicUuid",
+      "bmUuid",
+      "gatewayUuid",
+      "ret.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/gateway/BareMetal2Gateway.java"
+  },
+  {
+    "raw": "failed to prepare volume[uuid:%s] for baremetal2 instance[uuid:%s] through gateway[uuid:%s], because %s",
+    "en_US": "failed to prepare volume[uuid:{0}] for baremetal2 instance[uuid:{1}] through gateway[uuid:{2}], because {3}",
+    "zh_CN": "",
+    "arguments": [
+      "volumeUuid",
+      "bmUuid",
+      "gatewayUuid",
+      "ret.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/gateway/BareMetal2Gateway.java"
+  },
+  {
+    "raw": "failed to attach volume[uuid:%s] to baremetal2 instance[uuid:%s] through gateway[uuid:%s], because %s",
+    "en_US": "failed to attach volume[uuid:{0}] to baremetal2 instance[uuid:{1}] through gateway[uuid:{2}], because {3}",
+    "zh_CN": "",
+    "arguments": [
+      "volumeUuid",
+      "bmUuid",
+      "gatewayUuid",
+      "ret.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/gateway/BareMetal2Gateway.java"
+  },
+  {
+    "raw": "baremetal2 instance[uuid:%s] is not connected, cannot attach volume to it",
+    "en_US": "baremetal2 instance[uuid:{0}] is not connected, cannot attach volume to it",
+    "zh_CN": "BareMetal2实例[uuid：{0}]未连接，无法将卷附加到该实例",
+    "arguments": [
+      "bmUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/gateway/BareMetal2Gateway.java"
+  },
+  {
+    "raw": "failed to get volume[uuid:%s] lunid for baremetal2 instance[uuid:%s] in gateway[uuid:%s], because %s",
+    "en_US": "failed to get volume[uuid:{0}] lunid for baremetal2 instance[uuid:{1}] in gateway[uuid:{2}], because {3}",
+    "zh_CN": "",
+    "arguments": [
+      "volumeUuid",
+      "bmUuid",
+      "gatewayUuid",
+      "ret.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/gateway/BareMetal2Gateway.java"
+  },
+  {
+    "raw": "failed to get gateway ips of the access path[iscsiPath: %s] for block volume %s, because %s",
+    "en_US": "failed to get gateway ips of the access path[iscsiPath: {0}] for block volume {1}, because {2}",
+    "zh_CN": "",
+    "arguments": [
+      "cmd.getVolume().getIscsiPath()",
+      "volumeUuid",
+      "ret.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/gateway/BareMetal2Gateway.java"
+  },
+  {
+    "raw": "failed to detach volume[uuid:%s] from baremetal2 instance[uuid:%s] through gateway[uuid:%s], because %s",
+    "en_US": "failed to detach volume[uuid:{0}] from baremetal2 instance[uuid:{1}] through gateway[uuid:{2}], because {3}",
+    "zh_CN": "",
+    "arguments": [
+      "volumeUuid",
+      "bmUuid",
+      "gatewayUuid",
+      "ret.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/gateway/BareMetal2Gateway.java"
+  },
+  {
+    "raw": "failed to destroy volume[uuid:%s] for baremetal2 instance[uuid:%s] in gateway[uuid:%s], because %s",
+    "en_US": "failed to destroy volume[uuid:{0}] for baremetal2 instance[uuid:{1}] in gateway[uuid:{2}], because {3}",
+    "zh_CN": "",
+    "arguments": [
+      "volumeUuid",
+      "bmUuid",
+      "gatewayUuid",
+      "ret.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/gateway/BareMetal2Gateway.java"
+  },
+  {
+    "raw": "all ceph mons of primary storage[uuid:%s] are not in Connected state",
+    "en_US": "all ceph mons of primary storage[uuid:{0}] are not in Connected state",
+    "zh_CN": "分布式存储[uuid:{0}]所有的监控节点都不是已连接状态",
+    "arguments": [
+      "vo.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/gateway/BareMetal2Gateway.java"
+  },
+  {
+    "raw": "there is already a baremetal pxe server with management ip %s, do not use it to create baremetal2 gateway",
+    "en_US": "there is already a baremetal pxe server with management ip {0}, do not use it to create baremetal2 gateway",
+    "zh_CN": "已存在管理IP为{0}的Baremetal PXE服务器，请不要使用它来创建Baremetal2网关",
+    "arguments": [
+      "msg.getManagementIp()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/gateway/BareMetal2GatewayApiInterceptor.java"
+  },
+  {
+    "raw": "management ip[%s] is neither an IPv4 address nor a valid hostname",
+    "en_US": "management ip[{0}] is neither an IPv4 address nor a valid hostname",
+    "zh_CN": "管理IP[{0}]既不是IPv4地址也不是有效的主机名",
+    "arguments": [
+      "msg.getManagementIp()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/gateway/BareMetal2GatewayApiInterceptor.java"
+  },
+  {
+    "raw": "cannot add baremetal2 gateway in non-baremetal2 cluster[uuid:%s]",
+    "en_US": "cannot add baremetal2 gateway in non-baremetal2 cluster[uuid:{0}]",
+    "zh_CN": "无法在非Baremetal2集群[uuid：{0}]中添加Baremetal2网关",
+    "arguments": [
+      "msg.getClusterUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/gateway/BareMetal2GatewayApiInterceptor.java"
+  },
+  {
+    "raw": "there has been a baremetal2 gateway having management ip %s",
+    "en_US": "there has been a baremetal2 gateway having management ip {0}",
+    "zh_CN": "存在管理IP为{0}的BareMetal2网关",
+    "arguments": [
+      "msg.getManagementIp()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/gateway/BareMetal2GatewayApiInterceptor.java"
+  },
+  {
+    "raw": "there has been a host having management ip %s",
+    "en_US": "there has been a host having management ip {0}",
+    "zh_CN": "已存在管理IP为{0}的主机",
+    "arguments": [
+      "msg.getManagementIp()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/gateway/BareMetal2GatewayApiInterceptor.java"
+  },
+  {
+    "raw": "cannot attach baremetal2 gateway[uuid:%s] to non-baremetal2 cluster[uuid:%s]",
+    "en_US": "cannot attach baremetal2 gateway[uuid:{0}] to non-baremetal2 cluster[uuid:{1}]",
+    "zh_CN": "无法将Baremetal2网关[uuid：{0}]连接到非Baremetal2集群[uuid：{1}]",
+    "arguments": [
+      "msg.getGatewayUuid()",
+      "msg.getClusterUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/gateway/BareMetal2GatewayApiInterceptor.java"
+  },
+  {
+    "raw": "baremetal2 gateway[uuid:%s] already attached to cluster[uuid:%s]",
+    "en_US": "baremetal2 gateway[uuid:{0}] already attached to cluster[uuid:{1}]",
+    "zh_CN": "Baremetal2网关[uuid：{0}]已连接到集群[uuid：{1}]",
+    "arguments": [
+      "msg.getGatewayUuid()",
+      "msg.getClusterUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/gateway/BareMetal2GatewayApiInterceptor.java"
+  },
+  {
+    "raw": "baremetal2 gateway[uuid:%s] can only attach to one cluster",
+    "en_US": "baremetal2 gateway[uuid:{0}] can only attach to one cluster",
+    "zh_CN": "Baremetal2网关[uuid：{0}]只能连接到一个集群",
+    "arguments": [
+      "msg.getGatewayUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/gateway/BareMetal2GatewayApiInterceptor.java"
+  },
+  {
+    "raw": "baremetal2 gateway[uuid:%s] not attached to cluster[uuid:%s], no need to detach",
+    "en_US": "baremetal2 gateway[uuid:{0}] not attached to cluster[uuid:{1}], no need to detach",
+    "zh_CN": "Baremetal2网关[uuid：{0}]未连接到集群[uuid：{1}]，无需分离",
+    "arguments": [
+      "msg.getGatewayUuid()",
+      "msg.getClusterUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/gateway/BareMetal2GatewayApiInterceptor.java"
+  },
+  {
+    "raw": "baremetal2 gateway[uuid:%s] is attached to only one cluster now, do not detach it",
+    "en_US": "baremetal2 gateway[uuid:{0}] is attached to only one cluster now, do not detach it",
+    "zh_CN": "BareMetal2网关[uuid：{0}]现在仅连接到一个集群，请不要将其分离",
+    "arguments": [
+      "msg.getGatewayUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/gateway/BareMetal2GatewayApiInterceptor.java"
+  },
+  {
+    "raw": "cluster[uuid:%s] does not exist",
+    "en_US": "cluster[uuid:{0}] does not exist",
+    "zh_CN": "集群[uuid：{0}]不存在",
+    "arguments": [
+      "msg.getClusterUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/gateway/BareMetal2GatewayApiInterceptor.java"
+  },
+  {
+    "raw": "cluster[uuid:%s] is not a baremetal2 cluster",
+    "en_US": "cluster[uuid:{0}] is not a baremetal2 cluster",
+    "zh_CN": "集群[uuid：{0}]不是BareMetal2集群",
+    "arguments": [
+      "msg.getClusterUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/gateway/BareMetal2GatewayApiInterceptor.java"
+  },
+  {
+    "raw": "gateway[uuid:%s] does not exist",
+    "en_US": "gateway[uuid:{0}] does not exist",
+    "zh_CN": "网关[uuid：{0}]不存在",
+    "arguments": [
+      "msg.getGatewayUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/gateway/BareMetal2GatewayApiInterceptor.java"
+  },
+  {
+    "raw": "baremetal2 gateway[uuid:%s] is already in cluster[uuid:%s]",
+    "en_US": "baremetal2 gateway[uuid:{0}] is already in cluster[uuid:{1}]",
+    "zh_CN": "Baremetal2网关[uuid：{0}]已在集群[uuid：{1}]中",
+    "arguments": [
+      "msg.getGatewayUuid()",
+      "msg.getClusterUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/gateway/BareMetal2GatewayApiInterceptor.java"
+  },
+  {
+    "raw": "baremetal2 gateway[uuid:%s] is not in the same zone as cluster[uuid:%s]",
+    "en_US": "baremetal2 gateway[uuid:{0}] is not in the same zone as cluster[uuid:{1}]",
+    "zh_CN": "Baremetal2网关[uuid：{0}]与集群[uuid：{1}]不在同一个数据中心中",
+    "arguments": [
+      "msg.getGatewayUuid()",
+      "msg.getClusterUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/gateway/BareMetal2GatewayApiInterceptor.java"
+  },
+  {
+    "raw": "cannot change the cluster of baremetal2 gateway[uuid:%s] when there are running instances depending on it",
+    "en_US": "cannot change the cluster of baremetal2 gateway[uuid:{0}] when there are running instances depending on it",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getGatewayUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/gateway/BareMetal2GatewayApiInterceptor.java"
+  },
+  {
+    "raw": "baremetal2 instance[uuid:%s] doesn\u0027t exist, cannot generate its console url",
+    "en_US": "baremetal2 instance[uuid:{0}] doesn\u0027t exist, cannot generate its console url",
+    "zh_CN": "Baremetal2实例[uuid：{0}]不存在，无法生成其控制台URL",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/baremetal2/gateway/BareMetal2GatewayConsoleHypervisorBackend.java"
+  },
+  {
+    "raw": "baremetal2 gateway[uuid:%s] is not Connected, cannot generate console url for instance[uuid:%s]",
+    "en_US": "baremetal2 gateway[uuid:{0}] is not Connected, cannot generate console url for instance[uuid:{1}]",
+    "zh_CN": "",
+    "arguments": [
+      "bm.getGatewayUuid()",
+      "bm.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/gateway/BareMetal2GatewayConsoleHypervisorBackend.java"
+  },
+  {
+    "raw": "cluster[uuid:%s] hypervisorType is not %s",
+    "en_US": "cluster[uuid:{0}] hypervisorType is not {1}",
+    "zh_CN": "集群[uuid：{0}]管理程序类型不是{1}",
+    "arguments": [
+      "msg.getClusterUuid()",
+      "BareMetal2GatewayConstant.BM2_HYPERVISOR_TYPE"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/gateway/BareMetal2GatewayFactory.java"
+  },
+  {
+    "raw": "cluster[%s] is not baremetal2 type",
+    "en_US": "cluster[{0}] is not baremetal2 type",
+    "zh_CN": "集群[{0}]不是BareMetal2类型",
+    "arguments": [
+      "resourceUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/gateway/BareMetal2GatewayManagerImpl.java"
+  },
+  {
+    "raw": "baremetal2 instance required",
+    "en_US": "baremetal2 instance required",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/baremetal2/gateway/BareMetal2GatewayManagerImpl.java"
+  },
+  {
+    "raw": "failed to allocate baremetal2 gateway",
+    "en_US": "failed to allocate baremetal2 gateway",
+    "zh_CN": "无法分配Baremetal2网关",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/baremetal2/gateway/allocator/AbstractGatewayAllocatorStrategy.java"
+  },
+  {
+    "raw": "no available baremetal2 gateway found",
+    "en_US": "no available baremetal2 gateway found",
+    "zh_CN": "找不到可用的Baremetal2网关",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/baremetal2/gateway/allocator/BareMetal2GatewayMainAllocatorFlow.java"
+  },
+  {
+    "raw": "only one baremetal2 system tag is allowed, but %d was got",
+    "en_US": "only one baremetal2 system tag is allowed, but {0} was got",
+    "zh_CN": "只允许一个Baremetal2系统标记，但获得了{0}",
+    "arguments": [
+      "bm2ImageCount"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/image/BareMetal2ImageManagerImpl.java"
+  },
+  {
+    "raw": "only root volume template of format raw/qcow2 can be tagged with baremetal2",
+    "en_US": "only root volume template of format raw/qcow2 can be tagged with baremetal2",
+    "zh_CN": "只有RAW/QCOW2格式的根卷模板才能使用BareMetal2进行标记",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/baremetal2/image/BareMetal2ImageManagerImpl.java"
+  },
+  {
+    "raw": "the bootMode tag is mandatory for baremetal2 images",
+    "en_US": "the bootMode tag is mandatory for baremetal2 images",
+    "zh_CN": "对于BareMetal2镜像，bootmode标记是必需的",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/baremetal2/image/BareMetal2ImageManagerImpl.java"
+  },
+  {
+    "raw": "only baremetal2 image with boot mode %s is supported",
+    "en_US": "only baremetal2 image with boot mode {0} is supported",
+    "zh_CN": "仅支持引导模式为{0}的BareMetal2镜像",
+    "arguments": [
+      "BareMetal2GlobalProperty.BAREMETAL2_SUPPORTED_BOOT_MODE"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/image/BareMetal2ImageManagerImpl.java"
+  },
+  {
+    "raw": "required chassis disk[%s] not belong to chassis[%s]",
+    "en_US": "required chassis disk[{0}] not belong to chassis[{1}]",
+    "zh_CN": "所需的机箱磁盘[{0}]不属于机箱[{1}]",
+    "arguments": [
+      "spec.getRequiredChassisDiskUuid()",
+      "chassis.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/instance/BareMetal2InstanceAllocateChassisFlow.java"
+  },
+  {
+    "raw": "chassis not have engouh capacity for image[%s]",
+    "en_US": "chassis not have engouh capacity for image[{0}]",
+    "zh_CN": "机箱没有足够的容量用于镜像[{0}]",
+    "arguments": [
+      "chassis.getUuid()",
+      "spec.getImageSpec().getInventory().getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/instance/BareMetal2InstanceAllocateChassisFlow.java"
+  },
+  {
+    "raw": "not enough information to determine which baremetal2 cluster should be used",
+    "en_US": "not enough information to determine which baremetal2 cluster should be used",
+    "zh_CN": "没有足够的信息来确定应使用哪个BareMetal2集群",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/baremetal2/instance/BareMetal2InstanceAllocateClusterFlow.java"
+  },
+  {
+    "raw": "no baremetal2 cluster found",
+    "en_US": "no baremetal2 cluster found",
+    "zh_CN": "未找到BareMetal2集群",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/baremetal2/instance/BareMetal2InstanceAllocateClusterFlow.java"
+  },
+  {
+    "raw": "failed to allocate primary storage in clusters[uuids:%s] for baremetal2 instance[uuid:%s]",
+    "en_US": "failed to allocate primary storage in clusters[uuids:{0}] for baremetal2 instance[uuid:{1}]",
+    "zh_CN": "无法在集群[uuid：{0}]中为Baremetal2实例[uuid：{1}]分配主存储",
+    "arguments": [
+      "spec.findOnlyAllowedClusters()",
+      "spec.getVmInventory().getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/instance/BareMetal2InstanceAllocateClusterFlow.java"
+  },
+  {
+    "raw": "failed to allocate gateway in clusters[uuids:%s] for baremetal2 instance[uuid:%s]",
+    "en_US": "failed to allocate gateway in clusters[uuids:{0}] for baremetal2 instance[uuid:{1}]",
+    "zh_CN": "无法在集群[uuid：{0}]中为BareMetal2实例[uuid：{1}]分配网关",
+    "arguments": [
+      "spec.findOnlyAllowedClusters()",
+      "spec.getVmInventory().getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/instance/BareMetal2InstanceAllocateClusterFlow.java"
+  },
+  {
+    "raw": "failed to allocate chassis in clusters[uuids:%s] for baremetal2 instance[uuid:%s]",
+    "en_US": "failed to allocate chassis in clusters[uuids:{0}] for baremetal2 instance[uuid:{1}]",
+    "zh_CN": "无法在集群[uuid：{0}]中为Baremetal2实例[uuid：{1}]分配机箱",
+    "arguments": [
+      "spec.findOnlyAllowedClusters()",
+      "spec.getVmInventory().getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/instance/BareMetal2InstanceAllocateClusterFlow.java"
+  },
+  {
+    "raw": "no baremetal2 cluster found in clusters[uuid:%s]",
+    "en_US": "no baremetal2 cluster found in clusters[uuid:{0}]",
+    "zh_CN": "在集群[uuid：{0}]中找不到BareMetal2集群",
+    "arguments": [
+      "spec.findOnlyAllowedClusters()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/instance/BareMetal2InstanceAllocateClusterFlow.java"
+  },
+  {
+    "raw": "only baremetal2 clusters[uuid:%s] meet the needs for chassis and gateway, but they have no provision network attached",
+    "en_US": "only baremetal2 clusters[uuid:{0}] meet the needs for chassis and gateway, but they have no provision network attached",
+    "zh_CN": "",
+    "arguments": [
+      "clusterUuids"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/instance/BareMetal2InstanceAllocateClusterFlow.java"
+  },
+  {
+    "raw": "name[%s] is invalid, the name requirement: 1~128 characters, support uppercase and lowercase letters, numbers, underscores, and hyphens; It can only start with uppercase and lowercase letters; It does not start or end with a space ",
+    "en_US": "name[{0}] is invalid, the name requirement: 1~128 characters, support uppercase and lowercase letters, numbers, underscores, and hyphens; It can only start with uppercase and lowercase letters; It does not start or end with a space ",
+    "zh_CN": "",
+    "arguments": [
+      "name"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/instance/BareMetal2InstanceApiInterceptor.java"
+  },
+  {
+    "raw": "only support vpc network support attach eip on baremetal2 instance",
+    "en_US": "only support vpc network support attach eip on baremetal2 instance",
+    "zh_CN": "仅支持VPC网络支持在Baremetal2实例上附加EIP",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/baremetal2/instance/BareMetal2InstanceApiInterceptor.java"
+  },
+  {
+    "raw": "bare metal instance not allowed to change vm nic network",
+    "en_US": "bare metal instance not allowed to change vm nic network",
+    "zh_CN": "不允许裸机实例更改VM NIC网络",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/baremetal2/instance/BareMetal2InstanceApiInterceptor.java"
+  },
+  {
+    "raw": "current operation is not supported on local baremetal instance",
+    "en_US": "current operation is not supported on local baremetal instance",
+    "zh_CN": "本地裸机实例不支持当前操作",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/baremetal2/instance/BareMetal2InstanceApiInterceptor.java"
+  },
+  {
+    "raw": "not supported by baremetal2 instance",
+    "en_US": "not supported by baremetal2 instance",
+    "zh_CN": "BareMetal2实例不支持",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/baremetal2/instance/BareMetal2InstanceApiInterceptor.java"
+  },
+  {
+    "raw": "baremetal2 instance[uuid:%s] is not Connected",
+    "en_US": "baremetal2 instance[uuid:{0}] is not Connected",
+    "zh_CN": "BareMetal2实例[uuid：{0}]未连接",
+    "arguments": [
+      "bm.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/instance/BareMetal2InstanceApiInterceptor.java"
+  },
+  {
+    "raw": "baremetal2 instance[uuid:%s] is not stopped",
+    "en_US": "baremetal2 instance[uuid:{0}] is not stopped",
+    "zh_CN": "Baremetal2实例[uuid：{0}]未停止",
+    "arguments": [
+      "bm.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/instance/BareMetal2InstanceApiInterceptor.java"
+  },
+  {
+    "raw": "baremetal2 instance[uuid:%s] is running but its agent is not Connected",
+    "en_US": "baremetal2 instance[uuid:{0}] is running but its agent is not Connected",
+    "zh_CN": "",
+    "arguments": [
+      "bm.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/instance/BareMetal2InstanceApiInterceptor.java"
+  },
+  {
+    "raw": "make sure all baremetal2 gateways on provision network[uuid:%s] are Connected",
+    "en_US": "make sure all baremetal2 gateways on provision network[uuid:{0}] are Connected",
+    "zh_CN": "确保配置网络[uuid：{0}]上的所有Baremetal2网关均已连接",
+    "arguments": [
+      "networkUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/instance/BareMetal2InstanceApiInterceptor.java"
+  },
+  {
+    "raw": "baremetal2 instance[uuid:%s] is not stopped can not change its chassis offering",
+    "en_US": "baremetal2 instance[uuid:{0}] is not stopped can not change its chassis offering",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getInstanceUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/instance/BareMetal2InstanceApiInterceptor.java"
+  },
+  {
+    "raw": "baremetal2 instance[uuid:%s] has not been allocated a chassis, start the instance and try again",
+    "en_US": "baremetal2 instance[uuid:{0}] has not been allocated a chassis, start the instance and try again",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getVmInstanceUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/instance/BareMetal2InstanceApiInterceptor.java"
+  },
+  {
+    "raw": "only l3 network with ip version %d is supported by baremetal2 instance",
+    "en_US": "only l3 network with ip version {0} is supported by baremetal2 instance",
+    "zh_CN": "Baremetal2实例仅支持IP版本为{0}的三层网络",
+    "arguments": [
+      "ipVersion"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/instance/BareMetal2InstanceApiInterceptor.java"
+  },
+  {
+    "raw": "l2 network type %s not supported by baremetal2 instance",
+    "en_US": "l2 network type {0} not supported by baremetal2 instance",
+    "zh_CN": "二层网络类型{0}不受Baremetal2实例支持",
+    "arguments": [
+      "l2Type"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/instance/BareMetal2InstanceApiInterceptor.java"
+  },
+  {
+    "raw": "customMac is mandatory when attaching l3 network to baremetal2 instance",
+    "en_US": "customMac is mandatory when attaching l3 network to baremetal2 instance",
+    "zh_CN": "将三层网络连接到Baremetal2实例时，CustomMAC是必需的",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/baremetal2/instance/BareMetal2InstanceApiInterceptor.java"
+  },
+  {
+    "raw": "%s is not valid mac address",
+    "en_US": "{0} is not valid mac address",
+    "zh_CN": "{0}不是有效的MAC地址",
+    "arguments": [
+      "msg.getCustomMac()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/instance/BareMetal2InstanceApiInterceptor.java"
+  },
+  {
+    "raw": "duplicated mac address %s",
+    "en_US": "duplicated mac address {0}",
+    "zh_CN": "重复的MAC地址{0}",
+    "arguments": [
+      "msg.getCustomMac()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/instance/BareMetal2InstanceApiInterceptor.java"
+  },
+  {
+    "raw": "baremetal2 instance[uuid:%s] running on chassis[uuid:%s], which doesn\u0027t have non-provisioning nic with mac address %s",
+    "en_US": "baremetal2 instance[uuid:{0}] running on chassis[uuid:{1}], which doesn\u0027t have non-provisioning nic with mac address {2}",
+    "zh_CN": "",
+    "arguments": [
+      "bm.getUuid()",
+      "bm.getChassisUuid()",
+      "msg.getCustomMac()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/instance/BareMetal2InstanceApiInterceptor.java"
+  },
+  {
+    "raw": "mac address %s has already been used, try another one",
+    "en_US": "mac address {0} has already been used, try another one",
+    "zh_CN": "MAC地址{0}已被使用，请尝试其他地址",
+    "arguments": [
+      "msg.getCustomMac()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/instance/BareMetal2InstanceApiInterceptor.java"
+  },
+  {
+    "raw": "nic with mac:%s cannot be attached l3Network, because it has been bonded",
+    "en_US": "nic with mac:{0} cannot be attached l3Network, because it has been bonded",
+    "zh_CN": "MAC为{0}的NIC无法连接到L3Network，因为它已绑定",
+    "arguments": [
+      "msg.getCustomMac()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/instance/BareMetal2InstanceApiInterceptor.java"
+  },
+  {
+    "raw": "third party ceph cannot mixed with other primary storage",
+    "en_US": "third party ceph cannot mixed with other primary storage",
+    "zh_CN": "第三方 分布式存储 不能与其他主存储混合",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/baremetal2/instance/BareMetal2InstanceApiInterceptor.java"
+  },
+  {
+    "raw": "remote provision instance not support attach provision nic to bond",
+    "en_US": "remote provision instance not support attach provision nic to bond",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/baremetal2/instance/BareMetal2InstanceApiInterceptor.java"
+  },
+  {
+    "raw": "cluster[uuid:%s] is not an Enabled baremetal2 cluster, cannot start instance[uuid:%s] in it",
+    "en_US": "cluster[uuid:{0}] is not an Enabled baremetal2 cluster, cannot start instance[uuid:{1}] in it",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getClusterUuid()",
+      "msg.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/instance/BareMetal2InstanceApiInterceptor.java"
+  },
+  {
+    "raw": "baremetal2 gateway[uuid:%s] does not exist or is not Enabled or Connected",
+    "en_US": "baremetal2 gateway[uuid:{0}] does not exist or is not Enabled or Connected",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getGatewayUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/instance/BareMetal2InstanceApiInterceptor.java"
+  },
+  {
+    "raw": "baremetal2 gateway[uuid:%s] is not in cluster [uuid:%s]",
+    "en_US": "baremetal2 gateway[uuid:{0}] is not in cluster [uuid:{1}]",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getGatewayUuid()",
+      "msg.getClusterUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/instance/BareMetal2InstanceApiInterceptor.java"
+  },
+  {
+    "raw": "please specify chassis uuid or chassis offering uuid to start baremetal2 instance[uuid:%s]",
+    "en_US": "please specify chassis uuid or chassis offering uuid to start baremetal2 instance[uuid:{0}]",
+    "zh_CN": "请指定机箱uuid或机箱提供uuid以启动BareMetal2实例[uuid：{0}]",
+    "arguments": [
+      "msg.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/instance/BareMetal2InstanceApiInterceptor.java"
+  },
+  {
+    "raw": "baremetal2 chassis offering[uuid:%s] does not exist",
+    "en_US": "baremetal2 chassis offering[uuid:{0}] does not exist",
+    "zh_CN": "Baremetal2机箱产品[uuid：{0}]不存在",
+    "arguments": [
+      "msg.getChassisOfferingUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/instance/BareMetal2InstanceApiInterceptor.java"
+  },
+  {
+    "raw": "baremetal2 chassis offering[uuid:%s] is not Enabled",
+    "en_US": "baremetal2 chassis offering[uuid:{0}] is not Enabled",
+    "zh_CN": "未启用Baremetal2机箱产品[uuid：{0}]",
+    "arguments": [
+      "msg.getChassisOfferingUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/instance/BareMetal2InstanceApiInterceptor.java"
+  },
+  {
+    "raw": "no need to set chassisOfferingUuid because the instance has been assigned an chassis already",
+    "en_US": "no need to set chassisOfferingUuid because the instance has been assigned an chassis already",
+    "zh_CN": "无需设置Chassisofferinguuid，因为实例已分配机箱",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/baremetal2/instance/BareMetal2InstanceApiInterceptor.java"
+  },
+  {
+    "raw": "no need to set chassisOfferingUuid because the instance has been assigned an chassis offering already",
+    "en_US": "no need to set chassisOfferingUuid because the instance has been assigned an chassis offering already",
+    "zh_CN": "无需设置ChassisOfferinguuid，因为已为实例分配了机箱产品",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/baremetal2/instance/BareMetal2InstanceApiInterceptor.java"
+  },
+  {
+    "raw": "baremetal2 chassis[uuid:%s] does not exist",
+    "en_US": "baremetal2 chassis[uuid:{0}] does not exist",
+    "zh_CN": "Baremetal2机箱[uuid：{0}]不存在",
+    "arguments": [
+      "msg.getChassisUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/instance/BareMetal2InstanceApiInterceptor.java"
+  },
+  {
+    "raw": "baremetal2 chassis[uuid:%s] is not belonging to chassis offering[uuid:%s]",
+    "en_US": "baremetal2 chassis[uuid:{0}] is not belonging to chassis offering[uuid:{1}]",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getChassisUuid()",
+      "bm.getChassisOfferingUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/instance/BareMetal2InstanceApiInterceptor.java"
+  },
+  {
+    "raw": "baremetal2 chassis[uuid:%s] is not Enabled",
+    "en_US": "baremetal2 chassis[uuid:{0}] is not Enabled",
+    "zh_CN": "未启用Baremetal2机箱[uuid：{0}]",
+    "arguments": [
+      "msg.getChassisUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/instance/BareMetal2InstanceApiInterceptor.java"
+  },
+  {
+    "raw": "baremetal2 chassis[uuid:%s] has already been allocated",
+    "en_US": "baremetal2 chassis[uuid:{0}] has already been allocated",
+    "zh_CN": "已分配Baremetal2机箱[uuid：{0}]",
+    "arguments": [
+      "msg.getChassisUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/instance/BareMetal2InstanceApiInterceptor.java"
+  },
+  {
+    "raw": "zone[uuid:%s] is specified but it\u0027s not Enabled, can not create baremetal2 instance from it",
+    "en_US": "zone[uuid:{0}] is specified but it\u0027s not Enabled, can not create baremetal2 instance from it",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getZoneUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/instance/BareMetal2InstanceApiInterceptor.java"
+  },
+  {
+    "raw": "cluster[uuid:%s] is specified but it\u0027s not an Enabled baremetal2 cluster, can not create baremetal2 instance from it",
+    "en_US": "cluster[uuid:{0}] is specified but it\u0027s not an Enabled baremetal2 cluster, can not create baremetal2 instance from it",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getClusterUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/instance/BareMetal2InstanceApiInterceptor.java"
+  },
+  {
+    "raw": "neither chassisUuid nor chassisOfferingUuid is set when create baremetal2 instance",
+    "en_US": "neither chassisUuid nor chassisOfferingUuid is set when create baremetal2 instance",
+    "zh_CN": "创建BareMetal2实例时，Chassisuuid和ChassisOfferuuid均未设置",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/baremetal2/instance/BareMetal2InstanceApiInterceptor.java"
+  },
+  {
+    "raw": "do not set chassisUuid and chassisOfferingUuid at the same time",
+    "en_US": "do not set chassisUuid and chassisOfferingUuid at the same time",
+    "zh_CN": "不要同时设置Chassisuuid和ChassisOfferuuid",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/baremetal2/instance/BareMetal2InstanceApiInterceptor.java"
+  },
+  {
+    "raw": "baremetal2 chassis[uuid:%s] is not Enabled, can\u0027t create baremetal2 instance from it",
+    "en_US": "baremetal2 chassis[uuid:{0}] is not Enabled, can\u0027t create baremetal2 instance from it",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getChassisUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/instance/BareMetal2InstanceApiInterceptor.java"
+  },
+  {
+    "raw": "baremetal2 chassis[uuid:%s] is not Available, can\u0027t create baremetal2 instance from it",
+    "en_US": "baremetal2 chassis[uuid:{0}] is not Available, can\u0027t create baremetal2 instance from it",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getChassisUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/instance/BareMetal2InstanceApiInterceptor.java"
+  },
+  {
+    "raw": "baremetal2 chassis offering[uuid:%s] is not Enabled, can\u0027t create baremetal2 instance from it",
+    "en_US": "baremetal2 chassis offering[uuid:{0}] is not Enabled, can\u0027t create baremetal2 instance from it",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getChassisOfferingUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/instance/BareMetal2InstanceApiInterceptor.java"
+  },
+  {
+    "raw": "baremetal2 gateway[uuid:%s] is not Enabled, can\u0027t create baremetal2 instance from it",
+    "en_US": "baremetal2 gateway[uuid:{0}] is not Enabled, can\u0027t create baremetal2 instance from it",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getGatewayUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/instance/BareMetal2InstanceApiInterceptor.java"
+  },
+  {
+    "raw": "baremetal2 gateway[uuid:%s] is not Connected, can\u0027t create baremetal2 instance from it",
+    "en_US": "baremetal2 gateway[uuid:{0}] is not Connected, can\u0027t create baremetal2 instance from it",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getGatewayUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/instance/BareMetal2InstanceApiInterceptor.java"
+  },
+  {
+    "raw": "baremetal2 gateway[uuid:%s] is not in the same cluster with chassis[uuid:%s]",
+    "en_US": "baremetal2 gateway[uuid:{0}] is not in the same cluster with chassis[uuid:{1}]",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getGatewayUuid()",
+      "msg.getChassisUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/instance/BareMetal2InstanceApiInterceptor.java"
+  },
+  {
+    "raw": "image cannot be empty unless chassis is in direct mode",
+    "en_US": "image cannot be empty unless chassis is in direct mode",
+    "zh_CN": "除非机箱处于直接模式，否则镜像不能为空",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/baremetal2/instance/BareMetal2InstanceApiInterceptor.java"
+  },
+  {
+    "raw": "direct mode not support choose image",
+    "en_US": "direct mode not support choose image",
+    "zh_CN": "直接模式不支持选择镜像",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/baremetal2/instance/BareMetal2InstanceApiInterceptor.java"
+  },
+  {
+    "raw": "image[uuid:%s] does not exist",
+    "en_US": "image[uuid:{0}] does not exist",
+    "zh_CN": "镜像[uuid：{0}]不存在",
+    "arguments": [
+      "msg.getImageUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/instance/BareMetal2InstanceApiInterceptor.java"
+  },
+  {
+    "raw": "Chassis disk[%s] not have enough capacity for image[%s]",
+    "en_US": "Chassis disk[{0}] not have enough capacity for image[{1}]",
+    "zh_CN": "机箱磁盘[{0}]没有足够的容量用于镜像[{1}]",
+    "arguments": [
+      "disk.getUuid()",
+      "image.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/instance/BareMetal2InstanceApiInterceptor.java"
+  },
+  {
+    "raw": "image[uuid:%s] is not Enabled, can\u0027t create baremetal2 instance from it",
+    "en_US": "image[uuid:{0}] is not Enabled, can\u0027t create baremetal2 instance from it",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getImageUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/instance/BareMetal2InstanceApiInterceptor.java"
+  },
+  {
+    "raw": "image[uuid:%s] is not Ready, can\u0027t create baremetal2 instance from it",
+    "en_US": "image[uuid:{0}] is not Ready, can\u0027t create baremetal2 instance from it",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getImageUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/instance/BareMetal2InstanceApiInterceptor.java"
+  },
+  {
+    "raw": "image[uuid:%s] is of mediaType: %s, only RootVolumeTemplate can be used to create baremetal2 instance",
+    "en_US": "image[uuid:{0}] is of mediaType: {1}, only RootVolumeTemplate can be used to create baremetal2 instance",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getImageUuid()",
+      "image.getMediaType()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/instance/BareMetal2InstanceApiInterceptor.java"
+  },
+  {
+    "raw": "image[uuid:%s] is of format: %s, only %s can be used to create baremetal2 instance",
+    "en_US": "image[uuid:{0}] is of format: {1}, only {2} can be used to create baremetal2 instance",
+    "zh_CN": "",
+    "arguments": [
+      "image.getFormat()",
+      "BareMetal2InstanceConstant.IMAGE_FORMAT_FOR_BM"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/instance/BareMetal2InstanceApiInterceptor.java"
+  },
+  {
+    "raw": "image[uuid:%s] is not baremetal2 image, can\u0027t create baremetal2 instance from it",
+    "en_US": "image[uuid:{0}] is not baremetal2 image, can\u0027t create baremetal2 instance from it",
+    "zh_CN": "",
+    "arguments": [
+      "image.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/instance/BareMetal2InstanceApiInterceptor.java"
+  },
+  {
+    "raw": "only image with boot mode %s is supported to create baremetal2 instance",
+    "en_US": "only image with boot mode {0} is supported to create baremetal2 instance",
+    "zh_CN": "",
+    "arguments": [
+      "BareMetal2GlobalProperty.BAREMETAL2_SUPPORTED_BOOT_MODE"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/instance/BareMetal2InstanceApiInterceptor.java"
+  },
+  {
+    "raw": "different boot mode between the image and chassis/offering",
+    "en_US": "different boot mode between the image and chassis/offering",
+    "zh_CN": "镜像和机箱/产品之间的引导模式不同",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/baremetal2/instance/BareMetal2InstanceApiInterceptor.java"
+  },
+  {
+    "raw": "the architecture of baremetal2 cluster[arch:%s] and image[arch:%s] don\u0027t match",
+    "en_US": "the architecture of baremetal2 cluster[arch:{0}] and image[arch:{1}] don\u0027t match",
+    "zh_CN": "",
+    "arguments": [
+      "clusterArchitecture",
+      "image.getArchitecture()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/instance/BareMetal2InstanceApiInterceptor.java"
+  },
+  {
+    "raw": "not all disk offerings[uuids:%s] are Enabled, can not create baremetal2 instance from them",
+    "en_US": "not all disk offerings[uuids:{0}] are Enabled, can not create baremetal2 instance from them",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getDataDiskOfferingUuids()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/instance/BareMetal2InstanceApiInterceptor.java"
+  },
+  {
+    "raw": "the primary storage[%s] of the root volume and the primary storage[%s] of the data volume are not in the same cluster",
+    "en_US": "the primary storage[{0}] of the root volume and the primary storage[{1}] of the data volume are not in the same cluster",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getPrimaryStorageUuidForRootVolume()",
+      "msg.getPrimaryStorageUuidForDataVolume()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/instance/BareMetal2InstanceApiInterceptor.java"
+  },
+  {
+    "raw": "cannot decide which zone the baremetal2 instance should be created in",
+    "en_US": "cannot decide which zone the baremetal2 instance should be created in",
+    "zh_CN": "无法确定应在哪个数据中心中创建BareMetal2实例",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/baremetal2/instance/BareMetal2InstanceApiInterceptor.java"
+  },
+  {
+    "raw": "baremetal2 instance[uuid:%s] is either not exist or not Connected, cannot change its password",
+    "en_US": "baremetal2 instance[uuid:{0}] is either not exist or not Connected, cannot change its password",
+    "zh_CN": "Baremetal2实例[uuid：{0}]不存在或未连接，无法更改其密码",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/baremetal2/instance/BareMetal2InstanceBase.java"
+  },
+  {
+    "raw": "cannot find the image[uuid:%s] in any connected backup storage attached to the zone[uuid:%s]. check below:\\n1. if the backup storage is attached to the zone where the VM[name: %s, uuid:%s] is in\\n2. if the backup storage is in connected status, if not, try reconnecting it",
+    "en_US": "cannot find the image[uuid:{0}] in any connected backup storage attached to the zone[uuid:{1}]. check below:\\n1. if the backup storage is attached to the zone where the VM[name: {2}, uuid:{3}] is in\\n2. if the backup storage is in connected status, if not, try reconnecting it",
+    "zh_CN": "",
+    "arguments": [
+      "imageUuid",
+      "spec.getVmInventory().getZoneUuid()",
+      "spec.getVmInventory().getName()",
+      "spec.getVmInventory().getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/instance/BareMetal2InstanceImageSelectBackupStorageFlow.java"
+  },
+  {
+    "raw": "cannot find the image[uuid:%s] in any connected backup storage. check below:\\n1. if the backup storage is attached to the zone where the VM[name: %s, uuid:%s] is in\\n2. if the backup storage is in connected status, if not, try reconnecting it",
+    "en_US": "cannot find the image[uuid:{0}] in any connected backup storage. check below:\\n1. if the backup storage is attached to the zone where the VM[name: {1}, uuid:{2}] is in\\n2. if the backup storage is in connected status, if not, try reconnecting it",
+    "zh_CN": "",
+    "arguments": [
+      "imageUuid",
+      "spec.getVmInventory().getName()",
+      "spec.getVmInventory().getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/instance/BareMetal2InstanceImageSelectBackupStorageFlow.java"
+  },
+  {
+    "raw": "no backup storage attached to the zone[uuid:%s] contains the ISO[uuid:%s]",
+    "en_US": "no backup storage attached to the zone[uuid:{0}] contains the ISO[uuid:{1}]",
+    "zh_CN": "在数据中心 {0} 中找不到存放 ISO 镜像 {1} 的镜像存储",
+    "arguments": [
+      "zoneUuid",
+      "isoImageUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/instance/BareMetal2InstanceImageSelectBackupStorageFlow.java"
+  },
+  {
+    "raw": "Cannot find BareMetal2 Instance[uuid:%s], it may have been deleted",
+    "en_US": "Cannot find BareMetal2 Instance[uuid:{0}], it may have been deleted",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getInstanceUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/instance/BareMetal2InstanceManagerImpl.java"
+  },
+  {
+    "raw": "%s can only be created or deleted",
+    "en_US": "{0} can only be created or deleted",
+    "zh_CN": "只能创建或删除{0}",
+    "arguments": [
+      "releaseTag"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/instance/BareMetal2InstanceManagerImpl.java"
+  },
+  {
+    "raw": "%s can only be created or deleted when the baremetal2 instance is Running",
+    "en_US": "{0} can only be created or deleted when the baremetal2 instance is Running",
+    "zh_CN": "只能在运行BareMetal2实例时创建或删除{0}",
+    "arguments": [
+      "releaseTag"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/instance/BareMetal2InstanceManagerImpl.java"
+  },
+  {
+    "raw": "there already exists a baremetal2 provision network with dhcpInterface \u003d %s, dhcpRangeStartIp \u003d %s, dhcpRangeEndIp \u003d %s, dhcpRangeNetmask \u003d %s, dhcpRangeGateway \u003d %s",
+    "en_US": "there already exists a baremetal2 provision network with dhcpInterface \u003d {0}, dhcpRangeStartIp \u003d {1}, dhcpRangeEndIp \u003d {2}, dhcpRangeNetmask \u003d {3}, dhcpRangeGateway \u003d {4}",
+    "zh_CN": "",
+    "arguments": [
+      "dhcpInterface",
+      "dhcpRangeStartIp",
+      "dhcpRangeEndIp",
+      "dhcpRangeNetmask",
+      "dhcpRangeGateway"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/provisionnetwork/BareMetal2ProvisionNetworkApiInterceptor.java"
+  },
+  {
+    "raw": "cannot update baremetal2 provision network[uuid:%s] dhcp configuration when there are instances depending on it",
+    "en_US": "cannot update baremetal2 provision network[uuid:{0}] dhcp configuration when there are instances depending on it",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getNetworkUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/provisionnetwork/BareMetal2ProvisionNetworkApiInterceptor.java"
+  },
+  {
+    "raw": "baremetal2 provision network dhcp range netmask %s is invalid",
+    "en_US": "baremetal2 provision network dhcp range netmask {0} is invalid",
+    "zh_CN": "Baremetal2设置网络DHCP范围网络掩码{0}无效",
+    "arguments": [
+      "netmask"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/provisionnetwork/BareMetal2ProvisionNetworkApiInterceptor.java"
+  },
+  {
+    "raw": "baremetal2 provision network start ip %s and stop ip %s do not belong to the same subnet",
+    "en_US": "baremetal2 provision network start ip {0} and stop ip {1} do not belong to the same subnet",
+    "zh_CN": "Baremetal2配置网络启动IP{0}和停止IP{1}不属于同一子网",
+    "arguments": [
+      "begin",
+      "end"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/provisionnetwork/BareMetal2ProvisionNetworkApiInterceptor.java"
+  },
+  {
+    "raw": "cannot delete baremetal2 provision network[uuid:%s] when there are instances depending on it",
+    "en_US": "cannot delete baremetal2 provision network[uuid:{0}] when there are instances depending on it",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getNetworkUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/provisionnetwork/BareMetal2ProvisionNetworkApiInterceptor.java"
+  },
+  {
+    "raw": "cannot attach baremetal2 provision network[uuid:%s] to non-baremetal2 cluster[uuid:%s]",
+    "en_US": "cannot attach baremetal2 provision network[uuid:{0}] to non-baremetal2 cluster[uuid:{1}]",
+    "zh_CN": "无法将BareMetal2设置网络[uuid：{0}]连接到非BareMetal2集群[uuid：{1}]",
+    "arguments": [
+      "msg.getNetworkUuid()",
+      "msg.getClusterUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/provisionnetwork/BareMetal2ProvisionNetworkApiInterceptor.java"
+  },
+  {
+    "raw": "baremetal2 provision network[uuid:%s] is already attached to cluster[uuid:%s]",
+    "en_US": "baremetal2 provision network[uuid:{0}] is already attached to cluster[uuid:{1}]",
+    "zh_CN": "Baremetal2配置网络[uuid：{0}]已连接到集群[uuid：{1}]",
+    "arguments": [
+      "msg.getNetworkUuid()",
+      "msg.getClusterUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/provisionnetwork/BareMetal2ProvisionNetworkApiInterceptor.java"
+  },
+  {
+    "raw": "cannot attach baremetal2 provision network[uuid:%s] to cluster[uuid:%s] because the cluster already have one",
+    "en_US": "cannot attach baremetal2 provision network[uuid:{0}] to cluster[uuid:{1}] because the cluster already have one",
+    "zh_CN": "无法将BareMetal2设置网络[uuid：{0}]附加到集群[uuid：{1}]，因为该集群已有一个网络",
+    "arguments": [
+      "msg.getNetworkUuid()",
+      "msg.getClusterUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/provisionnetwork/BareMetal2ProvisionNetworkApiInterceptor.java"
+  },
+  {
+    "raw": "cannot attach baremetal2 provision network[uuid:%s] to cluster[uuid:%s] because they are not in the same zone",
+    "en_US": "cannot attach baremetal2 provision network[uuid:{0}] to cluster[uuid:{1}] because they are not in the same zone",
+    "zh_CN": "无法将BareMetal2配置网络[uuid：{0}]附加到集群[uuid：{1}]，因为它们不在同一数据中心中",
+    "arguments": [
+      "msg.getNetworkUuid()",
+      "msg.getClusterUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/provisionnetwork/BareMetal2ProvisionNetworkApiInterceptor.java"
+  },
+  {
+    "raw": "cannot attach baremetal2 provision network[uuid:%s] to cluster[uuid:%s], because we need to make sure that every gateway attached to the clusters that have the same provision network attached",
+    "en_US": "cannot attach baremetal2 provision network[uuid:{0}] to cluster[uuid:{1}], because we need to make sure that every gateway attached to the clusters that have the same provision network attached",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getNetworkUuid()",
+      "msg.getClusterUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/provisionnetwork/BareMetal2ProvisionNetworkApiInterceptor.java"
+  },
+  {
+    "raw": "provision network should not have the same interface name with l2 networks that are already attached to the cluster",
+    "en_US": "provision network should not have the same interface name with l2 networks that are already attached to the cluster",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/baremetal2/provisionnetwork/BareMetal2ProvisionNetworkApiInterceptor.java"
+  },
+  {
+    "raw": "cannot detach baremetal2 provision network[uuid:%s] when there are running instances depending on it",
+    "en_US": "cannot detach baremetal2 provision network[uuid:{0}] when there are running instances depending on it",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getNetworkUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/provisionnetwork/BareMetal2ProvisionNetworkApiInterceptor.java"
+  },
+  {
+    "raw": "networkUuids is empty",
+    "en_US": "networkUuids is empty",
+    "zh_CN": "网络uuid为空",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/baremetal2/provisionnetwork/BareMetal2ProvisionNetworkApiInterceptor.java"
+  },
+  {
+    "raw": "not all baremetal2 provision networks exist in %s",
+    "en_US": "not all baremetal2 provision networks exist in {0}",
+    "zh_CN": "{0}中并不存在所有BareMetal2配置网络",
+    "arguments": [
+      "msg.getNetworkUuids()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/provisionnetwork/BareMetal2ProvisionNetworkApiInterceptor.java"
+  },
+  {
+    "raw": "failed to update provision network[uuid:%s] in gateway[uuid:%s]: %s",
+    "en_US": "failed to update provision network[uuid:{0}] in gateway[uuid:{1}]: {2}",
+    "zh_CN": "无法更新设置网络[uuid：{0}]（在网关[uuid：{1}]中）：{2}",
+    "arguments": [
+      "networkUuid",
+      "gatewayUuid",
+      "reply.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/provisionnetwork/BareMetal2ProvisionNetworkBase.java"
+  },
+  {
+    "raw": "failed to prepare provision network[uuid:%s] in gateway[uuid:%s]: %s",
+    "en_US": "failed to prepare provision network[uuid:{0}] in gateway[uuid:{1}]: {2}",
+    "zh_CN": "无法准备设置网络[uuid：{0}]（在网关[uuid：{1}]中）：{2}",
+    "arguments": [
+      "networkUuid",
+      "gatewayUuid",
+      "reply.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/provisionnetwork/BareMetal2ProvisionNetworkBase.java"
+  },
+  {
+    "raw": "failed to allocate ip from baremetal2 provision network[uuid:%s]",
+    "en_US": "failed to allocate ip from baremetal2 provision network[uuid:{0}]",
+    "zh_CN": "无法从BareMetal2配置网络[uuid：{0}]分配IP",
+    "arguments": [
+      "msg.getNetworkUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/provisionnetwork/BareMetal2ProvisionNetworkBase.java"
+  },
+  {
+    "raw": "required ip %s has been occupied on other instance",
+    "en_US": "required ip {0} has been occupied on other instance",
+    "zh_CN": "",
+    "arguments": [
+      "requiredIp"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/provisionnetwork/BareMetal2ProvisionNetworkBase.java"
+  },
+  {
+    "raw": "requiredIp %s is out of dhcp range %s ~ %s",
+    "en_US": "requiredIp {0} is out of dhcp range {1} ~ {2}",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getRequiredIp()",
+      "self.getDhcpRangeStartIp()",
+      "self.getDhcpRangeEndIp()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/provisionnetwork/BareMetal2ProvisionNetworkBase.java"
+  },
+  {
+    "raw": "Cannot find BareMetal2 Provision Network[uuid:%s], it may have been deleted",
+    "en_US": "Cannot find BareMetal2 Provision Network[uuid:{0}], it may have been deleted",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getNetworkUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/baremetal2/provisionnetwork/BareMetal2ProvisionNetworkManagerImpl.java"
+  }
+]

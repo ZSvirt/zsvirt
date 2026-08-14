@@ -1,0 +1,1410 @@
+[
+  {
+    "raw": "cannot connect to [%s] in %d milliseconds, so aliyun openapi is unreachable.",
+    "en_US": "cannot connect to [{0}] in {1} milliseconds, so aliyun openapi is unreachable.",
+    "zh_CN": "无法在{1}毫秒内连接到[{0}]，因此无法访问阿里云OpenAPI。",
+    "arguments": [
+      "builder.deleteCharAt(builder.length() - 1)",
+      "timeout"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/account/AliyunAccountBase.java"
+  },
+  {
+    "raw": "[%s, %s] not a valid ak pair, please check it. more details: %s",
+    "en_US": "[{0}, {1}] not a valid ak pair, please check it. more details: {2}",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getKey()",
+      "\"******\"",
+      "reply.getError().getDetails()"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/account/AliyunAccountBase.java"
+  },
+  {
+    "raw": "no bucket found for backup",
+    "en_US": "no bucket found for backup",
+    "zh_CN": "没有可用的Bucket执行备份",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/aliyun/backup/BackupToAliyunBase.java"
+  },
+  {
+    "raw": "accessKey and keySecret must be set!",
+    "en_US": "accessKey and keySecret must be set!",
+    "zh_CN": "必须设置AccessKey和KeySecret！",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/aliyun/core/AliyunClient.java"
+  },
+  {
+    "raw": "regionId must be set!",
+    "en_US": "regionId must be set!",
+    "zh_CN": "必须设置RegionID！",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/aliyun/core/AliyunClient.java"
+  },
+  {
+    "raw": "cannot find key / secret from msg",
+    "en_US": "cannot find key / secret from msg",
+    "zh_CN": "无法从消息中找到密钥/机密",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/aliyun/core/AliyunSdkImpl.java"
+  },
+  {
+    "raw": "no such instance type support: %s",
+    "en_US": "no such instance type support: {0}",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getTypeId()"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/core/AliyunSdkImpl.java"
+  },
+  {
+    "raw": "couldn\u0027t find router table in router: [%s]",
+    "en_US": "couldn\u0027t find router table in router: [{0}]",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getvRouterId()"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/core/AliyunSdkImpl.java"
+  },
+  {
+    "raw": "entry is still existed after %s ms",
+    "en_US": "entry is still existed after {0} ms",
+    "zh_CN": "虚拟路由器删除超时（{0} ms）",
+    "arguments": [
+      "AliyunConstant.DEFAULT_ENTRY_WAIT_STATUS_TIMEOUT"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/core/AliyunSdkImpl.java"
+  },
+  {
+    "raw": "cannot find EcsInstance[%s], please check if it exists in Aliyun console",
+    "en_US": "cannot find EcsInstance[{0}], please check if it exists in Aliyun console",
+    "zh_CN": "找不到ECSInstance[{0}]，请检查阿里云控制台是否存在",
+    "arguments": [
+      "request.getInstanceIds()"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/core/AliyunSdkImpl.java"
+  },
+  {
+    "raw": "image already existed remote, please use sync first.",
+    "en_US": "image already existed remote, please use sync first.",
+    "zh_CN": "镜像已经存在阿里云服务器上，请尝试同步数据",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/aliyun/core/AliyunSdkImpl.java"
+  },
+  {
+    "raw": "the izone chosen by user doesn\u0027t support VPC",
+    "en_US": "the izone chosen by user doesn\u0027t support VPC",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/aliyun/core/AliyunSdkImpl.java"
+  },
+  {
+    "raw": "regionId[%s] is invalid by aliyun!",
+    "en_US": "regionId[{0}] is invalid by aliyun!",
+    "zh_CN": "regionId[{0}]是无效的！",
+    "arguments": [
+      "request.getRegionId()"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/core/AliyunSdkImpl.java"
+  },
+  {
+    "raw": "add endpoint to sdk failed, due to: %s",
+    "en_US": "add endpoint to sdk failed, due to: {0}",
+    "zh_CN": "将终结点添加到SDK失败，原因是：{0}",
+    "arguments": [
+      "e.getMessage()"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/core/AliyunUtils.java"
+  },
+  {
+    "raw": "no accountUuid found, please check the login session!",
+    "en_US": "no accountUuid found, please check the login session!",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/aliyun/core/AliyunUtils.java"
+  },
+  {
+    "raw": "cannot input 0-length file as vm images!",
+    "en_US": "cannot input 0-length file as vm images!",
+    "zh_CN": "无法将长度为0的文件作为虚拟机镜像输入！",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/aliyun/core/OssSdkImpl.java"
+  },
+  {
+    "raw": "Permission denied for: %s",
+    "en_US": "Permission denied for: {0}",
+    "zh_CN": "权限被拒绝：{0}",
+    "arguments": [
+      "e.getMessage()"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/core/OssSdkImpl.java"
+  },
+  {
+    "raw": "no such oss bucket: %s",
+    "en_US": "no such oss bucket: {0}",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getBucketName()"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/core/OssSdkImpl.java"
+  },
+  {
+    "raw": "Bucket name is already existed (maybe created by other user), Please select a different name and try again.(aliyun request-id: %s)",
+    "en_US": "Bucket name is already existed (maybe created by other user), Please select a different name and try again.(aliyun request-id: {0})",
+    "zh_CN": "Bucket名称已经存在（可能已经被别的用户使用了），请尝试使用一个新的命名。（阿里云请求ID: {0}）",
+    "arguments": [
+      "e.getRequestId()"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/core/OssSdkImpl.java"
+  },
+  {
+    "raw": "ecs image existed remote and local, ecs image uuid: %s, name: %s, created time: %s",
+    "en_US": "ecs image existed remote and local, ecs image uuid: {0}, name: {1}, created time: {2}",
+    "zh_CN": "云主机镜像存在于阿里云服务器和本地，云主机镜像的uuid: {0}，名称: {1}，创建时间: {2}",
+    "arguments": [
+      "eivo.getUuid()",
+      "eivo.getName()",
+      "eivo.getCreateDate()"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/ecs/CheckEcsImageExistPublicFlow.java"
+  },
+  {
+    "raw": "ecs image existed remote, name: %s, created time: %s",
+    "en_US": "ecs image existed remote, name: {0}, created time: {1}",
+    "zh_CN": "云主机镜像已经存在于阿里云服务器上，名称: {0}，创建时间: {1}",
+    "arguments": [
+      "msg.getName()",
+      "new SimpleDateFormat(\"yyyy/MM/dd HH:mm:ss\").format(HybridUtilsForAliyun.fmtTime(rpl.getCreateDate()))"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/ecs/CheckEcsImageExistPublicFlow.java"
+  },
+  {
+    "raw": "no such instance-offering uuid",
+    "en_US": "no such instance-offering uuid",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/aliyun/ecs/CreateEcsInstancePublicFlow.java"
+  },
+  {
+    "raw": "mem must \\\\\u003e 1G, and mem GB must \\\\\u003e\u003d cpu",
+    "en_US": "mem must \\\\\u003e 1G, and mem GB must \\\\\u003e\u003d cpu",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/aliyun/ecs/CreateEcsInstancePublicFlow.java"
+  },
+  {
+    "raw": "No Available instance types now.",
+    "en_US": "No Available instance types now.",
+    "zh_CN": "没有可用的实例类型",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/aliyun/ecs/CreateEcsInstancePublicFlow.java"
+  },
+  {
+    "raw": "This region [%s] cannot produce instance type [%s] now, please select another instance type or another region",
+    "en_US": "This region [{0}] cannot produce instance type [{1}] now, please select another instance type or another region",
+    "zh_CN": "",
+    "arguments": [
+      "regionId",
+      "data1.get(\"type\")"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/ecs/CreateEcsInstancePublicFlow.java"
+  },
+  {
+    "raw": "no system disk found for ecs: [%s], ecs id is: [%s]",
+    "en_US": "no system disk found for ecs: [{0}], ecs id is: [{1}]",
+    "zh_CN": "没有系统云盘可用来创建云主机，云主机id是: [{1}]",
+    "arguments": [
+      "ecs.getUuid()",
+      "ecs.getEcsInstanceId()"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/ecs/CreateEcsInstancePublicFlow.java"
+  },
+  {
+    "raw": "Only delete ecs which status is running or stopped, now is %s",
+    "en_US": "Only delete ecs which status is running or stopped, now is {0}",
+    "zh_CN": "只能删除状态为运行中或者已停止的云主机，现在云主机状态为{0}",
+    "arguments": [
+      "evo.getEcsStatus().toString()"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/ecs/EcsApiInterceptor.java"
+  },
+  {
+    "raw": "Only postpaid ecs support delete remote, the indicate ecs charge type is: %s",
+    "en_US": "Only postpaid ecs support delete remote, the indicate ecs charge type is: {0}",
+    "zh_CN": "只有已付费的云主机支持删除，目前云主机付费状态是: {0}",
+    "arguments": [
+      "evo.getChargeType().toString()"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/ecs/EcsApiInterceptor.java"
+  },
+  {
+    "raw": "Only admin can set parameter [onlyZstack] \u003d false",
+    "en_US": "Only admin can set parameter [onlyZstack] \u003d false",
+    "zh_CN": "只有管理员能设置[onlyZsatck]参数为false",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/aliyun/ecs/EcsApiInterceptor.java"
+  },
+  {
+    "raw": "vSwitch availableIpAddress is not enough, now is (%d)",
+    "en_US": "vSwitch availableIpAddress is not enough, now is ({0})",
+    "zh_CN": "虚拟交换机可用IP地址不够，现有IP地址数量({0})",
+    "arguments": [
+      "evo.getAvailableIpAddressCount()"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/ecs/EcsApiInterceptor.java"
+  },
+  {
+    "raw": "%s is not in cidr range: %s",
+    "en_US": "{0} is not in cidr range: {1}",
+    "zh_CN": "{0}没有在CIDR范围中: {1}",
+    "arguments": [
+      "privateIp",
+      "cidr"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/ecs/EcsApiInterceptor.java"
+  },
+  {
+    "raw": "private ip is existed in vswitch: %s, allocated to ecs: %s",
+    "en_US": "private ip is existed in vswitch: {0}, allocated to ecs: {1}",
+    "zh_CN": "私有IP已经存在虚拟交换机中: {0}，已分配给云主机: {1}",
+    "arguments": [
+      "vSwitchUuid",
+      "ecs.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/ecs/EcsApiInterceptor.java"
+  },
+  {
+    "raw": "bandwidth must be set while allocate publicIp",
+    "en_US": "bandwidth must be set while allocate publicIp",
+    "zh_CN": "当分配公有IP时带宽必须被设置",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/aliyun/ecs/EcsApiInterceptor.java"
+  },
+  {
+    "raw": "%s is not ipv4 address",
+    "en_US": "{0} is not ipv4 address",
+    "zh_CN": "{0}不是一个ipv4地址",
+    "arguments": [
+      "msg.getPrivateIpAddress()"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/ecs/EcsApiInterceptor.java"
+  },
+  {
+    "raw": "%s is not valid volume type, valid types are [%s]",
+    "en_US": "{0} is not valid volume type, valid types are [{1}]",
+    "zh_CN": "{0}不是有效的云盘类型，有效的云盘类型有[{1}]",
+    "arguments": [
+      "msg.getEcsRootVolumeType()",
+      "EcsInstanceConstant.validVolumeCategory.toString()"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/ecs/EcsApiInterceptor.java"
+  },
+  {
+    "raw": "instanceOffering or instanceType must be set!",
+    "en_US": "instanceOffering or instanceType must be set!",
+    "zh_CN": "计算规格和实例类型必须被设置",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/aliyun/ecs/EcsApiInterceptor.java"
+  },
+  {
+    "raw": "decode url failed: %s",
+    "en_US": "decode url failed: {0}",
+    "zh_CN": "url解码失败: {0}",
+    "arguments": [
+      "rly1.getVncUrl()"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/ecs/EcsInstanceManagerImpl.java"
+  },
+  {
+    "raw": "image has been deleted!",
+    "en_US": "image has been deleted!",
+    "zh_CN": "图像已删除！",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/aliyun/ecs/ExportImageFromBSFlow.java"
+  },
+  {
+    "raw": "must less than 500 GB",
+    "en_US": "must less than 500 GB",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/aliyun/ecs/ImportEcsImageFlow.java"
+  },
+  {
+    "raw": "no identity found",
+    "en_US": "no identity found",
+    "zh_CN": "找不到身份",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/aliyun/identityzone/AliyunIdentityZoneBase.java"
+  },
+  {
+    "raw": "the operation only custom image",
+    "en_US": "the operation only custom image",
+    "zh_CN": "这个操作只能对用户自己的镜像进行",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/aliyun/image/EcsImageApiInterceptor.java"
+  },
+  {
+    "raw": "Only system disks can create mirrors",
+    "en_US": "Only system disks can create mirrors",
+    "zh_CN": "只有系统云盘可以创建快照",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/aliyun/image/EcsImageApiInterceptor.java"
+  },
+  {
+    "raw": "no ossbucket attached to the datacenter: %s",
+    "en_US": "no ossbucket attached to the datacenter: {0}",
+    "zh_CN": "没有oss Bucket添加到数据中心{0}",
+    "arguments": [
+      "msg.getDataCenterUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/image/EcsImageApiInterceptor.java"
+  },
+  {
+    "raw": "can not delete ecs system image remote",
+    "en_US": "can not delete ecs system image remote",
+    "zh_CN": "不能删除阿里云服务器上的云主机系统镜像",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/aliyun/image/EcsImageApiInterceptor.java"
+  },
+  {
+    "raw": "Only support ImageStoreBackupStorage",
+    "en_US": "Only support ImageStoreBackupStorage",
+    "zh_CN": "用本地镜像创建阿里云上的镜像只支持ImageStore镜像服务器",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/aliyun/image/EcsImageApiInterceptor.java"
+  },
+  {
+    "raw": "image name cannot starts with http:// or https://",
+    "en_US": "image name cannot starts with http:// or https://",
+    "zh_CN": "镜像名称不可以以http://或https://开始",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/aliyun/image/EcsImageApiInterceptor.java"
+  },
+  {
+    "raw": "no backup storage found for imageUuid: %s",
+    "en_US": "no backup storage found for imageUuid: {0}",
+    "zh_CN": "未找到uuid为{0}的镜像服务器",
+    "arguments": [
+      "imageUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/image/EcsImageApiInterceptor.java"
+  },
+  {
+    "raw": "exceeded backup storage found for the imageUuid: %s, please indicate it manually",
+    "en_US": "exceeded backup storage found for the imageUuid: {0}, please indicate it manually",
+    "zh_CN": "发现多个存在镜像uuid为{0}的镜像服务器，请尝试指定镜像服务器",
+    "arguments": [
+      "imageUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/image/EcsImageApiInterceptor.java"
+  },
+  {
+    "raw": "valid platform:[%s] for aliyun image import, valid value are: [%s]",
+    "en_US": "valid platform:[{0}] for aliyun image import, valid value are: [{1}]",
+    "zh_CN": "",
+    "arguments": [
+      "platform",
+      "EcsImageConstant.ECS_IMAGE_PLATFORM.getValid()"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/image/EcsImageApiInterceptor.java"
+  },
+  {
+    "raw": "image [%s] is not enable now",
+    "en_US": "image [{0}] is not enable now",
+    "zh_CN": "镜像[{0}]不可用",
+    "arguments": [
+      "ivo.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/image/EcsImageApiInterceptor.java"
+  },
+  {
+    "raw": "the indicated image [%s] is importing to datacenter [%s] now...",
+    "en_US": "the indicated image [{0}] is importing to datacenter [{1}] now...",
+    "zh_CN": "指定的镜像[{0}]正在被导入到数据中心[{1}]中...",
+    "arguments": [
+      "msg.getImageUuid()",
+      "msg.getDataCenterUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/image/EcsImageManagerImpl.java"
+  },
+  {
+    "raw": "ecs instance[%s] isn\u0027t existed, please check it.",
+    "en_US": "ecs instance[{0}] isn\u0027t existed, please check it.",
+    "zh_CN": "云主机[{0}]不存在，请进行核查",
+    "arguments": [
+      "eipVo.getAllocateResourceUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/network/AliyunNetworkServiceBase.java"
+  },
+  {
+    "raw": "Only ecs instances that are in the running and stopped status can detach the eip , but the ecs [%s] status is [%s] now ",
+    "en_US": "Only ecs instances that are in the running and stopped status can detach the eip , but the ecs [{0}] status is [{1}] now ",
+    "zh_CN": "",
+    "arguments": [
+      "ecsVo.getUuid()",
+      "ecsVo.getEcsStatus()"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/network/AliyunNetworkServiceBase.java"
+  },
+  {
+    "raw": "virtual border: %s has been deleted",
+    "en_US": "virtual border: {0} has been deleted",
+    "zh_CN": "边界路由器: {0}已经被删除",
+    "arguments": [
+      "msg.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/network/AliyunNetworkServiceBase.java"
+  },
+  {
+    "raw": "couldn\u0027t find such router interface: [%s]",
+    "en_US": "couldn\u0027t find such router interface: [{0}]",
+    "zh_CN": "",
+    "arguments": [
+      "vRouterInterfaceUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/network/AliyunNetworkServiceBase.java"
+  },
+  {
+    "raw": "destination cidr [%s] is existed and point to another instance-id [%s], please check or delete it first",
+    "en_US": "destination cidr [{0}] is existed and point to another instance-id [{1}], please check or delete it first",
+    "zh_CN": "目标CIDR[{0}]已经存在且指向其他云主机[{1}]，请检查或删除它",
+    "arguments": [
+      "tupleCidr",
+      "msg.getNextHopUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/network/AliyunNetworkServiceBase.java"
+  },
+  {
+    "raw": "couldn\u0027t find such vr entry: [%s]",
+    "en_US": "couldn\u0027t find such vr entry: [{0}]",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/network/AliyunNetworkServiceBase.java"
+  },
+  {
+    "raw": "Only esc instances that are in the running and stopped status can attach the eip , but the ecs [%s] status is [%s] now ",
+    "en_US": "Only esc instances that are in the running and stopped status can attach the eip , but the ecs [{0}] status is [{1}] now ",
+    "zh_CN": "",
+    "arguments": [
+      "evo.getUuid()",
+      "evo.getEcsStatus()"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/network/AliyunNetworkServiceBase.java"
+  },
+  {
+    "raw": "Vbr: [%s] is in create connection progress, please wait...",
+    "en_US": "Vbr: [{0}] is in create connection progress, please wait...",
+    "zh_CN": "虚拟边界路由器: [{0}]正在创建连接中，请稍后...",
+    "arguments": [
+      "msg.getVbrUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/network/connection/AliyunConnectionManagerImpl.java"
+  },
+  {
+    "raw": "custom cidr [%s] is already existed in vbr [%s], it is overlapped with target cidr [%s], please check and delete it first.",
+    "en_US": "custom cidr [{0}] is already existed in vbr [{1}], it is overlapped with target cidr [{2}], please check and delete it first.",
+    "zh_CN": "",
+    "arguments": [
+      "tuple.get(0, String.class)",
+      "msg.getVbrUuid()",
+      "vpcCidr"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/network/connection/CreateVbrRouteEntryFlow.java"
+  },
+  {
+    "raw": "custom cidr [%s] is already existed in vrouter [%s], it is overlapped with target cidr [%s], please check and delete it first.",
+    "en_US": "custom cidr [{0}] is already existed in vrouter [{1}], it is overlapped with target cidr [{2}], please check and delete it first.",
+    "zh_CN": "",
+    "arguments": [
+      "tuple.get(0, String.class)",
+      "vRouterUuid",
+      "cidr"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/network/connection/CreateVpcRouteEntryFlow.java"
+  },
+  {
+    "raw": "No Such VRouter nic found for l3network: %s",
+    "en_US": "No Such VRouter nic found for l3network: {0}",
+    "zh_CN": "未找到三层网络{0}对应的虚拟路由器网卡",
+    "arguments": [
+      "msg.getL3networkUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/network/connection/GetCidrsFlow.java"
+  },
+  {
+    "raw": "No Such Cidr found for l3network: %s",
+    "en_US": "No Such Cidr found for l3network: {0}",
+    "zh_CN": "未找到三层网络{0}对应的CIDR",
+    "arguments": [
+      "msg.getL3networkUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/network/connection/GetCidrsFlow.java"
+  },
+  {
+    "raw": "No Such Ecs VPC found: %s",
+    "en_US": "No Such Ecs VPC found: {0}",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getVpcUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/network/connection/GetCidrsFlow.java"
+  },
+  {
+    "raw": "no such router interface in vbr: %s",
+    "en_US": "no such router interface in vbr: {0}",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getVbrUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/network/connection/GetRouterInterfaceFlow.java"
+  },
+  {
+    "raw": "no interface on vrouter: %s, maybe it has been deleted.",
+    "en_US": "no interface on vrouter: {0}, maybe it has been deleted.",
+    "zh_CN": "",
+    "arguments": [
+      "vrUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/network/connection/GetRouterInterfaceFlow.java"
+  },
+  {
+    "raw": "cannot find a pair of router interface for indicated vbr[%s] and vrouter[%s]",
+    "en_US": "cannot find a pair of router interface for indicated vbr[{0}] and vrouter[{1}]",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getVbrUuid()",
+      "vrUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/network/connection/GetRouterInterfaceFlow.java"
+  },
+  {
+    "raw": "the interface [%s and %s] doesn\u0027t matched vbr-%s and vrouter-%s, which belong to vpc-%s",
+    "en_US": "the interface [{0} and {1}] doesn\u0027t matched vbr-{2} and vrouter-{3}, which belong to vpc-{4}",
+    "zh_CN": "",
+    "arguments": [
+      "vbrri.getUuid()",
+      "vpcri.getUuid()",
+      "msg.getVbrUuid()",
+      "vrUuid",
+      "msg.getVpcUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/network/connection/GetRouterInterfaceFlow.java"
+  },
+  {
+    "raw": "no such vpc found for: %s",
+    "en_US": "no such vpc found for: {0}",
+    "zh_CN": "未找到该VPC: {0}",
+    "arguments": [
+      "msg.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/network/connection/VpcConnectionApiInterceptor.java"
+  },
+  {
+    "raw": "no such vm found for: %s",
+    "en_US": "no such vm found for: {0}",
+    "zh_CN": "没有找到该云主机: {0}",
+    "arguments": [
+      "msg.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/network/connection/VpcConnectionApiInterceptor.java"
+  },
+  {
+    "raw": "no such vbr found for: %s",
+    "en_US": "no such vbr found for: {0}",
+    "zh_CN": "没有找到该虚拟边界路由器: {0}",
+    "arguments": [
+      "msg.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/network/connection/VpcConnectionApiInterceptor.java"
+  },
+  {
+    "raw": "no such l3network found for: %s",
+    "en_US": "no such l3network found for: {0}",
+    "zh_CN": "没有找到该三层网络: {0}",
+    "arguments": [
+      "msg.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/network/connection/VpcConnectionApiInterceptor.java"
+  },
+  {
+    "raw": "not a supported resource type: %s",
+    "en_US": "not a supported resource type: {0}",
+    "zh_CN": "不支持资源类型: {0}",
+    "arguments": [
+      "msg.getResourceType()"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/network/connection/VpcConnectionApiInterceptor.java"
+  },
+  {
+    "raw": "Only admin can create connections",
+    "en_US": "Only admin can create connections",
+    "zh_CN": "只有admin才能创建连接",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/aliyun/network/connection/VpcConnectionApiInterceptor.java"
+  },
+  {
+    "raw": "CpeIp must be ipv4 address, but now is %s",
+    "en_US": "CpeIp must be ipv4 address, but now is {0}",
+    "zh_CN": "CpeIp必须是ipv4地址，但是现在是{0}",
+    "arguments": [
+      "msg.getCpeIp()"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/network/connection/VpcConnectionApiInterceptor.java"
+  },
+  {
+    "raw": "cpeIp must be ipv4 address",
+    "en_US": "cpeIp must be ipv4 address",
+    "zh_CN": "cpeIp必须是ipv4地址",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/aliyun/network/connection/VpcConnectionApiInterceptor.java"
+  },
+  {
+    "raw": "l3network %s and vpc %s already connected, please check it",
+    "en_US": "l3network {0} and vpc {1} already connected, please check it",
+    "zh_CN": "三层网络{0}和vpc{1}已经连接",
+    "arguments": [
+      "msg.getL3networkUuid()",
+      "msg.getVpcUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/network/connection/VpcConnectionApiInterceptor.java"
+  },
+  {
+    "raw": "vpn gateway and user gateway are not in the same dataCenterUuid!",
+    "en_US": "vpn gateway and user gateway are not in the same dataCenterUuid!",
+    "zh_CN": "vpn网关和用户网关不是同一个dataCenterUuid",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/aliyun/network/vpn/AliyunVpcVpnBase.java"
+  },
+  {
+    "raw": "ossBucket [%s] is already added in dataCenter [%s]",
+    "en_US": "ossBucket [{0}] is already added in dataCenter [{1}]",
+    "zh_CN": "oss Bucket[{0]已经被添加数据中心[{1}]",
+    "arguments": [
+      "msg.getBucketName()",
+      "msg.getDataCenterUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/oss/EcsOssApiInterceptor.java"
+  },
+  {
+    "raw": "OssBucket[%s] is not attached.",
+    "en_US": "OssBucket[{0}] is not attached.",
+    "zh_CN": "oss Bucket[{0}]没有被添加",
+    "arguments": [
+      "ovo.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/oss/EcsOssApiInterceptor.java"
+  },
+  {
+    "raw": "domain, key, secret must be set all",
+    "en_US": "domain, key, secret must be set all",
+    "zh_CN": "域、密钥、机密必须全部设置",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/aliyun/oss/EcsOssManagerImpl.java"
+  },
+  {
+    "raw": "oss bucket is not empty!",
+    "en_US": "oss bucket is not empty!",
+    "zh_CN": "oss Bucket不为空",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/aliyun/oss/OssBucketCascadeExtension.java"
+  },
+  {
+    "raw": "Root volume cannot be deleted",
+    "en_US": "Root volume cannot be deleted",
+    "zh_CN": "云盘不能被删除",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/aliyun/storage/disk/AliyunDiskApiInterceptor.java"
+  },
+  {
+    "raw": "Cannot set the disk\u0027s deleteWithInstance property to false when the category property of the disk is ephemeral",
+    "en_US": "Cannot set the disk\u0027s deleteWithInstance property to false when the category property of the disk is ephemeral",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/aliyun/storage/disk/AliyunDiskApiInterceptor.java"
+  },
+  {
+    "raw": "Cannot set the disk\u0027s deleteWithInstance property to false when the category property of the disk is cloud and portable property is false",
+    "en_US": "Cannot set the disk\u0027s deleteWithInstance property to false when the category property of the disk is cloud and portable property is false",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/aliyun/storage/disk/AliyunDiskApiInterceptor.java"
+  },
+  {
+    "raw": "The disk [%s] is not attach on any instance ",
+    "en_US": "The disk [{0}] is not attach on any instance ",
+    "zh_CN": "该云盘[{0}]没有加载到任何云主机",
+    "arguments": [
+      "msg.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/storage/disk/AliyunDiskApiInterceptor.java"
+  },
+  {
+    "raw": "Only data disk can be mounted on ecs",
+    "en_US": "Only data disk can be mounted on ecs",
+    "zh_CN": "只有云盘可以挂装到云主机上",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/aliyun/storage/disk/AliyunDiskApiInterceptor.java"
+  },
+  {
+    "raw": "The disk not be attach on any ecs",
+    "en_US": "The disk not be attach on any ecs",
+    "zh_CN": "该云盘没有加载到任何云主机",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/aliyun/storage/disk/AliyunDiskApiInterceptor.java"
+  },
+  {
+    "raw": "The state of the ecs [%s] instance must be running or stopped",
+    "en_US": "The state of the ecs [{0}] instance must be running or stopped",
+    "zh_CN": "云主机[{0}]的状态必须是运行或者已停止",
+    "arguments": [
+      "msg.getEcsUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/storage/disk/AliyunDiskApiInterceptor.java"
+  },
+  {
+    "raw": "Disk and ecs instances must be in the same zone",
+    "en_US": "Disk and ecs instances must be in the same zone",
+    "zh_CN": "云盘和云主机必须在相同的数据中心下",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/aliyun/storage/disk/AliyunDiskApiInterceptor.java"
+  },
+  {
+    "raw": "The disk [%s] is already mounted on the instance [%s]",
+    "en_US": "The disk [{0}] is already mounted on the instance [{1}]",
+    "zh_CN": "云盘[{0}]已经安装到云服务器实例[{1}]",
+    "arguments": [
+      "msg.getDiskUuid()",
+      "msg.getEcsUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/aliyun/storage/disk/AliyunDiskApiInterceptor.java"
+  },
+  {
+    "raw": "Only data disk can attach to ecs",
+    "en_US": "Only data disk can attach to ecs",
+    "zh_CN": "只有云盘能加载到云服务器",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/aliyun/storage/disk/AliyunDiskApiInterceptor.java"
+  },
+  {
+    "raw": "Cannot attach disk when in use",
+    "en_US": "Cannot attach disk when in use",
+    "zh_CN": "不能加载正在使用的云盘",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/aliyun/storage/disk/AliyunDiskApiInterceptor.java"
+  },
+  {
+    "raw": "Non-independent disk can only be destroyed with instances",
+    "en_US": "Non-independent disk can only be destroyed with instances",
+    "zh_CN": "未独立的云盘只能和云主机一起删除",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/aliyun/storage/disk/AliyunDiskApiInterceptor.java"
+  },
+  {
+    "raw": "The size and snapshot id in the request parameter must select one of the items to specify the size of the disk or create a disk using the snapshot.",
+    "en_US": "The size and snapshot id in the request parameter must select one of the items to specify the size of the disk or create a disk using the snapshot.",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/aliyun/storage/disk/AliyunDiskApiInterceptor.java"
+  },
+  {
+    "raw": "Not allowed create disk on root volume snapshot",
+    "en_US": "Not allowed create disk on root volume snapshot",
+    "zh_CN": "不允许在云盘快照上创建云盘",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/aliyun/storage/disk/AliyunDiskApiInterceptor.java"
+  },
+  {
+    "raw": "the disk name or description cannot set start with \u0027http://\u0027 or \u0027https://\u0027 ",
+    "en_US": "the disk name or description cannot set start with \u0027http://\u0027 or \u0027https://\u0027 ",
+    "zh_CN": "云盘名称和介绍不能以http://或https://开头",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/aliyun/storage/disk/AliyunDiskApiInterceptor.java"
+  },
+  {
+    "raw": "The operation allows only when ecs state of the ecs instance status be running or stopped",
+    "en_US": "The operation allows only when ecs state of the ecs instance status be running or stopped",
+    "zh_CN": "当云主机态为运行中或已停止时该操作才被允许",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/aliyun/storage/snapshot/AliyunSnapshotApiInterceptor.java"
+  },
+  {
+    "raw": "keyType not supported type [%s]",
+    "en_US": "keyType not supported type [{0}]",
+    "zh_CN": "KeyType不支持类型[{0}]",
+    "arguments": [
+      "type"
+    ],
+    "fileName": "src/main/java/org/zstack/hybrid/account/HybridAccountApiInterceptor.java"
+  },
+  {
+    "raw": "key: [%s] with type: [%s] already existed by accountUuid: [%s]",
+    "en_US": "key: [{0}] with type: [{1}] already existed by accountUuid: [{2}]",
+    "zh_CN": "AccountUuId[{2}]已存在类型为[{1}]的项[{0}]",
+    "arguments": [
+      "msg.getKey()",
+      "msg.getType()",
+      "accountUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/hybrid/account/HybridAccountApiInterceptor.java"
+  },
+  {
+    "raw": "parameters [accountUuid] only can be used by admin user!",
+    "en_US": "parameters [accountUuid] only can be used by admin user!",
+    "zh_CN": "参数[accountUuid]必须被admin用户设置",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/hybrid/account/HybridAccountApiInterceptor.java"
+  },
+  {
+    "raw": "key: [%s] already existed by accountUuid: [%s]",
+    "en_US": "key: [{0}] already existed by accountUuid: [{1}]",
+    "zh_CN": "key: [{0}]已经存在于accountUuid: [{1}]",
+    "arguments": [
+      "msg.getKey()",
+      "accountUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/hybrid/account/HybridAccountApiInterceptor.java"
+  },
+  {
+    "raw": "%s can only be called by admin account",
+    "en_US": "{0} can only be called by admin account",
+    "zh_CN": "{0}只能被admin账户调用",
+    "arguments": [
+      "msg.getClass().getSimpleName()"
+    ],
+    "fileName": "src/main/java/org/zstack/hybrid/backup/HybridBackupApiInterceptor.java"
+  },
+  {
+    "raw": "couldn\u0027t find such vpn-connection: [%s]",
+    "en_US": "couldn\u0027t find such vpn-connection: [{0}]",
+    "zh_CN": "",
+    "arguments": [
+      "conUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/hybrid/core/HybridUtilsForAliyun.java"
+  },
+  {
+    "raw": "couldn\u0027t find such vpn gateway: [%s]",
+    "en_US": "couldn\u0027t find such vpn gateway: [{0}]",
+    "zh_CN": "",
+    "arguments": [
+      "gvo"
+    ],
+    "fileName": "src/main/java/org/zstack/hybrid/core/HybridUtilsForAliyun.java"
+  },
+  {
+    "raw": "couldn\u0027t find such datacenter: [%s]",
+    "en_US": "couldn\u0027t find such datacenter: [{0}]",
+    "zh_CN": "",
+    "arguments": [
+      "dcUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/hybrid/core/HybridUtilsForAliyun.java"
+  },
+  {
+    "raw": "couldn\u0027t find such identityzone: [%s]",
+    "en_US": "couldn\u0027t find such identityzone: [{0}]",
+    "zh_CN": "",
+    "arguments": [
+      "izUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/hybrid/core/HybridUtilsForAliyun.java"
+  },
+  {
+    "raw": "couldn\u0027t find such vpc: [%s]",
+    "en_US": "couldn\u0027t find such vpc: [{0}]",
+    "zh_CN": "",
+    "arguments": [
+      "vpcUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/hybrid/core/HybridUtilsForAliyun.java"
+  },
+  {
+    "raw": "couldn\u0027t find such vswitch: [%s]",
+    "en_US": "couldn\u0027t find such vswitch: [{0}]",
+    "zh_CN": "",
+    "arguments": [
+      "vswitchUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/hybrid/core/HybridUtilsForAliyun.java"
+  },
+  {
+    "raw": "couldn\u0027t find such oss bucket: [%s]",
+    "en_US": "couldn\u0027t find such oss bucket: [{0}]",
+    "zh_CN": "",
+    "arguments": [
+      "ossBucketUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/hybrid/core/HybridUtilsForAliyun.java"
+  },
+  {
+    "raw": "couldn\u0027t find such virtual border router: [%s]",
+    "en_US": "couldn\u0027t find such virtual border router: [{0}]",
+    "zh_CN": "",
+    "arguments": [
+      "vrUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/hybrid/core/HybridUtilsForAliyun.java"
+  },
+  {
+    "raw": "couldn\u0027t find such virtual router: [%s]",
+    "en_US": "couldn\u0027t find such virtual router: [{0}]",
+    "zh_CN": "",
+    "arguments": [
+      "vrUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/hybrid/core/HybridUtilsForAliyun.java"
+  },
+  {
+    "raw": "non support virtual router type: [%s]",
+    "en_US": "non support virtual router type: [{0}]",
+    "zh_CN": "",
+    "arguments": [
+      "type"
+    ],
+    "fileName": "src/main/java/org/zstack/hybrid/core/HybridUtilsForAliyun.java"
+  },
+  {
+    "raw": "couldn\u0027t find such vswitch: %s",
+    "en_US": "couldn\u0027t find such vswitch: {0}",
+    "zh_CN": "",
+    "arguments": [
+      "vswitchUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/hybrid/core/HybridUtilsForAliyun.java"
+  },
+  {
+    "raw": "couldn\u0027t find such virtual border router: %s",
+    "en_US": "couldn\u0027t find such virtual border router: {0}",
+    "zh_CN": "",
+    "arguments": [
+      "vRouterId"
+    ],
+    "fileName": "src/main/java/org/zstack/hybrid/core/HybridUtilsForAliyun.java"
+  },
+  {
+    "raw": "couldn\u0027t find vpc in dataCenter: %s",
+    "en_US": "couldn\u0027t find vpc in dataCenter: {0}",
+    "zh_CN": "",
+    "arguments": [
+      "dataCenterUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/hybrid/core/HybridUtilsForAliyun.java"
+  },
+  {
+    "raw": "couldn\u0027t find such virtual router: %s",
+    "en_US": "couldn\u0027t find such virtual router: {0}",
+    "zh_CN": "",
+    "arguments": [
+      "vRouterId"
+    ],
+    "fileName": "src/main/java/org/zstack/hybrid/core/HybridUtilsForAliyun.java"
+  },
+  {
+    "raw": "non supported virtual router type: %s",
+    "en_US": "non supported virtual router type: {0}",
+    "zh_CN": "",
+    "arguments": [
+      "type"
+    ],
+    "fileName": "src/main/java/org/zstack/hybrid/core/HybridUtilsForAliyun.java"
+  },
+  {
+    "raw": "couldn\u0027t find such virtual router from vpcUuid: %s",
+    "en_US": "couldn\u0027t find such virtual router from vpcUuid: {0}",
+    "zh_CN": "",
+    "arguments": [
+      "vpcUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/hybrid/core/HybridUtilsForAliyun.java"
+  },
+  {
+    "raw": "no current used key/secret for aliyun!",
+    "en_US": "no current used key/secret for aliyun!",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/hybrid/core/HybridUtilsForAliyun.java"
+  },
+  {
+    "raw": "no current used key/secret for %s!",
+    "en_US": "no current used key/secret for {0}!",
+    "zh_CN": "",
+    "arguments": [
+      "type.toString()"
+    ],
+    "fileName": "src/main/java/org/zstack/hybrid/core/HybridUtilsForAliyun.java"
+  },
+  {
+    "raw": "dcType not supported type [%s]",
+    "en_US": "dcType not supported type [{0}]",
+    "zh_CN": "DCType不支持类型[{0}]",
+    "arguments": [
+      "type"
+    ],
+    "fileName": "src/main/java/org/zstack/hybrid/datacenter/DataCenterApiInterceptor.java"
+  },
+  {
+    "raw": "regionId [%s] already created by ak [%s]",
+    "en_US": "regionId [{0}] already created by ak [{1}]",
+    "zh_CN": "数据中心ID[{0}]已经被AccessKey[{1}]创建",
+    "arguments": [
+      "msg.getRegionId()",
+      "ak"
+    ],
+    "fileName": "src/main/java/org/zstack/hybrid/datacenter/DataCenterApiInterceptor.java"
+  },
+  {
+    "raw": "DataCenter [%s] is still in sync progress, please wait.",
+    "en_US": "DataCenter [{0}] is still in sync progress, please wait.",
+    "zh_CN": "数据中心[{0}]仍在同步进程中，请稍后",
+    "arguments": [
+      "msg.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/hybrid/datacenter/DataCenterManagerImpl.java"
+  },
+  {
+    "raw": "identity zone [%s] already existed, uuid is: %s",
+    "en_US": "identity zone [{0}] already existed, uuid is: {1}",
+    "zh_CN": "可用区[{0}]已经存在，uuid是{1}",
+    "arguments": [
+      "msg.getZoneId()",
+      "izo.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/hybrid/identityzone/IdentityZoneApiInterceptor.java"
+  },
+  {
+    "raw": "type [%s] is not matched datacenter type [%s]",
+    "en_US": "type [{0}] is not matched datacenter type [{1}]",
+    "zh_CN": "类型[{0}]与数据中心类型[{1}]不匹配",
+    "arguments": [
+      "type",
+      "dvo.getDcType().toString()"
+    ],
+    "fileName": "src/main/java/org/zstack/hybrid/identityzone/IdentityZoneApiInterceptor.java"
+  },
+  {
+    "raw": "either dataCenterUuid or regionId should be set, please check the parameters.",
+    "en_US": "either dataCenterUuid or regionId should be set, please check the parameters.",
+    "zh_CN": "dataCenterUuid和regionId应该被设置，请检查参数",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/hybrid/identityzone/IdentityZoneApiInterceptor.java"
+  },
+  {
+    "raw": "IdentityZone [%s] is still in sync progress, please wait.",
+    "en_US": "IdentityZone [{0}] is still in sync progress, please wait.",
+    "zh_CN": "可用区[{0}]仍在同步进程中，请稍后",
+    "arguments": [
+      "msg.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/hybrid/identityzone/IdentityZoneManagerImpl.java"
+  },
+  {
+    "raw": "EcsInstance must be running or stopped while deleting eip ",
+    "en_US": "EcsInstance must be running or stopped while deleting eip ",
+    "zh_CN": "删除弹性IP时云主机必须时允许中或者已停止",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/hybrid/network/HybridEipCascadeExtension.java"
+  },
+  {
+    "raw": "router interface must be in the same datacenter, but ri[%s] is in dc[%s] and ri[%s] is in dc[%s]",
+    "en_US": "router interface must be in the same datacenter, but ri[{0}] is in dc[{1}] and ri[{2}] is in dc[{3}]",
+    "zh_CN": "路由接口必须在相同的数据中心，但是接口[{0}]在数据中心[{1}]而接口[{2}]在数据中心[{3}]",
+    "arguments": [
+      "vbri.getUuid()",
+      "vbri.getDataCenterUuid()",
+      "vrouteri.getUuid()",
+      "vrouteri.getDataCenterUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/hybrid/network/HybridNetworkApiInterceptor.java"
+  },
+  {
+    "raw": "router interface[%s] status is not idle, it is %s",
+    "en_US": "router interface[{0}] status is not idle, it is {1}",
+    "zh_CN": "路由接口[{0}]并非闲置状态，当前状态为{1}",
+    "arguments": [
+      "vrouteri.getUuid()",
+      "vrouteri.getStatus()"
+    ],
+    "fileName": "src/main/java/org/zstack/hybrid/network/HybridNetworkApiInterceptor.java"
+  },
+  {
+    "raw": "router interface[%s] already has a connection, it is %s",
+    "en_US": "router interface[{0}] already has a connection, it is {1}",
+    "zh_CN": "路由接口[{0}]已经有链接{1}",
+    "arguments": [
+      "vrouteri.getUuid()",
+      "vrouteri.getOppositeInterfaceUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/hybrid/network/HybridNetworkApiInterceptor.java"
+  },
+  {
+    "raw": "accessPointUuid cannot be null if the router interface on VBR type router",
+    "en_US": "accessPointUuid cannot be null if the router interface on VBR type router",
+    "zh_CN": "当路由接口的类型为VBR路由时，accessPointUuid不能为空",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/hybrid/network/HybridNetworkApiInterceptor.java"
+  },
+  {
+    "raw": "cannot delete system entry",
+    "en_US": "cannot delete system entry",
+    "zh_CN": "不能删除系统路由条目",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/hybrid/network/HybridNetworkApiInterceptor.java"
+  },
+  {
+    "raw": "only support intranet rule in vpc",
+    "en_US": "only support intranet rule in vpc",
+    "zh_CN": "在VPC中仅仅支持内网规则",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/hybrid/network/HybridNetworkApiInterceptor.java"
+  },
+  {
+    "raw": "%s is not a valid cidr",
+    "en_US": "{0} is not a valid cidr",
+    "zh_CN": "{0}是一个无效的CIDR",
+    "arguments": [
+      "msg.getCidr()"
+    ],
+    "fileName": "src/main/java/org/zstack/hybrid/network/HybridNetworkApiInterceptor.java"
+  },
+  {
+    "raw": "security group rule already existed",
+    "en_US": "security group rule already existed",
+    "zh_CN": "安全组已经存在了",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/hybrid/network/HybridNetworkApiInterceptor.java"
+  },
+  {
+    "raw": "dstCidrBlock[%s] is not a valid cidr",
+    "en_US": "dstCidrBlock[{0}] is not a valid cidr",
+    "zh_CN": "dstCidrBlock[{0}]是一个无效的CIDR",
+    "arguments": [
+      "msg.getDstCidrBlock()"
+    ],
+    "fileName": "src/main/java/org/zstack/hybrid/network/HybridNetworkApiInterceptor.java"
+  },
+  {
+    "raw": "no such ecs instance: %s",
+    "en_US": "no such ecs instance: {0}",
+    "zh_CN": "没有这样的ESC云主机: {0}",
+    "arguments": [
+      "msg.getNextHopUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/hybrid/network/HybridNetworkApiInterceptor.java"
+  },
+  {
+    "raw": "nexthop routerInterface belongs to %s, but the entry belongs to %s",
+    "en_US": "nexthop routerInterface belongs to {0}, but the entry belongs to {1}",
+    "zh_CN": "下一跳路由接口类型是{0}，但是该路由类型是{1}",
+    "arguments": [
+      "rivo.getvRouterType().toString()",
+      "msg.getvRouterType()"
+    ],
+    "fileName": "src/main/java/org/zstack/hybrid/network/HybridNetworkApiInterceptor.java"
+  },
+  {
+    "raw": "no such vpn gateway: %s",
+    "en_US": "no such vpn gateway: {0}",
+    "zh_CN": "没有这样的VPN网关: {0}",
+    "arguments": [
+      "msg.getNextHopUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/hybrid/network/HybridNetworkApiInterceptor.java"
+  },
+  {
+    "raw": "next hop type [%s] not supported create route entry now!",
+    "en_US": "next hop type [{0}] not supported create route entry now!",
+    "zh_CN": "不支持下一个跃点类型[{0}]，请立即创建路由条目！",
+    "arguments": [
+      "msg.getNextHopType()"
+    ],
+    "fileName": "src/main/java/org/zstack/hybrid/network/HybridNetworkApiInterceptor.java"
+  },
+  {
+    "raw": "virtual border router only support routerinterface as next hop type",
+    "en_US": "virtual border router only support routerinterface as next hop type",
+    "zh_CN": "作为下一跳类型，虚拟边界路由只支持路由接口",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/hybrid/network/HybridNetworkApiInterceptor.java"
+  },
+  {
+    "raw": "vswitch\u0027s cidr [%s] not in the vpc\u0027s [%s]",
+    "en_US": "vswitch\u0027s cidr [{0}] not in the vpc\u0027s [{1}]",
+    "zh_CN": "虚拟交换机的CIDR没有在VPC[{1}]中",
+    "arguments": [
+      "msg.getCidrBlock()",
+      "vpcCidr"
+    ],
+    "fileName": "src/main/java/org/zstack/hybrid/network/HybridNetworkApiInterceptor.java"
+  },
+  {
+    "raw": "cidr is overlap by another vswitch: %s",
+    "en_US": "cidr is overlap by another vswitch: {0}",
+    "zh_CN": "CIDR和其他的虚拟交换机{0}有重叠",
+    "arguments": [
+      "old.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/hybrid/network/HybridNetworkApiInterceptor.java"
+  },
+  {
+    "raw": "invalid CidrBlock: %s, which must subnet in \u002710.0.0.0/8\u0027, \u0027172.16.0.0/12\u0027, \u0027192.168.0.0/16\u0027",
+    "en_US": "invalid CidrBlock: {0}, which must subnet in \u002710.0.0.0/8\u0027, \u0027172.16.0.0/12\u0027, \u0027192.168.0.0/16\u0027",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getCidrBlock()"
+    ],
+    "fileName": "src/main/java/org/zstack/hybrid/network/HybridNetworkApiInterceptor.java"
+  },
+  {
+    "raw": "no such virtual border router: %s",
+    "en_US": "no such virtual border router: {0}",
+    "zh_CN": "没有这个虚拟边界路由器: {0}",
+    "arguments": [
+      "msg.getvRouterUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/hybrid/network/HybridNetworkApiInterceptor.java"
+  },
+  {
+    "raw": "no such virtual router: %s",
+    "en_US": "no such virtual router: {0}",
+    "zh_CN": "没有这个的虚拟路由: {0}",
+    "arguments": [
+      "msg.getvRouterUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/hybrid/network/HybridNetworkApiInterceptor.java"
+  },
+  {
+    "raw": "localGateway is not IPv4: %s",
+    "en_US": "localGateway is not IPv4: {0}",
+    "zh_CN": "本地网关地址不是IPV4: {0}",
+    "arguments": [
+      "msg.getLocalGatewayIp()"
+    ],
+    "fileName": "src/main/java/org/zstack/hybrid/network/HybridNetworkApiInterceptor.java"
+  },
+  {
+    "raw": "peerGateway is not IPv4: %s",
+    "en_US": "peerGateway is not IPv4: {0}",
+    "zh_CN": "对端网关地址不是IPV4: {0}",
+    "arguments": [
+      "msg.getPeerGatewayIp()"
+    ],
+    "fileName": "src/main/java/org/zstack/hybrid/network/HybridNetworkApiInterceptor.java"
+  },
+  {
+    "raw": "peerGateway is not subnet mask: %s",
+    "en_US": "peerGateway is not subnet mask: {0}",
+    "zh_CN": "对端网关地址不是在子网掩码{0}中",
+    "arguments": [
+      "msg.getPeeringSubnetMask()"
+    ],
+    "fileName": "src/main/java/org/zstack/hybrid/network/HybridNetworkApiInterceptor.java"
+  },
+  {
+    "raw": "vlanId is not number: %s",
+    "en_US": "vlanId is not number: {0}",
+    "zh_CN": "vlanId不是一个数字:{0}",
+    "arguments": [
+      "msg.getVlanId()"
+    ],
+    "fileName": "src/main/java/org/zstack/hybrid/network/HybridNetworkApiInterceptor.java"
+  },
+  {
+    "raw": "couldn\u0027t attach eip to ecs: [%s] , eip :[%s] already attached ecs:[%s] ",
+    "en_US": "couldn\u0027t attach eip to ecs: [{0}] , eip :[{1}] already attached ecs:[{2}] ",
+    "zh_CN": "不能绑定弹性IP到ECS云主机[{0}]，弹性IP[{1}]已经绑定到ECS云主机[{2}]",
+    "arguments": [
+      "msg.getEcsUuid()",
+      "msg.getEipUuid()",
+      "hevo.getAllocateResourceUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/hybrid/network/HybridNetworkApiInterceptor.java"
+  },
+  {
+    "raw": "ecs [%s] already has public ip now",
+    "en_US": "ecs [{0}] already has public ip now",
+    "zh_CN": "ECS云主机[{0}]已经拥有IP",
+    "arguments": [
+      "msg.getEcsUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/hybrid/network/HybridNetworkApiInterceptor.java"
+  },
+  {
+    "raw": "couldn\u0027t attach eip [%s] to ecs: [%s] , ecs is already attached",
+    "en_US": "couldn\u0027t attach eip [{0}] to ecs: [{1}] , ecs is already attached",
+    "zh_CN": "不能绑定弹性IP[{0}]到ECS云主机[{1}]，ECS云主机已经绑定了弹性IP",
+    "arguments": [
+      "msg.getEipUuid()",
+      "msg.getEcsUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/hybrid/network/HybridNetworkApiInterceptor.java"
+  },
+  {
+    "raw": "eip[%s] and ecs[%s] should be in the same dataCenter ",
+    "en_US": "eip[{0}] and ecs[{1}] should be in the same dataCenter ",
+    "zh_CN": "弹性IP[{0}]和ECS云主机[{1}]应该在同一个数据中心",
+    "arguments": [
+      "msg.getEipUuid()",
+      "msg.getEcsUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/hybrid/network/HybridNetworkApiInterceptor.java"
+  },
+  {
+    "raw": "couldn\u0027t detach eip :[%s], it is not attached on any instance ",
+    "en_US": "couldn\u0027t detach eip :[{0}], it is not attached on any instance ",
+    "zh_CN": "不能解绑弹性IP[{0}]，因为它没有绑定任何云主机",
+    "arguments": [
+      "msg.getEipUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/hybrid/network/HybridNetworkApiInterceptor.java"
+  },
+  {
+    "raw": "couldn\u0027t find such security group: [%s]",
+    "en_US": "couldn\u0027t find such security group: [{0}]",
+    "zh_CN": "",
+    "arguments": [
+      "rule.getEcsSecurityGroupUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/hybrid/network/HybridNetworkSecurityGroupRuleCascadeExtension.java"
+  },
+  {
+    "raw": "%s is not a valid ipv4 address",
+    "en_US": "{0} is not a valid ipv4 address",
+    "zh_CN": "{0}是一个无效的IPV4地址",
+    "arguments": [
+      "msg.getId()"
+    ],
+    "fileName": "src/main/java/org/zstack/hybrid/network/vpn/VpcVpnApiInterceptor.java"
+  },
+  {
+    "raw": "localCidr must be Cidr!",
+    "en_US": "localCidr must be Cidr!",
+    "zh_CN": "本地CIDR必须是CIDR",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/hybrid/network/vpn/VpcVpnApiInterceptor.java"
+  },
+  {
+    "raw": "remoteCidr must be Cidr!",
+    "en_US": "remoteCidr must be Cidr!",
+    "zh_CN": "远程CIDR必须是CIDR",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/hybrid/network/vpn/VpcVpnApiInterceptor.java"
+  },
+  {
+    "raw": "localCidr and remoteCidr must be Cidr!",
+    "en_US": "localCidr and remoteCidr must be Cidr!",
+    "zh_CN": "本地CIDR和远程CIDR必须是CIDR",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/hybrid/network/vpn/VpcVpnApiInterceptor.java"
+  },
+  {
+    "raw": "vpngateway [%s] existed, cannot delete remote",
+    "en_US": "vpngateway [{0}] existed, cannot delete remote",
+    "zh_CN": "VPN网关[{0}]已经存在，不能删除远程的",
+    "arguments": [
+      "gateways.get(0).getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/hybrid/network/vpn/VpcVpnGatewayCascadeExtension.java"
+  }
+]

@@ -1,0 +1,246 @@
+[
+  {
+    "raw": "Sdn controller type: %s in not in the supported list: %s ",
+    "en_US": "Sdn controller type: {0} in not in the supported list: {1} ",
+    "zh_CN": "SDN控制器类型：{0}不在支持的列表中：{1}",
+    "arguments": [
+      "msg.getVendorType()",
+      "SdnControllerType.getAllTypeNames()"
+    ],
+    "fileName": "src/main/java/org/zstack/sdnController/SdnControllerApiInterceptor.java"
+  },
+  {
+    "raw": "unable create vni range, because l2 uuid[%s] is not vxlan network pool",
+    "en_US": "unable create vni range, because l2 uuid[{0}] is not vxlan network pool",
+    "zh_CN": "无法创建VNI范围，因为L2 uuid[{0}]不是VXLAN网络池",
+    "arguments": [
+      "msg.getL2NetworkUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/sdnController/h3cVcfc/H3cVcfcApiInterceptor.java"
+  },
+  {
+    "raw": "the vni range:[%s.%s} is illegal, because h3c\u0027s controller uses vni as vlan id",
+    "en_US": "the vni range:[{0}.{1}} is illegal, because h3c\u0027s controller uses vni as vlan id",
+    "zh_CN": "VNI范围[{0}.{1}}非法，因为H3C的控制器使用VNI作为VLAN ID",
+    "arguments": [
+      "msg.getStartVni()",
+      "msg.getEndVni()"
+    ],
+    "fileName": "src/main/java/org/zstack/sdnController/h3cVcfc/H3cVcfcApiInterceptor.java"
+  },
+  {
+    "raw": "the vni range:[%s.%s} is illegal, must covered by a sdn\u0027s vniRange",
+    "en_US": "the vni range:[{0}.{1}} is illegal, must covered by a sdn\u0027s vniRange",
+    "zh_CN": "VNI范围[{0}.{1}}非法，必须由SDN的VNI范围覆盖",
+    "arguments": [
+      "userVniRange.startVni",
+      "userVniRange.endVni"
+    ],
+    "fileName": "src/main/java/org/zstack/sdnController/h3cVcfc/H3cVcfcApiInterceptor.java"
+  },
+  {
+    "raw": "H3C VCFC controller must include systemTags vdsUuid::{%s}",
+    "en_US": "H3C VCFC controller must include systemTags vdsUuid::{{0}}",
+    "zh_CN": "H3C VCFC控制器必须包含系统标签VDSuuid：:{{0}}",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/sdnController/h3cVcfc/H3cVcfcApiInterceptor.java"
+  },
+  {
+    "raw": "get vni range on sdn controller [ip:%s] failed",
+    "en_US": "get vni range on sdn controller [ip:{0}] failed",
+    "zh_CN": "在SDN控制器[IP：{0}]上获取VNI范围失败",
+    "arguments": [
+      "self.getIp()"
+    ],
+    "fileName": "src/main/java/org/zstack/sdnController/h3cVcfc/H3cVcfcSdnController.java"
+  },
+  {
+    "raw": "get sdn controller [ip:%s] vni range failed because %s",
+    "en_US": "get sdn controller [ip:{0}] vni range failed because {1}",
+    "zh_CN": "获取SDN控制器[IP：{0}]VNI范围失败，原因是{1}",
+    "arguments": [
+      "self.getIp()",
+      "e.getLocalizedMessage()"
+    ],
+    "fileName": "src/main/java/org/zstack/sdnController/h3cVcfc/H3cVcfcSdnController.java"
+  },
+  {
+    "raw": "there is no vni range on sdn controller [ip:%s]",
+    "en_US": "there is no vni range on sdn controller [ip:{0}]",
+    "zh_CN": "SDN控制器[IP：{0}]上没有VNI范围",
+    "arguments": [
+      "self.getIp()"
+    ],
+    "fileName": "src/main/java/org/zstack/sdnController/h3cVcfc/H3cVcfcSdnController.java"
+  },
+  {
+    "raw": "there is no default tenant on sdn controller [ip:%s]",
+    "en_US": "there is no default tenant on sdn controller [ip:{0}]",
+    "zh_CN": "SDN控制器[IP：{0}]上没有默认租户",
+    "arguments": [
+      "self.getIp()"
+    ],
+    "fileName": "src/main/java/org/zstack/sdnController/h3cVcfc/H3cVcfcSdnController.java"
+  },
+  {
+    "raw": "create vxlan network on sdn controller [ip:%s] failed",
+    "en_US": "create vxlan network on sdn controller [ip:{0}] failed",
+    "zh_CN": "在SDN控制器[IP：{0}]上创建VXLAN网络失败",
+    "arguments": [
+      "self.getIp()"
+    ],
+    "fileName": "src/main/java/org/zstack/sdnController/h3cVcfc/H3cVcfcSdnController.java"
+  },
+  {
+    "raw": "create vxlan network on sdn controller [ip:%s] failed because %s",
+    "en_US": "create vxlan network on sdn controller [ip:{0}] failed because {1}",
+    "zh_CN": "在SDN控制器[IP：{0}]上创建VXLAN网络失败，原因是{1}",
+    "arguments": [
+      "self.getIp()",
+      "e.getMessage()"
+    ],
+    "fileName": "src/main/java/org/zstack/sdnController/h3cVcfc/H3cVcfcSdnController.java"
+  },
+  {
+    "raw": "delete vxlan network on sdn controller [ip:%s] failed",
+    "en_US": "delete vxlan network on sdn controller [ip:{0}] failed",
+    "zh_CN": "删除SDN控制器[IP：{0}]上的VXLAN网络失败",
+    "arguments": [
+      "self.getIp()"
+    ],
+    "fileName": "src/main/java/org/zstack/sdnController/h3cVcfc/H3cVcfcSdnController.java"
+  },
+  {
+    "raw": "delete vxlan network on sdn controller [ip:%s] failed because %s",
+    "en_US": "delete vxlan network on sdn controller [ip:{0}] failed because {1}",
+    "zh_CN": "删除SDN控制器[IP：{0}]上的VXLAN网络失败，原因是{1}",
+    "arguments": [
+      "self.getIp()",
+      "e.getMessage()"
+    ],
+    "fileName": "src/main/java/org/zstack/sdnController/h3cVcfc/H3cVcfcSdnController.java"
+  },
+  {
+    "raw": "get leader of sdn controller [ip:%s] failed",
+    "en_US": "get leader of sdn controller [ip:{0}] failed",
+    "zh_CN": "获取SDN控制器[IP：{0}]的领导者失败",
+    "arguments": [
+      "self.getIp()"
+    ],
+    "fileName": "src/main/java/org/zstack/sdnController/h3cVcfc/H3cVcfcSdnController.java"
+  },
+  {
+    "raw": "get token of sdn controller [ip:%s] failed",
+    "en_US": "get token of sdn controller [ip:{0}] failed",
+    "zh_CN": "获取SDN控制器[IP：{0}]的令牌失败",
+    "arguments": [
+      "self.getIp()"
+    ],
+    "fileName": "src/main/java/org/zstack/sdnController/h3cVcfc/H3cVcfcSdnController.java"
+  },
+  {
+    "raw": "get token of sdn controller [ip:%s] failed because %s",
+    "en_US": "get token of sdn controller [ip:{0}] failed because {1}",
+    "zh_CN": "获取SDN控制器[IP：{0}]的令牌失败，原因是{1}",
+    "arguments": [
+      "self.getIp()",
+      "e.getMessage()"
+    ],
+    "fileName": "src/main/java/org/zstack/sdnController/h3cVcfc/H3cVcfcSdnController.java"
+  },
+  {
+    "raw": "there is no sdn controller for vxlan pool [uuid:%s]",
+    "en_US": "there is no sdn controller for vxlan pool [uuid:{0}]",
+    "zh_CN": "VXLAN池[uuid：{0}]没有SDN控制器",
+    "arguments": [
+      "vxlan.getPoolUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/sdnController/hardwareVxlan/HardwareVxlanNetworkFactory.java"
+  },
+  {
+    "raw": "cannot configure hardware vxlan network for vm[uuid:%s] on the destination host[uuid:%s]",
+    "en_US": "cannot configure hardware vxlan network for vm[uuid:{0}] on the destination host[uuid:{1}]",
+    "zh_CN": "无法为目标主机[uuid：{1}]上的VM[uuid：{0}]配置硬件VXLAN网络",
+    "arguments": [
+      "inv.getUuid()",
+      "destHostUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/sdnController/hardwareVxlan/HardwareVxlanNetworkFactory.java"
+  },
+  {
+    "raw": "hardware vxlan network pool doesn\u0027t support create l3 network",
+    "en_US": "hardware vxlan network pool doesn\u0027t support create l3 network",
+    "zh_CN": "硬件VXLAN网络池不支持创建三层网络",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/sdnController/hardwareVxlan/HardwareVxlanNetworkPoolFactory.java"
+  },
+  {
+    "raw": "hardware vxlan network pool must configure the physical interface",
+    "en_US": "hardware vxlan network pool must configure the physical interface",
+    "zh_CN": "硬件VXLAN网络池必须配置物理接口",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/sdnController/hardwareVxlan/HardwareVxlanNetworkPoolFactory.java"
+  },
+  {
+    "raw": "ONLY hardware vxlan network can be created in hardware vxlan pool",
+    "en_US": "ONLY hardware vxlan network can be created in hardware vxlan pool",
+    "zh_CN": "在硬件VXLAN池中只能创建硬件VXLAN网络",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/sdnController/hardwareVxlan/HardwareVxlanNetworkPoolFactory.java"
+  },
+  {
+    "raw": "hardware vxlan network can ONLY be created in hardware vxlan pool",
+    "en_US": "hardware vxlan network can ONLY be created in hardware vxlan pool",
+    "zh_CN": "硬件VXLAN网络只能在硬件VXLAN池中创建",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/sdnController/hardwareVxlan/HardwareVxlanNetworkPoolFactory.java"
+  },
+  {
+    "raw": "cannot create vlan-device on %s because it\u0027s too long",
+    "en_US": "cannot create vlan-device on {0} because it\u0027s too long",
+    "zh_CN": "无法在{0}上创建VLAN设备，因为它太长",
+    "arguments": [
+      "msg.getPhysicalInterface()"
+    ],
+    "fileName": "src/main/java/org/zstack/sdnController/hardwareVxlan/HardwareVxlanNetworkPoolFactory.java"
+  },
+  {
+    "raw": "failed to create bridge[%s] for hardwareVxlan[uuid:%s, type:%s, vlan:%s] on kvm host[uuid:%s], because %s",
+    "en_US": "failed to create bridge[{0}] for hardwareVxlan[uuid:{1}, type:{2}, vlan:{3}] on kvm host[uuid:{4}], because {5}",
+    "zh_CN": "无法在KVM主机[uuid：{4}]上为HardwareVXLAN[uuid：{1}，类型：{2}，VLAN：{3}]创建网桥[{0}]，因为{5}",
+    "arguments": [
+      "cmd.getBridgeName()",
+      "l2Network.getUuid()",
+      "l2Network.getType()",
+      "finalVlanId",
+      "hostUuid",
+      "rsp.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/sdnController/hardwareVxlan/KVMRealizeHardwareVxlanNetworkBackend.java"
+  },
+  {
+    "raw": "failed to check bridge[%s] for hardwareVxlan[uuid:%s, name:%s] on kvm host[uuid:%s], %s",
+    "en_US": "failed to check bridge[{0}] for hardwareVxlan[uuid:{1}, name:{2}] on kvm host[uuid:{3}], {4}",
+    "zh_CN": "无法在KVM主机[uuid：{3}]上检查硬件VXLAN[uuid：{1}，名称：{2}]的网桥[{0}]，{4}",
+    "arguments": [
+      "cmd.getBridgeName()",
+      "vxlan.getUuid()",
+      "vxlan.getName()",
+      "hostUuid",
+      "rsp.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/sdnController/hardwareVxlan/KVMRealizeHardwareVxlanNetworkBackend.java"
+  },
+  {
+    "raw": "failed to check physical interface for HardwareVxlanPool[uuid:%s, name:%s] on kvm host[uuid: %s], %s",
+    "en_US": "failed to check physical interface for HardwareVxlanPool[uuid:{0}, name:{1}] on kvm host[uuid: {2}], {3}",
+    "zh_CN": "无法检查KVM主机[uuid：{2}]上的硬件vxlanpool[uuid：{0}，名称：{1}]的物理接口，{3}",
+    "arguments": [
+      "l2Network.getUuid()",
+      "l2Network.getName()",
+      "hostUuid",
+      "rsp.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/sdnController/hardwareVxlan/KVMRealizeHardwareVxlanPoolNetworkBackend.java"
+  }
+]

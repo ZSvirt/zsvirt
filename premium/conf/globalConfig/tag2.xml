@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<globalConfig xmlns="http://zstack.org/schema/zstack">
+    <config>
+        <category>tag2</category>
+        <name>tag.resource.attached</name>
+        <description>The limit of one resource attached tags.</description>
+        <defaultValue>50</defaultValue>
+        <type>java.lang.Integer</type>
+    </config>
+
+    <config>
+        <category>quota</category>
+        <name>tag2.tag.num</name>
+        <description>default quota for tag2.user defined tag num</description>
+        <defaultValue>20</defaultValue>
+        <type>java.lang.Long</type>
+    </config>
+
+</globalConfig>

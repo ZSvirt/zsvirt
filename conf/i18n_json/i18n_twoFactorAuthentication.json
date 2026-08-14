@@ -1,0 +1,63 @@
+[
+  {
+    "raw": "Unsupported AccountType：%s",
+    "en_US": "Unsupported AccountType：{0}",
+    "zh_CN": "不支持的帐户类型：{0}",
+    "arguments": [
+      "loginType"
+    ],
+    "fileName": "src/main/java/org/zstack/twoFactorAuthentication/TwoFactorAuthenticationAccountBackend.java"
+  },
+  {
+    "raw": "wrong account name or password",
+    "en_US": "wrong account name or password",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/twoFactorAuthentication/TwoFactorAuthenticationManagerImpl.java"
+  },
+  {
+    "raw": "two factor authenticator is not enabled",
+    "en_US": "two factor authenticator is not enabled",
+    "zh_CN": "双因子认证未启用",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/twoFactorAuthentication/TwoFactorAuthenticationManagerImpl.java"
+  },
+  {
+    "raw": "additional authentication failed",
+    "en_US": "additional authentication failed",
+    "zh_CN": "附加认证失败",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/twoFactorAuthentication/TwoFactorAuthenticationManagerImpl.java"
+  },
+  {
+    "raw": "two factor authentication failed because there is no system tags in msg",
+    "en_US": "two factor authentication failed because there is no system tags in msg",
+    "zh_CN": "双因素身份验证失败，因为MSG中没有系统标记",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/twoFactorAuthentication/TwoFactorAuthenticationManagerImpl.java"
+  },
+  {
+    "raw": "two factor authentication failed because there is no token in msg system tag",
+    "en_US": "two factor authentication failed because there is no token in msg system tag",
+    "zh_CN": "双因素身份验证失败，因为MSG系统标记中没有令牌",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/twoFactorAuthentication/TwoFactorAuthenticationManagerImpl.java"
+  },
+  {
+    "raw": "two factor authentication failed because there is no secret for %s:%s",
+    "en_US": "two factor authentication failed because there is no secret for {0}:{1}",
+    "zh_CN": "双因素身份验证失败，因为{0}没有密码：{1}",
+    "arguments": [
+      "loginContext.getLoginBackendType()",
+      "info.getAccountUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/twoFactorAuthentication/TwoFactorAuthenticationManagerImpl.java"
+  },
+  {
+    "raw": "failed to verify two factor authentication code",
+    "en_US": "failed to verify two factor authentication code",
+    "zh_CN": "验证双因素身份验证代码失败",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/twoFactorAuthentication/TwoFactorAuthenticationManagerImpl.java"
+  }
+]

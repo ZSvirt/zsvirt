@@ -1,0 +1,4 @@
+* xref:index.adoc[]
+* xref:overview.adoc[]
+* xref:contribute/index.adoc[]
+** xref:contribute/commit_msg.adoc[]

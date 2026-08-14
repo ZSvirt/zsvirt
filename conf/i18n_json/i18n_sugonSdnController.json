@@ -1,0 +1,193 @@
+[
+  {
+    "raw": "tf sdn controller already exists.",
+    "en_US": "tf sdn controller already exists.",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/sugonSdnController/controller/SugonSdnController.java"
+  },
+  {
+    "raw": "get default admin account from zstack db failed",
+    "en_US": "get default admin account from zstack db failed",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/sugonSdnController/controller/SugonSdnController.java"
+  },
+  {
+    "raw": "get default domain on tf controller failed",
+    "en_US": "get default domain on tf controller failed",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/sugonSdnController/controller/SugonSdnController.java"
+  },
+  {
+    "raw": "create tf project for zstack admin on tf controller failed",
+    "en_US": "create tf project for zstack admin on tf controller failed",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/sugonSdnController/controller/SugonSdnController.java"
+  },
+  {
+    "raw": "get project[uuid:%s] on tf controller failed ",
+    "en_US": "get project[uuid:{0}] on tf controller failed ",
+    "zh_CN": "",
+    "arguments": [
+      "accountUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/sugonSdnController/controller/SugonSdnController.java"
+  },
+  {
+    "raw": "create tf l2 network[name:%s] on tf controller failed ",
+    "en_US": "create tf l2 network[name:{0}] on tf controller failed ",
+    "zh_CN": "",
+    "arguments": [
+      "name"
+    ],
+    "fileName": "src/main/java/org/zstack/sugonSdnController/controller/SugonSdnController.java"
+  },
+  {
+    "raw": "get virtual network[uuid:%s] on tf controller failed ",
+    "en_US": "get virtual network[uuid:{0}] on tf controller failed ",
+    "zh_CN": "",
+    "arguments": [
+      "uuid"
+    ],
+    "fileName": "src/main/java/org/zstack/sugonSdnController/controller/SugonSdnController.java"
+  },
+  {
+    "raw": "update tf l2 network[name:%s] on tf controller failed ",
+    "en_US": "update tf l2 network[name:{0}] on tf controller failed ",
+    "zh_CN": "",
+    "arguments": [
+      "name"
+    ],
+    "fileName": "src/main/java/org/zstack/sugonSdnController/controller/SugonSdnController.java"
+  },
+  {
+    "raw": "delete tf l2 network[uuid:%s] on tf controller failed ",
+    "en_US": "delete tf l2 network[uuid:{0}] on tf controller failed ",
+    "zh_CN": "",
+    "arguments": [
+      "uuid"
+    ],
+    "fileName": "src/main/java/org/zstack/sugonSdnController/controller/SugonSdnController.java"
+  },
+  {
+    "raw": "delete tf l3 network[name:%s] on tf controller failed due to：%s",
+    "en_US": "delete tf l3 network[name:{0}] on tf controller failed due to：{1}",
+    "zh_CN": "",
+    "arguments": [
+      "l3NetworkVO.getName()",
+      "status.getMsg()"
+    ],
+    "fileName": "src/main/java/org/zstack/sugonSdnController/controller/SugonSdnController.java"
+  },
+  {
+    "raw": "update tf l3 network[name:%s] on tf controller failed due to：%s",
+    "en_US": "update tf l3 network[name:{0}] on tf controller failed due to：{1}",
+    "zh_CN": "",
+    "arguments": [
+      "l3NetworkVO.getName()",
+      "status.getMsg()"
+    ],
+    "fileName": "src/main/java/org/zstack/sugonSdnController/controller/SugonSdnController.java"
+  },
+  {
+    "raw": "add tf l3 subnet[name:%s] on tf controller failed due to：%s",
+    "en_US": "add tf l3 subnet[name:{0}] on tf controller failed due to：{1}",
+    "zh_CN": "",
+    "arguments": [
+      "l3NetworkVO.getName()",
+      "status.getMsg()"
+    ],
+    "fileName": "src/main/java/org/zstack/sugonSdnController/controller/SugonSdnController.java"
+  },
+  {
+    "raw": "add host router to l3 network[name:%s] on tf controller failed due to：%s",
+    "en_US": "add host router to l3 network[name:{0}] on tf controller failed due to：{1}",
+    "zh_CN": "",
+    "arguments": [
+      "l3NetworkVO.getName()",
+      "status.getMsg()"
+    ],
+    "fileName": "src/main/java/org/zstack/sugonSdnController/controller/SugonSdnController.java"
+  },
+  {
+    "raw": "delete host route from l3 network[name:%s] on tf controller failed due to：%s",
+    "en_US": "delete host route from l3 network[name:{0}] on tf controller failed due to：{1}",
+    "zh_CN": "",
+    "arguments": [
+      "l3NetworkVO.getName()",
+      "status.getMsg()"
+    ],
+    "fileName": "src/main/java/org/zstack/sugonSdnController/controller/SugonSdnController.java"
+  },
+  {
+    "raw": "add dns to l3 network[name:%s] on tf controller failed due to：%s",
+    "en_US": "add dns to l3 network[name:{0}] on tf controller failed due to：{1}",
+    "zh_CN": "",
+    "arguments": [
+      "l3NetworkVO.getName()",
+      "status.getMsg()"
+    ],
+    "fileName": "src/main/java/org/zstack/sugonSdnController/controller/SugonSdnController.java"
+  },
+  {
+    "raw": "delete dns from to l3 network[name:%s] on tf controller failed due to：%s",
+    "en_US": "delete dns from to l3 network[name:{0}] on tf controller failed due to：{1}",
+    "zh_CN": "",
+    "arguments": [
+      "l3NetworkVO.getName()",
+      "status.getMsg()"
+    ],
+    "fileName": "src/main/java/org/zstack/sugonSdnController/controller/SugonSdnController.java"
+  },
+  {
+    "raw": "L3 Network is missing",
+    "en_US": "L3 Network is missing",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/sugonSdnController/network/TfL3Network.java"
+  },
+  {
+    "raw": "notifySugonSdn: failed to notify sugon sdn to %s vrouter for vm [uuid:%s], on the destination host[uuid:%s]",
+    "en_US": "notifySugonSdn: failed to notify sugon sdn to {0} vrouter for vm [uuid:{1}], on the destination host[uuid:{2}]",
+    "zh_CN": "",
+    "arguments": [
+      "operate",
+      "inv.getUuid()",
+      "destHostUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/sugonSdnController/network/TfMigrateVmBackend.java"
+  },
+  {
+    "raw": "notifySugonSdn: failed to notify sugon sdn to %s vrouter for vm [uuid:%s], on the destination host[uuid:%s], error is:%s",
+    "en_US": "notifySugonSdn: failed to notify sugon sdn to {0} vrouter for vm [uuid:{1}], on the destination host[uuid:{2}], error is:{3}",
+    "zh_CN": "",
+    "arguments": [
+      "operate",
+      "inv.getUuid()",
+      "destHostUuid",
+      "rsp.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/sugonSdnController/network/TfMigrateVmBackend.java"
+  },
+  {
+    "raw": "host[uuid:%s] is not connected",
+    "en_US": "host[uuid:{0}] is not connected",
+    "zh_CN": "物理机[uuid:{0}]未连接",
+    "arguments": [
+      "struct.getHostUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/sugonSdnController/userdata/TfUserdataBackend.java"
+  },
+  {
+    "raw": "operation error, because:%s",
+    "en_US": "operation error, because:{0}",
+    "zh_CN": "操作错误，因为{0}",
+    "arguments": [
+      "rsp.getError()"
+    ],
+    "fileName": "src/main/java/org/zstack/sugonSdnController/userdata/TfUserdataBackend.java"
+  }
+]

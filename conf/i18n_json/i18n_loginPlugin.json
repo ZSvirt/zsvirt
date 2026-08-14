@@ -1,0 +1,27 @@
+[
+  {
+    "raw": "missing loginPluginName",
+    "en_US": "missing loginPluginName",
+    "zh_CN": "缺少LoginPluginName",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/login/plugin/LoginPluginBackend.java"
+  },
+  {
+    "raw": "no login plugin named %s",
+    "en_US": "no login plugin named {0}",
+    "zh_CN": "没有名为{0}的登录插件",
+    "arguments": [
+      "loginContext.getLoginPluginName()"
+    ],
+    "fileName": "src/main/java/org/zstack/login/plugin/LoginPluginBackend.java"
+  },
+  {
+    "raw": "missing LoginUserInfo when use plugin login",
+    "en_US": "missing LoginUserInfo when use plugin login",
+    "zh_CN": "使用插件登录时缺少LoginUserInfo",
+    "arguments": [
+      "loginContext.getLoginPluginName()"
+    ],
+    "fileName": "src/main/java/org/zstack/login/plugin/LoginPluginBackend.java"
+  }
+]

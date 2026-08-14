@@ -1,0 +1,238 @@
+[
+  {
+    "raw": "ticket[uuid:%s, name:%s] can only be updated after being cancelled, current status is %s",
+    "en_US": "ticket[uuid:{0}, name:{1}] can only be updated after being cancelled, current status is {2}",
+    "zh_CN": "工单[uuid:{0}, name:{1}]当前状态为{2}，不支持更新操作",
+    "arguments": [
+      "self.getUuid()",
+      "self.getName()",
+      "self.getStatus()"
+    ],
+    "fileName": "src/main/java/org/zstack/ticket/TicketBase.java"
+  },
+  {
+    "raw": "operation denied. the operator needs to be done by account/virtual ID[uuid:%s]",
+    "en_US": "operation denied. the operator needs to be done by account/virtual ID[uuid:{0}]",
+    "zh_CN": "操作无效，需要account/virtual ID[uuid:{0}]才能完成操作",
+    "arguments": [
+      "operator.operatorUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/ticket/TicketBase.java"
+  },
+  {
+    "raw": "no accountSystemType[%s] defined in system",
+    "en_US": "no accountSystemType[{0}] defined in system",
+    "zh_CN": "未定义的accountSystemType[{0}]类型",
+    "arguments": [
+      "msg.getAccountSystemType()"
+    ],
+    "fileName": "src/main/java/org/zstack/ticket/api/TicketApiInterceptor.java"
+  },
+  {
+    "raw": "not matched ticket type found",
+    "en_US": "not matched ticket type found",
+    "zh_CN": "未找到匹配的票证类型",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/ticket/api/TicketApiInterceptor.java"
+  },
+  {
+    "raw": "no matched ticket flow collection or no default ticket flow collection found, you must specify the flowCollectionUuid or create a default ticket flow collection in system",
+    "en_US": "no matched ticket flow collection or no default ticket flow collection found, you must specify the flowCollectionUuid or create a default ticket flow collection in system",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/ticket/api/TicketApiInterceptor.java"
+  },
+  {
+    "raw": "Ticket flow collection[uuid:%s] not matches ticket type[uuid:%s]",
+    "en_US": "Ticket flow collection[uuid:{0}] not matches ticket type[uuid:{1}]",
+    "zh_CN": "票证流集合[uuid：{0}]与票证类型[uuid：{1}]不匹配",
+    "arguments": [
+      "msg.getFlowCollectionUuid()",
+      "ticketTypeUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/ticket/api/TicketApiInterceptor.java"
+  },
+  {
+    "raw": "Ticket flow collection[uuid:%s] is invalid, contact admin to correct it",
+    "en_US": "Ticket flow collection[uuid:{0}] is invalid, contact admin to correct it",
+    "zh_CN": "当前工单流程[uuid:{0}]失效，请联系admin修复",
+    "arguments": [
+      "msg.getFlowCollectionUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/ticket/api/TicketApiInterceptor.java"
+  },
+  {
+    "raw": "Ticket flow collection[uuid:%s] is disable, can not be used",
+    "en_US": "Ticket flow collection[uuid:{0}] is disable, can not be used",
+    "zh_CN": "工单流程[uuid:{0}]处于禁用状态，无法被使用",
+    "arguments": [
+      "msg.getFlowCollectionUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/ticket/api/TicketApiInterceptor.java"
+  },
+  {
+    "raw": "invalid request. no API[%s] found",
+    "en_US": "invalid request. no API[{0}] found",
+    "zh_CN": "无效的请求。找不到API[{0}]",
+    "arguments": [
+      "req.apiName"
+    ],
+    "fileName": "src/main/java/org/zstack/ticket/api/TicketApiInterceptor.java"
+  },
+  {
+    "raw": "invalid request, cannot create API[%s] from apiBody, %s",
+    "en_US": "invalid request, cannot create API[{0}] from apiBody, {1}",
+    "zh_CN": "无效的请求，无法通过apiBody创建API[{0}]，{1}",
+    "arguments": [
+      "clz",
+      "e.getMessage()"
+    ],
+    "fileName": "src/main/java/org/zstack/ticket/api/TicketApiInterceptor.java"
+  },
+  {
+    "raw": "operation denied. the ticket is in status of %s, cannot do the operation[%s]",
+    "en_US": "operation denied. the ticket is in status of {0}, cannot do the operation[{1}]",
+    "zh_CN": "操作无效。当前工单状态为{0}，无法进行操作[{0}]",
+    "arguments": [
+      "this",
+      "event"
+    ],
+    "fileName": "src/main/java/org/zstack/ticket/entity/TicketStatus.java"
+  },
+  {
+    "raw": "No api class[name:%s] is found",
+    "en_US": "No api class[name:{0}] is found",
+    "zh_CN": "找不到API类[名称：{0}]",
+    "arguments": [
+      "request.apiName"
+    ],
+    "fileName": "src/main/java/org/zstack/ticket/executor/DefaultSingletonRequestExecutor.java"
+  },
+  {
+    "raw": "failed to get value from event: %s",
+    "en_US": "failed to get value from event: {0}",
+    "zh_CN": "无法从事件中获取值：{0}",
+    "arguments": [
+      "exception.getMessage()"
+    ],
+    "fileName": "src/main/java/org/zstack/ticket/executor/DefaultSingletonRequestExecutor.java"
+  },
+  {
+    "raw": "operation denied because the ticket submitter[uuid:%s] has been deleted, the ticket[uuid:%s, name:%s] can only be deleted now",
+    "en_US": "operation denied because the ticket submitter[uuid:{0}] has been deleted, the ticket[uuid:{1}, name:{2}] can only be deleted now",
+    "zh_CN": "操作无效。因为工单的提交者[uuid:{0}]已经被删除，工单[uuid:{1}, name:{2}]仅支持删除操作",
+    "arguments": [
+      "ctx.getVirtualIDUuid()",
+      "self.getUuid()",
+      "self.getName()"
+    ],
+    "fileName": "src/main/java/org/zstack/ticket/iam2/IAM2Ticket.java"
+  },
+  {
+    "raw": "operation denied because the project[uuid:%s] of the ticket has been deleted, the ticket[uuid:%s, name:%s] can only be deleted now",
+    "en_US": "operation denied because the project[uuid:{0}] of the ticket has been deleted, the ticket[uuid:{1}, name:{2}] can only be deleted now",
+    "zh_CN": "操作无效。因为工单所属的项目[uuid:{0}]已经被删除，工单[uuid:{1}, name:{2}]仅支持删除操作",
+    "arguments": [
+      "ctx.getProjectUuid()",
+      "self.getUuid()",
+      "self.getName()"
+    ],
+    "fileName": "src/main/java/org/zstack/ticket/iam2/IAM2Ticket.java"
+  },
+  {
+    "raw": "operation denied because flow collection[uuid:%s] it not belong the project[uuid:%s]",
+    "en_US": "operation denied because flow collection[uuid:{0}] it not belong the project[uuid:{1}]",
+    "zh_CN": "操作无效，因为流程[uuid:{0}]不属于项目[uuid:{1}]",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/ticket/iam2/IAM2Ticket.java"
+  },
+  {
+    "raw": "the virtual ID[uuid:%s] is not the owner of the ticket[uuid:%s, name:%s]",
+    "en_US": "the virtual ID[uuid:{0}] is not the owner of the ticket[uuid:{1}, name:{2}]",
+    "zh_CN": "virtual ID[uuid:{0}]不是工单[uuid:{1}, name:{2}]的所有者",
+    "arguments": [
+      "msg.getSession().getUserUuid()",
+      "self.getUuid()",
+      "self.getName()"
+    ],
+    "fileName": "src/main/java/org/zstack/ticket/iam2/IAM2Ticket.java"
+  },
+  {
+    "raw": "approver is removed from project or deleted, flow collection changed to invalid, reject this ticket",
+    "en_US": "approver is removed from project or deleted, flow collection changed to invalid, reject this ticket",
+    "zh_CN": "审批人已经离开项目或者被删除，流程失效，因此驳回当前工单",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/ticket/iam2/IAM2TicketManager.java"
+  },
+  {
+    "raw": "name is needed when create a flow",
+    "en_US": "name is needed when create a flow",
+    "zh_CN": "创建步骤时需要填写名称",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/ticket/iam2/api/IAM2TicketApiInterceptor.java"
+  },
+  {
+    "raw": "one ticket type can only have one matches flow collection",
+    "en_US": "one ticket type can only have one matches flow collection",
+    "zh_CN": "一个票证类型只能有一个匹配流集合",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/ticket/iam2/api/IAM2TicketApiInterceptor.java"
+  },
+  {
+    "raw": "admin or iam2 operation is required as approver of the last flow",
+    "en_US": "admin or iam2 operation is required as approver of the last flow",
+    "zh_CN": "需要管理员或IAM2操作作为最后一个流的批准人",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/ticket/iam2/api/IAM2TicketApiInterceptor.java"
+  },
+  {
+    "raw": "at least one flow is needed for create flow collection",
+    "en_US": "at least one flow is needed for create flow collection",
+    "zh_CN": "创建流程时需要至少一个步骤",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/ticket/iam2/api/IAM2TicketApiInterceptor.java"
+  },
+  {
+    "raw": "wrong approver title %s, valid value is %s",
+    "en_US": "wrong approver title {0}, valid value is {1}",
+    "zh_CN": "错误的审批人职位{0}, 有效输入为{1}",
+    "arguments": [
+      "flow.approverTitle",
+      "approveTitles"
+    ],
+    "fileName": "src/main/java/org/zstack/ticket/iam2/api/IAM2TicketApiInterceptor.java"
+  },
+  {
+    "raw": "name cannot be null",
+    "en_US": "name cannot be null",
+    "zh_CN": "名称不能为空",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/ticket/iam2/api/IAM2TicketApiInterceptor.java"
+  },
+  {
+    "raw": "approverUuid cannot be null",
+    "en_US": "approverUuid cannot be null",
+    "zh_CN": "Approveruuid不能为空",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/ticket/iam2/api/IAM2TicketApiInterceptor.java"
+  },
+  {
+    "raw": "can not find IAM2VirtualIDVO[uuid:%s]",
+    "en_US": "can not find IAM2VirtualIDVO[uuid:{0}]",
+    "zh_CN": "找不到对应的IAM2VirtualIDVO[uuid:{0}]",
+    "arguments": [
+      "flow.approverUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/ticket/iam2/api/IAM2TicketApiInterceptor.java"
+  },
+  {
+    "raw": "virtual id[uuid:%s] not belong to project[uuid:%s]",
+    "en_US": "virtual id[uuid:{0}] not belong to project[uuid:{1}]",
+    "zh_CN": "virtual id[uuid:{0}]不属于项目[uuid:{1}]",
+    "arguments": [
+      "flow.approverUuid",
+      "projectUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/ticket/iam2/api/IAM2TicketApiInterceptor.java"
+  }
+]

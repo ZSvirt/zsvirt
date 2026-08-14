@@ -1,0 +1,284 @@
+[
+  {
+    "raw": "field[hosts] must not be null or empty",
+    "en_US": "field[hosts] must not be null or empty",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zstone/ZStoneApiInterceptor.java"
+  },
+  {
+    "raw": "at least 2 hosts are required for ZStone initialization",
+    "en_US": "at least 2 hosts are required for ZStone initialization",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zstone/ZStoneApiInterceptor.java"
+  },
+  {
+    "raw": "field[uuid] in hosts must not be null or empty",
+    "en_US": "field[uuid] in hosts must not be null or empty",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zstone/ZStoneApiInterceptor.java"
+  },
+  {
+    "raw": "duplicated host uuid(s) found: %s",
+    "en_US": "duplicated host uuid(s) found: {0}",
+    "zh_CN": "",
+    "arguments": [
+      "dups"
+    ],
+    "fileName": "src/main/java/org/zstack/zstone/ZStoneApiInterceptor.java"
+  },
+  {
+    "raw": "field[uuid] of message[APIUpdateZStoneHostConfigMsg].hosts are invalid: %s",
+    "en_US": "field[uuid] of message[APIUpdateZStoneHostConfigMsg].hosts are invalid: {0}",
+    "zh_CN": "",
+    "arguments": [
+      "hostUuidList"
+    ],
+    "fileName": "src/main/java/org/zstack/zstone/ZStoneApiInterceptor.java"
+  },
+  {
+    "raw": "field[publicIp] of message[APIUpdateZStoneHostConfigMsg].hosts is mandatory, can not be null",
+    "en_US": "field[publicIp] of message[APIUpdateZStoneHostConfigMsg].hosts is mandatory, can not be null",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zstone/ZStoneApiInterceptor.java"
+  },
+  {
+    "raw": "invalid package status. only Installed, InitializeFailed or Initialized packages can be initialized",
+    "en_US": "invalid package status. only Installed, InitializeFailed or Initialized packages can be initialized",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zstone/ZStoneApiInterceptor.java"
+  },
+  {
+    "raw": "failed to connect to zstone[%s]",
+    "en_US": "failed to connect to zstone[{0}]",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getManagementIp()"
+    ],
+    "fileName": "src/main/java/org/zstack/zstone/ZStoneManager.java"
+  },
+  {
+    "raw": "ZStone with management ip[%s] already exists",
+    "en_US": "ZStone with management ip[{0}] already exists",
+    "zh_CN": "",
+    "arguments": [
+      "msg.getManagementIp()"
+    ],
+    "fileName": "src/main/java/org/zstack/zstone/ZStoneManager.java"
+  },
+  {
+    "raw": "ZStone[%s] has %s block clusters, we must ensure no other clusters in ZStone before add new cluster",
+    "en_US": "ZStone[{0}] has {1} block clusters, we must ensure no other clusters in ZStone before add new cluster",
+    "zh_CN": "",
+    "arguments": [
+      "zstone.getUuid()",
+      "errorableValue.result.size()"
+    ],
+    "fileName": "src/main/java/org/zstack/zstone/ZStoneManager.java"
+  },
+  {
+    "raw": "all management nodes must have the same username and password",
+    "en_US": "all management nodes must have the same username and password",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zstone/ZStoneManager.java"
+  },
+  {
+    "raw": "all storage nodes must have the same username and password",
+    "en_US": "all storage nodes must have the same username and password",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zstone/ZStoneManager.java"
+  },
+  {
+    "raw": "config parameter cannot be null or empty",
+    "en_US": "config parameter cannot be null or empty",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zstone/ZStoneManager.java"
+  },
+  {
+    "raw": "install.sh not found: %s. install.sh has been manually deleted. please re-upload the installation package",
+    "en_US": "install.sh not found: {0}. install.sh has been manually deleted. please re-upload the installation package",
+    "zh_CN": "未找到 install.sh: {0}. install.sh 可能被手动删除, 需要重新上传安装包",
+    "arguments": [
+      "installPath"
+    ],
+    "fileName": "src/main/java/org/zstack/zstone/ZStoneManager.java"
+  },
+  {
+    "raw": "failed to install distributed storage",
+    "en_US": "failed to install distributed storage",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zstone/ZStoneManager.java"
+  },
+  {
+    "raw": "cleanup.sh not found: %s. the cleanup.sh has been manually deleted.",
+    "en_US": "cleanup.sh not found: {0}. the cleanup.sh has been manually deleted.",
+    "zh_CN": "",
+    "arguments": [
+      "installPath"
+    ],
+    "fileName": "src/main/java/org/zstack/zstone/ZStoneManager.java"
+  },
+  {
+    "raw": "install config not found for software package: %s",
+    "en_US": "install config not found for software package: {0}",
+    "zh_CN": "",
+    "arguments": [
+      "softwarePackageVO.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/zstone/ZStoneManager.java"
+  },
+  {
+    "raw": "failed to cleanup env",
+    "en_US": "failed to cleanup env",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zstone/ZStoneManager.java"
+  },
+  {
+    "raw": "failed to uninstall distributed storage on hosts",
+    "en_US": "failed to uninstall distributed storage on hosts",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zstone/ZStoneManager.java"
+  },
+  {
+    "raw": "failed to authorize in ZStone server",
+    "en_US": "failed to authorize in ZStone server",
+    "zh_CN": "无法登录 ZStone 服务器",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zstone/client/ZStoneClient.java"
+  },
+  {
+    "raw": "failed to get licenses from ZStone",
+    "en_US": "failed to get licenses from ZStone",
+    "zh_CN": "无法从 ZStone 获取许可证",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zstone/client/ZStoneClient.java"
+  },
+  {
+    "raw": "failed to get licenses from ZStone: %s",
+    "en_US": "failed to get licenses from ZStone: {0}",
+    "zh_CN": "",
+    "arguments": [
+      "response.result.error"
+    ],
+    "fileName": "src/main/java/org/zstack/zstone/client/ZStoneClient.java"
+  },
+  {
+    "raw": "failed to reload licenses from ZStone",
+    "en_US": "failed to reload licenses from ZStone",
+    "zh_CN": "无法从 ZStone 重新加载许可证",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zstone/client/ZStoneClient.java"
+  },
+  {
+    "raw": "failed to get clusters from ZStone 5.2.x / 5.3.x",
+    "en_US": "failed to get clusters from ZStone 5.2.x / 5.3.x",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zstone/client/ZStoneClient.java"
+  },
+  {
+    "raw": "failed to get clusters from ZStone (version \u003e\u003d 5.4.x)",
+    "en_US": "failed to get clusters from ZStone (version \u003e\u003d 5.4.x)",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zstone/client/ZStoneClient.java"
+  },
+  {
+    "raw": "failed to get clusters from ZStone",
+    "en_US": "failed to get clusters from ZStone",
+    "zh_CN": "无法从 ZStone 获取集群信息",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zstone/client/ZStoneClient.java"
+  },
+  {
+    "raw": "failed to get host info from ZStone",
+    "en_US": "failed to get host info from ZStone",
+    "zh_CN": "无法从 ZStone 获取主机信息",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zstone/client/ZStoneClient.java"
+  },
+  {
+    "raw": "failed to get pool info from ZStone",
+    "en_US": "failed to get pool info from ZStone",
+    "zh_CN": "无法从 ZStone 获取存储池信息",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zstone/client/ZStoneClient.java"
+  },
+  {
+    "raw": "failed to get session info from ZStone",
+    "en_US": "failed to get session info from ZStone",
+    "zh_CN": "无法从 ZStone 获取会话信息",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zstone/client/ZStoneClient.java"
+  },
+  {
+    "raw": "failed to update cluster",
+    "en_US": "failed to update cluster",
+    "zh_CN": "无法更新集群信息",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zstone/client/ZStoneClient.java"
+  },
+  {
+    "raw": "failed to add host",
+    "en_US": "failed to add host",
+    "zh_CN": "无法添加主机",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zstone/client/ZStoneClient.java"
+  },
+  {
+    "raw": "failed to add ZStone hosts",
+    "en_US": "failed to add ZStone hosts",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zstone/client/ZStoneClient.java"
+  },
+  {
+    "raw": "invalid session for ZStone server",
+    "en_US": "invalid session for ZStone server",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zstone/client/ZStoneClient.java"
+  },
+  {
+    "raw": "ZStone session expired",
+    "en_US": "ZStone session expired",
+    "zh_CN": "",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zstone/client/ZStoneClient.java"
+  },
+  {
+    "raw": "failed to get api response for path[%s]",
+    "en_US": "failed to get api response for path[{0}]",
+    "zh_CN": "无法获取 ZStone API 响应",
+    "arguments": [
+      "redirectApiResponse.requestUrl"
+    ],
+    "fileName": "src/main/java/org/zstack/zstone/client/ZStoneClient.java"
+  },
+  {
+    "raw": "ZStone API failed",
+    "en_US": "ZStone API failed",
+    "zh_CN": "无法调用 ZStone API",
+    "arguments": [],
+    "fileName": "src/main/java/org/zstack/zstone/client/ZStoneClient.java"
+  },
+  {
+    "raw": "Failed to find ZStone with uuid [%s]",
+    "en_US": "Failed to find ZStone with uuid [{0}]",
+    "zh_CN": "",
+    "arguments": [
+      "addition.resourceUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/zstone/compute/ZsvZStoneLicenseFactory.java"
+  }
+]

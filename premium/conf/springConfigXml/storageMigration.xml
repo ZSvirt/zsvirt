@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx" xmlns:zstack="http://zstack.org/schema/zstack"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+    http://www.springframework.org/schema/aop
+    http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+    http://www.springframework.org/schema/tx
+    http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+    http://www.springframework.org/schema/util
+    http://www.springframework.org/schema/util/spring-util-3.0.xsd
+    http://zstack.org/schema/zstack
+    http://zstack.org/schema/zstack/plugin.xsd"
+       default-init-method="init" default-destroy-method="destroy">
+
+	<util:list id="CephMetric">
+		<value>Ceph</value>
+	</util:list>
+
+	<util:list id="NfsMetric">
+		<value>NFS</value>
+	</util:list>
+
+	<util:list id="SharedBlockMetric">
+		<value>SharedBlock</value>
+	</util:list>
+
+	<util:map id="PrimaryStoragePrimaryStorageMetrics" value-type="java.util.List">
+		<entry key="Ceph" value-ref="CephMetric"/>
+		<entry key="NFS" value-ref="NfsMetric"/>
+		<entry key="SharedBlock" value-ref="SharedBlockMetric"/>
+	</util:map>
+
+	<util:map id="BackupStorageBackupStorageMetrics" value-type="java.util.List">
+		<entry key="Ceph" value-ref="CephMetric"/>
+	</util:map>
+
+	<util:map id="PrimaryStorageNotSupportCrossClusterMigrationMetrics" value-type="java.util.List">
+		<entry key="SharedBlock" value-ref="SharedBlockMetric"/>
+	</util:map>
+
+	<bean id="StorageMigrationApiInterceptor" class="org.zstack.storage.migration.StorageMigrationApiInterceptor">
+		<zstack:plugin>
+			<zstack:extension interface="org.zstack.header.apimediator.ApiMessageInterceptor" />
+            <zstack:extension interface="org.zstack.header.apimediator.GlobalApiMessageInterceptor"/>
+		</zstack:plugin>
+
+        <property name="primaryStoragePrimaryStorageMetrics" ref="PrimaryStoragePrimaryStorageMetrics"/>
+        <property name="backupStorageBackupStorageMetrics" ref="BackupStorageBackupStorageMetrics"/>
+	</bean>
+
+	<bean id="StorageMigration" class="org.zstack.storage.migration.StorageMigrationBase">
+		<zstack:plugin>
+			<zstack:extension interface="org.zstack.header.Component" />
+		</zstack:plugin>
+
+		<property name="primaryStoragePrimaryStorageMetrics" ref="PrimaryStoragePrimaryStorageMetrics"/>
+		<property name="backupStorageBackupStorageMetrics" ref="BackupStorageBackupStorageMetrics"/>
+		<property name="primaryStorageNotSupportCrossClusterMigrationMetrics"
+				  ref="PrimaryStorageNotSupportCrossClusterMigrationMetrics"/>
+	</bean>
+
+	<bean id="CephToCephMigrateImageChainFactory" class="org.zstack.storage.migration.backup.ceph.CephToCephMigrateImageChainFactory">
+		<zstack:plugin>
+			<zstack:extension interface="org.zstack.header.Component" />
+			<zstack:extension interface="org.zstack.storage.migration.StorageMigrationChainFactory" />
+		</zstack:plugin>
+		<property name="flowClassNames">
+			<list>
+				<value>org.zstack.storage.migration.backup.ReserveCapacityFromDstBSFlow</value>
+				<value>org.zstack.storage.migration.backup.ceph.CephToCephMigrateImageFlow</value>
+				<value>org.zstack.storage.migration.backup.UpdateImageVOFlow</value>
+				<value>org.zstack.storage.migration.backup.ceph.CephDeleteImageFileFromSrcBSFlow</value>
+			</list>
+		</property>
+	</bean>
+
+	<bean id="CephToCephMigrateVolumeChainFactory" class="org.zstack.storage.migration.primary.ceph.CephToCephMigrateVolumeChainFactory">
+		<zstack:plugin>
+			<zstack:extension interface="org.zstack.header.Component" />
+			<zstack:extension interface="org.zstack.storage.migration.StorageMigrationChainFactory" />
+		</zstack:plugin>
+		<property name="flowClassNames">
+			<list>
+				<value>org.zstack.storage.migration.primary.ReserveCapacityFromDstPSFlow</value>
+				<value>org.zstack.storage.migration.primary.ceph.CephToCephMigrateVolumeFlow</value>
+				<value>org.zstack.storage.migration.primary.UpdateVolumeVOFlow</value>
+				<value>org.zstack.storage.migration.primary.DiscardVolumeReferenceFlow</value>
+				<value>org.zstack.storage.migration.primary.ceph.CephDeleteVolumeFromSrcPSFlow</value>
+			</list>
+		</property>
+		<property name="discardClassNames">
+			<list>
+				<value>org.zstack.storage.migration.primary.DiscardVolumeReferenceFlow</value>
+				<value>org.zstack.storage.migration.primary.ceph.CephDeleteVolumeFromSrcPSFlow</value>
+			</list>
+		</property>
+		<property name="cancelFlowClassNames">
+			<list>
+				<value>org.zstack.storage.migration.primary.ceph.CephToCephCancelMigrateVolumeFlow</value>
+			</list>
+		</property>
+	</bean>
+
+	<bean id="NfsToNfsMigrateVolumeChainFactory" class="org.zstack.storage.migration.primary.nfs.NfsToNfsMigrateVolumeChainFactory">
+		<zstack:plugin>
+			<zstack:extension interface="org.zstack.header.Component" />
+			<zstack:extension interface="org.zstack.storage.migration.StorageMigrationChainFactory" />
+		</zstack:plugin>
+		<property name="flowClassNames">
+			<list>
+				<value>org.zstack.storage.migration.primary.ReserveCapacityFromDstPSFlow</value>
+				<value>org.zstack.storage.migration.primary.nfs.NfsToNfsMigrateVolumeFlow</value>
+				<value>org.zstack.storage.migration.primary.UpdateVolumeVOFlow</value>
+				<value>org.zstack.storage.migration.primary.DiscardVolumeReferenceFlow</value>
+				<value>org.zstack.storage.migration.primary.nfs.NfsDeleteVolumeFromSrcPSFlow</value>
+			</list>
+		</property>
+		<property name="discardClassNames">
+			<list>
+				<value>org.zstack.storage.migration.primary.DiscardVolumeReferenceFlow</value>
+				<value>org.zstack.storage.migration.primary.nfs.NfsDeleteVolumeFromSrcPSFlow</value>
+			</list>
+		</property>
+		<property name="cancelFlowClassNames">
+			<list>
+				<value>org.zstack.storage.migration.primary.nfs.NfsToNfsCancelMigrateVolumeFlow</value>
+			</list>
+		</property>
+	</bean>
+
+	<bean id="LocalToLocalMigrateVolumeChainFactory" class="org.zstack.storage.migration.primary.local.LocalToLocalMigrateVolumeChainFactory">
+		<zstack:plugin>
+			<zstack:extension interface="org.zstack.header.Component" />
+			<zstack:extension interface="org.zstack.storage.migration.StorageMigrationChainFactory" />
+		</zstack:plugin>
+		<property name="flowClassNames">
+			<list>
+				<value>org.zstack.storage.migration.primary.ReserveCapacityFromDstPSFlow</value>
+				<value>org.zstack.storage.migration.primary.local.LocalToLocalMigrateVolumeFlow</value>
+				<value>org.zstack.storage.migration.primary.DiscardVolumeReferenceFlow</value>
+			</list>
+		</property>
+		<property name="discardClassNames">
+			<list>
+				<value>org.zstack.storage.migration.primary.DiscardVolumeReferenceFlow</value>
+			</list>
+		</property>
+		<property name="cancelFlowClassNames">
+			<list>
+				<value>org.zstack.storage.migration.primary.local.LocalToLocalCancelMigrateVolumeFlow</value>
+			</list>
+		</property>
+	</bean>
+
+	<bean id="SharedBlockToSharedBlockVmStorageMigrationMetric" class="org.zstack.storage.primary.sharedblock.SharedBlockToSharedBlockVmStorageMigrationMetric">
+		<zstack:plugin>
+			<zstack:extension interface="org.zstack.storage.migration.VmStorageMigrationMetric"/>
+		</zstack:plugin>
+	</bean>
+
+	<bean id="NfsToNfsVmStorageMigrationMetric" class="org.zstack.storage.migration.primary.nfs.NfsToNfsVmStorageMigrationMetric">
+		<zstack:plugin>
+			<zstack:extension interface="org.zstack.storage.migration.VmStorageMigrationMetric"/>
+		</zstack:plugin>
+	</bean>
+
+	<bean id="CephToCephVmStorageMigrationMetric" class="org.zstack.storage.migration.primary.ceph.CephToCephVmStorageMigrationMetric">
+		<zstack:plugin>
+			<zstack:extension interface="org.zstack.storage.migration.VmStorageMigrationMetric"/>
+		</zstack:plugin>
+	</bean>
+
+	<bean id="KvmBlockLiveMigrationMetric" class="org.zstack.storage.migration.primary.KvmBlockLiveMigrationMetric">
+		<zstack:plugin>
+			<zstack:extension interface="org.zstack.storage.migration.VmStorageMigrationMetric"/>
+		</zstack:plugin>
+	</bean>
+
+	<bean id="LocalToLocalKvmBlockLiveMigrationMetric" class="org.zstack.storage.migration.primary.local.LocalToLocalKvmBlockLiveMigrationMetric">
+		<zstack:plugin>
+			<zstack:extension interface="org.zstack.storage.migration.VmStorageMigrationMetric"/>
+		</zstack:plugin>
+	</bean>
+
+	<bean id="LocalToLocalVmStorageMigrationMetric" class="org.zstack.storage.migration.primary.local.LocalToLocalVmStorageMigrationMetric">
+		<zstack:plugin>
+			<zstack:extension interface="org.zstack.storage.migration.VmStorageMigrationMetric"/>
+		</zstack:plugin>
+	</bean>
+
+	<bean id="KvmStorageLiveMigrationBackend" class="org.zstack.storage.migration.KvmStorageLiveMigrationBackend" >
+		<zstack:plugin>
+			<zstack:extension interface="org.zstack.header.Component" />
+			<zstack:extension interface="org.zstack.storage.migration.HypervisorStorageLiveMigrationBackend" />
+		</zstack:plugin>
+	</bean>
+
+	<bean id="KvmMigrateVmWithStorageWorkFlow" class="org.zstack.storage.migration.KvmMigrateVmWithStorageWorkFlow" >
+		<zstack:plugin>
+			<zstack:extension interface="org.zstack.storage.migration.KvmLiveMigrationWorkFlowTemplate" />
+		</zstack:plugin>
+	</bean>
+
+	<bean id="KvmBlockLiveMigrationWorkFlow" class="org.zstack.storage.migration.KvmBlockLiveMigrationWorkFlow" >
+		<zstack:plugin>
+			<zstack:extension interface="org.zstack.storage.migration.KvmLiveMigrationWorkFlowTemplate" />
+		</zstack:plugin>
+	</bean>
+</beans>

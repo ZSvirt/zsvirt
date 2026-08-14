@@ -1,0 +1,199 @@
+[
+  {
+    "raw": "Port forwarding rule[uuid:%s] is not in state of Enabled, current state is %s",
+    "en_US": "Port forwarding rule[uuid:{0}] is not in state of Enabled, current state is {1}",
+    "zh_CN": "端口转发规则[uuid:{0}]未启用，当前状态[{1}]",
+    "arguments": [
+      "msg.getRuleUuid()",
+      "state"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/portforwarding/PortForwardingApiInterceptor.java"
+  },
+  {
+    "raw": "port forwarding rule rule[uuid:%s] has not been attached to any vm nic, can\u0027t detach",
+    "en_US": "port forwarding rule rule[uuid:{0}] has not been attached to any vm nic, can\u0027t detach",
+    "zh_CN": "端口转发规则[uuid:{0}]尚未被挂载到任何虚拟机网卡，无法卸载",
+    "arguments": [
+      "msg.getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/portforwarding/PortForwardingApiInterceptor.java"
+  },
+  {
+    "raw": "port forwarding rule[uuid:%s] has been attached to vm nic[uuid:%s], can\u0027t attach again",
+    "en_US": "port forwarding rule[uuid:{0}] has been attached to vm nic[uuid:{1}], can\u0027t attach again",
+    "zh_CN": "端口转发规则[uuid:{0}]已经被挂载到虚拟机网卡[uuid:{1}]，无法再次挂载",
+    "arguments": [
+      "msg.getRuleUuid()",
+      "vmNicUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/portforwarding/PortForwardingApiInterceptor.java"
+  },
+  {
+    "raw": "port forwarding rule[uuid:%s] is not in state of Enabled,  current state is %s. A rule can only be attached when its state is Enabled",
+    "en_US": "port forwarding rule[uuid:{0}] is not in state of Enabled,  current state is {1}. A rule can only be attached when its state is Enabled",
+    "zh_CN": "端口转发规则[uuid:{0}]没有启用，当前状态为{1}。一个规则只能在启用时被挂载",
+    "arguments": [
+      "msg.getRuleUuid()",
+      "state"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/portforwarding/PortForwardingApiInterceptor.java"
+  },
+  {
+    "raw": "guest l3Network of vm nic[uuid:%s] and vip l3Network of port forwarding rule[uuid:%s] are the same network",
+    "en_US": "guest l3Network of vm nic[uuid:{0}] and vip l3Network of port forwarding rule[uuid:{1}] are the same network",
+    "zh_CN": "虚拟机网卡[uuid:{0}]的客户三层网络和端口转发规则[uuid:{1}]的VIP 三层网络是同一个网络",
+    "arguments": [
+      "msg.getVmNicUuid()",
+      "msg.getRuleUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/portforwarding/PortForwardingApiInterceptor.java"
+  },
+  {
+    "raw": "could not create port forwarding rule, because vip port range[vipStartPort:%s, vipEndPort:%s] is incompatible with private port range[privateStartPort:%s, privateEndPort:%s]",
+    "en_US": "could not create port forwarding rule, because vip port range[vipStartPort:{0}, vipEndPort:{1}] is incompatible with private port range[privateStartPort:{2}, privateEndPort:{3}]",
+    "zh_CN": "无法创建端口转发规则，因为VIP端口范围[vipStartPort：{0}，vipEndPort：{1}]与专用端口范围[PrivateStartPort：[2}，PrivateEndPport：{3}]不兼容",
+    "arguments": [
+      "msg.getVipPortStart()",
+      "msg.getVipPortEnd()",
+      "msg.getPrivatePortStart()",
+      "msg.getPrivatePortEnd()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/portforwarding/PortForwardingApiInterceptor.java"
+  },
+  {
+    "raw": "for range port forwarding, the port range size must match; vip range[%s, %s]\u0027s size doesn\u0027t match range[%s, %s]\u0027s size",
+    "en_US": "for range port forwarding, the port range size must match; vip range[{0}, {1}]\u0027s size doesn\u0027t match range[{2}, {3}]\u0027s size",
+    "zh_CN": "对于范围端口转发，端口范围大小必须匹配；VIP范围[{0}, {1}]的大小不匹配范围[{2}, {3}]的大小",
+    "arguments": [
+      "msg.getVipPortStart()",
+      "msg.getVipPortEnd()",
+      "msg.getPrivatePortStart()",
+      "msg.getPrivatePortEnd()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/portforwarding/PortForwardingApiInterceptor.java"
+  },
+  {
+    "raw": "invalid CIDR[%s]",
+    "en_US": "invalid CIDR[{0}]",
+    "zh_CN": "无效的CIDR[{0}]",
+    "arguments": [
+      "msg.getAllowedCidr()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/portforwarding/PortForwardingApiInterceptor.java"
+  },
+  {
+    "raw": "invalid CIDR[%s], only ipv4 is supported",
+    "en_US": "invalid CIDR[{0}], only ipv4 is supported",
+    "zh_CN": "无效的CIDR[{0}]，仅支持ipv4",
+    "arguments": [
+      "msg.getAllowedCidr()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/portforwarding/PortForwardingApiInterceptor.java"
+  },
+  {
+    "raw": "the vip[uuid:%s] has been occupied other network service entity[%s]",
+    "en_US": "the vip[uuid:{0}] has been occupied other network service entity[{1}]",
+    "zh_CN": "虚拟IP[uuid:{0}]已经被其他网络服务占用",
+    "arguments": [
+      "msg.getVipUuid()",
+      "useForList.toString()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/portforwarding/PortForwardingApiInterceptor.java"
+  },
+  {
+    "raw": "vip port range[vipStartPort:%s, vipEndPort:%s] overlaps with rule[uuid:%s, vipStartPort:%s, vipEndPort:%s]",
+    "en_US": "vip port range[vipStartPort:{0}, vipEndPort:{1}] overlaps with rule[uuid:{2}, vipStartPort:{3}, vipEndPort:{4}]",
+    "zh_CN": "虚拟IP（vip）端口范围[vipStartPort:{0}, vipEndPort:{1}]与规则[uuid:{2}, vipStartPort:{3}, vipEndPort:{4}]重叠",
+    "arguments": [
+      "vipStart",
+      "vipEnd",
+      "vo.getUuid()",
+      "vo.getVipPortStart()",
+      "vo.getVipPortEnd()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/portforwarding/PortForwardingApiInterceptor.java"
+  },
+  {
+    "raw": "guest l3Network of vm nic[uuid:%s] and vip l3Network of vip[uuid: %s] are the same network",
+    "en_US": "guest l3Network of vm nic[uuid:{0}] and vip l3Network of vip[uuid: {1}] are the same network",
+    "zh_CN": "云主机网卡[uuid:{0}]的客户三层网络和虚拟IP[uuid:{1}]的虚拟IP 三层网络是同一个网络",
+    "arguments": [
+      "msg.getVmNicUuid()",
+      "msg.getVipUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/portforwarding/PortForwardingApiInterceptor.java"
+  },
+  {
+    "raw": "the VM[name:%s uuid:%s] already has port forwarding rules that have different VIPs than the one[uuid:%s]",
+    "en_US": "the VM[name:{0} uuid:{1}] already has port forwarding rules that have different VIPs than the one[uuid:{2}]",
+    "zh_CN": "云主机[name:{0} uuid:{1}]已经有端口转发规则，且与[uuid:{2}]有不同的VIPs",
+    "arguments": [
+      "vm.getName()",
+      "vm.getUuid()",
+      "vipUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/portforwarding/PortForwardingApiInterceptor.java"
+  },
+  {
+    "raw": "the VmNic[uuid:%s] already has port forwarding rules that have different VIPs than the one[uuid:%s]",
+    "en_US": "the VmNic[uuid:{0}] already has port forwarding rules that have different VIPs than the one[uuid:{1}]",
+    "zh_CN": "",
+    "arguments": [
+      "vmNic.getUuid()",
+      "vipUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/portforwarding/PortForwardingApiInterceptor.java"
+  },
+  {
+    "raw": "vmNic uuid[%s] is not allowed add portForwarding with allowedCidr rule, because vmNic exist eip",
+    "en_US": "vmNic uuid[{0}] is not allowed add portForwarding with allowedCidr rule, because vmNic exist eip",
+    "zh_CN": "不允许vmnic uuid[{0}]使用AllowedCIDR规则添加PortForwarding，因为vmnic存在EIP",
+    "arguments": [
+      "vmNicUuid"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/portforwarding/PortForwardingApiInterceptor.java"
+  },
+  {
+    "raw": "could not attach port forwarding rule with allowedCidr, because vmNic[uuid:%s] already has rules that overlap the target private port ranges[%s, %s] and have the same protocol type[%s]",
+    "en_US": "could not attach port forwarding rule with allowedCidr, because vmNic[uuid:{0}] already has rules that overlap the target private port ranges[{1}, {2}] and have the same protocol type[{3}]",
+    "zh_CN": "不允许使用 AllowedCIDR 规则添加端口转发，因为 vmnic[uuid:{0}] 已经有重叠的端口转发规则[私网端口范围:{1}, {2}]，且协议类型相同[{3}]",
+    "arguments": [
+      "vmNicUuid",
+      "privatePortStart",
+      "privatePortEnd",
+      "protocolType"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/portforwarding/PortForwardingApiInterceptor.java"
+  },
+  {
+    "raw": "could not attach port forwarding rule, because vmNic[uuid:%s] already has a rule that overlaps the target private port ranges[%s, %s], has the same protocol type[%s] and has AllowedCidr",
+    "en_US": "could not attach port forwarding rule, because vmNic[uuid:{0}] already has a rule that overlaps the target private port ranges[{1}, {2}], has the same protocol type[{3}] and has AllowedCidr",
+    "zh_CN": "不允许添加端口转发，因为 vmnic[uuid:{0}] 已经有重叠的端口转发规则[私网端口范围:{1}, {2}], 且协议类型相同[{3}]",
+    "arguments": [
+      "vmNicUuid",
+      "privatePortStart",
+      "privatePortEnd",
+      "protocolType"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/portforwarding/PortForwardingApiInterceptor.java"
+  },
+  {
+    "raw": "unable to create port forwarding rule, extension[%s] refused it because %s",
+    "en_US": "unable to create port forwarding rule, extension[{0}] refused it because {1}",
+    "zh_CN": "",
+    "arguments": [
+      "extp.getClass().getName()",
+      "e.getMessage()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/portforwarding/PortForwardingManagerImpl.java"
+  },
+  {
+    "raw": "port forwarding rule [uuid:%s] is deleted",
+    "en_US": "port forwarding rule [uuid:{0}] is deleted",
+    "zh_CN": "端口转发规则[uuid：{0}]已删除",
+    "arguments": [
+      "struct.getRule().getUuid()"
+    ],
+    "fileName": "src/main/java/org/zstack/network/service/portforwarding/PortForwardingManagerImpl.java"
+  }
+]

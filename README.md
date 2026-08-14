@@ -203,6 +203,18 @@ Powered by the same enterprise engine as ZSphere, ZSvirt inherits proven success
   >
 </p>
 
+## Virtualization Platform Comparison
+
+Proxmox VE vs VMware vSphere vs ZSvirt
+
+<p align="center">
+  <img
+    src="https://raw.githubusercontent.com/ZSvirt/.github/main/assets/zsvirt-comparison.png"
+    alt="Proxmox VE vs ZSvirt virtualization platform comparison"
+    width="100%"
+  >
+</p>
+
 
 ## Governance
 

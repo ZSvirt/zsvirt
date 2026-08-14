@@ -184,6 +184,19 @@ ZSvirt 与 ZSphere 采用相同的企业级虚拟化引擎，继承了经过全�
   >
 </p>
 
+## 虚拟化平台对比
+
+Proxmox VE、VMware vSphere 与 ZSvirt 对比
+
+<p align="center">
+  <img
+    src="https://raw.githubusercontent.com/ZSvirt/.github/main/assets/zsvirt-comparison.png"
+    alt="Proxmox VE vs ZSvirt virtualization platform comparison"
+    width="100%"
+  >
+</p>
+
+
 ## 社区治理
 
 ZSvirt 采用轻量级开源治理模式，用于明确项目如何维护、如何制定决策，以及贡献者之间如何协作。

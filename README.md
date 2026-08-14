@@ -22,7 +22,7 @@
     </a>
     <a href="https://zsvirt.io/en/docs">
       <img
-        src="https://img.shields.io/badge/Docs-2563EB?style=flat-square&logo=readthedocs&logoColor=white"
+        src="https://img.shields.io/badge/Docs-7C3AED?style=flat-square&logo=readthedocs&logoColor=white"
         alt="Documentation"
       >
     </a>
@@ -34,7 +34,7 @@
     </a>
     <a href="https://zsvirt.io/en/download">
       <img
-        src="https://img.shields.io/badge/Download-F97316?style=flat-square&logo=download&logoColor=white"
+        src="https://img.shields.io/badge/Download-F97316?style=flat-square&logo=data:image/svg%2Bxml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI%2BPHBhdGggZmlsbD0iI2ZmZiIgZD0iTTUgMjBoMTR2LTJINXYyem0xNC05aC00VjNIOXY4SDVsNyA3IDctN3oiLz48L3N2Zz4%3D"
         alt="Download"
       >
     </a>

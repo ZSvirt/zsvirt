@@ -7,6 +7,7 @@ import org.zstack.compute.host.HostGlobalConfig;
 import org.zstack.compute.vm.CrashStrategy;
 import org.zstack.compute.vm.VmGlobalConfig;
 import org.zstack.compute.vm.VmNicManager;
+import org.zstack.compute.vm.VmBootTimeUtils;
 import org.zstack.core.CoreGlobalProperty;
 import org.zstack.core.Platform;
 import org.zstack.core.ansible.AnsibleFacade;
@@ -96,6 +97,7 @@ import static org.zstack.utils.CollectionUtils.transform;
 public class KVMHostFactory extends AbstractService implements HypervisorFactory, Component,
         ManagementNodeReadyExtensionPoint, MaxDataVolumeNumberExtensionPoint, HypervisorMessageFactory, ProxyHardwareFactory {
     private static final CLogger logger = Utils.getLogger(KVMHostFactory.class);
+    private static final VmBootTimeUtils vmBootTimeUtils = new VmBootTimeUtils();
 
     public static final HypervisorType hypervisorType = new HypervisorType(KVMConstant.KVM_HYPERVISOR_TYPE);
     public static final VolumeFormat QCOW2_FORMAT = new VolumeFormat(VolumeConstant.VOLUME_FORMAT_QCOW2, hypervisorType);
@@ -539,6 +541,7 @@ public class KVMHostFactory extends AbstractService implements HypervisorFactory
         });
 
         restf.registerSyncHttpCallHandler(KVMConstant.KVM_REPORT_VM_REBOOT_EVENT, ReportVmRebootEventCmd.class, cmd -> {
+            vmBootTimeUtils.resetBootTime(cmd.vmUuid);
             evf.fire(VmCanonicalEvents.VM_LIBVIRT_REPORT_REBOOT, cmd.vmUuid);
 
             return null;

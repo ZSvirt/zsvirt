@@ -219,5 +219,6 @@
         <class>org.zstack.header.resourceattribute.entity.ResourceAttributeConstraintVO</class>
         <class>org.zstack.header.vm.metadata.VmMetadataDirtyVO</class>
         <class>org.zstack.header.vm.metadata.VmMetadataFlushStateVO</class>
+        <class>org.zstack.log.server.LogServerVO</class>
     </persistence-unit>
 </persistence>

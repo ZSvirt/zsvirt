@@ -1,5 +1,10 @@
 package org.zstack.log4j2;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import org.apache.commons.lang.StringUtils;
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Appender;
 import org.apache.logging.log4j.core.LoggerContext;
@@ -10,18 +15,18 @@ import org.apache.logging.log4j.core.config.LoggerConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.zstack.core.Platform;
 import org.zstack.core.componentloader.PluginRegistry;
-import org.zstack.core.db.SQL;
-import org.zstack.core.jsonlabel.JsonLabelVO;
+import org.zstack.core.db.Q;
 import org.zstack.header.Component;
 import org.zstack.header.apimediator.ApiMessageInterceptionException;
 import org.zstack.header.core.ReturnValueCompletion;
 import org.zstack.header.errorcode.OperationFailureException;
 import org.zstack.header.exception.CloudRuntimeException;
-import org.zstack.header.identity.AccountConstant;
 import org.zstack.log.LogConfigurationFactory;
 import org.zstack.log.LogConfigurationStruct;
+import org.zstack.log.server.LogCategory;
+import org.zstack.log.server.LogServerVO;
+import org.zstack.log.server.LogServerVO_;
 import org.zstack.utils.Utils;
-import org.zstack.utils.gson.JSONObjectUtil;
 import org.zstack.utils.logging.CLogger;
 
 import java.util.HashMap;
@@ -52,17 +57,17 @@ public class Log4j2LogConfigurationFactory implements Component, LogConfiguratio
             return;
         }
 
-        Log4j2ConfigurationStruct lstruct = JSONObjectUtil.toObject(struct.getConfiguration(), Log4j2ConfigurationStruct.class);
+        Log4j2ConfigurationStruct log4j2 = toLog4j2ConfigurationStruct(struct.getConfiguration());
 
-        Log4j2AppenderProxyFactory factory = log4j2AppenderFactories.get(lstruct.getAppenderType());
+        Log4j2AppenderProxyFactory factory = log4j2AppenderFactories.get(log4j2.getAppenderType());
 
         if (factory == null) {
-            throw new OperationFailureException(operr("No factory found for log4j2 appender type:%s.", lstruct.getAppenderType()));
+            throw new OperationFailureException(operr("No factory found for log4j2 appender type:%s.", log4j2.getAppenderType()));
         }
 
-        String appenderString = factory.createLog4j2Appender(config, lstruct, struct.getUuid());
+        String appenderString = factory.createLog4j2Appender(config, log4j2, struct.getUuid());
 
-        AppenderRef ref = AppenderRef.createAppenderRef(struct.getUuid(), null, null);
+        AppenderRef ref = AppenderRef.createAppenderRef(struct.getUuid(), struct.getLog4jOfLevel(), null);
         AppenderRef[] refs = new AppenderRef[]{ref};
         Appender appender = AsyncAppender.newBuilder()
                 .setConfiguration(config)
@@ -94,22 +99,28 @@ public class Log4j2LogConfigurationFactory implements Component, LogConfiguratio
         final Configuration config = ctx.getConfiguration();
         final LoggerConfig rootConfig = config.getRootLogger();
 
-        List<JsonLabelVO> vos = SQL.New("select vo from JsonLabelVO vo where resourceUuid = :adminUuid and labelKey like :key", JsonLabelVO.class)
-                .param("adminUuid", AccountConstant.INITIAL_SYSTEM_ADMIN_UUID)
-                .param("key", String.format("%%%s%%", getLogConfigurationType()))
+        List<LogServerVO> logServerVOS = Q.New(LogServerVO.class)
+                .eq(LogServerVO_.category, LogCategory.ManagementNodeLog)
                 .list();
 
-        for (JsonLabelVO vo : vos) {
-            LogConfigurationStruct ls = JSONObjectUtil.toObject(vo.getLabelValue(), LogConfigurationStruct.class);
-            Log4j2ConfigurationStruct log4j2s = JSONObjectUtil.toObject(ls.getConfiguration(), Log4j2ConfigurationStruct.class);
+        for (LogServerVO vo : logServerVOS) {
+            Log4j2ConfigurationStruct log4j2s = toLog4j2ConfigurationStruct(vo.getConfiguration());
+            if (StringUtils.isEmpty(log4j2s.getAppenderType())) {
+                log4j2s.setAppenderType(Log4j2AppenderType.Syslog.name());
+            }
 
-            log4j2AppenderFactories.get(log4j2s.getAppenderType()).createLog4j2Appender(config, log4j2s, ls.getUuid());
+            Log4j2AppenderProxyFactory factory = log4j2AppenderFactories.get(log4j2s.getAppenderType());
+            if (factory == null) {
+                throw new OperationFailureException(operr("No factory found for log4j2 appender type:%s.", log4j2s.getAppenderType()));
+            }
+            factory.createLog4j2Appender(config, log4j2s, vo.getUuid());
 
-            AppenderRef ref = AppenderRef.createAppenderRef(ls.getUuid(), null, null);
+            Level level = vo.getLevel() == null ? Level.ALL : Level.getLevel(vo.getLevel().name());
+            AppenderRef ref = AppenderRef.createAppenderRef(vo.getUuid(), level, null);
             AppenderRef[] refs = new AppenderRef[]{ref};
             Appender appender = AsyncAppender.newBuilder()
                     .setConfiguration(config)
-                    .setName(ls.getUuid())
+                    .setName(vo.getUuid())
                     .setAppenderRefs(refs)
                     .build();
             appender.start();
@@ -126,15 +137,37 @@ public class Log4j2LogConfigurationFactory implements Component, LogConfiguratio
 
     @Override
     public void validate(LogConfigurationStruct struct) {
-        Log4j2ConfigurationStruct lstruct = JSONObjectUtil.toObject(struct.getConfiguration(), Log4j2ConfigurationStruct.class);
+        Log4j2ConfigurationStruct log4j2 = toLog4j2ConfigurationStruct(struct.getConfiguration());
 
-        Log4j2AppenderProxyFactory factory = log4j2AppenderFactories.get(lstruct.getAppenderType());
+        Log4j2AppenderProxyFactory factory = log4j2AppenderFactories.get(log4j2.getAppenderType());
 
         if (factory == null) {
-            throw new ApiMessageInterceptionException(argerr("Unknown log4j2 appender type %s", lstruct.getAppenderType()));
+            throw new ApiMessageInterceptionException(argerr("Unknown log4j2 appender type %s", log4j2.getAppenderType()));
         }
 
-        factory.validate(lstruct);
+        factory.validate(log4j2);
+    }
+
+    private Log4j2ConfigurationStruct toLog4j2ConfigurationStruct(String configuration) {
+        JsonObject object = new JsonParser().parse(configuration).getAsJsonObject();
+        Log4j2ConfigurationStruct struct = new Log4j2ConfigurationStruct();
+
+        String appenderType = getString(object, "type");
+        if (StringUtils.isEmpty(appenderType)) {
+            appenderType = getString(object, "appenderType");
+        }
+
+        struct.setAppenderType(appenderType);
+        JsonElement config = object.get("configuration");
+        if (config != null && !config.isJsonNull()) {
+            struct.setConfiguration(config.isJsonPrimitive() ? config.getAsString() : config.toString());
+        }
+        return struct;
+    }
+
+    private String getString(JsonObject object, String name) {
+        JsonElement element = object.get(name);
+        return element == null || element.isJsonNull() ? null : element.getAsString();
     }
 
     private void populateExtensions() {

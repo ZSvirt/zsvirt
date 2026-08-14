@@ -31,5 +31,6 @@ public class VmInstanceAO_ extends ResourceVO_ {
     public static volatile SingularAttribute<VmInstanceAO, Long> cpuSpeed;
     public static volatile SingularAttribute<VmInstanceAO, Timestamp> createDate;
     public static volatile SingularAttribute<VmInstanceAO, Timestamp> lastOpDate;
+    public static volatile SingularAttribute<VmInstanceAO, Timestamp> bootTime;
     public static volatile SingularAttribute<VmInstanceAO, VmInstanceState> state;
 }

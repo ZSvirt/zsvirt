@@ -59,5 +59,10 @@ public class RBACInfo implements PackageDescription {
                 .api(APIQueryVolumeSnapshotGroupMsg.class)
                 .toService(SearchConstant.QUERY_FACADE_SERVICE_ID)
                 .build();
+
+        apis()
+                .api(APIGetVolumeSnapshotSizeMsg.class)
+                .skipAudit()
+                .build();
     }
 }

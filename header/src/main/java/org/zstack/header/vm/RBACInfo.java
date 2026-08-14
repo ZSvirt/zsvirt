@@ -227,5 +227,13 @@ public class RBACInfo implements PackageDescription {
                 .inPackage("org.zstack.header.vm.devices")
                 .toService(SearchConstant.QUERY_FACADE_SERVICE_ID)
                 .build();
+
+        apis()
+                .api(
+                        APIGetVmsCapabilitiesMsg.class,
+                        APITakeVmConsoleScreenshotMsg.class
+                )
+                .skipAudit()
+                .build();
     }
 }

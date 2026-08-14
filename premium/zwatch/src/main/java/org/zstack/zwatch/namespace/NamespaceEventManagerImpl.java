@@ -890,8 +890,7 @@ public class NamespaceEventManagerImpl implements NamespaceEventManager, Compone
     }}).create();
 
     private void processAudit(Bundle b) {
-        if (ApiAudits.shouldSkipAudit(b.request.getClass())
-                || AuditConstants.API_AUDIT_BLOCK_LIST.contains(b.request.getClass().getName())) {
+        if (ApiAudits.shouldSkipAudit(b.request.getClass())) {
             return;
         }
 

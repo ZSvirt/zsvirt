@@ -1,17 +1,22 @@
 package org.zstack.header.description;
 
+import org.zstack.header.description.apis.ApiCapabilities;
+import org.zstack.header.description.apis.ApiPackageCapabilities;
 import org.zstack.header.description.ensemble.ResourceEnsembleMember;
 import org.zstack.header.description.permission.Permission;
 import org.zstack.header.description.role.Role;
 import org.zstack.header.description.role.RoleBuilder;
 import org.zstack.header.description.role.RoleContributor;
-import org.zstack.header.description.route.ApiPackageRoute;
 import org.zstack.header.message.APIMessageDefinition;
+import org.zstack.utils.DebugUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.function.Function;
 
 /**
@@ -36,29 +41,17 @@ public final class PackageDescriptionRegistry {
             new HashMap<>();
 
     /**
-     * API class -> serviceId, from:
-     * <pre>
-     * apis()
-     *     .api(...Msg.class / multi)
-     *     .toService(...SERVICE_ID)
-     *     .build();
-     * </pre>
-     * Takes precedence over {@link #packageServiceRoutes} for that class.
-     * Later registration overwrites the same key.
+     * Class -&gt; capabilities, from {@code apis().api(...).xxx.build()}.
+     * Duplicate class registration is an error (no merge).
      */
-    public static final Map<Class<? extends APIMessageDefinition>, String> apiServiceRoutes = new HashMap<>();
+    public static final Map<Class<? extends APIMessageDefinition>, ApiCapabilities> apiCapabilitiesByClass =
+            new HashMap<>();
 
     /**
-     * Package-prefix -> serviceId routes, from:
-     * <pre>
-     * apis()
-     *     .inThisPackage()
-     *     .toService(...SERVICE_ID)
-     *     .build();
-     * </pre>
-     * Later registration of the same package name replaces the previous entry.
+     * Package-prefix capabilities, from {@code apis().inPackage(...).xxx.build()}.
+     * The same package name may appear more than once. Kept longest-prefix first.
      */
-    public static final List<ApiPackageRoute> packageServiceRoutes = new ArrayList<>();
+    public static final List<ApiPackageCapabilities> apiCapabilitiesByPackage = new ArrayList<>();
 
     static final List<RoleContributor> roleContributors = new ArrayList<>();
     static final List<RoleBuilder> roleBuilders = new ArrayList<>();
@@ -86,12 +79,107 @@ public final class PackageDescriptionRegistry {
         expandedPermissions.computeIfAbsent(apiClass, k -> new ArrayList<>()).add(function);
     }
 
-    public static void addApiServiceRoute(Class<? extends APIMessageDefinition> apiClass, String serviceId) {
-        apiServiceRoutes.put(apiClass, serviceId);
+    public static void addApiCapabilities(Class<? extends APIMessageDefinition> apiClass, ApiCapabilities capabilities) {
+        DebugUtils.Assert(apiClass != null, "api class cannot be null");
+        DebugUtils.Assert(capabilities != null, "capabilities cannot be null");
+
+        ApiCapabilities last = apiCapabilitiesByClass.get(apiClass), next;
+
+        try {
+            next = (last == null) ? capabilities : last.merge(capabilities);
+        } catch (Exception e) {
+            throw new RuntimeException("failed to merge ApiCapabilities for class " + apiClass.getSimpleName(), e);
+        }
+        apiCapabilitiesByClass.put(apiClass, next);
     }
 
-    public static void addPackageServiceRoute(String packageName, String serviceId) {
-        packageServiceRoutes.removeIf(r -> r.packageName.equals(packageName));
-        packageServiceRoutes.add(new ApiPackageRoute(packageName, serviceId));
+    public static void addPackageCapabilities(String packageName, ApiCapabilities capabilities) {
+        DebugUtils.Assert(packageName != null && !packageName.isEmpty(), "packageName cannot be empty");
+        DebugUtils.Assert(capabilities != null, "capabilities cannot be null");
+        ApiPackageCapabilities row = new ApiPackageCapabilities(packageName, capabilities);
+        int i = 0;
+        while (i < apiCapabilitiesByPackage.size()
+                && apiCapabilitiesByPackage.get(i).packageName.length() >= packageName.length()) {
+            i++;
+        }
+        apiCapabilitiesByPackage.add(i, row);
+    }
+
+    /**
+     * Class-level capabilities, or {@code null} if this API was not declared with {@code apis().api(...)}.
+     */
+    @SuppressWarnings({"rawtypes"})
+    public static ApiCapabilities getApiCapabilities(Class<?> apiClass) {
+        if (apiClass == null) {
+            return null;
+        }
+        return apiCapabilitiesByClass.get((Class) apiClass);
+    }
+
+    /**
+     * Matching path for {@code apiClass}: class-level capabilities first (if any),
+     * then package-level rows, longest prefix first. Duplicate package names yield
+     * multiple elements. Unset fields are left for later elements to fill.
+     */
+    public static Iterator<ApiCapabilities> resolve(Class<?> apiClass) {
+        if (apiClass == null) {
+            return Collections.emptyIterator();
+        }
+        return new MatchingCapabilitiesIterator(apiClass);
+    }
+
+    private static boolean packageMatches(String apiPackage, String prefix) {
+        return apiPackage.equals(prefix) || apiPackage.startsWith(prefix + ".");
+    }
+
+    private static final class MatchingCapabilitiesIterator implements Iterator<ApiCapabilities> {
+        private final ApiCapabilities classCaps;
+        private final String apiPackage;
+        private boolean classEmitted;
+        private int index;
+        private ApiCapabilities next;
+
+        MatchingCapabilitiesIterator(Class<?> apiClass) {
+            this.classCaps = getApiCapabilities(apiClass);
+            Package pkg = apiClass.getPackage();
+            this.apiPackage = pkg == null ? null : pkg.getName();
+            advance();
+        }
+
+        private void advance() {
+            next = null;
+            if (!classEmitted) {
+                classEmitted = true;
+                if (classCaps != null) {
+                    next = classCaps;
+                    return;
+                }
+            }
+            if (apiPackage == null) {
+                return;
+            }
+            while (index < apiCapabilitiesByPackage.size()) {
+                ApiPackageCapabilities row = apiCapabilitiesByPackage.get(index++);
+                if (packageMatches(apiPackage, row.packageName)) {
+                    next = row.capabilities;
+                    return;
+                }
+            }
+        }
+
+        @Override
+        public boolean hasNext() {
+            return next != null;
+        }
+
+        @Override
+        public ApiCapabilities next() {
+            if (next == null) {
+                throw new NoSuchElementException();
+            }
+            ApiCapabilities caps = next;
+            advance();
+            return caps;
+        }
     }
 }

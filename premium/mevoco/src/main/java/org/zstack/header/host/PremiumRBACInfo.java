@@ -42,5 +42,10 @@ public class PremiumRBACInfo implements PackageDescription {
                 )
                 .toService(SearchConstant.QUERY_FACADE_SERVICE_ID)
                 .build();
+
+        apis()
+                .api(APIGetHostNUMATopologyMsg.class)
+                .skipAudit()
+                .build();
     }
 }

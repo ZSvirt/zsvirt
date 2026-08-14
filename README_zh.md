@@ -14,13 +14,13 @@
   </h1>
 
   <p align="center">
-    <a href="https://zsvirt.io/en">
+    <a href="https://zsvirt.io">
       <img
         src="https://img.shields.io/badge/官方网站-0F62FE?style=flat-square&logo=googlechrome&logoColor=white"
         alt="ZSvirt 官方网站"
       >
     </a>
-    <a href="https://zsvirt.io/en/docs">
+    <a href="https://zsvirt.io/docs">
       <img
         src="https://img.shields.io/badge/产品文档-2563EB?style=flat-square&logo=readthedocs&logoColor=white"
         alt="产品文档"
@@ -32,7 +32,7 @@
         alt="在线体验"
       >
     </a>
-    <a href="https://zsvirt.io/en/download">
+    <a href="https://zsvirt.io/download">
       <img
         src="https://img.shields.io/badge/下载-F97316?style=flat-square&logo=download&logoColor=white"
         alt="下载"
@@ -169,7 +169,7 @@ ZSvirt 提供面向迁移的功能和运维工具，帮助用户评估、规划�
 
 体验 ZSvirt 最快捷的方式是阅读产品文档中的快速开始指南。该指南将引导你准备计算、网络和存储资源，初始化管理服务，并创建第一台虚拟机。
 
-🚀 [快速开始](https://zsvirt.io/en/docs/quick-start)<br>
+🚀 [快速开始](https://zsvirt.io/docs/quick-start)<br>
 ▶️ [视频链接](https://youtu.be/LsSJlBRUvYw)
 
 ## 最佳实践

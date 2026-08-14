@@ -60,6 +60,8 @@ public class ActionProgressService extends AbstractService implements
     @Override
     @SuppressWarnings("unchecked")
     public boolean start() {
+        cleanIntervalMillis = TimeUnit.SECONDS.toMillis(ProgressGlobalConfig.CLEANUP_THREAD_INTERVAL.value(Long.class));
+
         restFacade.registerSyncHttpCallHandler(
                 ProgressConstants.PROGRESS_REPORT_PATH,
                 ProgressCommands.ProgressReportCmd.class,
@@ -487,7 +489,8 @@ public class ActionProgressService extends AbstractService implements
         }
 
         lastCleanTime = now;
-        long maxCleanTime = now - ProgressGlobalConfig.PROGRESS_TTL.value(Long.class);
+        long ttlMillis = TimeUnit.SECONDS.toMillis(ProgressGlobalConfig.PROGRESS_TTL_SECONDS.value(Long.class));
+        long maxCleanTime = now - ttlMillis;
 
         synchronized (globalLock) {
             logger.trace("clean expired progress: maxCleanTime = " + maxCleanTime);

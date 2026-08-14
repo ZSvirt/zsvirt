@@ -31,6 +31,9 @@ public class GetLoginProceduresAction extends AbstractAction {
     @Param(required = true, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
     public java.lang.String loginType;
 
+    @Param(required = false, validValues = {"Local","OpenLdap","WindowsAD","CAS","OAuth2"}, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
+    public java.lang.String source;
+
     @Param(required = false)
     public java.util.List systemTags;
 

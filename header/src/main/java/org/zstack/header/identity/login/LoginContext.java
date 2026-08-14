@@ -58,6 +58,22 @@ public class LoginContext {
     private String accountUuid;
     private Timestamp lastUpdatedTime;
 
+    /**
+     * Optional account source. Only set on the {@link APIGetLoginProceduresMsg} path
+     * to let a caller explicitly pick which same-name account's procedures to compute
+     * (ZSV-12379). It is never declared on the actual login path; a selection hint,
+     * never an authorization basis.
+     */
+    private String source;
+
+    public String getSource() {
+        return source;
+    }
+
+    public void setSource(String source) {
+        this.source = source;
+    }
+
     public String getAccountUuid() {
         return accountUuid;
     }
@@ -205,6 +221,7 @@ public class LoginContext {
         params.setUsername(msg.getUsername());
         params.setLoginBackendType(msg.getLoginType());
         params.setSystemTags(msg.getSystemTags());
+        params.setSource(msg.getSource());
 
         if (params.getSystemTags() == null) {
             params.setSystemTags(Collections.emptyList());

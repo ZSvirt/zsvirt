@@ -527,11 +527,21 @@ public class AccountManagerImpl extends AbstractService implements AccountManage
         final AccountInventory inv = new SQLBatchWithReturn<AccountInventory>() {
             @Override
             protected AccountInventory scripts() {
+                AccountSource source;
+                try {
+                    source = AccountSource.valueOf(msg.getSource());
+                } catch (RuntimeException e) {
+                    throw operr("invalid account source[%s]", msg.getSource())
+                            .withOpaque("allowed.values", list(AccountSource.values()))
+                            .toException();
+                }
+
                 boolean duplicateName = q(AccountVO.class)
                         .eq(AccountVO_.name, msg.getName())
+                        .eq(AccountVO_.source, source)
                         .isExists();
                 if (duplicateName) {
-                    throw operr("account name[%s] is duplicate", msg.getName()).toException();
+                    throw operr("account name[%s] is duplicate within source[%s]", msg.getName(), source).toException();
                 }
 
                 AccountVO vo = new AccountVO();
@@ -550,13 +560,7 @@ public class AccountManagerImpl extends AbstractService implements AccountManage
                 }
                 vo.setType(accountType);
 
-                try {
-                    vo.setSource(AccountSource.valueOf(msg.getSource()));
-                } catch (RuntimeException e) {
-                    throw operr("invalid account source[%s]", msg.getSource())
-                            .withOpaque("allowed.values", list(AccountSource.values()))
-                            .toException();
-                }
+                vo.setSource(source);
 
                 vo.setState(msg.getState() == null ? AccountState.Enabled : msg.getState());
                 persist(vo);
@@ -1048,8 +1052,12 @@ public class AccountManagerImpl extends AbstractService implements AccountManage
     }
 
     private void validate(APICreateAccountMsg msg) {
-        if (Q.New(AccountVO.class).eq(AccountVO_.name, msg.getName()).isExists()) {
-            throw new ApiMessageInterceptionException(argerr("unable to create an account. An account already called %s", msg.getName()));
+        boolean exists = Q.New(AccountVO.class)
+                .eq(AccountVO_.name, msg.getName())
+                .eq(AccountVO_.source, AccountSource.Local)
+                .isExists();
+        if (exists) {
+            throw new ApiMessageInterceptionException(argerr("unable to create an account. A local account already called %s", msg.getName()));
         }
     }
 
@@ -1093,20 +1101,41 @@ public class AccountManagerImpl extends AbstractService implements AccountManage
     private void validate(APIUpdateAccountMsg msg) {
         AccountVO a = dbf.findByUuid(msg.getSession().getAccountUuid(), AccountVO.class);
 
-        if (msg.getName() != null) {
-            if (Q.New(AccountVO.class).eq(AccountVO_.name, msg.getName()).isExists()) {
-                throw new ApiMessageInterceptionException(argerr("unable to update name. An account already called %s", msg.getName()));
-            }
-        }
-
         if (msg.getUuid() == null) {
             msg.setUuid(msg.getSession().getAccountUuid());
         }
         AccountVO account = dbf.findByUuid(msg.getUuid(), AccountVO.class);
 
+        if (msg.getName() != null) {
+            boolean exists = Q.New(AccountVO.class)
+                    .eq(AccountVO_.name, msg.getName())
+                    .eq(AccountVO_.source, account.getSource())
+                    .notEq(AccountVO_.uuid, account.getUuid())
+                    .isExists();
+            if (exists) {
+                throw new ApiMessageInterceptionException(argerr("unable to update name. An account already called %s within source %s", msg.getName(), account.getSource()));
+            }
+        }
+
+
 
         if (msg.getOldPassword() != null && !msg.getOldPassword().equals(account.getPassword())) {
             throw new OperationFailureException(operr("old password is not equal to the original password, cannot update the password of account[uuid: %s]", msg.getUuid()));
+        }
+
+        // ZSV-12379 scheme B: when a same-name Local account exists it shadows non-Local accounts on
+        // the local login channel, so a non-Local account cannot use local password login; changing
+        // its password would be meaningless and confusing, hence it is rejected.
+        if (msg.getPassword() != null && account.getSource() != AccountSource.Local) {
+            boolean shadowedByLocal = Q.New(AccountVO.class)
+                    .eq(AccountVO_.name, account.getName())
+                    .eq(AccountVO_.source, AccountSource.Local)
+                    .isExists();
+            if (shadowedByLocal) {
+                throw new OperationFailureException(operr(
+                        "cannot update the password of account[uuid: %s, name: %s, source: %s]; a local account with the same name exists and this account cannot use local login",
+                        account.getUuid(), account.getName(), account.getSource()));
+            }
         }
 
         if (a.getType() == AccountType.SystemAdmin) {

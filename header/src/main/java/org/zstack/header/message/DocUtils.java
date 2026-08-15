@@ -43,6 +43,10 @@ public class DocUtils {
         return new Timestamp(date);
     }
 
+    public static Timestamp timestampAndAddDays(int days) {
+        return new Timestamp(date + TimeUnit.DAYS.toMillis(days));
+    }
+
     public static long dateInSeconds() {
         return date / 1000;
     }

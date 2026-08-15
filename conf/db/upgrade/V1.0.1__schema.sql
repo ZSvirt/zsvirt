@@ -212,3 +212,54 @@ CALL CREATE_INDEX('AccountVO', 'idxAccountVOname', 'name');
 CALL DELETE_INDEX('AccountVO', 'name');
 ALTER TABLE `zstack`.`AccountVO` ADD CONSTRAINT `uqAccountVOSourceName` UNIQUE (`source`, `name`);
 
+-- Feature: ZCenter License & License Client | ZSV-12274, ZSV-12506
+
+CREATE TABLE IF NOT EXISTS `zstack`.`LicenseAuthorizedNodeVO` (
+    `uuid` char(32) NOT NULL UNIQUE,
+    `appId` char(32) NOT NULL,
+    `ip` varchar(255) NOT NULL,
+    `port` int DEFAULT NULL,
+    `lastSyncDate` timestamp NOT NULL DEFAULT '1999-12-31 23:59:59',
+    `status` varchar(64) NOT NULL,
+    `type` varchar(64) NOT NULL,
+    `protocol` varchar(64) NOT NULL DEFAULT 'Normal',
+    `lastOpDate` timestamp NOT NULL DEFAULT '1999-12-31 23:59:59' ON UPDATE CURRENT_TIMESTAMP,
+    `createDate` timestamp NOT NULL DEFAULT '1999-12-31 23:59:59',
+    PRIMARY KEY (`uuid`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS `zstack`.`LicenseAuthorizedCapacityVO` (
+    `id` bigint unsigned NOT NULL UNIQUE AUTO_INCREMENT,
+    `nodeUuid` char(32) NOT NULL,
+    `prodInfo` varchar(255) NOT NULL,
+    `quotaType` varchar(64) NOT NULL,
+    `quota` bigint unsigned NOT NULL DEFAULT 0,
+    `licenseType` varchar(64) NOT NULL,
+    `state` varchar(64) NOT NULL DEFAULT 'active',
+    `issueTime` bigint unsigned NOT NULL DEFAULT 0,
+    `expireTime` bigint unsigned NOT NULL DEFAULT 0,
+    `localUsed` bigint unsigned NOT NULL DEFAULT 0,
+    `otherUsed` bigint unsigned NOT NULL DEFAULT 0,
+    `lastOpDate` timestamp NOT NULL DEFAULT '1999-12-31 23:59:59' ON UPDATE CURRENT_TIMESTAMP,
+    `createDate` timestamp NOT NULL DEFAULT '1999-12-31 23:59:59',
+    PRIMARY KEY (`id`),
+    CONSTRAINT `fkLicenseAuthorizedCapacityLicenseAuthorizedNode` FOREIGN KEY (`nodeUuid`) REFERENCES `LicenseAuthorizedNodeVO` (`uuid`) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS `zstack`.`LicenseAuthorizeHistoryVO` (
+    `id` bigint unsigned NOT NULL UNIQUE AUTO_INCREMENT,
+    `nodeUuid` char(32) NOT NULL,
+    `resourceUuid` char(32) DEFAULT NULL,
+    `quotaType` varchar(64) NOT NULL,
+    `usageFrom` bigint unsigned DEFAULT 0,
+    `usageTo` bigint unsigned DEFAULT NULL,
+    `quota` bigint unsigned DEFAULT 0,
+    `licenseType` varchar(64) NOT NULL,
+    `type` varchar(64) NOT NULL,
+    `action` varchar(255) NOT NULL,
+    `result` varchar(64) DEFAULT NULL,
+    `error` text DEFAULT NULL,
+    `requestUuid` char(32) NOT NULL,
+    `createDate` timestamp NOT NULL DEFAULT '1999-12-31 23:59:59',
+    PRIMARY KEY (`id`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8;

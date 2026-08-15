@@ -82,6 +82,8 @@ public class Platform {
     public static final String FAKE_UUID = "THIS_IS_A_FAKE_UUID";
     public static final String BASE_PACKAGE_NAME = AccountConstant.POLICY_BASE_PACKAGE;
 
+    public static final String DEFAULT_OS_USER = "zstack";
+
     private static final Map<String, String> globalProperties = new HashMap<String, String>();
 
     private static Locale locale;
@@ -99,6 +101,10 @@ public class Platform {
     public static Map<String, String> childResourceToBaseResourceMap = new HashMap<>();
 
     static Map<Class, DynamicObjectMetadata> dynamicObjectMetadata = new HashMap<>();
+
+    public static String localOsUserName() {
+        return DEFAULT_OS_USER;
+    }
 
     public static Locale getLocale() {
         return locale;

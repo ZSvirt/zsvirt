@@ -95,7 +95,7 @@ CREATE TABLE IF NOT EXISTS `zstack`.`ExternalServiceConfigurationVO` (
     `lastOpDate` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     `createDate` timestamp NOT NULL DEFAULT '1999-12-31 23:59:59',
     PRIMARY KEY (`uuid`),
-    UNIQUE KEY `ukExternalServiceConfigurationVOServiceType` (`serviceType`)
+    INDEX `idxExternalServiceConfigurationVOServiceType` (`serviceType`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- Feature: System AccessKey | ZSV-12416
@@ -263,3 +263,12 @@ CREATE TABLE IF NOT EXISTS `zstack`.`LicenseAuthorizeHistoryVO` (
     `createDate` timestamp NOT NULL DEFAULT '1999-12-31 23:59:59',
     PRIMARY KEY (`id`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+DELETE shadow FROM ImageCacheShadowVO shadow
+    LEFT JOIN PrimaryStorageEO ps ON shadow.primaryStorageUuid = ps.uuid
+    WHERE ps.uuid IS NULL;
+CALL ADD_CONSTRAINT('ImageCacheShadowVO', 'fkImageCacheShadowVOPrimaryStorageEOCascade', 'primaryStorageUuid', 'PrimaryStorageEO', 'uuid', 'CASCADE');
+
+-- Feature: allow duplicate ExternalServiceConfigurationVO | ZCF-4579
+CALL DELETE_INDEX('ExternalServiceConfigurationVO', 'ukExternalServiceConfigurationVOServiceType');
+CALL CREATE_INDEX('ExternalServiceConfigurationVO', 'idxExternalServiceConfigurationVOServiceType', 'serviceType');

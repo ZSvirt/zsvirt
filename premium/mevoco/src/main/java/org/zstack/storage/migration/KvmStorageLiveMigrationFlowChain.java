@@ -87,6 +87,37 @@ public class KvmStorageLiveMigrationFlowChain {
         return new KvmStorageLiveMigrationFlowChain(paramIn);
     }
 
+    static void markDeletedSnapshotsInSnapshotGroup(List<String> snapshotUuids) {
+        if (snapshotUuids == null || snapshotUuids.isEmpty()) {
+            return;
+        }
+
+        List<String> snapshotGroupUuids = Q.New(VolumeSnapshotGroupRefVO.class)
+                .select(VolumeSnapshotGroupRefVO_.volumeSnapshotGroupUuid)
+                .in(VolumeSnapshotGroupRefVO_.volumeSnapshotUuid, snapshotUuids)
+                .listValues();
+        if (snapshotGroupUuids.isEmpty()) {
+            return;
+        }
+
+        SQL.New(VolumeSnapshotGroupRefVO.class)
+                .in(VolumeSnapshotGroupRefVO_.volumeSnapshotUuid, snapshotUuids)
+                .set(VolumeSnapshotGroupRefVO_.snapshotDeleted, true)
+                .update();
+
+        List<String> emptySnapshotGroupUuids = new LinkedHashSet<>(snapshotGroupUuids).stream()
+                .filter(snapshotGroupUuid -> !Q.New(VolumeSnapshotGroupRefVO.class)
+                        .eq(VolumeSnapshotGroupRefVO_.volumeSnapshotGroupUuid, snapshotGroupUuid)
+                        .eq(VolumeSnapshotGroupRefVO_.snapshotDeleted, false)
+                        .isExists())
+                .collect(Collectors.toList());
+        if (!emptySnapshotGroupUuids.isEmpty()) {
+            SQL.New(VolumeSnapshotGroupVO.class)
+                    .in(VolumeSnapshotGroupVO_.uuid, emptySnapshotGroupUuids)
+                    .hardDelete();
+        }
+    }
+
     private boolean psIsLocal(String psUuid) {
         return Q.New(PrimaryStorageVO.class)
                 .eq(PrimaryStorageVO_.uuid, psUuid)
@@ -615,13 +646,19 @@ public class KvmStorageLiveMigrationFlowChain {
                                     .in(VolumeSnapshotTreeVO_.volumeUuid, oldUuids)
                                     .hardDelete();
 
-                            sql(VolumeSnapshotGroupRefVO.class)
-                                    .in(VolumeSnapshotGroupRefVO_.volumeSnapshotUuid, snapshotUuids)
-                                    .hardDelete();
+                            boolean rootVolumeMigrated = finalVolumes.stream()
+                                    .anyMatch(v -> VolumeType.Root == v.getType());
+                            if (rootVolumeMigrated) {
+                                sql(VolumeSnapshotGroupRefVO.class)
+                                        .in(VolumeSnapshotGroupRefVO_.volumeSnapshotUuid, snapshotUuids)
+                                        .hardDelete();
 
-                            sql(VolumeSnapshotGroupVO.class)
-                                    .eq(VolumeSnapshotGroupVO_.vmInstanceUuid, msg.getVmInstanceUuid())
-                                    .hardDelete();
+                                sql(VolumeSnapshotGroupVO.class)
+                                        .eq(VolumeSnapshotGroupVO_.vmInstanceUuid, msg.getVmInstanceUuid())
+                                        .hardDelete();
+                            } else {
+                                markDeletedSnapshotsInSnapshotGroup(snapshotUuids);
+                            }
 
                             flush();
                         }

@@ -5,10 +5,10 @@ import org.zstack.header.vo.ToInventory;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.Index;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
 import java.sql.Timestamp;
 
 /**
@@ -16,9 +16,7 @@ import java.sql.Timestamp;
  * @Date: 1/15/26 1:25 AM
  */
 @Entity
-@Table(uniqueConstraints = {
-        @UniqueConstraint(name = "ukExternalServiceConfigurationVOServiceType", columnNames = {"serviceType"})
-})
+@Table(indexes = @Index(name = "idxExternalServiceConfigurationVOServiceType", columnList = "serviceType"))
 public class ExternalServiceConfigurationVO extends ResourceVO implements ToInventory {
     @Column
     private String serviceType;

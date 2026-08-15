@@ -205,13 +205,6 @@ public class ExternalServiceManagerImpl extends AbstractService implements Exter
             completion.fail(operr("unable to find external service type [%s]", msg.getExternalServiceType()));
             return;
         }
-        if (Q.New(ExternalServiceConfigurationVO.class)
-                .eq(ExternalServiceConfigurationVO_.serviceType, msg.getExternalServiceType())
-                .count() > 0) {
-            completion.fail(operr("external service configuration for type [%s] already exists", msg.getExternalServiceType()));
-            return;
-        }
-
         final String configuration;
         try {
             configuration = ExternalServiceConfigurationInventory.restoreMaskedRemoteWritePassword(msg.getConfiguration(), null);

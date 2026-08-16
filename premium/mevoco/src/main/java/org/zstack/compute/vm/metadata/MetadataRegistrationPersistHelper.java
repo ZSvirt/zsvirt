@@ -20,6 +20,8 @@ import org.zstack.header.storage.snapshot.reference.VolumeSnapshotReferenceVO;
 import org.zstack.header.storage.snapshot.reference.VolumeSnapshotReferenceVO_;
 import org.zstack.header.tag.SystemTagVO;
 import org.zstack.header.tag.SystemTagVO_;
+import org.zstack.header.tag.UserTagVO;
+import org.zstack.header.tag.UserTagVO_;
 import org.zstack.header.vm.VmInstanceSequenceNumberVO;
 import org.zstack.header.vm.VmInstanceState;
 import org.zstack.header.vm.VmInstanceVO;
@@ -942,6 +944,7 @@ public class MetadataRegistrationPersistHelper {
 
         logger.debug(String.format("[MetadataRegistration] rollback: deleting SystemTags and ResourceConfigs for vm=%s", vmUuid));
         SQL.New(SystemTagVO.class).eq(SystemTagVO_.resourceUuid, vmUuid).hardDelete();
+        SQL.New(UserTagVO.class).eq(UserTagVO_.resourceUuid, vmUuid).hardDelete();
         SQL.New(ResourceConfigVO.class).eq(ResourceConfigVO_.resourceUuid, vmUuid).hardDelete();
 
         logger.debug(String.format("[MetadataRegistration] rollback: deleting VmInstanceVO[uuid:%s]", vmUuid));

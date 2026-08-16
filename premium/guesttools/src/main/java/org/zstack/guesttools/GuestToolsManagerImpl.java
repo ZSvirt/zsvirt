@@ -196,6 +196,36 @@ public class GuestToolsManagerImpl extends AbstractService implements GuestTools
         return supportQga;
     }
 
+    private GuestToolsStateVO createGuestToolsStateForUserVmIfAbsent(String vmUuid) {
+        String vmType = Q.New(VmInstanceVO.class)
+                .eq(VmInstanceVO_.uuid, vmUuid)
+                .select(VmInstanceVO_.type)
+                .findValue();
+        if (!USER_VM_TYPE.equals(vmType)) {
+            logger.debug(String.format("skip creating guest tools state for vm[uuid:%s] because vm type is %s",
+                    vmUuid, vmType));
+            return null;
+        }
+
+        String toolsVersion = VmSystemTags.VM_GUEST_TOOLS.getTokenByResourceUuid(vmUuid, VmSystemTags.VM_GUEST_TOOLS_VERSION_TOKEN);
+        GuestToolsStateVO stateVO = initGuestToolsStateByGuestToolsVersion(vmUuid, toolsVersion);
+        try {
+            stateVO = dbf.persistAndRefresh(stateVO);
+            logger.debug(String.format("create missing GuestToolsStateVO for vm[uuid:%s]: %s",
+                    vmUuid, JSONObjectUtil.toJsonString(stateVO)));
+            return stateVO;
+        } catch (RuntimeException e) {
+            GuestToolsStateVO existing = dbf.findByUuid(vmUuid, GuestToolsStateVO.class);
+            if (existing != null) {
+                logger.debug(String.format("GuestToolsStateVO for vm[uuid:%s] was created concurrently, continue guest tools state update",
+                        vmUuid));
+                return existing;
+            }
+
+            throw e;
+        }
+    }
+
     private GuestToolsStateVO qgaStateChange(String vmUuid, GuestToolsZWatchStateEvent zevent, GuestToolsQgaStateEvent qevent,
                                 String osType, String platform, String zversion, String qversion, Boolean noversion) {
         if (zevent == null) {
@@ -211,7 +241,10 @@ public class GuestToolsManagerImpl extends AbstractService implements GuestTools
         GuestToolsStateVO stateVO = dbf.findByUuid(vmUuid, GuestToolsStateVO.class);
         if (stateVO == null) {
             logger.debug(String.format("get guest tools state failed for vm[uuid:%s]", vmUuid));
-            return null;
+            stateVO = createGuestToolsStateForUserVmIfAbsent(vmUuid);
+            if (stateVO == null) {
+                return null;
+            }
         }
 
         if (logger.isTraceEnabled()) {

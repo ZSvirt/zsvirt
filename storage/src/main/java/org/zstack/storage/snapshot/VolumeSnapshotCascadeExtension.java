@@ -72,11 +72,13 @@ public class VolumeSnapshotCascadeExtension extends AbstractAsyncCascadeExtensio
                 sinvs.forEach(s -> dbf.eoCleanup(VolumeSnapshotVO.class, s.getUuid()));
             } else {
                 dbf.eoCleanup(VolumeSnapshotVO.class);
+                dbf.eoCleanup(VolumeSnapshotTreeVO.class);
                 dbf.eoCleanup(VolumeSnapshotGroupVO.class);
             }
         } catch (NullPointerException e) {
             logger.warn(e.getLocalizedMessage());
             dbf.eoCleanup(VolumeSnapshotVO.class);
+            dbf.eoCleanup(VolumeSnapshotTreeVO.class);
             dbf.eoCleanup(VolumeSnapshotGroupVO.class);
         } finally {
             completion.success();

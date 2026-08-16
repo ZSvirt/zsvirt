@@ -24,6 +24,7 @@ import org.zstack.header.message.APICreateMessage;
 import org.zstack.header.message.APIMessage;
 import org.zstack.header.message.Message;
 import org.zstack.header.storage.primary.PrimaryStorageDiscoverExtensionPoint;
+import org.zstack.header.storage.primary.PrimaryStorageDiscoveryResult;
 import org.zstack.header.storage.primary.PrimaryStorageInventory;
 import org.zstack.header.storage.primary.PrimaryStorageStatus;
 import org.zstack.header.storage.primary.PrimaryStorageVO;
@@ -231,14 +232,14 @@ public class SharedBlockManagerImpl extends AbstractService implements PrimarySt
     }
 
     @Override
-    public void discoverStrangePrimaryStorage(String clusterUuid, ReturnValueCompletion<List<PrimaryStorageInventory>> completion) {
+    public void discoverStrangePrimaryStorage(String clusterUuid, ReturnValueCompletion<PrimaryStorageDiscoveryResult> completion) {
         List<String> hostUuids = Q.New(HostVO.class).eq(HostVO_.clusterUuid, clusterUuid)
                 .eq(HostVO_.status, HostStatus.Connected)
                 .notIn(HostVO_.state, Arrays.asList(HostState.Maintenance, HostState.PreMaintenance))
                 .select(HostVO_.uuid)
                 .listValues();
         if (CollectionUtils.isEmpty(hostUuids)) {
-            completion.success(new ArrayList<>());
+            completion.success(new PrimaryStorageDiscoveryResult());
             return;
         }
 
@@ -268,7 +269,7 @@ public class SharedBlockManagerImpl extends AbstractService implements PrimarySt
         });
     }
 
-    private void discoverDisksFromHosts(String clusterUuid, List<String> hostUuids, ReturnValueCompletion<List<PrimaryStorageInventory>> completion) {
+    private void discoverDisksFromHosts(String clusterUuid, List<String> hostUuids, ReturnValueCompletion<PrimaryStorageDiscoveryResult> completion) {
         Map<String, SharedBlockKvmCommands.GetVgsInfoRsp> hostResults = new ConcurrentHashMap<>();
         Set<String> allVgUuids = new HashSet<>();
         new While<>(hostUuids).step((hostUuid, whileCompletion) -> {
@@ -303,12 +304,10 @@ public class SharedBlockManagerImpl extends AbstractService implements PrimarySt
                     }
                 });
 
-                Set<String> existingPsUuids = new HashSet<>(Q.New(PrimaryStorageVO.class)
-                        .eq(PrimaryStorageVO_.type, SharedBlockConstants.SHARED_BLOCK_PRIMARY_STORAGE_TYPE)
-                        .select(PrimaryStorageVO_.uuid).listValues());
-                allVgUuids.removeAll(existingPsUuids);
+                Set<String> existingSharedBlockGroupUuids = getExistingSharedBlockGroupUuids(allVgUuids);
 
                 List<PrimaryStorageInventory> inventories = new ArrayList<>();
+                List<String> resetVgUuidRequiredUuids = new ArrayList<>();
                 for (String vgUuid : allVgUuids) {
                     DiskAggregation aggregation = collectDiskAggregation(vgUuid, hostUuids, hostResults);
 
@@ -335,11 +334,29 @@ public class SharedBlockManagerImpl extends AbstractService implements PrimarySt
                     }
                     inv.setSharedBlocks(sharedBlocks);
                     inventories.add(inv);
+                    if (existingSharedBlockGroupUuids.contains(vgUuid)) {
+                        resetVgUuidRequiredUuids.add(vgUuid);
+                    }
                 }
 
-                completion.success(inventories);
+                PrimaryStorageDiscoveryResult result = new PrimaryStorageDiscoveryResult();
+                result.setInventories(inventories);
+                result.setResetVgUuidRequiredUuids(resetVgUuidRequiredUuids);
+                completion.success(result);
             }
         });
+    }
+
+    private Set<String> getExistingSharedBlockGroupUuids(Collection<String> vgUuids) {
+        if (isEmpty(vgUuids)) {
+            return Collections.emptySet();
+        }
+
+        List<String> existingUuids = Q.New(SharedBlockGroupVO.class)
+                .select(SharedBlockGroupVO_.uuid)
+                .in(SharedBlockGroupVO_.uuid, vgUuids)
+                .listValues();
+        return new HashSet<>(existingUuids);
     }
 
     private DiskAggregation collectDiskAggregation(String vgUuid, List<String> hostUuids, Map<String, SharedBlockKvmCommands.GetVgsInfoRsp> hostResults) {

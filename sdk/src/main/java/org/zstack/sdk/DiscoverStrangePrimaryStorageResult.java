@@ -11,4 +11,12 @@ public class DiscoverStrangePrimaryStorageResult {
         return this.inventories;
     }
 
+    public java.util.List resetVgUuidRequiredUuids;
+    public void setResetVgUuidRequiredUuids(java.util.List resetVgUuidRequiredUuids) {
+        this.resetVgUuidRequiredUuids = resetVgUuidRequiredUuids;
+    }
+    public java.util.List getResetVgUuidRequiredUuids() {
+        return this.resetVgUuidRequiredUuids;
+    }
+
 }

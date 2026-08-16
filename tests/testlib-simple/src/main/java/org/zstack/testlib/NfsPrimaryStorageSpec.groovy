@@ -464,8 +464,10 @@ class NfsPrimaryStorageSpec extends PrimaryStorageSpec {
                 def cmd = JSONObjectUtil.toObject(e.body, NfsPrimaryStorageKVMBackendCommands.NfsToNfsMigrateBitsCmd.class)
                 VFS srcVfs = vfs(cmd.srcPrimaryStorageUuid, spec)
 
-                PrimaryStorageVO dstNFS = Q.New(PrimaryStorageVO.class).eq(PrimaryStorageVO_.url, cmd.url).find()
-                assert dstNFS : "cannot find NFS primary storage[url: ${cmd.url}]"
+                PrimaryStorageVO dstNFS = cmd.isMounted ?
+                        Q.New(PrimaryStorageVO.class).eq(PrimaryStorageVO_.uuid, cmd.uuid).find() :
+                        Q.New(PrimaryStorageVO.class).eq(PrimaryStorageVO_.url, cmd.url).find()
+                assert dstNFS : "cannot find NFS primary storage[uuid: ${cmd.uuid}, url: ${cmd.url}]"
 
                 VFS dstVfs = vfs(dstNFS.uuid, spec)
                 srcVfs.walkFileSystem { VFSFile f ->

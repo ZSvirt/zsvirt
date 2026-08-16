@@ -308,12 +308,17 @@ public class PrimaryStorageManagerImpl extends AbstractService implements Primar
         }
 
         new While<>(exts).all((ext, whileCompletion) -> {
-            ext.discoverStrangePrimaryStorage(msg.getClusterUuid(), new ReturnValueCompletion<List<PrimaryStorageInventory>>(whileCompletion) {
+            ext.discoverStrangePrimaryStorage(msg.getClusterUuid(), new ReturnValueCompletion<PrimaryStorageDiscoveryResult>(whileCompletion) {
                 @Override
-                public void success(List<PrimaryStorageInventory> inventories) {
-                    if (inventories != null) {
+                public void success(PrimaryStorageDiscoveryResult result) {
+                    if (result != null) {
                         synchronized (reply) {
-                            reply.getInventories().addAll(inventories);
+                            if (result.getInventories() != null) {
+                                reply.getInventories().addAll(result.getInventories());
+                            }
+                            if (result.getResetVgUuidRequiredUuids() != null) {
+                                reply.getResetVgUuidRequiredUuids().addAll(result.getResetVgUuidRequiredUuids());
+                            }
                         }
                     }
                     whileCompletion.done();

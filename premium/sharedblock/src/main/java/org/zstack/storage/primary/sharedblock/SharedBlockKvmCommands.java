@@ -209,7 +209,7 @@ public class SharedBlockKvmCommands {
         public Long actualSize;
         public Long size;
     }
-    public static class DeleteBitsCmd extends AgentCmd {
+    public static class DeleteBitsCmd extends AgentCmd implements HasThreadContext {
         public String path;
         public boolean folder = false;
         public String issueDiscards;

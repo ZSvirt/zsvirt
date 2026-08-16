@@ -6249,8 +6249,8 @@ public class KVMHost extends HostBase implements Host {
                             deployArguments.setInit("true");
                             runner.setFullDeploy(true);
                         }
-                        if (NetworkGlobalProperty.SKIP_IPV6) {
-                            deployArguments.setSkipIpv6("true");
+                        if (NetworkGlobalProperty.SKIP_IPV6 || NetworkGlobalProperty.BRIDGE_DISABLE_IP6TABLES) {
+                            deployArguments.setDisableIp6Tables("true");
                         }
 
                         for (KvmHostAgentDeploymentExtensionPoint ext : pluginRegistry.getExtensionList(KvmHostAgentDeploymentExtensionPoint.class)) {

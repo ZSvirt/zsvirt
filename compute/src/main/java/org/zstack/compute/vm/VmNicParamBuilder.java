@@ -70,9 +70,10 @@ public class VmNicParamBuilder {
             }
         }
 
-        List<VmNicParam> ret = new ArrayList<>(vmNicParams);
+        List<VmNicParam> remainingParams = new ArrayList<>(vmNicParams);
+        List<VmNicParam> ret = new ArrayList<>();
         for (VmNicVO nic: sortedVmNics) {
-            VmNicParam nicParam = ret.stream()
+            VmNicParam nicParam = remainingParams.stream()
                     .filter(param -> Objects.equals(param.getL3NetworkUuid(), nic.getL3NetworkUuid()))
                     .findFirst()
                     .orElse(new VmNicParam());
@@ -87,7 +88,7 @@ public class VmNicParamBuilder {
                 nicParam.setMultiQueueNum(nicMultiQueueNum);
             }
 
-            vmNicParams.remove(nicParam);
+            remainingParams.remove(nicParam);
             ret.add(nicParam);
         }
 

@@ -6,6 +6,7 @@ import org.zstack.header.vm.*;
 import org.zstack.header.vm.devices.VmDevicesSpec;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -27,6 +28,7 @@ public class InstantiateVmFromNewCreatedStruct {
     private List<String> avoidHostUuids;
     private List<String> disableL3Networks;
     private List<String> sshKeyPairUuids;
+    private Map<String, Map<String, String>> vmNicSecurityPolicyByDeviceId = new HashMap<>();
     private final List<String> candidatePrimaryStorageUuidsForRootVolume = new ArrayList<>();
     private final List<String> candidatePrimaryStorageUuidsForDataVolume = new ArrayList<>();
     private DiskAO rootDisk;
@@ -178,6 +180,7 @@ public class InstantiateVmFromNewCreatedStruct {
         struct.setDeprecatedDataVolumeSpecs(msg.getDeprecatedDataVolumeSpecs());
         struct.setVmCustomSpecification(msg.getVmCustomSpecification());
         struct.setDevicesSpec(msg.getDevicesSpec());
+        struct.setVmNicSecurityPolicyByDeviceId(msg.getVmNicSecurityPolicyByDeviceId());
         return struct;
     }
 
@@ -199,6 +202,7 @@ public class InstantiateVmFromNewCreatedStruct {
         struct.setDeprecatedDataVolumeSpecs(msg.getDeprecatedDataVolumeSpecs());
         struct.setVmCustomSpecification(msg.getVmCustomSpecification());
         struct.setDevicesSpec(msg.getDevicesSpec());
+        struct.setVmNicSecurityPolicyByDeviceId(msg.getVmNicSecurityPolicyByDeviceId());
         return struct;
     }
 
@@ -289,6 +293,17 @@ public class InstantiateVmFromNewCreatedStruct {
 
     public void setDisableL3Networks(List<String> disableL3Networks) {
         this.disableL3Networks = disableL3Networks;
+    }
+
+    public Map<String, Map<String, String>> getVmNicSecurityPolicyByDeviceId() {
+        if (vmNicSecurityPolicyByDeviceId == null) {
+            vmNicSecurityPolicyByDeviceId = new HashMap<>();
+        }
+        return vmNicSecurityPolicyByDeviceId;
+    }
+
+    public void setVmNicSecurityPolicyByDeviceId(Map<String, Map<String, String>> vmNicSecurityPolicyByDeviceId) {
+        this.vmNicSecurityPolicyByDeviceId = vmNicSecurityPolicyByDeviceId;
     }
 
     public List<String> getSshKeyPairUuids() {

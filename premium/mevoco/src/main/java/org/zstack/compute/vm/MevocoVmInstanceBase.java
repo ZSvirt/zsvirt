@@ -1254,6 +1254,7 @@ public class MevocoVmInstanceBase extends VmInstanceBase {
                         cvmsg.setName(name);
 
                         cvmsg.setL3NetworkSpecs(NewVmInstanceMsgBuilder.getVmNicSpecsFromVmNicParams(msg.getVmNicParams(), msg.getL3NetworkUuids()));
+                        cvmsg.setVmNicSecurityPolicyByDeviceId(msg.getVmNicSecurityPolicyByDeviceId());
                         cvmsg.setDefaultL3NetworkUuid(msg.getDefaultL3NetworkUuid());
                         cvmsg.setClusterUuid(msg.getClusterUuid());
                         cvmsg.setHostUuid(msg.getHostUuid());

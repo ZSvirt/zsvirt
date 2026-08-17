@@ -59,6 +59,7 @@ import org.zstack.utils.Utils;
 import org.zstack.utils.logging.CLogger;
 
 import javax.persistence.LockModeType;
+import javax.persistence.Tuple;
 import javax.persistence.TypedQuery;
 import java.util.*;
 import java.util.function.Supplier;
@@ -1913,9 +1914,51 @@ public abstract class PrimaryStorageBase extends AbstractPrimaryStorage {
                         .filter(e -> e.getVmCategory() != null)
                         .filter(e -> !VmMetadataCategory.VM_TEMPLATE_CACHE.name().equals(e.getVmCategory()))
                         .collect(Collectors.toList());
+                enrichVmMetadataRegistrationHints(filtered, msg.getPrimaryStorageUuid());
                 reply.setVmInstanceMetadata(filtered);
                 bus.reply(msg, reply);
             }
         });
+    }
+
+    private void enrichVmMetadataRegistrationHints(List<VmMetadataScanEntry> metadata, String scannedPrimaryStorageUuid) {
+        if (metadata == null || metadata.isEmpty()) {
+            return;
+        }
+
+        Set<String> vmUuids = metadata.stream()
+                .map(VmMetadataScanEntry::getVmUuid)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+        if (vmUuids.isEmpty()) {
+            return;
+        }
+
+        Map<String, String> existingVmRootPrimaryStorageUuids = new HashMap<>();
+        List<Tuple> tuples = Q.New(VolumeVO.class)
+                .select(VolumeVO_.vmInstanceUuid, VolumeVO_.primaryStorageUuid)
+                .in(VolumeVO_.vmInstanceUuid, vmUuids)
+                .eq(VolumeVO_.type, VolumeType.Root)
+                .listTuple();
+        for (Tuple tuple : tuples) {
+            String vmUuid = tuple.get(0, String.class);
+            String primaryStorageUuid = tuple.get(1, String.class);
+            if (vmUuid != null && primaryStorageUuid != null) {
+                existingVmRootPrimaryStorageUuids.put(vmUuid, primaryStorageUuid);
+            }
+        }
+
+        if (existingVmRootPrimaryStorageUuids.isEmpty()) {
+            return;
+        }
+
+        for (VmMetadataScanEntry entry : metadata) {
+            String existingPrimaryStorageUuid = existingVmRootPrimaryStorageUuids.get(entry.getVmUuid());
+            if (existingPrimaryStorageUuid == null) {
+                continue;
+            }
+
+            entry.setRegenerateUuidRequired(!Objects.equals(existingPrimaryStorageUuid, scannedPrimaryStorageUuid));
+        }
     }
 }

@@ -140,6 +140,8 @@ public class SharedBlockManagerImpl extends AbstractService implements PrimarySt
                     reply.getResults().add(new SharedBlockCandidateStruct(s));
                 }
 
+                new SharedBlockCandidateFilter().retainManagedLunCandidates(reply.getResults());
+
                 logger.debug("sharedblock devices calculate done, return result");
                 bus.reply(msg, reply);
             }

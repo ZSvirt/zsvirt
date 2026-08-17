@@ -52,6 +52,7 @@ public interface VmInstanceConstant {
         ApplianceVmSyncHaConfig_haUuid,
         AllocatedUrlForAttachingVolume,
         VmAllocateNicFlow_allowDuplicatedMac,
+        VmNicSecurityPolicyByDeviceId,
 
         VmInstanceUuid,
     }

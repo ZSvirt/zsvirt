@@ -28,6 +28,7 @@ public class CloneVmInstanceMsg extends NeedReplyMessage implements VmInstanceMe
     private List<String> l3NetworkUuids;
     private String defaultL3NetworkUuid;
     private List<VmNicParam> vmNicParams;
+    private Map<String, Map<String, String>> vmNicSecurityPolicyByDeviceId = new HashMap<>();
     private List<DiskAO> diskAOs;
     private VolumeSnapshotGroupInventory volumeSnapshotGroup;
     private VmCustomSpecificationStruct vmCustomSpecification;
@@ -176,6 +177,17 @@ public class CloneVmInstanceMsg extends NeedReplyMessage implements VmInstanceMe
 
     public void setVmNicParams(List<VmNicParam> vmNicParams) {
         this.vmNicParams = vmNicParams;
+    }
+
+    public Map<String, Map<String, String>> getVmNicSecurityPolicyByDeviceId() {
+        if (vmNicSecurityPolicyByDeviceId == null) {
+            vmNicSecurityPolicyByDeviceId = new HashMap<>();
+        }
+        return vmNicSecurityPolicyByDeviceId;
+    }
+
+    public void setVmNicSecurityPolicyByDeviceId(Map<String, Map<String, String>> vmNicSecurityPolicyByDeviceId) {
+        this.vmNicSecurityPolicyByDeviceId = vmNicSecurityPolicyByDeviceId;
     }
 
     public List<DiskAO> getDiskAOs() {

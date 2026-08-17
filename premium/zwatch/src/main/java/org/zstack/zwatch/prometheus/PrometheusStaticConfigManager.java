@@ -25,6 +25,8 @@ public interface PrometheusStaticConfigManager {
 
     void writeBaremetaPxeServerConfig(String uuid, String ip, PrometheusConfig.StaticConfig config);
 
+    void deleteBaremetaPxeServerConfig(String uuid);
+
     static PrometheusConfig.StaticConfig createVirtualRouterConfig(String vrUuid, String mgmtIp) {
         PrometheusConfig.StaticConfig sc = new PrometheusConfig.StaticConfig();
         HashSet<String> targets = new HashSet<>();

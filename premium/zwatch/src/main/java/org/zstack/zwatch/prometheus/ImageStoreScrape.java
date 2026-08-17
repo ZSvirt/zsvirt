@@ -34,6 +34,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -179,11 +180,20 @@ public class ImageStoreScrape implements PreparePrometheusConfigExtensionPoint, 
 
         List<String> bsUuids = Q.New(BackupStorageVO.class).select(BackupStorageVO_.uuid).listValues();
 
-        files = files.stream().filter(f -> bsUuids.stream().noneMatch(h -> f.startsWith(Paths.get(DISCOVER_DIR, h).toString()))).collect(Collectors.toList());
-
-        files.parallelStream().forEach(PathUtil::forceRemoveFile);
+        files.stream()
+                .filter(f -> bsUuids.stream().noneMatch(h -> f.startsWith(Paths.get(DISCOVER_DIR, h).toString())))
+                .map(this::backupStorageUuidFromConfigPath)
+                .filter(Objects::nonNull)
+                .distinct()
+                .forEach(pscMgr::deleteBackupStorageConfig);
         watch.stop();
         logger.debug(String.format("All redundant prometheus files have been deleted, cost: %sms", watch.getTime()));
+    }
+
+    private String backupStorageUuidFromConfigPath(String path) {
+        String filename = Paths.get(path).getFileName().toString();
+        String[] fs = filename.split("-", 2);
+        return fs.length == 0 ? null : fs[0];
     }
 
     @Override

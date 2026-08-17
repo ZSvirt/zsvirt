@@ -7790,6 +7790,11 @@ public class VmInstanceBase extends AbstractVmInstance {
             spec.setL3Networks(new ArrayList<>());
         }
 
+        if (struct.getVmNicSecurityPolicyByDeviceId() != null && !struct.getVmNicSecurityPolicyByDeviceId().isEmpty()) {
+            spec.putExtensionData(VmInstanceConstant.Params.VmNicSecurityPolicyByDeviceId.toString(),
+                    struct.getVmNicSecurityPolicyByDeviceId());
+        }
+
         spec.setDataVolumeTemplateUuids(struct.getDataVolumeTemplateUuids());
         spec.setDataVolumeFromTemplateSystemTags(struct.getDataVolumeFromTemplateSystemTags());
         if (!isEmpty(struct.getDeprecatedDataVolumeSpecs())) {

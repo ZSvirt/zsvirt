@@ -1428,6 +1428,7 @@ public class VolumeBase extends AbstractVolume implements Volume {
                                 .set(VolumeVO_.primaryStorageUuid, volume.getPrimaryStorageUuid())
                                 .set(VolumeVO_.actualSize, volume.getActualSize())
                                 .set(VolumeVO_.protocol, volume.getProtocol())
+                                .set(VolumeVO_.format, volume.getFormat())
                                 .update();
 
                         sql(VolumeVO.class)
@@ -1438,6 +1439,7 @@ public class VolumeBase extends AbstractVolume implements Volume {
                                 .set(VolumeVO_.primaryStorageUuid, transientVolume.getPrimaryStorageUuid())
                                 .set(VolumeVO_.actualSize, transientVolume.getActualSize())
                                 .set(VolumeVO_.protocol, transientVolume.getProtocol())
+                                .set(VolumeVO_.format, transientVolume.getFormat())
                                 .update();
 
                         pluginRgty.getExtensionList(OverwriteVolumeExtensionPoint.class).forEach(it ->

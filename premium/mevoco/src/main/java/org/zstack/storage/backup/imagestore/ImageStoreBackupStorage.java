@@ -652,6 +652,7 @@ public class ImageStoreBackupStorage extends BackupStorageBase {
         cmd.name = name;
         cmd.imageuuid = iinv.getUuid();
         cmd.cancellationApiId = msg.getCancellationApiId();
+        cmd.allowTaskNotFound = msg.isAllowTaskNotFound();
         return cmd;
     }
 
@@ -1583,6 +1584,8 @@ public class ImageStoreBackupStorage extends BackupStorageBase {
             public void success(CancelDownloadImgRsp rsp) {
                 if (!rsp.isSuccess()) {
                     reply.setError(operr("operation error, because:%s", rsp.getError()));
+                } else {
+                    reply.setCancelResult(rsp.cancelResult);
                 }
                 bus.reply(msg, reply);
             }
@@ -3059,6 +3062,7 @@ public class ImageStoreBackupStorage extends BackupStorageBase {
 
         CancelDownloadFileCmd cmd = new CancelDownloadFileCmd();
         cmd.cancellationApiId = msg.getCancellationApiId();
+        cmd.allowTaskNotFound = msg.isAllowTaskNotFound();
 
         restf.asyncJsonPost(buildUrl(ImageStoreBackupStorageConstant.FILE_CANCEL_PATH), cmd,
                 new JsonAsyncRESTCallback<CancelDownloadFileRsp>(msg) {
@@ -3071,11 +3075,14 @@ public class ImageStoreBackupStorage extends BackupStorageBase {
                         try {
                             CancelJobCmd fallbackCmd = new CancelJobCmd();
                             fallbackCmd.cancellationApiId = msg.getCancellationApiId();
+                            fallbackCmd.allowTaskNotFound = msg.isAllowTaskNotFound();
                             CancelJobRsp rsp = restf.syncJsonPost(
                                     buildUrl(ImageStoreBackupStorageConstant.SYNC_CANCEL_JOB),
                                     fallbackCmd, CancelJobRsp.class);
                             if (!rsp.isSuccess()) {
                                 reply.setError(operr("operation error, because:%s", rsp.getError()));
+                            } else {
+                                reply.setCancelResult(rsp.cancelResult);
                             }
                         } catch (Exception e) {
                             reply.setError(operr("cancel fallback also failed: %s", e.getMessage()));
@@ -3087,6 +3094,8 @@ public class ImageStoreBackupStorage extends BackupStorageBase {
                     public void success(CancelDownloadFileRsp ret) {
                         if (!ret.isSuccess()) {
                             reply.setError(operr("operation error, because:%s", ret.getError()));
+                        } else {
+                            reply.setCancelResult(ret.cancelResult);
                         }
                         bus.reply(msg, reply);
                     }

@@ -961,6 +961,7 @@ public class NfsPrimaryStorageKVMBackendCommands {
     public static class WriteVmMetadataCmd extends NfsPrimaryStorageAgentCommand {
         public String metadata;
         public String metadataPath;
+        public long metadataGeneration;
         public String vmUuid;
         public String vmName;
         public String vmCategory;
@@ -993,6 +994,16 @@ public class NfsPrimaryStorageKVMBackendCommands {
     }
 
     public static class CleanupVmMetadataRsp extends NfsPrimaryStorageAgentResponse {
+    }
+
+    public static class CleanupAllVmMetadataCmd extends NfsPrimaryStorageAgentCommand {
+        public String metadataDir;
+        public long metadataGeneration;
+    }
+
+    public static class CleanupAllVmMetadataRsp extends NfsPrimaryStorageAgentResponse {
+        public boolean skipped;
+        public Long currentGeneration;
     }
 
     public static class PrefixRebaseBackingFilesCmd extends NfsPrimaryStorageAgentCommand {

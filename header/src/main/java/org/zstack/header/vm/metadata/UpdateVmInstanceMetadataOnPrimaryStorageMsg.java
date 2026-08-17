@@ -14,6 +14,7 @@ public class UpdateVmInstanceMetadataOnPrimaryStorageMsg extends NeedReplyMessag
     private String schemaVersion;
     private boolean storageStructureChange;
     private String metadataPath;
+    private long metadataGeneration;
 
     @Override
     public String getPrimaryStorageUuid() {
@@ -94,5 +95,13 @@ public class UpdateVmInstanceMetadataOnPrimaryStorageMsg extends NeedReplyMessag
 
     public void setMetadataPath(String metadataPath) {
         this.metadataPath = metadataPath;
+    }
+
+    public long getMetadataGeneration() {
+        return metadataGeneration;
+    }
+
+    public void setMetadataGeneration(long metadataGeneration) {
+        this.metadataGeneration = metadataGeneration;
     }
 }

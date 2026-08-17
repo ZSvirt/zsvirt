@@ -75,6 +75,7 @@ public class SharedBlockKvmCommands {
     public static final String GET_VM_INSTANCE_METADATA_PATH = "/sharedblock/vm/metadata/get";
     public static final String SCAN_VM_METADATA_PATH = "/sharedblock/vm/metadata/scan";
     public static final String CLEANUP_VM_METADATA_PATH = "/sharedblock/vm/metadata/cleanup";
+    public static final String CLEANUP_ALL_VM_METADATA_PATH = "/sharedblock/vm/metadata/cleanupall";
     public static final String PREFIX_REBASE_BACKING_FILES_PATH = "/sharedblock/snapshot/prefixrebasebackingfiles";
 
     public static class AgentCmd extends KVMAgentCommands.PrimaryStorageCommand {
@@ -801,9 +802,36 @@ public class SharedBlockKvmCommands {
     public static class CleanupVmMetadataRsp extends AgentRsp {
     }
 
+    public static class CleanupAllVmMetadataCmd extends AgentCmd {
+        private String metadataDir;
+        private long metadataGeneration;
+
+        public String getMetadataDir() {
+            return metadataDir;
+        }
+
+        public void setMetadataDir(String metadataDir) {
+            this.metadataDir = metadataDir;
+        }
+
+        public long getMetadataGeneration() {
+            return metadataGeneration;
+        }
+
+        public void setMetadataGeneration(long metadataGeneration) {
+            this.metadataGeneration = metadataGeneration;
+        }
+    }
+
+    public static class CleanupAllVmMetadataRsp extends AgentRsp {
+        public boolean skipped;
+        public Long currentGeneration;
+    }
+
     public static class WriteVmMetadataCmd extends AgentCmd {
         public String metadata;
         public String metadataPath;
+        public long metadataGeneration;
         public String vmUuid;
         public String vmName;
         public String vmCategory;

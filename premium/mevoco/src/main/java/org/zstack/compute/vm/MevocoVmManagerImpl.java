@@ -64,6 +64,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * Created by MaJin on 2020/10/10.
@@ -112,6 +113,8 @@ public class MevocoVmManagerImpl implements VmInstanceExtensionManager, BeforeVm
             handle((UpdateVmInstanceMetadataMsg) msg);
         } else if (msg instanceof APICleanupVmInstanceMetadataMsg) {
             handle((APICleanupVmInstanceMetadataMsg) msg);
+        } else if (msg instanceof APICleanupAllVmInstanceMetadataMsg) {
+            handle((APICleanupAllVmInstanceMetadataMsg) msg);
         } else if (msg instanceof APIUpdateVmInstanceMetadataMsg) {
             handle((APIUpdateVmInstanceMetadataMsg) msg);
         } else if (msg instanceof APIGetVmInstanceMetadataFromPrimaryStorageMsg) {
@@ -128,6 +131,7 @@ public class MevocoVmManagerImpl implements VmInstanceExtensionManager, BeforeVm
                 APICreateVmInstanceFromVolumeSnapshotGroupMsg.class,
                 APIRegisterVmInstanceFromMetadataMsg.class,
                 APICleanupVmInstanceMetadataMsg.class,
+                APICleanupAllVmInstanceMetadataMsg.class,
                 APIUpdateVmInstanceMetadataMsg.class,
                 APIGetVmInstanceMetadataFromPrimaryStorageMsg.class,
                 UpdateVmInstanceMetadataMsg.class
@@ -869,6 +873,7 @@ public class MevocoVmManagerImpl implements VmInstanceExtensionManager, BeforeVm
         umsg.setPrimaryStorageUuid(primaryStorageUuid);
         umsg.setStorageStructureChange(msg.isStorageStructureChange());
         umsg.setMetadataPath(metadataPath);
+        umsg.setMetadataGeneration(vmMetadataDirtyMarker.getCurrentMetadataGeneration());
         bus.makeTargetServiceIdByResourceUuid(umsg, PrimaryStorageConstant.SERVICE_ID, primaryStorageUuid);
         bus.send(umsg, new CloudBusCallBack(msg) {
             @Override
@@ -966,6 +971,378 @@ public class MevocoVmManagerImpl implements VmInstanceExtensionManager, BeforeVm
                 bus.publish(evt);
             }
         });
+    }
+
+    private static final class VmMetadataCleanupTarget {
+        private final String primaryStorageUuid;
+        private final String metadataDir;
+
+        private VmMetadataCleanupTarget(String primaryStorageUuid, String metadataDir) {
+            this.primaryStorageUuid = primaryStorageUuid;
+            this.metadataDir = metadataDir;
+        }
+    }
+
+    private static final class VmMetadataCleanupTargets {
+        private final List<VmMetadataCleanupTarget> supportedTargets;
+        private final Map<String, String> failedPsCauses;
+        private final int totalTargetedPrimaryStorages;
+
+        private VmMetadataCleanupTargets(List<VmMetadataCleanupTarget> supportedTargets,
+                                         Map<String, String> failedPsCauses,
+                                         int totalTargetedPrimaryStorages) {
+            this.supportedTargets = supportedTargets;
+            this.failedPsCauses = failedPsCauses;
+            this.totalTargetedPrimaryStorages = totalTargetedPrimaryStorages;
+        }
+    }
+
+    private void handle(APICleanupAllVmInstanceMetadataMsg msg) {
+        APICleanupAllVmInstanceMetadataEvent evt = new APICleanupAllVmInstanceMetadataEvent(msg.getId());
+        VmMetadataCleanupTargets resolvedTargets;
+        try {
+            resolvedTargets = resolveVmMetadataCleanupTargets(msg);
+        } catch (Throwable t) {
+            logger.warn("[MetadataCleanup] failed to resolve cleanup-all targets", t);
+            evt.setError(Platform.operr("failed to resolve VM metadata cleanup targets: %s", t.getMessage()));
+            bus.publish(evt);
+            return;
+        }
+
+        Map<String, String> failedPsCauses =
+                Collections.synchronizedMap(new LinkedHashMap<>(resolvedTargets.failedPsCauses));
+        if (resolvedTargets.supportedTargets.isEmpty()) {
+            setCleanupAllResult(evt, failedPsCauses, resolvedTargets.totalTargetedPrimaryStorages);
+            bus.publish(evt);
+            return;
+        }
+
+        Set<String> targetPrimaryStorageUuids = resolvedTargets.supportedTargets.stream()
+                .map(target -> target.primaryStorageUuid)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+        vmMetadataDirtyMarker.acquireCleanupBarrierAndDrain(
+                targetPrimaryStorageUuids,
+                new ReturnValueCompletion<VmMetadataDirtyMarker.CleanupBarrierToken>(msg) {
+                    @Override
+                    public void success(VmMetadataDirtyMarker.CleanupBarrierToken token) {
+                        dispatchCleanupAllSafely(
+                                msg,
+                                evt,
+                                resolvedTargets.supportedTargets,
+                                failedPsCauses,
+                                resolvedTargets.totalTargetedPrimaryStorages,
+                                token,
+                                false);
+                    }
+
+                    @Override
+                    public void fail(ErrorCode errorCode) {
+                        evt.setError(errorCode);
+                        bus.publish(evt);
+                    }
+                });
+    }
+
+    private VmMetadataCleanupTargets resolveVmMetadataCleanupTargets(APICleanupAllVmInstanceMetadataMsg msg) {
+        boolean explicit = msg.getPrimaryStorageUuids() != null && !msg.getPrimaryStorageUuids().isEmpty();
+        Set<String> requestedPrimaryStorageUuids = explicit
+                ? new LinkedHashSet<>(msg.getPrimaryStorageUuids())
+                : Collections.emptySet();
+
+        List<Tuple> psList;
+        if (explicit) {
+            psList = Q.New(PrimaryStorageVO.class)
+                    .select(PrimaryStorageVO_.uuid, PrimaryStorageVO_.type)
+                    .in(PrimaryStorageVO_.uuid, requestedPrimaryStorageUuids)
+                    .listTuple();
+        } else {
+            psList = Q.New(PrimaryStorageVO.class)
+                    .eq(PrimaryStorageVO_.state, PrimaryStorageState.Enabled)
+                    .eq(PrimaryStorageVO_.status, PrimaryStorageStatus.Connected)
+                    .select(PrimaryStorageVO_.uuid, PrimaryStorageVO_.type)
+                    .listTuple();
+        }
+
+        Map<String, Tuple> psByUuid = psList.stream().collect(Collectors.toMap(
+                t -> t.get(0, String.class),
+                t -> t,
+                (first, ignored) -> first,
+                LinkedHashMap::new));
+        Map<String, String> failedPsCauses = new LinkedHashMap<>();
+        if (explicit) {
+            for (String psUuid : requestedPrimaryStorageUuids) {
+                if (!psByUuid.containsKey(psUuid)) {
+                    failedPsCauses.put(psUuid, "primary storage no longer exists");
+                }
+            }
+        }
+
+        List<VmMetadataCleanupTarget> supportedTargets = new ArrayList<>();
+        Collection<Tuple> orderedPs = explicit
+                ? requestedPrimaryStorageUuids.stream()
+                        .map(psByUuid::get)
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toList())
+                : psList;
+        for (Tuple t : orderedPs) {
+            String psUuid = t.get(0, String.class);
+            String psType = t.get(1, String.class);
+            VmMetadataPathBuildExtensionPoint ext =
+                    pluginRgty.getExtensionFromMap(psType, VmMetadataPathBuildExtensionPoint.class);
+            if (ext == null) {
+                if (explicit) {
+                    failedPsCauses.put(
+                            psUuid,
+                            String.format("primary storage type[%s] does not support vm metadata cleanup", psType));
+                }
+                continue;
+            }
+
+            try {
+                supportedTargets.add(new VmMetadataCleanupTarget(psUuid, ext.buildMetadataDir(psUuid)));
+            } catch (Throwable t1) {
+                failedPsCauses.put(
+                        psUuid,
+                        String.format("failed to build VM metadata directory for primary storage type[%s]: %s",
+                                psType, t1.getMessage()));
+            }
+        }
+
+        int totalTargetedPrimaryStorages = supportedTargets.size() + failedPsCauses.size();
+        return new VmMetadataCleanupTargets(
+                Collections.unmodifiableList(supportedTargets),
+                Collections.unmodifiableMap(failedPsCauses),
+                totalTargetedPrimaryStorages);
+    }
+
+    private void dispatchCleanupAllSafely(APICleanupAllVmInstanceMetadataMsg msg,
+                                          APICleanupAllVmInstanceMetadataEvent evt,
+                                          List<VmMetadataCleanupTarget> targets,
+                                          Map<String, String> failedPsCauses,
+                                          int totalTargetedPrimaryStorages,
+                                          VmMetadataDirtyMarker.CleanupBarrierToken token,
+                                          boolean retriedAfterGenerationReconciliation) {
+        try {
+            dispatchCleanupAll(
+                    msg,
+                    evt,
+                    targets,
+                    failedPsCauses,
+                    totalTargetedPrimaryStorages,
+                    token,
+                    retriedAfterGenerationReconciliation);
+        } catch (Throwable t) {
+            logger.warn(String.format("[MetadataCleanup] cleanup-all dispatch failed: operationUuid=%s",
+                    token.getOperationUuid()), t);
+            finishCleanupAll(
+                    evt,
+                    failedPsCauses,
+                    totalTargetedPrimaryStorages,
+                    token,
+                    null,
+                    Platform.operr("failed to dispatch VM metadata cleanup: %s", t.getMessage()));
+        }
+    }
+
+    private void dispatchCleanupAll(APICleanupAllVmInstanceMetadataMsg msg,
+                                    APICleanupAllVmInstanceMetadataEvent evt,
+                                    List<VmMetadataCleanupTarget> targets,
+                                    Map<String, String> failedPsCauses,
+                                    int totalTargetedPrimaryStorages,
+                                    VmMetadataDirtyMarker.CleanupBarrierToken token,
+                                    boolean retriedAfterGenerationReconciliation) {
+        List<CleanupAllVmMetadataOnPrimaryStorageMsg> cleanupMsgs = targets.stream()
+                .map(target -> buildCleanupAllMessage(target, token.getGeneration()))
+                .collect(Collectors.toList());
+        Map<String, Long> skippedPsGenerations =
+                Collections.synchronizedMap(new LinkedHashMap<>());
+
+        new While<>(cleanupMsgs).each((cmsg, whileCompletion) -> {
+            bus.send(cmsg, new CloudBusCallBack(whileCompletion) {
+                @Override
+                public void run(MessageReply reply) {
+                    if (reply instanceof CleanupAllVmMetadataOnPrimaryStorageReply) {
+                        CleanupAllVmMetadataOnPrimaryStorageReply cleanupReply =
+                                (CleanupAllVmMetadataOnPrimaryStorageReply) reply;
+                        if (cleanupReply.isSkipped()) {
+                            if (cleanupReply.getCurrentGeneration() == null
+                                    || cleanupReply.getCurrentGeneration() < 0) {
+                                failedPsCauses.put(
+                                        cmsg.getPrimaryStorageUuid(),
+                                        "storage skipped stale cleanup without a valid currentGeneration");
+                            } else {
+                                skippedPsGenerations.put(
+                                        cmsg.getPrimaryStorageUuid(),
+                                        cleanupReply.getCurrentGeneration());
+                            }
+                        }
+                    }
+
+                    if (!reply.isSuccess()) {
+                        String cause = reply.getError() == null
+                                ? "unknown error"
+                                : reply.getError().getDescription();
+                        failedPsCauses.put(cmsg.getPrimaryStorageUuid(), cause);
+                    }
+                    whileCompletion.done();
+                }
+            });
+        }).run(new WhileDoneCompletion(msg) {
+            @Override
+            public void done(ErrorCodeList errorCodeList) {
+                handleCleanupAllRound(
+                        msg,
+                        evt,
+                        targets,
+                        failedPsCauses,
+                        skippedPsGenerations,
+                        totalTargetedPrimaryStorages,
+                        token,
+                        retriedAfterGenerationReconciliation);
+            }
+        });
+    }
+
+    private CleanupAllVmMetadataOnPrimaryStorageMsg buildCleanupAllMessage(VmMetadataCleanupTarget target,
+                                                                            long metadataGeneration) {
+        CleanupAllVmMetadataOnPrimaryStorageMsg cmsg = new CleanupAllVmMetadataOnPrimaryStorageMsg();
+        cmsg.setPrimaryStorageUuid(target.primaryStorageUuid);
+        cmsg.setMetadataDir(target.metadataDir);
+        cmsg.setMetadataGeneration(metadataGeneration);
+        bus.makeTargetServiceIdByResourceUuid(
+                cmsg,
+                PrimaryStorageConstant.SERVICE_ID,
+                target.primaryStorageUuid);
+        return cmsg;
+    }
+
+    private void handleCleanupAllRound(APICleanupAllVmInstanceMetadataMsg msg,
+                                       APICleanupAllVmInstanceMetadataEvent evt,
+                                       List<VmMetadataCleanupTarget> targets,
+                                       Map<String, String> failedPsCauses,
+                                       Map<String, Long> skippedPsGenerations,
+                                       int totalTargetedPrimaryStorages,
+                                       VmMetadataDirtyMarker.CleanupBarrierToken token,
+                                       boolean retriedAfterGenerationReconciliation) {
+        if (skippedPsGenerations.isEmpty()) {
+            finishCleanupAll(evt, failedPsCauses, totalTargetedPrimaryStorages, token, null, null);
+            return;
+        }
+
+        long maxStorageGeneration = Collections.max(skippedPsGenerations.values());
+        long minimumReconciledGeneration;
+        try {
+            minimumReconciledGeneration = Math.addExact(maxStorageGeneration, 1);
+        } catch (ArithmeticException e) {
+            skippedPsGenerations.forEach((psUuid, currentGeneration) ->
+                    failedPsCauses.put(
+                            psUuid,
+                            String.format("storage generation[%d] cannot be advanced", currentGeneration)));
+            finishCleanupAll(evt, failedPsCauses, totalTargetedPrimaryStorages, token, null, null);
+            return;
+        }
+
+        if (retriedAfterGenerationReconciliation || !failedPsCauses.isEmpty()) {
+            skippedPsGenerations.forEach((psUuid, currentGeneration) ->
+                    failedPsCauses.put(
+                            psUuid,
+                            String.format("storage generation[%d] is newer than cleanup generation[%d]",
+                                    currentGeneration, token.getGeneration())));
+            finishCleanupAll(
+                    evt,
+                    failedPsCauses,
+                    totalTargetedPrimaryStorages,
+                    token,
+                    minimumReconciledGeneration,
+                    null);
+            return;
+        }
+
+        boolean released;
+        try {
+            released = vmMetadataDirtyMarker.releaseCleanupBarrierAtLeast(token, minimumReconciledGeneration);
+        } catch (Throwable t) {
+            released = false;
+            logger.warn(String.format("[MetadataCleanup] failed to release cleanup barrier for generation reconciliation: operationUuid=%s",
+                    token.getOperationUuid()), t);
+        }
+        if (!released) {
+            skippedPsGenerations.forEach((psUuid, ignored) ->
+                    failedPsCauses.put(psUuid, "failed to release cleanup barrier for generation reconciliation"));
+            setCleanupAllResult(evt, failedPsCauses, totalTargetedPrimaryStorages);
+            bus.publish(evt);
+            return;
+        }
+
+        Set<String> targetPrimaryStorageUuids = targets.stream()
+                .map(target -> target.primaryStorageUuid)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+        vmMetadataDirtyMarker.acquireCleanupBarrierAndDrain(
+                targetPrimaryStorageUuids,
+                new ReturnValueCompletion<VmMetadataDirtyMarker.CleanupBarrierToken>(msg) {
+                    @Override
+                    public void success(VmMetadataDirtyMarker.CleanupBarrierToken retryToken) {
+                        dispatchCleanupAllSafely(
+                                msg,
+                                evt,
+                                targets,
+                                failedPsCauses,
+                                totalTargetedPrimaryStorages,
+                                retryToken,
+                                true);
+                    }
+
+                    @Override
+                    public void fail(ErrorCode errorCode) {
+                        String cause = String.format(
+                                "failed to reacquire cleanup barrier after generation reconciliation: %s",
+                                errorCode);
+                        targets.forEach(target ->
+                                failedPsCauses.put(target.primaryStorageUuid, cause));
+                        setCleanupAllResult(evt, failedPsCauses, totalTargetedPrimaryStorages);
+                        bus.publish(evt);
+                    }
+                });
+    }
+
+    private void finishCleanupAll(APICleanupAllVmInstanceMetadataEvent evt,
+                                  Map<String, String> failedPsCauses,
+                                  int totalTargetedPrimaryStorages,
+                                  VmMetadataDirtyMarker.CleanupBarrierToken token,
+                                  Long minimumGeneration,
+                                  ErrorCode cleanupError) {
+        boolean barrierReleased;
+        try {
+            barrierReleased = minimumGeneration == null
+                    ? vmMetadataDirtyMarker.releaseCleanupBarrier(token)
+                    : vmMetadataDirtyMarker.releaseCleanupBarrierAtLeast(token, minimumGeneration);
+        } catch (Throwable t) {
+            barrierReleased = false;
+            logger.warn(String.format("[MetadataCleanup] failed to release cleanup barrier: operationUuid=%s",
+                    token.getOperationUuid()), t);
+        }
+
+        setCleanupAllResult(evt, failedPsCauses, totalTargetedPrimaryStorages);
+        if (cleanupError != null) {
+            evt.setError(cleanupError);
+        }
+        if (!barrierReleased) {
+            evt.setError(Platform.operr("VM metadata cleanup finished but failed to release cluster cleanup barrier; " +
+                    "operationUuid=%s, primaryStorageFailures=%s", token.getOperationUuid(), failedPsCauses));
+        }
+        bus.publish(evt);
+    }
+
+    private void setCleanupAllResult(APICleanupAllVmInstanceMetadataEvent evt,
+                                     Map<String, String> failedPsCauses,
+                                     int totalTargetedPrimaryStorages) {
+        if (failedPsCauses.isEmpty()) {
+            evt.setFailedPrimaryStorageUuids(Collections.emptyList());
+        } else {
+            evt.setFailedPrimaryStorageUuids(new ArrayList<>(failedPsCauses.keySet()));
+            evt.setError(Platform.operr("cleanup all vm metadata failed on %d/%d primary storage(s): %s",
+                    failedPsCauses.size(), totalTargetedPrimaryStorages, failedPsCauses));
+        }
     }
 
     private void submitMetadataCleanupGC(CleanupVmInstanceMetadataOnPrimaryStorageMsg cmsg) {

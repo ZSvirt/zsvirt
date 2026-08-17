@@ -61,6 +61,7 @@ import org.zstack.utils.logging.CLogger;
 import javax.persistence.Tuple;
 import javax.persistence.TypedQuery;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -136,6 +137,8 @@ public class NfsPrimaryStorage extends PrimaryStorageBase {
             handle((PullVolumeSnapshotOnPrimaryStorageMsg) msg);
         } else if (msg instanceof RebaseVolumeBackingFileOnPrimaryStorageMsg) {
             handle((RebaseVolumeBackingFileOnPrimaryStorageMsg) msg);
+        } else if (msg instanceof CleanupAllVmMetadataOnPrimaryStorageMsg) {
+            handle((CleanupAllVmMetadataOnPrimaryStorageMsg) msg);
         } else {
             super.handleLocalMessage(msg);
         }
@@ -2061,6 +2064,48 @@ public class NfsPrimaryStorage extends PrimaryStorageBase {
             public void fail(ErrorCode errorCode) {
                 reply.setError(errorCode);
                 bus.reply(msg, reply);
+            }
+        });
+    }
+
+    @Override
+    protected void handle(CleanupAllVmMetadataOnPrimaryStorageMsg msg) {
+        CleanupAllVmMetadataOnPrimaryStorageReply reply = new CleanupAllVmMetadataOnPrimaryStorageReply();
+        List<HostInventory> connectedHosts = factory.getConnectedHostForOperation(getSelfInventory());
+        if (connectedHosts.isEmpty()) {
+            reply.setError(operr("no connected host found for NFS primary storage[uuid:%s]", self.getUuid()));
+            bus.reply(msg, reply);
+            return;
+        }
+
+        cleanupAllOnHostWithFallback(msg, reply, connectedHosts, 0, new ArrayList<>());
+    }
+
+    private void cleanupAllOnHostWithFallback(CleanupAllVmMetadataOnPrimaryStorageMsg msg,
+                                              CleanupAllVmMetadataOnPrimaryStorageReply reply,
+                                              List<HostInventory> connectedHosts, int idx,
+                                              List<ErrorCode> causes) {
+        if (idx >= connectedHosts.size()) {
+            reply.setError(operr("failed to cleanup all vm metadata on NFS primary storage[uuid:%s] after trying %d connected host(s): %s",
+                    self.getUuid(), connectedHosts.size(), causes));
+            bus.reply(msg, reply);
+            return;
+        }
+
+        String hostUuid = connectedHosts.get(idx).getUuid();
+        final NfsPrimaryStorageBackend backend = getBackendByHostUuid(hostUuid);
+        backend.handle(msg, hostUuid, new ReturnValueCompletion<CleanupAllVmMetadataOnPrimaryStorageReply>(msg) {
+            @Override
+            public void success(CleanupAllVmMetadataOnPrimaryStorageReply r) {
+                bus.reply(msg, r);
+            }
+
+            @Override
+            public void fail(ErrorCode errorCode) {
+                logger.warn(String.format("[MetadataCleanupAll] NFS ps[uuid:%s] failed on host[uuid:%s]: %s; trying next connected host",
+                        self.getUuid(), hostUuid, errorCode));
+                causes.add(errorCode);
+                cleanupAllOnHostWithFallback(msg, reply, connectedHosts, idx + 1, causes);
             }
         });
     }

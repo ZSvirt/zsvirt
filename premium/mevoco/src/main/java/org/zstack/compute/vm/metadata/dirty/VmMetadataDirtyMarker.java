@@ -15,6 +15,7 @@ import org.zstack.core.thread.ChainTask;
 import org.zstack.core.thread.SyncTaskChain;
 import org.zstack.core.thread.ThreadFacade;
 import org.zstack.header.Component;
+import org.zstack.header.core.ReturnValueCompletion;
 import org.zstack.header.errorcode.ErrorCode;
 import org.zstack.header.managementnode.ManagementNodeChangeListener;
 import org.zstack.header.managementnode.ManagementNodeInventory;
@@ -28,11 +29,16 @@ import org.zstack.header.vm.VmInstanceVO_;
 import org.zstack.utils.Utils;
 import org.zstack.utils.logging.CLogger;
 
+import javax.persistence.LockModeType;
+import javax.persistence.Query;
 import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -78,6 +84,35 @@ public class VmMetadataDirtyMarker implements VmMetadataDirtyService, Component,
      */
     private static final long INIT_BATCH_DELAY_SEC = 10;
 
+    private static final long CLEANUP_DRAIN_TIMEOUT_SEC = 300;
+    private static final long CLEANUP_DRAIN_POLL_INTERVAL_SEC = 1;
+    private static final long CLEANUP_BARRIER_LEASE_SEC = 300;
+    private static final long CLEANUP_BARRIER_HEARTBEAT_SEC = 30;
+
+    public static final class CleanupBarrierToken {
+        private final String operationUuid;
+        private final long generation;
+        private final Set<String> primaryStorageUuids;
+
+        private CleanupBarrierToken(String operationUuid, long generation, Set<String> primaryStorageUuids) {
+            this.operationUuid = operationUuid;
+            this.generation = generation;
+            this.primaryStorageUuids = Collections.unmodifiableSet(new HashSet<>(primaryStorageUuids));
+        }
+
+        public String getOperationUuid() {
+            return operationUuid;
+        }
+
+        public long getGeneration() {
+            return generation;
+        }
+
+        public Set<String> getPrimaryStorageUuids() {
+            return primaryStorageUuids;
+        }
+    }
+
     @Autowired
     private CloudBus bus;
     @Autowired
@@ -91,6 +126,7 @@ public class VmMetadataDirtyMarker implements VmMetadataDirtyService, Component,
     private final AtomicInteger globalFlushInFlight = new AtomicInteger(0);
     private final AtomicBoolean upgradeRefreshScheduled = new AtomicBoolean(false);
     private final AtomicInteger upgradeRefreshRescheduleCount = new AtomicInteger(0);
+    private final Set<String> activeCleanupOperations = ConcurrentHashMap.newKeySet();
 
     @Override
     public boolean start() {
@@ -192,17 +228,22 @@ public class VmMetadataDirtyMarker implements VmMetadataDirtyService, Component,
                     "AND (nextRetryTime IS NULL OR nextRetryTime <= CURRENT_TIMESTAMP)";
         }
 
-        SQL query = SQL.New(sql)
-                .param("myId", myId)
-                .param("vmUuid", vmUuid);
+        int claimed;
         if (staleId != null) {
-            query.param("staleId", staleId).param("staleCutoff", staleCutoff);
+            claimed = executeClaimWhenCleanupIdle(sql,
+                    "myId", myId,
+                    "vmUuid", vmUuid,
+                    "staleId", staleId,
+                    "staleCutoff", staleCutoff);
+        } else {
+            claimed = executeClaimWhenCleanupIdle(sql,
+                    "myId", myId,
+                    "vmUuid", vmUuid);
         }
-        int claimed = query.execute();
 
         if (claimed == 0) {
             logger.debug(String.format("[MetadataDirty] triggerFlushForVm SKIP: vm=%s, claim failed " +
-                    "(row may be claimed by another node, or nextRetryTime not yet reached)", vmUuid));
+                    "(cleanup barrier active, row claimed by another node, or nextRetryTime not yet reached)", vmUuid));
             return;
         }
 
@@ -239,7 +280,7 @@ public class VmMetadataDirtyMarker implements VmMetadataDirtyService, Component,
         thdf.chainSubmit(new ChainTask(null) {
             @Override
             public String getSyncSignature() {
-                return String.format("update-vm-%s-metadata", vmUuid);
+                return metadataFlushSyncSignature(vmUuid);
             }
 
             @Override
@@ -293,9 +334,321 @@ public class VmMetadataDirtyMarker implements VmMetadataDirtyService, Component,
         });
     }
 
+    public void acquireCleanupBarrierAndDrain(Set<String> primaryStorageUuids,
+                                              ReturnValueCompletion<CleanupBarrierToken> completion) {
+        if (primaryStorageUuids == null || primaryStorageUuids.isEmpty()) {
+            completion.fail(Platform.operr("cannot acquire VM metadata cleanup barrier without primary storage targets"));
+            return;
+        }
+
+        CleanupBarrierToken token;
+        try {
+            token = acquireCleanupBarrier(primaryStorageUuids);
+        } catch (Throwable t) {
+            logger.warn("[MetadataCleanup] failed to acquire cleanup barrier", t);
+            completion.fail(Platform.operr("failed to acquire VM metadata cleanup barrier: %s", t.getMessage()));
+            return;
+        }
+
+        if (token == null) {
+            completion.fail(Platform.operr("another VM metadata cleanup operation is already in progress"));
+            return;
+        }
+
+        activeCleanupOperations.add(token.getOperationUuid());
+        scheduleCleanupBarrierHeartbeat(token);
+        long deadline = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(CLEANUP_DRAIN_TIMEOUT_SEC);
+        drainForCleanup(token, deadline, completion);
+    }
+
+    public boolean releaseCleanupBarrier(CleanupBarrierToken token) {
+        return releaseCleanupBarrier(token, null);
+    }
+
+    public boolean releaseCleanupBarrierAtLeast(CleanupBarrierToken token, long minimumGeneration) {
+        return releaseCleanupBarrier(token, minimumGeneration);
+    }
+
+    private boolean releaseCleanupBarrier(CleanupBarrierToken token, Long minimumGeneration) {
+        activeCleanupOperations.remove(token.getOperationUuid());
+        String generationAssignment = minimumGeneration == null
+                ? "generation = generation + 1 "
+                : "generation = GREATEST(generation + 1, :minimumGeneration) ";
+        String releaseSql = "UPDATE VmMetadataCleanupBarrierVO " +
+                        "SET state = 'Idle', operationUuid = NULL, managementNodeUuid = NULL, leaseExpireDate = NULL, " +
+                        generationAssignment +
+                        "WHERE id = :id AND operationUuid = :operationUuid AND managementNodeUuid = :managementNodeUuid " +
+                        "AND generation = :generation";
+        int updated = minimumGeneration == null
+                ? nativeExecute(
+                        releaseSql,
+                        "id", VmMetadataCleanupBarrierVO.SINGLETON_ID,
+                        "operationUuid", token.getOperationUuid(),
+                        "managementNodeUuid", Platform.getManagementServerId(),
+                        "generation", token.getGeneration())
+                : nativeExecute(
+                        releaseSql,
+                        "id", VmMetadataCleanupBarrierVO.SINGLETON_ID,
+                        "operationUuid", token.getOperationUuid(),
+                        "managementNodeUuid", Platform.getManagementServerId(),
+                        "generation", token.getGeneration(),
+                        "minimumGeneration", minimumGeneration);
+        if (updated == 0) {
+            logger.warn(String.format("[MetadataCleanup] cleanup barrier release skipped: operationUuid=%s is no longer owned by this MN",
+                    token.getOperationUuid()));
+            return false;
+        }
+        long releasedGeneration = minimumGeneration == null
+                ? token.getGeneration() + 1
+                : Math.max(token.getGeneration() + 1, minimumGeneration);
+        logger.info(String.format("[MetadataCleanup] cleanup barrier released: operationUuid=%s, generation=%d",
+                token.getOperationUuid(), releasedGeneration));
+        return true;
+    }
+
+    private CleanupBarrierToken acquireCleanupBarrier(Set<String> primaryStorageUuids) {
+        return new SQLBatchWithReturn<CleanupBarrierToken>() {
+            @Override
+            protected CleanupBarrierToken scripts() {
+                VmMetadataCleanupBarrierVO barrier = dbf.getEntityManager().find(
+                        VmMetadataCleanupBarrierVO.class,
+                        VmMetadataCleanupBarrierVO.SINGLETON_ID,
+                        LockModeType.PESSIMISTIC_WRITE);
+                if (barrier == null) {
+                    throw new IllegalStateException("VmMetadataCleanupBarrierVO singleton row is missing");
+                }
+
+                Timestamp now = databaseCurrentTimestamp();
+                if (barrier.getState() != VmMetadataCleanupBarrierState.Idle
+                        && (barrier.getLeaseExpireDate() == null
+                        || barrier.getLeaseExpireDate().after(now))) {
+                    return null;
+                }
+
+                if (barrier.getState() != VmMetadataCleanupBarrierState.Idle) {
+                    logger.warn(String.format("[MetadataCleanup] reclaiming expired cleanup barrier: operationUuid=%s, owner=%s",
+                            barrier.getOperationUuid(), barrier.getManagementNodeUuid()));
+                }
+
+                String operationUuid = Platform.getUuid();
+                barrier.setState(VmMetadataCleanupBarrierState.Draining);
+                barrier.setOperationUuid(operationUuid);
+                barrier.setManagementNodeUuid(Platform.getManagementServerId());
+                barrier.setLeaseExpireDate(leaseExpireDate(now));
+                barrier.setGeneration(barrier.getGeneration() + 1);
+                return new CleanupBarrierToken(operationUuid, barrier.getGeneration(), primaryStorageUuids);
+            }
+        }.execute();
+    }
+
+    private void drainForCleanup(CleanupBarrierToken token,
+                                 long deadline,
+                                 ReturnValueCompletion<CleanupBarrierToken> completion) {
+        try {
+            if (!isCleanupBarrierOwned(token, VmMetadataCleanupBarrierState.Draining)) {
+                failCleanupDrain(token,
+                        Platform.operr("VM metadata cleanup barrier ownership was lost"),
+                        completion);
+                return;
+            }
+
+            long retryPending = countTargetRetryPending(token);
+            if (retryPending > 0) {
+                failCleanupDrain(token,
+                        Platform.operr("cannot cleanup VM metadata while %d dirty row(s) are waiting for retry", retryPending),
+                        completion);
+                return;
+            }
+
+            long stalePending = countTargetStalePending(token);
+            if (stalePending > 0) {
+                failCleanupDrain(token,
+                        Platform.operr("cannot cleanup VM metadata while %d VM(s) are waiting for stale recovery", stalePending),
+                        completion);
+                return;
+            }
+
+            claimAndFlushForCleanup(token);
+            long dirtyCount = countTargetDirtyRows(token);
+            if (dirtyCount == 0 && transitionCleanupBarrierToCleaning(token)) {
+                logger.info(String.format("[MetadataCleanup] cleanup barrier drained: operationUuid=%s, generation=%d",
+                        token.getOperationUuid(), token.getGeneration()));
+                completion.success(token);
+                return;
+            }
+
+            if (System.currentTimeMillis() >= deadline) {
+                failCleanupDrain(token,
+                        Platform.operr("timed out after %d seconds waiting for %d VM metadata dirty row(s) to drain",
+                                CLEANUP_DRAIN_TIMEOUT_SEC, dirtyCount),
+                        completion);
+                return;
+            }
+
+            thdf.submitTimeoutTask(
+                    () -> drainForCleanup(token, deadline, completion),
+                    TimeUnit.SECONDS,
+                    CLEANUP_DRAIN_POLL_INTERVAL_SEC);
+        } catch (Throwable t) {
+            logger.warn(String.format("[MetadataCleanup] cleanup drain failed: operationUuid=%s",
+                    token.getOperationUuid()), t);
+            failCleanupDrain(token,
+                    Platform.operr("failed to drain VM metadata flushes before cleanup: %s", t.getMessage()),
+                    completion);
+        }
+    }
+
+    private void failCleanupDrain(CleanupBarrierToken token,
+                                  ErrorCode error,
+                                  ReturnValueCompletion<CleanupBarrierToken> completion) {
+        try {
+            releaseCleanupBarrier(token);
+        } catch (Throwable t) {
+            logger.warn(String.format("[MetadataCleanup] failed to release cleanup barrier after drain failure: operationUuid=%s",
+                    token.getOperationUuid()), t);
+        }
+        completion.fail(error);
+    }
+
+    private boolean transitionCleanupBarrierToCleaning(CleanupBarrierToken token) {
+        return new SQLBatchWithReturn<Boolean>() {
+            @Override
+            protected Boolean scripts() {
+                VmMetadataCleanupBarrierVO barrier = dbf.getEntityManager().find(
+                        VmMetadataCleanupBarrierVO.class,
+                        VmMetadataCleanupBarrierVO.SINGLETON_ID,
+                        LockModeType.PESSIMISTIC_WRITE);
+                if (!isCleanupBarrierOwned(barrier, token, VmMetadataCleanupBarrierState.Draining)) {
+                    return false;
+                }
+
+                if (countTargetDirtyRows(token) > 0 || countTargetStalePending(token) > 0) {
+                    return false;
+                }
+
+                barrier.setState(VmMetadataCleanupBarrierState.Cleaning);
+                barrier.setLeaseExpireDate(leaseExpireDate(databaseCurrentTimestamp()));
+                return true;
+            }
+        }.execute();
+    }
+
+    private long countTargetRetryPending(CleanupBarrierToken token) {
+        Query q = dbf.getEntityManager().createQuery(
+                "SELECT COUNT(d) FROM VmMetadataDirtyVO d, VmInstanceVO vm, VolumeVO vol " +
+                        "WHERE d.vmInstanceUuid = vm.uuid AND vm.rootVolumeUuid = vol.uuid " +
+                        "AND vol.primaryStorageUuid IN (:primaryStorageUuids) " +
+                        "AND d.managementNodeUuid IS NULL AND d.nextRetryTime IS NOT NULL " +
+                        "AND d.nextRetryTime > :now");
+        q.setParameter("primaryStorageUuids", token.getPrimaryStorageUuids());
+        q.setParameter("now", databaseCurrentTimestamp());
+        return ((Number) q.getSingleResult()).longValue();
+    }
+
+    private long countTargetStalePending(CleanupBarrierToken token) {
+        Query q = dbf.getEntityManager().createQuery(
+                "SELECT COUNT(f) FROM VmMetadataFlushStateVO f, VmInstanceVO vm, VolumeVO vol " +
+                        "WHERE f.vmInstanceUuid = vm.uuid AND vm.rootVolumeUuid = vol.uuid " +
+                        "AND vol.primaryStorageUuid IN (:primaryStorageUuids) " +
+                        "AND f.pendingStaleRecovery = true");
+        q.setParameter("primaryStorageUuids", token.getPrimaryStorageUuids());
+        return ((Number) q.getSingleResult()).longValue();
+    }
+
+    private long countTargetDirtyRows(CleanupBarrierToken token) {
+        Query q = dbf.getEntityManager().createQuery(
+                "SELECT COUNT(d) FROM VmMetadataDirtyVO d, VmInstanceVO vm, VolumeVO vol " +
+                        "WHERE d.vmInstanceUuid = vm.uuid AND vm.rootVolumeUuid = vol.uuid " +
+                        "AND vol.primaryStorageUuid IN (:primaryStorageUuids)");
+        q.setParameter("primaryStorageUuids", token.getPrimaryStorageUuids());
+        return ((Number) q.getSingleResult()).longValue();
+    }
+
+    private boolean isCleanupBarrierOwned(CleanupBarrierToken token, VmMetadataCleanupBarrierState expectedState) {
+        return new SQLBatchWithReturn<Boolean>() {
+            @Override
+            protected Boolean scripts() {
+                VmMetadataCleanupBarrierVO barrier = dbf.getEntityManager().find(
+                        VmMetadataCleanupBarrierVO.class,
+                        VmMetadataCleanupBarrierVO.SINGLETON_ID,
+                        LockModeType.PESSIMISTIC_READ);
+                return isCleanupBarrierOwned(barrier, token, expectedState);
+            }
+        }.execute();
+    }
+
+    private boolean isCleanupBarrierOwned(VmMetadataCleanupBarrierVO barrier,
+                                          CleanupBarrierToken token,
+                                          VmMetadataCleanupBarrierState expectedState) {
+        return barrier != null
+                && barrier.getState() == expectedState
+                && token.getOperationUuid().equals(barrier.getOperationUuid())
+                && Platform.getManagementServerId().equals(barrier.getManagementNodeUuid())
+                && token.getGeneration() == barrier.getGeneration();
+    }
+
+    private void scheduleCleanupBarrierHeartbeat(CleanupBarrierToken token) {
+        thdf.submitTimeoutTask(() -> {
+            if (!activeCleanupOperations.contains(token.getOperationUuid())) {
+                return;
+            }
+
+            try {
+                int updated = nativeExecute(
+                        "UPDATE VmMetadataCleanupBarrierVO " +
+                                "SET leaseExpireDate = TIMESTAMPADD(SECOND, :leaseSeconds, CURRENT_TIMESTAMP) " +
+                                "WHERE id = :id AND operationUuid = :operationUuid AND managementNodeUuid = :managementNodeUuid " +
+                                "AND generation = :generation AND state <> 'Idle'",
+                        "leaseSeconds", CLEANUP_BARRIER_LEASE_SEC,
+                        "id", VmMetadataCleanupBarrierVO.SINGLETON_ID,
+                        "operationUuid", token.getOperationUuid(),
+                        "managementNodeUuid", Platform.getManagementServerId(),
+                        "generation", token.getGeneration());
+                if (updated == 0) {
+                    activeCleanupOperations.remove(token.getOperationUuid());
+                    return;
+                }
+            } catch (Throwable t) {
+                logger.warn(String.format("[MetadataCleanup] cleanup barrier heartbeat failed, will retry: operationUuid=%s",
+                        token.getOperationUuid()), t);
+            }
+            scheduleCleanupBarrierHeartbeat(token);
+        }, TimeUnit.SECONDS, CLEANUP_BARRIER_HEARTBEAT_SEC);
+    }
+
+    public long getCurrentMetadataGeneration() {
+        List<?> generations = dbf.getEntityManager()
+                .createNativeQuery(
+                        "SELECT generation FROM VmMetadataCleanupBarrierVO WHERE id = :id")
+                .setParameter("id", VmMetadataCleanupBarrierVO.SINGLETON_ID)
+                .getResultList();
+        if (generations.isEmpty()) {
+            throw new IllegalStateException("VmMetadataCleanupBarrierVO singleton row is missing");
+        }
+        return ((Number) generations.get(0)).longValue();
+    }
+
+    private Timestamp databaseCurrentTimestamp() {
+        return (Timestamp) dbf.getEntityManager()
+                .createNativeQuery("SELECT CURRENT_TIMESTAMP")
+                .getSingleResult();
+    }
+
+    private Timestamp leaseExpireDate(Timestamp now) {
+        return new Timestamp(now.getTime() + TimeUnit.SECONDS.toMillis(CLEANUP_BARRIER_LEASE_SEC));
+    }
+
+    private static String metadataFlushSyncSignature(String vmUuid) {
+        return String.format("update-vm-%s-metadata", vmUuid);
+    }
+
     private void releaseClaim(String vmUuid) {
         logger.debug(String.format("[MetadataDirty] releaseClaim: vm=%s", vmUuid));
-        SQL.New(VmMetadataDirtyVO.class).eq(VmMetadataDirtyVO_.vmInstanceUuid, vmUuid).set(VmMetadataDirtyVO_.managementNodeUuid, null).update();
+        SQL.New(VmMetadataDirtyVO.class)
+                .eq(VmMetadataDirtyVO_.vmInstanceUuid, vmUuid)
+                .eq(VmMetadataDirtyVO_.managementNodeUuid, Platform.getManagementServerId())
+                .set(VmMetadataDirtyVO_.managementNodeUuid, null)
+                .update();
     }
 
     private void doFlush(VmMetadataDirtyVO dirty, Runnable chainNext) {
@@ -355,6 +708,7 @@ public class VmMetadataDirtyMarker implements VmMetadataDirtyService, Component,
             @Override
             protected void scripts() {
                 int deleted = SQL.New(VmMetadataDirtyVO.class).eq(VmMetadataDirtyVO_.vmInstanceUuid, vmUuid)
+                        .eq(VmMetadataDirtyVO_.managementNodeUuid, claimOwner)
                         .eq(VmMetadataDirtyVO_.dirtyVersion, snapshotVersion).hardDelete();
 
                 if (deleted == 0) {
@@ -536,7 +890,22 @@ public class VmMetadataDirtyMarker implements VmMetadataDirtyService, Component,
         }
     }
 
+    private void claimAndFlushForCleanup(CleanupBarrierToken token) {
+        List<VmMetadataDirtyVO> claimed = claimDirtyRowsForCleanup(token);
+        for (VmMetadataDirtyVO dirty : claimed) {
+            submitFlushTask(dirty);
+        }
+    }
+
     private List<VmMetadataDirtyVO> claimDirtyRows() {
+        return claimDirtyRows(null);
+    }
+
+    private List<VmMetadataDirtyVO> claimDirtyRowsForCleanup(CleanupBarrierToken token) {
+        return claimDirtyRows(token);
+    }
+
+    private List<VmMetadataDirtyVO> claimDirtyRows(CleanupBarrierToken cleanupToken) {
         String myId = Platform.getManagementServerId();
 
         // Use DB timestamp as the exact claimTime written into UPDATE, so the
@@ -554,16 +923,31 @@ public class VmMetadataDirtyMarker implements VmMetadataDirtyService, Component,
 
         // Atomic claim: single UPDATE-LIMIT avoids the SELECT→UPDATE race where
         // multiple MNs SELECT the same candidates then compete on UPDATE.
-        int claimed = nativeExecute(
-                "UPDATE VmMetadataDirtyVO " +
-                        "SET managementNodeUuid = :myId, lastClaimTime = :claimTime " +
-                        "WHERE managementNodeUuid IS NULL " +
-                        "AND (nextRetryTime IS NULL OR nextRetryTime <= CURRENT_TIMESTAMP) " +
-                        "ORDER BY lastOpDate ASC, vmInstanceUuid ASC " +
-                        "LIMIT :batchSize",
-                "myId", myId,
-                "claimTime", claimTime,
-                "batchSize", VmGlobalConfig.VM_METADATA_FLUSH_BATCH_SIZE.value(Integer.class));
+        String targetFilter = cleanupToken == null ? "" :
+                "AND vmInstanceUuid IN (" +
+                        "SELECT vm.uuid FROM VmInstanceVO vm " +
+                        "JOIN VolumeVO vol ON vm.rootVolumeUuid = vol.uuid " +
+                        "WHERE vol.primaryStorageUuid IN (:primaryStorageUuids)) ";
+        String claimSql = "UPDATE VmMetadataDirtyVO " +
+                "SET managementNodeUuid = :myId, lastClaimTime = :claimTime " +
+                "WHERE managementNodeUuid IS NULL " +
+                "AND (nextRetryTime IS NULL OR nextRetryTime <= CURRENT_TIMESTAMP) " +
+                targetFilter +
+                "ORDER BY lastOpDate ASC, vmInstanceUuid ASC " +
+                "LIMIT :batchSize";
+        int claimed = cleanupToken == null
+                ? executeClaimWhenCleanupIdle(
+                        claimSql,
+                        "myId", myId,
+                        "claimTime", claimTime,
+                        "batchSize", VmGlobalConfig.VM_METADATA_FLUSH_BATCH_SIZE.value(Integer.class))
+                : executeClaimForCleanup(
+                        cleanupToken,
+                        claimSql,
+                        "myId", myId,
+                        "claimTime", claimTime,
+                        "primaryStorageUuids", cleanupToken.getPrimaryStorageUuids(),
+                        "batchSize", VmGlobalConfig.VM_METADATA_FLUSH_BATCH_SIZE.value(Integer.class));
 
         if (claimed == 0) {
             return Collections.emptyList();
@@ -571,10 +955,57 @@ public class VmMetadataDirtyMarker implements VmMetadataDirtyService, Component,
 
         // Precise match: only return rows stamped with THIS round's claimTime,
         // not rows from triggerFlushForVm() or previous polls still being flushed.
-        return Q.New(VmMetadataDirtyVO.class)
-                .eq(VmMetadataDirtyVO_.managementNodeUuid, myId)
-                .eq(VmMetadataDirtyVO_.lastClaimTime, claimTime)
+        if (cleanupToken == null) {
+            return Q.New(VmMetadataDirtyVO.class)
+                    .eq(VmMetadataDirtyVO_.managementNodeUuid, myId)
+                    .eq(VmMetadataDirtyVO_.lastClaimTime, claimTime)
+                    .list();
+        }
+
+        return SQL.New(
+                        "SELECT d FROM VmMetadataDirtyVO d, VmInstanceVO vm, VolumeVO vol " +
+                                "WHERE d.vmInstanceUuid = vm.uuid AND vm.rootVolumeUuid = vol.uuid " +
+                                "AND vol.primaryStorageUuid IN (:primaryStorageUuids) " +
+                                "AND d.managementNodeUuid = :myId AND d.lastClaimTime = :claimTime",
+                        VmMetadataDirtyVO.class)
+                .param("primaryStorageUuids", cleanupToken.getPrimaryStorageUuids())
+                .param("myId", myId)
+                .param("claimTime", claimTime)
                 .list();
+    }
+
+    private int executeClaimWhenCleanupIdle(String sql, Object... kvPairs) {
+        return executeClaimWithBarrier(null, sql, kvPairs);
+    }
+
+    private int executeClaimForCleanup(CleanupBarrierToken token, String sql, Object... kvPairs) {
+        return executeClaimWithBarrier(token, sql, kvPairs);
+    }
+
+    private int executeClaimWithBarrier(CleanupBarrierToken cleanupToken, String sql, Object... kvPairs) {
+        return new SQLBatchWithReturn<Integer>() {
+            @Override
+            protected Integer scripts() {
+                VmMetadataCleanupBarrierVO barrier = dbf.getEntityManager().find(
+                        VmMetadataCleanupBarrierVO.class,
+                        VmMetadataCleanupBarrierVO.SINGLETON_ID,
+                        LockModeType.PESSIMISTIC_READ);
+                if (barrier == null) {
+                    throw new IllegalStateException("VmMetadataCleanupBarrierVO singleton row is missing");
+                }
+
+                boolean claimAllowed = cleanupToken == null
+                        ? barrier.getState() == VmMetadataCleanupBarrierState.Idle
+                        : isCleanupBarrierOwned(
+                                barrier,
+                                cleanupToken,
+                                VmMetadataCleanupBarrierState.Draining);
+                if (!claimAllowed) {
+                    return 0;
+                }
+                return nativeExecuteInCurrentTransaction(sql, kvPairs);
+            }
+        }.execute();
     }
 
     private String findStaleClaimOwner(String vmUuid, Duration staleThreshold) {
@@ -591,22 +1022,26 @@ public class VmMetadataDirtyMarker implements VmMetadataDirtyService, Component,
         return new SQLBatchWithReturn<Integer>() {
             @Override
             protected Integer scripts() {
-                javax.persistence.Query q = dbf.getEntityManager().createNativeQuery(sql);
-                for (int i = 0; i < kvPairs.length; i += 2) {
-                    String key = (String) kvPairs[i];
-                    Object val = kvPairs[i + 1];
-                    if (val instanceof java.util.Collection) {
-                        // JPA native query setParameter does not expand collection for IN clause;
-                        // Hibernate's setParameterList handles it correctly.
-                        q.unwrap(org.hibernate.query.NativeQuery.class)
-                                .setParameterList(key, (java.util.Collection<?>) val);
-                    } else {
-                        q.setParameter(key, val);
-                    }
-                }
-                return q.executeUpdate();
+                return nativeExecuteInCurrentTransaction(sql, kvPairs);
             }
         }.execute();
+    }
+
+    private int nativeExecuteInCurrentTransaction(String sql, Object... kvPairs) {
+        Query q = dbf.getEntityManager().createNativeQuery(sql);
+        for (int i = 0; i < kvPairs.length; i += 2) {
+            String key = (String) kvPairs[i];
+            Object val = kvPairs[i + 1];
+            if (val instanceof java.util.Collection) {
+                // JPA native query setParameter does not expand collection for IN clause;
+                // Hibernate's setParameterList handles it correctly.
+                q.unwrap(org.hibernate.query.NativeQuery.class)
+                        .setParameterList(key, (java.util.Collection<?>) val);
+            } else {
+                q.setParameter(key, val);
+            }
+        }
+        return q.executeUpdate();
     }
 
     private void cleanupZombieClaims() {
@@ -616,12 +1051,12 @@ public class VmMetadataDirtyMarker implements VmMetadataDirtyService, Component,
         logger.debug(String.format("[MetadataDirty] cleanupZombieClaims: thresholdMinutes=%d, cutoff=%s",
                 thresholdMinutes, cutoff));
 
-        int cleaned = SQL.New("UPDATE VmMetadataDirtyVO " +
+        int cleaned = executeClaimWhenCleanupIdle(
+                "UPDATE VmMetadataDirtyVO " +
                         "SET managementNodeUuid = NULL, lastClaimTime = NULL " +
                         "WHERE managementNodeUuid IS NOT NULL " +
-                        "AND lastClaimTime < :cutoff")
-                .param("cutoff", cutoff)
-                .execute();
+                        "AND lastClaimTime < :cutoff",
+                "cutoff", cutoff);
 
         if (cleaned > 0) {
             logger.info(String.format("[MetadataDirty] cleanupZombieClaims released %d zombie claim(s) " +

@@ -6628,6 +6628,7 @@ public class SharedBlockKvmBackend extends SharedBlockHypervisorBackend implemen
         cmd.vgUuid = self.getUuid();
         cmd.metadata = msg.getMetadata();
         cmd.metadataPath = msg.getMetadataPath();
+        cmd.metadataGeneration = msg.getMetadataGeneration();
         cmd.vmUuid = msg.getVmInstanceUuid();
         cmd.vmName = msg.getVmInstanceName();
         cmd.vmCategory = msg.getVmCategory();
@@ -6725,6 +6726,33 @@ public class SharedBlockKvmBackend extends SharedBlockHypervisorBackend implemen
                 completion.fail(errorCode);
             }
         });
+    }
+
+    @Override
+    void handle(CleanupAllVmMetadataOnPrimaryStorageMsg msg, final ReturnValueCompletion<CleanupAllVmMetadataOnPrimaryStorageReply> completion) {
+        CleanupAllVmMetadataOnPrimaryStorageReply reply = new CleanupAllVmMetadataOnPrimaryStorageReply();
+
+        CleanupAllVmMetadataCmd cmd = new CleanupAllVmMetadataCmd();
+        cmd.vgUuid = self.getUuid();
+        cmd.setMetadataDir(msg.getMetadataDir());
+        cmd.setMetadataGeneration(msg.getMetadataGeneration());
+        try {
+            new Do().go(CLEANUP_ALL_VM_METADATA_PATH, cmd, CleanupAllVmMetadataRsp.class, new ReturnValueCompletion<CleanupAllVmMetadataRsp>(completion) {
+                @Override
+                public void success(CleanupAllVmMetadataRsp rsp) {
+                    reply.setSkipped(rsp.skipped);
+                    reply.setCurrentGeneration(rsp.currentGeneration);
+                    completion.success(reply);
+                }
+
+                @Override
+                public void fail(ErrorCode errorCode) {
+                    completion.fail(errorCode);
+                }
+            });
+        } catch (OperationFailureException e) {
+            completion.fail(e.getErrorCode());
+        }
     }
 
     @Override

@@ -52,6 +52,7 @@ import javax.persistence.Tuple;
 import javax.persistence.TypedQuery;
 import java.util.*;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import static org.zstack.utils.CollectionUtils.transform;
@@ -296,6 +297,116 @@ public class VmCascadeExtension extends AbstractAsyncCascadeExtension {
         completion.success();
     }
 
+    private void cleanupDeletedTemplatedVmInstanceRows(Collection<String> vmUuids) {
+        cleanupDeletedTemplatedVmInstanceRows(vmUuids, vmUuids);
+    }
+
+    private void cleanupDeletedTemplatedVmInstanceRows(Collection<String> deletedVmUuids, Collection<String> deletingVmUuids) {
+        Set<String> successfullyDeletedVmUuids = new HashSet<>(deletedVmUuids);
+        successfullyDeletedVmUuids.remove(null);
+        if (successfullyDeletedVmUuids.isEmpty()) {
+            return;
+        }
+
+        List<String> templatedVmUuids = Q.New(TemplatedVmInstanceVO.class)
+                .select(TemplatedVmInstanceVO_.uuid)
+                .in(TemplatedVmInstanceVO_.uuid, successfullyDeletedVmUuids)
+                .listValues();
+        List<String> fullyDeletedTemplatedVmUuids =
+                findFullyDeletedTemplatedVmInstanceUuids(successfullyDeletedVmUuids, deletingVmUuids, templatedVmUuids);
+        if (!fullyDeletedTemplatedVmUuids.isEmpty()) {
+            cleanupTemplatedVmInstanceRows(fullyDeletedTemplatedVmUuids);
+        }
+
+        SQL.New(TemplatedVmInstanceCacheVO.class)
+                .in(TemplatedVmInstanceCacheVO_.cacheVmInstanceUuid, successfullyDeletedVmUuids)
+                .hardDelete();
+        SQL.New(TemplatedVmInstanceRefVO.class)
+                .in(TemplatedVmInstanceRefVO_.vmInstanceUuid, successfullyDeletedVmUuids)
+                .hardDelete();
+    }
+
+    private List<String> findFullyDeletedTemplatedVmInstanceUuids(Set<String> successfullyDeletedVmUuids,
+                                                                  Collection<String> deletingVmUuids,
+                                                                  List<String> templatedVmUuids) {
+        if (templatedVmUuids.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        Set<String> attemptedVmUuids = new HashSet<>(deletingVmUuids);
+        attemptedVmUuids.remove(null);
+
+        Map<String, Set<String>> cacheVmUuidsByTemplateUuid = new HashMap<>();
+        List<Tuple> cacheTuples = Q.New(TemplatedVmInstanceCacheVO.class)
+                .select(TemplatedVmInstanceCacheVO_.templatedVmInstanceUuid, TemplatedVmInstanceCacheVO_.cacheVmInstanceUuid)
+                .in(TemplatedVmInstanceCacheVO_.templatedVmInstanceUuid, templatedVmUuids)
+                .listTuple();
+        for (Tuple t : cacheTuples) {
+            addVmUuidMapping(cacheVmUuidsByTemplateUuid, t.get(0, String.class), t.get(1, String.class));
+        }
+
+        Map<String, Set<String>> refVmUuidsByTemplateUuid = new HashMap<>();
+        List<Tuple> refTuples = Q.New(TemplatedVmInstanceRefVO.class)
+                .select(TemplatedVmInstanceRefVO_.templatedVmInstanceUuid, TemplatedVmInstanceRefVO_.vmInstanceUuid)
+                .in(TemplatedVmInstanceRefVO_.templatedVmInstanceUuid, templatedVmUuids)
+                .listTuple();
+        for (Tuple t : refTuples) {
+            addVmUuidMapping(refVmUuidsByTemplateUuid, t.get(0, String.class), t.get(1, String.class));
+        }
+
+        return templatedVmUuids.stream()
+                .filter(uuid -> areAllRelatedVmDeletionsSuccessful(
+                        cacheVmUuidsByTemplateUuid.get(uuid), successfullyDeletedVmUuids))
+                .filter(uuid -> areAttemptedRelatedVmDeletionsSuccessful(
+                        refVmUuidsByTemplateUuid.get(uuid), attemptedVmUuids, successfullyDeletedVmUuids))
+                .collect(Collectors.toList());
+    }
+
+    private void addVmUuidMapping(Map<String, Set<String>> vmUuidsByTemplateUuid, String templateUuid, String vmUuid) {
+        if (templateUuid == null || vmUuid == null) {
+            return;
+        }
+
+        vmUuidsByTemplateUuid.computeIfAbsent(templateUuid, k -> new HashSet<>()).add(vmUuid);
+    }
+
+    private boolean areAllRelatedVmDeletionsSuccessful(Collection<String> relatedVmUuids,
+                                                       Set<String> successfullyDeletedVmUuids) {
+        if (relatedVmUuids == null || relatedVmUuids.isEmpty()) {
+            return true;
+        }
+
+        return successfullyDeletedVmUuids.containsAll(relatedVmUuids);
+    }
+
+    private boolean areAttemptedRelatedVmDeletionsSuccessful(Collection<String> relatedVmUuids,
+                                                            Set<String> attemptedVmUuids,
+                                                            Set<String> successfullyDeletedVmUuids) {
+        if (relatedVmUuids == null || relatedVmUuids.isEmpty()) {
+            return true;
+        }
+
+        for (String relatedVmUuid : relatedVmUuids) {
+            if (attemptedVmUuids.contains(relatedVmUuid) && !successfullyDeletedVmUuids.contains(relatedVmUuid)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private void cleanupTemplatedVmInstanceRows(List<String> templatedVmUuids) {
+        SQL.New(TemplatedVmInstanceCacheVO.class)
+                .in(TemplatedVmInstanceCacheVO_.templatedVmInstanceUuid, templatedVmUuids)
+                .hardDelete();
+        SQL.New(TemplatedVmInstanceRefVO.class)
+                .in(TemplatedVmInstanceRefVO_.templatedVmInstanceUuid, templatedVmUuids)
+                .hardDelete();
+        SQL.New(TemplatedVmInstanceVO.class)
+                .in(TemplatedVmInstanceVO_.uuid, templatedVmUuids)
+                .hardDelete();
+    }
+
     protected List<DetachNicFromVmMsg> handleDeletionForIpRange(List<VmDeletionStruct> vminvs, List<IpRangeInventory> iprs) {
         List<DetachNicFromVmMsg> msgs = new ArrayList<>();
         List<String> uuids = iprs.stream().map(IpRangeInventory::getUuid).collect(Collectors.toList());
@@ -426,7 +537,10 @@ public class VmCascadeExtension extends AbstractAsyncCascadeExtension {
 
 
             int parallelism = 10;
-            new While<>(vminvs).step((inv, noErrorCompletion) -> {
+            Set<String> successfullyDeletedVmUuids = ConcurrentHashMap.newKeySet();
+            List<VmDeletionStruct> deletionTargets = appendTemplatedCacheVmDeletionStructs(vminvs);
+            Set<String> deletingVmUuids = collectVmUuids(deletionTargets);
+            new While<>(deletionTargets).step((inv, noErrorCompletion) -> {
                 VmInstanceDeletionMsg msg = new VmInstanceDeletionMsg();
                 if (PrimaryStorageVO.class.getSimpleName().equals(action.getParentIssuer()) ||
                         ZoneVO.class.getSimpleName().equals(action.getRootIssuer())) {
@@ -450,11 +564,11 @@ public class VmCascadeExtension extends AbstractAsyncCascadeExtension {
                 bus.send(msg, new CloudBusCallBack(noErrorCompletion) {
                     @Override
                     public void run(MessageReply reply) {
-                        if (!action.isActionCode(CascadeConstant.DELETION_FORCE_DELETE_CODE)) {
-                            if (!reply.isSuccess()) {
-                                // TODO
-                                logger.warn(reply.getError().toString());
-                            }
+                        if (reply.isSuccess()) {
+                            successfullyDeletedVmUuids.add(msg.getVmInstanceUuid());
+                        } else if (!action.isActionCode(CascadeConstant.DELETION_FORCE_DELETE_CODE)) {
+                            // TODO
+                            logger.warn(reply.getError().toString());
                         }
 
                         noErrorCompletion.done();
@@ -463,17 +577,25 @@ public class VmCascadeExtension extends AbstractAsyncCascadeExtension {
             }, parallelism).run(new WhileDoneCompletion(completion) {
                 @Override
                 public void done(ErrorCodeList errorCodeList) {
+                    if (ZoneVO.class.getSimpleName().equals(action.getRootIssuer()) ||
+                            PrimaryStorageVO.class.getSimpleName().equals(action.getParentIssuer())) {
+                        cleanupDeletedTemplatedVmInstanceRows(successfullyDeletedVmUuids, deletingVmUuids);
+                    }
+
                     if (ZoneVO.class.getSimpleName().equals(action.getRootIssuer())) {
-                        dbf.removeByPrimaryKeys(vminvs.stream().map(vm -> vm.getInventory().getVmNics())
+                        List<VmDeletionStruct> deletedVmStructs = deletionTargets.stream()
+                                .filter(vm -> successfullyDeletedVmUuids.contains(vm.getInventory().getUuid()))
+                                .collect(Collectors.toList());
+                        dbf.removeByPrimaryKeys(deletedVmStructs.stream().map(vm -> vm.getInventory().getVmNics())
                                         .flatMap(List::stream).map(VmNicInventory::getUuid)
                                         .collect(Collectors.toList()),
                                 VmNicVO.class);
-                        List<String> cdRomUuids = vminvs.stream().map(vm -> vm.getInventory().getVmCdRoms())
+                        List<String> cdRomUuids = deletedVmStructs.stream().map(vm -> vm.getInventory().getVmCdRoms())
                                 .flatMap(List::stream).map(VmCdRomInventory::getUuid)
                                 .collect(Collectors.toList());
                         dbf.removeByPrimaryKeys(cdRomUuids, VmCdRomVO.class);
 
-                        List<String> vmUuidList = transform(vminvs, p -> p.getInventory().getUuid());
+                        List<String> vmUuidList = transform(deletedVmStructs, p -> p.getInventory().getUuid());
                         dbf.removeByPrimaryKeys(vmUuidList, VmInstanceVO.class);
                     }
 
@@ -557,6 +679,38 @@ public class VmCascadeExtension extends AbstractAsyncCascadeExtension {
             structs.add(s);
         }
         return structs;
+    }
+
+    private List<VmDeletionStruct> appendTemplatedCacheVmDeletionStructs(List<VmDeletionStruct> structs) {
+        Set<String> vmUuids = collectVmUuids(structs);
+        if (vmUuids.isEmpty()) {
+            return structs;
+        }
+
+        List<String> cacheVmUuids = Q.New(TemplatedVmInstanceCacheVO.class)
+                .select(TemplatedVmInstanceCacheVO_.cacheVmInstanceUuid)
+                .in(TemplatedVmInstanceCacheVO_.templatedVmInstanceUuid, vmUuids)
+                .listValues();
+        cacheVmUuids.removeAll(vmUuids);
+        if (cacheVmUuids.isEmpty()) {
+            return structs;
+        }
+
+        List<VmInstanceVO> cacheVms = Q.New(VmInstanceVO.class)
+                .in(VmInstanceVO_.uuid, cacheVmUuids)
+                .list();
+        if (cacheVms.isEmpty()) {
+            return structs;
+        }
+
+        List<VmDeletionStruct> ret = new ArrayList<>(structs);
+        ret.addAll(toVmDeletionStruct(cacheVms));
+        return ret;
+    }
+
+    private Set<String> collectVmUuids(Collection<VmDeletionStruct> structs) {
+        return transformAndRemoveNull(structs, s -> s.getInventory().getUuid()).stream()
+                .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     protected List<VmDeletionStruct> vmFromDeleteAction(CascadeAction action) {

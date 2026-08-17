@@ -56,7 +56,9 @@ import org.zstack.utils.logging.CLogger;
 import javax.persistence.Tuple;
 import javax.persistence.TypedQuery;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static java.util.Arrays.asList;
@@ -113,6 +115,8 @@ public class VmMevocoApiInterceptor implements GlobalApiMessageInterceptor {
             validate((APICreateVmInstanceFromTemplatedVmInstanceMsg) msg);
         } else if (msg instanceof APIConvertVmInstanceToTemplatedVmInstanceMsg) {
             validate((APIConvertVmInstanceToTemplatedVmInstanceMsg) msg);
+        } else if (msg instanceof APICleanupAllVmInstanceMetadataMsg) {
+            validate((APICleanupAllVmInstanceMetadataMsg) msg);
         } else if (msg instanceof APICloneVmInstanceMsg) {
             validate((APICloneVmInstanceMsg) msg);
         } else if (msg instanceof APISetVmSecurityLevelMsg) {
@@ -131,6 +135,50 @@ public class VmMevocoApiInterceptor implements GlobalApiMessageInterceptor {
     private void validate(APIConvertVmInstanceToTemplatedVmInstanceMsg msg) {
         ensureVmWithoutShareableVolume(msg.getVmInstanceUuid());
         checkVmSchedulerJob(msg.getVmInstanceUuid());
+    }
+
+    private void validate(APICleanupAllVmInstanceMetadataMsg msg) {
+        if (!acmgr.isAdmin(msg.getSession())) {
+            throw new ApiMessageInterceptionException(argerr("only admin can cleanup all vm instance metadata"));
+        }
+
+        List<String> requested = msg.getPrimaryStorageUuids();
+        if (requested == null || requested.isEmpty()) {
+            return;
+        }
+
+        List<Tuple> tuples = Q.New(PrimaryStorageVO.class)
+                .select(PrimaryStorageVO_.uuid, PrimaryStorageVO_.state, PrimaryStorageVO_.status)
+                .in(PrimaryStorageVO_.uuid, requested)
+                .listTuple();
+        Map<String, Tuple> existing = new HashMap<>();
+        for (Tuple t : tuples) {
+            existing.put(t.get(0, String.class), t);
+        }
+
+        List<String> missing = new ArrayList<>();
+        List<String> notEnabled = new ArrayList<>();
+        List<String> notConnected = new ArrayList<>();
+        for (String uuid : requested) {
+            Tuple t = existing.get(uuid);
+            if (t == null) {
+                missing.add(uuid);
+                continue;
+            }
+
+            if (t.get(1, PrimaryStorageState.class) != PrimaryStorageState.Enabled) {
+                notEnabled.add(uuid);
+            }
+            if (t.get(2, PrimaryStorageStatus.class) != PrimaryStorageStatus.Connected) {
+                notConnected.add(uuid);
+            }
+        }
+
+        if (!missing.isEmpty() || !notEnabled.isEmpty() || !notConnected.isEmpty()) {
+            throw new ApiMessageInterceptionException(argerr(
+                    "invalid primaryStorageUuids: missing=%s, notEnabled=%s, notConnected=%s; all specified primary storages must exist and be Enabled+Connected",
+                    missing, notEnabled, notConnected));
+        }
     }
 
     private void ensureVmWithoutShareableVolume(String vmInstanceUuid) {
@@ -548,7 +596,8 @@ public class VmMevocoApiInterceptor implements GlobalApiMessageInterceptor {
             APIGetVirtualizerInfoMsg.class,
             APICreateVmInstanceFromTemplatedVmInstanceMsg.class,
             APICreateTemplatedVmInstanceFromVmInstanceMsg.class,
-            APIConvertVmInstanceToTemplatedVmInstanceMsg.class
+            APIConvertVmInstanceToTemplatedVmInstanceMsg.class,
+            APICleanupAllVmInstanceMetadataMsg.class
         );
     }
 

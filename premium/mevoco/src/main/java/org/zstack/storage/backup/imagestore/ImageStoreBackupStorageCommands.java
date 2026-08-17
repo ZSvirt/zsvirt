@@ -4,6 +4,7 @@ import org.zstack.header.HasThreadContext;
 import org.zstack.header.agent.AgentResponse;
 import org.zstack.header.agent.CancelCommand;
 import org.zstack.header.log.NoLogging;
+import org.zstack.header.message.CancelTaskResult;
 import org.zstack.storage.backup.sftp.SftpBackupStorageCommands;
 import org.zstack.utils.DebugUtils;
 
@@ -927,6 +928,7 @@ public class ImageStoreBackupStorageCommands {
         public String name;
         public String imageuuid;
         public String cancellationApiId;
+        public boolean allowTaskNotFound;
 
         @Override
         public void setCancellationApiId(String cancellationApiId) {
@@ -935,7 +937,7 @@ public class ImageStoreBackupStorageCommands {
     }
 
     public static class CancelDownloadImgRsp extends ImageStoreResponse {
-
+        public CancelTaskResult cancelResult;
     }
 
     public static class UploadImageToRemoteTargetCmd extends AgentCommand {
@@ -1268,6 +1270,7 @@ public class ImageStoreBackupStorageCommands {
 
     public static class CancelJobCmd extends AgentCommand implements CancelCommand {
         public String cancellationApiId;
+        public boolean allowTaskNotFound;
 
         @Override
         public void setCancellationApiId(String cancellationApiId) {
@@ -1276,7 +1279,7 @@ public class ImageStoreBackupStorageCommands {
     }
 
     public static class CancelJobRsp extends ImageStoreResponse {
-
+        public CancelTaskResult cancelResult;
     }
 
     // ---- ZMigrate file operation commands ----
@@ -1337,6 +1340,7 @@ public class ImageStoreBackupStorageCommands {
 
     public static class CancelDownloadFileCmd extends AgentCommand implements CancelCommand, Serializable {
         public String cancellationApiId;
+        public boolean allowTaskNotFound;
 
         @Override
         public void setCancellationApiId(String cancellationApiId) {
@@ -1345,6 +1349,7 @@ public class ImageStoreBackupStorageCommands {
     }
 
     public static class CancelDownloadFileRsp extends ImageStoreResponse {
+        public CancelTaskResult cancelResult;
     }
 
     public static class UnzipFileCmd extends AgentCommand implements HasThreadContext, Serializable {

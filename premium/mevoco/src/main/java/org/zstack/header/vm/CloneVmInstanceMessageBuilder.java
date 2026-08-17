@@ -151,6 +151,7 @@ public class CloneVmInstanceMessageBuilder {
                 clmsg.setCpuNum(msg.getCpuNum());
                 clmsg.setMemorySize(msg.getMemorySize());
                 clmsg.setReservedMemorySize(msg.getReservedMemorySize());
+                clmsg.setVmEncryption(msg.getVmEncryption());
                 clmsg.setVolumeSnapshotGroup(msg.getTemplatedCacheVolumeSnapshotGroup());
                 clmsg.setDescription(msg.getDescription());
                 DiskAO rootDiskAO = templatedVmVolumeDiskAOs
@@ -176,7 +177,7 @@ public class CloneVmInstanceMessageBuilder {
                 .select(VmInstanceVO_.platform, VmInstanceVO_.guestOsType, VmInstanceVO_.architecture).findTuple();
         List<Tuple> volumeTuples = Q.New(VolumeVO.class).eq(VolumeVO_.vmInstanceUuid, vmUuid)
                 .in(VolumeVO_.type, Arrays.asList(VolumeType.Root, VolumeType.Data))
-                .select(VolumeVO_.uuid, VolumeVO_.type).listTuple();
+                .select(VolumeVO_.uuid, VolumeVO_.type, VolumeVO_.encrypted).listTuple();
         List<String> volumeUuids = volumeTuples.stream().map(t -> t.get(0, String.class)).collect(Collectors.toList());
 
         diskAOs = CollectionUtils.isEmpty(diskAOs) ? new ArrayList<>() : diskAOs;
@@ -192,6 +193,7 @@ public class CloneVmInstanceMessageBuilder {
         volumeTuples.forEach(volumeTuple -> {
             String volumeUuid = volumeTuple.get(0, String.class);
             VolumeType volumeType = volumeTuple.get(1, VolumeType.class);
+            Boolean encrypted = volumeTuple.get(2, Boolean.class);
             DiskAO diskAO = templatedVmVolumeDiskAOByVolumeUuid.get(volumeUuid);
             if (diskAO != null) {
                 DiskAO newDiskAO = new DiskAO();
@@ -201,10 +203,11 @@ public class CloneVmInstanceMessageBuilder {
                     newDiskAO.setGuestOsType(diskAO.getGuestOsType() != null ? diskAO.getGuestOsType() : vmTuples.get(1, String.class));
                     newDiskAO.setArchitecture(diskAO.getArchitecture() != null ? diskAO.getArchitecture() : vmTuples.get(2, String.class));
                 }
-                newDiskAO.setSourceUuid(diskAO.getSourceUuid());
+                newDiskAO.setSourceUuid(volumeUuid);
                 newDiskAO.setPrimaryStorageUuid(diskAO.getPrimaryStorageUuid());
                 newDiskAO.setSystemTags(buildResourceConfigsForClone(volumeUuid, VolumeVO.class.getSimpleName(), diskAO.getSystemTags()));
                 newDiskAO.setSize(diskAO.getSize());
+                newDiskAO.setEncrypted(diskAO.getEncrypted() != null ? diskAO.getEncrypted() : encrypted);
                 this.templatedVmVolumeDiskAOs.add(newDiskAO);
                 return;
             }
@@ -218,6 +221,7 @@ public class CloneVmInstanceMessageBuilder {
                 diskAO.setGuestOsType(diskAO.getGuestOsType() != null ? diskAO.getGuestOsType() : vmTuples.get(1, String.class));
                 diskAO.setArchitecture(diskAO.getArchitecture() != null ? diskAO.getArchitecture() : vmTuples.get(2, String.class));
             }
+            diskAO.setEncrypted(encrypted);
             this.templatedVmVolumeDiskAOs.add(diskAO);
         });
 
@@ -230,12 +234,13 @@ public class CloneVmInstanceMessageBuilder {
                 .select(VmInstanceVO_.platform, VmInstanceVO_.guestOsType, VmInstanceVO_.architecture).findTuple();
         List<Tuple> volumeTuples = Q.New(VolumeVO.class).eq(VolumeVO_.vmInstanceUuid, VmUuid)
                 .in(VolumeVO_.type, Arrays.asList(VolumeType.Root, VolumeType.Data))
-                .select(VolumeVO_.uuid, VolumeVO_.type).listTuple();
+                .select(VolumeVO_.uuid, VolumeVO_.type, VolumeVO_.encrypted).listTuple();
 
         List<DiskAO> diskAOs = new ArrayList<>();
         volumeTuples.forEach(volumeTuple -> {
             String volumeUuid = volumeTuple.get(0, String.class);
             VolumeType volumeType = volumeTuple.get(1, VolumeType.class);
+            Boolean encrypted = volumeTuple.get(2, Boolean.class);
             DiskAO diskAO = new DiskAO();
             diskAO.setSourceUuid(volumeUuid);
             diskAO.setSystemTags(buildResourceConfigsForClone(volumeUuid, VolumeVO.class.getSimpleName(), new ArrayList<>()));
@@ -245,6 +250,7 @@ public class CloneVmInstanceMessageBuilder {
                 diskAO.setGuestOsType(vmTuples.get(1, String.class));
                 diskAO.setArchitecture(vmTuples.get(2, String.class));
             }
+            diskAO.setEncrypted(encrypted);
             diskAOs.add(diskAO);
         });
         return diskAOs;
@@ -375,7 +381,7 @@ public class CloneVmInstanceMessageBuilder {
                 .forEach(volume -> volumesPrimaryStorageUuidMap.put(volume.getUuid(), volume.getPrimaryStorageUuid()));
 
         if (CollectionUtils.isEmpty(msg.getDiskAOs())) {
-            List<DiskAO> diskAOs = new ArrayList<>();
+            List<DiskAO> requestedDiskAOs = new ArrayList<>();
             buildVmDiskAOsForClone(msg.getVmInstanceUuid()).forEach(diskAO -> {
                 diskAO.setSystemTags(null);
                 if (diskAO.isBoot()) {
@@ -390,12 +396,28 @@ public class CloneVmInstanceMessageBuilder {
                             volumesPrimaryStorageUuidMap.get(diskAO.getSourceUuid()));
                     diskAO.setSystemTags(msg.getDataVolumeSystemTags());
                 }
-                diskAOs.add(diskAO);
+                requestedDiskAOs.add(diskAO);
             });
-            return buildVmDiskAOsForClone(msg.getVmInstanceUuid(), diskAOs);
+            List<DiskAO> diskAOs = buildVmDiskAOsForClone(msg.getVmInstanceUuid(), requestedDiskAOs);
+            inheritSourceVolumeEncryption(msg.getVmInstanceUuid(), diskAOs);
+            return diskAOs;
         }
 
-        return buildVmDiskAOsForClone(msg.getVmInstanceUuid(), msg.getDiskAOs());
+        List<DiskAO> diskAOs = buildVmDiskAOsForClone(msg.getVmInstanceUuid(), msg.getDiskAOs());
+        inheritSourceVolumeEncryption(msg.getVmInstanceUuid(), diskAOs);
+        return diskAOs;
+    }
+
+    private void inheritSourceVolumeEncryption(String vmUuid, List<DiskAO> diskAOs) {
+        List<Tuple> volumeTuples = Q.New(VolumeVO.class).eq(VolumeVO_.vmInstanceUuid, vmUuid)
+                .in(VolumeVO_.type, Arrays.asList(VolumeType.Root, VolumeType.Data))
+                .select(VolumeVO_.uuid, VolumeVO_.encrypted).listTuple();
+        Map<String, Boolean> encryptedByVolumeUuid = volumeTuples.stream()
+                .collect(Collectors.toMap(t -> t.get(0, String.class), t -> t.get(1, Boolean.class)));
+
+        diskAOs.stream()
+                .filter(diskAO -> encryptedByVolumeUuid.containsKey(diskAO.getSourceUuid()))
+                .forEach(diskAO -> diskAO.setEncrypted(encryptedByVolumeUuid.get(diskAO.getSourceUuid())));
     }
 
     private List<DiskAO> mapTemplateDiskSourceUuidsToCacheVolumes(List<DiskAO> templatedVmDiskAOs, String templatedVmUuid, String templatedCacheVmUuid) {

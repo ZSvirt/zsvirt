@@ -97,6 +97,9 @@ public class APICreateVmInstanceFromTemplatedVmInstanceMsg extends APIMessage im
     @APIParam(required = false)
     private Boolean resetTpm;
 
+    @APIParam(required = false)
+    private Boolean vmEncryption;
+
     @APINoSee
     private String platform;
 
@@ -299,6 +302,16 @@ public class APICreateVmInstanceFromTemplatedVmInstanceMsg extends APIMessage im
 
     public void setResetTpm(Boolean resetTpm) {
         this.resetTpm = resetTpm;
+    }
+
+    @Override
+    public Boolean getVmEncryption() {
+        return vmEncryption;
+    }
+
+    @Override
+    public void setVmEncryption(Boolean vmEncryption) {
+        this.vmEncryption = vmEncryption;
     }
 
     @Override

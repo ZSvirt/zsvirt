@@ -108,9 +108,11 @@ public abstract class LocalStorageHypervisorBackend extends LocalStorageBase {
 
     abstract void deleteBits(String path, String hostUuid, Completion completion);
 
-    abstract void createEmptyVolume(VolumeInventory volume, String hostUuid, ReturnValueCompletion<VolumeStats> completion);
+    abstract void createEmptyVolume(VolumeInventory volume, String hostUuid, VolumeLuksAgentSpec volumeLuksAgentSpec,
+            ReturnValueCompletion<VolumeStats> completion);
 
-    abstract void createEmptyVolumeWithBackingFile(VolumeInventory volume, String hostUuid, String backingFile, ReturnValueCompletion<VolumeStats> completion);
+    abstract void createEmptyVolumeWithBackingFile(VolumeInventory volume, String hostUuid, String backingFile,
+            VolumeLuksAgentSpec volumeLuksAgentSpec, ReturnValueCompletion<VolumeStats> completion);
 
     abstract void checkHostAttachedPSMountPath(String hostUuid, ReturnValueCompletion<LocalStorageKvmBackend.CheckInitializedFileRsp> completion);
 
@@ -135,4 +137,8 @@ public abstract class LocalStorageHypervisorBackend extends LocalStorageBase {
     abstract void handle(CleanupAllVmMetadataOnPrimaryStorageMsg msg, String hostUuid, ReturnValueCompletion<CleanupAllVmMetadataOnPrimaryStorageReply> completion);
 
     abstract void handle(RebaseVolumeBackingFileOnPrimaryStorageMsg msg, String hostUuid, ReturnValueCompletion<RebaseVolumeBackingFileOnPrimaryStorageReply> completion);
+
+    abstract void handle(EncryptVolumeBitsOnPrimaryStorageMsg msg, ReturnValueCompletion<EncryptVolumeBitsOnPrimaryStorageReply> completion);
+
+    abstract void handle(ConvertVolumeEncryptionOnPrimaryStorageMsg msg, String hostUuid, ReturnValueCompletion<ConvertVolumeEncryptionOnPrimaryStorageReply> completion);
 }

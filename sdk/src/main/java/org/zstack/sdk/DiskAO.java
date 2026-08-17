@@ -100,4 +100,12 @@ public class DiskAO  {
         return this.name;
     }
 
+    public java.lang.Boolean encrypted;
+    public void setEncrypted(java.lang.Boolean encrypted) {
+        this.encrypted = encrypted;
+    }
+    public java.lang.Boolean getEncrypted() {
+        return this.encrypted;
+    }
+
 }

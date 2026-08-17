@@ -20,4 +20,11 @@ public interface VolumeCreateMessage {
     void setSystemTags(List<String> systemTags);
 
     void addSystemTag(String tag);
+
+    default Boolean getEncrypted() {
+        return null;
+    }
+
+    default void setEncrypted(Boolean encrypted) {
+    }
 }

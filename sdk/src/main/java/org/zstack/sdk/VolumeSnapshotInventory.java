@@ -108,6 +108,14 @@ public class VolumeSnapshotInventory  {
         return this.size;
     }
 
+    public java.lang.Boolean encrypted;
+    public void setEncrypted(java.lang.Boolean encrypted) {
+        this.encrypted = encrypted;
+    }
+    public java.lang.Boolean getEncrypted() {
+        return this.encrypted;
+    }
+
     public int distance;
     public void setDistance(int distance) {
         this.distance = distance;

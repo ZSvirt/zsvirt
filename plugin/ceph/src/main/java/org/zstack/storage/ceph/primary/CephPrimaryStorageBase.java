@@ -36,6 +36,7 @@ import org.zstack.header.errorcode.SysErrors;
 import org.zstack.header.exception.CloudRuntimeException;
 import org.zstack.header.host.*;
 import org.zstack.header.image.ImageBackupStorageRefInventory;
+import org.zstack.header.image.ImageConstant;
 import org.zstack.header.image.ImageConstant.ImageMediaType;
 import org.zstack.header.image.ImageInventory;
 import org.zstack.header.image.ImageStatus;
@@ -66,6 +67,8 @@ import org.zstack.storage.ceph.backup.CephBackupStorageVO;
 import org.zstack.storage.ceph.backup.CephBackupStorageVO_;
 import org.zstack.storage.ceph.primary.CephPrimaryStorageMonBase.PingOperationFailure;
 import org.zstack.storage.ceph.primary.capacity.CephOsdGroupCapacityHelper;
+import org.zstack.storage.encrypt.VolumeEncryptedSecretHelper;
+import org.zstack.storage.encrypt.VolumeSnapshotEncryptionHelper;
 import org.zstack.storage.primary.*;
 import org.zstack.storage.volume.VolumeErrors;
 import org.zstack.storage.volume.VolumeSystemTags;
@@ -113,6 +116,10 @@ public class CephPrimaryStorageBase extends PrimaryStorageBase {
     private StorageTrash trash;
     @Autowired
     private PoolUsageReport poolUsageCollector;
+    @Autowired
+    private VolumeSnapshotEncryptionHelper snapshotEncryptionHelper;
+    @Autowired
+    private VolumeEncryptedSecretHelper volumeEncryptedSecretHelper;
 
 
     public CephPrimaryStorageBase() {
@@ -416,6 +423,52 @@ public class CephPrimaryStorageBase extends PrimaryStorageBase {
         public void setInstallPath(String installPath) {
             this.installPath = installPath;
         }
+    }
+
+    public static class KVMHostLuksCloneCmd implements Serializable {
+        public String psUuid;
+        @NoLogging
+        public String encryptedDek;
+        public String srcPath;
+        public String dstPath;
+        public Long virtualSizeForLuksClone;
+    }
+
+    public static class KVMHostLuksCreateEmptyCmd implements Serializable {
+        public String psUuid;
+        @NoLogging
+        public String encryptedDek;
+        public String installPath;
+        public long size;
+    }
+
+    public static class KVMHostLuksResizeCmd implements Serializable {
+        public String psUuid;
+        @NoLogging
+        public String encryptedDek;
+        public String installPath;
+        public Long virtualSize;
+    }
+
+    public static class KVMHostLuksConvertCmd implements Serializable {
+        public String psUuid;
+        @NoLogging
+        public String encryptedDek;
+        public String installPath;
+        public String targetInstallPath;
+        public String sourceTrashInstallPath;
+        public boolean targetEncrypted;
+        public Long virtualSize;
+    }
+
+    public static class KVMHostEncryptInPlaceCmd implements Serializable {
+        public String psUuid;
+        public String secFilePath;
+        public String installPath;
+    }
+
+    public static class KVMHostLuksRsp extends KVMAgentCommands.AgentResponse {
+        public Long actualSize;
     }
 
     public static class DeleteCmd extends AgentCommand {
@@ -1356,6 +1409,14 @@ public class CephPrimaryStorageBase extends PrimaryStorageBase {
     public static final String CREATE_VOLUME_PATH = "/ceph/primarystorage/volume/createempty";
     public static final String DELETE_PATH = "/ceph/primarystorage/delete";
     public static final String CLONE_PATH = "/ceph/primarystorage/volume/clone";
+    // LUKS variants that run on the KVM host instead of cephagent (the host that
+    // qemu-img must run on is the one that has key-agent + the libvirt secret
+    // FIFO; cephagent nodes do not, especially in non-converged deployments).
+    public static final String KVM_HOST_LUKS_CLONE_PATH = "/ceph/primarystorage/kvmhost/luksclone";
+    public static final String KVM_HOST_LUKS_CREATE_EMPTY_PATH = "/ceph/primarystorage/kvmhost/lukscreateempty";
+    public static final String KVM_HOST_LUKS_ENCRYPT_IN_PLACE_PATH = "/ceph/primarystorage/kvmhost/encryptinplace";
+    public static final String KVM_HOST_LUKS_RESIZE_PATH = "/ceph/primarystorage/kvmhost/luksresize";
+    public static final String KVM_HOST_LUKS_CONVERT_PATH = "/ceph/primarystorage/kvmhost/luksconvert";
     public static final String FLATTEN_PATH = "/ceph/primarystorage/volume/flatten";
     public static final String SFTP_DOWNLOAD_PATH = "/ceph/primarystorage/sftpbackupstorage/download";
     public static final String SFTP_UPLOAD_PATH = "/ceph/primarystorage/sftpbackupstorage/upload";
@@ -1720,11 +1781,56 @@ public class CephPrimaryStorageBase extends PrimaryStorageBase {
     }
 
     private void createEmptyVolume(final InstantiateVolumeOnPrimaryStorageMsg msg) {
-        final CreateEmptyVolumeCmd cmd = new CreateEmptyVolumeCmd();
         String volumeUuid = msg.getVolume().getUuid();
         final String finalPoolName = getTargetPoolNameFromAllocatedUrl(msg.getAllocatedInstallUrl());
-        cmd.installPath = makeVolumeInstallPathByTargetPool(volumeUuid, finalPoolName);
-        cmd.size = msg.getVolume().getSize();
+        final String installPath = makeVolumeInstallPathByTargetPool(volumeUuid, finalPoolName);
+        final long volumeSize = msg.getVolume().getSize();
+
+        final InstantiateVolumeOnPrimaryStorageReply reply = new InstantiateVolumeOnPrimaryStorageReply();
+
+        // Encrypted variant: forward to the dest KVM host so qemu-img can open
+        // a one-shot key-agent channel from encryptedDek.
+        if (Boolean.TRUE.equals(msg.getVolume().getEncrypted())) {
+            if (msg.getDestHost() == null || StringUtils.isBlank(msg.getDestHost().getUuid())) {
+                reply.setError(operr(
+                        "ceph LUKS createempty requires destHost; volume[uuid:%s] has none", volumeUuid));
+                bus.reply(msg, reply);
+                return;
+            }
+            KVMHostLuksCreateEmptyCmd kcmd = new KVMHostLuksCreateEmptyCmd();
+            kcmd.psUuid = self.getUuid();
+            kcmd.installPath = installPath;
+            kcmd.size = volumeSize;
+            kcmd.encryptedDek = volumeEncryptedSecretHelper.prepareLuksEnvelopeDekOnHost(
+                    msg.getDestHost().getUuid(), volumeUuid);
+            httpCallToKvmHost(msg.getDestHost().getUuid(),
+                    KVM_HOST_LUKS_CREATE_EMPTY_PATH, kcmd, KVMHostLuksRsp.class,
+                    new ReturnValueCompletion<KVMHostLuksRsp>(msg) {
+                        @Override
+                        public void fail(ErrorCode err) {
+                            reply.setError(err);
+                            bus.reply(msg, reply);
+                        }
+
+                        @Override
+                        public void success(KVMHostLuksRsp ret) {
+                            VolumeInventory vol = msg.getVolume();
+                            // installPath is the canonical "ceph://<pool>/<uuid>" computed above;
+                            // don't run it through buildEmptyVolumeInstallPath again (that helper
+                            // assumes the agent returned a bare pool/uuid relative path).
+                            vol.setInstallPath(installPath);
+                            vol.setFormat(VolumeConstant.VOLUME_FORMAT_RAW);
+                            vol.setActualSize(ret.actualSize);
+                            reply.setVolume(vol);
+                            bus.reply(msg, reply);
+                        }
+                    });
+            return;
+        }
+
+        final CreateEmptyVolumeCmd cmd = new CreateEmptyVolumeCmd();
+        cmd.installPath = installPath;
+        cmd.size = volumeSize;
         cmd.setShareable(msg.getVolume().isShareable());
         cmd.skipIfExisting = msg.isSkipIfExisting();
 
@@ -1735,8 +1841,6 @@ public class CephPrimaryStorageBase extends PrimaryStorageBase {
         cmd.format = msg.hasSystemTag(VolumeSystemTags.FORMAT_QCOW2.getTagFormat()) ?
                 VolumeConstant.VOLUME_FORMAT_QCOW2 :
                 VolumeConstant.VOLUME_FORMAT_RAW ;
-
-        final InstantiateVolumeOnPrimaryStorageReply reply = new InstantiateVolumeOnPrimaryStorageReply();
 
         httpCall(CREATE_VOLUME_PATH, cmd, CreateEmptyVolumeRsp.class, new ReturnValueCompletion<CreateEmptyVolumeRsp>(msg) {
             @Override
@@ -2113,6 +2217,7 @@ public class CephPrimaryStorageBase extends PrimaryStorageBase {
     class DownloadToCache {
         ImageSpec image;
         VolumeSnapshotInventory snapshot;
+        Boolean encrypted;
         private void doDownload(final ReturnValueCompletion<ImageCacheVO> completion) {
             ImageCacheVO cache = Q.New(ImageCacheVO.class)
                     .eq(ImageCacheVO_.primaryStorageUuid, self.getUuid())
@@ -2130,6 +2235,8 @@ public class CephPrimaryStorageBase extends PrimaryStorageBase {
                 long actualSize = image.getInventory().getActualSize();
                 String allocatedInstall;
                 ImageCacheVO cvo = new ImageCacheVO();
+                String encryptHostUuid;
+                VolumeLuksAgentSpec imageLuksSpec;
 
                 @Override
                 public void setup() {
@@ -2179,6 +2286,31 @@ public class CephPrimaryStorageBase extends PrimaryStorageBase {
                     });
 
                     flow(new Flow() {
+                        String __name__ = "prepare-luks-secret-for-snapshot-image-cache";
+
+                        @Override
+                        public boolean skip(Map data) {
+                            return snapshot == null || !Boolean.TRUE.equals(encrypted);
+                        }
+
+                        @Override
+                        public void run(FlowTrigger trigger, Map data) {
+                            encryptHostUuid = findConnectedHostForCephLuks();
+                            imageLuksSpec = snapshotEncryptionHelper.prepareTemporarySnapshotImageSecretMaterial(
+                                    encryptHostUuid,
+                                    snapshot.getUuid(),
+                                    image.getInventory().getUuid(),
+                                    encrypted);
+                            trigger.next();
+                        }
+
+                        @Override
+                        public void rollback(FlowRollback trigger, Map data) {
+                            trigger.rollback();
+                        }
+                    });
+
+                    flow(new Flow() {
                         String __name__ = "download-from-" + (snapshot != null ? "volume" : "backup-storage");
 
                         boolean deleteOnRollback;
@@ -2197,6 +2329,32 @@ public class CephPrimaryStorageBase extends PrimaryStorageBase {
 
                         private void createFromVolumeSnapshot(FlowTrigger trigger) {
                             deleteOnRollback = true;
+                            if (imageLuksSpec != null && imageLuksSpec.isComplete()) {
+                                KVMHostLuksCloneCmd kcmd = new KVMHostLuksCloneCmd();
+                                kcmd.psUuid = self.getUuid();
+                                kcmd.srcPath = snapshot.getPrimaryStorageInstallPath();
+                                kcmd.dstPath = dstPath;
+                                kcmd.encryptedDek = volumeEncryptedSecretHelper.prepareLuksEnvelopeDekOnHost(encryptHostUuid, image.getInventory().getUuid());
+                                httpCallToKvmHost(encryptHostUuid,
+                                        KVM_HOST_LUKS_CLONE_PATH, kcmd, KVMHostLuksRsp.class,
+                                        new ReturnValueCompletion<KVMHostLuksRsp>(trigger) {
+                                            @Override
+                                            public void success(KVMHostLuksRsp rsp) {
+                                                if (rsp.actualSize != null) {
+                                                    actualSize = rsp.actualSize;
+                                                }
+                                                cachePath = dstPath;
+                                                trigger.next();
+                                            }
+
+                                            @Override
+                                            public void fail(ErrorCode errorCode) {
+                                                trigger.fail(errorCode);
+                                            }
+                                        });
+                                return;
+                            }
+
                             CpCmd cmd = new CpCmd();
                             cmd.srcPath = snapshot.getPrimaryStorageInstallPath();
                             cmd.dstPath = dstPath;
@@ -2527,6 +2685,33 @@ public class CephPrimaryStorageBase extends PrimaryStorageBase {
             String volumePath = makeVolumeInstallPathByTargetPool(msg.getVolume().getUuid(), targetCephPoolName);
             ImageCacheInventory cache;
             Long actualSize;
+            boolean clonedFromEncryptedSnapshotImageCache;
+
+            private void resizeClonedLuksRbd(final FlowTrigger trigger) {
+                KVMHostLuksResizeCmd kcmd = new KVMHostLuksResizeCmd();
+                kcmd.psUuid = self.getUuid();
+                kcmd.installPath = volumePath;
+                kcmd.encryptedDek = volumeEncryptedSecretHelper.prepareLuksEnvelopeDekOnHost(
+                        msg.getDestHost().getUuid(), msg.getVolume().getUuid());
+                if (ispec.getInventory().getSize() < msg.getVolume().getSize()) {
+                    kcmd.virtualSize = msg.getVolume().getSize();
+                }
+
+                httpCallToKvmHost(msg.getDestHost().getUuid(),
+                        KVM_HOST_LUKS_RESIZE_PATH, kcmd, KVMHostLuksRsp.class,
+                        new ReturnValueCompletion<KVMHostLuksRsp>(trigger) {
+                            @Override
+                            public void fail(ErrorCode err) {
+                                trigger.fail(err);
+                            }
+
+                            @Override
+                            public void success(KVMHostLuksRsp ret) {
+                                actualSize = ret.actualSize;
+                                trigger.next();
+                            }
+                        });
+            }
 
             @Override
             public void setup() {
@@ -2562,6 +2747,47 @@ public class CephPrimaryStorageBase extends PrimaryStorageBase {
 
                     @Override
                     public void run(final FlowTrigger trigger, Map data) {
+                        boolean createEncryptedVolume = Boolean.TRUE.equals(msg.getVolume().getEncrypted());
+                        clonedFromEncryptedSnapshotImageCache =
+                                createEncryptedVolume && isEncryptedSnapshotImageCache(cache);
+                        if (clonedFromEncryptedSnapshotImageCache) {
+                            cloneImage(trigger);
+                            return;
+                        }
+
+                        // If the image cache is not already LUKS, RBD clone cannot create a LUKS overlay/top layer:
+                        // RBD only provides block-level COW and preserves the source byte layout. Use qemu-img
+                        // convert on the KVM host to write a new LUKS container with the host-local FIFO secret.
+                        if (createEncryptedVolume) {
+                            KVMHostLuksCloneCmd kcmd = new KVMHostLuksCloneCmd();
+                            kcmd.psUuid = self.getUuid();
+                            kcmd.srcPath = cloneInstallPath;
+                            kcmd.dstPath = volumePath;
+                            kcmd.encryptedDek = volumeEncryptedSecretHelper.prepareLuksEnvelopeDekOnHost(msg.getDestHost().getUuid(), msg.getVolume().getUuid());
+                            if (ispec.getInventory().getSize() < msg.getVolume().getSize()) {
+                                kcmd.virtualSizeForLuksClone = msg.getVolume().getSize();
+                            }
+                            httpCallToKvmHost(msg.getDestHost().getUuid(),
+                                    KVM_HOST_LUKS_CLONE_PATH, kcmd, KVMHostLuksRsp.class,
+                                    new ReturnValueCompletion<KVMHostLuksRsp>(trigger) {
+                                        @Override
+                                        public void fail(ErrorCode err) {
+                                            trigger.fail(err);
+                                        }
+
+                                        @Override
+                                        public void success(KVMHostLuksRsp ret) {
+                                            actualSize = ret.actualSize;
+                                            trigger.next();
+                                        }
+                                    });
+                            return;
+                        }
+
+                        cloneImage(trigger);
+                    }
+
+                    private void cloneImage(final FlowTrigger trigger) {
                         CloneCmd cmd = new CloneCmd();
                         cmd.srcPath = cloneInstallPath;
                         cmd.dstPath = volumePath;
@@ -2587,11 +2813,23 @@ public class CephPrimaryStorageBase extends PrimaryStorageBase {
                     @Override
                     public boolean skip(Map data) {
                         ImageInventory image = ispec.getInventory();
+                        if (clonedFromEncryptedSnapshotImageCache) {
+                            return false;
+                        }
+                        if (Boolean.TRUE.equals(msg.getVolume().getEncrypted())) {
+                            // LUKS clone converts to a standalone LUKS RBD and applies virtualSizeForLuksClone before this raw resize flow.
+                            return true;
+                        }
                         return image.getSize() >= msg.getVolume().getSize();
                     }
 
                     @Override
                     public void run(final FlowTrigger trigger, Map data) {
+                        if (clonedFromEncryptedSnapshotImageCache) {
+                            resizeClonedLuksRbd(trigger);
+                            return;
+                        }
+
                         ResizeVolumeOnPrimaryStorageMsg rmsg = new ResizeVolumeOnPrimaryStorageMsg();
                         rmsg.setVolume(msg.getVolume());
                         rmsg.setSize(msg.getVolume().getSize());
@@ -2640,6 +2878,35 @@ public class CephPrimaryStorageBase extends PrimaryStorageBase {
                 });
             }
         }).start();
+    }
+
+    private boolean isEncryptedSnapshotImageCache(ImageCacheInventory cache) {
+        if (cache == null) {
+            return false;
+        }
+
+        boolean hasTemporarySnapshotImageKey = snapshotEncryptionHelper.hasTemporarySnapshotImageKey(cache.getImageUuid());
+        if (hasTemporarySnapshotImageKey) {
+            return true;
+        }
+
+        String installUrl = cache.getInstallUrl();
+        if (StringUtils.isBlank(installUrl) || !installUrl.contains(ImageConstant.SNAPSHOT_REUSE_IMAGE_SCHEMA)) {
+            return false;
+        }
+
+        String snapshotUuid = installUrl.substring(installUrl.lastIndexOf(ImageConstant.SNAPSHOT_REUSE_IMAGE_SCHEMA)
+                + ImageConstant.SNAPSHOT_REUSE_IMAGE_SCHEMA.length());
+        if (snapshotUuid.length() < 32) {
+            return false;
+        }
+        snapshotUuid = snapshotUuid.substring(0, 32);
+
+        Boolean encrypted = Q.New(VolumeSnapshotVO.class)
+                .eq(VolumeSnapshotVO_.uuid, snapshotUuid)
+                .select(VolumeSnapshotVO_.encrypted)
+                .findValue();
+        return Boolean.TRUE.equals(encrypted);
     }
 
     @Override
@@ -2883,6 +3150,7 @@ public class CephPrimaryStorageBase extends PrimaryStorageBase {
         cache.image = new ImageSpec();
         cache.image.setInventory(msg.getImageInventory());
         cache.snapshot = msg.getVolumeSnapshot();
+        cache.encrypted = msg.getEncrypted();
         cache.download(new ReturnValueCompletion<ImageCacheVO>(msg) {
             @Override
             public void success(ImageCacheVO inv) {
@@ -3197,6 +3465,101 @@ public class CephPrimaryStorageBase extends PrimaryStorageBase {
         });
     }
 
+    private void handle(final EncryptVolumeBitsOnPrimaryStorageMsg msg) {
+        // Encrypt-in-place always consumes a LUKS secret FIFO, so it must run
+        // on the KVM host that owns the FIFO + key-agent (msg.getHostUuid()).
+        EncryptVolumeBitsOnPrimaryStorageReply reply = new EncryptVolumeBitsOnPrimaryStorageReply();
+        if (StringUtils.isBlank(msg.getHostUuid())) {
+            reply.setError(operr(
+                    "ceph encryptInPlace requires hostUuid; volume[uuid:%s] installPath[%s] has none",
+                    msg.getVolumeUuid(), msg.getInstallPath()));
+            bus.reply(msg, reply);
+            return;
+        }
+        KVMHostEncryptInPlaceCmd kcmd = new KVMHostEncryptInPlaceCmd();
+        kcmd.psUuid = self.getUuid();
+        kcmd.installPath = msg.getInstallPath();
+        kcmd.secFilePath = msg.getEncryptLuksSecretMaterialFilePath();
+        httpCallToKvmHost(msg.getHostUuid(),
+                KVM_HOST_LUKS_ENCRYPT_IN_PLACE_PATH, kcmd, KVMHostLuksRsp.class,
+                new ReturnValueCompletion<KVMHostLuksRsp>(msg) {
+                    @Override
+                    public void fail(ErrorCode err) {
+                        reply.setError(err);
+                        bus.reply(msg, reply);
+                    }
+
+                    @Override
+                    public void success(KVMHostLuksRsp ret) {
+                        bus.reply(msg, reply);
+                    }
+                });
+    }
+
+    @Override
+    protected void handle(ConvertVolumeEncryptionOnPrimaryStorageMsg msg) {
+        ConvertVolumeEncryptionOnPrimaryStorageReply reply = new ConvertVolumeEncryptionOnPrimaryStorageReply();
+        if (msg.getItems() == null || msg.getItems().size() != 1) {
+            reply.setError(operr(
+                    "ceph volume encryption conversion requires volume snapshots to be merged before conversion; volume[uuid:%s] has %s conversion items",
+                    msg.getVolume().getUuid(), msg.getItems() == null ? 0 : msg.getItems().size()));
+            bus.reply(msg, reply);
+            return;
+        }
+
+        ConvertVolumeEncryptionOnPrimaryStorageMsg.VolumeEncryptionConversionItem item = msg.getItems().get(0);
+        if (!VolumeVO.class.getSimpleName().equals(item.getResourceType())) {
+            reply.setError(operr(
+                    "ceph volume encryption conversion only supports the active volume after snapshots are merged, but got resource[type:%s, uuid:%s]",
+                    item.getResourceType(), item.getResourceUuid()));
+            bus.reply(msg, reply);
+            return;
+        }
+
+        if (StringUtils.isBlank(item.getSourceInstallPath()) || item.getSourceInstallPath().contains("@")) {
+            reply.setError(operr(
+                    "ceph volume encryption conversion requires an active RBD image path, but got source path[%s]",
+                    item.getSourceInstallPath()));
+            bus.reply(msg, reply);
+            return;
+        }
+
+        String hostUuid;
+        try {
+            hostUuid = findConnectedHostForCephLuks();
+        } catch (OperationFailureException e) {
+            reply.setError(e.getErrorCode());
+            bus.reply(msg, reply);
+            return;
+        }
+
+        KVMHostLuksConvertCmd kcmd = new KVMHostLuksConvertCmd();
+        kcmd.psUuid = self.getUuid();
+        kcmd.installPath = item.getSourceInstallPath();
+        kcmd.targetInstallPath = item.getTargetInstallPath();
+        kcmd.sourceTrashInstallPath = item.getSourceTrashInstallPath();
+        kcmd.targetEncrypted = msg.isTargetEncrypted();
+        kcmd.virtualSize = msg.getVolume().getSize();
+        kcmd.encryptedDek = volumeEncryptedSecretHelper.prepareLuksEnvelopeDekOnHost(hostUuid, msg.getVolume().getUuid());
+
+        httpCallToKvmHost(hostUuid, KVM_HOST_LUKS_CONVERT_PATH, kcmd, KVMHostLuksRsp.class,
+                new ReturnValueCompletion<KVMHostLuksRsp>(msg) {
+                    @Override
+                    public void fail(ErrorCode err) {
+                        reply.setError(err);
+                        bus.reply(msg, reply);
+                    }
+
+                    @Override
+                    public void success(KVMHostLuksRsp ret) {
+                        if (ret.actualSize != null) {
+                            reply.setActualSizes(Collections.singletonMap(msg.getVolume().getUuid(), ret.actualSize));
+                        }
+                        bus.reply(msg, reply);
+                    }
+                });
+    }
+
     @Override
     protected void handle(final DownloadIsoToPrimaryStorageMsg msg) {
         final DownloadIsoToPrimaryStorageReply reply = new DownloadIsoToPrimaryStorageReply();
@@ -3379,6 +3742,61 @@ public class CephPrimaryStorageBase extends PrimaryStorageBase {
 
     protected <T extends AgentResponse> void httpCall(final String path, final AgentCommand cmd, final Class<T> retClass, final ReturnValueCompletion<T> callback, TimeUnit unit, long timeout) {
         new HttpCaller<>(path, cmd, retClass, callback, unit, timeout).call();
+    }
+
+    /**
+     * Send an HTTP cmd to a KVM host's kvmagent (not to cephagent). Used by the
+     * LUKS variants of clone / createempty / encrypt-in-place, where qemu-img
+     * must run on the host that has key-agent + libvirt-secret FIFO present.
+     */
+    private <T extends KVMAgentCommands.AgentResponse> void httpCallToKvmHost(
+            final String hostUuid,
+            final String path,
+            final Object cmd,
+            final Class<T> retClass,
+            final ReturnValueCompletion<T> callback) {
+        KVMHostAsyncHttpCallMsg kmsg = new KVMHostAsyncHttpCallMsg();
+        kmsg.setCommand(cmd);
+        kmsg.setPath(path);
+        kmsg.setHostUuid(hostUuid);
+        kmsg.setNoStatusCheck(true);
+        bus.makeTargetServiceIdByResourceUuid(kmsg, HostConstant.SERVICE_ID, hostUuid);
+        bus.send(kmsg, new CloudBusCallBack(callback) {
+            @Override
+            public void run(MessageReply reply) {
+                if (!reply.isSuccess()) {
+                    callback.fail(reply.getError());
+                    return;
+                }
+                KVMHostAsyncHttpCallReply kr = reply.castReply();
+                T rsp = kr.toResponse(retClass);
+                if (rsp == null) {
+                    callback.fail(operr(
+                            "kvm host[uuid:%s] returned null reply for ceph luks path[%s]",
+                            hostUuid, path));
+                    return;
+                }
+                if (!rsp.isSuccess()) {
+                    callback.fail(operr(
+                            "kvm host[uuid:%s] ceph luks path[%s] failed",
+                            hostUuid, path).withException(rsp.getError()));
+                    return;
+                }
+                callback.success(rsp);
+            }
+        });
+    }
+
+    protected void resizeEncryptedRbdVolumeOnKvmHost(VolumeInventory volume, long size,
+                                                     ReturnValueCompletion<KVMHostLuksRsp> completion) {
+        String hostUuid = findConnectedHostForCephLuks();
+        KVMHostLuksResizeCmd cmd = new KVMHostLuksResizeCmd();
+        cmd.psUuid = self.getUuid();
+        cmd.installPath = volume.getInstallPath();
+        cmd.encryptedDek = volumeEncryptedSecretHelper.prepareLuksEnvelopeDekOnHost(hostUuid, volume.getUuid());
+        cmd.virtualSize = size;
+
+        httpCallToKvmHost(hostUuid, KVM_HOST_LUKS_RESIZE_PATH, cmd, KVMHostLuksRsp.class, completion);
     }
 
     public class HttpCaller<T extends AgentResponse> {
@@ -4406,6 +4824,8 @@ public class CephPrimaryStorageBase extends PrimaryStorageBase {
             handle((GetPrimaryStorageUsageReportMsg) msg);
         } else if (msg instanceof CleanUpStorageTrashOnPrimaryStorageMsg) {
             handle((CleanUpStorageTrashOnPrimaryStorageMsg)msg);
+        } else if (msg instanceof EncryptVolumeBitsOnPrimaryStorageMsg) {
+            handle((EncryptVolumeBitsOnPrimaryStorageMsg) msg);
         } else {
             super.handleLocalMessage(msg);
         }
@@ -4976,6 +5396,15 @@ public class CephPrimaryStorageBase extends PrimaryStorageBase {
 
     private void fastCreateVolumeFromSnapshot(final CreateVolumeFromVolumeSnapshotOnPrimaryStorageMsg msg, final NoErrorCompletion completion) {
         final CreateVolumeFromVolumeSnapshotOnPrimaryStorageReply reply = new CreateVolumeFromVolumeSnapshotOnPrimaryStorageReply();
+        VolumeVO targetVolume = Q.New(VolumeVO.class).eq(VolumeVO_.uuid, msg.getVolumeUuid()).find();
+        if (targetVolume != null && targetVolume.isEncrypted()) {
+            // RBD fast clone cannot change a plain snapshot into a LUKS volume.
+            // Convert the snapshot into an independent LUKS RBD; the helper also
+            // passes the target virtual size so the KVM agent resizes after convert.
+            flattenSnapshotToEncryptedVolume(msg, completion);
+            return;
+        }
+
         // create volume first, then reserve size for it, so we use snapshot poolName for volume create
         String snapShotPath = msg.getSnapshot().getPrimaryStorageInstallPath();
         final String volPath = makeVolumeInstallPathByTargetPool(msg.getVolumeUuid(), getTargetPoolNameFromAllocatedUrl(snapShotPath));
@@ -5050,6 +5479,12 @@ public class CephPrimaryStorageBase extends PrimaryStorageBase {
 
     private void createVolumeFromSnapshot(final CreateVolumeFromVolumeSnapshotOnPrimaryStorageMsg msg, final NoErrorCompletion completion) {
         final CreateVolumeFromVolumeSnapshotOnPrimaryStorageReply reply = new CreateVolumeFromVolumeSnapshotOnPrimaryStorageReply();
+        VolumeVO targetVolume = Q.New(VolumeVO.class).eq(VolumeVO_.uuid, msg.getVolumeUuid()).find();
+        if (targetVolume != null && targetVolume.isEncrypted()) {
+            flattenSnapshotToEncryptedVolume(msg, completion);
+            return;
+        }
+
         String snapShotPath = msg.getSnapshot().getPrimaryStorageInstallPath();
         final String volPath =  makeVolumeInstallPathByTargetPool(msg.getVolumeUuid(), getTargetPoolNameFromAllocatedUrl(snapShotPath));
         VolumeSnapshotInventory sp = msg.getSnapshot();
@@ -5076,6 +5511,68 @@ public class CephPrimaryStorageBase extends PrimaryStorageBase {
                 completion.done();
             }
         });
+    }
+
+    private void flattenSnapshotToEncryptedVolume(final CreateVolumeFromVolumeSnapshotOnPrimaryStorageMsg msg,
+                                                  final NoErrorCompletion completion) {
+        final CreateVolumeFromVolumeSnapshotOnPrimaryStorageReply reply =
+                new CreateVolumeFromVolumeSnapshotOnPrimaryStorageReply();
+        VolumeSnapshotInventory sp = msg.getSnapshot();
+        String snapshotPath = sp.getPrimaryStorageInstallPath();
+        final String volPath = makeVolumeInstallPathByTargetPool(msg.getVolumeUuid(), getTargetPoolNameFromAllocatedUrl(snapshotPath));
+        String hostUuid = findConnectedHostForCephLuks();
+
+        KVMHostLuksCloneCmd kcmd = new KVMHostLuksCloneCmd();
+        kcmd.psUuid = self.getUuid();
+        kcmd.srcPath = snapshotPath;
+        kcmd.dstPath = volPath;
+        kcmd.encryptedDek = volumeEncryptedSecretHelper.prepareLuksEnvelopeDekOnHost(hostUuid, msg.getVolumeUuid());
+
+        VolumeVO volume = Q.New(VolumeVO.class).eq(VolumeVO_.uuid, msg.getVolumeUuid()).find();
+        if (volume != null && volume.getSize() != 0) {
+            kcmd.virtualSizeForLuksClone = volume.getSize();
+        }
+
+        httpCallToKvmHost(hostUuid,
+                KVM_HOST_LUKS_CLONE_PATH, kcmd, KVMHostLuksRsp.class,
+                new ReturnValueCompletion<KVMHostLuksRsp>(completion) {
+                    @Override
+                    public void success(KVMHostLuksRsp rsp) {
+                        reply.setInstallPath(volPath);
+                        long asize = rsp.actualSize == null ? 1 : rsp.actualSize;
+                        reply.setActualSize(asize);
+                        reply.setSize(volume == null ? sp.getSize() : volume.getSize());
+                        bus.reply(msg, reply);
+                        completion.done();
+                    }
+
+                    @Override
+                    public void fail(ErrorCode errorCode) {
+                        reply.setError(errorCode);
+                        bus.reply(msg, reply);
+                        completion.done();
+                    }
+                });
+    }
+
+    private String findConnectedHostForCephLuks() {
+        List<String> connectedHostUuids = Q.New(PrimaryStorageHostRefVO.class)
+                .eq(PrimaryStorageHostRefVO_.primaryStorageUuid, self.getUuid())
+                .eq(PrimaryStorageHostRefVO_.status, PrimaryStorageHostStatus.Connected)
+                .select(PrimaryStorageHostRefVO_.hostUuid)
+                .listValues();
+        String hostUuid = connectedHostUuids.isEmpty() ? null : Q.New(HostVO.class)
+                .eq(HostVO_.hypervisorType, KVMConstant.KVM_HYPERVISOR_TYPE)
+                .in(HostVO_.uuid, connectedHostUuids)
+                .select(HostVO_.uuid)
+                .limit(1)
+                .findValue();
+        if (StringUtils.isBlank(hostUuid)) {
+            throw new OperationFailureException(operr(
+                    "cannot find a connected KVM host attached to ceph primary storage[uuid:%s] to run LUKS RBD operation",
+                    self.getUuid()));
+        }
+        return hostUuid;
     }
 
     protected void handle(final RevertVolumeFromSnapshotOnPrimaryStorageMsg msg) {
@@ -5229,6 +5726,37 @@ public class CephPrimaryStorageBase extends PrimaryStorageBase {
 
                     @Override
                     public void run(final FlowTrigger trigger, Map data) {
+                        if (Boolean.TRUE.equals(msg.getVolume().getEncrypted())) {
+                            String hostUuid = findConnectedHostForCephLuks();
+                            String secretPath = volumeEncryptedSecretHelper.prepareLuksSecretMaterialFileOnHost(
+                                    hostUuid, msg.getVolume().getUuid());
+                            if (StringUtils.isBlank(secretPath)) {
+                                trigger.fail(operr("cannot prepare LUKS secret for encrypted volume[uuid:%s] reimage on host[uuid:%s]",
+                                        msg.getVolume().getUuid(), hostUuid));
+                                return;
+                            }
+
+                            KVMHostLuksCloneCmd kcmd = new KVMHostLuksCloneCmd();
+                            kcmd.psUuid = self.getUuid();
+                            kcmd.srcPath = installUrl;
+                            kcmd.dstPath = volumePath;
+                            kcmd.encryptedDek = volumeEncryptedSecretHelper.prepareLuksEnvelopeDekOnHost(hostUuid, msg.getVolume().getUuid());
+                            httpCallToKvmHost(hostUuid,
+                                    KVM_HOST_LUKS_CLONE_PATH, kcmd, KVMHostLuksRsp.class,
+                                    new ReturnValueCompletion<KVMHostLuksRsp>(trigger) {
+                                        @Override
+                                        public void fail(ErrorCode err) {
+                                            trigger.fail(err);
+                                        }
+
+                                        @Override
+                                        public void success(KVMHostLuksRsp ret) {
+                                            trigger.next();
+                                        }
+                                    });
+                            return;
+                        }
+
                         CloneCmd cmd = new CloneCmd();
                         cmd.srcPath = installUrl;
                         cmd.dstPath = volumePath;
@@ -5386,6 +5914,14 @@ public class CephPrimaryStorageBase extends PrimaryStorageBase {
                 .eq(VolumeVO_.uuid, sp.getVolumeUuid())
                 .findValue();
 
+        VolumeVO volume = dbf.findByUuid(sp.getVolumeUuid(), VolumeVO.class);
+        if (volume != null && volume.isEncrypted()) {
+            // RBD snapshot operations do not open guest-visible LUKS/qcow2 data,
+            // so no secret material is needed here. Only inherit the volume key
+            // binding so later qemu-img based conversions know this snapshot is encrypted.
+            snapshotEncryptionHelper.inheritVolumeKeyToSnapshot(volume, sp);
+        }
+
         final String spPath = String.format("%s@%s", volumePath, sp.getUuid());
         CreateSnapshotCmd cmd = new CreateSnapshotCmd();
         cmd.volumeUuid = sp.getVolumeUuid();
@@ -5402,6 +5938,9 @@ public class CephPrimaryStorageBase extends PrimaryStorageBase {
                 sp.setPrimaryStorageInstallPath(rsp.getInstallPath());
                 sp.setType(VolumeSnapshotConstant.STORAGE_SNAPSHOT_TYPE.toString());
                 sp.setFormat(VolumeConstant.VOLUME_FORMAT_RAW);
+                if (volume != null && volume.isEncrypted()) {
+                    snapshotEncryptionHelper.completeTakeSnapshot(volume, sp);
+                }
                 reply.setInventory(sp);
                 bus.reply(msg, reply);
                 completion.done();

@@ -134,6 +134,7 @@ public class VmMevocoApiInterceptor implements GlobalApiMessageInterceptor {
 
     private void validate(APIConvertVmInstanceToTemplatedVmInstanceMsg msg) {
         ensureVmWithoutShareableVolume(msg.getVmInstanceUuid());
+        ensureVmWithoutEncryptedVolume(msg.getVmInstanceUuid(), "convert vm to templated vmInstance");
         checkVmSchedulerJob(msg.getVmInstanceUuid());
     }
 
@@ -291,6 +292,13 @@ public class VmMevocoApiInterceptor implements GlobalApiMessageInterceptor {
                     .validate();
 
             new VmInstanceHelper().validateL3Networks(vmNicParams.stream().map(VmNicParam::getL3NetworkUuid).collect(Collectors.toList()));
+        }
+
+        if (!CollectionUtils.isEmpty(msg.getDiskAOs())) {
+            boolean hasEncrypted = msg.getDiskAOs().stream().anyMatch(diskAO -> diskAO.getEncrypted() != null);
+            if (hasEncrypted) {
+                throw new ApiMessageInterceptionException(argerr("encrypted field in diskAOs is not allowed for clone vm, it is inherited from the source volume"));
+            }
         }
 
         if (!msg.getFull()) {
@@ -532,6 +540,7 @@ public class VmMevocoApiInterceptor implements GlobalApiMessageInterceptor {
 
     private void validate(APICreateTemplatedVmInstanceFromVmInstanceMsg msg) {
         ensureVmWithoutShareableVolume(msg.getVmInstanceUuid());
+        ensureVmWithoutEncryptedVolume(msg.getVmInstanceUuid(), "create templated vmInstance");
 
         if (msg.getHostUuid() == null) {
             Tuple tuple = Q.New(VmInstanceVO.class).eq(VmInstanceVO_.uuid, msg.getVmInstanceUuid())
@@ -543,6 +552,16 @@ public class VmMevocoApiInterceptor implements GlobalApiMessageInterceptor {
             } else {
                 msg.setHostUuid(tuple.get(1, String.class));
             }
+        }
+    }
+
+    private void ensureVmWithoutEncryptedVolume(String vmInstanceUuid, String operation) {
+        if (Q.New(VolumeVO.class)
+                .eq(VolumeVO_.vmInstanceUuid, vmInstanceUuid)
+                .eq(VolumeVO_.encrypted, true)
+                .isExists()) {
+            throw new ApiMessageInterceptionException(argerr(
+                    "cannot %s from vm[uuid:%s] with encrypted volume", operation, vmInstanceUuid));
         }
     }
 

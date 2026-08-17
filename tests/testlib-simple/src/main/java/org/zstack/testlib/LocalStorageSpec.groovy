@@ -295,6 +295,14 @@ class LocalStorageSpec extends PrimaryStorageSpec {
                 return new LocalStorageKvmBackend.CreateVolumeWithBackingRsp()
             }
 
+            simulator(LocalStorageKvmBackend.ENCRYPT_VOLUME_BITS_PATH) {
+                return new LocalStorageKvmBackend.EncryptVolumeBitsRsp()
+            }
+
+            simulator(LocalStorageKvmBackend.CONVERT_VOLUME_ENCRYPTION_PATH) {
+                return new LocalStorageKvmBackend.ConvertVolumeEncryptionRsp()
+            }
+
             VFS.vfsHook(LocalStorageKvmBackend.CREATE_VOLUME_WITH_BACKING_PATH, espec) { rsp, HttpEntity<String> e, EnvSpec spec ->
                 def cmd = JSONObjectUtil.toObject(e.body, LocalStorageKvmBackend.CreateVolumeWithBackingCmd.class)
                 VFS vfs = vfs(e, cmd, spec)

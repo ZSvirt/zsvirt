@@ -106,6 +106,9 @@ public class CreateVmInstanceAction extends AbstractAction {
     public java.lang.Boolean virtio;
 
     @Param(required = false, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
+    public java.lang.Boolean vmEncryption;
+
+    @Param(required = false, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
     public java.lang.String allocatorStrategy;
 
     @Param(required = false, nonempty = false, nullElements = false, emptyString = true, noTrim = false)

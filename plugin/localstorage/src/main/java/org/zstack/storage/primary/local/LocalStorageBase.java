@@ -1,5 +1,6 @@
 package org.zstack.storage.primary.local;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.zstack.compute.host.VolumeMigrationTargetHostFilter;
@@ -909,9 +910,80 @@ public class LocalStorageBase extends PrimaryStorageBase {
             handle((PullVolumeSnapshotOnPrimaryStorageMsg) msg);
         } else if (msg instanceof CleanupAllVmMetadataOnPrimaryStorageMsg) {
             handle((CleanupAllVmMetadataOnPrimaryStorageMsg) msg);
+        } else if (msg instanceof EncryptVolumeBitsOnPrimaryStorageMsg) {
+            handle((EncryptVolumeBitsOnPrimaryStorageMsg) msg);
+        } else if (msg instanceof ConvertVolumeEncryptionOnPrimaryStorageMsg) {
+            handle((ConvertVolumeEncryptionOnPrimaryStorageMsg) msg);
         } else {
             super.handleLocalMessage(msg);
         }
+    }
+
+    protected void handle(ConvertVolumeEncryptionOnPrimaryStorageMsg msg) {
+        ConvertVolumeEncryptionOnPrimaryStorageReply reply = new ConvertVolumeEncryptionOnPrimaryStorageReply();
+        if (msg.getVolume() == null || StringUtils.isBlank(msg.getVolume().getUuid())) {
+            reply.setError(operr("convert volume encryption on local primary storage[uuid:%s] requires volume with non-blank uuid",
+                    self.getUuid()));
+            bus.reply(msg, reply);
+            return;
+        }
+
+        String hostUuid = StringUtils.isNotBlank(msg.getHostUuid()) ?
+                msg.getHostUuid() : null;
+        if (StringUtils.isBlank(hostUuid)) {
+            try {
+                hostUuid = getHostUuidByResourceUuid(msg.getVolume().getUuid());
+            } catch (OperationFailureException e) {
+                reply.setError(e.getErrorCode());
+                bus.reply(msg, reply);
+                return;
+            }
+        }
+        if (StringUtils.isBlank(hostUuid)) {
+            reply.setError(operr("cannot determine host for converting volume[uuid:%s] encryption on local primary storage[uuid:%s]",
+                    msg.getVolume().getUuid(), self.getUuid()));
+            bus.reply(msg, reply);
+            return;
+        }
+
+        LocalStorageHypervisorBackend bkd = getHypervisorBackendFactoryByHostUuid(hostUuid).getHypervisorBackend(self);
+        bkd.handle(msg, hostUuid, new ReturnValueCompletion<ConvertVolumeEncryptionOnPrimaryStorageReply>(msg) {
+            @Override
+            public void success(ConvertVolumeEncryptionOnPrimaryStorageReply returnValue) {
+                bus.reply(msg, returnValue);
+            }
+
+            @Override
+            public void fail(ErrorCode errorCode) {
+                reply.setError(errorCode);
+                bus.reply(msg, reply);
+            }
+        });
+    }
+
+    private void handle(EncryptVolumeBitsOnPrimaryStorageMsg msg) {
+        if (StringUtils.isBlank(msg.getHostUuid()) || StringUtils.isBlank(msg.getVolumeUuid())) {
+            EncryptVolumeBitsOnPrimaryStorageReply reply = new EncryptVolumeBitsOnPrimaryStorageReply();
+            reply.setError(operr("encrypt volume bits on local primary storage[uuid:%s] requires non-blank hostUuid and volumeUuid",
+                    self.getUuid()));
+            bus.reply(msg, reply);
+            return;
+        }
+
+        LocalStorageHypervisorBackend bkd = getHypervisorBackendFactoryByHostUuid(msg.getHostUuid()).getHypervisorBackend(self);
+        bkd.handle(msg, new ReturnValueCompletion<EncryptVolumeBitsOnPrimaryStorageReply>(msg) {
+            @Override
+            public void success(EncryptVolumeBitsOnPrimaryStorageReply reply) {
+                bus.reply(msg, reply);
+            }
+
+            @Override
+            public void fail(ErrorCode errorCode) {
+                EncryptVolumeBitsOnPrimaryStorageReply reply = new EncryptVolumeBitsOnPrimaryStorageReply();
+                reply.setError(errorCode);
+                bus.reply(msg, reply);
+            }
+        });
     }
 
     private void handle(DownloadBitsFromKVMHostToPrimaryStorageMsg msg) {

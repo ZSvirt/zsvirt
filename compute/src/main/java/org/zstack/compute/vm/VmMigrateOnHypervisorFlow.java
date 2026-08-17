@@ -53,6 +53,11 @@ public class VmMigrateOnHypervisorFlow implements Flow {
         msg.setMigrateFromDestination(migrateFromDest);
         msg.setStrategy(strategy);
         msg.setDownTime(downTime);
+        @SuppressWarnings("unchecked")
+        Map<String, String> luksSecrets = spec.getExtensionData("VolumeLuksSecrets", Map.class);
+        if (luksSecrets != null) {
+            msg.setVolumeLuksSecrets(luksSecrets);
+        }
         bus.makeTargetServiceIdByResourceUuid(msg, HostConstant.SERVICE_ID, msg.getHostUuid());
         bus.send(msg, new CloudBusCallBack(chain) {
             @Override

@@ -18,6 +18,7 @@ public class CreateDataVolumeFromVolumeTemplateMsg extends NeedReplyMessage impl
     private String hostUuid;
     private String resourceUuid;
     private String accountUuid;
+    private Boolean encrypted;
     private APICreateDataVolumeFromVolumeTemplateMsg apiMsg;
 
     public CreateDataVolumeFromVolumeTemplateMsg() {
@@ -96,5 +97,13 @@ public class CreateDataVolumeFromVolumeTemplateMsg extends NeedReplyMessage impl
 
     public void setApiMsg(APICreateDataVolumeFromVolumeTemplateMsg amsg) {
         this.apiMsg = amsg;
+    }
+
+    public Boolean getEncrypted() {
+        return encrypted;
+    }
+
+    public void setEncrypted(Boolean encrypted) {
+        this.encrypted = encrypted;
     }
 }

@@ -5,10 +5,13 @@ import org.zstack.header.HasThreadContext;
 import org.zstack.header.agent.ReloadableCommand;
 import org.zstack.header.core.validation.Validation;
 import org.zstack.header.errorcode.ErrorCode;
+import org.zstack.header.log.NoLogging;
+import org.zstack.header.storage.primary.ConvertVolumeEncryptionOnPrimaryStorageMsg;
 import org.zstack.header.storage.primary.VmMetadataScanEntry;
 import org.zstack.kvm.KVMAgentCommands;
 import org.zstack.storage.volume.VolumeErrors;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -77,8 +80,12 @@ public class SharedBlockKvmCommands {
     public static final String CLEANUP_VM_METADATA_PATH = "/sharedblock/vm/metadata/cleanup";
     public static final String CLEANUP_ALL_VM_METADATA_PATH = "/sharedblock/vm/metadata/cleanupall";
     public static final String PREFIX_REBASE_BACKING_FILES_PATH = "/sharedblock/snapshot/prefixrebasebackingfiles";
+    @AcquireExVgLock
+    public static final String ENCRYPT_VOLUME_BITS_PATH = "/sharedblock/volume/encryptinplace";
+    @AcquireExVgLock
+    public static final String CONVERT_VOLUME_ENCRYPTION_PATH = "/sharedblock/volume/convertencryption";
 
-    public static class AgentCmd extends KVMAgentCommands.PrimaryStorageCommand {
+    public static class AgentCmd extends KVMAgentCommands.PrimaryStorageCommand implements Serializable {
         public String vgUuid;
         public String hostUuid;
         public String provisioning;
@@ -194,6 +201,8 @@ public class SharedBlockKvmCommands {
         public String installPath;
         public String volumeUuid;
         public long virtualSize;
+        @NoLogging
+        public String encryptedDek;
 
         @Override
         public String getVolumeUuid() {
@@ -245,6 +254,7 @@ public class SharedBlockKvmCommands {
         public String installPath;
         public String volumePath;
         public boolean compareQcow2 = false;
+        public String encryptLuksSecretMaterialFilePath;
     }
 
     public static class CreateImageCacheFromVolumeRsp extends AgentRsp {
@@ -275,6 +285,7 @@ public class SharedBlockKvmCommands {
         public String snapshotInstallPath;
         public String volumeUuid;
         public String installPath;
+        public String encryptLuksSecretMaterialFilePath;
 
         @Override
         public String getVolumeUuid() {
@@ -299,6 +310,7 @@ public class SharedBlockKvmCommands {
         public String volumeUuid;
         public String snapshotInstallPath;
         public String workspaceInstallPath;
+        public String encryptLuksSecretMaterialFilePath;
     }
 
     public static class MergeSnapshotRsp extends AgentRsp {
@@ -342,6 +354,7 @@ public class SharedBlockKvmCommands {
         public boolean fullRebase;
         public boolean sharedVolume = false;
         public String volumeUuid;
+        public String encryptedDek;
 
         @Override
         public String getVolumeUuid() {
@@ -371,6 +384,7 @@ public class SharedBlockKvmCommands {
         public String base;
         public String volumeUuid;
         public List<String> topChildrenInstallPathInDb = new ArrayList<>();
+        public String encryptedDek;
 
         @Override
         public String getVolumeUuid() {
@@ -403,6 +417,8 @@ public class SharedBlockKvmCommands {
         public String volumeFormat;
         public String backingFile;
         public boolean zeroFilled = true;
+        @NoLogging
+        public String encryptedDek;
 
         @Override
         public String getVolumeUuid() {
@@ -425,6 +441,8 @@ public class SharedBlockKvmCommands {
         public String installPath;
         public String volumeUuid;
         public long virtualSize;
+        @NoLogging
+        public String encryptedDek;
 
         @Override
         public String getVolumeUuid() {
@@ -440,6 +458,30 @@ public class SharedBlockKvmCommands {
     public static class CreateDataVolumeWithBackingRsp extends AgentRsp {
         public long actualSize;
         public long size;
+    }
+
+    /**
+     * In-place encryption of a plain volume on a SharedBlock LV. Send to
+     * {@link #ENCRYPT_VOLUME_BITS_PATH}. The agent owns the LV lifecycle:
+     * lvextend the source LV to fit the LUKS header overhead, run a sibling
+     * lvcreate as convert destination, qemu-img convert, dd back, lvremove the
+     * sibling.
+     */
+    public static class EncryptVolumeBitsCmd extends AgentCmd implements HasThreadContext {
+        public String installPath;
+        public String encryptLuksSecretMaterialFilePath;
+    }
+
+    public static class ConvertVolumeEncryptionCmd extends AgentCmd implements HasThreadContext, Serializable {
+        public String volumeUuid;
+        public boolean targetEncrypted;
+        public List<ConvertVolumeEncryptionOnPrimaryStorageMsg.VolumeEncryptionConversionItem> items;
+        @NoLogging
+        public String encryptedDek;
+    }
+
+    public static class ConvertVolumeEncryptionRsp extends AgentRsp {
+        public Map<String, Long> actualSizes = new HashMap<>();
     }
 
     public static class CheckBitsCmd extends AgentCmd {
@@ -485,6 +527,8 @@ public class SharedBlockKvmCommands {
         public boolean force = false;
         public boolean live = false;
         public String volumeUuid;
+        public boolean encrypted = false;
+        public String encryptLuksSecretMaterialFilePath;
 
         @Override
         public String getVolumeUuid() {

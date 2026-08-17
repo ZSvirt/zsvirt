@@ -105,6 +105,9 @@ public class APICreateVmInstanceFromVolumeMsg extends APICreateMessage implement
     @APIParam(required = false, validValues = {"InstantStart", "CreateStopped"})
     private String strategy = VmCreationStrategy.InstantStart.toString();
 
+    @APIParam(required = false)
+    private Boolean vmEncryption;
+
     public String getName() {
         return name;
     }
@@ -228,6 +231,16 @@ public class APICreateVmInstanceFromVolumeMsg extends APICreateMessage implement
 
     public void setStrategy(String strategy) {
         this.strategy = strategy;
+    }
+
+    @Override
+    public Boolean getVmEncryption() {
+        return vmEncryption;
+    }
+
+    @Override
+    public void setVmEncryption(Boolean vmEncryption) {
+        this.vmEncryption = vmEncryption;
     }
 
     public String getPlatform() {

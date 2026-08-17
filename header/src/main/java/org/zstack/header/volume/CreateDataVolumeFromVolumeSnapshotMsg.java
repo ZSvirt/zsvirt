@@ -9,6 +9,7 @@ public class CreateDataVolumeFromVolumeSnapshotMsg extends NeedReplyMessage {
     private String volumeSnapshotUuid;
     private SessionInventory session;
     private Long size;
+    private Boolean encrypted;
 
     public String getName() {
         return name;
@@ -48,5 +49,13 @@ public class CreateDataVolumeFromVolumeSnapshotMsg extends NeedReplyMessage {
 
     public void setSize(Long size) {
         this.size = size;
+    }
+
+    public Boolean getEncrypted() {
+        return encrypted;
+    }
+
+    public void setEncrypted(Boolean encrypted) {
+        this.encrypted = encrypted;
     }
 }

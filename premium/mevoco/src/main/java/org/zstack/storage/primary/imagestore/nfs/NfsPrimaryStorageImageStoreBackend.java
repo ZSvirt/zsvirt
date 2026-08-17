@@ -15,6 +15,7 @@ import org.zstack.header.agent.AgentResponse;
 import org.zstack.header.core.ReturnValueCompletion;
 import org.zstack.header.core.workflow.*;
 import org.zstack.header.errorcode.ErrorCode;
+import org.zstack.header.errorcode.OperationFailureException;
 import org.zstack.header.host.HostConstant;
 import org.zstack.header.host.HypervisorType;
 import org.zstack.header.image.CreateImageExtensionPoint;
@@ -33,6 +34,7 @@ import org.zstack.kvm.KVMConstant;
 import org.zstack.kvm.KVMHostAsyncHttpCallMsg;
 import org.zstack.kvm.KVMHostAsyncHttpCallReply;
 import org.zstack.storage.backup.imagestore.*;
+import org.zstack.storage.encrypt.VolumeEncryptedSecretHelper;
 import org.zstack.storage.primary.PrimaryStorageGlobalConfig;
 import org.zstack.storage.primary.nfs.NfsPrimaryStorage;
 import org.zstack.storage.primary.nfs.NfsPrimaryStorageFactory;
@@ -58,6 +60,8 @@ public class NfsPrimaryStorageImageStoreBackend extends NfsPrimaryStorage {
     private ApiTimeoutManager timeoutMgr;
     @Autowired
     private PluginRegistry pluginRgty;
+    @Autowired
+    private VolumeEncryptedSecretHelper volumeEncryptedSecretHelper;
 
     public static final String COMMIT_PATH = "/nfsprimarystorage/imagestore/commit";
     public static final String RESIZE_VOLUME_PATH = "/nfsprimarystorage/volume/resize";
@@ -151,6 +155,7 @@ public class NfsPrimaryStorageImageStoreBackend extends NfsPrimaryStorage {
         private String installPath;
         private long size;
         private boolean force;
+        private String encryptLuksSecretMaterialFilePath;
 
         public String getInstallPath() {
             return installPath;
@@ -174,6 +179,14 @@ public class NfsPrimaryStorageImageStoreBackend extends NfsPrimaryStorage {
 
         public void setForce(boolean force) {
             this.force = force;
+        }
+
+        public String getEncryptLuksSecretMaterialFilePath() {
+            return encryptLuksSecretMaterialFilePath;
+        }
+
+        public void setEncryptLuksSecretMaterialFilePath(String encryptLuksSecretMaterialFilePath) {
+            this.encryptLuksSecretMaterialFilePath = encryptLuksSecretMaterialFilePath;
         }
     }
 
@@ -252,6 +265,21 @@ public class NfsPrimaryStorageImageStoreBackend extends NfsPrimaryStorage {
         cmd.setInstallPath(volume.getInstallPath());
         cmd.setSize(msg.getSize());
         cmd.setForce(msg.isForce());
+        String secretMaterialPath;
+        try {
+            secretMaterialPath = prepareVolumeSecretMaterialPath(hostUuid, volume);
+        } catch (OperationFailureException e) {
+            reply.setError(e.getErrorCode());
+            bus.reply(msg, reply);
+            return;
+        }
+        if (Boolean.TRUE.equals(volume.getEncrypted()) && secretMaterialPath == null) {
+            reply.setError(operr("failed to prepare LUKS secret material for volume[uuid:%s]",
+                    volume.getUuid()));
+            bus.reply(msg, reply);
+            return;
+        }
+        cmd.setEncryptLuksSecretMaterialFilePath(secretMaterialPath);
 
         KVMHostAsyncHttpCallMsg kmsg = new KVMHostAsyncHttpCallMsg();
         kmsg.setHostUuid(hostUuid);
@@ -279,6 +307,14 @@ public class NfsPrimaryStorageImageStoreBackend extends NfsPrimaryStorage {
                 bus.reply(msg, reply);
             }
         });
+    }
+
+    private String prepareVolumeSecretMaterialPath(String hostUuid, VolumeInventory volume) {
+        if (volume == null || !Boolean.TRUE.equals(volume.getEncrypted())) {
+            return null;
+        }
+
+        return volumeEncryptedSecretHelper.prepareLuksSecretMaterialFileOnHost(hostUuid, volume.getUuid());
     }
 
     private String getVolumeRootImageUuid(String volumeUuid) {

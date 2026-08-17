@@ -34,6 +34,42 @@ public class NkpHealthTracker implements Component, ManagementNodeReadyExtension
     private final Map<String, Tracker> trackers = new ConcurrentHashMap<>();
     private final Object trackerLock = new Object();
 
+    public static class HealthCheckResult {
+        private boolean available;
+        private boolean connected;
+        private Integer statusCode;
+        private String statusMessage;
+
+        static HealthCheckResult of(boolean connected, Integer statusCode, String statusMessage) {
+            HealthCheckResult result = new HealthCheckResult();
+            result.available = connected;
+            result.connected = connected;
+            result.statusCode = statusCode;
+            result.statusMessage = statusMessage;
+            return result;
+        }
+
+        static HealthCheckResult unavailable(String statusMessage) {
+            return of(false, -1, statusMessage);
+        }
+
+        public boolean isAvailable() {
+            return available;
+        }
+
+        public boolean isConnected() {
+            return connected;
+        }
+
+        public Integer getStatusCode() {
+            return statusCode;
+        }
+
+        public String getStatusMessage() {
+            return statusMessage;
+        }
+    }
+
     @Autowired
     private ResourceDestinationMaker destMaker;
     @Autowired
@@ -114,6 +150,10 @@ public class NkpHealthTracker implements Component, ManagementNodeReadyExtension
         trackNkp(nkpUuid);
     }
 
+    public HealthCheckResult checkHealthNow(String nkpUuid) {
+        return doHealthCheck(nkpUuid);
+    }
+
     private void reScanNkp() {
         synchronized (trackerLock) {
             trackers.values().forEach(Tracker::cancel);
@@ -170,11 +210,11 @@ public class NkpHealthTracker implements Component, ManagementNodeReadyExtension
         }
     }
 
-    private void doHealthCheck(String nkpUuid) {
+    private HealthCheckResult doHealthCheck(String nkpUuid) {
         NkpVO nkp = dbf.findByUuid(nkpUuid, NkpVO.class);
         if (nkp == null) {
             untrackNkp(nkpUuid);
-            return;
+            return HealthCheckResult.unavailable(String.format("cannot find nkp[uuid:%s]", nkpUuid));
         }
 
         KeyToolGrpcClient.HealthResult result;
@@ -194,5 +234,6 @@ public class NkpHealthTracker implements Component, ManagementNodeReadyExtension
             nkp.setConnected(connected);
             dbf.update(nkp);
         }
+        return HealthCheckResult.of(connected, result.getStatusCode(), result.getStatusMessage());
     }
 }

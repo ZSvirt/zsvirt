@@ -1080,6 +1080,8 @@ public class LocalStorageFactory implements PrimaryStorageFactory, Component,
         imsg.setVolume(volume);
         imsg.setPrimaryStorageUuid(msg.getPrimaryStorageUuid());
         imsg.setDestHost(HostInventory.valueOf(dbf.findByUuid(hostUuid, HostVO.class)));
+        // For root volume with backing file
+        imsg.setVolumeLuksAgentSpec(msg.getVolumeLuksAgentSpec());
         bus.makeTargetServiceIdByResourceUuid(imsg, PrimaryStorageConstant.SERVICE_ID, msg.getPrimaryStorageUuid());
         bus.send(imsg, new CloudBusCallBack(completion) {
             @Override

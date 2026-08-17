@@ -33,6 +33,7 @@ public class CloneVmInstanceMsg extends NeedReplyMessage implements VmInstanceMe
     private VolumeSnapshotGroupInventory volumeSnapshotGroup;
     private VmCustomSpecificationStruct vmCustomSpecification;
     private Boolean resetTpm;
+    private Boolean vmEncryption;
 
     @Override
     public String getVmInstanceUuid() {
@@ -220,6 +221,14 @@ public class CloneVmInstanceMsg extends NeedReplyMessage implements VmInstanceMe
 
     public void setResetTpm(Boolean resetTpm) {
         this.resetTpm = resetTpm;
+    }
+
+    public Boolean getVmEncryption() {
+        return vmEncryption;
+    }
+
+    public void setVmEncryption(Boolean vmEncryption) {
+        this.vmEncryption = vmEncryption;
     }
 
     public Map<String, DiskAO> getDiskAOsByVolumeUuid() {

@@ -9,6 +9,7 @@ public class CreateImageCacheFromVolumeSnapshotMsg extends NeedReplyMessage impl
     private String imageUuid;
     private String snapshotUuid;
     private String volumeUuid;
+    private Boolean encrypted;
     /**
      * @ignore
      */
@@ -47,5 +48,13 @@ public class CreateImageCacheFromVolumeSnapshotMsg extends NeedReplyMessage impl
 
     public void setSnapshotUuid(String snapshotUuid) {
         this.snapshotUuid = snapshotUuid;
+    }
+
+    public Boolean getEncrypted() {
+        return encrypted;
+    }
+
+    public void setEncrypted(Boolean encrypted) {
+        this.encrypted = encrypted;
     }
 }

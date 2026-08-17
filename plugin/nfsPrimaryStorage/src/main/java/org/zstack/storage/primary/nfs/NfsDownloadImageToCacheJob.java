@@ -47,6 +47,10 @@ public class NfsDownloadImageToCacheJob implements Job {
     private PrimaryStorageInventory primaryStorage;
     @JobContext
     private String volumeResourceInstallPath;
+    @JobContext
+    private String volumeSnapshotUuid;
+    @JobContext
+    private Boolean encrypted;
 
     @Autowired
     private NfsPrimaryStorageFactory nfsFactory;
@@ -175,7 +179,8 @@ public class NfsDownloadImageToCacheJob implements Job {
                             }
                         };
 
-                        bkd.createImageCacheFromVolumeResource(primaryStorage, volumeResourceInstallPath, image.getInventory(), compl);
+                        bkd.createImageCacheFromVolumeResource(primaryStorage, volumeResourceInstallPath,
+                                image.getInventory(), volumeSnapshotUuid, encrypted, compl);
                     }
 
                     private void downloadFromBackupStorage(FlowTrigger trigger) {
@@ -318,5 +323,13 @@ public class NfsDownloadImageToCacheJob implements Job {
 
     public void setVolumeResourceInstallPath(String volumeResourceInstallPath) {
         this.volumeResourceInstallPath = volumeResourceInstallPath;
+    }
+
+    public void setVolumeSnapshotUuid(String volumeSnapshotUuid) {
+        this.volumeSnapshotUuid = volumeSnapshotUuid;
+    }
+
+    public void setEncrypted(Boolean encrypted) {
+        this.encrypted = encrypted;
     }
 }

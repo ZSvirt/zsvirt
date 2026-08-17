@@ -34,7 +34,7 @@ public class GetTrashOnPrimaryStorageAction extends AbstractAction {
     @Param(required = false, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
     public java.lang.String resourceType;
 
-    @Param(required = false, validValues = {"MigrateVolume","MigrateVolumeSnapshot","RevertVolume","VolumeSnapshot"}, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
+    @Param(required = false, validValues = {"MigrateVolume","MigrateVolumeSnapshot","ConvertVolumeEncryption","ConvertVolumeSnapshotEncryption","RevertVolume","VolumeSnapshot","ReimageVolume"}, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
     public java.lang.String trashType;
 
     @Param(required = false)

@@ -24,6 +24,7 @@ import org.zstack.header.errorcode.ErrorCodeList;
 import org.zstack.header.identity.AccountResourceRefVO;
 import org.zstack.header.identity.AccountResourceRefVO_;
 import org.zstack.header.message.MessageReply;
+import org.zstack.header.storage.migration.KvmStorageLiveMigrationExtensionPoint;
 import org.zstack.header.storage.primary.*;
 import org.zstack.header.storage.snapshot.*;
 import org.zstack.header.storage.snapshot.group.VolumeSnapshotGroupRefVO;
@@ -198,6 +199,7 @@ public class KvmStorageLiveMigrationFlowChain {
         //  - feed old/new volume uuid, returns new/old volume uuid.
         final Map<String, String> volumeMappingDict = ctx.getVolumeMappingDict();
         final Map<String, String> volumeAllocatedUrlDict = new HashMap<>();
+        final Map<String, Long> sourceVolumeVirtualSizes = new HashMap<>();
         final List<VolumeInventory> createdVolumes = ctx.getCreatedVolumes();
         final List<VolumeInventory> initializedVolumes = ctx.getInitializedVolumes();
 
@@ -215,6 +217,16 @@ public class KvmStorageLiveMigrationFlowChain {
         chain.setName(flowChainName);
 
         paramIn.getTemplate().getPrepareFlows(paramIn).forEach(chain::then);
+        for (KvmStorageLiveMigrationExtensionPoint ext : pluginRgty.getExtensionList(KvmStorageLiveMigrationExtensionPoint.class)) {
+            List<Flow> flows = ext.getAllocateTemporaryVolumeFlow(
+                    msg.getVmInstanceUuid(),
+                    paramIn.getVmInstanceInventory().getHostUuid(),
+                    finalVolumes,
+                    sourceVolumeVirtualSizes);
+            if (flows != null) {
+                flows.forEach(chain::then);
+            }
+        }
 
         chain.then(new Flow() {
             String __name__ = "allocate-volume-on-ps-" + dstPsLabel();
@@ -238,6 +250,14 @@ public class KvmStorageLiveMigrationFlowChain {
                                     map(e(VolumeSystemTags.VOLUME_PROVISIONING_STRATEGY_TOKEN, volumeProvisioningStrategy))
                             )
                     ));
+                    for (KvmStorageLiveMigrationExtensionPoint ext : pluginRgty.getExtensionList(KvmStorageLiveMigrationExtensionPoint.class)) {
+                        ErrorCode extErr = ext.preCreateTemporaryVolume(cmsg, volumeVO, sourceVolumeVirtualSizes);
+                        if (extErr != null) {
+                            err[0] = extErr;
+                            whileCompletion.allDone();
+                            return;
+                        }
+                    }
 
                     bus.makeLocalServiceId(cmsg, VolumeConstant.SERVICE_ID);
                     bus.send(cmsg, new CloudBusCallBack(whileCompletion) {
@@ -250,9 +270,17 @@ public class KvmStorageLiveMigrationFlowChain {
                             }
 
                             CreateVolumeReply r = reply.castReply();
+                            createdVolumes.add(r.getInventory());
+                            for (KvmStorageLiveMigrationExtensionPoint ext : pluginRgty.getExtensionList(KvmStorageLiveMigrationExtensionPoint.class)) {
+                                ErrorCode extErr = ext.afterCreateTemporaryVolume(volumeVO, r.getInventory());
+                                if (extErr != null) {
+                                    err[0] = extErr;
+                                    whileCompletion.allDone();
+                                    return;
+                                }
+                            }
                             volumeMappingDict.put(r.getInventory().getUuid(), volumeVO.getUuid());
                             volumeMappingDict.put(volumeVO.getUuid(), r.getInventory().getUuid());
-                            createdVolumes.add(r.getInventory());
                             whileCompletion.done();
                         }
                     });
@@ -371,10 +399,23 @@ public class KvmStorageLiveMigrationFlowChain {
                     String dstPs = volToDst.get(srcUuid);
                     imsg.setOriginVolumeUuid(srcUuid);
                     imsg.setPrimaryStorageUuid(dstPs);
-                    imsg.setVolume(VolumeInventory.valueOf(dbf.findByUuid(volTempUuid, VolumeVO.class)));
+                    VolumeInventory tempVolume = VolumeInventory.valueOf(dbf.findByUuid(volTempUuid, VolumeVO.class));
+                    imsg.setVolume(tempVolume);
                     imsg.setDestHost(paramIn.getDstHostInventory());
                     imsg.setSystemTags(msg.getSystemTags());
                     imsg.setAllocatedInstallUrl(volumeAllocatedUrlDict.get(volTempUuid));
+
+                    for (KvmStorageLiveMigrationExtensionPoint ext : pluginRgty.getExtensionList(KvmStorageLiveMigrationExtensionPoint.class)) {
+                        ErrorCode extErr = ext.beforeInstantiateTemporaryVolume(
+                                paramIn.getDstHostInventory().getUuid(),
+                                tempVolume,
+                                imsg);
+                        if (extErr != null) {
+                            err[0] = extErr;
+                            whileCompletion.allDone();
+                            return;
+                        }
+                    }
 
                     bus.makeTargetServiceIdByResourceUuid(imsg, PrimaryStorageConstant.SERVICE_ID, dstPs);
                     bus.send(imsg, new CloudBusCallBack(whileCompletion) {

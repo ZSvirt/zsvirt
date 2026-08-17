@@ -30,6 +30,11 @@ public abstract class SharedBlockHypervisorBackend extends SharedBlockGroupPrima
 
     abstract void handle(InstantiateVolumeOnPrimaryStorageMsg msg, ReturnValueCompletion<InstantiateVolumeOnPrimaryStorageReply> completion);
 
+    abstract void handle(EncryptVolumeBitsOnPrimaryStorageMsg msg, ReturnValueCompletion<EncryptVolumeBitsOnPrimaryStorageReply> completion);
+
+    abstract void handle(ConvertVolumeEncryptionOnPrimaryStorageMsg msg, String hostUuid,
+                         ReturnValueCompletion<ConvertVolumeEncryptionOnPrimaryStorageReply> completion);
+
     abstract void handle(DownloadVolumeTemplateToPrimaryStorageMsg msg, ReturnValueCompletion<DownloadVolumeTemplateToPrimaryStorageReply> completion);
 
     abstract void handle(DeleteVolumeOnPrimaryStorageMsg msg, ReturnValueCompletion<DeleteVolumeOnPrimaryStorageReply> completion);

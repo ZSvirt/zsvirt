@@ -2,12 +2,15 @@ package org.zstack.storage.primary.nfs;
 
 import org.zstack.header.HasThreadContext;
 import org.zstack.header.core.validation.Validation;
-import org.zstack.header.volume.VolumeConstant;
+import org.zstack.header.log.NoLogging;
 import org.zstack.header.storage.primary.VmMetadataScanEntry;
+import org.zstack.header.storage.primary.ConvertVolumeEncryptionOnPrimaryStorageMsg;
+import org.zstack.header.volume.VolumeConstant;
 import org.zstack.kvm.KVMAgentCommands;
 import org.zstack.kvm.KVMAgentCommands.AgentCommand;
 import org.zstack.kvm.KVMAgentCommands.AgentResponse;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -35,7 +38,7 @@ public class NfsPrimaryStorageKVMBackendCommands {
         }
     }
 
-    public static class NfsPrimaryStorageAgentCommand extends KVMAgentCommands.PrimaryStorageCommand {
+    public static class NfsPrimaryStorageAgentCommand extends KVMAgentCommands.PrimaryStorageCommand implements Serializable {
         private String uuid;
 
         public String getUuid() {
@@ -145,6 +148,7 @@ public class NfsPrimaryStorageKVMBackendCommands {
     public static class CreateTemplateFromVolumeCmd extends NfsPrimaryStorageAgentCommand implements HasThreadContext{
         private String installPath;
         private String rootVolumePath;
+        private String encryptLuksSecretMaterialFilePath;
 
         public String getInstallPath() {
             return installPath;
@@ -158,6 +162,12 @@ public class NfsPrimaryStorageKVMBackendCommands {
         }
         public void setVolumePath(String rootVolumePath) {
             this.rootVolumePath = rootVolumePath;
+        }
+        public String getEncryptLuksSecretMaterialFilePath() {
+            return encryptLuksSecretMaterialFilePath;
+        }
+        public void setEncryptLuksSecretMaterialFilePath(String encryptLuksSecretMaterialFilePath) {
+            this.encryptLuksSecretMaterialFilePath = encryptLuksSecretMaterialFilePath;
         }
     }
     public static class CreateTemplateFromVolumeRsp extends NfsPrimaryStorageAgentResponse {
@@ -371,6 +381,8 @@ public class NfsPrimaryStorageKVMBackendCommands {
     public static class CreateRootVolumeFromTemplateCmd extends CreateVolumeCmd {
         private String templatePathInCache;
         private long timeout;
+        @NoLogging
+        private String encryptedDek;
 
         public long getTimeout() {
             return timeout;
@@ -384,6 +396,14 @@ public class NfsPrimaryStorageKVMBackendCommands {
         public void setTemplatePathInCache(String templatePathInCache) {
             this.templatePathInCache = templatePathInCache;
         }
+
+        public String getEncryptedDek() {
+            return encryptedDek;
+        }
+
+        public void setEncryptedDek(String encryptedDek) {
+            this.encryptedDek = encryptedDek;
+        }
     }
     
     public static class CreateRootVolumeFromTemplateResponse extends NfsPrimaryStorageAgentResponse {
@@ -391,14 +411,58 @@ public class NfsPrimaryStorageKVMBackendCommands {
         public Long size;
     }
 
-    public static class CreateVolumeWithBackingCmd extends CreateVolumeCmd {
+    public static class CreateVolumeWithBackingCmd extends NfsPrimaryStorageAgentCommand {
+        private String installUrl;
+        private String accountUuid;
+        private String hypervisorType;
+        private String volumeUuid;
+        protected long virtualSize;
         private String templatePathInCache;
+        @NoLogging
+        private String encryptedDek;
+
+        public String getInstallUrl() {
+            return installUrl;
+        }
+        public void setInstallUrl(String installUrl) {
+            this.installUrl = installUrl;
+        }
+        public String getAccountUuid() {
+            return accountUuid;
+        }
+        public void setAccountUuid(String accountUuid) {
+            this.accountUuid = accountUuid;
+        }
+        public String getHypervisorType() {
+            return hypervisorType;
+        }
+        public void setHypervisorType(String hypervisorType) {
+            this.hypervisorType = hypervisorType;
+        }
+        public String getVolumeUuid() {
+            return volumeUuid;
+        }
+        public void setVolumeUuid(String volumeUuid) {
+            this.volumeUuid = volumeUuid;
+        }
+        public long getVirtualSize() {
+            return virtualSize;
+        }
+        public void setVirtualSize(long virtualSize) {
+            this.virtualSize = virtualSize;
+        }
 
         public String getTemplatePathInCache() {
             return templatePathInCache;
         }
         public void setTemplatePathInCache(String templatePathInCache) {
             this.templatePathInCache = templatePathInCache;
+        }
+        public String getEncryptedDek() {
+            return encryptedDek;
+        }
+        public void setEncryptedDek(String encryptedDek) {
+            this.encryptedDek = encryptedDek;
         }
     }
 
@@ -424,6 +488,8 @@ public class NfsPrimaryStorageKVMBackendCommands {
         private long size;
         private boolean withoutVolume;
         private String backingFile;
+        @NoLogging
+        private String encryptedDek;
 
         public long getSize() {
             return size;
@@ -447,10 +513,38 @@ public class NfsPrimaryStorageKVMBackendCommands {
         public void setBackingFile(String backingFile) {
             this.backingFile = backingFile;
         }
+
+        public String getEncryptedDek() {
+            return encryptedDek;
+        }
+
+        public void setEncryptedDek(String encryptedDek) {
+            this.encryptedDek = encryptedDek;
+        }
     }
     public static class CreateEmptyVolumeResponse extends NfsPrimaryStorageAgentResponse {
         public Long actualSize;
         public Long size;
+    }
+
+    public static class EncryptVolumeBitsCmd extends NfsPrimaryStorageAgentCommand {
+        public String installPath;
+        public String encryptLuksSecretMaterialFilePath;
+    }
+
+    public static class EncryptVolumeBitsRsp extends NfsPrimaryStorageAgentResponse {
+    }
+
+    public static class ConvertVolumeEncryptionCmd extends NfsPrimaryStorageAgentCommand implements Serializable {
+        public String volumeUuid;
+        public boolean targetEncrypted;
+        public List<ConvertVolumeEncryptionOnPrimaryStorageMsg.VolumeEncryptionConversionItem> items;
+        @NoLogging
+        public String encryptedDek;
+    }
+
+    public static class ConvertVolumeEncryptionRsp extends NfsPrimaryStorageAgentResponse {
+        public Map<String, Long> actualSizes;
     }
 
     public static class DeleteCmd extends NfsPrimaryStorageAgentCommand {
@@ -512,6 +606,7 @@ public class NfsPrimaryStorageKVMBackendCommands {
     
     public static class RevertVolumeFromSnapshotCmd extends NfsPrimaryStorageAgentCommand {
         private String snapshotInstallPath;
+        private String encryptLuksSecretMaterialFilePath;
 
         public String getSnapshotInstallPath() {
             return snapshotInstallPath;
@@ -519,6 +614,14 @@ public class NfsPrimaryStorageKVMBackendCommands {
 
         public void setSnapshotInstallPath(String snapshotInstallPath) {
             this.snapshotInstallPath = snapshotInstallPath;
+        }
+
+        public String getEncryptLuksSecretMaterialFilePath() {
+            return encryptLuksSecretMaterialFilePath;
+        }
+
+        public void setEncryptLuksSecretMaterialFilePath(String encryptLuksSecretMaterialFilePath) {
+            this.encryptLuksSecretMaterialFilePath = encryptLuksSecretMaterialFilePath;
         }
     }
 
@@ -549,6 +652,7 @@ public class NfsPrimaryStorageKVMBackendCommands {
     public static class ReInitImageCmd extends NfsPrimaryStorageAgentCommand {
         private String imagePath;
         private String volumePath;
+        private String encryptLuksSecretMaterialFilePath;
 
         public String getImagePath() {
             return imagePath;
@@ -564,6 +668,14 @@ public class NfsPrimaryStorageKVMBackendCommands {
 
         public void setVolumePath(String volumePath) {
             this.volumePath = volumePath;
+        }
+
+        public String getEncryptLuksSecretMaterialFilePath() {
+            return encryptLuksSecretMaterialFilePath;
+        }
+
+        public void setEncryptLuksSecretMaterialFilePath(String encryptLuksSecretMaterialFilePath) {
+            this.encryptLuksSecretMaterialFilePath = encryptLuksSecretMaterialFilePath;
         }
     }
 
@@ -639,6 +751,7 @@ public class NfsPrimaryStorageKVMBackendCommands {
         private String volumeUuid;
         private String snapshotInstallPath;
         private String workspaceInstallPath;
+        private String encryptLuksSecretMaterialFilePath;
 
         public String getVolumeUuid() {
             return volumeUuid;
@@ -662,6 +775,14 @@ public class NfsPrimaryStorageKVMBackendCommands {
 
         public void setWorkspaceInstallPath(String workspaceInstallPath) {
             this.workspaceInstallPath = workspaceInstallPath;
+        }
+
+        public String getEncryptLuksSecretMaterialFilePath() {
+            return encryptLuksSecretMaterialFilePath;
+        }
+
+        public void setEncryptLuksSecretMaterialFilePath(String encryptLuksSecretMaterialFilePath) {
+            this.encryptLuksSecretMaterialFilePath = encryptLuksSecretMaterialFilePath;
         }
     }
 
@@ -765,6 +886,7 @@ public class NfsPrimaryStorageKVMBackendCommands {
         private String srcPath;
         private String destPath;
         private boolean fullRebase;
+        private String encryptedDek;
 
         public boolean isFullRebase() {
             return fullRebase;
@@ -789,6 +911,14 @@ public class NfsPrimaryStorageKVMBackendCommands {
         public void setDestPath(String destPath) {
             this.destPath = destPath;
         }
+
+        public String getEncryptedDek() {
+            return encryptedDek;
+        }
+
+        public void setEncryptedDek(String encryptedDek) {
+            this.encryptedDek = encryptedDek;
+        }
     }
 
     public static class OfflineMergeSnapshotRsp extends NfsPrimaryStorageAgentResponse {
@@ -807,6 +937,7 @@ public class NfsPrimaryStorageKVMBackendCommands {
         public String top;
         public String base;
         public List<String> topChildrenInstallPathInDb = new ArrayList<>();
+        public String encryptedDek;
     }
 
     public static class OfflineCommitSnapshotRsp extends NfsPrimaryStorageAgentResponse {

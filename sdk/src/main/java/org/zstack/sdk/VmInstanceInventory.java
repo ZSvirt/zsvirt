@@ -180,6 +180,30 @@ public class VmInstanceInventory  {
         return this.lastOpDate;
     }
 
+    public java.lang.Boolean vmEncryption;
+    public void setVmEncryption(java.lang.Boolean vmEncryption) {
+        this.vmEncryption = vmEncryption;
+    }
+    public java.lang.Boolean getVmEncryption() {
+        return this.vmEncryption;
+    }
+
+    public java.lang.Boolean hasEncryptionResource;
+    public void setHasEncryptionResource(java.lang.Boolean hasEncryptionResource) {
+        this.hasEncryptionResource = hasEncryptionResource;
+    }
+    public java.lang.Boolean getHasEncryptionResource() {
+        return this.hasEncryptionResource;
+    }
+
+    public java.sql.Timestamp keyLastOpDate;
+    public void setKeyLastOpDate(java.sql.Timestamp keyLastOpDate) {
+        this.keyLastOpDate = keyLastOpDate;
+    }
+    public java.sql.Timestamp getKeyLastOpDate() {
+        return this.keyLastOpDate;
+    }
+
     public java.lang.String state;
     public void setState(java.lang.String state) {
         this.state = state;

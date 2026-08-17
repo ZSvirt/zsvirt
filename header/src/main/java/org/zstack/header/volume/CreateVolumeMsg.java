@@ -16,6 +16,7 @@ public class CreateVolumeMsg extends NeedReplyMessage implements VolumeCreateMes
     private String format;
     private String resourceUuid;
     private String protocol;
+    private Boolean encrypted;
 
     public String getFormat() {
         return format;
@@ -129,5 +130,15 @@ public class CreateVolumeMsg extends NeedReplyMessage implements VolumeCreateMes
 
     public void setProtocol(String protocol) {
         this.protocol = protocol;
+    }
+
+    @Override
+    public Boolean getEncrypted() {
+        return encrypted;
+    }
+
+    @Override
+    public void setEncrypted(Boolean encrypted) {
+        this.encrypted = encrypted;
     }
 }

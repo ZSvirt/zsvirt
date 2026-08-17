@@ -52,6 +52,7 @@ import org.zstack.header.storage.snapshot.*;
 import org.zstack.header.vm.*;
 import org.zstack.header.vm.metadata.*;
 import org.zstack.header.volume.*;
+import org.zstack.storage.encrypt.VolumeEncryptedTrashCleanupHelper;
 import org.zstack.storage.volume.VolumeUtils;
 import org.zstack.utils.CollectionDSL;
 import org.zstack.utils.DebugUtils;
@@ -100,6 +101,8 @@ public abstract class PrimaryStorageBase extends AbstractPrimaryStorage {
     protected StorageTrash trash;
     @Autowired
     protected PrimaryStoragePhysicalCapacityManager physicalCapacityMgr;
+    @Autowired
+    private VolumeEncryptedTrashCleanupHelper volumeEncryptedTrashCleanupHelper;
     @Autowired
     private PluginRegistry pluginRgty;
 
@@ -179,6 +182,13 @@ public abstract class PrimaryStorageBase extends AbstractPrimaryStorage {
 
     protected abstract void handle(GetVolumeSnapshotEncryptedOnPrimaryStorageMsg msg);
 
+    protected void handle(ConvertVolumeEncryptionOnPrimaryStorageMsg msg) {
+        ConvertVolumeEncryptionOnPrimaryStorageReply reply = new ConvertVolumeEncryptionOnPrimaryStorageReply();
+        reply.setError(operr("primary storage[type:%s, uuid:%s] does not support volume encryption conversion",
+                self.getType(), self.getUuid()));
+        bus.reply(msg, reply);
+    }
+
     public PrimaryStorageBase(PrimaryStorageVO self) {
         this.self = self;
     }
@@ -191,7 +201,9 @@ public abstract class PrimaryStorageBase extends AbstractPrimaryStorage {
         return String.format("primaryStorage-%s", self.getUuid());
     }
 
-    protected static List<TrashType> trashLists = CollectionDSL.list(TrashType.MigrateVolume, TrashType.MigrateVolumeSnapshot, TrashType.RevertVolume, TrashType.VolumeSnapshot, TrashType.ReimageVolume);
+    protected static List<TrashType> trashLists = CollectionDSL.list(TrashType.MigrateVolume, TrashType.MigrateVolumeSnapshot,
+            TrashType.ConvertVolumeEncryption, TrashType.ConvertVolumeSnapshotEncryption,
+            TrashType.RevertVolume, TrashType.VolumeSnapshot, TrashType.ReimageVolume);
 
     protected void fireDisconnectedCanonicalEvent(ErrorCode reason) {
         PrimaryStorageCanonicalEvent.DisconnectedData data = new PrimaryStorageCanonicalEvent.DisconnectedData();
@@ -418,6 +430,8 @@ public abstract class PrimaryStorageBase extends AbstractPrimaryStorage {
             handle((UnlinkBitsOnPrimaryStorageMsg) msg);
         } else if (msg instanceof GetVolumeSnapshotEncryptedOnPrimaryStorageMsg) {
             handle((GetVolumeSnapshotEncryptedOnPrimaryStorageMsg) msg);
+        } else if (msg instanceof ConvertVolumeEncryptionOnPrimaryStorageMsg) {
+            handle((ConvertVolumeEncryptionOnPrimaryStorageMsg) msg);
         } else if (msg instanceof DeleteVolumeChainOnPrimaryStorageMsg) {
             handle((DeleteVolumeChainOnPrimaryStorageMsg) msg);
         } else if (msg instanceof CleanUpStorageTrashOnPrimaryStorageMsg) {
@@ -1098,6 +1112,7 @@ public abstract class PrimaryStorageBase extends AbstractPrimaryStorage {
                     imsg.setAllocatedInstallUrl(allocatedInstallUrl);
                     bus.makeTargetServiceIdByResourceUuid(imsg, PrimaryStorageConstant.SERVICE_ID, self.getUuid());
                     bus.send(imsg);
+                    volumeEncryptedTrashCleanupHelper.cleanupKeyRefAfterTrashDeleted(inv);
                     trash.removeFromDb(trashId);
                     logger.info(String.format("Returned space[size:%s] to PS %s after volume migration", inv.getSize(), self.getUuid()));
                     completion.success(new TrashCleanupResult(inv.getResourceUuid(), inv.getTrashId(), inv.getSize()));

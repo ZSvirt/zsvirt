@@ -176,6 +176,10 @@ public class SharedBlockImageStoreKvmBackend extends SharedBlockKvmBackend {
         cmd.live = false;
         cmd.force = msg.isForce();
         cmd.volumeUuid = volume.getUuid();
+        cmd.encrypted = Boolean.TRUE.equals(volume.getEncrypted());
+        if (cmd.encrypted) {
+            cmd.encryptLuksSecretMaterialFilePath = prepareVolumeSecretMaterialPath(hosts.get(0).getUuid(), volume);
+        }
         httpCall(SharedBlockKvmCommands.RESIZE_VOLUME_PATH, hosts.get(0).getUuid(), cmd, SharedBlockKvmCommands.ResizeVolumeRsp.class, new ReturnValueCompletion<SharedBlockKvmCommands.ResizeVolumeRsp>(msg) {
             @Override
             public void success(SharedBlockKvmCommands.ResizeVolumeRsp rsp) {

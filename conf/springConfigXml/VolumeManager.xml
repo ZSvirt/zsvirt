@@ -92,4 +92,77 @@
             <zstack:extension interface="org.zstack.header.volume.VolumeAttachedJudger"/>
         </zstack:plugin>
     </bean>
+
+    <bean id="DummyVolumeEncryptedResourceKeyBackend"
+          class="org.zstack.storage.encrypt.DummyVolumeEncryptedResourceKeyBackend"/>
+
+    <bean id="VolumeInPlaceEncryptor" class="org.zstack.storage.volume.VolumeInPlaceEncryptor"/>
+
+    <bean id="VolumeEncryptedSecretHelper" class="org.zstack.storage.encrypt.VolumeEncryptedSecretHelper"/>
+    <bean id="VolumeEncryptedTrashCleanupHelper" class="org.zstack.storage.encrypt.VolumeEncryptedTrashCleanupHelper"/>
+
+    <bean id="VolumeSnapshotEncryptionHelper" class="org.zstack.storage.encrypt.VolumeSnapshotEncryptionHelper"/>
+
+    <bean id="VolumeSnapshotEncryptionExtension" class="org.zstack.storage.encrypt.VolumeSnapshotEncryptionExtension">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.kvm.KVMTakeSnapshotExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.storage.snapshot.BeforeTakeLiveSnapshotsOnVolumes"/>
+            <zstack:extension interface="org.zstack.header.storage.snapshot.VolumeSnapshotCreationExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.storage.snapshot.VolumeSnapshotAfterDeleteExtensionPoint"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="VolumeEncryptedInitialExtension" class="org.zstack.storage.encrypt.VolumeEncryptedInitialExtension">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.volume.PreInstantiateVolumeExtensionPoint" order="-5"/>
+            <zstack:extension interface="org.zstack.header.volume.AfterInstantiateVolumeExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.volume.CreateDataVolumeExtensionPoint"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="VolumeEncryptedStartExtension" class="org.zstack.storage.encrypt.VolumeEncryptedStartExtension">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.vm.VmBeforeStartOnHypervisorExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.vm.VmBeforeCreateOnHypervisorExtensionPoint"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="VolumeEncryptedAttachExtension" class="org.zstack.storage.encrypt.VolumeEncryptedAttachExtension">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.kvm.KVMAttachVolumeExtensionPoint"/>
+            <zstack:extension interface="org.zstack.kvm.KVMConvertVolumeExtensionPoint"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="VolumeEncryptedExpungeExtension" class="org.zstack.storage.encrypt.VolumeEncryptedExpungeExtension">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.volume.VolumeJustBeforeDeleteFromDbExtensionPoint"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="VolumeEncryptedMigrateVmExtension" class="org.zstack.storage.encrypt.VolumeEncryptedMigrateVmExtension">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.vm.VmPreMigrationExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.vm.VmInstanceMigrateExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.vm.VmStateChangedExtensionPoint"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="VolumeEncryptedStorageLiveMigrationPrepareBlockMigrationExtension" class="org.zstack.storage.encrypt.VolumeEncryptedStorageLiveMigrationPrepareBlockMigrationExtension">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.storage.migration.KvmBlockLiveMigrationExtensionPoint"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="VolumeEncryptedMigrateVmWithStorageExtension" class="org.zstack.storage.encrypt.VolumeEncryptedMigrateVmWithStorageExtension">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.storage.migration.KvmMigrateVmWithStorageExtensionPoint"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="VolumeEncryptedStorageLiveMigrationPrepareTargetVolumeExtension" class="org.zstack.storage.encrypt.VolumeEncryptedStorageLiveMigrationPrepareTargetVolumeExtension">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.storage.migration.KvmStorageLiveMigrationExtensionPoint"/>
+        </zstack:plugin>
+    </bean>
 </beans>

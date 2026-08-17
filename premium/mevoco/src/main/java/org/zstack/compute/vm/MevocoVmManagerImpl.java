@@ -52,6 +52,7 @@ import org.zstack.header.volume.VolumeVO_;
 import org.zstack.kvm.KVMConstant;
 import org.zstack.resourceconfig.ResourceConfigFacade;
 import org.zstack.storage.ceph.CephConstants;
+import org.zstack.storage.encrypt.SnapshotGroupRevertVolumeEncryptionHelper;
 import org.zstack.tag.TagManager;
 import org.zstack.storage.snapshot.group.VolumeSnapshotGroupBase;
 import org.zstack.utils.Utils;
@@ -255,7 +256,15 @@ public class MevocoVmManagerImpl implements VmInstanceExtensionManager, BeforeVm
                 .find();
 
         VolumeSnapshotGroupVO group = Q.New(VolumeSnapshotGroupVO.class).eq(VolumeSnapshotGroupVO_.uuid, msg.getVolumeSnapshotGroupUuid()).find();
-        List<VolumeSnapshotVO> snaps = new VolumeSnapshotGroupBase(group).getEffectiveSnapshots();
+        List<VolumeSnapshotVO> allSnaps = new VolumeSnapshotGroupBase(group).getEffectiveSnapshots();
+        ErrorCode err = new SnapshotGroupRevertVolumeEncryptionHelper().validateVolumeSnapshotEncryption(msg, allSnaps);
+        if (err != null) {
+            event.setError(err);
+            bus.publish(event);
+            return;
+        }
+
+        List<VolumeSnapshotVO> snaps = new ArrayList<>(allSnaps);
         snaps.removeIf(it -> !it.getVolumeType().equals(VolumeType.Data.toString()));
 
         spec.setApiMsg(msg);

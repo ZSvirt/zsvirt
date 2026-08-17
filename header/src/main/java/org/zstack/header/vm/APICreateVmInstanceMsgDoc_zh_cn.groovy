@@ -338,6 +338,15 @@ doc {
 					optional true
 					since "zsv 4.10.10"
 				}
+				column {
+					name "vmEncryption"
+					enclosedIn "params"
+					desc "虚拟机是否加密"
+					location "body"
+					type "Boolean"
+					optional true
+					since "1.0.1, zsv_5.1.0"
+				}
 			}
 		}
 

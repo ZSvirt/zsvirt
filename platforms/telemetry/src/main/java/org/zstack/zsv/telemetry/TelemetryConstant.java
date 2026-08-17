@@ -38,7 +38,7 @@ public class TelemetryConstant {
      */
     public static final String CLOUD_TLS_CERT_HOSTNAME = "telemetry.local";
 
-    public static final String LICENSE_TYPE_PLACEHOLDER = "Communicate";
+    public static final String LICENSE_TYPE_PLACEHOLDER = "Community";
 
     public static final String LOCAL_ROOT_DIR = "/var/lib/zstack/telemetry";
     public static final String LOCAL_DIR_PERMISSION = "rwx------";

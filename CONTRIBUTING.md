@@ -14,7 +14,7 @@ Before contributing, please read:
 - [Code of Conduct](CODE_OF_CONDUCT.md)
 - [Governance](GOVERNANCE.md)
 - [Security Policy](SECURITY.md)
-- [License](LICENSE.txt)
+- [License](LICENSE)
 
 By participating in this project, you are expected to follow the project Code of Conduct.
 

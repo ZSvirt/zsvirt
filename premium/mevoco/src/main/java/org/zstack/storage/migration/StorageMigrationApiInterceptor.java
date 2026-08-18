@@ -24,6 +24,7 @@ import org.zstack.header.storage.backup.BackupStorageState;
 import org.zstack.header.storage.backup.BackupStorageVO;
 import org.zstack.header.storage.primary.PrimaryStorageClusterRefVO;
 import org.zstack.header.storage.primary.PrimaryStorageState;
+import org.zstack.header.storage.primary.PrimaryStorageStatus;
 import org.zstack.header.storage.primary.PrimaryStorageVO;
 import org.zstack.header.storage.primary.PrimaryStorageVO_;
 import org.zstack.header.vm.VmInstanceState;
@@ -95,8 +96,11 @@ public class StorageMigrationApiInterceptor implements GlobalApiMessageIntercept
         } else if (msg instanceof APIPrimaryStorageMigrateVolumeMsg) {
             validate((APIPrimaryStorageMigrateVolumeMsg) msg);
         } else if (msg instanceof APIPrimaryStorageMigrateVmMsg) {
-            normalize((APIPrimaryStorageMigrateVmMsg) msg);
-            validate((APIPrimaryStorageMigrateVmMsg) msg);
+            APIPrimaryStorageMigrateVmMsg mmsg = (APIPrimaryStorageMigrateVmMsg) msg;
+            boolean legacyRootOnly = isLegacyRootOnly(mmsg);
+            mmsg.setLegacyRootOnlyMigration(legacyRootOnly);
+            normalize(mmsg);
+            validate(mmsg, legacyRootOnly);
         }
 
         return msg;
@@ -139,6 +143,12 @@ public class StorageMigrationApiInterceptor implements GlobalApiMessageIntercept
                 vm, msg.getVolumeMigrationAOs(), msg.getDstPrimaryStorageUuid(), msg.isWithDataVolumes(), msg.isWithSnapshots()));
     }
 
+    private boolean isLegacyRootOnly(APIPrimaryStorageMigrateVmMsg msg) {
+        return (msg.getVolumeMigrationAOs() == null || msg.getVolumeMigrationAOs().isEmpty())
+                && msg.getDstPrimaryStorageUuid() != null
+                && !msg.isWithDataVolumes();
+    }
+
     private boolean isFullVmMigration(VmInstanceVO vm, List<VolumeMigrationAO> specs) {
         if (specs == null || specs.isEmpty()) {
             return true;
@@ -153,6 +163,25 @@ public class StorageMigrationApiInterceptor implements GlobalApiMessageIntercept
             }
         }
         return true;
+    }
+
+    private void validateVmStorageLayout(VmInstanceVO vm, List<VolumeMigrationAO> specs,
+                                         String dstHostUuid, List<String> systemTags,
+                                         boolean legacyRootOnly) {
+        Map<String, String> dstPsByVolumeUuid = specs.stream().collect(Collectors.toMap(
+                VolumeMigrationAO::getVolumeUuid, VolumeMigrationAO::getDstPrimaryStorageUuid));
+        if (legacyRootOnly
+                && specs.size() == 1
+                && vm.getRootVolumeUuid().equals(specs.get(0).getVolumeUuid())
+                && !StorageMigrationLayoutChecker.hasFinalLocalStorage(vm, dstPsByVolumeUuid)) {
+            return;
+        }
+        String invalidReason = StorageMigrationLayoutChecker.validateFinalLayout(
+                vm, dstPsByVolumeUuid, dstHostUuid, systemTags);
+        if (invalidReason != null) {
+            throw new ApiMessageInterceptionException(Platform.argerr(
+                    "cannot migrate VM[uuid:%s] because %s", vm.getUuid(), invalidReason));
+        }
     }
 
     // do not migrate vm with iso in ceph backup storage attached
@@ -180,7 +209,7 @@ public class StorageMigrationApiInterceptor implements GlobalApiMessageIntercept
         }
     }
 
-    private void validate(APIPrimaryStorageMigrateVmMsg msg) {
+    private void validate(APIPrimaryStorageMigrateVmMsg msg, boolean legacyRootOnly) {
         VmInstanceVO vmInstanceVO = Q.New(VmInstanceVO.class).eq(VmInstanceVO_.uuid, msg.getVmInstanceUuid()).find();
         if (vmInstanceVO == null) {
             throw new ApiMessageInterceptionException(Platform.argerr(
@@ -269,6 +298,11 @@ public class StorageMigrationApiInterceptor implements GlobalApiMessageIntercept
                         "destination primary storage[uuid:%s] state is %s",
                         dstPrimaryStorageVO.getUuid(), dstPrimaryStorageVO.getState()));
             }
+            if (dstPrimaryStorageVO.getStatus() != PrimaryStorageStatus.Connected) {
+                throw new ApiMessageInterceptionException(Platform.argerr(
+                        "destination primary storage[uuid:%s] status is %s",
+                        dstPrimaryStorageVO.getUuid(), dstPrimaryStorageVO.getStatus()));
+            }
 
             PrimaryStorageVO srcPrimaryStorageVO = Q.New(PrimaryStorageVO.class)
                     .eq(PrimaryStorageVO_.uuid, volumeVO.getPrimaryStorageUuid())
@@ -284,6 +318,10 @@ public class StorageMigrationApiInterceptor implements GlobalApiMessageIntercept
             boolean capable = false;
             for (VmStorageMigrationMetric metric : metrics) {
                 if (!metric.isCapable(srcPsType, dstPsType)) {
+                    continue;
+                }
+
+                if (!metric.isDestinationPrimaryStorageSupported(volumeVO, dstPrimaryStorageVO.getUuid())) {
                     continue;
                 }
 
@@ -314,6 +352,8 @@ public class StorageMigrationApiInterceptor implements GlobalApiMessageIntercept
                         volumeVO.getUuid(), srcPsType, dstPsType));
             }
         }
+
+        validateVmStorageLayout(vmInstanceVO, specs, msg.getDstHostUuid(), msg.getSystemTags(), legacyRootOnly);
     }
 
     private void validate(APIBackupStorageMigrateImageMsg msg) {
@@ -369,6 +409,7 @@ public class StorageMigrationApiInterceptor implements GlobalApiMessageIntercept
 
     private void validate(APIPrimaryStorageMigrateVolumeMsg msg) {
         VolumeVO srcVolume = dbf.findByUuid(msg.getVolumeUuid(), VolumeVO.class);
+        VmInstanceVO attachedVm = null;
         msg.setSrcPrimaryStorageUuid(srcVolume.getPrimaryStorageUuid());
         PrimaryStorageVO srcPS = dbf.findByUuid(msg.getSrcPrimaryStorageUuid(), PrimaryStorageVO.class);
         PrimaryStorageVO dstPS = dbf.findByUuid(msg.getDstPrimaryStorageUuid(), PrimaryStorageVO.class);
@@ -455,13 +496,15 @@ public class StorageMigrationApiInterceptor implements GlobalApiMessageIntercept
             }
         } else if (srcVolume.getType() == VolumeType.Data) {
             if (srcVolume.getVmInstanceUuid() != null) {
-                VmInstanceState state = Q.New(VmInstanceVO.class).select(VmInstanceVO_.state).eq(VmInstanceVO_.uuid, srcVolume.getVmInstanceUuid()).findValue();
                 if (!srcPS.getType().equals(StorageMigrationConstant.SHAREDBLOCK_STORAGE_TYPE)) {
                     throw new ApiMessageInterceptionException(Platform.argerr(
                             "the volume[uuid:%s] is still attached on vm[uuid:%s], please detach it before migration.",
                             msg.getVolumeUuid(), srcVolume.getVmInstanceUuid()
                     ));
-                } else if (state != VmInstanceState.Stopped) {
+                }
+
+                attachedVm = dbf.findByUuid(srcVolume.getVmInstanceUuid(), VmInstanceVO.class);
+                if (attachedVm.getState() != VmInstanceState.Stopped) {
                     throw new ApiMessageInterceptionException(Platform.argerr(
                             "cannot migrate data volume[uuid:%s] bewteen sharedblock primary storages when vm[vmuuid:%s] instance is not stopped.",
                             msg.getVolumeUuid(), srcVolume.getVmInstanceUuid()
@@ -483,6 +526,16 @@ public class StorageMigrationApiInterceptor implements GlobalApiMessageIntercept
             throw new ApiMessageInterceptionException(Platform.argerr(
                     "Cannot migrate volume from %s to %s.", srcPS.getType(), dstPS.getType())
             );
+        }
+
+        if (attachedVm != null) {
+            String invalidReason = StorageMigrationLayoutChecker.validateFinalLayout(
+                    attachedVm, Collections.singletonMap(srcVolume.getUuid(), dstPS.getUuid()),
+                    null, msg.getSystemTags());
+            if (invalidReason != null) {
+                throw new ApiMessageInterceptionException(Platform.argerr(
+                        "cannot migrate volume[uuid:%s] because %s", srcVolume.getUuid(), invalidReason));
+            }
         }
 
         // Ceph <-> Ceph

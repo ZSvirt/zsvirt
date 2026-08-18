@@ -10,6 +10,10 @@ import java.util.List;
 public interface VmStorageMigrationMetric {
     boolean isCapable(String srcPsType, String dstPsType);
 
+    default boolean isDestinationPrimaryStorageSupported(VolumeVO volume, String dstPrimaryStorageUuid) {
+        return true;
+    }
+
     boolean isSupportWithDataVolume();
 
     boolean isSupportWithSnapshot();

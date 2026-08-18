@@ -20,6 +20,11 @@ public class LocalToLocalVmStorageMigrationMetric implements VmStorageMigrationM
     }
 
     @Override
+    public boolean isDestinationPrimaryStorageSupported(VolumeVO volume, String dstPrimaryStorageUuid) {
+        return volume.getPrimaryStorageUuid().equals(dstPrimaryStorageUuid);
+    }
+
+    @Override
     public boolean isSupportWithDataVolume() {
         return true;
     }

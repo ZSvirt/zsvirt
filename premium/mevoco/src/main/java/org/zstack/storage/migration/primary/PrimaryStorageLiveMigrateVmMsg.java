@@ -21,6 +21,7 @@ public class PrimaryStorageLiveMigrateVmMsg extends NeedReplyMessage implements 
     private String longJobUuid;
     private long bandwidth;
     private List<VolumeMigrationAO> volumeMigrationAOs;
+    private boolean legacyRootOnlyMigration;
 
     public PrimaryStorageLiveMigrateVmMsg(PrimaryStorageMigrateVmMsg amsg) {
         this.vmInstanceUuid = amsg.getVmInstanceUuid();
@@ -34,6 +35,7 @@ public class PrimaryStorageLiveMigrateVmMsg extends NeedReplyMessage implements 
         this.longJobUuid = amsg.getLongJobUuid();
         this.bandwidth = amsg.getBandwidth();
         this.volumeMigrationAOs = amsg.getVolumeMigrationAOs();
+        this.legacyRootOnlyMigration = amsg.isLegacyRootOnlyMigration();
     }
 
     public PrimaryStorageLiveMigrateVmMsg() {
@@ -45,6 +47,14 @@ public class PrimaryStorageLiveMigrateVmMsg extends NeedReplyMessage implements 
 
     public void setVolumeMigrationAOs(List<VolumeMigrationAO> volumeMigrationAOs) {
         this.volumeMigrationAOs = volumeMigrationAOs;
+    }
+
+    public boolean isLegacyRootOnlyMigration() {
+        return legacyRootOnlyMigration;
+    }
+
+    public void setLegacyRootOnlyMigration(boolean legacyRootOnlyMigration) {
+        this.legacyRootOnlyMigration = legacyRootOnlyMigration;
     }
 
     public PrimaryStorageMigrateVmContext getJobContext() {

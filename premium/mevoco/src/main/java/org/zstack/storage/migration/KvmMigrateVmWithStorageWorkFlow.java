@@ -30,6 +30,7 @@ import org.zstack.header.volume.VolumeAO;
 import org.zstack.header.volume.VolumeStatus;
 import org.zstack.header.volume.VolumeVO;
 import org.zstack.header.volume.VolumeVO_;
+import org.zstack.storage.migration.primary.PrimaryStorageLiveMigrateVmMsg;
 import org.zstack.storage.migration.primary.VolumeMigrationAO;
 import org.zstack.utils.Utils;
 import org.zstack.utils.logging.CLogger;
@@ -72,10 +73,8 @@ public class KvmMigrateVmWithStorageWorkFlow implements KvmLiveMigrationWorkFlow
     public List<Flow> getPrepareFlows(ParamIn paramIn) {
         VmInstanceVO vmInstanceVO = dbf.findByUuid(paramIn.getVmInstanceInventory().getUuid(), VmInstanceVO.class);
 
-        Set<String> requiredDstPsUuids = paramIn.getMsg().getVolumeMigrationAOs().stream()
-                .map(VolumeMigrationAO::getDstPrimaryStorageUuid)
-                .collect(Collectors.toSet());
-        List<String> sortedDstPsUuids = requiredDstPsUuids.stream().sorted().collect(Collectors.toList());
+        Set<String> requiredPrimaryStorageUuids = getRequiredPrimaryStorageUuids(vmInstanceVO, paramIn.getMsg());
+        List<String> sortedDstPsUuids = requiredPrimaryStorageUuids.stream().sorted().collect(Collectors.toList());
         final String allocFlowName = "allocate-host-connected-to-ps-" + String.join(",", sortedDstPsUuids);
 
         List<Flow> flows = new ArrayList<>();
@@ -97,7 +96,7 @@ public class KvmMigrateVmWithStorageWorkFlow implements KvmLiveMigrationWorkFlow
                 amsg.setL3NetworkUuids(VmNicHelper.getL3Uuids(VmNicInventory.valueOf(vmInstanceVO.getVmNics())));
                 amsg.setVmNicParams(VmNicHelper.getVmNicParamsWithVfNic(vmInstanceVO));
                 amsg.setAllowNoL3Networks(true);
-                amsg.setRequiredPrimaryStorageUuids(requiredDstPsUuids);
+                amsg.setRequiredPrimaryStorageUuids(requiredPrimaryStorageUuids);
                 amsg.addLocationSpec(VmLocationSpec.avoidHost(vmInstanceVO.getHostUuid()));
                 amsg.setCpuCapacity(vmInstanceVO.getCpuNum());
                 amsg.setMemoryCapacity(vmInstanceVO.getMemorySize());
@@ -181,6 +180,17 @@ public class KvmMigrateVmWithStorageWorkFlow implements KvmLiveMigrationWorkFlow
         });
 
         return flows;
+    }
+
+    private Set<String> getRequiredPrimaryStorageUuids(VmInstanceVO vmInstanceVO, PrimaryStorageLiveMigrateVmMsg msg) {
+        Map<String, String> volToDstPs = VolumeMigrationAO.toVolToDstMap(msg.getVolumeMigrationAOs());
+        if (msg.isLegacyRootOnlyMigration()) {
+            return volToDstPs.values().stream().collect(Collectors.toSet());
+        }
+
+        return vmInstanceVO.getAllDiskVolumes().stream()
+                .map(volume -> volToDstPs.getOrDefault(volume.getUuid(), volume.getPrimaryStorageUuid()))
+                .collect(Collectors.toSet());
     }
 
     @Override

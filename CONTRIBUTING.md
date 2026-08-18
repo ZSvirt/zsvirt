@@ -1,3 +1,4 @@
+
 # Contributing to ZSvirt
 
 Thank you for your interest in contributing to ZSvirt.
@@ -10,12 +11,12 @@ Contributions may include bug reports, feature proposals, documentation improvem
 
 Before contributing, please read:
 
-- [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
-- [GOVERNANCE.md](GOVERNANCE.md)
-- [SECURITY.md](SECURITY.md)
-- [LICENSE](LICENSE.txt)
+- [Code of Conduct](CODE_OF_CONDUCT.md)
+- [Governance](GOVERNANCE.md)
+- [Security Policy](SECURITY.md)
+- [License](LICENSE.txt)
 
-By participating in this project, you are expected to follow the project code of conduct.
+By participating in this project, you are expected to follow the project Code of Conduct.
 
 ## Contributor License Agreement
 
@@ -24,12 +25,36 @@ All external contributors are required to sign the ZSvirt Contributor License Ag
 The CLA confirms that:
 
 1. You have the right to submit the contribution, and the contribution is your original work or you have obtained all necessary rights to submit it.
-2. You grant the project maintainer and its affiliated organizations a perpetual, irrevocable, worldwide, non-exclusive, royalty-free, sublicensable, and relicensable copyright license to use, modify, reproduce, distribute, prepare derivative works of, publicly perform, and publicly display your contribution as part of ZSvirt.
-3. You grant the project maintainer a commercial re-licensing right, permitting the project maintainer to re-license your contribution under any license terms of its choice, including but not limited to proprietary or commercial licenses that are different from the open-source license applicable to the project. This right enables the project maintainer to offer ZSvirt under a dual-licensing model, providing both an open-source release (under GPL v3) and a commercial release (under a separate commercial license) to enterprise users who prefer not to be bound by GPL v3 obligations.
-4. You grant the project maintainer a perpetual, irrevocable, worldwide, non-exclusive, royalty-free patent license to make, use, sell, offer for sale, and import any contribution that embodies your patent claims, for the purpose of enabling the project maintainer to use, distribute, and commercially re-license the contribution.
-5. This authorization is irrevocable and survives the termination of your participation in the project. Once granted, the rights above cannot be withdrawn, and the project maintainer may continue to exercise them in all existing and future distributions of ZSvirt, including commercial distributions, enterprise editions, hosted services, and derivative works.
 
-This authorization allows the contribution to be used in ZSvirt open-source releases, commercial distributions, enterprise editions, hosted services, derivative works, and other project-maintained distributions.
+2. To the best of your knowledge, your contribution does not knowingly violate any third-party copyright, patent, trade secret, or other right.
+
+3. You grant the project maintainer and its affiliated organizations a perpetual, irrevocable, worldwide, non-exclusive, royalty-free, sublicensable copyright license to use, modify, reproduce, prepare derivative works of, distribute, sublicense, relicense, publicly perform, and publicly display your contribution as part of ZSvirt.
+
+4. You grant the project maintainer a commercial relicensing right, permitting the project maintainer to relicense your contribution under any license terms of its choice. These terms may include proprietary or commercial licenses that differ from the open-source license applicable to the project.
+
+   This right enables the project maintainer to offer ZSvirt under a dual-licensing model, providing:
+
+   - An open-source release under GPLv3
+   - A commercial release under a separate commercial license for enterprise users who prefer not to be bound by GPLv3 obligations
+
+   You also grant the right to distribute your contributed content and derivative works under any license selected for the project.
+
+5. You grant the project maintainer a perpetual, irrevocable, worldwide, non-exclusive, royalty-free patent license to make, use, sell, offer for sale, and import any contribution that embodies your patent claims, for the purpose of enabling the project maintainer to use, distribute, and commercially relicense the contribution.
+
+   If a contributor initiates patent litigation alleging that the contribution or project infringes a patent, any patent license granted under this agreement may terminate as permitted by law.
+
+6. This authorization is irrevocable and survives the termination of your participation in the project.
+
+   Once granted, the rights above cannot be withdrawn. The project maintainer may continue to exercise them in all existing and future distributions of ZSvirt, including commercial distributions, enterprise editions, hosted services, and derivative works.
+
+This authorization allows contributions to be used in:
+
+- ZSvirt open-source releases
+- Commercial distributions
+- Enterprise editions
+- Hosted services
+- Derivative works
+- Other project-maintained distributions
 
 If you are contributing on behalf of your employer or another organization, your employer or organization may be required to sign a Corporate CLA that provides the same grants.
 
@@ -61,7 +86,7 @@ Before opening a new issue:
 - Provide enough information for maintainers to understand and reproduce the problem.
 - Include logs, screenshots, version information, and environment details when applicable.
 
-Security vulnerabilities should not be reported through public issues. Please follow [SECURITY.md](SECURITY.md).
+Security vulnerabilities must not be reported through public issues. Please follow the instructions in [SECURITY.md](SECURITY.md).
 
 ## Issue Types
 
@@ -110,19 +135,25 @@ Use clear and descriptive commit messages.
 
 Recommended format:
 
-- `component: short description`
+```text
+component: short description
+```
 
 Examples:
 
-- `vm: fix instance start timeout handling`
-- `docs: update quick start guide`
-- `storage: add validation for data storage capacity`
+```text
+vm: fix instance start timeout handling
+docs: update quick start guide
+storage: add validation for data storage capacity
+```
 
 Avoid vague messages such as:
 
-- `fix bug`
-- `update code`
-- `change files`
+```text
+fix bug
+update code
+change files
+```
 
 ## Pull Request Description
 
@@ -139,11 +170,13 @@ If the pull request fixes an issue, link it in the description.
 
 Example:
 
-- `Fixes #123`
+```text
+Fixes #123
+```
 
 ## Tests
 
-Please run relevant tests before submitting a pull request.
+Please run all relevant tests before submitting a pull request.
 
 Depending on the repository, tests may include:
 
@@ -154,34 +187,40 @@ Depending on the repository, tests may include:
 - Static analysis
 - Installation or upgrade verification
 
-If tests cannot be run locally, explain why in the pull request.
+If tests cannot be run locally, explain why in the pull request description.
 
 ## Documentation
 
-Documentation changes are welcome.
+Documentation contributions are welcome.
 
 Please update documentation when:
 
 - User-facing behavior changes
 - Installation steps change
-- Configuration options are added or removed
+- Configuration options are added, changed, or removed
 - APIs are added, changed, or deprecated
-- Troubleshooting steps are discovered
+- New troubleshooting procedures are discovered
 - Migration or upgrade behavior changes
 
 Documentation should be clear, accurate, and easy to follow.
 
 ## Code Review
 
-Maintainers review pull requests for correctness, maintainability, compatibility, security, and project direction.
+Maintainers review pull requests for:
+
+- Correctness
+- Maintainability
+- Compatibility
+- Security
+- Alignment with the project direction
 
 A pull request may require changes before it can be merged.
 
-Please keep discussion respectful and focused on the technical topic.
+Please keep discussions respectful and focused on the technical topic.
 
 ## Compatibility
 
-ZSvirt is infrastructure software. Compatibility matters.
+ZSvirt is infrastructure software, so compatibility is important.
 
 When making changes, consider:
 
@@ -190,20 +229,30 @@ When making changes, consider:
 - Configuration compatibility
 - Data migration impact
 - Deployment and rollback impact
-- Integration impact with other components
+- Integration impact on other components
 
-Breaking changes should be clearly documented and discussed before implementation.
+Breaking changes must be clearly documented and discussed before implementation.
 
 ## Security
 
-Do not include secrets, private keys, credentials, customer data, or internal-only information in issues, pull requests, commits, logs, or screenshots.
+Do not include any of the following in issues, pull requests, commits, logs, or screenshots:
 
-If you find a security vulnerability, follow [SECURITY.md](SECURITY.md).
+- Secrets
+- Private keys
+- Credentials
+- Customer data
+- Internal-only information
+
+If you discover a security vulnerability, follow the instructions in [SECURITY.md](SECURITY.md).
 
 ## License
 
-By contributing to this project, you agree that your contributions will be licensed under the project license (GPL v3) for the open-source release, and that you have granted the project maintainer the commercial re-licensing rights described in the Contributor License Agreement section above for the purpose of dual licensing, unless otherwise stated.
+By contributing to this project, you agree that your contributions will be licensed under the project license (GPLv3) for the open-source release.
 
-This project is currently planned to use the GNU General Public License v3.0. Some repositories or components may include third-party open-source software under different licenses. Please check the `LICENSE`, `NOTICE`, and related files in each repository for details.
+You also agree that you have granted the project maintainer the commercial relicensing rights described in the [Contributor License Agreement](#contributor-license-agreement) section above for the purpose of dual licensing.
+
+This project is currently planned to use the GNU General Public License version 3.0.
+
+Some repositories or components may include third-party open-source software under different licenses. Please check the `LICENSE`, `NOTICE`, and related files in each repository for details.
 
 Thank you for helping improve ZSvirt.

@@ -2,6 +2,8 @@ package org.zstack.network.service.portforwarding;
 
 import org.zstack.header.description.PackageDescription;
 import org.zstack.header.search.SearchConstant;
+import org.zstack.header.vm.VmNicInventory;
+import org.zstack.network.service.vip.VipInventory;
 
 public class RBACInfo implements PackageDescription {
     @Override
@@ -33,5 +35,22 @@ public class RBACInfo implements PackageDescription {
                 .toService(SearchConstant.QUERY_FACADE_SERVICE_ID)
                 .build();
 
+        expandedQuery()
+                .on(VmNicInventory.class)
+                .expose("portForwarding")
+                .then(PortForwardingRuleInventory.class)
+                    .where(VmNicInventory.class, "uuid")
+                    .equals(PortForwardingRuleInventory.class, "vmNicUuid")
+                    .end()
+                .build();
+
+        expandedQuery()
+                .on(VipInventory.class)
+                .expose("portForwarding")
+                .then(PortForwardingRuleInventory.class)
+                    .where(VipInventory.class, "uuid")
+                    .equals(PortForwardingRuleInventory.class, "vipUuid")
+                    .end()
+                .build();
     }
 }

@@ -3,6 +3,7 @@ package org.zstack.header.description;
 import org.zstack.header.description.apis.ApiDescriptionBuilder;
 import org.zstack.header.description.ensemble.ResourceEnsembleContributorBuilder;
 import org.zstack.header.description.permission.PermissionBuilder;
+import org.zstack.header.description.query.ExpandedQueryBuilder;
 import org.zstack.header.description.resource.AttributeSupportResourceBuilder;
 import org.zstack.header.description.resource.GlobalReadableResourceBuilder;
 import org.zstack.header.description.role.RoleBuilder;
@@ -74,6 +75,16 @@ public interface PackageDescription {
      */
     default ApiDescriptionBuilder apis() {
         return new ApiDescriptionBuilder(this);
+    }
+
+    /**
+     * Fluent inventory expanded-query description (configuration only).
+     * Parallel to {@link #expandedPermission}; execution reads
+     * {@link PackageDescriptionRegistry#expandedQueries} /
+     * {@link PackageDescriptionRegistry#expandedQueryAliases}.
+     */
+    default ExpandedQueryBuilder expandedQuery() {
+        return new ExpandedQueryBuilder();
     }
 
     /**

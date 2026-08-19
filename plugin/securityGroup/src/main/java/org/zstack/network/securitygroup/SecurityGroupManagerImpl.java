@@ -53,9 +53,6 @@ import org.zstack.header.network.l3.UsedIpVO;
 import org.zstack.header.network.l3.UsedIpVO_;
 import org.zstack.header.network.service.NetworkServiceL3NetworkRefVO;
 import org.zstack.header.network.service.NetworkServiceL3NetworkRefVO_;
-import org.zstack.header.query.AddExpandedQueryExtensionPoint;
-import org.zstack.header.query.ExpandedQueryAliasStruct;
-import org.zstack.header.query.ExpandedQueryStruct;
 import org.zstack.header.vm.*;
 import org.zstack.identity.Account;
 import org.zstack.identity.AccountManager;
@@ -89,7 +86,7 @@ import static org.zstack.utils.CollectionDSL.list;
 import static org.zstack.utils.CollectionUtils.transformAndRemoveNull;
 
 public class SecurityGroupManagerImpl extends AbstractService implements SecurityGroupManager, ManagementNodeReadyExtensionPoint,
-        VmInstanceMigrateExtensionPoint, AddExpandedQueryExtensionPoint, ReportQuotaExtensionPoint, ValidateL3SecurityGroupExtensionPoint {
+        VmInstanceMigrateExtensionPoint, ReportQuotaExtensionPoint, ValidateL3SecurityGroupExtensionPoint {
     private static CLogger logger = Utils.getLogger(SecurityGroupManagerImpl.class);
 
     @Autowired
@@ -2490,34 +2487,6 @@ public class SecurityGroupManagerImpl extends AbstractService implements Securit
         logger.debug(String.format("vm[uuid:%s, name:%s] failed to migrate to host[uuid:%s], recover its rules on previous host[uuid:%s]",
                 inv.getUuid(), inv.getName(), destHostUuid, inv.getHostUuid()));
         applyRules(htos);
-    }
-
-    @Override
-    public List<ExpandedQueryStruct> getExpandedQueryStructs() {
-        List<ExpandedQueryStruct> structs = new ArrayList<>();
-
-        ExpandedQueryStruct struct = new ExpandedQueryStruct();
-        struct.setExpandedField("securityGroupRef");
-        struct.setHidden(true);
-        struct.setExpandedInventoryKey("vmNicUuid");
-        struct.setForeignKey("uuid");
-        struct.setInventoryClass(VmNicSecurityGroupRefInventory.class);
-        struct.setInventoryClassToExpand(VmNicInventory.class);
-
-        structs.add(struct);
-        return structs;
-    }
-
-    @Override
-    public List<ExpandedQueryAliasStruct> getExpandedQueryAliasesStructs() {
-        List<ExpandedQueryAliasStruct> aliases = new ArrayList<>();
-
-        ExpandedQueryAliasStruct as = new ExpandedQueryAliasStruct();
-        as.setInventoryClass(VmNicInventory.class);
-        as.setAlias("securityGroup");
-        as.setExpandedField("securityGroupRef.securityGroup");
-        aliases.add(as);
-        return aliases;
     }
 
     private class FailureHostWorker implements PeriodicTask {

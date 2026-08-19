@@ -33,9 +33,6 @@ import org.zstack.header.image.ImagePlatform;
 import org.zstack.header.message.AbstractBeforeDeliveryMessageInterceptor;
 import org.zstack.header.message.Message;
 import org.zstack.header.message.MessageReply;
-import org.zstack.header.query.AddExpandedQueryExtensionPoint;
-import org.zstack.header.query.ExpandedQueryAliasStruct;
-import org.zstack.header.query.ExpandedQueryStruct;
 import org.zstack.header.storage.backup.BackupStorageAskInstallPathMsg;
 import org.zstack.header.storage.backup.BackupStorageAskInstallPathReply;
 import org.zstack.header.storage.backup.BackupStorageConstant;
@@ -72,7 +69,7 @@ import static org.zstack.utils.CollectionUtils.transformAndRemoveNull;
  */
 public class LocalStorageFactory implements PrimaryStorageFactory, Component,
         MarshalVmOperationFlowExtensionPoint, HostDeleteExtensionPoint, VmAttachVolumeExtensionPoint,
-        GetAttachableVolumeExtensionPoint, HostMaintenancePolicyExtensionPoint, AddExpandedQueryExtensionPoint, VolumeGetAttachableVmExtensionPoint,
+        GetAttachableVolumeExtensionPoint, HostMaintenancePolicyExtensionPoint, VolumeGetAttachableVmExtensionPoint,
         RecoverDataVolumeExtensionPoint, RecoverVmExtensionPoint, VmPreMigrationExtensionPoint, CreateTemplateFromVolumeSnapshotExtensionPoint,
         HostAfterConnectedExtensionPoint, InstantiateDataVolumeOnCreationExtensionPoint, PrimaryStorageAttachExtensionPoint,
         PostMarkRootVolumeAsSnapshotExtension, VolumeSnapshotCreationExtensionPoint, VmCapabilitiesExtensionPoint, PrimaryStorageDetachExtensionPoint,
@@ -772,34 +769,6 @@ public class LocalStorageFactory implements PrimaryStorageFactory, Component,
         List<String> vmUuids = q.getResultList();
         vmUuids.forEach(it -> result.put(it, HostMaintenancePolicy.StopVm));
         return result;
-    }
-
-    @Override
-    public List<ExpandedQueryStruct> getExpandedQueryStructs() {
-        List<ExpandedQueryStruct> structs = new ArrayList<>();
-
-        ExpandedQueryStruct s = new ExpandedQueryStruct();
-        s.setExpandedField("localStorageHostRef");
-        s.setExpandedInventoryKey("resourceUuid");
-        s.setForeignKey("uuid");
-        s.setInventoryClass(LocalStorageResourceRefInventory.class);
-        s.setInventoryClassToExpand(VolumeInventory.class);
-        structs.add(s);
-
-        s = new ExpandedQueryStruct();
-        s.setExpandedField("localStorageHostRef");
-        s.setExpandedInventoryKey("resourceUuid");
-        s.setForeignKey("uuid");
-        s.setInventoryClass(LocalStorageResourceRefInventory.class);
-        s.setInventoryClassToExpand(VolumeSnapshotInventory.class);
-        structs.add(s);
-
-        return structs;
-    }
-
-    @Override
-    public List<ExpandedQueryAliasStruct> getExpandedQueryAliasesStructs() {
-        return null;
     }
 
     @Override

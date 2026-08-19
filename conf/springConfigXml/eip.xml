@@ -17,7 +17,6 @@
             <zstack:extension interface="org.zstack.header.Component"/>
             <zstack:extension interface="org.zstack.header.Service"/>
             <zstack:extension interface="org.zstack.network.service.vip.VipReleaseExtensionPoint"/>
-            <zstack:extension interface="org.zstack.header.query.AddExpandedQueryExtensionPoint"/>
             <zstack:extension interface="org.zstack.header.identity.ReportQuotaExtensionPoint"/>
             <zstack:extension interface="org.zstack.header.vm.VmPreAttachL3NetworkExtensionPoint"/>
             <zstack:extension interface="org.zstack.header.vm.VmIpChangedExtensionPoint"/>

@@ -13,6 +13,7 @@ import org.zstack.header.Component;
 import org.zstack.header.apimediator.ApiMessageInterceptionException;
 import org.zstack.header.apimediator.GlobalApiMessageInterceptor;
 import org.zstack.header.configuration.PythonApiBindingWriter;
+import org.zstack.header.description.PackageDescriptionRegistry;
 import org.zstack.header.errorcode.OperationFailureException;
 import org.zstack.header.exception.CloudRuntimeException;
 import org.zstack.header.message.APIMessage;
@@ -120,7 +121,7 @@ public class MysqlQueryBuilderImpl3 implements Component, QueryBuilder, GlobalAp
                     }
                 }
 
-                throw new CloudRuntimeException(String.format("inventory[%s] has an expanded query alias[%s](added by AddExpandedQueryExtensionPoint]," +
+                throw new CloudRuntimeException(String.format("inventory[%s] has an expanded query alias[%s](added by package description]," +
                                 " but the extension doesn't declare any expanded query having expandedField[%s]",
                         inventoryClassDefiningThisAlias.getClass(), alias, firstExpand));
             }
@@ -1079,41 +1080,12 @@ public class MysqlQueryBuilderImpl3 implements Component, QueryBuilder, GlobalAp
             }
         }
 
-        for (AddExpandedQueryExtensionPoint ext : pluginRgty.getExtensionList(AddExpandedQueryExtensionPoint.class)) {
-            List<ExpandedQueryStruct> expandedQueries = ext.getExpandedQueryStructs();
-            if (expandedQueries != null) {
-                for (ExpandedQueryStruct s : expandedQueries) {
-                    List<ExpandedQueryStruct> exts = expandedQueryStructs.get(s.getInventoryClassToExpand());
-                    if (exts == null) {
-                        exts = new ArrayList<ExpandedQueryStruct>();
-                        expandedQueryStructs.put(s.getInventoryClassToExpand(), exts);
-                    }
-
-                    exts.add(s);
-                }
-            }
-
-            List<ExpandedQueryAliasStruct> aliases = ext.getExpandedQueryAliasesStructs();
-            if (aliases != null) {
-                for (ExpandedQueryAliasStruct as : aliases) {
-                    ExpandedQueryAliasInfo info = new ExpandedQueryAliasInfo();
-                    info.isFromAnnotation = false;
-                    info.inventoryClassDefiningThisAlias = as.getInventoryClass();
-                    info.queryMessageClass = inventoryQueryMessageMap.get(info.inventoryClassDefiningThisAlias);
-                    DebugUtils.Assert(info.queryMessageClass != null, String.format("AddExpandedQueryExtensionPoint[%s] defines an expanded query alias[%s], but no query message declares inventory class[%s] to which the alias maps",
-                            ext.getClass().getName(), as.getAlias(), as.getInventoryClass()));
-                    info.expandField = as.getExpandedField();
-                    info.alias = as.getAlias();
-
-                    List<ExpandedQueryAliasInfo> infos = aliasInfos.get(info.queryMessageClass);
-                    if (infos == null) {
-                        infos = new ArrayList<ExpandedQueryAliasInfo>();
-                        aliasInfos.put(info.queryMessageClass, infos);
-                    }
-
-                    infos.add(info);
-                }
-            }
+        for (org.zstack.header.description.query.ExpandedQuery eq : PackageDescriptionRegistry.expandedQueries) {
+            addExpandedQueryStruct(toExpandedQueryStruct(eq), "PackageDescriptionRegistry");
+        }
+        for (org.zstack.header.description.query.ExpandedQueryAlias alias : PackageDescriptionRegistry.expandedQueryAliases) {
+            addExpandedQueryAlias(alias.inventoryClass, alias.alias, alias.expandedField,
+                    "PackageDescriptionRegistry");
         }
 
         for (AddExtraConditionToQueryExtensionPoint ext : pluginRgty.getExtensionList(AddExtraConditionToQueryExtensionPoint.class)) {
@@ -1126,6 +1098,64 @@ public class MysqlQueryBuilderImpl3 implements Component, QueryBuilder, GlobalAp
                 exts.add(ext);
             }
         }
+    }
+
+    private static ExpandedQueryStruct toExpandedQueryStruct(org.zstack.header.description.query.ExpandedQuery eq) {
+        ExpandedQueryStruct s = new ExpandedQueryStruct();
+        s.setInventoryClassToExpand(eq.inventoryClassToExpand);
+        s.setExpandedField(eq.expandedField);
+        s.setInventoryClass(eq.inventoryClass);
+        s.setForeignKey(eq.foreignKey);
+        s.setExpandedInventoryKey(eq.expandedInventoryKey);
+        s.setHidden(eq.hidden);
+        s.setSuppressedInventoryClass(eq.suppressedInventoryClass);
+        return s;
+    }
+
+    private void addExpandedQueryStruct(ExpandedQueryStruct s, String source) {
+        List<ExpandedQueryStruct> exts = expandedQueryStructs.computeIfAbsent(
+                s.getInventoryClassToExpand(), k -> new ArrayList<>());
+        for (ExpandedQueryStruct existing : exts) {
+            if (existing.getExpandedField().equals(s.getExpandedField())) {
+                if (existing.getInventoryClass().equals(s.getInventoryClass())
+                        && Objects.equals(existing.getForeignKey(), s.getForeignKey())
+                        && Objects.equals(existing.getExpandedInventoryKey(), s.getExpandedInventoryKey())
+                        && existing.isHidden() == s.isHidden()
+                        && Objects.equals(existing.getSuppressedInventoryClass(), s.getSuppressedInventoryClass())) {
+                    return;
+                }
+                throw new CloudRuntimeException(String.format(
+                        "duplicate expanded query on %s field[%s] from %s conflicts with an existing declaration",
+                        s.getInventoryClassToExpand().getName(), s.getExpandedField(), source));
+            }
+        }
+        exts.add(s);
+    }
+
+    private void addExpandedQueryAlias(Class inventoryClass, String alias, String expandField, String source) {
+        ExpandedQueryAliasInfo info = new ExpandedQueryAliasInfo();
+        info.isFromAnnotation = false;
+        info.inventoryClassDefiningThisAlias = inventoryClass;
+        info.queryMessageClass = inventoryQueryMessageMap.get(info.inventoryClassDefiningThisAlias);
+        DebugUtils.Assert(info.queryMessageClass != null, String.format(
+                "%s defines an expanded query alias[%s], but no query message declares inventory class[%s] to which the alias maps",
+                source, alias, inventoryClass));
+        info.expandField = expandField;
+        info.alias = alias;
+
+        List<ExpandedQueryAliasInfo> infos = aliasInfos.computeIfAbsent(info.queryMessageClass, k -> new ArrayList<>());
+        for (ExpandedQueryAliasInfo existing : infos) {
+            if (existing.alias.equals(alias)) {
+                if (existing.expandField.equals(expandField)
+                        && existing.inventoryClassDefiningThisAlias.equals(inventoryClass)) {
+                    return;
+                }
+                throw new CloudRuntimeException(String.format(
+                        "duplicate expanded query alias[%s] on %s from %s conflicts with an existing declaration",
+                        alias, inventoryClass.getName(), source));
+            }
+        }
+        infos.add(info);
     }
 
     private void buildExpandedQueryAliasInfo() {

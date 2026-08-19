@@ -4,6 +4,8 @@ import org.zstack.header.description.apis.ApiCapabilities;
 import org.zstack.header.description.apis.ApiPackageCapabilities;
 import org.zstack.header.description.ensemble.ResourceEnsembleMember;
 import org.zstack.header.description.permission.Permission;
+import org.zstack.header.description.query.ExpandedQuery;
+import org.zstack.header.description.query.ExpandedQueryAlias;
 import org.zstack.header.description.role.Role;
 import org.zstack.header.description.role.RoleBuilder;
 import org.zstack.header.description.role.RoleContributor;
@@ -32,6 +34,16 @@ public final class PackageDescriptionRegistry {
     public static final List<Class<?>> readableResources = new ArrayList<>();
     public static final List<Class<?>> attributeSupportResources = new ArrayList<>();
     public static final List<ResourceEnsembleMember> ensembleMembers = new ArrayList<>();
+
+    /**
+     * Inventory expanded-query hops from {@code expandedQuery()...build()}.
+     */
+    public static final List<ExpandedQuery> expandedQueries = new ArrayList<>();
+
+    /**
+     * Inventory expanded-query aliases from {@code expandedQuery()...build()}.
+     */
+    public static final List<ExpandedQueryAlias> expandedQueryAliases = new ArrayList<>();
 
     /**
      * Expanded-permission expanders keyed by base API class.
@@ -71,6 +83,16 @@ public final class PackageDescriptionRegistry {
 
     public static void addRoleBuilder(RoleBuilder builder) {
         roleBuilders.add(builder);
+    }
+
+    public static void addExpandedQuery(ExpandedQuery query) {
+        DebugUtils.Assert(query != null, "expanded query cannot be null");
+        expandedQueries.add(query);
+    }
+
+    public static void addExpandedQueryAlias(ExpandedQueryAlias alias) {
+        DebugUtils.Assert(alias != null, "expanded query alias cannot be null");
+        expandedQueryAliases.add(alias);
     }
 
     public static <MSG extends APIMessageDefinition> void addExpandedPermission(

@@ -50,9 +50,6 @@ import org.zstack.header.network.l2.L2NetworkCreateExtensionPoint;
 import org.zstack.header.network.l2.L2NetworkInventory;
 import org.zstack.header.network.l3.*;
 import org.zstack.header.network.service.*;
-import org.zstack.header.query.AddExpandedQueryExtensionPoint;
-import org.zstack.header.query.ExpandedQueryAliasStruct;
-import org.zstack.header.query.ExpandedQueryStruct;
 import org.zstack.header.query.QueryBelongFilter;
 import org.zstack.header.tag.*;
 import org.zstack.header.vm.*;
@@ -106,7 +103,7 @@ import static org.zstack.utils.VipUseForList.SNAT_NETWORK_SERVICE_TYPE;
 
 public class VirtualRouterManagerImpl extends AbstractService implements VirtualRouterManager,
         PrepareDbInitialValueExtensionPoint, L2NetworkCreateExtensionPoint,
-        GlobalApiMessageInterceptor, AddExpandedQueryExtensionPoint, GetCandidateVmNicsForLoadBalancerExtensionPoint,
+        GlobalApiMessageInterceptor, GetCandidateVmNicsForLoadBalancerExtensionPoint,
         GetPeerL3NetworksForLoadBalancerExtensionPoint, FilterVmNicsForEipInVirtualRouterExtensionPoint, ApvmCascadeFilterExtensionPoint, ManagementNodeReadyExtensionPoint,
         VipCleanupExtensionPoint, GetL3NetworkForEipInVirtualRouterExtensionPoint, VirtualRouterHaGetCallbackExtensionPoint, AfterAddIpRangeExtensionPoint, QueryBelongFilter {
     private final static CLogger logger = Utils.getLogger(VirtualRouterManagerImpl.class);
@@ -1516,73 +1513,6 @@ public class VirtualRouterManagerImpl extends AbstractService implements Virtual
         if (!snat && portForwarding) {
             throw new ApiMessageInterceptionException(argerr("failed tot attach virtual router network services to l3Network[uuid:%s]. When port forwarding is selected, snat must be selected too", msg.getL3NetworkUuid()));
         }
-    }
-
-    @Override
-    public List<ExpandedQueryStruct> getExpandedQueryStructs() {
-        List<ExpandedQueryStruct> structs = new ArrayList<ExpandedQueryStruct>();
-
-        ExpandedQueryStruct struct = new ExpandedQueryStruct();
-        struct.setExpandedField("virtualRouterEipRef");
-        struct.setExpandedInventoryKey("virtualRouterVmUuid");
-        struct.setHidden(true);
-        struct.setForeignKey("uuid");
-        struct.setInventoryClass(VirtualRouterEipRefInventory.class);
-        struct.setInventoryClassToExpand(ApplianceVmInventory.class);
-        structs.add(struct);
-
-        struct = new ExpandedQueryStruct();
-        struct.setExpandedField("virtualRouterVipRef");
-        struct.setExpandedInventoryKey("virtualRouterVmUuid");
-        struct.setHidden(true);
-        struct.setForeignKey("uuid");
-        struct.setInventoryClass(VirtualRouterVipInventory.class);
-        struct.setInventoryClassToExpand(ApplianceVmInventory.class);
-        structs.add(struct);
-
-        struct = new ExpandedQueryStruct();
-        struct.setExpandedField("virtualRouterPortforwardingRef");
-        struct.setExpandedInventoryKey("virtualRouterVmUuid");
-        struct.setHidden(true);
-        struct.setForeignKey("uuid");
-        struct.setInventoryClass(VirtualRouterPortForwardingRuleRefInventory.class);
-        struct.setInventoryClassToExpand(ApplianceVmInventory.class);
-        structs.add(struct);
-
-        struct = new ExpandedQueryStruct();
-        struct.setExpandedField("virtualRouterOffering");
-        struct.setExpandedInventoryKey("uuid");
-        struct.setForeignKey("instanceOfferingUuid");
-        struct.setInventoryClass(VirtualRouterOfferingInventory.class);
-        struct.setInventoryClassToExpand(ApplianceVmInventory.class);
-        struct.setSuppressedInventoryClass(InstanceOfferingInventory.class);
-        structs.add(struct);
-
-        return structs;
-    }
-
-    @Override
-    public List<ExpandedQueryAliasStruct> getExpandedQueryAliasesStructs() {
-        List<ExpandedQueryAliasStruct> aliases = new ArrayList<ExpandedQueryAliasStruct>();
-
-        ExpandedQueryAliasStruct as = new ExpandedQueryAliasStruct();
-        as.setInventoryClass(ApplianceVmInventory.class);
-        as.setAlias("eip");
-        as.setExpandedField("virtualRouterEipRef.eip");
-        aliases.add(as);
-
-        as = new ExpandedQueryAliasStruct();
-        as.setInventoryClass(ApplianceVmInventory.class);
-        as.setAlias("vip");
-        as.setExpandedField("virtualRouterVipRef.vip");
-        aliases.add(as);
-
-        as = new ExpandedQueryAliasStruct();
-        as.setInventoryClass(ApplianceVmInventory.class);
-        as.setAlias("portForwarding");
-        as.setExpandedField("virtualRouterPortforwardingRef.portForwarding");
-        aliases.add(as);
-        return aliases;
     }
 
     @Override

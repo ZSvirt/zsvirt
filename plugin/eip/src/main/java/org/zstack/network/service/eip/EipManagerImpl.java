@@ -29,9 +29,6 @@ import org.zstack.header.network.l2.L2NetworkClusterRefVO;
 import org.zstack.header.network.l2.L2NetworkClusterRefVO_;
 import org.zstack.header.network.l3.*;
 import org.zstack.header.network.service.NetworkServiceProviderType;
-import org.zstack.header.query.AddExpandedQueryExtensionPoint;
-import org.zstack.header.query.ExpandedQueryAliasStruct;
-import org.zstack.header.query.ExpandedQueryStruct;
 import org.zstack.header.vm.*;
 import org.zstack.identity.AccountManager;
 import org.zstack.network.l3.L3NetworkManager;
@@ -57,7 +54,7 @@ import static org.zstack.utils.CollectionUtils.transformAndRemoveNull;
 /**
  */
 public class EipManagerImpl extends AbstractService implements EipManager, VipReleaseExtensionPoint,
-        AddExpandedQueryExtensionPoint, ReportQuotaExtensionPoint, VmPreAttachL3NetworkExtensionPoint,
+        ReportQuotaExtensionPoint, VmPreAttachL3NetworkExtensionPoint,
         VmIpChangedExtensionPoint, ResourceOwnerAfterChangeExtensionPoint, VipGetServiceReferencePoint,
         ManagementNodeReadyExtensionPoint, FilterAttachableL3NetworkExtensionPoint, VmNicChangeNetworkExtensionPoint {
     private static final CLogger logger = Utils.getLogger(EipManagerImpl.class);
@@ -1546,34 +1543,6 @@ public class EipManagerImpl extends AbstractService implements EipManager, VipRe
                 completion.fail(errorCode);
             }
         });
-    }
-
-    @Override
-    public List<ExpandedQueryStruct> getExpandedQueryStructs() {
-        List<ExpandedQueryStruct> structs = new ArrayList<>();
-
-        ExpandedQueryStruct struct = new ExpandedQueryStruct();
-        struct.setInventoryClassToExpand(VmNicInventory.class);
-        struct.setExpandedField("eip");
-        struct.setInventoryClass(EipInventory.class);
-        struct.setForeignKey("uuid");
-        struct.setExpandedInventoryKey("vmNicUuid");
-        structs.add(struct);
-
-        struct = new ExpandedQueryStruct();
-        struct.setInventoryClassToExpand(VipInventory.class);
-        struct.setExpandedField("eip");
-        struct.setInventoryClass(EipInventory.class);
-        struct.setForeignKey("uuid");
-        struct.setExpandedInventoryKey("vipUuid");
-        structs.add(struct);
-
-        return structs;
-    }
-
-    @Override
-    public List<ExpandedQueryAliasStruct> getExpandedQueryAliasesStructs() {
-        return null;
     }
 
     @Override

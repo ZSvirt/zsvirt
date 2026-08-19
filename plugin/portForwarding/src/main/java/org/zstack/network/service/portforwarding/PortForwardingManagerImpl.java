@@ -32,9 +32,6 @@ import org.zstack.header.network.l3.L3NetworkVO;
 import org.zstack.header.network.l3.UsedIpInventory;
 import org.zstack.header.network.service.NetworkServiceProviderType;
 import org.zstack.header.network.service.NetworkServiceType;
-import org.zstack.header.query.AddExpandedQueryExtensionPoint;
-import org.zstack.header.query.ExpandedQueryAliasStruct;
-import org.zstack.header.query.ExpandedQueryStruct;
 import org.zstack.header.vm.*;
 import org.zstack.identity.AccountManager;
 import org.zstack.network.l3.L3NetworkManager;
@@ -59,7 +56,7 @@ import static org.zstack.core.Platform.operr;
 import static org.zstack.utils.CollectionDSL.list;
 
 public class PortForwardingManagerImpl extends AbstractService implements PortForwardingManager,
-        VipReleaseExtensionPoint, AddExpandedQueryExtensionPoint, ReportQuotaExtensionPoint, VipGetUsedPortRangeExtensionPoint,
+        VipReleaseExtensionPoint, ReportQuotaExtensionPoint, VipGetUsedPortRangeExtensionPoint,
         VipGetServiceReferencePoint, VmNicChangeNetworkExtensionPoint, VmIpChangedExtensionPoint {
     private static CLogger logger = Utils.getLogger(PortForwardingManagerImpl.class);
 
@@ -1243,34 +1240,6 @@ public class PortForwardingManagerImpl extends AbstractService implements PortFo
                 return String.format("detach-portforwarding-%s", struct.getRule().getUuid());
             }
         });
-    }
-
-    @Override
-    public List<ExpandedQueryStruct> getExpandedQueryStructs() {
-        List<ExpandedQueryStruct> structs = new ArrayList<ExpandedQueryStruct>();
-
-        ExpandedQueryStruct struct = new ExpandedQueryStruct();
-        struct.setInventoryClassToExpand(VmNicInventory.class);
-        struct.setExpandedField("portForwarding");
-        struct.setInventoryClass(PortForwardingRuleInventory.class);
-        struct.setForeignKey("uuid");
-        struct.setExpandedInventoryKey("vmNicUuid");
-        structs.add(struct);
-
-        struct = new ExpandedQueryStruct();
-        struct.setInventoryClassToExpand(VipInventory.class);
-        struct.setExpandedField("portForwarding");
-        struct.setInventoryClass(PortForwardingRuleInventory.class);
-        struct.setForeignKey("uuid");
-        struct.setExpandedInventoryKey("vipUuid");
-        structs.add(struct);
-
-        return structs;
-    }
-
-    @Override
-    public List<ExpandedQueryAliasStruct> getExpandedQueryAliasesStructs() {
-        return null;
     }
 
     @Override

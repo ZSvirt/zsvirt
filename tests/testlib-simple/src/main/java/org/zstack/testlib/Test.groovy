@@ -239,8 +239,14 @@ abstract class Test extends ApiHelper implements Retry {
     protected boolean INCLUDE_CORE_SERVICES = true
 
     protected String getDeployDBScriptBaseDir() {
-        String home = System.getProperty("user.dir")
-        return  [home, "../"].join("/")
+        File dir = new File(System.getProperty("user.dir")).getAbsoluteFile()
+        while (dir != null) {
+            if (new File(dir, "build/deploydb.sh").isFile()) {
+                return dir.getAbsolutePath()
+            }
+            dir = dir.getParentFile()
+        }
+        throw new CloudRuntimeException("cannot find build/deploydb.sh starting from ${System.getProperty("user.dir")}")
     }
 
     private Map<String, String> getHostAndPort(String jdbcUrl) {

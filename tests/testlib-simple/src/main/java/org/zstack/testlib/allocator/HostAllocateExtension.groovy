@@ -1,4 +1,4 @@
-package org.zstack.test.integration.kvm.hostallocator
+package org.zstack.testlib.allocator
 
 import org.zstack.core.Platform
 import org.zstack.header.allocator.HostAllocatorSpec
@@ -23,4 +23,3 @@ class HostAllocateExtension implements HostAllocateExtensionPoint {
         }
     }
 }
-

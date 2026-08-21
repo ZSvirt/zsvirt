@@ -476,6 +476,23 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
                 return vmNotRunning(vmUuid) || cbtNotRunning(taskUuid);
             }
         }).then(new NoRollbackFlow() {
+            final String __name__ = "destroy-retained-cbt-volumes";
+
+            @Override
+            public void run(FlowTrigger trigger, Map data) {
+                destroyCbtVolumes(taskUuid, new Completion(trigger) {
+                    @Override
+                    public void success() {
+                        trigger.next();
+                    }
+
+                    @Override
+                    public void fail(ErrorCode errorCode) {
+                        trigger.fail(errorCode);
+                    }
+                });
+            }
+        }).then(new NoRollbackFlow() {
             final String __name__ = "delete-cbt-data";
 
             @Override
@@ -667,14 +684,16 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
                     @Override
                     public void success() {
                         logger.warn(String.format("rollback prepare cbt[uuid %s] volume successfully.", taskVO.getUuid()));
+                        trigger.rollback();
                     }
 
                     @Override
                     public void fail(ErrorCode errorCode) {
-                        logger.warn(String.format("rollback prepare cbt[uuid %s] volume failed.", taskVO.getUuid()));
+                        logger.warn(String.format("rollback prepare cbt[uuid %s] volume failed: %s",
+                                taskVO.getUuid(), errorCode));
+                        trigger.rollback();
                     }
                 });
-                trigger.rollback();
             }
         });
         chain.then(new Flow() {
@@ -705,7 +724,7 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
                     return;
                 }
 
-                backend.rollbackVolumeCbtBackup(vmUuid, hostUuid, volumeInfos, new Completion(trigger) {
+                backend.rollbackVolumeCbtBackup(vmUuid, hostUuid, bitmapName, volumeInfos, new Completion(trigger) {
                     @Override
                     public void success() {
                         trigger.rollback();
@@ -730,8 +749,17 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
                     public void success(List<VolumeCbtBackupInfo> infos) {
                         volumeInfos.clear();
                         volumeInfos.addAll(infos);
-                        persistVolumeCbtBackupRecord(taskVO.getUuid(), bitmapName, volumeInfos);
-                        trigger.next();
+                        persistVolumeCbtBackupRecord(taskVO.getUuid(), bitmapName, volumeInfos, new Completion(trigger) {
+                            @Override
+                            public void success() {
+                                trigger.next();
+                            }
+
+                            @Override
+                            public void fail(ErrorCode errorCode) {
+                                trigger.fail(errorCode);
+                            }
+                        });
                     }
 
                     @Override
@@ -1019,7 +1047,7 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
 
                     VolumeCbtBackupInfo info = new VolumeCbtBackupInfo();
                     info.setVolume(VolumeTO.valueOf(VolumeInventory.valueOf(vo), inv));
-                    info.setTarget(cReply.getInventory().getInstallPath());
+                    info.setTarget(VolumeTO.valueOf(cReply.getInventory(), inv).getInstallPath());
                     info.setNbdServer(nbdServer);
                     infos.add(info);
                     wcompl.done();
@@ -1252,7 +1280,9 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
         logger.debug(String.format("Cbt task[%s]'s status changed from %s to %s", cbtTaskUuid, vo.getStatus(), newStatus));
     }
 
-    protected void persistVolumeCbtBackupRecord(String cbtTaskUuid, String lastBitmapName, List<VolumeCbtBackupInfo> backupInfos) {
+    protected void persistVolumeCbtBackupRecord(String cbtTaskUuid, String lastBitmapName,
+                                                List<VolumeCbtBackupInfo> backupInfos, Completion completion) {
+        List<VolumeCbtBackupRecordVO> records = new ArrayList<>(backupInfos.size());
         for (VolumeCbtBackupInfo info : backupInfos) {
             VolumeCbtBackupRecordVO recodeVO = new VolumeCbtBackupRecordVO();
             recodeVO.setTaskUuid(cbtTaskUuid);
@@ -1262,7 +1292,13 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
             recodeVO.setTarget(info.getTarget());
             recodeVO.setVolumeUuid(info.getVolume().getVolumeUuid());
             recodeVO.setScratchNodeName(info.getScratchNodeName());
-            dbf.persistAndRefresh(recodeVO);
+            records.add(recodeVO);
         }
+        if (records.isEmpty()) {
+            completion.success();
+            return;
+        }
+        dbf.persistCollection(records);
+        completion.success();
     }
 }

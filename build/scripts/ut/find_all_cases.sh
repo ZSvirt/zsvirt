@@ -20,7 +20,7 @@ cd ../../../     # under zvirt
 
 CASELIST=""
 for module in `ls test/src/test/resources/UTCapabilities`; do
-    module_name=`echo $module | awk -F'-' '{print $2}'`
+    module_name="${module#module-}"
 
     # find ${module}/pom.xml
     pom_file=`find -regex ".*${module_name}/pom.xml" | head -n 1`

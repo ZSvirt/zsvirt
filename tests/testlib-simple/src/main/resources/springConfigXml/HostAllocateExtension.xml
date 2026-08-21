@@ -7,7 +7,7 @@
          http://zstack.org/schema/zstack
          http://zstack.org/schema/zstack/plugin.xsd"
        default-init-method="init" default-destroy-method="destory">
-    <bean id="HostAllocateExtension" class="org.zstack.test.integration.kvm.hostallocator.HostAllocateExtension">
+    <bean id="HostAllocateExtension" class="org.zstack.testlib.allocator.HostAllocateExtension">
         <zstack:plugin>
             <zstack:extension
                     interface="org.zstack.header.host.HostAllocateExtensionPoint" />

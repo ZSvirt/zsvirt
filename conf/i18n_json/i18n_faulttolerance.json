@@ -474,7 +474,7 @@
   {
     "raw": "could not failover vm[uuid:%s]. Related fault tolerance vm group not exists",
     "en_US": "could not failover vm[uuid:{0}]. Related fault tolerance vm group not exists",
-    "zh_CN": "无法对虚拟机[uuid：{0}]进行故障切换。相关容错云主机组不存在",
+    "zh_CN": "无法对虚拟机[uuid：{0}]进行故障切换。相关容错虚拟机组不存在",
     "arguments": [
       "vmInstanceUuid"
     ],
@@ -492,14 +492,14 @@
   {
     "raw": "could not failover. Primary vm is unknown but no fault tolerance network address available",
     "en_US": "could not failover. Primary vm is unknown but no fault tolerance network address available",
-    "zh_CN": "无法进行故障转移。主云主机未知，但没有可用的容错网络地址",
+    "zh_CN": "无法进行故障转移。主虚拟机未知，但没有可用的容错网络地址",
     "arguments": [],
     "fileName": "src/main/java/org/zstack/faulttolerance/FaultToleranceManagerImpl.java"
   },
   {
     "raw": "could not failover. Secondary vm is unknown but no fault tolerance network address available",
     "en_US": "could not failover. Secondary vm is unknown but no fault tolerance network address available",
-    "zh_CN": "无法进行故障转移。辅助云主机未知，但没有可用的容错网络地址",
+    "zh_CN": "无法进行故障转移。辅助虚拟机未知，但没有可用的容错网络地址",
     "arguments": [],
     "fileName": "src/main/java/org/zstack/faulttolerance/FaultToleranceManagerImpl.java"
   },
@@ -522,7 +522,7 @@
   {
     "raw": "can not start secondary vm, because primary vm is stopped",
     "en_US": "can not start secondary vm, because primary vm is stopped",
-    "zh_CN": "无法启动辅助云主机，因为主云主机已停止",
+    "zh_CN": "无法启动辅助虚拟机，因为主虚拟机已停止",
     "arguments": [],
     "fileName": "src/main/java/org/zstack/faulttolerance/FaultToleranceManagerImpl.java"
   },

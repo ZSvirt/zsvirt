@@ -726,7 +726,7 @@
   {
     "raw": "L3 networks[uuids:%s] of the vm nics has no network service[%s] enabled",
     "en_US": "L3 networks[uuids:{0}] of the vm nics has no network service[{1}] enabled",
-    "zh_CN": "云主机网卡的三层网络没有可用的网络服务",
+    "zh_CN": "虚拟机网卡的三层网络没有可用的网络服务",
     "arguments": [
       "l3Uuids",
       "LoadBalancerConstants.LB_NETWORK_SERVICE_TYPE_STRING"

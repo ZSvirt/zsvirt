@@ -440,6 +440,8 @@ class RestDocumentationGenerator implements DocumentGenerator {
 
     String projectVersion
 
+    static final String DOC_CHARSET = "UTF-8"
+
     Map<String, File> sourceFiles = [:]
 
     def MUTUAL_FIELDS = [
@@ -596,7 +598,7 @@ class RestDocumentationGenerator implements DocumentGenerator {
                     f.parentFile.mkdirs()
                 }
 
-                f.write(md.generate())
+                f.write(md.generate(), DOC_CHARSET)
                 logger.info("written ${f.absolutePath}")
             } catch (Exception e) {
                 if (ignoreError()) {
@@ -617,7 +619,7 @@ class RestDocumentationGenerator implements DocumentGenerator {
 
         URL url = Resources.getResource("doc/RestIntroduction_zh_cn.md")
         String context = Resources.toString(url, Charsets.UTF_8)
-        new File(PathUtil.join(dir.absolutePath, "RestIntroduction_zh_cn.md")).write(context)
+        new File(PathUtil.join(dir.absolutePath, "RestIntroduction_zh_cn.md")).write(context, DOC_CHARSET)
     }
 
     @Override
@@ -665,7 +667,7 @@ class RestDocumentationGenerator implements DocumentGenerator {
             sb.append("\n")
         }
 
-        out.write(sb.toString())
+        out.write(sb.toString(), DOC_CHARSET)
         logger.info(String.format("written error code doc to %s (%s codes)", out.absolutePath, codes.size()))
     }
 
@@ -692,7 +694,7 @@ class RestDocumentationGenerator implements DocumentGenerator {
                     return
                 }
                 logger.info("generating global config markdown for config[${it.key}]")
-                f.write(configMd.generate())
+                f.write(configMd.generate(), DOC_CHARSET)
                 logger.info("written a global config markdown ${path}")
             } else {
                 GlobalConfigMarkDown g = configMd
@@ -704,7 +706,7 @@ class RestDocumentationGenerator implements DocumentGenerator {
                     g.merge(configMd)
                     logger.info("re-written a global config markdown ${path}")
                 }
-                f.write(g.generate())
+                f.write(g.generate(), DOC_CHARSET)
             }
         }
     }
@@ -1220,7 +1222,7 @@ class RestDocumentationGenerator implements DocumentGenerator {
     }
 
     Doc createDoc(String docTemplatePath) {
-        Script script = new GroovyShell().parse(new File(docTemplatePath))
+        Script script = new GroovyShell().parse(new File(docTemplatePath).getText(DOC_CHARSET))
         return createDocFromGroobyScript(script)
     }
 
@@ -2515,7 +2517,7 @@ ${paramString}
                 oldDoc.merge(newDoc)
             }
 
-            new File(docFilePath).write generate(oldDoc)
+            new File(docFilePath).write(generate(oldDoc), DOC_CHARSET)
             logger.info("re-written a request doc template ${docFilePath}")
         }
 
@@ -2523,13 +2525,13 @@ ${paramString}
             def docFilePath = getDocTemplatePathFromClass(apiClass)
 
             if (mode == DocMode.RECREATE_ALL) {
-                new File(docFilePath).write generate()
+                new File(docFilePath).write(generate(), DOC_CHARSET)
                 logger.info("written a request doc template ${docFilePath}")
             } else if (mode == DocMode.REPAIR) {
                 repair(docFilePath)
             } else if (mode == DocMode.CREATE_MISSING) {
                 if (!new File(docFilePath).exists()) {
-                    new File(docFilePath).write generate()
+                    new File(docFilePath).write(generate(), DOC_CHARSET)
                     logger.info("written a request doc template ${docFilePath}")
                 } else {
                     logger.info("${docFilePath} exists, skip it")
@@ -2763,7 +2765,7 @@ ${additionalRemark}
 
             docFiles.each { k, v ->
                 def f = new File(k)
-                f.write(v)
+                f.write(v, DOC_CHARSET)
                 logger.info("written doc template ${k}")
             }
         }

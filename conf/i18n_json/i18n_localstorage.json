@@ -159,7 +159,7 @@
   {
     "raw": "The two clusters[uuid:%s,uuid:%s] cannot access each other in l2 network  when migrate the vm[uuid:%s] to another cluster",
     "en_US": "The two clusters[uuid:{0},uuid:{1}] cannot access each other in l2 network  when migrate the vm[uuid:{2}] to another cluster",
-    "zh_CN": "两个集群[uuid:{0},uuid:{1}]无法在二层网络中互相访问对方，当迁移云主机[uuid:{2}]从其中一个集群到另一个集群时",
+    "zh_CN": "两个集群[uuid:{0},uuid:{1}]无法在二层网络中互相访问对方，当迁移虚拟机[uuid:{2}]从其中一个集群到另一个集群时",
     "arguments": [
       "originClusterUuid",
       "clusterUuid",
@@ -270,7 +270,7 @@
   {
     "raw": "resource[uuid:%s, type: %s] on the local primary storage[uuid:%s] maps to multiple hypervisor%s",
     "en_US": "resource[uuid:{0}, type: {1}] on the local primary storage[uuid:{2}] maps to multiple hypervisor{3}",
-    "zh_CN": "本地主存储[uuid：{2}]上的资源[uuid：{0}，类型：{1}]映射到多个云主机管理程序{3}",
+    "zh_CN": "本地主存储[uuid：{2}]上的资源[uuid：{0}，类型：{1}]映射到多个虚拟机管理程序{3}",
     "arguments": [
       "resUuid",
       "resourceType",
@@ -388,7 +388,7 @@
   {
     "raw": "Can\u0027t attach volume to VM, no qualified cluster",
     "en_US": "Can\u0027t attach volume to VM, no qualified cluster",
-    "zh_CN": "不能加载云盘到云主机上，没有可用集群",
+    "zh_CN": "不能加载云盘到虚拟机上，没有可用集群",
     "arguments": [],
     "fileName": "src/main/java/org/zstack/storage/primary/local/LocalStorageFactory.java"
   },
@@ -500,14 +500,14 @@
   {
     "raw": "root image has been deleted, cannot reimage now",
     "en_US": "root image has been deleted, cannot reimage now",
-    "zh_CN": "系统镜像已经被删除，无法重制云主机",
+    "zh_CN": "系统镜像已经被删除，无法重制虚拟机",
     "arguments": [],
     "fileName": "src/main/java/org/zstack/storage/primary/local/LocalStorageKvmBackend.java"
   },
   {
     "raw": "the volume[uuid;%s] is attached to a VM[uuid:%s] which is in state of %s, cannot do the snapshot merge",
     "en_US": "the volume[uuid;{0}] is attached to a VM[uuid:{1}] which is in state of {2}, cannot do the snapshot merge",
-    "zh_CN": "云盘[uuid;{0}] 挂载到处于{2}状态的云主机，不能合并快照",
+    "zh_CN": "云盘[uuid;{0}] 挂载到处于{2}状态的虚拟机，不能合并快照",
     "arguments": [
       "volume.getUuid()",
       "volume.getVmInstanceUuid()",

@@ -11,7 +11,7 @@
   {
     "raw": "volume %s still have snapshot group on vm %s, cannot attach to other vm",
     "en_US": "volume {0} still have snapshot group on vm {1}, cannot attach to other vm",
-    "zh_CN": "卷{0}在云主机{1}上仍具有快照组，无法连接到其他云主机",
+    "zh_CN": "卷{0}在虚拟机{1}上仍具有快照组，无法连接到其他虚拟机",
     "arguments": [
       "volume.getUuid()",
       "volume.getLastVmInstanceUuid()"

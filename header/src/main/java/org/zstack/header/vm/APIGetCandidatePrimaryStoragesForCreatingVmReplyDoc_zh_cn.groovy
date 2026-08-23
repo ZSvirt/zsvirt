@@ -5,7 +5,7 @@ import org.zstack.header.errorcode.ErrorCode
 
 doc {
 
-	title "创建云主机可选主存储的结果"
+	title "创建虚拟机可选主存储的结果"
 
 	ref {
 		name "rootVolumePrimaryStorages"

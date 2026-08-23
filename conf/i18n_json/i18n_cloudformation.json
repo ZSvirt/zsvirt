@@ -198,7 +198,7 @@
   {
     "raw": "cannot find default ip on vm[%s]",
     "en_US": "cannot find default ip on vm[{0}]",
-    "zh_CN": "在云主机[{0}]上找不到默认IP",
+    "zh_CN": "在虚拟机[{0}]上找不到默认IP",
     "arguments": [
       "vm.getUuid()"
     ],

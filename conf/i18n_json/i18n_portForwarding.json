@@ -116,7 +116,7 @@
   {
     "raw": "guest l3Network of vm nic[uuid:%s] and vip l3Network of vip[uuid: %s] are the same network",
     "en_US": "guest l3Network of vm nic[uuid:{0}] and vip l3Network of vip[uuid: {1}] are the same network",
-    "zh_CN": "云主机网卡[uuid:{0}]的客户三层网络和虚拟IP[uuid:{1}]的虚拟IP 三层网络是同一个网络",
+    "zh_CN": "虚拟机网卡[uuid:{0}]的客户三层网络和虚拟IP[uuid:{1}]的虚拟IP 三层网络是同一个网络",
     "arguments": [
       "msg.getVmNicUuid()",
       "msg.getVipUuid()"
@@ -126,7 +126,7 @@
   {
     "raw": "the VM[name:%s uuid:%s] already has port forwarding rules that have different VIPs than the one[uuid:%s]",
     "en_US": "the VM[name:{0} uuid:{1}] already has port forwarding rules that have different VIPs than the one[uuid:{2}]",
-    "zh_CN": "云主机[name:{0} uuid:{1}]已经有端口转发规则，且与[uuid:{2}]有不同的VIPs",
+    "zh_CN": "虚拟机[name:{0} uuid:{1}]已经有端口转发规则，且与[uuid:{2}]有不同的VIPs",
     "arguments": [
       "vm.getName()",
       "vm.getUuid()",

@@ -2,7 +2,7 @@
   {
     "raw": "cannot configure vxlan network for vm[uuid:%s] on the destination host[uuid:%s]",
     "en_US": "cannot configure vxlan network for vm[uuid:{0}] on the destination host[uuid:{1}]",
-    "zh_CN": "无法为云主机[uuid:{0}]在目标主机[uuid:{1}]上配置VXLAN网络",
+    "zh_CN": "无法为虚拟机[uuid:{0}]在目标主机[uuid:{1}]上配置VXLAN网络",
     "arguments": [
       "inv.getUuid()",
       "destHostUuid"

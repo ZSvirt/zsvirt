@@ -443,7 +443,7 @@
   {
     "raw": "rootVolume[%s] is already in use(ceph rbd image[%s] already has watchers), in order to prevent brain splitting, Starting VM is prohibited.",
     "en_US": "rootVolume[{0}] is already in use(ceph rbd image[{1}] already has watchers), in order to prevent brain splitting, Starting VM is prohibited.",
-    "zh_CN": "云盘[{0}]正在使用中(ceph rbd 镜像[{1}]存在watchers)，为了防止云主机脑裂，禁止启动云主机",
+    "zh_CN": "云盘[{0}]正在使用中(ceph rbd 镜像[{1}]存在watchers)，为了防止虚拟机脑裂，禁止启动虚拟机",
     "arguments": [
       "msg.getVolumeUuid()",
       "installPath"

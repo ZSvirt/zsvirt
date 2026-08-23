@@ -133,7 +133,7 @@
   {
     "raw": "instance offering[uuid:%s] is Disabled, can\u0027t create vm from it",
     "en_US": "instance offering[uuid:{0}] is Disabled, can\u0027t create vm from it",
-    "zh_CN": "计算规格[uuid:{0}]没有被启用，不能根据该规格创建云主机",
+    "zh_CN": "计算规格[uuid:{0}]没有被启用，不能根据该规格创建虚拟机",
     "arguments": [
       "instanceOfferingVO.getUuid()"
     ],
@@ -142,7 +142,7 @@
   {
     "raw": "instance offering[uuid:%s, type:%s] is not UserVm type, can\u0027t create vm from it",
     "en_US": "instance offering[uuid:{0}, type:{1}] is not UserVm type, can\u0027t create vm from it",
-    "zh_CN": "计算规格[uuid:{0}, type:{1}]不是UserVm类型，不能通过它创建云主机",
+    "zh_CN": "计算规格[uuid:{0}, type:{1}]不是UserVm类型，不能通过它创建虚拟机",
     "arguments": [
       "instanceOfferingVO.getUuid()",
       "instanceOfferingVO.getType()"
@@ -161,7 +161,7 @@
   {
     "raw": "image[uuid:%s] is Disabled, can\u0027t create vm from it",
     "en_US": "image[uuid:{0}] is Disabled, can\u0027t create vm from it",
-    "zh_CN": "镜像[uuid:{0}]没被启用，不能根据该镜像创建云主机",
+    "zh_CN": "镜像[uuid:{0}]没被启用，不能根据该镜像创建虚拟机",
     "arguments": [
       "imageVO.getUuid()"
     ],
@@ -179,7 +179,7 @@
   {
     "raw": "image[uuid:%s] is of mediaType: %s, only RootVolumeTemplate and ISO can be used to create vm",
     "en_US": "image[uuid:{0}] is of mediaType: {1}, only RootVolumeTemplate and ISO can be used to create vm",
-    "zh_CN": "镜像[uuid：{0}]类型为{1}，只能用RootVolumeTemplate和ISO来创建云主机",
+    "zh_CN": "镜像[uuid：{0}]类型为{1}，只能用RootVolumeTemplate和ISO来创建虚拟机",
     "arguments": [
       "imageVO.getUuid()",
       "imageVO.getMediaType()"
@@ -196,7 +196,7 @@
   {
     "raw": "image[uuid:%s] is system image, can\u0027t be used to create user vm",
     "en_US": "image[uuid:{0}] is system image, can\u0027t be used to create user vm",
-    "zh_CN": "镜像[uuid:{0}] 是系统镜像，不能使用它创建用户云主机",
+    "zh_CN": "镜像[uuid:{0}] 是系统镜像，不能使用它创建用户虚拟机",
     "arguments": [
       "imageVO.getUuid()"
     ],
@@ -232,7 +232,7 @@
   {
     "raw": "l3Network[uuid:%s] is Disabled, can not create vm on it",
     "en_US": "l3Network[uuid:{0}] is Disabled, can not create vm on it",
-    "zh_CN": "三层网络[uuid：{0}]没有被启用，不能在这上面创建云主机",
+    "zh_CN": "三层网络[uuid：{0}]没有被启用，不能在这上面创建虚拟机",
     "arguments": [
       "l3Uuid"
     ],
@@ -241,7 +241,7 @@
   {
     "raw": "l3Network[uuid:%s] is system network, can not create user vm on it",
     "en_US": "l3Network[uuid:{0}] is system network, can not create user vm on it",
-    "zh_CN": "三层网络[uuid：{0}]是系统网络，不能在这上面创建云主机",
+    "zh_CN": "三层网络[uuid：{0}]是系统网络，不能在这上面创建虚拟机",
     "arguments": [
       "l3Uuid"
     ],
@@ -286,7 +286,7 @@
   {
     "raw": "autoScalingGroup[%s] destroy vms[%s] failed completely, errors are %s",
     "en_US": "autoScalingGroup[{0}] destroy vms[{1}] failed completely, errors are {2}",
-    "zh_CN": "AutoScalingGroup[{0}]销毁云主机[{1}]完全失败，错误为{2}",
+    "zh_CN": "AutoScalingGroup[{0}]销毁虚拟机[{1}]完全失败，错误为{2}",
     "arguments": [
       "self.getUuid()",
       "vmInstanceUuids",

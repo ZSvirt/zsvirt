@@ -1,5 +1,6 @@
 ZStack/BackupStorage/BackupStorageDisconnected: 镜像存储失联
 ZStack/BackupStorage/BackupStorageConnected: 镜像存储已连接
+ZStack/BackupStorage/FaultMountPointOnBackupStorage: 镜像/备份存储挂载路径错误
 ZStack/SNS/SendSmsFailed: 短信发送失败
 ZStack/VCenter/VCenterHostWrongDateTime: VCenter主机时间异常
 ZStack/VCenter/VCenterResourceEvent: VCenter资源事件

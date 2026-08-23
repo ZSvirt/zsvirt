@@ -10,6 +10,8 @@ import org.zstack.tag.SystemTag;
  */
 @TagDefinition
 public class ImageStoreSystemTags {
+    public static SystemTag INITIALIZED_FILE = new SystemTag("imagestore::initializedFile", ImageStoreBackupStorageVO.class);
+
     public static String IMAGESTORE_SYNC_TASK_TOKEN = "taskid";
     public static String IMAGESTORE_SYNC_STATUS_TOKEN = "status";
     public static String IMAGESTORE_SYNC_IMAGE_TOKEN = "image";

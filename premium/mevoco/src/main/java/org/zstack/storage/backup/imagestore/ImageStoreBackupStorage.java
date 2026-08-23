@@ -234,7 +234,7 @@ public class ImageStoreBackupStorage extends BackupStorageBase {
         chain.then(new NoRollbackFlow() {
             @Override
             public void run(FlowTrigger trigger, Map data) {
-                init(new Completion(trigger) {
+                init(newAdded, new Completion(trigger) {
                     @Override
                     public void success() {
                         trigger.next();
@@ -266,14 +266,17 @@ public class ImageStoreBackupStorage extends BackupStorageBase {
         }).start();
     }
 
-    private void init(final Completion complete) {
+    private void init(boolean newAdded, final Completion complete) {
         restf.echo(buildUrl(ImageStoreBackupStorageConstant.ECHO_PATH), new Completion(complete) {
             @Override
             public void success() {
                 String url = buildUrl(ImageStoreBackupStorageConstant.CONNECT_PATH);
                 ConnectCmd cmd = new ConnectCmd();
                 cmd.setUuid(self.getUuid());
+                boolean createInitializedFile = newAdded || !ImageStoreSystemTags.INITIALIZED_FILE.hasTag(self.getUuid());
+                cmd.setCreateInitializedFile(createInitializedFile);
                 ConnectResponse rsp = restf.syncJsonPost(url, cmd, ConnectResponse.class);
+                fireInitializedFileFailureEvent(rsp.getInitializedFileExists(), rsp.getError());
                 if (!rsp.isSuccess()) {
                     ErrorCode err = operr("unable to connect to SimpleHttpBackupStorage[url:%s], because %s",
                             url, rsp.getError());
@@ -287,6 +290,13 @@ public class ImageStoreBackupStorage extends BackupStorageBase {
                 initIscsiInitiatorName(rsp.getIscsiInitiatorName());
                 initStorageInfo(rsp.getStorageInfo());
                 updateIORate(rsp.getIoRate());
+
+                if (createInitializedFile) {
+                    SystemTagCreator creator = ImageStoreSystemTags.INITIALIZED_FILE.newSystemTagCreator(self.getUuid());
+                    creator.inherent = true;
+                    creator.recreate = false;
+                    creator.create();
+                }
 
                 logger.debug(String.format("connected to backup storage[uuid:%s, name:%s, total capacity:%sG, available capacity: %sG",
                         getSelf().getUuid(), getSelf().getName(), rsp.getTotalSize(), rsp.getFreeSize()));
@@ -1876,6 +1886,11 @@ public class ImageStoreBackupStorage extends BackupStorageBase {
 
                 @Override
                 public void success(PingResponse ret) {
+                    fireInitializedFileFailureEvent(ret.getInitializedFileExists(), ret.getError());
+                    if (Boolean.FALSE.equals(ret.getInitializedFileExists())) {
+                        completion.success();
+                        return;
+                    }
                     if (ret.isSuccess()) {
                         if (ret.getUuid() == null || ret.getUuid().equals("")) {
                             connect(new Completion(completion) {
@@ -1918,6 +1933,11 @@ public class ImageStoreBackupStorage extends BackupStorageBase {
         } else {
             // image store deployed in public cloud, it couldn't callback mn node
             PingResponse resp = restf.syncJsonPost(buildUrl(ImageStoreBackupStorageConstant.SYNC_PING_PATH), cmd, PingResponse.class, TimeUnit.SECONDS, 5);
+            fireInitializedFileFailureEvent(resp.getInitializedFileExists(), resp.getError());
+            if (Boolean.FALSE.equals(resp.getInitializedFileExists())) {
+                completion.success();
+                return;
+            }
             if (resp.isSuccess()) {
                 if (resp.getUuid() == null || resp.getUuid().equals("")) {
                     connect(new Completion(completion) {
@@ -1948,6 +1968,17 @@ public class ImageStoreBackupStorage extends BackupStorageBase {
                 completion.fail(operr("operation error, because:%s", resp.getError()));
             }
         }
+    }
+
+    private void fireInitializedFileFailureEvent(Boolean initializedFileExists, String details) {
+        if (!Boolean.FALSE.equals(initializedFileExists)) {
+            return;
+        }
+
+        BackupStorageCanonicalEvents.BackupStorageMountData data = new BackupStorageCanonicalEvents.BackupStorageMountData();
+        data.backupStorageUuid = self.getUuid();
+        data.details = details;
+        evtf.fire(BackupStorageCanonicalEvents.BACKUP_STORAGE_CHECK_INITIALIZED_FAILED, data);
     }
 
     @Override

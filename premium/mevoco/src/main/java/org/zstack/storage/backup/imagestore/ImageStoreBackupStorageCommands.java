@@ -26,12 +26,22 @@ public class ImageStoreBackupStorageCommands {
 
     public static class ConnectCmd extends AgentCommand {
         private String uuid;
+        private boolean createInitializedFile;
+
         public String getUuid() {
             return uuid;
         }
 
         public void setUuid(String uuid) {
             this.uuid = uuid;
+        }
+
+        public boolean isCreateInitializedFile() {
+            return createInitializedFile;
+        }
+
+        public void setCreateInitializedFile(boolean createInitializedFile) {
+            this.createInitializedFile = createInitializedFile;
         }
     }
 
@@ -85,12 +95,21 @@ public class ImageStoreBackupStorageCommands {
         private long totalSize;
         private long freeSize;
         private List<String> ipAddresses;
+        private Boolean initializedFileExists;
 
         private String iscsiInitiatorName;
         private StorageInfo storageInfo;
 
         private int ioRate;
         private boolean supportFuse;
+
+        public Boolean getInitializedFileExists() {
+            return initializedFileExists;
+        }
+
+        public void setInitializedFileExists(Boolean initializedFileExists) {
+            this.initializedFileExists = initializedFileExists;
+        }
 
         public long getTotalSize() {
             return totalSize;
@@ -156,6 +175,7 @@ public class ImageStoreBackupStorageCommands {
 
     public static class PingResponse extends ImageStoreResponse {
         private String uuid;
+        private Boolean initializedFileExists;
         public Long totalSize;
         public Long freeSize;
 
@@ -165,6 +185,14 @@ public class ImageStoreBackupStorageCommands {
 
         public void setUuid(String uuid) {
             this.uuid = uuid;
+        }
+
+        public Boolean getInitializedFileExists() {
+            return initializedFileExists;
+        }
+
+        public void setInitializedFileExists(Boolean initializedFileExists) {
+            this.initializedFileExists = initializedFileExists;
         }
     }
 

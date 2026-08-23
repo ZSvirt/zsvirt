@@ -48,6 +48,7 @@ public class LocalStorageDeleteBitsGC extends EventBasedGarbageCollector {
         LocalStorageKvmBackend.DeleteBitsCmd cmd = new LocalStorageKvmBackend.DeleteBitsCmd();
         cmd.setPath(installPath);
         cmd.setHostUuid(hostUuid);
+        cmd.uuid = primaryStorageUuid;
         cmd.storagePath = Q.New(PrimaryStorageVO.class).
                 eq(PrimaryStorageVO_.uuid, primaryStorageUuid).
                 select(PrimaryStorageVO_.url).

@@ -30,6 +30,7 @@
     <name>zstack</name>
     <modules>
         <module>core</module>
+        <module>computes</module>
         <module>compute</module>
         <module>utils</module>
         <module>headers</module>

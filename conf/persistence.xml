@@ -222,5 +222,8 @@
         <class>org.zstack.header.vm.metadata.VmMetadataFlushStateVO</class>
         <class>org.zstack.log.server.LogServerVO</class>
         <class>org.zstack.header.core.external.service.ExternalServiceConfigurationVO</class>
+        <class>org.zstack.allocator.domain.entity.AllocatorDomainVO</class>
+        <class>org.zstack.allocator.domain.entity.AllocatorDomainRuleVO</class>
+        <class>org.zstack.allocator.domain.entity.AllocatorDomainSceneVO</class>
     </persistence-unit>
 </persistence>

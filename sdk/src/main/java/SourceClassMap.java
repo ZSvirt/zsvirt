@@ -8,6 +8,10 @@ public class SourceClassMap {
 			put("org.zstack.accessKey.AccessKeyInventory", "org.zstack.sdk.AccessKeyInventory");
 			put("org.zstack.accessKey.AccessKeyState", "org.zstack.sdk.AccessKeyState");
 			put("org.zstack.accessKey.AccessKeyType", "org.zstack.sdk.AccessKeyType");
+			put("org.zstack.allocator.domain.entity.AllocatorDomainInventory", "org.zstack.sdk.allocator.domain.entity.AllocatorDomainInventory");
+			put("org.zstack.allocator.domain.entity.AllocatorDomainRuleInventory", "org.zstack.sdk.allocator.domain.entity.AllocatorDomainRuleInventory");
+			put("org.zstack.allocator.domain.entity.AllocatorDomainRuleParam", "org.zstack.sdk.allocator.domain.entity.AllocatorDomainRuleParam");
+			put("org.zstack.allocator.domain.entity.AllocatorDomainSceneInventory", "org.zstack.sdk.allocator.domain.entity.AllocatorDomainSceneInventory");
 			put("org.zstack.appliancevm.ApplianceVmInventory", "org.zstack.sdk.ApplianceVmInventory");
 			put("org.zstack.autoscaling.group.AutoScalingGroupInventory", "org.zstack.sdk.AutoScalingGroupInventory");
 			put("org.zstack.autoscaling.group.activity.AutoScalingGroupActivityInventory", "org.zstack.sdk.AutoScalingGroupActivityInventory");
@@ -1071,6 +1075,10 @@ public class SourceClassMap {
 			put("org.zstack.sdk.XskyBlockVolumeInventory", "org.zstack.header.volume.block.XskyBlockVolumeInventory");
 			put("org.zstack.sdk.ZQLQueryReturn", "org.zstack.zql.ZQLQueryReturn");
 			put("org.zstack.sdk.ZoneInventory", "org.zstack.header.zone.ZoneInventory");
+			put("org.zstack.sdk.allocator.domain.entity.AllocatorDomainInventory", "org.zstack.allocator.domain.entity.AllocatorDomainInventory");
+			put("org.zstack.sdk.allocator.domain.entity.AllocatorDomainRuleInventory", "org.zstack.allocator.domain.entity.AllocatorDomainRuleInventory");
+			put("org.zstack.sdk.allocator.domain.entity.AllocatorDomainRuleParam", "org.zstack.allocator.domain.entity.AllocatorDomainRuleParam");
+			put("org.zstack.sdk.allocator.domain.entity.AllocatorDomainSceneInventory", "org.zstack.allocator.domain.entity.AllocatorDomainSceneInventory");
 			put("org.zstack.sdk.attribute.entity.CreateResourceAttributeResult", "org.zstack.header.resourceattribute.entity.CreateResourceAttributeResult");
 			put("org.zstack.sdk.attribute.entity.ResourceAttributeConstraintInventory", "org.zstack.header.resourceattribute.entity.ResourceAttributeConstraintInventory");
 			put("org.zstack.sdk.attribute.entity.ResourceAttributeKeyInventory", "org.zstack.header.resourceattribute.entity.ResourceAttributeKeyInventory");

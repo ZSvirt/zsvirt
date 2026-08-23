@@ -568,6 +568,9 @@
         <class>org.zstack.header.core.external.service.ExternalServiceConfigurationVO</class>
         <class>org.zstack.zwatch.resnotify.ResNotifySubscriptionVO</class>
         <class>org.zstack.zwatch.resnotify.ResNotifyWebhookRefVO</class>
+        <class>org.zstack.allocator.domain.entity.AllocatorDomainVO</class>
+        <class>org.zstack.allocator.domain.entity.AllocatorDomainRuleVO</class>
+        <class>org.zstack.allocator.domain.entity.AllocatorDomainSceneVO</class>
 
         <!-- module agents -->
         <class>org.zstack.softwarePackage.entity.SoftwarePackageVO</class>

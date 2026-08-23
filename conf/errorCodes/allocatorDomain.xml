@@ -1,0 +1,48 @@
+<error>
+    <prefix>ALLOCATOR.DOMAIN</prefix>
+
+    <code>
+        <id>1000</id>
+        <description>Allocator domain general error</description>
+    </code>
+
+    <code>
+        <id>2000</id>
+        <description>Allocator domain related error</description>
+    </code>
+
+    <code>
+        <id>2001</id>
+        <description>Allocator domain not found</description>
+    </code>
+
+    <code>
+        <id>2002</id>
+        <description>Allocator domain is still referenced by VMs and cannot be deleted</description>
+    </code>
+
+    <code>
+        <id>3000</id>
+        <description>Allocator domain rule related error</description>
+    </code>
+
+    <code>
+        <id>3001</id>
+        <description>Invalid allocator domain rule</description>
+    </code>
+
+    <code>
+        <id>4000</id>
+        <description>Allocator domain allocation related error</description>
+    </code>
+
+    <code>
+        <id>4001</id>
+        <description>Specified resource is outside the allocator domain</description>
+    </code>
+
+    <code>
+        <id>4002</id>
+        <description>Changing the VM allocator domain to another domain uuid is not allowed via this API</description>
+    </code>
+</error>

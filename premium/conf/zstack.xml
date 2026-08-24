@@ -182,6 +182,7 @@
     <import resource="springConfigXml/memoryBalloon.xml"/>
     <import resource="springConfigXml/zsv.xml"/>
     <import resource="springConfigXml/telemetry.xml"/>
+    <import resource="springConfigXml/allocatorDomain.xml"/>
     <import resource="springConfigXml/virtualSwitch.xml"/>
     <import resource="springConfigXml/HostNetworkManager.xml"/>
     <import resource="springConfigXml/iam1/iam1-ensemble.xml"/>

@@ -16,25 +16,13 @@ import static org.zstack.utils.gson.JSONObjectUtil.rehashObject;
 
 
 public abstract class Message implements Serializable, AsyncBackup, Cloneable {
-    /**
-     * @ignore
-     */
     @APINoSee
     @NoJsonSchema
-    private Map<String, Object> headers = new LinkedHashMap<String, Object>();
-    /**
-     * @ignore
-     */
+    private Map<String, Object> headers = new LinkedHashMap<>();
     @APINoSee
     private String id;
-    /**
-     * @ignore
-     */
     @APINoSee
     private String serviceId;
-    /**
-     * @ignore
-     */
     @APINoSee
     private long createdTime;
 

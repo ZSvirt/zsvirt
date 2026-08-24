@@ -1008,7 +1008,7 @@ class VirtualRouterLoadBalancerListenerCase extends SubCase{
         lbTO =cmd.lbs.stream().filter{lb -> lb.listenerUuid.equals(lblRes.value.inventory.uuid)}.collect(Collectors.toList())[0] as VirtualRouterLoadBalancerBackend.LbTO
         assert lbTO.getServerGroups().size() == 3
         assert lbTO.getRedirectRules().size() == 2
-        List<VirtualRouterLoadBalancerBackend.LbTO.ServerGroup> serverGroupList1 = lbTO.getServerGroups()
+        def serverGroupList1 = lbTO.getServerGroups()
         List<String> ips1 = lbTO.getNicIps()
 
 
@@ -1019,7 +1019,7 @@ class VirtualRouterLoadBalancerListenerCase extends SubCase{
         }
         sleep(1000)
         lbTO =cmd.lbs.stream().filter{lb -> lb.listenerUuid.equals(lblRes.value.inventory.uuid)}.collect(Collectors.toList())[0] as VirtualRouterLoadBalancerBackend.LbTO
-        List<VirtualRouterLoadBalancerBackend.LbTO.ServerGroup> serverGroupList2 = lbTO.getServerGroups()
+        def serverGroupList2 = lbTO.getServerGroups()
         List<String> ips2 = lbTO.getNicIps()
 
         assert serverGroupList1.size() == serverGroupList2.size()
@@ -1170,7 +1170,7 @@ class VirtualRouterLoadBalancerListenerCase extends SubCase{
         }
         sleep(1000)
         lbTO = cmd.lbs.stream().filter{lb -> lb.listenerUuid.equals(lblRes.value.inventory.uuid)}.collect(Collectors.toList())[0] as VirtualRouterLoadBalancerBackend.LbTO
-        List<VirtualRouterLoadBalancerBackend.LbTO.RedirectRule> redirectRules = lbTO.getRedirectRules()
+        def redirectRules = lbTO.getRedirectRules()
         assert redirectRules.get(0).getRedirectRule().equals(("base_reg -i zstack.io:8903/test").replace(".", "\\."))
         assert redirectRules.get(1).getRedirectRule().equals(("hdr_reg(host) -i zstack.io").replace(".", "\\."))
         assert redirectRules.get(2).getRedirectRule().equals(("hdr_reg(host) -i *est.zstack.io").replace(".", "\\.").replace("*", ".*"))

@@ -1,7 +1,6 @@
 package org.zstack.utils.test;
 
 import org.junit.Test;
-import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
 import org.zstack.utils.network.NetworkUtils;
 
 public class TestNetworkUtils {

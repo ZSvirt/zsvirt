@@ -9,6 +9,7 @@ import org.zstack.testlib.SpecID
 import org.zstack.testlib.SpecParam
 import org.zstack.testlib.Test
 import org.zstack.testlib.http.PostHandlerPair
+import org.zstack.testlib.zsv.telemetry.TelemetryHttpClientSimulator.HttpForTest
 import org.zstack.zsv.telemetry.client.TelemetryHttpClient
 import org.zstack.zsv.telemetry.client.TelemetryLocalClient
 
@@ -53,12 +54,12 @@ class TelemetryVirtualEndpointSpec extends Spec {
         }
     }
 
-    List<PostHandlerPair<TelemetryHttpClientSimulator.HttpForTest, Object>> postHandlers = []
+    List<PostHandlerPair<HttpForTest, Object>> postHandlers = []
 
     BooleanSupplier registerPostHttpHandler(
-            Predicate<TelemetryHttpClientSimulator.HttpForTest> predicate,
-            BiFunction<TelemetryHttpClientSimulator.HttpForTest, ErrorableValue<Object>, ErrorableValue<Object>> handler) {
-        def pair = new PostHandlerPair<TelemetryHttpClientSimulator.HttpForTest, Object>(
+            Predicate<HttpForTest> predicate,
+            BiFunction<HttpForTest, ErrorableValue<Object>, ErrorableValue<Object>> handler) {
+        def pair = new PostHandlerPair<HttpForTest, Object>(
                 Objects.requireNonNull(predicate),
                 Objects.requireNonNull(handler))
         this.postHandlers << pair
@@ -67,14 +68,14 @@ class TelemetryVirtualEndpointSpec extends Spec {
 
     BooleanSupplier registerPostHttpHandler(
             String path,
-            BiFunction<TelemetryHttpClientSimulator.HttpForTest, ErrorableValue<Object>, ErrorableValue<Object>> handler) {
+            BiFunction<HttpForTest, ErrorableValue<Object>, ErrorableValue<Object>> handler) {
         return registerPostHttpHandler({ it.path == path || it.pathWithoutIpAndPort == path }, handler)
     }
 
     BooleanSupplier registerPostHttpHandler(
             String path,
             HttpMethod method,
-            BiFunction<TelemetryHttpClientSimulator.HttpForTest, ErrorableValue<Object>, ErrorableValue<Object>> handler) {
+            BiFunction<HttpForTest, ErrorableValue<Object>, ErrorableValue<Object>> handler) {
         return registerPostHttpHandler(
                 { (it.path == path || it.pathWithoutIpAndPort == path) && it.method == method },
                 handler)

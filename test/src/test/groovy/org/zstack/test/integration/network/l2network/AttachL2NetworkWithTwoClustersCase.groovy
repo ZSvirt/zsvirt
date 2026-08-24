@@ -1,6 +1,5 @@
 package org.zstack.test.integration.network.l2network
 
-import org.apache.commons.collections.list.SynchronizedList
 import org.springframework.http.HttpEntity
 import org.zstack.core.db.DatabaseFacade
 import org.zstack.header.network.service.NetworkServiceType
@@ -14,7 +13,6 @@ import org.zstack.network.service.flat.FlatNetworkServiceConstant
 import org.zstack.sdk.ClusterInventory
 import org.zstack.sdk.HostInventory
 import org.zstack.sdk.ImageInventory
-import org.zstack.sdk.InstanceOfferingInventory
 import org.zstack.sdk.L2NetworkInventory
 import org.zstack.sdk.L2VxlanNetworkPoolInventory
 import org.zstack.sdk.L3NetworkInventory
@@ -202,7 +200,7 @@ public class AttachL2NetworkWithTwoClustersCase extends SubCase{
         }
         assert vm2.hostUuid == host2.uuid
 
-        def cmds = [] as SynchronizedList<KVMAgentCommands.DeleteBridgeCmd>
+        def cmds = Collections.synchronizedList([])
         env.afterSimulator(KVMConstant.KVM_DELETE_L2NOVLAN_NETWORK_PATH) { rsp, HttpEntity<String> e ->
             def deleteBridgeCmd = JSONObjectUtil.toObject(e.body, KVMAgentCommands.DeleteBridgeCmd.class)
             cmds.add(deleteBridgeCmd)
@@ -257,7 +255,7 @@ public class AttachL2NetworkWithTwoClustersCase extends SubCase{
         }
         assert vm2.hostUuid == host2.uuid
 
-        def cmds = [] as SynchronizedList<KVMAgentCommands.DeleteVlanBridgeCmd>
+        def cmds = Collections.synchronizedList([])
         env.afterSimulator(KVMConstant.KVM_DELETE_L2VLAN_NETWORK_PATH) { rsp, HttpEntity<String> e ->
             def deleteBridgeCmd = JSONObjectUtil.toObject(e.body, KVMAgentCommands.DeleteVlanBridgeCmd.class)
             cmds.add(deleteBridgeCmd)
@@ -370,7 +368,7 @@ public class AttachL2NetworkWithTwoClustersCase extends SubCase{
         }
         assert vm2.hostUuid == host2.uuid
 
-        def cmds = [] as SynchronizedList<VxlanKvmAgentCommands.DeleteVxlanBridgeCmd>
+        def cmds = Collections.synchronizedList([])
         env.afterSimulator(VxlanNetworkPoolConstant.VXLAN_KVM_DELETE_L2VXLAN_NETWORK_PATH) { rsp, HttpEntity<String> e ->
             def deleteBridgeCmd = JSONObjectUtil.toObject(e.body, VxlanKvmAgentCommands.DeleteVxlanBridgeCmd.class)
             cmds.add(deleteBridgeCmd)

@@ -423,7 +423,7 @@ public class AccountManagerImpl extends AbstractService implements AccountManage
         SessionInventory session = Session.getSession(msg.getSessionUuid());
         if (session == null) {
             SessionVO svo = dbf.findByUuid(msg.getSessionUuid(), SessionVO.class);
-            session = svo == null ? null : SessionInventory.valueOf(svo);
+            session = svo == null ? null : svo.toInventory();
         }
         msg.setSession(session);
 
@@ -966,7 +966,7 @@ public class AccountManagerImpl extends AbstractService implements AccountManage
         SessionInventory session = Session.getSession(sessionUuid);
         if (session == null) {
             SessionVO svo = dbf.findByUuid(sessionUuid, SessionVO.class);
-            session = svo == null ? null : SessionInventory.valueOf(svo);
+            session = svo == null ? null : svo.toInventory();
         }
 
         if (session == null) {
@@ -1214,7 +1214,7 @@ public class AccountManagerImpl extends AbstractService implements AccountManage
     public SessionInventory doAuth(RestAuthenticationParams params) {
         SessionVO vo = Q.New(SessionVO.class).eq(SessionVO_.uuid, params.authKey).find();
         if (vo != null) {
-            return SessionInventory.valueOf(vo);
+            return vo.toInventory();
         }
 
         /* invalid session error should be raised in ApiMessageProcessorImpl */

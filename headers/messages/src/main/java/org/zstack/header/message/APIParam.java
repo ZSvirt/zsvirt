@@ -1,7 +1,5 @@
 package org.zstack.header.message;
 
-import org.zstack.header.vo.ResourceVO;
-
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
@@ -57,7 +55,7 @@ public @interface APIParam {
      * </pre></blockquote><p>
      * </p>
      *
-     * @see ResourceVO#getResourceType()
+     * See {@code ResourceVO#getResourceType()} for how resource types are stored.
      */
     Class<?>[] resourceType() default {};
 

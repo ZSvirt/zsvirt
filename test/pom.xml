@@ -324,7 +324,7 @@
                             <dependency>
                                 <groupId>org.jacoco</groupId>
                                 <artifactId>org.jacoco.ant</artifactId>
-                                <version>0.8.6</version>
+                                <version>${jacoco.version}</version>
                             </dependency>
                         </dependencies>
                     </plugin>
@@ -389,7 +389,7 @@
                             <dependency>
                                 <groupId>org.jacoco</groupId>
                                 <artifactId>org.jacoco.ant</artifactId>
-                                <version>0.8.6</version>
+                                <version>${jacoco.version}</version>
                             </dependency>
                         </dependencies>
                     </plugin>
@@ -452,7 +452,7 @@
                             <dependency>
                                 <groupId>org.jacoco</groupId>
                                 <artifactId>org.jacoco.ant</artifactId>
-                                <version>0.8.6</version>
+                                <version>${jacoco.version}</version>
                             </dependency>
                         </dependencies>
                     </plugin>
@@ -467,7 +467,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.6</version>
+                <version>${jacoco.version}</version>
 
                 <executions>
                     <execution>
@@ -513,7 +513,7 @@
 	    <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.6.1</version>
+                <version>${project.compiler.version}</version>
                 <configuration>
                     <compilerId>groovy-eclipse-compiler</compilerId>
                     <source>${project.java.version}</source>
@@ -525,12 +525,12 @@
                     <dependency>
                         <groupId>org.codehaus.groovy</groupId>
                         <artifactId>groovy-eclipse-compiler</artifactId>
-                        <version>2.9.2-01</version>
+                        <version>${groovy.eclipse.compiler}</version>
                     </dependency>
                     <dependency>
                         <groupId>org.codehaus.groovy</groupId>
                         <artifactId>groovy-eclipse-batch</artifactId>
-                        <version>2.4.3-01</version>
+                        <version>${groovy.eclipse.batch}</version>
                     </dependency>
                 </dependencies>
             </plugin>

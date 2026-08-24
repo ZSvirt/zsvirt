@@ -24,9 +24,7 @@ import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -67,7 +65,7 @@ public class AllocatorDomainVO extends ResourceVO implements OwnedByAccount, ToI
     @JoinColumn(name = "domainUuid", insertable = false, updatable = false)
     @OrderBy("priority ASC")
     @NoView
-    private List<AllocatorDomainRuleVO> rules = new ArrayList<>();
+    private Set<AllocatorDomainRuleVO> rules = new HashSet<>();
 
     @OneToMany(fetch = FetchType.EAGER)
     @JoinColumn(name = "domainUuid", insertable = false, updatable = false)
@@ -130,11 +128,11 @@ public class AllocatorDomainVO extends ResourceVO implements OwnedByAccount, ToI
         this.lastOpDate = lastOpDate;
     }
 
-    public List<AllocatorDomainRuleVO> getRules() {
+    public Set<AllocatorDomainRuleVO> getRules() {
         return rules;
     }
 
-    public void setRules(List<AllocatorDomainRuleVO> rules) {
+    public void setRules(Set<AllocatorDomainRuleVO> rules) {
         this.rules = rules;
     }
 

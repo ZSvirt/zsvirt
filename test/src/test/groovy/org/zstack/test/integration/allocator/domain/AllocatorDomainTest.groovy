@@ -1,0 +1,25 @@
+package org.zstack.test.integration.allocator.domain
+
+import org.zstack.testlib.SpringSpec
+import org.zstack.testlib.Test
+
+class AllocatorDomainTest extends Test {
+    static SpringSpec springSpec = {
+        def spec = makeSpring()
+        return spec
+    }()
+
+    @Override
+    void setup() {
+        useSpring(springSpec)
+    }
+
+    @Override
+    void environment() {
+    }
+
+    @Override
+    void test() {
+        runSubCases()
+    }
+}

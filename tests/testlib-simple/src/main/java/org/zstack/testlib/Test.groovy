@@ -158,6 +158,7 @@ abstract class Test extends ApiHelper implements Retry {
             include("HostAllocateExtension.xml")
             include("HostNetworkManager.xml")
             include("telemetry.xml")
+            include("allocatorDomain.xml")
         }
     }
 

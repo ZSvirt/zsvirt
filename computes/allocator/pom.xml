@@ -6,7 +6,7 @@
         <groupId>org.zstack</groupId>
         <artifactId>computes</artifactId>
         <version>5.0.0</version>
-        <relativePath>..</relativePath>
+        <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>allocator</artifactId>
     <name>allocator</name>

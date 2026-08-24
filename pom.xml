@@ -10,8 +10,10 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.compiler.version>3.6.1</project.compiler.version>
         <project.java.version>1.8</project.java.version>
+        <jacoco.version>0.8.6</jacoco.version>
         <spring.framework.version>5.2.25.RELEASE</spring.framework.version>
         <spring.security.version>5.7.13</spring.security.version>
+        <maven.war.version>2.3</maven.war.version>
         <hibernate.version>5.3.26.Final</hibernate.version>
         <aspectj.version>1.8.9</aspectj.version>
         <aspectj.plugin.version>1.10</aspectj.plugin.version>

@@ -5,7 +5,7 @@
         <artifactId>zstack</artifactId>
         <groupId>org.zstack</groupId>
         <version>5.0.0</version>
-        <relativePath>..</relativePath>
+        <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>build</artifactId>
     <packaging>war</packaging>
@@ -18,7 +18,7 @@
                 <plugins>
                     <plugin>
                         <artifactId>maven-war-plugin</artifactId>
-                        <version>2.3</version>
+                        <version>${maven.war.version}</version>
                         <configuration>
                             <packagingExcludes>
                                 %regex[WEB-INF/lib/maven(?!-artifact).*.jar],
@@ -515,7 +515,7 @@
             </plugin>
             <plugin>
                 <artifactId>maven-war-plugin</artifactId>
-                <version>2.3</version>
+                <version>${maven.war.version}</version>
                 <configuration>
                     <packagingExcludes>
                         %regex[WEB-INF/lib/maven(?!-artifact).*.jar],

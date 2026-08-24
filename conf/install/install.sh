@@ -341,7 +341,6 @@ check_cmd(){
 
 check_cmd unzip unzip
 check_cmd mysql mysql
-check_cmd rabbitmqctl rabbitmq-server
 check_cmd ansible ansible
 
 check_mysql
@@ -352,15 +351,6 @@ if [ $? -ne 0 ];then
     [mysql server:] $db_host:$db_port
 
     The reason is:
-    `cat $error_tmp_file`
-    "
-fi
-
-# check rabbitmq-server connection.
-rabbitmqctl status >/dev/null 2>$error_tmp_file
-if [ $? -ne 0 ]; then
-    err_quit "Can not get rabbitmq server's status.
-    The reason is :
     `cat $error_tmp_file`
     "
 fi

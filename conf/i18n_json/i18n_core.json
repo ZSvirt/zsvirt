@@ -65,69 +65,13 @@
     "fileName": "src/main/java/org/zstack/core/ansible/SshFolderMd5Checker.java"
   },
   {
-    "raw": "unable to deliver the message; the destination service[%s] is dead; please use rabbitmqctl to check if the queue is existing and if any consumers on that queue",
-    "en_US": "unable to deliver the message; the destination service[{0}] is dead; please use rabbitmqctl to check if the queue is existing and if any consumers on that queue",
-    "zh_CN": "",
-    "arguments": [
-      "msg.getServiceId()"
-    ],
-    "fileName": "src/main/java/org/zstack/core/cloudbus/CloudBusImpl2.java"
-  },
-  {
-    "raw": "management node[uuid:%s] is no ready",
-    "en_US": "management node[uuid:{0}] is no ready",
-    "zh_CN": "",
-    "arguments": [
-      "Platform.getManagementServerId()"
-    ],
-    "fileName": "src/main/java/org/zstack/core/cloudbus/CloudBusImpl2.java"
-  },
-  {
-    "raw": "No route found for the reply[%s], the service[id:%s] waiting for this reply may have been quit. %s",
-    "en_US": "No route found for the reply[{0}], the service[id:{1}] waiting for this reply may have been quit. {2}",
-    "zh_CN": "",
-    "arguments": [
-      "msg.getClass().getName()",
-      "msg.getServiceId()",
-      "wire.dumpMessage(msg)"
-    ],
-    "fileName": "src/main/java/org/zstack/core/cloudbus/CloudBusImpl2.java"
-  },
-  {
-    "raw": "No route found for the message[%s], the service[id:%s] may not be running. Checking Spring xml to make sure you have loaded it. Message dump:\\n %s",
-    "en_US": "No route found for the message[{0}], the service[id:{1}] may not be running. Checking Spring xml to make sure you have loaded it. Message dump:\\n {2}",
-    "zh_CN": "",
-    "arguments": [
-      "msg.getClass().getName()",
-      "msg.getServiceId()",
-      "wire.dumpMessage(msg)"
-    ],
-    "fileName": "src/main/java/org/zstack/core/cloudbus/CloudBusImpl2.java"
-  },
-  {
-    "raw": "the message becomes a dead letter; the possible reason is the service[%s] it sends to has been dead",
-    "en_US": "the message becomes a dead letter; the possible reason is the service[{0}] it sends to has been dead",
-    "zh_CN": "",
-    "arguments": [
-      "msg.getServiceId()"
-    ],
-    "fileName": "src/main/java/org/zstack/core/cloudbus/CloudBusImpl2.java"
-  },
-  {
-    "raw": "message is not in correct JSON mediaType",
-    "en_US": "message is not in correct JSON mediaType",
-    "zh_CN": "",
-    "arguments": [],
-    "fileName": "src/main/java/org/zstack/core/cloudbus/CloudBusImpl2.java"
-  },
-  {
     "raw": "management node[uuid:%s] is unavailable",
     "en_US": "management node[uuid:{0}] is unavailable",
     "zh_CN": "",
     "arguments": [
-      "mgmtNodeId"
+      "nodeUUID"
     ],
-    "fileName": "src/main/java/org/zstack/core/cloudbus/CloudBusImpl2.java"
+    "fileName": "src/main/java/org/zstack/core/cloudbus/CloudBus3ManagementNodeLifeCycleTracker.java"
   },
   {
     "raw": "HTTP ERROR, status code: %s, body: %s",

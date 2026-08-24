@@ -2,7 +2,6 @@ package org.zstack.test.integration.networkservice.provider.flat.dhcp
 
 import junit.framework.Assert
 import org.springframework.http.HttpEntity
-import org.zstack.core.db.DatabaseFacade
 import org.zstack.core.db.Q
 import org.zstack.header.network.l3.UsedIpVO
 import org.zstack.header.network.l3.UsedIpVO_
@@ -20,7 +19,6 @@ import org.zstack.sdk.UsedIpInventory
 import org.zstack.sdk.VmInstanceInventory
 import org.zstack.sdk.VmNicInventory
 import org.zstack.test.integration.networkservice.provider.NetworkServiceProviderTest
-import org.zstack.test.integration.networkservice.provider.flat.FlatNetworkServiceEnv
 import org.zstack.testlib.EnvSpec
 import org.zstack.testlib.SubCase
 import org.zstack.utils.CollectionUtils
@@ -235,7 +233,7 @@ class CheckFlatDhcpWorkCase extends SubCase{
     }
 
     void testDisableIpv4Dhcp(){
-        final L3NetworkInventory l31 = env.inventoryByName("l3-1")
+        L3NetworkInventory l31 = env.inventoryByName("l3-1")
         VmInstanceInventory vm = env.inventoryByName("vm-1")
 
         List<FlatDhcpBackend.FlushDhcpNamespaceCmd> flushCmds = Collections.synchronizedList(new ArrayList<FlatDhcpBackend.FlushDhcpNamespaceCmd>())
@@ -358,7 +356,7 @@ class CheckFlatDhcpWorkCase extends SubCase{
     }
 
     void testDisableDualStackDhcp(){
-        final L3NetworkInventory l32 = env.inventoryByName("l3-2")
+        L3NetworkInventory l32 = env.inventoryByName("l3-2")
 
         List<FlatDhcpBackend.FlushDhcpNamespaceCmd> flushCmds = Collections.synchronizedList(new ArrayList<FlatDhcpBackend.FlushDhcpNamespaceCmd>())
         env.afterSimulator(FlatDhcpBackend.DHCP_FLUSH_NAMESPACE_PATH) { rsp, HttpEntity<String> e1 ->

@@ -1,6 +1,5 @@
 package org.zstack.test.integration.network.vxlanNetwork
 
-import org.apache.commons.collections.list.SynchronizedList
 import org.springframework.http.HttpEntity
 import org.zstack.header.network.service.NetworkServiceType
 import org.zstack.kvm.KVMAgentCommands
@@ -310,7 +309,7 @@ class VxlanLazyAttachCase extends SubCase {
             return rsp
         }
 
-        def realizeRecords = [] as SynchronizedList<String>
+        def realizeRecords = Collections.synchronizedList([])
         List<VxlanKvmAgentCommands.CreateVxlanBridgeCmd> createBridgeCmds = new ArrayList<>()
         createBridgeCmds = Collections.synchronizedList(new ArrayList())
         env.simulator(VxlanNetworkPoolConstant.VXLAN_KVM_REALIZE_L2VXLAN_NETWORK_PATH) { HttpEntity<String> entity, EnvSpec spec ->

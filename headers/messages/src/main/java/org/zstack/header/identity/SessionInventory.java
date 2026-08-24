@@ -16,15 +16,6 @@ public class SessionInventory implements Serializable {
     @APINoSee
     private boolean noSessionEvaluation;
 
-    public static SessionInventory valueOf(SessionVO vo) {
-        SessionInventory inv = new SessionInventory();
-        inv.setAccountUuid(vo.getAccountUuid());
-        inv.setCreateDate(vo.getCreateDate());
-        inv.setExpiredDate(vo.getExpiredDate());
-        inv.setUuid(vo.getUuid());
-        return inv;
-    }
-
     public String getUuid() {
         return uuid;
     }
@@ -67,8 +58,8 @@ public class SessionInventory implements Serializable {
 
     public static SessionInventory __example__() {
         SessionInventory session = new SessionInventory();
-        session.setUuid(DocUtils.createFixedUuid(SessionVO.class));
-        session.setAccountUuid(DocUtils.createFixedUuid(AccountVO.class));
+        session.setUuid(DocUtils.createFixedUuid(SessionInventory.class));
+        session.setAccountUuid(DocUtils.uuidForAPIDoc());
         session.setCreateDate(DocUtils.timestamp());
         session.setExpiredDate(DocUtils.timestampAndAddDays(1));
         return session;

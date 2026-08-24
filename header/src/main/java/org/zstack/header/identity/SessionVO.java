@@ -59,4 +59,13 @@ public class SessionVO {
     public void setCreateDate(Timestamp createDate) {
         this.createDate = createDate;
     }
+
+    public SessionInventory toInventory() {
+        SessionInventory inv = new SessionInventory();
+        inv.setAccountUuid(accountUuid);
+        inv.setCreateDate(createDate);
+        inv.setExpiredDate(expiredDate);
+        inv.setUuid(uuid);
+        return inv;
+    }
 }

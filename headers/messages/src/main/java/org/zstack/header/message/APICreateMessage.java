@@ -1,7 +1,5 @@
 package org.zstack.header.message;
 
-import org.zstack.header.tag.TagPatternVO;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,7 +12,7 @@ public class APICreateMessage extends APIMessage {
      */
     private String resourceUuid;
 
-    @APIParam(required = false, resourceType = TagPatternVO.class)
+    @APIParam(required = false)
     private List<String> tagUuids;
 
     public void addSystemTag(String tag) {

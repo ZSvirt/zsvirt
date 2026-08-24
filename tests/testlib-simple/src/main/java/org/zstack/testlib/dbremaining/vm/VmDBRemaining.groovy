@@ -1,8 +1,8 @@
-package org.zstack.test.integration.kvm.vm
+package org.zstack.testlib.dbremaining.vm
 
 import org.zstack.header.identity.AccountResourceRefVO
 import org.zstack.header.vm.VmPriorityConfigVO
-import org.zstack.testlib.AllowedDBRemaining
+import org.zstack.testlib.dbremaining.AllowedDBRemaining
 
 class VmDBRemaining extends AllowedDBRemaining {
     @Override

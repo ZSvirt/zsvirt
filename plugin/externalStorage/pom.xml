@@ -6,7 +6,7 @@
         <artifactId>plugin</artifactId>
         <groupId>org.zstack</groupId>
         <version>5.0.0</version>
-        <relativePath>..</relativePath>
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>externalStorage</artifactId>

@@ -7,7 +7,6 @@ import org.apache.commons.lang.StringUtils
 import org.zstack.core.Platform
 import org.zstack.core.StartMode
 import org.zstack.core.cloudbus.CloudBus
-import org.zstack.core.cloudbus.CloudBusImpl2
 import org.zstack.core.componentloader.ComponentLoader
 import org.zstack.core.db.DatabaseFacade
 import org.zstack.header.AbstractService
@@ -333,10 +332,6 @@ abstract class Test extends ApiHelper implements Retry {
 
     private void hijackService() {
         CloudBus bus = bean(CloudBus.class)
-        if(bus instanceof CloudBusImpl2){
-            logger.info(String.format("CloudBus message timeout: %s mills", getMessageTimeoutMillsConfig()))
-            ((CloudBusImpl2)bus).setDEFAULT_MESSAGE_TIMEOUT(getMessageTimeoutMillsConfig())
-        }
 
         def serviceId = "test.hijack.service"
         def service = new AbstractService() {

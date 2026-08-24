@@ -1613,7 +1613,7 @@ public class LocalStorageBase extends PrimaryStorageBase {
 
                     @Override
                     public void run(FlowTrigger trigger, Map data) {
-                        returnStorageCapacityToHost(hostUuid, msg.getSnapshot().getSize());
+                        returnStorageCapacityToHost(hostUuid, msg.getCapacityToReturn());
                         trigger.next();
                     }
                 });

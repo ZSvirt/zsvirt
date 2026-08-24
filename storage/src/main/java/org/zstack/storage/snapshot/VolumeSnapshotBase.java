@@ -226,6 +226,7 @@ public class VolumeSnapshotBase implements VolumeSnapshot {
 
     private void handle(final VolumeSnapshotPrimaryStorageDeletionMsg msg) {
         final VolumeSnapshotInventory sp = getSelfInventory();
+        final long capacityToReturn = msg.getCapacityToReturn() == null ? self.getSize() : msg.getCapacityToReturn();
 
         FlowChain chain = FlowChainBuilder.newShareFlowChain();
         chain.setName(String.format("delete-volume-snapshot-%s-on-primary-storage", self.getUuid()));
@@ -286,6 +287,7 @@ public class VolumeSnapshotBase implements VolumeSnapshot {
                     public void run(final FlowTrigger trigger, Map data) {
                         DeleteSnapshotOnPrimaryStorageMsg dmsg = new DeleteSnapshotOnPrimaryStorageMsg();
                         dmsg.setSnapshot(getSelfInventory());
+                        dmsg.setCapacityToReturn(capacityToReturn);
                         bus.makeTargetServiceIdByResourceUuid(dmsg, PrimaryStorageConstant.SERVICE_ID, self.getPrimaryStorageUuid());
                         bus.send(dmsg, new CloudBusCallBack(trigger) {
                             @Override
@@ -306,7 +308,7 @@ public class VolumeSnapshotBase implements VolumeSnapshot {
                     @Override
                     public void run(FlowTrigger trigger, Map data) {
                         IncreasePrimaryStorageCapacityMsg imsg = new IncreasePrimaryStorageCapacityMsg();
-                        imsg.setDiskSize(self.getSize());
+                        imsg.setDiskSize(capacityToReturn);
                         imsg.setNoOverProvisioning(true);
                         imsg.setPrimaryStorageUuid(self.getPrimaryStorageUuid());
                         bus.makeTargetServiceIdByResourceUuid(imsg, PrimaryStorageConstant.SERVICE_ID, imsg.getPrimaryStorageUuid());

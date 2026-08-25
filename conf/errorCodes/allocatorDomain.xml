@@ -32,6 +32,121 @@
     </code>
 
     <code>
+        <id>3002</id>
+        <description>The same selector cannot have both Include and Exclude</description>
+    </code>
+
+    <code>
+        <id>3003</id>
+        <description>Duplicate allocator domain rule</description>
+    </code>
+
+    <code>
+        <id>3004</id>
+        <description>Invalid allocator domain rule effect</description>
+    </code>
+
+    <code>
+        <id>3100</id>
+        <description>Invalid host allocator domain rule</description>
+    </code>
+
+    <code>
+        <id>3101</id>
+        <description>Host is not in the allocator domain zone</description>
+    </code>
+
+    <code>
+        <id>3102</id>
+        <description>Host allocator domain rule must not set resourceQualifier</description>
+    </code>
+
+    <code>
+        <id>3103</id>
+        <description>Host is not found or is not a HostVO</description>
+    </code>
+
+    <code>
+        <id>3200</id>
+        <description>Invalid cluster allocator domain rule</description>
+    </code>
+
+    <code>
+        <id>3201</id>
+        <description>Cluster is not in the allocator domain zone</description>
+    </code>
+
+    <code>
+        <id>3202</id>
+        <description>Cluster allocator domain rule must not set resourceQualifier</description>
+    </code>
+
+    <code>
+        <id>3203</id>
+        <description>Cluster is not found or is not a ClusterVO</description>
+    </code>
+
+    <code>
+        <id>3300</id>
+        <description>Invalid primary storage allocator domain rule</description>
+    </code>
+
+    <code>
+        <id>3301</id>
+        <description>Primary storage is not in the allocator domain zone</description>
+    </code>
+
+    <code>
+        <id>3302</id>
+        <description>Primary storage resourceQualifier must be empty, Root, or Data</description>
+    </code>
+
+    <code>
+        <id>3303</id>
+        <description>Primary storage is not found or is not a PrimaryStorageVO</description>
+    </code>
+
+    <code>
+        <id>3400</id>
+        <description>Invalid L3 allocator domain rule</description>
+    </code>
+
+    <code>
+        <id>3401</id>
+        <description>L3 network is not in the allocator domain zone</description>
+    </code>
+
+    <code>
+        <id>3402</id>
+        <description>L3 allocator domain rule must not set resourceQualifier</description>
+    </code>
+
+    <code>
+        <id>3403</id>
+        <description>L3 network is not found or is not an L3NetworkVO</description>
+    </code>
+
+    <code>
+        <id>3500</id>
+        <description>Invalid backup storage allocator domain rule</description>
+    </code>
+
+    <code>
+        <id>3501</id>
+        <description>Backup storage is not attached to the allocator domain zone</description>
+    </code>
+
+    <code>
+        <id>3502</id>
+        <description>Backup storage allocator domain rule must not set resourceQualifier</description>
+    </code>
+
+    <code>
+        <id>3503</id>
+        <description>Backup storage is not found or is not a BackupStorageVO</description>
+    </code>
+
+    <code>
         <id>4000</id>
         <description>Allocator domain allocation related error</description>
     </code>

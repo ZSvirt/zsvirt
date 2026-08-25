@@ -25,19 +25,24 @@ import org.zstack.allocator.domain.header.AllocatorDomainRuleEffect;
 import org.zstack.allocator.domain.header.AllocatorDomainScene;
 import org.zstack.allocator.domain.header.AllocatorDomainState;
 import org.zstack.allocator.domain.header.AllocatorDomainSystemTags;
-import org.zstack.core.Platform;
 import org.zstack.core.cloudbus.CloudBus;
 import org.zstack.core.cloudbus.MessageSafe;
 import org.zstack.core.db.DatabaseFacade;
 import org.zstack.core.db.Q;
 import org.zstack.core.db.SQL;
 import org.zstack.core.db.SQLBatch;
+import org.zstack.core.thread.ChainTask;
+import org.zstack.core.thread.SyncTaskChain;
+import org.zstack.core.thread.ThreadFacade;
 import org.zstack.core.timeout.TimeHelper;
+import org.zstack.core.workflow.SimpleFlowChain;
 import org.zstack.header.AbstractService;
+import org.zstack.header.core.workflow.Flow;
 import org.zstack.header.cluster.ClusterInventory;
 import org.zstack.header.cluster.ClusterState;
 import org.zstack.header.cluster.ClusterVO;
 import org.zstack.header.cluster.ClusterVO_;
+import org.zstack.header.apimediator.ApiMessageInterceptionException;
 import org.zstack.header.errorcode.OperationFailureException;
 import org.zstack.header.host.HostInventory;
 import org.zstack.header.host.HostState;
@@ -80,6 +85,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.zstack.core.Platform.err;
+import static org.zstack.core.Platform.inerr;
 import static org.zstack.utils.CollectionDSL.e;
 import static org.zstack.utils.CollectionDSL.map;
 
@@ -94,6 +100,8 @@ public class AllocatorDomainManager extends AbstractService {
     private TagManager tagMgr;
     @Autowired
     private TimeHelper timeHelper;
+    @Autowired
+    private ThreadFacade threadFacade;
 
     @Override
     @MessageSafe
@@ -134,83 +142,201 @@ public class AllocatorDomainManager extends AbstractService {
 
     // ------------------------------------- Message Handers ------------------------------------
 
+    private String syncSignature(String domainUuid) {
+        return "allocator-domain-" + domainUuid;
+    }
+
     private void handle(APICreateAllocatorDomainMsg msg) {
-        Timestamp now = timeHelper.getCurrentTimestamp();
-        AllocatorDomainVO vo = new AllocatorDomainVO();
-        vo.setUuid(msg.getResourceUuid() == null ? Platform.getUuid() : msg.getResourceUuid());
-        vo.setName(msg.getName());
-        vo.setDescription(msg.getDescription());
-        vo.setZoneUuid(msg.getZoneUuid());
-        vo.setState(AllocatorDomainState.Enabled);
-        vo.setAccountUuid(msg.getSession().getAccountUuid());
-        vo.setCreateDate(now);
-        vo.setLastOpDate(now);
-        vo = dbf.persistAndRefresh(vo);
+        threadFacade.chainSubmit(new ChainTask(msg) {
+            @Override
+            public String getSyncSignature() {
+                return syncSignature(msg.getResourceUuid());
+            }
 
-        persistRules(vo.getUuid(), msg.getRules(), now);
-        persistScenes(vo.getUuid(), msg.getScenes(), now);
-        tagMgr.createTagsFromAPICreateMessage(msg, vo.getUuid(), AllocatorDomainVO.class.getSimpleName());
+            @Override
+            public String getName() {
+                return "create-allocator-domain-" + msg.getResourceUuid();
+            }
 
+            @Override
+            public void run(SyncTaskChain chain) {
+                createAllocatorDomain(msg, chain);
+            }
+        });
+    }
+
+    private void createAllocatorDomain(APICreateAllocatorDomainMsg msg, SyncTaskChain chain) {
         APICreateAllocatorDomainEvent event = new APICreateAllocatorDomainEvent(msg.getId());
-        event.setInventory(toInventory(vo.getUuid()));
-        bus.publish(event);
+        String uuid = msg.getResourceUuid();
+        Timestamp now = timeHelper.getCurrentTimestamp();
+
+        SimpleFlowChain.of("create-allocator-domain-" + uuid)
+        .then(Flow.of("persist-allocator-domain")
+            .handle(trigger -> {
+                AllocatorDomainVO vo = new AllocatorDomainVO();
+                vo.setUuid(uuid);
+                vo.setName(msg.getName());
+                vo.setDescription(msg.getDescription());
+                vo.setZoneUuid(msg.getZoneUuid());
+                vo.setState(AllocatorDomainState.Enabled);
+                vo.setAccountUuid(msg.getSession().getAccountUuid());
+                vo.setCreateDate(now);
+                vo.setLastOpDate(now);
+                dbf.persistAndRefresh(vo);
+                persistRules(uuid, msg.getRules(), now);
+                persistScenes(uuid, msg.getScenes(), now);
+                trigger.next();
+            })
+            .rollback(trigger -> {
+                AllocatorDomainVO vo = dbf.findByUuid(uuid, AllocatorDomainVO.class);
+                if (vo != null) {
+                    dbf.remove(vo);
+                }
+                trigger.rollback();
+            })
+            .build())
+        .then(Flow.of("create-allocator-domain-tags")
+            .handle(trigger -> {
+                try {
+                    tagMgr.createTagsFromAPICreateMessage(msg, uuid, AllocatorDomainVO.class.getSimpleName());
+                    trigger.next();
+                } catch (ApiMessageInterceptionException e) {
+                    trigger.fail(e.getError());
+                } catch (OperationFailureException e) {
+                    trigger.fail(e.getErrorCode());
+                }
+            })
+            .build())
+        .propagateExceptionTo(msg)
+        .done(() -> {
+            chain.next();
+            event.setInventory(toInventory(uuid));
+            bus.publish(event);
+        })
+        .error(errorCode -> {
+            chain.next();
+            event.setError(errorCode);
+            bus.publish(event);
+        })
+        .start();
     }
 
     private void handle(APIUpdateAllocatorDomainMsg msg) {
+        threadFacade.chainSubmit(new ChainTask(msg) {
+            @Override
+            public String getSyncSignature() {
+                return syncSignature(msg.getUuid());
+            }
+
+            @Override
+            public String getName() {
+                return "update-allocator-domain-" + msg.getUuid();
+            }
+
+            @Override
+            public void run(SyncTaskChain chain) {
+                APIUpdateAllocatorDomainEvent event = new APIUpdateAllocatorDomainEvent(msg.getId());
+                try {
+                    updateAllocatorDomain(msg);
+                    event.setInventory(toInventory(msg.getUuid()));
+                    bus.publish(event);
+                } catch (OperationFailureException e) {
+                    event.setError(e.getErrorCode());
+                    bus.publish(event);
+                } catch (Throwable t) {
+                    logger.warn(String.format("failed to update allocator domain[uuid:%s]", msg.getUuid()), t);
+                    event.setError(inerr(t.getMessage()));
+                    bus.publish(event);
+                } finally {
+                    chain.next();
+                }
+            }
+        });
+    }
+
+    private void updateAllocatorDomain(APIUpdateAllocatorDomainMsg msg) {
         boolean rewriteRules = msg.getRules() != null;
         boolean rewriteScenes = msg.getScenes() != null;
         boolean changed = rewriteRules || rewriteScenes
                 || msg.getName() != null || msg.getDescription() != null || msg.getState() != null;
 
-        if (changed) {
-            Timestamp now = timeHelper.getCurrentTimestamp();
-            new SQLBatch() {
-                @Override
-                protected void scripts() {
-                    if (rewriteRules) {
-                        sql(AllocatorDomainRuleVO.class).eq(AllocatorDomainRuleVO_.domainUuid, msg.getUuid()).delete();
-                        flush();
-                    }
-                    if (rewriteScenes) {
-                        sql(AllocatorDomainSceneVO.class).eq(AllocatorDomainSceneVO_.domainUuid, msg.getUuid()).delete();
-                        flush();
-                    }
-
-                    AllocatorDomainVO vo = findByUuid(msg.getUuid(), AllocatorDomainVO.class);
-                    if (msg.getName() != null) {
-                        vo.setName(msg.getName());
-                    }
-                    if (msg.getDescription() != null) {
-                        vo.setDescription(msg.getDescription());
-                    }
-                    if (msg.getState() != null) {
-                        vo.setState(AllocatorDomainState.valueOf(msg.getState()));
-                    }
-                    if (rewriteRules) {
-                        for (AllocatorDomainRuleVO rvo : buildRuleVOs(vo.getUuid(), msg.getRules(), now)) {
-                            persist(rvo);
-                        }
-                    }
-                    if (rewriteScenes) {
-                        for (AllocatorDomainSceneVO svo : buildSceneVOs(vo.getUuid(), msg.getScenes(), now)) {
-                            persist(svo);
-                        }
-                    }
-                    merge(vo);
-                }
-            }.execute();
+        if (!changed) {
+            return;
         }
 
-        APIUpdateAllocatorDomainEvent event = new APIUpdateAllocatorDomainEvent(msg.getId());
-        event.setInventory(toInventory(msg.getUuid()));
-        bus.publish(event);
+        Timestamp now = timeHelper.getCurrentTimestamp();
+        new SQLBatch() {
+            @Override
+            protected void scripts() {
+                if (rewriteRules) {
+                    sql(AllocatorDomainRuleVO.class).eq(AllocatorDomainRuleVO_.domainUuid, msg.getUuid()).delete();
+                    flush();
+                }
+                if (rewriteScenes) {
+                    sql(AllocatorDomainSceneVO.class).eq(AllocatorDomainSceneVO_.domainUuid, msg.getUuid()).delete();
+                    flush();
+                }
+
+                AllocatorDomainVO vo = findByUuid(msg.getUuid(), AllocatorDomainVO.class);
+                if (msg.getName() != null) {
+                    vo.setName(msg.getName());
+                }
+                if (msg.getDescription() != null) {
+                    vo.setDescription(msg.getDescription());
+                }
+                if (msg.getState() != null) {
+                    vo.setState(AllocatorDomainState.valueOf(msg.getState()));
+                }
+                if (rewriteRules) {
+                    for (AllocatorDomainRuleVO rvo : buildRuleVOs(vo.getUuid(), msg.getRules(), now)) {
+                        persist(rvo);
+                    }
+                }
+                if (rewriteScenes) {
+                    for (AllocatorDomainSceneVO svo : buildSceneVOs(vo.getUuid(), msg.getScenes(), now)) {
+                        persist(svo);
+                    }
+                }
+                merge(vo);
+            }
+        }.execute();
     }
 
     private void handle(APIDeleteAllocatorDomainMsg msg) {
-        APIDeleteAllocatorDomainEvent event = new APIDeleteAllocatorDomainEvent(msg.getId());
+        threadFacade.chainSubmit(new ChainTask(msg) {
+            @Override
+            public String getSyncSignature() {
+                return syncSignature(msg.getUuid());
+            }
+
+            @Override
+            public String getName() {
+                return "delete-allocator-domain-" + msg.getUuid();
+            }
+
+            @Override
+            public void run(SyncTaskChain chain) {
+                APIDeleteAllocatorDomainEvent event = new APIDeleteAllocatorDomainEvent(msg.getId());
+                try {
+                    deleteAllocatorDomain(msg);
+                    bus.publish(event);
+                } catch (OperationFailureException e) {
+                    event.setError(e.getErrorCode());
+                    bus.publish(event);
+                } catch (Throwable t) {
+                    logger.warn(String.format("failed to delete allocator domain[uuid:%s]", msg.getUuid()), t);
+                    event.setError(inerr(t.getMessage()));
+                    bus.publish(event);
+                } finally {
+                    chain.next();
+                }
+            }
+        });
+    }
+
+    private void deleteAllocatorDomain(APIDeleteAllocatorDomainMsg msg) {
         AllocatorDomainVO vo = dbf.findByUuid(msg.getUuid(), AllocatorDomainVO.class);
         if (vo == null) {
-            bus.publish(event);
             return;
         }
 
@@ -226,7 +352,6 @@ public class AllocatorDomainManager extends AbstractService {
         }
 
         dbf.remove(vo);
-        bus.publish(event);
     }
 
     private void handle(APIGetAllocatorDomainVmsMsg msg) {
@@ -310,10 +435,7 @@ public class AllocatorDomainManager extends AbstractService {
             rvo.setResourceUuid(param.getResourceUuid());
             rvo.setResourceType(param.getResourceType());
             rvo.setResourceQualifier(param.getResourceQualifier());
-            rvo.setResourcePolicy(param.getResourcePolicy());
             rvo.setEffect(AllocatorDomainRuleEffect.valueOf(param.getEffect()));
-            rvo.setPolicyFrom(param.getPolicyFrom());
-            rvo.setPolicyUuid(param.getPolicyUuid());
             rvo.setCreateDate(now);
             vos.add(rvo);
         }
@@ -346,6 +468,7 @@ public class AllocatorDomainManager extends AbstractService {
         return new ArrayList<>(uuids);
     }
 
+    @SuppressWarnings("unchecked")
     private List<String> listCurrentVmUuids(String domainUuid) {
         String tag = AllocatorDomainSystemTags.SCHEDULING_DOMAIN.instantiateTag(
                 map(e(AllocatorDomainSystemTags.DOMAIN_UUID_TOKEN, domainUuid)));
@@ -367,6 +490,7 @@ public class AllocatorDomainManager extends AbstractService {
         return uuids == null ? new ArrayList<>() : uuids;
     }
 
+    @SuppressWarnings("unchecked")
     private void cleanupVmReferences(String domainUuid) {
         String tag = AllocatorDomainSystemTags.SCHEDULING_DOMAIN.instantiateTag(
                 map(e(AllocatorDomainSystemTags.DOMAIN_UUID_TOKEN, domainUuid)));

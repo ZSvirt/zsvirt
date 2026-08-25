@@ -14,4 +14,10 @@
             <zstack:extension interface="org.zstack.header.Service"/>
         </zstack:plugin>
     </bean>
+
+    <bean id="AllocatorDomainApiInterceptor" class="org.zstack.allocator.domain.AllocatorDomainApiInterceptor">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.apimediator.ApiMessageInterceptor"/>
+        </zstack:plugin>
+    </bean>
 </beans>

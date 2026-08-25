@@ -24,6 +24,11 @@ public class RBACInfo implements PackageDescription {
                 .zsvProAvailable()
                 .build();
 
+        roleBuilder()
+                .uuid("77affcd91a8f4e3b9c6d0a5f1e8b4723")
+                .permissionBaseOnThis()
+                .build();
+
         roleContributorBuilder()
                 .actions(
                         APIQueryAllocatorDomainMsg.class,

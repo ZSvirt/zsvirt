@@ -14,6 +14,8 @@ public class AllocatorDomainConstant {
 
     public static final String PORT_GROUP_RESOURCE_TYPE = "PortGroupVO";
 
+    public static final String UNBOUND_DOMAIN_UUID = "None";
+
     public static final List<AllocatorDomainScene> DEFAULT_SCENES = Collections.unmodifiableList(Arrays.asList(
             AllocatorDomainScene.NewCreate,
             AllocatorDomainScene.Start,
@@ -37,5 +39,6 @@ public class AllocatorDomainConstant {
         public static final String RESOURCE_TYPE = "resource.type";
         public static final String RESOURCE_QUALIFIER = "resource.qualifier";
         public static final String EFFECT = "effect";
+        public static final String DOMAIN_UUID = "domain.uuid";
     }
 }

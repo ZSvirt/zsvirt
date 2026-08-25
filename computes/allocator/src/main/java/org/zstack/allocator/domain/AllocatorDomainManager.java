@@ -1,5 +1,6 @@
 package org.zstack.allocator.domain;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.zstack.allocator.domain.api.APICreateAllocatorDomainEvent;
 import org.zstack.allocator.domain.api.APICreateAllocatorDomainMsg;
@@ -18,6 +19,7 @@ import org.zstack.allocator.domain.entity.AllocatorDomainRuleVO_;
 import org.zstack.allocator.domain.entity.AllocatorDomainSceneVO;
 import org.zstack.allocator.domain.entity.AllocatorDomainSceneVO_;
 import org.zstack.allocator.domain.entity.AllocatorDomainVO;
+import org.zstack.allocator.domain.entity.AllocatorDomainVO_;
 import org.zstack.allocator.domain.header.AllocatorDomainConstant;
 import org.zstack.allocator.domain.header.AllocatorDomainErrors;
 import org.zstack.allocator.domain.header.AllocatorDomainGlobalConfig;
@@ -25,6 +27,8 @@ import org.zstack.allocator.domain.header.AllocatorDomainRuleEffect;
 import org.zstack.allocator.domain.header.AllocatorDomainScene;
 import org.zstack.allocator.domain.header.AllocatorDomainState;
 import org.zstack.allocator.domain.header.AllocatorDomainSystemTags;
+import org.zstack.allocator.domain.message.AllocatorDomainDeletionMsg;
+import org.zstack.allocator.domain.message.AllocatorDomainDeletionReply;
 import org.zstack.core.cloudbus.CloudBus;
 import org.zstack.core.cloudbus.MessageSafe;
 import org.zstack.core.db.DatabaseFacade;
@@ -71,6 +75,8 @@ import org.zstack.header.storage.primary.PrimaryStorageVO_;
 import org.zstack.header.tag.SystemTagVO;
 import org.zstack.header.tag.SystemTagVO_;
 import org.zstack.header.vm.VmInstanceVO;
+import org.zstack.resourceconfig.ResourceConfig;
+import org.zstack.resourceconfig.ResourceConfigFacade;
 import org.zstack.resourceconfig.ResourceConfigVO;
 import org.zstack.resourceconfig.ResourceConfigVO_;
 import org.zstack.tag.TagManager;
@@ -102,6 +108,8 @@ public class AllocatorDomainManager extends AbstractService {
     private TimeHelper timeHelper;
     @Autowired
     private ThreadFacade threadFacade;
+    @Autowired
+    private ResourceConfigFacade resourceConfigs;
 
     @Override
     @MessageSafe
@@ -120,6 +128,8 @@ public class AllocatorDomainManager extends AbstractService {
             } else {
                 bus.dealWithUnknownMessage(msg);
             }
+        } else if (msg instanceof AllocatorDomainDeletionMsg) {
+            handle((AllocatorDomainDeletionMsg) msg);
         } else {
             bus.dealWithUnknownMessage(msg);
         }
@@ -132,6 +142,21 @@ public class AllocatorDomainManager extends AbstractService {
 
     @Override
     public boolean start() {
+        ResourceConfig rc = resourceConfigs.getResourceConfig(AllocatorDomainGlobalConfig.DOMAIN_UUID_IDENTITY);
+        rc.installValidatorExtension((resourceUuid, oldValue, newValue) -> {
+            if (StringUtils.isEmpty(newValue) || AllocatorDomainConstant.UNBOUND_DOMAIN_UUID.equals(newValue)) {
+                return;
+            }
+            boolean exists = Q.New(AllocatorDomainVO.class)
+                    .eq(AllocatorDomainVO_.uuid, newValue)
+                    .isExists();
+            if (!exists) {
+                throw err(AllocatorDomainErrors.DOMAIN_NOT_FOUND,
+                        "allocator domain[uuid:%s] not found", newValue)
+                        .withOpaque(AllocatorDomainConstant.Opaque.DOMAIN_UUID, newValue)
+                        .toException();
+            }
+        });
         return true;
     }
 
@@ -318,7 +343,8 @@ public class AllocatorDomainManager extends AbstractService {
             public void run(SyncTaskChain chain) {
                 APIDeleteAllocatorDomainEvent event = new APIDeleteAllocatorDomainEvent(msg.getId());
                 try {
-                    deleteAllocatorDomain(msg);
+                    deleteAllocatorDomain(msg.getUuid(),
+                            msg.getDeletionMode() == APIDeleteMessage.DeletionMode.Enforcing);
                     bus.publish(event);
                 } catch (OperationFailureException e) {
                     event.setError(e.getErrorCode());
@@ -334,21 +360,51 @@ public class AllocatorDomainManager extends AbstractService {
         });
     }
 
-    private void deleteAllocatorDomain(APIDeleteAllocatorDomainMsg msg) {
-        AllocatorDomainVO vo = dbf.findByUuid(msg.getUuid(), AllocatorDomainVO.class);
+    private void handle(AllocatorDomainDeletionMsg msg) {
+        threadFacade.chainSubmit(new ChainTask(msg) {
+            @Override
+            public String getSyncSignature() {
+                return syncSignature(msg.getUuid());
+            }
+
+            @Override
+            public String getName() {
+                return "delete-allocator-domain-" + msg.getUuid();
+            }
+
+            @Override
+            public void run(SyncTaskChain chain) {
+                AllocatorDomainDeletionReply reply = new AllocatorDomainDeletionReply();
+                try {
+                    deleteAllocatorDomain(msg.getUuid(), msg.isForceDelete());
+                } catch (OperationFailureException e) {
+                    reply.setError(e.getErrorCode());
+                } catch (Throwable t) {
+                    logger.warn(String.format("failed to delete allocator domain[uuid:%s]", msg.getUuid()), t);
+                    reply.setError(inerr(t.getMessage()));
+                } finally {
+                    bus.reply(msg, reply);
+                    chain.next();
+                }
+            }
+        });
+    }
+
+    private void deleteAllocatorDomain(String uuid, boolean forceDelete) {
+        AllocatorDomainVO vo = dbf.findByUuid(uuid, AllocatorDomainVO.class);
         if (vo == null) {
             return;
         }
 
-        List<String> referringVmUuids = listReferringVmUuids(msg.getUuid());
+        List<String> referringVmUuids = listReferringVmUuids(uuid);
         if (!referringVmUuids.isEmpty()) {
-            if (msg.getDeletionMode() == APIDeleteMessage.DeletionMode.Permissive) {
+            if (!forceDelete) {
                 throw err(AllocatorDomainErrors.DOMAIN_IN_USE,
                         "allocator domain[uuid:%s] is still referenced by VMs %s and cannot be deleted",
-                        msg.getUuid(), referringVmUuids)
+                        uuid, referringVmUuids)
                         .toException();
             }
-            cleanupVmReferences(msg.getUuid());
+            cleanupVmReferences(uuid);
         }
 
         dbf.remove(vo);

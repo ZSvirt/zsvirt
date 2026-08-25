@@ -660,6 +660,13 @@ class AllocatorDomainNegativeUpdateCase extends SubCase {
 
     @Override
     void clean() {
+        queryAllocatorDomain {}.each { AllocatorDomainInventory domain ->
+            if (domain != null) {
+                deleteAllocatorDomain {
+                    delegate.uuid = domain.uuid
+                }
+            }
+        }
         env.delete()
     }
 }

@@ -18,6 +18,13 @@
     <bean id="AllocatorDomainApiInterceptor" class="org.zstack.allocator.domain.AllocatorDomainApiInterceptor">
         <zstack:plugin>
             <zstack:extension interface="org.zstack.header.apimediator.ApiMessageInterceptor"/>
+            <zstack:extension interface="org.zstack.header.apimediator.GlobalApiMessageInterceptor"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="AllocatorDomainCascadeExtension" class="org.zstack.allocator.domain.AllocatorDomainCascadeExtension">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.core.cascade.CascadeExtensionPoint"/>
         </zstack:plugin>
     </bean>
 </beans>

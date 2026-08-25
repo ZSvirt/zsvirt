@@ -31,6 +31,7 @@ import org.zstack.allocator.domain.message.AllocatorDomainDeletionMsg;
 import org.zstack.allocator.domain.message.AllocatorDomainDeletionReply;
 import org.zstack.core.cloudbus.CloudBus;
 import org.zstack.core.cloudbus.MessageSafe;
+import org.zstack.core.config.SkipResetGlobalConfigException;
 import org.zstack.core.db.DatabaseFacade;
 import org.zstack.core.db.Q;
 import org.zstack.core.db.SQL;
@@ -142,6 +143,16 @@ public class AllocatorDomainManager extends AbstractService {
 
     @Override
     public boolean start() {
+        AllocatorDomainGlobalConfig.SCHEDULING_DOMAIN_UUID.installLocalBeforeUpdateExtension((oldConfig, newValue) -> {
+            throw err(AllocatorDomainErrors.GLOBAL_CONFIG_UPDATE_NOT_ALLOWED,
+                    "global config[%s] can only be changed as a resource config",
+                    AllocatorDomainGlobalConfig.DOMAIN_UUID_IDENTITY)
+                    .toException();
+        });
+        AllocatorDomainGlobalConfig.SCHEDULING_DOMAIN_UUID.installBeforeResetExtension(session -> {
+            throw new SkipResetGlobalConfigException();
+        });
+
         ResourceConfig rc = resourceConfigs.getResourceConfig(AllocatorDomainGlobalConfig.DOMAIN_UUID_IDENTITY);
         rc.installValidatorExtension((resourceUuid, oldValue, newValue) -> {
             if (StringUtils.isEmpty(newValue) || AllocatorDomainConstant.UNBOUND_DOMAIN_UUID.equals(newValue)) {

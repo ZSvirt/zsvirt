@@ -15,7 +15,7 @@ public class AllocatorDomainGlobalConfig {
 
     @BindResourceConfig({VmInstanceVO.class})
     @GlobalConfigDef(defaultValue = "None", type = String.class,
-            description = "Configured allocator domain uuid for a VM. None means no domain. This is the desired domain, not the currently effective domain.")
+            description = "Configured allocator domain uuid for a VM. None means no domain. This is the desired domain, not the currently effective domain. Change it only via resource config; the global value cannot be updated.")
     @GlobalConfigValidation
     public static GlobalConfig SCHEDULING_DOMAIN_UUID = new GlobalConfig(CATEGORY, DOMAIN_UUID_NAME);
 }

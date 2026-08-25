@@ -18,6 +18,7 @@
     <bean id="AllocatorDomainApiInterceptor" class="org.zstack.allocator.domain.AllocatorDomainApiInterceptor">
         <zstack:plugin>
             <zstack:extension interface="org.zstack.header.apimediator.ApiMessageInterceptor"/>
+            <zstack:extension interface="org.zstack.header.apimediator.GlobalApiMessageInterceptor"/>
         </zstack:plugin>
     </bean>
 

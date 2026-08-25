@@ -22,6 +22,11 @@
     </code>
 
     <code>
+        <id>2003</id>
+        <description>Global Config Update Not Allowed</description>
+    </code>
+
+    <code>
         <id>3000</id>
         <description>Allocator domain rule related error</description>
     </code>

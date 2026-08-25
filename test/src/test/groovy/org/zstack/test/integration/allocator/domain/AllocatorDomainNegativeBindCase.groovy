@@ -4,6 +4,7 @@ import org.zstack.allocator.domain.header.AllocatorDomainConstant
 import org.zstack.allocator.domain.header.AllocatorDomainErrors
 import org.zstack.allocator.domain.header.AllocatorDomainGlobalConfig
 import org.zstack.sdk.GetResourceConfigResult
+import org.zstack.sdk.GlobalConfigInventory
 import org.zstack.sdk.VmInstanceInventory
 import org.zstack.sdk.allocator.domain.entity.AllocatorDomainInventory
 import org.zstack.testlib.EnvSpec
@@ -93,6 +94,7 @@ class AllocatorDomainNegativeBindCase extends SubCase {
         env.create {
             vm = env.inventoryByName("vm") as VmInstanceInventory
             testBindMissingDomain()
+            testUpdateGlobalConfigRejected()
         }
     }
 
@@ -128,6 +130,30 @@ class AllocatorDomainNegativeBindCase extends SubCase {
             delegate.name = AllocatorDomainGlobalConfig.DOMAIN_UUID_NAME
         } as GetResourceConfigResult
         assert cfg.value == AllocatorDomainConstant.UNBOUND_DOMAIN_UUID
+    }
+
+    void testUpdateGlobalConfigRejected() {
+        logger.info("Test 101: update vm.scheduling.domainUuid as global config, expect API failure ALLOCATOR.DOMAIN.2003")
+        expectApiFailure({
+            updateGlobalConfig {
+                delegate.category = AllocatorDomainGlobalConfig.CATEGORY
+                delegate.name = AllocatorDomainGlobalConfig.DOMAIN_UUID_NAME
+                delegate.value = missingUuid
+            }
+        }) {
+            assert delegate.code == AllocatorDomainErrors.GLOBAL_CONFIG_UPDATE_NOT_ALLOWED.toString()
+        }
+
+        logger.info("Test 102: query global config after failed update, expect value still None")
+        def configs = queryGlobalConfig {
+            delegate.conditions = [
+                    "category=${AllocatorDomainGlobalConfig.CATEGORY}",
+                    "name=${AllocatorDomainGlobalConfig.DOMAIN_UUID_NAME}"
+            ]
+        } as List<GlobalConfigInventory>
+        assert configs.size() == 1
+        assert configs[0].value == AllocatorDomainConstant.UNBOUND_DOMAIN_UUID
+        assert configs[0].defaultValue == AllocatorDomainConstant.UNBOUND_DOMAIN_UUID
     }
 
     @Override

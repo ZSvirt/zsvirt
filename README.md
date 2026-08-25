@@ -6,7 +6,24 @@
       width="180"
     >
   </a>
-
+  <p align="center">
+    <a
+      href="https://trendshift.io/repositories/156451?utm_source=trendshift-badge&amp;utm_medium=badge&amp;utm_campaign=badge-trendshift-156451"
+      target="_blank"
+      rel="noopener noreferrer"><img
+        src="https://trendshift.io/api/badge/trendshift/repositories/156451/daily?language=Java"
+        alt="ZSvirt/zsvirt Daily Java | Trendshift"
+        width="250"
+        height="55"
+      /></a> <a href="https://trendshift.io/repositories/156451?utm_source=trendshift-badge&amp;utm_medium=badge&amp;utm_campaign=badge-trendshift-156451"
+       target="_blank"
+       rel="noopener noreferrer"><img
+        src="https://trendshift.io/api/badge/trendshift/repositories/156451/weekly?language=Java"
+        alt="ZSvirt/zsvirt Weekly Java | Trendshift"
+        width="250"
+        height="55"
+      /></a>&nbsp;&nbsp;
+  </p>
   <h1 align="center">
     Open Source Virtualization
     <br>

@@ -2,6 +2,7 @@ package org.zstack.test.integration.core
 
 import org.zstack.core.Platform
 import org.zstack.test.integration.stabilisation.StabilityTestCase
+import org.zstack.testlib.FSMCase
 import org.zstack.testlib.SubCase
 import org.zstack.testlib.Test
 
@@ -38,9 +39,12 @@ class CaseNameCheckCase extends SubCase {
         def tests = Platform.reflections.getSubTypesOf(Test.class).findAll { !Modifier.isAbstract(it.modifiers) }
         tests.forEach{ it ->
             Class caseClass = it
-            boolean result = it.package != null && !it.name.endsWith("Test") && !SubCase.isAssignableFrom(it) && ignoreCheckListForTestSuite.find{ caseClass.name == it } == null
+            boolean result = it.package != null && !it.name.endsWith("Test") &&
+                    !SubCase.isAssignableFrom(it) &&
+                    !FSMCase.isAssignableFrom(it) &&
+                    ignoreCheckListForTestSuite.find{ caseClass.name == it } == null
 
-            if(result){
+            if (result) {
                 invalidNameList.add(it.name)
             }
         }
@@ -51,8 +55,10 @@ class CaseNameCheckCase extends SubCase {
     void checkTestCaseName(){
         List<String> invalidNameList = []
 
-        def tests = Platform.reflections.getSubTypesOf(SubCase.class).findAll { !Modifier.isAbstract(it.modifiers) }
-        tests.forEach{ it ->
+        Set<Class<?>> allCases = new HashSet<>()
+        allCases.addAll(Platform.reflections.getSubTypesOf(SubCase.class).findAll { !Modifier.isAbstract(it.modifiers) })
+        allCases.addAll(Platform.reflections.getSubTypesOf(FSMCase.class).findAll { !Modifier.isAbstract(it.modifiers) })
+        allCases.forEach{ it ->
             boolean result = it.package != null && !it.name.endsWith("Case")
 
             if(result){
@@ -60,7 +66,7 @@ class CaseNameCheckCase extends SubCase {
             }
         }
 
-        assert 0 == invalidNameList.size() : "invalid SubCase name, testsuite name must end with 'Case', ${invalidNameList}"
+        assert 0 == invalidNameList.size() : "invalid SubCase/FSMCase name, testsuite name must end with 'Case', ${invalidNameList}"
     }
 
 }

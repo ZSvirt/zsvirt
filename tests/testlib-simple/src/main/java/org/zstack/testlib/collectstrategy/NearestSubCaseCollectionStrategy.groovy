@@ -51,7 +51,7 @@ class NearestSubCaseCollectionStrategy implements SubCaseCollectionStrategy{
         }
         assert 1 == testSuites.findAll{ it.name == test.class.name}.size() : "Can not find current testsuite class"
 
-        // collect case
+        // collect case (include FSMCase and SubCase)
         def cases = Platform.reflections.getSubTypesOf(Case.class).findAll { !Modifier.isAbstract(it.modifiers) }
         cases = cases.findAll { it.package.name.startsWith(test.class.package.name) }
         cases = cases.sort{ a, b ->

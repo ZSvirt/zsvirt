@@ -331,9 +331,9 @@ files in each repository for details.
       <a href="https://x.com/ZSvirt"><strong>Follow on X →</strong></a>
     </td>
     <td width="50%">
-      <h3>🟠 Reddit</h3>
-      <p>Join community conversations and share your ZSvirt experience.</p>
-      <a href="https://www.reddit.com/r/ZSvirt/"><strong>Join on Reddit →</strong></a>
+      <h3>🎮 Discord</h3>
+      <p>Join the ZSvirt community to ask questions, share ideas, and connect with other users.</p>
+      <a href="https://discord.com/invite/j2u94Jqf7"><strong>Join on Discord →</strong></a>
     </td>
   </tr>
 </table>

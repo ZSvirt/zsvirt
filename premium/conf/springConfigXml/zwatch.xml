@@ -321,6 +321,13 @@
 		</zstack:plugin>
 	</bean>
 
+    <bean id="KeyProviderNamespace" class="org.zstack.zwatch.namespace.KeyProviderNamespace">
+        <constructor-arg ref="PrometheusDatabaseDriver"/>
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.Component" />
+        </zstack:plugin>
+    </bean>
+
     <bean id="PrometheusDatabaseDriver" class="org.zstack.zwatch.prometheus.PrometheusDatabaseDriver">
         <zstack:plugin>
             <!-- the driver must be loaded before PrometheusFactory-->

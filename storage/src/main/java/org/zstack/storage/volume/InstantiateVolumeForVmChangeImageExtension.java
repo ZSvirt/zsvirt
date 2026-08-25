@@ -37,6 +37,10 @@ public class InstantiateVolumeForVmChangeImageExtension extends InstantiateVolum
         InstantiateVolumeMsg rmsg = new InstantiateTemporaryRootVolumeMsg();
         ((InstantiateRootVolumeMsg)rmsg).setTemplateSpec(image);
         ((InstantiateTemporaryRootVolumeMsg)rmsg).setOriginVolumeUuid(spec.getVmInventory().getRootVolumeUuid());
+        ((InstantiateRootVolumeMsg)rmsg).setEncryptedVolumeBackupRestore(
+                spec.getRootDisk() != null
+                        && spec.getRootDisk().isVolumeBackupTemplate()
+                        && Boolean.TRUE.equals(spec.getRootDisk().getEncrypted()));
 
         rmsg.setPrimaryStorageUuid(spec.getDestRootVolume().getPrimaryStorageUuid());
         rmsg.setHostUuid(spec.getDestHost().getUuid());

@@ -245,6 +245,7 @@ public class CephPrimaryStorageImageStoreBackend extends CephPrimaryStorageBase 
             cmsg.setVolumeUuid(volume.getUuid());
             cmsg.setTreeUuid(snapshot.getTreeUuid());
             cmsg.setSystemTags(msg.getSystemTags());
+            cmsg.setEncrypted(msg.getEncrypted());
             bus.makeTargetServiceIdByResourceUuid(cmsg, VolumeSnapshotConstant.SERVICE_ID, volume.getUuid());
             bus.send(cmsg, new CloudBusCallBack(msg) {
                 @Override
@@ -284,6 +285,7 @@ public class CephPrimaryStorageImageStoreBackend extends CephPrimaryStorageBase 
             cmsg.setBackupStorageUuid(backupStorageUuid);
             cmsg.setVolumeUuid(volume.getUuid());
             cmsg.setImageUuid(imageVO.getUuid());
+            cmsg.setEncrypted(msg.getEncrypted());
             cmsg.setQueuedInVolume(!PrimaryStorageGlobalConfig.UNDO_TEMP_SNAPSHOT.value(Boolean.class));
             ImageBackupStorageRefVO ref = persistRefVOByBsInventory(backupStorageUuid, imageVO.getUuid());
             bus.makeTargetServiceIdByResourceUuid(cmsg, VolumeConstant.SERVICE_ID, volume.getUuid());

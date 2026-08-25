@@ -67,6 +67,7 @@
     <import resource="springConfigXml/ha.xml"/>
     <import resource="springConfigXml/HostAllocatorManager.xml"/>
     <import resource="springConfigXml/HostManager.xml"/>
+    <import resource="springConfigXml/hostPki.xml"/>
     <import resource="springConfigXml/ImageManager.xml"/>
     <import resource="springConfigXml/imagestore.xml"/>
     <import resource="springConfigXml/CbtBackupStorage.xml"/>

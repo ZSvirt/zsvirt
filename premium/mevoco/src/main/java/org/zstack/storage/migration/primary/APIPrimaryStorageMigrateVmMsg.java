@@ -63,6 +63,7 @@ public class APIPrimaryStorageMigrateVmMsg extends APIMessage implements Storage
 
     @APIParam(required = false)
     private List<VolumeMigrationAO> volumeMigrationAOs;
+    private Boolean enableMigrationTls;
 
     @APINoSee
     private Boolean legacyRootOnlyMigration;
@@ -88,6 +89,7 @@ public class APIPrimaryStorageMigrateVmMsg extends APIMessage implements Storage
         msg.setDownTime(300);
         msg.setBandwidth(50L * 1024 * 1024);
         msg.setVolumeMigrationAOs(Collections.singletonList(new VolumeMigrationAO(uuid(), uuid())));
+        msg.setEnableMigrationTls(false);
         return msg;
     }
 
@@ -203,5 +205,14 @@ public class APIPrimaryStorageMigrateVmMsg extends APIMessage implements Storage
     @Override
     public boolean isAllowUnknown() {
         return false;
+    }
+
+    @Override
+    public Boolean getEnableMigrationTls() {
+        return enableMigrationTls;
+    }
+
+    public void setEnableMigrationTls(Boolean enableMigrationTls) {
+        this.enableMigrationTls = enableMigrationTls;
     }
 }

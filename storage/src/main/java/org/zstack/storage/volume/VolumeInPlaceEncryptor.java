@@ -10,22 +10,28 @@ import org.zstack.core.db.DatabaseFacade;
 import org.zstack.header.core.Completion;
 import org.zstack.header.core.ReturnValueCompletion;
 import org.zstack.header.errorcode.ErrorCode;
-import org.zstack.header.host.HostConstant;
+import org.zstack.header.errorcode.OperationFailureException;
 import org.zstack.header.keyprovider.EncryptedResourceKeyManager;
 import org.zstack.header.message.MessageReply;
-import org.zstack.header.secret.SecretHostEnsureLuksSecretFileMsg;
-import org.zstack.header.secret.SecretHostEnsureLuksSecretFileReply;
+import org.zstack.header.storage.primary.DeleteVolumeBitsOnPrimaryStorageMsg;
 import org.zstack.header.storage.primary.EncryptVolumeBitsOnPrimaryStorageMsg;
+import org.zstack.header.storage.primary.EncryptVolumeBitsOnPrimaryStorageReply;
 import org.zstack.header.storage.primary.PrimaryStorageConstant;
+import org.zstack.header.volume.VolumeFormat;
 import org.zstack.header.volume.VolumeVO;
 import org.zstack.storage.encrypt.VolumeEncryptedResourceKeyBackend;
+import org.zstack.storage.encrypt.VolumeEncryptedSecretHelper;
+import org.zstack.storage.primary.PrimaryStorageDeleteBitGC;
+import org.zstack.storage.primary.PrimaryStorageGlobalConfig;
 import org.zstack.utils.Utils;
 import org.zstack.utils.logging.CLogger;
+
+import java.util.concurrent.TimeUnit;
 
 import static org.zstack.core.Platform.operr;
 
 /**
- * Performs an in-place LUKS conversion of an existing volume's bits.
+ * Performs a LUKS conversion of an existing volume's bits.
  *
  * <p>This is the single source of truth for the "encrypt-in-place" workflow that was
  * previously duplicated between {@link VolumeBase#handleMessage} (for the
@@ -37,10 +43,11 @@ import static org.zstack.core.Platform.operr;
  *   <li>Ensure a key-provider binding exists for the volume; auto-attach the default
  *       provider when none is bound yet.</li>
  *   <li>Materialize a DEK via {@link EncryptedResourceKeyManager#getOrCreateKey}.</li>
- *   <li>Stage the LUKS secret material file on the target host via
- *       {@code SecretHostEnsureLuksSecretFileMsg}.</li>
- *   <li>Ask the primary storage backend to LUKS-convert the bits in place via
- *       {@code EncryptVolumeBitsOnPrimaryStorageMsg}.</li>
+ *   <li>Seal the DEK for the target host and pass it as {@code encryptedDek}
+ *       to the primary storage backend.</li>
+ *   <li>Ask the primary storage backend to LUKS-convert the bits via
+ *       {@code EncryptVolumeBitsOnPrimaryStorageMsg}. The backend may return a
+ *       replacement install path.</li>
  *   <li>Persist {@code VolumeVO.encrypted = true} after a successful conversion.</li>
  * </ol>
  *
@@ -61,6 +68,8 @@ public class VolumeInPlaceEncryptor {
     private EncryptedResourceKeyManager encryptedResourceKeyManager;
     @Autowired
     private VolumeEncryptedResourceKeyBackend volumeEncryptedResourceKeyBackend;
+    @Autowired
+    private VolumeEncryptedSecretHelper volumeEncryptedSecretHelper;
 
     /**
      * Inputs that don't live on {@link VolumeVO} (host to stage the secret on, overrides
@@ -204,6 +213,12 @@ public class VolumeInPlaceEncryptor {
                     }
                 });
         if (keyErrorRef[0] != null) {
+            if (VolumeEncryptedSecretHelper.isKeyProviderUnavailable(keyErrorRef[0])) {
+                failAfterRollingBackMetadata(volume.getUuid(), rollbackAttachedProvider, null,
+                        keyErrorRef[0], completion);
+                return;
+            }
+
             failAfterRollingBackMetadata(volume.getUuid(), rollbackAttachedProvider, null, operr(
                     "failed to materialize encryption key for volume[uuid:%s]",
                     volume.getUuid()).withCause(keyErrorRef[0]), completion);
@@ -224,36 +239,27 @@ public class VolumeInPlaceEncryptor {
             return;
         }
 
-        // 3) Stage the LUKS secret material file on the host.
-        SecretHostEnsureLuksSecretFileMsg ensureMsg = new SecretHostEnsureLuksSecretFileMsg();
-        ensureMsg.setHostUuid(ctx.getHostUuid());
-        ensureMsg.setDekBase64(dekBase64);
-        bus.makeTargetServiceIdByResourceUuid(ensureMsg, HostConstant.SERVICE_ID, ctx.getHostUuid());
-
-        MessageReply ensureReply = bus.call(ensureMsg);
-        if (!ensureReply.isSuccess()) {
+        // 3) Seal the DEK for the host. The kvmagent unwraps it and creates any
+        //    short-lived secret material file locally.
+        final String encryptedDek;
+        try {
+            encryptedDek = volumeEncryptedSecretHelper.verifyHostKeyAndHpkeSealDek(
+                    ctx.getHostUuid(), volume.getUuid(), dekBase64);
+        } catch (OperationFailureException e) {
             failAfterRollingBackMetadata(volume.getUuid(), rollbackAttachedProvider, keyResult, operr(
-                    "failed to prepare LUKS secret material file for volume[uuid:%s] on host[uuid:%s]",
+                    "failed to prepare LUKS encryptedDek for volume[uuid:%s] on host[uuid:%s]",
                     volume.getUuid(), ctx.getHostUuid())
-                    .withCause(ensureReply.getError()), completion);
+                    .withCause(e.getErrorCode()), completion);
             return;
         }
-        SecretHostEnsureLuksSecretFileReply er = ensureReply.castReply();
-        if (StringUtils.isBlank(er.getSecFilePath())) {
-            failAfterRollingBackMetadata(volume.getUuid(), rollbackAttachedProvider, keyResult, operr(
-                    "ensure LUKS secret file on host succeeded but secFilePath is empty, host[uuid:%s]",
-                    ctx.getHostUuid()), completion);
-            return;
-        }
-        final String secFilePath = er.getSecFilePath();
 
-        // 4) Ask the PS backend to LUKS-convert the bits in place.
+        // 4) Ask the PS backend to LUKS-convert the bits.
         EncryptVolumeBitsOnPrimaryStorageMsg emsg = new EncryptVolumeBitsOnPrimaryStorageMsg();
         emsg.setPrimaryStorageUuid(psUuid);
         emsg.setHostUuid(ctx.getHostUuid());
         emsg.setVolumeUuid(volume.getUuid());
         emsg.setInstallPath(installPath);
-        emsg.setEncryptLuksSecretMaterialFilePath(secFilePath);
+        emsg.setEncryptedDek(encryptedDek);
         bus.makeTargetServiceIdByResourceUuid(emsg, PrimaryStorageConstant.SERVICE_ID, psUuid);
         bus.send(emsg, new CloudBusCallBack(completion) {
             @Override
@@ -263,13 +269,57 @@ public class VolumeInPlaceEncryptor {
                             r.getError(), completion);
                     return;
                 }
+                EncryptVolumeBitsOnPrimaryStorageReply reply = r.castReply();
+                String newInstallPath = reply.getInstallPath();
+                boolean installPathChanged = StringUtils.isNotBlank(newInstallPath)
+                        && !StringUtils.equals(newInstallPath, installPath);
+                if (installPathChanged) {
+                    volume.setInstallPath(newInstallPath);
+                }
                 // 5) Persist encrypted=true. The short-circuit above guarantees we only
                 //    reach here when the row was previously encrypted=false; this is the
                 //    one and only place the flag flips, ensuring it always reflects the
                 //    on-disk reality.
                 volume.setEncrypted(true);
                 VolumeVO latest = dbf.updateAndRefresh(volume);
+                if (installPathChanged) {
+                    deleteOldVolumeBits(psUuid, latest, installPath, completion);
+                    return;
+                }
                 completion.success(latest);
+            }
+        });
+    }
+
+    void deleteOldVolumeBits(String psUuid, VolumeVO volume, String oldInstallPath,
+                             ReturnValueCompletion<VolumeVO> completion) {
+        DeleteVolumeBitsOnPrimaryStorageMsg dmsg = new DeleteVolumeBitsOnPrimaryStorageMsg();
+        dmsg.setPrimaryStorageUuid(psUuid);
+        dmsg.setInstallPath(oldInstallPath);
+        dmsg.setBitsUuid(volume.getUuid());
+        dmsg.setBitsType(VolumeVO.class.getSimpleName());
+        dmsg.setHypervisorType(VolumeFormat.getMasterHypervisorTypeByVolumeFormat(volume.getFormat()).toString());
+        dmsg.setSize(volume.getSize());
+        bus.makeTargetServiceIdByResourceUuid(dmsg, PrimaryStorageConstant.SERVICE_ID, psUuid);
+        bus.send(dmsg, new CloudBusCallBack(completion) {
+            @Override
+            public void run(MessageReply reply) {
+                if (reply.isSuccess()) {
+                    completion.success(volume);
+                    return;
+                }
+
+                PrimaryStorageDeleteBitGC gc = new PrimaryStorageDeleteBitGC();
+                gc.NAME = String.format("gc-delete-old-bits-volume-%s-on-primary-storage-%s", volume.getUuid(), psUuid);
+                gc.primaryStorageInstallPath = oldInstallPath;
+                gc.primaryStorageUuid = psUuid;
+                gc.volume = volume;
+                gc.submit(PrimaryStorageGlobalConfig.PRIMARY_STORAGE_DELETEBITS_GARBAGE_COLLECTOR_INTERVAL.value(Long.class),
+                        TimeUnit.SECONDS);
+                logger.warn(String.format(
+                        "failed to delete old volume bits[installPath:%s] after encrypting volume[uuid:%s] in place, cleanup GC has been submitted: %s",
+                        oldInstallPath, volume.getUuid(), reply.getError()));
+                completion.success(volume);
             }
         });
     }

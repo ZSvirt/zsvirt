@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<globalConfig xmlns="http://zstack.org/schema/zstack">
+    <config>
+        <category>kvm</category>
+        <name>migrate.tls.enable</name>
+        <description>Enable libvirt/QEMU native TLS for KVM live migration.</description>
+        <defaultValue>false</defaultValue>
+        <type>java.lang.Boolean</type>
+    </config>
+    <config>
+        <category>kvm</category>
+        <name>migrate.tls.mutualAuth</name>
+        <description>Enable mutual TLS for KVM live migration.</description>
+        <defaultValue>true</defaultValue>
+        <type>java.lang.Boolean</type>
+    </config>
+    <config>
+        <category>kvm</category>
+        <name>migrate.tls.policy</name>
+        <description>TLS migration policy: strict or permissive.</description>
+        <defaultValue>strict</defaultValue>
+        <type>java.lang.String</type>
+    </config>
+    <config>
+        <category>kvm</category>
+        <name>migrate.tls.minVersion</name>
+        <description>Minimum TLS version for KVM live migration.</description>
+        <defaultValue>TLSv1.2</defaultValue>
+        <type>java.lang.String</type>
+    </config>
+</globalConfig>

@@ -7,6 +7,7 @@ public class CommitVolumeAsImageOnPrimaryStorageMsg extends NeedReplyMessage imp
     private String backupStorageUuid;
     private String volumeUuid;
     private String imageUuid;
+    private Boolean encrypted;
 
     @Override
     public String getPrimaryStorageUuid() {
@@ -39,5 +40,13 @@ public class CommitVolumeAsImageOnPrimaryStorageMsg extends NeedReplyMessage imp
 
     public void setImageUuid(String imageUuid) {
         this.imageUuid = imageUuid;
+    }
+
+    public Boolean getEncrypted() {
+        return encrypted;
+    }
+
+    public void setEncrypted(Boolean encrypted) {
+        this.encrypted = encrypted;
     }
 }

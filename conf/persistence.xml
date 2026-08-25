@@ -30,6 +30,8 @@
         <class>org.zstack.header.host.HostVO</class>
         <class>org.zstack.header.host.HostEO</class>
         <class>org.zstack.header.host.HostKeyIdentityVO</class>
+        <class>org.zstack.header.pki.PkiCaVO</class>
+        <class>org.zstack.header.pki.HostCertificateVO</class>
         <class>org.zstack.header.host.CpuFeaturesHistoryVO</class>
         <class>org.zstack.header.storage.primary.PrimaryStorageVO</class>
         <class>org.zstack.header.storage.primary.PrimaryStorageEO</class>

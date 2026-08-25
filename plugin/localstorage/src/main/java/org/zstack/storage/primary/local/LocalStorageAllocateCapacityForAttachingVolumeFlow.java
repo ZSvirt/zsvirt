@@ -86,6 +86,9 @@ public class LocalStorageAllocateCapacityForAttachingVolumeFlow implements Flow 
             if (localStorageHostRefVOList != null && !localStorageHostRefVOList.isEmpty()) {
                 localStorageHostRefVOList.forEach(r -> amsg.addExcludePrimaryStorageUuid(r.getPrimaryStorageUuid()));
             }
+            if (Boolean.TRUE.equals(volume.getEncrypted())) {
+                amsg.addRequiredFeature(PrimaryStorageFeature.ENCRYPTED_VOLUME);
+            }
         } else {
             amsg.setAllocationStrategy(LocalStorageConstants.LOCAL_STORAGE_ALLOCATOR_STRATEGY);
             amsg.setRequiredPrimaryStorageUuid(spec.getVmInventory().getRootVolume().getPrimaryStorageUuid());

@@ -937,6 +937,8 @@ public class AutoScalingGroupBase implements AutoScalingGroup {
             throw new OperationFailureException(argerr("defaultL3NetworkUuid[uuid:%s] is not in l3NetworkUuids %s", vmTemplateVO.getDefaultL3NetworkUuid(), l3Uuids));
         }
 
+        // Phase-1: auto-scaling does not pass vmEncryption; scaled VMs stay non-encrypted even if
+        // the template VM had vmEncryption. Encrypted-VM auto-scaling is out of scope.
         List<String> vmTemplateSystemTags = new ArrayList<>();
         if (AutoScalingVmTemplateSystemTags.HOSTNAME.hasTag(vmTemplateVO.getUuid())) {
             vmTemplateSystemTags.add(AutoScalingVmTemplateSystemTags.HOSTNAME.getTag(vmTemplateVO.getUuid()));

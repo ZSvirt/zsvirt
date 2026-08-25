@@ -29,8 +29,11 @@ import org.zstack.utils.Utils;
 import org.zstack.utils.logging.CLogger;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static org.zstack.core.Platform.operr;
 
@@ -63,7 +66,7 @@ public class VolumeSnapshotEncryptionExtension implements KVMTakeSnapshotExtensi
             snapshotUuid = snapshot.getUuid();
             snapshotEncryptionHelper.inheritVolumeKeyToSnapshot(volume, snapshot);
             if (!cmd.isOnline()) {
-                String envelopeDek = volumeEncryptedSecretHelper.prepareLuksEnvelopeDekOnHost(host.getUuid(), volume.getUuid());
+                String envelopeDek = volumeEncryptedSecretHelper.materializeAndSealVolumeDekForHost(host.getUuid(), volume.getUuid());
                 if (StringUtils.isNotBlank(envelopeDek)) {
                     cmd.setEncryptedDek(envelopeDek);
                 }
@@ -92,22 +95,24 @@ public class VolumeSnapshotEncryptionExtension implements KVMTakeSnapshotExtensi
                 return;
             }
 
+            Map<String, VolumeVO> volumes = findVolumes(tmsg.getSnapshotJobs());
+            Map<String, VolumeSnapshotInventory> snapshots = findSnapshots(tmsg.getSnapshotJobs());
             for (TakeSnapshotsOnKvmJobStruct job : tmsg.getSnapshotJobs()) {
                 if (job.isMemory()) {
                     continue;
                 }
 
-                VolumeVO volume = findVolume(job.getVolumeUuid());
+                VolumeVO volume = findVolume(volumes, job.getVolumeUuid());
                 if (!volume.isEncrypted()) {
                     continue;
                 }
 
-                VolumeSnapshotInventory snapshot = findSnapshot(job.getSnapshotUuid());
+                VolumeSnapshotInventory snapshot = findSnapshot(snapshots, job.getSnapshotUuid());
                 snapshotEncryptionHelper.inheritVolumeKeyToSnapshot(volume, snapshot);
                 inheritedSnapshotUuids.add(snapshot.getUuid());
 
                 if (StringUtils.isBlank(job.getEncryptedDek())) {
-                    String envelopeDek = volumeEncryptedSecretHelper.prepareLuksEnvelopeDekOnHost(tmsg.getHostUuid(), volume.getUuid());
+                    String envelopeDek = volumeEncryptedSecretHelper.materializeAndSealVolumeDekForHost(tmsg.getHostUuid(), volume.getUuid());
                     if (StringUtils.isNotBlank(envelopeDek)) {
                         job.setEncryptedDek(envelopeDek);
                     }
@@ -285,6 +290,37 @@ public class VolumeSnapshotEncryptionExtension implements KVMTakeSnapshotExtensi
         return volume;
     }
 
+    private Map<String, VolumeVO> findVolumes(List<TakeSnapshotsOnKvmJobStruct> jobs) {
+        Set<String> volumeUuids = new HashSet<>();
+        for (TakeSnapshotsOnKvmJobStruct job : jobs) {
+            if (!job.isMemory() && StringUtils.isNotBlank(job.getVolumeUuid())) {
+                volumeUuids.add(job.getVolumeUuid());
+            }
+        }
+
+        Map<String, VolumeVO> ret = new HashMap<>();
+        if (volumeUuids.isEmpty()) {
+            return ret;
+        }
+
+        for (VolumeVO volume : dbf.listByPrimaryKeys(volumeUuids, VolumeVO.class)) {
+            ret.put(volume.getUuid(), volume);
+        }
+        return ret;
+    }
+
+    private VolumeVO findVolume(Map<String, VolumeVO> volumes, String volumeUuid) {
+        if (StringUtils.isBlank(volumeUuid)) {
+            throw new OperationFailureException(operr("volume uuid is required for encrypted snapshot preparation"));
+        }
+
+        VolumeVO volume = volumes.get(volumeUuid);
+        if (volume == null) {
+            throw new OperationFailureException(operr("volume[uuid:%s] not found", volumeUuid));
+        }
+        return volume;
+    }
+
     private VolumeSnapshotInventory findSnapshot(String snapshotUuid) {
         if (StringUtils.isBlank(snapshotUuid)) {
             throw new OperationFailureException(operr("snapshot uuid is required for encrypted snapshot preparation"));
@@ -295,5 +331,36 @@ public class VolumeSnapshotEncryptionExtension implements KVMTakeSnapshotExtensi
             throw new OperationFailureException(operr("volume snapshot[uuid:%s] not found", snapshotUuid));
         }
         return VolumeSnapshotInventory.valueOf(snapshot);
+    }
+
+    private Map<String, VolumeSnapshotInventory> findSnapshots(List<TakeSnapshotsOnKvmJobStruct> jobs) {
+        Set<String> snapshotUuids = new HashSet<>();
+        for (TakeSnapshotsOnKvmJobStruct job : jobs) {
+            if (!job.isMemory() && StringUtils.isNotBlank(job.getSnapshotUuid())) {
+                snapshotUuids.add(job.getSnapshotUuid());
+            }
+        }
+
+        Map<String, VolumeSnapshotInventory> ret = new HashMap<>();
+        if (snapshotUuids.isEmpty()) {
+            return ret;
+        }
+
+        for (VolumeSnapshotVO snapshot : dbf.listByPrimaryKeys(snapshotUuids, VolumeSnapshotVO.class)) {
+            ret.put(snapshot.getUuid(), VolumeSnapshotInventory.valueOf(snapshot));
+        }
+        return ret;
+    }
+
+    private VolumeSnapshotInventory findSnapshot(Map<String, VolumeSnapshotInventory> snapshots, String snapshotUuid) {
+        if (StringUtils.isBlank(snapshotUuid)) {
+            throw new OperationFailureException(operr("snapshot uuid is required for encrypted snapshot preparation"));
+        }
+
+        VolumeSnapshotInventory snapshot = snapshots.get(snapshotUuid);
+        if (snapshot == null) {
+            throw new OperationFailureException(operr("volume snapshot[uuid:%s] not found", snapshotUuid));
+        }
+        return snapshot;
     }
 }

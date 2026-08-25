@@ -39,6 +39,16 @@
         </dependency>
         <dependency>
             <groupId>org.zstack</groupId>
+            <artifactId>volumebackup</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.zstack</groupId>
+            <artifactId>ovf</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.zstack</groupId>
             <artifactId>twoFactorAuthentication</artifactId>
             <version>${project.version}</version>
         </dependency>

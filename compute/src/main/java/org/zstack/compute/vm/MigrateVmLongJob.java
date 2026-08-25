@@ -38,9 +38,14 @@ public class MigrateVmLongJob implements LongJob {
 
     protected String auditResourceUuid;
 
+    private MigrateVmInnerMsg toInnerMsg(LongJobVO job) {
+        APIMigrateVmMsg apiMsg = JSONObjectUtil.toObject(job.getJobData(), APIMigrateVmMsg.class);
+        return MigrateVmInnerMsg.from(apiMsg);
+    }
+
     @Override
     public void start(LongJobVO job, ReturnValueCompletion<APIEvent> completion) {
-        MigrateVmInnerMsg msg = JSONObjectUtil.toObject(job.getJobData(), MigrateVmInnerMsg.class);
+        MigrateVmInnerMsg msg = toInnerMsg(job);
         bus.makeTargetServiceIdByResourceUuid(msg, VmInstanceConstant.SERVICE_ID, msg.getVmInstanceUuid());
         bus.send(msg, new CloudBusCallBack(completion) {
             @Override
@@ -62,7 +67,7 @@ public class MigrateVmLongJob implements LongJob {
 
     @Override
     public void cancel(LongJobVO job, ReturnValueCompletion<Boolean> completion) {
-        MigrateVmInnerMsg msg = JSONObjectUtil.toObject(job.getJobData(), MigrateVmInnerMsg.class);
+        MigrateVmInnerMsg msg = toInnerMsg(job);
         CancelMigrateVmMsg cmsg = new CancelMigrateVmMsg();
         cmsg.setCancellationApiId(job.getApiId());
         cmsg.setUuid(msg.getVmInstanceUuid());

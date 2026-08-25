@@ -184,6 +184,18 @@
         </zstack:plugin>
     </bean>
 
+    <bean id="VmSensitiveTagEncryptor" class="org.zstack.compute.vm.VmSensitiveTagEncryptor"/>
+
+    <bean id="VmEncryptionOperator" class="org.zstack.compute.vm.VmEncryptionOperatorImpl"/>
+
+    <bean id="VmSensitiveTagExtension" class="org.zstack.compute.vm.VmSensitiveTagExtension">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.tag.SystemTagPersistExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.tag.SystemTagTokenDecryptExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.tag.SystemTagCopyExtensionPoint"/>
+        </zstack:plugin>
+    </bean>
+
     <bean id="VmInstanceApiInterceptor" class="org.zstack.compute.vm.VmInstanceApiInterceptor">
         <zstack:plugin>
             <zstack:extension interface="org.zstack.header.apimediator.ApiMessageInterceptor" />
@@ -321,6 +333,18 @@
     </bean>
 
     <bean id="VmTpmRekeyAssociation" class="org.zstack.compute.vm.devices.VmTpmRekeyAssociation">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.keyprovider.KeyProviderRekeyAssociationExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="VmVolumeRekeyAssociation" class="org.zstack.compute.vm.devices.VmVolumeRekeyAssociation">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.keyprovider.KeyProviderRekeyAssociationExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="VmVolumeSnapshotRekeyAssociation" class="org.zstack.compute.vm.devices.VmVolumeSnapshotRekeyAssociation">
         <zstack:plugin>
             <zstack:extension interface="org.zstack.header.keyprovider.KeyProviderRekeyAssociationExtensionPoint" />
         </zstack:plugin>

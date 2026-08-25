@@ -303,6 +303,20 @@ class LocalStorageSpec extends PrimaryStorageSpec {
                 return new LocalStorageKvmBackend.ConvertVolumeEncryptionRsp()
             }
 
+            VFS.vfsHook(LocalStorageKvmBackend.CONVERT_VOLUME_ENCRYPTION_PATH, espec) { rsp, HttpEntity<String> e, EnvSpec spec ->
+                def cmd = JSONObjectUtil.toObject(e.body, LocalStorageKvmBackend.ConvertVolumeEncryptionCmd.class)
+                VFS vfs = vfs(e, cmd, spec)
+                rsp.actualSizes = [:]
+                cmd.items.each { item ->
+                    Qcow2 source = vfs.getFile(item.sourceInstallPath)
+                    assert source != null : "cannot find source file[${item.sourceInstallPath}]"
+                    Qcow2 target = vfs.createQcow2(item.targetInstallPath, source.actualSize,
+                            source.virtualSize, item.targetBackingInstallPath)
+                    rsp.actualSizes[item.resourceUuid] = target.actualSize
+                }
+                return rsp
+            }
+
             VFS.vfsHook(LocalStorageKvmBackend.CREATE_VOLUME_WITH_BACKING_PATH, espec) { rsp, HttpEntity<String> e, EnvSpec spec ->
                 def cmd = JSONObjectUtil.toObject(e.body, LocalStorageKvmBackend.CreateVolumeWithBackingCmd.class)
                 VFS vfs = vfs(e, cmd, spec)

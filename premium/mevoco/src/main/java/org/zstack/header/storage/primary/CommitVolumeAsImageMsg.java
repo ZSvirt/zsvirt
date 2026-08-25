@@ -24,6 +24,7 @@ public class CommitVolumeAsImageMsg extends NeedReplyMessage implements PrimaryS
     private String mediaType;
     private long volumeActualSize; // optional
     private boolean virtio;
+    private Boolean encrypted;
 
     @Override
     public String getVolumeUuid() {
@@ -149,5 +150,13 @@ public class CommitVolumeAsImageMsg extends NeedReplyMessage implements PrimaryS
 
     public void setVolumeActualSize(long volumeActualSize) {
         this.volumeActualSize = volumeActualSize;
+    }
+
+    public Boolean getEncrypted() {
+        return encrypted;
+    }
+
+    public void setEncrypted(Boolean encrypted) {
+        this.encrypted = encrypted;
     }
 }

@@ -10,6 +10,7 @@ public class CreateDataVolumeMsg extends NeedReplyMessage implements VolumeCreat
     private String primaryStorageUuid;
     private String accountUuid;
     private String resourceUuid;
+    private Boolean encrypted;
     private APICreateDataVolumeMsg apiMsg;
 
     public String getPrimaryStorageUuid() {
@@ -74,5 +75,15 @@ public class CreateDataVolumeMsg extends NeedReplyMessage implements VolumeCreat
 
     public void setApiMsg(APICreateDataVolumeMsg apiMsg) {
         this.apiMsg = apiMsg;
+    }
+
+    @Override
+    public Boolean getEncrypted() {
+        return encrypted;
+    }
+
+    @Override
+    public void setEncrypted(Boolean encrypted) {
+        this.encrypted = encrypted;
     }
 }

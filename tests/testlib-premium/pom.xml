@@ -390,5 +390,10 @@
             <artifactId>zmigrate-plugin</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.zstack</groupId>
+            <artifactId>host-pki</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 </project>

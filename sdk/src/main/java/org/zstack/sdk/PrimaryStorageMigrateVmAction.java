@@ -56,6 +56,9 @@ public class PrimaryStorageMigrateVmAction extends AbstractAction {
     public java.util.List volumeMigrationAOs;
 
     @Param(required = false)
+    public java.lang.Boolean enableMigrationTls;
+
+    @Param(required = false)
     public java.util.List systemTags;
 
     @Param(required = false)

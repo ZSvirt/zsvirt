@@ -8,6 +8,7 @@ public class CreateTemplateFromVolumeOnPrimaryStorageMsg extends NeedReplyMessag
     private VolumeInventory volumeInventory;
     private ImageInventory imageInventory;
     private String backupStorageUuid;
+    private Boolean encrypted;
 
     @Override
     public String getPrimaryStorageUuid() {
@@ -36,5 +37,13 @@ public class CreateTemplateFromVolumeOnPrimaryStorageMsg extends NeedReplyMessag
 
     public void setImageInventory(ImageInventory imageInventory) {
         this.imageInventory = imageInventory;
+    }
+
+    public Boolean getEncrypted() {
+        return encrypted;
+    }
+
+    public void setEncrypted(Boolean encrypted) {
+        this.encrypted = encrypted;
     }
 }

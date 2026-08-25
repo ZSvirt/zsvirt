@@ -252,6 +252,7 @@ public class MevocoImageManagerImpl implements ImageExtensionManager {
         cmsg.setVolumeSnapshotUuid(msg.getSnapshotUuid());
         cmsg.setVolumeUuid(t.get(0, String.class));
         cmsg.setPrimaryStorageUuid(t.get(1, String.class));
+        cmsg.setEncrypted(msg.getEncrypted());
 
         createTemplateFromVolume(cmsg, new ReturnValueCompletion<ImageInventory>(msg) {
             final CreateDataVolumeTemplateFromVolumeSnapshotReply creply = new CreateDataVolumeTemplateFromVolumeSnapshotReply();
@@ -289,6 +290,7 @@ public class MevocoImageManagerImpl implements ImageExtensionManager {
         cmsg.setVolumeSnapshotUuid(msg.getSnapshotUuid());
         cmsg.setVolumeUuid(t.get(0, String.class));
         cmsg.setPrimaryStorageUuid(t.get(1, String.class));
+        cmsg.setEncrypted(msg.getEncrypted());
 
         createTemplateFromVolume(cmsg, new ReturnValueCompletion<ImageInventory>(msg) {
             final CreateRootVolumeTemplateFromVolumeSnapshotReply creply = new CreateRootVolumeTemplateFromVolumeSnapshotReply();

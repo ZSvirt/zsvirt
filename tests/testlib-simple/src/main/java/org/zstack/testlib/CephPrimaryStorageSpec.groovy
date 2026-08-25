@@ -262,6 +262,38 @@ class CephPrimaryStorageSpec extends PrimaryStorageSpec {
                 return rsp
             }
 
+            simulator(CephPrimaryStorageBase.LUKS_SWAP_IN_PLACE_PATH) { HttpEntity<String> e, EnvSpec spec ->
+                return new CephPrimaryStorageBase.AgentResponse()
+            }
+
+            VFS.vfsHook(CephPrimaryStorageBase.LUKS_SWAP_IN_PLACE_PATH, espec) { rsp, HttpEntity<String> e, EnvSpec spec ->
+                def cmd = JSONObjectUtil.toObject(e.body, CephPrimaryStorageBase.SwapInPlaceLuksRbdCmd.class)
+                VFS vfs = vfs(cmd, spec)
+                String srcPath = cephPathToVFSPath(cmd.installPath)
+                String tmpPath = cephPathToVFSPath(cmd.temporaryInstallPath)
+                String oldPath = "${srcPath}-plain-${Platform.uuid.substring(0, 8)}"
+
+                [srcPath, tmpPath].each {
+                    vfs.Assert(!it.contains("@"), "RBD LUKS in-place swap only supports active image paths[${it}]")
+                }
+                vfs.Assert(vfs.isFile(srcPath), "cannot find the source file[${cmd.installPath}]")
+                CephRaw src = vfs.getFile(srcPath, true)
+                if (!vfs.exists(tmpPath)) {
+                    CephRaw tmp = vfs.createCephRaw(tmpPath, src.virtualSize)
+                    tmp.actualSize = src.actualSize
+                    tmp.update()
+                }
+                vfs.Assert(vfs.isFile(tmpPath), "cannot find the temporary file[${cmd.temporaryInstallPath}]")
+                vfs.Assert(!vfs.exists(oldPath), "old file[${oldPath}] already exists")
+
+                src.move(oldPath)
+                CephRaw tmp = vfs.getFile(tmpPath, true)
+                tmp.move(srcPath)
+                vfs.delete(oldPath)
+
+                return rsp
+            }
+
             simulator(CephPrimaryStorageBase.KVM_CREATE_SECRET_PATH) {
                 return new KVMAgentCommands.AgentResponse()
             }
@@ -599,7 +631,11 @@ class CephPrimaryStorageSpec extends PrimaryStorageSpec {
             VFS.vfsHook(CephPrimaryStorageBase.CHECK_BITS_PATH, espec) { rsp, HttpEntity<String> e, EnvSpec spec ->
                 def cmd = JSONObjectUtil.toObject(e.body, CephPrimaryStorageBase.CheckIsBitsExistingCmd.class)
                 VFS vfs = vfs(cmd, spec)
-                vfs.Assert(vfs.isFile(cephPathToVFSPath(cmd.installPath)), "cannot find ${cmd.installPath}")
+                if (cmd.installPath ==~ /.*[0-9a-f]{32}\.(encrypted|plain)\.[0-9a-f]{32}$/) {
+                    rsp.existing = vfs.exists(cephPathToVFSPath(cmd.installPath))
+                } else {
+                    vfs.Assert(vfs.isFile(cephPathToVFSPath(cmd.installPath)), "cannot find ${cmd.installPath}")
+                }
 
                 return rsp
             }

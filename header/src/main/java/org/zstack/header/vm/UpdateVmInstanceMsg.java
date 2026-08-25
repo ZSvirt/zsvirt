@@ -17,6 +17,7 @@ public class UpdateVmInstanceMsg extends NeedReplyMessage implements VmInstanceM
     private Long reservedMemorySize;
     private String guestOsType;
     private String allocatorStrategy;
+    private Boolean vmEncryption;
 
     public String getUuid() {
         return uuid;
@@ -104,6 +105,14 @@ public class UpdateVmInstanceMsg extends NeedReplyMessage implements VmInstanceM
 
     public void setAllocatorStrategy(String allocatorStrategy) {
         this.allocatorStrategy = allocatorStrategy;
+    }
+
+    public Boolean getVmEncryption() {
+        return vmEncryption;
+    }
+
+    public void setVmEncryption(Boolean vmEncryption) {
+        this.vmEncryption = vmEncryption;
     }
 
     @Override

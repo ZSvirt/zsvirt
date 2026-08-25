@@ -32,6 +32,8 @@ public class APICreateDataVolumeFromVolumeTemplateMsg extends APICreateMessage i
     private String primaryStorageUuid;
     @APIParam(resourceType = HostVO.class, required = false)
     private String hostUuid;
+    @APIParam(required = false)
+    private Boolean encrypted;
 
     public String getHostUuid() {
         return hostUuid;
@@ -91,6 +93,16 @@ public class APICreateDataVolumeFromVolumeTemplateMsg extends APICreateMessage i
     @Override
     public void setDiskSize(long diskSize) {
 
+    }
+
+    @Override
+    public Boolean getEncrypted() {
+        return encrypted;
+    }
+
+    @Override
+    public void setEncrypted(Boolean encrypted) {
+        this.encrypted = encrypted;
     }
 
     public static APICreateDataVolumeFromVolumeTemplateMsg __example__() {

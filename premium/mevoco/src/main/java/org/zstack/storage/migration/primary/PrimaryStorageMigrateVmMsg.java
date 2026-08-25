@@ -40,6 +40,7 @@ public class PrimaryStorageMigrateVmMsg extends NeedReplyMessage implements Prim
     private List<VolumeMigrationAO> volumeMigrationAOs;
 
     private Boolean legacyRootOnlyMigration;
+    private Boolean enableMigrationTls;
 
     public PrimaryStorageMigrateVmContext getJobContext() {
         return jobContext;
@@ -72,6 +73,7 @@ public class PrimaryStorageMigrateVmMsg extends NeedReplyMessage implements Prim
         bandwidth = amsg.getBandwidth();
         volumeMigrationAOs = amsg.getVolumeMigrationAOs();
         legacyRootOnlyMigration = amsg.getLegacyRootOnlyMigration();
+        enableMigrationTls = amsg.getEnableMigrationTls();
         resolveLegacyRootOnlyMigration();
     }
 
@@ -175,5 +177,13 @@ public class PrimaryStorageMigrateVmMsg extends NeedReplyMessage implements Prim
                 && !withDataVolumes
                 && rootVolumeUuid.equals(specs.get(0).getVolumeUuid())
                 && dstPrimaryStorageUuid.equals(specs.get(0).getDstPrimaryStorageUuid());
+    }
+
+    public Boolean getEnableMigrationTls() {
+        return enableMigrationTls;
+    }
+
+    public void setEnableMigrationTls(Boolean enableMigrationTls) {
+        this.enableMigrationTls = enableMigrationTls;
     }
 }

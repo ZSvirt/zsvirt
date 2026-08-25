@@ -54,7 +54,6 @@ public class ConvertVolumeEncryptionOnPrimaryStorageMsg extends NeedReplyMessage
         private String resourceUuid;
         private String resourceType;
         private String sourceInstallPath;
-        private String sourceTrashInstallPath;
         private String targetInstallPath;
         private String targetBackingInstallPath;
 
@@ -80,14 +79,6 @@ public class ConvertVolumeEncryptionOnPrimaryStorageMsg extends NeedReplyMessage
 
         public void setSourceInstallPath(String sourceInstallPath) {
             this.sourceInstallPath = sourceInstallPath;
-        }
-
-        public String getSourceTrashInstallPath() {
-            return sourceTrashInstallPath;
-        }
-
-        public void setSourceTrashInstallPath(String sourceTrashInstallPath) {
-            this.sourceTrashInstallPath = sourceTrashInstallPath;
         }
 
         public String getTargetInstallPath() {

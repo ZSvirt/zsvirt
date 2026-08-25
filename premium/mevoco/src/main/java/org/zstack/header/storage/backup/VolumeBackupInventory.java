@@ -31,6 +31,12 @@ public class VolumeBackupInventory {
     private String metadata;
     private String groupUuid;
     private BackupMode mode;
+    private Boolean encrypted;
+    /**
+     * Latest key update time of the encrypted backup; nullable when not encrypted.
+     * Populated at query reply time from EncryptedResourceKeyRefVO by the encryption inventory marshaller.
+     */
+    private Timestamp keyLastOpDate;
     private String vmInstanceUuid;
     private Timestamp createDate;
     private Timestamp lastOpDate;
@@ -53,6 +59,7 @@ public class VolumeBackupInventory {
         inv.setMetadata(vo.getMetadata());
         inv.setGroupUuid(vo.getGroupUuid());
         inv.setMode(vo.getMode());
+        inv.setEncrypted(vo.isEncrypted());
         inv.setBackupStorageRefs(VolumeBackupStorageRefInventory.valueOf(vo.getBackupStorageRefs()));
         inv.setVmInstanceUuid(vo.getVmInstanceUuid());
         return inv;
@@ -174,6 +181,22 @@ public class VolumeBackupInventory {
 
     public void setMode(BackupMode mode) {
         this.mode = mode;
+    }
+
+    public Boolean getEncrypted() {
+        return encrypted;
+    }
+
+    public void setEncrypted(Boolean encrypted) {
+        this.encrypted = encrypted;
+    }
+
+    public Timestamp getKeyLastOpDate() {
+        return keyLastOpDate;
+    }
+
+    public void setKeyLastOpDate(Timestamp keyLastOpDate) {
+        this.keyLastOpDate = keyLastOpDate;
     }
 
     public String getVmInstanceUuid() {

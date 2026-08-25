@@ -248,7 +248,12 @@ public class VmInstanceExtensionPointEmitter implements Component {
     }
 
     public void preMigrateVm(final VmInstanceInventory inv, final String dstHostUuid, Completion completion) {
-        new While<>(migrateVmExtensions).each((ext, comp) -> ext.preMigrateVm(inv, dstHostUuid, new Completion(comp) {
+        preMigrateVm(inv, dstHostUuid, null, completion);
+    }
+
+    public void preMigrateVm(final VmInstanceInventory inv, final String dstHostUuid, Boolean enableMigrationTls,
+                             Completion completion) {
+        new While<>(migrateVmExtensions).each((ext, comp) -> ext.preMigrateVm(inv, dstHostUuid, enableMigrationTls, new Completion(comp) {
             @Override
             public void success() {
                 comp.done();

@@ -75,4 +75,11 @@ public interface TagManager {
     List<String> filterSystemTags(List<String> systemTags, String resourceType);
 
     boolean isCloneable(String tag, String resourceType);
+
+    String applyBeforePersist(String resourceUuid, String resourceType, String tag);
+
+    String decryptTokenValue(String resourceType, String tagHead, String tokenName, String tokenValue);
+
+    String transformTagForCopy(String srcResourceUuid, String srcResourceType,
+                               String dstResourceUuid, String dstResourceType, String srcTag);
 }

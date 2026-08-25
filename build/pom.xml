@@ -468,6 +468,11 @@
                 </dependency>
                 <dependency>
                     <groupId>org.zstack</groupId>
+                    <artifactId>host-pki</artifactId>
+                    <version>${project.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.zstack</groupId>
                     <artifactId>virtualSwitchNetwork</artifactId>
                     <version>${project.version}</version>
                 </dependency>

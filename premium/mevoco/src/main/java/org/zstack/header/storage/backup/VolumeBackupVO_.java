@@ -19,6 +19,7 @@ public class VolumeBackupVO_ extends ResourceVO_ {
     public static volatile SingularAttribute<VolumeBackupVO, String> metadata;
     public static volatile SingularAttribute<VolumeBackupVO, String> groupUuid;
     public static volatile SingularAttribute<VolumeBackupVO, BackupMode> mode;
+    public static volatile SingularAttribute<VolumeBackupVO, Boolean> encrypted;
     public static volatile SingularAttribute<VolumeBackupVO, String> vmInstanceUuid;
     public static volatile SingularAttribute<VolumeBackupVO, Timestamp> createDate;
     public static volatile SingularAttribute<VolumeBackupVO, Timestamp> lastOpDate;

@@ -646,6 +646,9 @@ public class MevocoVmInstanceBase extends VmInstanceBase {
                 vmSpec.setRootDisk(DiskAO.rootDisk());
             }
             vmSpec.getRootDisk().setEncrypted(true);
+            if (msg.isEncryptedVolumeBackupRestore()) {
+                vmSpec.getRootDisk().setVolumeBackupTemplate(true);
+            }
         }
 
         // discard these info in vmSpec
@@ -1162,6 +1165,7 @@ public class MevocoVmInstanceBase extends VmInstanceBase {
                             CreateRootVolumeTemplateMessage csmsg = fastCreate ?
                                     new CreateTemporaryRootVolumeTemplateFromVolumeSnapshotMsg() :
                                     new CreateRootVolumeTemplateFromVolumeSnapshotMsg();
+                            DiskAO diskAO = msg.getDiskAOsByVolumeUuid().get(snap.getVolumeUuid());
 
                             csmsg.setName(String.format("for-clone-vm-%s-rootVolume-%s", vivo.getUuid(),
                                     snap.getVolumeUuid()));
@@ -1170,15 +1174,19 @@ public class MevocoVmInstanceBase extends VmInstanceBase {
                             csmsg.setVirtio(VmExtraInfoGetter.New(vivo.getUuid()).isVirtio());
                             csmsg.setGuestOsType(vivo.getGuestOsType());
                             if (csmsg instanceof CreateTemporaryRootVolumeTemplateFromVolumeSnapshotMsg) {
-                                DiskAO diskAO = msg.getDiskAOsByVolumeUuid().get(snap.getVolumeUuid());
                                 ((CreateTemporaryRootVolumeTemplateFromVolumeSnapshotMsg) csmsg)
+                                        .setEncrypted(diskAO == null ? null : diskAO.getEncrypted());
+                            } else {
+                                ((CreateRootVolumeTemplateFromVolumeSnapshotMsg) csmsg)
                                         .setEncrypted(diskAO == null ? null : diskAO.getEncrypted());
                             }
                             cmsg = csmsg;
                         } else {
                             CreateDataVolumeTemplateFromVolumeSnapshotMsg csmsg = new CreateDataVolumeTemplateFromVolumeSnapshotMsg();
+                            DiskAO diskAO = msg.getDiskAOsByVolumeUuid().get(snap.getVolumeUuid());
                             csmsg.setName(String.format("for-clone-vm-%s-volume-%s",
                                     vivo.getUuid(), snap.getVolumeUuid()));
+                            csmsg.setEncrypted(diskAO == null ? null : diskAO.getEncrypted());
                             cmsg = csmsg;
                         }
 
@@ -1282,7 +1290,7 @@ public class MevocoVmInstanceBase extends VmInstanceBase {
                         cvmsg.setPlatform(msg.getPlatform());
                         cvmsg.setGuestOsType(msg.getGuestOsType());
                         cvmsg.setArchitecture(msg.getArchitecture());
-                        cvmsg.setVmEncryption(msg.getVmEncryption() != null ? msg.getVmEncryption() : vivo.isVmEncryption());
+                        cvmsg.setVmEncryption(msg.getVmEncryption());
                         cvmsg.setVirtio(cvmsg.hasSystemTag(VmSystemTags.VIRTIO::isMatch));
 
                         if (!cvmsg.hasSystemTag(VmSystemTags.CREATE_VM_CD_ROM_LIST::isMatch)) {

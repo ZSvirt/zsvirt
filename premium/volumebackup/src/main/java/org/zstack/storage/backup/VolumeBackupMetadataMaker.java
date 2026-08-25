@@ -61,10 +61,12 @@ public class VolumeBackupMetadataMaker implements CreateVolumeBackupExtensionPoi
     private final static CLogger logger = Utils.getLogger(VolumeBackupMetadataMaker.class);
 
     public static final String MERGE_BACKUP_METADATA = "/imagestore/mergebackupmetadata/";
+    public static final String UPDATE_BACKUP_METADATA = "/imagestore/updatebackupmetadata/";
     public static final String DELETE_BACKUP_METADATA = "/imagestore/deletebackupmetadata/";
     public static final String CHECK_BACKUP_METADATA_FILE = "/imagestore/checkbackupmetadatafile/";
 
     public static final String SYNC_MERGE_BACKUP_METADATA = "/imagestore/mergebackupmetadata-sync/";
+    public static final String SYNC_UPDATE_BACKUP_METADATA = "/imagestore/updatebackupmetadata-sync/";
     public static final String SYNC_DELETE_BACKUP_METADATA = "/imagestore/deletebackupmetadata-sync/";
     public static final String SYNC_CHECK_BACKUP_METADATA_FILE = "/imagestore/checkbackupmetadatafile-sync/";
 
@@ -75,6 +77,13 @@ public class VolumeBackupMetadataMaker implements CreateVolumeBackupExtensionPoi
     }
 
     public static class MergeVolumeBackupMetadataRsp extends ImageStoreResponse {
+    }
+
+    public static class UpdateVolumeBackupMetadataCmd extends AgentCommand {
+        public List<String> backupMetadatas;
+    }
+
+    public static class UpdateVolumeBackupMetadataRsp extends ImageStoreResponse {
     }
 
     public static class DeleteVolumeBackupMetadataCmd extends AgentCommand {
@@ -107,6 +116,10 @@ public class VolumeBackupMetadataMaker implements CreateVolumeBackupExtensionPoi
     @Override
     public void afterCreateVmBackup(Collection<VolumeBackupVO> backups, String bsUuid) {
         mergeVolumeBackupMetadataToImageStore(backups, bsUuid);
+    }
+
+    public void updateVolumeBackupMetadata(Collection<VolumeBackupVO> backups, String bsUuid) {
+        updateVolumeBackupMetadataOnImageStore(backups, bsUuid);
     }
 
     @Override
@@ -297,6 +310,43 @@ public class VolumeBackupMetadataMaker implements CreateVolumeBackupExtensionPoi
         }
     }
 
+    private void updateVolumeBackupMetadataOnImageStore(Collection<VolumeBackupVO> volumeBackups, String bsUuid) {
+        UpdateVolumeBackupMetadataCmd cmd = new UpdateVolumeBackupMetadataCmd();
+        List<VolumeBackupMetadata> metadatas = VolumeBackupMetadata.valueOf(volumeBackups, bsUuid);
+        List<VolumeBackupMetadataExtensionPoint> exts = pluginRgty.getExtensionList(VolumeBackupMetadataExtensionPoint.class);
+        for (VolumeBackupMetadata metadata : metadatas) {
+            for (VolumeBackupMetadataExtensionPoint ext : exts) {
+                try {
+                    ext.collectMetadata(metadata.getUuid(), metadata.getAttachments());
+                } catch (Exception e) {
+                    logger.warn(String.format("extension %s failed to collect metadata for backup %s: %s",
+                            ext.getClass().getName(), metadata.getUuid(), e.getMessage()));
+                }
+            }
+        }
+        cmd.backupMetadatas = metadatas.stream().map(JSONObjectUtil::toJsonString).collect(Collectors.toList());
+        ReturnValueCompletion<UpdateVolumeBackupMetadataRsp> completion =
+                new ReturnValueCompletion<UpdateVolumeBackupMetadataRsp>(null) {
+            @Override
+            public void success(UpdateVolumeBackupMetadataRsp rsp) {
+                logger.debug(String.format("succeed to update backups[uuids: %s] on image store[uuid: %s]",
+                        volumeBackups.stream().map(VolumeBackupVO::getUuid).collect(Collectors.toList()), bsUuid));
+            }
+
+            @Override
+            public void fail(ErrorCode errorCode) {
+                logger.warn(String.format("fail to update backups[uuids: %s] on image store[uuid: %s]",
+                        volumeBackups.stream().map(VolumeBackupVO::getUuid).collect(Collectors.toList()), bsUuid));
+            }
+        };
+
+        if (ImageStoreBackupStorageSelector.isRemote(bsUuid)) {
+            syncPost(SYNC_UPDATE_BACKUP_METADATA, cmd, bsUuid, UpdateVolumeBackupMetadataRsp.class, completion);
+        } else {
+            asyncPost(UPDATE_BACKUP_METADATA, cmd, bsUuid, UpdateVolumeBackupMetadataRsp.class, completion);
+        }
+    }
+
     SyncBackupResult syncVolumeBackupsMetaDataFromImageStore(String bsUuid) throws IOException {
         return syncBackupsMetaDataFromImageStore(bsUuid, false);
     }
@@ -446,6 +496,7 @@ public class VolumeBackupMetadataMaker implements CreateVolumeBackupExtensionPoi
                 vo.setType(metadata.getType());
                 vo.setVolumeUuid(metadata.getVolumeUuid());
                 vo.setVmInstanceUuid(metadata.getVmInstanceUuid());
+                vo.setEncrypted(Boolean.TRUE.equals(metadata.getEncrypted()));
                 vo.setState(VolumeBackupState.Enabled);
                 vo.setStatus(VolumeBackupStatus.Ready);
                 toPersists.add(vo);

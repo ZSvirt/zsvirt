@@ -23,6 +23,7 @@ public class MigrateVmOnHypervisorMsg extends NeedReplyMessage implements HostMe
     private boolean reload;
     private Integer downTime;
     private long bandwidth;
+    private Boolean enableMigrationTls;
 
     public Integer getDownTime() {
         return downTime;
@@ -115,5 +116,13 @@ public class MigrateVmOnHypervisorMsg extends NeedReplyMessage implements HostMe
 
     public void setVolumeLuksSecrets(Map<String, String> volumeLuksSecrets) {
         this.volumeLuksSecrets = volumeLuksSecrets;
+    }
+
+    public Boolean getEnableMigrationTls() {
+        return enableMigrationTls;
+    }
+
+    public void setEnableMigrationTls(Boolean enableMigrationTls) {
+        this.enableMigrationTls = enableMigrationTls;
     }
 }

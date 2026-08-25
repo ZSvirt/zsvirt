@@ -4,19 +4,23 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
+import org.zstack.core.db.DatabaseFacade;
 import org.zstack.header.errorcode.OperationFailureException;
 import org.zstack.header.host.HostInventory;
 import org.zstack.header.vm.VmBeforeCreateOnHypervisorExtensionPoint;
 import org.zstack.header.vm.VmBeforeStartOnHypervisorExtensionPoint;
 import org.zstack.header.vm.VmInstanceSpec;
 import org.zstack.header.volume.VolumeInventory;
+import org.zstack.header.volume.VolumeVO;
 import org.zstack.utils.Utils;
 import org.zstack.utils.logging.CLogger;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static org.zstack.core.Platform.operr;
 
@@ -46,6 +50,8 @@ public class VolumeEncryptedStartExtension
 
     @Autowired
     private VolumeEncryptedSecretHelper secretHelper;
+    @Autowired
+    private DatabaseFacade dbf;
 
     @Override
     public void beforeStartVmOnHypervisor(VmInstanceSpec spec) {
@@ -94,17 +100,52 @@ public class VolumeEncryptedStartExtension
 
     private List<VolumeInventory> collectEncryptedVolumes(VmInstanceSpec spec) {
         List<VolumeInventory> result = new ArrayList<>();
+        Map<String, VolumeVO> latestVolumes = latestVolumes(spec);
         VolumeInventory root = spec.getDestRootVolume();
-        if (root != null && Boolean.TRUE.equals(root.getEncrypted())) {
+        if (root != null && isEncrypted(latestVolumes, root)) {
             result.add(root);
         }
         if (spec.getDestDataVolumes() != null) {
             for (VolumeInventory v : spec.getDestDataVolumes()) {
-                if (v != null && Boolean.TRUE.equals(v.getEncrypted())) {
+                if (v != null && isEncrypted(latestVolumes, v)) {
                     result.add(v);
                 }
             }
         }
         return result;
+    }
+
+    private Map<String, VolumeVO> latestVolumes(VmInstanceSpec spec) {
+        Set<String> volumeUuids = new HashSet<>();
+        collectVolumeUuid(volumeUuids, spec.getDestRootVolume());
+        if (spec.getDestDataVolumes() != null) {
+            for (VolumeInventory v : spec.getDestDataVolumes()) {
+                collectVolumeUuid(volumeUuids, v);
+            }
+        }
+
+        Map<String, VolumeVO> ret = new HashMap<>();
+        if (volumeUuids.isEmpty()) {
+            return ret;
+        }
+
+        for (VolumeVO volume : dbf.listByPrimaryKeys(volumeUuids, VolumeVO.class)) {
+            ret.put(volume.getUuid(), volume);
+        }
+        return ret;
+    }
+
+    private void collectVolumeUuid(Set<String> volumeUuids, VolumeInventory volume) {
+        if (volume != null && StringUtils.isNotBlank(volume.getUuid())) {
+            volumeUuids.add(volume.getUuid());
+        }
+    }
+
+    private boolean isEncrypted(Map<String, VolumeVO> latestVolumes, VolumeInventory volume) {
+        VolumeVO latest = latestVolumes.get(volume.getUuid());
+        if (latest != null) {
+            return latest.isEncrypted();
+        }
+        return Boolean.TRUE.equals(volume.getEncrypted());
     }
 }

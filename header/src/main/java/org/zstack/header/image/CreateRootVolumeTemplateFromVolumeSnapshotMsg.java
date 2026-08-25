@@ -21,6 +21,7 @@ public class CreateRootVolumeTemplateFromVolumeSnapshotMsg extends NeedReplyMess
     private boolean system;
     private boolean virtio = true;
     private SessionInventory session;
+    private Boolean encrypted;
 
     public void setSnapshotUuid(String snapshotUuid) {
         this.snapshotUuid = snapshotUuid;
@@ -110,6 +111,15 @@ public class CreateRootVolumeTemplateFromVolumeSnapshotMsg extends NeedReplyMess
     public void setSystem(boolean system) {
         this.system = system;
     }
+
+    public Boolean getEncrypted() {
+        return encrypted;
+    }
+
+    public void setEncrypted(Boolean encrypted) {
+        this.encrypted = encrypted;
+    }
+
     @Override
 
     public SessionInventory getSession() {

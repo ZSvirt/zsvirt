@@ -12,6 +12,7 @@ import org.zstack.utils.Utils;
 import org.zstack.utils.logging.CLogger;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -83,11 +84,40 @@ public class PatternedSystemTag extends SystemTag {
     }
 
     public String getTokenByTag(String tag, String tokenName) {
+        return getTokenByTag(tag, tokenName, resourceClass);
+    }
+
+    private String getTokenByTag(String tag, String tokenName, Class resourceClass) {
         Map<String, String> tokens = getTokensByTag(tag);
         if (tokens == null) {
             return null;
         }
-        return tokens.get(tokenName);
+        String value = tokens.get(tokenName);
+        if (value == null || tagMgr == null) {
+            return value;
+        }
+        int idx = tag.indexOf("::");
+        String tagHead = idx > 0 ? tag.substring(0, idx) : tokenName;
+        return tagMgr.decryptTokenValue(resourceClass.getSimpleName(), tagHead, tokenName, value);
+    }
+
+    private Map<String, String> getDecryptedTokensByTag(String tag, Class resourceClass) {
+        Map<String, String> tokens = getTokensByTag(tag);
+        if (tokens == null || tagMgr == null) {
+            return tokens;
+        }
+
+        int idx = tag.indexOf("::");
+        String tagHead = idx > 0 ? tag.substring(0, idx) : null;
+        Map<String, String> decrypted = new HashMap<>();
+        for (Map.Entry<String, String> entry : tokens.entrySet()) {
+            String tokenName = entry.getKey();
+            String value = entry.getValue();
+            decrypted.put(tokenName, value == null ? null :
+                    tagMgr.decryptTokenValue(resourceClass.getSimpleName(),
+                            tagHead == null ? tokenName : tagHead, tokenName, value));
+        }
+        return decrypted;
     }
 
     public Map<String, String> getTokensByResourceUuid(String resourceUuid, Class resourceClass) {
@@ -96,7 +126,7 @@ public class PatternedSystemTag extends SystemTag {
             return null;
         }
 
-        return TagUtils.parseIfMatch(tagFormat, tag);
+        return getDecryptedTokensByTag(tag, resourceClass);
     }
 
     public List<Map<String, String>> getTokensOfTagsByResourceUuid(String resourceUuid) {
@@ -108,7 +138,7 @@ public class PatternedSystemTag extends SystemTag {
 
         List<String> tags = getTags(resourceUuid, resourceClass);
         for (String tag : tags) {
-            res.add(TagUtils.parseIfMatch(tagFormat, tag));
+            res.add(getDecryptedTokensByTag(tag, resourceClass));
         }
 
         return res;
@@ -119,11 +149,11 @@ public class PatternedSystemTag extends SystemTag {
     }
 
     public String getTokenByResourceUuid(String resourceUuid, Class resourceClass, String tokenName) {
-        Map<String, String> tokens = getTokensByResourceUuid(resourceUuid, resourceClass);
-        if (tokens == null) {
+        String tag = getTag(resourceUuid, resourceClass);
+        if (tag == null) {
             return null;
         }
-        return tokens.get(tokenName);
+        return getTokenByTag(tag, tokenName, resourceClass);
     }
 
     public String getTokenByResourceUuid(String resourceUuid, String tokenName) {
@@ -170,19 +200,31 @@ public class PatternedSystemTag extends SystemTag {
     }
 
     public void copyTagInventories(String srcUuid, Class srcResourceClass, String dstUuid, Class dstResourceClass, boolean inherent) {
-        if (getTag(srcUuid, srcResourceClass) == null) {
+        if (!isCloneable()) {
             return;
         }
 
-        if (getTokenByResourceUuid(dstUuid, dstResourceClass, tagFormat) != null) {
-            delete(dstUuid, tagFormat);
+        String rawTag = getTag(srcUuid, srcResourceClass);
+        if (rawTag == null) {
+            return;
         }
+
+        if (getTag(dstUuid, dstResourceClass) != null) {
+            delete(dstUuid, dstResourceClass);
+        }
+
+        String dstTag = tagMgr.transformTagForCopy(srcUuid, srcResourceClass.getSimpleName(),
+                dstUuid, dstResourceClass.getSimpleName(), rawTag);
+        if (dstTag == null) {
+            return;
+        }
+
         SystemTagVO svo = new SystemTagVO();
         svo.setUuid(Platform.getUuid());
         svo.setInherent(inherent);
         svo.setResourceUuid(dstUuid);
         svo.setResourceType(dstResourceClass.getSimpleName());
-        svo.setTag(getTag(srcUuid, srcResourceClass));
+        svo.setTag(dstTag);
         dbf.persistAndRefresh(svo);
     }
 
@@ -193,13 +235,17 @@ public class PatternedSystemTag extends SystemTag {
                 .like(SystemTagVO_.tag, useTagFormat())
                 .find();
 
-        String oldTag = getTokenByResourceUuid(resourceUuid, tokenName);
-        if (vo == null || oldTag == null) {
+        if (vo == null) {
             return false;
         }
 
-        vo.setTag(vo.getTag().replace(oldTag, newTag));
-        dbf.updateAndRefresh(vo);
+        Map<String, String> rawTokens = getTokensByTag(vo.getTag());
+        String oldTag = rawTokens == null ? null : rawTokens.get(tokenName);
+        if (oldTag == null) {
+            return false;
+        }
+
+        tagMgr.updateSystemTag(vo.getUuid(), vo.getTag().replace(oldTag, newTag));
 
         return true;
     }

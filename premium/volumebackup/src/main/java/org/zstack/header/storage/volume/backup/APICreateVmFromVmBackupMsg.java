@@ -107,6 +107,9 @@ public class APICreateVmFromVmBackupMsg extends APICreateMessage implements NewV
     @APIParam(required = false, numberRange = {0, Long.MAX_VALUE})
     private Long reservedMemorySize;
 
+    @APIParam(required = false)
+    private Boolean vmEncryption;
+
     @APINoSee
     private String platform;
 
@@ -279,6 +282,14 @@ public class APICreateVmFromVmBackupMsg extends APICreateMessage implements NewV
 
     public void setReservedMemorySize(Long reservedMemorySize) {
         this.reservedMemorySize = reservedMemorySize;
+    }
+
+    public Boolean getVmEncryption() {
+        return vmEncryption;
+    }
+
+    public void setVmEncryption(Boolean vmEncryption) {
+        this.vmEncryption = vmEncryption;
     }
 
     public String getPlatform() {

@@ -140,6 +140,8 @@ public class VmInstanceBase extends AbstractVmInstance {
     @Autowired
     private TagManager tagMgr;
     @Autowired
+    private VmSensitiveTagEncryptor vmSensitiveTagEncryptor;
+    @Autowired
     private VmInstanceResourceMetadataManager vidm;
     @Autowired
     private NetworkServiceManager nwServiceMgr;
@@ -5980,6 +5982,9 @@ public class VmInstanceBase extends AbstractVmInstance {
     private void doVmInstanceUpdate(final UpdateVmInstanceMsg msg, Completion completion) {
         refreshVO();
 
+        final boolean encryptionEnabledBeforeUpdate = vmSensitiveTagEncryptor.isVmEncryptionEnabled(self.getUuid());
+        final Boolean requestedVmEncryption = msg.getVmEncryption();
+
         List<Runnable> extensions = new ArrayList<>();
         final VmInstanceInventory vm = getSelfInventory();
         VmInstanceSpec spec = new VmInstanceSpec();
@@ -6127,6 +6132,61 @@ public class VmInstanceBase extends AbstractVmInstance {
 
         setAdditionalFlow(chain, spec);
 
+        chain.then(new Flow() {
+            String __name__ = "update-vm-encryption";
+
+            boolean encryptionApplied;
+
+            @Override
+            public boolean skip(Map data) {
+                return requestedVmEncryption == null;
+            }
+
+            @Override
+            public void run(FlowTrigger trigger, Map data) {
+                if (Boolean.TRUE.equals(requestedVmEncryption)) {
+                    if (encryptionEnabledBeforeUpdate) {
+                        syncVmEncryptionField(true);
+                        trigger.next();
+                        return;
+                    }
+                } else if (Boolean.FALSE.equals(requestedVmEncryption)) {
+                    if (!encryptionEnabledBeforeUpdate) {
+                        syncVmEncryptionField(false);
+                        trigger.next();
+                        return;
+                    }
+                } else {
+                    trigger.next();
+                    return;
+                }
+
+                try {
+                    applyVmEncryptionState(Boolean.TRUE.equals(requestedVmEncryption));
+                    encryptionApplied = true;
+                    trigger.next();
+                } catch (OperationFailureException ex) {
+                    restoreVmEncryptionState(encryptionEnabledBeforeUpdate);
+                    trigger.fail(ex.getErrorCode());
+                } catch (RuntimeException ex) {
+                    restoreVmEncryptionState(encryptionEnabledBeforeUpdate);
+                    trigger.fail(operr("failed to update vmEncryption for vm[uuid:%s]: %s",
+                            self.getUuid(), ex.getMessage()));
+                }
+            }
+
+            @Override
+            public void rollback(FlowRollback trigger, Map data) {
+                if (!encryptionApplied) {
+                    trigger.rollback();
+                    return;
+                }
+
+                restoreVmEncryptionState(encryptionEnabledBeforeUpdate);
+                trigger.rollback();
+            }
+        });
+
         chain.error(new FlowErrorHandler(completion) {
             @Override
             public void handle(ErrorCode errCode, Map data) {
@@ -6138,6 +6198,36 @@ public class VmInstanceBase extends AbstractVmInstance {
                 completion.success();
             }
         }).start();
+    }
+
+    private void applyVmEncryptionState(boolean enable) {
+        if (enable) {
+            self.setVmEncryption(true);
+            vmSensitiveTagEncryptor.enableVmEncryption(self.getUuid());
+        } else {
+            vmSensitiveTagEncryptor.disableVmEncryption(self.getUuid());
+            self.setVmEncryption(false);
+        }
+        dbf.update(self);
+    }
+
+    private void restoreVmEncryptionState(boolean encryptionEnabled) {
+        if (encryptionEnabled) {
+            self.setVmEncryption(true);
+            vmSensitiveTagEncryptor.enableVmEncryption(self.getUuid());
+        } else {
+            vmSensitiveTagEncryptor.disableVmEncryption(self.getUuid());
+            self.setVmEncryption(false);
+        }
+        dbf.update(self);
+    }
+
+    private void syncVmEncryptionField(boolean vmEncryption) {
+        if (self.isVmEncryption() == vmEncryption) {
+            return;
+        }
+        self.setVmEncryption(vmEncryption);
+        dbf.update(self);
     }
 
     private void handle(APIUpdateVmInstanceMsg msg) {
@@ -6155,6 +6245,7 @@ public class VmInstanceBase extends AbstractVmInstance {
         umsg.setGuestOsType(msg.getGuestOsType());
         umsg.setSystemTags(msg.getSystemTags());
         umsg.setAllocatorStrategy(msg.getAllocatorStrategy());
+        umsg.setVmEncryption(msg.getVmEncryption());
         bus.makeTargetServiceIdByResourceUuid(umsg, VmInstanceConstant.SERVICE_ID, umsg.getVmInstanceUuid());
         bus.send(umsg, new CloudBusCallBack(msg) {
             @Override

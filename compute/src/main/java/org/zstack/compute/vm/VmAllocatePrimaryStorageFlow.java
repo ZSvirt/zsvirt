@@ -24,6 +24,7 @@ import org.zstack.header.storage.primary.AllocatePrimaryStorageSpaceMsg;
 import org.zstack.header.storage.primary.AllocatePrimaryStorageSpaceReply;
 import org.zstack.header.storage.primary.PrimaryStorageAllocationPurpose;
 import org.zstack.header.storage.primary.PrimaryStorageConstant;
+import org.zstack.header.storage.primary.PrimaryStorageFeature;
 import org.zstack.header.storage.primary.ReleasePrimaryStorageSpaceMsg;
 import org.zstack.header.vm.DiskAO;
 import org.zstack.header.vm.VmInstanceConstant;
@@ -146,6 +147,10 @@ public class VmAllocatePrimaryStorageFlow implements Flow {
         } else {
             rmsg.setCandidatePrimaryStorageUuids(candidatePs);
             rmsg.setPossiblePrimaryStorageTypes(selectPsTypesFromSpec(spec));
+        }
+        if (disk != null && Boolean.TRUE.equals(disk.getEncrypted())
+                && disk.getPrimaryStorageUuid() == null && isEmpty(candidatePs)) {
+            rmsg.addRequiredFeature(PrimaryStorageFeature.ENCRYPTED_VOLUME);
         }
 
         Set<String> tags = new HashSet<>();

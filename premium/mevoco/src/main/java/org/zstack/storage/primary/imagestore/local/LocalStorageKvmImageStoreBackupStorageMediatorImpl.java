@@ -18,6 +18,8 @@ import org.zstack.header.image.*;
 import org.zstack.header.message.MessageReply;
 import org.zstack.header.storage.backup.BackupStorageConstant;
 import org.zstack.header.storage.backup.BackupStorageInventory;
+import org.zstack.header.storage.primary.imagestore.ImageStoreDownloadContext;
+import org.zstack.header.storage.primary.imagestore.ImageStoreDownloadExtension;
 import org.zstack.header.storage.primary.PrimaryStorageInventory;
 import org.zstack.kvm.KVMConstant;
 import org.zstack.kvm.KVMHostAsyncHttpCallMsg;
@@ -25,6 +27,7 @@ import org.zstack.kvm.KVMHostAsyncHttpCallReply;
 import org.zstack.resourceconfig.ResourceConfig;
 import org.zstack.resourceconfig.ResourceConfigFacade;
 import org.zstack.storage.backup.imagestore.*;
+import org.zstack.storage.primary.imagestore.ImageStoreDownloadExtensions;
 import org.zstack.storage.primary.local.LocalStorageBackupStorageMediator;
 import org.zstack.storage.primary.local.LocalStorageConstants;
 import org.zstack.storage.primary.local.LocalStorageKvmBackend;
@@ -53,6 +56,8 @@ public class LocalStorageKvmImageStoreBackupStorageMediatorImpl implements Local
     private PluginRegistry pluginRgty;
     @Autowired
     private ResourceConfigFacade rcf;
+    @Autowired(required = false)
+    private ImageStoreDownloadExtension imageStoreDownloadExtension;
 
     // c.f. corresponding handlers in image store plugin for the kvmagent.
     public static final String UPLOAD_BIT_PATH = "/localstorage/imagestore/upload";
@@ -234,11 +239,28 @@ public class LocalStorageKvmImageStoreBackupStorageMediatorImpl implements Local
                             return;
                         }
 
-                        completion.success();
+                        ImageStoreDownloadExtensions.afterDownload(imageStoreDownloadExtension, buildDownloadContext(pinv, bsinv,
+                                backupStorageInstallPath, primaryStorageInstallPath, hostUuid, isData), completion);
                     }
                 });
             }
         });
+    }
+
+    private ImageStoreDownloadContext buildDownloadContext(PrimaryStorageInventory pinv,
+                                                           BackupStorageInventory bsinv,
+                                                           String backupStorageInstallPath,
+                                                           String primaryStorageInstallPath,
+                                                           String hostUuid,
+                                                           boolean isData) {
+        ImageStoreDownloadContext context = new ImageStoreDownloadContext();
+        context.setPrimaryStorageUuid(pinv.getUuid());
+        context.setBackupStorageUuid(bsinv.getUuid());
+        context.setBackupStorageInstallPath(backupStorageInstallPath);
+        context.setPrimaryStorageInstallPath(primaryStorageInstallPath);
+        context.setHostUuid(hostUuid);
+        context.setData(isData);
+        return context;
     }
 
     @Override

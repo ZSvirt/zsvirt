@@ -232,7 +232,7 @@ public class VmInstanceInventory implements Serializable, Cloneable {
      */
     private Timestamp lastOpDate;
     /**
-     * @desc whether the vm itself is marked encrypted
+     * @desc whether VM sensitive system tags are encrypted
      */
     private Boolean vmEncryption;
     /**

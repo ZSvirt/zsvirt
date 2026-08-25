@@ -23,6 +23,8 @@ public class PrimaryStorageLiveMigrateVmMsg extends NeedReplyMessage implements 
     private List<VolumeMigrationAO> volumeMigrationAOs;
     private boolean legacyRootOnlyMigration;
 
+    private Boolean enableMigrationTls;
+
     public PrimaryStorageLiveMigrateVmMsg(PrimaryStorageMigrateVmMsg amsg) {
         this.vmInstanceUuid = amsg.getVmInstanceUuid();
         this.dstPrimaryStorageUuid = amsg.getDstPrimaryStorageUuid();
@@ -36,6 +38,7 @@ public class PrimaryStorageLiveMigrateVmMsg extends NeedReplyMessage implements 
         this.bandwidth = amsg.getBandwidth();
         this.volumeMigrationAOs = amsg.getVolumeMigrationAOs();
         this.legacyRootOnlyMigration = amsg.isLegacyRootOnlyMigration();
+        this.enableMigrationTls = amsg.getEnableMigrationTls();
     }
 
     public PrimaryStorageLiveMigrateVmMsg() {
@@ -126,5 +129,13 @@ public class PrimaryStorageLiveMigrateVmMsg extends NeedReplyMessage implements 
 
     public void setBandwidth(long bandwidth) {
         this.bandwidth = bandwidth;
+    }
+
+    public Boolean getEnableMigrationTls() {
+        return enableMigrationTls;
+    }
+
+    public void setEnableMigrationTls(Boolean enableMigrationTls) {
+        this.enableMigrationTls = enableMigrationTls;
     }
 }

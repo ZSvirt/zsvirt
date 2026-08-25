@@ -14,8 +14,8 @@ import java.util.concurrent.TimeUnit;
  *   <li>Ensure the volume has a key-provider binding (auto-attaches the default key provider
  *       when none is bound yet).</li>
  *   <li>Materialize a DEK via the {@code EncryptedResourceKeyManager}.</li>
- *   <li>Stage the LUKS secret material file on the host
- *       ({@code SecretHostEnsureLuksSecretFileMsg}).</li>
+ *   <li>Seal the DEK for the target host as {@code encryptedDek}; the kvmagent
+ *       creates any single-use secret material file locally as needed.</li>
  *   <li>Ask the primary storage backend to LUKS-convert the bits in place
  *       ({@code EncryptVolumeBitsOnPrimaryStorageMsg}).</li>
  *   <li>Persist {@code VolumeVO.encrypted = true}.</li>

@@ -132,7 +132,7 @@ public class KVMGlobalConfig {
     @BindResourceConfig({HostVO.class})
     public static GlobalConfig HOST_KSM = new GlobalConfig(CATEGORY, "host.ksm");
 
-    @GlobalConfigDef(defaultValue = "true", type = Boolean.class, description = "use 'force' mode when stop VM without operating system")
+    @GlobalConfigDef(defaultValue = "true", type = Boolean.class, description = "use 'cold' mode when stop VM without operating system")
     public static GlobalConfig STOP_VM_WITHOUT_OS_BY_FORCE_MODE =
             new GlobalConfig(CATEGORY, "stop.vm.without.os.by.force.mode");
 

@@ -28,6 +28,7 @@ import org.zstack.header.core.WhileDoneCompletion;
 import org.zstack.header.core.workflow.*;
 import org.zstack.header.errorcode.ErrorCode;
 import org.zstack.header.errorcode.ErrorCodeList;
+import org.zstack.header.errorcode.ErrorableValue;
 import org.zstack.header.errorcode.OperationFailureException;
 import org.zstack.header.host.*;
 import org.zstack.header.identity.AccountResourceRefInventory;
@@ -42,6 +43,7 @@ import org.zstack.header.storage.primary.*;
 import org.zstack.header.storage.snapshot.*;
 import org.zstack.header.storage.snapshot.group.VolumeSnapshotGroupVO;
 import org.zstack.header.storage.snapshot.group.VolumeSnapshotGroupVO_;
+import org.zstack.storage.encrypt.VolumeEncryptedResourceKeyBackend;
 import org.zstack.storage.encrypt.VolumeSnapshotEncryptionHelper;
 import org.zstack.header.vm.*;
 import org.zstack.header.vm.devices.VmInstanceResourceMetadataManager;
@@ -97,6 +99,8 @@ public class VolumeManagerImpl extends AbstractService implements VolumeManager,
     private VolumeInPlaceEncryptor volumeInPlaceEncryptor;
     @Autowired
     private VolumeSnapshotEncryptionHelper snapshotEncryptionHelper;
+    @Autowired
+    private VolumeEncryptedResourceKeyBackend volumeEncryptedResourceKeyBackend;
 
     private Future<Void> volumeExpungeTask;
 
@@ -292,6 +296,8 @@ public class VolumeManagerImpl extends AbstractService implements VolumeManager,
             String volumeFormat;
             String volumeProtocol;
             String allocatedInstallUrl;
+            String selectedHostUuid;
+            boolean encryptInPlaceRequired;
 
             @Override
             public void setup() {
@@ -367,6 +373,23 @@ public class VolumeManagerImpl extends AbstractService implements VolumeManager,
                                 AllocatePrimaryStorageSpaceReply ar = (AllocatePrimaryStorageSpaceReply) reply;
                                 allocatedInstallUrl = ar.getAllocatedInstallUrl();
                                 targetPrimaryStorage = ar.getPrimaryStorageInventory();
+                                encryptInPlaceRequired = requiresEncryptInPlace(msg);
+                                selectedHostUuid = msg.getHostUuid();
+                                String allocatedHostUuid = getHostUuidFromAllocatedInstallUrl(
+                                        targetPrimaryStorage.getType(), allocatedInstallUrl);
+                                if (StringUtils.isNotBlank(allocatedHostUuid)) {
+                                    selectedHostUuid = allocatedHostUuid;
+                                }
+                                if (encryptInPlaceRequired && StringUtils.isBlank(selectedHostUuid)) {
+                                    HostInventory host = selectHostForEncryptInPlace(targetPrimaryStorage.getUuid());
+                                    if (host == null) {
+                                        trigger.fail(operr(
+                                                "cannot encrypt volume[uuid:%s] in place: no connected KVM host found for primary storage[uuid:%s]",
+                                                vol.getUuid(), targetPrimaryStorage.getUuid()));
+                                        return;
+                                    }
+                                    selectedHostUuid = host.getUuid();
+                                }
                                 trigger.next();
                             }
                         });
@@ -398,7 +421,7 @@ public class VolumeManagerImpl extends AbstractService implements VolumeManager,
                         gmsg.setVolumeUuid(vol.getUuid());
                         gmsg.setBackupStorageRef(ImageBackupStorageRefInventory.valueOf(targetBackupStorageRef));
                         gmsg.setImage(ImageInventory.valueOf(template));
-                        gmsg.setHostUuid(msg.getHostUuid());
+                        gmsg.setHostUuid(selectedHostUuid);
                         gmsg.setAllocatedInstallUrl(allocatedInstallUrl);
                         bus.makeTargetServiceIdByResourceUuid(gmsg, PrimaryStorageConstant.SERVICE_ID, targetPrimaryStorage.getUuid());
                         bus.send(gmsg, new CloudBusCallBack(trigger) {
@@ -428,8 +451,9 @@ public class VolumeManagerImpl extends AbstractService implements VolumeManager,
                         dmsg.setVolumeUuid(vol.getUuid());
                         dmsg.setBackupStorageRef(ImageBackupStorageRefInventory.valueOf(targetBackupStorageRef));
                         dmsg.setImage(ImageInventory.valueOf(template));
-                        dmsg.setHostUuid(msg.getHostUuid());
+                        dmsg.setHostUuid(selectedHostUuid);
                         dmsg.setAllocatedInstallUrl(allocatedInstallUrl);
+                        dmsg.setEncryptedVolumeBackupRestore(msg.isEncryptedVolumeBackupRestore());
                         bus.makeTargetServiceIdByResourceUuid(dmsg, PrimaryStorageConstant.SERVICE_ID, targetPrimaryStorage.getUuid());
                         bus.send(dmsg, new CloudBusCallBack(trigger) {
                             @Override
@@ -478,23 +502,22 @@ public class VolumeManagerImpl extends AbstractService implements VolumeManager,
 
                     @Override
                     public boolean skip(Map data) {
-                        // Template bits cloned from an encrypted source are already LUKS.
-                        if (isTemplateFromEncryptedSource(msg.getImageUuid())) {
-                            return true;
-                        }
-                        return !Boolean.TRUE.equals(msg.getEncrypted());
+                        return !encryptInPlaceRequired;
                     }
 
                     @Override
                     public void run(FlowTrigger trigger, Map data) {
                         VolumeInPlaceEncryptor.Context ctx = new VolumeInPlaceEncryptor.Context()
-                                .setHostUuid(msg.getHostUuid())
+                                .setHostUuid(selectedHostUuid)
                                 .setPrimaryStorageUuid(targetPrimaryStorage.getUuid())
                                 .setInstallPath(primaryStorageInstallPath)
                                 .setPurpose("create-data-volume-from-template");
                         volumeInPlaceEncryptor.encryptInPlace(vol, ctx, new ReturnValueCompletion<VolumeVO>(trigger) {
                             @Override
                             public void success(VolumeVO latest) {
+                                if (StringUtils.isNotBlank(latest.getInstallPath())) {
+                                    primaryStorageInstallPath = latest.getInstallPath();
+                                }
                                 trigger.next();
                             }
 
@@ -648,7 +671,8 @@ public class VolumeManagerImpl extends AbstractService implements VolumeManager,
         vo.setStatus(VolumeStatus.NotInstantiated);
         vo.setType(VolumeType.valueOf(msg.getVolumeType()));
         vo.setDiskOfferingUuid(msg.getDiskOfferingUuid());
-        vo.setEncrypted(Boolean.TRUE.equals(msg.getEncrypted()));
+        vo.setEncrypted(Boolean.TRUE.equals(msg.getEncrypted()) ||
+                (vo.getType() == VolumeType.Root && isTemplateFromEncryptedSource(msg.getRootImageUuid())));
         if (vo.getType() == VolumeType.Root) {
             vo.setDeviceId(0);
         }
@@ -701,9 +725,71 @@ public class VolumeManagerImpl extends AbstractService implements VolumeManager,
         return inv;
     }
 
+    private boolean requiresEncryptInPlace(CreateDataVolumeFromVolumeTemplateMsg msg) {
+        return Boolean.TRUE.equals(msg.getEncrypted()) && !isTemplateFromEncryptedSource(msg.getImageUuid());
+    }
+
+    private String getHostUuidFromAllocatedInstallUrl(String primaryStorageType, String allocatedInstallUrl) {
+        if (StringUtils.isBlank(primaryStorageType) || StringUtils.isBlank(allocatedInstallUrl)) {
+            return null;
+        }
+
+        PSCapacityExtensionPoint ext = pluginRgty.getExtensionFromMap(primaryStorageType, PSCapacityExtensionPoint.class);
+        return ext == null ? null : ext.getHostUuidFromAllocatedInstallUrl(allocatedInstallUrl);
+    }
+
+    private HostInventory selectHostForEncryptInPlace(String primaryStorageUuid) {
+        SimpleQuery<PrimaryStorageClusterRefVO> clusterRefQuery = dbf.createQuery(PrimaryStorageClusterRefVO.class);
+        clusterRefQuery.select(PrimaryStorageClusterRefVO_.clusterUuid);
+        clusterRefQuery.add(PrimaryStorageClusterRefVO_.primaryStorageUuid, Op.EQ, primaryStorageUuid);
+        List<String> clusterUuids = clusterRefQuery.listValue();
+        if (clusterUuids.isEmpty()) {
+            return null;
+        }
+
+        SimpleQuery<PrimaryStorageHostRefVO> hostRefQuery = dbf.createQuery(PrimaryStorageHostRefVO.class);
+        hostRefQuery.add(PrimaryStorageHostRefVO_.primaryStorageUuid, Op.EQ, primaryStorageUuid);
+        List<PrimaryStorageHostRefVO> hostRefs = hostRefQuery.list();
+        List<String> connectedHostUuids = hostRefs.stream()
+                .filter(ref -> PrimaryStorageHostStatus.Connected == ref.getStatus())
+                .map(PrimaryStorageHostRefVO::getHostUuid)
+                .collect(Collectors.toList());
+        if (!hostRefs.isEmpty() && connectedHostUuids.isEmpty()) {
+            return null;
+        }
+
+        SimpleQuery<HostVO> hostQuery = dbf.createQuery(HostVO.class);
+        hostQuery.add(HostVO_.clusterUuid, Op.IN, clusterUuids);
+        if (!connectedHostUuids.isEmpty()) {
+            hostQuery.add(HostVO_.uuid, Op.IN, connectedHostUuids);
+        }
+        hostQuery.add(HostVO_.hypervisorType, Op.EQ, VmInstanceConstant.KVM_HYPERVISOR_TYPE);
+        hostQuery.add(HostVO_.status, Op.EQ, HostStatus.Connected);
+        hostQuery.add(HostVO_.state, Op.EQ, HostState.Enabled);
+        hostQuery.orderBy(HostVO_.uuid, SimpleQuery.Od.ASC);
+        hostQuery.setLimit(1);
+        HostVO host = hostQuery.find();
+        return host == null ? null : HostInventory.valueOf(host);
+    }
+
+    @Override
+    public ErrorableValue<String> findConnectedKvmHostByPrimaryStorage(String primaryStorageUuid, String storageDescription, String operation) {
+        HostInventory host = selectHostForEncryptInPlace(primaryStorageUuid);
+        if (host == null) {
+            return ErrorableValue.ofErrorCode(operr(
+                    "cannot find a connected KVM host attached to %s[uuid:%s] to %s",
+                    storageDescription, primaryStorageUuid, operation));
+        }
+        return ErrorableValue.of(host.getUuid());
+    }
+
     private boolean isTemplateFromEncryptedSource(String imageUuid) {
         if (StringUtils.isBlank(imageUuid)) {
             return false;
+        }
+
+        if (snapshotEncryptionHelper.hasTemporarySnapshotImageKey(imageUuid)) {
+            return true;
         }
 
         String imageUrl = Q.New(ImageVO.class)
@@ -1143,6 +1229,7 @@ public class VolumeManagerImpl extends AbstractService implements VolumeManager,
         vo.setType(VolumeType.Data);
         vo.setStatus(VolumeStatus.NotInstantiated);
         vo.setAccountUuid(msg.getAccountUuid());
+        vo.setEncrypted(Boolean.TRUE.equals(msg.getEncrypted()));
 
         if (msg.getSystemTags() != null) {
             Iterator<String> iterators = msg.getSystemTags().iterator();
@@ -1215,6 +1302,7 @@ public class VolumeManagerImpl extends AbstractService implements VolumeManager,
             public void run(MessageReply r) {
                 InstantiateVolumeReply  cr = r.castReply();
                 if (!cr.isSuccess()) {
+                    detachVolumeKeyProviderOnCreateFailure(finalVo);
                     dbf.remove(finalVo);
                     reply.setError(cr.getError());
                 } else {
@@ -1223,6 +1311,19 @@ public class VolumeManagerImpl extends AbstractService implements VolumeManager,
                 bus.reply(msg, reply);
             }
         });
+    }
+
+    private void detachVolumeKeyProviderOnCreateFailure(VolumeVO volume) {
+        if (!volume.isEncrypted()) {
+            return;
+        }
+
+        try {
+            volumeEncryptedResourceKeyBackend.detachKeyProviderFromVolume(volume.getUuid());
+        } catch (Exception e) {
+            logger.warn(String.format("failed to detach key provider from volume[uuid:%s] after create failure",
+                    volume.getUuid()), e);
+        }
     }
 
     private void handle(APICreateDataVolumeMsg msg) {
@@ -1236,6 +1337,7 @@ public class VolumeManagerImpl extends AbstractService implements VolumeManager,
         cmsg.setDiskOfferingUuid(msg.getDiskOfferingUuid());
         cmsg.setPrimaryStorageUuid(msg.getPrimaryStorageUuid());
         cmsg.setDescription(msg.getDescription());
+        cmsg.setEncrypted(msg.getEncrypted());
         cmsg.setApiMsg(msg);
         bus.makeLocalServiceId(cmsg, VolumeConstant.SERVICE_ID);
         bus.send(cmsg, new CloudBusCallBack(msg) {

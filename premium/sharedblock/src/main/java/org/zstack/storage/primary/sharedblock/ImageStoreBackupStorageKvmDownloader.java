@@ -11,11 +11,14 @@ import org.zstack.header.errorcode.ErrorCode;
 import org.zstack.header.message.MessageReply;
 import org.zstack.header.storage.backup.BackupStorageConstant;
 import org.zstack.header.storage.primary.PrimaryStorageInventory;
+import org.zstack.header.storage.primary.imagestore.ImageStoreDownloadContext;
+import org.zstack.header.storage.primary.imagestore.ImageStoreDownloadExtension;
 import org.zstack.resourceconfig.ResourceConfig;
 import org.zstack.resourceconfig.ResourceConfigFacade;
 import org.zstack.storage.backup.imagestore.GetImageStoreBackupStorageDownloadCredentialMsg;
 import org.zstack.storage.backup.imagestore.GetImageStoreBackupStorageDownloadCredentialReply;
 import org.zstack.storage.backup.imagestore.ImageStoreGlobalConfig;
+import org.zstack.storage.primary.imagestore.ImageStoreDownloadExtensions;
 
 /**
  * Created by david on 7/22/16.
@@ -26,6 +29,8 @@ public class ImageStoreBackupStorageKvmDownloader extends BackupStorageSharedBlo
     private CloudBus bus;
     @Autowired
     private ResourceConfigFacade rcf;
+    @Autowired(required = false)
+    private ImageStoreDownloadExtension imageStoreDownloadExtension;
 
     private PrimaryStorageInventory pinv;
     private String backupStorageUuid;
@@ -124,7 +129,9 @@ public class ImageStoreBackupStorageKvmDownloader extends BackupStorageSharedBlo
                 new KvmAgentCommandDispatcher(pinv.getUuid()).go(DOWNLOAD_BIT_PATH, cmd, SharedBlockKvmCommands.AgentRsp.class, new ReturnValueCompletion<SharedBlockKvmCommands.AgentRsp>(completion) {
                     @Override
                     public void success(SharedBlockKvmCommands.AgentRsp returnValue) {
-                        completion.success();
+                        ImageStoreDownloadContext context = buildDownloadContext(bsPath, psPath);
+                        context.setHostUuid(cmd.hostUuid);
+                        ImageStoreDownloadExtensions.afterDownload(imageStoreDownloadExtension, context, completion);
                     }
 
                     @Override
@@ -135,4 +142,15 @@ public class ImageStoreBackupStorageKvmDownloader extends BackupStorageSharedBlo
             }
         });
     }
+
+    private ImageStoreDownloadContext buildDownloadContext(String backupStorageInstallPath,
+                                                           String primaryStorageInstallPath) {
+        ImageStoreDownloadContext context = new ImageStoreDownloadContext();
+        context.setPrimaryStorageUuid(pinv.getUuid());
+        context.setBackupStorageUuid(backupStorageUuid);
+        context.setBackupStorageInstallPath(backupStorageInstallPath);
+        context.setPrimaryStorageInstallPath(primaryStorageInstallPath);
+        return context;
+    }
+
 }

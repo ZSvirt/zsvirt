@@ -1,4 +1,4 @@
-package org.zstack.allocator.domain;
+package org.zstack.allocator.domain.compute;
 
 import org.apache.commons.lang.StringUtils;
 import org.zstack.allocator.domain.api.APICreateAllocatorDomainMsg;

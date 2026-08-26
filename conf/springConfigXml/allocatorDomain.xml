@@ -8,21 +8,21 @@
          http://zstack.org/schema/zstack/plugin.xsd"
        default-init-method="init" default-destroy-method="destroy">
 
-    <bean id="AllocatorDomainManager" class="org.zstack.allocator.domain.AllocatorDomainManager">
+    <bean id="AllocatorDomainManager" class="org.zstack.allocator.domain.compute.AllocatorDomainManager">
         <zstack:plugin>
             <zstack:extension interface="org.zstack.header.Component"/>
             <zstack:extension interface="org.zstack.header.Service"/>
         </zstack:plugin>
     </bean>
 
-    <bean id="AllocatorDomainApiInterceptor" class="org.zstack.allocator.domain.AllocatorDomainApiInterceptor">
+    <bean id="AllocatorDomainApiInterceptor" class="org.zstack.allocator.domain.compute.AllocatorDomainApiInterceptor">
         <zstack:plugin>
             <zstack:extension interface="org.zstack.header.apimediator.ApiMessageInterceptor"/>
             <zstack:extension interface="org.zstack.header.apimediator.GlobalApiMessageInterceptor"/>
         </zstack:plugin>
     </bean>
 
-    <bean id="AllocatorDomainCascadeExtension" class="org.zstack.allocator.domain.AllocatorDomainCascadeExtension">
+    <bean id="AllocatorDomainCascadeExtension" class="org.zstack.allocator.domain.compute.AllocatorDomainCascadeExtension">
         <zstack:plugin>
             <zstack:extension interface="org.zstack.core.cascade.CascadeExtensionPoint"/>
         </zstack:plugin>

@@ -15,6 +15,7 @@ import org.zstack.core.thread.ChainTask;
 import org.zstack.core.thread.SyncTaskChain;
 import org.zstack.core.thread.ThreadFacade;
 import org.zstack.core.workflow.FlowChainBuilder;
+import org.zstack.allocator.domain.entity.AllocatorHostRuleSet;
 import org.zstack.header.AbstractService;
 import org.zstack.header.allocator.*;
 import org.zstack.header.allocator.datatypes.CpuMemoryCapacityData;
@@ -452,6 +453,8 @@ public class HostAllocatorManagerImpl extends AbstractService implements HostAll
             replyAllocateHostFailure(msg, errf.throwableToInternalError(e), completion);
             return;
         }
+
+        logger.debug("allocate host rule sets:\n" + AllocatorHostRuleSet.toString(msg.getRuleSets()));
 
         HostAllocatorSpec spec = HostAllocatorSpec.fromAllocationMsg(msg);
         spec.setBackupStoragePrimaryStorageMetrics(backupStoragePrimaryStorageMetrics);

@@ -27,4 +27,11 @@
             <zstack:extension interface="org.zstack.core.cascade.CascadeExtensionPoint"/>
         </zstack:plugin>
     </bean>
+
+    <bean id="AllocatorDomainAllocateExtension" class="org.zstack.allocator.domain.compute.AllocatorDomainAllocateExtension">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.allocator.AllocateHostBeforeExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.host.HostAllocateExtensionPoint"/>
+        </zstack:plugin>
+    </bean>
 </beans>

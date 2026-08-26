@@ -125,6 +125,20 @@ public class VmPrometheusNamespace extends AbstractPrometheusNamespace {
         } else if (metric == VmNamespace.CPUIdleUtilization) {
             rule.setExpression("100 - (rate(collectd_virt_virt_vcpu[1m]) / 10000000)");
             rule.labelMapping("type", VmNamespace.LabelNames.CPUNum.toString());
+        } else if (metric == VmNamespace.CPUReadyTimeMilliseconds) {
+            rule.setExpression("zstack_vm_cpu_ready_time_milliseconds");
+            rule.labelMapping("vm_uuid", VmNamespace.LabelNames.VMUuid.toString());
+        } else if (metric == VmNamespace.CPUReadinessPercent) {
+            rule.setExpression("zstack_vm_cpu_readiness_percent");
+            rule.labelMapping("vm_uuid", VmNamespace.LabelNames.VMUuid.toString());
+        } else if (metric == VmNamespace.VCPUReadyTimeMilliseconds) {
+            rule.setExpression("zstack_vm_vcpu_ready_time_milliseconds");
+            rule.labelMapping("vm_uuid", VmNamespace.LabelNames.VMUuid.toString());
+            rule.labelMapping("vcpu_id", VmAbstractNamespace.LabelNames.VCPUId.toString());
+        } else if (metric == VmNamespace.VCPUReadinessPercent) {
+            rule.setExpression("zstack_vm_vcpu_readiness_percent");
+            rule.labelMapping("vm_uuid", VmNamespace.LabelNames.VMUuid.toString());
+            rule.labelMapping("vcpu_id", VmAbstractNamespace.LabelNames.VCPUId.toString());
         } else if (metric == VmNamespace.OperatingSystemCPUSystemUtilization) {
             // windows CPU privileged time simply used as kernel mode cpu time
             // details: http://jira.zstack.io/browse/ZSTAC-45385
@@ -215,6 +229,14 @@ public class VmPrometheusNamespace extends AbstractPrometheusNamespace {
             rule.labelMapping("type", VmNamespace.LabelNames.DiskDeviceLetter.toString());
         } else if (metric == VmNamespace.DiskAllWriteOps) {
             rule.setExpression("sum(irate(collectd_virt_disk_ops_1[10m])) by (virt)");
+        } else if (metric == VmNamespace.DiskReadLatencyMilliseconds) {
+            rule.setExpression("zstack_vm_disk_read_latency_milliseconds");
+            rule.labelMapping("vm_uuid", VmNamespace.LabelNames.VMUuid.toString());
+            rule.labelMapping("disk_name", VmAbstractNamespace.LabelNames.DiskName.toString());
+        } else if (metric == VmNamespace.DiskWriteLatencyMilliseconds) {
+            rule.setExpression("zstack_vm_disk_write_latency_milliseconds");
+            rule.labelMapping("vm_uuid", VmNamespace.LabelNames.VMUuid.toString());
+            rule.labelMapping("disk_name", VmAbstractNamespace.LabelNames.DiskName.toString());
         } else if (metric == VmNamespace.DiskFreeCapacityInBytes) {
             rule.setExpression(String.format("node_filesystem_avail{vmUuid!=\"\", fstype!~\"%1$s\", mountpoint!~\"%2$s\"}",
                     IGNORED_FS_TYPE,
@@ -309,6 +331,14 @@ public class VmPrometheusNamespace extends AbstractPrometheusNamespace {
             rule.labelMapping("type", VmNamespace.LabelNames.NetworkDeviceLetter.toString());
         } else if (metric == VmNamespace.NetworkAllOutDroppedBytes) {
             rule.setExpression("sum(irate(collectd_virt_if_dropped_1[10m])) by (virt)");
+        } else if (metric == VmNamespace.NetworkReceiveDroppedPackets) {
+            rule.setExpression("zstack_vm_network_receive_dropped_packets");
+            rule.labelMapping("vm_uuid", VmNamespace.LabelNames.VMUuid.toString());
+            rule.labelMapping("nic_name", VmAbstractNamespace.LabelNames.NicName.toString());
+        } else if (metric == VmNamespace.NetworkTransmitDroppedPackets) {
+            rule.setExpression("zstack_vm_network_transmit_dropped_packets");
+            rule.labelMapping("vm_uuid", VmNamespace.LabelNames.VMUuid.toString());
+            rule.labelMapping("nic_name", VmAbstractNamespace.LabelNames.NicName.toString());
         } else if(metric == VmNamespace.TotalNetworkInBytesIn5Min) {
             rule.setExpression("increase(collectd_virt_if_octets_0{type!=\"\"}[5m])");
             rule.labelMapping("type", VmNamespace.LabelNames.NetworkDeviceLetter.toString());

@@ -18,8 +18,11 @@ public abstract class VmAbstractNamespace extends AbstractNamespace {
     public enum LabelNames {
         VMUuid,
         CPUNum,
+        VCPUId,
         DiskDeviceLetter,
+        DiskName,
         NetworkDeviceLetter,
+        NicName,
         MountPoint,
         FSType,
         MdevDeviceUuid,
@@ -46,6 +49,19 @@ public abstract class VmAbstractNamespace extends AbstractNamespace {
     );
     public static final Metric CPUAllIdleUtilization = new PercentMetric("CPUAllIdleUtilization", metrics, false,
             LabelNames.VMUuid
+    );
+
+    public static final Metric CPUReadyTimeMilliseconds = new TimeDurationMetric("CPUReadyTimeMilliseconds", metrics,
+            false, LabelNames.VMUuid
+    );
+    public static final Metric CPUReadinessPercent = new PercentMetric("CPUReadinessPercent", metrics, false,
+            LabelNames.VMUuid
+    );
+    public static final Metric VCPUReadyTimeMilliseconds = new TimeDurationMetric("VCPUReadyTimeMilliseconds", metrics,
+            false, LabelNames.VMUuid, LabelNames.VCPUId
+    );
+    public static final Metric VCPUReadinessPercent = new PercentMetric("VCPUReadinessPercent", metrics, false,
+            LabelNames.VMUuid, LabelNames.VCPUId
     );
 
     // Data collected from within the vm operating system
@@ -93,6 +109,12 @@ public abstract class VmAbstractNamespace extends AbstractNamespace {
     );
     public static final Metric DiskAllWriteBytes = new ByteRateMetric("DiskAllWriteBytes", metrics, false,
             LabelNames.VMUuid
+    );
+    public static final Metric DiskReadLatencyMilliseconds = new TimeDurationMetric("DiskReadLatencyMilliseconds",
+            metrics, false, LabelNames.VMUuid, LabelNames.DiskName
+    );
+    public static final Metric DiskWriteLatencyMilliseconds = new TimeDurationMetric("DiskWriteLatencyMilliseconds",
+            metrics, false, LabelNames.VMUuid, LabelNames.DiskName
     );
 
     // Data collected from within the vm operating system
@@ -169,6 +191,12 @@ public abstract class VmAbstractNamespace extends AbstractNamespace {
     );
     public static final Metric NetworkAllOutDroppedBytes = new PacketRateMetric("NetworkAllOutDroppedBytes", metrics, false,
             LabelNames.VMUuid
+    );
+    public static final Metric NetworkReceiveDroppedPackets = new CountMetric("NetworkReceiveDroppedPackets", metrics,
+            false, LabelNames.VMUuid, LabelNames.NicName
+    );
+    public static final Metric NetworkTransmitDroppedPackets = new CountMetric("NetworkTransmitDroppedPackets", metrics,
+            false, LabelNames.VMUuid, LabelNames.NicName
     );
 
     public static final Metric MemoryFreeBytes = new ByteSizeMetric("MemoryFreeBytes", metrics, false,

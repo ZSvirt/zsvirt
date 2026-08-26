@@ -140,4 +140,16 @@ public class VmLocationSpec implements Serializable {
         spec.level = AVOID;
         return spec;
     }
+
+    public static VmLocationSpec onlyAllowedHost(String... hostUuidArray) {
+        return onlyAllowedHost(list(hostUuidArray));
+    }
+
+    public static VmLocationSpec onlyAllowedHost(List<String> hostUuidList) {
+        VmLocationSpec spec = new VmLocationSpec();
+        spec.uuids = hostUuidList;
+        spec.resourceType = HostVO.class.getSimpleName();
+        spec.level = ONLY_ALLOWED;
+        return spec;
+    }
 }

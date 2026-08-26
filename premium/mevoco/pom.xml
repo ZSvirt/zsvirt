@@ -196,6 +196,25 @@
     </profiles>
 
     <build>
+        <resources>
+            <!-- Parent enables filtering for all resources; ELF binaries under license/ must not be filtered. -->
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+                <excludes>
+                    <exclude>license/genlicreq</exclude>
+                    <exclude>license/genlicreq_*</exclude>
+                </excludes>
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>false</filtering>
+                <includes>
+                    <include>license/genlicreq</include>
+                    <include>license/genlicreq_*</include>
+                </includes>
+            </resource>
+        </resources>
         <plugins>
 
             <plugin>

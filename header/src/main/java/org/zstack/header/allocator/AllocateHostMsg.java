@@ -1,5 +1,6 @@
 package org.zstack.header.allocator;
 
+import org.zstack.allocator.domain.entity.AllocatorHostRuleSet;
 import org.zstack.header.configuration.DiskOfferingInventory;
 import org.zstack.header.image.ImageInventory;
 import org.zstack.header.message.NeedReplyMessage;
@@ -36,6 +37,7 @@ public class AllocateHostMsg extends NeedReplyMessage {
     private boolean fullAllocate = true;
     private long oldMemoryCapacity = 0;
     private AllocatorDomainScene allocationScene;
+    private List<AllocatorHostRuleSet> ruleSets = new ArrayList<AllocatorHostRuleSet>();
     private String architecture;
 
     public List<VmLocationSpec> getLocationSpecs() {
@@ -68,6 +70,20 @@ public class AllocateHostMsg extends NeedReplyMessage {
 
     public void setAllocationScene(AllocatorDomainScene allocationScene) {
         this.allocationScene = allocationScene;
+    }
+
+    public List<AllocatorHostRuleSet> getRuleSets() {
+        return ruleSets;
+    }
+
+    public void setRuleSets(List<AllocatorHostRuleSet> ruleSets) {
+        this.ruleSets = ruleSets;
+    }
+
+    public void addRuleSet(AllocatorHostRuleSet ruleSet) {
+        if (ruleSet != null) {
+            ruleSets.add(ruleSet);
+        }
     }
 
     public Set<String> getRequiredPrimaryStorageUuids() {

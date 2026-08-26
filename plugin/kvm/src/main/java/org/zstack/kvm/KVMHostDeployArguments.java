@@ -10,6 +10,8 @@ public class KVMHostDeployArguments extends SyncTimeRequestedDeployArguments {
     private String init;
     @SerializedName("skipIpv6")
     private String skipIpv6;
+    @SerializedName("disableIp6Tables")
+    private String disableIp6Tables;
     @SerializedName("isBareMetal2Gateway")
     private String isBareMetal2Gateway;
     @SerializedName("bridgeDisableIptables")
@@ -51,6 +53,14 @@ public class KVMHostDeployArguments extends SyncTimeRequestedDeployArguments {
 
     public void setSkipIpv6(String skipIpv6) {
         this.skipIpv6 = skipIpv6;
+    }
+
+    public String getDisableIp6Tables() {
+        return disableIp6Tables;
+    }
+
+    public void setDisableIp6Tables(String disableIp6Tables) {
+        this.disableIp6Tables = disableIp6Tables;
     }
 
     public String getIsBareMetal2Gateway() {

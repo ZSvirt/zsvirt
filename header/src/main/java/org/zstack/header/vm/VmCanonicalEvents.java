@@ -21,6 +21,7 @@ public class VmCanonicalEvents {
     public static final String VM_NIC_INFO_DUPLICATE_PATH = "/vm/nicinfo/duplicate";
     public static final String VM_NIC_INFO_IPRANGE_CONFLICT_PATH = "/vm/nicinfo/iprangeConflict";
     public static final String VM_HOST_FILE_CHANGED_PATH = "/vm/hostfile/changed";
+    public static final String VM_USERDATA_ENCRYPTION_DEGRADED_PATH = "/vm/userdata/encryption/degraded";
 
     @NeedJsonSchema
     public static class VmCrashReportData {
@@ -348,6 +349,73 @@ public class VmCanonicalEvents {
 
         public void setTypes(List<String> types) {
             this.types = types;
+        }
+    }
+
+    @NeedJsonSchema
+    public static class VmUserdataEncryptionDegradedData {
+        private String vmUuid;
+        private String tagType;
+        private int userdataBase64Length;
+        private int attemptedTagLength;
+        private int threshold;
+        private boolean degradedToPlaintext = true;
+        private Date date = new Date();
+
+        public String getVmUuid() {
+            return vmUuid;
+        }
+
+        public void setVmUuid(String vmUuid) {
+            this.vmUuid = vmUuid;
+        }
+
+        public String getTagType() {
+            return tagType;
+        }
+
+        public void setTagType(String tagType) {
+            this.tagType = tagType;
+        }
+
+        public int getUserdataBase64Length() {
+            return userdataBase64Length;
+        }
+
+        public void setUserdataBase64Length(int userdataBase64Length) {
+            this.userdataBase64Length = userdataBase64Length;
+        }
+
+        public int getAttemptedTagLength() {
+            return attemptedTagLength;
+        }
+
+        public void setAttemptedTagLength(int attemptedTagLength) {
+            this.attemptedTagLength = attemptedTagLength;
+        }
+
+        public int getThreshold() {
+            return threshold;
+        }
+
+        public void setThreshold(int threshold) {
+            this.threshold = threshold;
+        }
+
+        public boolean isDegradedToPlaintext() {
+            return degradedToPlaintext;
+        }
+
+        public void setDegradedToPlaintext(boolean degradedToPlaintext) {
+            this.degradedToPlaintext = degradedToPlaintext;
+        }
+
+        public Date getDate() {
+            return date;
+        }
+
+        public void setDate(Date date) {
+            this.date = date;
         }
     }
 }

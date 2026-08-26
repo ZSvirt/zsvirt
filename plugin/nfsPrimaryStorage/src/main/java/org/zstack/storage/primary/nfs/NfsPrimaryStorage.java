@@ -61,6 +61,7 @@ import org.zstack.utils.logging.CLogger;
 import javax.persistence.Tuple;
 import javax.persistence.TypedQuery;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -136,9 +137,63 @@ public class NfsPrimaryStorage extends PrimaryStorageBase {
             handle((PullVolumeSnapshotOnPrimaryStorageMsg) msg);
         } else if (msg instanceof RebaseVolumeBackingFileOnPrimaryStorageMsg) {
             handle((RebaseVolumeBackingFileOnPrimaryStorageMsg) msg);
+        } else if (msg instanceof CleanupAllVmMetadataOnPrimaryStorageMsg) {
+            handle((CleanupAllVmMetadataOnPrimaryStorageMsg) msg);
+        } else if (msg instanceof EncryptVolumeBitsOnPrimaryStorageMsg) {
+            handle((EncryptVolumeBitsOnPrimaryStorageMsg) msg);
+        } else if (msg instanceof ConvertVolumeEncryptionOnPrimaryStorageMsg) {
+            handle((ConvertVolumeEncryptionOnPrimaryStorageMsg) msg);
         } else {
             super.handleLocalMessage(msg);
         }
+    }
+
+    protected void handle(ConvertVolumeEncryptionOnPrimaryStorageMsg msg) {
+        ConvertVolumeEncryptionOnPrimaryStorageReply reply = new ConvertVolumeEncryptionOnPrimaryStorageReply();
+        NfsPrimaryStorageBackend backend = getUsableBackend();
+        if (backend == null) {
+            reply.setError(operr("the NFS primary storage[uuid:%s, name:%s] cannot find any usable host to change volume[uuid:%s] encryption",
+                    self.getUuid(), self.getName(), msg.getVolume().getUuid()));
+            bus.reply(msg, reply);
+            return;
+        }
+
+        backend.handle(getSelfInventory(), msg, new ReturnValueCompletion<ConvertVolumeEncryptionOnPrimaryStorageReply>(msg) {
+            @Override
+            public void success(ConvertVolumeEncryptionOnPrimaryStorageReply returnValue) {
+                bus.reply(msg, returnValue);
+            }
+
+            @Override
+            public void fail(ErrorCode errorCode) {
+                reply.setError(errorCode);
+                bus.reply(msg, reply);
+            }
+        });
+    }
+
+    private void handle(EncryptVolumeBitsOnPrimaryStorageMsg msg) {
+        NfsPrimaryStorageBackend backend = getUsableBackend();
+        if (backend == null) {
+            EncryptVolumeBitsOnPrimaryStorageReply reply = new EncryptVolumeBitsOnPrimaryStorageReply();
+            reply.setError(operr("the NFS primary storage[uuid:%s, name:%s] cannot find any usable host to" +
+                            " encrypt volume[uuid:%s] bits", self.getUuid(), self.getName(), msg.getVolumeUuid()));
+            bus.reply(msg, reply);
+            return;
+        }
+        backend.handle(msg, new ReturnValueCompletion<EncryptVolumeBitsOnPrimaryStorageReply>(msg) {
+            @Override
+            public void success(EncryptVolumeBitsOnPrimaryStorageReply reply) {
+                bus.reply(msg, reply);
+            }
+
+            @Override
+            public void fail(ErrorCode errorCode) {
+                EncryptVolumeBitsOnPrimaryStorageReply reply = new EncryptVolumeBitsOnPrimaryStorageReply();
+                reply.setError(errorCode);
+                bus.reply(msg, reply);
+            }
+        });
     }
 
     protected void updateMountPoint(String newUrl, Completion completion) {
@@ -812,7 +867,7 @@ public class NfsPrimaryStorage extends PrimaryStorageBase {
                         @Override
                         public void run(final FlowTrigger trigger, Map data) {
                             NfsPrimaryStorageBackend backend = factory.getHypervisorBackend(nfsMgr.findHypervisorTypeByImageFormatAndPrimaryStorageUuid(image.getFormat(), self.getUuid()));
-                            backend.createVolumeFromImageCache(primaryStorage, image, imageCache, volume, new ReturnValueCompletion<VolumeStats>(trigger) {
+                            backend.createVolumeFromImageCache(primaryStorage, image, imageCache, volume, msg.getDestHost(), new ReturnValueCompletion<VolumeStats>(trigger) {
                                 @Override
                                 public void success(VolumeStats returnValue) {
                                     volumeInstallPath = returnValue.getInstallPath();
@@ -1037,6 +1092,8 @@ public class NfsPrimaryStorage extends PrimaryStorageBase {
         job.setPrimaryStorage(getSelfInventory());
         job.setImage(spec);
         job.setVolumeResourceInstallPath(msg.getVolumeSnapshot().getPrimaryStorageInstallPath());
+        job.setVolumeSnapshotUuid(msg.getVolumeSnapshot().getUuid());
+        job.setEncrypted(msg.getEncrypted());
 
         jobf.execute(NfsPrimaryStorageKvmHelper.makeDownloadImageJobName(msg.getImageInventory(), job.getPrimaryStorage()),
                 NfsPrimaryStorageKvmHelper.makeJobOwnerName(job.getPrimaryStorage()), job,
@@ -2061,6 +2118,48 @@ public class NfsPrimaryStorage extends PrimaryStorageBase {
             public void fail(ErrorCode errorCode) {
                 reply.setError(errorCode);
                 bus.reply(msg, reply);
+            }
+        });
+    }
+
+    @Override
+    protected void handle(CleanupAllVmMetadataOnPrimaryStorageMsg msg) {
+        CleanupAllVmMetadataOnPrimaryStorageReply reply = new CleanupAllVmMetadataOnPrimaryStorageReply();
+        List<HostInventory> connectedHosts = factory.getConnectedHostForOperation(getSelfInventory());
+        if (connectedHosts.isEmpty()) {
+            reply.setError(operr("no connected host found for NFS primary storage[uuid:%s]", self.getUuid()));
+            bus.reply(msg, reply);
+            return;
+        }
+
+        cleanupAllOnHostWithFallback(msg, reply, connectedHosts, 0, new ArrayList<>());
+    }
+
+    private void cleanupAllOnHostWithFallback(CleanupAllVmMetadataOnPrimaryStorageMsg msg,
+                                              CleanupAllVmMetadataOnPrimaryStorageReply reply,
+                                              List<HostInventory> connectedHosts, int idx,
+                                              List<ErrorCode> causes) {
+        if (idx >= connectedHosts.size()) {
+            reply.setError(operr("failed to cleanup all vm metadata on NFS primary storage[uuid:%s] after trying %d connected host(s): %s",
+                    self.getUuid(), connectedHosts.size(), causes));
+            bus.reply(msg, reply);
+            return;
+        }
+
+        String hostUuid = connectedHosts.get(idx).getUuid();
+        final NfsPrimaryStorageBackend backend = getBackendByHostUuid(hostUuid);
+        backend.handle(msg, hostUuid, new ReturnValueCompletion<CleanupAllVmMetadataOnPrimaryStorageReply>(msg) {
+            @Override
+            public void success(CleanupAllVmMetadataOnPrimaryStorageReply r) {
+                bus.reply(msg, r);
+            }
+
+            @Override
+            public void fail(ErrorCode errorCode) {
+                logger.warn(String.format("[MetadataCleanupAll] NFS ps[uuid:%s] failed on host[uuid:%s]: %s; trying next connected host",
+                        self.getUuid(), hostUuid, errorCode));
+                causes.add(errorCode);
+                cleanupAllOnHostWithFallback(msg, reply, connectedHosts, idx + 1, causes);
             }
         });
     }

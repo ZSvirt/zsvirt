@@ -168,7 +168,7 @@ public class VolumeCascadeExtension extends AbstractAsyncCascadeExtension {
                 List<String> psUuids = CollectionUtils.transform(pinvs, PrimaryStorageInventory::getUuid);
 
                 SimpleQuery<VolumeVO> q = dbf.createQuery(VolumeVO.class);
-                q.add(VolumeVO_.type, Op.EQ, VolumeType.Data);
+                q.add(VolumeVO_.type, Op.IN, Arrays.asList(VolumeType.Data, VolumeType.Memory));
                 q.add(VolumeVO_.primaryStorageUuid, Op.IN, psUuids);
                 List<VolumeVO> vos = q.list();
                 return toVolumeDeletionStruct(action, vos);

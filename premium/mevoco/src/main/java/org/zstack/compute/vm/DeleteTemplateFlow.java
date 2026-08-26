@@ -12,6 +12,7 @@ import org.zstack.header.image.ImageDeletionMsg;
 import org.zstack.header.image.ImageDeletionPolicyManager;
 import org.zstack.header.message.MessageReply;
 import org.zstack.mevoco.MevocoGlobalConfig;
+import org.zstack.storage.encrypt.VolumeEncryptedResourceKeyBackend;
 
 import java.util.Map;
 
@@ -23,19 +24,22 @@ import java.util.Map;
 public class DeleteTemplateFlow extends NoRollbackFlow {
     @Autowired
     CloudBus bus;
+    @Autowired
+    VolumeEncryptedResourceKeyBackend volumeEncryptedResourceKeyBackend;
 
     @Override
     public void run(FlowTrigger trigger, Map data) {
         CreateVmFromVolumeResourceSpec spec = (CreateVmFromVolumeResourceSpec) data.get(PremiumVmInstanceConstant.VM_INSTANCE_FROM_VOLUME_SPEC);
+        boolean temporaryImage = spec.getRootVolumeImage().isTemporary();
 
-        if (spec.getRootVolumeImage().isTemporary() || MevocoGlobalConfig.DELETE_TEMP_IMAGES.value(Boolean.class)) {
-            deleteImage(spec.getRootVolumeImage().getUuid(), trigger);
+        if (temporaryImage || MevocoGlobalConfig.DELETE_TEMP_IMAGES.value(Boolean.class)) {
+            deleteImage(spec.getRootVolumeImage().getUuid(), temporaryImage, trigger);
         } else {
             trigger.next();
         }
     }
 
-    private void deleteImage(String imageUuid, FlowTrigger trigger) {
+    private void deleteImage(String imageUuid, boolean temporaryImage, FlowTrigger trigger) {
         ImageDeletionMsg msg = new ImageDeletionMsg();
         msg.setImageUuid(imageUuid);
         msg.setDeletionPolicy(ImageDeletionPolicyManager.ImageDeletionPolicy.Direct.toString());
@@ -44,6 +48,9 @@ public class DeleteTemplateFlow extends NoRollbackFlow {
         bus.send(msg, new CloudBusCallBack(trigger) {
             @Override
             public void run(MessageReply reply) {
+                if (reply.isSuccess() && temporaryImage) {
+                    volumeEncryptedResourceKeyBackend.detachKeyProviderFromTemporarySnapshotImage(msg.getImageUuid());
+                }
                 trigger.next();
             }
         });

@@ -5,9 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.zstack.core.Platform;
 import org.zstack.core.db.DatabaseFacade;
-import org.zstack.core.db.SimpleQuery;
-import org.zstack.core.db.SimpleQuery.Od;
-import org.zstack.core.db.SimpleQuery.Op;
+import org.zstack.core.db.Q;
 import org.zstack.core.errorcode.ErrorFacade;
 import org.zstack.core.statemachine.StateMachine;
 import org.zstack.header.errorcode.ErrorCode;
@@ -52,7 +50,7 @@ public class AsyncWorkFlowChain {
 
     protected String name;
     protected String owner;
-    protected List<AsyncWorkFlow> flows = new ArrayList<AsyncWorkFlow>();
+    protected List<AsyncWorkFlow> flows = new ArrayList<>();
     protected String uuid;
     protected WorkFlowChainVO chainvo;
     protected WorkFlowCallback callback;
@@ -162,10 +160,10 @@ public class AsyncWorkFlowChain {
     }
     
     private WorkFlowVO getFlowVOByPosition(int position) {
-        SimpleQuery<WorkFlowVO> query = dbf.createQuery(WorkFlowVO.class);
-        query.add(WorkFlowVO_.position, Op.EQ, position);
-        query.add(WorkFlowVO_.chainUuid, Op.EQ, chainvo.getUuid());
-        WorkFlowVO vo = query.find();
+        WorkFlowVO vo = Q.New(WorkFlowVO.class)
+                .eq(WorkFlowVO_.position, position)
+                .eq(WorkFlowVO_.chainUuid, chainvo.getUuid())
+                .find();
         assert vo != null : "Where is WorkFlowVO for position: " + position;
         return vo;
     }
@@ -223,10 +221,10 @@ public class AsyncWorkFlowChain {
     }
     
     public void rollback() {
-        SimpleQuery<WorkFlowVO> query = dbf.createQuery(WorkFlowVO.class);
-        query.add(WorkFlowVO_.chainUuid, Op.EQ, chainvo.getUuid());
-        query.orderBy(WorkFlowVO_.position, Od.DESC);
-        List<WorkFlowVO> vos = query.list();
+        List<WorkFlowVO> vos = Q.New(WorkFlowVO.class)
+                .eq(WorkFlowVO_.chainUuid, chainvo.getUuid())
+                .orderByDesc(WorkFlowVO_.position)
+                .list();
         logger.debug(String.format("starting to rollback AsyncWorkFlowChain[name: %s, owner: %s]", name, owner));
         for (WorkFlowVO vo : vos) {
             if (vo.getState() == WorkFlowState.RollbackDone) {
@@ -287,10 +285,10 @@ public class AsyncWorkFlowChain {
         } else if (chainvo.getState() == WorkFlowChainState.ProcessFailed) {
             return ContinueStrategy.Rollback;
         } else if (chainvo.getState() == WorkFlowChainState.Processing) {
-            SimpleQuery<WorkFlowVO> query = dbf.createQuery(WorkFlowVO.class);
-            query.add(WorkFlowVO_.chainUuid, Op.EQ, chainvo.getUuid());
-            query.orderBy(WorkFlowVO_.position, Od.DESC);
-            List<WorkFlowVO> vos = query.list();
+            List<WorkFlowVO> vos = Q.New(WorkFlowVO.class)
+                    .eq(WorkFlowVO_.chainUuid, chainvo.getUuid())
+                    .orderByDesc(WorkFlowVO_.position)
+                    .list();
             if (vos.isEmpty()) {
                 return ContinueStrategy.Restart;
             }
@@ -316,9 +314,9 @@ public class AsyncWorkFlowChain {
             throw new IllegalArgumentException("callback can not be null");
         }
         
-        SimpleQuery<WorkFlowChainVO> query = dbf.createQuery(WorkFlowChainVO.class);
-        query.add(WorkFlowChainVO_.uuid, Op.EQ, chainUuid);
-        chainvo = query.find();
+        chainvo = Q.New(WorkFlowChainVO.class)
+                .eq(WorkFlowChainVO_.uuid, chainUuid)
+                .find();
         if (chainvo == null) {
             throw new IllegalArgumentException(String.format("Cannot find workflow chain[uuid:%s]", chainUuid));
         }
@@ -341,10 +339,10 @@ public class AsyncWorkFlowChain {
     
     protected void carryOnRollback() {
         logger.debug(String.format("Restart to roll back flows in work AsyncWorkFlowChain[uuid:%s]", chainvo.getUuid()));
-        SimpleQuery<WorkFlowVO> query = dbf.createQuery(WorkFlowVO.class);
-        query.add(WorkFlowVO_.chainUuid, Op.EQ, chainvo.getUuid());
-        query.add(WorkFlowVO_.reason, Op.NOT_NULL);
-        WorkFlowVO failedFlow = query.find();
+        WorkFlowVO failedFlow = Q.New(WorkFlowVO.class)
+                .eq(WorkFlowVO_.chainUuid, chainvo.getUuid())
+                .notNull(WorkFlowVO_.reason)
+                .find();
         rollback();
         WorkFlowContext ctx = WorkFlowContext.fromBytes(failedFlow.getContext());
         ErrorCode err = operr(failedFlow.getReason());
@@ -352,10 +350,10 @@ public class AsyncWorkFlowChain {
     }
     
     protected void carryOnRestart() throws WorkFlowException {
-        SimpleQuery<WorkFlowVO> query = dbf.createQuery(WorkFlowVO.class);
-        query.add(WorkFlowVO_.chainUuid, Op.EQ, chainvo.getUuid());
-        query.orderBy(WorkFlowVO_.position, Od.DESC);
-        List<WorkFlowVO>  vos = query.list();
+        List<WorkFlowVO> vos = Q.New(WorkFlowVO.class)
+                .eq(WorkFlowVO_.chainUuid, chainvo.getUuid())
+                .orderByDesc(WorkFlowVO_.position)
+                .list();
         WorkFlowVO last = vos.get(0);
         assert last.getState() == WorkFlowState.Done || last.getState() == WorkFlowState.Processing : String.format("How can work flow[%s] in %s state when restart workflow chain[uuid:%s] !!?", last.getName(), last.getState(), chainvo.getUuid());
         int startPosition;
@@ -378,11 +376,11 @@ public class AsyncWorkFlowChain {
         logger.debug(String.format("Noting to carry on for work flow chain[uuid:%s]", chainvo.getUuid()));
     }
 
-	public WorkFlowContext getContext() {
-		return context;
-	}
+    public WorkFlowContext getContext() {
+        return context;
+    }
 
-	public void setContext(WorkFlowContext context) {
-		this.context = context;
-	}
+    public void setContext(WorkFlowContext context) {
+        this.context = context;
+    }
 }

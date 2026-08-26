@@ -2,10 +2,7 @@ package org.zstack.test.integration.storage.primary.local_nfs
 
 import org.zstack.header.storage.primary.PrimaryStorageStateEvent
 import org.zstack.header.vm.VmInstanceState
-import org.zstack.sdk.CreateVmInstanceAction
-import org.zstack.sdk.PrimaryStorageInventory
-import org.zstack.sdk.StartVmInstanceAction
-import org.zstack.sdk.VmInstanceInventory
+import org.zstack.sdk.*
 import org.zstack.test.integration.storage.StorageTest
 import org.zstack.testlib.*
 import org.zstack.utils.data.SizeUnit
@@ -102,6 +99,7 @@ class MaintenancePSCase extends SubCase{
                 useInstanceOffering("instanceOffering")
                 useImage("image")
                 useL3Networks("pubL3")
+                usePrimaryStorage("local")
             }
 
             vm {
@@ -109,7 +107,12 @@ class MaintenancePSCase extends SubCase{
                 useInstanceOffering("instanceOffering")
                 useImage("image")
                 useL3Networks("pubL3")
-                useDiskOfferings("diskOffering")
+                usePrimaryStorage("nfs")
+                disk {}
+                disk {
+                    usePrimaryStorage("nfs")
+                    useDiskOffering("diskOffering")
+                }
             }
         }
     }
@@ -126,6 +129,11 @@ class MaintenancePSCase extends SubCase{
         PrimaryStorageInventory local = env.inventoryByName("local")
         VmInstanceInventory vm = env.inventoryByName("vm")
         VmInstanceInventory vm1 = env.inventoryByName("vm1")
+
+        assert vm.allVolumes[0] instanceof VolumeInventory
+        assert vm.allVolumes[0].primaryStorageUuid == local.uuid
+        assert vm1.allVolumes[0] instanceof VolumeInventory
+        assert vm1.allVolumes[0].primaryStorageUuid == nfs.uuid
 
         changePrimaryStorageState {
             uuid = nfs.uuid
@@ -158,24 +166,29 @@ class MaintenancePSCase extends SubCase{
             uuid = nfs.uuid
             stateEvent = PrimaryStorageStateEvent.enable.toString()
         }
-        CreateVmInstanceAction a = new CreateVmInstanceAction(
-                name: "vm2",
-                instanceOfferingUuid: vm.instanceOfferingUuid,
-                imageUuid: vm.imageUuid,
-                l3NetworkUuids: [vm.defaultL3NetworkUuid],
-                sessionId: currentEnvSpec.session.uuid
-        )
-        // can't checkout concrete content of error message
-        // assert a.call().error.details.indexOf("no LocalStorage primary storage") > 0
-        assert a.call().error == null
 
-        StartVmInstanceAction startVmInstanceAction = new StartVmInstanceAction(
-                uuid: vm1.uuid,
-                sessionId: Test.currentEnvSpec.session.uuid
-        )
+        def vm2 = createVmInstance {
+            name = "vm2"
+            instanceOfferingUuid = vm.instanceOfferingUuid
+            imageUuid = vm.imageUuid
+            l3NetworkUuids = [vm.defaultL3NetworkUuid]
+        } as VmInstanceInventory
+        assert vm2.allVolumes[0] instanceof VolumeInventory
+        assert vm2.allVolumes[0].primaryStorageUuid == nfs.uuid
 
-        // startVmInstanceAction.call().error.details.indexOf("volume stored location primary storage is in a state of maintenance") > 0
-        assert startVmInstanceAction.call().error != null
+        startVmInstance {
+            uuid = vm1.uuid
+        }
+
+        expectApiFailure({
+            startVmInstance {
+                uuid = vm.uuid
+            }
+        }) {
+            assert delegate.code == "VM.1001"
+            // failed to start VM: preStartVm returned an ErrorCode (e.g. from PrimaryStorageManagerImpl)
+            assert delegate.details.contains("primary storage is in a state of maintenance")
+        }
     }
 
     @Override

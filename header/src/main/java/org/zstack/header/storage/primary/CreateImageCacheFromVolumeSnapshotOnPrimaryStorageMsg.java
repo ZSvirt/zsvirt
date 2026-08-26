@@ -10,6 +10,7 @@ import org.zstack.header.storage.snapshot.VolumeSnapshotInventory;
 public class CreateImageCacheFromVolumeSnapshotOnPrimaryStorageMsg extends NeedReplyMessage implements PrimaryStorageMessage {
     private VolumeSnapshotInventory volumeSnapshot;
     private ImageInventory imageInventory;
+    private Boolean encrypted;
 
     @Override
     public String getPrimaryStorageUuid() {
@@ -30,6 +31,14 @@ public class CreateImageCacheFromVolumeSnapshotOnPrimaryStorageMsg extends NeedR
 
     public void setImageInventory(ImageInventory imageInventory) {
         this.imageInventory = imageInventory;
+    }
+
+    public Boolean getEncrypted() {
+        return encrypted;
+    }
+
+    public void setEncrypted(Boolean encrypted) {
+        this.encrypted = encrypted;
     }
 
 }

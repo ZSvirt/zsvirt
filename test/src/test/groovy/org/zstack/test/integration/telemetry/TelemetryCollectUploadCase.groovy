@@ -82,6 +82,13 @@ class TelemetryCollectUploadCase extends SubCase {
                 })
 
         try {
+            File reportsDir0 = new File(telemetryEndpoint.tempRootDir, TelemetryConstant.LOCAL_REPORTS_DIR)
+            logger.info("Test 101a: wait for consent-triggered scheduler collect to finish, expect reports json exists")
+            retryInSecs {
+                File[] ready = reportsDir0.listFiles({ dir, name -> name.endsWith(".json") } as FilenameFilter)
+                assert ready != null && ready.length >= 1
+            }
+
             MessageReply collectReply = callLocal(new TelemetryRunCollectMsg())
             assert collectReply.success
 

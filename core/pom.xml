@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.zstack</groupId>
         <version>5.0.0</version>
-        <relativePath>..</relativePath>
+        <relativePath>../pom.xml</relativePath>
         <artifactId>zstack</artifactId>
     </parent>
     <artifactId>core</artifactId>
@@ -140,6 +140,10 @@
             <groupId>com.bladejava</groupId>
             <artifactId>blade-patchca</artifactId>
             <version>1.1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcpkix-jdk15on</artifactId>
         </dependency>
     </dependencies>
 

@@ -40,6 +40,8 @@ public class APIUpdateVmInstanceMsg extends APIMessage implements VmInstanceMess
     private String guestOsType;
     @APIParam(required = false)
     private String allocatorStrategy;
+    @APIParam(required = false)
+    private Boolean vmEncryption;
 
     public String getDefaultL3NetworkUuid() {
         return defaultL3NetworkUuid;
@@ -132,6 +134,14 @@ public class APIUpdateVmInstanceMsg extends APIMessage implements VmInstanceMess
 
     public void setAllocatorStrategy(String allocatorStrategy) {
         this.allocatorStrategy = allocatorStrategy;
+    }
+
+    public Boolean getVmEncryption() {
+        return vmEncryption;
+    }
+
+    public void setVmEncryption(Boolean vmEncryption) {
+        this.vmEncryption = vmEncryption;
     }
 
     public static APIUpdateVmInstanceMsg __example__() {

@@ -117,7 +117,7 @@ class DeleteIsoCase extends SubCase {
                     name = "disk1"
                     boot = true
                     sizeGB(20)
-                    diskUsePrimaryStorage("local")
+                    usePrimaryStorage("local")
                 }
             }
         }

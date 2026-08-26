@@ -242,6 +242,7 @@ public class ImageManagerImpl extends AbstractService implements ImageManager, M
                 cmsg.setImageUuid(vo.getUuid());
                 cmsg.setVolumeUuid(volumeUuid);
                 cmsg.setTreeUuid(treeUuid);
+                cmsg.setEncrypted(msg.getEncrypted());
                 cmsg.setSystemTags(msg.getSystemTags());
                 String resourceUuid = volumeUuid != null ? volumeUuid : treeUuid;
                 bus.makeTargetServiceIdByResourceUuid(cmsg, VolumeSnapshotConstant.SERVICE_ID, resourceUuid);
@@ -561,11 +562,12 @@ public class ImageManagerImpl extends AbstractService implements ImageManager, M
     private void createVolumeTemplateFromVolumeSnapshot(AddImageMessage msg, String snapshotUuid, ReturnValueCompletion<ImageInventory> completion) {
         ImageMessageFiller.fillFromSnapshot(msg, snapshotUuid);
 
-        Tuple t = Q.New(VolumeSnapshotVO.class).select(VolumeSnapshotVO_.volumeUuid, VolumeSnapshotVO_.treeUuid, VolumeSnapshotVO_.format)
+        Tuple t = Q.New(VolumeSnapshotVO.class).select(VolumeSnapshotVO_.volumeUuid, VolumeSnapshotVO_.treeUuid, VolumeSnapshotVO_.format, VolumeSnapshotVO_.encrypted)
                 .eq(VolumeSnapshotVO_.uuid, snapshotUuid).findTuple();
         String volumeUuid = t.get(0, String.class);
         String treeUuid = t.get(1, String.class);
         String format = t.get(2, String.class);
+        Boolean encrypted = t.get(3, Boolean.class);
 
         ImageVO vo = createImageInDb(msg, imgvo -> {
             imgvo.setFormat(format);
@@ -585,6 +587,7 @@ public class ImageManagerImpl extends AbstractService implements ImageManager, M
             cmsg.setVolumeUuid(volumeUuid);
             cmsg.setTreeUuid(treeUuid);
             cmsg.setBackupStorageUuid(bsUuid);
+            cmsg.setEncrypted(encrypted);
             String resourceUuid = volumeUuid != null ? volumeUuid : treeUuid;
             bus.makeTargetServiceIdByResourceUuid(cmsg, VolumeSnapshotConstant.SERVICE_ID, resourceUuid);
             return cmsg;
@@ -1886,11 +1889,17 @@ public class ImageManagerImpl extends AbstractService implements ImageManager, M
                     @Override
                     public void run(final FlowTrigger trigger, Map data) {
                         // FIXME: should create once and then upload different bs.
+                        Boolean encrypted = Q.New(VolumeVO.class)
+                                .select(VolumeVO_.encrypted)
+                                .eq(VolumeVO_.uuid, volumeUuid)
+                                .findValue();
+
                         List<CreateDataVolumeTemplateFromDataVolumeMsg> cmsgs = transform(backupStorages, bs -> {
                             CreateDataVolumeTemplateFromDataVolumeMsg cmsg = new CreateDataVolumeTemplateFromDataVolumeMsg();
                             cmsg.setVolumeUuid(volumeUuid);
                             cmsg.setBackupStorageUuid(bs.getUuid());
                             cmsg.setImageUuid(image.getUuid());
+                            cmsg.setEncrypted(encrypted);
                             bus.makeTargetServiceIdByResourceUuid(cmsg, VolumeConstant.SERVICE_ID, volumeUuid);
                             return cmsg;
                         });

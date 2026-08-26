@@ -1,6 +1,5 @@
 package org.zstack.test.integration.network.vxlanNetwork
 
-import org.apache.commons.collections.list.SynchronizedList
 import org.springframework.http.HttpEntity
 import org.zstack.network.l2.vxlan.vxlanNetworkPool.VxlanKvmAgentCommands
 import org.zstack.network.l2.vxlan.vxlanNetworkPool.VxlanNetworkPoolConstant
@@ -269,7 +268,7 @@ class AddVxlanVtepIpCase extends SubCase {
             resp.setSuccess(true)
             return resp
         }
-        def cmds = [] as SynchronizedList<String>
+        def cmds = Collections.synchronizedList([])
         env.afterSimulator(VxlanNetworkPoolConstant.VXLAN_KVM_POPULATE_FDB_L2VXLAN_NETWORKS_PATH) { rsp, HttpEntity<String> e ->
             VxlanKvmAgentCommands.PopulateVxlanNetworksFdbCmd cmd = JSONObjectUtil.toObject(e.body, VxlanKvmAgentCommands.PopulateVxlanNetworksFdbCmd.class)
             cmds.add(cmd)

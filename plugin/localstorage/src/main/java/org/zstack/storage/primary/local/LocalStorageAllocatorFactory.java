@@ -349,6 +349,11 @@ public class LocalStorageAllocatorFactory implements PrimaryStorageAllocatorStra
         return path.makeFullPath();
     }
 
+    @Override
+    public String getHostUuidFromAllocatedInstallUrl(String allocatedInstallUrl) {
+        return LocalStorageUtils.getHostUuidFromInstallUrl(allocatedInstallUrl);
+    }
+
     public static String getHostUuidFromURIScheme(String uri) {
         String protocol;
         try {

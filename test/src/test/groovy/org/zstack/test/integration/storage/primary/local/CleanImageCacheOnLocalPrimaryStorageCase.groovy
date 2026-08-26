@@ -2,8 +2,11 @@ package org.zstack.test.integration.storage.primary.local
 
 import org.springframework.http.HttpEntity
 import org.zstack.compute.vm.VmGlobalConfig
+import org.zstack.core.db.DatabaseFacade
 import org.zstack.core.db.Q
+import org.zstack.header.image.ImageConstant.ImageMediaType
 import org.zstack.header.network.service.NetworkServiceType
+import org.zstack.header.storage.primary.ImageCacheState
 import org.zstack.header.storage.primary.ImageCacheShadowVO
 import org.zstack.header.storage.primary.ImageCacheShadowVO_
 import org.zstack.header.storage.primary.ImageCacheVO
@@ -12,9 +15,11 @@ import org.zstack.header.vm.VmInstanceDeletionPolicyManager
 import org.zstack.network.securitygroup.SecurityGroupConstant
 import org.zstack.network.service.virtualrouter.VirtualRouterConstant
 import org.zstack.sdk.ApplianceVmInventory
+import org.zstack.sdk.HostInventory
 import org.zstack.sdk.ImageInventory
 import org.zstack.sdk.PrimaryStorageInventory
 import org.zstack.sdk.VmInstanceInventory
+import org.zstack.sdk.ZoneInventory
 import org.zstack.storage.primary.PrimaryStorageGlobalConfig
 import org.zstack.storage.primary.local.LocalStorageKvmBackend
 import org.zstack.test.integration.storage.StorageTest
@@ -24,6 +29,7 @@ import org.zstack.utils.data.SizeUnit
 import org.zstack.utils.gson.JSONObjectUtil
 import org.zstack.utils.path.PathUtil
 
+import java.sql.Timestamp
 import java.util.concurrent.TimeUnit
 
 /**
@@ -171,6 +177,7 @@ class CleanImageCacheOnLocalPrimaryStorageCase extends SubCase{
     void test() {
         env.create {
             testDelete()
+            testDeleteLocalStorageCascadesImageCacheShadow()
         }
     }
 
@@ -223,5 +230,45 @@ class CleanImageCacheOnLocalPrimaryStorageCase extends SubCase{
                     .eq(ImageCacheVO_.imageUuid, vrImage.getUuid())
                     .isExists()
         }
+    }
+
+    void testDeleteLocalStorageCascadesImageCacheShadow() {
+        PrimaryStorageGlobalConfig.IMAGE_CACHE_GARBAGE_COLLECTOR_INTERVAL.updateValue(100000)
+        ZoneInventory zone = env.inventoryByName("zone")
+        HostInventory host = env.inventoryByName("kvm")
+        PrimaryStorageInventory shadowPs = addLocalPrimaryStorage {
+            name = "shadow-cascade-local"
+            url = "/local_ps_shadow"
+            zoneUuid = zone.uuid
+        }
+
+        DatabaseFacade dbf = bean(DatabaseFacade.class)
+        ImageCacheShadowVO shadow = new ImageCacheShadowVO()
+        shadow.primaryStorageUuid = shadowPs.uuid
+        shadow.imageUuid = "test-image-cache-shadow"
+        shadow.installUrl = "file://${shadowPs.url}/imagecache/template/${shadow.imageUuid}/${shadow.imageUuid}.qcow2;hostUuid://${host.uuid}".toString()
+        shadow.mediaType = ImageMediaType.RootVolumeTemplate
+        shadow.size = SizeUnit.GIGABYTE.toByte(1)
+        shadow.state = ImageCacheState.ready
+        shadow.md5sum = ""
+        shadow.createDate = new Timestamp(System.currentTimeMillis())
+        shadow.lastOpDate = shadow.createDate
+        dbf.persist(shadow)
+
+        long beforeDelete = Q.New(ImageCacheShadowVO.class)
+                .eq(ImageCacheShadowVO_.primaryStorageUuid, shadowPs.uuid)
+                .count()
+        assert beforeDelete == 1 : "ImageCacheShadowVO 测试数据未创建: expected=1 actual=${beforeDelete} primaryStorageUuid=${shadowPs.uuid}"
+
+        deletePrimaryStorage {
+            uuid = shadowPs.uuid
+        }
+
+        long afterDelete = Q.New(ImageCacheShadowVO.class)
+                .eq(ImageCacheShadowVO_.primaryStorageUuid, shadowPs.uuid)
+                .count()
+        assert afterDelete == 0 : "删除本地存储后 ImageCacheShadowVO 未级联删除: expected=0 actual=${afterDelete} primaryStorageUuid=${shadowPs.uuid}"
+
+        PrimaryStorageGlobalConfig.IMAGE_CACHE_GARBAGE_COLLECTOR_INTERVAL.resetValue()
     }
 }

@@ -211,6 +211,15 @@ doc {
 					optional true
 					since "5.0.0"
 				}
+				column {
+					name "vmEncryption"
+					enclosedIn "cloneVmInstance"
+					desc "虚拟机是否加密"
+					location "body"
+					type "Boolean"
+					optional true
+					since "1.0.1, zsv 5.1.0"
+				}
 			}
 		}
 

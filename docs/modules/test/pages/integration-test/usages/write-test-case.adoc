@@ -558,7 +558,7 @@ Integreation
 Test 中大部分时候是基于 API 对具体场景进行测试。所有测试用例必须使用 ZStack
 Java SDK 调用 API，任何其他形式都是禁止的（例如通过 CloudBus 发 API
 Message）。为了方便 API 调用，Integreation Test 将所有 Java SDK 封装成了 API
-DSL。例如使用 SDK 启动一个云主机，写法为：
+DSL。例如使用 SDK 启动一个虚拟机，写法为：
 
 [source,groovy]
 ----

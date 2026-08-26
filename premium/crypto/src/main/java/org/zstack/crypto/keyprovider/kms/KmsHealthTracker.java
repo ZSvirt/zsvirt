@@ -52,6 +52,55 @@ public class KmsHealthTracker implements Component, ManagementNodeReadyExtension
     private final Map<String, Integer> unknownFailureCounts = new ConcurrentHashMap<>();
     private final Object trackerLock = new Object();
 
+    public static class HealthCheckResult {
+        private boolean available;
+        private boolean connected;
+        private KmsTrustState trustState;
+        private String activeIdentityUuid;
+        private Integer statusCode;
+        private String statusMessage;
+
+        static HealthCheckResult of(boolean connected, KmsTrustState trustState, String activeIdentityUuid,
+                                    Integer statusCode, String statusMessage) {
+            HealthCheckResult result = new HealthCheckResult();
+            result.connected = connected;
+            result.trustState = trustState == null ? KmsTrustState.MUTUAL_UNTRUSTED : trustState;
+            result.activeIdentityUuid = activeIdentityUuid;
+            result.statusCode = statusCode;
+            result.statusMessage = statusMessage;
+            result.available = connected && result.trustState == KmsTrustState.MUTUAL_TRUSTED;
+            return result;
+        }
+
+        static HealthCheckResult unavailable(String statusMessage) {
+            return of(false, KmsTrustState.MUTUAL_UNTRUSTED, null, -1, statusMessage);
+        }
+
+        public boolean isAvailable() {
+            return available;
+        }
+
+        public boolean isConnected() {
+            return connected;
+        }
+
+        public KmsTrustState getTrustState() {
+            return trustState;
+        }
+
+        public String getActiveIdentityUuid() {
+            return activeIdentityUuid;
+        }
+
+        public Integer getStatusCode() {
+            return statusCode;
+        }
+
+        public String getStatusMessage() {
+            return statusMessage;
+        }
+    }
+
     @Autowired
     private ResourceDestinationMaker destMaker;
     @Autowired
@@ -134,6 +183,10 @@ public class KmsHealthTracker implements Component, ManagementNodeReadyExtension
         trackKms(kmsUuid);
     }
 
+    public HealthCheckResult checkHealthNow(String kmsUuid) {
+        return doHealthCheck(kmsUuid, null, true);
+    }
+
     private void reScanKms() {
         synchronized (trackerLock) {
             new ArrayList<>(trackers.values()).forEach(Tracker::cancel);
@@ -192,14 +245,18 @@ public class KmsHealthTracker implements Component, ManagementNodeReadyExtension
     }
 
     private void doHealthCheck(String kmsUuid, Tracker runningTracker) {
+        doHealthCheck(kmsUuid, runningTracker, false);
+    }
+
+    private HealthCheckResult doHealthCheck(String kmsUuid, Tracker runningTracker, boolean realtime) {
         if (shouldDiscardHealthCheckResult(kmsUuid, runningTracker)) {
-            return;
+            return HealthCheckResult.unavailable("stale kms health check result");
         }
 
         KmsVO kms = dbf.findByUuid(kmsUuid, KmsVO.class);
         if (kms == null) {
             untrackKms(kmsUuid);
-            return;
+            return HealthCheckResult.unavailable(String.format("cannot find kms[uuid:%s]", kmsUuid));
         }
 
         List<KmsIdentityVO> identities = Q.New(KmsIdentityVO.class)
@@ -216,25 +273,32 @@ public class KmsHealthTracker implements Component, ManagementNodeReadyExtension
                 KeyToolGrpcClient.HealthResult result = KeyToolGrpcClient.healthKmip(kmsUuid,
                         KmipConfig.fromKms(kms));
                 if (shouldDiscardHealthCheckResult(kmsUuid, runningTracker)) {
-                    return;
+                    return HealthCheckResult.unavailable("stale kms health check result");
                 }
                 if (!isKnownKmipHealthStatus(result.getStatusCode())) {
-                    handleUnknownHealthCheckResult(kmsUuid, runningTracker,
-                            operr("unknown kmip health status without identity: code=%s, error=%s",
-                                    result.getStatusCode(), result.getError()));
-                    return;
+                    String status = String.format("unknown kmip health status without identity: code=%s, error=%s",
+                            result.getStatusCode(), result.getError());
+                    if (!realtime) {
+                        handleUnknownHealthCheckResult(kmsUuid, runningTracker, operr(status));
+                    }
+                    return HealthCheckResult.of(false, KmsTrustState.MUTUAL_UNTRUSTED, null,
+                            result.getStatusCode(), status);
                 }
                 boolean connected = result.isConnected();
                 KmsTrustState trustState = determineTrustStateWithoutIdentity(result);
                 if (!resetUnknownFailures(kmsUuid, runningTracker)) {
-                    return;
+                    return HealthCheckResult.unavailable("stale kms health check result");
                 }
                 updateKmsStatus(kmsUuid, connected, trustState, null);
+                return HealthCheckResult.of(connected, trustState, null,
+                        result.getStatusCode(), result.getStatusMessage());
             } catch (Throwable t) {
-                handleUnknownHealthCheckResult(kmsUuid, runningTracker,
-                        operr("kms health check without identity failed").withException(t.toString()));
+                if (!realtime) {
+                    handleUnknownHealthCheckResult(kmsUuid, runningTracker,
+                            operr("kms health check without identity failed").withException(t.toString()));
+                }
+                return HealthCheckResult.unavailable(t.getMessage());
             }
-            return;
         }
 
         List<IdentityResult> results = new ArrayList<>();
@@ -244,15 +308,16 @@ public class KmsHealthTracker implements Component, ManagementNodeReadyExtension
             results.add(activeResult);
 
             if (shouldDiscardHealthCheckResult(kmsUuid, runningTracker)) {
-                return;
+                return HealthCheckResult.unavailable("stale kms health check result");
             }
 
             if (activeResult.canBeActiveIdentity()) {
                 if (!resetUnknownFailures(kmsUuid, runningTracker)) {
-                    return;
+                    return HealthCheckResult.unavailable("stale kms health check result");
                 }
                 updateKmsStatus(kmsUuid, activeResult.isConnected(), KmsTrustState.MUTUAL_TRUSTED, currentActive.getUuid());
-                return;
+                return HealthCheckResult.of(activeResult.isConnected(), KmsTrustState.MUTUAL_TRUSTED,
+                        currentActive.getUuid(), activeResult.getStatusCode(), activeResult.getError());
             }
         }
 
@@ -264,15 +329,16 @@ public class KmsHealthTracker implements Component, ManagementNodeReadyExtension
             results.add(result);
 
             if (shouldDiscardHealthCheckResult(kmsUuid, runningTracker)) {
-                return;
+                return HealthCheckResult.unavailable("stale kms health check result");
             }
 
             if (result.canBeActiveIdentity()) {
                 if (!resetUnknownFailures(kmsUuid, runningTracker)) {
-                    return;
+                    return HealthCheckResult.unavailable("stale kms health check result");
                 }
                 updateKmsStatus(kmsUuid, result.isConnected(), KmsTrustState.MUTUAL_TRUSTED, identity.getUuid());
-                return;
+                return HealthCheckResult.of(result.isConnected(), KmsTrustState.MUTUAL_TRUSTED,
+                        identity.getUuid(), result.getStatusCode(), result.getError());
             }
         }
 
@@ -284,21 +350,30 @@ public class KmsHealthTracker implements Component, ManagementNodeReadyExtension
         }
 
         if (!hasKnownIdentityResult(results)) {
-            handleUnknownHealthCheckResult(kmsUuid, runningTracker,
-                    operr("kms health check finished with only unknown identity results"));
-            return;
+            String status = "kms health check finished with only unknown identity results";
+            if (!realtime) {
+                handleUnknownHealthCheckResult(kmsUuid, runningTracker, operr(status));
+            }
+            return HealthCheckResult.unavailable(status);
         }
 
         if (shouldDiscardHealthCheckResult(kmsUuid, runningTracker)) {
-            return;
+            return HealthCheckResult.unavailable("stale kms health check result");
         }
         KmsIdentityVO active = pickActiveIdentity(results);
         KmsTrustState trustState = calculateTrustState(results, active);
         boolean connected = hasConnectedIdentity(results);
         if (!resetUnknownFailures(kmsUuid, runningTracker)) {
-            return;
+            return HealthCheckResult.unavailable("stale kms health check result");
         }
         updateKmsStatus(kmsUuid, connected, trustState, active == null ? null : active.getUuid());
+        IdentityResult selected = active == null ? null : results.stream()
+                .filter(result -> active.getUuid().equals(result.getIdentity().getUuid()))
+                .findFirst()
+                .orElse(null);
+        return HealthCheckResult.of(connected, trustState, active == null ? null : active.getUuid(),
+                selected == null ? null : selected.getStatusCode(),
+                selected == null ? null : selected.getError());
     }
 
     private IdentityResult checkIdentity(KmsVO kms, KmsIdentityVO identity, boolean hasServerCert) {
@@ -394,6 +469,9 @@ public class KmsHealthTracker implements Component, ManagementNodeReadyExtension
     }
 
     private boolean shouldDiscardHealthCheckResult(String kmsUuid, Tracker tracker) {
+        if (tracker == null) {
+            return false;
+        }
         if (tracker != null && trackers.get(kmsUuid) == tracker) {
             return false;
         }

@@ -58,6 +58,9 @@ public class UpdateVmInstanceAction extends AbstractAction {
     @Param(required = false, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
     public java.lang.String allocatorStrategy;
 
+    @Param(required = false, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
+    public java.lang.Boolean vmEncryption;
+
     @Param(required = false)
     public java.util.List systemTags;
 

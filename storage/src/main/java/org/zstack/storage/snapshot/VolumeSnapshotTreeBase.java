@@ -1,5 +1,6 @@
 package org.zstack.storage.snapshot;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
@@ -59,8 +60,11 @@ import org.zstack.header.vm.devices.VmInstanceResourceMetadataManager;
 import org.zstack.header.volume.*;
 import org.zstack.longjob.LongJobUtils;
 import org.zstack.storage.primary.PrimaryStorageCapacityUpdater;
+import org.zstack.storage.encrypt.VolumeEncryptedResourceKeyBackend;
+import org.zstack.storage.encrypt.VolumeEncryptedSecretHelper;
 import org.zstack.storage.snapshot.reference.VolumeSnapshotReferenceUtils;
 import org.zstack.storage.volume.FireSnapShotCanonicalEvent;
+import org.zstack.storage.volume.VolumeSystemTags;
 import org.zstack.tag.TagManager;
 import org.zstack.utils.TimeUtils;
 import org.zstack.utils.Utils;
@@ -136,6 +140,10 @@ public class VolumeSnapshotTreeBase {
     private PluginRegistry pluginRgty;
     @Autowired
     private PrimaryStorageOverProvisioningManager psRaitoMgr;
+    @Autowired
+    private VolumeEncryptedResourceKeyBackend volumeEncryptedResourceKeyBackend;
+    @Autowired
+    private VolumeEncryptedSecretHelper volumeEncryptedSecretHelper;
 
     public VolumeSnapshotTreeBase(VolumeSnapshotVO vo, boolean syncOnVolume) {
         currentRoot = vo;
@@ -1727,6 +1735,9 @@ public class VolumeSnapshotTreeBase {
         paramIn.setPrimaryStorageUuid(currentRoot.getPrimaryStorageUuid());
         paramIn.setSnapshot(currentLeaf.getInventory());
         paramIn.setImage(ImageInventory.valueOf(dbf.findByUuid(msg.getImageUuid(), ImageVO.class)));
+        if (msg.getEncrypted() != null) {
+            paramIn.getSnapshot().setEncrypted(msg.getEncrypted());
+        }
         WorkflowTemplate workflowTemplate = ext.createTemplateFromVolumeSnapshot(paramIn);
 
         ParamOut paramOut = new ParamOut();
@@ -1842,6 +1853,7 @@ public class VolumeSnapshotTreeBase {
         CreateImageCacheFromVolumeSnapshotOnPrimaryStorageMsg cmsg = new CreateImageCacheFromVolumeSnapshotOnPrimaryStorageMsg();
         cmsg.setImageInventory(image);
         cmsg.setVolumeSnapshot(VolumeSnapshotInventory.valueOf(currentRoot));
+        cmsg.setEncrypted(msg.getEncrypted());
         cmsg.setSystemTags(msg.getSystemTags());
         bus.makeTargetServiceIdByResourceUuid(cmsg, PrimaryStorageConstant.SERVICE_ID, cmsg.getPrimaryStorageUuid());
         bus.send(cmsg, new CloudBusCallBack(msg, completion) {
@@ -2878,8 +2890,14 @@ public class VolumeSnapshotTreeBase {
                     @Override
                     public void handle(Map data) {
                         String oldVolumeInstallPath = volume.getInstallPath();
+                        Integer oldKeyVersion = volume.isEncrypted() && !currentRoot.isEncrypted() ?
+                                volumeEncryptedResourceKeyBackend.findKeyVersionByVolume(volume.getUuid()) : null;
+                        String oldSecretHostUuid = volume.isEncrypted() && !currentRoot.isEncrypted() ?
+                                resolveVolumeSecretHostUuid(volume) : null;
+                        String oldSecretVmUuid = StringUtils.defaultIfBlank(volume.getVmInstanceUuid(), volume.getUuid());
 
                         volume.setInstallPath(newVolumeInstallPath);
+                        volume.setEncrypted(currentRoot.isEncrypted());
 
                         // if resized capacity should be updated
                         if (newSize != 0) {
@@ -2891,10 +2909,15 @@ public class VolumeSnapshotTreeBase {
                             @Override
                             protected void scripts() {
                                 merge(volume);
+                                syncVolumeEncryptionAfterRevert(volume.getUuid(), currentRoot);
                                 updateLatest();
                             }
                         }.execute();
 
+                        if (oldKeyVersion != null) {
+                            volumeEncryptedSecretHelper.deleteSecretOnHostBestEffort(
+                                    oldSecretHostUuid, oldSecretVmUuid, volume.getUuid(), oldKeyVersion);
+                        }
                         completion.success();
                     }
                 });
@@ -2910,6 +2933,44 @@ public class VolumeSnapshotTreeBase {
             }
         }).start();
 
+    }
+
+    private void syncVolumeEncryptionAfterRevert(String volumeUuid, VolumeSnapshotVO snapshot) {
+        if (snapshot.isEncrypted()) {
+            volumeEncryptedResourceKeyBackend.copySnapshotKeyRefToVolume(snapshot.getUuid(), volumeUuid);
+        } else {
+            volumeEncryptedResourceKeyBackend.detachKeyProviderFromVolume(volumeUuid);
+        }
+    }
+
+    private String resolveVolumeSecretHostUuid(VolumeVO volume) {
+        if (volume == null) {
+            return null;
+        }
+
+        List<String> tags = VolumeSystemTags.VOLUME_LIBVIRT_SECRET_HOST.getTags(volume.getUuid(), VolumeVO.class);
+        if (tags != null && !tags.isEmpty()) {
+            return VolumeSystemTags.VOLUME_LIBVIRT_SECRET_HOST.getTokenByTag(
+                    tags.get(0), VolumeSystemTags.VOLUME_LIBVIRT_SECRET_HOST_TOKEN);
+        }
+
+        String vmUuid = volume.getVmInstanceUuid();
+        if (StringUtils.isBlank(vmUuid)) {
+            return null;
+        }
+
+        String hostUuid = Q.New(VmInstanceVO.class)
+                .eq(VmInstanceVO_.uuid, vmUuid)
+                .select(VmInstanceVO_.hostUuid)
+                .findValue();
+        if (StringUtils.isNotBlank(hostUuid)) {
+            return hostUuid;
+        }
+
+        return Q.New(VmInstanceVO.class)
+                .eq(VmInstanceVO_.uuid, vmUuid)
+                .select(VmInstanceVO_.lastHostUuid)
+                .findValue();
     }
 
     private void deleteVolumeSnapshot(final DeleteVolumeSnapshotMessage msg, Completion completion) {

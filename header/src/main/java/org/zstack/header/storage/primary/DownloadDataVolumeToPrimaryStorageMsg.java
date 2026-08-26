@@ -12,6 +12,7 @@ public class DownloadDataVolumeToPrimaryStorageMsg extends NeedReplyMessage impl
     private String volumeUuid;
     private String hostUuid;
     private String allocatedInstallUrl;
+    private boolean encryptedVolumeBackupRestore;
 
     public String getAllocatedInstallUrl() {
         return allocatedInstallUrl;
@@ -59,6 +60,14 @@ public class DownloadDataVolumeToPrimaryStorageMsg extends NeedReplyMessage impl
 
     public void setImage(ImageInventory image) {
         this.image = image;
+    }
+
+    public boolean isEncryptedVolumeBackupRestore() {
+        return encryptedVolumeBackupRestore;
+    }
+
+    public void setEncryptedVolumeBackupRestore(boolean encryptedVolumeBackupRestore) {
+        this.encryptedVolumeBackupRestore = encryptedVolumeBackupRestore;
     }
 
     @Override

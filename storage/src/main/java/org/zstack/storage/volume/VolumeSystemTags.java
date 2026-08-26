@@ -49,4 +49,9 @@ public class VolumeSystemTags {
 
     public static String VOLUME_QOS_TOKEN = "qos";
     public static PatternedSystemTag VOLUME_QOS = new PatternedSystemTag(String.format("%s::{%s}", VOLUME_QOS_TOKEN, VOLUME_QOS_TOKEN), VolumeVO.class);
+
+    @NonCloneable
+    public static String VOLUME_LIBVIRT_SECRET_HOST_TOKEN = "hostUuid";
+    public static PatternedSystemTag VOLUME_LIBVIRT_SECRET_HOST = new PatternedSystemTag(
+            String.format("volumeLibvirtSecretHost::{%s}", VOLUME_LIBVIRT_SECRET_HOST_TOKEN), VolumeVO.class);
 }

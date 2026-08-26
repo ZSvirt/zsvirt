@@ -1,14 +1,19 @@
 package org.zstack.identity.imports.entity;
 
+import org.apache.commons.lang.StringUtils;
 import org.zstack.header.configuration.PythonClassInventory;
+import org.zstack.header.message.DocUtils;
 import org.zstack.header.search.Inventory;
 import org.zstack.utils.CollectionUtils;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+
+import static org.zstack.utils.CollectionDSL.list;
 
 /**
  * Created by Wenhao.Zhang on 2024/12/05
@@ -21,6 +26,7 @@ public class ThirdPartyAccountSourceInventory implements Serializable {
     private String description;
     private String type;
     private String createAccountStrategy;
+    private List<String> updateAccountStrategies;
     private String deleteAccountStrategy;
     private Timestamp createDate;
     private Timestamp lastOpDate;
@@ -35,6 +41,15 @@ public class ThirdPartyAccountSourceInventory implements Serializable {
         inv.setDeleteAccountStrategy(Objects.toString(vo.getDeleteAccountStrategy()));
         inv.setCreateDate(vo.getCreateDate());
         inv.setLastOpDate(vo.getLastOpDate());
+
+        List<String> updateStrategies = new ArrayList<>();
+        if (!StringUtils.isEmpty(vo.getUpdateAccountStrategies())) {
+            List<SyncUpdateAccountStrategy> strategies =
+                    SyncUpdateAccountStrategy.valueOfStrategies(vo.getUpdateAccountStrategies());
+            updateStrategies.addAll(CollectionUtils.transform(strategies, Enum::name));
+        }
+        inv.setUpdateAccountStrategies(updateStrategies);
+
         return inv;
     }
 
@@ -82,6 +97,14 @@ public class ThirdPartyAccountSourceInventory implements Serializable {
         this.createAccountStrategy = createAccountStrategy;
     }
 
+    public List<String> getUpdateAccountStrategies() {
+        return updateAccountStrategies;
+    }
+
+    public void setUpdateAccountStrategies(List<String> updateAccountStrategies) {
+        this.updateAccountStrategies = updateAccountStrategies;
+    }
+
     public String getDeleteAccountStrategy() {
         return deleteAccountStrategy;
     }
@@ -108,14 +131,15 @@ public class ThirdPartyAccountSourceInventory implements Serializable {
 
     public static ThirdPartyAccountSourceInventory __example__() {
         ThirdPartyAccountSourceInventory inventory = new ThirdPartyAccountSourceInventory();
-        inventory.setUuid("dc6cd27ea6c25cafba684d19a01107f9");
+        inventory.setUuid(DocUtils.createFixedUuid(ThirdPartyAccountSourceVO.class));
         inventory.setName("Test-ldap");
         inventory.setDescription("some descriptions");
-        inventory.setType("ldap");
+        inventory.setType("OpenLdap");
         inventory.setCreateAccountStrategy(SyncCreatedAccountStrategy.CreateDisabledAccount.toString());
+        inventory.setUpdateAccountStrategies(list(SyncUpdateAccountStrategy.AccountStateKeepSameWithSource.toString()));
         inventory.setDeleteAccountStrategy(SyncDeletedAccountStrategy.StaleAccount.toString());
-        inventory.setCreateDate(new Timestamp(org.zstack.header.message.DocUtils.date));
-        inventory.setLastOpDate(new Timestamp(org.zstack.header.message.DocUtils.date));
+        inventory.setCreateDate(DocUtils.timestamp());
+        inventory.setLastOpDate(DocUtils.timestamp());
         return inventory;
     }
 }

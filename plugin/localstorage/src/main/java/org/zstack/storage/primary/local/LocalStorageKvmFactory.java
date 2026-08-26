@@ -195,7 +195,7 @@ public class LocalStorageKvmFactory implements LocalStorageHypervisorFactory, KV
 
         LocalStorageHypervisorBackend bkd = getHypervisorBackend(primaryStorageVO);
         String backingFile = cmd.isOnline() ? cmd.getVolumeInstallPath() : null;
-        bkd.createEmptyVolumeWithBackingFile(inv, msg.getHostUuid(), backingFile, new ReturnValueCompletion<VolumeStats>(completion) {
+        bkd.createEmptyVolumeWithBackingFile(inv, msg.getHostUuid(), backingFile, null, new ReturnValueCompletion<VolumeStats>(completion) {
             @Override
             public void success(VolumeStats returnValue) {
                 completion.success();

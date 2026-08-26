@@ -19,6 +19,7 @@
         <class>org.zstack.header.managementnode.ManagementNodeVO</class>
         <class>org.zstack.header.managementnode.ManagementNodeContextVO</class>
         <class>org.zstack.header.tpm.entity.TpmVO</class>
+        <class>org.zstack.header.tpm.entity.TpmKeyBackupVO</class>
         <class>org.zstack.header.vm.additions.VmHostFileVO</class>
         <class>org.zstack.header.vm.additions.VmHostBackupFileVO</class>
         <class>org.zstack.header.vm.additions.VmHostFileContentVO</class>
@@ -29,6 +30,8 @@
         <class>org.zstack.header.host.HostVO</class>
         <class>org.zstack.header.host.HostEO</class>
         <class>org.zstack.header.host.HostKeyIdentityVO</class>
+        <class>org.zstack.header.pki.PkiCaVO</class>
+        <class>org.zstack.header.pki.HostCertificateVO</class>
         <class>org.zstack.header.host.CpuFeaturesHistoryVO</class>
         <class>org.zstack.header.storage.primary.PrimaryStorageVO</class>
         <class>org.zstack.header.storage.primary.PrimaryStorageEO</class>
@@ -216,7 +219,13 @@
         <class>org.zstack.header.resourceattribute.entity.ResourceAttributeValueVO</class>
         <class>org.zstack.header.resourceattribute.entity.ResourceAttributeKeyResourceTypeVO</class>
         <class>org.zstack.header.resourceattribute.entity.ResourceAttributeConstraintVO</class>
+        <class>org.zstack.header.vm.metadata.VmMetadataCleanupBarrierVO</class>
         <class>org.zstack.header.vm.metadata.VmMetadataDirtyVO</class>
         <class>org.zstack.header.vm.metadata.VmMetadataFlushStateVO</class>
+        <class>org.zstack.log.server.LogServerVO</class>
+        <class>org.zstack.header.core.external.service.ExternalServiceConfigurationVO</class>
+        <class>org.zstack.allocator.domain.entity.AllocatorDomainVO</class>
+        <class>org.zstack.allocator.domain.entity.AllocatorDomainRuleVO</class>
+        <class>org.zstack.allocator.domain.entity.AllocatorDomainSceneVO</class>
     </persistence-unit>
 </persistence>

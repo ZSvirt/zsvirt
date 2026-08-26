@@ -12,6 +12,9 @@ public class LogConfigurationInventory {
     private String type;
     private List<String> managementNodeUuids;
 
+    public LogConfigurationInventory() {
+    }
+
     public String getUuid() {
         return uuid;
     }
@@ -34,9 +37,6 @@ public class LogConfigurationInventory {
 
     public void setManagementNodeUuids(List<String> managementNodeUuids) {
         this.managementNodeUuids = managementNodeUuids;
-    }
-
-    public LogConfigurationInventory() {
     }
 
     protected LogConfigurationInventory(LogConfigurationStruct vo) {

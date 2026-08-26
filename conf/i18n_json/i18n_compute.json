@@ -1967,16 +1967,6 @@
     "fileName": "src/main/java/org/zstack/compute/vm/VmInstanceExtensionPointEmitter.java"
   },
   {
-    "raw": "VmInstanceStartExtensionPoint[%s] refuses to start vm[uuid:%s]",
-    "en_US": "VmInstanceStartExtensionPoint[{0}] refuses to start vm[uuid:{1}]",
-    "zh_CN": "VmInstanceStartExtensionPoint[{0}] 拒绝启动虚拟机[uuid:{1}]",
-    "arguments": [
-      "ext.getClass().getSimpleName()",
-      "inv.getUuid()"
-    ],
-    "fileName": "src/main/java/org/zstack/compute/vm/VmInstanceExtensionPointEmitter.java"
-  },
-  {
     "raw": "Not allowed same mac [%s]",
     "en_US": "Not allowed same mac [{0}]",
     "zh_CN": "不允许存在相同的MAC地址[{0}]",

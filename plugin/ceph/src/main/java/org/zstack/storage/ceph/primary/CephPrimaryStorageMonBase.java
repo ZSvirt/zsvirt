@@ -24,6 +24,7 @@ import org.zstack.header.errorcode.ErrorCodeList;
 import org.zstack.header.errorcode.OperationFailureException;
 import org.zstack.header.rest.JsonAsyncRESTCallback;
 import org.zstack.storage.ceph.*;
+import org.zstack.storage.ceph.primary.capacity.CephOsdGroupCapacityHelper;
 import org.zstack.utils.Utils;
 import org.zstack.utils.logging.CLogger;
 import org.zstack.utils.path.PathUtil;
@@ -502,6 +503,7 @@ public class CephPrimaryStorageMonBase extends CephMonBase {
                                     .findValue();
                             CephCapacity cephCapacity = new CephCapacity(fsid, rsp);
                             new CephCapacityUpdater().update(cephCapacity);
+                            new CephOsdGroupCapacityHelper(primaryStorageUuid).recalculateAvailableCapacity();
                         }
                     }
 

@@ -2,6 +2,7 @@ package org.zstack.network.securitygroup;
 
 import org.zstack.header.description.PackageDescription;
 import org.zstack.header.search.SearchConstant;
+import org.zstack.header.vm.VmNicInventory;
 
 public class RBACInfo implements PackageDescription {
     @Override
@@ -52,5 +53,17 @@ public class RBACInfo implements PackageDescription {
                 .toService(SearchConstant.QUERY_FACADE_SERVICE_ID)
                 .build();
 
+        expandedQuery()
+                .on(VmNicInventory.class)
+                .expose("securityGroup")
+                .then(VmNicSecurityGroupRefInventory.class)
+                    .named("securityGroupRef")
+                    .where(VmNicInventory.class, "uuid")
+                    .equals(VmNicSecurityGroupRefInventory.class, "vmNicUuid")
+                    .end()
+                .then(SecurityGroupInventory.class)
+                    .named("securityGroup")
+                    .end()
+                .build();
     }
 }

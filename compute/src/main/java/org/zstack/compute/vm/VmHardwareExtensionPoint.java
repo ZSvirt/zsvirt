@@ -3,28 +3,22 @@ package org.zstack.compute.vm;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.zstack.header.errorcode.ErrorCode;
 import org.zstack.header.vm.VmInstanceInventory;
+import org.zstack.header.vm.extension.VmInstancePreStartExtensionPoint;
 import org.zstack.header.vm.VmInstanceStartExtensionPoint;
 import org.zstack.header.vm.VmInstanceStartNewCreatedVmExtensionPoint;
 import org.zstack.resourceconfig.ResourceConfigFacade;
-import org.zstack.tag.SystemTagCreator;
-import org.zstack.utils.Utils;
-import org.zstack.utils.logging.CLogger;
 
-import static org.zstack.utils.CollectionDSL.e;
-import static org.zstack.utils.CollectionDSL.map;
-
-public class VmHardwareExtensionPoint implements VmInstanceStartExtensionPoint, VmInstanceStartNewCreatedVmExtensionPoint {
-    private static final CLogger logger = Utils.getLogger(VmHardwareExtensionPoint.class);
-
+public class VmHardwareExtensionPoint implements VmInstanceStartExtensionPoint, VmInstancePreStartExtensionPoint,
+        VmInstanceStartNewCreatedVmExtensionPoint {
     @Autowired
     private ResourceConfigFacade rcf;
 
     @Override
-    public String preStartVm(VmInstanceInventory inv) {
+    public ErrorCode preStartVm(VmInstanceInventory inv) {
         return verifyCpuTopology(inv);
     }
 
-    private String verifyCpuTopology(VmInstanceInventory inv) {
+    private ErrorCode verifyCpuTopology(VmInstanceInventory inv) {
         String sockets = VmHardwareSystemTags.CPU_SOCKETS.getTokenByResourceUuid(inv.getUuid(), VmHardwareSystemTags.CPU_SOCKETS_TOKEN);
         String cores = VmHardwareSystemTags.CPU_CORES.getTokenByResourceUuid(inv.getUuid(), VmHardwareSystemTags.CPU_CORES_TOKEN);
         String threads = VmHardwareSystemTags.CPU_THREADS.getTokenByResourceUuid(inv.getUuid(), VmHardwareSystemTags.CPU_THREADS_TOKEN);
@@ -42,7 +36,7 @@ public class VmHardwareExtensionPoint implements VmInstanceStartExtensionPoint, 
         }
 
         CpuTopology topology = new CpuTopology(maxVcpuNum != null ? maxVcpuNum : cpuNum, sockets, cores, threads);
-        return topology.calculateValidTopologyWithoutException();
+        return topology.calculateValidTopology();
     }
 
     @Override
@@ -62,7 +56,8 @@ public class VmHardwareExtensionPoint implements VmInstanceStartExtensionPoint, 
 
     @Override
     public String preStartNewCreatedVm(VmInstanceInventory inv) {
-        return verifyCpuTopology(inv);
+        ErrorCode ec = verifyCpuTopology(inv);
+        return ec == null ? null : ec.getDetails();
     }
 
     @Override

@@ -1,5 +1,6 @@
 package org.zstack.storage.primary.local;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.zstack.compute.host.VolumeMigrationTargetHostFilter;
@@ -907,9 +908,82 @@ public class LocalStorageBase extends PrimaryStorageBase {
             handle((CommitVolumeSnapshotOnPrimaryStorageMsg) msg);
         } else if (msg instanceof PullVolumeSnapshotOnPrimaryStorageMsg) {
             handle((PullVolumeSnapshotOnPrimaryStorageMsg) msg);
+        } else if (msg instanceof CleanupAllVmMetadataOnPrimaryStorageMsg) {
+            handle((CleanupAllVmMetadataOnPrimaryStorageMsg) msg);
+        } else if (msg instanceof EncryptVolumeBitsOnPrimaryStorageMsg) {
+            handle((EncryptVolumeBitsOnPrimaryStorageMsg) msg);
+        } else if (msg instanceof ConvertVolumeEncryptionOnPrimaryStorageMsg) {
+            handle((ConvertVolumeEncryptionOnPrimaryStorageMsg) msg);
         } else {
             super.handleLocalMessage(msg);
         }
+    }
+
+    protected void handle(ConvertVolumeEncryptionOnPrimaryStorageMsg msg) {
+        ConvertVolumeEncryptionOnPrimaryStorageReply reply = new ConvertVolumeEncryptionOnPrimaryStorageReply();
+        if (msg.getVolume() == null || StringUtils.isBlank(msg.getVolume().getUuid())) {
+            reply.setError(operr("convert volume encryption on local primary storage[uuid:%s] requires volume with non-blank uuid",
+                    self.getUuid()));
+            bus.reply(msg, reply);
+            return;
+        }
+
+        String hostUuid = StringUtils.isNotBlank(msg.getHostUuid()) ?
+                msg.getHostUuid() : null;
+        if (StringUtils.isBlank(hostUuid)) {
+            try {
+                hostUuid = getHostUuidByResourceUuid(msg.getVolume().getUuid());
+            } catch (OperationFailureException e) {
+                reply.setError(e.getErrorCode());
+                bus.reply(msg, reply);
+                return;
+            }
+        }
+        if (StringUtils.isBlank(hostUuid)) {
+            reply.setError(operr("cannot determine host for converting volume[uuid:%s] encryption on local primary storage[uuid:%s]",
+                    msg.getVolume().getUuid(), self.getUuid()));
+            bus.reply(msg, reply);
+            return;
+        }
+
+        LocalStorageHypervisorBackend bkd = getHypervisorBackendFactoryByHostUuid(hostUuid).getHypervisorBackend(self);
+        bkd.handle(msg, hostUuid, new ReturnValueCompletion<ConvertVolumeEncryptionOnPrimaryStorageReply>(msg) {
+            @Override
+            public void success(ConvertVolumeEncryptionOnPrimaryStorageReply returnValue) {
+                bus.reply(msg, returnValue);
+            }
+
+            @Override
+            public void fail(ErrorCode errorCode) {
+                reply.setError(errorCode);
+                bus.reply(msg, reply);
+            }
+        });
+    }
+
+    private void handle(EncryptVolumeBitsOnPrimaryStorageMsg msg) {
+        if (StringUtils.isBlank(msg.getHostUuid()) || StringUtils.isBlank(msg.getVolumeUuid())) {
+            EncryptVolumeBitsOnPrimaryStorageReply reply = new EncryptVolumeBitsOnPrimaryStorageReply();
+            reply.setError(operr("encrypt volume bits on local primary storage[uuid:%s] requires non-blank hostUuid and volumeUuid",
+                    self.getUuid()));
+            bus.reply(msg, reply);
+            return;
+        }
+
+        LocalStorageHypervisorBackend bkd = getHypervisorBackendFactoryByHostUuid(msg.getHostUuid()).getHypervisorBackend(self);
+        bkd.handle(msg, new ReturnValueCompletion<EncryptVolumeBitsOnPrimaryStorageReply>(msg) {
+            @Override
+            public void success(EncryptVolumeBitsOnPrimaryStorageReply reply) {
+                bus.reply(msg, reply);
+            }
+
+            @Override
+            public void fail(ErrorCode errorCode) {
+                EncryptVolumeBitsOnPrimaryStorageReply reply = new EncryptVolumeBitsOnPrimaryStorageReply();
+                reply.setError(errorCode);
+                bus.reply(msg, reply);
+            }
+        });
     }
 
     private void handle(DownloadBitsFromKVMHostToPrimaryStorageMsg msg) {
@@ -3624,5 +3698,102 @@ public class LocalStorageBase extends PrimaryStorageBase {
                 return String.format("cleanup-metadata-on-ps-%s-%s", self.getUuid(), msg.getVmInstanceUuid());
             }
         });
+    }
+
+    @Override
+    protected void handle(final CleanupAllVmMetadataOnPrimaryStorageMsg msg) {
+        CleanupAllVmMetadataOnPrimaryStorageReply reply = new CleanupAllVmMetadataOnPrimaryStorageReply();
+
+        List<String> allHostUuids = getLocalStorageHostUuids();
+        if (allHostUuids.isEmpty()) {
+            reply.setError(operr("no host found for local primary storage[uuid:%s]", self.getUuid()));
+            bus.reply(msg, reply);
+            return;
+        }
+
+        List<String> connectedHostUuids = getConnectedLocalStorageHostUuids();
+        if (connectedHostUuids.isEmpty()) {
+            reply.setError(operr("no connected host found for local primary storage[uuid:%s], " +
+                    "total hosts=%d", self.getUuid(), allHostUuids.size()));
+            bus.reply(msg, reply);
+            return;
+        }
+
+        List<String> disconnectedHostUuids = new ArrayList<>(allHostUuids);
+        disconnectedHostUuids.removeAll(connectedHostUuids);
+        if (!disconnectedHostUuids.isEmpty()) {
+            logger.warn(String.format("local primary storage[uuid:%s] has %d disconnected hosts that cannot clean up vm metadata: %s",
+                    self.getUuid(), disconnectedHostUuids.size(), disconnectedHostUuids));
+        }
+
+        new While<>(connectedHostUuids).all((hostUuid, com) -> {
+            final LocalStorageHypervisorBackend bkd;
+            try {
+                LocalStorageHypervisorFactory f = getHypervisorBackendFactoryByHostUuid(hostUuid);
+                bkd = f.getHypervisorBackend(self);
+            } catch (Exception e) {
+                logger.warn(String.format("[MetadataCleanupAll] failed to prepare backend for host[uuid:%s] on ps[uuid:%s]: %s",
+                        hostUuid, self.getUuid(), e.getMessage()));
+                com.addError(operr("host[uuid:%s] backend prepare failed: %s", hostUuid, e.getMessage()));
+                com.done();
+                return;
+            }
+
+            bkd.handle(msg, hostUuid, new ReturnValueCompletion<CleanupAllVmMetadataOnPrimaryStorageReply>(com) {
+                @Override
+                public void success(CleanupAllVmMetadataOnPrimaryStorageReply returnValue) {
+                    if (returnValue.isSkipped()) {
+                        synchronized (reply) {
+                            reply.setSkipped(true);
+                            if (returnValue.getCurrentGeneration() != null
+                                    && (reply.getCurrentGeneration() == null
+                                    || returnValue.getCurrentGeneration() > reply.getCurrentGeneration())) {
+                                reply.setCurrentGeneration(returnValue.getCurrentGeneration());
+                            }
+                        }
+                    }
+                    com.done();
+                }
+
+                @Override
+                public void fail(ErrorCode errorCode) {
+                    logger.warn(String.format("[MetadataCleanupAll] failed on host[uuid:%s] on local ps[uuid:%s]: %s",
+                            hostUuid, self.getUuid(), errorCode));
+                    com.addError(errorCode);
+                    com.done();
+                }
+            });
+        }).run(new WhileDoneCompletion(msg) {
+            @Override
+            public void done(ErrorCodeList errorCodeList) {
+                int failedHostCount = disconnectedHostUuids.size() + errorCodeList.getCauses().size();
+                if (failedHostCount > 0) {
+                    reply.setError(operr("local primary storage[uuid:%s] cleanup all vm metadata failed on %d/%d host(s), " +
+                                    "disconnectedHosts=%s, causes=%s",
+                            self.getUuid(), failedHostCount, allHostUuids.size(), disconnectedHostUuids, errorCodeList));
+                }
+                bus.reply(msg, reply);
+            }
+        });
+    }
+
+    private List<String> getLocalStorageHostUuids() {
+        return SQL.New(
+                        "select h.hostUuid from LocalStorageHostRefVO h, HostVO host" +
+                                " where h.primaryStorageUuid = :psUuid" +
+                                " and h.hostUuid = host.uuid", String.class)
+                .param("psUuid", self.getUuid())
+                .list();
+    }
+
+    private List<String> getConnectedLocalStorageHostUuids() {
+        return SQL.New(
+                        "select h.hostUuid from LocalStorageHostRefVO h, HostVO host" +
+                                " where h.primaryStorageUuid = :psUuid" +
+                                " and h.hostUuid = host.uuid" +
+                                " and host.status = :hstatus", String.class)
+                .param("psUuid", self.getUuid())
+                .param("hstatus", HostStatus.Connected)
+                .list();
     }
 }

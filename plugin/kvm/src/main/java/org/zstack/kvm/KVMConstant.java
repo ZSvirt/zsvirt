@@ -55,6 +55,8 @@ public interface KVMConstant {
     String KVM_VM_ONLINE_INCREASE_MEMORY = "/vm/increase/mem";
     String KVM_VM_SYNC_PATH = "/vm/vmsync";
     String KVM_VOLUME_SYNC_PATH = "/vm/volumesync";
+    String KVM_GET_ACTIVE_VOLUME_SIZE_PATH = "/vm/getactivevolumesize";
+    String KVM_VOLUME_RESOLVE_LIBVIRT_SECRET_UUID_PATH = "/vm/volume/resolveLibvirtSecretUuid";
     String KVM_ATTACH_VOLUME = "/vm/attachdatavolume";
     String KVM_DETACH_VOLUME = "/vm/detachdatavolume";
     String KVM_ATTACH_NIC_PATH = "/vm/attachnic";
@@ -133,6 +135,7 @@ public interface KVMConstant {
     String KVM_VERIFY_ENVELOPE_KEY_PATH = "/host/key/envelope/checkEnvelopeKey";
     String KVM_GET_SECRET_PATH = "/host/key/envelope/getSecret";
     String KVM_ENSURE_SECRET_PATH = "/host/key/envelope/ensureSecret";
+    String KVM_WRITE_SECRET_MATERIAL_FILE_PATH = "/host/key/envelope/writeSecretMaterialFile";
     String KVM_DELETE_SECRET_PATH = "/host/key/envelope/deleteSecret";
 
     /** HTTP timeout in seconds for envelope key sync (verify/create/rotate/get) to agent. */
@@ -141,6 +144,19 @@ public interface KVMConstant {
     /** Max size in bytes for DEK payload in SecretHostDefine (decoded from dekBase64). */
     int MAX_DEK_BYTES = 1024;
     String HOST_SECRET_USAGE_INSTANCE_VTPM = "tpm0";
+    /**
+     * Per-volume usage instance string for the libvirt LUKS secret. Returned
+     * value is what we feed key-agent in {@code SecretHostDefineMsg} /
+     * {@code SecretHostGetMsg} / {@code SecretHostDeleteMsg}. For
+     * {@code purpose="volume"}, key-agent builds the libvirt usage name as
+     * {@code <usageInstance>-version-<keyVersion>}, so the secret follows the
+     * volume across VM detach/attach. {@code vmUuid} is still carried by the RPC
+     * for validation compatibility, but it is not part of the volume secret
+     * identity.
+     */
+    static String volumeSecretUsageInstance(String volumeUuid) {
+        return "volume-" + volumeUuid;
+    }
 
     String KVM_HOST_FILE_DOWNLOAD_PATH = "/host/file/download";
     String KVM_HOST_FILE_UPLOAD_PATH = "/host/file/upload";

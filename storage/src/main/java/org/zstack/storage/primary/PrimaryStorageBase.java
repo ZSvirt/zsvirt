@@ -52,6 +52,7 @@ import org.zstack.header.storage.snapshot.*;
 import org.zstack.header.vm.*;
 import org.zstack.header.vm.metadata.*;
 import org.zstack.header.volume.*;
+import org.zstack.storage.encrypt.VolumeEncryptedTrashCleanupHelper;
 import org.zstack.storage.volume.VolumeUtils;
 import org.zstack.utils.CollectionDSL;
 import org.zstack.utils.DebugUtils;
@@ -59,6 +60,7 @@ import org.zstack.utils.Utils;
 import org.zstack.utils.logging.CLogger;
 
 import javax.persistence.LockModeType;
+import javax.persistence.Tuple;
 import javax.persistence.TypedQuery;
 import java.util.*;
 import java.util.function.Supplier;
@@ -99,6 +101,8 @@ public abstract class PrimaryStorageBase extends AbstractPrimaryStorage {
     protected StorageTrash trash;
     @Autowired
     protected PrimaryStoragePhysicalCapacityManager physicalCapacityMgr;
+    @Autowired
+    private VolumeEncryptedTrashCleanupHelper volumeEncryptedTrashCleanupHelper;
     @Autowired
     private PluginRegistry pluginRgty;
 
@@ -178,6 +182,13 @@ public abstract class PrimaryStorageBase extends AbstractPrimaryStorage {
 
     protected abstract void handle(GetVolumeSnapshotEncryptedOnPrimaryStorageMsg msg);
 
+    protected void handle(ConvertVolumeEncryptionOnPrimaryStorageMsg msg) {
+        ConvertVolumeEncryptionOnPrimaryStorageReply reply = new ConvertVolumeEncryptionOnPrimaryStorageReply();
+        reply.setError(operr("primary storage[type:%s, uuid:%s] does not support volume encryption conversion",
+                self.getType(), self.getUuid()));
+        bus.reply(msg, reply);
+    }
+
     public PrimaryStorageBase(PrimaryStorageVO self) {
         this.self = self;
     }
@@ -190,7 +201,9 @@ public abstract class PrimaryStorageBase extends AbstractPrimaryStorage {
         return String.format("primaryStorage-%s", self.getUuid());
     }
 
-    protected static List<TrashType> trashLists = CollectionDSL.list(TrashType.MigrateVolume, TrashType.MigrateVolumeSnapshot, TrashType.RevertVolume, TrashType.VolumeSnapshot, TrashType.ReimageVolume);
+    protected static List<TrashType> trashLists = CollectionDSL.list(TrashType.MigrateVolume, TrashType.MigrateVolumeSnapshot,
+            TrashType.ConvertVolumeEncryption, TrashType.ConvertVolumeSnapshotEncryption,
+            TrashType.RevertVolume, TrashType.VolumeSnapshot, TrashType.ReimageVolume);
 
     protected void fireDisconnectedCanonicalEvent(ErrorCode reason) {
         PrimaryStorageCanonicalEvent.DisconnectedData data = new PrimaryStorageCanonicalEvent.DisconnectedData();
@@ -417,6 +430,8 @@ public abstract class PrimaryStorageBase extends AbstractPrimaryStorage {
             handle((UnlinkBitsOnPrimaryStorageMsg) msg);
         } else if (msg instanceof GetVolumeSnapshotEncryptedOnPrimaryStorageMsg) {
             handle((GetVolumeSnapshotEncryptedOnPrimaryStorageMsg) msg);
+        } else if (msg instanceof ConvertVolumeEncryptionOnPrimaryStorageMsg) {
+            handle((ConvertVolumeEncryptionOnPrimaryStorageMsg) msg);
         } else if (msg instanceof DeleteVolumeChainOnPrimaryStorageMsg) {
             handle((DeleteVolumeChainOnPrimaryStorageMsg) msg);
         } else if (msg instanceof CleanUpStorageTrashOnPrimaryStorageMsg) {
@@ -429,6 +444,8 @@ public abstract class PrimaryStorageBase extends AbstractPrimaryStorage {
             handle((GetVmInstanceMetadataFromPrimaryStorageMsg) msg);
         } else if (msg instanceof CleanupVmInstanceMetadataOnPrimaryStorageMsg) {
             handle((CleanupVmInstanceMetadataOnPrimaryStorageMsg) msg);
+        } else if (msg instanceof CleanupAllVmMetadataOnPrimaryStorageMsg) {
+            handle((CleanupAllVmMetadataOnPrimaryStorageMsg) msg);
         } else if (msg instanceof RebaseVolumeBackingFileOnPrimaryStorageMsg) {
             handle((RebaseVolumeBackingFileOnPrimaryStorageMsg) msg);
         } else {
@@ -1095,6 +1112,7 @@ public abstract class PrimaryStorageBase extends AbstractPrimaryStorage {
                     imsg.setAllocatedInstallUrl(allocatedInstallUrl);
                     bus.makeTargetServiceIdByResourceUuid(imsg, PrimaryStorageConstant.SERVICE_ID, self.getUuid());
                     bus.send(imsg);
+                    volumeEncryptedTrashCleanupHelper.cleanupKeyRefAfterTrashDeleted(inv);
                     trash.removeFromDb(trashId);
                     logger.info(String.format("Returned space[size:%s] to PS %s after volume migration", inv.getSize(), self.getUuid()));
                     completion.success(new TrashCleanupResult(inv.getResourceUuid(), inv.getTrashId(), inv.getSize()));
@@ -1821,6 +1839,12 @@ public abstract class PrimaryStorageBase extends AbstractPrimaryStorage {
         bus.reply(msg, reply);
     }
 
+    protected void handle(CleanupAllVmMetadataOnPrimaryStorageMsg msg) {
+        CleanupAllVmMetadataOnPrimaryStorageReply reply = new CleanupAllVmMetadataOnPrimaryStorageReply();
+        reply.setError(operr("operation not supported"));
+        bus.reply(msg, reply);
+    }
+
     protected void handle(RebaseVolumeBackingFileOnPrimaryStorageMsg msg) {
         RebaseVolumeBackingFileOnPrimaryStorageReply reply = new RebaseVolumeBackingFileOnPrimaryStorageReply();
         reply.setError(operr("operation not supported"));
@@ -1913,9 +1937,51 @@ public abstract class PrimaryStorageBase extends AbstractPrimaryStorage {
                         .filter(e -> e.getVmCategory() != null)
                         .filter(e -> !VmMetadataCategory.VM_TEMPLATE_CACHE.name().equals(e.getVmCategory()))
                         .collect(Collectors.toList());
+                enrichVmMetadataRegistrationHints(filtered, msg.getPrimaryStorageUuid());
                 reply.setVmInstanceMetadata(filtered);
                 bus.reply(msg, reply);
             }
         });
+    }
+
+    private void enrichVmMetadataRegistrationHints(List<VmMetadataScanEntry> metadata, String scannedPrimaryStorageUuid) {
+        if (metadata == null || metadata.isEmpty()) {
+            return;
+        }
+
+        Set<String> vmUuids = metadata.stream()
+                .map(VmMetadataScanEntry::getVmUuid)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+        if (vmUuids.isEmpty()) {
+            return;
+        }
+
+        Map<String, String> existingVmRootPrimaryStorageUuids = new HashMap<>();
+        List<Tuple> tuples = Q.New(VolumeVO.class)
+                .select(VolumeVO_.vmInstanceUuid, VolumeVO_.primaryStorageUuid)
+                .in(VolumeVO_.vmInstanceUuid, vmUuids)
+                .eq(VolumeVO_.type, VolumeType.Root)
+                .listTuple();
+        for (Tuple tuple : tuples) {
+            String vmUuid = tuple.get(0, String.class);
+            String primaryStorageUuid = tuple.get(1, String.class);
+            if (vmUuid != null && primaryStorageUuid != null) {
+                existingVmRootPrimaryStorageUuids.put(vmUuid, primaryStorageUuid);
+            }
+        }
+
+        if (existingVmRootPrimaryStorageUuids.isEmpty()) {
+            return;
+        }
+
+        for (VmMetadataScanEntry entry : metadata) {
+            String existingPrimaryStorageUuid = existingVmRootPrimaryStorageUuids.get(entry.getVmUuid());
+            if (existingPrimaryStorageUuid == null) {
+                continue;
+            }
+
+            entry.setRegenerateUuidRequired(!Objects.equals(existingPrimaryStorageUuid, scannedPrimaryStorageUuid));
+        }
     }
 }

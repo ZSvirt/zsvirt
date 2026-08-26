@@ -71,6 +71,7 @@ class SdkDataStructureGenerator implements SdkTemplate {
         dstToSrc.sort()
 
         SdkFile f = new SdkFile()
+        f.subPath = "org/zstack/sdk"
         f.fileName = "SourceClassMap.java"
         f.content = """package org.zstack.sdk;
 

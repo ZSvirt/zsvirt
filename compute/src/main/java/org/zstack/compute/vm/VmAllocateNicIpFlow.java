@@ -105,6 +105,17 @@ public class VmAllocateNicIpFlow implements Flow {
                     }
                 })
                 .collect(Collectors.toList());
+        Map<String, Set<Integer>> vmNicParamIpVersions = new HashMap<>();
+        for (VmNicSpec nicSpec : firstL3s) {
+            VmNicParam vmNicParam = nicSpec.getVmNicParam();
+            String l3Uuid = nicSpec.getL3Invs().get(0).getUuid();
+            if (vmNicParam.getIp() != null && !vmNicParam.getIp().isEmpty()) {
+                vmNicParamIpVersions.computeIfAbsent(l3Uuid, k -> new HashSet<>()).add(IPv6Constants.IPv4);
+            }
+            if (vmNicParam.getIp6() != null && !vmNicParam.getIp6().isEmpty()) {
+                vmNicParamIpVersions.computeIfAbsent(l3Uuid, k -> new HashSet<>()).add(IPv6Constants.IPv6);
+            }
+        }
 
         new While<>(firstL3s).each((nicSpec, wcomp) -> {
             L3NetworkInventory nw = nicSpec.getL3Invs().get(0);
@@ -117,7 +128,9 @@ public class VmAllocateNicIpFlow implements Flow {
 
             VmNicVO nic = dbf.findByUuid(nicUuid.getUuid(), VmNicVO.class);
             List<Integer> ipVersions = nw.getIpVersions();
-            Map<Integer, String> nicStaticIpMap = new StaticIpOperator().getNicStaticIpMap(vmStaticIps.get(nw.getUuid()));
+            Map<Integer, String> nicStaticIpMap = new StaticIpOperator().getNicStaticIpMap(
+                    vmStaticIps.get(nw.getUuid()), nicSpec.getVmNicParam(),
+                    vmNicParamIpVersions.get(nw.getUuid()));
             List<AllocateIpMsg> msgs = new ArrayList<>();
             for (int ipversion : ipVersions) {
                 AllocateIpMsg msg = new AllocateIpMsg();

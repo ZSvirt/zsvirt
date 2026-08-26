@@ -14,8 +14,6 @@ import org.zstack.core.componentloader.PluginRegistry;
 import org.zstack.core.config.GlobalConfigFacade;
 import org.zstack.core.db.DatabaseFacade;
 import org.zstack.core.db.Q;
-import org.zstack.core.db.SimpleQuery;
-import org.zstack.core.db.SimpleQuery.Op;
 import org.zstack.core.job.JobQueueFacade;
 import org.zstack.core.workflow.FlowChainBuilder;
 import org.zstack.header.AbstractService;
@@ -475,10 +473,10 @@ public class ApplianceVmFacadeImpl extends AbstractService implements ApplianceV
             return arg.makeIdentity();
         });
 
-        SimpleQuery<ApplianceVmFirewallRuleVO> q = dbf.createQuery(ApplianceVmFirewallRuleVO.class);
-        q.select(ApplianceVmFirewallRuleVO_.identity);
-        q.add(ApplianceVmFirewallRuleVO_.identity, Op.IN, ids);
-        final List<String> existingIds = q.listValue();
+        final List<String> existingIds = Q.New(ApplianceVmFirewallRuleVO.class)
+                .select(ApplianceVmFirewallRuleVO_.identity)
+                .in(ApplianceVmFirewallRuleVO_.identity, ids)
+                .listValues();
 
         List<ApplianceVmFirewallRuleVO> vos = transformAndRemoveNull(rules, r -> {
             if (!existingIds.contains(r.makeIdentity())) {

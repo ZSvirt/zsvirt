@@ -15,7 +15,6 @@ import org.zstack.core.componentloader.PluginRegistry;
 import org.zstack.core.db.DatabaseFacade;
 import org.zstack.core.db.Q;
 import org.zstack.core.db.SQL;
-import org.zstack.core.db.SimpleQuery;
 import org.zstack.core.errorcode.ErrorFacade;
 import org.zstack.core.timeout.ApiTimeoutManager;
 import org.zstack.core.workflow.FlowChainBuilder;
@@ -50,9 +49,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.zstack.network.l2.vxlan.vxlanNetworkPool.VxlanNetworkPoolConstant.VXLAN_KVM_POPULATE_FDB_L2VXLAN_NETWORKS_PATH;
-import static org.zstack.utils.CollectionDSL.e;
-import static org.zstack.utils.CollectionDSL.map;
 import static org.zstack.core.Platform.err;
+import static org.zstack.utils.CollectionDSL.*;
 
 /**
  * Created by weiwang on 01/03/2017.
@@ -426,10 +424,10 @@ public class VxlanNetworkPool extends L2NoVlanNetwork implements L2VxlanNetworkP
     private void handle(final APIDeleteVxlanPoolRemoteVtepMsg msg) {
         APIDeleteVxlanPoolRemoteVtepEvent evt = new APIDeleteVxlanPoolRemoteVtepEvent(msg.getId());
 
-        SimpleQuery<L2NetworkClusterRefVO> rq = dbf.createQuery(L2NetworkClusterRefVO.class);
-        rq.add(L2NetworkClusterRefVO_.clusterUuid, SimpleQuery.Op.EQ, msg.getClusterUuid());
-        rq.add(L2NetworkClusterRefVO_.l2NetworkUuid, SimpleQuery.Op.EQ, msg.getL2NetworkUuid());
-        long count = rq.count();
+        long count = Q.New(L2NetworkClusterRefVO.class)
+                .eq(L2NetworkClusterRefVO_.clusterUuid, msg.getClusterUuid())
+                .eq(L2NetworkClusterRefVO_.l2NetworkUuid, msg.getL2NetworkUuid())
+                .count();
         if (count == 0) {
             bus.publish(evt);
             return;
@@ -462,11 +460,11 @@ public class VxlanNetworkPool extends L2NoVlanNetwork implements L2VxlanNetworkP
             return;
         }
         // delete based vxlan bridge remote vtep ip info
-        SimpleQuery<HostVO> query = dbf.createQuery(HostVO.class);
-        query.add(HostVO_.clusterUuid, SimpleQuery.Op.EQ, msg.getClusterUuid());
-        query.add(HostVO_.state, SimpleQuery.Op.NOT_IN, HostState.PreMaintenance, HostState.Maintenance);
-        query.add(HostVO_.status, SimpleQuery.Op.EQ, HostStatus.Connected);
-        final List<HostVO> hosts = query.list();
+        final List<HostVO> hosts = Q.New(HostVO.class)
+                .eq(HostVO_.clusterUuid, msg.getClusterUuid())
+                .notIn(HostVO_.state, list(HostState.PreMaintenance, HostState.Maintenance))
+                .eq(HostVO_.status, HostStatus.Connected)
+                .list();
         List<HostInventory> hvinvs = HostInventory.valueOf(hosts);
         // cluster no hosts, only remove db
         if (hvinvs == null || hvinvs.isEmpty()) {
@@ -544,21 +542,21 @@ public class VxlanNetworkPool extends L2NoVlanNetwork implements L2VxlanNetworkP
     private void handle(final APICreateVxlanPoolRemoteVtepMsg msg) {
         APICreateVxlanPoolRemoteVtepEvent evt = new APICreateVxlanPoolRemoteVtepEvent(msg.getId());
 
-        SimpleQuery<L2NetworkClusterRefVO> rq = dbf.createQuery(L2NetworkClusterRefVO.class);
-        rq.add(L2NetworkClusterRefVO_.clusterUuid, SimpleQuery.Op.EQ, msg.getClusterUuid());
-        rq.add(L2NetworkClusterRefVO_.l2NetworkUuid, SimpleQuery.Op.EQ, msg.getL2NetworkUuid());
-        long count = rq.count();
+        long count = Q.New(L2NetworkClusterRefVO.class)
+                .eq(L2NetworkClusterRefVO_.clusterUuid, msg.getClusterUuid())
+                .eq(L2NetworkClusterRefVO_.l2NetworkUuid, msg.getL2NetworkUuid())
+                .count();
         if (count == 0) {
             evt.setError(err(SysErrors.RESOURCE_NOT_FOUND, "Cannot find L2NetworkClusterRefVO item for l2NetworkUuid[%s] clusterUuid[%s]", msg.getL2NetworkUuid(), msg.getClusterUuid()));
             bus.publish(evt);
             return;
         }
 
-        SimpleQuery<RemoteVtepVO> rqVtep = dbf.createQuery(RemoteVtepVO.class);
-        rqVtep.add(RemoteVtepVO_.clusterUuid, SimpleQuery.Op.EQ, msg.getClusterUuid());
-        rqVtep.add(RemoteVtepVO_.poolUuid, SimpleQuery.Op.EQ, msg.getL2NetworkUuid());
-        rqVtep.add(RemoteVtepVO_.vtepIp, SimpleQuery.Op.EQ, msg.getRemoteVtepIp());
-        count = rqVtep.count();
+        count = Q.New(RemoteVtepVO.class)
+                .eq(RemoteVtepVO_.clusterUuid, msg.getClusterUuid())
+                .eq(RemoteVtepVO_.poolUuid, msg.getL2NetworkUuid())
+                .eq(RemoteVtepVO_.vtepIp, msg.getRemoteVtepIp())
+                .count();
         if (count > 0) {
             evt.setError(err(SysErrors.OPERATION_ERROR, "ip[%s] l2NetworkUuid[%s] clusterUuid[%s] exist", msg.getRemoteVtepIp(), msg.getL2NetworkUuid(), msg.getClusterUuid()));
             bus.publish(evt);
@@ -574,11 +572,11 @@ public class VxlanNetworkPool extends L2NoVlanNetwork implements L2VxlanNetworkP
             return;
         }
         //based vxlan br already exist, add gw ip to bridge fdb
-        SimpleQuery<HostVO> query = dbf.createQuery(HostVO.class);
-        query.add(HostVO_.clusterUuid, SimpleQuery.Op.EQ, msg.getClusterUuid());
-        query.add(HostVO_.state, SimpleQuery.Op.NOT_IN, HostState.PreMaintenance, HostState.Maintenance);
-        query.add(HostVO_.status, SimpleQuery.Op.EQ, HostStatus.Connected);
-        final List<HostVO> hosts = query.list();
+        final List<HostVO> hosts = Q.New(HostVO.class)
+                .eq(HostVO_.clusterUuid, msg.getClusterUuid())
+                .notIn(HostVO_.state, list(HostState.PreMaintenance, HostState.Maintenance))
+                .eq(HostVO_.status, HostStatus.Connected)
+                .list();
         List<HostInventory> hvinvs = HostInventory.valueOf(hosts);
         // cluster no hosts, only add db
         if (hvinvs == null || hvinvs.isEmpty()) {
@@ -824,10 +822,10 @@ public class VxlanNetworkPool extends L2NoVlanNetwork implements L2VxlanNetworkP
 
     private void handle(final APIAttachL2NetworkToClusterMsg msg) {
         final APIAttachL2NetworkToClusterEvent evt = new APIAttachL2NetworkToClusterEvent(msg.getId());
-        SimpleQuery<L2NetworkClusterRefVO> rq = dbf.createQuery(L2NetworkClusterRefVO.class);
-        rq.add(L2NetworkClusterRefVO_.clusterUuid, SimpleQuery.Op.EQ, msg.getClusterUuid());
-        rq.add(L2NetworkClusterRefVO_.l2NetworkUuid, SimpleQuery.Op.EQ, msg.getL2NetworkUuid());
-        long count = rq.count();
+        long count = Q.New(L2NetworkClusterRefVO.class)
+                .eq(L2NetworkClusterRefVO_.clusterUuid, msg.getClusterUuid())
+                .eq(L2NetworkClusterRefVO_.l2NetworkUuid, msg.getL2NetworkUuid())
+                .count();
         if (count != 0) {
             evt.setInventory(self.toInventory());
             bus.publish(evt);
@@ -840,11 +838,11 @@ public class VxlanNetworkPool extends L2NoVlanNetwork implements L2VxlanNetworkP
             }
         }
 
-        SimpleQuery<HostVO> query = dbf.createQuery(HostVO.class);
-        query.add(HostVO_.clusterUuid, SimpleQuery.Op.EQ, msg.getClusterUuid());
-        query.add(HostVO_.state, SimpleQuery.Op.NOT_IN, HostState.PreMaintenance, HostState.Maintenance);
-        query.add(HostVO_.status, SimpleQuery.Op.EQ, HostStatus.Connected);
-        final List<HostVO> hosts = query.list();
+        final List<HostVO> hosts = Q.New(HostVO.class)
+                .eq(HostVO_.clusterUuid, msg.getClusterUuid())
+                .notIn(HostVO_.state, list(HostState.PreMaintenance, HostState.Maintenance))
+                .eq(HostVO_.status, HostStatus.Connected)
+                .list();
         List<HostInventory> hvinvs = HostInventory.valueOf(hosts);
 
         prepareL2NetworkOnHosts(msg.getL2NetworkUuid(), hvinvs, new Completion(msg) {

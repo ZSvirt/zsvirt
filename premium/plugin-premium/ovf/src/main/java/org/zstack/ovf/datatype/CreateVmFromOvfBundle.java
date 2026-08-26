@@ -49,6 +49,7 @@ public class CreateVmFromOvfBundle {
     private String backupStorageUuid;
     private String vmInstanceUuid;
     private CreateVmInstanceMsg innerMessage;
+    private Boolean ovfDiskEncryption;
     private VmInstanceInventory vmInventory;
 
     /**
@@ -144,6 +145,14 @@ public class CreateVmFromOvfBundle {
         this.innerMessage = innerMessage;
     }
 
+    public Boolean getOvfDiskEncryption() {
+        return ovfDiskEncryption;
+    }
+
+    public void setOvfDiskEncryption(Boolean ovfDiskEncryption) {
+        this.ovfDiskEncryption = ovfDiskEncryption;
+    }
+
     public VmInstanceInventory getVmInventory() {
         return vmInventory;
     }
@@ -191,6 +200,7 @@ public class CreateVmFromOvfBundle {
             bundle.setDeleteImageAfterSuccess(message.isDeleteImageAfterSuccess());
             bundle.setDeleteImageOnFail(message.isDeleteImageOnFail());
             bundle.setParams(message.getImageInfos());
+            bundle.setOvfDiskEncryption(message.getOvfDiskEncryption());
             bundle.setBackupStorageUuid(message.getBackupStorageUuid());
             bundle.setVmInstanceUuid(message.getResourceUuid());
             bundle.currentApiId = ThreadContext.get(Constants.THREAD_CONTEXT_API);

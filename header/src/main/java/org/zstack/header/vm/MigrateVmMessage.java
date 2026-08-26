@@ -12,4 +12,8 @@ public interface MigrateVmMessage {
     default AllocationScene getAllocationScene() {
         return null;
     }
+
+    default Boolean getEnableMigrationTls() {
+        return null;
+    }
 }

@@ -30,11 +30,13 @@ import org.zstack.storage.migration.primary.PrimaryStorageCancelLiveMigrateVmMsg
 import org.zstack.storage.migration.primary.PrimaryStorageCancelLiveMigrateVmReply;
 import org.zstack.storage.migration.primary.PrimaryStorageLiveMigrateVmMsg;
 import org.zstack.storage.migration.primary.PrimaryStorageLiveMigrateVmReply;
+import org.zstack.storage.migration.primary.VolumeMigrationAO;
 import org.zstack.storage.primary.local.LocalStorageConstants;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -54,6 +56,8 @@ public class KvmStorageLiveMigrationBackend implements HypervisorStorageLiveMigr
     @Override
     public void handle(PrimaryStorageLiveMigrateVmMsg msg) {
         VmInstanceVO vmInstanceVO = dbf.findByUuid(msg.getVmInstanceUuid(), VmInstanceVO.class);
+        msg.setVolumeMigrationAOs(VolumeMigrationAO.fromLegacyDstPs(
+                vmInstanceVO, msg.getVolumeMigrationAOs(), msg.getDstPrimaryStorageUuid(), msg.isWithDataVolumes(), true));
 
         final List<VolumeVO> volumesToMigrate = getVolumesToMigrate(vmInstanceVO, msg);
         PrimaryStorageLiveMigrateVmReply reply = new PrimaryStorageLiveMigrateVmReply();
@@ -174,27 +178,25 @@ public class KvmStorageLiveMigrationBackend implements HypervisorStorageLiveMigr
         return res;
     }
 
-    private boolean requireMigration(VolumeVO vo, PrimaryStorageLiveMigrateVmMsg msg) {
+    private boolean requireMigration(VolumeVO vo, String dstPsUuid, PrimaryStorageLiveMigrateVmMsg msg) {
         String srcPsType = Q.New(PrimaryStorageVO.class).eq(PrimaryStorageVO_.uuid, vo.getPrimaryStorageUuid())
                 .select(PrimaryStorageVO_.type).findValue();
-        String dstPsType = Q.New(PrimaryStorageVO.class).eq(PrimaryStorageVO_.uuid, msg.getDstPrimaryStorageUuid())
+        String dstPsType = Q.New(PrimaryStorageVO.class).eq(PrimaryStorageVO_.uuid, dstPsUuid)
                 .select(PrimaryStorageVO_.type).findValue();
 
         return pluginRgty.getExtensionList(VmStorageMigrationMetric.class).stream().anyMatch(ext ->
-                ext.isCapable(srcPsType, dstPsType) && ext.needMigration(vo, msg.getDstPrimaryStorageUuid(), msg.getDstHostUuid(), msg.getSystemTags()));
+                ext.isCapable(srcPsType, dstPsType) && ext.needMigration(vo, dstPsUuid, msg.getDstHostUuid(), msg.getSystemTags()));
     }
 
     private List<VolumeVO> getVolumesToMigrate(VmInstanceVO vmInstanceVO, PrimaryStorageLiveMigrateVmMsg msg) {
-        List<VolumeVO> volumes = new ArrayList<>();
-        if (!msg.isWithDataVolumes()) {
-            volumes.add(vmInstanceVO.getRootVolume());
-        } else {
-            volumes.addAll(vmInstanceVO.getAllDiskVolumes());
-        }
-
-        List<VolumeVO> vols = volumes.stream().filter(vol -> requireMigration(vol, msg)).collect(Collectors.toList());
-
-        return PrimaryStorageMigrationRecoverHelper.getVolumesToMigrateFromJobContext(msg, volumes, vols);
+        Map<String, String> volToDst = VolumeMigrationAO.toVolToDstMap(msg.getVolumeMigrationAOs());
+        List<VolumeVO> all = vmInstanceVO.getAllDiskVolumes().stream()
+                .filter(v -> volToDst.containsKey(v.getUuid()))
+                .collect(Collectors.toList());
+        List<VolumeVO> vols = all.stream()
+                .filter(vol -> requireMigration(vol, volToDst.get(vol.getUuid()), msg))
+                .collect(Collectors.toList());
+        return PrimaryStorageMigrationRecoverHelper.getVolumesToMigrateFromJobContext(msg, all, vols);
     }
 
     private boolean psIsLocal(String psUuid) {

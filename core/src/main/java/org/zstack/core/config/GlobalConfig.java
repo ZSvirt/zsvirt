@@ -151,6 +151,8 @@ public class GlobalConfig {
     }
 
     public GlobalConfigVO reload() {
+        // Note: SimpleQuery can not be replaced by Q: deadlock found when ENABLE_PASSWORD_ENCRYPT update
+        // and DataCryptoCase will fail
         SimpleQuery<GlobalConfigVO> q = dbf.createQuery(GlobalConfigVO.class);
         q.add(GlobalConfigVO_.category, Op.EQ, category);
         q.add(GlobalConfigVO_.name, Op.EQ, name);

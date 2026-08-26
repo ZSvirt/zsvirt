@@ -27,6 +27,7 @@ import org.zstack.header.core.Completion;
 import org.zstack.header.core.ReturnValueCompletion;
 import org.zstack.header.errorcode.ErrorCode;
 import org.zstack.header.errorcode.OperationFailureException;
+import org.zstack.header.errorcode.SysErrors;
 import org.zstack.header.expon.HealthStatus;
 import org.zstack.header.host.HostInventory;
 import org.zstack.header.host.HostVO;
@@ -34,6 +35,10 @@ import org.zstack.header.host.HostVO_;
 import org.zstack.header.image.ImageConstant;
 import org.zstack.header.storage.addon.*;
 import org.zstack.header.storage.addon.primary.*;
+import org.zstack.header.storage.primary.EncryptVolumeBitsOnPrimaryStorageMsg;
+import org.zstack.header.storage.primary.EncryptVolumeBitsOnPrimaryStorageReply;
+import org.zstack.header.storage.primary.ConvertVolumeEncryptionOnPrimaryStorageMsg;
+import org.zstack.header.storage.primary.ConvertVolumeEncryptionOnPrimaryStorageReply;
 import org.zstack.header.storage.primary.ImageCacheInventory;
 import org.zstack.header.storage.primary.VolumeSnapshotCapability;
 import org.zstack.header.storage.snapshot.VolumeSnapshotStats;
@@ -1094,6 +1099,19 @@ public class ExponStorageController implements PrimaryStorageControllerSvc, Prim
     }
 
     @Override
+    public void encryptVolumeBits(EncryptVolumeBitsOnPrimaryStorageMsg msg, ReturnValueCompletion<EncryptVolumeBitsOnPrimaryStorageReply> comp) {
+        String details = String.format("primary storage controller[%s] does not support encrypting volume bits in place", getIdentity());
+        comp.fail(new ErrorCode(SysErrors.UNIMPLEMENTED_OPERATION_ERROR.toString(), "unimplemented operation", details));
+    }
+
+    @Override
+    public void convertVolumeEncryption(ConvertVolumeEncryptionOnPrimaryStorageMsg msg,
+                                        ReturnValueCompletion<ConvertVolumeEncryptionOnPrimaryStorageReply> completion) {
+        String details = String.format("primary storage controller[%s] does not support volume encryption conversion", getIdentity());
+        completion.fail(new ErrorCode(SysErrors.UNIMPLEMENTED_OPERATION_ERROR.toString(), "unimplemented operation", details));
+    }
+
+    @Override
     public void flattenVolume(String installPath, ReturnValueCompletion<VolumeStats> comp) {
         // TODO flatten snapshot
         stats(installPath, comp);
@@ -1125,7 +1143,8 @@ public class ExponStorageController implements PrimaryStorageControllerSvc, Prim
     }
 
     @Override
-    public void expandVolume(String installPath, long size, ReturnValueCompletion<VolumeStats> comp) {
+    public void expandVolume(VolumeInventory volume, long size, ReturnValueCompletion<VolumeStats> comp) {
+        String installPath = volume.getInstallPath();
         VolumeModule vol = apiHelper.expandVolume(getVolIdFromPath(installPath), size);
         VolumeStats stats = new VolumeStats();
         stats.setInstallPath(installPath);

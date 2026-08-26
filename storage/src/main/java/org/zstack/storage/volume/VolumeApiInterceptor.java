@@ -54,6 +54,7 @@ import org.zstack.header.vm.VmInstanceVO_;
 import org.zstack.header.volume.APIAttachDataVolumeToHostMsg;
 import org.zstack.header.volume.APIAttachDataVolumeToVmMsg;
 import org.zstack.header.volume.APIBackupDataVolumeMsg;
+import org.zstack.header.volume.APIChangeVolumeEncryptionMsg;
 import org.zstack.header.volume.APIChangeVolumeStateMsg;
 import org.zstack.header.volume.APICreateDataVolumeFromVolumeTemplateMsg;
 import org.zstack.header.volume.APICreateDataVolumeMsg;
@@ -148,6 +149,8 @@ public class VolumeApiInterceptor implements Component, GlobalApiMessageIntercep
             validate((APIDetachDataVolumeFromHostMsg) msg);
         } else if (msg instanceof APIFlattenVolumeMsg) {
             validate((APIFlattenVolumeMsg) msg);
+        } else if (msg instanceof APIChangeVolumeEncryptionMsg) {
+            validate((APIChangeVolumeEncryptionMsg) msg);
         } else if (msg instanceof APIUndoSnapshotCreationMsg) {
             validate((APIUndoSnapshotCreationMsg) msg);
         } else if (msg instanceof APICreateVmInstanceMsg) {
@@ -603,6 +606,44 @@ public class VolumeApiInterceptor implements Component, GlobalApiMessageIntercep
         boolean isShareable = Q.New(VolumeVO.class).eq(VolumeVO_.uuid, msg.getVolumeUuid()).select(VolumeVO_.isShareable).findValue();
         if (isShareable) {
             throw new ApiMessageInterceptionException(argerr("cannot flatten a shareable volume[uuid:%s]", msg.getVolumeUuid()));
+        }
+    }
+
+    private void validate(APIChangeVolumeEncryptionMsg msg) {
+        Tuple t = Q.New(VolumeVO.class)
+                .select(VolumeVO_.status, VolumeVO_.state, VolumeVO_.vmInstanceUuid)
+                .eq(VolumeVO_.uuid, msg.getVolumeUuid())
+                .findTuple();
+        VolumeStatus status = (VolumeStatus) t.get(0);
+        VolumeState state = (VolumeState) t.get(1);
+        String vmUuid = (String) t.get(2);
+
+        if (status != VolumeStatus.Ready) {
+            throw new ApiMessageInterceptionException(operr(
+                    "volume[uuid:%s] is not in status Ready, current is %s, cannot change encryption",
+                    msg.getVolumeUuid(), status));
+        }
+        if (state != VolumeState.Enabled) {
+            throw new ApiMessageInterceptionException(operr(
+                    "volume[uuid:%s] is not in state Enabled, current is %s, cannot change encryption",
+                    msg.getVolumeUuid(), state));
+        }
+        if (Q.New(VolumeHostRefVO.class).eq(VolumeHostRefVO_.volumeUuid, msg.getVolumeUuid()).isExists()) {
+            throw new ApiMessageInterceptionException(operr(
+                    "volume[uuid:%s] is attached to a host, cannot change encryption", msg.getVolumeUuid()));
+        }
+        if (vmUuid == null) {
+            return;
+        }
+
+        VmInstanceState vmState = Q.New(VmInstanceVO.class)
+                .select(VmInstanceVO_.state)
+                .eq(VmInstanceVO_.uuid, vmUuid)
+                .findValue();
+        if (vmState != VmInstanceState.Stopped) {
+            throw new ApiMessageInterceptionException(operr(
+                    "volume[uuid:%s] is attached to vm[uuid:%s] whose state is %s, only Stopped is allowed to change encryption",
+                    msg.getVolumeUuid(), vmUuid, vmState));
         }
     }
 

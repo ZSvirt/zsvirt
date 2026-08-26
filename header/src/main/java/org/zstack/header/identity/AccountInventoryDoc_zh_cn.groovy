@@ -31,6 +31,12 @@ doc {
 		since "zsv 4.0.0"
 	}
 	field {
+		name "source"
+		desc "账户来源，创建时确定且不可修改"
+		type "String"
+		since "zsv 5.1.0"
+	}
+	field {
 		name "state"
 		desc "账户状态"
 		type "String"

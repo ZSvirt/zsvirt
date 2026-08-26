@@ -9,7 +9,6 @@ import org.zstack.core.cloudbus.MessageSafe;
 import org.zstack.core.componentloader.PluginRegistry;
 import org.zstack.core.config.GlobalConfigException;
 import org.zstack.core.db.*;
-import org.zstack.core.db.SimpleQuery.Op;
 import org.zstack.core.defer.Defer;
 import org.zstack.core.defer.Deferred;
 import org.zstack.core.errorcode.ErrorFacade;
@@ -77,6 +76,9 @@ public class TagManagerImpl extends AbstractService implements TagManager,
     private Map<String, List<SystemTagResourceDeletionOperator>> resourceDeletionOperators = new HashMap<>();
     private Map<String, List<SystemTagLifeCycleExtension>> lifeCycleExtensions = new HashMap<>();
     private List<CreateTagFromMsgExtensionPoint> createTagExtensions = new ArrayList<>();
+    private List<SystemTagPersistExtensionPoint> persistExtensions = new ArrayList<>();
+    private List<SystemTagTokenDecryptExtensionPoint> tokenDecryptExtensions = new ArrayList<>();
+    private List<SystemTagCopyExtensionPoint> copyExtensions = new ArrayList<>();
     private List<Class> autoDeleteTagClasses;
 
 
@@ -209,6 +211,40 @@ public class TagManagerImpl extends AbstractService implements TagManager,
         }
 
         createTagExtensions.addAll(pluginRgty.getExtensionList(CreateTagFromMsgExtensionPoint.class));
+        persistExtensions.addAll(pluginRgty.getExtensionList(SystemTagPersistExtensionPoint.class));
+        tokenDecryptExtensions.addAll(pluginRgty.getExtensionList(SystemTagTokenDecryptExtensionPoint.class));
+        copyExtensions.addAll(pluginRgty.getExtensionList(SystemTagCopyExtensionPoint.class));
+    }
+
+    @Override
+    public String applyBeforePersist(String resourceUuid, String resourceType, String tag) {
+        String result = tag;
+        for (SystemTagPersistExtensionPoint ext : persistExtensions) {
+            result = ext.beforePersist(resourceUuid, resourceType, result);
+        }
+        return result;
+    }
+
+    @Override
+    public String decryptTokenValue(String resourceType, String tagHead, String tokenName, String tokenValue) {
+        String result = tokenValue;
+        for (SystemTagTokenDecryptExtensionPoint ext : tokenDecryptExtensions) {
+            result = ext.decryptTokenValue(resourceType, tagHead, tokenName, result);
+        }
+        return result;
+    }
+
+    @Override
+    public String transformTagForCopy(String srcResourceUuid, String srcResourceType,
+                                      String dstResourceUuid, String dstResourceType, String srcTag) {
+        String result = srcTag;
+        for (SystemTagCopyExtensionPoint ext : copyExtensions) {
+            result = ext.transformTagForCopy(srcResourceUuid, srcResourceType, dstResourceUuid, dstResourceType, result);
+            if (result == null) {
+                return null;
+            }
+        }
+        return result;
     }
 
     private boolean isTagExisting(String resourceUuid, String tag, TagType type, String resourceType) {
@@ -248,6 +284,7 @@ public class TagManagerImpl extends AbstractService implements TagManager,
             dbf.getEntityManager().refresh(vo);
             return UserTagInventory.valueOf(vo);
         } else {
+            tag = applyBeforePersist(resourceUuid, resourceType, tag);
             SystemTagVO vo = new SystemTagVO();
             vo.setResourceType(resourceType);
             vo.setUuid(Platform.getUuid());
@@ -293,6 +330,8 @@ public class TagManagerImpl extends AbstractService implements TagManager,
 
         validateSystemTag(resourceUuid, resourceType, tag);
 
+        tag = applyBeforePersist(resourceUuid, resourceType, tag);
+
         SystemTagVO vo = new SystemTagVO();
         vo.setResourceType(resourceType);
         vo.setUuid(Platform.getUuid());
@@ -323,6 +362,8 @@ public class TagManagerImpl extends AbstractService implements TagManager,
         }
 
         validateSystemTag(resourceUuid, resourceType, tag);
+
+        tag = applyBeforePersist(resourceUuid, resourceType, tag);
 
         SystemTagVO vo = new SystemTagVO();
         vo.setResourceType(resourceType);
@@ -434,10 +475,19 @@ public class TagManagerImpl extends AbstractService implements TagManager,
         }
 
         for (SystemTagVO stag : srctags) {
+            if (!isCloneable(stag.getTag(), srcResourceType)) {
+                continue;
+            }
+            String dstTag = transformTagForCopy(srcResourceUuid, srcResourceType,
+                    dstResourceUuid, dstResourceType, stag.getTag());
+            if (dstTag == null) {
+                continue;
+            }
             SystemTagVO ntag = new SystemTagVO(stag);
             ntag.setUuid(Platform.getUuid());
             ntag.setResourceType(dstResourceType);
             ntag.setResourceUuid(dstResourceUuid);
+            ntag.setTag(dstTag);
             dbf.getEntityManager().persist(ntag);
         }
     }
@@ -447,6 +497,7 @@ public class TagManagerImpl extends AbstractService implements TagManager,
         SystemTagVO vo = dbf.findByUuid(tagUuid, SystemTagVO.class);
         SystemTagInventory old = SystemTagInventory.valueOf(vo);
         if (!vo.getTag().equals(newTag)) {
+            newTag = applyBeforePersist(vo.getResourceUuid(), vo.getResourceType(), newTag);
             vo.setTag(newTag);
 
             preTagUpdated(old, vo.toInventory());
@@ -462,31 +513,31 @@ public class TagManagerImpl extends AbstractService implements TagManager,
 
     @Override
     public List<String> findSystemTags(String resourceUuid) {
-        SimpleQuery<SystemTagVO> q = dbf.createQuery(SystemTagVO.class);
-        q.select(SystemTagVO_.tag);
-        q.add(SystemTagVO_.resourceUuid, SimpleQuery.Op.EQ, resourceUuid);
-        return q.listValue();
+        return Q.New(SystemTagVO.class)
+                .select(SystemTagVO_.tag)
+                .eq(SystemTagVO_.resourceUuid, resourceUuid)
+                .listValues();
     }
 
     @Override
     public List<String> findUserTags(String resourceUuid) {
-        SimpleQuery<UserTagVO> q = dbf.createQuery(UserTagVO.class);
-        q.select(UserTagVO_.tag);
-        q.add(UserTagVO_.resourceUuid, SimpleQuery.Op.EQ, resourceUuid);
-        return q.listValue();
+        return Q.New(UserTagVO.class)
+                .select(UserTagVO_.tag)
+                .eq(UserTagVO_.resourceUuid, resourceUuid)
+                .listValues();
     }
 
     private boolean hasTag(String resourceUuid, String tag, TagType tagType) {
         if (tagType == TagType.System) {
-            SimpleQuery<SystemTagVO> q = dbf.createQuery(SystemTagVO.class);
-            q.add(SystemTagVO_.resourceUuid, SimpleQuery.Op.EQ, resourceUuid);
-            q.add(SystemTagVO_.tag, SimpleQuery.Op.EQ, tag);
-            return q.isExists();
+            return Q.New(SystemTagVO.class)
+                    .eq(SystemTagVO_.resourceUuid, resourceUuid)
+                    .eq(SystemTagVO_.tag, tag)
+                    .isExists();
         } else {
-            SimpleQuery<UserTagVO> q = dbf.createQuery(UserTagVO.class);
-            q.add(UserTagVO_.resourceUuid, SimpleQuery.Op.EQ, resourceUuid);
-            q.add(UserTagVO_.tag, SimpleQuery.Op.EQ, tag);
-            return q.isExists();
+            return Q.New(UserTagVO.class)
+                    .eq(UserTagVO_.resourceUuid, resourceUuid)
+                    .eq(UserTagVO_.tag, tag)
+                    .isExists();
         }
     }
 
@@ -552,22 +603,22 @@ public class TagManagerImpl extends AbstractService implements TagManager,
     private boolean deleteSystemTag(String tag, String resourceUuid, String resourceType, Boolean inherit, boolean useLike) {
         DebugUtils.Assert(tag != null || resourceUuid != null || resourceType != null,
                 "tag, resourceUuid, resourceType cannot all be null");
-        SimpleQuery<SystemTagVO> q = dbf.createQuery(SystemTagVO.class);
+        Q q = Q.New(SystemTagVO.class);
         if (tag != null) {
             if (useLike) {
-                q.add(SystemTagVO_.tag, Op.LIKE, tag);
+                q.like(SystemTagVO_.tag, tag);
             } else {
-                q.add(SystemTagVO_.tag, Op.EQ, tag);
+                q.eq(SystemTagVO_.tag, tag);
             }
         }
         if (resourceUuid != null) {
-            q.add(SystemTagVO_.resourceUuid, Op.EQ, resourceUuid);
+            q.eq(SystemTagVO_.resourceUuid, resourceUuid);
         }
         if (resourceType != null) {
-            q.add(SystemTagVO_.resourceType, Op.EQ, resourceType);
+            q.eq(SystemTagVO_.resourceType, resourceType);
         }
         if (inherit != null) {
-            q.add(SystemTagVO_.inherent, Op.EQ, inherit);
+            q.eq(SystemTagVO_.inherent, inherit);
         }
 
         List<SystemTagVO> vos = q.list();

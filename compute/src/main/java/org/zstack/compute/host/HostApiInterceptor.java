@@ -156,6 +156,9 @@ public class HostApiInterceptor implements GlobalApiMessageInterceptor {
     }
 
     private void validate(APIMountBlockDeviceMsg msg) {
+        validatePath(msg.getPath());
+        MountPointPathValidator.validateAndNormalize(msg.getMountPoint());
+
         if (msg.getPassword() != null) {
             return;
         }
@@ -166,16 +169,12 @@ public class HostApiInterceptor implements GlobalApiMessageInterceptor {
         }
         msg.setPassword(proxyHardware.getPassword());
         msg.setUsername(msg.getUsername() != null ? msg.getUsername() : proxyHardware.getUsername());
-
-        validatePath(msg.getPath());
-        validateMountPoint(msg.getMountPoint());
     }
 
     private void validate(APIUpdateHostnameMsg msg) {
         VmHostnameUtils.validateHostname(msg.getHostname(), false);
     }
 
-    private static final String SAFE_MOUNT_POINT_PATTERN = "^[a-zA-Z0-9_\\-./]+$";
     private static final String SAFE_DEVICE_PATH_PATTERN = "^[a-zA-Z0-9_\\-./:=+]+$";
 
     private void validateAbsolutePathCommon(String value, String fieldName) {
@@ -205,23 +204,6 @@ public class HostApiInterceptor implements GlobalApiMessageInterceptor {
                             "shell metacharacters are rejected to prevent command injection. " +
                             "invalid value detected: '%s'",
                     SAFE_DEVICE_PATH_PATTERN, path));
-        }
-    }
-
-    private void validateMountPoint(String mountPoint) {
-        validateAbsolutePathCommon(mountPoint, "mount point");
-        if (!mountPoint.matches(SAFE_MOUNT_POINT_PATTERN)) {
-            throw new ApiMessageInterceptionException(operr(
-                    "mount point must match pattern '%s'. " +
-                            "allowed characters: alphanumeric, '-', '_', '.', '/'. " +
-                            "valid examples: /mnt/data, /volumes/drive01, /backup-2023.disk. " +
-                            "shell metacharacters are rejected to prevent command injection. " +
-                            "invalid value detected: '%s'",
-                    SAFE_MOUNT_POINT_PATTERN, mountPoint));
-        }
-        if (mountPoint.endsWith("/") && !mountPoint.equals("/")) {
-            throw new ApiMessageInterceptionException(operr(
-                    "mountPoint should not end with '/' except root directory"));
         }
     }
 

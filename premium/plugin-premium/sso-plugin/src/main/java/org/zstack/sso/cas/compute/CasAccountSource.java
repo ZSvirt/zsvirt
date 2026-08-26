@@ -21,7 +21,6 @@ import java.util.List;
 
 import static org.zstack.core.Platform.operr;
 import static org.zstack.identity.imports.AccountImportsManager.accountSourceQueueSyncSignature;
-import static org.zstack.sso.SSOConstants.CAS_CLIENT_TYPE;
 
 public class CasAccountSource extends SSOAccountSource {
     @Autowired
@@ -39,11 +38,6 @@ public class CasAccountSource extends SSOAccountSource {
         }
         self = clientVO;
         return clientVO;
-    }
-
-    @Override
-    public String type() {
-        return CAS_CLIENT_TYPE;
     }
 
     @Override

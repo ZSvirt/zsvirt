@@ -7,6 +7,7 @@ import org.zstack.compute.host.HostGlobalConfig;
 import org.zstack.compute.vm.CrashStrategy;
 import org.zstack.compute.vm.VmGlobalConfig;
 import org.zstack.compute.vm.VmNicManager;
+import org.zstack.compute.vm.VmBootTimeUtils;
 import org.zstack.core.CoreGlobalProperty;
 import org.zstack.core.Platform;
 import org.zstack.core.ansible.AnsibleFacade;
@@ -21,7 +22,6 @@ import org.zstack.core.config.schema.GuestOsCharacter;
 import org.zstack.core.db.DatabaseFacade;
 import org.zstack.core.db.Q;
 import org.zstack.core.db.SQL;
-import org.zstack.core.db.SimpleQuery;
 import org.zstack.core.thread.AsyncThread;
 import org.zstack.core.thread.PeriodicTask;
 import org.zstack.core.thread.ThreadFacade;
@@ -97,6 +97,7 @@ import static org.zstack.utils.CollectionUtils.transform;
 public class KVMHostFactory extends AbstractService implements HypervisorFactory, Component,
         ManagementNodeReadyExtensionPoint, MaxDataVolumeNumberExtensionPoint, HypervisorMessageFactory, ProxyHardwareFactory {
     private static final CLogger logger = Utils.getLogger(KVMHostFactory.class);
+    private static final VmBootTimeUtils vmBootTimeUtils = new VmBootTimeUtils();
 
     public static final HypervisorType hypervisorType = new HypervisorType(KVMConstant.KVM_HYPERVISOR_TYPE);
     public static final VolumeFormat QCOW2_FORMAT = new VolumeFormat(VolumeConstant.VOLUME_FORMAT_QCOW2, hypervisorType);
@@ -228,13 +229,13 @@ public class KVMHostFactory extends AbstractService implements HypervisorFactory
         List<String> hostUuids = new ArrayList<String>();
         int start = 0;
         for (int i = 0; i < times; i++) {
-            SimpleQuery<KVMHostVO> q = dbf.createQuery(KVMHostVO.class);
-            q.select(HostVO_.uuid);
-            // disconnected host will be handled by HostManager
-            q.add(HostVO_.status, SimpleQuery.Op.EQ, HostStatus.Connected);
-            q.setLimit(qun);
-            q.setStart(start);
-            List<String> lst = q.listValue();
+            List<String> lst = Q.New(KVMHostVO.class)
+                    .select(HostVO_.uuid)
+                    // disconnected host will be handled by HostManager
+                    .eq(HostVO_.status, HostStatus.Connected)
+                    .limit(qun)
+                    .start(start)
+                    .listValues();
             start += qun;
             for (String huuid : lst) {
                 if (!destMaker.isManagedByUs(huuid)) {
@@ -540,6 +541,7 @@ public class KVMHostFactory extends AbstractService implements HypervisorFactory
         });
 
         restf.registerSyncHttpCallHandler(KVMConstant.KVM_REPORT_VM_REBOOT_EVENT, ReportVmRebootEventCmd.class, cmd -> {
+            vmBootTimeUtils.resetBootTime(cmd.vmUuid);
             evf.fire(VmCanonicalEvents.VM_LIBVIRT_REPORT_REBOOT, cmd.vmUuid);
 
             return null;
@@ -1229,5 +1231,13 @@ public class KVMHostFactory extends AbstractService implements HypervisorFactory
                 "where host.uuid = kvm.uuid " +
                 "and host.managementIp = :hostname";
         return SQL.New(sql, KVMHostVO.class).param("hostname", hostName).find();
+    }
+
+    @Override
+    public String getClusterUuid(String hostName) {
+        return Q.New(HostVO.class)
+                .select(HostVO_.clusterUuid)
+                .eq(HostVO_.managementIp, hostName)
+                .findValue();
     }
 }

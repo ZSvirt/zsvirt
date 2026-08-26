@@ -19,9 +19,11 @@ public class MigrateVmOnHypervisorMsg extends NeedReplyMessage implements HostMe
     private boolean migrateFromDestination;
     // A map from old disk to new disk
     private Map<String, String> diskMigrationMap;
+    private Map<String, String> volumeLuksSecrets;
     private boolean reload;
     private Integer downTime;
     private long bandwidth;
+    private Boolean enableMigrationTls;
 
     public Integer getDownTime() {
         return downTime;
@@ -106,5 +108,21 @@ public class MigrateVmOnHypervisorMsg extends NeedReplyMessage implements HostMe
 
     public void setBandwidth(long bandwidth) {
         this.bandwidth = bandwidth;
+    }
+
+    public Map<String, String> getVolumeLuksSecrets() {
+        return volumeLuksSecrets;
+    }
+
+    public void setVolumeLuksSecrets(Map<String, String> volumeLuksSecrets) {
+        this.volumeLuksSecrets = volumeLuksSecrets;
+    }
+
+    public Boolean getEnableMigrationTls() {
+        return enableMigrationTls;
+    }
+
+    public void setEnableMigrationTls(Boolean enableMigrationTls) {
+        this.enableMigrationTls = enableMigrationTls;
     }
 }

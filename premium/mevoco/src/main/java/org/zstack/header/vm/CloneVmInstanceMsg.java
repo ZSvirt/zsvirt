@@ -28,10 +28,12 @@ public class CloneVmInstanceMsg extends NeedReplyMessage implements VmInstanceMe
     private List<String> l3NetworkUuids;
     private String defaultL3NetworkUuid;
     private List<VmNicParam> vmNicParams;
+    private Map<String, Map<String, String>> vmNicSecurityPolicyByDeviceId = new HashMap<>();
     private List<DiskAO> diskAOs;
     private VolumeSnapshotGroupInventory volumeSnapshotGroup;
     private VmCustomSpecificationStruct vmCustomSpecification;
     private Boolean resetTpm;
+    private Boolean vmEncryption;
 
     @Override
     public String getVmInstanceUuid() {
@@ -178,6 +180,17 @@ public class CloneVmInstanceMsg extends NeedReplyMessage implements VmInstanceMe
         this.vmNicParams = vmNicParams;
     }
 
+    public Map<String, Map<String, String>> getVmNicSecurityPolicyByDeviceId() {
+        if (vmNicSecurityPolicyByDeviceId == null) {
+            vmNicSecurityPolicyByDeviceId = new HashMap<>();
+        }
+        return vmNicSecurityPolicyByDeviceId;
+    }
+
+    public void setVmNicSecurityPolicyByDeviceId(Map<String, Map<String, String>> vmNicSecurityPolicyByDeviceId) {
+        this.vmNicSecurityPolicyByDeviceId = vmNicSecurityPolicyByDeviceId;
+    }
+
     public List<DiskAO> getDiskAOs() {
         return diskAOs;
     }
@@ -208,6 +221,14 @@ public class CloneVmInstanceMsg extends NeedReplyMessage implements VmInstanceMe
 
     public void setResetTpm(Boolean resetTpm) {
         this.resetTpm = resetTpm;
+    }
+
+    public Boolean getVmEncryption() {
+        return vmEncryption;
+    }
+
+    public void setVmEncryption(Boolean vmEncryption) {
+        this.vmEncryption = vmEncryption;
     }
 
     public Map<String, DiskAO> getDiskAOsByVolumeUuid() {

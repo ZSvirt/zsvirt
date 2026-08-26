@@ -194,7 +194,7 @@
   {
     "raw": "Only vm in state: %s can be exported.",
     "en_US": "Only vm in state: {0} can be exported.",
-    "zh_CN": "只能导出状态为{0}的云主机。",
+    "zh_CN": "只能导出状态为{0}的虚拟机。",
     "arguments": [
       "VmInstanceState.Stopped.toString()"
     ],

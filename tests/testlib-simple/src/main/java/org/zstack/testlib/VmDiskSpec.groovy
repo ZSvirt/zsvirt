@@ -5,6 +5,7 @@ import org.zstack.utils.data.SizeUnit
 
 class VmDiskSpec extends Spec {
     private Closure primaryStorage = {}
+    private Closure diskOffering = {}
 
     @SpecParam(required = false)
     boolean boot
@@ -21,8 +22,6 @@ class VmDiskSpec extends Spec {
      */
     @SpecParam(required = false)
     String templateUuid
-    @SpecParam(required = false)
-    String diskOfferingUuid
     @SpecParam(required = false)
     String sourceType
     /**
@@ -59,10 +58,10 @@ class VmDiskSpec extends Spec {
         ao.platform = platform
         ao.guestOsType = guestOsType
         ao.architecture = architecture
-        ao.primaryStorageUuid = primaryStorage();
+        ao.primaryStorageUuid = primaryStorage()
         ao.size = size
         ao.templateUuid = templateUuid
-        ao.diskOfferingUuid = diskOfferingUuid
+        ao.diskOfferingUuid = diskOffering()
         ao.sourceType = sourceType
         ao.sourceUuid = sourceUuid
         ao.systemTags = new ArrayList<>(systemTags)
@@ -75,13 +74,26 @@ class VmDiskSpec extends Spec {
     }
 
     @SpecMethod
-    void diskUsePrimaryStorage(String name) {
+    void usePrimaryStorage(String name) {
         preCreate {
             addDependency(name, PrimaryStorageSpec.class)
         }
         primaryStorage = {
             PrimaryStorageSpec spec = findSpec(name, PrimaryStorageSpec.class)
             assert spec != null: "cannot find primaryStorage[$name], check the vm block of environment"
+            return spec.inventory.uuid
+        }
+    }
+
+    @SpecMethod
+    void useDiskOffering(String name) {
+        preCreate {
+            addDependency(name, DiskOfferingSpec.class)
+        }
+
+        diskOffering = {
+            def spec = findSpec(name, DiskOfferingSpec.class) as DiskOfferingSpec
+            assert spec != null: "cannot find diskOffering[$name], check the disk block of environment"
             return spec.inventory.uuid
         }
     }

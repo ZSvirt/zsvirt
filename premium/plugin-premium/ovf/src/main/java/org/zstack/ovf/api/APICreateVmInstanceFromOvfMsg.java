@@ -41,8 +41,13 @@ public class APICreateVmInstanceFromOvfMsg extends APICreateMessage implements A
     @APIParam(required = false)
     private boolean deleteImageOnFail = false;
 
+    @APIParam(required = false)
+    private Boolean vmEncryption;
+
     @APINoSee
     private List<CreateVmFromOvfImageParam> imageInfos;
+    @APINoSee
+    private Boolean ovfDiskEncryption;
     @APINoSee
     private APICreateVmInstanceMsg createVmMsg;
 
@@ -94,12 +99,28 @@ public class APICreateVmInstanceFromOvfMsg extends APICreateMessage implements A
         this.deleteImageOnFail = deleteImageOnFail;
     }
 
+    public Boolean getVmEncryption() {
+        return vmEncryption;
+    }
+
+    public void setVmEncryption(Boolean vmEncryption) {
+        this.vmEncryption = vmEncryption;
+    }
+
     public List<CreateVmFromOvfImageParam> getImageInfos() {
         return imageInfos;
     }
 
     public void setImageInfos(List<CreateVmFromOvfImageParam> imageInfos) {
         this.imageInfos = imageInfos;
+    }
+
+    public Boolean getOvfDiskEncryption() {
+        return ovfDiskEncryption;
+    }
+
+    public void setOvfDiskEncryption(Boolean ovfDiskEncryption) {
+        this.ovfDiskEncryption = ovfDiskEncryption;
     }
 
     public APICreateVmInstanceMsg getCreateVmMsg() {
@@ -116,7 +137,7 @@ public class APICreateVmInstanceFromOvfMsg extends APICreateMessage implements A
         msg.setXmlBase64("PD94bWwgdmVyc2lvbj0nMS4wJyBlbmNvZGluZz0nVVRGLTgnPz4KPEVudmVsb3BlIHhtbG5zPSJodHRwOi8vc2NoZW1hcy5kbXR");
         msg.setJsonImageInfos("[{\"ovfId\":\"vm-1-system.vmdk\",\"type\":\"Download\",\"installPath\":\"http://xxx/vm-1-system.vmdk\"}]");
         msg.setBackupStorageUuid(uuid());
-        msg.setJsonCreateVmParam("{\"name\":\"a\",\"clusterUuid\":\"" + uuid() + "\",\"l3NetworkUuids\":[\"" + uuid() + "\"]}");
+        msg.setJsonCreateVmParam("{\"name\":\"a\",\"clusterUuid\":\"" + uuid() + "\",\"l3NetworkUuids\":[\"" + uuid() + "\"],\"disk\":{\"encrypted\":true}}");
 
         return msg;
     }

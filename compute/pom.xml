@@ -5,7 +5,7 @@
         <artifactId>zstack</artifactId>
         <groupId>org.zstack</groupId>
         <version>5.0.0</version>
-        <relativePath>..</relativePath>
+        <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>compute</artifactId>
     <name>compute</name>
@@ -86,6 +86,11 @@
         <dependency>
             <groupId>org.zstack</groupId>
             <artifactId>header</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.zstack</groupId>
+            <artifactId>allocator</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

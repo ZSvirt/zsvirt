@@ -34,9 +34,6 @@ import org.zstack.header.identity.quota.QuotaMessageHandler;
 import org.zstack.header.message.APIMessage;
 import org.zstack.header.message.Message;
 import org.zstack.header.message.MessageReply;
-import org.zstack.header.query.AddExpandedQueryExtensionPoint;
-import org.zstack.header.query.ExpandedQueryAliasStruct;
-import org.zstack.header.query.ExpandedQueryStruct;
 import org.zstack.header.tag.*;
 import org.zstack.header.vm.VmNicChangeNetworkExtensionPoint;
 import org.zstack.header.vm.VmNicInventory;
@@ -66,7 +63,7 @@ import static org.zstack.utils.CollectionUtils.*;
  * Created by frank on 8/8/2015.
  */
 public class LoadBalancerManagerImpl extends AbstractService implements LoadBalancerManager,
-        AddExpandedQueryExtensionPoint, ReportQuotaExtensionPoint, VipGetUsedPortRangeExtensionPoint, VipGetServiceReferencePoint, VmNicChangeNetworkExtensionPoint {
+        ReportQuotaExtensionPoint, VipGetUsedPortRangeExtensionPoint, VipGetServiceReferencePoint, VmNicChangeNetworkExtensionPoint {
     private static final CLogger logger = Utils.getLogger(LoadBalancerManagerImpl.class);
 
     @Autowired
@@ -748,41 +745,6 @@ public class LoadBalancerManagerImpl extends AbstractService implements LoadBala
     public LoadBalancerFactory getLoadBalancerFactoryByApplianceVmType(String applianceVmType) {
         LoadBalancerFactory f = lbFactories.get(applianceVmType);
         return f;
-    }
-
-    @Override
-    public List<ExpandedQueryStruct> getExpandedQueryStructs() {
-        List<ExpandedQueryStruct> structs = new ArrayList<ExpandedQueryStruct>();
-
-        ExpandedQueryStruct s = new ExpandedQueryStruct();
-        s.setExpandedField("loadBalancerListenerRef");
-        s.setHidden(true);
-        s.setForeignKey("uuid");
-        s.setExpandedInventoryKey("vmNicUuid");
-        s.setInventoryClassToExpand(VmNicInventory.class);
-        s.setInventoryClass(LoadBalancerListenerVmNicRefInventory.class);
-        structs.add(s);
-
-        s = new ExpandedQueryStruct();
-        s.setInventoryClassToExpand(VipInventory.class);
-        s.setExpandedField("loadBalancer");
-        s.setInventoryClass(LoadBalancerInventory.class);
-        s.setForeignKey("uuid");
-        s.setExpandedInventoryKey("vipUuid");
-        structs.add(s);
-        return structs;
-    }
-
-    @Override
-    public List<ExpandedQueryAliasStruct> getExpandedQueryAliasesStructs() {
-        List<ExpandedQueryAliasStruct> structs = new ArrayList<ExpandedQueryAliasStruct>();
-
-        ExpandedQueryAliasStruct s = new ExpandedQueryAliasStruct();
-        s.setInventoryClass(VmNicInventory.class);
-        s.setAlias("loadBalancerListener");
-        s.setExpandedField("loadBalancerListenerRef.listener");
-        structs.add(s);
-        return structs;
     }
 
     @Override

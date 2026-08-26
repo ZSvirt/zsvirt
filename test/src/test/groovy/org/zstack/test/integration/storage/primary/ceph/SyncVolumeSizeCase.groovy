@@ -1,5 +1,8 @@
 package org.zstack.test.integration.storage.primary.ceph
 
+import org.zstack.core.cloudbus.CloudBus
+import org.zstack.header.storage.primary.ResizeVolumeOnPrimaryStorageMsg
+import org.zstack.header.storage.primary.ResizeVolumeOnPrimaryStorageReply
 import org.zstack.sdk.VolumeInventory
 import org.zstack.sdk.VmInstanceInventory
 import org.zstack.storage.ceph.primary.CephPrimaryStorageBase
@@ -27,6 +30,13 @@ class SyncVolumeSizeCase extends SubCase{
 
     @Override
     void test() {
+        env.message(ResizeVolumeOnPrimaryStorageMsg.class) { ResizeVolumeOnPrimaryStorageMsg msg, CloudBus bus ->
+            ResizeVolumeOnPrimaryStorageReply reply = new ResizeVolumeOnPrimaryStorageReply()
+            msg.volume.size = msg.size
+            reply.volume = msg.volume
+            bus.reply(msg, reply)
+        }
+
         env.create {
             testSyncVolumeSize()
         }

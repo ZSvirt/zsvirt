@@ -5,6 +5,7 @@ import org.zstack.utils.CollectionDSL;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 
@@ -53,6 +54,13 @@ public class AllocatePrimaryStorageMsg extends NeedReplyMessage {
 
     public void setRequiredFeatures(Set<PrimaryStorageFeature> requiredFeatures) {
         this.requiredFeatures = requiredFeatures;
+    }
+
+    public void addRequiredFeature(PrimaryStorageFeature requiredFeature) {
+        requiredFeatures = requiredFeatures == null || requiredFeatures.isEmpty()
+                ? EnumSet.of(requiredFeature)
+                : EnumSet.copyOf(requiredFeatures);
+        requiredFeatures.add(requiredFeature);
     }
 
     public List<String> getExcludePrimaryStorageTypes() {

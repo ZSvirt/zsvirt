@@ -3,6 +3,9 @@ package org.zstack.storage.migration.primary;
 import org.zstack.header.message.CancelMessage;
 import org.zstack.storage.migration.PrimaryStorageMigrateVmMessage;
 
+import java.util.Collections;
+import java.util.List;
+
 /**
  * Created by MaJin on 2019/9/9.
  */
@@ -16,6 +19,8 @@ public class PrimaryStorageCancelMigrateVmMsg extends CancelMessage implements P
     private boolean withDataVolumes = true;
 
     private boolean withSnapshots = false;
+
+    private List<VolumeMigrationAO> volumeMigrationAOs;
 
     public String getVmInstanceUuid() {
         return vmInstanceUuid;
@@ -55,5 +60,14 @@ public class PrimaryStorageCancelMigrateVmMsg extends CancelMessage implements P
 
     public void setDstHostUuid(String dstHostUuid) {
         this.dstHostUuid = dstHostUuid;
+    }
+
+    @Override
+    public List<VolumeMigrationAO> getVolumeMigrationAOs() {
+        return volumeMigrationAOs == null ? Collections.emptyList() : volumeMigrationAOs;
+    }
+
+    public void setVolumeMigrationAOs(List<VolumeMigrationAO> volumeMigrationAOs) {
+        this.volumeMigrationAOs = volumeMigrationAOs;
     }
 }

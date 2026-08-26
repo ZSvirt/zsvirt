@@ -19,6 +19,7 @@ import org.zstack.header.identity.AccountVO;
 import org.zstack.header.message.MessageReply;
 import org.zstack.header.storage.backup.*;
 import org.zstack.header.storage.volume.backup.VolumeBackupDeletionMsg;
+import org.zstack.header.storage.volume.backup.VolumeBackupDeletionStruct;
 import org.zstack.scheduler.SchedulerFacade;
 import org.zstack.utils.Utils;
 import org.zstack.utils.logging.CLogger;
@@ -110,6 +111,22 @@ public class VolumeBackupCascadeExtension extends AbstractCascadeExtension {
                     }
 
                     return msgs;
+                } else if (VolumeBackupVO.class.getSimpleName().equals(action.getParentIssuer())) {
+                    List<?> contexts = action.getParentIssuerContext();
+                    if (contexts == null) {
+                        return new ArrayList<>();
+                    }
+                    return contexts.stream()
+                            .filter(it -> it instanceof VolumeBackupDeletionStruct)
+                            .map(it -> {
+                                VolumeBackupDeletionStruct struct = (VolumeBackupDeletionStruct) it;
+                                VolumeBackupDeletionMsg msg = new VolumeBackupDeletionMsg();
+                                msg.setUuid(struct.getVolumeBackupUuid());
+                                msg.setBackupStorageUuids(struct.getBackupStorageUuids());
+                                msg.setHandleDependency(struct.isHandleDependency());
+                                bus.makeTargetServiceIdByResourceUuid(msg, VolumeBackupConstant.SERVICE_ID, struct.getVolumeBackupUuid());
+                                return msg;
+                            }).collect(Collectors.toList());
                 } else {
                     return new ArrayList<>();
                 }
@@ -148,6 +165,11 @@ public class VolumeBackupCascadeExtension extends AbstractCascadeExtension {
 
     @Override
     public CascadeAction createActionForChildResource(CascadeAction action) {
+        if (CascadeConstant.DELETION_CODES.contains(action.getActionCode())
+                && VolumeBackupVO.class.getSimpleName().equals(action.getParentIssuer())) {
+            return action.copy();
+        }
+
         return null;
     }
 }

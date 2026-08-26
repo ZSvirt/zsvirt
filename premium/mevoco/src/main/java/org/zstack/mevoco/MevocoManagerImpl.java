@@ -2588,6 +2588,7 @@ public class MevocoManagerImpl extends AbstractService implements MevocoManager,
                             error(new FlowErrorHandler(whileCompletion) {
                                 @Override
                                 public void handle(ErrorCode errCode, Map data) {
+                                    vmInv.setError(errCode);
                                     whileCompletion.done();
                                 }
                             });

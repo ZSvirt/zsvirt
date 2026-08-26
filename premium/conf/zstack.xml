@@ -67,6 +67,7 @@
     <import resource="springConfigXml/ha.xml"/>
     <import resource="springConfigXml/HostAllocatorManager.xml"/>
     <import resource="springConfigXml/HostManager.xml"/>
+    <import resource="springConfigXml/hostPki.xml"/>
     <import resource="springConfigXml/ImageManager.xml"/>
     <import resource="springConfigXml/imagestore.xml"/>
     <import resource="springConfigXml/CbtBackupStorage.xml"/>
@@ -157,6 +158,7 @@
     <import resource="springConfigXml/vpcHa.xml" />
     <import resource="springConfigXml/LogConfiguration.xml"/>
     <import resource="springConfigXml/Log4j2Configuration.xml"/>
+    <import resource="springConfigXml/FluentBitConfiguration.xml"/>
     <import resource="springConfigXml/grafana.xml"/>
     <import resource="springConfigXml/guesttools.xml"/>
     <import resource="springConfigXml/drs.xml"/>
@@ -181,6 +183,7 @@
     <import resource="springConfigXml/memoryBalloon.xml"/>
     <import resource="springConfigXml/zsv.xml"/>
     <import resource="springConfigXml/telemetry.xml"/>
+    <import resource="springConfigXml/allocatorDomain.xml"/>
     <import resource="springConfigXml/virtualSwitch.xml"/>
     <import resource="springConfigXml/HostNetworkManager.xml"/>
     <import resource="springConfigXml/iam1/iam1-ensemble.xml"/>

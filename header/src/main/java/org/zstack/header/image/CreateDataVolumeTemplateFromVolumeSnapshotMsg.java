@@ -16,6 +16,7 @@ public class CreateDataVolumeTemplateFromVolumeSnapshotMsg extends NeedReplyMess
     private String description;
     private List<String> backupStorageUuids;
     private SessionInventory session;
+    private Boolean encrypted;
 
     public void setSnapshotUuid(String snapshotUuid) {
         this.snapshotUuid = snapshotUuid;
@@ -65,5 +66,13 @@ public class CreateDataVolumeTemplateFromVolumeSnapshotMsg extends NeedReplyMess
 
     public void setResourceUuid(String resourceUuid) {
         this.resourceUuid = resourceUuid;
+    }
+
+    public Boolean getEncrypted() {
+        return encrypted;
+    }
+
+    public void setEncrypted(Boolean encrypted) {
+        this.encrypted = encrypted;
     }
 }

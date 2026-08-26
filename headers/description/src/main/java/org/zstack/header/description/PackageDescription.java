@@ -1,12 +1,13 @@
 package org.zstack.header.description;
 
+import org.zstack.header.description.apis.ApiDescriptionBuilder;
 import org.zstack.header.description.ensemble.ResourceEnsembleContributorBuilder;
 import org.zstack.header.description.permission.PermissionBuilder;
+import org.zstack.header.description.query.ExpandedQueryBuilder;
 import org.zstack.header.description.resource.AttributeSupportResourceBuilder;
 import org.zstack.header.description.resource.GlobalReadableResourceBuilder;
 import org.zstack.header.description.role.RoleBuilder;
 import org.zstack.header.description.role.RoleContributorBuilder;
-import org.zstack.header.description.route.ApiRouteBuilder;
 import org.zstack.header.message.APIMessageDefinition;
 
 import java.util.List;
@@ -52,7 +53,7 @@ public interface PackageDescription {
     }
 
     /**
-     * Fluent API -> serviceId routing (configuration only; not consumed until a later step).
+     * Fluent API description: service routing and attributes (configuration only).
      * Prefer multi-line chains at call sites, e.g.
      * <pre>
      * apis()
@@ -64,10 +65,26 @@ public interface PackageDescription {
      *     .api(APISomeMsg.class, APIOtherMsg.class)
      *     .toService(OtherConstant.SERVICE_ID)
      *     .build();
+     *
+     * apis()
+     *     .api(APISomeMsg.class)
+     *     .toService(OtherConstant.SERVICE_ID)
+     *     .skipAudit()
+     *     .build();
      * </pre>
      */
-    default ApiRouteBuilder apis() {
-        return new ApiRouteBuilder(this);
+    default ApiDescriptionBuilder apis() {
+        return new ApiDescriptionBuilder(this);
+    }
+
+    /**
+     * Fluent inventory expanded-query description (configuration only).
+     * Parallel to {@link #expandedPermission}; execution reads
+     * {@link PackageDescriptionRegistry#expandedQueries} /
+     * {@link PackageDescriptionRegistry#expandedQueryAliases}.
+     */
+    default ExpandedQueryBuilder expandedQuery() {
+        return new ExpandedQueryBuilder();
     }
 
     /**

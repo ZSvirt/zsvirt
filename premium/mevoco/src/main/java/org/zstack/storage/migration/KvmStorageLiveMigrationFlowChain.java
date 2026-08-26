@@ -24,6 +24,7 @@ import org.zstack.header.errorcode.ErrorCodeList;
 import org.zstack.header.identity.AccountResourceRefVO;
 import org.zstack.header.identity.AccountResourceRefVO_;
 import org.zstack.header.message.MessageReply;
+import org.zstack.header.storage.migration.KvmStorageLiveMigrationExtensionPoint;
 import org.zstack.header.storage.primary.*;
 import org.zstack.header.storage.snapshot.*;
 import org.zstack.header.storage.snapshot.group.VolumeSnapshotGroupRefVO;
@@ -45,6 +46,7 @@ import org.zstack.storage.primary.local.LocalStorageConstants;
 import org.zstack.storage.primary.local.LocalStorageResourceRefVO;
 import org.zstack.storage.primary.local.LocalStorageResourceRefVO_;
 import org.zstack.storage.snapshot.reference.VolumeSnapshotReferenceUtils;
+import org.zstack.storage.migration.primary.VolumeMigrationAO;
 import org.zstack.storage.volume.VolumeSystemTags;
 import org.zstack.utils.DebugUtils;
 import org.zstack.utils.Utils;
@@ -86,6 +88,37 @@ public class KvmStorageLiveMigrationFlowChain {
         return new KvmStorageLiveMigrationFlowChain(paramIn);
     }
 
+    static void markDeletedSnapshotsInSnapshotGroup(List<String> snapshotUuids) {
+        if (snapshotUuids == null || snapshotUuids.isEmpty()) {
+            return;
+        }
+
+        List<String> snapshotGroupUuids = Q.New(VolumeSnapshotGroupRefVO.class)
+                .select(VolumeSnapshotGroupRefVO_.volumeSnapshotGroupUuid)
+                .in(VolumeSnapshotGroupRefVO_.volumeSnapshotUuid, snapshotUuids)
+                .listValues();
+        if (snapshotGroupUuids.isEmpty()) {
+            return;
+        }
+
+        SQL.New(VolumeSnapshotGroupRefVO.class)
+                .in(VolumeSnapshotGroupRefVO_.volumeSnapshotUuid, snapshotUuids)
+                .set(VolumeSnapshotGroupRefVO_.snapshotDeleted, true)
+                .update();
+
+        List<String> emptySnapshotGroupUuids = new LinkedHashSet<>(snapshotGroupUuids).stream()
+                .filter(snapshotGroupUuid -> !Q.New(VolumeSnapshotGroupRefVO.class)
+                        .eq(VolumeSnapshotGroupRefVO_.volumeSnapshotGroupUuid, snapshotGroupUuid)
+                        .eq(VolumeSnapshotGroupRefVO_.snapshotDeleted, false)
+                        .isExists())
+                .collect(Collectors.toList());
+        if (!emptySnapshotGroupUuids.isEmpty()) {
+            SQL.New(VolumeSnapshotGroupVO.class)
+                    .in(VolumeSnapshotGroupVO_.uuid, emptySnapshotGroupUuids)
+                    .hardDelete();
+        }
+    }
+
     private boolean psIsLocal(String psUuid) {
         return Q.New(PrimaryStorageVO.class)
                 .eq(PrimaryStorageVO_.uuid, psUuid)
@@ -125,6 +158,12 @@ public class KvmStorageLiveMigrationFlowChain {
         return disks;
     }
 
+    private String dstPsLabel() {
+        return msg.getVolumeMigrationAOs().stream()
+                .map(VolumeMigrationAO::getDstPrimaryStorageUuid)
+                .distinct().sorted().collect(Collectors.joining(","));
+    }
+
     private void initMigrationContext(PrimaryStorageMigrateVmContext ctx) {
         ctx.setCreatedVolumes(new ArrayList<>());
         ctx.setInitializedVolumes(new ArrayList<>());
@@ -133,7 +172,7 @@ public class KvmStorageLiveMigrationFlowChain {
         ctx.setMigrateStarted(false);
         String flowChainName = String.format("kvm-live-storage-migrate-vm-%s-to-ps-%s",
                 msg.getVmInstanceUuid(),
-                msg.getDstPrimaryStorageUuid());
+                dstPsLabel());
         if (ctx.getStartedFlowNames() == null) {
             ctx.setStartedFlowNames(new HashMap<>());
         }
@@ -160,6 +199,7 @@ public class KvmStorageLiveMigrationFlowChain {
         //  - feed old/new volume uuid, returns new/old volume uuid.
         final Map<String, String> volumeMappingDict = ctx.getVolumeMappingDict();
         final Map<String, String> volumeAllocatedUrlDict = new HashMap<>();
+        final Map<String, Long> sourceVolumeVirtualSizes = new HashMap<>();
         final List<VolumeInventory> createdVolumes = ctx.getCreatedVolumes();
         final List<VolumeInventory> initializedVolumes = ctx.getInitializedVolumes();
 
@@ -168,35 +208,56 @@ public class KvmStorageLiveMigrationFlowChain {
         paramIn.setVolumeMappingDict(volumeMappingDict);
         paramIn.setDstHostInventory(ctx.getDstHostInventory() != null ? ctx.getDstHostInventory() : paramIn.getDstHostInventory());
 
+        final Map<String, String> volToDst = VolumeMigrationAO.toVolToDstMap(msg.getVolumeMigrationAOs());
+
         FlowChain chain = FlowChainBuilder.newSimpleFlowChain();
         String flowChainName = String.format("kvm-live-storage-migrate-vm-%s-to-ps-%s",
                 msg.getVmInstanceUuid(),
-                msg.getDstPrimaryStorageUuid());
+                dstPsLabel());
         chain.setName(flowChainName);
 
         paramIn.getTemplate().getPrepareFlows(paramIn).forEach(chain::then);
+        for (KvmStorageLiveMigrationExtensionPoint ext : pluginRgty.getExtensionList(KvmStorageLiveMigrationExtensionPoint.class)) {
+            List<Flow> flows = ext.getAllocateTemporaryVolumeFlow(
+                    msg.getVmInstanceUuid(),
+                    paramIn.getVmInstanceInventory().getHostUuid(),
+                    finalVolumes,
+                    sourceVolumeVirtualSizes);
+            if (flows != null) {
+                flows.forEach(chain::then);
+            }
+        }
 
         chain.then(new Flow() {
-            String __name__ = "allocate-volume-on-ps-" + msg.getDstPrimaryStorageUuid();
+            String __name__ = "allocate-volume-on-ps-" + dstPsLabel();
 
             @Override
             public void run(FlowTrigger trigger, Map data) {
                 // create volume
                 final ErrorCode[] err = new ErrorCode[1];
                 new While<>(finalVolumes).each((volumeVO, whileCompletion) -> {
+                    String dstPs = volToDst.get(volumeVO.getUuid());
                     CreateVolumeMsg cmsg = new CreateVolumeMsg();
                     cmsg.setAccountUuid(acntMngr.getOwnerAccountUuidOfResource(volumeVO.getUuid()));
                     cmsg.setSize(volumeVO.getSize());
                     cmsg.setVmInstanceUuid(msg.getVmInstanceUuid());
-                    cmsg.setPrimaryStorageUuid(msg.getDstPrimaryStorageUuid());
+                    cmsg.setPrimaryStorageUuid(dstPs);
                     cmsg.setName(volumeVO.getName());
                     cmsg.setVolumeType(volumeVO.getType().toString());
-                    String volumeProvisioningStrategy = PrimaryStorageProvisioningStrategyGetter.get(msg.getDstPrimaryStorageUuid());
+                    String volumeProvisioningStrategy = PrimaryStorageProvisioningStrategyGetter.get(dstPs);
                     cmsg.setSystemTags(Arrays.asList(
                             VolumeSystemTags.VOLUME_PROVISIONING_STRATEGY.instantiateTag(
                                     map(e(VolumeSystemTags.VOLUME_PROVISIONING_STRATEGY_TOKEN, volumeProvisioningStrategy))
                             )
                     ));
+                    for (KvmStorageLiveMigrationExtensionPoint ext : pluginRgty.getExtensionList(KvmStorageLiveMigrationExtensionPoint.class)) {
+                        ErrorCode extErr = ext.preCreateTemporaryVolume(cmsg, volumeVO, sourceVolumeVirtualSizes);
+                        if (extErr != null) {
+                            err[0] = extErr;
+                            whileCompletion.allDone();
+                            return;
+                        }
+                    }
 
                     bus.makeLocalServiceId(cmsg, VolumeConstant.SERVICE_ID);
                     bus.send(cmsg, new CloudBusCallBack(whileCompletion) {
@@ -209,9 +270,17 @@ public class KvmStorageLiveMigrationFlowChain {
                             }
 
                             CreateVolumeReply r = reply.castReply();
+                            createdVolumes.add(r.getInventory());
+                            for (KvmStorageLiveMigrationExtensionPoint ext : pluginRgty.getExtensionList(KvmStorageLiveMigrationExtensionPoint.class)) {
+                                ErrorCode extErr = ext.afterCreateTemporaryVolume(volumeVO, r.getInventory());
+                                if (extErr != null) {
+                                    err[0] = extErr;
+                                    whileCompletion.allDone();
+                                    return;
+                                }
+                            }
                             volumeMappingDict.put(r.getInventory().getUuid(), volumeVO.getUuid());
                             volumeMappingDict.put(volumeVO.getUuid(), r.getInventory().getUuid());
-                            createdVolumes.add(r.getInventory());
                             whileCompletion.done();
                         }
                     });
@@ -247,14 +316,16 @@ public class KvmStorageLiveMigrationFlowChain {
         });
 
         chain.then(new Flow() {
-            String __name__ = "allocate-space-for-volume-on-ps-" + msg.getDstPrimaryStorageUuid();
+            String __name__ = "allocate-space-for-volume-on-ps-" + dstPsLabel();
 
             @Override
             public void run(FlowTrigger trigger, Map data) {
                 final ErrorCode[] err = new ErrorCode[1];
                 new While<>(createdVolumes).each((volumeInventory, whileCompletion) -> {
+                    String srcUuid = volumeMappingDict.get(volumeInventory.getUuid());
+                    String dstPs = volToDst.get(srcUuid);
                     AllocatePrimaryStorageSpaceMsg amsg = new AllocatePrimaryStorageSpaceMsg();
-                    amsg.setRequiredPrimaryStorageUuid(msg.getDstPrimaryStorageUuid());
+                    amsg.setRequiredPrimaryStorageUuid(dstPs);
                     amsg.setSize(volumeInventory.getSize());
                     amsg.setRequiredHostUuid(paramIn.getDstHostInventory().getUuid());
                     amsg.setSystemTags(msg.getSystemTags());
@@ -296,11 +367,13 @@ public class KvmStorageLiveMigrationFlowChain {
                 List<ReleasePrimaryStorageSpaceMsg> rmsgs = Lists.newArrayList();
                 for (Map.Entry<String, String> e : volumeAllocatedUrlDict.entrySet()) {
                     long size = Q.New(VolumeVO.class).select(VolumeVO_.size).eq(VolumeVO_.uuid, e.getKey()).findValue();
+                    String srcUuid = volumeMappingDict.get(e.getKey());
+                    String dstPs = volToDst.get(srcUuid);
                     ReleasePrimaryStorageSpaceMsg rmsg = new ReleasePrimaryStorageSpaceMsg();
                     rmsg.setAllocatedInstallUrl(e.getValue());
-                    rmsg.setPrimaryStorageUuid(msg.getDstPrimaryStorageUuid());
+                    rmsg.setPrimaryStorageUuid(dstPs);
                     rmsg.setDiskSize(size);
-                    bus.makeTargetServiceIdByResourceUuid(rmsg, PrimaryStorageConstant.SERVICE_ID, msg.getDstPrimaryStorageUuid());
+                    bus.makeTargetServiceIdByResourceUuid(rmsg, PrimaryStorageConstant.SERVICE_ID, dstPs);
                     rmsgs.add(rmsg);
                 }
 
@@ -313,7 +386,7 @@ public class KvmStorageLiveMigrationFlowChain {
         });
 
         chain.then(new Flow() {
-            String __name__ = "instantiate-volume-on-ps-" + msg.getDstPrimaryStorageUuid();
+            String __name__ = "instantiate-volume-on-ps-" + dstPsLabel();
 
             @Override
             public void run(FlowTrigger trigger, Map data) {
@@ -322,14 +395,29 @@ public class KvmStorageLiveMigrationFlowChain {
                 new While<>(createdVolumes).each((volumeInventory, whileCompletion) -> {
                     InstantiateTemporaryVolumeOnPrimaryStorageMsg imsg = new InstantiateTemporaryVolumeOnPrimaryStorageMsg();
                     String volTempUuid = volumeInventory.getUuid();
-                    imsg.setOriginVolumeUuid(volumeMappingDict.get(volTempUuid));
-                    imsg.setPrimaryStorageUuid(msg.getDstPrimaryStorageUuid());
-                    imsg.setVolume(VolumeInventory.valueOf(dbf.findByUuid(volTempUuid, VolumeVO.class)));
+                    String srcUuid = volumeMappingDict.get(volTempUuid);
+                    String dstPs = volToDst.get(srcUuid);
+                    imsg.setOriginVolumeUuid(srcUuid);
+                    imsg.setPrimaryStorageUuid(dstPs);
+                    VolumeInventory tempVolume = VolumeInventory.valueOf(dbf.findByUuid(volTempUuid, VolumeVO.class));
+                    imsg.setVolume(tempVolume);
                     imsg.setDestHost(paramIn.getDstHostInventory());
                     imsg.setSystemTags(msg.getSystemTags());
                     imsg.setAllocatedInstallUrl(volumeAllocatedUrlDict.get(volTempUuid));
 
-                    bus.makeTargetServiceIdByResourceUuid(imsg, PrimaryStorageConstant.SERVICE_ID, msg.getDstPrimaryStorageUuid());
+                    for (KvmStorageLiveMigrationExtensionPoint ext : pluginRgty.getExtensionList(KvmStorageLiveMigrationExtensionPoint.class)) {
+                        ErrorCode extErr = ext.beforeInstantiateTemporaryVolume(
+                                paramIn.getDstHostInventory().getUuid(),
+                                tempVolume,
+                                imsg);
+                        if (extErr != null) {
+                            err[0] = extErr;
+                            whileCompletion.allDone();
+                            return;
+                        }
+                    }
+
+                    bus.makeTargetServiceIdByResourceUuid(imsg, PrimaryStorageConstant.SERVICE_ID, dstPs);
                     bus.send(imsg, new CloudBusCallBack(whileCompletion) {
                         @Override
                         public void run(MessageReply reply) {
@@ -372,10 +460,12 @@ public class KvmStorageLiveMigrationFlowChain {
             public void rollback(FlowRollback trigger, Map data) {
                 List<DeleteVolumeOnPrimaryStorageMsg> dmsgs = initializedVolumes.stream()
                         .map(v -> {
+                            String srcUuid = volumeMappingDict.get(v.getUuid());
+                            String dstPs = volToDst.get(srcUuid);
                             DeleteVolumeOnPrimaryStorageMsg dmsg = new DeleteVolumeOnPrimaryStorageMsg();
-                            dmsg.setUuid(msg.getDstPrimaryStorageUuid());
+                            dmsg.setUuid(dstPs);
                             dmsg.setVolume(v);
-                            bus.makeTargetServiceIdByResourceUuid(dmsg, PrimaryStorageConstant.SERVICE_ID, msg.getDstPrimaryStorageUuid());
+                            bus.makeTargetServiceIdByResourceUuid(dmsg, PrimaryStorageConstant.SERVICE_ID, dstPs);
                             return dmsg;
                         }).collect(Collectors.toList());
                 if (!dmsgs.isEmpty()) {
@@ -506,7 +596,7 @@ public class KvmStorageLiveMigrationFlowChain {
                     VolumeInventory oldv = (VolumeInventory) pair.first();
                     VolumeInventory newv = (VolumeInventory) pair.second();
 
-                    if (oldv.getPrimaryStorageUuid().equals(msg.getDstPrimaryStorageUuid()) &&
+                    if (oldv.getPrimaryStorageUuid().equals(volToDst.get(oldv.getUuid())) &&
                             oldv.getInstallPath().equals(newv.getInstallPath())) {
                         logger.info(String.format("volume[%s] has been overwrite, skip it", oldv.getUuid()));
                         trigger.next();
@@ -547,12 +637,13 @@ public class KvmStorageLiveMigrationFlowChain {
             @Override
             public void run(FlowTrigger trigger, Map data) {
                 Set<String> oldUuids = finalVolumes.stream().map(VolumeVO::getUuid).collect(Collectors.toSet());
-                boolean dstIsLocal = psIsLocal(msg.getDstPrimaryStorageUuid());
 
                 new SQLBatch() {
                     @Override
                     protected void scripts() {
                         for (VolumeVO v : finalVolumes) {
+                            String dstPs = volToDst.get(v.getUuid());
+                            boolean dstIsLocal = psIsLocal(dstPs);
                             sql(LocalStorageResourceRefVO.class)
                                     .eq(LocalStorageResourceRefVO_.resourceUuid, v.getUuid())
                                     .eq(LocalStorageResourceRefVO_.primaryStorageUuid, v.getPrimaryStorageUuid())
@@ -562,7 +653,7 @@ public class KvmStorageLiveMigrationFlowChain {
                                 String tmpVolumeUuid = volumeMappingDict.get(v.getUuid());
                                 sql(LocalStorageResourceRefVO.class)
                                         .eq(LocalStorageResourceRefVO_.resourceUuid, tmpVolumeUuid)
-                                        .eq(LocalStorageResourceRefVO_.primaryStorageUuid, msg.getDstPrimaryStorageUuid())
+                                        .eq(LocalStorageResourceRefVO_.primaryStorageUuid, dstPs)
                                         .set(LocalStorageResourceRefVO_.resourceUuid, v.getUuid())
                                         .update();
                             }
@@ -596,13 +687,19 @@ public class KvmStorageLiveMigrationFlowChain {
                                     .in(VolumeSnapshotTreeVO_.volumeUuid, oldUuids)
                                     .hardDelete();
 
-                            sql(VolumeSnapshotGroupRefVO.class)
-                                    .in(VolumeSnapshotGroupRefVO_.volumeSnapshotUuid, snapshotUuids)
-                                    .hardDelete();
+                            boolean rootVolumeMigrated = finalVolumes.stream()
+                                    .anyMatch(v -> VolumeType.Root == v.getType());
+                            if (rootVolumeMigrated) {
+                                sql(VolumeSnapshotGroupRefVO.class)
+                                        .in(VolumeSnapshotGroupRefVO_.volumeSnapshotUuid, snapshotUuids)
+                                        .hardDelete();
 
-                            sql(VolumeSnapshotGroupVO.class)
-                                    .eq(VolumeSnapshotGroupVO_.vmInstanceUuid, msg.getVmInstanceUuid())
-                                    .hardDelete();
+                                sql(VolumeSnapshotGroupVO.class)
+                                        .eq(VolumeSnapshotGroupVO_.vmInstanceUuid, msg.getVmInstanceUuid())
+                                        .hardDelete();
+                            } else {
+                                markDeletedSnapshotsInSnapshotGroup(snapshotUuids);
+                            }
 
                             flush();
                         }

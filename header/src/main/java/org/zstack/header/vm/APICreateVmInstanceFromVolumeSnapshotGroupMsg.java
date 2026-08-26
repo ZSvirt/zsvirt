@@ -112,11 +112,17 @@ public class APICreateVmInstanceFromVolumeSnapshotGroupMsg extends APICreateMess
     @APIParam(required = false)
     private Map<String, List<String>> dataVolumeSystemTags;
 
+    @APIParam(required = false)
+    private List<VolumeSnapshotEncryption> volumeSnapshotEncryptions;
+
     @APINoSee
     private String platform;
 
     @APIParam(required = false)
     private Boolean resetTpm;
+
+    @APIParam(required = false)
+    private Boolean vmEncryption;
 
     public String getName() {
         return name;
@@ -243,6 +249,16 @@ public class APICreateVmInstanceFromVolumeSnapshotGroupMsg extends APICreateMess
         this.strategy = strategy;
     }
 
+    @Override
+    public Boolean getVmEncryption() {
+        return vmEncryption;
+    }
+
+    @Override
+    public void setVmEncryption(Boolean vmEncryption) {
+        this.vmEncryption = vmEncryption;
+    }
+
     public String getPrimaryStorageUuidForRootVolume() {
         return primaryStorageUuidForRootVolume;
     }
@@ -285,6 +301,35 @@ public class APICreateVmInstanceFromVolumeSnapshotGroupMsg extends APICreateMess
 
     public void setDataVolumeSystemTags(Map<String, List<String>> dataVolumeSystemTags) {
         this.dataVolumeSystemTags = dataVolumeSystemTags;
+    }
+
+    public List<VolumeSnapshotEncryption> getVolumeSnapshotEncryptions() {
+        return volumeSnapshotEncryptions;
+    }
+
+    public void setVolumeSnapshotEncryptions(List<VolumeSnapshotEncryption> volumeSnapshotEncryptions) {
+        this.volumeSnapshotEncryptions = volumeSnapshotEncryptions;
+    }
+
+    public static class VolumeSnapshotEncryption {
+        private String volumeSnapshotUuid;
+        private Boolean encrypted;
+
+        public String getVolumeSnapshotUuid() {
+            return volumeSnapshotUuid;
+        }
+
+        public void setVolumeSnapshotUuid(String volumeSnapshotUuid) {
+            this.volumeSnapshotUuid = volumeSnapshotUuid;
+        }
+
+        public Boolean getEncrypted() {
+            return encrypted;
+        }
+
+        public void setEncrypted(Boolean encrypted) {
+            this.encrypted = encrypted;
+        }
     }
 
     @Override

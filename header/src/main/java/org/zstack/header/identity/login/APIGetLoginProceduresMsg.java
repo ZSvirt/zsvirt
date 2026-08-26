@@ -1,6 +1,7 @@
 package org.zstack.header.identity.login;
 
 import org.springframework.http.HttpMethod;
+import org.zstack.header.identity.AccountSource;
 import org.zstack.header.identity.SuppressCredentialCheck;
 import org.zstack.header.message.APIParam;
 import org.zstack.header.message.APISyncCallMessage;
@@ -20,6 +21,13 @@ public class APIGetLoginProceduresMsg extends APISyncCallMessage {
      */
     @APIParam
     private String loginType;
+    /**
+     * Optional account source used only to disambiguate accounts that share the
+     * same name across different sources (ZSV-12379). Most callers should leave
+     * it null; it is a selection hint, never an authorization basis.
+     */
+    @APIParam(required = false, validEnums = AccountSource.class)
+    private String source;
 
     public String getLoginType() {
         return loginType;
@@ -35,6 +43,14 @@ public class APIGetLoginProceduresMsg extends APISyncCallMessage {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public String getSource() {
+        return source;
+    }
+
+    public void setSource(String source) {
+        this.source = source;
     }
 
     public static APIGetLoginProceduresMsg __example__() {

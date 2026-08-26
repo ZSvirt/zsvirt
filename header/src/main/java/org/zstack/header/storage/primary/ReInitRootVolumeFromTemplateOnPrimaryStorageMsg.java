@@ -8,6 +8,7 @@ public class ReInitRootVolumeFromTemplateOnPrimaryStorageMsg extends NeedReplyMe
     private VolumeInventory volume;
     private long originSize;
     private String allocatedInstallUrl;
+    private String hostUuid;
 
     public String getAllocatedInstallUrl() {
         return allocatedInstallUrl;
@@ -36,5 +37,13 @@ public class ReInitRootVolumeFromTemplateOnPrimaryStorageMsg extends NeedReplyMe
 
     public void setOriginSize(long originSize) {
         this.originSize = originSize;
+    }
+
+    public String getHostUuid() {
+        return hostUuid;
+    }
+
+    public void setHostUuid(String hostUuid) {
+        this.hostUuid = hostUuid;
     }
 }

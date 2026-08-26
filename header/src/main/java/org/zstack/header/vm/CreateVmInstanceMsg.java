@@ -5,6 +5,7 @@ import org.zstack.header.message.NeedReplyMessage;
 import org.zstack.header.vm.devices.VmDevicesSpec;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -36,10 +37,12 @@ public class CreateVmInstanceMsg extends NeedReplyMessage implements CreateVmIns
     private String guestOsType;
     private String architecture;
     private Boolean virtio;
+    private Boolean vmEncryption;
     private List<String> rootVolumeSystemTags;
     private List<String> dataVolumeSystemTags;
     private List<String> disableL3Networks;
     private List<String> sshKeyPairUuids;
+    private Map<String, Map<String, String>> vmNicSecurityPolicyByDeviceId = new HashMap<>();
     private final List<String> candidatePrimaryStorageUuidsForRootVolume = new ArrayList<>();
     private final List<String> candidatePrimaryStorageUuidsForDataVolume = new ArrayList<>();
     private DiskAO rootDisk = DiskAO.rootDisk();
@@ -198,12 +201,31 @@ public class CreateVmInstanceMsg extends NeedReplyMessage implements CreateVmIns
         this.l3NetworkSpecs = l3NetworkSpecs;
     }
 
+    public Map<String, Map<String, String>> getVmNicSecurityPolicyByDeviceId() {
+        if (vmNicSecurityPolicyByDeviceId == null) {
+            vmNicSecurityPolicyByDeviceId = new HashMap<>();
+        }
+        return vmNicSecurityPolicyByDeviceId;
+    }
+
+    public void setVmNicSecurityPolicyByDeviceId(Map<String, Map<String, String>> vmNicSecurityPolicyByDeviceId) {
+        this.vmNicSecurityPolicyByDeviceId = vmNicSecurityPolicyByDeviceId;
+    }
+
     public String getImageUuid() {
         return imageUuid;
     }
 
     public void setImageUuid(String imageUuid) {
         this.imageUuid = imageUuid;
+    }
+
+    public Boolean getVmEncryption() {
+        return vmEncryption;
+    }
+
+    public void setVmEncryption(Boolean vmEncryption) {
+        this.vmEncryption = vmEncryption;
     }
 
     @Override

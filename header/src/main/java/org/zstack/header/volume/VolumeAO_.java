@@ -31,4 +31,5 @@ public class VolumeAO_ extends ResourceVO_ {
     public static volatile SingularAttribute<VolumeAO, Boolean> isShareable;
     public static volatile SingularAttribute<VolumeAO, String> volumeQos;
     public static volatile SingularAttribute<VolumeAO, String> protocol;
+    public static volatile SingularAttribute<VolumeAO, Boolean> encrypted;
 }

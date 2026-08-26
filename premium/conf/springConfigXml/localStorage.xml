@@ -22,7 +22,6 @@
             <zstack:extension interface="org.zstack.header.vm.VmAttachVolumeExtensionPoint"/>
             <zstack:extension interface="org.zstack.header.vm.GetAttachableVolumeExtensionPoint"/>
             <zstack:extension interface="org.zstack.header.host.HostMaintenancePolicyExtensionPoint"/>
-            <zstack:extension interface="org.zstack.header.query.AddExpandedQueryExtensionPoint"/>
             <zstack:extension interface="org.zstack.header.volume.VolumeGetAttachableVmExtensionPoint"/>
             <zstack:extension interface="org.zstack.header.volume.RecoverDataVolumeExtensionPoint"/>
             <zstack:extension interface="org.zstack.header.vm.RecoverVmExtensionPoint"/>

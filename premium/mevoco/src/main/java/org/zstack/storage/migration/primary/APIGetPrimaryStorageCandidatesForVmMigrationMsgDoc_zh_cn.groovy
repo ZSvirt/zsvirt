@@ -24,11 +24,11 @@ doc {
 				column {
 					name "vmInstanceUuid"
 					enclosedIn ""
-					desc "云主机UUID"
+					desc "虚拟机UUID"
 					location "url"
 					type "String"
 					optional false
-					since "0.6"
+					since "zsv 0.6"
 				}
 				column {
 					name "withDataVolumes"
@@ -37,7 +37,7 @@ doc {
 					location "query"
 					type "boolean"
 					optional true
-					since "3.7"
+					since "zsv 3.7"
 				}
 				column {
 					name "systemTags"
@@ -46,7 +46,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "0.6"
+					since "zsv 0.6"
 				}
 				column {
 					name "userTags"
@@ -55,7 +55,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "0.6"
+					since "zsv 0.6"
 				}
 				column {
 					name "migrateStorageOnly"
@@ -64,7 +64,7 @@ doc {
 					location "query"
 					type "boolean"
 					optional true
-					since "0.6"
+					since "zsv 0.6"
 				}
 			}
 		}

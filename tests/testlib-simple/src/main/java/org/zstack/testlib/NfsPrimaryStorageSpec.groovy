@@ -153,6 +153,28 @@ class NfsPrimaryStorageSpec extends PrimaryStorageSpec {
                 return new NfsPrimaryStorageKVMBackendCommands.CreateEmptyVolumeResponse()
             }
 
+            simulator(NfsPrimaryStorageKVMBackend.ENCRYPT_VOLUME_BITS_PATH) {
+                return new NfsPrimaryStorageKVMBackendCommands.EncryptVolumeBitsRsp()
+            }
+
+            simulator(NfsPrimaryStorageKVMBackend.CONVERT_VOLUME_ENCRYPTION_PATH) {
+                return new NfsPrimaryStorageKVMBackendCommands.ConvertVolumeEncryptionRsp()
+            }
+
+            VFS.vfsHook(NfsPrimaryStorageKVMBackend.CONVERT_VOLUME_ENCRYPTION_PATH, xspec) { rsp, HttpEntity<String> e, EnvSpec spec ->
+                def cmd = JSONObjectUtil.toObject(e.body, NfsPrimaryStorageKVMBackendCommands.ConvertVolumeEncryptionCmd.class)
+                VFS vfs = vfs(cmd, spec)
+                rsp.actualSizes = [:]
+                cmd.items.each { item ->
+                    Qcow2 source = vfs.getFile(item.sourceInstallPath)
+                    assert source != null : "cannot find source file[${item.sourceInstallPath}]"
+                    Qcow2 target = vfs.createQcow2(item.targetInstallPath, source.actualSize,
+                            source.virtualSize, item.targetBackingInstallPath)
+                    rsp.actualSizes[item.resourceUuid] = target.actualSize
+                }
+                return rsp
+            }
+
             VFS.vfsHook(NfsPrimaryStorageKVMBackend.CREATE_EMPTY_VOLUME_PATH, xspec) { rsp, HttpEntity<String> e, EnvSpec spec ->
                 def cmd = JSONObjectUtil.toObject(e.body, NfsPrimaryStorageKVMBackendCommands.CreateEmptyVolumeCmd.class)
                 VFS vfs = vfs(cmd, spec)

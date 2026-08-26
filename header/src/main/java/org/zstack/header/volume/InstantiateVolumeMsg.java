@@ -12,6 +12,7 @@ public class InstantiateVolumeMsg extends NeedReplyMessage implements VolumeMess
     private boolean primaryStorageAllocated;
     private boolean skipIfExisting;
     private String allocatedInstallUrl;
+    private VolumeLuksAgentSpec volumeLuksAgentSpec;
 
     public String getAllocatedInstallUrl() {
         return allocatedInstallUrl;
@@ -60,5 +61,13 @@ public class InstantiateVolumeMsg extends NeedReplyMessage implements VolumeMess
 
     public void setSkipIfExisting(boolean skipIfExisting) {
         this.skipIfExisting = skipIfExisting;
+    }
+
+    public VolumeLuksAgentSpec getVolumeLuksAgentSpec() {
+        return volumeLuksAgentSpec;
+    }
+
+    public void setVolumeLuksAgentSpec(VolumeLuksAgentSpec volumeLuksAgentSpec) {
+        this.volumeLuksAgentSpec = volumeLuksAgentSpec;
     }
 }

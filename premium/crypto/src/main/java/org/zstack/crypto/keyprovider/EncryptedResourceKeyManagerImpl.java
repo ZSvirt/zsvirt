@@ -29,17 +29,18 @@ import static org.zstack.core.Platform.operr;
 
 public class EncryptedResourceKeyManagerImpl implements EncryptedResourceKeyManager {
     private static final CLogger logger = Utils.getLogger(EncryptedResourceKeyManagerImpl.class);
+    private static final String KEY_PROVIDER_UNAVAILABLE = "keyProviderUnavailable";
 
     @Autowired
     private DatabaseFacade dbf;
+    @Autowired
+    private KeyProviderAvailabilityChecker keyProviderAvailabilityChecker;
 
     @Override
     public void getOrCreateKey(GetOrCreateResourceKeyContext ctx,
                                ReturnValueCompletion<ResourceKeyResult> completion) {
         try {
-            validateContext(ctx);
-            ResourceKeyResult result = doGetOrCreateKey(ctx);
-            completion.success(result);
+            completion.success(getOrCreateKeySync(ctx));
         } catch (OperationFailureException e) {
             completion.fail(e.getErrorCode());
         } catch (Exception e) {
@@ -50,7 +51,13 @@ public class EncryptedResourceKeyManagerImpl implements EncryptedResourceKeyMana
     }
 
     @Override
-    public ResourceKeyResult getKey(GetOrCreateResourceKeyContext ctx) {
+    public ResourceKeyResult getOrCreateKeySync(GetOrCreateResourceKeyContext ctx) {
+        validateContext(ctx);
+        return doGetOrCreateKey(ctx);
+    }
+
+    @Override
+    public ResourceKeyResult getExistingKeySync(GetOrCreateResourceKeyContext ctx) {
         try {
             validateContext(ctx);
             return doGetKey(ctx);
@@ -65,6 +72,7 @@ public class EncryptedResourceKeyManagerImpl implements EncryptedResourceKeyMana
 
     private ResourceKeyResult doGetKey(GetOrCreateResourceKeyContext ctx) {
         KeyProviderVO provider = resolveProvider(ctx);
+        keyProviderAvailabilityChecker.ensureProviderAvailable(provider.getUuid());
 
         NkpConfig nkpConfig = null;
         KmipConfig kmipConfig = null;
@@ -84,14 +92,13 @@ public class EncryptedResourceKeyManagerImpl implements EncryptedResourceKeyMana
             throw new OperationFailureException(operr("unsupported key provider type[%s]", provider.getType()));
         }
 
-        EncryptedResourceKeyRefVO ref = Q.New(EncryptedResourceKeyRefVO.class)
-                .eq(EncryptedResourceKeyRefVO_.resourceUuid, ctx.getResourceUuid())
-                .eq(EncryptedResourceKeyRefVO_.resourceType, ctx.getResourceType())
-                .find();
+        String resourceType = ctx.getResourceType();
+        String resourceUuid = ctx.getResourceUuid();
+        EncryptedResourceKeyRefVO ref = findResourceKeyRef(resourceType, resourceUuid);
         if (ref == null) {
             throw new OperationFailureException(operr(
                     "no encrypted resource key ref for %s[uuid:%s]; hot migration requires an existing key binding",
-                    ctx.getResourceType(), ctx.getResourceUuid()));
+                    resourceType, resourceUuid));
         }
         ref = normalizeExistingRef(ref, provider, ctx);
         if (StringUtils.isBlank(ref.getKekRef())) {
@@ -123,6 +130,7 @@ public class EncryptedResourceKeyManagerImpl implements EncryptedResourceKeyMana
 
     private ResourceKeyResult doGetOrCreateKey(GetOrCreateResourceKeyContext ctx) {
         KeyProviderVO provider = resolveProvider(ctx);
+        keyProviderAvailabilityChecker.ensureProviderAvailable(provider.getUuid());
 
         NkpConfig nkpConfig = null;
         KmipConfig kmipConfig = null;
@@ -142,10 +150,9 @@ public class EncryptedResourceKeyManagerImpl implements EncryptedResourceKeyMana
             throw new OperationFailureException(operr("unsupported key provider type[%s]", provider.getType()));
         }
 
-        EncryptedResourceKeyRefVO ref = Q.New(EncryptedResourceKeyRefVO.class)
-                .eq(EncryptedResourceKeyRefVO_.resourceUuid, ctx.getResourceUuid())
-                .eq(EncryptedResourceKeyRefVO_.resourceType, ctx.getResourceType())
-                .find();
+        String resourceType = ctx.getResourceType();
+        String resourceUuid = ctx.getResourceUuid();
+        EncryptedResourceKeyRefVO ref = findResourceKeyRef(resourceType, resourceUuid);
         ref = normalizeExistingRef(ref, provider, ctx);
 
         String requestId = Platform.getUuid();
@@ -196,10 +203,7 @@ public class EncryptedResourceKeyManagerImpl implements EncryptedResourceKeyMana
 
         try {
             if (StringUtils.isBlank(result.getSecretRef())) {
-                EncryptedResourceKeyRefVO ref = Q.New(EncryptedResourceKeyRefVO.class)
-                        .eq(EncryptedResourceKeyRefVO_.resourceUuid, result.getResourceUuid())
-                        .eq(EncryptedResourceKeyRefVO_.resourceType, result.getResourceType())
-                        .find();
+                EncryptedResourceKeyRefVO ref = findResourceKeyRef(result.getResourceType(), result.getResourceUuid());
                 if (ref != null) {
                     result.setSecretRef(ref.getKekRef());
                 }
@@ -292,13 +296,10 @@ public class EncryptedResourceKeyManagerImpl implements EncryptedResourceKeyMana
         if (provider == null) {
             if (StringUtils.isNotBlank(ctx.getKeyProviderName())) {
                 throw new OperationFailureException(operr(
-                        "key provider [name:%s] does not exist for %s[uuid:%s]; "
-                                + "verify the name or add the key provider first",
-                        ctx.getKeyProviderName(), ctx.getResourceType(), ctx.getResourceUuid()));
+                        "cannot find key provider for encrypted resource[type:%s, uuid:%s]",
+                        ctx.getResourceType(), ctx.getResourceUuid()).withOpaque(KEY_PROVIDER_UNAVAILABLE, true));
             }
-            throw new OperationFailureException(operr(
-                    "key provider [uuid:%s] does not exist for %s[uuid:%s]; verify the UUID or add the key provider first",
-                    ctx.getKeyProviderUuid(), ctx.getResourceType(), ctx.getResourceUuid()));
+            keyProviderAvailabilityChecker.ensureProviderAvailable(ctx.getKeyProviderUuid());
         }
 
         return provider;
@@ -307,6 +308,13 @@ public class EncryptedResourceKeyManagerImpl implements EncryptedResourceKeyMana
     private KmipConfig buildKmipConfig(KmsVO kms) {
         KmsIdentityVO identity = kms.getActiveIdentity();
         return KmipConfig.fromKms(kms, identity);
+    }
+
+    private EncryptedResourceKeyRefVO findResourceKeyRef(String resourceType, String resourceUuid) {
+        return Q.New(EncryptedResourceKeyRefVO.class)
+                .eq(EncryptedResourceKeyRefVO_.resourceType, resourceType)
+                .eq(EncryptedResourceKeyRefVO_.resourceUuid, resourceUuid)
+                .find();
     }
 
     private EncryptedResourceKeyRefVO normalizeExistingRef(EncryptedResourceKeyRefVO ref,

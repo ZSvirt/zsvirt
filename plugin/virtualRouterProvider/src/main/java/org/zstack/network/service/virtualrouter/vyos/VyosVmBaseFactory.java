@@ -8,11 +8,10 @@ import org.zstack.core.ansible.AnsibleFacade;
 import org.zstack.core.componentloader.PluginRegistry;
 import org.zstack.core.config.GlobalConfigException;
 import org.zstack.core.config.GlobalConfigValidatorExtensionPoint;
+import org.zstack.core.db.Q;
 import org.zstack.network.service.virtualrouter.VirtualRouterConstant;
 import org.zstack.resourceconfig.ResourceConfigFacade;
 import org.zstack.core.db.DatabaseFacade;
-import org.zstack.core.db.SimpleQuery;
-import org.zstack.core.db.SimpleQuery.Op;
 import org.zstack.core.workflow.FlowChainBuilder;
 import org.zstack.header.Component;
 import org.zstack.header.core.workflow.Flow;
@@ -219,9 +218,9 @@ public class VyosVmBaseFactory extends VirtualRouterApplianceVmFactory implement
 
     @Override
     public void prepareDbInitialValue() {
-        SimpleQuery<NetworkServiceProviderVO> query = dbf.createQuery(NetworkServiceProviderVO.class);
-        query.add(NetworkServiceProviderVO_.type, Op.EQ, VyosConstants.VYOS_ROUTER_PROVIDER_TYPE);
-        providerVO = query.find();
+        providerVO = Q.New(NetworkServiceProviderVO.class)
+                .eq(NetworkServiceProviderVO_.type, VyosConstants.VYOS_ROUTER_PROVIDER_TYPE)
+                .find();
         if (providerVO != null) {
             return;
         }
@@ -271,10 +270,11 @@ public class VyosVmBaseFactory extends VirtualRouterApplianceVmFactory implement
 
     @Override
     public void applianceVmPrepareBootstrapInfo(VmInstanceSpec spec, Map<String, Object> info) {
-        SimpleQuery<ApplianceVmVO> q = dbf.createQuery(ApplianceVmVO.class);
-        q.add(ApplianceVmVO_.applianceVmType, Op.EQ, VyosConstants.VYOS_VM_TYPE);
-        q.add(ApplianceVmVO_.uuid, Op.EQ, spec.getVmInventory().getUuid());
-        if (!q.isExists()) {
+        boolean exists = Q.New(ApplianceVmVO.class)
+                .eq(ApplianceVmVO_.applianceVmType, VyosConstants.VYOS_VM_TYPE)
+                .eq(ApplianceVmVO_.uuid, spec.getVmInventory().getUuid())
+                .isExists();
+        if (!exists) {
             return;
         }
         logger.debug("add vyos password to vrouter");

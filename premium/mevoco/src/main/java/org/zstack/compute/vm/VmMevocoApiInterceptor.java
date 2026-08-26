@@ -49,14 +49,22 @@ import org.zstack.mevoco.MevocoGlobalConfig;
 import org.zstack.mevoco.ShareableVolumeVmInstanceRefVO;
 import org.zstack.mevoco.ShareableVolumeVmInstanceRefVO_;
 import org.zstack.resourceconfig.ResourceConfigFacade;
+import org.zstack.utils.TagUtils;
 import org.zstack.utils.Utils;
 import org.zstack.utils.gson.JSONObjectUtil;
 import org.zstack.utils.logging.CLogger;
+import org.zstack.utils.network.IPv6Constants;
+import org.zstack.utils.network.IPv6NetworkUtils;
 
 import javax.persistence.Tuple;
 import javax.persistence.TypedQuery;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static java.util.Arrays.asList;
@@ -113,6 +121,8 @@ public class VmMevocoApiInterceptor implements GlobalApiMessageInterceptor {
             validate((APICreateVmInstanceFromTemplatedVmInstanceMsg) msg);
         } else if (msg instanceof APIConvertVmInstanceToTemplatedVmInstanceMsg) {
             validate((APIConvertVmInstanceToTemplatedVmInstanceMsg) msg);
+        } else if (msg instanceof APICleanupAllVmInstanceMetadataMsg) {
+            validate((APICleanupAllVmInstanceMetadataMsg) msg);
         } else if (msg instanceof APICloneVmInstanceMsg) {
             validate((APICloneVmInstanceMsg) msg);
         } else if (msg instanceof APISetVmSecurityLevelMsg) {
@@ -130,7 +140,52 @@ public class VmMevocoApiInterceptor implements GlobalApiMessageInterceptor {
 
     private void validate(APIConvertVmInstanceToTemplatedVmInstanceMsg msg) {
         ensureVmWithoutShareableVolume(msg.getVmInstanceUuid());
+        ensureVmWithoutEncryptedVolume(msg.getVmInstanceUuid(), "convert vm to templated vmInstance");
         checkVmSchedulerJob(msg.getVmInstanceUuid());
+    }
+
+    private void validate(APICleanupAllVmInstanceMetadataMsg msg) {
+        if (!acmgr.isAdmin(msg.getSession())) {
+            throw new ApiMessageInterceptionException(argerr("only admin can cleanup all vm instance metadata"));
+        }
+
+        List<String> requested = msg.getPrimaryStorageUuids();
+        if (requested == null || requested.isEmpty()) {
+            return;
+        }
+
+        List<Tuple> tuples = Q.New(PrimaryStorageVO.class)
+                .select(PrimaryStorageVO_.uuid, PrimaryStorageVO_.state, PrimaryStorageVO_.status)
+                .in(PrimaryStorageVO_.uuid, requested)
+                .listTuple();
+        Map<String, Tuple> existing = new HashMap<>();
+        for (Tuple t : tuples) {
+            existing.put(t.get(0, String.class), t);
+        }
+
+        List<String> missing = new ArrayList<>();
+        List<String> notEnabled = new ArrayList<>();
+        List<String> notConnected = new ArrayList<>();
+        for (String uuid : requested) {
+            Tuple t = existing.get(uuid);
+            if (t == null) {
+                missing.add(uuid);
+                continue;
+            }
+
+            if (t.get(1, PrimaryStorageState.class) != PrimaryStorageState.Enabled) {
+                notEnabled.add(uuid);
+            }
+            if (t.get(2, PrimaryStorageStatus.class) != PrimaryStorageStatus.Connected) {
+                notConnected.add(uuid);
+            }
+        }
+
+        if (!missing.isEmpty() || !notEnabled.isEmpty() || !notConnected.isEmpty()) {
+            throw new ApiMessageInterceptionException(argerr(
+                    "invalid primaryStorageUuids: missing=%s, notEnabled=%s, notConnected=%s; all specified primary storages must exist and be Enabled+Connected",
+                    missing, notEnabled, notConnected));
+        }
     }
 
     private void ensureVmWithoutShareableVolume(String vmInstanceUuid) {
@@ -220,6 +275,7 @@ public class VmMevocoApiInterceptor implements GlobalApiMessageInterceptor {
         VmInstanceVO vmInstanceVO = Q.New(VmInstanceVO.class).eq(VmInstanceVO_.uuid, msg.getVmInstanceUuid()).find();
         checkVmInstanceType(vmInstanceVO.getType());
         msg.setVmInstanceInventory(VmInstanceInventory.valueOf(vmInstanceVO));
+        List<VmNicParam> vmNicParams = Collections.emptyList();
 
         if (!CollectionUtils.isEmpty(msg.getDiskAOs()) &&
                 (msg.getPrimaryStorageUuidForDataVolume() != null || msg.getPrimaryStorageUuidForRootVolume() != null ||
@@ -227,9 +283,9 @@ public class VmMevocoApiInterceptor implements GlobalApiMessageInterceptor {
             throw new ApiMessageInterceptionException(argerr("can not set primaryStorageUuidForRootVolume or " +
                     "primaryStorageUuidForDataVolume or rootVolumeSystemTags or dataVolumeSystemTags when diskAOs is not empty"));
         }
+        validateCloneDiskAOs(msg, vmInstanceVO);
 
         if (!StringUtils.isEmpty(msg.getVmNicParams())) {
-            List<VmNicParam> vmNicParams;
             try {
                 vmNicParams = JSONObjectUtil.toCollection(msg.getVmNicParams(), ArrayList.class, VmNicParam.class);
             } catch (JsonSyntaxException e) {
@@ -245,11 +301,40 @@ public class VmMevocoApiInterceptor implements GlobalApiMessageInterceptor {
             new VmInstanceHelper().validateL3Networks(vmNicParams.stream().map(VmNicParam::getL3NetworkUuid).collect(Collectors.toList()));
         }
 
+        validateIpv6GatewaySystemTags(msg.getSystemTags(), vmNicParams);
+        validateIpv6PrefixSystemTags(msg.getSystemTags(), vmNicParams);
+        new StaticIpOperator().validateStaticIpTagsInApiMessage(msg);
+
         if (!msg.getFull()) {
             return;
         }
 
         checkPrimaryStorageCapacity(msg.getNames().size(), vmInstanceVO);
+    }
+
+    private void validateCloneDiskAOs(APICloneVmInstanceMsg msg, VmInstanceVO vmInstanceVO) {
+        if (CollectionUtils.isEmpty(msg.getDiskAOs())) {
+            return;
+        }
+
+        Map<String, Boolean> sourceVolumeEncryptedByUuid = new HashMap<>();
+        vmInstanceVO.getAllVolumes().forEach(volume -> sourceVolumeEncryptedByUuid.put(volume.getUuid(), volume.isEncrypted()));
+
+        for (DiskAO diskAO : msg.getDiskAOs()) {
+            if (StringUtils.isEmpty(diskAO.getSourceUuid()) || !sourceVolumeEncryptedByUuid.containsKey(diskAO.getSourceUuid())) {
+                throw new ApiMessageInterceptionException(argerr(
+                        "diskAO source volume[uuid:%s] is not a volume of source vm[uuid:%s]",
+                        diskAO.getSourceUuid(), msg.getVmInstanceUuid()
+                ));
+            }
+
+            if (Boolean.TRUE.equals(sourceVolumeEncryptedByUuid.get(diskAO.getSourceUuid())) && Boolean.FALSE.equals(diskAO.getEncrypted())) {
+                throw new ApiMessageInterceptionException(argerr(
+                        "can not set encrypted=false for diskAO[sourceUuid:%s], because source volume is encrypted",
+                        diskAO.getSourceUuid()
+                ));
+            }
+        }
     }
 
     private void checkVmInstanceType(String type) {
@@ -483,7 +568,9 @@ public class VmMevocoApiInterceptor implements GlobalApiMessageInterceptor {
     }
 
     private void validate(APICreateTemplatedVmInstanceFromVmInstanceMsg msg) {
+        validateIpv6GatewaySystemTags(msg.getSystemTags());
         ensureVmWithoutShareableVolume(msg.getVmInstanceUuid());
+        ensureVmWithoutEncryptedVolume(msg.getVmInstanceUuid(), "create templated vmInstance");
 
         if (msg.getHostUuid() == null) {
             Tuple tuple = Q.New(VmInstanceVO.class).eq(VmInstanceVO_.uuid, msg.getVmInstanceUuid())
@@ -495,6 +582,16 @@ public class VmMevocoApiInterceptor implements GlobalApiMessageInterceptor {
             } else {
                 msg.setHostUuid(tuple.get(1, String.class));
             }
+        }
+    }
+
+    private void ensureVmWithoutEncryptedVolume(String vmInstanceUuid, String operation) {
+        if (Q.New(VolumeVO.class)
+                .eq(VolumeVO_.vmInstanceUuid, vmInstanceUuid)
+                .eq(VolumeVO_.encrypted, true)
+                .isExists()) {
+            throw new ApiMessageInterceptionException(argerr(
+                    "cannot %s from vm[uuid:%s] with encrypted volume", operation, vmInstanceUuid));
         }
     }
 
@@ -526,8 +623,106 @@ public class VmMevocoApiInterceptor implements GlobalApiMessageInterceptor {
 
         checkVmInstanceType(templatedVmInstance.getType());
         checkPrimaryStorageCapacity(msg.getNames().size(), templatedVmInstance);
+        List<VmNicParam> vmNicParams = Collections.emptyList();
+        if (!StringUtils.isEmpty(msg.getVmNicParams())) {
+            try {
+                vmNicParams = JSONObjectUtil.toCollection(msg.getVmNicParams(), ArrayList.class, VmNicParam.class);
+            } catch (JsonSyntaxException e) {
+                throw new ApiMessageInterceptionException(argerr("invalid json format, causes: %s", e.getMessage()));
+            }
+        }
+        validateIpv6GatewaySystemTags(msg.getSystemTags(), vmNicParams);
+        validateIpv6PrefixSystemTags(msg.getSystemTags(), vmNicParams);
 
         new VmInstanceHelper().validate(msg);
+    }
+
+    private void validateIpv6GatewaySystemTags(List<String> systemTags) {
+        validateIpv6GatewaySystemTags(systemTags, Collections.emptyList());
+    }
+
+    private void validateIpv6GatewaySystemTags(List<String> systemTags, List<VmNicParam> vmNicParams) {
+        if (CollectionUtils.isEmpty(systemTags)) {
+            return;
+        }
+
+        Set<String> l3UuidsWithIpv6 = getL3UuidsWithIpv6(systemTags, vmNicParams);
+        for (String systemTag : systemTags) {
+            if (!VmSystemTags.IPV6_GATEWAY.isMatch(systemTag)) {
+                continue;
+            }
+
+            Map<String, String> tokens = TagUtils.parse(VmSystemTags.IPV6_GATEWAY.getTagFormat(), systemTag);
+            String l3Uuid = tokens.get(VmSystemTags.IPV6_GATEWAY_L3_UUID_TOKEN);
+            if (!l3UuidsWithIpv6.contains(l3Uuid)) {
+                continue;
+            }
+
+            String gateway = IPv6NetworkUtils.ipv6TagValueToAddress(tokens.get(VmSystemTags.IPV6_GATEWAY_TOKEN));
+            if (!IPv6NetworkUtils.isIpv6Address(gateway)) {
+                throw new ApiMessageInterceptionException(argerr("ipv6 gateway[%s] should be ipv6 address", gateway));
+            }
+        }
+    }
+
+    private void validateIpv6PrefixSystemTags(List<String> systemTags) {
+        validateIpv6PrefixSystemTags(systemTags, Collections.emptyList());
+    }
+
+    private void validateIpv6PrefixSystemTags(List<String> systemTags, List<VmNicParam> vmNicParams) {
+        if (CollectionUtils.isEmpty(systemTags)) {
+            return;
+        }
+
+        Set<String> l3UuidsWithIpv6 = getL3UuidsWithIpv6(systemTags, vmNicParams);
+        for (String systemTag : systemTags) {
+            if (!VmSystemTags.IPV6_PREFIX.isMatch(systemTag)) {
+                continue;
+            }
+
+            Map<String, String> tokens = TagUtils.parse(VmSystemTags.IPV6_PREFIX.getTagFormat(), systemTag);
+            String l3Uuid = tokens.get(VmSystemTags.IPV6_PREFIX_L3_UUID_TOKEN);
+            if (!l3UuidsWithIpv6.contains(l3Uuid)) {
+                continue;
+            }
+
+            String prefix = tokens.get(VmSystemTags.IPV6_PREFIX_TOKEN);
+            try {
+                int prefixLen = Integer.parseInt(prefix);
+                if (prefixLen > IPv6Constants.IPV6_PREFIX_LEN_MAX || prefixLen < IPv6Constants.IPV6_PREFIX_LEN_MIN) {
+                    throw new ApiMessageInterceptionException(argerr("ip range prefix length[%d] is out of range [%d - %d]. Please correct your system tag[%s] of %s",
+                            prefixLen, IPv6Constants.IPV6_PREFIX_LEN_MIN, IPv6Constants.IPV6_PREFIX_LEN_MAX, systemTag, VmSystemTags.IPV6_PREFIX_TOKEN));
+                }
+            } catch (NumberFormatException e) {
+                throw new ApiMessageInterceptionException(argerr("ipv6 prefix length[%s] must be an integer. Please correct your system tag[%s] of %s",
+                        prefix, systemTag, VmSystemTags.IPV6_PREFIX_TOKEN));
+            }
+        }
+    }
+
+    private Set<String> getL3UuidsWithIpv6(List<String> systemTags, List<VmNicParam> vmNicParams) {
+        Set<String> l3Uuids = new HashSet<>();
+        if (!CollectionUtils.isEmpty(systemTags)) {
+            for (String systemTag : systemTags) {
+                if (!VmSystemTags.STATIC_IP.isMatch(systemTag)) {
+                    continue;
+                }
+
+                Map<String, String> tokens = TagUtils.parse(VmSystemTags.STATIC_IP.getTagFormat(), systemTag);
+                String ip = IPv6NetworkUtils.ipv6TagValueToAddress(tokens.get(VmSystemTags.STATIC_IP_TOKEN));
+                if (IPv6NetworkUtils.isIpv6Address(ip)) {
+                    l3Uuids.add(tokens.get(VmSystemTags.STATIC_IP_L3_UUID_TOKEN));
+                }
+            }
+        }
+
+        if (!CollectionUtils.isEmpty(vmNicParams)) {
+            vmNicParams.stream()
+                    .filter(param -> !StringUtils.isEmpty(param.getIp6()))
+                    .map(VmNicParam::getL3NetworkUuid)
+                    .forEach(l3Uuids::add);
+        }
+        return l3Uuids;
     }
 
     @Override
@@ -548,7 +743,8 @@ public class VmMevocoApiInterceptor implements GlobalApiMessageInterceptor {
             APIGetVirtualizerInfoMsg.class,
             APICreateVmInstanceFromTemplatedVmInstanceMsg.class,
             APICreateTemplatedVmInstanceFromVmInstanceMsg.class,
-            APIConvertVmInstanceToTemplatedVmInstanceMsg.class
+            APIConvertVmInstanceToTemplatedVmInstanceMsg.class,
+            APICleanupAllVmInstanceMetadataMsg.class
         );
     }
 

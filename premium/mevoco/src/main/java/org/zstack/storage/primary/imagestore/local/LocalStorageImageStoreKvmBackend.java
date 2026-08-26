@@ -1,5 +1,6 @@
 package org.zstack.storage.primary.imagestore.local;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
@@ -13,9 +14,11 @@ import org.zstack.core.workflow.FlowChainBuilder;
 import org.zstack.core.workflow.ShareFlow;
 import org.zstack.core.workflow.SimpleFlowChain;
 import org.zstack.header.HasThreadContext;
+import org.zstack.header.core.Completion;
 import org.zstack.header.core.ReturnValueCompletion;
 import org.zstack.header.core.workflow.*;
 import org.zstack.header.errorcode.ErrorCode;
+import org.zstack.header.errorcode.OperationFailureException;
 import org.zstack.header.image.CreateImageExtensionPoint;
 import org.zstack.header.image.ImageInventory;
 import org.zstack.header.image.ImageVO;
@@ -29,13 +32,20 @@ import org.zstack.header.volume.*;
 import org.zstack.identity.AccountManager;
 import org.zstack.kvm.KVMConstant;
 import org.zstack.storage.backup.imagestore.*;
+import org.zstack.storage.encrypt.VolumeSnapshotEncryptionHelper;
 import org.zstack.storage.primary.PrimaryStorageGlobalConfig;
 import org.zstack.storage.primary.local.*;
+import org.zstack.utils.Utils;
+import org.zstack.utils.logging.CLogger;
 
 import java.util.Map;
 
+import static org.zstack.core.Platform.operr;
+
 @Configurable(preConstruction = true, autowire = Autowire.BY_TYPE, dependencyCheck = true)
 public class LocalStorageImageStoreKvmBackend extends LocalStorageKvmBackend {
+    private static final CLogger logger = Utils.getLogger(LocalStorageImageStoreKvmBackend.class);
+
     @Autowired
     private LocalStorageFactory localStorageFactory;
 
@@ -43,6 +53,8 @@ public class LocalStorageImageStoreKvmBackend extends LocalStorageKvmBackend {
     private AccountManager acntMgr;
     @Autowired
     private PluginRegistry pluginRgty;
+    @Autowired
+    private VolumeSnapshotEncryptionHelper snapshotEncryptionHelper;
 
     public static final String COMMIT_PATH = "/localstorage/imagestore/commit";
     public static final String CLEAN_IMAGE_META_PATH = "/localstorage/imagestore/meta/clean";
@@ -103,6 +115,7 @@ public class LocalStorageImageStoreKvmBackend extends LocalStorageKvmBackend {
         private String installPath;
         private long size;
         private boolean force;
+        private String encryptLuksSecretMaterialFilePath;
 
         public String getInstallPath() {
             return installPath;
@@ -126,6 +139,14 @@ public class LocalStorageImageStoreKvmBackend extends LocalStorageKvmBackend {
 
         public void setForce(boolean force) {
             this.force = force;
+        }
+
+        public String getEncryptLuksSecretMaterialFilePath() {
+            return encryptLuksSecretMaterialFilePath;
+        }
+
+        public void setEncryptLuksSecretMaterialFilePath(String encryptLuksSecretMaterialFilePath) {
+            this.encryptLuksSecretMaterialFilePath = encryptLuksSecretMaterialFilePath;
         }
     }
 
@@ -233,6 +254,7 @@ public class LocalStorageImageStoreKvmBackend extends LocalStorageKvmBackend {
                 cmd.setInstallPath(volume.getInstallPath());
                 cmd.setSize(msg.getSize());
                 cmd.setForce(msg.isForce());
+                cmd.setEncryptLuksSecretMaterialFilePath(prepareVolumeSecretMaterialPath(hostUuid, volume));
 
                 httpCall(RESIZE_VOLUME_PATH, hostUuid, cmd, ResizeVolumeRsp.class, new ReturnValueCompletion<ResizeVolumeRsp>(trigger) {
                     @Override
@@ -315,6 +337,42 @@ public class LocalStorageImageStoreKvmBackend extends LocalStorageKvmBackend {
         });
     }
 
+    private void createEncryptedSnapshotImageTemplate(String hostUuid, String snapshotUuid, String sourceInstallPath, String imageUuid,
+                                                      String temporaryTemplatePath,
+                                                      ReturnValueCompletion<String> completion) {
+        String encryptedDek;
+        try {
+            encryptedDek = snapshotEncryptionHelper.prepareTemporarySnapshotImageEncryptedDek(hostUuid, snapshotUuid, imageUuid, true);
+        } catch (OperationFailureException e) {
+            completion.fail(e.getErrorCode());
+            return;
+        }
+        if (StringUtils.isBlank(encryptedDek)) {
+            completion.fail(operr("cannot prepare LUKS encryptedDek for encrypted temporary snapshot image[uuid:%s] from snapshot[uuid:%s] on host[uuid:%s]",
+                    imageUuid, snapshotUuid, hostUuid));
+            return;
+        }
+
+        CreateTemplateFromVolumeCmd cmd = new CreateTemplateFromVolumeCmd();
+        cmd.setInstallPath(temporaryTemplatePath);
+        cmd.setVolumePath(sourceInstallPath);
+        cmd.setEncryptedDek(encryptedDek);
+        cmd.storagePath = self.getUrl();
+
+        httpCall(CREATE_TEMPLATE_FROM_VOLUME, hostUuid, cmd, false, CreateTemplateFromVolumeRsp.class,
+                new ReturnValueCompletion<CreateTemplateFromVolumeRsp>(completion) {
+                    @Override
+                    public void success(CreateTemplateFromVolumeRsp returnValue) {
+                        completion.success(temporaryTemplatePath);
+                    }
+
+                    @Override
+                    public void fail(ErrorCode errorCode) {
+                        completion.fail(errorCode);
+                    }
+                });
+    }
+
     private void handle(final CommitVolumeAsImageMsg msg) {
         CommitVolumeAsImageFlowChain.getFlow(msg).run();
     }
@@ -343,6 +401,7 @@ public class LocalStorageImageStoreKvmBackend extends LocalStorageKvmBackend {
             CommitVolumeAsImageRsp cvRsp;
             String volumeSnapshotInstallPath;
             String volumeSnapshotFormat;
+            String encryptedTemplateInstallPath;
             VolumeSnapshotInventory snapshot;
 
             // The flow logic:
@@ -424,6 +483,58 @@ public class LocalStorageImageStoreKvmBackend extends LocalStorageKvmBackend {
                             }
                         });
                     }
+	                });
+
+                flow(new Flow() {
+                    String __name__ = "create-encrypted-template-from-snapshot";
+
+                    @Override
+                    public boolean skip(Map data) {
+                        return !Boolean.TRUE.equals(msg.getEncrypted());
+                    }
+
+                    @Override
+                    public void run(FlowTrigger trigger, Map data) {
+                        encryptedTemplateInstallPath = makeTemplateFromVolumeInWorkspacePath(msg.getImageUuid());
+                        createEncryptedSnapshotImageTemplate(ref.getHostUuid(), snapshot.getUuid(), volumeSnapshotInstallPath, msg.getImageUuid(),
+                                encryptedTemplateInstallPath,
+                                new ReturnValueCompletion<String>(trigger) {
+                                    @Override
+                                    public void success(String returnValue) {
+                                        encryptedTemplateInstallPath = returnValue;
+                                        volumeSnapshotInstallPath = returnValue;
+                                        volumeSnapshotFormat = "qcow2";
+                                        trigger.next();
+                                    }
+
+                                    @Override
+                                    public void fail(ErrorCode errorCode) {
+                                        trigger.fail(errorCode);
+                                    }
+                                });
+                    }
+
+                    @Override
+                    public void rollback(FlowRollback trigger, Map data) {
+                        if (encryptedTemplateInstallPath == null) {
+                            trigger.rollback();
+                            return;
+                        }
+
+                        deleteBits(encryptedTemplateInstallPath, ref.getHostUuid(), new Completion(trigger) {
+                            @Override
+                            public void success() {
+                                encryptedTemplateInstallPath = null;
+                                trigger.rollback();
+                            }
+
+                            @Override
+                            public void fail(ErrorCode errorCode) {
+                                logger.warn(String.format("failed to delete encrypted temporary template[%s], %s", encryptedTemplateInstallPath, errorCode));
+                                trigger.rollback();
+                            }
+                        });
+                    }
                 });
 
                 flow(new NoRollbackFlow() {
@@ -464,6 +575,32 @@ public class LocalStorageImageStoreKvmBackend extends LocalStorageKvmBackend {
                             @Override
                             public void fail(ErrorCode errorCode) {
                                 trigger.fail(errorCode);
+                            }
+                        });
+                    }
+	                });
+
+                flow(new NoRollbackFlow() {
+                    String __name__ = "delete-encrypted-temporary-template";
+
+                    @Override
+                    public boolean skip(Map data) {
+                        return encryptedTemplateInstallPath == null;
+                    }
+
+                    @Override
+                    public void run(FlowTrigger trigger, Map data) {
+                        deleteBits(encryptedTemplateInstallPath, ref.getHostUuid(), new Completion(trigger) {
+                            @Override
+                            public void success() {
+                                encryptedTemplateInstallPath = null;
+                                trigger.next();
+                            }
+
+                            @Override
+                            public void fail(ErrorCode errorCode) {
+                                logger.warn(String.format("failed to delete encrypted temporary template[%s], %s", encryptedTemplateInstallPath, errorCode));
+                                trigger.next();
                             }
                         });
                     }

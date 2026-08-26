@@ -54,6 +54,10 @@ public class VolumeTO extends BaseVirtualDeviceTO {
     private String ioThreadPin;
     private int controllerIndex;
 
+    // Host-local libvirt secret UUID holding the LUKS passphrase for an
+    // encrypted volume. cephx auth's secretUuid is on KVMCephVolumeTO.
+    private String luksSecretUuid;
+
     static {
         deviceTypes.put(VolumeProtocol.Vhost, VHOST);
         deviceTypes.put(VolumeProtocol.CBD, CBD);
@@ -83,6 +87,7 @@ public class VolumeTO extends BaseVirtualDeviceTO {
         this.ioThreadId = other.ioThreadId;
         this.ioThreadPin = other.ioThreadPin;
         this.controllerIndex = other.controllerIndex;
+        this.luksSecretUuid = other.luksSecretUuid;
     }
 
     public static List<VolumeTO> valueOf(List<VolumeInventory> vols, KVMHostInventory host) {
@@ -312,5 +317,13 @@ public class VolumeTO extends BaseVirtualDeviceTO {
 
     public void setControllerIndex(int controllerIndex) {
         this.controllerIndex = controllerIndex;
+    }
+
+    public String getLuksSecretUuid() {
+        return luksSecretUuid;
+    }
+
+    public void setLuksSecretUuid(String luksSecretUuid) {
+        this.luksSecretUuid = luksSecretUuid;
     }
 }

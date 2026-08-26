@@ -92,7 +92,7 @@ public class Session implements Component {
                 vo.setExpiredDate(new Timestamp(expiredTime));
                 persist(vo);
                 reload(vo);
-                SessionInventory inv = SessionInventory.valueOf(vo);
+                SessionInventory inv = vo.toInventory();
                 sessions.put(inv.getUuid(), inv);
 
                 return inv;
@@ -159,7 +159,7 @@ public class Session implements Component {
                 SessionInventory s = sessions.remove(uuid);
                 if (s == null) {
                     SessionVO vo = findByUuid(uuid, SessionVO.class);
-                    s = vo == null ? null : SessionInventory.valueOf(vo);
+                    s = vo == null ? null : vo.toInventory();
                 }
 
                 if (s == null) {
@@ -249,7 +249,7 @@ public class Session implements Component {
                 return null;
             }
 
-            s = SessionInventory.valueOf(vo);
+            s = vo.toInventory();
             sessions.put(s.getUuid(), s);
             return s;
         }
@@ -353,10 +353,10 @@ public class Session implements Component {
             private void removeMemorySessionsAccordingToDB(Map tokens, Object data) {
                 IdentityCanonicalEvents.AccountDeletedData d = (IdentityCanonicalEvents.AccountDeletedData) data;
 
-                SimpleQuery<SessionVO> q = dbf.createQuery(SessionVO.class);
-                q.select(SessionVO_.uuid);
-                q.add(SessionVO_.accountUuid, SimpleQuery.Op.EQ, d.getAccountUuid());
-                List<String> suuids = q.listValue();
+                List<String> suuids = Q.New(SessionVO.class)
+                        .select(SessionVO_.uuid)
+                        .eq(SessionVO_.accountUuid, d.getAccountUuid())
+                        .listValues();
 
                 for (String uuid : suuids) {
                     logout(uuid);

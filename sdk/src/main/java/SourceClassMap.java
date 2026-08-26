@@ -7,6 +7,11 @@ public class SourceClassMap {
         {
 			put("org.zstack.accessKey.AccessKeyInventory", "org.zstack.sdk.AccessKeyInventory");
 			put("org.zstack.accessKey.AccessKeyState", "org.zstack.sdk.AccessKeyState");
+			put("org.zstack.accessKey.AccessKeyType", "org.zstack.sdk.AccessKeyType");
+			put("org.zstack.allocator.domain.entity.AllocatorDomainInventory", "org.zstack.sdk.allocator.domain.entity.AllocatorDomainInventory");
+			put("org.zstack.allocator.domain.entity.AllocatorDomainRuleInventory", "org.zstack.sdk.allocator.domain.entity.AllocatorDomainRuleInventory");
+			put("org.zstack.allocator.domain.entity.AllocatorDomainRuleParam", "org.zstack.sdk.allocator.domain.entity.AllocatorDomainRuleParam");
+			put("org.zstack.allocator.domain.entity.AllocatorDomainSceneInventory", "org.zstack.sdk.allocator.domain.entity.AllocatorDomainSceneInventory");
 			put("org.zstack.appliancevm.ApplianceVmInventory", "org.zstack.sdk.ApplianceVmInventory");
 			put("org.zstack.autoscaling.group.AutoScalingGroupInventory", "org.zstack.sdk.AutoScalingGroupInventory");
 			put("org.zstack.autoscaling.group.activity.AutoScalingGroupActivityInventory", "org.zstack.sdk.AutoScalingGroupActivityInventory");
@@ -65,7 +70,7 @@ public class SourceClassMap {
 			put("org.zstack.core.errorcode.ElaborationCheckResult", "org.zstack.sdk.ElaborationCheckResult");
 			put("org.zstack.core.errorcode.ElaborationContent", "org.zstack.sdk.ElaborationContent");
 			put("org.zstack.core.eventlog.EventLogInventory", "org.zstack.sdk.EventLogInventory");
-			put("org.zstack.core.externalservice.ExternalServiceCapabilitiesBuilder", "org.zstack.sdk.ExternalServiceCapabilitiesBuilder");
+			put("org.zstack.core.externalservice.ExternalServiceCapabilitiesBuilder", "org.zstack.sdk.external.service.ExternalServiceCapabilitiesBuilder");
 			put("org.zstack.core.gc.GarbageCollectorInventory", "org.zstack.sdk.GarbageCollectorInventory");
 			put("org.zstack.core.jsonlabel.JsonLabelInventory", "org.zstack.sdk.JsonLabelInventory");
 			put("org.zstack.crypto.keyprovider.api.RekeyFailedResource", "org.zstack.sdk.keyprovider.api.RekeyFailedResource");
@@ -125,8 +130,10 @@ public class SourceClassMap {
 			put("org.zstack.header.configuration.VmCustomSpecificationStruct", "org.zstack.sdk.VmCustomSpecificationStruct");
 			put("org.zstack.header.console.ConsoleInventory", "org.zstack.sdk.ConsoleInventory");
 			put("org.zstack.header.console.ConsoleProxyAgentInventory", "org.zstack.sdk.ConsoleProxyAgentInventory");
-			put("org.zstack.header.core.external.service.ExternalServiceCapabilities", "org.zstack.sdk.ExternalServiceCapabilities");
-			put("org.zstack.header.core.external.service.ExternalServiceInventory", "org.zstack.sdk.ExternalServiceInventory");
+			put("org.zstack.header.core.external.service.ApplyExternalConfigurationResult", "org.zstack.sdk.external.service.ApplyExternalConfigurationResult");
+			put("org.zstack.header.core.external.service.ExternalServiceCapabilities", "org.zstack.sdk.external.service.ExternalServiceCapabilities");
+			put("org.zstack.header.core.external.service.ExternalServiceConfigurationInventory", "org.zstack.sdk.external.service.ExternalServiceConfigurationInventory");
+			put("org.zstack.header.core.external.service.ExternalServiceInventory", "org.zstack.sdk.external.service.ExternalServiceInventory");
 			put("org.zstack.header.core.progress.ChainInfo", "org.zstack.sdk.ChainInfo");
 			put("org.zstack.header.core.progress.PendingTaskInfo", "org.zstack.sdk.PendingTaskInfo");
 			put("org.zstack.header.core.progress.RunningTaskInfo", "org.zstack.sdk.RunningTaskInfo");
@@ -255,6 +262,7 @@ public class SourceClassMap {
 			put("org.zstack.header.vm.CloneVmInstanceInventory", "org.zstack.sdk.CloneVmInstanceInventory");
 			put("org.zstack.header.vm.CloneVmInstanceResults", "org.zstack.sdk.CloneVmInstanceResults");
 			put("org.zstack.header.vm.CreateVmInstanceFromTemplatedVmInstanceResults", "org.zstack.sdk.CreateVmInstanceFromTemplatedVmInstanceResults");
+			put("org.zstack.header.vm.DiskAO", "org.zstack.sdk.DiskAO");
 			put("org.zstack.header.vm.TemplatedVmInstanceInventory", "org.zstack.sdk.TemplatedVmInstanceInventory");
 			put("org.zstack.header.vm.VdiPortInfo", "org.zstack.sdk.VdiPortInfo");
 			put("org.zstack.header.vm.VirtualizerInfo", "org.zstack.sdk.VirtualizerInfo");
@@ -326,6 +334,11 @@ public class SourceClassMap {
 			put("org.zstack.ldap.entity.LdapEntryAttributeInventory", "org.zstack.sdk.identity.ldap.entity.LdapEntryAttributeInventory");
 			put("org.zstack.ldap.entity.LdapEntryInventory", "org.zstack.sdk.identity.ldap.entity.LdapEntryInventory");
 			put("org.zstack.ldap.entity.LdapServerInventory", "org.zstack.sdk.identity.ldap.entity.LdapServerInventory");
+			put("org.zstack.log.server.LogCategory", "org.zstack.sdk.logserver.LogCategory");
+			put("org.zstack.log.server.LogLevel", "org.zstack.sdk.logserver.LogLevel");
+			put("org.zstack.log.server.LogServerInventory", "org.zstack.sdk.logserver.LogServerInventory");
+			put("org.zstack.log.server.LogServerState", "org.zstack.sdk.logserver.LogServerState");
+			put("org.zstack.log.server.LogType", "org.zstack.sdk.logserver.LogType");
 			put("org.zstack.loginControl.entity.AccessControlRuleInventory", "org.zstack.sdk.AccessControlRuleInventory");
 			put("org.zstack.loginControl.entity.ControlStrategy", "org.zstack.sdk.ControlStrategy");
 			put("org.zstack.managements.entity.common.ManagementNodeStatusView", "org.zstack.sdk.managements.common.ManagementNodeStatusView");
@@ -499,6 +512,7 @@ public class SourceClassMap {
 			put("org.zstack.storage.device.nvme.NvmeServerClusterRefInventory", "org.zstack.sdk.NvmeServerClusterRefInventory");
 			put("org.zstack.storage.device.nvme.NvmeServerInventory", "org.zstack.sdk.NvmeServerInventory");
 			put("org.zstack.storage.device.nvme.NvmeTargetInventory", "org.zstack.sdk.NvmeTargetInventory");
+			put("org.zstack.storage.migration.primary.VolumeMigrationAO", "org.zstack.sdk.VolumeMigrationAO");
 			put("org.zstack.storage.primary.block.BlockPrimaryStorageInventory", "org.zstack.sdk.BlockPrimaryStorageInventory");
 			put("org.zstack.storage.primary.local.APIGetLocalStorageHostDiskCapacityReply$HostDiskCapacity", "org.zstack.sdk.HostDiskCapacity");
 			put("org.zstack.storage.primary.local.LocalStorageResourceRefInventory", "org.zstack.sdk.LocalStorageResourceRefInventory");
@@ -585,6 +599,10 @@ public class SourceClassMap {
 			put("org.zstack.zwatch.monitorgroup.entity.MonitorGroupTemplateRefInventory", "org.zstack.sdk.zwatch.monitorgroup.entity.MonitorGroupTemplateRefInventory");
 			put("org.zstack.zwatch.monitorgroup.entity.MonitorGroupTemplateRefVO", "org.zstack.sdk.zwatch.monitorgroup.entity.MonitorGroupTemplateRefVO");
 			put("org.zstack.zwatch.monitorgroup.entity.MonitorTemplateInventory", "org.zstack.sdk.zwatch.monitorgroup.entity.MonitorTemplateInventory");
+			put("org.zstack.zwatch.resnotify.ResNotifySubscriptionInventory", "org.zstack.sdk.zwatch.resnotify.ResNotifySubscriptionInventory");
+			put("org.zstack.zwatch.resnotify.ResNotifySubscriptionState", "org.zstack.sdk.zwatch.resnotify.ResNotifySubscriptionState");
+			put("org.zstack.zwatch.resnotify.ResNotifyType", "org.zstack.sdk.zwatch.resnotify.ResNotifyType");
+			put("org.zstack.zwatch.resnotify.ResNotifyWebhookRefInventory", "org.zstack.sdk.zwatch.resnotify.ResNotifyWebhookRefInventory");
 			put("org.zstack.zwatch.ruleengine.ComparisonOperator", "org.zstack.sdk.zwatch.ruleengine.ComparisonOperator");
 			put("org.zstack.zwatch.thirdparty.entity.SNSEndpointThirdpartyAlertHistoryInventory", "org.zstack.sdk.zwatch.thirdparty.entity.SNSEndpointThirdpartyAlertHistoryInventory");
 			put("org.zstack.zwatch.thirdparty.entity.ThirdpartyOriginalAlertInventory", "org.zstack.sdk.zwatch.thirdparty.entity.ThirdpartyOriginalAlertInventory");
@@ -599,6 +617,7 @@ public class SourceClassMap {
 			put("org.zstack.sdk.AccessControlRuleInventory", "org.zstack.loginControl.entity.AccessControlRuleInventory");
 			put("org.zstack.sdk.AccessKeyInventory", "org.zstack.accessKey.AccessKeyInventory");
 			put("org.zstack.sdk.AccessKeyState", "org.zstack.accessKey.AccessKeyState");
+			put("org.zstack.sdk.AccessKeyType", "org.zstack.accessKey.AccessKeyType");
 			put("org.zstack.sdk.AccessPathInfo", "org.zstack.header.volume.block.AccessPathInfo");
 			put("org.zstack.sdk.AccountInventory", "org.zstack.header.identity.AccountInventory");
 			put("org.zstack.sdk.AccountPriceTableRefInventory", "org.zstack.billing.table.AccountPriceTableRefInventory");
@@ -681,6 +700,7 @@ public class SourceClassMap {
 			put("org.zstack.sdk.DeviceAddress", "org.zstack.header.vm.devices.DeviceAddress");
 			put("org.zstack.sdk.DeviceTO", "org.zstack.storage.device.multipath.DeviceTO");
 			put("org.zstack.sdk.DirectoryInventory", "org.zstack.directory.DirectoryInventory");
+			put("org.zstack.sdk.DiskAO", "org.zstack.header.vm.DiskAO");
 			put("org.zstack.sdk.DiskOfferingInventory", "org.zstack.header.configuration.DiskOfferingInventory");
 			put("org.zstack.sdk.EipInventory", "org.zstack.network.service.eip.EipInventory");
 			put("org.zstack.sdk.ElaborationCategory", "org.zstack.core.errorcode.ElaborationCategory");
@@ -697,9 +717,6 @@ public class SourceClassMap {
 			put("org.zstack.sdk.ExternalBackupState", "org.zstack.externalbackup.ExternalBackupState");
 			put("org.zstack.sdk.ExternalBackupStorageInventory", "org.zstack.header.storage.addon.backup.ExternalBackupStorageInventory");
 			put("org.zstack.sdk.ExternalPrimaryStorageInventory", "org.zstack.header.storage.addon.primary.ExternalPrimaryStorageInventory");
-			put("org.zstack.sdk.ExternalServiceCapabilities", "org.zstack.header.core.external.service.ExternalServiceCapabilities");
-			put("org.zstack.sdk.ExternalServiceCapabilitiesBuilder", "org.zstack.core.externalservice.ExternalServiceCapabilitiesBuilder");
-			put("org.zstack.sdk.ExternalServiceInventory", "org.zstack.header.core.external.service.ExternalServiceInventory");
 			put("org.zstack.sdk.FcHbaDeviceInventory", "org.zstack.storage.device.hba.FcHbaDeviceInventory");
 			put("org.zstack.sdk.FiberChannelLunInventory", "org.zstack.storage.device.fibreChannel.FiberChannelLunInventory");
 			put("org.zstack.sdk.FiberChannelStorageInventory", "org.zstack.storage.device.fibreChannel.FiberChannelStorageInventory");
@@ -1035,6 +1052,7 @@ public class SourceClassMap {
 			put("org.zstack.sdk.VolumeExternalBackupInfo", "org.zstack.externalbackup.VolumeExternalBackupInfo");
 			put("org.zstack.sdk.VolumeFormatReplyStruct", "org.zstack.header.volume.APIGetVolumeFormatReply$VolumeFormatReplyStruct");
 			put("org.zstack.sdk.VolumeInventory", "org.zstack.header.volume.VolumeInventory");
+			put("org.zstack.sdk.VolumeMigrationAO", "org.zstack.storage.migration.primary.VolumeMigrationAO");
 			put("org.zstack.sdk.VolumeSnapshotBackupStorageRefInventory", "org.zstack.header.storage.snapshot.VolumeSnapshotBackupStorageRefInventory");
 			put("org.zstack.sdk.VolumeSnapshotGroupAvailability", "org.zstack.header.storage.snapshot.group.VolumeSnapshotGroupAvailability");
 			put("org.zstack.sdk.VolumeSnapshotGroupInventory", "org.zstack.header.storage.snapshot.group.VolumeSnapshotGroupInventory");
@@ -1057,6 +1075,10 @@ public class SourceClassMap {
 			put("org.zstack.sdk.XskyBlockVolumeInventory", "org.zstack.header.volume.block.XskyBlockVolumeInventory");
 			put("org.zstack.sdk.ZQLQueryReturn", "org.zstack.zql.ZQLQueryReturn");
 			put("org.zstack.sdk.ZoneInventory", "org.zstack.header.zone.ZoneInventory");
+			put("org.zstack.sdk.allocator.domain.entity.AllocatorDomainInventory", "org.zstack.allocator.domain.entity.AllocatorDomainInventory");
+			put("org.zstack.sdk.allocator.domain.entity.AllocatorDomainRuleInventory", "org.zstack.allocator.domain.entity.AllocatorDomainRuleInventory");
+			put("org.zstack.sdk.allocator.domain.entity.AllocatorDomainRuleParam", "org.zstack.allocator.domain.entity.AllocatorDomainRuleParam");
+			put("org.zstack.sdk.allocator.domain.entity.AllocatorDomainSceneInventory", "org.zstack.allocator.domain.entity.AllocatorDomainSceneInventory");
 			put("org.zstack.sdk.attribute.entity.CreateResourceAttributeResult", "org.zstack.header.resourceattribute.entity.CreateResourceAttributeResult");
 			put("org.zstack.sdk.attribute.entity.ResourceAttributeConstraintInventory", "org.zstack.header.resourceattribute.entity.ResourceAttributeConstraintInventory");
 			put("org.zstack.sdk.attribute.entity.ResourceAttributeKeyInventory", "org.zstack.header.resourceattribute.entity.ResourceAttributeKeyInventory");
@@ -1065,6 +1087,11 @@ public class SourceClassMap {
 			put("org.zstack.sdk.databasebackup.DatabaseBackupStorageRefInventory", "org.zstack.header.storage.database.backup.DatabaseBackupStorageRefInventory");
 			put("org.zstack.sdk.databasebackup.DatabaseBackupStruct", "org.zstack.header.storage.database.backup.DatabaseBackupStruct");
 			put("org.zstack.sdk.databasebackup.DatabaseType", "org.zstack.header.storage.database.backup.DatabaseType");
+			put("org.zstack.sdk.external.service.ApplyExternalConfigurationResult", "org.zstack.header.core.external.service.ApplyExternalConfigurationResult");
+			put("org.zstack.sdk.external.service.ExternalServiceCapabilities", "org.zstack.header.core.external.service.ExternalServiceCapabilities");
+			put("org.zstack.sdk.external.service.ExternalServiceCapabilitiesBuilder", "org.zstack.core.externalservice.ExternalServiceCapabilitiesBuilder");
+			put("org.zstack.sdk.external.service.ExternalServiceConfigurationInventory", "org.zstack.header.core.external.service.ExternalServiceConfigurationInventory");
+			put("org.zstack.sdk.external.service.ExternalServiceInventory", "org.zstack.header.core.external.service.ExternalServiceInventory");
 			put("org.zstack.sdk.guesttools.GuestToolsInventory", "org.zstack.guesttools.GuestToolsInventory");
 			put("org.zstack.sdk.guesttools.GuestToolsStateInventory", "org.zstack.guesttools.GuestToolsStateInventory");
 			put("org.zstack.sdk.guesttools.advanced.VmCustomSpecificationInventory", "org.zstack.guesttools.advanced.VmCustomSpecificationInventory");
@@ -1089,6 +1116,11 @@ public class SourceClassMap {
 			put("org.zstack.sdk.keyprovider.api.RekeyFailedResource", "org.zstack.crypto.keyprovider.api.RekeyFailedResource");
 			put("org.zstack.sdk.keyprovider.api.RekeyProviderResult", "org.zstack.crypto.keyprovider.api.RekeyProviderResult");
 			put("org.zstack.sdk.keyprovider.api.RekeySkippedResource", "org.zstack.crypto.keyprovider.api.RekeySkippedResource");
+			put("org.zstack.sdk.logserver.LogCategory", "org.zstack.log.server.LogCategory");
+			put("org.zstack.sdk.logserver.LogLevel", "org.zstack.log.server.LogLevel");
+			put("org.zstack.sdk.logserver.LogServerInventory", "org.zstack.log.server.LogServerInventory");
+			put("org.zstack.sdk.logserver.LogServerState", "org.zstack.log.server.LogServerState");
+			put("org.zstack.sdk.logserver.LogType", "org.zstack.log.server.LogType");
 			put("org.zstack.sdk.managements.common.ManagementNodeStatusView", "org.zstack.managements.entity.common.ManagementNodeStatusView");
 			put("org.zstack.sdk.managements.common.ManagementsStatusView", "org.zstack.managements.entity.common.ManagementsStatusView");
 			put("org.zstack.sdk.managements.ha2.ZSha2StatusView", "org.zstack.managements.entity.ha2.ZSha2StatusView");
@@ -1174,6 +1206,10 @@ public class SourceClassMap {
 			put("org.zstack.sdk.zwatch.monitorgroup.entity.MonitorGroupTemplateRefInventory", "org.zstack.zwatch.monitorgroup.entity.MonitorGroupTemplateRefInventory");
 			put("org.zstack.sdk.zwatch.monitorgroup.entity.MonitorGroupTemplateRefVO", "org.zstack.zwatch.monitorgroup.entity.MonitorGroupTemplateRefVO");
 			put("org.zstack.sdk.zwatch.monitorgroup.entity.MonitorTemplateInventory", "org.zstack.zwatch.monitorgroup.entity.MonitorTemplateInventory");
+			put("org.zstack.sdk.zwatch.resnotify.ResNotifySubscriptionInventory", "org.zstack.zwatch.resnotify.ResNotifySubscriptionInventory");
+			put("org.zstack.sdk.zwatch.resnotify.ResNotifySubscriptionState", "org.zstack.zwatch.resnotify.ResNotifySubscriptionState");
+			put("org.zstack.sdk.zwatch.resnotify.ResNotifyType", "org.zstack.zwatch.resnotify.ResNotifyType");
+			put("org.zstack.sdk.zwatch.resnotify.ResNotifyWebhookRefInventory", "org.zstack.zwatch.resnotify.ResNotifyWebhookRefInventory");
 			put("org.zstack.sdk.zwatch.ruleengine.ComparisonOperator", "org.zstack.zwatch.ruleengine.ComparisonOperator");
 			put("org.zstack.sdk.zwatch.thirdparty.entity.SNSEndpointThirdpartyAlertHistoryInventory", "org.zstack.zwatch.thirdparty.entity.SNSEndpointThirdpartyAlertHistoryInventory");
 			put("org.zstack.sdk.zwatch.thirdparty.entity.ThirdpartyOriginalAlertInventory", "org.zstack.zwatch.thirdparty.entity.ThirdpartyOriginalAlertInventory");

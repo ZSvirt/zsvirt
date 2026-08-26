@@ -70,6 +70,9 @@ public class APICreateDataVolumeMsg extends APICreateMessage implements APIAudit
     @APIParam(required = false, resourceType = PrimaryStorageVO.class)
     private String primaryStorageUuid;
 
+    @APIParam(required = false)
+    private Boolean encrypted;
+
     public String getPrimaryStorageUuid() {
         return primaryStorageUuid;
     }
@@ -108,6 +111,16 @@ public class APICreateDataVolumeMsg extends APICreateMessage implements APIAudit
 
     public void setDiskSize(long diskSize) {
         this.diskSize = diskSize;
+    }
+
+    @Override
+    public Boolean getEncrypted() {
+        return encrypted;
+    }
+
+    @Override
+    public void setEncrypted(Boolean encrypted) {
+        this.encrypted = encrypted;
     }
 
     public static APICreateDataVolumeMsg __example__() {

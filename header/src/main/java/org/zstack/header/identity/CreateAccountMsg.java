@@ -13,6 +13,7 @@ public class CreateAccountMsg extends NeedReplyMessage {
     @NoLogging
     private String password;
     private String type;
+    private String source = AccountSource.Local.toString();
     private String description;
     private AccountState state;
 
@@ -46,6 +47,14 @@ public class CreateAccountMsg extends NeedReplyMessage {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public String getSource() {
+        return source;
+    }
+
+    public void setSource(String source) {
+        this.source = source;
     }
 
     public String getDescription() {

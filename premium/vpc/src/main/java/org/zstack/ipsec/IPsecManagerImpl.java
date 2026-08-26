@@ -1,7 +1,6 @@
 package org.zstack.ipsec;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.zstack.appliancevm.ApplianceVmCommands;
 import org.zstack.core.CoreGlobalProperty;
 import org.zstack.core.Platform;
 import org.zstack.core.asyncbatch.While;
@@ -12,13 +11,8 @@ import org.zstack.core.componentloader.PluginRegistry;
 import org.zstack.core.db.DatabaseFacade;
 import org.zstack.core.db.Q;
 import org.zstack.core.db.SQL;
-import org.zstack.core.db.SimpleQuery;
-import org.zstack.core.db.SimpleQuery.Op;
 import org.zstack.core.retry.Retry;
 import org.zstack.core.retry.RetryCondition;
-import org.zstack.core.thread.ChainTask;
-import org.zstack.core.thread.SyncTaskChain;
-import org.zstack.core.workflow.FlowChainBuilder;
 import org.zstack.header.AbstractService;
 import org.zstack.header.apimediator.ApiMessageInterceptionException;
 import org.zstack.header.apimediator.GlobalApiMessageInterceptor;
@@ -142,19 +136,19 @@ public class IPsecManagerImpl extends AbstractService implements IPsecManager, V
     }
 
     private IPsecBackend getBackend(String l3Uuid, boolean errOnException) {
-        SimpleQuery<NetworkServiceL3NetworkRefVO> rq = dbf.createQuery(NetworkServiceL3NetworkRefVO.class);
-        rq.select(NetworkServiceL3NetworkRefVO_.networkServiceProviderUuid);
-        rq.add(NetworkServiceL3NetworkRefVO_.l3NetworkUuid, Op.EQ, l3Uuid);
-        rq.add(NetworkServiceL3NetworkRefVO_.networkServiceType, Op.EQ, IPsecConstants.IPSEC_NETWORK_SERVICE_TYPE.toString());
-        String providerUuid = rq.findValue();
+        String providerUuid = Q.New(NetworkServiceL3NetworkRefVO.class)
+                .select(NetworkServiceL3NetworkRefVO_.networkServiceProviderUuid)
+                .eq(NetworkServiceL3NetworkRefVO_.l3NetworkUuid, l3Uuid)
+                .eq(NetworkServiceL3NetworkRefVO_.networkServiceType, IPsecConstants.IPSEC_NETWORK_SERVICE_TYPE.toString())
+                .findValue();
         if (errOnException) {
             DebugUtils.Assert(providerUuid != null, String.format("the L3 network[uuid:%s] doesn't have IPsec service attached", l3Uuid));
         }
 
-        SimpleQuery<NetworkServiceProviderVO> q = dbf.createQuery(NetworkServiceProviderVO.class);
-        q.select(NetworkServiceProviderVO_.type);
-        q.add(NetworkServiceProviderVO_.uuid, SimpleQuery.Op.EQ, providerUuid);
-        String providerType = q.findValue();
+        String providerType = Q.New(NetworkServiceProviderVO.class)
+                .select(NetworkServiceProviderVO_.type)
+                .eq(NetworkServiceProviderVO_.uuid, providerUuid)
+                .findValue();
 
         IPsecBackend bkd = backends.get(providerType);
         if (errOnException) {

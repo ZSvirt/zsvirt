@@ -188,4 +188,12 @@ public class VolumeInventory  {
         return this.protocol;
     }
 
+    public java.lang.Boolean encrypted;
+    public void setEncrypted(java.lang.Boolean encrypted) {
+        this.encrypted = encrypted;
+    }
+    public java.lang.Boolean getEncrypted() {
+        return this.encrypted;
+    }
+
 }

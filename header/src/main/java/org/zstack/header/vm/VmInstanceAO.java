@@ -90,6 +90,9 @@ public class VmInstanceAO extends ResourceVO {
     private String guestOsType;
 
     @Column
+    private boolean vmEncryption;
+
+    @Column
     private Timestamp createDate;
 
     @Column
@@ -98,6 +101,9 @@ public class VmInstanceAO extends ResourceVO {
     @Column
     @Enumerated(EnumType.STRING)
     private VmInstanceState state;
+
+    @Column
+    private Timestamp bootTime;
 
     public VmInstanceAO() {
     }
@@ -125,9 +131,11 @@ public class VmInstanceAO extends ResourceVO {
         this.createDate = other.createDate;
         this.lastOpDate = other.lastOpDate;
         this.state = other.state;
+        this.bootTime = other.bootTime;
         this.platform = other.platform;
         this.guestOsType = other.guestOsType;
         this.architecture = other.architecture;
+        this.vmEncryption = other.vmEncryption;
     }
 
     @PreUpdate
@@ -279,6 +287,14 @@ public class VmInstanceAO extends ResourceVO {
         this.state = state;
     }
 
+    public Timestamp getBootTime() {
+        return bootTime;
+    }
+
+    public void setBootTime(Timestamp bootTime) {
+        this.bootTime = bootTime;
+    }
+
     public String getRootVolumeUuid() {
         return rootVolumeUuid;
     }
@@ -329,5 +345,13 @@ public class VmInstanceAO extends ResourceVO {
 
     public void setGuestOsType(String guestOsType) {
         this.guestOsType = guestOsType;
+    }
+
+    public boolean isVmEncryption() {
+        return vmEncryption;
+    }
+
+    public void setVmEncryption(boolean vmEncryption) {
+        this.vmEncryption = vmEncryption;
     }
 }

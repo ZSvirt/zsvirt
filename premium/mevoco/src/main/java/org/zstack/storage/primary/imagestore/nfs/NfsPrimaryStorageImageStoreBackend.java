@@ -1,5 +1,6 @@
 package org.zstack.storage.primary.imagestore.nfs;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.zstack.core.cloudbus.CloudBus;
 import org.zstack.core.cloudbus.CloudBusCallBack;
@@ -10,11 +11,13 @@ import org.zstack.core.errorcode.ErrorFacade;
 import org.zstack.core.timeout.ApiTimeoutManager;
 import org.zstack.core.workflow.FlowChainBuilder;
 import org.zstack.core.workflow.ShareFlow;
+import org.zstack.header.core.Completion;
 import org.zstack.header.HasThreadContext;
 import org.zstack.header.agent.AgentResponse;
 import org.zstack.header.core.ReturnValueCompletion;
 import org.zstack.header.core.workflow.*;
 import org.zstack.header.errorcode.ErrorCode;
+import org.zstack.header.errorcode.OperationFailureException;
 import org.zstack.header.host.HostConstant;
 import org.zstack.header.host.HypervisorType;
 import org.zstack.header.image.CreateImageExtensionPoint;
@@ -33,17 +36,25 @@ import org.zstack.kvm.KVMConstant;
 import org.zstack.kvm.KVMHostAsyncHttpCallMsg;
 import org.zstack.kvm.KVMHostAsyncHttpCallReply;
 import org.zstack.storage.backup.imagestore.*;
+import org.zstack.storage.encrypt.VolumeEncryptedSecretHelper;
+import org.zstack.storage.encrypt.VolumeSnapshotEncryptionHelper;
 import org.zstack.storage.primary.PrimaryStorageGlobalConfig;
 import org.zstack.storage.primary.nfs.NfsPrimaryStorage;
 import org.zstack.storage.primary.nfs.NfsPrimaryStorageFactory;
+import org.zstack.storage.primary.nfs.NfsPrimaryStorageKVMBackend;
 import org.zstack.storage.primary.nfs.NfsPrimaryStorageKVMBackendCommands;
+import org.zstack.storage.primary.nfs.NfsPrimaryStorageKvmHelper;
 import org.zstack.storage.primary.nfs.NfsPrimaryToBackupStorageMediator;
+import org.zstack.utils.Utils;
+import org.zstack.utils.logging.CLogger;
 
 import java.util.Map;
 
 import static org.zstack.core.Platform.operr;
 
 public class NfsPrimaryStorageImageStoreBackend extends NfsPrimaryStorage {
+    private static final CLogger logger = Utils.getLogger(NfsPrimaryStorageImageStoreBackend.class);
+
     @Autowired
     private NfsPrimaryStorageFactory nfsPrimaryStorageFactory;
     @Autowired
@@ -58,6 +69,10 @@ public class NfsPrimaryStorageImageStoreBackend extends NfsPrimaryStorage {
     private ApiTimeoutManager timeoutMgr;
     @Autowired
     private PluginRegistry pluginRgty;
+    @Autowired
+    private VolumeEncryptedSecretHelper volumeEncryptedSecretHelper;
+    @Autowired
+    private VolumeSnapshotEncryptionHelper snapshotEncryptionHelper;
 
     public static final String COMMIT_PATH = "/nfsprimarystorage/imagestore/commit";
     public static final String RESIZE_VOLUME_PATH = "/nfsprimarystorage/volume/resize";
@@ -151,6 +166,7 @@ public class NfsPrimaryStorageImageStoreBackend extends NfsPrimaryStorage {
         private String installPath;
         private long size;
         private boolean force;
+        private String encryptLuksSecretMaterialFilePath;
 
         public String getInstallPath() {
             return installPath;
@@ -174,6 +190,14 @@ public class NfsPrimaryStorageImageStoreBackend extends NfsPrimaryStorage {
 
         public void setForce(boolean force) {
             this.force = force;
+        }
+
+        public String getEncryptLuksSecretMaterialFilePath() {
+            return encryptLuksSecretMaterialFilePath;
+        }
+
+        public void setEncryptLuksSecretMaterialFilePath(String encryptLuksSecretMaterialFilePath) {
+            this.encryptLuksSecretMaterialFilePath = encryptLuksSecretMaterialFilePath;
         }
     }
 
@@ -252,6 +276,21 @@ public class NfsPrimaryStorageImageStoreBackend extends NfsPrimaryStorage {
         cmd.setInstallPath(volume.getInstallPath());
         cmd.setSize(msg.getSize());
         cmd.setForce(msg.isForce());
+        String secretMaterialPath;
+        try {
+            secretMaterialPath = prepareVolumeSecretMaterialPath(hostUuid, volume);
+        } catch (OperationFailureException e) {
+            reply.setError(e.getErrorCode());
+            bus.reply(msg, reply);
+            return;
+        }
+        if (Boolean.TRUE.equals(volume.getEncrypted()) && secretMaterialPath == null) {
+            reply.setError(operr("failed to prepare LUKS secret material for volume[uuid:%s]",
+                    volume.getUuid()));
+            bus.reply(msg, reply);
+            return;
+        }
+        cmd.setEncryptLuksSecretMaterialFilePath(secretMaterialPath);
 
         KVMHostAsyncHttpCallMsg kmsg = new KVMHostAsyncHttpCallMsg();
         kmsg.setHostUuid(hostUuid);
@@ -279,6 +318,14 @@ public class NfsPrimaryStorageImageStoreBackend extends NfsPrimaryStorage {
                 bus.reply(msg, reply);
             }
         });
+    }
+
+    private String prepareVolumeSecretMaterialPath(String hostUuid, VolumeInventory volume) {
+        if (volume == null || !Boolean.TRUE.equals(volume.getEncrypted())) {
+            return null;
+        }
+
+        return volumeEncryptedSecretHelper.prepareLuksSecretMaterialFileOnHost(hostUuid, volume.getUuid());
     }
 
     private String getVolumeRootImageUuid(String volumeUuid) {
@@ -337,6 +384,73 @@ public class NfsPrimaryStorageImageStoreBackend extends NfsPrimaryStorage {
         });
     }
 
+    private void createEncryptedSnapshotImageTemplate(String hostUuid, String snapshotUuid, String sourceInstallPath, String imageUuid,
+                                                      String temporaryTemplatePath,
+                                                      ReturnValueCompletion<String> completion) {
+        String encryptedDek;
+        try {
+            encryptedDek = snapshotEncryptionHelper.prepareTemporarySnapshotImageEncryptedDek(hostUuid, snapshotUuid, imageUuid, true);
+        } catch (OperationFailureException e) {
+            completion.fail(e.getErrorCode());
+            return;
+        }
+        if (StringUtils.isBlank(encryptedDek)) {
+            completion.fail(operr("cannot prepare LUKS encryptedDek for encrypted temporary snapshot image[uuid:%s] from snapshot[uuid:%s] on host[uuid:%s]",
+                    imageUuid, snapshotUuid, hostUuid));
+            return;
+        }
+
+        NfsPrimaryStorageKVMBackendCommands.CreateTemplateFromVolumeCmd cmd = new NfsPrimaryStorageKVMBackendCommands.CreateTemplateFromVolumeCmd();
+        cmd.setInstallPath(temporaryTemplatePath);
+        cmd.setVolumePath(sourceInstallPath);
+        cmd.setUuid(self.getUuid());
+        cmd.setEncryptedDek(encryptedDek);
+
+        KVMHostAsyncHttpCallMsg kmsg = new KVMHostAsyncHttpCallMsg();
+        kmsg.setHostUuid(hostUuid);
+        kmsg.setPath(NfsPrimaryStorageKVMBackend.CREATE_TEMPLATE_FROM_VOLUME_PATH);
+        kmsg.setCommand(cmd);
+        bus.makeTargetServiceIdByResourceUuid(kmsg, HostConstant.SERVICE_ID, hostUuid);
+        bus.send(kmsg, new CloudBusCallBack(completion) {
+            @Override
+            public void run(MessageReply reply) {
+                if (!reply.isSuccess()) {
+                    completion.fail(reply.getError());
+                    return;
+                }
+
+                NfsPrimaryStorageKVMBackendCommands.CreateTemplateFromVolumeRsp rsp =
+                        ((KVMHostAsyncHttpCallReply) reply).toResponse(NfsPrimaryStorageKVMBackendCommands.CreateTemplateFromVolumeRsp.class);
+                if (!rsp.isSuccess()) {
+                    completion.fail(operr("failed to create encrypted temporary snapshot image template[uuid:%s], because %s",
+                            imageUuid, rsp.getError()));
+                    return;
+                }
+
+                completion.success(temporaryTemplatePath);
+            }
+        });
+    }
+
+    private void deleteTemporaryTemplate(String installPath, Completion completion) {
+        DeleteBitsOnPrimaryStorageMsg dmsg = new DeleteBitsOnPrimaryStorageMsg();
+        dmsg.setPrimaryStorageUuid(self.getUuid());
+        dmsg.setInstallPath(installPath);
+        dmsg.setRecycle(false);
+        bus.makeTargetServiceIdByResourceUuid(dmsg, PrimaryStorageConstant.SERVICE_ID, self.getUuid());
+        bus.send(dmsg, new CloudBusCallBack(completion) {
+            @Override
+            public void run(MessageReply reply) {
+                if (!reply.isSuccess()) {
+                    completion.fail(reply.getError());
+                    return;
+                }
+
+                completion.success();
+            }
+        });
+    }
+
     private void handle(final CommitVolumeAsImageMsg msg) {
         CommitVolumeAsImageFlowChain.getFlow(msg).run();
     }
@@ -362,6 +476,7 @@ public class NfsPrimaryStorageImageStoreBackend extends NfsPrimaryStorage {
             CommitVolumeAsImageRsp cvRsp;
             String volumeSnapshotInstallPath;
             String volumeSnapshotFormat;
+            String encryptedTemplateInstallPath;
             VolumeSnapshotInventory snapshot;
 
             // The flow logic:
@@ -438,6 +553,60 @@ public class NfsPrimaryStorageImageStoreBackend extends NfsPrimaryStorage {
                     }
                 });
 
+                flow(new Flow() {
+                    String __name__ = "create-encrypted-template-from-snapshot";
+
+                    @Override
+                    public boolean skip(Map data) {
+                        return !Boolean.TRUE.equals(msg.getEncrypted());
+                    }
+
+                    @Override
+                    public void run(FlowTrigger trigger, Map data) {
+                        String hostUuid = nfsPrimaryStorageFactory.getConnectedHostForOperation(getSelfInventory()).get(0).getUuid();
+                        encryptedTemplateInstallPath = NfsPrimaryStorageKvmHelper.makeTemplateFromVolumeInWorkspacePath(
+                                getSelfInventory(), msg.getImageUuid());
+                        createEncryptedSnapshotImageTemplate(hostUuid, snapshot.getUuid(), volumeSnapshotInstallPath, msg.getImageUuid(),
+                                encryptedTemplateInstallPath,
+                                new ReturnValueCompletion<String>(trigger) {
+                                    @Override
+                                    public void success(String returnValue) {
+                                        encryptedTemplateInstallPath = returnValue;
+                                        volumeSnapshotInstallPath = returnValue;
+                                        volumeSnapshotFormat = "qcow2";
+                                        trigger.next();
+                                    }
+
+                                    @Override
+                                    public void fail(ErrorCode errorCode) {
+                                        trigger.fail(errorCode);
+                                    }
+                                });
+                    }
+
+                    @Override
+                    public void rollback(FlowRollback trigger, Map data) {
+                        if (encryptedTemplateInstallPath == null) {
+                            trigger.rollback();
+                            return;
+                        }
+
+                        deleteTemporaryTemplate(encryptedTemplateInstallPath, new Completion(trigger) {
+                            @Override
+                            public void success() {
+                                encryptedTemplateInstallPath = null;
+                                trigger.rollback();
+                            }
+
+                            @Override
+                            public void fail(ErrorCode errorCode) {
+                                logger.warn(String.format("failed to delete encrypted temporary template[%s], %s", encryptedTemplateInstallPath, errorCode));
+                                trigger.rollback();
+                            }
+                        });
+                    }
+                });
+
                 flow(new NoRollbackFlow() {
                     String __name__ = "commit-snapshot-to-local-image-registry";
 
@@ -478,6 +647,32 @@ public class NfsPrimaryStorageImageStoreBackend extends NfsPrimaryStorage {
                             @Override
                             public void fail(ErrorCode errorCode) {
                                 trigger.fail(errorCode);
+                            }
+                        });
+                    }
+                });
+
+                flow(new NoRollbackFlow() {
+                    String __name__ = "delete-encrypted-temporary-template";
+
+                    @Override
+                    public boolean skip(Map data) {
+                        return encryptedTemplateInstallPath == null;
+                    }
+
+                    @Override
+                    public void run(FlowTrigger trigger, Map data) {
+                        deleteTemporaryTemplate(encryptedTemplateInstallPath, new Completion(trigger) {
+                            @Override
+                            public void success() {
+                                encryptedTemplateInstallPath = null;
+                                trigger.next();
+                            }
+
+                            @Override
+                            public void fail(ErrorCode errorCode) {
+                                logger.warn(String.format("failed to delete encrypted temporary template[%s], %s", encryptedTemplateInstallPath, errorCode));
+                                trigger.next();
                             }
                         });
                     }

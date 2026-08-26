@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.zstack</groupId>
+        <artifactId>headers</artifactId>
+        <version>5.0.0</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+    <artifactId>messages</artifactId>
+    <name>messages</name>
+    <description>Message protocol: Message/APIMessage, ErrorCode, REST/SDK annotations, SessionInventory</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.zstack</groupId>
+            <artifactId>utils</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.zstack</groupId>
+            <artifactId>description</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>commons-collections</groupId>
+            <artifactId>commons-collections</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>commons-beanutils</groupId>
+            <artifactId>commons-beanutils</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.hibernate.javax.persistence</groupId>
+            <artifactId>hibernate-jpa-2.1-api</artifactId>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${project.compiler.version}</version>
+                <configuration>
+                    <source>${project.java.version}</source>
+                    <target>${project.java.version}</target>
+                    <debug>true</debug>
+                    <!-- Doc generator parses these DSL sources; do not compile them. -->
+                    <excludes>
+                        <exclude>**/*Doc_zh_cn.groovy</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

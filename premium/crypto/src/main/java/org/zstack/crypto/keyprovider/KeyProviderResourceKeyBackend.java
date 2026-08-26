@@ -2,6 +2,7 @@ package org.zstack.crypto.keyprovider;
 
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.zstack.compute.vm.devices.TpmEncryptedResourceKeyBackend;
 import org.zstack.core.db.DatabaseFacade;
 import org.zstack.core.db.Q;
@@ -13,8 +14,11 @@ import org.zstack.header.keyprovider.EncryptedResourceKeyRefVO_;
 import org.zstack.header.keyprovider.KeyProviderGlobalConfig;
 import org.zstack.header.keyprovider.KeyProviderVO;
 import org.zstack.header.keyprovider.KeyProviderVO_;
+import org.zstack.header.tpm.entity.TpmKeyBackupVO;
 import org.zstack.header.tpm.entity.TpmVO;
 import org.zstack.header.vm.additions.VmHostBackupFileVO;
+import org.zstack.header.vo.ResourceVO;
+import org.zstack.header.vo.ResourceVO_;
 import org.zstack.utils.Utils;
 import org.zstack.utils.logging.CLogger;
 
@@ -31,6 +35,8 @@ public class KeyProviderResourceKeyBackend implements TpmEncryptedResourceKeyBac
     private DatabaseFacade databaseFacade;
     @Autowired
     private TimeHelper timeHelper;
+    @Autowired
+    private KeyProviderAvailabilityChecker keyProviderAvailabilityChecker;
 
     @Override
     public void attachKeyProviderToTpm(String tpmUuid, String keyProviderUuid) {
@@ -49,6 +55,8 @@ public class KeyProviderResourceKeyBackend implements TpmEncryptedResourceKeyBac
                     .withOpaque("tpm.uuid", tpmUuid)
                     .toException();
         }
+
+        keyProviderAvailabilityChecker.ensureProviderAvailable(keyProviderUuid);
 
         final KeyProviderVO provider = Q.New(KeyProviderVO.class)
                 .eq(KeyProviderVO_.uuid, keyProviderUuid)
@@ -161,6 +169,7 @@ public class KeyProviderResourceKeyBackend implements TpmEncryptedResourceKeyBac
             logger.info(String.format("reset encrypted resource key for TPM[uuid=%s] from source TPM[uuid=%s]",
                     context.dstTpmUuid, context.srcTpmUuid));
             String defaultProviderUuid = defaultKeyProviderUuid();
+            keyProviderAvailabilityChecker.ensureProviderAvailable(defaultProviderUuid);
             String defaultProviderName = Q.New(KeyProviderVO.class)
                     .eq(KeyProviderVO_.uuid, defaultProviderUuid)
                     .select(KeyProviderVO_.name)
@@ -241,19 +250,98 @@ public class KeyProviderResourceKeyBackend implements TpmEncryptedResourceKeyBac
     }
 
     @Override
-    public void backupEncryptedResourceKey(BackupEncryptedResourceKeyContent context) {
+    @Transactional
+    public void backupEncryptedResourceKey(BackupEncryptedResourceKeyContext context) {
         EncryptedResourceKeyRefVO src = Q.New(EncryptedResourceKeyRefVO.class)
-                .eq(EncryptedResourceKeyRefVO_.resourceUuid, context.srcTpmUuid)
+                .eq(EncryptedResourceKeyRefVO_.resourceUuid, context.srcResourceUuid)
                 .find();
         if (src == null) {
-            logger.debug(String.format("No encrypted resource key found for tpm[uuid:%s], skip backup to VmHostBackupFile[uuid:%s]",
-                    context.srcTpmUuid, context.dstVmHostBackupFileUuid));
+            logger.debug(String.format("No encrypted resource key found for source resource[uuid:%s], skip backup to resource[uuid:%s]",
+                    context.srcResourceUuid, context.dstResourceUuid));
+            return;
+        }
+
+        String resourceType = Q.New(ResourceVO.class)
+                .select(ResourceVO_.resourceType)
+                .eq(ResourceVO_.uuid, context.dstResourceUuid)
+                .findValue();
+        if (resourceType == null) {
+            throw operr("failed to find resource[uuid: %s]", context.dstResourceUuid).toException();
+        }
+
+        EncryptedResourceKeyRefVO exists = Q.New(EncryptedResourceKeyRefVO.class)
+                .eq(EncryptedResourceKeyRefVO_.resourceUuid, context.dstResourceUuid)
+                .find();
+        if (exists != null) {
+            SQL.New(EncryptedResourceKeyRefVO.class)
+                    .eq(EncryptedResourceKeyRefVO_.resourceUuid, context.dstResourceUuid)
+                    .eq(EncryptedResourceKeyRefVO_.resourceType, resourceType)
+                    .set(EncryptedResourceKeyRefVO_.providerUuid, src.getProviderUuid())
+                    .set(EncryptedResourceKeyRefVO_.providerName, src.getProviderName())
+                    .set(EncryptedResourceKeyRefVO_.keyVersion, src.getKeyVersion())
+                    .set(EncryptedResourceKeyRefVO_.kekRef, src.getKekRef())
+                    .set(EncryptedResourceKeyRefVO_.wrappedDek, src.getWrappedDek())
+                    .set(EncryptedResourceKeyRefVO_.algorithm, src.getAlgorithm())
+                    .update();
             return;
         }
 
         EncryptedResourceKeyRefVO backup = new EncryptedResourceKeyRefVO();
-        backup.setResourceType(VmHostBackupFileVO.class.getSimpleName());
-        backup.setResourceUuid(context.dstVmHostBackupFileUuid);
+        backup.setResourceType(resourceType);
+        backup.setResourceUuid(context.dstResourceUuid);
+        backup.setProviderUuid(src.getProviderUuid());
+        backup.setProviderName(src.getProviderName());
+        backup.setKeyVersion(src.getKeyVersion());
+        backup.setKekRef(src.getKekRef());
+        backup.setWrappedDek(src.getWrappedDek());
+        backup.setAlgorithm(src.getAlgorithm());
+        backup.setCreateDate(timeHelper.getCurrentTimestamp());
+        backup.setLastOpDate(backup.getCreateDate());
+        databaseFacade.persist(backup);
+    }
+
+    @Override
+    public void restoreEncryptedResourceKey(RestoreEncryptedResourceKeyContext context) {
+        String resourceType = Q.New(ResourceVO.class)
+                .select(ResourceVO_.resourceType)
+                .eq(ResourceVO_.uuid, context.dstResourceUuid)
+                .findValue();
+        if (resourceType == null) {
+            throw operr("failed to find resource[uuid: %s]", context.dstResourceUuid).toException();
+        }
+
+        EncryptedResourceKeyRefVO src = Q.New(EncryptedResourceKeyRefVO.class)
+                .eq(EncryptedResourceKeyRefVO_.resourceUuid, context.srcResourceUuid)
+                .find();
+        if (src == null) {
+            logger.debug(String.format("No encrypted resource key found for source resource[uuid:%s], delete resource key for resource[uuid:%s]",
+                    context.srcResourceUuid, context.dstResourceUuid));
+            SQL.New(EncryptedResourceKeyRefVO.class)
+                    .eq(EncryptedResourceKeyRefVO_.resourceUuid, context.dstResourceUuid)
+                    .delete();
+            return;
+        }
+
+        EncryptedResourceKeyRefVO exists = Q.New(EncryptedResourceKeyRefVO.class)
+                .eq(EncryptedResourceKeyRefVO_.resourceUuid, context.dstResourceUuid)
+                .find();
+        if (exists != null) {
+            SQL.New(EncryptedResourceKeyRefVO.class)
+                    .eq(EncryptedResourceKeyRefVO_.resourceUuid, context.dstResourceUuid)
+                    .eq(EncryptedResourceKeyRefVO_.resourceType, resourceType)
+                    .set(EncryptedResourceKeyRefVO_.providerUuid, src.getProviderUuid())
+                    .set(EncryptedResourceKeyRefVO_.providerName, src.getProviderName())
+                    .set(EncryptedResourceKeyRefVO_.keyVersion, src.getKeyVersion())
+                    .set(EncryptedResourceKeyRefVO_.kekRef, src.getKekRef())
+                    .set(EncryptedResourceKeyRefVO_.wrappedDek, src.getWrappedDek())
+                    .set(EncryptedResourceKeyRefVO_.algorithm, src.getAlgorithm())
+                    .update();
+            return;
+        }
+
+        EncryptedResourceKeyRefVO backup = new EncryptedResourceKeyRefVO();
+        backup.setResourceType(resourceType);
+        backup.setResourceUuid(context.dstResourceUuid);
         backup.setProviderUuid(src.getProviderUuid());
         backup.setProviderName(src.getProviderName());
         backup.setKeyVersion(src.getKeyVersion());
@@ -270,6 +358,14 @@ public class KeyProviderResourceKeyBackend implements TpmEncryptedResourceKeyBac
         SQL.New(EncryptedResourceKeyRefVO.class)
                 .eq(EncryptedResourceKeyRefVO_.resourceType, VmHostBackupFileVO.class.getSimpleName())
                 .eq(EncryptedResourceKeyRefVO_.resourceUuid, vmHostBackupFileUuid)
+                .delete();
+    }
+
+    @Override
+    public void cleanTpmKeyBackupEncryptedResourceKey(String tpmKeyBackupUuid) {
+        SQL.New(EncryptedResourceKeyRefVO.class)
+                .eq(EncryptedResourceKeyRefVO_.resourceType, TpmKeyBackupVO.class.getSimpleName())
+                .eq(EncryptedResourceKeyRefVO_.resourceUuid, tpmKeyBackupUuid)
                 .delete();
     }
 }

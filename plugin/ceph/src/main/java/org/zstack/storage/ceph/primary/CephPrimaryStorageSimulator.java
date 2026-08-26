@@ -10,13 +10,12 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.zstack.core.Platform;
 import org.zstack.core.db.DatabaseFacade;
-import org.zstack.core.db.SimpleQuery;
-import org.zstack.core.db.SimpleQuery.Op;
+import org.zstack.core.db.Q;
 import org.zstack.header.exception.CloudRuntimeException;
 import org.zstack.header.rest.RESTConstant;
 import org.zstack.header.rest.RESTFacade;
-import org.zstack.header.storage.backup.BackupStorageVO_;
 import org.zstack.header.storage.primary.PrimaryStorageVO;
+import org.zstack.header.storage.primary.PrimaryStorageVO_;
 import org.zstack.kvm.KVMAgentCommands;
 import org.zstack.storage.ceph.primary.CephPrimaryStorageBase.*;
 import org.zstack.storage.ceph.primary.CephPrimaryStorageMonBase.PingCmd;
@@ -57,10 +56,10 @@ public class CephPrimaryStorageSimulator {
     }
 
     private CephPrimaryStorageConfig getConfig(AgentCommand cmd) {
-        SimpleQuery<PrimaryStorageVO> q = dbf.createQuery(PrimaryStorageVO.class);
-        q.select(BackupStorageVO_.name);
-        q.add(BackupStorageVO_.uuid, Op.EQ, cmd.getUuid());
-        String name = q.findValue();
+        String name = Q.New(PrimaryStorageVO.class)
+                .select(PrimaryStorageVO_.name)
+                .eq(PrimaryStorageVO_.uuid, cmd.getUuid())
+                .findValue();
 
         CephPrimaryStorageConfig c = config.config.get(name);
         if (c == null) {

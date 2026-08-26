@@ -9,6 +9,7 @@ import org.zstack.core.asyncbatch.While;
 import org.zstack.core.cloudbus.CloudBus;
 import org.zstack.core.componentloader.PluginRegistry;
 import org.zstack.core.db.DatabaseFacade;
+import org.zstack.core.db.Q;
 import org.zstack.core.db.SQLBatchWithReturn;
 import org.zstack.core.errorcode.ErrorFacade;
 import org.zstack.header.core.WhileDoneCompletion;
@@ -80,6 +81,7 @@ public class VmAllocateNicFlow implements Flow {
                 .map(obj -> (Map<String, NicIpAddressInfo>) obj)
                 .orElse(ipOperator.getNicNetworkInfoByVmUuid(spec.getVmInventory().getUuid()));
         ipOperator.updateNicNetworkInfoByVmNicParam(spec.getVmInventory().getUuid(), nicNetworkInfoMap, VmNicSpec.getVmNicParamsOfSpec(spec.getL3Networks()));
+        final Map<String, Set<Integer>> vmNicParamIpVersions = getVmNicParamIpVersions(spec.getL3Networks());
 
         final List<String> disableL3Networks = new ArrayList<>();
         if (spec.getDisableL3Networks() != null && !spec.getDisableL3Networks().isEmpty()) {
@@ -160,14 +162,15 @@ public class VmAllocateNicFlow implements Flow {
                             ? VmNicState.disable.toString()
                             : VmNicState.enable.toString()
             );
+            final NicIpAddressInfo nicIpAddressInfo = !nw.enableIpAllocation()
+                    && spec.getVmInventory().getType().equals(VmInstanceConstant.USER_VM_TYPE)
+                    ? getNicNetworkInfo(nw.getUuid(), nicParam, nicNetworkInfoMap, vmNicParamIpVersions)
+                    : null;
             final String vmNicUuid = new SQLBatchWithReturn<String>() {
                 @Override
                 protected String scripts() {
                     VmNicVO nicVO = vnicFactory.createVmNic(nic, spec);
-                    if (!nw.enableIpAllocation() && nicNetworkInfoMap != null
-                            && nicNetworkInfoMap.containsKey(nw.getUuid())
-                            && spec.getVmInventory().getType().equals(VmInstanceConstant.USER_VM_TYPE)) {
-                        NicIpAddressInfo nicIpAddressInfo = nicNetworkInfoMap.get(nic.getL3NetworkUuid());
+                    if (nicIpAddressInfo != null) {
                         if (!StringUtils.isEmpty(nicIpAddressInfo.ipv6Address)) {
                             UsedIpVO vo = new UsedIpVO();
                             vo.setUuid(Platform.getUuid());
@@ -226,6 +229,151 @@ public class VmAllocateNicFlow implements Flow {
                 }
             }
         });
+    }
+
+
+    private Map<String, Set<Integer>> getVmNicParamIpVersions(List<VmNicSpec> nicSpecs) {
+        Map<String, Set<Integer>> ret = new HashMap<>();
+        for (VmNicSpec nicSpec : VmNicSpec.getFirstL3NetworkInventoryOfSpec(nicSpecs)) {
+            if (nicSpec.getL3Invs() == null || nicSpec.getL3Invs().isEmpty()) {
+                continue;
+            }
+
+            VmNicParam vmNicParam = nicSpec.getVmNicParam();
+            if (vmNicParam == null) {
+                continue;
+            }
+            String l3Uuid = nicSpec.getL3Invs().get(0).getUuid();
+            if (!StringUtils.isEmpty(vmNicParam.getIp())) {
+                ret.computeIfAbsent(l3Uuid, k -> new HashSet<>()).add(IPv6Constants.IPv4);
+            }
+            if (!StringUtils.isEmpty(vmNicParam.getIp6())) {
+                ret.computeIfAbsent(l3Uuid, k -> new HashSet<>()).add(IPv6Constants.IPv6);
+            }
+        }
+
+        return ret;
+    }
+
+    private NicIpAddressInfo getNicNetworkInfo(String l3Uuid, VmNicParam vmNicParam,
+                                               Map<String, NicIpAddressInfo> nicNetworkInfoMap,
+                                               Map<String, Set<Integer>> vmNicParamIpVersions) {
+        NicIpAddressInfo info = copyNicIpAddressInfo(nicNetworkInfoMap == null ? null : nicNetworkInfoMap.get(l3Uuid));
+        Set<Integer> ipVersions = vmNicParamIpVersions.get(l3Uuid);
+        if (ipVersions != null) {
+            if (ipVersions.contains(IPv6Constants.IPv4)) {
+                info = clearIpv4Info(info);
+            }
+            if (ipVersions.contains(IPv6Constants.IPv6)) {
+                info = clearIpv6Info(info);
+            }
+        }
+
+        info = updateNicNetworkInfoByVmNicParam(l3Uuid, info, vmNicParam);
+        return isEmptyNicNetworkInfo(info) ? null : info;
+    }
+
+    private NicIpAddressInfo copyNicIpAddressInfo(NicIpAddressInfo info) {
+        if (info == null) {
+            return null;
+        }
+
+        NicIpAddressInfo ret = new NicIpAddressInfo();
+        ret.ipv4Address = info.ipv4Address;
+        ret.ipv4Gateway = info.ipv4Gateway;
+        ret.ipv4Netmask = info.ipv4Netmask;
+        ret.ipv6Address = info.ipv6Address;
+        ret.ipv6Gateway = info.ipv6Gateway;
+        ret.ipv6Prefix = info.ipv6Prefix;
+        return ret;
+    }
+
+    private NicIpAddressInfo clearIpv4Info(NicIpAddressInfo info) {
+        if (info == null) {
+            return null;
+        }
+
+        info.ipv4Address = null;
+        info.ipv4Gateway = null;
+        info.ipv4Netmask = null;
+        return info;
+    }
+
+    private NicIpAddressInfo clearIpv6Info(NicIpAddressInfo info) {
+        if (info == null) {
+            return null;
+        }
+
+        info.ipv6Address = null;
+        info.ipv6Gateway = null;
+        info.ipv6Prefix = null;
+        return info;
+    }
+
+    private NicIpAddressInfo updateNicNetworkInfoByVmNicParam(String l3Uuid, NicIpAddressInfo info, VmNicParam vmNicParam) {
+        if (vmNicParam == null) {
+            return info;
+        }
+
+        if (!StringUtils.isEmpty(vmNicParam.getIp())) {
+            info = info == null ? new NicIpAddressInfo() : info;
+            info.ipv4Address = vmNicParam.getIp();
+            info.ipv4Netmask = vmNicParam.getNetmask();
+            info.ipv4Gateway = vmNicParam.getGateway();
+        }
+        if (!StringUtils.isEmpty(vmNicParam.getIp6())) {
+            info = info == null ? new NicIpAddressInfo() : info;
+            info.ipv6Address = IPv6NetworkUtils.getIpv6AddressCanonicalString(vmNicParam.getIp6());
+            info.ipv6Prefix = vmNicParam.getIpv6Prefix();
+            if (vmNicParam.getIpv6Gateway() != null) {
+                info.ipv6Gateway = IPv6NetworkUtils.getIpv6AddressCanonicalString(vmNicParam.getIpv6Gateway());
+            }
+        }
+
+        fillNicNetworkInfoByIpRange(l3Uuid, info);
+        return info;
+    }
+
+    private void fillNicNetworkInfoByIpRange(String l3Uuid, NicIpAddressInfo info) {
+        if (info == null) {
+            return;
+        }
+
+        if (!StringUtils.isEmpty(info.ipv4Address)) {
+            NormalIpRangeVO ipRangeVO = Q.New(NormalIpRangeVO.class)
+                    .eq(NormalIpRangeVO_.l3NetworkUuid, l3Uuid)
+                    .eq(NormalIpRangeVO_.ipVersion, IPv6Constants.IPv4)
+                    .limit(1).find();
+
+            if (ipRangeVO != null) {
+                if (StringUtils.isEmpty(info.ipv4Netmask)) {
+                    info.ipv4Netmask = ipRangeVO.getNetmask();
+                }
+                if (StringUtils.isEmpty(info.ipv4Gateway)) {
+                    info.ipv4Gateway = ipRangeVO.getGateway();
+                }
+            }
+        }
+
+        if (!StringUtils.isEmpty(info.ipv6Address)) {
+            NormalIpRangeVO ipRangeVO = Q.New(NormalIpRangeVO.class)
+                    .eq(NormalIpRangeVO_.l3NetworkUuid, l3Uuid)
+                    .eq(NormalIpRangeVO_.ipVersion, IPv6Constants.IPv6)
+                    .limit(1).find();
+
+            if (ipRangeVO != null) {
+                if (info.ipv6Prefix == null) {
+                    info.ipv6Prefix = ipRangeVO.getPrefixLen();
+                }
+                if (StringUtils.isEmpty(info.ipv6Gateway)) {
+                    info.ipv6Gateway = IPv6NetworkUtils.getIpv6AddressCanonicalString(ipRangeVO.getGateway());
+                }
+            }
+        }
+    }
+
+    private boolean isEmptyNicNetworkInfo(NicIpAddressInfo info) {
+        return info == null || (StringUtils.isEmpty(info.ipv4Address) && StringUtils.isEmpty(info.ipv6Address));
     }
 
     private void addVmNicConfig(String vmNicUuid, VmInstanceSpec vmSpec, VmNicParam vmNicParam) {

@@ -1,5 +1,6 @@
 package org.zstack.storage.primary.sharedblock;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
@@ -133,9 +134,55 @@ public class SharedBlockGroupPrimaryStorageBase extends PrimaryStorageBase imple
             handle((CommitVolumeSnapshotOnPrimaryStorageMsg) msg);
         } else if (msg instanceof PullVolumeSnapshotOnPrimaryStorageMsg) {
             handle((PullVolumeSnapshotOnPrimaryStorageMsg) msg);
+        } else if (msg instanceof EncryptVolumeBitsOnPrimaryStorageMsg) {
+            handle((EncryptVolumeBitsOnPrimaryStorageMsg) msg);
+        } else if (msg instanceof ConvertVolumeEncryptionOnPrimaryStorageMsg) {
+            handle((ConvertVolumeEncryptionOnPrimaryStorageMsg) msg);
         } else {
             super.handleLocalMessage(msg);
         }
+    }
+
+    private void handle(EncryptVolumeBitsOnPrimaryStorageMsg msg) {
+        SharedBlockHypervisorBackend bkd = getHypervisorFactoryByHostUuid(msg.getHostUuid()).getHypervisorBackend(self);
+        bkd.handle(msg, new ReturnValueCompletion<EncryptVolumeBitsOnPrimaryStorageReply>(msg) {
+            @Override
+            public void success(EncryptVolumeBitsOnPrimaryStorageReply reply) {
+                bus.reply(msg, reply);
+            }
+
+            @Override
+            public void fail(ErrorCode errorCode) {
+                EncryptVolumeBitsOnPrimaryStorageReply reply = new EncryptVolumeBitsOnPrimaryStorageReply();
+                reply.setError(errorCode);
+                bus.reply(msg, reply);
+            }
+        });
+    }
+
+    protected void handle(ConvertVolumeEncryptionOnPrimaryStorageMsg msg) {
+        ConvertVolumeEncryptionOnPrimaryStorageReply reply = new ConvertVolumeEncryptionOnPrimaryStorageReply();
+        String hostUuid = StringUtils.isNotBlank(msg.getHostUuid()) ? msg.getHostUuid() : getAvailableHostUuidForOperation();
+        if (StringUtils.isBlank(hostUuid)) {
+            reply.setError(operr("cannot find available host to convert volume[uuid:%s] encryption on shared block primary storage[uuid:%s]",
+                    msg.getVolume().getUuid(), self.getUuid()));
+            bus.reply(msg, reply);
+            return;
+        }
+
+        SharedBlockHypervisorBackend bkd = getHypervisorFactoryByHostUuid(hostUuid).getHypervisorBackend(self);
+        bkd.handle(msg, hostUuid, new ReturnValueCompletion<ConvertVolumeEncryptionOnPrimaryStorageReply>(msg) {
+            @Override
+            public void success(ConvertVolumeEncryptionOnPrimaryStorageReply returnValue) {
+                bus.reply(msg, returnValue);
+            }
+
+            @Override
+            public void fail(ErrorCode errorCode) {
+                reply.setError(errorCode);
+                bus.reply(msg, reply);
+            }
+        });
     }
 
     @Override
@@ -2084,6 +2131,34 @@ public class SharedBlockGroupPrimaryStorageBase extends PrimaryStorageBase imple
         bkd.handle(msg, new ReturnValueCompletion<CleanupVmInstanceMetadataOnPrimaryStorageReply>(msg) {
             @Override
             public void success(CleanupVmInstanceMetadataOnPrimaryStorageReply returnValue) {
+                bus.reply(msg, returnValue);
+            }
+
+            @Override
+            public void fail(ErrorCode errorCode) {
+                reply.setError(errorCode);
+                bus.reply(msg, reply);
+            }
+        });
+    }
+
+    @Override
+    protected void handle(CleanupAllVmMetadataOnPrimaryStorageMsg msg) {
+        CleanupAllVmMetadataOnPrimaryStorageReply reply = new CleanupAllVmMetadataOnPrimaryStorageReply();
+
+        List<PrimaryStorageClusterRefVO> refs = Q.New(PrimaryStorageClusterRefVO.class)
+                .eq(PrimaryStorageClusterRefVO_.primaryStorageUuid, self.getUuid())
+                .list();
+        if (refs.isEmpty()) {
+            reply.setError(operr("no cluster attached to shared block primary storage[uuid:%s]", self.getUuid()));
+            bus.reply(msg, reply);
+            return;
+        }
+
+        SharedBlockHypervisorBackend bkd = getHypervisorFactoryByClusterUuid(refs.get(0).getClusterUuid()).getHypervisorBackend(self);
+        bkd.handle(msg, new ReturnValueCompletion<CleanupAllVmMetadataOnPrimaryStorageReply>(msg) {
+            @Override
+            public void success(CleanupAllVmMetadataOnPrimaryStorageReply returnValue) {
                 bus.reply(msg, returnValue);
             }
 

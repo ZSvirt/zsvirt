@@ -2,8 +2,7 @@ package org.zstack.kvm;
 
 import org.apache.commons.lang.StringUtils;
 import org.zstack.core.db.DatabaseFacade;
-import org.zstack.core.db.SimpleQuery;
-import org.zstack.core.db.SimpleQuery.Op;
+import org.zstack.core.db.Q;
 import org.zstack.header.host.HostKeyIdentityVO;
 import org.zstack.header.host.HostKeyIdentityVO_;
 import org.zstack.header.secret.SecretHostDefineReply;
@@ -53,9 +52,9 @@ public final class HostKeyIdentityHelper {
     }
 
     public static HostKeyIdentityVO getHostKeyIdentity(DatabaseFacade dbf, String hostUuid) {
-        SimpleQuery<HostKeyIdentityVO> q = dbf.createQuery(HostKeyIdentityVO.class);
-        q.add(HostKeyIdentityVO_.hostUuid, Op.EQ, hostUuid);
-        return q.find();
+        return Q.New(HostKeyIdentityVO.class)
+                .eq(HostKeyIdentityVO_.hostUuid, hostUuid)
+                .find();
     }
 
     /**

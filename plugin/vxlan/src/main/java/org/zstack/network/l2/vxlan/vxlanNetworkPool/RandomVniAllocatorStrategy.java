@@ -1,6 +1,6 @@
 package org.zstack.network.l2.vxlan.vxlanNetworkPool;
 
-import org.zstack.core.db.SimpleQuery;
+import org.zstack.core.db.Q;
 import org.zstack.network.l2.vxlan.vxlanNetwork.VxlanNetworkVO;
 import org.zstack.network.l2.vxlan.vxlanNetwork.VxlanNetworkVO_;
 import org.zstack.utils.Utils;
@@ -30,9 +30,9 @@ public class RandomVniAllocatorStrategy extends AbstractVniAllocatorStrategy {
             return allocateRequiredVni(msg);
         }
 
-        SimpleQuery<VniRangeVO> query = dbf.createQuery(VniRangeVO.class);
-        query.add(VniRangeVO_.l2NetworkUuid, SimpleQuery.Op.EQ, msg.getL2NetworkUuid());
-        List<VniRangeVO> ranges = query.list();
+        List<VniRangeVO> ranges = Q.New(VniRangeVO.class)
+                .eq(VniRangeVO_.l2NetworkUuid, msg.getL2NetworkUuid())
+                .list();
 
         Collections.shuffle(ranges);
 
@@ -83,11 +83,11 @@ public class RandomVniAllocatorStrategy extends AbstractVniAllocatorStrategy {
             // have to count the used IP every time allocating a Vni, and count operation
             // is a full scan in DB, which is very costly
             if (failureCheckPoint == failureCount++) {
-                SimpleQuery<VxlanNetworkVO> q = dbf.createQuery(VxlanNetworkVO.class);
-                q.add(VxlanNetworkVO_.poolUuid, SimpleQuery.Op.EQ, poolUuid);
-                q.add(VxlanNetworkVO_.vni, SimpleQuery.Op.GTE, s);
-                q.add(VxlanNetworkVO_.vni, SimpleQuery.Op.LTE, e);
-                long count = q.count();
+                long count = Q.New(VxlanNetworkVO.class)
+                        .eq(VxlanNetworkVO_.poolUuid, poolUuid)
+                        .gte(VxlanNetworkVO_.vni, s)
+                        .lte(VxlanNetworkVO_.vni, e)
+                        .count();
                 if (count == total) {
                     logger.debug(String.format("vni range[uuid:%s] has no vni available, try next one", rangeUuid));
                     return null;
@@ -98,12 +98,12 @@ public class RandomVniAllocatorStrategy extends AbstractVniAllocatorStrategy {
 
             int te = s + step;
             te = te > e ? e : te;
-            SimpleQuery<VxlanNetworkVO> q = dbf.createQuery(VxlanNetworkVO.class);
-            q.select(VxlanNetworkVO_.vni);
-            q.add(VxlanNetworkVO_.vni, SimpleQuery.Op.GTE, s);
-            q.add(VxlanNetworkVO_.vni, SimpleQuery.Op.LTE, te);
-            q.add(VxlanNetworkVO_.poolUuid, SimpleQuery.Op.EQ, poolUuid);
-            List<Integer> used = q.listValue();
+            List<Integer> used = Q.New(VxlanNetworkVO.class)
+                    .select(VxlanNetworkVO_.vni)
+                    .gte(VxlanNetworkVO_.vni, s)
+                    .lte(VxlanNetworkVO_.vni, te)
+                    .eq(VxlanNetworkVO_.poolUuid, poolUuid)
+                    .listValues();
             if (te - s + 1 == used.size()) {
                 s += step;
                 continue;

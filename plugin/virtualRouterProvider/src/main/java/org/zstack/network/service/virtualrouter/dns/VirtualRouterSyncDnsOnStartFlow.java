@@ -8,8 +8,6 @@ import org.zstack.core.cloudbus.CloudBus;
 import org.zstack.core.cloudbus.CloudBusCallBack;
 import org.zstack.core.db.DatabaseFacade;
 import org.zstack.core.db.Q;
-import org.zstack.core.db.SimpleQuery;
-import org.zstack.core.db.SimpleQuery.Op;
 import org.zstack.core.errorcode.ErrorFacade;
 import org.zstack.core.timeout.ApiTimeoutManager;
 import org.zstack.header.core.workflow.FlowTrigger;
@@ -79,12 +77,8 @@ public class VirtualRouterSyncDnsOnStartFlow extends NoRollbackFlow {
 
         new VirtualRouterRoleManager().makeDnsRole(vr.getUuid());
 
-        SimpleQuery<L3NetworkDnsVO> query = dbf.createQuery(L3NetworkDnsVO.class);
-        query.select(L3NetworkDnsVO_.dns);
-        query.add(L3NetworkDnsVO_.l3NetworkUuid, Op.IN, l3Uuids);
         List<L3NetworkDnsVO> l3NetworkDnsVOS =  Q.New(L3NetworkDnsVO.class).in(L3NetworkDnsVO_.l3NetworkUuid, l3Uuids).list();
-
-        final List<DnsInfo> dns = new ArrayList<DnsInfo>(l3NetworkDnsVOS.size());
+        final List<DnsInfo> dns = new ArrayList<>(l3NetworkDnsVOS.size());
         for (L3NetworkDnsVO vo : l3NetworkDnsVOS) {
             DnsInfo dinfo = new DnsInfo();
             dinfo.setDnsAddress(vo.getDns());
@@ -97,7 +91,10 @@ public class VirtualRouterSyncDnsOnStartFlow extends NoRollbackFlow {
             dinfo.setNicMac(nic.get().getMac());
             dns.add(dinfo);
         }
-        List<String> lst = query.listValue();
+        List<String> lst = Q.New(L3NetworkDnsVO.class)
+                .select(L3NetworkDnsVO_.dns)
+                .in(L3NetworkDnsVO_.l3NetworkUuid, l3Uuids)
+                .listValues();
         if (lst.isEmpty()) {
             chain.next();
             return;

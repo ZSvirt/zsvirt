@@ -5,7 +5,7 @@
         <artifactId>zstack</artifactId>
         <groupId>org.zstack</groupId>
         <version>5.0.0</version>
-        <relativePath>..</relativePath>
+        <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>search</artifactId>
     <dependencies>
@@ -148,12 +148,12 @@
                     <dependency>
                         <groupId>org.codehaus.groovy</groupId>
                         <artifactId>groovy-eclipse-compiler</artifactId>
-                        <version>2.9.2-01</version>
+                        <version>${groovy.eclipse.compiler}</version>
                     </dependency>
                     <dependency>
                         <groupId>org.codehaus.groovy</groupId>
                         <artifactId>groovy-eclipse-batch</artifactId>
-                        <version>2.4.3-01</version>
+                        <version>${groovy.eclipse.batch}</version>
                     </dependency>
                 </dependencies>
             </plugin>

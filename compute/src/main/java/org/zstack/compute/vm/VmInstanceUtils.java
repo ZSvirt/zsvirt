@@ -1,6 +1,5 @@
 package org.zstack.compute.vm;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.zstack.core.Platform;
 import org.zstack.header.configuration.InstanceOfferingInventory;
 import org.zstack.header.errorcode.OperationFailureException;
@@ -12,11 +11,11 @@ import org.zstack.header.vm.UpdateVmInstanceMsg;
 import org.zstack.header.vm.UpdateVmInstanceSpec;
 import org.zstack.header.vm.VmInstanceVO;
 import org.zstack.tag.SystemTagUtils;
+import org.zstack.utils.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 import static java.util.Objects.requireNonNull;
@@ -43,15 +42,11 @@ public class VmInstanceUtils {
         cmsg.setArchitecture(msg.getArchitecture());
         cmsg.setStrategy(msg.getStrategy());
         cmsg.setDevicesSpec(msg.getDevicesSpec());
-        if (CollectionUtils.isNotEmpty(msg.getDataDiskOfferingUuids()) || CollectionUtils.isNotEmpty(msg.getDataDiskSizes())) {
-            cmsg.setPrimaryStorageUuidForDataVolume(getPSUuidForDataVolume(msg.getSystemTags()));
-        }
         if (msg.getVirtio() == null) {
             cmsg.setVirtio(false);
         } else {
             cmsg.setVirtio(msg.getVirtio());
         }
-
         if (!isEmpty(msg.getDiskAOs())) {
             DiskAO rootDisk = findOneOrNull(msg.getDiskAOs(), DiskAO::isBoot);
             cmsg.setRootDisk(rootDisk);
@@ -83,31 +78,6 @@ public class VmInstanceUtils {
             bootDisk.setArchitecture(msg.getArchitecture());
         }
 
-        // dataDiskOfferingUuids + dataDiskSizes -> deprecatedDataVolumeSpecs
-        int expectDataVolumeCount =
-                (msg.getDataDiskOfferingUuids() == null ? 0 : msg.getDataDiskOfferingUuids().size()) +
-                (msg.getDataDiskSizes() == null ? 0 : msg.getDataDiskSizes().size());
-        List<DiskAO> deprecatedDataVolumeSpecs = new ArrayList<>();
-        for (int i = 0; i < expectDataVolumeCount; i++) {
-            deprecatedDataVolumeSpecs.add(DiskAO.nonRootDisk());
-        }
-
-        int index = 0;
-        if (!isEmpty(msg.getDataDiskOfferingUuids())) {
-            for (String dataDiskOfferingUuid : msg.getDataDiskOfferingUuids()) {
-                deprecatedDataVolumeSpecs.get(index).setDiskOfferingUuid(dataDiskOfferingUuid);
-                index++;
-            }
-        }
-        if (!isEmpty(msg.getDataDiskSizes())) {
-            for (Long dataDiskSize : msg.getDataDiskSizes()) {
-                deprecatedDataVolumeSpecs.get(index).setSize(dataDiskSize);
-                index++;
-            }
-        }
-
-        cmsg.setDeprecatedDataVolumeSpecs(deprecatedDataVolumeSpecs);
-
         if (!isEmpty(msg.getSystemTags())) {
             for (Iterator<String> it = msg.getSystemTags().iterator(); it.hasNext();) {
                 String tag = it.next();
@@ -119,7 +89,6 @@ public class VmInstanceUtils {
                     if (cmsg.getDataDisks() != null) {
                         cmsg.getDataDisks().forEach(diskAO -> diskAO.setPrimaryStorageUuid(psUuid));
                     }
-                    cmsg.getDeprecatedDataVolumeSpecs().forEach(diskAO -> diskAO.setPrimaryStorageUuid(psUuid));
                     it.remove();
                 }
             }
@@ -194,21 +163,29 @@ public class VmInstanceUtils {
         return spec;
     }
 
-    private static void setVmInstanceInfoFromRootDiskAO(CreateVmInstanceMsg cmsg, APICreateVmInstanceMsg msg) {
-        if (CollectionUtils.isEmpty(msg.getDiskAOs())) {
-            return;
+    private static DiskAO findRootDiskAO(APICreateVmInstanceMsg message) {
+        if (CollectionUtils.isEmpty(message.getDiskAOs())) {
+            return null;
         }
-        DiskAO rootdiskAO = msg.getDiskAOs().stream()
-                .filter(DiskAO::isBoot).findFirst().orElse(null);
-        if (rootdiskAO == null) {
-            return;
+        return CollectionUtils.findOneOrNull(message.getDiskAOs(), DiskAO::isBoot);
+    }
+
+    public static String findRootDiskOfferingUuid(APICreateVmInstanceMsg message) {
+        DiskAO rootDisk = findRootDiskAO(message);
+        if (rootDisk == null) {
+            return message.getRootDiskOfferingUuid();
+        } else {
+            return rootDisk.getDiskOfferingUuid() == null ?
+                    message.getRootDiskOfferingUuid() : rootDisk.getDiskOfferingUuid();
         }
-        cmsg.setPlatform(rootdiskAO.getPlatform());
-        cmsg.setGuestOsType(rootdiskAO.getGuestOsType());
-        cmsg.setArchitecture(rootdiskAO.getArchitecture());
-        if (CollectionUtils.isNotEmpty(rootdiskAO.getSystemTags())
-                && rootdiskAO.getSystemTags().contains(VmSystemTags.VIRTIO.getTagFormat())) {
-            cmsg.setVirtio(true);
+    }
+
+    public static Long findRootDiskSize(APICreateVmInstanceMsg message) {
+        DiskAO rootDisk = findRootDiskAO(message);
+        if (rootDisk == null) {
+            return message.getRootDiskSize();
+        } else {
+            return rootDisk.getSize() > 0 ? rootDisk.getSize() : message.getRootDiskSize();
         }
     }
 }

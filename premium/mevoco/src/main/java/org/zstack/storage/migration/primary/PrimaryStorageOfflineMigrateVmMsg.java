@@ -3,6 +3,9 @@ package org.zstack.storage.migration.primary;
 import org.zstack.header.message.NeedReplyMessage;
 import org.zstack.storage.migration.StorageMigrationMessage;
 
+import java.util.Collections;
+import java.util.List;
+
 /**
  * Created by GuoYi on 10/14/17.
  */
@@ -12,6 +15,7 @@ public class PrimaryStorageOfflineMigrateVmMsg extends NeedReplyMessage implemen
     private boolean withDataVolumes;
     private boolean withSnapshots;
     private boolean discardSourceVolume = true;
+    private List<VolumeMigrationAO> volumeMigrationAOs;
 
     public PrimaryStorageOfflineMigrateVmMsg(PrimaryStorageMigrateVmMsg amsg) {
         this.vmInstanceUuid = amsg.getVmInstanceUuid();
@@ -19,6 +23,18 @@ public class PrimaryStorageOfflineMigrateVmMsg extends NeedReplyMessage implemen
         this.withDataVolumes = amsg.isWithDataVolumes();
         this.withSnapshots = amsg.isWithSnapshots();
         this.systemTags = amsg.getSystemTags();
+        this.volumeMigrationAOs = amsg.getVolumeMigrationAOs();
+    }
+
+    public PrimaryStorageOfflineMigrateVmMsg() {
+    }
+
+    public List<VolumeMigrationAO> getVolumeMigrationAOs() {
+        return volumeMigrationAOs == null ? Collections.emptyList() : volumeMigrationAOs;
+    }
+
+    public void setVolumeMigrationAOs(List<VolumeMigrationAO> volumeMigrationAOs) {
+        this.volumeMigrationAOs = volumeMigrationAOs;
     }
 
     public String getDstPrimaryStorageUuid() {

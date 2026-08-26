@@ -20,7 +20,7 @@
   {
     "raw": "vm[uuid:%s] is not Running, Paused or Stopped, current state[%s]",
     "en_US": "vm[uuid:{0}] is not Running, Paused or Stopped, current state[{1}]",
-    "zh_CN": "云主机[uuid:{0}]不是运行中、已暂停或者已停止状态，现在的状态是[{1}]",
+    "zh_CN": "虚拟机[uuid:{0}]不是运行中、已暂停或者已停止状态，现在的状态是[{1}]",
     "arguments": [
       "vol.getVmInstanceUuid()",
       "state"
@@ -30,7 +30,7 @@
   {
     "raw": "the volume[uuid;%s] is attached to a VM[uuid:%s] which is in state of %s, cannot do the snapshot merge",
     "en_US": "the volume[uuid;{0}] is attached to a VM[uuid:{1}] which is in state of {2}, cannot do the snapshot merge",
-    "zh_CN": "云盘[uuid;{0}] 挂载到处于{2}状态的云主机，不能合并快照",
+    "zh_CN": "云盘[uuid;{0}] 挂载到处于{2}状态的虚拟机，不能合并快照",
     "arguments": [
       "volume.getUuid()",
       "volume.getVmInstanceUuid()",

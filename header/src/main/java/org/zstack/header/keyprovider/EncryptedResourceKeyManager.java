@@ -26,6 +26,8 @@ public interface EncryptedResourceKeyManager {
     void getOrCreateKey(GetOrCreateResourceKeyContext ctx,
                         ReturnValueCompletion<ResourceKeyResult> completion);
 
+    ResourceKeyResult getOrCreateKeySync(GetOrCreateResourceKeyContext ctx);
+
     /**
      * Load the existing resource encryption key material only.
      * <p>
@@ -45,7 +47,7 @@ public interface EncryptedResourceKeyManager {
      * @return {@link ResourceKeyResult} with {@code createdNewKey == false} on success
      * @throws org.zstack.header.errorcode.OperationFailureException when the key cannot be loaded
      */
-    ResourceKeyResult getKey(GetOrCreateResourceKeyContext ctx);
+    ResourceKeyResult getExistingKeySync(GetOrCreateResourceKeyContext ctx);
 
     /**
      * Roll back a newly created resource key during upper-layer workflow rollback.

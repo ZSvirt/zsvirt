@@ -49,6 +49,12 @@ public class CbtBackupApiInterceptor implements ApiMessageInterceptor, GlobalApi
     public APIMessage intercept(APIMessage msg) throws ApiMessageInterceptionException {
         if (msg instanceof APIEnableCbtTaskMsg) {
             validate((APIEnableCbtTaskMsg) msg);
+        } else if (msg instanceof APIDisableCbtTaskMsg) {
+            validate((APIDisableCbtTaskMsg) msg);
+        } else if (msg instanceof APIExportNbdVolumesMsg) {
+            validate((APIExportNbdVolumesMsg) msg);
+        } else if (msg instanceof APIUnexportNbdVolumesMsg) {
+            validate((APIUnexportNbdVolumesMsg) msg);
         }
 
         setServiceId(msg);
@@ -64,19 +70,8 @@ public class CbtBackupApiInterceptor implements ApiMessageInterceptor, GlobalApi
         if (taskVO.getStatus() == CbtTaskStatus.Running){
             throw new ApiMessageInterceptionException(operr("Cbt task[uuid: %s] has already enabled, please disable it.", msg.getUuid()));
         }
-        final String vmUuid = Q.New(CbtTaskResourceRefVO.class)
-                .eq(CbtTaskResourceRefVO_.resourceType, VmInstanceVO.class.getSimpleName())
-                .eq(CbtTaskResourceRefVO_.taskUuid, msg.getUuid())
-                .select(CbtTaskResourceRefVO_.resourceUuid)
-                .findValue();
-
-        VmInstanceState state = Q.New(VmInstanceVO.class)
-                .eq(VmInstanceVO_.uuid, vmUuid)
-                .select(VmInstanceVO_.state)
-                .findValue();
-        if (state != VmInstanceState.Running) {
-            throw new ApiMessageInterceptionException(operr("Unexpected vm[uuid: %s] state: %s, the expected vm state is Running.", vmUuid, state));
-        }
+        final String vmUuid = getVmUuidByCbtTaskUuid(msg.getUuid());
+        validateVmState(vmUuid, VmInstanceState.Running, "enable cbt task");
 
         List<String> resourceUuids = Q.New(VolumeVO.class)
                 .eq(VolumeVO_.vmInstanceUuid, vmUuid)
@@ -93,6 +88,47 @@ public class CbtBackupApiInterceptor implements ApiMessageInterceptor, GlobalApi
             if (!CollectionUtils.isEmpty(resourceSchedulerJobTypes)) {
                 throw new ApiMessageInterceptionException(operr("The vm[uuid: %s] has already created a backup job, cannot enable the cbt task at the same time.", vmUuid));
             }
+        }
+    }
+
+    private void validate(APIDisableCbtTaskMsg msg) {
+        CbtTaskVO taskVO = dbf.findByUuid(msg.getUuid(), CbtTaskVO.class);
+        if (taskVO == null) {
+            throw new ApiMessageInterceptionException(operr("Cbt task not found[uuid: %s]", msg.getUuid()));
+        }
+
+        String vmUuid = getVmUuidByCbtTaskUuid(msg.getUuid());
+        validateVmState(vmUuid, VmInstanceState.Running, "disable cbt task");
+    }
+
+    private void validate(APIExportNbdVolumesMsg msg) {
+        validateVmState(msg.getVmInstanceUuid(), VmInstanceState.Stopped, "export NBD volumes");
+    }
+
+    private void validate(APIUnexportNbdVolumesMsg msg) {
+        validateVmState(msg.getVmInstanceUuid(), VmInstanceState.Stopped, "unexport NBD volumes");
+    }
+
+    private String getVmUuidByCbtTaskUuid(String taskUuid) {
+        String vmUuid = Q.New(CbtTaskResourceRefVO.class)
+                .eq(CbtTaskResourceRefVO_.resourceType, VmInstanceVO.class.getSimpleName())
+                .eq(CbtTaskResourceRefVO_.taskUuid, taskUuid)
+                .select(CbtTaskResourceRefVO_.resourceUuid)
+                .findValue();
+        if (vmUuid == null) {
+            throw new ApiMessageInterceptionException(operr("Cannot find vm for cbt task[uuid: %s].", taskUuid));
+        }
+        return vmUuid;
+    }
+
+    private void validateVmState(String vmUuid, VmInstanceState expectedState, String operation) {
+        VmInstanceState state = Q.New(VmInstanceVO.class)
+                .eq(VmInstanceVO_.uuid, vmUuid)
+                .select(VmInstanceVO_.state)
+                .findValue();
+        if (state != expectedState) {
+            throw new ApiMessageInterceptionException(operr("Cannot %s for vm[uuid: %s], current vm state is %s, the expected vm state is %s.",
+                    operation, vmUuid, state, expectedState));
         }
     }
 

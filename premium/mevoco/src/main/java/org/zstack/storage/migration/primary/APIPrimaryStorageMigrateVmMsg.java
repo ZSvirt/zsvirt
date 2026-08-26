@@ -7,6 +7,7 @@ import org.zstack.header.message.APIMessage;
 import org.zstack.header.message.APIParam;
 import org.zstack.header.other.APIAuditor;
 import org.zstack.header.other.APIMultiAuditor;
+import org.zstack.header.rest.APINoSee;
 import org.zstack.header.rest.RestRequest;
 import org.zstack.header.storage.primary.PrimaryStorageVO;
 import org.zstack.header.vm.MigrateVmMessage;
@@ -18,6 +19,7 @@ import org.zstack.header.volume.VolumeVO;
 import org.zstack.storage.migration.StorageMigrationMessage;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -35,15 +37,18 @@ public class APIPrimaryStorageMigrateVmMsg extends APIMessage implements Storage
     @APIParam(resourceType = VmInstanceVO.class)
     private String vmInstanceUuid;
 
-    @APIParam(resourceType = PrimaryStorageVO.class)
+    @Deprecated
+    @APIParam(required = false, resourceType = PrimaryStorageVO.class)
     private String dstPrimaryStorageUuid;
 
     @APIParam(required = false)
     private String dstHostUuid;
 
+    @Deprecated
     @APIParam(required = false)
     private boolean withDataVolumes = true;
 
+    @Deprecated
     @APIParam(required = false)
     private boolean withSnapshots = true;
 
@@ -55,6 +60,13 @@ public class APIPrimaryStorageMigrateVmMsg extends APIMessage implements Storage
 
     @APIParam(required = false)
     private long bandwidth;
+
+    @APIParam(required = false)
+    private List<VolumeMigrationAO> volumeMigrationAOs;
+    private Boolean enableMigrationTls;
+
+    @APINoSee
+    private Boolean legacyRootOnlyMigration;
 
     public APIPrimaryStorageMigrateVmMsg(PrimaryStorageMigrateVmMsg pmsg) {
         vmInstanceUuid = pmsg.getVmInstanceUuid();
@@ -71,12 +83,30 @@ public class APIPrimaryStorageMigrateVmMsg extends APIMessage implements Storage
     public static APIPrimaryStorageMigrateVmMsg __example__() {
         APIPrimaryStorageMigrateVmMsg msg = new APIPrimaryStorageMigrateVmMsg();
         msg.setVmInstanceUuid(uuid());
-        msg.setWithDataVolumes(true);
-        msg.setWithSnapshots(false);
         msg.setDstPrimaryStorageUuid(uuid());
         msg.setDstHostUuid(uuid());
+        msg.setWithSnapshots(false);
         msg.setDownTime(300);
+        msg.setBandwidth(50L * 1024 * 1024);
+        msg.setVolumeMigrationAOs(Collections.singletonList(new VolumeMigrationAO(uuid(), uuid())));
+        msg.setEnableMigrationTls(false);
         return msg;
+    }
+
+    public List<VolumeMigrationAO> getVolumeMigrationAOs() {
+        return volumeMigrationAOs;
+    }
+
+    public void setVolumeMigrationAOs(List<VolumeMigrationAO> volumeMigrationAOs) {
+        this.volumeMigrationAOs = volumeMigrationAOs;
+    }
+
+    public Boolean getLegacyRootOnlyMigration() {
+        return legacyRootOnlyMigration;
+    }
+
+    public void setLegacyRootOnlyMigration(Boolean legacyRootOnlyMigration) {
+        this.legacyRootOnlyMigration = legacyRootOnlyMigration;
     }
 
     public Integer getDownTime() {
@@ -97,22 +127,27 @@ public class APIPrimaryStorageMigrateVmMsg extends APIMessage implements Storage
         return dstPrimaryStorageUuid;
     }
 
+    @Deprecated
     public void setDstPrimaryStorageUuid(String dstPrimaryStorageUuid) {
         this.dstPrimaryStorageUuid = dstPrimaryStorageUuid;
     }
 
+    @Deprecated
     public boolean isWithDataVolumes() {
         return withDataVolumes;
     }
 
+    @Deprecated
     public void setWithDataVolumes(boolean withDataVolumes) {
         this.withDataVolumes = withDataVolumes;
     }
 
+    @Deprecated
     public boolean isWithSnapshots() {
         return withSnapshots;
     }
 
+    @Deprecated
     public void setWithSnapshots(boolean withSnapshots) {
         this.withSnapshots = withSnapshots;
     }
@@ -170,5 +205,14 @@ public class APIPrimaryStorageMigrateVmMsg extends APIMessage implements Storage
     @Override
     public boolean isAllowUnknown() {
         return false;
+    }
+
+    @Override
+    public Boolean getEnableMigrationTls() {
+        return enableMigrationTls;
+    }
+
+    public void setEnableMigrationTls(Boolean enableMigrationTls) {
+        this.enableMigrationTls = enableMigrationTls;
     }
 }

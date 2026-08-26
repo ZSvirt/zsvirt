@@ -137,6 +137,7 @@ public class CommitVolumeAsImageFlowChain {
         abmsg.setVolumeUuid(msg.getVolumeUuid());
         abmsg.setBackupStorageUuid(backupStorageUuid);
         abmsg.setImageUuid(imageVO.getUuid());
+        abmsg.setEncrypted(msg.getEncrypted());
         ImageBackupStorageRefVO ref = persistRefVOByBsInventory(backupStorageUuid,imageVO.getUuid());
         // send the message to primary storage backend for processing
         bus.makeTargetServiceIdByResourceUuid(abmsg, PrimaryStorageConstant.SERVICE_ID, m.getPrimaryStorageUuid());
@@ -181,6 +182,7 @@ public class CommitVolumeAsImageFlowChain {
         cmsg.setVolumeUuid(volume.getUuid());
         cmsg.setTreeUuid(snapshot.getTreeUuid());
         cmsg.setSystemTags(msg.getSystemTags());
+        cmsg.setEncrypted(msg.getEncrypted());
         bus.makeTargetServiceIdByResourceUuid(cmsg, VolumeSnapshotConstant.SERVICE_ID, volume.getUuid());
         bus.send(cmsg, new CloudBusCallBack(msg) {
             @Override
@@ -221,6 +223,7 @@ public class CommitVolumeAsImageFlowChain {
         cmsg.setBackupStorageUuid(backupStorageUuid);
         cmsg.setVolumeUuid(volume.getUuid());
         cmsg.setImageUuid(img.getUuid());
+        cmsg.setEncrypted(msg.getEncrypted());
 
         ImageBackupStorageRefVO ref = persistRefVOByBsInventory(backupStorageUuid, imageVO.getUuid());
 

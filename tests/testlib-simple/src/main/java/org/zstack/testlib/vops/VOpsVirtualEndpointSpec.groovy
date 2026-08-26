@@ -9,6 +9,7 @@ import org.zstack.testlib.SpecID
 import org.zstack.testlib.SpecParam
 import org.zstack.testlib.Test
 import org.zstack.testlib.http.PostHandlerPair
+import org.zstack.testlib.vops.VOpsClientSimulator.HttpForTest
 
 import java.util.function.BiFunction
 import java.util.function.BooleanSupplier
@@ -34,15 +35,15 @@ class VOpsVirtualEndpointSpec extends Spec {
         Test.functionForMockTestObjectFactory.remove(VOpsClient.class)
     }
 
-    public List<PostHandlerPair<VOpsClientSimulator.HttpForTest, Object>> postHandlers = []
+    public List<PostHandlerPair<HttpForTest, Object>> postHandlers = []
 
     /**
      * @return a function to remove this handler
      */
     BooleanSupplier registerPostHttpHandler(
-            Predicate<VOpsClientSimulator.HttpForTest> predicate,
-            BiFunction<VOpsClientSimulator.HttpForTest, ErrorableValue<Object>, ErrorableValue<Object>> handler) {
-        def pair = new PostHandlerPair<VOpsClientSimulator.HttpForTest, Object>(
+            Predicate<HttpForTest> predicate,
+            BiFunction<HttpForTest, ErrorableValue<Object>, ErrorableValue<Object>> handler) {
+        def pair = new PostHandlerPair<HttpForTest, Object>(
                 Objects.requireNonNull(predicate),
                 Objects.requireNonNull(handler))
 
@@ -55,7 +56,7 @@ class VOpsVirtualEndpointSpec extends Spec {
      */
     BooleanSupplier registerPostHttpHandler(
             String path,
-            BiFunction<VOpsClientSimulator.HttpForTest, ErrorableValue<Object>, ErrorableValue<Object>> handler) {
+            BiFunction<HttpForTest, ErrorableValue<Object>, ErrorableValue<Object>> handler) {
         return registerPostHttpHandler({ it.path == path || it.pathWithoutIpAndPort == path }, handler)
     }
 
@@ -65,7 +66,7 @@ class VOpsVirtualEndpointSpec extends Spec {
     BooleanSupplier registerPostHttpHandler(
             String path,
             HttpMethod method,
-            BiFunction<VOpsClientSimulator.HttpForTest, ErrorableValue<Object>, ErrorableValue<Object>> handler) {
+            BiFunction<HttpForTest, ErrorableValue<Object>, ErrorableValue<Object>> handler) {
         return registerPostHttpHandler(
             {
                 (it.path == path || it.pathWithoutIpAndPort == path) && it.method == method

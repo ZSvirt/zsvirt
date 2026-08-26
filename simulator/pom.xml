@@ -5,7 +5,7 @@
         <artifactId>zstack</artifactId>
         <groupId>org.zstack</groupId>
         <version>5.0.0</version>
-        <relativePath>..</relativePath>
+        <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>simulator</artifactId>
     <packaging>pom</packaging>
@@ -76,8 +76,8 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <source>1.6</source>
-                    <target>1.6</target>
+                    <source>${project.java.version}</source>
+                    <target>${project.java.version}</target>
                     <XnoInline>true</XnoInline>
                     <aspectLibraries>
                         <aspectLibrary>

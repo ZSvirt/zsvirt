@@ -24,6 +24,7 @@ public class VolumeBackupMetadata {
     private Timestamp createTime;
     private VolumeType type;
     private Long size;
+    private Boolean encrypted;
     private String vmInstanceUuid;
     private Map<String, String> attachments = new HashMap<>();
 
@@ -129,6 +130,7 @@ public class VolumeBackupMetadata {
         metadata.mode = vo.getMode();
         metadata.type = vo.getType();
         metadata.size = vo.getSize();
+        metadata.encrypted = vo.isEncrypted();
         metadata.metadata = vo.getMetadata();
         metadata.createTime = vo.getCreateDate();
         metadata.vmInstanceUuid = vo.getVmInstanceUuid();
@@ -149,6 +151,7 @@ public class VolumeBackupMetadata {
         metadata.mode = inv.getMode();
         metadata.type = VolumeType.valueOf(inv.getType());
         metadata.size = inv.getSize();
+        metadata.encrypted = inv.getEncrypted();
         metadata.metadata = inv.getMetadata();
         metadata.createTime = inv.getCreateDate();
         metadata.vmInstanceUuid = inv.getVmInstanceUuid();
@@ -173,5 +176,13 @@ public class VolumeBackupMetadata {
 
     public void setVmInstanceUuid(String vmInstanceUuid) {
         this.vmInstanceUuid = vmInstanceUuid;
+    }
+
+    public Boolean getEncrypted() {
+        return encrypted;
+    }
+
+    public void setEncrypted(Boolean encrypted) {
+        this.encrypted = encrypted;
     }
 }

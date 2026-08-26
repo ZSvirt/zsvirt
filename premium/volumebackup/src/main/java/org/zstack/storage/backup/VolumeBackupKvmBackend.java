@@ -570,9 +570,11 @@ public class VolumeBackupKvmBackend implements VolumeBackupHypervisorBackend {
             final TakeBackupsCmd cmd = new TakeBackupsCmd();
             List<VolumeInventory> volumes;
             final Map<String, VolumeBackupVO> volumeBackups = new HashMap<>();
+            final VmBackupKvmCommandExtensionContext commandExtensionContext = new VmBackupKvmCommandExtensionContext();
             final BiMap<String, Integer> deviceIdMap = getDeviceIdMap(msg.getVolumeUuids());
             final ImageStoreBackupStorageCommands.StorageInfo storageInfo = getStorageInfo(msg.getBackupStorageUuid());
             boolean nbdDefault = true;
+            boolean forceFileTarget = false;
 
             String nbdProcessDescription = null;
             final Map<Integer, AllocateImageInstallPathReply> ReplyByDeviceId = new HashMap<>();
@@ -664,7 +666,8 @@ public class VolumeBackupKvmBackend implements VolumeBackupHypervisorBackend {
                             protected void scripts() {
                                 for (String volumeUuid : msg.getVolumeUuids()) {
                                     VolumeBackupVO vbvo = new VolumeBackupVO();
-                                    vbvo.setType(Q.New(VolumeVO.class).eq(VolumeVO_.uuid, volumeUuid).select(VolumeVO_.type).findValue());
+                                    VolumeVO volume = Q.New(VolumeVO.class).eq(VolumeVO_.uuid, volumeUuid).find();
+                                    vbvo.setType(volume.getType());
                                     vbvo.setUuid(vbvo.getType() == VolumeType.Root ? rootVolumeBackupUuid : Platform.getUuid());
                                     vbvo.setAccountUuid(msg.getAccountUuid());
                                     vbvo.setVolumeUuid(volumeUuid);
@@ -691,6 +694,40 @@ public class VolumeBackupKvmBackend implements VolumeBackupHypervisorBackend {
                                 .map(ResourceVO::getUuid)
                                 .collect(Collectors.toList());
                         dbf.removeByPrimaryKeys(backupUuids, VolumeBackupVO.class);
+                        trigger.rollback();
+                    }
+                });
+
+                flow(new Flow() {
+                    String __name__ = "prepare-vm-backup-command-extensions";
+                    final List<VmBackupKvmCommandExtensionPoint> extensions =
+                            pluginRgty.getExtensionList(VmBackupKvmCommandExtensionPoint.class);
+
+                    @Override
+                    public void run(FlowTrigger trigger, Map data) {
+                        commandExtensionContext.setHostUuid(msg.getHostUuid());
+                        commandExtensionContext.setVmInstanceUuid(msg.getVmInstanceUuid());
+                        commandExtensionContext.setBackupStorageUuid(msg.getBackupStorageUuid());
+                        commandExtensionContext.setVolumes(dbf.listByPrimaryKeys(msg.getVolumeUuids(), VolumeVO.class));
+                        commandExtensionContext.setVolumeBackups(volumeBackups);
+                        commandExtensionContext.setDeviceIds(deviceIdMap);
+
+                        extensions.forEach(ext -> ext.beforeTakeVmBackup(commandExtensionContext));
+                        if (commandExtensionContext.isFileTargetRequired()) {
+                            forceFileTarget = true;
+                        }
+                        trigger.next();
+                    }
+
+                    @Override
+                    public void rollback(FlowRollback trigger, Map data) {
+                        extensions.forEach(new Consumer<VmBackupKvmCommandExtensionPoint>() {
+                            @Override
+                            @ExceptionSafe
+                            public void accept(VmBackupKvmCommandExtensionPoint ext) {
+                                ext.rollbackTakeVmBackup(commandExtensionContext);
+                            }
+                        });
                         trigger.rollback();
                     }
                 });
@@ -816,7 +853,8 @@ public class VolumeBackupKvmBackend implements VolumeBackupHypervisorBackend {
                                 volumes = VolumeInventory.valueOf(dbf.listByPrimaryKeys(msg.getVolumeUuids(), VolumeVO.class));
                                 volumes.sort(Comparator.comparingInt(VolumeInventory::getDeviceId));
                                 cmd.setVolumes(VolumeTO.valueOf(volumes, KVMHostInventory.valueOf(host)));
-                                cmd.setStorageInfo(storageInfo);
+                                cmd.getAddons().putAll(commandExtensionContext.getAddons());
+                                cmd.setStorageInfo(forceFileTarget ? null : storageInfo);
 
                                 if (msg.getBackupQosStruct() != null) {
                                     cmd.setNetworkWriteBandwidth(msg.getBackupQosStruct().getNetworkWriteBandwidth());
@@ -1129,6 +1167,9 @@ public class VolumeBackupKvmBackend implements VolumeBackupHypervisorBackend {
             }
 
             private boolean targetIsNbd() {
+                if (forceFileTarget) {
+                    return false;
+                }
                 return (storageInfo == null && nbdDefault) || (storageInfo != null && storageInfo.getType().equals("nbd"));
             }
         }).start();
@@ -1403,7 +1444,8 @@ public class VolumeBackupKvmBackend implements VolumeBackupHypervisorBackend {
                     public void run(FlowTrigger trigger, Map data) {
                         vbvo = new VolumeBackupVO();
                         vbvo.setUuid(volumeBackupUuid);
-                        vbvo.setType(Q.New(VolumeVO.class).eq(VolumeVO_.uuid, msg.getVolumeUuid()).select(VolumeVO_.type).findValue());
+                        VolumeVO volume = Q.New(VolumeVO.class).eq(VolumeVO_.uuid, msg.getVolumeUuid()).find();
+                        vbvo.setType(volume.getType());
                         vbvo.setAccountUuid(msg.getAccountUuid());
                         vbvo.setVolumeUuid(msg.getVolumeUuid());
                         vbvo.setName(msg.getName());
@@ -1420,7 +1462,8 @@ public class VolumeBackupKvmBackend implements VolumeBackupHypervisorBackend {
 
                     @Override
                     public void rollback(FlowRollback trigger, Map data) {
-                        dbf.removeByPrimaryKey(vbvo.getUuid(), VolumeBackupVO.class);
+                        String backupUuid = vbvo.getUuid();
+                        dbf.removeByPrimaryKey(backupUuid, VolumeBackupVO.class);
                         trigger.rollback();
                     }
                 });

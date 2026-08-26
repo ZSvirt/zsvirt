@@ -37,11 +37,6 @@ public class OAuth2AccountSource extends SSOAccountSource {
     }
 
     @Override
-    public String type() {
-        return OAUTH2_CLIENT_TYPE;
-    }
-
-    @Override
     public void handleMessage(Message msg) {
         if (msg instanceof APIUpdateOAuthClientMsg) {
             handle((APIUpdateOAuthClientMsg) msg);
@@ -134,7 +129,7 @@ public class OAuth2AccountSource extends SSOAccountSource {
 
     public static String getIpPort(String redirectUrl) {
         String ssoIp = Platform.getManagementServerVip();
-        Integer ssoPort = Platform.getManagementNodeServicePort();
+        int ssoPort = Platform.getManagementNodeServicePort();
 
         if (!StringUtils.isEmpty(redirectUrl)) {
             try {

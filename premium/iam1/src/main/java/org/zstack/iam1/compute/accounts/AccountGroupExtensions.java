@@ -10,13 +10,13 @@ import org.zstack.header.core.WhileDoneCompletion;
 import org.zstack.header.errorcode.ErrorCode;
 import org.zstack.header.errorcode.ErrorCodeList;
 import org.zstack.header.identity.AccountInventory;
-import org.zstack.header.identity.AccountType;
 import org.zstack.header.identity.AfterCreateAccountExtensionPoint;
 import org.zstack.header.message.MessageReply;
 import org.zstack.header.tag.SystemTagVO;
 import org.zstack.header.tag.SystemTagVO_;
 import org.zstack.iam1.entity.accounts.AccountGroupVO;
 import org.zstack.iam1.message.accounts.AddAccountToGroupMsg;
+import org.zstack.identity.Account;
 import org.zstack.utils.Utils;
 import org.zstack.utils.logging.CLogger;
 
@@ -34,7 +34,7 @@ public class AccountGroupExtensions implements AfterCreateAccountExtensionPoint 
 
     @Override
     public void afterCreateAccount(AccountInventory account) {
-        if (isNormalOrThirdPartyAccount(account)) {
+        if (!Account.isAdminPermission(account)) {
             addAccountToInitGroup(account.getUuid(), new Completion(null) {
                 @Override
                 public void success() {
@@ -48,11 +48,6 @@ public class AccountGroupExtensions implements AfterCreateAccountExtensionPoint 
                 }
             });
         }
-    }
-
-    private boolean isNormalOrThirdPartyAccount(AccountInventory account) {
-        return account.getType().equals(AccountType.Normal.toString())
-                || account.getType().equals(AccountType.ThirdParty.toString());
     }
 
     private void addAccountToInitGroup(String accountUuid, Completion completion) {

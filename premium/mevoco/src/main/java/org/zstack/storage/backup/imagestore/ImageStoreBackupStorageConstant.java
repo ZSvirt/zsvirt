@@ -12,6 +12,8 @@ public class ImageStoreBackupStorageConstant {
     public static final String PING_PATH = "/imagestore/ping/";
     public static final String EXPORT_IMAGE_PATH = "/imagestore/export/";
     public static final String EXPORT_IMAGE_AS_REMOTE_TARGET_PATH = "/imagestore/export/remotetarget/";
+    public static final String EXPORT_IMAGE_NBD_CHAIN = "/imagestore/export/nbdchain/";
+    public static final String CLEANUP_IMAGE_NBD_CHAIN = "/imagestore/export/nbdchain/cleanup/";
     public static final String DELETE_REMOTE_TARGET_PATH =  "/imagestore/remotetarget/delete/";
     public static final String PACKAGE_EXPORTED_IMAGES_PATH = "/imagestore/pack-exported-images/";
     public static final String DELETE_IMAGE_PACKAGE = "/imagestore/delete-image-package";

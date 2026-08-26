@@ -2,6 +2,7 @@ package org.zstack.compute.vm;
 
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
+import org.zstack.header.core.NonCloneable;
 import org.zstack.header.tag.AdminOnlyTag;
 import org.zstack.header.tag.TagDefinition;
 import org.zstack.header.vm.VmInstanceVO;
@@ -10,15 +11,44 @@ import org.zstack.tag.SensitiveTagOutputHandler;
 import org.zstack.tag.SensitiveTag;
 import org.zstack.tag.SystemTag;
 
+import java.util.Arrays;
 import java.util.Base64;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
+
+import static org.zstack.utils.CollectionDSL.e;
+import static org.zstack.utils.CollectionDSL.map;
 
 /**
  */
 @TagDefinition
 public class VmSystemTags {
+    private static final Set<String> SENSITIVE_TAG_HEADS = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
+            "consolePassword",
+            "sshkey",
+            "userdata"
+    )));
+
+    public static boolean isSensitiveTagHead(String tagHead) {
+        return tagHead != null && SENSITIVE_TAG_HEADS.contains(tagHead);
+    }
+
+    public static boolean isSensitiveVmTag(String tag) {
+        if (tag == null) {
+            return false;
+        }
+        int idx = tag.indexOf("::");
+        if (idx <= 0) {
+            return false;
+        }
+        return isSensitiveTagHead(tag.substring(0, idx));
+    }
+
     public static String HOSTNAME_TOKEN = "hostname";
     public static PatternedSystemTag HOSTNAME = new PatternedSystemTag(String.format("hostname::{%s}", HOSTNAME_TOKEN), VmInstanceVO.class);
 
@@ -66,6 +96,7 @@ public class VmSystemTags {
     @Deprecated
     public static String SSHKEY_TOKEN = "sshkey";
     @Deprecated
+    @SensitiveTag(tokens = {"sshkey"})
     public static PatternedSystemTag SSHKEY = new PatternedSystemTag(String.format("sshkey::{%s}", SSHKEY_TOKEN), VmInstanceVO.class);
 
     public static String ROOT_PASSWORD_TOKEN = "rootPassword";
@@ -92,6 +123,44 @@ public class VmSystemTags {
     public static String CONSOLE_PASSWORD_TOKEN = "consolePassword";
     @SensitiveTag(tokens = {"consolePassword"})
     public static PatternedSystemTag CONSOLE_PASSWORD = new PatternedSystemTag(String.format("consolePassword::{%s}",CONSOLE_PASSWORD_TOKEN),VmInstanceVO.class);
+
+    public static PatternedSystemTag getSensitivePatternedTagByHead(String tagHead) {
+        if (CONSOLE_PASSWORD_TOKEN.equals(tagHead)) {
+            return CONSOLE_PASSWORD;
+        }
+        if (SSHKEY_TOKEN.equals(tagHead)) {
+            return SSHKEY;
+        }
+        if (USERDATA_TOKEN.equals(tagHead)) {
+            return USERDATA;
+        }
+        return null;
+    }
+
+    public static List<PatternedSystemTag> sensitivePatternedTags() {
+        return Arrays.asList(CONSOLE_PASSWORD, SSHKEY, USERDATA);
+    }
+
+    /**
+     * Returns a plaintext tag for create/clone messages. The persist hook encrypts when vmEncryption=true.
+     */
+    public static String plainTagForCreateMessage(String resourceUuid, SystemTag systemTag, String rawTag) {
+        if (!(systemTag instanceof PatternedSystemTag) || !isSensitiveVmTag(rawTag)) {
+            return rawTag;
+        }
+
+        PatternedSystemTag patternedTag = (PatternedSystemTag) systemTag;
+        String tagHead = rawTag.substring(0, rawTag.indexOf("::"));
+        String plain = patternedTag.getTokenByResourceUuid(resourceUuid, tagHead);
+        if (plain == null) {
+            return rawTag;
+        }
+        return patternedTag.instantiateTag(map(e(tagHead, plain)));
+    }
+
+    public static String VM_ENCRYPTION_TOKEN = "vmEncryption";
+    @NonCloneable
+    public static PatternedSystemTag VM_ENCRYPTION = new PatternedSystemTag(String.format("vmEncryption::{%s}", VM_ENCRYPTION_TOKEN), VmInstanceVO.class);
 
     // set usbRedirect::true to enable usb redirect
     public static String USB_REDIRECT_TOKEN = "usbRedirect";
@@ -260,6 +329,9 @@ public class VmSystemTags {
             for (String t : sensitiveTokens) {
                 String base64Pattern = "^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{4}|[A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)$";
                 String userdata = tokens.get(t);
+                if (userdata != null && userdata.startsWith(VmSensitiveTagEncryptor.ENC_PREFIX)) {
+                    return tag.replace(userdata, "*****");
+                }
                 if (Pattern.matches(base64Pattern, userdata)) {
                     userdata = new String(Base64.getDecoder().decode(userdata.getBytes()));
                 }

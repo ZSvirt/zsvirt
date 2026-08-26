@@ -26,6 +26,7 @@ import org.zstack.header.core.workflow.*;
 import org.zstack.header.errorcode.ErrorCode;
 import org.zstack.header.errorcode.ErrorCodeList;
 import org.zstack.header.identity.*;
+import org.zstack.header.identity.accesskey.AccessKeyHandler;
 import org.zstack.header.message.Message;
 import org.zstack.header.rest.RestAuthenticationBackend;
 import org.zstack.header.rest.RestAuthenticationParams;
@@ -45,7 +46,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
-public class AccessKeyManager extends AbstractService implements RestAuthenticationBackend {
+public class AccessKeyManager extends AbstractService implements RestAuthenticationBackend, AccessKeyHandler {
     private static final CLogger logger = Utils.getLogger(AccessKeyManager.class);
 
     @Autowired
@@ -67,6 +68,15 @@ public class AccessKeyManager extends AbstractService implements RestAuthenticat
         vo.setAccountUuid(msg.getAccountUuid());
         vo.setDescription(msg.getDescription());
         vo.setState(AccessKeyState.Enabled);
+        AccessKeyType accessKeyType = AccessKeyType.User;
+        if (msg.getAccessKeyType() != null) {
+            try {
+                accessKeyType = AccessKeyType.valueOf(msg.getAccessKeyType());
+            } catch (IllegalArgumentException e) {
+                throw new IllegalArgumentException(String.format("invalid accessKeyType: %s", msg.getAccessKeyType()), e);
+            }
+        }
+        vo.setType(accessKeyType);
         /* access key and secret can not include ":" */
         if (msg.getAccessKeyID() != null) {
             vo.setAccessKeyID(msg.getAccessKeyID());
@@ -83,6 +93,18 @@ public class AccessKeyManager extends AbstractService implements RestAuthenticat
                 return AccessKeyInventory.valueOf(reload(vo));
             }
         }.execute();
+    }
+
+    @Override
+    public String[] createAccessKeyAndSecret(String accountUuid) {
+        final AccessKeyVO vo = new AccessKeyVO();
+        vo.setUuid(Platform.getUuid());
+        vo.setAccountUuid(accountUuid);
+        vo.setState(AccessKeyState.Enabled);
+        vo.setAccessKeyID(Platform.randomAlphanumeric(AccessKeyConstant.ACCESSKEY_ID_LEN));
+        vo.setAccessKeySecret(Platform.randomAlphanumeric(AccessKeyConstant.ACCESSKEY_SECRET_LEN));
+        dbf.persist(vo);
+        return new String[] { vo.getAccessKeyID(), vo.getAccessKeySecret() };
     }
 
     private static SessionInventory getAccessKeySession(AccessKeyInventory accessKey) {
@@ -239,6 +261,18 @@ public class AccessKeyManager extends AbstractService implements RestAuthenticat
                 return String.format("delete-accesskey-%s", accessKeyUuid);
             }
         });
+    }
+
+    @Override
+    public void deleteAccessKeyById(String accessKeyId, Completion completion) {
+        AccessKeyVO vo = Q.New(AccessKeyVO.class)
+                .eq(AccessKeyVO_.AccessKeyID, accessKeyId)
+                .find();
+        if (vo == null) {
+            completion.success();
+            return;
+        }
+        deleteAccessKey(vo, completion);
     }
 
     private void handle(APIDeleteAccessKeyMsg msg) {

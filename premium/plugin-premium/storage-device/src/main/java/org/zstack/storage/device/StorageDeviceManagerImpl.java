@@ -1304,21 +1304,94 @@ public class StorageDeviceManagerImpl extends AbstractService implements Storage
         }
 
         IscsiTargetInventory targetInventory = IscsiTargetInventory.valueOf(targetVO);
-        Set<IscsiLunInventory> needDelete = new HashSet<>(targetInventory.getIscsiLuns());
+        List<IscsiLunInventory> needDelete = new ArrayList<>(targetInventory.getIscsiLuns());
+        Set<String> validIscsiLunKeys = getValidIscsiLunKeys(iscsiTargetInventory);
+        Set<String> validIscsiLunSerials = getValidIscsiLunSerials(iscsiTargetInventory);
+        Set<String> invalidIscsiLunSerials = getInvalidIscsiLunSerials(iscsiTargetInventory);
         if (StorageDeviceGlobalConfig.ALLOW_DIFFERENT_ISCSI_CONFIG.value(Boolean.class)) {
-            needDelete = new HashSet<>(IscsiTargetInventory.valueOf(dbf.findByUuid(targetVO.getUuid(), IscsiTargetVO.class)).getIscsiLuns());
-            needDelete.removeIf(lun -> !lun.getScsiLunHostRefs().isEmpty());
+            needDelete = new ArrayList<>(IscsiTargetInventory.valueOf(dbf.findByUuid(targetVO.getUuid(), IscsiTargetVO.class)).getIscsiLuns());
+            needDelete.removeIf(lun -> shouldKeepIscsiLun(lun, validIscsiLunKeys, validIscsiLunSerials, invalidIscsiLunSerials) ||
+                    !lun.getScsiLunHostRefs().isEmpty());
         } else {
-            needDelete.removeAll(new HashSet<>(iscsiTargetInventory.getIscsiLuns()));
+            needDelete.removeIf(lun -> shouldKeepIscsiLun(lun, validIscsiLunKeys, validIscsiLunSerials, invalidIscsiLunSerials));
         }
 
-        removeIscsiLun(new ArrayList<>(needDelete), targetInventory);
+        removeIscsiLun(needDelete, targetInventory);
+    }
+
+    private boolean shouldKeepIscsiLun(IscsiLunInventory lun, Set<String> validIscsiLunKeys,
+                                       Set<String> validIscsiLunSerials, Set<String> invalidIscsiLunSerials) {
+        if (validIscsiLunKeys.contains(getIscsiLunKey(lun))) {
+            return true;
+        }
+
+        String serial = getIscsiLunSerial(lun);
+        if (invalidIscsiLunSerials.contains(serial) && !validIscsiLunSerials.contains(serial)) {
+            logger.warn(String.format("keep existing iSCSI LUN[uuid:%s, serial:%s, wwid:%s] because agent only reports blank wwid for this serial",
+                    lun.getUuid(), lun.getSerial(), lun.getWwid()));
+            return true;
+        }
+
+        return false;
+    }
+
+    private Set<String> getValidIscsiLunKeys(IscsiTargetInventory iscsiTargetInventory) {
+        if (iscsiTargetInventory.getIscsiLuns() == null || iscsiTargetInventory.getIscsiLuns().isEmpty()) {
+            return Collections.emptySet();
+        }
+
+        return iscsiTargetInventory.getIscsiLuns().stream()
+                .filter(lun -> StringUtils.isNotBlank(getIscsiLunWwid(lun)))
+                .map(this::getIscsiLunKey)
+                .collect(Collectors.toSet());
+    }
+
+    private Set<String> getValidIscsiLunSerials(IscsiTargetInventory iscsiTargetInventory) {
+        if (iscsiTargetInventory.getIscsiLuns() == null || iscsiTargetInventory.getIscsiLuns().isEmpty()) {
+            return Collections.emptySet();
+        }
+
+        return iscsiTargetInventory.getIscsiLuns().stream()
+                .filter(lun -> StringUtils.isNotBlank(getIscsiLunWwid(lun)))
+                .map(this::getIscsiLunSerial)
+                .filter(serial -> StringUtils.isNotBlank(serial))
+                .collect(Collectors.toSet());
+    }
+
+    private Set<String> getInvalidIscsiLunSerials(IscsiTargetInventory iscsiTargetInventory) {
+        if (iscsiTargetInventory.getIscsiLuns() == null || iscsiTargetInventory.getIscsiLuns().isEmpty()) {
+            return Collections.emptySet();
+        }
+
+        return iscsiTargetInventory.getIscsiLuns().stream()
+                .filter(lun -> StringUtils.isBlank(getIscsiLunWwid(lun)))
+                .map(this::getIscsiLunSerial)
+                .filter(serial -> StringUtils.isNotBlank(serial))
+                .collect(Collectors.toSet());
+    }
+
+    private String getIscsiLunKey(IscsiLunInventory lun) {
+        return String.format("%s:%s", getIscsiLunSerial(lun), getIscsiLunWwid(lun));
+    }
+
+    private String getIscsiLunSerial(IscsiLunInventory lun) {
+        return StringUtils.trimToEmpty(lun.getSerial());
+    }
+
+    private String getIscsiLunWwid(IscsiLunInventory lun) {
+        return StringUtils.trimToEmpty(lun.getWwid());
     }
 
     private void syncIscsiLunDbFromAgent(IscsiLunInventory iscsiLunInventory, IscsiTargetVO iscsiTargetVO, String hostUuid) {
+        if (StringUtils.isBlank(iscsiLunInventory.getWwid())) {
+            logger.warn(String.format("skip syncing iSCSI LUN[serial:%s, path:%s] with blank wwid", iscsiLunInventory.getSerial(), iscsiLunInventory.getPath()));
+            return;
+        }
+
         IscsiLunVO lunVO = Q.New(IscsiLunVO.class)
                 .eq(IscsiLunVO_.iscsiTargetUuid, iscsiLunInventory.getIscsiTargetUuid())
                 .eq(IscsiLunVO_.serial, iscsiLunInventory.getSerial())
+                .eq(IscsiLunVO_.wwid, iscsiLunInventory.getWwid())
                 .find();
 
         if (lunVO == null) {

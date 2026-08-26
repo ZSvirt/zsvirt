@@ -1,6 +1,6 @@
 package org.zstack.compute.vm;
 
-import org.zstack.header.errorcode.OperationFailureException;
+import org.zstack.header.errorcode.ErrorCode;
 
 import static org.zstack.core.Platform.operr;
 
@@ -18,11 +18,12 @@ public class CpuTopology {
         this.cpuThreads = cpuThreads == null ? null : Integer.valueOf(cpuThreads);
     }
 
-    public String calculateValidTopologyWithoutException() {
-        return calculateValidTopology(false);
-    }
-
-    public String calculateValidTopology(boolean throwException) {
+    /**
+     * Validates topology and updates {@link #cpuSockets}/{@link #cpuCores}/{@link #cpuThreads} when valid.
+     *
+     * @return null if valid or nothing to validate; otherwise an {@link ErrorCode} describing the failure.
+     */
+    public ErrorCode calculateValidTopology() {
         if (cpuSockets == null && cpuCores == null && cpuThreads == null) {
             return null;
         }
@@ -59,7 +60,6 @@ public class CpuTopology {
             }
         }
 
-        // check the topology is valid
         if (cpuNum >= socketNum * coreNum * threadNum) {
             cpuSockets = socketNum;
             cpuCores = coreNum;
@@ -67,15 +67,9 @@ public class CpuTopology {
             return null;
         }
 
-        if (throwException) {
-            throw new OperationFailureException(operr("cpu topology is not correct, cpuNum[%s], configured cpuSockets[%s], cpuCores[%s], cpuThreads[%s];" +
-                            " Calculated cpuSockets[%s], cpuCores[%s], cpuThreads[%s]",
-                    cpuNum, cpuSockets, cpuCores, cpuThreads, socketNum, coreNum, threadNum));
-        } else {
-            return String.format("cpu topology is not correct, cpuNum[%s], configured cpuSockets[%s], cpuCores[%s], cpuThreads[%s];" +
-                            " Calculated cpuSockets[%s], cpuCores[%s], cpuThreads[%s]",
-                    cpuNum, cpuSockets, cpuCores, cpuThreads, socketNum, coreNum, threadNum);
-        }
+        return operr("cpu topology is not correct, cpuNum[%s], configured cpuSockets[%s], cpuCores[%s], cpuThreads[%s];" +
+                        " Calculated cpuSockets[%s], cpuCores[%s], cpuThreads[%s]",
+                cpuNum, cpuSockets, cpuCores, cpuThreads, socketNum, coreNum, threadNum);
     }
 
     public Integer getCpuSockets() {

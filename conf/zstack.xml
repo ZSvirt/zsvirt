@@ -117,4 +117,5 @@
     <import resource="springConfigXml/sshKeyPair.xml"/>
     <import resource="springConfigXml/HostNetworkManager.xml"/>
     <import resource="springConfigXml/telemetry.xml"/>
+    <import resource="springConfigXml/allocatorDomain.xml"/>
 </beans>

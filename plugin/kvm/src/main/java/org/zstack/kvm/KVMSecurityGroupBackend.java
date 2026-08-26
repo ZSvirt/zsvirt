@@ -129,7 +129,7 @@ public class KVMSecurityGroupBackend implements SecurityGroupHypervisorBackend, 
     @Override
     public void checkDefaultRules(String hostUuid, Completion completion) {
         CheckDefaultSecurityGroupCmd cmd = new CheckDefaultSecurityGroupCmd();
-        cmd.skipIpv6 = NetworkGlobalProperty.SKIP_IPV6;
+        cmd.disableIp6Tables = NetworkGlobalProperty.SKIP_IPV6 || NetworkGlobalProperty.BRIDGE_DISABLE_IP6TABLES;
 
         KVMHostAsyncHttpCallMsg msg = new KVMHostAsyncHttpCallMsg();
         msg.setHostUuid(hostUuid);
@@ -193,7 +193,7 @@ public class KVMSecurityGroupBackend implements SecurityGroupHypervisorBackend, 
     @Override
     public void cleanUpUnusedRuleOnHost(String hostUuid, final Completion completion) {
         KVMAgentCommands.CleanupUnusedRulesOnHostCmd cmd = new KVMAgentCommands.CleanupUnusedRulesOnHostCmd();
-        cmd.skipIpv6 = NetworkGlobalProperty.SKIP_IPV6;
+        cmd.disableIp6Tables = NetworkGlobalProperty.SKIP_IPV6 || NetworkGlobalProperty.BRIDGE_DISABLE_IP6TABLES;
         KVMHostAsyncHttpCallMsg msg = new KVMHostAsyncHttpCallMsg();
         msg.setHostUuid(hostUuid);
         msg.setCommand(cmd);

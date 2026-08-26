@@ -76,7 +76,7 @@ public class SystemTagUtils {
     }
 
     public static void cloneTag(PatternedSystemTag tag, String tagToken, String srcUuid, String destUuid){
-        if (tagToken == null) {
+        if (tagToken == null || !tag.isCloneable()) {
             return;
         }
         List<SystemTagInventory> srcTags = tag.getTagInventories(srcUuid);
@@ -95,6 +95,9 @@ public class SystemTagUtils {
     }
 
     public static void cloneTag(PatternedSystemTag tag, String srcUuid, String destUuid, List<String> tokens){
+        if (!tag.isCloneable()) {
+            return;
+        }
         List<SystemTagInventory> srcTags = tag.getTagInventories(srcUuid);
 
         if (srcTags == null || srcTags.isEmpty()) {

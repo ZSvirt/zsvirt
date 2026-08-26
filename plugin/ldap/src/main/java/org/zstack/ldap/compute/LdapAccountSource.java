@@ -6,6 +6,7 @@ import org.zstack.header.core.Completion;
 import org.zstack.header.core.ReturnValueCompletion;
 import org.zstack.header.errorcode.ErrorCode;
 import org.zstack.header.errorcode.OperationFailureException;
+import org.zstack.header.identity.AccountSource;
 import org.zstack.header.message.Message;
 import org.zstack.identity.imports.header.SyncTaskResult;
 import org.zstack.identity.imports.header.SyncTaskSpec;
@@ -50,11 +51,6 @@ public class LdapAccountSource extends AbstractAccountSourceBase {
         }
         self = serverVO;
         return serverVO;
-    }
-
-    @Override
-    public String type() {
-        return LdapConstant.LOGIN_TYPE;
     }
 
     @Override
@@ -117,6 +113,7 @@ public class LdapAccountSource extends AbstractAccountSourceBase {
         }
         if (spec.getServerType() != null) {
             vo.setServerType(spec.getServerType());
+            vo.setType(AccountSource.fromLdapServerTypeName(spec.getServerType().name()).name());
         }
         if (spec.getCreateAccountStrategy() != null) {
             vo.setCreateAccountStrategy(spec.getCreateAccountStrategy());

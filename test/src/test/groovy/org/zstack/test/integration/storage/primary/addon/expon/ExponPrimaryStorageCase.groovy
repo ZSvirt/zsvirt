@@ -49,7 +49,6 @@ import org.zstack.utils.data.SizeUnit
 import org.zstack.utils.gson.JSONObjectUtil
 
 import static java.util.Arrays.asList
-import static org.zstack.expon.ExponIscsiHelper.iscsiExportTargetName
 import static org.zstack.expon.ExponNameHelper.getVolIdFromPath
 
 class ExponPrimaryStorageCase extends SubCase {
@@ -554,7 +553,7 @@ class ExponPrimaryStorageCase extends SubCase {
         def poolId = controller.addonInfo.getPools()[0].id
         def exponVol = controller.apiHelper.createVolume("test_" + Platform.uuid, poolId, SizeUnit.GIGABYTE.toByte(1))
 
-        IscsiModule iscsi = apiHelper.queryIscsiController(iscsiExportTargetName)
+        IscsiModule iscsi = apiHelper.queryIscsiController("iscsi_zstack_export")
         IscsiClientGroupModule client = apiHelper.queryIscsiClient("iscsi_127_0_0_2") // bs ip
         apiHelper.addVolumeToIscsiClientGroup(exponVol.id, client.id, iscsi.id, false)
         apiHelper.addVolumeToIscsiClientGroup(exponVol.id, client.id, iscsi.id, false)

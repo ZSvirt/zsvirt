@@ -5,9 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.zstack.core.Platform;
 import org.zstack.core.db.DatabaseFacade;
-import org.zstack.core.db.SimpleQuery;
-import org.zstack.core.db.SimpleQuery.Od;
-import org.zstack.core.db.SimpleQuery.Op;
+import org.zstack.core.db.Q;
 import org.zstack.core.errorcode.ErrorFacade;
 import org.zstack.core.statemachine.StateMachine;
 import org.zstack.header.errorcode.ErrorCode;
@@ -175,10 +173,10 @@ public class WorkFlowChain {
     }
 
     protected void rollback() {
-        SimpleQuery<WorkFlowVO> query = dbf.createQuery(WorkFlowVO.class);
-        query.add(WorkFlowVO_.chainUuid, Op.EQ, chainvo.getUuid());
-        query.orderBy(WorkFlowVO_.position, Od.DESC);
-        List<WorkFlowVO> vos = query.list();
+        List<WorkFlowVO> vos = Q.New(WorkFlowVO.class)
+                .eq(WorkFlowVO_.chainUuid, chainvo.getUuid())
+                .orderByDesc(WorkFlowVO_.position)
+                .list();
         for (WorkFlowVO vo : vos) {
             if (vo.getState() == WorkFlowState.RollbackDone) {
                 /* when this is called from carryOn(), some flows may have been rolled back, skip them */
@@ -275,10 +273,10 @@ public class WorkFlowChain {
         } else if (chainvo.getState() == WorkFlowChainState.ProcessFailed) {
             return ContinueStrategy.Rollback;
         } else if (chainvo.getState() == WorkFlowChainState.Processing) {
-            SimpleQuery<WorkFlowVO> query = dbf.createQuery(WorkFlowVO.class);
-            query.add(WorkFlowVO_.chainUuid, Op.EQ, chainvo.getUuid());
-            query.orderBy(WorkFlowVO_.position, Od.DESC);
-            List<WorkFlowVO> vos = query.list();
+            List<WorkFlowVO> vos = Q.New(WorkFlowVO.class)
+                    .eq(WorkFlowVO_.chainUuid, chainvo.getUuid())
+                    .orderByDesc(WorkFlowVO_.position)
+                    .list();
             if (vos.isEmpty()) {
                 return ContinueStrategy.Restart;
             }
@@ -300,9 +298,9 @@ public class WorkFlowChain {
     }
 
     public WorkFlowContext carryOn(String chainUuid) throws WorkFlowException {
-        SimpleQuery<WorkFlowChainVO> query = dbf.createQuery(WorkFlowChainVO.class);
-        query.add(WorkFlowChainVO_.uuid, Op.EQ, chainUuid);
-        chainvo = query.find();
+        chainvo = Q.New(WorkFlowChainVO.class)
+                .eq(WorkFlowChainVO_.uuid, chainUuid)
+                .find();
         if (chainvo == null) {
             throw new IllegalArgumentException(String.format("Cannot find workflow chain[uuid:%s]", chainUuid));
         }
@@ -330,10 +328,10 @@ public class WorkFlowChain {
     }
 
     protected WorkFlowContext carryOnRestart() throws WorkFlowException {
-        SimpleQuery<WorkFlowVO> query = dbf.createQuery(WorkFlowVO.class);
-        query.add(WorkFlowVO_.chainUuid, Op.EQ, chainvo.getUuid());
-        query.orderBy(WorkFlowVO_.position, Od.DESC);
-        List<WorkFlowVO>  vos = query.list();
+        List<WorkFlowVO> vos = Q.New(WorkFlowVO.class)
+                .eq(WorkFlowVO_.chainUuid, chainvo.getUuid())
+                .orderByDesc(WorkFlowVO_.position)
+                .list();
         WorkFlowVO last = vos.get(0);
         assert last.getState() == WorkFlowState.Done || last.getState() == WorkFlowState.Processing : String.format("How can work flow[%s] in %s state when restart workflow chain[uuid:%s] !!?", last.getName(), last.getState(), chainvo.getUuid());
         return run(WorkFlowContext.fromBytes(last.getContext()), last);
@@ -342,10 +340,10 @@ public class WorkFlowChain {
     protected WorkFlowContext carryOnNothing() {
         logger.debug(String.format("Noting to carry on for work flow chain[uuid:%s]", chainvo.getUuid()));
         if (chainvo.getState() == WorkFlowChainState.ProcessDone) {
-            SimpleQuery<WorkFlowVO> query = dbf.createQuery(WorkFlowVO.class);
-            query.add(WorkFlowVO_.chainUuid, Op.EQ, chainvo.getUuid());
-            query.add(WorkFlowVO_.position, Op.EQ, chainvo.getTotalWorkFlows() - 1);
-            WorkFlowVO vo = query.find();
+            WorkFlowVO vo = Q.New(WorkFlowVO.class)
+                    .eq(WorkFlowVO_.chainUuid, chainvo.getUuid())
+                    .eq(WorkFlowVO_.position, chainvo.getTotalWorkFlows() - 1)
+                    .find();
             return WorkFlowContext.fromBytes(vo.getContext());
         } else if (chainvo.getState() == WorkFlowChainState.RollbackDone) {
             return null;
@@ -353,21 +351,21 @@ public class WorkFlowChain {
             assert false : "Cannot be here";
             return null;
             /*
-            SimpleQuery<WorkFlowVO> query = dbf.createQuery(WorkFlowVO.class);
-            query.add(WorkFlowVO_.chainUuid, Op.EQ, chainvo.getUuid());
-            query.add(WorkFlowVO_.position, Op.EQ, chainvo.getTotalWorkFlows() - 1);
-            WorkFlowVO vo = query.find();
+            WorkFlowVO vo = Q.New(WorkFlowVO.class)
+                    .eq(WorkFlowVO_.chainUuid, chainvo.getUuid())
+                    .eq(WorkFlowVO_.position, chainvo.getTotalWorkFlows() - 1)
+                    .find();
             if (vo.getState() == WorkFlowState.Done) {
                 chainvo.setState(WorkFlowChainState.ProcessDone);
                 chainvo.setCurrentPosition(chainvo.getTotalWorkFlows()-1);
                 chainvo = dbf.update(chainvo);
                 return WorkFlowContext.fromBytes(vo.getContext());
             } else if (vo.getState() == WorkFlowState.RollbackDone) {
-                query = dbf.createQuery(WorkFlowVO.class);
-                query.select(WorkFlowVO_.reason);
-                query.add(WorkFlowVO_.chainUuid, Op.EQ, chainvo.getUuid());
-                query.add(WorkFlowVO_.reason, Op.NOT_NULL);
-                String reason = query.findValue();
+                String reason = Q.New(WorkFlowVO.class)
+                        .select(WorkFlowVO_.reason)
+                        .eq(WorkFlowVO_.chainUuid, chainvo.getUuid())
+                        .notNull(WorkFlowVO_.reason)
+                        .findValue();
                 chainvo.setReason(reason);
                 chainvo.setState(WorkFlowChainState.RollbackDone);
                 chainvo.setCurrentPosition(chainvo.getTotalWorkFlows()-1);

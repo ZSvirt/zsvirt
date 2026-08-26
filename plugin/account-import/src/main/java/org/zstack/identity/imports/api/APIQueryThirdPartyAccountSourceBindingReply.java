@@ -22,14 +22,7 @@ public class APIQueryThirdPartyAccountSourceBindingReply extends APIQueryReply {
  
     public static APIQueryThirdPartyAccountSourceBindingReply __example__() {
         APIQueryThirdPartyAccountSourceBindingReply reply = new APIQueryThirdPartyAccountSourceBindingReply();
-
-        AccountThirdPartyAccountSourceRefInventory inventory = new AccountThirdPartyAccountSourceRefInventory();
-        inventory.setId(1L);
-        inventory.setCredentials("ou=Employee,uid=test");
-        inventory.setAccountUuid(uuid());
-        inventory.setAccountSourceUuid(uuid());
-
-        reply.setInventories(list(inventory));
+        reply.setInventories(list(AccountThirdPartyAccountSourceRefInventory.__example__()));
         return reply;
     }
 

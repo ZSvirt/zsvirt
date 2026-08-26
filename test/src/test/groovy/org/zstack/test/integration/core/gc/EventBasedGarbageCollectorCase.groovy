@@ -1,6 +1,5 @@
 package org.zstack.test.integration.core.gc
 
-import org.apache.commons.collections.map.HashedMap
 import org.zstack.core.Platform
 import org.zstack.core.cloudbus.EventFacade
 import org.zstack.core.db.DatabaseFacade
@@ -76,7 +75,7 @@ class EventBasedGarbageCollectorCase extends SubCase {
         }
     }
 
-    static Map<String, Closure<EventBasedGCInDbBehavior>> testLogicForJobLoadedFromDbMap = new HashedMap<>()
+    static Map<String, Closure<EventBasedGCInDbBehavior>> testLogicForJobLoadedFromDbMap = new HashMap<>()
 
     static enum EventBasedGCInDbBehavior {
         SUCCESS,
@@ -123,7 +122,7 @@ class EventBasedGarbageCollectorCase extends SubCase {
         }
     }
 
-    static Map<String, Closure<EventBasedGCInDbBehavior>> testTriggerNowForJobLoadedFromDbMap = new HashedMap<>()
+    static Map<String, Closure<EventBasedGCInDbBehavior>> testTriggerNowForJobLoadedFromDbMap = new HashMap<>()
 
     static class EventBasedGCInDbTriggerNow extends EventBasedGarbageCollector {
         Closure trigger = { true }

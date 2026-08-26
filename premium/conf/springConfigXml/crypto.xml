@@ -24,6 +24,67 @@
     <bean id="KeyProviderResourceKeyBackend" class="org.zstack.crypto.keyprovider.KeyProviderResourceKeyBackend" primary="true">
     </bean>
 
+    <bean id="KeyProviderResourceKeyBackendVolume" class="org.zstack.crypto.keyprovider.KeyProviderResourceKeyBackendVolume" primary="true">
+    </bean>
+
+    <bean id="VolumeBackupEncryptionCascadeExtension" class="org.zstack.crypto.volumebackup.VolumeBackupEncryptionCascadeExtension">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.core.cascade.CascadeExtensionPoint"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="VolumeBackupEncryptionKvmCommandExtension" class="org.zstack.crypto.volumebackup.VolumeBackupEncryptionKvmCommandExtension">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.storage.volume.backup.VmBackupKvmCommandExtensionPoint"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="ImageStoreEncryptionCreateImageExtension" class="org.zstack.crypto.volume.ImageStoreEncryptionCreateImageExtension">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.image.CreateImageExtensionPoint"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="VolumeBackupEncryptionConversion" class="org.zstack.crypto.volumebackup.VolumeBackupEncryptionConversion"/>
+
+    <bean id="VolumeBackupEncryptionConversionCommitter" class="org.zstack.crypto.volumebackup.VolumeBackupEncryptionConversionCommitterImpl" primary="true"/>
+
+    <bean id="BackupImageDownloadExtension" class="org.zstack.crypto.volumebackup.BackupImageDownloadExtension"/>
+
+    <bean id="ZbsVolumeBackupImageDownloadHandler" class="org.zstack.crypto.volumebackup.ZbsVolumeBackupImageDownloadHandler"/>
+
+    <bean id="CryptoVolumeBackupService" class="org.zstack.crypto.volumebackup.CryptoVolumeBackupService">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.Service"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="BackupVmSpecEncryptionExtension" class="org.zstack.crypto.volumebackup.BackupVmSpecEncryptionExtension">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.compute.vm.BuildVmSpecExtensionPoint"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="BackupImageKeyManager" class="org.zstack.crypto.volumebackup.BackupImageKeyManager"/>
+
+    <bean id="ZbsEncryptedCbdResizeExtension" class="org.zstack.crypto.volume.ZbsEncryptedCbdResizeExtension">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.volume.ResizeVolumeExtensionPoint"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="BackupImageKeyCleanupExtension" class="org.zstack.crypto.volumebackup.BackupImageKeyCleanupExtension">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.image.ExpungeImageExtensionPoint"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="VolumeBackupRekeyAssociation" class="org.zstack.crypto.volumebackup.VolumeBackupRekeyAssociation">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.keyprovider.KeyProviderRekeyAssociationExtensionPoint"/>
+        </zstack:plugin>
+    </bean>
+
     <bean id="EncryptedResourceKeyManager" class="org.zstack.crypto.keyprovider.EncryptedResourceKeyManagerImpl" primary="true">
     </bean>
 
@@ -42,6 +103,14 @@
     <bean id="KeyProviderTpmAutoCompleter" class="org.zstack.crypto.keyprovider.KeyProviderTpmAutoCompleter">
         <zstack:plugin>
             <zstack:extension interface="org.zstack.header.apimediator.GlobalApiMessageInterceptor"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="KeyProviderAvailabilityChecker" class="org.zstack.crypto.keyprovider.KeyProviderAvailabilityChecker"/>
+
+    <bean id="EncryptionInventoryReplyMarshaller" class="org.zstack.crypto.keyprovider.EncryptionInventoryReplyMarshaller">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.core.cloudbus.MarshalReplyMessageExtensionPoint" order="-100"/>
         </zstack:plugin>
     </bean>
 
@@ -66,6 +135,24 @@
     </bean>
 
     <bean id="NkpHealthTracker" class="org.zstack.crypto.keyprovider.nkp.NkpHealthTracker">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.Component" order="-100"/>
+            <zstack:extension interface="org.zstack.header.managementnode.ManagementNodeChangeListener" />
+            <zstack:extension interface="org.zstack.header.managementnode.ManagementNodeReadyExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="CertificateExpiryScanner" class="org.zstack.crypto.keyprovider.CertificateExpiryScanner">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.Component" order="-100"/>
+            <zstack:extension interface="org.zstack.header.managementnode.ManagementNodeChangeListener" />
+            <zstack:extension interface="org.zstack.header.managementnode.ManagementNodeReadyExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="ScannerAlarmStateStore" class="org.zstack.crypto.keyprovider.ScannerAlarmStateStore"/>
+
+    <bean id="KeyProviderServiceAlarmScanner" class="org.zstack.crypto.keyprovider.KeyProviderServiceAlarmScanner">
         <zstack:plugin>
             <zstack:extension interface="org.zstack.header.Component" order="-100"/>
             <zstack:extension interface="org.zstack.header.managementnode.ManagementNodeChangeListener" />

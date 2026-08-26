@@ -264,20 +264,40 @@ public class StorageMigrationBase implements Component {
     }
 
     private List<VolumeVO> getVolumesToMigrate(VmInstanceVO vmInstanceVO, PrimaryStorageMigrateVmMessage msg) {
-        List<VolumeVO> volumes = new ArrayList<>();
-        if (!msg.isWithDataVolumes()) {
-            volumes.add(vmInstanceVO.getRootVolume());
-        } else {
-            volumes.addAll(vmInstanceVO.getAllDiskVolumes());
-        }
-
-        return volumes.stream().filter(vol -> requireMigration(vol, msg.getDstPrimaryStorageUuid(), msg.getDstHostUuid(), msg.getSystemTags()))
+        Map<String, String> volToDst = VolumeMigrationAO.toVolToDstMap(msg.getVolumeMigrationAOs());
+        return vmInstanceVO.getAllDiskVolumes().stream()
+                .filter(vol -> volToDst.containsKey(vol.getUuid()))
+                .filter(vol -> requireMigration(vol, volToDst.get(vol.getUuid()),
+                        msg.getDstHostUuid(), msg.getSystemTags()))
                 .collect(Collectors.toList());
+    }
+
+    private Set<String> collectDstPsUuids(PrimaryStorageMigrateVmMessage msg, List<VolumeVO> volumesToMigrate) {
+        Map<String, String> volToDst = VolumeMigrationAO.toVolToDstMap(msg.getVolumeMigrationAOs());
+        Set<String> dstPsSet = new HashSet<>();
+        for (VolumeVO v : volumesToMigrate) {
+            String d = volToDst.get(v.getUuid());
+            if (d != null) {
+                dstPsSet.add(d);
+            }
+        }
+        return dstPsSet;
+    }
+
+    private String resolveRootDstPs(PrimaryStorageMigrateVmMessage msg, VmInstanceVO vm) {
+        String rootUuid = vm.getRootVolumeUuid();
+        return msg.getVolumeMigrationAOs().stream()
+                .filter(s -> rootUuid.equals(s.getVolumeUuid()))
+                .map(VolumeMigrationAO::getDstPrimaryStorageUuid)
+                .findFirst().orElse(null);
     }
 
     private void handle(PrimaryStorageMigrateVmMsg msg) {
         PrimaryStorageMigrateVmReply oreply = new PrimaryStorageMigrateVmReply();
         VmInstanceVO vmInstanceVO = Q.New(VmInstanceVO.class).eq(VmInstanceVO_.uuid, msg.getVmInstanceUuid()).find();
+        msg.resolveLegacyRootOnlyMigration(vmInstanceVO.getRootVolumeUuid());
+        msg.setVolumeMigrationAOs(VolumeMigrationAO.fromLegacyDstPs(
+                vmInstanceVO, msg.getVolumeMigrationAOs(), msg.getDstPrimaryStorageUuid(), msg.isWithDataVolumes(), msg.isWithSnapshots()));
         List<VolumeVO> volumesToMigrate = getVolumesToMigrate(vmInstanceVO, msg);
         if (volumesToMigrate.isEmpty()) {
             oreply.setInventory(VmInstanceInventory.valueOf(vmInstanceVO));
@@ -287,7 +307,10 @@ public class StorageMigrationBase implements Component {
 
         VmInstanceState vmInstanceState = PrimaryStorageMigrationRecoverHelper.saveAndGetVmStatus(msg);
         PrimaryStorageMigrateVmContext ctx = msg.getJobContext();
-        String flowChainName = String.format("migrate-vm-%s-to-ps-%s", msg.getVmInstanceUuid(), msg.getDstPrimaryStorageUuid());
+        String dstPsLabel = msg.getVolumeMigrationAOs().stream()
+                .map(VolumeMigrationAO::getDstPrimaryStorageUuid)
+                .distinct().sorted().collect(Collectors.joining(","));
+        String flowChainName = String.format("migrate-vm-%s-to-ps-%s", msg.getVmInstanceUuid(), dstPsLabel);
         if (!ctx.isMigrateStarted()) {
             ctx.setStartedFlowNames(new HashMap<>());
             ctx.getStartedFlowNames().put(flowChainName, new ArrayList<>());
@@ -339,7 +362,9 @@ public class StorageMigrationBase implements Component {
                 }
                 // change vm status before storage migration
                 ChangeVmStateMsg cmsg = new ChangeVmStateMsg();
-                cmsg.setStateEvent(VmInstanceStateEvent.volumeMigrating.toString());
+                VmInstanceStateEvent stateEvent = vmInstanceVO.getState() == VmInstanceState.Paused
+                        ? VmInstanceStateEvent.migrating : VmInstanceStateEvent.volumeMigrating;
+                cmsg.setStateEvent(stateEvent.toString());
                 cmsg.setVmInstanceUuid(msg.getVmInstanceUuid());
                 bus.makeTargetServiceIdByResourceUuid(cmsg, VmInstanceConstant.SERVICE_ID, msg.getVmInstanceUuid());
                 bus.send(cmsg, new CloudBusCallBack(trigger) {
@@ -403,19 +428,35 @@ public class StorageMigrationBase implements Component {
             String __name__ = "refresh dst primary storage capacity";
             @Override
             public void run(FlowTrigger trigger, Map data) {
-                SyncPrimaryStorageCapacityMsg smsg = new SyncPrimaryStorageCapacityMsg();
-                smsg.setPrimaryStorageUuid(msg.getDstPrimaryStorageUuid());
-                bus.makeTargetServiceIdByResourceUuid(smsg, PrimaryStorageConstant.SERVICE_ID, smsg.getPrimaryStorageUuid());
-                bus.send(smsg, new CloudBusCallBack(trigger) {
-                    @Override
-                    public void run(MessageReply reply) {
-                        if (!reply.isSuccess()) {
-                            trigger.fail(reply.getError());
-                            return;
+                Set<String> dstPsSet = collectDstPsUuids(msg, volumesToMigrate);
+                if (dstPsSet.isEmpty()) {
+                    trigger.next();
+                    return;
+                }
+                List<ErrorCode> errors = Collections.synchronizedList(new ArrayList<>());
+                new While<>(dstPsSet).all((dstPs, wc) -> {
+                    SyncPrimaryStorageCapacityMsg smsg = new SyncPrimaryStorageCapacityMsg();
+                    smsg.setPrimaryStorageUuid(dstPs);
+                    bus.makeTargetServiceIdByResourceUuid(smsg, PrimaryStorageConstant.SERVICE_ID, smsg.getPrimaryStorageUuid());
+                    bus.send(smsg, new CloudBusCallBack(wc) {
+                        @Override
+                        public void run(MessageReply reply) {
+                            if (!reply.isSuccess()) {
+                                errors.add(reply.getError());
+                            } else {
+                                SyncPrimaryStorageCapacityReply r = reply.castReply();
+                                if (!r.isSuccess()) {
+                                    errors.add(r.getError());
+                                }
+                            }
+                            wc.done();
                         }
-                        SyncPrimaryStorageCapacityReply reply1 = reply.castReply();
-                        if (!reply1.isSuccess()) {
-                            trigger.fail(reply1.getError());
+                    });
+                }).run(new WhileDoneCompletion(trigger) {
+                    @Override
+                    public void done(ErrorCodeList errorCodeList) {
+                        if (!errors.isEmpty()) {
+                            trigger.fail(errors.get(0));
                             return;
                         }
                         trigger.next();
@@ -426,29 +467,39 @@ public class StorageMigrationBase implements Component {
             String __name__ = "check capacity after refresh actual size";
             @Override
             public void run(FlowTrigger trigger, Map data) {
-                long size = 0;
+                Map<String, String> volToDst = VolumeMigrationAO.toVolToDstMap(msg.getVolumeMigrationAOs());
+                Map<String, Long> requiredPerPs = new HashMap<>();
                 for (VolumeVO volumeVO : volumesToMigrate) {
-                    size += volumeVO.getActualSize();
+                    String dstPs = volToDst.get(volumeVO.getUuid());
+                    requiredPerPs.merge(dstPs, volumeVO.getActualSize(), Long::sum);
                     if (volumeVO.getType() == VolumeType.Data) {
                         continue;
                     }
 
                     boolean alreadyDownloaded = Q.New(ImageCacheVO.class)
                             .eq(ImageCacheVO_.imageUuid, volumeVO.getRootImageUuid())
-                            .eq(ImageCacheVO_.primaryStorageUuid, msg.getDstPrimaryStorageUuid())
+                            .eq(ImageCacheVO_.primaryStorageUuid, dstPs)
                             .isExists();
                     if (!alreadyDownloaded && volumeVO.getRootImageUuid() != null) {
                         ImageEO eo = dbf.findByUuid(volumeVO.getRootImageUuid(), ImageEO.class);
-                        size += eo != null ? eo.getActualSize() : 0;
+                        requiredPerPs.merge(dstPs, eo != null ? eo.getActualSize() : 0L, Long::sum);
                     }
                 }
-                PrimaryStorageVO dstPrimaryStorageVO = Q.New(PrimaryStorageVO.class).eq(PrimaryStorageVO_.uuid, msg.getDstPrimaryStorageUuid()).find();
 
-                if (size > dstPrimaryStorageVO.getCapacity().getAvailablePhysicalCapacity()) {
-                    trigger.fail(operr("there are not enough capacity for vm[uuid: %s] storage migration," +
-                                    " required capacity(include image cache): %s, current available physical capacity: %s",
-                            msg.getVmInstanceUuid(), size, dstPrimaryStorageVO.getCapacity().getAvailablePhysicalCapacity()));
-                    return;
+                for (Map.Entry<String, Long> entry : requiredPerPs.entrySet()) {
+                    PrimaryStorageVO dstPrimaryStorageVO = Q.New(PrimaryStorageVO.class)
+                            .eq(PrimaryStorageVO_.uuid, entry.getKey()).find();
+                    if (dstPrimaryStorageVO == null) {
+                        trigger.fail(operr("dst primary storage[uuid:%s] not found", entry.getKey()));
+                        return;
+                    }
+                    if (entry.getValue() > dstPrimaryStorageVO.getCapacity().getAvailablePhysicalCapacity()) {
+                        trigger.fail(operr("there are not enough capacity on primary storage[uuid:%s] for vm[uuid: %s] storage migration," +
+                                        " required capacity(include image cache): %s, current available physical capacity: %s",
+                                entry.getKey(), msg.getVmInstanceUuid(), entry.getValue(),
+                                dstPrimaryStorageVO.getCapacity().getAvailablePhysicalCapacity()));
+                        return;
+                    }
                 }
                 trigger.next();
             }
@@ -513,7 +564,9 @@ public class StorageMigrationBase implements Component {
             public void run(FlowTrigger trigger, Map data) {
                 // change vm status back after storage migration
                 ChangeVmStateMsg cmsg = new ChangeVmStateMsg();
-                cmsg.setStateEvent(VmInstanceStateEvent.volumeMigrated.toString());
+                VmInstanceStateEvent stateEvent = vmInstanceState == VmInstanceState.Paused
+                        ? VmInstanceStateEvent.paused : VmInstanceStateEvent.volumeMigrated;
+                cmsg.setStateEvent(stateEvent.toString());
                 cmsg.setVmInstanceUuid(msg.getVmInstanceUuid());
                 bus.makeTargetServiceIdByResourceUuid(cmsg, VmInstanceConstant.SERVICE_ID, msg.getVmInstanceUuid());
                 // if fail, host ping task will sync it state
@@ -532,9 +585,13 @@ public class StorageMigrationBase implements Component {
                 if (!offlineStorageVmState.contains(vmInstanceVO.getState())) {
                     return true;
                 }
+                String rootDstPs = resolveRootDstPs(msg, vmInstanceVO);
+                if (rootDstPs == null) {
+                    return true;
+                }
                 boolean vmClusterAttached = Q.New(PrimaryStorageClusterRefVO.class)
                         .eq(PrimaryStorageClusterRefVO_.clusterUuid, vmInstanceVO.getClusterUuid())
-                        .eq(PrimaryStorageClusterRefVO_.primaryStorageUuid, msg.getDstPrimaryStorageUuid())
+                        .eq(PrimaryStorageClusterRefVO_.primaryStorageUuid, rootDstPs)
                         .isExists();
 
                 return vmClusterAttached;
@@ -633,57 +690,29 @@ public class StorageMigrationBase implements Component {
         PrimaryStorageOfflineMigrateVmReply reply = new PrimaryStorageOfflineMigrateVmReply();
         VmInstanceVO vmInstanceVO = Q.New(VmInstanceVO.class).eq(VmInstanceVO_.uuid, msg.getVmInstanceUuid()).find();
 
-        if (!msg.isWithDataVolumes()) {
-            if (!requireMigration(vmInstanceVO.getRootVolume(), msg.getDstPrimaryStorageUuid(), null, msg.getSystemTags())) {
-                reply.setInventory(VmInstanceInventory.valueOf(vmInstanceVO));
-                bus.reply(msg, reply);
-                return;
-            }
-            MigrateVolumeOnPrimaryStorageMsg mmsg = new MigrateVolumeOnPrimaryStorageMsg();
-            mmsg.setSrcPrimaryStorageUuid(vmInstanceVO.getRootVolume().getPrimaryStorageUuid());
-            mmsg.setDstPrimaryStorageUuid(msg.getDstPrimaryStorageUuid());
-            mmsg.setVmInstanceUuid(msg.getVmInstanceUuid());
-            mmsg.setVolumeUuid(vmInstanceVO.getRootVolume().getUuid());
-            mmsg.setType(judgeOfflineStorageMigrationType(vmInstanceVO.getRootVolume().getPrimaryStorageUuid(), msg.getDstPrimaryStorageUuid()));
-            mmsg.setMigrateWithSnapshots(msg.isWithSnapshots());
-            mmsg.setDiscardSourceVolume(true);
-            mmsg.setSystemTags(msg.getSystemTags());
+        final Map<String, String> finalVolToDst = VolumeMigrationAO.toVolToDstMap(msg.getVolumeMigrationAOs());
+        final Map<String, Boolean> finalVolToWithSnapshots = VolumeMigrationAO.toVolToWithSnapshotsMap(msg.getVolumeMigrationAOs());
 
-            bus.makeTargetServiceIdByResourceUuid(mmsg, MevocoConstants.SERVICE_ID, vmInstanceVO.getRootVolume().getUuid());
-            bus.send(mmsg, new CloudBusCallBack(msg) {
-                @Override
-                public void run(MessageReply reply1) {
-                    if (!reply1.isSuccess()) {
-                        reply.setSuccess(false);
-                        reply.setError(reply1.getError());
-                        bus.reply(msg, reply);
-                        return;
-                    }
+        final List<VolumeInventory> toMigrateVols = vmInstanceVO.getAllDiskVolumes().stream()
+                .filter(it -> finalVolToDst.containsKey(it.getUuid())
+                        && requireMigration(it, finalVolToDst.get(it.getUuid()), null, msg.getSystemTags()))
+                .map(VolumeInventory::valueOf)
+                .collect(Collectors.toList());
 
-                    MigrateVolumeOnPrimaryStorageReply mreply = reply1.castReply();
-                    if (!mreply.isSuccess()) {
-                        reply.setSuccess(false);
-                        reply.setError(mreply.getError());
-                    } else {
-                        VmInstanceVO currentVm = Q.New(VmInstanceVO.class).eq(VmInstanceVO_.uuid, msg.getVmInstanceUuid()).find();
-                        reply.setInventory(VmInstanceInventory.valueOf(currentVm));
-                    }
-                    bus.reply(msg, reply);
-                }
-            });
+        if (toMigrateVols.isEmpty()) {
+            reply.setInventory(VmInstanceInventory.valueOf(vmInstanceVO));
+            bus.reply(msg, reply);
             return;
         }
 
-        final List<VolumeInventory> toMigrateVols = vmInstanceVO.getAllDiskVolumes().stream()
-                .filter(it -> requireMigration(it, msg.getDstPrimaryStorageUuid(), null, msg.getSystemTags()))
-                .map(VolumeInventory::valueOf)
-                .collect(Collectors.toList());
+        final java.util.function.Function<String, String> resolveDst = finalVolToDst::get;
 
         final Map<String, Set<String>> volumePathsToTrash = Collections.synchronizedMap(new HashMap<>());
         final Map<String, List<VolumeSnapshotInventory>> srcSnapshots = Collections.synchronizedMap(new HashMap<>());
 
         FlowChain chain = FlowChainBuilder.newSimpleFlowChain();
-        chain.setName(String.format("offline-migrate-vm-%s-to-ps-%s", msg.getVmInstanceUuid(), msg.getDstPrimaryStorageUuid()));
+        String chainPsLabel = finalVolToDst.values().stream().distinct().sorted().collect(Collectors.joining(","));
+        chain.setName(String.format("offline-migrate-vm-%s-to-ps-%s", msg.getVmInstanceUuid(), chainPsLabel));
         chain.preCheck(data -> LongJobUtils.buildErrIfCanceled());
         chain.then(new Flow() {
             String __name__ = "migrate volumes related to vm";
@@ -701,13 +730,14 @@ public class StorageMigrationBase implements Component {
                             Q.New(VolumeSnapshotVO.class).eq(VolumeSnapshotVO_.volumeUuid, volumeVO.getUuid()).list()
                     ));
                     MigrateVolumeOnPrimaryStorageMsg mmsg = new MigrateVolumeOnPrimaryStorageMsg();
+                    String dstPs = resolveDst.apply(volumeVO.getUuid());
                     mmsg.setSrcPrimaryStorageUuid(volumeVO.getPrimaryStorageUuid());
-                    mmsg.setDstPrimaryStorageUuid(msg.getDstPrimaryStorageUuid());
+                    mmsg.setDstPrimaryStorageUuid(dstPs);
                     mmsg.setVmInstanceUuid(msg.getVmInstanceUuid());
                     mmsg.setVolumeUuid(volumeVO.getUuid());
-                    mmsg.setType(judgeOfflineStorageMigrationType(volumeVO.getPrimaryStorageUuid(), msg.getDstPrimaryStorageUuid()));
+                    mmsg.setType(judgeOfflineStorageMigrationType(volumeVO.getPrimaryStorageUuid(), dstPs));
                     mmsg.setDiscardSourceVolume(false);
-                    mmsg.setMigrateWithSnapshots(msg.isWithSnapshots());
+                    mmsg.setMigrateWithSnapshots(finalVolToWithSnapshots.getOrDefault(volumeVO.getUuid(), true));
                     mmsg.setSystemTags(msg.getSystemTags());
                     bus.makeTargetServiceIdByResourceUuid(mmsg, MevocoConstants.SERVICE_ID, volumeVO.getUuid());
 
@@ -751,16 +781,17 @@ public class StorageMigrationBase implements Component {
 
                 new While<>(succeededVolumes).all((volume, whileCompletion) -> {
                     RollbackVolumeOnPrimaryStorageMsg msg1 = new RollbackVolumeOnPrimaryStorageMsg();
+                    String dstPs = resolveDst.apply(volume.getUuid());
                     msg1.setSrcPrimaryStorageUuid(vmInstanceVO.getAllDiskVolumes().stream()
                             .filter(v -> v.getUuid().equalsIgnoreCase(volume.getUuid()))
                             .findFirst().get().getPrimaryStorageUuid());
-                    msg1.setDstPrimaryStorageUuid(msg.getDstPrimaryStorageUuid());
+                    msg1.setDstPrimaryStorageUuid(dstPs);
                     msg1.setVmInstanceUuid(msg.getVmInstanceUuid());
                     msg1.setVolumeUuid(volume.getUuid());
-                    msg1.setType(judgeOfflineStorageMigrationType(volume.getPrimaryStorageUuid(), msg.getDstPrimaryStorageUuid()));
+                    msg1.setType(judgeOfflineStorageMigrationType(volume.getPrimaryStorageUuid(), dstPs));
                     msg1.setSourceVolumeDiscarded(false);
                     msg1.setDiscardDestinationVolume(true);
-                    msg1.setMigrateWithSnapshots(msg.isWithSnapshots());
+                    msg1.setMigrateWithSnapshots(finalVolToWithSnapshots.getOrDefault(volume.getUuid(), true));
                     bus.makeTargetServiceIdByResourceUuid(msg1, MevocoConstants.SERVICE_ID, volume.getUuid());
                     bus.send(msg1, new CloudBusCallBack(trigger) {
                         @Override
@@ -786,18 +817,19 @@ public class StorageMigrationBase implements Component {
 
                 new While<>(toMigrateVols).all((vol, whileCompletion) -> {
                     DiscardVolumeDataOnPrimaryStorageMsg dmsg = new DiscardVolumeDataOnPrimaryStorageMsg();
+                    String dstPs = resolveDst.apply(vol.getUuid());
                     dmsg.setSrcVolume(vol);
                     dmsg.setSrcVolumeSnapshots(srcSnapshots.get(vol.getUuid()));
                     dmsg.setSrcVolumeInstallPaths(volumePathsToTrash.get(vol.getUuid()));
-                    dmsg.setType(judgeOfflineStorageMigrationType(vol.getPrimaryStorageUuid(), msg.getDstPrimaryStorageUuid()));
-                    dmsg.setMigrateWithSnapshots(msg.isWithSnapshots());
+                    dmsg.setType(judgeOfflineStorageMigrationType(vol.getPrimaryStorageUuid(), dstPs));
+                    dmsg.setMigrateWithSnapshots(finalVolToWithSnapshots.getOrDefault(vol.getUuid(), true));
                     bus.makeTargetServiceIdByResourceUuid(dmsg, MevocoConstants.SERVICE_ID, vol.getUuid());
                     bus.send(dmsg, new CloudBusCallBack(whileCompletion) {
                         @Override
                         public void run(MessageReply reply) {
                             if (!reply.isSuccess()) {
                                 logger.warn(String.format("discard volume[%s] on primary storage[%s] failed",
-                                        vol.getPrimaryStorageUuid(), msg.getDstPrimaryStorageUuid()));
+                                        vol.getPrimaryStorageUuid(), dstPs));
                                 whileCompletion.done();
                                 return;
                             }
@@ -805,7 +837,7 @@ public class StorageMigrationBase implements Component {
                             DiscardVolumeDataOnPrimaryStorageReply dreply = reply.castReply();
                             if (!dreply.isSuccess()) {
                                 logger.warn(String.format("discard volume[%s] on primary storage[%s] failed",
-                                        vol.getPrimaryStorageUuid(), msg.getDstPrimaryStorageUuid()));
+                                        vol.getPrimaryStorageUuid(), dstPs));
                             }
                             whileCompletion.done();
                         }
@@ -1152,6 +1184,8 @@ public class StorageMigrationBase implements Component {
         PrimaryStorageCancelMigrateVmReply reply = new PrimaryStorageCancelMigrateVmReply();
 
         VmInstanceVO vmInstanceVO = dbf.findByUuid(msg.getVmInstanceUuid(), VmInstanceVO.class);
+        msg.setVolumeMigrationAOs(VolumeMigrationAO.fromLegacyDstPs(
+                vmInstanceVO, msg.getVolumeMigrationAOs(), msg.getDstPrimaryStorageUuid(), msg.isWithDataVolumes(), msg.isWithSnapshots()));
         List<VolumeVO> volumesToMigrate = getVolumesToMigrate(vmInstanceVO, msg);
         if (volumesToMigrate.isEmpty()) {
             reply.setError(LongJobUtils.noncancelableErr(String.format("vm[uuid:%s] has been migrated, do not cancel it.",
@@ -1165,6 +1199,7 @@ public class StorageMigrationBase implements Component {
             cmsg.setCancellationApiId(msg.getCancellationApiId());
             cmsg.setVmInstanceUuid(msg.getVmInstanceUuid());
             cmsg.setSystemTags(msg.getSystemTags());
+            cmsg.setVolumeMigrationAOs(msg.getVolumeMigrationAOs());
             bus.makeLocalServiceId(cmsg, MevocoConstants.SERVICE_ID);
             bus.send(cmsg, new CloudBusCallBack(msg) {
                 @Override
@@ -1176,16 +1211,19 @@ public class StorageMigrationBase implements Component {
                 }
             });
         } else if (offlineMigratingVmStates.contains(vmInstanceVO.getState())) {
+            Map<String, String> volToDst = VolumeMigrationAO.toVolToDstMap(msg.getVolumeMigrationAOs());
+            Map<String, Boolean> volToWithSnapshots = VolumeMigrationAO.toVolToWithSnapshotsMap(msg.getVolumeMigrationAOs());
             new While<>(volumesToMigrate).all((vol, compl) -> {
+                String dstPs = volToDst.get(vol.getUuid());
                 PrimaryStorageCancelMigrateVolumeMsg cmsg = new PrimaryStorageCancelMigrateVolumeMsg();
                 cmsg.setCancellationApiId(msg.getCancellationApiId());
                 cmsg.setSrcPrimaryStorageUuid(vol.getPrimaryStorageUuid());
-                cmsg.setDstPrimaryStorageUuid(msg.getDstPrimaryStorageUuid());
+                cmsg.setDstPrimaryStorageUuid(dstPs);
                 cmsg.setVmInstanceUuid(msg.getVmInstanceUuid());
                 cmsg.setVolumeUuid(vol.getUuid());
                 cmsg.setSystemTags(msg.getSystemTags());
-                cmsg.setType(judgeOfflineStorageMigrationType(vol.getPrimaryStorageUuid(), msg.getDstPrimaryStorageUuid()));
-                cmsg.setMigrateWithSnapshots(msg.isWithSnapshots());
+                cmsg.setType(judgeOfflineStorageMigrationType(vol.getPrimaryStorageUuid(), dstPs));
+                cmsg.setMigrateWithSnapshots(volToWithSnapshots.getOrDefault(vol.getUuid(), true));
                 bus.makeLocalServiceId(cmsg, MevocoConstants.SERVICE_ID);
                 bus.send(cmsg, new CloudBusCallBack(compl) {
                     @Override
@@ -1453,18 +1491,137 @@ public class StorageMigrationBase implements Component {
 
     private void handle(APIGetPrimaryStorageCandidatesForVolumeMigrationMsg msg) {
         APIGetPrimaryStorageCandidatesForVolumeMigrationReply reply = new APIGetPrimaryStorageCandidatesForVolumeMigrationReply();
-        String srcPsUuid = Q.New(VolumeVO.class).eq(VolumeVO_.uuid, msg.getVolumeUuid()).select(VolumeVO_.primaryStorageUuid).findValue();
-        String psType = Q.New(PrimaryStorageVO.class).eq(PrimaryStorageVO_.uuid, srcPsUuid).select(PrimaryStorageVO_.type).findValue();
-        List<PrimaryStorageInventory> candidates = getPrimaryStorageCandidatesForVolumeMigration(false, msg.getVolumeUuid(), true);
+        VolumeVO srcVolume = dbf.findByUuid(msg.getVolumeUuid(), VolumeVO.class);
+        String srcPsUuid = srcVolume.getPrimaryStorageUuid();
+        String srcPsType = Q.New(PrimaryStorageVO.class).eq(PrimaryStorageVO_.uuid, srcPsUuid).select(PrimaryStorageVO_.type).findValue();
+        final VolumeType volumeType = srcVolume.getType();
+        VmInstanceVO attachedVm = volumeType == VolumeType.Data && srcVolume.getVmInstanceUuid() != null
+                ? dbf.findByUuid(srcVolume.getVmInstanceUuid(), VmInstanceVO.class) : null;
+        boolean live = attachedVm != null && liveStorageVmState.contains(attachedVm.getState());
 
-        boolean removeItSelf = true;
-        removeItSelf &= !pluginRgty.getExtensionList(VmStorageMigrationMetric.class).stream().anyMatch(ext ->
-                ext.isCapable(psType, psType) && ext.isSupportSameStorage());
-        if (removeItSelf) {
-            candidates.removeIf(it -> it.getUuid().equals(srcPsUuid));
+        CandidateRejectionRecorder rejectionRecorder = new CandidateRejectionRecorder();
+        boolean collectPrefilterRejections = logger.isTraceEnabled();
+        List<VmStorageMigrationMetric> metrics = pluginRgty.getExtensionList(VmStorageMigrationMetric.class);
+        List<PrimaryStorageInventory> candidates = getPrimaryStorageCandidatesForVolumeMigration(
+                false, msg.getVolumeUuid(), true,
+                collectPrefilterRejections ? rejectionRecorder : null,
+                attachedVm == null ? Collections.emptyList() : metrics);
+
+        for (PrimaryStorageInventory candidate : new ArrayList<>(candidates)) {
+            String unsupportedReason = getVolumeMigrationCandidateUnsupportedReason(
+                    metrics, srcVolume, candidate, srcPsUuid, srcPsType, volumeType, attachedVm, live);
+            if (unsupportedReason != null) {
+                candidates.remove(candidate);
+                rejectCandidate(rejectionRecorder, candidate, "CAPABILITY", unsupportedReason);
+            }
         }
+
+        if (attachedVm != null) {
+            filterCandidatesByVmStorageLayout(attachedVm, srcVolume, candidates, rejectionRecorder);
+        }
+        logger.debug(String.format(
+                "evaluated primary storage migration candidates for volume[uuid:%s, sourcePrimaryStorageUuid:%s, vmUuid:%s, vmState:%s, prefilterRejectionsCollected:%s], acceptedPrimaryStorageUuids%s, rejectedPrimaryStorages%s",
+                srcVolume.getUuid(), srcPsUuid,
+                attachedVm == null ? null : attachedVm.getUuid(),
+                attachedVm == null ? null : attachedVm.getState(),
+                collectPrefilterRejections,
+                candidates.stream().map(PrimaryStorageInventory::getUuid).collect(Collectors.toList()),
+                rejectionRecorder.getRejections()));
         reply.setInventories(candidates);
         bus.reply(msg, reply);
+    }
+
+    private String getVolumeMigrationCandidateUnsupportedReason(
+            List<VmStorageMigrationMetric> metrics, VolumeVO volume, PrimaryStorageInventory candidate,
+            String srcPsUuid, String srcPsType, VolumeType volumeType, VmInstanceVO attachedVm, boolean live) {
+        List<VmStorageMigrationMetric> supportedMetrics = metrics.stream()
+                .filter(metric -> metric.isCapable(srcPsType, candidate.getType()))
+                .collect(Collectors.toList());
+        if (supportedMetrics.isEmpty()) {
+            return String.format("no storage migration metric supports primary storage type migration[%s -> %s]",
+                    srcPsType, candidate.getType());
+        }
+
+        if (volumeType == VolumeType.Data) {
+            supportedMetrics = supportedMetrics.stream()
+                    .filter(VmStorageMigrationMetric::isSupportWithDataVolume)
+                    .collect(Collectors.toList());
+            if (supportedMetrics.isEmpty()) {
+                return String.format("primary storage type migration[%s -> %s] does not support data volume migration",
+                        srcPsType, candidate.getType());
+            }
+        }
+
+        if (srcPsUuid.equals(candidate.getUuid())) {
+            return supportedMetrics.stream().anyMatch(VmStorageMigrationMetric::isSupportSameStorage)
+                    ? null : "same-primary-storage migration is not supported";
+        }
+
+        if (attachedVm == null) {
+            return null;
+        }
+
+        supportedMetrics = supportedMetrics.stream()
+                .filter(metric -> metric.isDestinationPrimaryStorageSupported(volume, candidate.getUuid()))
+                .collect(Collectors.toList());
+        if (supportedMetrics.isEmpty()) {
+            return String.format("destination primary storage[uuid:%s] does not support volume[uuid:%s]",
+                    candidate.getUuid(), volume.getUuid());
+        }
+
+        boolean supported = live
+                ? supportedMetrics.stream().anyMatch(VmStorageMigrationMetric::isSupportLive)
+                : supportedMetrics.stream().anyMatch(VmStorageMigrationMetric::isSupportOffline);
+        if (supported) {
+            return null;
+        }
+        return live
+                ? "live migration is not supported"
+                : "offline migration is not supported";
+    }
+
+    private void filterCandidatesByVmStorageLayout(
+            VmInstanceVO vmInstanceVO, VolumeVO volumeVO, List<PrimaryStorageInventory> candidates,
+            CandidateRejectionRecorder rejectionRecorder) {
+        Set<String> primaryStorageUuids = candidates.stream()
+                .map(PrimaryStorageInventory::getUuid)
+                .collect(Collectors.toSet());
+        primaryStorageUuids.addAll(vmInstanceVO.getAllDiskVolumes().stream()
+                .map(VolumeVO::getPrimaryStorageUuid)
+                .collect(Collectors.toSet()));
+        List<PrimaryStorageVO> primaryStorages = Q.New(PrimaryStorageVO.class)
+                .in(PrimaryStorageVO_.uuid, primaryStorageUuids)
+                .list();
+        StorageMigrationLayoutChecker.CandidateContext context =
+                StorageMigrationLayoutChecker.createCandidateContext(vmInstanceVO, primaryStorages);
+        for (PrimaryStorageInventory candidate : new ArrayList<>(candidates)) {
+            String invalidReason = context.validate(volumeVO.getUuid(), candidate.getUuid());
+            if (invalidReason != null) {
+                candidates.remove(candidate);
+                rejectCandidate(rejectionRecorder, candidate, "VM_LAYOUT", invalidReason);
+            }
+        }
+    }
+
+    private static final class CandidateRejectionRecorder {
+        private final Map<String, String> rejections = new LinkedHashMap<>();
+
+        void reject(PrimaryStorageVO primaryStorage, String stage, String reason) {
+            reject(primaryStorage.getUuid(), primaryStorage.getType(), stage, reason);
+        }
+
+        void reject(PrimaryStorageInventory primaryStorage, String stage, String reason) {
+            reject(primaryStorage.getUuid(), primaryStorage.getType(), stage, reason);
+        }
+
+        private void reject(String primaryStorageUuid, String primaryStorageType, String stage, String reason) {
+            rejections.putIfAbsent(primaryStorageUuid, String.format(
+                    "type:%s, stage:%s, reason:%s", primaryStorageType, stage, reason));
+        }
+
+        Map<String, String> getRejections() {
+            return rejections;
+        }
     }
 
     private void handle(APIGetHostCandidatesForVmMigrationMsg msg) {
@@ -1622,22 +1779,48 @@ public class StorageMigrationBase implements Component {
     }
 
     private List<PrimaryStorageInventory> getPrimaryStorageCandidatesForVolumeMigration(boolean live, String srcVolumeUuid, boolean migrateStorageOnly) {
+        return getPrimaryStorageCandidatesForVolumeMigration(
+                live, srcVolumeUuid, migrateStorageOnly, null, Collections.emptyList());
+    }
+
+    private List<PrimaryStorageInventory> getPrimaryStorageCandidatesForVolumeMigration(
+            boolean live, String srcVolumeUuid, boolean migrateStorageOnly,
+            CandidateRejectionRecorder rejectionRecorder,
+            List<VmStorageMigrationMetric> vmStorageMigrationMetrics) {
         VolumeVO srcVolume = dbf.findByUuid(srcVolumeUuid, VolumeVO.class);
 
         String srcPsUuid = srcVolume.getPrimaryStorageUuid();
         PrimaryStorageVO srcPs = dbf.findByUuid(srcPsUuid, PrimaryStorageVO.class);
 
-        List<PrimaryStorageVO> candidates = Q.New(PrimaryStorageVO.class)
-                .notEq(PrimaryStorageVO_.state, PrimaryStorageState.Disabled)
-                .notEq(PrimaryStorageVO_.state, PrimaryStorageState.Maintenance)
-                .notEq(PrimaryStorageVO_.status, PrimaryStorageStatus.Disconnected)
-                .list();
+        List<PrimaryStorageVO> candidates;
+        if (rejectionRecorder == null) {
+            candidates = Q.New(PrimaryStorageVO.class)
+                    .notEq(PrimaryStorageVO_.state, PrimaryStorageState.Disabled)
+                    .notEq(PrimaryStorageVO_.state, PrimaryStorageState.Maintenance)
+                    .notEq(PrimaryStorageVO_.status, PrimaryStorageStatus.Disconnected)
+                    .list();
+        } else {
+            candidates = Q.New(PrimaryStorageVO.class).list();
+            for (PrimaryStorageVO candidate : new ArrayList<>(candidates)) {
+                String unavailableReason = getPrimaryStorageUnavailableReason(candidate);
+                if (unavailableReason != null) {
+                    candidates.remove(candidate);
+                    rejectionRecorder.reject(candidate, "STATUS", unavailableReason);
+                }
+            }
+        }
 
         if (live && migrateStorageOnly) {
             List<String> psUuids = SQL.New("select ref.primaryStorageUuid from PrimaryStorageClusterRefVO ref where ref.clusterUuid = (" +
                     "select h.clusterUuid from HostVO h where h.uuid = " +
                     "(select hostUuid from VmInstanceVO where uuid = :vmuuid))").param("vmuuid", srcVolume.getVmInstanceUuid()).list();
-            candidates = candidates.parallelStream().filter(it -> psUuids.contains(it.getUuid())).collect(Collectors.toList());
+            for (PrimaryStorageVO candidate : new ArrayList<>(candidates)) {
+                if (!psUuids.contains(candidate.getUuid())) {
+                    candidates.remove(candidate);
+                    rejectCandidate(rejectionRecorder, candidate, "TOPOLOGY",
+                            "primary storage is not attached to the VM current cluster for storage-only live migration");
+                }
+            }
             return PrimaryStorageInventory.valueOf(candidates);
         }
 
@@ -1647,7 +1830,14 @@ public class StorageMigrationBase implements Component {
             if (architecture != null) {
                 List<String> cs = Q.New(ClusterVO.class).select(ClusterVO_.uuid).eq(ClusterVO_.architecture, architecture).listValues();
                 List<String> withArchPsUuids = Q.New(PrimaryStorageClusterRefVO.class).select(PrimaryStorageClusterRefVO_.primaryStorageUuid).in(PrimaryStorageClusterRefVO_.clusterUuid, cs).listValues();
-                candidates = candidates.parallelStream().filter(it -> withArchPsUuids.contains(it.getUuid())).collect(Collectors.toList());
+                for (PrimaryStorageVO candidate : new ArrayList<>(candidates)) {
+                    if (!withArchPsUuids.contains(candidate.getUuid())) {
+                        candidates.remove(candidate);
+                        rejectCandidate(rejectionRecorder, candidate, "TOPOLOGY",
+                                String.format("primary storage is not attached to a cluster with architecture[%s]",
+                                        architecture));
+                    }
+                }
             }
         }
 
@@ -1663,8 +1853,14 @@ public class StorageMigrationBase implements Component {
                 String srcPsType = srcPs.getType();
                 String dstPsType = candidate.getType();
                 List<String> types = primaryStoragePrimaryStorageMetrics.get(srcPsType);
-                if (types == null || !types.contains(dstPsType)) {
+                boolean supportedByPrimaryStorageMetric = types != null && types.contains(dstPsType);
+                boolean supportedByVmStorageMigrationMetric = vmStorageMigrationMetrics.stream()
+                        .anyMatch(metric -> metric.isCapable(srcPsType, dstPsType));
+                if (!supportedByPrimaryStorageMetric && !supportedByVmStorageMigrationMetric) {
                     candidates.remove(candidate);
+                    rejectCandidate(rejectionRecorder, candidate, "CAPABILITY",
+                            String.format("primary storage type migration[%s -> %s] is not supported",
+                                    srcPsType, dstPsType));
                     continue;
                 }
 
@@ -1672,6 +1868,9 @@ public class StorageMigrationBase implements Component {
                 List<String> psTypes = primaryStorageNotSupportCrossClusterMigrationMetrics.get(srcPsType);
                 if (psTypes != null && psTypes.contains(dstPsType) && !psUuids.contains(candidate.getUuid())) {
                     candidates.remove(candidate);
+                    rejectCandidate(rejectionRecorder, candidate, "TOPOLOGY",
+                            String.format("primary storage type migration[%s -> %s] does not support cross-cluster migration",
+                                    srcPsType, dstPsType));
                 }
             }
         }
@@ -1714,9 +1913,38 @@ public class StorageMigrationBase implements Component {
         for (PrimaryStorageVO candidate : new ArrayList<>(candidates)) {
             if (!psUuids.contains(candidate.getUuid())) {
                 candidates.remove(candidate);
+                rejectCandidate(rejectionRecorder, candidate, "TOPOLOGY",
+                        "primary storage has no attached cluster providing every L2 network used by the VM");
             }
         }
 
         return PrimaryStorageInventory.valueOf(candidates);
+    }
+
+    private String getPrimaryStorageUnavailableReason(PrimaryStorageVO primaryStorage) {
+        if (primaryStorage.getState() == PrimaryStorageState.Disabled) {
+            return "primary storage state is Disabled";
+        }
+        if (primaryStorage.getState() == PrimaryStorageState.Maintenance) {
+            return "primary storage state is Maintenance";
+        }
+        if (primaryStorage.getStatus() == PrimaryStorageStatus.Disconnected) {
+            return "primary storage status is Disconnected";
+        }
+        return null;
+    }
+
+    private void rejectCandidate(CandidateRejectionRecorder rejectionRecorder,
+                                 PrimaryStorageVO candidate, String stage, String reason) {
+        if (rejectionRecorder != null) {
+            rejectionRecorder.reject(candidate, stage, reason);
+        }
+    }
+
+    private void rejectCandidate(CandidateRejectionRecorder rejectionRecorder,
+                                 PrimaryStorageInventory candidate, String stage, String reason) {
+        if (rejectionRecorder != null) {
+            rejectionRecorder.reject(candidate, stage, reason);
+        }
     }
 }

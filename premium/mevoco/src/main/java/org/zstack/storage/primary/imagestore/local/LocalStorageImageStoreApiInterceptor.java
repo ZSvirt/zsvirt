@@ -12,13 +12,17 @@ import org.zstack.header.vm.*;
 import org.zstack.header.volume.VolumeAO;
 import org.zstack.header.volume.VolumeVO;
 import org.zstack.storage.migration.primary.APIPrimaryStorageMigrateVmMsg;
+import org.zstack.storage.migration.primary.VolumeMigrationAO;
 import org.zstack.storage.primary.local.LocalStorageConstants;
 import org.zstack.storage.primary.local.LocalStorageSystemTags;
 import org.zstack.storage.volume.VolumeSystemTags;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.zstack.core.Platform.argerr;
@@ -108,12 +112,33 @@ public class LocalStorageImageStoreApiInterceptor implements GlobalApiMessageInt
     }
 
     void validate(APIPrimaryStorageMigrateVmMsg msg) {
-        String dstPsType = Q.New(PrimaryStorageVO.class).eq(PrimaryStorageVO_.uuid, msg.getDstPrimaryStorageUuid()).select(PrimaryStorageVO_.type).findValue();
-        if (LocalStorageConstants.LOCAL_STORAGE_TYPE.equals(dstPsType) && msg.getDstHostUuid() != null) {
-            if (msg.getSystemTags() == null) {
-                msg.setSystemTags(new ArrayList<>());
-            }
-            msg.getSystemTags().add(String.format("localStorage::hostUuid::%s", msg.getDstHostUuid()));
+        if (msg.getDstHostUuid() == null) {
+            return;
+        }
+
+        Set<String> dstPrimaryStorageUuids = msg.getVolumeMigrationAOs() == null
+                || msg.getVolumeMigrationAOs().isEmpty()
+                ? new LinkedHashSet<>(Collections.singletonList(msg.getDstPrimaryStorageUuid()))
+                : msg.getVolumeMigrationAOs().stream()
+                .map(VolumeMigrationAO::getDstPrimaryStorageUuid)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+        dstPrimaryStorageUuids.remove(null);
+        if (dstPrimaryStorageUuids.isEmpty()) {
+            return;
+        }
+
+        boolean hasLocalDestination = Q.New(PrimaryStorageVO.class)
+                .in(PrimaryStorageVO_.uuid, dstPrimaryStorageUuids)
+                .eq(PrimaryStorageVO_.type, LocalStorageConstants.LOCAL_STORAGE_TYPE)
+                .isExists();
+        if (hasLocalDestination) {
+            List<String> systemTags = msg.getSystemTags() == null
+                    ? new ArrayList<>() : new ArrayList<>(msg.getSystemTags());
+            systemTags.removeIf(LocalStorageSystemTags.DEST_HOST_FOR_CREATING_DATA_VOLUME::isMatch);
+            systemTags.add(LocalStorageSystemTags.DEST_HOST_FOR_CREATING_DATA_VOLUME.instantiateTag(
+                    Collections.singletonMap(LocalStorageSystemTags.DEST_HOST_FOR_CREATING_DATA_VOLUME_TOKEN,
+                            msg.getDstHostUuid())));
+            msg.setSystemTags(systemTags);
         }
     }
 

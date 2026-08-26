@@ -121,6 +121,11 @@ public class VmGuestToolsExtension implements MemorySnapshotResourceExtensionPoi
     @Override
     public boolean skipUpdate(String vmInstanceUuid) {
         GuestToolsStateVO guestToolsStateVO = Q.New(GuestToolsStateVO.class).eq(GuestToolsStateVO_.vmInstanceUuid, vmInstanceUuid).find();
+        if (guestToolsStateVO == null) {
+            logger.debug(String.format("GuestToolsStateVO missing for vm[uuid:%s], continue guest tools state update", vmInstanceUuid));
+            return false;
+        }
+
         Timestamp createDate = guestToolsStateVO.getCreateDate();
         Timestamp lastOpDate = guestToolsStateVO.getLastOpDate();
         GuestToolsQgaState qgaState = guestToolsStateVO.getQgaState();

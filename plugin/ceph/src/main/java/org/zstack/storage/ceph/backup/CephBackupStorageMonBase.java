@@ -8,8 +8,7 @@ import org.zstack.core.asyncbatch.While;
 import org.zstack.core.cloudbus.CloudBusGlobalProperty;
 import org.zstack.core.componentloader.PluginRegistry;
 import org.zstack.core.db.DatabaseFacade;
-import org.zstack.core.db.SimpleQuery;
-import org.zstack.core.db.SimpleQuery.Op;
+import org.zstack.core.db.Q;
 import org.zstack.core.errorcode.ErrorFacade;
 import org.zstack.core.thread.ChainTask;
 import org.zstack.core.thread.SyncTaskChain;
@@ -456,10 +455,10 @@ public class CephBackupStorageMonBase extends CephMonBase {
     }
 
     public void doPing(final ReturnValueCompletion<PingResult> completion) {
-        SimpleQuery<CephBackupStorageVO> q = dbf.createQuery(CephBackupStorageVO.class);
-        q.select(CephBackupStorageVO_.poolName);
-        q.add(CephBackupStorageVO_.uuid, Op.EQ, getSelf().getBackupStorageUuid());
-        String poolName = q.findValue();
+        String poolName = Q.New(CephBackupStorageVO.class)
+                .select(CephBackupStorageVO_.poolName)
+                .eq(CephBackupStorageVO_.uuid, getSelf().getBackupStorageUuid())
+                .findValue();
         if (poolName == null) {
             completion.fail(operr("Ceph bs[uuid=%s] pool name not found", getSelf().getBackupStorageUuid()));
             return;

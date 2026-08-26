@@ -22,6 +22,7 @@ import org.zstack.header.vm.*;
 import org.zstack.header.vm.VmInstanceSpec.ImageSpec;
 import org.zstack.header.volume.*;
 import org.zstack.identity.AccountManager;
+import org.zstack.storage.encrypt.EncryptedVolumePrimaryStorageAllocatorExtension;
 import org.zstack.utils.Utils;
 import org.zstack.utils.gson.JSONObjectUtil;
 import org.zstack.utils.logging.CLogger;
@@ -30,6 +31,8 @@ import javax.persistence.Tuple;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
+
+import static org.zstack.core.Platform.operr;
 
 public class InstantiateVolumeForNewCreatedVmExtension implements PreVmInstantiateResourceExtensionPoint {
     private static final CLogger logger = Utils.getLogger(InstantiateVolumeForNewCreatedVmExtension.class);
@@ -42,6 +45,8 @@ public class InstantiateVolumeForNewCreatedVmExtension implements PreVmInstantia
     private PluginRegistry pluginRgty;
     @Autowired
     protected AccountManager acntMgr;
+    @Autowired
+    private EncryptedVolumePrimaryStorageAllocatorExtension encryptedVolumePrimaryStorageAllocatorExtension;
 
     @Override
     public void preBeforeInstantiateVmResource(VmInstanceSpec spec) throws VmInstantiateResourceException {
@@ -215,6 +220,9 @@ public class InstantiateVolumeForNewCreatedVmExtension implements PreVmInstantia
         } else if (image.getInventory() != null && ImageMediaType.RootVolumeTemplate.toString().equals(image.getInventory().getMediaType())) {
             InstantiateVolumeMsg rmsg = fillMsg(new InstantiateRootVolumeMsg(), spec.getDestRootVolume(), spec);
             ((InstantiateRootVolumeMsg) rmsg).setTemplateSpec(image);
+            ((InstantiateRootVolumeMsg) rmsg).setEncryptedVolumeBackupRestore(
+                    spec.getRootDisk().isVolumeBackupTemplate()
+                            && Boolean.TRUE.equals(spec.getRootDisk().getEncrypted()));
             rmsg.setSystemTags(new ArrayList<>(systemTags));
             msgs.add(rmsg);
         } else {
@@ -239,14 +247,22 @@ public class InstantiateVolumeForNewCreatedVmExtension implements PreVmInstantia
                 for (String imageUuid : spec.getDataVolumeTemplateUuids()) {
                     List<String> perImageTags = spec.getDataVolumeFromTemplateSystemTags() == null
                             ? null : spec.getDataVolumeFromTemplateSystemTags().get(imageUuid);
-                    msgs.add(buildCreateDataVolumeFromTemplateMsg(spec, imageUuid, defaultPsUuid, perImageTags, accountUuid));
+                    msgs.add(buildCreateDataVolumeFromTemplateMsg(spec, imageUuid, defaultPsUuid, perImageTags,
+                            accountUuid, null, false));
                 }
             }
 
             for (DiskAO diskAO : templateDataDisks) {
                 String psUuid = diskAO.getPrimaryStorageUuid() != null ? diskAO.getPrimaryStorageUuid() : defaultPsUuid;
+                if (diskAO.getPrimaryStorageUuid() == null && Boolean.TRUE.equals(diskAO.getEncrypted())
+                        && encryptedVolumePrimaryStorageAllocatorExtension
+                        .isEncryptedVolumeUnsupportedPrimaryStorage(psUuid)) {
+                    completion.fail(operr("no primary storage candidate is available"));
+                    return;
+                }
                 msgs.add(buildCreateDataVolumeFromTemplateMsg(spec, diskAO.getTemplateUuid(), psUuid,
-                        diskAO.getSystemTags(), accountUuid));
+                        diskAO.getSystemTags(), accountUuid, diskAO.getEncrypted(),
+                        diskAO.isVolumeBackupTemplate() && Boolean.TRUE.equals(diskAO.getEncrypted())));
             }
         }
 
@@ -254,7 +270,8 @@ public class InstantiateVolumeForNewCreatedVmExtension implements PreVmInstantia
     }
 
     private CreateDataVolumeFromVolumeTemplateMsg buildCreateDataVolumeFromTemplateMsg(
-            VmInstanceSpec spec, String imageUuid, String psUuid, List<String> systemTags, String accountUuid) {
+            VmInstanceSpec spec, String imageUuid, String psUuid, List<String> systemTags, String accountUuid,
+            Boolean encrypted, boolean encryptedVolumeBackupRestore) {
         CreateDataVolumeFromVolumeTemplateMsg cmsg = new CreateDataVolumeFromVolumeTemplateMsg();
         cmsg.setHostUuid(spec.getDestHost().getUuid());
         cmsg.setImageUuid(imageUuid);
@@ -266,6 +283,8 @@ public class InstantiateVolumeForNewCreatedVmExtension implements PreVmInstantia
         cmsg.setDescription(t.get(1, String.class));
         cmsg.setAccountUuid(accountUuid);
         cmsg.setSystemTags(systemTags);
+        cmsg.setEncrypted(encrypted);
+        cmsg.setEncryptedVolumeBackupRestore(encryptedVolumeBackupRestore);
         bus.makeLocalServiceId(cmsg, VolumeConstant.SERVICE_ID);
         return cmsg;
     }

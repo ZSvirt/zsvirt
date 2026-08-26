@@ -11,9 +11,10 @@
     <artifactId>headers</artifactId>
     <packaging>pom</packaging>
     <name>headers</name>
-    <description>Aggregator for lightweight header-like modules (package description, etc.)</description>
+    <description>Aggregator for lightweight header-like modules (package description, message protocol, etc.)</description>
 
     <modules>
         <module>description</module>
+        <module>messages</module>
     </modules>
 </project>

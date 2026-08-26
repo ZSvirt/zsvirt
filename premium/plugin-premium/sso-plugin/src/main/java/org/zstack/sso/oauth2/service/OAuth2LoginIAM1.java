@@ -15,6 +15,7 @@ import org.zstack.identity.Session;
 import org.zstack.identity.imports.entity.AccountThirdPartyAccountSourceRefVO;
 import org.zstack.identity.imports.entity.AccountThirdPartyAccountSourceRefVO_;
 import org.zstack.identity.imports.entity.SyncCreatedAccountStrategy;
+import org.zstack.identity.imports.entity.SyncUpdateAccountStrategy;
 import org.zstack.identity.imports.header.ImportAccountItem;
 import org.zstack.identity.imports.header.ImportAccountSpec;
 import org.zstack.sso.oauth2.header.OAuth2UserToken;
@@ -89,7 +90,6 @@ public class OAuth2LoginIAM1 implements OAuth2Login {
 
         List<String> accountList = Q.New(AccountVO.class)
                 .in(AccountVO_.uuid, accountUuidList)
-                .eq(AccountVO_.type, AccountType.ThirdParty)
                 .eq(AccountVO_.name, token.username)
                 .select(AccountVO_.uuid)
                 .listValues();
@@ -144,10 +144,12 @@ public class OAuth2LoginIAM1 implements OAuth2Login {
         spec.setSourceUuid(token.clientUuid);
         spec.setSourceType(OAUTH2_CLIENT_TYPE);
         spec.setSyncCreateStrategy(SyncCreatedAccountStrategy.CreateAccount);
+        spec.getSyncUpdateStrategies().add(SyncUpdateAccountStrategy.BindingNormalAccount);
+        spec.getSyncUpdateStrategies().add(SyncUpdateAccountStrategy.BindingSystemAdmin);
 
         ImportAccountItem item = new ImportAccountItem();
         item.setAccountUuid(Platform.getUuid());
-        item.setAccountType(AccountType.ThirdParty);
+        item.setAccountType(AccountType.Normal);
         item.setCredentials(token.sub);
         item.setUsername(token.username);
         spec.setAccountList(list(item));

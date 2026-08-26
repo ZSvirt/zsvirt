@@ -160,7 +160,7 @@
   {
     "raw": "ecs image existed remote and local, ecs image uuid: %s, name: %s, created time: %s",
     "en_US": "ecs image existed remote and local, ecs image uuid: {0}, name: {1}, created time: {2}",
-    "zh_CN": "云主机镜像存在于阿里云服务器和本地，云主机镜像的uuid: {0}，名称: {1}，创建时间: {2}",
+    "zh_CN": "虚拟机镜像存在于阿里云服务器和本地，虚拟机镜像的uuid: {0}，名称: {1}，创建时间: {2}",
     "arguments": [
       "eivo.getUuid()",
       "eivo.getName()",
@@ -171,7 +171,7 @@
   {
     "raw": "ecs image existed remote, name: %s, created time: %s",
     "en_US": "ecs image existed remote, name: {0}, created time: {1}",
-    "zh_CN": "云主机镜像已经存在于阿里云服务器上，名称: {0}，创建时间: {1}",
+    "zh_CN": "虚拟机镜像已经存在于阿里云服务器上，名称: {0}，创建时间: {1}",
     "arguments": [
       "msg.getName()",
       "new SimpleDateFormat(\"yyyy/MM/dd HH:mm:ss\").format(HybridUtilsForAliyun.fmtTime(rpl.getCreateDate()))"
@@ -212,7 +212,7 @@
   {
     "raw": "no system disk found for ecs: [%s], ecs id is: [%s]",
     "en_US": "no system disk found for ecs: [{0}], ecs id is: [{1}]",
-    "zh_CN": "没有系统云盘可用来创建云主机，云主机id是: [{1}]",
+    "zh_CN": "没有系统云盘可用来创建虚拟机，虚拟机id是: [{1}]",
     "arguments": [
       "ecs.getUuid()",
       "ecs.getEcsInstanceId()"
@@ -222,7 +222,7 @@
   {
     "raw": "Only delete ecs which status is running or stopped, now is %s",
     "en_US": "Only delete ecs which status is running or stopped, now is {0}",
-    "zh_CN": "只能删除状态为运行中或者已停止的云主机，现在云主机状态为{0}",
+    "zh_CN": "只能删除状态为运行中或者已停止的虚拟机，现在虚拟机状态为{0}",
     "arguments": [
       "evo.getEcsStatus().toString()"
     ],
@@ -231,7 +231,7 @@
   {
     "raw": "Only postpaid ecs support delete remote, the indicate ecs charge type is: %s",
     "en_US": "Only postpaid ecs support delete remote, the indicate ecs charge type is: {0}",
-    "zh_CN": "只有已付费的云主机支持删除，目前云主机付费状态是: {0}",
+    "zh_CN": "只有已付费的虚拟机支持删除，目前虚拟机付费状态是: {0}",
     "arguments": [
       "evo.getChargeType().toString()"
     ],
@@ -266,7 +266,7 @@
   {
     "raw": "private ip is existed in vswitch: %s, allocated to ecs: %s",
     "en_US": "private ip is existed in vswitch: {0}, allocated to ecs: {1}",
-    "zh_CN": "私有IP已经存在虚拟交换机中: {0}，已分配给云主机: {1}",
+    "zh_CN": "私有IP已经存在虚拟交换机中: {0}，已分配给虚拟机: {1}",
     "arguments": [
       "vSwitchUuid",
       "ecs.getUuid()"
@@ -362,7 +362,7 @@
   {
     "raw": "can not delete ecs system image remote",
     "en_US": "can not delete ecs system image remote",
-    "zh_CN": "不能删除阿里云服务器上的云主机系统镜像",
+    "zh_CN": "不能删除阿里云服务器上的虚拟机系统镜像",
     "arguments": [],
     "fileName": "src/main/java/org/zstack/aliyun/image/EcsImageApiInterceptor.java"
   },
@@ -430,7 +430,7 @@
   {
     "raw": "ecs instance[%s] isn\u0027t existed, please check it.",
     "en_US": "ecs instance[{0}] isn\u0027t existed, please check it.",
-    "zh_CN": "云主机[{0}]不存在，请进行核查",
+    "zh_CN": "虚拟机[{0}]不存在，请进行核查",
     "arguments": [
       "eipVo.getAllocateResourceUuid()"
     ],
@@ -467,7 +467,7 @@
   {
     "raw": "destination cidr [%s] is existed and point to another instance-id [%s], please check or delete it first",
     "en_US": "destination cidr [{0}] is existed and point to another instance-id [{1}], please check or delete it first",
-    "zh_CN": "目标CIDR[{0}]已经存在且指向其他云主机[{1}]，请检查或删除它",
+    "zh_CN": "目标CIDR[{0}]已经存在且指向其他虚拟机[{1}]，请检查或删除它",
     "arguments": [
       "tupleCidr",
       "msg.getNextHopUuid()"
@@ -604,7 +604,7 @@
   {
     "raw": "no such vm found for: %s",
     "en_US": "no such vm found for: {0}",
-    "zh_CN": "没有找到该云主机: {0}",
+    "zh_CN": "没有找到该虚拟机: {0}",
     "arguments": [
       "msg.getUuid()"
     ],
@@ -734,7 +734,7 @@
   {
     "raw": "The disk [%s] is not attach on any instance ",
     "en_US": "The disk [{0}] is not attach on any instance ",
-    "zh_CN": "该云盘[{0}]没有加载到任何云主机",
+    "zh_CN": "该云盘[{0}]没有加载到任何虚拟机",
     "arguments": [
       "msg.getUuid()"
     ],
@@ -743,21 +743,21 @@
   {
     "raw": "Only data disk can be mounted on ecs",
     "en_US": "Only data disk can be mounted on ecs",
-    "zh_CN": "只有云盘可以挂装到云主机上",
+    "zh_CN": "只有云盘可以挂装到虚拟机上",
     "arguments": [],
     "fileName": "src/main/java/org/zstack/aliyun/storage/disk/AliyunDiskApiInterceptor.java"
   },
   {
     "raw": "The disk not be attach on any ecs",
     "en_US": "The disk not be attach on any ecs",
-    "zh_CN": "该云盘没有加载到任何云主机",
+    "zh_CN": "该云盘没有加载到任何虚拟机",
     "arguments": [],
     "fileName": "src/main/java/org/zstack/aliyun/storage/disk/AliyunDiskApiInterceptor.java"
   },
   {
     "raw": "The state of the ecs [%s] instance must be running or stopped",
     "en_US": "The state of the ecs [{0}] instance must be running or stopped",
-    "zh_CN": "云主机[{0}]的状态必须是运行或者已停止",
+    "zh_CN": "虚拟机[{0}]的状态必须是运行或者已停止",
     "arguments": [
       "msg.getEcsUuid()"
     ],
@@ -766,7 +766,7 @@
   {
     "raw": "Disk and ecs instances must be in the same zone",
     "en_US": "Disk and ecs instances must be in the same zone",
-    "zh_CN": "云盘和云主机必须在相同的数据中心下",
+    "zh_CN": "云盘和虚拟机必须在相同的数据中心下",
     "arguments": [],
     "fileName": "src/main/java/org/zstack/aliyun/storage/disk/AliyunDiskApiInterceptor.java"
   },
@@ -797,7 +797,7 @@
   {
     "raw": "Non-independent disk can only be destroyed with instances",
     "en_US": "Non-independent disk can only be destroyed with instances",
-    "zh_CN": "未独立的云盘只能和云主机一起删除",
+    "zh_CN": "未独立的云盘只能和虚拟机一起删除",
     "arguments": [],
     "fileName": "src/main/java/org/zstack/aliyun/storage/disk/AliyunDiskApiInterceptor.java"
   },
@@ -825,7 +825,7 @@
   {
     "raw": "The operation allows only when ecs state of the ecs instance status be running or stopped",
     "en_US": "The operation allows only when ecs state of the ecs instance status be running or stopped",
-    "zh_CN": "当云主机态为运行中或已停止时该操作才被允许",
+    "zh_CN": "当虚拟机态为运行中或已停止时该操作才被允许",
     "arguments": [],
     "fileName": "src/main/java/org/zstack/aliyun/storage/snapshot/AliyunSnapshotApiInterceptor.java"
   },
@@ -1102,7 +1102,7 @@
   {
     "raw": "EcsInstance must be running or stopped while deleting eip ",
     "en_US": "EcsInstance must be running or stopped while deleting eip ",
-    "zh_CN": "删除弹性IP时云主机必须时允许中或者已停止",
+    "zh_CN": "删除弹性IP时虚拟机必须时允许中或者已停止",
     "arguments": [],
     "fileName": "src/main/java/org/zstack/hybrid/network/HybridEipCascadeExtension.java"
   },
@@ -1187,7 +1187,7 @@
   {
     "raw": "no such ecs instance: %s",
     "en_US": "no such ecs instance: {0}",
-    "zh_CN": "没有这样的ESC云主机: {0}",
+    "zh_CN": "没有这样的ESC虚拟机: {0}",
     "arguments": [
       "msg.getNextHopUuid()"
     ],
@@ -1313,7 +1313,7 @@
   {
     "raw": "couldn\u0027t attach eip to ecs: [%s] , eip :[%s] already attached ecs:[%s] ",
     "en_US": "couldn\u0027t attach eip to ecs: [{0}] , eip :[{1}] already attached ecs:[{2}] ",
-    "zh_CN": "不能绑定弹性IP到ECS云主机[{0}]，弹性IP[{1}]已经绑定到ECS云主机[{2}]",
+    "zh_CN": "不能绑定弹性IP到ECS虚拟机[{0}]，弹性IP[{1}]已经绑定到ECS云主机[{2}]",
     "arguments": [
       "msg.getEcsUuid()",
       "msg.getEipUuid()",

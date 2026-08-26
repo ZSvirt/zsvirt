@@ -9,14 +9,14 @@
   {
     "raw": "delete DRS is not allowed while the vm is being migrated",
     "en_US": "delete DRS is not allowed while the vm is being migrated",
-    "zh_CN": "迁移云主机时不允许删除 DRS",
+    "zh_CN": "迁移虚拟机时不允许删除 DRS",
     "arguments": [],
     "fileName": "src/main/java/org/zstack/drs/DRSBase.java"
   },
   {
     "raw": "Scheduling is not allowed while the vm is being migrated",
     "en_US": "Scheduling is not allowed while the vm is being migrated",
-    "zh_CN": "迁移云主机时不允许计划",
+    "zh_CN": "迁移虚拟机时不允许计划",
     "arguments": [],
     "fileName": "src/main/java/org/zstack/drs/DRSBase.java"
   },

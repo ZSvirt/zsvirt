@@ -1,6 +1,8 @@
 package org.zstack.ovf;
 
+import com.google.gson.JsonElement;
 import com.google.gson.JsonSyntaxException;
+import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
 import org.apache.commons.io.output.StringBuilderWriter;
 import org.apache.commons.lang.StringUtils;
@@ -50,6 +52,8 @@ import static org.zstack.ovf.datatype.OvfErrors.INVALID_IMAGE_INFO;
  */
 public class OvfHelper {
     private static final CLogger logger = Utils.getLogger(OvfHelper.class);
+    public static final String OVF_DISK = "disk";
+    public static final String OVF_DISK_ENCRYPTION = "encrypted";
 
     private static final String VMW_OS_TYPE_MAPPER_PATH = "ovf/vmwOsTypeMapper.yaml";
     private static final String EXPORT_OS_TYPE_MAPPER_PATH = "ovf/ExporterOsTypeMapper.yaml";
@@ -481,6 +485,43 @@ public class OvfHelper {
         }
 
         return list;
+    }
+
+    public static Boolean parseCreateVmFromOvfDiskEncryption(String jsonText) throws OperationFailureException {
+        if (StringUtils.isBlank(jsonText)) {
+            return null;
+        }
+
+        try {
+            JsonElement root = JsonParser.parseString(jsonText);
+            if (root == null || !root.isJsonObject()) {
+                return null;
+            }
+
+            JsonElement disk = root.getAsJsonObject().get(OVF_DISK);
+            if (disk == null || disk.isJsonNull()) {
+                return null;
+            }
+
+            if (!disk.isJsonObject()) {
+                throw err(INVALID_IMAGE_INFO, "%s must be an object", OVF_DISK).toException();
+            }
+
+            JsonElement encryption = disk.getAsJsonObject().get(OVF_DISK_ENCRYPTION);
+            if (encryption == null || encryption.isJsonNull()) {
+                return null;
+            }
+
+            if (!encryption.isJsonPrimitive() || !encryption.getAsJsonPrimitive().isBoolean()) {
+                throw err(INVALID_IMAGE_INFO, "%s.%s must be a boolean", OVF_DISK, OVF_DISK_ENCRYPTION).toException();
+            }
+
+            return encryption.getAsBoolean();
+        } catch (JsonSyntaxException e) {
+            throw new OperationFailureException(err(FAIL_TO_PARSE_IMAGE_INFO,
+                    "failed to parse %s.%s from jsonCreateVmParam, because %s", OVF_DISK, OVF_DISK_ENCRYPTION, e.getMessage()
+            ));
+        }
     }
 
     public static ImagePlatform getImagePlatformFromOVF(OvfInfo ovf) {

@@ -638,16 +638,26 @@ public class MevocoVmInstanceBase extends VmInstanceBase {
         imageSpec.setInventory(ImageInventory.valueOf(dbf.findByUuid(msg.getImageUuid(), ImageVO.class)));
         vmSpec.setImageSpec(imageSpec);
 
+        VolumeVO rootVolumeVO = Q.New(VolumeVO.class)
+                .eq(VolumeVO_.uuid, vmSpec.getVmInventory().getRootVolumeUuid())
+                .find();
+        if (rootVolumeVO != null && rootVolumeVO.isEncrypted()) {
+            if (vmSpec.getRootDisk() == null) {
+                vmSpec.setRootDisk(DiskAO.rootDisk());
+            }
+            vmSpec.getRootDisk().setEncrypted(true);
+            if (msg.isEncryptedVolumeBackupRestore()) {
+                vmSpec.getRootDisk().setVolumeBackupTemplate(true);
+            }
+        }
+
         // discard these info in vmSpec
         vmSpec.setVolumeSpecs(new ArrayList<>());
         vmSpec.setDestDataVolumes(Collections.emptyList());
         vmSpec.setDestHost(null);
 
         // use the same primary storage as before changing
-        String psUuid = Q.New(VolumeVO.class)
-                .select(VolumeVO_.primaryStorageUuid)
-                .eq(VolumeVO_.uuid, vmSpec.getVmInventory().getRootVolumeUuid())
-                .findValue();
+        String psUuid = rootVolumeVO == null ? null : rootVolumeVO.getPrimaryStorageUuid();
         vmSpec.setRequiredPrimaryStorageUuidForRootVolume(psUuid);
 
         // if root volume on LocalStorage, then allocate last host again
@@ -1155,6 +1165,7 @@ public class MevocoVmInstanceBase extends VmInstanceBase {
                             CreateRootVolumeTemplateMessage csmsg = fastCreate ?
                                     new CreateTemporaryRootVolumeTemplateFromVolumeSnapshotMsg() :
                                     new CreateRootVolumeTemplateFromVolumeSnapshotMsg();
+                            DiskAO diskAO = msg.getDiskAOsByVolumeUuid().get(snap.getVolumeUuid());
 
                             csmsg.setName(String.format("for-clone-vm-%s-rootVolume-%s", vivo.getUuid(),
                                     snap.getVolumeUuid()));
@@ -1162,11 +1173,20 @@ public class MevocoVmInstanceBase extends VmInstanceBase {
                             csmsg.setArchitecture(vivo.getArchitecture());
                             csmsg.setVirtio(VmExtraInfoGetter.New(vivo.getUuid()).isVirtio());
                             csmsg.setGuestOsType(vivo.getGuestOsType());
+                            if (csmsg instanceof CreateTemporaryRootVolumeTemplateFromVolumeSnapshotMsg) {
+                                ((CreateTemporaryRootVolumeTemplateFromVolumeSnapshotMsg) csmsg)
+                                        .setEncrypted(diskAO == null ? null : diskAO.getEncrypted());
+                            } else {
+                                ((CreateRootVolumeTemplateFromVolumeSnapshotMsg) csmsg)
+                                        .setEncrypted(diskAO == null ? null : diskAO.getEncrypted());
+                            }
                             cmsg = csmsg;
                         } else {
                             CreateDataVolumeTemplateFromVolumeSnapshotMsg csmsg = new CreateDataVolumeTemplateFromVolumeSnapshotMsg();
+                            DiskAO diskAO = msg.getDiskAOsByVolumeUuid().get(snap.getVolumeUuid());
                             csmsg.setName(String.format("for-clone-vm-%s-volume-%s",
                                     vivo.getUuid(), snap.getVolumeUuid()));
+                            csmsg.setEncrypted(diskAO == null ? null : diskAO.getEncrypted());
                             cmsg = csmsg;
                         }
 
@@ -1254,6 +1274,7 @@ public class MevocoVmInstanceBase extends VmInstanceBase {
                         cvmsg.setName(name);
 
                         cvmsg.setL3NetworkSpecs(NewVmInstanceMsgBuilder.getVmNicSpecsFromVmNicParams(msg.getVmNicParams(), msg.getL3NetworkUuids()));
+                        cvmsg.setVmNicSecurityPolicyByDeviceId(msg.getVmNicSecurityPolicyByDeviceId());
                         cvmsg.setDefaultL3NetworkUuid(msg.getDefaultL3NetworkUuid());
                         cvmsg.setClusterUuid(msg.getClusterUuid());
                         cvmsg.setHostUuid(msg.getHostUuid());
@@ -1269,6 +1290,7 @@ public class MevocoVmInstanceBase extends VmInstanceBase {
                         cvmsg.setPlatform(msg.getPlatform());
                         cvmsg.setGuestOsType(msg.getGuestOsType());
                         cvmsg.setArchitecture(msg.getArchitecture());
+                        cvmsg.setVmEncryption(msg.getVmEncryption());
                         cvmsg.setVirtio(cvmsg.hasSystemTag(VmSystemTags.VIRTIO::isMatch));
 
                         if (!cvmsg.hasSystemTag(VmSystemTags.CREATE_VM_CD_ROM_LIST::isMatch)) {
@@ -1638,6 +1660,7 @@ public class MevocoVmInstanceBase extends VmInstanceBase {
                                     spec.snapshot.getVolumeUuid()));
                             cmsg.setVolumeSnapshotUuid(spec.snapshot.getUuid());
                             cmsg.setSystemTags(diskAO != null ? diskAO.getSystemTags() : null);
+                            cmsg.setEncrypted(diskAO == null ? null : diskAO.getEncrypted());
                             cmsg.addSystemTag(VolumeSystemTags.FAST_CREATE.getTagFormat());
                             cmsg.setSession(msg.getSession());
                             if (diskAO != null && diskAO.getSize() != 0) {
@@ -1657,6 +1680,7 @@ public class MevocoVmInstanceBase extends VmInstanceBase {
                                 cmsg.setSystemTags(diskAO.getSystemTags() != null ? diskAO.getSystemTags() : null);
                                 cmsg.setPrimaryStorageUuid(diskAO.getPrimaryStorageUuid() != null ?
                                         diskAO.getPrimaryStorageUuid() : originVol.getPrimaryStorageUuid());
+                                cmsg.setEncrypted(diskAO.getEncrypted());
                             }
                             return cmsg;
                         }

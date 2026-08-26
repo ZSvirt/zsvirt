@@ -30,6 +30,11 @@ public abstract class SharedBlockHypervisorBackend extends SharedBlockGroupPrima
 
     abstract void handle(InstantiateVolumeOnPrimaryStorageMsg msg, ReturnValueCompletion<InstantiateVolumeOnPrimaryStorageReply> completion);
 
+    abstract void handle(EncryptVolumeBitsOnPrimaryStorageMsg msg, ReturnValueCompletion<EncryptVolumeBitsOnPrimaryStorageReply> completion);
+
+    abstract void handle(ConvertVolumeEncryptionOnPrimaryStorageMsg msg, String hostUuid,
+                         ReturnValueCompletion<ConvertVolumeEncryptionOnPrimaryStorageReply> completion);
+
     abstract void handle(DownloadVolumeTemplateToPrimaryStorageMsg msg, ReturnValueCompletion<DownloadVolumeTemplateToPrimaryStorageReply> completion);
 
     abstract void handle(DeleteVolumeOnPrimaryStorageMsg msg, ReturnValueCompletion<DeleteVolumeOnPrimaryStorageReply> completion);
@@ -153,6 +158,8 @@ public abstract class SharedBlockHypervisorBackend extends SharedBlockGroupPrima
     abstract void handle(ScanVmInstanceMetadataFromPrimaryStorageMsg msg, ReturnValueCompletion<ScanVmInstanceMetadataFromPrimaryStorageReply> completion);
 
     abstract void handle(CleanupVmInstanceMetadataOnPrimaryStorageMsg msg, ReturnValueCompletion<CleanupVmInstanceMetadataOnPrimaryStorageReply> completion);
+
+    abstract void handle(CleanupAllVmMetadataOnPrimaryStorageMsg msg, ReturnValueCompletion<CleanupAllVmMetadataOnPrimaryStorageReply> completion);
 
     abstract void handle(RebaseVolumeBackingFileOnPrimaryStorageMsg msg, ReturnValueCompletion<RebaseVolumeBackingFileOnPrimaryStorageReply> completion);
 

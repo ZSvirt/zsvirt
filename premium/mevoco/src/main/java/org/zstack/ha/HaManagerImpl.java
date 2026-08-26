@@ -138,11 +138,6 @@ public class HaManagerImpl extends AbstractService implements HaManager, Compone
             maximumSize(1000).expireAfterAccess(10, TimeUnit.MINUTES).build();
 
     @Override
-    public String preStartVm(VmInstanceInventory inv) {
-        return null;
-    }
-
-    @Override
     public void beforeStartVm(VmInstanceInventory inv) {
 
     }

@@ -86,6 +86,9 @@ public class VolumeAO extends ResourceVO implements ShadowEntity {
     @Column
     private String protocol;
 
+    @Column
+    private boolean encrypted;
+
     @Transient
     private VolumeAO shadow;
 
@@ -297,5 +300,13 @@ public class VolumeAO extends ResourceVO implements ShadowEntity {
 
     public void setProtocol(String protocol) {
         this.protocol = protocol;
+    }
+
+    public boolean isEncrypted() {
+        return encrypted;
+    }
+
+    public void setEncrypted(boolean encrypted) {
+        this.encrypted = encrypted;
     }
 }

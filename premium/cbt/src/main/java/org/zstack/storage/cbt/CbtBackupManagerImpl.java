@@ -16,6 +16,7 @@ import org.zstack.core.workflow.FlowChainBuilder;
 import org.zstack.header.AbstractService;
 import org.zstack.header.Component;
 import org.zstack.header.cbt.*;
+import org.zstack.header.core.AsyncBackup;
 import org.zstack.header.core.Completion;
 import org.zstack.header.core.ReturnValueCompletion;
 import org.zstack.header.core.WhileDoneCompletion;
@@ -59,6 +60,7 @@ import static org.zstack.utils.CollectionDSL.map;
 
 public class CbtBackupManagerImpl extends AbstractService implements Component, CbtBackupManager {
     private static final CLogger logger = Utils.getLogger(CbtBackupManagerImpl.class);
+    private static final String CBT_HOST_OPERATION_SYNC_SIGNATURE = "cbt-host-operation-on-host-%s";
     private final Map<String, CbtBackupFactory> bkFactories = new ConcurrentHashMap<>();
 
     @Autowired
@@ -122,27 +124,48 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
         thdf.chainSubmit(new ChainTask(msg) {
             @Override
             public String getSyncSignature() {
-                return String.format("export-volumes-for-cbt-recovery-task-%s", msg.getVmInstanceUuid());
+                return getVmSyncSignature(msg.getVmInstanceUuid());
             }
 
             @Override
             public void run(SyncTaskChain chain) {
-                CbtBackupHypervisorBackend backend = getCbtBackend(msg.getVmInstanceUuid());
-                exportNbdVolumesFlow(backend, msg.isForce(), msg.getVmInstanceUuid(), msg.getVolumeUuids(), new ReturnValueCompletion<List<VolumeCbtBackupInfo>>(msg) {
-                    final APIExportNbdVolumesEvent evt = new APIExportNbdVolumesEvent(msg.getId());
+                final APIExportNbdVolumesEvent evt = new APIExportNbdVolumesEvent(msg.getId());
+                ErrorCode err = validateVmStateForOperation(msg.getVmInstanceUuid(), VmInstanceState.Stopped, "export NBD volumes");
+                if (err != null) {
+                    evt.setError(err);
+                    bus.publish(evt);
+                    chain.next();
+                    return;
+                }
 
-                    @Override
-                    public void success(List<VolumeCbtBackupInfo> volumeInfos) {
-                        evt.setVolumeInfos(volumeInfos);
-                        bus.publish(evt);
-                        chain.next();
-                    }
+                String hostUuid = getVmHostUuid(msg.getVmInstanceUuid());
+                if (hostUuid == null) {
+                    evt.setError(operr("host not found for VM: %s", msg.getVmInstanceUuid()));
+                    bus.publish(evt);
+                    chain.next();
+                    return;
+                }
 
+                runInCbtHostOperationQueue(hostUuid, msg, String.format("export-nbd-volumes-on-host-%s", hostUuid), new CbtHostOperation() {
                     @Override
-                    public void fail(ErrorCode errorCode) {
-                        evt.setError(errorCode);
-                        bus.publish(evt);
-                        chain.next();
+                    public void run(SyncTaskChain hostChain) {
+                        exportNbdVolumesFlow(msg.isForce(), msg.getVmInstanceUuid(), msg.getVolumeUuids(), new ReturnValueCompletion<List<VolumeCbtBackupInfo>>(msg, hostChain) {
+                            @Override
+                            public void success(List<VolumeCbtBackupInfo> volumeInfos) {
+                                evt.setVolumeInfos(volumeInfos);
+                                bus.publish(evt);
+                                hostChain.next();
+                                chain.next();
+                            }
+
+                            @Override
+                            public void fail(ErrorCode errorCode) {
+                                evt.setError(errorCode);
+                                bus.publish(evt);
+                                hostChain.next();
+                                chain.next();
+                            }
+                        });
                     }
                 });
             }
@@ -158,26 +181,48 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
         thdf.chainSubmit(new ChainTask(msg) {
             @Override
             public String getSyncSignature() {
-                return String.format("unexport-volumes-for-cbt-recovery-task-%s",msg.getVmInstanceUuid());
+                return getVmSyncSignature(msg.getVmInstanceUuid());
             }
 
             @Override
             public void run(SyncTaskChain chain) {
-                CbtBackupHypervisorBackend backend = getCbtBackend(msg.getVmInstanceUuid());
-                backend.unexportNbdVolumesForRecovery(msg.getVmInstanceUuid(), msg.getVolumeUuids(), new Completion(msg) {
-                    final APIUnexportNbdVolumesEvent evt = new APIUnexportNbdVolumesEvent(msg.getId());
+                final APIUnexportNbdVolumesEvent evt = new APIUnexportNbdVolumesEvent(msg.getId());
+                ErrorCode err = validateVmStateForOperation(msg.getVmInstanceUuid(), VmInstanceState.Stopped, "unexport NBD volumes");
+                if (err != null) {
+                    evt.setError(err);
+                    bus.publish(evt);
+                    chain.next();
+                    return;
+                }
 
-                    @Override
-                    public void success() {
-                        bus.publish(evt);
-                        chain.next();
-                    }
+                String hostUuid = getVmHostUuid(msg.getVmInstanceUuid());
+                if (hostUuid == null) {
+                    evt.setError(operr("host not found for VM: %s", msg.getVmInstanceUuid()));
+                    bus.publish(evt);
+                    chain.next();
+                    return;
+                }
 
+                runInCbtHostOperationQueue(hostUuid, msg, String.format("unexport-nbd-volumes-on-host-%s", hostUuid), new CbtHostOperation() {
                     @Override
-                    public void fail(ErrorCode errorCode) {
-                        evt.setError(errorCode);
-                        bus.publish(evt);
-                        chain.next();
+                    public void run(SyncTaskChain hostChain) {
+                        CbtBackupHypervisorBackend backend = getCbtBackend(msg.getVmInstanceUuid());
+                        backend.unexportNbdVolumesForRecovery(msg.getVmInstanceUuid(), msg.getVolumeUuids(), new Completion(msg, hostChain) {
+                            @Override
+                            public void success() {
+                                bus.publish(evt);
+                                hostChain.next();
+                                chain.next();
+                            }
+
+                            @Override
+                            public void fail(ErrorCode errorCode) {
+                                evt.setError(errorCode);
+                                bus.publish(evt);
+                                hostChain.next();
+                                chain.next();
+                            }
+                        });
                     }
                 });
             }
@@ -294,27 +339,31 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
                 .eq(CbtTaskResourceRefVO_.resourceType, VmInstanceVO.class.getSimpleName())
                 .eq(CbtTaskResourceRefVO_.taskUuid, msg.getUuid()).select(CbtTaskResourceRefVO_.resourceUuid)
                 .findValue();
-        String hostUuid = getVmHostUuid(vmUuid);
-        if (hostUuid == null) {
-            reply.setError(operr("host not found for VM: %s", vmUuid));
-            bus.reply(msg, reply);
-            return;
-        }
-
-        CbtBackupHypervisorBackend backend = getCbtBackend(vmUuid);
         thdf.chainSubmit(new ChainTask(msg) {
             @Override
             public String getSyncSignature() {
-                return String.format("enable-cbt-task-on-host-%s", msg.getUuid());
-            }
-
-            @Override
-            protected int getSyncLevel() {
-                return CbtGlobalConfig.START_CBT_CONCURRENT_LEVEL.value(Integer.class);
+                return getVmSyncSignature(vmUuid);
             }
 
             @Override
             public void run(SyncTaskChain chain) {
+                ErrorCode err = validateVmStateForOperation(vmUuid, VmInstanceState.Running, "enable cbt task");
+                if (err != null) {
+                    reply.setError(err);
+                    bus.reply(msg, reply);
+                    chain.next();
+                    return;
+                }
+
+                String hostUuid = getVmHostUuid(vmUuid);
+                if (hostUuid == null) {
+                    reply.setError(operr("host not found for VM: %s", vmUuid));
+                    bus.reply(msg, reply);
+                    chain.next();
+                    return;
+                }
+
+                CbtBackupHypervisorBackend backend = getCbtBackend(vmUuid);
                 runStartVmInstanceCbtFlow(backend, vmUuid, taskVO, msg.getAccountUuid(), msg.getBitmapName(), new ReturnValueCompletion<List<VolumeCbtBackupInfo>>(msg, chain) {
                     @Override
                     public void success(List<VolumeCbtBackupInfo> infos) {
@@ -337,6 +386,29 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
             @Override
             public String getName() {
                 return String.format("running-cbt-task-%s", taskVO.getUuid());
+            }
+        });
+    }
+
+    private interface CbtHostOperation {
+        void run(SyncTaskChain chain);
+    }
+
+    private void runInCbtHostOperationQueue(final String hostUuid, final AsyncBackup backup, final String name, final CbtHostOperation operation) {
+        thdf.chainSubmit(new ChainTask(backup) {
+            @Override
+            public String getSyncSignature() {
+                return String.format(CBT_HOST_OPERATION_SYNC_SIGNATURE, hostUuid);
+            }
+
+            @Override
+            public void run(SyncTaskChain chain) {
+                operation.run(chain);
+            }
+
+            @Override
+            public String getName() {
+                return name;
             }
         });
     }
@@ -420,18 +492,14 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
         }).start();
     }
 
-    private void exportNbdVolumesFlow(CbtBackupHypervisorBackend backend,
-                                      boolean force,
+    private void exportNbdVolumesFlow(boolean force,
                                       String vmUuid,
                                       List<String> volumeUuids,
                                       final ReturnValueCompletion<List<VolumeCbtBackupInfo>> completion) {
         final List<VolumeCbtBackupInfo>[] volumeInfos = new List[]{new ArrayList<VolumeCbtBackupInfo>()};
-        boolean running = Q.New(VmInstanceVO.class)
-                .eq(VmInstanceVO_.uuid, vmUuid)
-                .eq(VmInstanceVO_.state, VmInstanceState.Running)
-                .isExists();
-        if (running) {
-            completion.fail(operr("vm[uuid: %s] is running，please stop it and try again.", vmUuid));
+        ErrorCode err = validateVmStateForOperation(vmUuid, VmInstanceState.Stopped, "export NBD volumes");
+        if (err != null) {
+            completion.fail(err);
             return;
         }
 
@@ -441,6 +509,7 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
             return;
         }
 
+        CbtBackupHypervisorBackend backend = getCbtBackend(vmUuid);
         FlowChain chain = FlowChainBuilder.newSimpleFlowChain();
         chain.setName(String.format("start-export-nbd-volumes-for-vm-%s", vmUuid));
         chain.then(new NoRollbackFlow() {
@@ -669,7 +738,7 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
         thdf.chainSubmit(new ChainTask(completion) {
             @Override
             public String getSyncSignature() {
-                return String.format("take-volume-cbt-backup-on-host-%s", hostUuid);
+                return String.format(CBT_HOST_OPERATION_SYNC_SIGNATURE, hostUuid);
             }
 
             @Override
@@ -697,10 +766,12 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
     }
 
     private void handle(final DisableCbtTaskMsg msg) {
+        String vmUuid = getVmUuidByCbtTaskUuid(msg.getUuid());
+        final String syncSignature = vmUuid == null ? String.format("disable-cbt-task-%s", msg.getUuid()) : getVmSyncSignature(vmUuid);
         thdf.chainSubmit(new ChainTask(msg) {
             @Override
             public String getSyncSignature() {
-                return String.format("disable-cbt-task-%s",msg.getUuid());
+                return syncSignature;
             }
 
             @Override
@@ -750,6 +821,12 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
         }
 
         final String vmUuid = refVO.getResourceUuid();
+        ErrorCode err = validateVmStateForOperation(vmUuid, VmInstanceState.Running, "disable cbt task");
+        if (err != null) {
+            completion.fail(err);
+            return;
+        }
+
         String hostUuid = getVmHostUuid(vmUuid);
         if (hostUuid == null) {
             completion.fail(operr("host not found for VM: %s", vmUuid));
@@ -1062,6 +1139,30 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
                 .select(CbtTaskVO_.status)
                 .findValue();
         return status != CbtTaskStatus.Running;
+    }
+
+    private String getVmUuidByCbtTaskUuid(String taskUuid) {
+        return Q.New(CbtTaskResourceRefVO.class)
+                .eq(CbtTaskResourceRefVO_.taskUuid, taskUuid)
+                .eq(CbtTaskResourceRefVO_.resourceType, VmInstanceVO.class.getSimpleName())
+                .select(CbtTaskResourceRefVO_.resourceUuid)
+                .findValue();
+    }
+
+    private String getVmSyncSignature(String vmUuid) {
+        return String.format("Vm-%s", vmUuid);
+    }
+
+    private ErrorCode validateVmStateForOperation(String vmUuid, VmInstanceState expectedState, String operation) {
+        VmInstanceState state = Q.New(VmInstanceVO.class)
+                .eq(VmInstanceVO_.uuid, vmUuid)
+                .select(VmInstanceVO_.state)
+                .findValue();
+        if (state != expectedState) {
+            return operr("Cannot %s for vm[uuid: %s], current vm state is %s, the expected vm state is %s.",
+                    operation, vmUuid, state, expectedState);
+        }
+        return null;
     }
 
     private List<String> getVmVolumeUuids(String vmUuid) {

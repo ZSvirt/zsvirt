@@ -4,6 +4,7 @@ import org.zstack.header.HasThreadContext;
 import org.zstack.header.agent.AgentResponse;
 import org.zstack.header.agent.CancelCommand;
 import org.zstack.header.log.NoLogging;
+import org.zstack.header.message.CancelTaskResult;
 import org.zstack.storage.backup.sftp.SftpBackupStorageCommands;
 import org.zstack.utils.DebugUtils;
 
@@ -367,6 +368,63 @@ public class ImageStoreBackupStorageCommands {
         public void setTargetUri(String targetUri) {
             this.targetUri = targetUri;
         }
+    }
+
+    public static class ExportImageNbdChainCmd extends AgentCommand implements HasThreadContext {
+        private String installPath;
+
+        public String getInstallPath() {
+            return installPath;
+        }
+
+        public void setInstallPath(String installPath) {
+            this.installPath = installPath;
+        }
+    }
+
+    public static class ExportImageNbdChainResponse extends ImageStoreResponse {
+        private String sessionId;
+        private int port;
+        private List<String> exportNames;
+
+        public String getSessionId() {
+            return sessionId;
+        }
+
+        public void setSessionId(String sessionId) {
+            this.sessionId = sessionId;
+        }
+
+        public int getPort() {
+            return port;
+        }
+
+        public void setPort(int port) {
+            this.port = port;
+        }
+
+        public List<String> getExportNames() {
+            return exportNames;
+        }
+
+        public void setExportNames(List<String> exportNames) {
+            this.exportNames = exportNames;
+        }
+    }
+
+    public static class CleanupImageNbdChainCmd extends AgentCommand implements HasThreadContext {
+        private String sessionId;
+
+        public String getSessionId() {
+            return sessionId;
+        }
+
+        public void setSessionId(String sessionId) {
+            this.sessionId = sessionId;
+        }
+    }
+
+    public static class CleanupImageNbdChainResponse extends ImageStoreResponse {
     }
 
     public static class DelExpImageCmd extends AgentCommand {
@@ -927,6 +985,7 @@ public class ImageStoreBackupStorageCommands {
         public String name;
         public String imageuuid;
         public String cancellationApiId;
+        public boolean allowTaskNotFound;
 
         @Override
         public void setCancellationApiId(String cancellationApiId) {
@@ -935,7 +994,7 @@ public class ImageStoreBackupStorageCommands {
     }
 
     public static class CancelDownloadImgRsp extends ImageStoreResponse {
-
+        public CancelTaskResult cancelResult;
     }
 
     public static class UploadImageToRemoteTargetCmd extends AgentCommand {
@@ -1268,6 +1327,7 @@ public class ImageStoreBackupStorageCommands {
 
     public static class CancelJobCmd extends AgentCommand implements CancelCommand {
         public String cancellationApiId;
+        public boolean allowTaskNotFound;
 
         @Override
         public void setCancellationApiId(String cancellationApiId) {
@@ -1276,7 +1336,7 @@ public class ImageStoreBackupStorageCommands {
     }
 
     public static class CancelJobRsp extends ImageStoreResponse {
-
+        public CancelTaskResult cancelResult;
     }
 
     // ---- ZMigrate file operation commands ----
@@ -1337,6 +1397,7 @@ public class ImageStoreBackupStorageCommands {
 
     public static class CancelDownloadFileCmd extends AgentCommand implements CancelCommand, Serializable {
         public String cancellationApiId;
+        public boolean allowTaskNotFound;
 
         @Override
         public void setCancellationApiId(String cancellationApiId) {
@@ -1345,6 +1406,7 @@ public class ImageStoreBackupStorageCommands {
     }
 
     public static class CancelDownloadFileRsp extends ImageStoreResponse {
+        public CancelTaskResult cancelResult;
     }
 
     public static class UnzipFileCmd extends AgentCommand implements HasThreadContext, Serializable {

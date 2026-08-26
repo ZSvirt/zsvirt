@@ -628,9 +628,9 @@ public class KvmTpmExtensions implements KVMStartVmExtensionPoint,
         keyCtx.setKeyProviderUuid(ctx.getProviderUuid());
         keyCtx.setKeyProviderName(ctx.getProviderName());
         keyCtx.setPurpose("vtpm");
-        ResourceKeyResult result = resourceKeyManager.getKey(keyCtx);
+        ResourceKeyResult result = resourceKeyManager.getExistingKeySync(keyCtx);
         if (StringUtils.isBlank(result.getDekBase64())) {
-            throw new OperationFailureException(operr("missing DEK for tpm[uuid:%s] after getKey before migrate", tpmUuid));
+            throw new OperationFailureException(operr("missing DEK for tpm[uuid:%s] before migrate", tpmUuid));
         }
         ctx.setResourceKeyResult(result);
     }

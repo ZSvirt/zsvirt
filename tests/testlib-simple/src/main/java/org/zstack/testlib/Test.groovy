@@ -7,7 +7,6 @@ import org.apache.commons.lang.StringUtils
 import org.zstack.core.Platform
 import org.zstack.core.StartMode
 import org.zstack.core.cloudbus.CloudBus
-import org.zstack.core.cloudbus.CloudBusImpl2
 import org.zstack.core.componentloader.ComponentLoader
 import org.zstack.core.db.DatabaseFacade
 import org.zstack.header.AbstractService
@@ -159,6 +158,7 @@ abstract class Test extends ApiHelper implements Retry {
             include("HostAllocateExtension.xml")
             include("HostNetworkManager.xml")
             include("telemetry.xml")
+            include("allocatorDomain.xml")
         }
     }
 
@@ -239,8 +239,14 @@ abstract class Test extends ApiHelper implements Retry {
     protected boolean INCLUDE_CORE_SERVICES = true
 
     protected String getDeployDBScriptBaseDir() {
-        String home = System.getProperty("user.dir")
-        return  [home, "../"].join("/")
+        File dir = new File(System.getProperty("user.dir")).getAbsoluteFile()
+        while (dir != null) {
+            if (new File(dir, "build/deploydb.sh").isFile()) {
+                return dir.getAbsolutePath()
+            }
+            dir = dir.getParentFile()
+        }
+        throw new CloudRuntimeException("cannot find build/deploydb.sh starting from ${System.getProperty("user.dir")}")
     }
 
     private Map<String, String> getHostAndPort(String jdbcUrl) {
@@ -327,10 +333,6 @@ abstract class Test extends ApiHelper implements Retry {
 
     private void hijackService() {
         CloudBus bus = bean(CloudBus.class)
-        if(bus instanceof CloudBusImpl2){
-            logger.info(String.format("CloudBus message timeout: %s mills", getMessageTimeoutMillsConfig()))
-            ((CloudBusImpl2)bus).setDEFAULT_MESSAGE_TIMEOUT(getMessageTimeoutMillsConfig())
-        }
 
         def serviceId = "test.hijack.service"
         def service = new AbstractService() {

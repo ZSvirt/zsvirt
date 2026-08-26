@@ -6,6 +6,9 @@ import org.zstack.header.vm.VmInstanceMessage;
 import org.zstack.storage.migration.PrimaryStorageMigrateVmContext;
 import org.zstack.storage.migration.StorageMigrationMessage;
 
+import java.util.Collections;
+import java.util.List;
+
 @SkipVmTracer(replyClass = PrimaryStorageLiveMigrateVmReply.class)
 public class PrimaryStorageLiveMigrateVmMsg extends NeedReplyMessage implements StorageMigrationMessage, VmInstanceMessage {
     private String vmInstanceUuid;
@@ -17,6 +20,10 @@ public class PrimaryStorageLiveMigrateVmMsg extends NeedReplyMessage implements 
     private PrimaryStorageMigrateVmContext jobContext;
     private String longJobUuid;
     private long bandwidth;
+    private List<VolumeMigrationAO> volumeMigrationAOs;
+    private boolean legacyRootOnlyMigration;
+
+    private Boolean enableMigrationTls;
 
     public PrimaryStorageLiveMigrateVmMsg(PrimaryStorageMigrateVmMsg amsg) {
         this.vmInstanceUuid = amsg.getVmInstanceUuid();
@@ -29,6 +36,28 @@ public class PrimaryStorageLiveMigrateVmMsg extends NeedReplyMessage implements 
         this.jobContext = amsg.getJobContext();
         this.longJobUuid = amsg.getLongJobUuid();
         this.bandwidth = amsg.getBandwidth();
+        this.volumeMigrationAOs = amsg.getVolumeMigrationAOs();
+        this.legacyRootOnlyMigration = amsg.isLegacyRootOnlyMigration();
+        this.enableMigrationTls = amsg.getEnableMigrationTls();
+    }
+
+    public PrimaryStorageLiveMigrateVmMsg() {
+    }
+
+    public List<VolumeMigrationAO> getVolumeMigrationAOs() {
+        return volumeMigrationAOs == null ? Collections.emptyList() : volumeMigrationAOs;
+    }
+
+    public void setVolumeMigrationAOs(List<VolumeMigrationAO> volumeMigrationAOs) {
+        this.volumeMigrationAOs = volumeMigrationAOs;
+    }
+
+    public boolean isLegacyRootOnlyMigration() {
+        return legacyRootOnlyMigration;
+    }
+
+    public void setLegacyRootOnlyMigration(boolean legacyRootOnlyMigration) {
+        this.legacyRootOnlyMigration = legacyRootOnlyMigration;
     }
 
     public PrimaryStorageMigrateVmContext getJobContext() {
@@ -100,5 +129,13 @@ public class PrimaryStorageLiveMigrateVmMsg extends NeedReplyMessage implements 
 
     public void setBandwidth(long bandwidth) {
         this.bandwidth = bandwidth;
+    }
+
+    public Boolean getEnableMigrationTls() {
+        return enableMigrationTls;
+    }
+
+    public void setEnableMigrationTls(Boolean enableMigrationTls) {
+        this.enableMigrationTls = enableMigrationTls;
     }
 }

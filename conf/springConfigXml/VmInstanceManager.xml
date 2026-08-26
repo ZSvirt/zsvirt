@@ -150,6 +150,7 @@
     <bean id="VmInstanceHookManager" class="org.zstack.compute.vm.VmInstanceHookManagerImpl">
         <zstack:plugin>
             <zstack:extension interface="org.zstack.header.vm.VmInstanceStartExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.vm.extension.VmInstancePreStartExtensionPoint" />
             <zstack:extension interface="org.zstack.header.vm.VmInstanceStopExtensionPoint" />
             <zstack:extension interface="org.zstack.header.vm.VmInstanceRebootExtensionPoint" />
             <zstack:extension interface="org.zstack.header.vm.VmInstanceDestroyExtensionPoint" />
@@ -160,6 +161,7 @@
     <bean id="VmHardwareExtensionPoint" class="org.zstack.compute.vm.VmHardwareExtensionPoint">
         <zstack:plugin>
             <zstack:extension interface="org.zstack.header.vm.VmInstanceStartExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.vm.extension.VmInstancePreStartExtensionPoint" />
             <zstack:extension interface="org.zstack.header.vm.VmInstanceStartNewCreatedVmExtensionPoint" />
         </zstack:plugin>
     </bean>
@@ -182,9 +184,27 @@
         </zstack:plugin>
     </bean>
 
+    <bean id="VmSensitiveTagEncryptor" class="org.zstack.compute.vm.VmSensitiveTagEncryptor"/>
+
+    <bean id="VmEncryptionOperator" class="org.zstack.compute.vm.VmEncryptionOperatorImpl"/>
+
+    <bean id="VmSensitiveTagExtension" class="org.zstack.compute.vm.VmSensitiveTagExtension">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.tag.SystemTagPersistExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.tag.SystemTagTokenDecryptExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.tag.SystemTagCopyExtensionPoint"/>
+        </zstack:plugin>
+    </bean>
+
     <bean id="VmInstanceApiInterceptor" class="org.zstack.compute.vm.VmInstanceApiInterceptor">
         <zstack:plugin>
             <zstack:extension interface="org.zstack.header.apimediator.ApiMessageInterceptor" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="VmInstanceAutoCompleter" class="org.zstack.compute.vm.VmInstanceAutoCompleter">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.apimediator.GlobalApiMessageInterceptor" />
         </zstack:plugin>
     </bean>
 
@@ -313,6 +333,18 @@
     </bean>
 
     <bean id="VmTpmRekeyAssociation" class="org.zstack.compute.vm.devices.VmTpmRekeyAssociation">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.keyprovider.KeyProviderRekeyAssociationExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="VmVolumeRekeyAssociation" class="org.zstack.compute.vm.devices.VmVolumeRekeyAssociation">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.keyprovider.KeyProviderRekeyAssociationExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="VmVolumeSnapshotRekeyAssociation" class="org.zstack.compute.vm.devices.VmVolumeSnapshotRekeyAssociation">
         <zstack:plugin>
             <zstack:extension interface="org.zstack.header.keyprovider.KeyProviderRekeyAssociationExtensionPoint" />
         </zstack:plugin>

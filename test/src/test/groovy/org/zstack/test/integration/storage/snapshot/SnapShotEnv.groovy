@@ -1,23 +1,11 @@
-package org.zstack.test.integration.storage.snapshot;
+package org.zstack.test.integration.storage.snapshot
 
-import org.zstack.testlib.EnvSpec;
-import org.zstack.testlib.Test;
-import org.zstack.utils.data.SizeUnit;
+import org.zstack.testlib.EnvSpec
+import org.zstack.testlib.Test
 
 class SnapShotEnv {
     static EnvSpec normalAccountLocalStorageEnv() {
         return Test.makeEnv {
-            instanceOffering {
-                name = "instanceOffering"
-                memory = SizeUnit.GIGABYTE.toByte(8)
-                cpu = 4
-            }
-
-            diskOffering {
-                name = "diskOffering"
-                diskSize = SizeUnit.GIGABYTE.toByte(20)
-            }
-
             sftpBackupStorage {
                 name = "sftp"
                 url = "/sftp"
@@ -84,11 +72,14 @@ class SnapShotEnv {
 
             vm {
                 name = "vm"
-                useInstanceOffering("instanceOffering")
+                cpu = 4
+                memoryGB(8)
                 useImage("image")
                 useL3Networks("l3")
-                useRootDiskOffering("diskOffering")
                 useHost("host")
+                disk {
+                    sizeGB(20)
+                }
             }
 
             account {

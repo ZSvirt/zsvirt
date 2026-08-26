@@ -6,6 +6,9 @@ import org.zstack.header.vm.VmInstanceMessage;
 import org.zstack.storage.migration.PrimaryStorageMigrateVmContext;
 import org.zstack.storage.migration.PrimaryStorageMigrateVmMessage;
 
+import java.util.Collections;
+import java.util.List;
+
 /**
  * Created by GuoYi on 12/7/17.
  * <p>
@@ -33,6 +36,11 @@ public class PrimaryStorageMigrateVmMsg extends NeedReplyMessage implements Prim
     private String longJobUuid;
 
     private long bandwidth;
+
+    private List<VolumeMigrationAO> volumeMigrationAOs;
+
+    private Boolean legacyRootOnlyMigration;
+    private Boolean enableMigrationTls;
 
     public PrimaryStorageMigrateVmContext getJobContext() {
         return jobContext;
@@ -63,6 +71,10 @@ public class PrimaryStorageMigrateVmMsg extends NeedReplyMessage implements Prim
         strategy = amsg.getStrategy();
         downTime = amsg.getDownTime();
         bandwidth = amsg.getBandwidth();
+        volumeMigrationAOs = amsg.getVolumeMigrationAOs();
+        legacyRootOnlyMigration = amsg.getLegacyRootOnlyMigration();
+        enableMigrationTls = amsg.getEnableMigrationTls();
+        resolveLegacyRootOnlyMigration();
     }
 
     public Integer getDownTime() {
@@ -125,5 +137,53 @@ public class PrimaryStorageMigrateVmMsg extends NeedReplyMessage implements Prim
 
     public void setBandwidth(long bandwidth) {
         this.bandwidth = bandwidth;
+    }
+
+    @Override
+    public List<VolumeMigrationAO> getVolumeMigrationAOs() {
+        return volumeMigrationAOs == null ? Collections.emptyList() : volumeMigrationAOs;
+    }
+
+    public void setVolumeMigrationAOs(List<VolumeMigrationAO> volumeMigrationAOs) {
+        this.volumeMigrationAOs = volumeMigrationAOs;
+    }
+
+    public boolean isLegacyRootOnlyMigration() {
+        return Boolean.TRUE.equals(legacyRootOnlyMigration);
+    }
+
+    public void setLegacyRootOnlyMigration(Boolean legacyRootOnlyMigration) {
+        this.legacyRootOnlyMigration = legacyRootOnlyMigration;
+    }
+
+    public void resolveLegacyRootOnlyMigration() {
+        if (legacyRootOnlyMigration != null) {
+            return;
+        }
+        if (getVolumeMigrationAOs().isEmpty()) {
+            legacyRootOnlyMigration = dstPrimaryStorageUuid != null && !withDataVolumes;
+        }
+    }
+
+    public void resolveLegacyRootOnlyMigration(String rootVolumeUuid) {
+        resolveLegacyRootOnlyMigration();
+        if (legacyRootOnlyMigration != null) {
+            return;
+        }
+
+        List<VolumeMigrationAO> specs = getVolumeMigrationAOs();
+        legacyRootOnlyMigration = specs.size() == 1
+                && dstPrimaryStorageUuid != null
+                && !withDataVolumes
+                && rootVolumeUuid.equals(specs.get(0).getVolumeUuid())
+                && dstPrimaryStorageUuid.equals(specs.get(0).getDstPrimaryStorageUuid());
+    }
+
+    public Boolean getEnableMigrationTls() {
+        return enableMigrationTls;
+    }
+
+    public void setEnableMigrationTls(Boolean enableMigrationTls) {
+        this.enableMigrationTls = enableMigrationTls;
     }
 }

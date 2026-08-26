@@ -5,7 +5,7 @@
         <artifactId>zstack</artifactId>
         <groupId>org.zstack</groupId>
         <version>5.0.0</version>
-        <relativePath>..</relativePath>
+        <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>build</artifactId>
     <packaging>war</packaging>
@@ -18,7 +18,7 @@
                 <plugins>
                     <plugin>
                         <artifactId>maven-war-plugin</artifactId>
-                        <version>2.3</version>
+                        <version>${maven.war.version}</version>
                         <configuration>
                             <packagingExcludes>
                                 %regex[WEB-INF/lib/maven(?!-artifact).*.jar],
@@ -102,6 +102,11 @@
                 <dependency>
                     <groupId>org.zstack</groupId>
                     <artifactId>compute</artifactId>
+                    <version>${project.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.zstack</groupId>
+                    <artifactId>allocator</artifactId>
                     <version>${project.version}</version>
                 </dependency>
                 <dependency>
@@ -463,6 +468,11 @@
                 </dependency>
                 <dependency>
                     <groupId>org.zstack</groupId>
+                    <artifactId>host-pki</artifactId>
+                    <version>${project.version}</version>
+                </dependency>
+                <dependency>
+                    <groupId>org.zstack</groupId>
                     <artifactId>virtualSwitchNetwork</artifactId>
                     <version>${project.version}</version>
                 </dependency>
@@ -510,7 +520,7 @@
             </plugin>
             <plugin>
                 <artifactId>maven-war-plugin</artifactId>
-                <version>2.3</version>
+                <version>${maven.war.version}</version>
                 <configuration>
                     <packagingExcludes>
                         %regex[WEB-INF/lib/maven(?!-artifact).*.jar],
@@ -567,6 +577,11 @@
         <dependency>
             <groupId>org.zstack</groupId>
             <artifactId>compute</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.zstack</groupId>
+            <artifactId>allocator</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

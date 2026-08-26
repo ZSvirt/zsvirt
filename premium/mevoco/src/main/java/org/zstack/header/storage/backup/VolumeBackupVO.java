@@ -61,6 +61,9 @@ public class VolumeBackupVO extends ResourceVO implements OwnedByAccount {
     private BackupMode mode;
 
     @Column
+    private boolean encrypted;
+
+    @Column
     private String vmInstanceUuid;
 
     @Column
@@ -189,6 +192,14 @@ public class VolumeBackupVO extends ResourceVO implements OwnedByAccount {
 
     public void setMode(BackupMode mode) {
         this.mode = mode;
+    }
+
+    public boolean isEncrypted() {
+        return encrypted;
+    }
+
+    public void setEncrypted(boolean encrypted) {
+        this.encrypted = encrypted;
     }
 
     public String getVmInstanceUuid() {

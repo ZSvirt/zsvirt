@@ -24,11 +24,11 @@ doc {
 				column {
 					name "volumeUuid"
 					enclosedIn "primaryStorageMigrateVolume"
-					desc "云盘UUID"
+					desc "硬盘UUID"
 					location "url"
 					type "String"
 					optional false
-					since "2.2"
+					since "zsv 2.2"
 				}
 				column {
 					name "dstPrimaryStorageUuid"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "2.2"
+					since "zsv 2.2"
 				}
 				column {
 					name "systemTags"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "2.2"
+					since "zsv 2.2"
 				}
 				column {
 					name "userTags"
@@ -55,7 +55,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "2.2"
+					since "zsv 2.2"
 				}
 			}
 		}

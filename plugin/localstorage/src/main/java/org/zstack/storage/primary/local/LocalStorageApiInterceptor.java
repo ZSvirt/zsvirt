@@ -1,8 +1,10 @@
 package org.zstack.storage.primary.local;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.zstack.compute.host.MountPointPathValidator;
 import org.zstack.compute.vm.IsoOperator;
 import org.zstack.core.cloudbus.CloudBus;
+import org.zstack.core.componentloader.PluginRegistry;
 import org.zstack.core.db.DatabaseFacade;
 import org.zstack.core.db.Q;
 import org.zstack.core.db.SQLBatch;
@@ -13,10 +15,15 @@ import org.zstack.header.apimediator.ApiMessageInterceptionException;
 import org.zstack.header.apimediator.GlobalApiMessageInterceptor;
 import org.zstack.header.apimediator.StopRoutingException;
 import org.zstack.header.errorcode.SysErrors;
+import org.zstack.header.agent.ProxyHardwareFactory;
+import org.zstack.header.host.APIMountBlockDeviceMsg;
 import org.zstack.header.host.HostInventory;
 import org.zstack.header.host.HostVO;
 import org.zstack.header.host.HostVO_;
 import org.zstack.header.message.APIMessage;
+import org.zstack.header.storage.primary.PrimaryStorageClusterRefVO;
+import org.zstack.header.storage.primary.PrimaryStorageClusterRefVO_;
+import org.zstack.header.storage.primary.PrimaryStorageConstants;
 import org.zstack.header.storage.primary.PrimaryStorageState;
 import org.zstack.header.storage.primary.PrimaryStorageVO;
 import org.zstack.header.storage.primary.PrimaryStorageVO_;
@@ -46,6 +53,8 @@ public class LocalStorageApiInterceptor implements GlobalApiMessageInterceptor {
     @Autowired
     private CloudBus bus;
     @Autowired
+    private PluginRegistry pluginRgty;
+    @Autowired
     protected PrimaryStoragePhysicalCapacityManager physicalCapacityMgr;
 
     @Override
@@ -56,9 +65,52 @@ public class LocalStorageApiInterceptor implements GlobalApiMessageInterceptor {
             validate((APILocalStorageMigrateVolumeMsg) msg);
         } else if (msg instanceof APILocalStorageGetVolumeMigratableHostsMsg) {
             validate((APILocalStorageGetVolumeMigratableHostsMsg) msg);
+        } else if (msg instanceof APIMountBlockDeviceMsg) {
+            validate((APIMountBlockDeviceMsg) msg);
         }
 
         return msg;
+    }
+
+    private void validate(APIMountBlockDeviceMsg msg) {
+        String clusterUuid = getClusterUuid(msg.getHostName());
+        if (clusterUuid == null) {
+            return;
+        }
+
+        List<String> primaryStorageUuids = Q.New(PrimaryStorageClusterRefVO.class)
+                .select(PrimaryStorageClusterRefVO_.primaryStorageUuid)
+                .eq(PrimaryStorageClusterRefVO_.clusterUuid, clusterUuid)
+                .listValues();
+        if (primaryStorageUuids.isEmpty()) {
+            return;
+        }
+
+        String mountPoint = MountPointPathValidator.validateAndNormalize(msg.getMountPoint());
+        List<String> localStorageUrls = Q.New(PrimaryStorageVO.class)
+                .select(PrimaryStorageVO_.url)
+                .eq(PrimaryStorageVO_.type, PrimaryStorageConstants.LOCAL_STORAGE_TYPE)
+                .in(PrimaryStorageVO_.uuid, primaryStorageUuids)
+                .listValues();
+
+        for (String url : localStorageUrls) {
+            if (!mountPoint.equals(MountPointPathValidator.normalize(url))) {
+                continue;
+            }
+            throw new ApiMessageInterceptionException(argerr(
+                    "url[%s] has been occupied by local primary storage in cluster[uuid:%s]",
+                    msg.getMountPoint(), clusterUuid));
+        }
+    }
+
+    private String getClusterUuid(String hostname) {
+        for (ProxyHardwareFactory factory : pluginRgty.getExtensionList(ProxyHardwareFactory.class)) {
+            String clusterUuid = factory.getClusterUuid(hostname);
+            if (clusterUuid != null) {
+                return clusterUuid;
+            }
+        }
+        return null;
     }
 
     @Override
@@ -68,7 +120,8 @@ public class LocalStorageApiInterceptor implements GlobalApiMessageInterceptor {
                 APIGetLocalStorageHostDiskCapacityMsg.class,
                 APIQueryLocalStorageResourceRefMsg.class,
                 APILocalStorageMigrateVolumeMsg.class,
-                APILocalStorageGetVolumeMigratableHostsMsg.class
+                APILocalStorageGetVolumeMigratableHostsMsg.class,
+                APIMountBlockDeviceMsg.class
         );
     }
 

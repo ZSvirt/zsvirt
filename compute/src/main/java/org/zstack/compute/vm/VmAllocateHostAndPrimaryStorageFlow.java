@@ -455,6 +455,7 @@ public class VmAllocateHostAndPrimaryStorageFlow implements Flow {
         } else {
             dataPs.add(null);
         }
+        filterPrimaryStorageCandidates(spec, rootPs, autoAllocateRootVolumePs);
 
         List<List<String>> finalPsCombos = new ArrayList<>();
         if (autoAllocateRootVolumePs && autoAllocateDataVolumePs) {
@@ -476,6 +477,13 @@ public class VmAllocateHostAndPrimaryStorageFlow implements Flow {
 
         rootPs.forEach(r -> dataPs.forEach(d -> finalPsCombos.add(Arrays.asList(r, d))));
         return finalPsCombos;
+    }
+
+    private void filterPrimaryStorageCandidates(VmInstanceSpec spec, List<String> rootPs, boolean rootAutoAllocation) {
+        for (VmAllocatePrimaryStorageExtensionPoint ext :
+                pluginRgty.getExtensionList(VmAllocatePrimaryStorageExtensionPoint.class)) {
+            ext.filterPrimaryStorageCandidates(spec, rootPs, rootAutoAllocation);
+        }
     }
 
     private void sortPrimaryStorages(final List<String> psUuids, String strategy, VmInstanceSpec.ImageSpec imageSpec) {

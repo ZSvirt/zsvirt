@@ -13,6 +13,7 @@ public class AccessKeyVO_ extends ResourceVO_ {
     public static volatile SingularAttribute<AccessKeyVO, String> AccessKeySecret;
     public static volatile SingularAttribute<AccessKeyVO, String> description;
     public static volatile SingularAttribute<AccessKeyVO, AccessKeyState> state;
+    public static volatile SingularAttribute<AccessKeyVO, AccessKeyType> type;
     public static volatile SingularAttribute<AccessKeyVO, Timestamp> createDate;
     public static volatile SingularAttribute<AccessKeyVO, Timestamp> lastOpDate;
 }

@@ -196,9 +196,9 @@ class MigrateVmSetDefaultRuleCase extends SubCase {
 
         retryInSecs {
             assert cmd != null
-            assert cmd.skipIpv6 == false
+            assert cmd.disableIp6Tables == false
             assert ccmd != null
-            assert ccmd.skipIpv6 == false
+            assert ccmd.disableIp6Tables == false
         }
     }
 }

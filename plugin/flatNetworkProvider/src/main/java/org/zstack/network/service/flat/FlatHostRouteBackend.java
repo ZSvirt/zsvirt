@@ -7,7 +7,6 @@ import org.zstack.core.cloudbus.CloudBusCallBack;
 import org.zstack.core.db.DatabaseFacade;
 import org.zstack.core.db.Q;
 import org.zstack.core.db.SQL;
-import org.zstack.core.db.SimpleQuery;
 import org.zstack.header.core.Completion;
 import org.zstack.header.managementnode.PrepareDbInitialValueExtensionPoint;
 import org.zstack.header.message.MessageReply;
@@ -123,14 +122,14 @@ public class FlatHostRouteBackend implements NetworkServiceHostRouteBackend, Dhc
 
     @Override
     public void prepareDbInitialValue() {
-        SimpleQuery<NetworkServiceProviderVO> query = dbf.createQuery(NetworkServiceProviderVO.class);
-        query.add(NetworkServiceProviderVO_.type, SimpleQuery.Op.EQ, FlatNetworkServiceConstant.FLAT_NETWORK_SERVICE_TYPE_STRING);
-        NetworkServiceProviderVO rpvo = query.find();
+        NetworkServiceProviderVO rpvo = Q.New(NetworkServiceProviderVO.class)
+                .eq(NetworkServiceProviderVO_.type, FlatNetworkServiceConstant.FLAT_NETWORK_SERVICE_TYPE_STRING)
+                .find();
         if (rpvo != null) {
             // check if any network service type missing, if any, complement them
-            SimpleQuery<NetworkServiceTypeVO> q = dbf.createQuery(NetworkServiceTypeVO.class);
-            q.add(NetworkServiceTypeVO_.networkServiceProviderUuid, SimpleQuery.Op.EQ, rpvo.getUuid());
-            List<NetworkServiceTypeVO> refs = q.list();
+            List<NetworkServiceTypeVO> refs = Q.New(NetworkServiceTypeVO.class)
+                    .eq(NetworkServiceTypeVO_.networkServiceProviderUuid, rpvo.getUuid())
+                    .list();
             Set<String> types = new HashSet<String>();
             for (NetworkServiceTypeVO ref : refs) {
                 types.add(ref.getType());

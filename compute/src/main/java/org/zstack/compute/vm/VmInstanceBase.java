@@ -140,6 +140,8 @@ public class VmInstanceBase extends AbstractVmInstance {
     @Autowired
     private TagManager tagMgr;
     @Autowired
+    private VmSensitiveTagEncryptor vmSensitiveTagEncryptor;
+    @Autowired
     private VmInstanceResourceMetadataManager vidm;
     @Autowired
     private NetworkServiceManager nwServiceMgr;
@@ -151,6 +153,7 @@ public class VmInstanceBase extends AbstractVmInstance {
     protected String syncThreadName;
     private final static StaticIpOperator ipOperator = new StaticIpOperator();
     private final static VmConfigSyncHelper vmConfigSyncHelper = new VmConfigSyncHelper();
+    private final static VmBootTimeUtils vmBootTimeUtils = new VmBootTimeUtils();
 
     private void detachTpmKeyProviderBestEffort(String tpmUuid) {
         if (tpmUuid == null) {
@@ -381,6 +384,7 @@ public class VmInstanceBase extends AbstractVmInstance {
                 }
 
                 self.setState(state);
+                self.setBootTime(getBootTimeAfterStateChanged(bs, state, getCurrentBootTimeForStateChange()));
                 self = merge(self);
             }
         };
@@ -417,6 +421,35 @@ public class VmInstanceBase extends AbstractVmInstance {
         }
 
         return self;
+    }
+
+    private Timestamp getCurrentBootTimeForStateChange() {
+        if (self.getBootTime() != null) {
+            return self.getBootTime();
+        }
+
+        return Q.New(VmInstanceVO.class)
+                .select(VmInstanceVO_.bootTime)
+                .eq(VmInstanceVO_.uuid, self.getUuid())
+                .findValue();
+    }
+
+    private Timestamp getBootTimeAfterStateChanged(VmInstanceState oldState, VmInstanceState newState, Timestamp currentBootTime) {
+        if (!VmBootTimeUtils.isBootTimeValidState(newState)) {
+            return null;
+        }
+
+        if (newState != VmInstanceState.Running) {
+            return currentBootTime;
+        }
+
+        if (oldState == VmInstanceState.Starting
+                || oldState == VmInstanceState.Rebooting
+                || (oldState == VmInstanceState.Resuming && currentBootTime == null)) {
+            return Timestamp.valueOf(LocalDateTime.now());
+        }
+
+        return currentBootTime;
     }
 
     @Override
@@ -3724,6 +3757,13 @@ public class VmInstanceBase extends AbstractVmInstance {
     private void handle(APIGetVmUptimeMsg msg) {
         APIGetVmUptimeReply reply = new APIGetVmUptimeReply();
 
+        String uptime = StringUtils.defaultString(vmBootTimeUtils.getBootTime(self.getUuid()), VmBootTimeUtils.UNKNOWN_UPTIME);
+        if (StringUtils.isNotEmpty(uptime)) {
+            reply.setUptime(uptime);
+            bus.reply(msg, reply);
+            return;
+        }
+
         GetVmUptimeMsg gmsg = new GetVmUptimeMsg();
         gmsg.setVmInstanceUuid(self.getUuid());
         gmsg.setHostUuid(self.getHostUuid());
@@ -3732,12 +3772,12 @@ public class VmInstanceBase extends AbstractVmInstance {
         bus.send(gmsg, new CloudBusCallBack(msg) {
             @Override
             public void run(MessageReply r) {
-                if (!r.isSuccess()) {
-                    reply.setSuccess(false);
-                    reply.setError(r.getError());
-                } else {
+                if (r.isSuccess()) {
                     GetVmUptimeReply re = (GetVmUptimeReply) r;
-                    reply.setUptime(re.getUptime());
+                    vmBootTimeUtils.backfillBootTimeIfMissing(self.getUuid(), re.getUptime());
+                    reply.setUptime(StringUtils.defaultString(vmBootTimeUtils.getBootTime(self.getUuid()), VmBootTimeUtils.UNKNOWN_UPTIME));
+                } else {
+                    reply.setUptime(VmBootTimeUtils.UNKNOWN_UPTIME);
                 }
                 bus.reply(msg, reply);
             }
@@ -5942,6 +5982,9 @@ public class VmInstanceBase extends AbstractVmInstance {
     private void doVmInstanceUpdate(final UpdateVmInstanceMsg msg, Completion completion) {
         refreshVO();
 
+        final boolean encryptionEnabledBeforeUpdate = vmSensitiveTagEncryptor.isVmEncryptionEnabled(self.getUuid());
+        final Boolean requestedVmEncryption = msg.getVmEncryption();
+
         List<Runnable> extensions = new ArrayList<>();
         final VmInstanceInventory vm = getSelfInventory();
         VmInstanceSpec spec = new VmInstanceSpec();
@@ -6089,6 +6132,61 @@ public class VmInstanceBase extends AbstractVmInstance {
 
         setAdditionalFlow(chain, spec);
 
+        chain.then(new Flow() {
+            String __name__ = "update-vm-encryption";
+
+            boolean encryptionApplied;
+
+            @Override
+            public boolean skip(Map data) {
+                return requestedVmEncryption == null;
+            }
+
+            @Override
+            public void run(FlowTrigger trigger, Map data) {
+                if (Boolean.TRUE.equals(requestedVmEncryption)) {
+                    if (encryptionEnabledBeforeUpdate) {
+                        syncVmEncryptionField(true);
+                        trigger.next();
+                        return;
+                    }
+                } else if (Boolean.FALSE.equals(requestedVmEncryption)) {
+                    if (!encryptionEnabledBeforeUpdate) {
+                        syncVmEncryptionField(false);
+                        trigger.next();
+                        return;
+                    }
+                } else {
+                    trigger.next();
+                    return;
+                }
+
+                try {
+                    applyVmEncryptionState(Boolean.TRUE.equals(requestedVmEncryption));
+                    encryptionApplied = true;
+                    trigger.next();
+                } catch (OperationFailureException ex) {
+                    restoreVmEncryptionState(encryptionEnabledBeforeUpdate);
+                    trigger.fail(ex.getErrorCode());
+                } catch (RuntimeException ex) {
+                    restoreVmEncryptionState(encryptionEnabledBeforeUpdate);
+                    trigger.fail(operr("failed to update vmEncryption for vm[uuid:%s]: %s",
+                            self.getUuid(), ex.getMessage()));
+                }
+            }
+
+            @Override
+            public void rollback(FlowRollback trigger, Map data) {
+                if (!encryptionApplied) {
+                    trigger.rollback();
+                    return;
+                }
+
+                restoreVmEncryptionState(encryptionEnabledBeforeUpdate);
+                trigger.rollback();
+            }
+        });
+
         chain.error(new FlowErrorHandler(completion) {
             @Override
             public void handle(ErrorCode errCode, Map data) {
@@ -6100,6 +6198,36 @@ public class VmInstanceBase extends AbstractVmInstance {
                 completion.success();
             }
         }).start();
+    }
+
+    private void applyVmEncryptionState(boolean enable) {
+        if (enable) {
+            self.setVmEncryption(true);
+            vmSensitiveTagEncryptor.enableVmEncryption(self.getUuid());
+        } else {
+            vmSensitiveTagEncryptor.disableVmEncryption(self.getUuid());
+            self.setVmEncryption(false);
+        }
+        dbf.update(self);
+    }
+
+    private void restoreVmEncryptionState(boolean encryptionEnabled) {
+        if (encryptionEnabled) {
+            self.setVmEncryption(true);
+            vmSensitiveTagEncryptor.enableVmEncryption(self.getUuid());
+        } else {
+            vmSensitiveTagEncryptor.disableVmEncryption(self.getUuid());
+            self.setVmEncryption(false);
+        }
+        dbf.update(self);
+    }
+
+    private void syncVmEncryptionField(boolean vmEncryption) {
+        if (self.isVmEncryption() == vmEncryption) {
+            return;
+        }
+        self.setVmEncryption(vmEncryption);
+        dbf.update(self);
     }
 
     private void handle(APIUpdateVmInstanceMsg msg) {
@@ -6117,6 +6245,7 @@ public class VmInstanceBase extends AbstractVmInstance {
         umsg.setGuestOsType(msg.getGuestOsType());
         umsg.setSystemTags(msg.getSystemTags());
         umsg.setAllocatorStrategy(msg.getAllocatorStrategy());
+        umsg.setVmEncryption(msg.getVmEncryption());
         bus.makeTargetServiceIdByResourceUuid(umsg, VmInstanceConstant.SERVICE_ID, umsg.getVmInstanceUuid());
         bus.send(umsg, new CloudBusCallBack(msg) {
             @Override
@@ -7750,6 +7879,11 @@ public class VmInstanceBase extends AbstractVmInstance {
             spec.setL3Networks(nicSpecs);
         } else {
             spec.setL3Networks(new ArrayList<>());
+        }
+
+        if (struct.getVmNicSecurityPolicyByDeviceId() != null && !struct.getVmNicSecurityPolicyByDeviceId().isEmpty()) {
+            spec.putExtensionData(VmInstanceConstant.Params.VmNicSecurityPolicyByDeviceId.toString(),
+                    struct.getVmNicSecurityPolicyByDeviceId());
         }
 
         spec.setDataVolumeTemplateUuids(struct.getDataVolumeTemplateUuids());

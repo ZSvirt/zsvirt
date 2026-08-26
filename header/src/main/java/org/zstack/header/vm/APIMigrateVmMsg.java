@@ -75,6 +75,13 @@ public class APIMigrateVmMsg extends APIMessage implements VmInstanceMessage, Mi
     @APIParam(required = false)
     private Integer downTime;
 
+    /**
+     * @desc opt-in migration TLS; default false (plain migration). Only true enables TLS on the hypervisor migrate path.
+     * @optional
+     */
+    @APIParam(required = false)
+    private Boolean enableMigrationTls = false;
+
     public void setVmInstanceUuid(String vmInstanceUuid) {
         this.vmInstanceUuid = vmInstanceUuid;
     }
@@ -134,12 +141,21 @@ public class APIMigrateVmMsg extends APIMessage implements VmInstanceMessage, Mi
         this.downTime = downTime;
     }
 
+    public Boolean getEnableMigrationTls() {
+        return enableMigrationTls;
+    }
+
+    public void setEnableMigrationTls(Boolean enableMigrationTls) {
+        this.enableMigrationTls = enableMigrationTls;
+    }
+
     public static APIMigrateVmMsg __example__() {
         APIMigrateVmMsg msg = new APIMigrateVmMsg();
         msg.vmInstanceUuid = uuid();
         msg.hostUuid = uuid();
         msg.setMigrateFromDestination(false);
         msg.setDownTime(300);
+        msg.setEnableMigrationTls(false);
         return msg;
     }
 

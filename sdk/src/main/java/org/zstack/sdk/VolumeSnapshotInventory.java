@@ -108,6 +108,22 @@ public class VolumeSnapshotInventory  {
         return this.size;
     }
 
+    public java.lang.Boolean encrypted;
+    public void setEncrypted(java.lang.Boolean encrypted) {
+        this.encrypted = encrypted;
+    }
+    public java.lang.Boolean getEncrypted() {
+        return this.encrypted;
+    }
+
+    public java.sql.Timestamp keyLastOpDate;
+    public void setKeyLastOpDate(java.sql.Timestamp keyLastOpDate) {
+        this.keyLastOpDate = keyLastOpDate;
+    }
+    public java.sql.Timestamp getKeyLastOpDate() {
+        return this.keyLastOpDate;
+    }
+
     public int distance;
     public void setDistance(int distance) {
         this.distance = distance;

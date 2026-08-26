@@ -9,8 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.zstack.core.db.DatabaseFacade;
-import org.zstack.core.db.SimpleQuery;
-import org.zstack.core.db.SimpleQuery.Op;
+import org.zstack.core.db.Q;
 import org.zstack.header.exception.CloudRuntimeException;
 import org.zstack.header.rest.RESTConstant;
 import org.zstack.header.rest.RESTFacade;
@@ -49,10 +48,10 @@ public class CephBackupStorageSimulator {
     }
 
     private CephBackupStorageConfig getConfig(AgentCommand cmd) {
-        SimpleQuery<BackupStorageVO> q = dbf.createQuery(BackupStorageVO.class);
-        q.select(BackupStorageVO_.name);
-        q.add(BackupStorageVO_.uuid, Op.EQ, cmd.getUuid());
-        String name = q.findValue();
+        String name = Q.New(BackupStorageVO.class)
+                .select(BackupStorageVO_.name)
+                .eq(BackupStorageVO_.uuid, cmd.getUuid())
+                .findValue();
 
         CephBackupStorageConfig c = config.config.get(name);
         if (c == null) {

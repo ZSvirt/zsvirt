@@ -24,18 +24,21 @@ import org.zstack.header.errorcode.ErrorCodeList;
 import org.zstack.header.host.HostConstant;
 import org.zstack.header.host.MigrateVmOnHypervisorMsg;
 import org.zstack.header.message.MessageReply;
+import org.zstack.header.storage.migration.KvmMigrateVmWithStorageExtensionPoint;
 import org.zstack.header.vm.*;
 import org.zstack.header.volume.VolumeAO;
 import org.zstack.header.volume.VolumeStatus;
 import org.zstack.header.volume.VolumeVO;
 import org.zstack.header.volume.VolumeVO_;
+import org.zstack.storage.migration.primary.PrimaryStorageLiveMigrateVmMsg;
+import org.zstack.storage.migration.primary.VolumeMigrationAO;
 import org.zstack.utils.Utils;
 import org.zstack.utils.logging.CLogger;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.zstack.core.Platform.operr;
@@ -70,9 +73,13 @@ public class KvmMigrateVmWithStorageWorkFlow implements KvmLiveMigrationWorkFlow
     public List<Flow> getPrepareFlows(ParamIn paramIn) {
         VmInstanceVO vmInstanceVO = dbf.findByUuid(paramIn.getVmInstanceInventory().getUuid(), VmInstanceVO.class);
 
+        Set<String> requiredPrimaryStorageUuids = getRequiredPrimaryStorageUuids(vmInstanceVO, paramIn.getMsg());
+        List<String> sortedDstPsUuids = requiredPrimaryStorageUuids.stream().sorted().collect(Collectors.toList());
+        final String allocFlowName = "allocate-host-connected-to-ps-" + String.join(",", sortedDstPsUuids);
+
         List<Flow> flows = new ArrayList<>();
         flows.add(new Flow() {
-            String __name__ = "allocate-host-connected-to-ps-" + paramIn.getMsg().getDstPrimaryStorageUuid();
+            String __name__ = allocFlowName;
 
             @Override
             public void run(FlowTrigger trigger, Map data) {
@@ -89,7 +96,7 @@ public class KvmMigrateVmWithStorageWorkFlow implements KvmLiveMigrationWorkFlow
                 amsg.setL3NetworkUuids(VmNicHelper.getL3Uuids(VmNicInventory.valueOf(vmInstanceVO.getVmNics())));
                 amsg.setVmNicParams(VmNicHelper.getVmNicParamsWithVfNic(vmInstanceVO));
                 amsg.setAllowNoL3Networks(true);
-                amsg.setRequiredPrimaryStorageUuids(Collections.singleton(paramIn.getMsg().getDstPrimaryStorageUuid()));
+                amsg.setRequiredPrimaryStorageUuids(requiredPrimaryStorageUuids);
                 amsg.addLocationSpec(VmLocationSpec.avoidHost(vmInstanceVO.getHostUuid()));
                 amsg.setCpuCapacity(vmInstanceVO.getCpuNum());
                 amsg.setMemoryCapacity(vmInstanceVO.getMemorySize());
@@ -141,7 +148,7 @@ public class KvmMigrateVmWithStorageWorkFlow implements KvmLiveMigrationWorkFlow
                 VmInstanceInventory vmInstanceInventory = VmInstanceInventory.valueOf(vmvo);
                 List<VmInstanceMigrateExtensionPoint> migrateVmExtensions = pluginRgty.getExtensionList(VmInstanceMigrateExtensionPoint.class);
                 // FIXME migration with storage do not match migrate extension point
-                new While<>(migrateVmExtensions).each((ext, comp) -> ext.preMigrateVm(vmInstanceInventory, paramIn.getDstHostInventory().getUuid(), new Completion(comp) {
+                new While<>(migrateVmExtensions).each((ext, comp) -> ext.preMigrateVm(vmInstanceInventory, paramIn.getDstHostInventory().getUuid(), paramIn.getMsg().getEnableMigrationTls(), new Completion(comp) {
                     @Override
                     public void success() {
                         comp.done();
@@ -149,11 +156,20 @@ public class KvmMigrateVmWithStorageWorkFlow implements KvmLiveMigrationWorkFlow
 
                     @Override
                     public void fail(ErrorCode errorCode) {
-                        comp.done();
+                        if (Boolean.TRUE.equals(paramIn.getMsg().getEnableMigrationTls())) {
+                            comp.addError(errorCode);
+                            comp.allDone();
+                        } else {
+                            comp.done();
+                        }
                     }
                 })).run(new WhileDoneCompletion(trigger) {
                     @Override
                     public void done(ErrorCodeList errorCodeList) {
+                        if (Boolean.TRUE.equals(paramIn.getMsg().getEnableMigrationTls()) && errorCodeList.hasError()) {
+                            trigger.fail(errorCodeList.getCauses().get(0));
+                            return;
+                        }
                         trigger.next();
                     }
                 });
@@ -173,6 +189,17 @@ public class KvmMigrateVmWithStorageWorkFlow implements KvmLiveMigrationWorkFlow
         });
 
         return flows;
+    }
+
+    private Set<String> getRequiredPrimaryStorageUuids(VmInstanceVO vmInstanceVO, PrimaryStorageLiveMigrateVmMsg msg) {
+        Map<String, String> volToDstPs = VolumeMigrationAO.toVolToDstMap(msg.getVolumeMigrationAOs());
+        if (msg.isLegacyRootOnlyMigration()) {
+            return volToDstPs.values().stream().collect(Collectors.toSet());
+        }
+
+        return vmInstanceVO.getAllDiskVolumes().stream()
+                .map(volume -> volToDstPs.getOrDefault(volume.getUuid(), volume.getPrimaryStorageUuid()))
+                .collect(Collectors.toSet());
     }
 
     @Override
@@ -254,6 +281,26 @@ public class KvmMigrateVmWithStorageWorkFlow implements KvmLiveMigrationWorkFlow
                 mmsg.setVmInventory(paramIn.getVmInstanceInventory());
                 mmsg.setStorageMigrationPolicy(MigrateVmOnHypervisorMsg.StorageMigrationPolicy.FullCopy);
                 mmsg.setBandwidth((long) Math.ceil((double) paramIn.getTotalBandwidth() / paramIn.getVolumesToMigrate().size()));
+                mmsg.setEnableMigrationTls(paramIn.getMsg().getEnableMigrationTls());
+                for (KvmMigrateVmWithStorageExtensionPoint ext : pluginRgty.getExtensionList(KvmMigrateVmWithStorageExtensionPoint.class)) {
+                    ErrorCode err;
+                    try {
+                        err = ext.beforeMigrateVmWithStorage(
+                                paramIn.getDstHostInventory(),
+                                paramIn.getVmInstanceInventory(),
+                                paramIn.getVolumesToMigrate(),
+                                paramIn.getVolumeMappingDict(),
+                                mmsg);
+                    } catch (Exception e) {
+                        trigger.fail(operr("failed to run migrate VM with storage extension[%s] for vm[uuid:%s]: %s",
+                                ext.getClass().getName(), paramIn.getVmInstanceInventory().getUuid(), e.getMessage()));
+                        return;
+                    }
+                    if (err != null) {
+                        trigger.fail(err);
+                        return;
+                    }
+                }
                 bus.makeTargetServiceIdByResourceUuid(mmsg, HostConstant.SERVICE_ID, mmsg.getHostUuid());
                 bus.send(mmsg, new CloudBusCallBack(trigger) {
                     @Override

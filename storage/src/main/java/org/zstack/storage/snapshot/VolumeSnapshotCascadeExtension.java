@@ -10,8 +10,6 @@ import org.zstack.core.cloudbus.CloudBusCallBack;
 import org.zstack.core.componentloader.PluginRegistry;
 import org.zstack.core.db.DatabaseFacade;
 import org.zstack.core.db.Q;
-import org.zstack.core.db.SimpleQuery;
-import org.zstack.core.db.SimpleQuery.Op;
 import org.zstack.core.errorcode.ErrorFacadeImpl;
 import org.zstack.header.core.Completion;
 import org.zstack.header.core.WhileDoneCompletion;
@@ -74,11 +72,13 @@ public class VolumeSnapshotCascadeExtension extends AbstractAsyncCascadeExtensio
                 sinvs.forEach(s -> dbf.eoCleanup(VolumeSnapshotVO.class, s.getUuid()));
             } else {
                 dbf.eoCleanup(VolumeSnapshotVO.class);
+                dbf.eoCleanup(VolumeSnapshotTreeVO.class);
                 dbf.eoCleanup(VolumeSnapshotGroupVO.class);
             }
         } catch (NullPointerException e) {
             logger.warn(e.getLocalizedMessage());
             dbf.eoCleanup(VolumeSnapshotVO.class);
+            dbf.eoCleanup(VolumeSnapshotTreeVO.class);
             dbf.eoCleanup(VolumeSnapshotGroupVO.class);
         } finally {
             completion.success();
@@ -282,9 +282,9 @@ public class VolumeSnapshotCascadeExtension extends AbstractAsyncCascadeExtensio
                 return null;
             }
 
-            SimpleQuery<VolumeSnapshotVO> q = dbf.createQuery(VolumeSnapshotVO.class);
-            q.add(VolumeSnapshotVO_.volumeUuid, Op.IN, volUuids);
-            List<VolumeSnapshotVO> vos = q.list();
+            List<VolumeSnapshotVO> vos = Q.New(VolumeSnapshotVO.class)
+                    .in(VolumeSnapshotVO_.volumeUuid, volUuids)
+                    .list();
             if (!vos.isEmpty()) {
                 ret = VolumeSnapshotInventory.valueOf(vos);
             }

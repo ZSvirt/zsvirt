@@ -1,6 +1,8 @@
 package org.zstack.log;
 
+import org.apache.logging.log4j.Level;
 import org.springframework.http.HttpMethod;
+import org.zstack.header.log.NoLogging;
 import org.zstack.header.message.APICreateMessage;
 import org.zstack.header.message.APIEvent;
 import org.zstack.header.message.APIMessage;
@@ -23,6 +25,9 @@ public class APIAddLogConfigurationMsg extends APICreateMessage implements APIAu
     private String description;
     @APIParam
     private String type;
+    @APIParam(validValues = {"OFF", "FATAL", "ERROR", "WARN", "INFO", "DEBUG", "TRACE", "ALL"}, required = false)
+    private String level;
+    @NoLogging
     @APIParam
     private String configuration;
 
@@ -58,6 +63,14 @@ public class APIAddLogConfigurationMsg extends APICreateMessage implements APIAu
         this.description = description;
     }
 
+    public String getLevel() {
+        return level;
+    }
+
+    public void setLevel(String level) {
+        this.level = level;
+    }
+
     @Override
     public Result audit(APIMessage msg, APIEvent rsp) {
         return null;
@@ -67,6 +80,7 @@ public class APIAddLogConfigurationMsg extends APICreateMessage implements APIAu
         APIAddLogConfigurationMsg msg = new APIAddLogConfigurationMsg();
         msg.setName("syslog");
         msg.setType("log4j2");
+        msg.setLevel(Level.ERROR.name());
         msg.setConfiguration("{\n" +
                 "\"appenderType\": \"Syslog\",\n" +
                 "\"configuration\": {\n" +

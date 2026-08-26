@@ -92,6 +92,22 @@ public class VolumeBackupInventory  {
         return this.mode;
     }
 
+    public java.lang.Boolean encrypted;
+    public void setEncrypted(java.lang.Boolean encrypted) {
+        this.encrypted = encrypted;
+    }
+    public java.lang.Boolean getEncrypted() {
+        return this.encrypted;
+    }
+
+    public java.sql.Timestamp keyLastOpDate;
+    public void setKeyLastOpDate(java.sql.Timestamp keyLastOpDate) {
+        this.keyLastOpDate = keyLastOpDate;
+    }
+    public java.sql.Timestamp getKeyLastOpDate() {
+        return this.keyLastOpDate;
+    }
+
     public java.lang.String vmInstanceUuid;
     public void setVmInstanceUuid(java.lang.String vmInstanceUuid) {
         this.vmInstanceUuid = vmInstanceUuid;

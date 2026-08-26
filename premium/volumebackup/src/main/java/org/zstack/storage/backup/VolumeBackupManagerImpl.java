@@ -9,6 +9,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.zstack.compute.vm.NewVmInstanceMsgBuilder;
 import org.zstack.core.Platform;
 import org.zstack.core.asyncbatch.While;
+import org.zstack.core.cascade.CascadeConstant;
+import org.zstack.core.cascade.CascadeFacade;
 import org.zstack.core.cloudbus.CloudBus;
 import org.zstack.core.cloudbus.CloudBusCallBack;
 import org.zstack.core.cloudbus.MessageSafe;
@@ -110,6 +112,8 @@ public class VolumeBackupManagerImpl extends AbstractService implements
     private AccountManager acntMgr;
     @Autowired
     private PluginRegistry pluginRgty;
+    @Autowired
+    private CascadeFacade casf;
     @Autowired
     private VmInstanceResourceMetadataManager vidm;
 
@@ -395,6 +399,7 @@ public class VolumeBackupManagerImpl extends AbstractService implements
                 cmsg.setResourceUuid(msg.getResourceUuid());
                 cmsg.setDefaultL3NetworkUuid(msg.getDefaultL3NetworkUuid());
                 cmsg.setStrategy(msg.getStrategy());
+                cmsg.setVmEncryption(msg.getVmEncryption());
 
                 Map<String, DiskAO> diskAOBySourceUuid = Optional.ofNullable(msg.getDiskAOs())
                         .orElse(Collections.emptyList()).stream()
@@ -405,6 +410,7 @@ public class VolumeBackupManagerImpl extends AbstractService implements
                 DiskAO rootUserAO = diskAOBySourceUuid.get(rootBundle.originVolumeUuid);
                 DiskAO rootDisk = DiskAO.rootDisk();
                 rootDisk.withImage(rootBundle.imageUuid);
+                rootDisk.setVolumeBackupTemplate(true);
                 rootDisk.setPrimaryStorageUuid(
                         rootUserAO != null && rootUserAO.getPrimaryStorageUuid() != null
                                 ? rootUserAO.getPrimaryStorageUuid()
@@ -413,6 +419,9 @@ public class VolumeBackupManagerImpl extends AbstractService implements
                 if (rootUserAO != null && rootUserAO.getName() != null) {
                     rootDisk.setName(rootUserAO.getName());
                 }
+                if (rootUserAO != null) {
+                    rootDisk.setEncrypted(rootUserAO.getEncrypted());
+                }
                 cmsg.setRootDisk(rootDisk);
 
                 // sort data disks by device-id to preserve original disk order
@@ -420,18 +429,22 @@ public class VolumeBackupManagerImpl extends AbstractService implements
                         it.metadata.getDeviceId() != null ? it.metadata.getDeviceId() : Integer.MAX_VALUE));
 
                 // Data disks go through deprecatedDataVolumeSpecs for legacy template flow
-                // (naming + device-id restoration). Only templateUuid/primaryStorageUuid/systemTags
+                // (naming + device-id restoration). Only templateUuid/primaryStorageUuid/systemTags/encrypted
                 // are set; size/diskOffering omitted so allocate flows skip these.
                 List<DiskAO> templateDataDisks = new ArrayList<>();
                 for (Bundle dataBundle : createStruct.dataVolBuckets) {
                     DiskAO userAO = diskAOBySourceUuid.get(dataBundle.originVolumeUuid);
                     DiskAO disk = DiskAO.nonRootDisk();
                     disk.setTemplateUuid(dataBundle.imageUuid);
+                    disk.setVolumeBackupTemplate(true);
                     disk.setPrimaryStorageUuid(
                             userAO != null && userAO.getPrimaryStorageUuid() != null
                                     ? userAO.getPrimaryStorageUuid()
                                     : msg.getPrimaryStorageUuidForDataVolume());
                     disk.setSystemTags(resolveSystemTags(userAO, dataBundle.metadata, msg.getDataVolumeSystemTags()));
+                    if (userAO != null) {
+                        disk.setEncrypted(userAO.getEncrypted());
+                    }
                     templateDataDisks.add(disk);
                 }
                 cmsg.setDeprecatedDataVolumeSpecs(templateDataDisks);
@@ -1036,13 +1049,13 @@ public class VolumeBackupManagerImpl extends AbstractService implements
             return;
         }
 
+        String backupUuid = backup.getUuid();
         if (CollectionUtils.isEmpty(backup.getBackupStorageRefs())) {
             dbf.remove(backup);
             completion.success();
             return;
         }
 
-        String backupUuid = backup.getUuid();
         While.Do<DeleteBitsOnBackupStorageMsg> consumer, msgSender;
         BiFunction<String, String, Boolean> otherDelMsgBuilder;
         Map<String, VolumeBackupDeletionMsg> otherMsgs = new HashMap<>();
@@ -1405,7 +1418,8 @@ public class VolumeBackupManagerImpl extends AbstractService implements
             @Override
             public void run(SyncTaskChain chain) {
                 APIDeleteVolumeBackupEvent evt = new APIDeleteVolumeBackupEvent(msg.getId());
-                doDeleteVolumeBackup(msg,  msg.getBackupStorageUuids(), new Completion(msg, chain) {
+                // TODO: switch to cascade deletion when encrypted volume backup deletion is supported.
+                doDeleteVolumeBackup(msg, msg.getBackupStorageUuids(), new Completion(msg, chain) {
                     @Override
                     public void success() {
                         bus.publish(evt);
@@ -1436,31 +1450,32 @@ public class VolumeBackupManagerImpl extends AbstractService implements
             return;
         }
 
-        new While<>(vos).each((vo, whileCompletion) -> {
-            VolumeBackupDeletionMsg dmsg = new VolumeBackupDeletionMsg();
-            dmsg.setBackupStorageUuids(msg.getBackupStorageUuids());
-            dmsg.setUuid(vo.getUuid());
-            dmsg.setHandleDependency(msg.isHandleDependency());
-            bus.makeTargetServiceIdByResourceUuid(dmsg, VolumeBackupConstant.SERVICE_ID, vo.getVolumeUuid());
-            bus.send(dmsg, new CloudBusCallBack(whileCompletion) {
-                @Override
-                public void run(MessageReply reply) {
-                    if (!reply.isSuccess()) {
-                        logger.warn(String.format("delete volume backup failed: %s", reply.getError().getDetails()));
+        List<VolumeBackupDeletionStruct> structs = vos.stream().map(vo -> {
+            VolumeBackupDeletionStruct struct = new VolumeBackupDeletionStruct();
+            struct.setVolumeBackupUuid(vo.getUuid());
+            struct.setBackupStorageUuids(msg.getBackupStorageUuids());
+            struct.setHandleDependency(msg.isHandleDependency());
+            return struct;
+        }).collect(Collectors.toList());
+
+        casf.asyncCascade(CascadeConstant.DELETION_DELETE_CODE,
+                VolumeBackupVO.class.getSimpleName(),
+                structs,
+                new Completion(msg) {
+                    @Override
+                    public void success() {
+                        for (CleanUpVmBackupExtensionPoint ext : pluginRgty.getExtensionList(CleanUpVmBackupExtensionPoint.class)) {
+                            ext.afterCleanUpVmBackup(msg.getGroupUuid());
+                        }
+                        bus.publish(evt);
                     }
 
-                    whileCompletion.done();
-                }
-            });
-        }).run(new WhileDoneCompletion(msg) {
-            @Override
-            public void done(ErrorCodeList errorCodeList) {
-                for (CleanUpVmBackupExtensionPoint ext : pluginRgty.getExtensionList(CleanUpVmBackupExtensionPoint.class)) {
-                    ext.afterCleanUpVmBackup(msg.getGroupUuid());
-                }
-                bus.publish(evt);
-            }
-        });
+                    @Override
+                    public void fail(ErrorCode errorCode) {
+                        evt.setError(errorCode);
+                        bus.publish(evt);
+                    }
+                });
     }
 
     private void deleteImageAsync(String imageUuid, String bsUuid) {
@@ -2329,6 +2344,10 @@ public class VolumeBackupManagerImpl extends AbstractService implements
 
     private Map<String, String> getBackupBsUuids(List<VolumeBackupVO> vos, String bsUuid) {
         Map<String, String> res = new HashMap<>();
+        if (vos.isEmpty()) {
+            return res;
+        }
+
         if (bsUuid != null) {
             vos.forEach(vo -> {
                 res.put(vo.getUuid(), bsUuid);
@@ -2337,18 +2356,29 @@ public class VolumeBackupManagerImpl extends AbstractService implements
             return res;
         }
 
-        List<String> remoteUuids = ImageStoreBackupStorageSelector.getRemoteBsUuids();
+        Set<String> remoteUuids = new HashSet<>(ImageStoreBackupStorageSelector.getRemoteBsUuids());
+        List<String> backupUuids = vos.stream().map(VolumeBackupVO::getUuid).collect(Collectors.toList());
+        Map<String, List<String>> backupStorageUuidsByBackupUuid = new HashMap<>();
+        List<Tuple> refs = Q.New(VolumeBackupStorageRefVO.class)
+                .in(VolumeBackupStorageRefVO_.volumeBackupUuid, backupUuids)
+                .select(VolumeBackupStorageRefVO_.volumeBackupUuid, VolumeBackupStorageRefVO_.backupStorageUuid)
+                .listTuple();
+        for (Tuple ref : refs) {
+            String backupStorageUuid = ref.get(1, String.class);
+            if (remoteUuids.contains(backupStorageUuid)) {
+                continue;
+            }
+            backupStorageUuidsByBackupUuid.computeIfAbsent(ref.get(0, String.class), k -> new ArrayList<>()).add(backupStorageUuid);
+        }
+
         vos.forEach(vo -> {
-            List<String> backupStorageUuids = Q.New(VolumeBackupStorageRefVO.class)
-                    .eq(VolumeBackupStorageRefVO_.volumeBackupUuid, vo.getUuid())
-                    .select(VolumeBackupStorageRefVO_.backupStorageUuid)
-                    .listValues();
-            backupStorageUuids.removeAll(remoteUuids);
+            List<String> backupStorageUuids = backupStorageUuidsByBackupUuid.getOrDefault(vo.getUuid(), Collections.emptyList());
             if (backupStorageUuids.isEmpty()) {
                 throw new OperationFailureException(Platform.argerr("Volume backup[uuid:%s] not found on any backup storage", vo.getUuid()));
             }
-            Collections.shuffle(backupStorageUuids);
-            res.put(vo.getUuid(), backupStorageUuids.get(0));
+            List<String> candidates = new ArrayList<>(backupStorageUuids);
+            Collections.shuffle(candidates);
+            res.put(vo.getUuid(), candidates.get(0));
         });
 
         return res;
@@ -2434,6 +2464,7 @@ public class VolumeBackupManagerImpl extends AbstractService implements
                         cmsg.setName(volumeVO.getName());
                         cmsg.setDescription("Recovered from backup: " + backupUuid);
                         cmsg.setPrimaryStorageUuid(volumeVO.getPrimaryStorageUuid());
+                        cmsg.setEncryptedVolumeBackupRestore(volumeVO.isEncrypted());
 
                         if (VolumeSystemTags.VOLUME_PROVISIONING_STRATEGY.hasTag(volumeVO.getUuid(), VolumeVO.class)) {
                             cmsg.setSystemTags(Arrays.asList(VolumeSystemTags.VOLUME_PROVISIONING_STRATEGY.getTag(volumeVO.getUuid(), VolumeVO.class)));
@@ -2588,6 +2619,8 @@ public class VolumeBackupManagerImpl extends AbstractService implements
                         ChangeVmImageMsg cmsg = new ChangeVmImageMsg();
                         cmsg.setImageUuid(imageUuid);
                         cmsg.setVmInstanceUuid(getVmInstanceUuid(backupUuid));
+                        cmsg.setEncryptedVolumeBackupRestore(
+                                dbf.findByUuid(backupUuid, VolumeBackupVO.class).isEncrypted());
                         bus.makeTargetServiceIdByResourceUuid(cmsg, VmInstanceConstant.SERVICE_ID, cmsg.getVmInstanceUuid());
                         bus.send(cmsg, new CloudBusCallBack(trigger) {
                             @Override

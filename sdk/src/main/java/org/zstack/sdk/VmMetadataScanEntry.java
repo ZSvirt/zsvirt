@@ -84,4 +84,12 @@ public class VmMetadataScanEntry  {
         return this.incomplete;
     }
 
+    public boolean regenerateUuidRequired;
+    public void setRegenerateUuidRequired(boolean regenerateUuidRequired) {
+        this.regenerateUuidRequired = regenerateUuidRequired;
+    }
+    public boolean getRegenerateUuidRequired() {
+        return this.regenerateUuidRequired;
+    }
+
 }

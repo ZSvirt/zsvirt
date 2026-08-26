@@ -1,4 +1,4 @@
-package org.zstack.allocator.domain.header;
+package org.zstack.header.allocator;
 
 public enum AllocatorDomainScene {
     NewCreate,

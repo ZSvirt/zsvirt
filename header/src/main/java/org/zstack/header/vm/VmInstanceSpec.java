@@ -1,7 +1,7 @@
 package org.zstack.header.vm;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.zstack.header.allocator.AllocationScene;
+import org.zstack.header.allocator.AllocatorDomainScene;
 import org.zstack.header.cluster.ClusterVO;
 import org.zstack.header.configuration.DiskOfferingInventory;
 import org.zstack.header.configuration.VmCustomSpecificationStruct;
@@ -370,7 +370,7 @@ public class VmInstanceSpec implements Serializable {
     private boolean createPaused;
     private boolean instantiateResourcesSuccess;
     private boolean instantiateResourcesSkipExisting;
-    private AllocationScene allocationScene;
+    private AllocatorDomainScene allocationScene;
 
     private List<String> rootVolumeSystemTags;
     private List<String> dataVolumeSystemTags;
@@ -481,11 +481,11 @@ public class VmInstanceSpec implements Serializable {
         this.skipIpAllocation = skipIpAllocation;
     }
 
-    public AllocationScene getAllocationScene() {
+    public AllocatorDomainScene getAllocationScene() {
         return allocationScene;
     }
 
-    public void setAllocationScene(AllocationScene allocationScene) {
+    public void setAllocationScene(AllocatorDomainScene allocationScene) {
         this.allocationScene = allocationScene;
     }
 

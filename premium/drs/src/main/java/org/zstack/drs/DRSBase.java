@@ -29,6 +29,7 @@ import org.zstack.drs.message.*;
 import org.zstack.drs.util.DRSActivityConcurrencyControl;
 import org.zstack.drs.util.DRSUtils;
 import org.zstack.header.allocator.HostCapacityVO;
+import org.zstack.header.allocator.AllocatorDomainScene;
 import org.zstack.header.core.Completion;
 import org.zstack.header.core.WhileDoneCompletion;
 import org.zstack.header.core.workflow.*;
@@ -870,6 +871,7 @@ public class DRSBase {
         MigrateVmMsg msg = new MigrateVmMsg();
         msg.setVmInstanceUuid(activityVO.getVmUuid());
         msg.setTargetHostUuid(activityVO.getVmTargetHostUuid());
+        msg.setAllocationScene(AllocatorDomainScene.Drs);
         bus.makeTargetServiceIdByResourceUuid(msg, VmInstanceConstant.SERVICE_ID, activityVO.getVmUuid());
         bus.send(msg, new CloudBusCallBack(completion) {
             @Override

@@ -35,7 +35,7 @@ public class AllocateHostMsg extends NeedReplyMessage {
     private final List<Set<String>> optionalPrimaryStorageUuids = new ArrayList<>();
     private boolean fullAllocate = true;
     private long oldMemoryCapacity = 0;
-    private AllocationScene allocationScene;
+    private AllocatorDomainScene allocationScene;
     private String architecture;
 
     public List<VmLocationSpec> getLocationSpecs() {
@@ -62,11 +62,11 @@ public class AllocateHostMsg extends NeedReplyMessage {
         }
     }
 
-    public AllocationScene getAllocationScene() {
+    public AllocatorDomainScene getAllocationScene() {
         return allocationScene;
     }
 
-    public void setAllocationScene(AllocationScene allocationScene) {
+    public void setAllocationScene(AllocatorDomainScene allocationScene) {
         this.allocationScene = allocationScene;
     }
 

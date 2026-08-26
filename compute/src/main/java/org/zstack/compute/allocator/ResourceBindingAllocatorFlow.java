@@ -9,7 +9,6 @@ import org.zstack.compute.vm.VmSystemTags;
 import org.zstack.core.Platform;
 import org.zstack.core.componentloader.PluginRegistry;
 import org.zstack.header.allocator.AbstractHostAllocatorFlow;
-import org.zstack.header.allocator.AllocationScene;
 import org.zstack.header.allocator.HostCandidate;
 import org.zstack.header.allocator.ResourceBindingCollector;
 import org.zstack.header.allocator.ResourceBindingStrategy;
@@ -63,23 +62,10 @@ public class ResourceBindingAllocatorFlow extends AbstractHostAllocatorFlow {
         return resourceMap;
     }
 
-    private boolean validateAllocationScene() {
-        String as = rcf.getResourceConfigValue(VmGlobalConfig.RESOURCE_BINDING_SCENE, spec.getVmInstance().getUuid(), String.class);
-        if (as.equals(AllocationScene.All.toString())) {
-            return true;
-        }
-
-        if (spec.getAllocationScene() != null) {
-            return as.equals(spec.getAllocationScene().toString());
-        }
-
-        return false;
-    }
-
     @Override
     public void allocate() {
         Boolean resourceConfig = rcf.getResourceConfigValue(VmGlobalConfig.VM_HA_ACROSS_CLUSTERS, spec.getVmInstance().getUuid(), Boolean.class);
-        if (!validateAllocationScene() || (!VmSystemTags.VM_RESOURCE_BINGDING.hasTag(spec.getVmInstance().getUuid()) && resourceConfig)) {
+        if (!VmSystemTags.VM_RESOURCE_BINGDING.hasTag(spec.getVmInstance().getUuid()) && resourceConfig) {
             next();
             return;
         }

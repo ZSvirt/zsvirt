@@ -44,7 +44,7 @@ public class HostAllocatorSpec {
     private Map<String, Set<String>> host2PrimaryStorageBlacklist = new HashMap<>();
     private boolean fullAllocate;
     private long oldMemoryCapacity = 0;
-    private AllocationScene allocationScene;
+    private AllocatorDomainScene allocationScene;
     private String architecture;
 
     public List<VmLocationSpec> getLocationSpecs() {
@@ -79,11 +79,11 @@ public class HostAllocatorSpec {
         this.hostUuid = hostUuid;
     }
 
-    public AllocationScene getAllocationScene() {
+    public AllocatorDomainScene getAllocationScene() {
         return allocationScene;
     }
 
-    public void setAllocationScene(AllocationScene allocationScene) {
+    public void setAllocationScene(AllocatorDomainScene allocationScene) {
         this.allocationScene = allocationScene;
     }
 

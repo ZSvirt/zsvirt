@@ -4,11 +4,7 @@
        xmlns:zstack="http://zstack.org/schema/zstack"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
     http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
-
-
-
-
-    http://zstack.org/schema/zstack 
+    http://zstack.org/schema/zstack
     http://zstack.org/schema/zstack/plugin.xsd"
        default-init-method="init" default-destroy-method="destroy">
 

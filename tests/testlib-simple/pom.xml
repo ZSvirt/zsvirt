@@ -205,6 +205,11 @@
         </dependency>
         <dependency>
             <groupId>org.zstack</groupId>
+            <artifactId>mediator</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.zstack</groupId>
             <artifactId>external-service</artifactId>
             <version>${project.version}</version>
         </dependency>

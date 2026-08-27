@@ -333,7 +333,7 @@ files in each repository for details.
     <td width="50%">
       <h3>🎮 Discord</h3>
       <p>Join the ZSvirt community to ask questions, share ideas, and connect with other users.</p>
-      <a href="https://discord.com/invite/j2u94Jqf7"><strong>Join on Discord →</strong></a>
+      <a href="https://discord.com/invite/KHsw63z9xA"><strong>Join on Discord →</strong></a>
     </td>
   </tr>
 </table>

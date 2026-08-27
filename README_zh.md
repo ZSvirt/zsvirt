@@ -66,11 +66,13 @@
   </p>
 </div>
 
+> **立即体验 — 无需物理服务器。** 从[下载中心](https://zsvirt.io/download)获取 qcow2 或 OVA 镜像，在 VMware、VirtualBox、KVM 或云主机（嵌套虚拟化）中创建一台虚拟机，配置 IP 后 ZSvirt 管理节点即可就绪。参见[在虚拟机中运行 ZSvirt](https://docs.zsvirt.io/en/docs/quick-start/nested-virtualization-management-node)或直接进入[快速开始](https://zsvirt.io/docs/quick-start)。
+
 ## ZSvirt介绍
 
-ZSvirt 将 [ZStack](https://www.zstack.io/) 经企业级实践验证的 ZSphere 虚拟化引擎带入开源世界。
+ZSvirt 将 [ZStack](https://www.zstack.io/) 经企业级实践验证的 ZSphere 虚拟化引擎带入开源世界。依托成熟的基础设施厂商 [ZStack](https://www.zstack.io/)，ZSvirt 提供轻量、可扩展的虚拟化平台，用于运行和管理虚拟机，不受厂商锁定限制。
 
-依托成熟的基础设施厂商 [ZStack](https://www.zstack.io/)，ZSvirt 提供轻量、可扩展的虚拟化平台。从高性能家庭实验室到超大规模基础设施，ZSvirt 致力于为用户提供不受厂商锁定限制的自由选择。
+安装管理节点，添加基于 KVM 的主机，即可通过 Web 界面、RESTful API（提供 Terraform 与 Go/Python/Java SDK）或 CLI 管理整个环境——虚拟机、集群、存储与网络。平台内置 VMware 迁移工具（在线迁移、OVF 导入与 VMDK 上传）。
 
 ## 产品导览
 
@@ -114,7 +116,7 @@ ZSvirt 将 [ZStack](https://www.zstack.io/) 经企业级实践验证的 ZSphere 
 
 <br>
 
-<details>
+<details open>
   <summary>
     <strong>🔄 迁移管理 — 工作负载迁移</strong>
   </summary>
@@ -134,7 +136,7 @@ ZSvirt 将 [ZStack](https://www.zstack.io/) 经企业级实践验证的 ZSphere 
 
 ## 在线体验
 
-[ZSvirt 在线体验环境](https://demo.zsvirt.io/)是一个可免费体验 ZSvirt 的托管环境，无需在本地安装。完成注册并登录后，即可开始探索 ZSvirt 的各项功能。
+[ZSvirt 在线体验环境](https://demo.zsvirt.io/)是一个可免费体验 ZSvirt 的托管环境，无需本地安装，也无需注册。打开链接，点击 **Demo Login** 即可开始探索 ZSvirt 的各项功能。
 
 ## 系统架构
 
@@ -187,6 +189,8 @@ ZSvirt 提供面向迁移的功能和运维工具，帮助用户评估、规划�
 ## 快速开始
 
 体验 ZSvirt 最快捷的方式是阅读产品文档中的快速开始指南。该指南将引导你准备计算、网络和存储资源，初始化管理服务，并创建第一台虚拟机。
+
+想先在虚拟机里试试？从[下载中心](https://zsvirt.io/download)获取 qcow2 或 OVA 镜像，在任何 hypervisor 中运行管理节点即可——参见[在虚拟机中运行 ZSvirt](https://docs.zsvirt.io/en/docs/quick-start/nested-virtualization-management-node)。
 
 🚀 [快速开始](https://zsvirt.io/docs/quick-start)<br>
 ▶️ [视频链接](https://youtu.be/LsSJlBRUvYw)

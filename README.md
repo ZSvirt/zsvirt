@@ -64,8 +64,12 @@
   </p>
 </div>
 
+> **Try it now — no physical hardware needed.** Grab the [qcow2 or OVA image](https://zsvirt.io/en/download), boot it as a VM on VMware, VirtualBox, KVM, or a cloud host (nested virtualization), set an IP, and the ZSvirt management node is ready. See [Run ZSvirt inside a VM](https://docs.zsvirt.io/en/docs/quick-start/nested-virtualization-management-node) or jump to the [Quick Start](https://zsvirt.io/en/docs/quick-start).
+
 ## What is ZSvirt
-ZSvirt brings [ZStack](https://www.zstack-cloud.com/)'s enterprise-proven ZSphere virtualization engine into the open-source world. Backed by [ZStack](https://www.zstack-cloud.com/), a mature infrastructure leader, ZSvirt delivers a lightweight, scalable platform designed for absolute freedom—from high-performance homelabs to hyperscale infrastructure without vendor lock-in.
+ZSvirt brings [ZStack](https://www.zstack-cloud.com/)'s enterprise-proven ZSphere virtualization engine into the open-source world. Backed by [ZStack](https://www.zstack-cloud.com/), a mature infrastructure leader, ZSvirt is a lightweight, scalable platform for running and managing virtual machines without vendor lock-in.
+
+Install a management node, attach KVM-based hosts, and manage your whole environment — VMs, clusters, storage, and networks — through a web UI, a RESTful API (with Terraform and Go/Python/Java SDKs), or a CLI. VMware migration tooling — online migration, OVF import, and VMDK upload — is built in.
 
 ## Product Tour
 
@@ -109,7 +113,7 @@ ZSvirt brings [ZStack](https://www.zstack-cloud.com/)'s enterprise-proven ZSpher
 
 <br>
 
-<details>
+<details open>
   <summary>
     <strong>🔄 MIGRATION MANAGEMENT — Workload Migration</strong>
   </summary>
@@ -129,7 +133,7 @@ ZSvirt brings [ZStack](https://www.zstack-cloud.com/)'s enterprise-proven ZSpher
 
 ## Live Demo
 
-[ZSvirt Live Demo](https://demo.zsvirt.io/) is a free hosted environment for trying ZSvirt online. No local installation is required—after registration and login, you can start exploring the platform right away.
+[ZSvirt Live Demo](https://demo.zsvirt.io/) is a free hosted environment for trying ZSvirt online — no installation or sign-up required. Open the link and click **Demo Login** to start exploring the platform right away.
 
 ## Architecture
 
@@ -206,6 +210,8 @@ The fastest way to evaluate ZSvirt is to follow the quick start guide in the
 product documentation. It walks you through preparing compute, network, and
 storage resources, initializing the management service, and creating your first
 virtual machine.
+
+Prefer to try it in a VM first? Download the [qcow2 or OVA image](https://zsvirt.io/en/download) and run the management node inside any hypervisor — see [Running ZSvirt inside a VM](https://docs.zsvirt.io/en/docs/quick-start/nested-virtualization-management-node).
 
 🚀 [Quick Start](https://zsvirt.io/en/docs/quick-start)<br>
 ▶️ [Video](https://youtu.be/LsSJlBRUvYw)

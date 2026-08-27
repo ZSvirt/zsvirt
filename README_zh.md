@@ -297,9 +297,9 @@ ZSvirt 基于 [GNU General Public License v3.0](LICENSE) 许可证发布。
       <a href="https://x.com/ZSvirt"><strong>关注 X →</strong></a>
     </td>
     <td width="50%">
-      <h3>🟠 Reddit</h3>
-      <p>加入社区讨论，分享你的 ZSvirt 使用经验。</p>
-      <a href="https://www.reddit.com/r/ZSvirt/"><strong>加入 Reddit 社区 →</strong></a>
+      <h3>🎮 Discord 社区</h3>
+      <p>加入 ZSvirt 社区，在这里提问、分享想法，并与其他用户交流。</p>
+      <a href="https://discord.com/invite/KHsw63z9xA"><strong>加入 Discord 社区 →</strong></a>
     </td>
   </tr>
 </table>

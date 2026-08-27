@@ -1,11 +1,9 @@
-package org.zstack.test.integration.compute
+package org.zstack.test.integration.zone
 
 import org.zstack.core.db.Q
-import org.zstack.core.db.SQL
 import org.zstack.header.zone.ZoneVO
 import org.zstack.header.zone.ZoneVO_
 import org.zstack.sdk.ZoneInventory
-import org.zstack.test.integration.kvm.KvmTest
 import org.zstack.testlib.EnvSpec
 import org.zstack.testlib.SubCase
 
@@ -22,12 +20,12 @@ class ZoneCase extends SubCase {
 
     @Override
     void setup() {
-        useSpring(KvmTest.springSpec)
+        useSpring(ZoneTest.springSpec)
     }
 
     @Override
     void environment() {
-        env = env {}
+        env = makeEnv {}
     }
 
     @Override

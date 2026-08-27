@@ -1,6 +1,6 @@
 package org.zstack.header.vm;
 
-import org.zstack.header.allocator.AllocationScene;
+import org.zstack.header.allocator.AllocatorDomainScene;
 import org.zstack.header.message.NeedReplyMessage;
 
 import java.util.List;
@@ -12,7 +12,7 @@ public class MigrateVmMsg extends NeedReplyMessage implements VmInstanceMessage,
     private String vmInstanceUuid;
     private String strategy;
     private List<String> avoidHostUuids;
-    private AllocationScene allocationScene;
+    private AllocatorDomainScene allocationScene;
     private String targetHostUuid;
     private boolean migrateFromDestination;
     private boolean allowUnknown;
@@ -28,11 +28,11 @@ public class MigrateVmMsg extends NeedReplyMessage implements VmInstanceMessage,
     }
 
     @Override
-    public AllocationScene getAllocationScene() {
+    public AllocatorDomainScene getAllocationScene() {
         return allocationScene;
     }
 
-    public void setAllocationScene(AllocationScene allocationScene) {
+    public void setAllocationScene(AllocatorDomainScene allocationScene) {
         this.allocationScene = allocationScene;
     }
 

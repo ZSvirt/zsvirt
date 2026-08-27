@@ -1,6 +1,6 @@
 package org.zstack.allocator.domain.entity;
 
-import org.zstack.allocator.domain.header.AllocatorDomainScene;
+import org.zstack.header.allocator.AllocatorDomainScene;
 import org.zstack.header.vo.EntityGraph;
 import org.zstack.header.vo.ForeignKey;
 import org.zstack.header.vo.ToInventory;

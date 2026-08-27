@@ -1,6 +1,6 @@
 package org.zstack.allocator.domain.entity;
 
-import org.zstack.allocator.domain.header.AllocatorDomainScene;
+import org.zstack.header.allocator.AllocatorDomainScene;
 import org.zstack.header.configuration.PythonClassInventory;
 import org.zstack.header.message.DocUtils;
 import org.zstack.header.search.Inventory;

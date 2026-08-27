@@ -29,6 +29,7 @@ import org.zstack.header.vm.VmInstanceDeletionPolicyManager
 import org.zstack.header.vm.VmSchedHistoryVO
 import org.zstack.header.vo.EO
 import org.zstack.header.volume.VolumeDeletionPolicyManager
+import org.zstack.testlib.dbremaining.AllowedDBRemaining
 import org.zstack.image.ImageGlobalConfig
 import org.zstack.sdk.*
 import org.zstack.sdk.allocator.domain.api.CreateAllocatorDomainAction

@@ -1,0 +1,277 @@
+#!/usr/bin/env python 
+#
+# NOTE(weiw): although we could use shell script, but python script may
+# be easier to port to Windows/MacOS/Linux
+#
+# An example hook script to check the commit log message.
+# Called by "git commit" with one argument, the name of the file
+# that has the commit message.  The hook should exit with non-zero
+# status after issuing an appropriate message if it wants to stop the
+# commit.  The hook is allowed to edit the commit message file.
+#
+# To enable this hook, rename this file to "commit-msg".
+
+# Uncomment the below to add a Signed-off-by line to the message.
+# Doing this in a hook is a bad idea in general, but the prepare-commit-msg
+# hook is more suited to it.
+#
+# SOB=$(git var GIT_AUTHOR_IDENT | sed -n 's/^\(.*>\).*$/Signed-off-by: \1/p')
+# grep -qs "^$SOB" "$1" || echo "$SOB" >> "$1"
+
+# This example catches duplicate Signed-off-by lines.
+
+import subprocess
+import traceback
+import sys
+import re
+import shutil
+
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKCYAN = '\033[96m'
+    OKGREEN = '\033[92m'
+    YELLOW = '\033[0;33m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
+WARNS = 0
+REPO_NAME =""
+
+
+# default open function(python3)
+open = open
+# using python2 codecs.open func if python version is 2
+if sys.version_info.major == 2:
+    import codecs
+    open = codecs.open
+
+
+def main():
+    try:
+        if not check_commit_msg_enabled():
+            return
+        check_user_email()
+        check_commit_msg(sys.argv[1])
+        if WARNS >= 3:
+            print(bcolors.FAIL + bcolors.BOLD + "ERROR: get %s warning, stop commit for world peace\n\nCOMMIT STOPPED" % WARNS + bcolors.ENDC)
+            backup_and_exit(sys.argv[1])
+        fix_commit_msg(sys.argv[1])
+    except Exception as e:
+        print("get exception while check commit msg: %s" % e)
+        traceback.print_exc()
+
+def backup_and_exit(file_path):
+    shutil.copy(file_path, "%s.bak" % file_path)
+    print("the following bad commit msg has been saved to %s.bak" % file_path)
+
+    lines = []
+    useful = ["\n\n"]
+    with open(file_path, 'r', encoding='utf8') as f:
+        lines = f.readlines()
+    for l in lines:
+            if l.startswith("# Please enter the commit") or \
+                    l.startswith("# ------------------------ >8 ------------------------"):
+                break
+            if l.startswith( "# ") or l == "\n":
+                continue
+            if l.startswith("diff --git"):
+                break
+            useful.append(l)
+    print("".join(useful))
+    exit(1)
+
+def get_repo_name():
+    global REPO_NAME
+    bashCommand = "sename -s .git $(git config --get remote.origin.url)"
+    process = subprocess.Popen(bashCommand.split(), stdout=subprocess.PIPE)
+    output, error = process.communicate()
+    REPO_NAME = output.decode()
+
+def fix_commit_msg(file_path):
+    # NOTE(weiw): sometimes diff would be added to commit msg
+    # see: https://superuser.com/questions/1367811/sometimes-git-includes-the-diff-to-commit-message-when-using-verbose
+
+    fixed_commit_msg = []
+    with open(file_path, 'r', encoding='utf8') as f:
+        lines = f.readlines()
+        for no, line in enumerate(lines):
+            if "# Everything below it will be ignored." in line.strip() or \
+                    line.strip().startswith("diff --git a/"):
+                fixed_commit_msg = lines[0:no]
+                break
+    if len(fixed_commit_msg) == 0:
+        return
+    with open(file_path, 'w', encoding='utf8') as f:
+        f.writelines(fixed_commit_msg)
+
+
+def check_commit_msg(file_path):
+    global WARNS
+    bump_version = False
+    jira_link = False
+    merge_commit = False
+    second_line_is_blank = False
+    header_not_change = False
+    body_not_change = False
+    footer_not_change = False
+    change_id = False
+    jira_link_not_changed = False
+    old_style_jira_link = False
+    revert_commit = False
+    header_too_long = False
+    msg_too_long = False
+    header_form = False
+    header_contains_nonsense = False
+    msg_lines = 0
+    modified_test = False
+    full_lines = 0
+    FAIL = False
+
+    jira_patterns = [r"\bZSTAC-\d+\b", r"\bZSTACK-\d+\b", r"\bMINI-\d+\b", 
+                     r"\bZOPS-\d+\b", r"\bZHCI-\d+\b", r"\bZSV-\d+\b"]
+    with open(file_path, 'r', encoding='utf8') as f:
+        lines = f.readlines()
+        full_lines = len(lines)
+
+        if re.search(r'<.*>\[.*\]\:.*', lines[0], re.I):
+            header_form = True
+        if re.search(r'<.*>\[.*\]\: <.*>', lines[0], re.I) or \
+                re.search(r'<.*>\[.*\]\: \[.*\]', lines[0], re.I):
+            header_contains_nonsense = True
+        if "revert" in lines[0].lower():
+            revert_commit = True
+        if "merge branch" in lines[0].lower() or "merge remote" in lines[0].lower():
+            merge_commit = True
+        if full_lines > 1 and "" == lines[1].strip():
+            second_line_is_blank = True
+        if lines[0].strip().endswith("]: <description>"):
+            header_not_change = True
+        if len(lines[0].strip()) > 50:
+            header_too_long = True
+
+        for l in lines:
+            if l.startswith("# Please enter the commit") or \
+                    l.startswith("# ------------------------ >8 ------------------------"):
+                break
+            if not l.strip().startswith("#") and change_id is False and \
+                    len(l.strip()) > 72:
+                msg_too_long = True
+            msg_lines += 1
+            if "[body]" == l.strip():
+                body_not_change = True
+            if "[footer(s)]" == l.strip():
+                footer_not_change = True
+            if "bump " in l.lower():
+                bump_version = True
+            if "change-id" in l.lower():
+                change_id = True
+            if "ZSTAC-XXXX".lower() in l.lower() or \
+                    "ZSTACK-XXXX".lower() in l.lower():
+                jira_link_not_changed = True
+            if re.search(r"\bZSTACK-\d+\b", l, re.I) or \
+                    re.search(r'\bZSTACK-(X){3,}\b', l, re.I):
+                old_style_jira_link = True
+            for pattern in jira_patterns:
+                if re.search(pattern, l, re.I):
+                    jira_link = True
+
+        for l in lines:
+            if not l.startswith("diff --git a/"):
+                continue
+            # path = l.split(" ")[2][2:]
+            if "test" in l.lower():
+                modified_test = True
+        
+    if bump_version or merge_commit or revert_commit:
+        return
+
+    if full_lines == 1 or msg_lines == 1:
+        WARNS += 1
+        print(bcolors.FAIL + "WARNING: one-line commit msg should only appropriate for bump version!" + bcolors.ENDC)
+    if not second_line_is_blank:
+        WARNS += 1
+        print(bcolors.FAIL + "WARNING: the second line should left blank!" + bcolors.ENDC)
+    if not jira_link:
+        WARNS += 1
+        print(bcolors.FAIL + "WARNING: no jira link found! it should be very rarely!" + bcolors.ENDC)
+    if old_style_jira_link:
+        WARNS += 1
+        print(bcolors.FAIL + "WARNING: jira link in the form of ZSTACK-XXXX is deprecated, ZSTAC-XXXX would in stead!" + bcolors.ENDC)
+    # if header_too_long:
+    #     WARNS += 1
+    #     print(bcolors.FAIL + "WARNING: header longer than 50 characters!" + bcolors.ENDC + bcolors.ENDC)
+    if msg_too_long:
+        WARNS += 1
+        print(bcolors.FAIL + "WARNING: line length of commit msg longger than 72 characters!" + bcolors.ENDC)
+    if not modified_test and REPO_NAME in ("zstack-vyos"):
+        WARNS += 1
+        print(bcolors.FAIL + "WARNING: seems no test cover!" + bcolors.ENDC)
+    if body_not_change or footer_not_change:
+        WARNS += 1
+        print(bcolors.FAIL + "WARNING: the '[body]' or '[footer(s)]' should be removed")
+    if header_form is False:
+        WARNS += 1
+        FAIL = True
+        print(bcolors.FAIL + bcolors.BOLD + "ERROR: header form is not <type>[scope]: <descrption>!" + bcolors.ENDC + bcolors.ENDC)
+    if header_contains_nonsense:
+        WARNS += 1
+        FAIL = True
+        print(bcolors.FAIL + bcolors.BOLD + "ERROR: bracket(including '<>' and '[]') in description of header should be removed!" + bcolors.ENDC + bcolors.ENDC)
+    if header_not_change:
+        WARNS += 1
+        FAIL = True
+        print(bcolors.FAIL + bcolors.BOLD + "ERROR: header is same as template! <descrption> should be filled!" + bcolors.ENDC + bcolors.ENDC)
+    if not change_id:
+        WARNS += 1
+        FAIL = True
+        print(bcolors.FAIL + bcolors.BOLD + "ERROR: no change-id found!" + bcolors.ENDC + bcolors.ENDC)
+    if jira_link_not_changed:
+        WARNS += 1
+        FAIL = True
+        print(bcolors.FAIL + bcolors.BOLD + "ERROR: jira link same as template! ZSTAC-XXXX should be filled!" + bcolors.ENDC + bcolors.ENDC)
+    if FAIL is True:
+        print(bcolors.FAIL + bcolors.BOLD + "\nCOMMIT STOPPED" + bcolors.ENDC + bcolors.ENDC)
+        backup_and_exit(file_path)
+
+def check_user_email():
+    global WARNS
+
+    bashCommand = "git config user.email"
+    process = subprocess.Popen(bashCommand.split(), stdout=subprocess.PIPE)
+    output, error = process.communicate()
+    output = output.decode()
+    if error != None:
+        print("get error while running git config user.email: %s" % error)
+    if "zstack" not in output:
+        WARNS += 1
+        print(bcolors.YELLOW + "WARNING: 'user email' of this commit not contains 'zstack', " + 
+              "if you are not an employee of ZStack, please just ignore this warning" + bcolors.ENDC)
+
+def check_commit_msg_enabled():
+    bashCommand = "git config --get zstack.checkCommitMsg"
+    process = subprocess.Popen(bashCommand.split(), stdout=subprocess.PIPE)
+    output, error = process.communicate()
+    output = output.decode()
+    if error != None:
+        print("get error while running git config --get zstack.checkCommitMsg: %s" % error)
+        return False
+    elif "false" in output.lower():
+        return False
+    return True
+
+
+if __name__ == "__main__":
+    main()
+
+#test "" = "$(grep '^Signed-off-by: ' "$1" |
+#     sort | uniq -c | sed -e '/^[   ]*1[    ]/d')" || {
+#     echo >&2 Duplicate Signed-off-by lines.
+#     exit 1
+#}
+#
+#grep '<description>' $1 && echo "\033[33mdescription in commit msg header not filed!"
+#grep -E 'ZSTAC-'

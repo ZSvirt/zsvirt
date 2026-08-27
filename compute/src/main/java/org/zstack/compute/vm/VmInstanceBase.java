@@ -7562,7 +7562,7 @@ public class VmInstanceBase extends AbstractVmInstance {
         final VmInstanceState originState = self.getState();
         changeVmStateInDb(VmInstanceStateEvent.migrating);
         spec.setMessage((Message) msg);
-        spec.setAllocationScene(msg.getAllocationScene());
+        spec.setAllocationScene(msg.getAllocationScene() != null ? msg.getAllocationScene() : AllocatorDomainScene.Migrate);
         FlowChain chain = getMigrateVmWorkFlowChain(inv);
 
         setFlowMarshaller(chain);
@@ -7734,22 +7734,26 @@ public class VmInstanceBase extends AbstractVmInstance {
             spec.setEnableRDP(VmSystemTags.RDP_ENABLE.getTokenByResourceUuid(self.getUuid(), VmSystemTags.RDP_ENABLE_TOKEN));
             spec.setVDIMonitorNumber(VmSystemTags.VDI_MONITOR_NUMBER.getTokenByResourceUuid(self.getUuid(), VmSystemTags.VDI_MONITOR_NUMBER_TOKEN));
             spec.setEnableSecurityElement(Boolean.parseBoolean(VmSystemTags.SECURITY_ELEMENT_ENABLE.getTokenByResourceUuid(self.getUuid(), VmSystemTags.SECURITY_ELEMENT_ENABLE_TOKEN)));
+            spec.setAllocationScene(AllocatorDomainScene.Start);
         }
 
         if (msg instanceof HaStartVmInstanceMsg) {
             spec.addLocationSpec(VmLocationSpec.notRecommendHost(((HaStartVmInstanceMsg) msg).getSoftAvoidHostUuids()));
-            spec.setAllocationScene(AllocationScene.Auto);
+            spec.setAllocationScene(AllocatorDomainScene.Ha);
         } else if (msg instanceof StartVmInstanceMsg) {
             spec.setRequiredHostUuid(((StartVmInstanceMsg) msg).getHostUuid());
             spec.addLocationSpec(VmLocationSpec.notRecommendHost(((StartVmInstanceMsg) msg).getSoftAvoidHostUuids()));
             spec.addLocationSpec(VmLocationSpec.avoidHost(((StartVmInstanceMsg) msg).getAvoidHostUuids()));
             if (((StartVmInstanceMsg) msg).getAllocationScene() != null) {
                 spec.setAllocationScene(((StartVmInstanceMsg) msg).getAllocationScene());
+            } else {
+                spec.setAllocationScene(AllocatorDomainScene.Start);
             }
             spec.setCreatePaused(((StartVmInstanceMsg) msg).isStartPaused());
             spec.setRequiredClusterUuid(((StartVmInstanceMsg) msg).getClusterUuid());
         } else if (msg instanceof RestoreVmInstanceMsg) {
             spec.setMemorySnapshotUuid(((RestoreVmInstanceMsg) msg).getMemorySnapshotUuid());
+            spec.setAllocationScene(AllocatorDomainScene.Start);
         }
 
         final VmInstanceState originState = self.getState();

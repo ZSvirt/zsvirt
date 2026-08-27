@@ -1,10 +1,6 @@
-package org.zstack.testlib
-
-import org.zstack.utils.Utils
-import org.zstack.utils.logging.CLogger
+package org.zstack.testlib.dbremaining
 
 abstract class AllowedDBRemaining {
-    CLogger logger = Utils.getLogger(AllowedDBRemaining.class)
     List<Table> tables = []
 
     private boolean resolved

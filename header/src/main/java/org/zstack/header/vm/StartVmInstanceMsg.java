@@ -1,6 +1,6 @@
 package org.zstack.header.vm;
 
-import org.zstack.header.allocator.AllocationScene;
+import org.zstack.header.allocator.AllocatorDomainScene;
 import org.zstack.header.message.NeedQuotaCheckMessage;
 import org.zstack.header.message.NeedReplyMessage;
 
@@ -19,7 +19,7 @@ public class StartVmInstanceMsg extends NeedReplyMessage implements VmInstanceMe
     private String hostUuid;
     private String clusterUuid;
     private List<String> softAvoidHostUuids;
-    private AllocationScene allocationScene;
+    private AllocatorDomainScene allocationScene;
     private boolean startPaused;
 
     public boolean isStartPaused() {
@@ -32,11 +32,11 @@ public class StartVmInstanceMsg extends NeedReplyMessage implements VmInstanceMe
 
     private List<String> avoidHostUuids;
 
-    public AllocationScene getAllocationScene() {
+    public AllocatorDomainScene getAllocationScene() {
         return allocationScene;
     }
 
-    public void setAllocationScene(AllocationScene allocationScene) {
+    public void setAllocationScene(AllocatorDomainScene allocationScene) {
         this.allocationScene = allocationScene;
     }
 

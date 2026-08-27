@@ -1,4 +1,4 @@
-package org.zstack.allocator.domain;
+package org.zstack.allocator.domain.compute;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.zstack.allocator.domain.entity.AllocatorDomainInventory;

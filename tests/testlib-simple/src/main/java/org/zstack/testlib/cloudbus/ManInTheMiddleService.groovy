@@ -1,4 +1,4 @@
-package org.zstack.test.integration.core.cloudbus
+package org.zstack.testlib.cloudbus
 
 import org.springframework.beans.factory.annotation.Autowired
 import org.zstack.core.cloudbus.CloudBus

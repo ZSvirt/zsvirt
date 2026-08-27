@@ -1,7 +1,8 @@
-package org.zstack.testlib
+package org.zstack.testlib.dbremaining.vm
 
 import org.zstack.header.vm.metadata.VmMetadataCleanupBarrierState
 import org.zstack.header.vm.metadata.VmMetadataCleanupBarrierVO
+import org.zstack.testlib.dbremaining.AllowedDBRemaining
 
 class VmMetadataCleanupBarrierDBRemaining extends AllowedDBRemaining {
     @Override

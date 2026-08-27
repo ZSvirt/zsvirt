@@ -1,8 +1,8 @@
-package org.zstack.test.integration.network.hostNetwork
+package org.zstack.testlib.dbremaining.network
 
 import org.zstack.header.identity.AccountResourceRefVO
 import org.zstack.network.hostNetworkInterface.lldp.entity.HostNetworkInterfaceLldpVO
-import org.zstack.testlib.AllowedDBRemaining
+import org.zstack.testlib.dbremaining.AllowedDBRemaining
 
 class HostNetworkDBRemaining extends AllowedDBRemaining {
     @Override

@@ -1,6 +1,6 @@
 package org.zstack.header.vm;
 
-import org.zstack.header.allocator.AllocationScene;
+import org.zstack.header.allocator.AllocatorDomainScene;
 
 public interface MigrateVmMessage {
     String getHostUuid();
@@ -9,7 +9,7 @@ public interface MigrateVmMessage {
     boolean isMigrateFromDestination();
     boolean isAllowUnknown();
 
-    default AllocationScene getAllocationScene() {
+    default AllocatorDomainScene getAllocationScene() {
         return null;
     }
 

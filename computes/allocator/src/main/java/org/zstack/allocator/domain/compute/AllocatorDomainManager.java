@@ -1,4 +1,4 @@
-package org.zstack.allocator.domain;
+package org.zstack.allocator.domain.compute;
 
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +24,6 @@ import org.zstack.allocator.domain.header.AllocatorDomainConstant;
 import org.zstack.allocator.domain.header.AllocatorDomainErrors;
 import org.zstack.allocator.domain.header.AllocatorDomainGlobalConfig;
 import org.zstack.allocator.domain.header.AllocatorDomainRuleEffect;
-import org.zstack.allocator.domain.header.AllocatorDomainScene;
 import org.zstack.allocator.domain.header.AllocatorDomainState;
 import org.zstack.allocator.domain.header.AllocatorDomainSystemTags;
 import org.zstack.allocator.domain.message.AllocatorDomainDeletionMsg;
@@ -42,6 +41,7 @@ import org.zstack.core.thread.ThreadFacade;
 import org.zstack.core.timeout.TimeHelper;
 import org.zstack.core.workflow.SimpleFlowChain;
 import org.zstack.header.AbstractService;
+import org.zstack.header.allocator.AllocatorDomainScene;
 import org.zstack.header.core.workflow.Flow;
 import org.zstack.header.cluster.ClusterInventory;
 import org.zstack.header.cluster.ClusterState;

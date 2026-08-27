@@ -22,7 +22,7 @@ import org.zstack.core.thread.*;
 import org.zstack.core.workflow.FlowChainBuilder;
 import org.zstack.core.workflow.ShareFlow;
 import org.zstack.header.agent.versioncontrol.AgentVersionVO;
-import org.zstack.header.allocator.AllocationScene;
+import org.zstack.header.allocator.AllocatorDomainScene;
 import org.zstack.header.allocator.HostAllocatorConstant;
 import org.zstack.header.core.Completion;
 import org.zstack.header.core.NoErrorCompletion;
@@ -504,7 +504,7 @@ public abstract class HostBase extends AbstractHost {
                                     .begin();
                             MigrateVmMsg msg = new MigrateVmMsg();
                             msg.setVmInstanceUuid(vmUuid);
-                            msg.setAllocationScene(AllocationScene.Auto);
+                            msg.setAllocationScene(AllocatorDomainScene.HostMaintenance);
                             bus.makeTargetServiceIdByResourceUuid(msg, VmInstanceConstant.SERVICE_ID, vmUuid);
                             bus.send(msg, new CloudBusCallBack(compl) {
                                 @Override

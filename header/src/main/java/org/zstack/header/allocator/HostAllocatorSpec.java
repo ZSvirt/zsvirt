@@ -1,5 +1,6 @@
 package org.zstack.header.allocator;
 
+import org.zstack.allocator.domain.entity.AllocatorHostRuleSet;
 import org.zstack.header.configuration.DiskOfferingInventory;
 import org.zstack.header.image.ImageInventory;
 import org.zstack.header.vm.VmInstanceInventory;
@@ -44,7 +45,8 @@ public class HostAllocatorSpec {
     private Map<String, Set<String>> host2PrimaryStorageBlacklist = new HashMap<>();
     private boolean fullAllocate;
     private long oldMemoryCapacity = 0;
-    private AllocationScene allocationScene;
+    private AllocatorDomainScene allocationScene;
+    private List<AllocatorHostRuleSet> ruleSets = new ArrayList<>();
     private String architecture;
 
     public List<VmLocationSpec> getLocationSpecs() {
@@ -79,12 +81,26 @@ public class HostAllocatorSpec {
         this.hostUuid = hostUuid;
     }
 
-    public AllocationScene getAllocationScene() {
+    public AllocatorDomainScene getAllocationScene() {
         return allocationScene;
     }
 
-    public void setAllocationScene(AllocationScene allocationScene) {
+    public void setAllocationScene(AllocatorDomainScene allocationScene) {
         this.allocationScene = allocationScene;
+    }
+
+    public List<AllocatorHostRuleSet> getRuleSets() {
+        return ruleSets;
+    }
+
+    public void setRuleSets(List<AllocatorHostRuleSet> ruleSets) {
+        this.ruleSets = ruleSets;
+    }
+
+    public void addRuleSet(AllocatorHostRuleSet ruleSet) {
+        if (ruleSet != null) {
+            ruleSets.add(ruleSet);
+        }
     }
 
     public List<String> getSystemTags() {
@@ -279,6 +295,7 @@ public class HostAllocatorSpec {
         spec.setRequiredPrimaryStorageUuids(msg.getRequiredPrimaryStorageUuids());
         msg.getOptionalPrimaryStorageUuids().forEach(spec::addOptionalPrimaryStorageUuids);
         spec.setAllocationScene(msg.getAllocationScene());
+        spec.setRuleSets(msg.getRuleSets());
         spec.setArchitecture(msg.getArchitecture());
         if (msg.getSystemTags() != null && !msg.getSystemTags().isEmpty()){
             spec.setSystemTags(new ArrayList<String>(msg.getSystemTags()));

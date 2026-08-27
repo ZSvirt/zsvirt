@@ -42,3 +42,7 @@ CREATE TABLE IF NOT EXISTS `zstack`.`AllocatorDomainSceneVO` (
     UNIQUE KEY `ukAllocatorDomainScene` (`domainUuid`, `scene`),
     CONSTRAINT `fkAllocatorDomainSceneVOAllocatorDomainVO` FOREIGN KEY (`domainUuid`) REFERENCES `AllocatorDomainVO` (`uuid`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- Unused vm.resourceBinding.Scene (AllocationScene Auto/All removed)
+DELETE FROM `zstack`.`GlobalConfigVO`
+ WHERE `category` = 'vm' AND `name` = 'resourceBinding.Scene';

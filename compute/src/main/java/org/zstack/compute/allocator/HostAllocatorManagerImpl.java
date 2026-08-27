@@ -15,6 +15,7 @@ import org.zstack.core.thread.ChainTask;
 import org.zstack.core.thread.SyncTaskChain;
 import org.zstack.core.thread.ThreadFacade;
 import org.zstack.core.workflow.FlowChainBuilder;
+import org.zstack.allocator.domain.entity.AllocatorHostRuleSet;
 import org.zstack.header.AbstractService;
 import org.zstack.header.allocator.*;
 import org.zstack.header.allocator.datatypes.CpuMemoryCapacityData;
@@ -25,6 +26,7 @@ import org.zstack.header.core.Completion;
 import org.zstack.header.core.ReturnValueCompletion;
 import org.zstack.header.core.workflow.*;
 import org.zstack.header.errorcode.ErrorCode;
+import org.zstack.header.errorcode.OperationFailureException;
 import org.zstack.header.exception.CloudRuntimeException;
 import org.zstack.header.host.*;
 import org.zstack.header.image.*;
@@ -426,7 +428,34 @@ public class HostAllocatorManagerImpl extends AbstractService implements HostAll
         });
     }
 
+    private void replyAllocateHostFailure(AllocateHostMsg msg, ErrorCode errorCode, Completion completion) {
+        if (msg.isDryRun()) {
+            AllocateHostDryRunReply reply = new AllocateHostDryRunReply();
+            reply.setError(errorCode);
+            bus.reply(msg, reply);
+        } else {
+            AllocateHostReply reply = new AllocateHostReply();
+            reply.setError(errorCode);
+            bus.reply(msg, reply);
+        }
+        completion.fail(errorCode);
+    }
+
     private void doHandleAllocateHost(final AllocateHostMsg msg, Completion completion) {
+        try {
+            for (AllocateHostBeforeExtensionPoint ext : pluginRgty.getExtensionList(AllocateHostBeforeExtensionPoint.class)) {
+                ext.beforeAllocateHost(msg);
+            }
+        } catch (OperationFailureException e) {
+            replyAllocateHostFailure(msg, e.getErrorCode(), completion);
+            return;
+        } catch (RuntimeException e) {
+            replyAllocateHostFailure(msg, errf.throwableToInternalError(e), completion);
+            return;
+        }
+
+        logger.debug("allocate host rule sets:\n" + AllocatorHostRuleSet.toString(msg.getRuleSets()));
+
         HostAllocatorSpec spec = HostAllocatorSpec.fromAllocationMsg(msg);
         spec.setBackupStoragePrimaryStorageMetrics(backupStoragePrimaryStorageMetrics);
 

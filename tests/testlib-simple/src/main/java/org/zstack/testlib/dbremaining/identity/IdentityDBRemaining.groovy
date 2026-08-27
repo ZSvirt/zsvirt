@@ -1,10 +1,10 @@
-package org.zstack.test.integration.identity
+package org.zstack.testlib.dbremaining.identity
 
 import org.zstack.core.db.Q
 import org.zstack.header.identity.AccountResourceRefVO
 import org.zstack.header.identity.QuotaVO
 import org.zstack.header.identity.role.*
-import org.zstack.testlib.AllowedDBRemaining
+import org.zstack.testlib.dbremaining.AllowedDBRemaining
 
 class IdentityDBRemaining extends AllowedDBRemaining {
     @Override

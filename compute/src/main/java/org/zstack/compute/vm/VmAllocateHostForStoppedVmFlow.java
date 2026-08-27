@@ -84,7 +84,7 @@ public class VmAllocateHostForStoppedVmFlow implements Flow {
                 .map(VolumeInventory::getPrimaryStorageUuid)
                 .collect(Collectors.toSet()));
         msg.setServiceId(bus.makeLocalServiceId(HostAllocatorConstant.SERVICE_ID));
-        msg.setAllocationScene(spec.getAllocationScene());
+        msg.setAllocationScene(spec.getAllocationScene() != null ? spec.getAllocationScene() : AllocatorDomainScene.Start);
         msg.getLocationSpecs().addAll(spec.getLocationSpecs().stream()
                 .filter(s -> HostVO.class.getSimpleName().equals(s.getResourceType()))
                 .collect(Collectors.toList()));

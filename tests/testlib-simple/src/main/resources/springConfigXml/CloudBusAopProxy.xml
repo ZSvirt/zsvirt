@@ -6,8 +6,6 @@
          http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
          http://www.springframework.org/schema/aop
          http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
-
-
          http://zstack.org/schema/zstack
          http://zstack.org/schema/zstack/plugin.xsd"
        default-init-method="init" default-destroy-method="destory">
@@ -31,9 +29,9 @@
 		</aop:aspect>
 	</aop:config>
 
-	<bean id="CloudBusAopProxy" class="org.zstack.test.integration.core.cloudbus.CloudBusAopProxy" />
+	<bean id="CloudBusAopProxy" class="org.zstack.testlib.cloudbus.CloudBusAopProxy" />
 
-	<bean id="ManInTheMiddleService" class="org.zstack.test.integration.core.cloudbus.ManInTheMiddleService">
+	<bean id="ManInTheMiddleService" class="org.zstack.testlib.cloudbus.ManInTheMiddleService">
 		<zstack:plugin>
 			<zstack:extension interface="org.zstack.header.Component" />
 		</zstack:plugin>

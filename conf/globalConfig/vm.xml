@@ -231,14 +231,6 @@
 	</config>
 
 	<config>
-		<name>resourceBinding.Scene</name>
-		<description>Scenarios supported by resource binding</description>
-		<defaultValue>All</defaultValue>
-		<category>vm</category>
-		<type>java.lang.String</type>
-	</config>
-
-	<config>
 		<name>crash.strategy</name>
 		<description>the execution strategy when a vm crashed</description>
 		<defaultValue>None</defaultValue>

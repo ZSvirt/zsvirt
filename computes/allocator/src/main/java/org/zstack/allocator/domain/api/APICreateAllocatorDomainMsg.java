@@ -3,7 +3,7 @@ package org.zstack.allocator.domain.api;
 import org.springframework.http.HttpMethod;
 import org.zstack.allocator.domain.entity.AllocatorDomainRuleParam;
 import org.zstack.allocator.domain.entity.AllocatorDomainVO;
-import org.zstack.allocator.domain.header.AllocatorDomainScene;
+import org.zstack.header.allocator.AllocatorDomainScene;
 import org.zstack.header.message.APICreateMessage;
 import org.zstack.header.message.APIEvent;
 import org.zstack.header.message.APIMessage;

@@ -1,6 +1,6 @@
 package org.zstack.allocator.domain.entity;
 
-import org.zstack.allocator.domain.header.AllocatorDomainScene;
+import org.zstack.header.allocator.AllocatorDomainScene;
 
 import javax.persistence.metamodel.SingularAttribute;
 import javax.persistence.metamodel.StaticMetamodel;

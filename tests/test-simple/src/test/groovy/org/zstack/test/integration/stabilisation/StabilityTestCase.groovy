@@ -1,6 +1,5 @@
 package org.zstack.test.integration.stabilisation
 
-import org.zstack.testlib.SkipTestSuite
 import org.zstack.testlib.SpringSpec
 import org.zstack.testlib.StabilityTest
 
@@ -11,7 +10,6 @@ import org.zstack.testlib.StabilityTest
  * Q : How do I know which subcase failed ?
  * A : search keyword is 'stability test fails', example: grep "stability test fails" management-server.log
  */
-@SkipTestSuite
 class StabilityTestCase extends StabilityTest {
     @Override
     SpringSpec getDefaultSpringSpec() {

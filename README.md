@@ -135,25 +135,41 @@ Install a management node, attach KVM-based hosts, and manage your whole environ
 
 ## Architecture
 
-ZSvirt uses a modular architecture built around virtualization resource management, the management plane, extension services, and operational tooling.
+ZSvirt uses a modular architecture built around virtualization resource
+management, the management plane, extension services, and operational tooling.
 
 Core capabilities include:
 
-- **Compute virtualization**:host, cluster, virtual machine, image, and lifecycle management.
-- **Network virtualization**: virtual networks, network services, security groups, and related capabilities.
-- **Storage virtualization**: primary storage, backup storage, volumes, snapshots, and storage resource management.
-- **Management plane**: API framework, permission model, events, alarms, auditing, and system operations.
-- **Extension services**: capabilities for migration, disaster recovery, monitoring, quota management, access control, and enterprise operations.
-- **Tools and integrations**:  installation tools, diagnostics tools, migration tools, automation scripts, agents, CLI, and external system integrations.
+- **Compute virtualization**: host, cluster, virtual machine, image, and
+  lifecycle management.
+- **Network virtualization**: virtual networks, network services, security
+  groups, and related capabilities.
+- **Storage virtualization**: primary storage, backup storage, volumes,
+  snapshots, and storage resource management.
+- **Management plane**: API framework, permission model, events, alarms,
+  auditing, and system operations.
+- **Extension services**: capabilities for migration, disaster recovery,
+  monitoring, quota management, access control, and enterprise operations.
+- **Tools and integrations**: installation tools, diagnostics tools, migration
+  tools, automation scripts, agents, CLI, and external system integrations.
 
-At the software architecture level, ZSvirt emphasizes asynchrony, statelessness, extensibility, and automation:
+At the software architecture level, ZSvirt emphasizes asynchrony, statelessness,
+extensibility, and automation:
 
-- **Asynchronous architecture**: ssupports asynchronous messages, asynchronous methods, and asynchronous HTTP calls to reduce blocking and improve system throughput.
-- **Stateless services**: individual requests do not depend on state from other requests, making services easier to scale, recover, and operate.
-- **Plugin-based extensibility**: supports horizontal extension of resource types, business capabilities, and integration capabilities through plugins.
-- **Workflow engine**: manages the execution order of complex operations and supports rollback and recovery in failure scenarios.
-- **Tagging and query capabilities**: supports resource attribute extension, resource classification, unified queries, and automation orchestration.
-- **Automated deployment**: uses automation tools to handle deployment, configuration, and operations tasks, reducing deployment and maintenance complexity.
+- **Asynchronous architecture**: supports asynchronous messages, asynchronous
+  methods, and asynchronous HTTP calls to reduce blocking and improve system
+  throughput.
+- **Stateless services**: individual requests do not depend on state from other
+  requests, making services easier to scale, recover, and operate.
+- **Plugin-based extensibility**: supports horizontal extension of resource
+  types, business capabilities, and integration capabilities through plugins.
+- **Workflow engine**: manages the execution order of complex operations and
+  supports rollback and recovery in failure scenarios.
+- **Tagging and query capabilities**: supports resource attribute extension,
+  resource classification, unified queries, and automation orchestration.
+- **Automated deployment**: uses automation tools to handle deployment,
+  configuration, and operations tasks, reducing deployment and maintenance
+  complexity.
 
 <p align="center">
   <img

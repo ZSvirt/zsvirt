@@ -65,7 +65,9 @@
 </div>
 
 ## What is ZSvirt
-ZSvirt brings [ZStack](https://www.zstack-cloud.com/)'s enterprise-proven ZSphere virtualization engine into the open-source world. Backed by [ZStack](https://www.zstack-cloud.com/), a mature infrastructure leader, ZSvirt delivers a lightweight, scalable platform designed for absolute freedom—from high-performance homelabs to hyperscale infrastructure without vendor lock-in.
+ZSvirt brings [ZStack](https://www.zstack-cloud.com/)'s enterprise-proven ZSphere virtualization engine into the open-source world. Backed by [ZStack](https://www.zstack-cloud.com/), a mature infrastructure leader, ZSvirt is a lightweight, scalable platform for running and managing virtual machines without vendor lock-in.
+
+Install a management node, attach KVM-based hosts, and manage your whole environment — VMs, clusters, storage, and networks — through a web UI, a RESTful API (with Terraform and Go/Python/Java SDKs), or a CLI. VMware migration tooling — online migration, OVF import, and VMDK upload — is built in.
 
 ## Product Tour
 
@@ -129,45 +131,29 @@ ZSvirt brings [ZStack](https://www.zstack-cloud.com/)'s enterprise-proven ZSpher
 
 ## Live Demo
 
-[ZSvirt Live Demo](https://demo.zsvirt.io/) is a free hosted environment for trying ZSvirt online. No local installation is required—after registration and login, you can start exploring the platform right away.
+[ZSvirt Live Demo](https://demo.zsvirt.io/) is a free hosted environment for trying ZSvirt online — no installation or sign-up required. Open the link and click Demo Login to start exploring the platform right away.
 
 ## Architecture
 
-ZSvirt uses a modular architecture built around virtualization resource
-management, the management plane, extension services, and operational tooling.
+ZSvirt uses a modular architecture built around virtualization resource management, the management plane, extension services, and operational tooling.
 
 Core capabilities include:
 
-- **Compute virtualization**: host, cluster, virtual machine, image, and
-  lifecycle management.
-- **Network virtualization**: virtual networks, network services, security
-  groups, and related capabilities.
-- **Storage virtualization**: primary storage, backup storage, volumes,
-  snapshots, and storage resource management.
-- **Management plane**: API framework, permission model, events, alarms,
-  auditing, and system operations.
-- **Extension services**: capabilities for migration, disaster recovery,
-  monitoring, quota management, access control, and enterprise operations.
-- **Tools and integrations**: installation tools, diagnostics tools, migration
-  tools, automation scripts, agents, CLI, and external system integrations.
+- **Compute virtualization**:host, cluster, virtual machine, image, and lifecycle management.
+- **Network virtualization**: virtual networks, network services, security groups, and related capabilities.
+- **Storage virtualization**: primary storage, backup storage, volumes, snapshots, and storage resource management.
+- **Management plane**: API framework, permission model, events, alarms, auditing, and system operations.
+- **Extension services**: capabilities for migration, disaster recovery, monitoring, quota management, access control, and enterprise operations.
+- **Tools and integrations**:  installation tools, diagnostics tools, migration tools, automation scripts, agents, CLI, and external system integrations.
 
-At the software architecture level, ZSvirt emphasizes asynchrony, statelessness,
-extensibility, and automation:
+At the software architecture level, ZSvirt emphasizes asynchrony, statelessness, extensibility, and automation:
 
-- **Asynchronous architecture**: supports asynchronous messages, asynchronous
-  methods, and asynchronous HTTP calls to reduce blocking and improve system
-  throughput.
-- **Stateless services**: individual requests do not depend on state from other
-  requests, making services easier to scale, recover, and operate.
-- **Plugin-based extensibility**: supports horizontal extension of resource
-  types, business capabilities, and integration capabilities through plugins.
-- **Workflow engine**: manages the execution order of complex operations and
-  supports rollback and recovery in failure scenarios.
-- **Tagging and query capabilities**: supports resource attribute extension,
-  resource classification, unified queries, and automation orchestration.
-- **Automated deployment**: uses automation tools to handle deployment,
-  configuration, and operations tasks, reducing deployment and maintenance
-  complexity.
+- **Asynchronous architecture**: ssupports asynchronous messages, asynchronous methods, and asynchronous HTTP calls to reduce blocking and improve system throughput.
+- **Stateless services**: individual requests do not depend on state from other requests, making services easier to scale, recover, and operate.
+- **Plugin-based extensibility**: supports horizontal extension of resource types, business capabilities, and integration capabilities through plugins.
+- **Workflow engine**: manages the execution order of complex operations and supports rollback and recovery in failure scenarios.
+- **Tagging and query capabilities**: supports resource attribute extension, resource classification, unified queries, and automation orchestration.
+- **Automated deployment**: uses automation tools to handle deployment, configuration, and operations tasks, reducing deployment and maintenance complexity.
 
 <p align="center">
   <img
@@ -179,14 +165,9 @@ extensibility, and automation:
 
 ## VMware Migration Guide
 
-As enterprises reassess their virtualization strategies, migration from VMware
-to alternative platforms has become an important topic for organizations
-seeking cost control, infrastructure flexibility, and long-term operational
-stability.
+As enterprises reassess their virtualization strategies, migration from VMware to alternative platforms has become an important topic for organizations seeking cost control, infrastructure flexibility, and long-term operational stability.
 
-ZSvirt provides migration-oriented capabilities and operational tools to help
-users evaluate, plan, and move workloads from existing VMware environments to
-ZSvirt-based virtualization infrastructure.
+ZSvirt provides migration-oriented capabilities and operational tools to help users evaluate, plan, and move workloads from existing VMware environments to ZSvirt-based virtualization infrastructure.
 
 - [VMware Migration Guide](https://zsvirt.io/vmware-alternative/)
 
@@ -202,10 +183,9 @@ ZSvirt-based virtualization infrastructure.
 
 ## Quick Start
 
-The fastest way to evaluate ZSvirt is to follow the quick start guide in the
-product documentation. It walks you through preparing compute, network, and
-storage resources, initializing the management service, and creating your first
-virtual machine.
+he fastest way to evaluate ZSvirt is to follow the quick start guide in the product documentation. It walks you through preparing compute, network, and storage resources, initializing the management service, and creating your first virtual machine.
+
+Prefer to try it in a VM first? Download the [qcow2 or OVA image](https://zsvirt.io/en/download) and run the management node inside any hypervisor — see [Running ZSvirt inside a VM](https://docs.zsvirt.io/en/docs/quick-start/nested-virtualization-management-node).
 
 🚀 [Quick Start](https://zsvirt.io/en/docs/quick-start)<br>
 ▶️ [Video](https://youtu.be/LsSJlBRUvYw)

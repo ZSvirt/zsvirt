@@ -199,7 +199,7 @@ ZSvirt provides migration-oriented capabilities and operational tools to help us
 
 ## Quick Start
 
-he fastest way to evaluate ZSvirt is to follow the quick start guide in the product documentation. It walks you through preparing compute, network, and storage resources, initializing the management service, and creating your first virtual machine.
+The fastest way to evaluate ZSvirt is to follow the quick start guide in the product documentation. It walks you through preparing compute, network, and storage resources, initializing the management service, and creating your first virtual machine.
 
 Prefer to try it in a VM first? Download the [qcow2 or OVA image](https://zsvirt.io/en/download) and run the management node inside any hypervisor — see [Running ZSvirt inside a VM](https://docs.zsvirt.io/en/docs/quick-start/nested-virtualization-management-node).
 

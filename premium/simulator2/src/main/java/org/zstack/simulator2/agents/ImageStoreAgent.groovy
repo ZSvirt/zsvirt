@@ -24,6 +24,7 @@ import org.zstack.storage.primary.imagestore.nfs.NfsPrimaryToImageStoreBackupKVM
 import org.zstack.storage.primary.imagestore.smp.ImageStoreBackupStorageKvmDownloader
 import org.zstack.storage.primary.imagestore.smp.ImageStoreBackupStorageKvmUploader
 import org.zstack.storage.primary.imagestore.smp.SMPImageStoreKvmBackend
+import org.zstack.storage.primary.local.LocalStorageKvmBackend
 import org.zstack.storage.primary.smp.KvmBackend
 
 import org.zstack.utils.SHAUtils
@@ -94,12 +95,12 @@ class ImageStoreAgent extends Agent {
         }
 
         handle(SMPImageStoreKvmBackend.CLEAN_IMAGE_META_PATH) {
-            def rsp = new SMPImageStoreKvmBackend.AgentRsp()
+            def rsp = new KvmBackend.AgentRsp()
             return rsp
         }
 
         handle(LocalStorageImageStoreKvmBackend.CLEAN_IMAGE_META_PATH) {
-            def rsp = new LocalStorageImageStoreKvmBackend.AgentResponse()
+            def rsp = new LocalStorageKvmBackend.AgentResponse()
             return rsp
         }
 

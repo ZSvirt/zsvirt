@@ -66,9 +66,6 @@ public class SourceClassMap {
 			put("org.zstack.cloudformation.template.struct.ResourceType", "org.zstack.sdk.ResourceType");
 			put("org.zstack.core.config.GlobalConfigInventory", "org.zstack.sdk.GlobalConfigInventory");
 			put("org.zstack.core.config.GlobalConfigOptions", "org.zstack.sdk.GlobalConfigOptions");
-			put("org.zstack.core.errorcode.ElaborationCategory", "org.zstack.sdk.ElaborationCategory");
-			put("org.zstack.core.errorcode.ElaborationCheckResult", "org.zstack.sdk.ElaborationCheckResult");
-			put("org.zstack.core.errorcode.ElaborationContent", "org.zstack.sdk.ElaborationContent");
 			put("org.zstack.core.eventlog.EventLogInventory", "org.zstack.sdk.EventLogInventory");
 			put("org.zstack.core.externalservice.ExternalServiceCapabilitiesBuilder", "org.zstack.sdk.external.service.ExternalServiceCapabilitiesBuilder");
 			put("org.zstack.core.gc.GarbageCollectorInventory", "org.zstack.sdk.GarbageCollectorInventory");
@@ -703,9 +700,6 @@ public class SourceClassMap {
 			put("org.zstack.sdk.DiskAO", "org.zstack.header.vm.DiskAO");
 			put("org.zstack.sdk.DiskOfferingInventory", "org.zstack.header.configuration.DiskOfferingInventory");
 			put("org.zstack.sdk.EipInventory", "org.zstack.network.service.eip.EipInventory");
-			put("org.zstack.sdk.ElaborationCategory", "org.zstack.core.errorcode.ElaborationCategory");
-			put("org.zstack.sdk.ElaborationCheckResult", "org.zstack.core.errorcode.ElaborationCheckResult");
-			put("org.zstack.sdk.ElaborationContent", "org.zstack.core.errorcode.ElaborationContent");
 			put("org.zstack.sdk.EmailMediaInventory", "org.zstack.monitoring.media.EmailMediaInventory");
 			put("org.zstack.sdk.EmailTriggerActionInventory", "org.zstack.monitoring.actions.EmailTriggerActionInventory");
 			put("org.zstack.sdk.ErrorCode", "org.zstack.header.errorcode.ErrorCode");

@@ -591,7 +591,7 @@ public class VmVfNicKvmBackend implements VmVfNicHypervisorBackend, VmInstanceSt
                         @Override
                         public void fail(ErrorCode errorCode) {
                             logger.debug(String.format("update sr-iov fdb for host[uuid:%s, name:%s] failed, because %s",
-                                    host.getUuid(), host.getName(), errorCode.getMessages()));
+                                    host.getUuid(), host.getName(), errorCode.getDetails()));
                             trigger.next();
                         }
                     });

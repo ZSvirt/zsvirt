@@ -3,12 +3,10 @@ package org.zstack.header.errorcode;
 import org.apache.commons.collections.CollectionUtils;
 import org.zstack.header.core.I18nMessage;
 import org.zstack.header.message.NoJsonSchema;
-import org.zstack.header.rest.APINoSee;
 import org.zstack.utils.gson.JSONObjectUtil;
 import org.zstack.utils.logging.CLogger;
 import org.zstack.utils.opaque.OpaqueCollection;
 import org.zstack.utils.opaque.OpaqueScripts;
-import org.zstack.utils.string.ErrorCodeElaboration;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -48,12 +46,6 @@ public class ErrorCode implements Serializable, Cloneable, OpaqueCollection, I18
 
     @Deprecated
     private String elaboration;
-    @APINoSee
-    @Deprecated
-    private ErrorCodeElaboration messages;
-    @APINoSee
-    @Deprecated
-    private String cost;
     /**
      * TODO: merge cause to causes
      */
@@ -129,7 +121,6 @@ public class ErrorCode implements Serializable, Cloneable, OpaqueCollection, I18
         this.details = other.details;
         this.i18nDetails = other.i18nDetails;
         this.elaboration = other.elaboration;
-        this.messages = other.messages;
         this.cause = other.cause;
         this.causes.addAll(other.causes);
         if (other.opaque != null) {
@@ -354,22 +345,6 @@ public class ErrorCode implements Serializable, Cloneable, OpaqueCollection, I18
 
         ErrorCode root = getRootCause();
         return root.getReadableDetails();
-    }
-
-    public ErrorCodeElaboration getMessages() {
-        return messages;
-    }
-
-    public void setMessages(ErrorCodeElaboration messages) {
-        this.messages = messages;
-    }
-
-    public String getCost() {
-        return cost;
-    }
-
-    public void setCost(String cost) {
-        this.cost = cost;
     }
 
     public String getLocation() {

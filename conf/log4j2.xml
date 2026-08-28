@@ -85,7 +85,6 @@
         <Logger name="org.zstack" level="debug"/>
 
         <Logger name="org.zstack.utils" level="trace"/>
-        <Logger name="org.zstack.utils.string.StringSimilarity" level="INFO"/>
         <Logger name="org.zstack.utils.HTTP" level="debug"/>
 
         <Logger name="org.zstack.core.rest" level="trace"/>

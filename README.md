@@ -133,7 +133,7 @@ Install a management node, attach KVM-based hosts, and manage your whole environ
 
 ## Live Demo
 
-[ZSvirt Live Demo](https://demo.zsvirt.io/) is a free hosted environment for trying ZSvirt online — no installation or sign-up required. Open the link and click Demo Login to start exploring the platform right away.
+[ZSvirt Live Demo](https://demo.zsvirt.io/) is a free hosted environment for trying ZSvirt online — no installation or sign-up required. Open the link and click **Demo Login** to start exploring the platform right away.
 
 ## Architecture
 

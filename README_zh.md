@@ -190,7 +190,10 @@ ZSvirt 提供面向迁移的功能和运维工具，帮助用户评估、规划�
 
 体验 ZSvirt 最快捷的方式是阅读产品文档中的快速开始指南。该指南将引导你准备计算、网络和存储资源，初始化管理服务，并创建第一台虚拟机。
 
-想先在虚拟机里试试？从下载中心获取 qcow2 或 OVA 镜像，在任何 hypervisor 中运行管理节点即可——参见在虚拟机中运行 ZSvirt。
+想先在虚拟机里试试？从[下载中心](https://zsvirt.io/zh/download)获取 qcow2 或 OVA 镜像，在任何 hypervisor 中运行管理节点即可——参见[在虚拟机中运行 ZSvirt](https://docs.zsvirt.io/docs/quick-start/nested-virtualization-management-node)。
+
+
+15:52
 
 🚀 [快速开始](https://zsvirt.io/docs/quick-start)<br>
 ▶️ [视频链接](https://youtu.be/LsSJlBRUvYw)

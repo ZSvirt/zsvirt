@@ -126,10 +126,10 @@ public class VmPrometheusNamespace extends AbstractPrometheusNamespace {
             rule.setExpression("100 - (rate(collectd_virt_virt_vcpu[1m]) / 10000000)");
             rule.labelMapping("type", VmNamespace.LabelNames.CPUNum.toString());
         } else if (metric == VmNamespace.CPUReadyTimeMilliseconds) {
-            rule.setExpression("zstack_vm_cpu_ready_time_milliseconds");
+            rule.setExpression("sum by (vm_uuid) (zstack_vm_vcpu_ready_time_milliseconds)");
             rule.labelMapping("vm_uuid", VmNamespace.LabelNames.VMUuid.toString());
         } else if (metric == VmNamespace.CPUReadinessPercent) {
-            rule.setExpression("zstack_vm_cpu_readiness_percent");
+            rule.setExpression("avg by (vm_uuid) (zstack_vm_vcpu_readiness_percent)");
             rule.labelMapping("vm_uuid", VmNamespace.LabelNames.VMUuid.toString());
         } else if (metric == VmNamespace.VCPUReadyTimeMilliseconds) {
             rule.setExpression("zstack_vm_vcpu_ready_time_milliseconds");
@@ -230,13 +230,21 @@ public class VmPrometheusNamespace extends AbstractPrometheusNamespace {
         } else if (metric == VmNamespace.DiskAllWriteOps) {
             rule.setExpression("sum(irate(collectd_virt_disk_ops_1[10m])) by (virt)");
         } else if (metric == VmNamespace.DiskReadLatencyMilliseconds) {
-            rule.setExpression("zstack_vm_disk_read_latency_milliseconds");
+            rule.setExpression("zstack_vm_disk_read_time_milliseconds / (zstack_vm_disk_read_requests > 0)");
             rule.labelMapping("vm_uuid", VmNamespace.LabelNames.VMUuid.toString());
             rule.labelMapping("disk_name", VmAbstractNamespace.LabelNames.DiskName.toString());
         } else if (metric == VmNamespace.DiskWriteLatencyMilliseconds) {
-            rule.setExpression("zstack_vm_disk_write_latency_milliseconds");
+            rule.setExpression("zstack_vm_disk_write_time_milliseconds / (zstack_vm_disk_write_requests > 0)");
             rule.labelMapping("vm_uuid", VmNamespace.LabelNames.VMUuid.toString());
             rule.labelMapping("disk_name", VmAbstractNamespace.LabelNames.DiskName.toString());
+        } else if (metric == VmNamespace.DiskAverageReadLatencyMilliseconds) {
+            // Interval gauges: never rate()/increase() these. Filter zero-IO
+            // disks before summing; averaging per-disk latencies is incorrect.
+            rule.setExpression("sum by (vm_uuid) (zstack_vm_disk_read_time_milliseconds and (zstack_vm_disk_read_requests > 0)) / sum by (vm_uuid) (zstack_vm_disk_read_requests > 0)");
+            rule.labelMapping("vm_uuid", VmNamespace.LabelNames.VMUuid.toString());
+        } else if (metric == VmNamespace.DiskAverageWriteLatencyMilliseconds) {
+            rule.setExpression("sum by (vm_uuid) (zstack_vm_disk_write_time_milliseconds and (zstack_vm_disk_write_requests > 0)) / sum by (vm_uuid) (zstack_vm_disk_write_requests > 0)");
+            rule.labelMapping("vm_uuid", VmNamespace.LabelNames.VMUuid.toString());
         } else if (metric == VmNamespace.DiskFreeCapacityInBytes) {
             rule.setExpression(String.format("node_filesystem_avail{vmUuid!=\"\", fstype!~\"%1$s\", mountpoint!~\"%2$s\"}",
                     IGNORED_FS_TYPE,

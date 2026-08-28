@@ -116,6 +116,12 @@ public abstract class VmAbstractNamespace extends AbstractNamespace {
     public static final Metric DiskWriteLatencyMilliseconds = new TimeDurationMetric("DiskWriteLatencyMilliseconds",
             metrics, false, LabelNames.VMUuid, LabelNames.DiskName
     );
+    public static final Metric DiskAverageReadLatencyMilliseconds = new TimeDurationMetric(
+            "DiskAverageReadLatencyMilliseconds", metrics, false, LabelNames.VMUuid
+    );
+    public static final Metric DiskAverageWriteLatencyMilliseconds = new TimeDurationMetric(
+            "DiskAverageWriteLatencyMilliseconds", metrics, false, LabelNames.VMUuid
+    );
 
     // Data collected from within the vm operating system
     public static final Metric DiskAllFreeCapacityInBytes = new ByteSizeMetric("DiskAllFreeCapacityInBytes", metrics,

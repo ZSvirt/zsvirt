@@ -51,7 +51,7 @@
         alt="在线体验"
       >
     </a>
-    <a href="https://zsvirt.io/download">
+    <a href="https://zsvirt.io/zh/download">
       <img
         src="https://img.shields.io/badge/下载中心-F97316?style=flat-square&logo=data:image/svg%2Bxml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI%2BPHBhdGggZmlsbD0iI2ZmZiIgZD0iTTUgMjBoMTR2LTJINXYyem0xNC05aC00VjNIOXY4SDVsNyA3IDctN3oiLz48L3N2Zz4%3D"
         alt="下载中心"
@@ -136,7 +136,7 @@ ZSvirt 将 [ZStack](https://www.zstack.io/) 经企业级实践验证的 ZSphere 
 
 ## 在线体验
 
-[ZSvirt 在线体验环境](https://demo.zsvirt.io/)是一个可免费体验 ZSvirt 的托管环境，也无需注册。打开链接，点击 Demo Login 即可开始探索 ZSvirt 的各项功能。
+[ZSvirt 在线体验环境](https://demo.zsvirt.io/)是一个可免费体验 ZSvirt 的托管环境，也无需注册。打开链接，点击 **Demo Login** 即可开始探索 ZSvirt 的各项功能。
 
 ## 系统架构
 

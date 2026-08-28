@@ -64,6 +64,8 @@
   </p>
 </div>
 
+*Try it now — no physical hardware needed.** Grab the [qcow2 or OVA image](https://zsvirt.io/en/download), boot it as a VM on VMware, VirtualBox, KVM, or a cloud host (nested virtualization), set an IP, and the ZSvirt management node is ready. See [Run ZSvirt inside a VM](https://docs.zsvirt.io/en/docs/quick-start/nested-virtualization-management-node) or jump to the [Quick Start](https://zsvirt.io/en/docs/quick-start).
+
 ## What is ZSvirt
 ZSvirt brings [ZStack](https://www.zstack-cloud.com/)'s enterprise-proven ZSphere virtualization engine into the open-source world. Backed by [ZStack](https://www.zstack-cloud.com/), a mature infrastructure leader, ZSvirt is a lightweight, scalable platform for running and managing virtual machines without vendor lock-in.
 

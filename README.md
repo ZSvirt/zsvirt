@@ -49,7 +49,7 @@
         alt="Live Demo"
       >
     </a>
-    <a href="https://zsvirt.io/en/download">
+    <a href="https://zsvirt.io/download">
       <img
         src="https://img.shields.io/badge/Download-F97316?style=flat-square&logo=data:image/svg%2Bxml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI%2BPHBhdGggZmlsbD0iI2ZmZiIgZD0iTTUgMjBoMTR2LTJINXYyem0xNC05aC00VjNIOXY4SDVsNyA3IDctN3oiLz48L3N2Zz4%3D"
         alt="Download"
@@ -201,7 +201,7 @@ ZSvirt provides migration-oriented capabilities and operational tools to help us
 
 The fastest way to evaluate ZSvirt is to follow the quick start guide in the product documentation. It walks you through preparing compute, network, and storage resources, initializing the management service, and creating your first virtual machine.
 
-Prefer to try it in a VM first? Download the [qcow2 or OVA image](https://zsvirt.io/en/download) and run the management node inside any hypervisor — see [Running ZSvirt inside a VM](https://docs.zsvirt.io/en/docs/quick-start/nested-virtualization-management-node).
+Prefer to try it in a VM first? Download the [qcow2 or OVA image](https://zsvirt.io/download) and run the management node inside any hypervisor — see [Running ZSvirt inside a VM](https://docs.zsvirt.io/en/docs/quick-start/nested-virtualization-management-node).
 
 🚀 [Quick Start](https://zsvirt.io/en/docs/quick-start)<br>
 ▶️ [Video](https://youtu.be/LsSJlBRUvYw)

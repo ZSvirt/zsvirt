@@ -21,7 +21,7 @@ test/unitTestSuiteReport/*
 *.swo
 .setting
 *.log
-premium/
+zsvirt-ee/
 *.orig
 *.rej
 .classpath

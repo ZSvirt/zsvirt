@@ -69,7 +69,6 @@ public class ErrorFacadeImpl implements ErrorFacade {
             ErrorCode subErr = JSONObjectUtil.toObject(details.substring(details.indexOf("{\"code\":")), ErrorCode.class);
             err.setCode(subErr.getCode());
             err.setElaboration(subErr.getElaboration());
-            err.setMessages(subErr.getMessages());
             err.setDescription(subErr.getDescription());
             err.setDetails(subErr.getDetails());
             err.setCause(subErr.getCause());

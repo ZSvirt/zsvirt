@@ -572,6 +572,43 @@
         </profile>
 
         <profile>
+            <id>ee</id>
+            <modules>
+                <module>core</module>
+                <module>computes</module>
+                <module>compute</module>
+                <module>utils</module>
+                <module>headers</module>
+                <module>header</module>
+                <module>portal</module>
+                <module>simulator</module>
+                <module>build</module>
+                <module>storage</module>
+                <module>plugin</module>
+                <module>image</module>
+                <module>network</module>
+                <module>configuration</module>
+                <module>identity</module>
+                <module>search</module>
+                <module>console</module>
+                <module>tag</module>
+                <module>rest</module>
+                <module>sdk</module>
+                <module>externalservice</module>
+                <module>longjob</module>
+                <module>resourceconfig</module>
+                <module>plugin/iscsi</module>
+                <module>abstraction</module>
+                <module>premium</module>
+                <module>test</module>
+                <module>tests</module>
+                <module>agents</module>
+                <module>platforms</module>
+                <module>zsvirt-ee</module>
+            </modules>
+        </profile>
+
+        <profile>
             <id>deploydb</id>
             <activation>
                 <property>

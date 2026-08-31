@@ -11,6 +11,7 @@
     </parent>
 
     <modules>
+        <module>zsvirt-full</module>
         <module>i18n-tools</module>
         <module>testlib-premium</module>
         <module>checker</module>

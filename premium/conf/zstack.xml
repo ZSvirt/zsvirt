@@ -77,8 +77,6 @@
     <import resource="springConfigXml/keyValueFacade.xml"/>
     <import resource="springConfigXml/Kvm.xml"/>
     <import resource="springConfigXml/lb.xml"/>
-    <import resource="springConfigXml/accountImport.xml"/>
-    <import resource="springConfigXml/LdapManagerImpl.xml"/>
     <import resource="springConfigXml/localStorage.xml"/>
     <import resource="springConfigXml/vhost.xml"/>
     <import resource="springConfigXml/iscsi.xml"/>
@@ -151,7 +149,6 @@
     <import resource="springConfigXml/LoginControl.xml"/>
     <import resource="springConfigXml/identity.xml"/>
     <import resource="springConfigXml/databaseBackup.xml" />
-    <import resource="springConfigXml/accessKey.xml" />
     <import resource="springConfigXml/tag2.xml" />
     <import resource="springConfigXml/routeProtocol.xml" />
     <import resource="springConfigXml/mevocoClusterManager.xml" />
@@ -191,4 +188,9 @@
     <import resource="springConfigXml/managements/managements-ha2.xml"/>
     <import resource="springConfigXml/agents/softwarePackagePlugin.xml"/>
     <import resource="springConfigXml/agents/zmigratePlugin.xml"/>
+
+    <!-- authentications modules -->
+    <import resource="springConfigXml/authentications/accessKey.xml"/>
+    <import resource="springConfigXml/authentications/accountImport.xml"/>
+    <import resource="springConfigXml/authentications/ldap.xml"/>
 </beans>

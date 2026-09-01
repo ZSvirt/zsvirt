@@ -2,7 +2,6 @@ package org.zstack.test.integration.identity.account
 
 import org.zstack.compute.vm.VmGlobalConfig
 import org.zstack.core.db.Q
-import org.zstack.core.db.SQL
 import org.zstack.header.identity.AccessLevel
 import org.zstack.header.identity.AccountConstant
 import org.zstack.header.identity.AccountResourceRefVO
@@ -11,25 +10,17 @@ import org.zstack.header.vm.VmInstanceDeletionPolicyManager
 import org.zstack.network.securitygroup.SecurityGroupConstant
 import org.zstack.sdk.AccountInventory
 import org.zstack.sdk.VmInstanceInventory
-import org.zstack.test.integration.ZStackTest
+import org.zstack.sdk.VolumeInventory
+import org.zstack.test.integration.identity.IdentityTest
 import org.zstack.testlib.EnvSpec
 import org.zstack.testlib.SubCase
-
-import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * Created by miao on 17-6-7.
  */
-class DeleteNormalAccountCase extends SubCase {
+class DelayDeleteResourceCase extends SubCase {
     EnvSpec env
-    AccountInventory accountInventory, toConcurrentDeleteAccount
-
-    def DOC = """
-1. create an environment with admin account and normal account and other resources
-2. delete all AccountResourceRefVO purposely
-3. delete normal account to trigger admin adopting all orphaned resources
-4. check
-"""
+    AccountInventory accountInventory
 
     @Override
     void clean() {
@@ -38,7 +29,7 @@ class DeleteNormalAccountCase extends SubCase {
 
     @Override
     void setup() {
-        useSpring(ZStackTest.springSpec)
+        useSpring(IdentityTest.springSpec)
     }
 
     @Override
@@ -141,11 +132,6 @@ class DeleteNormalAccountCase extends SubCase {
                 password = "password"
             } as AccountInventory
 
-            toConcurrentDeleteAccount = createAccount {
-                name = "test1"
-                password = "password"
-            } as AccountInventory
-
             VmGlobalConfig.VM_DELETION_POLICY.updateValue(VmInstanceDeletionPolicyManager.VmInstanceDeletionPolicy.Delay.toString())
 
             testAdminAdoptOrphanedResourceAfterDeletedNormalAccount()
@@ -154,52 +140,44 @@ class DeleteNormalAccountCase extends SubCase {
 
     void testAdminAdoptOrphanedResourceAfterDeletedNormalAccount() {
         VmInstanceInventory vm = env.inventoryByName("vm") as VmInstanceInventory
+        VolumeInventory vol = vm.getAllVolumes().find { i -> i.getUuid() != vm.getRootVolumeUuid() }
 
-        // gather resources which should be referenced in AccountResourceRefVO and belong to admin
-        // these should later belong to admin again
-        List<String> resourceUuids = Q.New(AccountResourceRefVO.class)
-                .select(AccountResourceRefVO_.resourceUuid)
-                .eq(AccountResourceRefVO_.accountUuid, AccountConstant.INITIAL_SYSTEM_ADMIN_UUID)
-                .eq(AccountResourceRefVO_.type, AccessLevel.Own)
-                .listValues()
+        List<String> resourceUuids = new ArrayList<>()
+        resourceUuids.add(vm.getUuid())
+        resourceUuids.add(vol.getUuid())
+        resourceUuids.add(vm.getRootVolumeUuid())
 
-        // change one vm's owner to normal account, leave an appliance vm to admin
+        // check initial owner
+        retryInSecs {
+            def size = Q.New(AccountResourceRefVO.class)
+                    .in(AccountResourceRefVO_.resourceUuid, resourceUuids)
+                    .eq(AccountResourceRefVO_.accountUuid, AccountConstant.INITIAL_SYSTEM_ADMIN_UUID)
+                    .eq(AccountResourceRefVO_.type, AccessLevel.Own)
+                    .count()
+            assert size == resourceUuids.size() as Long
+        }
+
         changeResourceOwner {
             accountUuid = accountInventory.getUuid()
             resourceUuid = vm.getUuid()
         }
 
-        // remove all AccountResourceRefVO records purposely
-        Q.New(AccountResourceRefVO.class)
-                .eq(AccountResourceRefVO_.accountUuid, AccountConstant.INITIAL_SYSTEM_ADMIN_UUID)
-                .eq(AccountResourceRefVO_.type, AccessLevel.Own)
-                .list()
-                .stream()
-                .forEach { it ->
-            logger.debug(String.format("resourceUuid:%s, resourceType:%s",
-                    (it as AccountResourceRefVO).getResourceUuid(),
-                    (it as AccountResourceRefVO).getResourceType()))
+        // make sure change owner success
+        retryInSecs {
+            def size = Q.New(AccountResourceRefVO.class)
+                    .in(AccountResourceRefVO_.resourceUuid, resourceUuids)
+                    .eq(AccountResourceRefVO_.accountUuid, accountInventory.getUuid())
+                    .eq(AccountResourceRefVO_.type, AccessLevel.Own)
+                    .count()
+            assert size == resourceUuids.size() as Long
         }
 
-        SQL.New(AccountResourceRefVO.class).hardDelete()
-
-        // delete normal account to trigger adoption
-
-        AtomicInteger success = new AtomicInteger(0)
-        for (String toDeleteUuid : [accountInventory.uuid, toConcurrentDeleteAccount.uuid]) {
-            String tempUuid = toDeleteUuid
-            Thread.start {
-                deleteAccount {
-                    uuid = tempUuid
-                }
-                success.addAndGet(1)
-            }
+        deleteAccount {
+            uuid = accountInventory.getUuid()
         }
-
 
         // check admin adopt all
         retryInSecs {
-            assert success.get() == 2
             def size = Q.New(AccountResourceRefVO.class)
                     .in(AccountResourceRefVO_.resourceUuid, resourceUuids)
                     .eq(AccountResourceRefVO_.accountUuid, AccountConstant.INITIAL_SYSTEM_ADMIN_UUID)

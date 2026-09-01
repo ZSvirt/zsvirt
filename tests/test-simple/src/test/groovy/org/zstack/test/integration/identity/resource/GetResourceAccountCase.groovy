@@ -5,8 +5,7 @@ import org.zstack.header.identity.AccessLevel
 import org.zstack.header.identity.AccountResourceRefVO
 import org.zstack.header.identity.AccountResourceRefVO_
 import org.zstack.sdk.VmInstanceInventory
-import org.zstack.test.integration.ZStackTest
-import org.zstack.test.integration.identity.Env
+import org.zstack.test.integration.identity.IdentityTest
 import org.zstack.testlib.EnvSpec
 import org.zstack.testlib.SubCase
 
@@ -23,12 +22,12 @@ class GetResourceAccountCase extends SubCase {
 
     @Override
     void setup() {
-        useSpring(ZStackTest.springSpec)
+        useSpring(IdentityTest.springSpec)
     }
 
     @Override
     void environment() {
-        envSpec = Env.oneVmBasicEnv()
+        envSpec = IdentityTest.oneVmBasicEnv()
     }
 
     void testGetResourceAccount() {

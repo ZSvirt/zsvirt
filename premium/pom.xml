@@ -16,7 +16,6 @@
         <module>crypto</module>
         <module>loginControl</module>
         <module>baremetal</module>
-        <module>accesskey</module>
         <module>tag2</module>
         <module>imagereplicator</module>
         <module>xdragon</module>

@@ -46,6 +46,7 @@
         <module>network</module>
         <module>configuration</module>
         <module>identity</module>
+        <module>authentications</module>
         <module>search</module>
         <module>console</module>
         <module>tag</module>
@@ -589,6 +590,7 @@
                 <module>network</module>
                 <module>configuration</module>
                 <module>identity</module>
+                <module>authentications</module>
                 <module>search</module>
                 <module>console</module>
                 <module>tag</module>

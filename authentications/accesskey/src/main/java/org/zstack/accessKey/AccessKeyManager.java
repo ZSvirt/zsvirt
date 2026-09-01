@@ -32,7 +32,6 @@ import org.zstack.header.rest.RestAuthenticationBackend;
 import org.zstack.header.rest.RestAuthenticationParams;
 import org.zstack.header.rest.RestAuthenticationType;
 import org.zstack.header.rest.RestException;
-import org.zstack.license.LicenseCanonicalEvents;
 import org.zstack.utils.CollectionUtils;
 import org.zstack.utils.Utils;
 import org.zstack.utils.gson.JSONObjectUtil;
@@ -42,7 +41,6 @@ import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -389,28 +387,6 @@ public class AccessKeyManager extends AbstractService implements RestAuthenticat
                 bus.send(innerMessage);
             }
         });
-
-        evtf.on(LicenseCanonicalEvents.LICENSE_TYPE_CHANGED_PATH, new EventCallback<LicenseCanonicalEvents.LicenseTypeChangeData>() {
-            @Override
-            protected void run(Map tokens, LicenseCanonicalEvents.LicenseTypeChangeData d) {
-                if (d.isCurEnterpriseLicense()) {
-                    return;
-                }
-
-                /* if not enterprise, remove all the accesskey */
-                logger.debug("license is community, remove all the access-keys");
-                final List<String> accountUuids = Q.New(AccessKeyVO.class)
-                        .select(AccessKeyVO_.accountUuid)
-                        .listValues();
-                for (String accountUuid : new HashSet<>(accountUuids)) {
-                    DeleteAccessKeyMsg innerMessage = new DeleteAccessKeyMsg();
-                    innerMessage.setAccountUuid(accountUuid);
-                    bus.makeLocalServiceId(innerMessage, AccessKeyConstant.SERVICE_ID);
-                    bus.send(innerMessage);
-                }
-            }
-        });
-
     }
 
     public boolean start() {

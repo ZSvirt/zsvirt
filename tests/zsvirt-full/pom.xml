@@ -180,6 +180,23 @@
             <version>${project.version}</version>
         </dependency>
 
+        <!-- authentications modules -->
+        <dependency>
+            <groupId>org.zstack</groupId>
+            <artifactId>account-import</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.zstack</groupId>
+            <artifactId>ldap</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.zstack</groupId>
+            <artifactId>accessKey</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
         <!-- premium modules -->
         <dependency>
             <groupId>org.zstack</groupId>
@@ -304,11 +321,6 @@
         <dependency>
             <groupId>org.zstack</groupId>
             <artifactId>routeProtocol</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.zstack</groupId>
-            <artifactId>accessKey</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

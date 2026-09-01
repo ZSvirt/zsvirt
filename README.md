@@ -31,7 +31,7 @@
   </h1>
 
   <p align="center">
-    <a href="https://zsvirt.io/en">
+    <a href="https://zsvirt.io/">
       <img
         src="https://img.shields.io/badge/Website-0F62FE?style=flat-square&logo=googlechrome&logoColor=white"
         alt="ZSvirt Website"

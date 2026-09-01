@@ -14,6 +14,7 @@
     <packaging>pom</packaging>
     <modules>
         <module>account-import</module>
+        <module>ldap</module>
     </modules>
 
     <dependencies>

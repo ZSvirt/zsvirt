@@ -3,8 +3,7 @@ package org.zstack.test.integration.identity.account
 import org.zstack.core.db.Q
 import org.zstack.sdk.*
 import org.zstack.header.identity.*
-import org.zstack.test.integration.ZStackTest
-import org.zstack.test.integration.identity.Env
+import org.zstack.test.integration.identity.IdentityTest
 import org.zstack.testlib.EnvSpec
 import org.zstack.testlib.SubCase
 import org.zstack.testlib.Test
@@ -24,12 +23,12 @@ class BatchDeleteAccountCase extends SubCase {
 
     @Override
     void setup() {
-        useSpring(ZStackTest.springSpec)
+        useSpring(IdentityTest.springSpec)
     }
 
     @Override
     void environment() {
-        env = Env.oneVmBasicEnv()
+        env = IdentityTest.oneVmBasicEnv()
     }
 
     @Override

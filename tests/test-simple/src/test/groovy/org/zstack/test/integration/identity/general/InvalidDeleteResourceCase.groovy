@@ -1,4 +1,4 @@
-package org.zstack.test.integration.identity
+package org.zstack.test.integration.identity.general
 
 import org.zstack.header.network.l3.L3NetworkConstant
 import org.zstack.sdk.L2NetworkInventory
@@ -10,7 +10,7 @@ import org.zstack.sdk.VipInventory
 import org.zstack.sdk.VmInstanceInventory
 import org.zstack.sdk.VolumeInventory
 import org.zstack.sdk.VolumeSnapshotInventory
-import org.zstack.test.integration.ZStackTest
+import org.zstack.test.integration.identity.IdentityTest
 import org.zstack.testlib.EnvSpec
 import org.zstack.testlib.SubCase
 import org.zstack.utils.data.SizeUnit
@@ -30,12 +30,12 @@ class InvalidDeleteResourceCase extends SubCase{
 
     @Override
     void setup() {
-        useSpring(ZStackTest.springSpec)
+        useSpring(IdentityTest.springSpec)
     }
 
     @Override
     void environment() {
-        env = Env.oneVmBasicEnv()
+        env = IdentityTest.oneVmBasicEnv()
     }
 
     @Override

@@ -2,13 +2,13 @@ package org.zstack.test.integration.identity.account
 
 import org.zstack.header.identity.IdentityErrors
 import org.zstack.sdk.AccountInventory
-import org.zstack.test.integration.ZStackTest
+import org.zstack.test.integration.identity.IdentityTest
 import org.zstack.testlib.FSMCase
 
 class AccountFSMCase extends FSMCase {
     @Override
     void setup() {
-        useSpring(ZStackTest.springSpec)
+        useSpring(IdentityTest.springSpec)
     }
 
     @Override

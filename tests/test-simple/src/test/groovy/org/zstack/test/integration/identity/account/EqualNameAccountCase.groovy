@@ -13,7 +13,7 @@ import org.zstack.sdk.LogInAction
 import org.zstack.sdk.SessionInventory
 import org.zstack.sdk.identity.imports.entity.AccountThirdPartyAccountSourceRefInventory
 import org.zstack.sdk.identity.ldap.entity.LdapServerInventory
-import org.zstack.test.integration.ZStackTest
+import org.zstack.test.integration.identity.IdentityTest
 import org.zstack.testlib.EnvSpec
 import org.zstack.testlib.SubCase
 import org.zstack.testlib.identity.ldap.LdapVirtualEndpointSpec
@@ -28,7 +28,7 @@ class EqualNameAccountCase extends SubCase {
 
     @Override
     void setup() {
-        useSpring(ZStackTest.springSpec)
+        useSpring(IdentityTest.springSpec)
     }
 
     @Override

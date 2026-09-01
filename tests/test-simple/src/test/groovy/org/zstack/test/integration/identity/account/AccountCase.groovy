@@ -20,8 +20,7 @@ import org.zstack.sdk.L3NetworkInventory
 import org.zstack.sdk.SessionInventory
 import org.zstack.sdk.UpdateAccountAction
 import org.zstack.sdk.UpdateGlobalConfigAction
-import org.zstack.test.integration.ZStackTest
-import org.zstack.test.integration.identity.Env
+import org.zstack.test.integration.identity.IdentityTest
 import org.zstack.testlib.EnvSpec
 import org.zstack.testlib.SubCase
 import org.zstack.utils.data.SizeUnit
@@ -45,12 +44,12 @@ class AccountCase extends SubCase {
 
     @Override
     void setup() {
-        useSpring(ZStackTest.springSpec)
+        useSpring(IdentityTest.springSpec)
     }
 
     @Override
     void environment() {
-        env = Env.oneVmBasicEnv()
+        env = IdentityTest.oneVmBasicEnv()
     }
 
     @Override

@@ -5,7 +5,7 @@ import org.zstack.header.zone.ZoneVO
 import org.zstack.sdk.ClusterInventory
 import org.zstack.sdk.ResourceInventory
 import org.zstack.sdk.ZoneInventory
-import org.zstack.test.integration.ZStackTest
+import org.zstack.test.integration.identity.IdentityTest
 import org.zstack.testlib.EnvSpec
 import org.zstack.testlib.SubCase
 
@@ -22,7 +22,7 @@ class ResourceCase extends SubCase {
 
     @Override
     void setup() {
-        useSpring(ZStackTest.springSpec)
+        useSpring(IdentityTest.springSpec)
     }
 
     @Override

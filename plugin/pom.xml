@@ -31,7 +31,6 @@
         <module>directory</module>
         <module>sshKeyPair</module>
         <module>hostNetworkInterface</module>
-        <module>account-import</module>
         <module>vhost</module>
         <module>expon</module>
         <module>externalStorage</module>

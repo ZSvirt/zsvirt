@@ -31,7 +31,7 @@
   </h1>
 
   <p align="center">
-    <a href="https://zsvirt.io/en">
+    <a href="https://zsvirt.io">
       <img
         src="https://img.shields.io/badge/Website-0F62FE?style=flat-square&logo=googlechrome&logoColor=white"
         alt="ZSvirt Website"
@@ -287,7 +287,7 @@ files in each repository for details.
     <td width="50%">
       <h3>🌐 Community Website</h3>
       <p>Explore ZSvirt features, use cases, news, and community resources.</p>
-      <a href="https://zsvirt.io/en"><strong>Visit Website →</strong></a>
+      <a href="https://zsvirt.io"><strong>Visit Website →</strong></a>
     </td>
     <td width="50%">
       <h3>▶️ Videos</h3>
@@ -300,7 +300,7 @@ files in each repository for details.
     <td width="50%">
       <h3>📝 Blog</h3>
       <p>Discover release updates, engineering stories, and virtualization insights.</p>
-      <a href="https://zsvirt.io/en/blog"><strong>Read the Blog →</strong></a>
+      <a href="https://zsvirt.io/blog"><strong>Read the Blog →</strong></a>
     </td>
     <td width="50%">
       <h3>💬 GitHub Discussions</h3>

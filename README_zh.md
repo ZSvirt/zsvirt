@@ -33,7 +33,7 @@
   </h1>
 
   <p align="center">
-    <a href="https://zsvirt.io">
+    <a href="https://zsvirt.io/zh">
       <img
         src="https://img.shields.io/badge/官方网站-0F62FE?style=flat-square&logo=googlechrome&logoColor=white"
         alt="ZSvirt 官方网站"
@@ -174,10 +174,10 @@ ZSvirt 采用模块化架构，围绕虚拟化资源管理、管理平面、扩�
 
 ZSvirt 提供面向迁移的功能和运维工具，帮助用户评估、规划并将工作负载从现有 VMware 环境迁移到基于 ZSvirt 的虚拟化基础设施。
 
-🔄 [查看 VMware 迁移指南](https://zsvirt.io/vmware-alternative/)
+🔄 [查看 VMware 迁移指南](https://zsvirt.io/zh/vmware-alternative)
 
 <p align="center">
-  <a href="https://zsvirt.io/vmware-alternative/">
+  <a href="https://zsvirt.io/zh/vmware-alternative">
     <img
       src="https://github.com/ZSvirt/.github/blob/main/assets/zvirt-migrate.png?raw=true"
       alt="从 VMware 迁移到 ZSvirt"

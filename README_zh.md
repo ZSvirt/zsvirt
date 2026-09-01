@@ -192,9 +192,6 @@ ZSvirt 提供面向迁移的功能和运维工具，帮助用户评估、规划�
 
 想先在虚拟机里试试？从[下载中心](https://zsvirt.io/zh/download)获取 qcow2 或 OVA 镜像，在任何 hypervisor 中运行管理节点即可——参见[在虚拟机中运行 ZSvirt](https://docs.zsvirt.io/docs/quick-start/nested-virtualization-management-node)。
 
-
-15:52
-
 🚀 [快速开始](https://zsvirt.io/docs/quick-start)<br>
 ▶️ [视频链接](https://youtu.be/LsSJlBRUvYw)
 
@@ -262,7 +259,7 @@ ZSvirt 基于 [GNU General Public License v3.0](LICENSE) 许可证发布。
     <td width="50%">
       <h3>🌐 社区网站</h3>
       <p>了解 ZSvirt 的产品功能、使用场景、项目动态和社区资源。</p>
-      <a href="https://zsvirt.io/en"><strong>访问网站 →</strong></a>
+      <a href="https://zsvirt.io/zh"><strong>访问网站 →</strong></a>
     </td>
     <td width="50%">
       <h3>▶️ 产品视频</h3>
@@ -275,7 +272,7 @@ ZSvirt 基于 [GNU General Public License v3.0](LICENSE) 许可证发布。
     <td width="50%">
       <h3>📝 博客</h3>
       <p>阅读版本动态、工程实践和虚拟化技术相关文章。</p>
-      <a href="https://zsvirt.io/en/blog"><strong>阅读博客 →</strong></a>
+      <a href="https://zsvirt.io/zh/blog"><strong>阅读博客 →</strong></a>
     </td>
     <td width="50%">
       <h3>💬 GitHub Discussions</h3>

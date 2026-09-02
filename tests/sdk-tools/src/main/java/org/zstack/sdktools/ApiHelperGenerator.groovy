@@ -2,6 +2,7 @@ package org.zstack.sdktools
 
 import org.zstack.core.Platform
 import org.zstack.sdk.AbstractAction
+import org.zstack.sdk.SdkClassSourceUtils
 
 import java.lang.reflect.Modifier
 
@@ -20,6 +21,9 @@ class ApiHelperGenerator {
     void generate(String outputFilePath) {
         actions.each { actionClass ->
             if (Modifier.isAbstract(actionClass.modifiers)) {
+                return
+            }
+            if (SdkClassSourceUtils.isFromEnterpriseEdition(actionClass)) {
                 return
             }
 

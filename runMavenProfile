@@ -6,7 +6,7 @@ usage() {
 Usage:$0 [option]
 
 Options:
-  apihelper           generate groovy API helper
+  apihelper           generate groovy API helper (also ApiHelperEe if zsvirt-ee/ is present)
 
   check               static check after build finished
 
@@ -94,6 +94,20 @@ apihelper() {
   cp ~/ApiHelper.groovy tests/testlib-simple/src/main/java/org/zstack/testlib/ApiHelper.groovy
 
   echo "ApiHelper.groovy is generated at ~/ApiHelper.groovy"
+
+  if [ -d zsvirt-ee/tests-ee/sdk-tools-ee ]; then
+    echo "zsvirt-ee found, also generating ApiHelperEe"
+    cd zsvirt-ee/tests-ee/sdk-tools-ee
+    $MVNTest -Dtest=TestGenerateApiHelperEe
+    if [ $? -ne 0 ]; then
+      echo "if you see a compile error, you may try to compile and install sdk-ee and sdk-tools first"
+      exit 1
+    fi
+    cd - >/dev/null
+    mkdir -p zsvirt-ee/tests-ee/testlib-ee/src/main/java/org/zstack/testlib/ee
+    cp ~/ApiHelperEe.groovy zsvirt-ee/tests-ee/testlib-ee/src/main/java/org/zstack/testlib/ee/ApiHelperEe.groovy
+    echo "ApiHelperEe.groovy is generated at ~/ApiHelperEe.groovy"
+  fi
 }
 
 doc() {

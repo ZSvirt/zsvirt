@@ -47,8 +47,8 @@ class LdapBasicCase extends SubCase {
             kvm()
             localStorage()
             sftpBackupStorage()
-            include("accountImport.xml")
-            include("LdapManagerImpl.xml")
+            include("authentications/accountImport.xml")
+            include("authentications/ldap.xml")
             include("captcha.xml")
         }
     }

@@ -74,8 +74,6 @@
     <import resource="springConfigXml/Kvm.xml"/>
     <import resource="springConfigXml/lb.xml"/>
     <import resource="springConfigXml/acl.xml"/>
-    <import resource="springConfigXml/accountImport.xml"/>
-    <import resource="springConfigXml/LdapManagerImpl.xml"/>
     <import resource="springConfigXml/localStorage.xml"/>
     <import resource="springConfigXml/ManagementNodeManager.xml"/>
     <import resource="springConfigXml/mediator.xml"/>
@@ -118,4 +116,9 @@
     <import resource="springConfigXml/HostNetworkManager.xml"/>
     <import resource="springConfigXml/telemetry.xml"/>
     <import resource="springConfigXml/allocatorDomain.xml"/>
+
+    <!-- authentications modules -->
+    <import resource="springConfigXml/authentications/accountImport.xml"/>
+    <import resource="springConfigXml/authentications/ldap.xml"/>
+    <import resource="springConfigXml/authentications/accessKey.xml"/>
 </beans>

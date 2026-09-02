@@ -11,6 +11,7 @@
     </parent>
 
     <modules>
+        <module>zsvirt-full</module>
         <module>i18n-tools</module>
         <module>testlib-premium</module>
         <module>checker</module>
@@ -43,6 +44,9 @@
                 <version>${project.compiler.version}</version>
                 <configuration>
                     <compilerId>groovy-eclipse-compiler</compilerId>
+                    <compilerArgs>
+                        <arg>-warn:-serial</arg>
+                    </compilerArgs>
                     <source>${project.java.version}</source>
                     <target>${project.java.version}</target>
                     <debuglevel>lines,vars,source</debuglevel>

@@ -121,16 +121,6 @@
             <version>0.17</version>
         </dependency>
         <dependency>
-            <groupId>info.debatty</groupId>
-            <artifactId>java-string-similarity</artifactId>
-            <version>2.0.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.github.sisyphsu</groupId>
-            <artifactId>retree</artifactId>
-            <version>1.0.4</version>
-        </dependency>
-        <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>servlet-api</artifactId>
         </dependency>

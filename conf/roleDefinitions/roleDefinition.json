@@ -180,7 +180,6 @@
           "org.zstack.network.l2.vxlan.vxlanNetworkPool.APIDeleteVxlanPoolRemoteVtepMsg",
           "org.zstack.header.network.l2.APIDeleteL2NetworkMsg",
           "org.zstack.ipsec.**",
-          "org.zstack.core.errorcode.**",
           "org.zstack.header.identityzone.**",
           "org.zstack.storage.primary.sharedblock.**",
           "org.zstack.network.securitygroup.**",

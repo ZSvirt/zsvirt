@@ -6,7 +6,7 @@ usage() {
 Usage:$0 [option]
 
 Options:
-  apihelper           generate groovy API helper
+  apihelper           generate groovy API helper (also ApiHelperEe if zsvirt-ee/ is present)
 
   check               static check after build finished
 
@@ -48,7 +48,7 @@ Options:
 
   pysdk               generate Python SDK
 
-  sdk                 generate Java SDK
+  sdk                 generate Java SDK (also sdk-ee if zsvirt-ee/ is present)
 
   gosdk               generate Golang SDK
 
@@ -84,12 +84,30 @@ pysdk() {
 }
 
 apihelper() {
-  cd test
+  cd tests/sdk-tools
   $MVNTest -Dtest=TestGenerateApiHelper
+  if [ $? -ne 0 ]; then
+    echo "if you see a compile error, you may try to compile and install the sdk module first"
+    exit 1
+  fi
   cd - >/dev/null
   cp ~/ApiHelper.groovy tests/testlib-simple/src/main/java/org/zstack/testlib/ApiHelper.groovy
 
   echo "ApiHelper.groovy is generated at ~/ApiHelper.groovy"
+
+  if [ -d zsvirt-ee/tests-ee/sdk-tools-ee ]; then
+    echo "zsvirt-ee found, also generating ApiHelperEe"
+    cd zsvirt-ee/tests-ee/sdk-tools-ee
+    $MVNTest -Dtest=TestGenerateApiHelperEe
+    if [ $? -ne 0 ]; then
+      echo "if you see a compile error, you may try to compile and install sdk-ee and sdk-tools first"
+      exit 1
+    fi
+    cd - >/dev/null
+    mkdir -p zsvirt-ee/tests-ee/testlib-ee/src/main/java/org/zstack/testlib/ee
+    cp ~/ApiHelperEe.groovy zsvirt-ee/tests-ee/testlib-ee/src/main/java/org/zstack/testlib/ee/ApiHelperEe.groovy
+    echo "ApiHelperEe.groovy is generated at ~/ApiHelperEe.groovy"
+  fi
 }
 
 doc() {
@@ -269,9 +287,32 @@ sdk() {
   cd - >/dev/null
 
   cd sdk/src/main/java/org/zstack/sdk/
-  find . -type f | grep -E -v "(ZSClient|ZSConfig|ApiException|AsyncRestState|Completion|Constants|ErrorCode|ErrorCodeList|InternalCompletion|ApiResult|Param|RestInfo|AbstractAction|QueryAction).java" | xargs rm -f
+  find . -type f | grep -E -v "(ZSClient|ZSConfig|ApiException|AsyncRestState|Completion|Constants|ErrorCode|ErrorCodeList|InternalCompletion|ApiResult|Param|RestInfo|AbstractAction|QueryAction|SdkClassSourceUtils|SourceClassMapExtension).java" | xargs rm -f
   cd -
   yes | cp -r ~/zstack-sdk/java/* sdk/src/main/java/
+  set +u
+
+  if [ -d zsvirt-ee/tests-ee/sdk-tools-ee ]; then
+    echo "zsvirt-ee found, also generating enterprise Java SDK into sdk-ee"
+    generate_sdk_ee
+  fi
+}
+
+generate_sdk_ee() {
+  set -u
+  rm -rf ~/zstack-sdk/java-ee
+  cd zsvirt-ee/tests-ee/sdk-tools-ee
+
+  $MVNTest -Dtest=TestGenerateSdkEe
+  if [ $? -ne 0 ]; then
+    echo "if you see a compile error, you may try to compile and install sdk and sdk-tools first"
+    exit 1
+  fi
+  cd - >/dev/null
+
+  mkdir -p zsvirt-ee/tests-ee/sdk-ee/src/main/java
+  find zsvirt-ee/tests-ee/sdk-ee/src/main/java -type f -name '*.java' | xargs rm -f
+  yes | cp -r ~/zstack-sdk/java-ee/* zsvirt-ee/tests-ee/sdk-ee/src/main/java/
   set +u
 }
 
@@ -485,6 +526,8 @@ clear_git_config() {
 run_profile() {
   if test x$1 = x'premium'; then
     mvn -Dmaven.test.skip=true -P premium clean install
+  elif test x$1 = x'ee'; then
+    mvn -Dmaven.test.skip=true -P premium,ee clean install
   elif test x$1 = x'md'; then
     md
   elif test x$1 = x'sdk'; then

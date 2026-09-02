@@ -108,6 +108,9 @@ public class ApiResult {
             for (String path : schema.keySet()) {
                 String src = schema.get(path);
                 String dst = org.zstack.sdk.SourceClassMap.srcToDstMapping.get(src);
+                if (dst == null) {
+                    dst = SourceClassMapExtension.getSrcToDst(src);
+                }
 
                 if (dst == null) {
                     //TODO: warning

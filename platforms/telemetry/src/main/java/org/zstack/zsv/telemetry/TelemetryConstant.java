@@ -27,7 +27,7 @@ public class TelemetryConstant {
 
     /**
      * Classpath resource (under {@code conf/telemetry/}) pinned as the Telemetry Cloud TLS CA.
-     * Same packaging layout as {@code mevoco/zcfLicenseServer/ca.pem}.
+     * Same packaging layout as {@code license/zcfLicenseServer/ca.pem}.
      */
     public static final String CLOUD_TLS_CA_RESOURCE = "telemetry/ca.pem";
 

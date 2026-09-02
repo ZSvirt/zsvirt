@@ -258,11 +258,14 @@ public class HostAllocatorManagerImpl extends AbstractService implements HostAll
 
         List<String> hostHasVms = transformAndRemoveNull(hostUsedCpuMemList, arg -> arg.hostUuid);
 
-        hostUuids.stream().filter(huuid -> !hostHasVms.contains(huuid)).forEach(huuid -> {
+        for (String huuid : hostUuids) {
+            if (hostHasVms.contains(huuid)) {
+                continue;
+            }
             HostUsedCpuMem s = new HostUsedCpuMem();
             s.hostUuid = huuid;
             hostUsedCpuMemList.add(s);
-        });
+        }
 
         for (final HostUsedCpuMem s : hostUsedCpuMemList) {
             new HostCapacityUpdater(s.hostUuid).run(cap -> {

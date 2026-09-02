@@ -14,6 +14,7 @@ import org.zstack.utils.FieldUtils
 
 import java.lang.reflect.Field
 import java.lang.reflect.Modifier
+import java.util.function.Predicate
 
 class SdkDataStructureGenerator implements SdkTemplate {
     Set<Class> responseClasses
@@ -21,12 +22,21 @@ class SdkDataStructureGenerator implements SdkTemplate {
     Set<Class> laterResolvedClasses = []
 
     Map<String, String> sourceClassMap = [:]
+    Predicate<Class<?>> include
+    boolean enterpriseEdition
 
     SdkDataStructureGenerator() {
+        this({ Class<?> c -> true } as Predicate<Class<?>>, false)
+    }
+
+    SdkDataStructureGenerator(Predicate<Class<?>> include, boolean enterpriseEdition) {
+        this.include = include
+        this.enterpriseEdition = enterpriseEdition
         Reflections reflections = Platform.getReflections()
         responseClasses = reflections.getTypesAnnotatedWith(RestResponse.class)
+                .findAll { include.test(it) }
         laterResolvedClasses.addAll(reflections.getTypesAnnotatedWith(SDK.class)
-                .findAll() { !Message.class.isAssignableFrom(it) })
+                .findAll { !Message.class.isAssignableFrom(it) && include.test(it) })
     }
 
     @Override
@@ -60,8 +70,32 @@ class SdkDataStructureGenerator implements SdkTemplate {
         dstToSrc.sort()
 
         SdkFile f = new SdkFile()
-        f.fileName = "SourceClassMap.java"
-        f.content = """package org.zstack.sdk;
+        if (enterpriseEdition) {
+            f.subPath = "org/zstack/sdk"
+            f.fileName = "SourceClassMapEe.java"
+            f.content = """package org.zstack.sdk;
+
+import java.util.HashMap;
+
+public class SourceClassMapEe {
+    static {
+        HashMap<String, String> srcToDst = new HashMap() {
+            {
+${srcToDst.join("\n")}
+            }
+        };
+        HashMap<String, String> dstToSrc = new HashMap() {
+            {
+${dstToSrc.join("\n")}
+            }
+        };
+        SourceClassMapExtension.registerAdditional(srcToDst, dstToSrc);
+    }
+}
+"""
+        } else {
+            f.fileName = "SourceClassMap.java"
+            f.content = """package org.zstack.sdk;
 
 import java.util.HashMap;
 
@@ -79,6 +113,7 @@ ${dstToSrc.join("\n")}
     };
 }
 """
+        }
         return f
     }
 
@@ -114,6 +149,10 @@ ${dstToSrc.join("\n")}
         }
 
         if (clz.isAnnotationPresent(NoSDK.class)) {
+            return
+        }
+
+        if (!include.test(clz)) {
             return
         }
 
@@ -199,12 +238,16 @@ ${output.join("\n")}
             return
         }
 
+        if (!include.test(clz)) {
+            return
+        }
+
         if (!sdkFileMap.containsKey(clz)) {
             laterResolvedClasses.add(clz)
         }
 
         Platform.reflections.getSubTypesOf(clz).forEach({ i ->
-            if (!sdkFileMap.containsKey(i) && !i.isAnnotationPresent(NoSDK.class)) {
+            if (!sdkFileMap.containsKey(i) && !i.isAnnotationPresent(NoSDK.class) && include.test(i)) {
                 laterResolvedClasses.add(i)
             }
         })

@@ -48,7 +48,7 @@ Options:
 
   pysdk               generate Python SDK
 
-  sdk                 generate Java SDK
+  sdk                 generate Java SDK (also sdk-ee if zsvirt-ee/ is present)
 
   gosdk               generate Golang SDK
 
@@ -269,9 +269,32 @@ sdk() {
   cd - >/dev/null
 
   cd sdk/src/main/java/org/zstack/sdk/
-  find . -type f | grep -E -v "(ZSClient|ZSConfig|ApiException|AsyncRestState|Completion|Constants|ErrorCode|ErrorCodeList|InternalCompletion|ApiResult|Param|RestInfo|AbstractAction|QueryAction).java" | xargs rm -f
+  find . -type f | grep -E -v "(ZSClient|ZSConfig|ApiException|AsyncRestState|Completion|Constants|ErrorCode|ErrorCodeList|InternalCompletion|ApiResult|Param|RestInfo|AbstractAction|QueryAction|SdkClassSourceUtils|SourceClassMapExtension).java" | xargs rm -f
   cd -
   yes | cp -r ~/zstack-sdk/java/* sdk/src/main/java/
+  set +u
+
+  if [ -d zsvirt-ee/tests-ee/sdk-tools-ee ]; then
+    echo "zsvirt-ee found, also generating enterprise Java SDK into sdk-ee"
+    generate_sdk_ee
+  fi
+}
+
+generate_sdk_ee() {
+  set -u
+  rm -rf ~/zstack-sdk/java-ee
+  cd zsvirt-ee/tests-ee/sdk-tools-ee
+
+  $MVNTest -Dtest=TestGenerateSdkEe
+  if [ $? -ne 0 ]; then
+    echo "if you see a compile error, you may try to compile and install sdk and sdk-tools first"
+    exit 1
+  fi
+  cd - >/dev/null
+
+  mkdir -p zsvirt-ee/tests-ee/sdk-ee/src/main/java
+  find zsvirt-ee/tests-ee/sdk-ee/src/main/java -type f -name '*.java' | xargs rm -f
+  yes | cp -r ~/zstack-sdk/java-ee/* zsvirt-ee/tests-ee/sdk-ee/src/main/java/
   set +u
 }
 

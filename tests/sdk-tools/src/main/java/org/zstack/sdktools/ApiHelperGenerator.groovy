@@ -1,4 +1,4 @@
-package org.zstack.testlib
+package org.zstack.sdktools
 
 import org.zstack.core.Platform
 import org.zstack.sdk.AbstractAction

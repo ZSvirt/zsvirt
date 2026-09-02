@@ -84,8 +84,12 @@ pysdk() {
 }
 
 apihelper() {
-  cd test
+  cd tests/sdk-tools
   $MVNTest -Dtest=TestGenerateApiHelper
+  if [ $? -ne 0 ]; then
+    echo "if you see a compile error, you may try to compile and install the sdk module first"
+    exit 1
+  fi
   cd - >/dev/null
   cp ~/ApiHelper.groovy tests/testlib-simple/src/main/java/org/zstack/testlib/ApiHelper.groovy
 

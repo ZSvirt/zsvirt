@@ -214,7 +214,7 @@ public class ReplicationGroupManagerImpl extends AbstractService implements
     }
 
     @Override
-    public List<Class> getReplyMessageClassForMarshalExtensionPoint() {
+    public List<Class<? extends Message>> getReplyMessageClassForMarshalExtensionPoint() {
         // We don't handle DeleteMsg - the replicator should check:
         //  - image status (ignore disabled/deleted)
         //  - BS status (pause replication upon disabled)

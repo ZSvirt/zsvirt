@@ -1168,12 +1168,12 @@ public class CloudBusImpl3 implements CloudBus, CloudBusIN {
         });
 
         for (MarshalReplyMessageExtensionPoint extp : pluginRgty.getExtensionList(MarshalReplyMessageExtensionPoint.class)) {
-            List<Class> clazzs = extp.getReplyMessageClassForMarshalExtensionPoint();
+            List<Class<? extends Message>> clazzs = extp.getReplyMessageClassForMarshalExtensionPoint();
             if (clazzs == null || clazzs.isEmpty()) {
                 continue;
             }
 
-            for (Class clz : clazzs) {
+            for (Class<? extends Message> clz : clazzs) {
                 if (!(APIEvent.class.isAssignableFrom(clz)) && !(MessageReply.class.isAssignableFrom(clz))) {
                     throw new CloudRuntimeException(String.format("ReplyMessagePreSendingExtensionPoint can only marshal APIEvent or MessageReply. %s claimed by %s is neither APIEvent nor MessageReply",
                             clz.getName(), extp.getClass().getName()));

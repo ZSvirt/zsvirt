@@ -1,6 +1,5 @@
 package org.zstack.sso.header;
 
-import org.zstack.header.log.NoLogging;
 import org.zstack.header.message.APIReply;
 import org.zstack.header.rest.RestResponse;
 

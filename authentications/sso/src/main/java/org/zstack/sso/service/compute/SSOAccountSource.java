@@ -23,15 +23,11 @@ import org.zstack.sso.header.APIUpdateSSORedirectTemplateMsg;
 import org.zstack.sso.header.SSORedirectTemplateInventory;
 import org.zstack.sso.header.SSORedirectTemplateVO;
 import org.zstack.sso.header.SSORedirectTemplateVO_;
-import org.zstack.utils.Utils;
-import org.zstack.utils.logging.CLogger;
 
 import static org.zstack.core.Platform.operr;
 import static org.zstack.identity.imports.AccountImportsManager.accountSourceQueueSyncSignature;
 
 public abstract class SSOAccountSource extends AbstractAccountSourceBase {
-    private static final CLogger logger = Utils.getLogger(SSOAccountSource.class);
-
     @Autowired
     protected DatabaseFacade databaseFacade;
 

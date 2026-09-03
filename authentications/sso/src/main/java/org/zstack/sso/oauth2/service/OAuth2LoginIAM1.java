@@ -9,7 +9,6 @@ import org.zstack.core.db.SQL;
 import org.zstack.header.errorcode.ErrorCode;
 import org.zstack.header.errorcode.ErrorableValue;
 import org.zstack.header.identity.*;
-import org.zstack.header.identity.login.LoginSessionInfo;
 import org.zstack.identity.AccountManager;
 import org.zstack.identity.Session;
 import org.zstack.identity.imports.entity.AccountThirdPartyAccountSourceRefVO;
@@ -20,8 +19,6 @@ import org.zstack.identity.imports.header.ImportAccountItem;
 import org.zstack.identity.imports.header.ImportAccountSpec;
 import org.zstack.sso.oauth2.header.OAuth2UserToken;
 import org.zstack.sso.service.SSOManager;
-import org.zstack.utils.Utils;
-import org.zstack.utils.logging.CLogger;
 
 import javax.persistence.Tuple;
 import java.util.List;
@@ -37,8 +34,6 @@ import static org.zstack.utils.CollectionDSL.*;
  * @Date: 2022/8/25
  */
 public class OAuth2LoginIAM1 implements OAuth2Login {
-    private static final CLogger logger = Utils.getLogger(OAuth2LoginIAM1.class);
-
     @Autowired
     private DatabaseFacade dbf;
     @Autowired

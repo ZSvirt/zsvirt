@@ -1,8 +1,6 @@
 package org.zstack.sso.service.redirect;
 
 import org.zstack.core.Platform;
-import org.zstack.utils.Utils;
-import org.zstack.utils.logging.CLogger;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -69,8 +69,6 @@ public class SSOManagerImpl extends AbstractService implements SSOManager {
     @Autowired
     private PluginRegistry pluginRgty;
 
-    private static final String iam2ModuleName = "project-management";
-
     @Override
     public void handleMessage(Message msg) {
         if (msg instanceof APIMessage) {

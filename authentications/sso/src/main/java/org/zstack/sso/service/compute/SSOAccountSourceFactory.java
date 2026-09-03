@@ -4,22 +4,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.zstack.core.Platform;
 import org.zstack.core.db.DatabaseFacade;
 import org.zstack.core.db.SQL;
-import org.zstack.core.workflow.FlowChainBuilder;
+import org.zstack.core.workflow.SimpleFlowChain;
 import org.zstack.header.core.ReturnValueCompletion;
 import org.zstack.header.core.workflow.Flow;
-import org.zstack.header.core.workflow.FlowChain;
-import org.zstack.header.core.workflow.FlowDoneHandler;
-import org.zstack.header.core.workflow.FlowErrorHandler;
-import org.zstack.header.core.workflow.FlowRollback;
-import org.zstack.header.core.workflow.FlowTrigger;
-import org.zstack.header.core.workflow.NoRollbackFlow;
 import org.zstack.header.errorcode.ErrorCode;
 import org.zstack.identity.imports.entity.ThirdPartyAccountSourceVO;
 import org.zstack.identity.imports.entity.ThirdPartyAccountSourceVO_;
 import org.zstack.identity.imports.header.AbstractAccountSourceSpec;
 import org.zstack.identity.imports.source.AccountSourceFactory;
-
-import java.util.Map;
 
 public abstract class SSOAccountSourceFactory implements AccountSourceFactory {
     @Autowired
@@ -31,45 +23,37 @@ public abstract class SSOAccountSourceFactory implements AccountSourceFactory {
     }
 
     @Override
-    @SuppressWarnings("rawtypes")
     public void createAccountSource(AbstractAccountSourceSpec spec, ReturnValueCompletion<ThirdPartyAccountSourceVO> completion) {
         final Context context = new Context();
         context.spec = spec;
         context.vo = null;
 
-        FlowChain chain = FlowChainBuilder.newSimpleFlowChain();
-        chain.setName("create-sso-client");
-        chain.then(new NoRollbackFlow() {
-            String __name__ = "pre-create-check";
-            @Override
-            public void run(FlowTrigger trigger, Map data) {
-                ErrorCode errorCode = checkSameSSOServerExists(spec);
-                if (errorCode != null) {
-                    trigger.fail(errorCode);
-                    return;
-                }
+        SimpleFlowChain chain = SimpleFlowChain.of("create-sso-client")
+
+        .then(Flow.of("pre-create-check")
+            .handle(() -> checkSameSSOServerExists(spec))
+            .build())
+        .then(Flow.of("complete-spec")
+            .handle(trigger -> {
                 if (spec.getUuid() == null) {
                     spec.setUuid(Platform.getUuid());
                 }
                 trigger.next();
-            }
-        }).then(new Flow() {
-            String __name__ = "add-VO-in-db";
-            @Override
-            public void run(FlowTrigger trigger, Map data) {
+            })
+            .build())
+        .then(Flow.of("add-VO-in-db")
+            .handle(trigger -> {
                 ThirdPartyAccountSourceVO clientVO = generateAccountSourceVO(spec);
                 context.vo = databaseFacade.persistAndRefresh(clientVO);
                 trigger.next();
-            }
-
-            @Override
-            public void rollback(FlowRollback trigger, Map data) {
+            })
+            .rollback(trigger -> {
                 SQL.New(ThirdPartyAccountSourceVO.class)
                         .eq(ThirdPartyAccountSourceVO_.uuid, spec.getUuid())
                         .delete();
                 trigger.rollback();
-            }
-        });
+            })
+            .build());
 
         Flow flow = buildSSOUrlTemplateFlow(context);
         if (flow != null) {
@@ -81,17 +65,10 @@ public abstract class SSOAccountSourceFactory implements AccountSourceFactory {
             chain.then(flow);
         }
 
-        chain.done(new FlowDoneHandler(completion) {
-            @Override
-            public void handle(Map data) {
-                completion.success(context.vo);
-            }
-        }).error(new FlowErrorHandler(completion) {
-            @Override
-            public void handle(ErrorCode errCode, Map data) {
-                completion.fail(errCode);
-            }
-        }).start();
+        chain.propagateExceptionTo(completion)
+            .done(() -> completion.success(context.vo))
+            .error(completion::fail)
+            .start();
     }
 
     protected abstract ThirdPartyAccountSourceVO generateAccountSourceVO(AbstractAccountSourceSpec spec);

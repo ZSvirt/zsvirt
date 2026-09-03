@@ -4,7 +4,6 @@ import org.zstack.header.query.ExpandedQueries;
 import org.zstack.header.query.ExpandedQuery;
 import org.zstack.header.search.Inventory;
 import org.zstack.identity.imports.entity.ThirdPartyAccountSourceInventory;
-import org.zstack.identity.imports.entity.ThirdPartyAccountSourceVO;
 import org.zstack.utils.CollectionUtils;
 
 import java.sql.Timestamp;

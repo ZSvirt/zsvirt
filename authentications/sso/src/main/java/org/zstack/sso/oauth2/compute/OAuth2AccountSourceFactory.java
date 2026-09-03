@@ -2,8 +2,6 @@ package org.zstack.sso.oauth2.compute;
 
 import org.zstack.core.db.Q;
 import org.zstack.header.core.workflow.Flow;
-import org.zstack.header.core.workflow.FlowTrigger;
-import org.zstack.header.core.workflow.NoRollbackFlow;
 import org.zstack.header.errorcode.ErrorCode;
 import org.zstack.header.errorcode.OperationFailureException;
 import org.zstack.identity.imports.entity.ThirdPartyAccountSourceVO;
@@ -14,7 +12,6 @@ import org.zstack.sso.oauth2.header.OAuth2AccountSourceSpec;
 import org.zstack.sso.service.compute.SSOAccountSourceFactory;
 
 import java.util.Collections;
-import java.util.Map;
 import java.util.Set;
 
 import static org.zstack.core.Platform.operr;
@@ -64,25 +61,17 @@ public class OAuth2AccountSourceFactory extends SSOAccountSourceFactory {
     }
 
     @Override
-    @SuppressWarnings("rawtypes")
     protected Flow buildSSOUrlTemplateFlow(Context context) {
         OAuth2AccountSourceSpec spec = (OAuth2AccountSourceSpec) context.spec;
 
-        return new NoRollbackFlow() {
-            String __name__ = "add-sso-url-template";
-
-            @Override
-            public boolean skip(Map data) {
-                return spec.getUrlTemplate() == null;
-            }
-
-            @Override
-            public void run(FlowTrigger trigger, Map data) {
+        return Flow.of("add-sso-url-template")
+            .skipIf(data -> spec.getUrlTemplate() == null)
+            .handle(trigger -> {
                 OAuth2ClientVO client = (OAuth2ClientVO) context.vo;
                 createBase(client).createSSORedirectTemplate(spec.getUrlTemplate());
                 trigger.next();
-            }
-        };
+            })
+            .build();
     }
 
     @Override

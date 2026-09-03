@@ -2,7 +2,6 @@ package org.zstack.twoFactorAuthentication;
 
 import com.warrenstrange.googleauth.GoogleAuthenticator;
 import com.warrenstrange.googleauth.GoogleAuthenticatorKey;
-import edu.emory.mathcs.backport.java.util.Collections;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.zstack.core.Platform;
 import org.zstack.core.cloudbus.*;
@@ -12,7 +11,7 @@ import org.zstack.core.db.DatabaseFacade;
 import org.zstack.core.db.Q;
 import org.zstack.core.db.SQL;
 import org.zstack.core.errorcode.ErrorFacade;
-import org.zstack.core.workflow.FlowChainBuilder;
+import org.zstack.core.workflow.SimpleFlowChain;
 import org.zstack.header.AbstractService;
 import org.zstack.header.apimediator.ApiMessageInterceptionException;
 import org.zstack.header.apimediator.ApiMessageInterceptor;
@@ -38,6 +37,7 @@ import java.util.Objects;
 
 import static org.zstack.core.Platform.err;
 import static org.zstack.core.Platform.operr;
+import static org.zstack.utils.CollectionDSL.list;
 
 @InterceptorForService(TwoFactorAuthenticationConstant.SERVICE_ID)
 public class TwoFactorAuthenticationManagerImpl extends AbstractService
@@ -130,10 +130,6 @@ public class TwoFactorAuthenticationManagerImpl extends AbstractService
             bus.reply(msg, apiReply);
             return;
         }
-
-        TwoFactorAuthenticationStruct struct = new TwoFactorAuthenticationStruct();
-        FlowChain chain = FlowChainBuilder.newSimpleFlowChain();
-        chain.setName("two-factor-get-secret-flow");
         TwoFactorAuthenticationFactory factory = factories.get(msg.getType());
         if (factory == null) {
             logger.warn(String.format("unsupported two-factor authentication type: %s", msg.getType()));
@@ -142,11 +138,10 @@ public class TwoFactorAuthenticationManagerImpl extends AbstractService
             return;
         }
 
-        chain.then(new NoRollbackFlow() {
-            String __name__ = "verify-account-login";
-
-            @Override
-            public void run(FlowTrigger trigger, Map data) {
+        TwoFactorAuthenticationStruct struct = new TwoFactorAuthenticationStruct();
+        SimpleFlowChain.of("two-factor-get-secret-flow")
+        .then(Flow.of("verify-account-login")
+            .handle(trigger -> {
                 LogInMsg logInMsg = new LogInMsg();
                 logInMsg.setUsername(msg.getName());
                 logInMsg.setPassword(msg.getPassword());
@@ -155,7 +150,7 @@ public class TwoFactorAuthenticationManagerImpl extends AbstractService
                 logInMsg.setVerifyCode(msg.getVerifyCode());
                 logInMsg.setValidateOnly(true);
                 // two factor need to skip itself to get the secret
-                logInMsg.setIgnoreAdditionalFeatures(Collections.singletonList(LoginAuthConstant.twoFactor));
+                logInMsg.setIgnoreAdditionalFeatures(list(LoginAuthConstant.twoFactor));
                 bus.makeTargetServiceIdByResourceUuid(logInMsg, LoginManager.SERVICE_ID, logInMsg.getUsername());
                 bus.send(logInMsg, new CloudBusCallBack(trigger) {
                     @Override
@@ -170,12 +165,10 @@ public class TwoFactorAuthenticationManagerImpl extends AbstractService
                         trigger.next();
                     }
                 });
-            }
-        }).then(new NoRollbackFlow() {
-            String __name__ = "get-two-factor-auth-secret";
-
-            @Override
-            public void run(FlowTrigger trigger, Map data) {
+            })
+            .build())
+        .then(Flow.of("get-two-factor-auth-secret")
+            .handle(trigger -> {
                 TwoFactorAuthenticationSecretVO secretVO = Q.New(TwoFactorAuthenticationSecretVO.class)
                         .eq(TwoFactorAuthenticationSecretVO_.accountUuid, struct.getAccountUuid())
                         .find();
@@ -197,19 +190,15 @@ public class TwoFactorAuthenticationManagerImpl extends AbstractService
                 }
                 apiReply.setInventory(inv);
                 trigger.next();
-            }
-        }).done(new FlowDoneHandler(msg) {
-            @Override
-            public void handle(Map data) {
-                bus.reply(msg, apiReply);
-            }
-        }).error(new FlowErrorHandler(msg) {
-            @Override
-            public void handle(ErrorCode errCode, Map data) {
-                apiReply.setError(errCode);
-                bus.reply(msg, apiReply);
-            }
-        }).start();
+            })
+            .build())
+        .propagateExceptionTo(msg)
+        .done(() -> bus.reply(msg, apiReply))
+        .error(errCode -> {
+            apiReply.setError(errCode);
+            bus.reply(msg, apiReply);
+        })
+        .start();
     }
 
     public String getId() {
@@ -373,7 +362,7 @@ public class TwoFactorAuthenticationManagerImpl extends AbstractService
 
         String secret = secretVO.getSecret();
         GoogleAuthenticator gAuth = new GoogleAuthenticator();
-        Integer itoken = Integer.valueOf(token);
+        int itoken = Integer.parseInt(token);
 
         return gAuth.authorize(secret, itoken) ? null : err(IdentityErrors.ADDITION_AUTHENTICATION_FAIL, "additional authentication failed");
     }

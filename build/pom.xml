@@ -362,7 +362,7 @@
                 </dependency>
                 <dependency>
                     <groupId>org.zstack</groupId>
-                    <artifactId>twoFactorAuthentication</artifactId>
+                    <artifactId>two-factor</artifactId>
                     <version>${project.version}</version>
                 </dependency>
                 <dependency>

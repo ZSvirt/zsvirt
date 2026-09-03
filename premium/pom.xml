@@ -28,7 +28,6 @@
         <module>billing</module>
         <module>network-plugin</module>
         <module>snmp</module>
-        <module>iam1</module>
         <module>cbt</module>
         <module>upgrade-hack</module>
     </modules>

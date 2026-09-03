@@ -16,6 +16,7 @@
         <module>account-import</module>
         <module>ldap</module>
         <module>accesskey</module>
+        <module>iam1</module>
     </modules>
 
     <dependencies>

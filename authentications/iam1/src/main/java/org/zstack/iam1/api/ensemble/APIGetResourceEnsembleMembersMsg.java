@@ -4,10 +4,8 @@ import org.springframework.http.HttpMethod;
 import org.zstack.header.message.APIParam;
 import org.zstack.header.message.APISyncCallMessage;
 import org.zstack.header.message.DefaultTimeout;
-import org.zstack.header.query.AutoQuery;
 import org.zstack.header.rest.RestRequest;
 import org.zstack.header.vo.ResourceVO;
-import org.zstack.iam1.entity.ensemble.ResourceEnsembleInventory;
 
 import java.util.concurrent.TimeUnit;
 

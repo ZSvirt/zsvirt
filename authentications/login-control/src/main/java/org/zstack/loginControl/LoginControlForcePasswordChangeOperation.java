@@ -5,7 +5,6 @@ import org.zstack.header.errorcode.ErrorCode;
 import org.zstack.loginControl.entity.LoginAttemptsVO;
 import org.zstack.loginControl.entity.LoginAttemptsVO_;
 
-import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 public class LoginControlForcePasswordChangeOperation implements LoginControlOperation {
@@ -21,7 +20,8 @@ public class LoginControlForcePasswordChangeOperation implements LoginControlOpe
             return;
         }
 
-        if (struct.getLastUpdatedTime().getTime() + TimeUnit.SECONDS.toMillis(PasswordStrategyGlobalConfig.FORCE_CHANGE_PASSWORD_PERIOD.value(Long.class)) < new Date().getTime()) {
+        long endTime = struct.getLastUpdatedTime().getTime() + TimeUnit.SECONDS.toMillis(PasswordStrategyGlobalConfig.FORCE_CHANGE_PASSWORD_PERIOD.value(Long.class));
+        if (endTime < System.currentTimeMillis()) {
             SQL.New(LoginAttemptsVO.class)
                     .set(LoginAttemptsVO_.forceChangePassword, true)
                     .eq(LoginAttemptsVO_.targetResourceIdentity, struct.getTargetResourceIdentity())

@@ -3,7 +3,7 @@ package org.zstack.loginControl;
 import org.zstack.core.config.GlobalConfigDef;
 import org.zstack.core.config.GlobalConfigDefinition;
 import org.zstack.header.core.encrypt.GlobalConfigEncrypt;
-import org.zstack.mevoco.PremiumGlobalConfig;
+import org.zstack.core.config.GlobalConfig;
 
 @GlobalConfigDefinition
 public class AccessControlGlobalConfig {
@@ -11,6 +11,6 @@ public class AccessControlGlobalConfig {
 
     @GlobalConfigEncrypt(category = CATEGORY, name = "enable.request.source.ip.address.check")
     @GlobalConfigDef(defaultValue = "true", type = Boolean.class, description = "Enable request source ip address check")
-    public static PremiumGlobalConfig ENABLE_REQUEST_SOURCE_IP_ADDRESS_CHECK = new PremiumGlobalConfig(CATEGORY, "enable.request.source.ip.address.check");
+    public static GlobalConfig ENABLE_REQUEST_SOURCE_IP_ADDRESS_CHECK = new GlobalConfig(CATEGORY, "enable.request.source.ip.address.check");
 
 }

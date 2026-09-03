@@ -17,6 +17,7 @@
         <module>ldap</module>
         <module>accesskey</module>
         <module>iam1</module>
+        <module>login-control</module>
     </modules>
 
     <dependencies>

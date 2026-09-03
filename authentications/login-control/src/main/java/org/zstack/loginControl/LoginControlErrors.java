@@ -10,7 +10,7 @@ public enum LoginControlErrors {
 
     private String code;
 
-    private LoginControlErrors(int id) {
+    LoginControlErrors(int id) {
         code = String.format("LOGIN_CONTROL.%s", id);
     }
 

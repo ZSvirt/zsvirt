@@ -103,9 +103,12 @@ public class LoginControlManagerImpl extends AbstractService implements LoginCon
                     }
                 }
 
-                Optional opt = supportedFields.stream().filter(f -> !jsonObject.has(f)).findFirst();
-                if (opt.isPresent()) {
-                    throw new ApiMessageInterceptionException(argerr("missing key:value of %s", opt.get()));
+                String opt = supportedFields.stream()
+                        .filter(f -> !jsonObject.has(f))
+                        .findFirst()
+                        .orElse(null);
+                if (opt != null) {
+                    throw new ApiMessageInterceptionException(argerr("missing key:value of %s", opt));
                 }
 
                 config = JSONObjectUtil.toObject(newValue, PasswordStrengthConfig.class);

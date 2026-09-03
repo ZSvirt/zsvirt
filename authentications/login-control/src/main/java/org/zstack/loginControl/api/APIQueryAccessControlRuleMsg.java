@@ -1,7 +1,6 @@
 package org.zstack.loginControl.api;
 
 import org.springframework.http.HttpMethod;
-import org.zstack.header.identity.SuppressCredentialCheck;
 import org.zstack.header.query.APIQueryMessage;
 import org.zstack.header.query.AutoQuery;
 import org.zstack.header.rest.RestRequest;

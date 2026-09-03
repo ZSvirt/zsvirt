@@ -4,7 +4,7 @@ import org.zstack.core.config.GlobalConfigDef;
 import org.zstack.core.config.GlobalConfigDefinition;
 import org.zstack.core.config.GlobalConfigValidation;
 import org.zstack.header.core.encrypt.GlobalConfigEncrypt;
-import org.zstack.mevoco.PremiumGlobalConfig;
+import org.zstack.core.config.GlobalConfig;
 
 /**
  * Created by kayo on 2018/8/8.
@@ -17,11 +17,11 @@ public class LoginControlGlobalConfig {
     @GlobalConfigValidation(validValues = {"true", "false"})
     @GlobalConfigDef(defaultValue = "false", type = Boolean.class, description = "Enable login control, including " +
             " login attempts check and verify code generation")
-    public static PremiumGlobalConfig LOGIN_CONTROL = new PremiumGlobalConfig(CATEGORY, "login.control");
+    public static GlobalConfig LOGIN_CONTROL = new GlobalConfig(CATEGORY, "login.control");
 
     @GlobalConfigEncrypt(category = CATEGORY, name = "login.attempts.maximum")
     @GlobalConfigValidation(min = 0)
     @GlobalConfigDef(defaultValue = "6", type = Long.class, description = "The maximum value to tolerate login failures " +
             "verify code will be required after that")
-    public static PremiumGlobalConfig LOGIN_ATTEMPTS_MAXIMUM = new PremiumGlobalConfig(CATEGORY, "login.attempts.maximum");
+    public static GlobalConfig LOGIN_ATTEMPTS_MAXIMUM = new GlobalConfig(CATEGORY, "login.attempts.maximum");
 }

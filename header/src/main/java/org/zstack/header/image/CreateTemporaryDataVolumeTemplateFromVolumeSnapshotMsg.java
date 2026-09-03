@@ -3,8 +3,6 @@ package org.zstack.header.image;
 import org.zstack.header.identity.SessionInventory;
 import org.zstack.header.message.NeedReplyMessage;
 
-import java.util.List;
-
 /**
  * Created by MaJin on 2021/3/18.
  */

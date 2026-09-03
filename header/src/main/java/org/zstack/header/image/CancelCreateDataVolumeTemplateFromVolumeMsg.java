@@ -1,7 +1,6 @@
 package org.zstack.header.image;
 
 import org.zstack.header.message.CancelMessage;
-import org.zstack.header.message.NeedReplyMessage;
 
 /**
  * Created by MaJin on 2019/7/23.

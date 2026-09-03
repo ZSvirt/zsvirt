@@ -1,18 +1,10 @@
 package org.zstack.header.network.l3;
 
-import org.apache.commons.net.util.SubnetUtils;
-import org.apache.commons.net.util.SubnetUtils.SubnetInfo;
 import org.zstack.header.configuration.PythonClassInventory;
 import org.zstack.header.query.ExpandedQueries;
 import org.zstack.header.query.ExpandedQuery;
 import org.zstack.header.search.Inventory;
-import org.zstack.utils.gson.JSONObjectUtil;
-import org.zstack.utils.network.IPv6Constants;
-import org.zstack.utils.network.IPv6NetworkUtils;
-import org.zstack.utils.network.NetworkUtils;
 
-import java.io.Serializable;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;

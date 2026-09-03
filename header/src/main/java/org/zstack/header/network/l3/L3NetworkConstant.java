@@ -2,9 +2,6 @@ package org.zstack.header.network.l3;
 
 import org.zstack.header.configuration.PythonClass;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @PythonClass
 public interface L3NetworkConstant {
     public static final String SERVICE_ID = "network.l3";

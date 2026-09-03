@@ -1,9 +1,7 @@
 package org.zstack.header.network.service;
 
-import org.zstack.header.message.APIEvent;
 import org.zstack.header.message.APIMessage;
 import org.zstack.header.message.APIParam;
-import org.zstack.header.network.l2.L2NetworkVO;
 
 public class APIDetachNetworkServiceProviderFromL2NetworkMsg extends APIMessage {
     @APIParam

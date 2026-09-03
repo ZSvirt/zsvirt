@@ -4,7 +4,6 @@ import org.zstack.header.errorcode.ErrorCode;
 import org.zstack.header.message.APIEvent;
 import org.zstack.header.rest.RestResponse;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 

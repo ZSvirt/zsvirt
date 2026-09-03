@@ -1,12 +1,10 @@
 package org.zstack.header.volume;
 
 import org.zstack.header.host.HostEO;
-import org.zstack.header.host.HostVO;
 import org.zstack.header.vo.EntityGraph;
 import org.zstack.header.vo.ForeignKey;
 
 import javax.persistence.*;
-import java.io.Serializable;
 import java.sql.Timestamp;
 
 @Entity

@@ -1,7 +1,6 @@
 package org.zstack.header.storage.snapshot;
 
 import org.zstack.header.storage.backup.BackupStorageEO;
-import org.zstack.header.vo.EntityGraph;
 import org.zstack.header.vo.ForeignKey;
 import org.zstack.header.vo.ForeignKey.ReferenceOption;
 

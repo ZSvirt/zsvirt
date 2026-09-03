@@ -11,10 +11,11 @@
     <artifactId>cores</artifactId>
     <packaging>pom</packaging>
     <name>cores</name>
-    <description>Aggregator for core platform modules (resource-config, etc.)</description>
+    <description>Aggregator for core platform modules (resource-config, tag, etc.)</description>
 
     <modules>
         <module>resource-config</module>
+        <module>tag</module>
     </modules>
 
     <build>

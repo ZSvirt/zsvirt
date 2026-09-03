@@ -120,7 +120,7 @@ public class ResourceAttributeBase {
                 createResourceAttributeValue(context);
 
                 APICreateResourceAttributeValueEvent event = new APICreateResourceAttributeValueEvent(msg.getId());
-                boolean allFail = context.values.stream().allMatch(value -> !value.isSuccess());
+                boolean allFail = context.values.stream().noneMatch(ErrorableValue::isSuccess);
                 if (allFail) {
                     ErrorCode error = err(GENERIC_ERROR, "failed to create resource attribute value");
                     ErrorCode errors = ObjectUtils.newAndCopy(error, ErrorCode.class);
@@ -310,7 +310,7 @@ public class ResourceAttributeBase {
                 Set<String> originalTypes = transformToSet(self.getTypes(), ResourceAttributeKeyResourceTypeVO::getResourceType);
 
                 Set<String> needDeletes = new HashSet<>(originalTypes);
-                needDeletes.removeAll(msg.getResourceTypes());
+                msg.getResourceTypes().forEach(needDeletes::remove);
 
                 Set<String> needPersists = new HashSet<>(msg.getResourceTypes());
                 needPersists.removeAll(originalTypes);
@@ -383,7 +383,6 @@ public class ResourceAttributeBase {
         List<ErrorableValue<ResourceAttributeValueVO>> values;
     }
 
-    @SuppressWarnings("unchecked")
     private void createResourceAttributeValue(CreateResourceAttributeValueContext context) {
         final Set<String> optionsMayNull = ResourceAttributeManager.enumOptionsForKeyUuid(self.getUuid());
         if (optionsMayNull != null && !optionsMayNull.contains(context.value)) {

@@ -16,7 +16,7 @@ public class TagZQLExtension implements RestrictByExprExtensionPoint {
     public static final String USER_TAG_NAME = "__userTag__";
     public static final String SYS_TAG_NAME = "__systemTag__";
 
-    private static Map<String, String> FALSE_OP = new HashMap();
+    private static Map<String, String> FALSE_OP = new HashMap<>();
 
     static {
         FALSE_OP.put("!=", "=");

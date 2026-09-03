@@ -49,7 +49,6 @@
         <module>authentications</module>
         <module>search</module>
         <module>console</module>
-        <module>tag</module>
         <module>rest</module>
         <module>sdk</module>
         <module>externalservice</module>
@@ -564,7 +563,6 @@
                 <module>identity</module>
                 <module>search</module>
                 <module>console</module>
-                <module>tag</module>
                 <module>premium</module>
                 <module>rest</module>
                 <module>sdk</module>
@@ -593,7 +591,6 @@
                 <module>authentications</module>
                 <module>search</module>
                 <module>console</module>
-                <module>tag</module>
                 <module>rest</module>
                 <module>sdk</module>
                 <module>externalservice</module>

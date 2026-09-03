@@ -1,43 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <artifactId>zstack</artifactId>
         <groupId>org.zstack</groupId>
+        <artifactId>zstack</artifactId>
         <version>5.0.0</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
-    <artifactId>resourceconfig</artifactId>
+    <artifactId>cores</artifactId>
+    <packaging>pom</packaging>
+    <name>cores</name>
+    <description>Aggregator for core platform modules (resource-config, etc.)</description>
 
-    <dependencies>
-        <dependency>
-            <groupId>org.zstack</groupId>
-            <artifactId>core</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.zstack</groupId>
-            <artifactId>utils</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.zstack</groupId>
-            <artifactId>search</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.zstack</groupId>
-            <artifactId>identity</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.zstack</groupId>
-            <artifactId>header</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-    </dependencies>
+    <modules>
+        <module>resource-config</module>
+    </modules>
 
     <build>
         <plugins>
@@ -54,6 +32,9 @@
                     <target>${project.java.version}</target>
                     <debuglevel>lines,vars,source</debuglevel>
                     <debug>true</debug>
+                    <excludes>
+                        <exclude>**/*Doc_zh_cn.groovy</exclude>
+                    </excludes>
                 </configuration>
                 <dependencies>
                     <dependency>
@@ -103,5 +84,4 @@
             </plugin>
         </plugins>
     </build>
-
 </project>

@@ -32,6 +32,7 @@
     <name>zstack</name>
     <modules>
         <module>core</module>
+        <module>cores</module>
         <module>computes</module>
         <module>compute</module>
         <module>utils</module>
@@ -53,7 +54,6 @@
         <module>sdk</module>
         <module>externalservice</module>
         <module>longjob</module>
-        <module>resourceconfig</module>
         <module>plugin/iscsi</module>
         <module>abstraction</module>
         <module>premium</module>
@@ -547,6 +547,7 @@
             <id>premium</id>
             <modules>
                 <module>core</module>
+                <module>cores</module>
                 <module>computes</module>
                 <module>compute</module>
                 <module>utils</module>
@@ -575,6 +576,7 @@
             <id>ee</id>
             <modules>
                 <module>core</module>
+                <module>cores</module>
                 <module>computes</module>
                 <module>compute</module>
                 <module>utils</module>
@@ -596,7 +598,6 @@
                 <module>sdk</module>
                 <module>externalservice</module>
                 <module>longjob</module>
-                <module>resourceconfig</module>
                 <module>plugin/iscsi</module>
                 <module>abstraction</module>
                 <module>premium</module>

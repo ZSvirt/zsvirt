@@ -18,8 +18,6 @@ import java.util.Map;
 
 import static org.zstack.utils.StringDSL.s;
 
-/**
- */
 public class PatternedSystemTag extends SystemTag {
     private static final CLogger logger = Utils.getLogger(SystemTag.class);
 

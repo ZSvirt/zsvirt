@@ -1,7 +1,6 @@
 package org.zstack.resourceconfig;
 
 import org.springframework.http.HttpMethod;
-import org.zstack.core.Platform;
 import org.zstack.header.message.APIDeleteMessage;
 import org.zstack.header.message.APIParam;
 import org.zstack.header.rest.RestRequest;

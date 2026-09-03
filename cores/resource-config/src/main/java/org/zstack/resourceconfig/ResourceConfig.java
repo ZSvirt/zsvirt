@@ -41,7 +41,7 @@ public class ResourceConfig {
     private EventFacade evtf;
 
     protected GlobalConfig globalConfig;
-    private List<Class> resourceClasses;
+    private List<Class<? extends ResourceVO>> resourceClasses;
     private Map<String, ResourceConfigGetter> configGetter = new HashMap<>();
     private List<ResourceConfigUpdateExtensionPoint> localUpdateExtensions = new ArrayList<>();
     private List<ResourceConfigUpdateExtensionPoint> updateExtensions = new ArrayList<>();
@@ -174,9 +174,11 @@ public class ResourceConfig {
 
     private void initResourceConfigNodes() {
         for (int i = 0; i < resourceClasses.size(); i++) {
-            Class clz = resourceClasses.get(i);
+            Class<? extends ResourceVO> clz = resourceClasses.get(i);
             ResourceConfigGetter getter = new ResourceConfigGetter();
-            getter.init(resourceClasses.subList(i, resourceClasses.size()));
+
+            List<Class<? extends ResourceVO>> classes = resourceClasses.subList(i, resourceClasses.size());
+            getter.init(classes);
             configGetter.put(clz.getSimpleName(), getter);
         }
     }
@@ -404,14 +406,14 @@ public class ResourceConfig {
             return results;
         }
 
-        private void init(List<Class> connectedClasses) {
-            Class resourceClass = connectedClasses.get(0);
-            for (Class parentClass : connectedClasses.subList(1, connectedClasses.size())) {
+        private void init(List<Class<? extends ResourceVO>> connectedClasses) {
+            Class<? extends ResourceVO> resourceClass = connectedClasses.get(0);
+            for (Class<? extends ResourceVO> parentClass : connectedClasses.subList(1, connectedClasses.size())) {
                 Optional.ofNullable(DBGraph.findVerticesWithSmallestWeight(resourceClass, parentClass)).ifPresent(vertex ->
                         parentTypeSql.add(vertex.toSQL("uuid", SimpleQuery.Op.EQ, "'%s'")));
             }
 
-            for (Class parentClass : connectedClasses.subList(1, connectedClasses.size())) {
+            for (Class<? extends ResourceVO> parentClass : connectedClasses.subList(1, connectedClasses.size())) {
                 Optional.ofNullable(DBGraph.findVerticesWithSmallestWeight(resourceClass, parentClass)).ifPresent(vertex ->
                         parentResourceUuidPairsSql.add(vertex.toBidirectionalSQL("uuid", SimpleQuery.Op.IN, "(%s)")));
             }
@@ -521,7 +523,7 @@ public class ResourceConfig {
                 .in(ResourceConfigVO_.resourceUuid, resourceUuids).listTuple();
     }
 
-    List<Class> getResourceClasses() {
+    List<Class<? extends ResourceVO>> getResourceClasses() {
         return resourceClasses;
     }
 }

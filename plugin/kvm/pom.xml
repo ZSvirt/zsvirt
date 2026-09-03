@@ -26,7 +26,7 @@
         </dependency>
         <dependency>
             <groupId>org.zstack</groupId>
-            <artifactId>resourceconfig</artifactId>
+            <artifactId>resource-config</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

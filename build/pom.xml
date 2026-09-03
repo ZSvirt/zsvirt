@@ -136,7 +136,7 @@
                 </dependency>
                 <dependency>
                     <groupId>org.zstack</groupId>
-                    <artifactId>configuration</artifactId>
+                    <artifactId>offering</artifactId>
                     <version>${project.version}</version>
                 </dependency>
                 <dependency>

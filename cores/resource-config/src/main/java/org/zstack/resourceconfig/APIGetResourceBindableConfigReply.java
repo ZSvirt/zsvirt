@@ -4,7 +4,6 @@ import org.zstack.header.cluster.ClusterVO;
 import org.zstack.header.host.HostVO;
 import org.zstack.header.message.APIReply;
 import org.zstack.header.rest.RestResponse;
-import org.zstack.header.zone.Zone;
 import org.zstack.header.zone.ZoneVO;
 
 import java.util.Arrays;

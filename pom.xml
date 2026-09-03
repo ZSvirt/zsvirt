@@ -44,7 +44,6 @@
         <module>plugin</module>
         <module>image</module>
         <module>network</module>
-        <module>configuration</module>
         <module>identity</module>
         <module>authentications</module>
         <module>search</module>
@@ -548,6 +547,7 @@
             <id>premium</id>
             <modules>
                 <module>core</module>
+                <module>computes</module>
                 <module>compute</module>
                 <module>utils</module>
                 <module>headers</module>
@@ -560,7 +560,6 @@
                 <module>plugin</module>
                 <module>image</module>
                 <module>network</module>
-                <module>configuration</module>
                 <module>identity</module>
                 <module>search</module>
                 <module>console</module>
@@ -588,7 +587,6 @@
                 <module>plugin</module>
                 <module>image</module>
                 <module>network</module>
-                <module>configuration</module>
                 <module>identity</module>
                 <module>authentications</module>
                 <module>search</module>

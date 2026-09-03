@@ -47,7 +47,7 @@ changed by this VM aggregation update.
 
 From premium repository root:
 
-```
+```bash
 bash zwatch/src/test/python/run_vm_performance_promql.sh
 ```
 
@@ -57,13 +57,13 @@ extracted from the Java source using synthetic vectors, and stops the process.
 The temporary directory is retained for logs. No production data or rules are
 modified. The port must be free. For a different Prometheus version:
 
-```
+```bash
 PROMETHEUS_URL=http://test-host:9090 python zwatch/src/test/python/test_vm_performance_promql.py -v
 ```
 
 Utility regression suite, from the Utility repository root:
 
-```
+```bash
 python kvmagent/kvmagent/test/test_vm_performance_metrics.py -v
 ```
 

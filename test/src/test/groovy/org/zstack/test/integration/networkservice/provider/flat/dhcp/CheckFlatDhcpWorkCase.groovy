@@ -1,6 +1,6 @@
 package org.zstack.test.integration.networkservice.provider.flat.dhcp
 
-import junit.framework.Assert
+import org.junit.Assert
 import org.springframework.http.HttpEntity
 import org.zstack.core.db.Q
 import org.zstack.header.network.l3.UsedIpVO

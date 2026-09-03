@@ -1,6 +1,6 @@
 package org.zstack.test.integration.network.l2network.cascade
 
-import junit.framework.Assert
+import org.junit.Assert
 import org.zstack.appliancevm.ApplianceVmVO
 import org.zstack.core.db.DatabaseFacade
 import org.zstack.header.vm.VmInstanceState

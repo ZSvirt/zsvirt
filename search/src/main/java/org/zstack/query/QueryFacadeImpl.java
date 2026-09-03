@@ -51,7 +51,7 @@ public class QueryFacadeImpl extends AbstractService implements QueryFacade, Glo
     private Map<String, QueryBuilderFactory> builerFactories = new HashMap<>();
     private Map<String, QueryBelongFilter> belongfilters = new HashMap<>();
     private String queryBuilderType = MysqlQueryBuilderFactory.type.toString();
-    private List<Class> zqlFilterClasses = Lists.newArrayList();
+    private List<Class<? extends Message>> zqlFilterClasses = Lists.newArrayList();
 
     private Map<String, List<String>> apiNoSeeFields = new HashMap<>();
     private Map<String, List<Class>> inventoryFamilies = new HashMap<>();
@@ -75,7 +75,14 @@ public class QueryFacadeImpl extends AbstractService implements QueryFacade, Glo
     }
 
     {
-        zqlFilterClasses.addAll(BeanUtils.reflections.getSubTypesOf(ZQLFilterReply.class));
+        Set<Class<? extends ZQLFilterReply>> classes = BeanUtils.reflections.getSubTypesOf(ZQLFilterReply.class);
+        for (Class<? extends ZQLFilterReply> clz : classes) {
+            if (!Message.class.isAssignableFrom(clz)) {
+                throw new CloudRuntimeException(String.format(
+                        "%s implements ZQLFilterReply but is not a subclass of Message", clz.getName()));
+            }
+            zqlFilterClasses.add(clz.asSubclass(Message.class));
+        }
     }
 
     @Override
@@ -665,7 +672,7 @@ public class QueryFacadeImpl extends AbstractService implements QueryFacade, Glo
     }
 
     @Override
-    public List<Class> getReplyMessageClassForMarshalExtensionPoint() {
+    public List<Class<? extends Message>> getReplyMessageClassForMarshalExtensionPoint() {
         return zqlFilterClasses;
     }
 

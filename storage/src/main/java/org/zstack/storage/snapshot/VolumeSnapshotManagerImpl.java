@@ -1334,10 +1334,8 @@ public class VolumeSnapshotManagerImpl extends AbstractService implements
     }
 
     @Override
-    public List<Class> getReplyMessageClassForMarshalExtensionPoint() {
-        List<Class> ret = new ArrayList<>();
-        ret.add(APIQueryVolumeSnapshotTreeReply.class);
-        return ret;
+    public List<Class<? extends Message>> getReplyMessageClassForMarshalExtensionPoint() {
+        return list(APIQueryVolumeSnapshotTreeReply.class);
     }
 
     @Override

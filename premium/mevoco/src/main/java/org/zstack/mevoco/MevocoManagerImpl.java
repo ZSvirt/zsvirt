@@ -3319,7 +3319,7 @@ public class MevocoManagerImpl extends AbstractService implements MevocoManager,
     }
 
     @Override
-    public List<Class> getReplyMessageClassForMarshalExtensionPoint() {
+    public List<Class<? extends Message>> getReplyMessageClassForMarshalExtensionPoint() {
         return Collections.singletonList(GetVmConsoleAddressFromHostReply.class);
     }
 

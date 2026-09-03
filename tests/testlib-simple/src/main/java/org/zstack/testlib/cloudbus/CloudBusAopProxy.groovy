@@ -27,7 +27,6 @@ class CloudBusAopProxy {
         messages.remove(clazz)
     }
 
-    @SuppressWarnings("unused")
     private Object singleMessageAdvice(ProceedingJoinPoint pjp, Message msg) throws Throwable {
         Behavior bh = messages.get(msg.getClass())
         if (bh == null) {
@@ -40,7 +39,6 @@ class CloudBusAopProxy {
         return pjp.proceed([msg].toArray())
     }
 
-    @SuppressWarnings("unused")
     private Object singleCallbackMessageAdvice(ProceedingJoinPoint pjp, Message msg, CloudBusCallBack callback) throws Throwable {
         Behavior bh = messages.get(msg.getClass())
         if (bh == null) {
@@ -53,7 +51,6 @@ class CloudBusAopProxy {
         return pjp.proceed([msg, callback].toArray())
     }
 
-    @SuppressWarnings("unused")
     private <T extends Message> Object listMessageAdvice(ProceedingJoinPoint pjp, List<T> msgs) throws Throwable {
         for (Message msg : msgs) {
             Behavior bh = messages.get(msg.getClass())

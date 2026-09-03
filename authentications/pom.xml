@@ -18,6 +18,8 @@
         <module>accesskey</module>
         <module>iam1</module>
         <module>login-control</module>
+        <module>sso</module>
+        <module>two-factor</module>
     </modules>
 
     <dependencies>

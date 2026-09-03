@@ -275,7 +275,7 @@
         </dependency>
         <dependency>
             <groupId>org.zstack</groupId>
-            <artifactId>twoFactorAuthentication</artifactId>
+            <artifactId>two-factor</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -370,7 +370,7 @@
         </dependency>
         <dependency>
             <groupId>org.zstack</groupId>
-            <artifactId>sso-plugin</artifactId>
+            <artifactId>sso</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

@@ -12,7 +12,6 @@
         <module>sharedblock</module>
         <module>volumebackup</module>
         <module>cloudformation</module>
-        <module>twoFactorAuthentication</module>
         <module>crypto</module>
         <module>baremetal</module>
         <module>tag2</module>

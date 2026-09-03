@@ -1,7 +1,6 @@
 package org.zstack.header.vo;
 
 import org.zstack.header.message.APIReply;
-import org.zstack.header.query.APIQueryReply;
 import org.zstack.header.rest.RestResponse;
 import org.zstack.header.vm.VmInstanceVO;
 import org.zstack.header.zone.ZoneVO;

@@ -1,7 +1,6 @@
 package org.zstack.header.image;
 
 import org.zstack.header.message.NeedReplyMessage;
-import org.zstack.header.tag.SystemTagInventory;
 
 import java.util.List;
 

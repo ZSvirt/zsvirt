@@ -49,12 +49,12 @@
         </dependency>
         <dependency>
             <groupId>org.zstack</groupId>
-            <artifactId>twoFactorAuthentication</artifactId>
+            <artifactId>two-factor</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.zstack</groupId>
-            <artifactId>loginControl</artifactId>
+            <artifactId>login-control</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

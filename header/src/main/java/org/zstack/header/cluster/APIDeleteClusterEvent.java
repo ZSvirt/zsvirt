@@ -3,8 +3,6 @@ package org.zstack.header.cluster;
 import org.zstack.header.message.APIEvent;
 import org.zstack.header.rest.RestResponse;
 
-import java.sql.Timestamp;
-
 /**
  * @apiResult
  * @example {

@@ -2,12 +2,9 @@ package org.zstack.header.image;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.util.Strings;
-import org.zstack.utils.CollectionUtils;
 import org.zstack.utils.URLBuilder;
 
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.Optional;
 
 public class ImageHelper {
     private static final HashMap<String, AbstractImageUpdate> updateImageFactory = new HashMap<>();

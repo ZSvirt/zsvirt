@@ -1,7 +1,6 @@
 package org.zstack.header.vm;
 
 import org.zstack.header.configuration.PythonClass;
-import org.zstack.utils.data.SizeUnit;
 
 @PythonClass
 public interface VmInstanceConstant {

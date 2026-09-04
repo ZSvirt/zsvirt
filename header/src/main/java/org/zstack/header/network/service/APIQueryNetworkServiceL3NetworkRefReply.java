@@ -1,7 +1,6 @@
 package org.zstack.header.network.service;
 
 import org.zstack.header.query.APIQueryReply;
-import org.zstack.header.rest.RestRequest;
 import org.zstack.header.rest.RestResponse;
 
 import java.util.Arrays;

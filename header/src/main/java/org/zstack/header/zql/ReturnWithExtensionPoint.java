@@ -1,6 +1,5 @@
 package org.zstack.header.zql;
 
-import org.zstack.header.core.Completion;
 import org.zstack.header.core.ReturnValueCompletion;
 
 import java.util.List;

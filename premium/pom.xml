@@ -12,9 +12,7 @@
         <module>sharedblock</module>
         <module>volumebackup</module>
         <module>cloudformation</module>
-        <module>twoFactorAuthentication</module>
         <module>crypto</module>
-        <module>loginControl</module>
         <module>baremetal</module>
         <module>tag2</module>
         <module>imagereplicator</module>
@@ -28,7 +26,6 @@
         <module>billing</module>
         <module>network-plugin</module>
         <module>snmp</module>
-        <module>iam1</module>
         <module>cbt</module>
         <module>upgrade-hack</module>
     </modules>

@@ -32,6 +32,7 @@
     <name>zstack</name>
     <modules>
         <module>core</module>
+        <module>cores</module>
         <module>computes</module>
         <module>compute</module>
         <module>utils</module>
@@ -44,17 +45,14 @@
         <module>plugin</module>
         <module>image</module>
         <module>network</module>
-        <module>configuration</module>
         <module>identity</module>
         <module>authentications</module>
         <module>search</module>
         <module>console</module>
-        <module>tag</module>
         <module>rest</module>
         <module>sdk</module>
         <module>externalservice</module>
         <module>longjob</module>
-        <module>resourceconfig</module>
         <module>plugin/iscsi</module>
         <module>abstraction</module>
         <module>premium</module>
@@ -548,6 +546,8 @@
             <id>premium</id>
             <modules>
                 <module>core</module>
+                <module>cores</module>
+                <module>computes</module>
                 <module>compute</module>
                 <module>utils</module>
                 <module>headers</module>
@@ -560,11 +560,9 @@
                 <module>plugin</module>
                 <module>image</module>
                 <module>network</module>
-                <module>configuration</module>
                 <module>identity</module>
                 <module>search</module>
                 <module>console</module>
-                <module>tag</module>
                 <module>premium</module>
                 <module>rest</module>
                 <module>sdk</module>
@@ -576,6 +574,7 @@
             <id>ee</id>
             <modules>
                 <module>core</module>
+                <module>cores</module>
                 <module>computes</module>
                 <module>compute</module>
                 <module>utils</module>
@@ -588,17 +587,14 @@
                 <module>plugin</module>
                 <module>image</module>
                 <module>network</module>
-                <module>configuration</module>
                 <module>identity</module>
                 <module>authentications</module>
                 <module>search</module>
                 <module>console</module>
-                <module>tag</module>
                 <module>rest</module>
                 <module>sdk</module>
                 <module>externalservice</module>
                 <module>longjob</module>
-                <module>resourceconfig</module>
                 <module>plugin/iscsi</module>
                 <module>abstraction</module>
                 <module>premium</module>

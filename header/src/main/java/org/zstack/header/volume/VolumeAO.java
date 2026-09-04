@@ -10,7 +10,6 @@ import org.zstack.header.vo.ShadowEntity;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
 
 @MappedSuperclass
 public class VolumeAO extends ResourceVO implements ShadowEntity {

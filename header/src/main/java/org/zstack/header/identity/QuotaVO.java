@@ -3,7 +3,6 @@ package org.zstack.header.identity;
 import org.zstack.header.vo.BaseResource;
 import org.zstack.header.vo.EntityGraph;
 import org.zstack.header.vo.ResourceVO;
-import org.zstack.header.vo.ResourceVO_;
 
 import javax.persistence.*;
 import java.sql.Timestamp;

@@ -3618,6 +3618,7 @@ public class LocalStorageBase extends PrimaryStorageBase {
                     reply.setError(operr("failed to scan vm metadata from all hosts on local primary storage[uuid:%s], causes: %s",
                             self.getUuid(), errorCodeList));
                 } else {
+                    enrichLocalVmMetadataRegistrationHints(allSummaries);
                     reply.setVmInstanceMetadata(new ArrayList<>(allSummaries));
                     if (!failedHosts.isEmpty()) {
                         logger.warn(String.format("partial scan failure on local primary storage[uuid:%s], " +
@@ -3630,6 +3631,53 @@ public class LocalStorageBase extends PrimaryStorageBase {
                 bus.reply(msg, reply);
             }
         });
+    }
+
+    private void enrichLocalVmMetadataRegistrationHints(List<VmMetadataScanEntry> metadata) {
+        if (metadata == null || metadata.isEmpty()) {
+            return;
+        }
+
+        Set<String> vmUuids = metadata.stream()
+                .map(VmMetadataScanEntry::getVmUuid)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+        if (vmUuids.isEmpty()) {
+            return;
+        }
+
+        Map<String, String> vmRootVolumeUuids = new HashMap<>();
+        List<Tuple> volumeTuples = Q.New(VolumeVO.class)
+                .select(VolumeVO_.vmInstanceUuid, VolumeVO_.uuid)
+                .in(VolumeVO_.vmInstanceUuid, vmUuids)
+                .eq(VolumeVO_.primaryStorageUuid, self.getUuid())
+                .eq(VolumeVO_.type, VolumeType.Root)
+                .listTuple();
+        for (Tuple tuple : volumeTuples) {
+            vmRootVolumeUuids.put(tuple.get(0, String.class), tuple.get(1, String.class));
+        }
+        if (vmRootVolumeUuids.isEmpty()) {
+            return;
+        }
+
+        Map<String, String> rootVolumeHostUuids = new HashMap<>();
+        List<Tuple> refTuples = Q.New(LocalStorageResourceRefVO.class)
+                .select(LocalStorageResourceRefVO_.resourceUuid, LocalStorageResourceRefVO_.hostUuid)
+                .in(LocalStorageResourceRefVO_.resourceUuid, vmRootVolumeUuids.values())
+                .eq(LocalStorageResourceRefVO_.primaryStorageUuid, self.getUuid())
+                .listTuple();
+        for (Tuple tuple : refTuples) {
+            rootVolumeHostUuids.put(tuple.get(0, String.class), tuple.get(1, String.class));
+        }
+
+        for (VmMetadataScanEntry entry : metadata) {
+            String rootVolumeUuid = vmRootVolumeUuids.get(entry.getVmUuid());
+            String existingHostUuid = rootVolumeHostUuids.get(rootVolumeUuid);
+            if (existingHostUuid != null && entry.getHostUuid() != null
+                    && !Objects.equals(existingHostUuid, entry.getHostUuid())) {
+                entry.setRegenerateUuidRequired(true);
+            }
+        }
     }
 
     @Override

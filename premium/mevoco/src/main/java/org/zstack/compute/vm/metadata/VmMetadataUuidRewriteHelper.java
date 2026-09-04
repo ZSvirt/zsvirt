@@ -6,25 +6,26 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
 import org.apache.commons.lang.StringUtils;
-import org.zstack.core.Platform;
+import org.zstack.header.storage.snapshot.VolumeSnapshotTreeVO;
+import org.zstack.header.storage.snapshot.VolumeSnapshotVO;
+import org.zstack.header.storage.snapshot.group.VolumeSnapshotGroupRefVO;
 import org.zstack.header.storage.snapshot.group.VolumeSnapshotGroupVO;
-import org.zstack.header.tag.SystemTagVO;
+import org.zstack.header.storage.snapshot.reference.VolumeSnapshotReferenceTreeVO;
 import org.zstack.header.vm.VmInstanceVO;
-import org.zstack.header.vm.VmNicVO;
 import org.zstack.header.vm.metadata.ResourceMetadata;
 import org.zstack.header.vm.metadata.VmInstanceMetadataDTO;
 import org.zstack.header.vm.metadata.VolumeResourceMetadata;
 import org.zstack.header.volume.VolumeVO;
-import org.zstack.resourceconfig.ResourceConfigVO;
 import org.zstack.utils.gson.JSONObjectUtil;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 public class VmMetadataUuidRewriteHelper {
     private static final List<String> PHYSICAL_INSTALL_URL_FIELDS = Arrays.asList(
@@ -38,11 +39,14 @@ public class VmMetadataUuidRewriteHelper {
         public final String originalVmUuid;
         public final String targetVmUuid;
         public final boolean changed;
+        public final Map<String, String> uuidMapping;
 
-        private RewriteResult(String originalVmUuid, String targetVmUuid, boolean changed) {
+        private RewriteResult(String originalVmUuid, String targetVmUuid, boolean changed,
+                              Map<String, String> uuidMapping) {
             this.originalVmUuid = originalVmUuid;
             this.targetVmUuid = targetVmUuid;
             this.changed = changed;
+            this.uuidMapping = Collections.unmodifiableMap(new LinkedHashMap<>(uuidMapping));
         }
     }
 
@@ -50,140 +54,214 @@ public class VmMetadataUuidRewriteHelper {
     }
 
     public static RewriteResult rewriteVmUuid(VmInstanceMetadataDTO dto, boolean regenerateUuid) {
+        return rewriteVmUuid(dto, regenerateUuid, VmMetadataUuidAllocator.databaseBacked());
+    }
+
+    public static RewriteResult rewriteVmUuid(VmInstanceMetadataDTO dto, boolean regenerateUuid,
+                                               VmMetadataUuidAllocator allocator) {
         String originalVmUuid = dto.getVm().getResourceUuid();
         if (!regenerateUuid) {
-            return new RewriteResult(originalVmUuid, originalVmUuid, false);
+            return new RewriteResult(originalVmUuid, originalVmUuid, false, Collections.emptyMap());
+        }
+        if (allocator == null) {
+            throw new IllegalArgumentException("allocator cannot be null");
         }
 
-        String targetVmUuid = Platform.getUuid();
-        rewriteVm(dto.getVm(), targetVmUuid);
-        rewriteVolumes(dto, originalVmUuid, targetVmUuid);
-        rewriteNics(dto, originalVmUuid, targetVmUuid);
-        rewriteSnapshotGroups(dto, originalVmUuid, targetVmUuid);
-        rewriteVmTagsAndConfigs(dto.getVm(), originalVmUuid, targetVmUuid);
-        replaceRemainingVmUuidReferences(dto, originalVmUuid, targetVmUuid);
-        return new RewriteResult(originalVmUuid, targetVmUuid, true);
+        Map<String, VmMetadataUuidAllocator.ResourceType> originalResources = collectResources(dto);
+        allocator.reserveAll(originalResources.keySet());
+
+        Map<String, String> uuidMapping = new LinkedHashMap<>();
+        for (Map.Entry<String, VmMetadataUuidAllocator.ResourceType> entry : originalResources.entrySet()) {
+            uuidMapping.put(entry.getKey(), allocator.allocate(entry.getValue()));
+        }
+
+        rewriteVm(dto.getVm(), uuidMapping);
+        rewriteVolumes(dto, uuidMapping);
+        dto.setSnapshots(rewriteSnapshots(dto.getSnapshots(), uuidMapping));
+        dto.setSnapshotTrees(rewriteSnapshotTrees(dto.getSnapshotTrees(), uuidMapping));
+        dto.setSnapshotGroups(rewriteSnapshotGroups(dto.getSnapshotGroups(), uuidMapping));
+        dto.setSnapshotGroupRefs(rewriteJsonList(dto.getSnapshotGroupRefs(), uuidMapping));
+
+        String targetVmUuid = uuidMapping.get(originalVmUuid);
+        return new RewriteResult(originalVmUuid, targetVmUuid, true, uuidMapping);
     }
 
-    private static void rewriteVm(ResourceMetadata vmMeta, String newVmUuid) {
+    private static Map<String, VmMetadataUuidAllocator.ResourceType> collectResources(VmInstanceMetadataDTO dto) {
+        Map<String, VmMetadataUuidAllocator.ResourceType> resources = new LinkedHashMap<>();
+        addResource(resources, dto.getVm().getResourceUuid(), VmMetadataUuidAllocator.ResourceType.VM);
+
+        if (dto.getVolumes() != null) {
+            for (VolumeResourceMetadata volumeMeta : dto.getVolumes()) {
+                VolumeVO volume = JSONObjectUtil.toObject(volumeMeta.getVo(), VolumeVO.class);
+                addResource(resources, volume.getUuid(), VmMetadataUuidAllocator.ResourceType.VOLUME);
+
+                if (volumeMeta.getSnapshotReferenceTree() != null) {
+                    VolumeSnapshotReferenceTreeVO referenceTree = JSONObjectUtil.toObject(
+                            volumeMeta.getSnapshotReferenceTree(), VolumeSnapshotReferenceTreeVO.class);
+                    addResource(resources, referenceTree.getUuid(),
+                            VmMetadataUuidAllocator.ResourceType.SNAPSHOT_REFERENCE_TREE);
+                }
+            }
+        }
+
+        if (dto.getSnapshots() != null) {
+            for (String snapshotJson : dto.getSnapshots()) {
+                VolumeSnapshotVO snapshot = JSONObjectUtil.toObject(snapshotJson, VolumeSnapshotVO.class);
+                addResource(resources, snapshot.getUuid(), VmMetadataUuidAllocator.ResourceType.SNAPSHOT);
+                // The persist path can reconstruct a snapshot tree from snapshot.treeUuid when
+                // snapshotTrees is absent, so that referenced tree is an independent identity too.
+                addResource(resources, snapshot.getTreeUuid(),
+                        VmMetadataUuidAllocator.ResourceType.SNAPSHOT_TREE);
+            }
+        }
+
+        if (dto.getSnapshotTrees() != null) {
+            for (String treeJson : dto.getSnapshotTrees()) {
+                addResource(resources,
+                        JSONObjectUtil.toObject(treeJson, VolumeSnapshotTreeVO.class).getUuid(),
+                        VmMetadataUuidAllocator.ResourceType.SNAPSHOT_TREE);
+            }
+        }
+
+        if (dto.getSnapshotGroups() != null) {
+            for (String groupJson : dto.getSnapshotGroups()) {
+                addResource(resources,
+                        JSONObjectUtil.toObject(groupJson, VolumeSnapshotGroupVO.class).getUuid(),
+                        VmMetadataUuidAllocator.ResourceType.SNAPSHOT_GROUP);
+            }
+        }
+
+        if (dto.getSnapshotGroupRefs() != null) {
+            for (String refJson : dto.getSnapshotGroupRefs()) {
+                addResource(resources,
+                        JSONObjectUtil.toObject(refJson, VolumeSnapshotGroupRefVO.class).getVolumeSnapshotUuid(),
+                        VmMetadataUuidAllocator.ResourceType.SNAPSHOT);
+            }
+        }
+
+        return resources;
+    }
+
+    private static void addResource(Map<String, VmMetadataUuidAllocator.ResourceType> resources,
+                                    String uuid, VmMetadataUuidAllocator.ResourceType resourceType) {
+        if (StringUtils.isNotBlank(uuid)) {
+            resources.putIfAbsent(uuid, resourceType);
+        }
+    }
+
+    private static void rewriteVm(ResourceMetadata vmMeta, Map<String, String> uuidMapping) {
+        String newVmUuid = uuidMapping.get(vmMeta.getResourceUuid());
         vmMeta.setResourceUuid(newVmUuid);
+
         VmInstanceVO vm = JSONObjectUtil.toObject(vmMeta.getVo(), VmInstanceVO.class);
         vm.setUuid(newVmUuid);
-        vmMeta.setVo(JSONObjectUtil.toJsonString(vm));
+        vmMeta.setVo(rewriteJsonString(JSONObjectUtil.toJsonString(vm), uuidMapping));
+        rewriteTagsAndConfigs(vmMeta, uuidMapping);
     }
 
-    private static void rewriteVolumes(VmInstanceMetadataDTO dto, String oldVmUuid, String newVmUuid) {
+    private static void rewriteVolumes(VmInstanceMetadataDTO dto, Map<String, String> uuidMapping) {
         if (dto.getVolumes() == null) {
             return;
         }
 
-        for (VolumeResourceMetadata volMeta : dto.getVolumes()) {
-            VolumeVO vol = JSONObjectUtil.toObject(volMeta.getVo(), VolumeVO.class);
-            if (Objects.equals(vol.getVmInstanceUuid(), oldVmUuid)) {
-                vol.setVmInstanceUuid(newVmUuid);
+        for (VolumeResourceMetadata volumeMeta : dto.getVolumes()) {
+            VolumeVO volume = JSONObjectUtil.toObject(volumeMeta.getVo(), VolumeVO.class);
+            String newVolumeUuid = uuidMapping.get(volume.getUuid());
+            volume.setUuid(newVolumeUuid);
+            volumeMeta.setResourceUuid(newVolumeUuid);
+            volumeMeta.setVo(rewriteJsonString(JSONObjectUtil.toJsonString(volume), uuidMapping));
+            rewriteTagsAndConfigs(volumeMeta, uuidMapping);
+
+            if (volumeMeta.getSnapshotReferenceTree() != null) {
+                VolumeSnapshotReferenceTreeVO referenceTree = JSONObjectUtil.toObject(
+                        volumeMeta.getSnapshotReferenceTree(), VolumeSnapshotReferenceTreeVO.class);
+                referenceTree.setUuid(uuidMapping.get(referenceTree.getUuid()));
+                volumeMeta.setSnapshotReferenceTree(
+                        rewriteJsonString(JSONObjectUtil.toJsonString(referenceTree), uuidMapping));
             }
-            if (Objects.equals(vol.getLastVmInstanceUuid(), oldVmUuid)) {
-                vol.setLastVmInstanceUuid(newVmUuid);
-            }
-            volMeta.setVo(JSONObjectUtil.toJsonString(vol));
+            volumeMeta.setSnapshotReference(
+                    rewriteJsonString(volumeMeta.getSnapshotReference(), uuidMapping));
         }
     }
 
-    private static void rewriteNics(VmInstanceMetadataDTO dto, String oldVmUuid, String newVmUuid) {
-        if (dto.getNics() == null) {
-            return;
-        }
-
-        for (ResourceMetadata nicMeta : dto.getNics()) {
-            VmNicVO nic = JSONObjectUtil.toObject(nicMeta.getVo(), VmNicVO.class);
-            if (Objects.equals(nic.getVmInstanceUuid(), oldVmUuid)) {
-                nic.setVmInstanceUuid(newVmUuid);
-                nicMeta.setVo(JSONObjectUtil.toJsonString(nic));
-            }
-        }
-    }
-
-    private static void rewriteSnapshotGroups(VmInstanceMetadataDTO dto, String oldVmUuid, String newVmUuid) {
-        if (dto.getSnapshotGroups() == null) {
-            return;
+    private static List<String> rewriteSnapshots(List<String> snapshots, Map<String, String> uuidMapping) {
+        if (snapshots == null) {
+            return null;
         }
 
         List<String> rewritten = new ArrayList<>();
-        for (String groupJson : dto.getSnapshotGroups()) {
+        for (String snapshotJson : snapshots) {
+            VolumeSnapshotVO snapshot = JSONObjectUtil.toObject(snapshotJson, VolumeSnapshotVO.class);
+            snapshot.setUuid(uuidMapping.get(snapshot.getUuid()));
+            rewritten.add(rewriteJsonString(JSONObjectUtil.toJsonString(snapshot), uuidMapping));
+        }
+        return rewritten;
+    }
+
+    private static List<String> rewriteSnapshotTrees(List<String> snapshotTrees,
+                                                     Map<String, String> uuidMapping) {
+        if (snapshotTrees == null) {
+            return null;
+        }
+
+        List<String> rewritten = new ArrayList<>();
+        for (String treeJson : snapshotTrees) {
+            VolumeSnapshotTreeVO tree = JSONObjectUtil.toObject(treeJson, VolumeSnapshotTreeVO.class);
+            tree.setUuid(uuidMapping.get(tree.getUuid()));
+            rewritten.add(rewriteJsonString(JSONObjectUtil.toJsonString(tree), uuidMapping));
+        }
+        return rewritten;
+    }
+
+    private static List<String> rewriteSnapshotGroups(List<String> snapshotGroups,
+                                                      Map<String, String> uuidMapping) {
+        if (snapshotGroups == null) {
+            return null;
+        }
+
+        List<String> rewritten = new ArrayList<>();
+        for (String groupJson : snapshotGroups) {
             VolumeSnapshotGroupVO group = JSONObjectUtil.toObject(groupJson, VolumeSnapshotGroupVO.class);
-            if (Objects.equals(group.getVmInstanceUuid(), oldVmUuid)) {
-                group.setVmInstanceUuid(newVmUuid);
-            }
-            rewritten.add(JSONObjectUtil.toJsonString(group));
+            group.setUuid(uuidMapping.get(group.getUuid()));
+            rewritten.add(rewriteJsonString(JSONObjectUtil.toJsonString(group), uuidMapping));
         }
-        dto.setSnapshotGroups(rewritten);
+        return rewritten;
     }
 
-    private static void rewriteVmTagsAndConfigs(ResourceMetadata vmMeta, String oldVmUuid, String newVmUuid) {
-        vmMeta.setSystemTags(rewriteSystemTags(vmMeta.getSystemTags(), oldVmUuid, newVmUuid));
-        vmMeta.setResourceConfigs(rewriteResourceConfigs(vmMeta.getResourceConfigs(), oldVmUuid, newVmUuid));
+    private static void rewriteTagsAndConfigs(ResourceMetadata metadata, Map<String, String> uuidMapping) {
+        metadata.setSystemTags(rewriteEncodedListStrings(metadata.getSystemTags(), uuidMapping));
+        metadata.setResourceConfigs(rewriteEncodedListStrings(metadata.getResourceConfigs(), uuidMapping));
     }
 
-    private static void replaceRemainingVmUuidReferences(VmInstanceMetadataDTO dto, String oldVmUuid, String newVmUuid) {
-        replaceResourceMetadataStrings(dto.getVm(), oldVmUuid, newVmUuid);
-
-        if (dto.getVolumes() != null) {
-            for (VolumeResourceMetadata volMeta : dto.getVolumes()) {
-                replaceResourceMetadataStrings(volMeta, oldVmUuid, newVmUuid);
-                volMeta.setSnapshotReference(replaceUuidInJsonString(volMeta.getSnapshotReference(), oldVmUuid, newVmUuid));
-                volMeta.setSnapshotReferenceTree(replaceUuidInJsonString(volMeta.getSnapshotReferenceTree(), oldVmUuid, newVmUuid));
-            }
-        }
-
-        if (dto.getNics() != null) {
-            for (ResourceMetadata nicMeta : dto.getNics()) {
-                replaceResourceMetadataStrings(nicMeta, oldVmUuid, newVmUuid);
-            }
-        }
-
-        dto.setSnapshots(replaceUuidInList(dto.getSnapshots(), oldVmUuid, newVmUuid));
-        dto.setSnapshotTrees(replaceUuidInList(dto.getSnapshotTrees(), oldVmUuid, newVmUuid));
-        dto.setSnapshotGroups(replaceUuidInList(dto.getSnapshotGroups(), oldVmUuid, newVmUuid));
-        dto.setSnapshotGroupRefs(replaceUuidInList(dto.getSnapshotGroupRefs(), oldVmUuid, newVmUuid));
-    }
-
-    private static void replaceResourceMetadataStrings(ResourceMetadata metadata, String oldVmUuid, String newVmUuid) {
-        if (metadata == null) {
-            return;
-        }
-
-        metadata.setVo(replaceUuidInJsonString(metadata.getVo(), oldVmUuid, newVmUuid));
-        metadata.setSystemTags(rewriteEncodedListStrings(metadata.getSystemTags(), oldVmUuid, newVmUuid));
-        metadata.setResourceConfigs(rewriteEncodedListStrings(metadata.getResourceConfigs(), oldVmUuid, newVmUuid));
-    }
-
-    private static List<String> replaceUuidInList(List<String> values, String oldVmUuid, String newVmUuid) {
+    private static List<String> rewriteJsonList(List<String> values, Map<String, String> uuidMapping) {
         if (values == null) {
             return null;
         }
 
         List<String> rewritten = new ArrayList<>();
         for (String value : values) {
-            rewritten.add(replaceUuidInJsonString(value, oldVmUuid, newVmUuid));
+            rewritten.add(rewriteJsonString(value, uuidMapping));
         }
         return rewritten;
     }
 
-    private static String replaceUuidInJsonString(String value, String oldVmUuid, String newVmUuid) {
-        if (value == null || !value.contains(oldVmUuid)) {
+    private static String rewriteJsonString(String value, Map<String, String> uuidMapping) {
+        if (value == null || !containsMappedUuid(value, uuidMapping)) {
             return value;
         }
 
         try {
             JsonElement root = new JsonParser().parse(value);
-            return replaceUuidInJsonElement(null, root, oldVmUuid, newVmUuid).toString();
+            return rewriteJsonElement(null, root, uuidMapping).toString();
         } catch (Exception ignored) {
-            return replaceUuid(value, oldVmUuid, newVmUuid);
+            // Preserve the previous helper's support for metadata fields that are plain strings
+            // rather than JSON documents.
+            return rewriteMappedUuids(value, uuidMapping);
         }
     }
 
-    private static JsonElement replaceUuidInJsonElement(String fieldName, JsonElement element,
-                                                       String oldVmUuid, String newVmUuid) {
+    private static JsonElement rewriteJsonElement(String fieldName, JsonElement element,
+                                                  Map<String, String> uuidMapping) {
         if (element == null || element.isJsonNull()) {
             return element;
         }
@@ -191,7 +269,7 @@ public class VmMetadataUuidRewriteHelper {
         if (element.isJsonObject()) {
             JsonObject object = element.getAsJsonObject();
             for (Map.Entry<String, JsonElement> entry : object.entrySet()) {
-                entry.setValue(replaceUuidInJsonElement(entry.getKey(), entry.getValue(), oldVmUuid, newVmUuid));
+                entry.setValue(rewriteJsonElement(entry.getKey(), entry.getValue(), uuidMapping));
             }
             return object;
         }
@@ -199,16 +277,33 @@ public class VmMetadataUuidRewriteHelper {
         if (element.isJsonArray()) {
             JsonArray array = element.getAsJsonArray();
             for (int i = 0; i < array.size(); i++) {
-                array.set(i, replaceUuidInJsonElement(fieldName, array.get(i), oldVmUuid, newVmUuid));
+                array.set(i, rewriteJsonElement(fieldName, array.get(i), uuidMapping));
             }
             return array;
         }
 
         if (element.isJsonPrimitive() && element.getAsJsonPrimitive().isString() && !isPathField(fieldName)) {
-            return new JsonPrimitive(replaceUuid(element.getAsString(), oldVmUuid, newVmUuid));
+            return new JsonPrimitive(rewriteMappedUuids(element.getAsString(), uuidMapping));
         }
 
         return element;
+    }
+
+    private static boolean containsMappedUuid(String value, Map<String, String> uuidMapping) {
+        for (String originalUuid : uuidMapping.keySet()) {
+            if (value.contains(originalUuid)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static String rewriteMappedUuids(String value, Map<String, String> uuidMapping) {
+        String rewritten = value;
+        for (Map.Entry<String, String> entry : uuidMapping.entrySet()) {
+            rewritten = rewritten.replace(entry.getKey(), entry.getValue());
+        }
+        return rewritten;
     }
 
     private static boolean isPathField(String fieldName) {
@@ -220,78 +315,24 @@ public class VmMetadataUuidRewriteHelper {
         return normalized.contains("path") || PHYSICAL_INSTALL_URL_FIELDS.contains(normalized);
     }
 
-    private static String replaceUuid(String value, String oldVmUuid, String newVmUuid) {
-        return value == null ? null : value.replace(oldVmUuid, newVmUuid);
-    }
-
-    private static String rewriteSystemTags(String encodedTags, String oldVmUuid, String newVmUuid) {
-        if (StringUtils.isBlank(encodedTags)) {
-            return encodedTags;
-        }
-
-        List<?> rawList = decodeEncodedList(encodedTags);
-        List<Object> rewritten = new ArrayList<>();
-        for (Object raw : rawList) {
-            if (!(raw instanceof String)) {
-                rewritten.add(raw);
-                continue;
-            }
-
-            SystemTagVO tag = JSONObjectUtil.toObject((String) raw, SystemTagVO.class);
-            if (Objects.equals(tag.getResourceUuid(), oldVmUuid)) {
-                tag.setResourceUuid(newVmUuid);
-            }
-            rewritten.add(JSONObjectUtil.toJsonString(tag));
-        }
-        return encodeList(rewritten);
-    }
-
-    private static String rewriteResourceConfigs(String encodedConfigs, String oldVmUuid, String newVmUuid) {
-        if (StringUtils.isBlank(encodedConfigs)) {
-            return encodedConfigs;
-        }
-
-        List<?> rawList = decodeEncodedList(encodedConfigs);
-        List<Object> rewritten = new ArrayList<>();
-        for (Object raw : rawList) {
-            if (!(raw instanceof String)) {
-                rewritten.add(raw);
-                continue;
-            }
-
-            ResourceConfigVO config = JSONObjectUtil.toObject((String) raw, ResourceConfigVO.class);
-            if (Objects.equals(config.getResourceUuid(), oldVmUuid)) {
-                config.setResourceUuid(newVmUuid);
-            }
-            rewritten.add(JSONObjectUtil.toJsonString(config));
-        }
-        return encodeList(rewritten);
-    }
-
-    private static String rewriteEncodedListStrings(String encoded, String oldVmUuid, String newVmUuid) {
+    private static String rewriteEncodedListStrings(String encoded, Map<String, String> uuidMapping) {
         if (StringUtils.isBlank(encoded)) {
             return encoded;
         }
 
-        List<?> rawList = decodeEncodedList(encoded);
-        List<Object> rewritten = new ArrayList<>();
-        for (Object raw : rawList) {
-            if (raw instanceof String) {
-                rewritten.add(replaceUuidInJsonString((String) raw, oldVmUuid, newVmUuid));
-            } else {
-                rewritten.add(raw);
-            }
-        }
-        return encodeList(rewritten);
-    }
-
-    private static List<?> decodeEncodedList(String encoded) {
         String decoded = new String(Base64.getDecoder().decode(encoded), StandardCharsets.UTF_8);
         List<?> rawList = JSONObjectUtil.toObject(decoded, ArrayList.class);
-        return rawList == null ? new ArrayList<>() : rawList;
-    }
-
-    private static String encodeList(List<Object> list) {
-        return Base64.getEncoder().encodeToString(JSONObjectUtil.toJsonString(list).getBytes(StandardCharsets.UTF_8));
+        List<Object> rewritten = new ArrayList<>();
+        if (rawList != null) {
+            for (Object raw : rawList) {
+                if (raw instanceof String) {
+                    rewritten.add(rewriteJsonString((String) raw, uuidMapping));
+                } else {
+                    rewritten.add(raw);
+                }
+            }
+        }
+        return Base64.getEncoder().encodeToString(
+                JSONObjectUtil.toJsonString(rewritten).getBytes(StandardCharsets.UTF_8));
     }
 }

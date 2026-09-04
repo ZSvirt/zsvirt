@@ -1981,7 +1981,8 @@ public abstract class PrimaryStorageBase extends AbstractPrimaryStorage {
                 continue;
             }
 
-            entry.setRegenerateUuidRequired(!Objects.equals(existingPrimaryStorageUuid, scannedPrimaryStorageUuid));
+            entry.setRegenerateUuidRequired(entry.isRegenerateUuidRequired()
+                    || !Objects.equals(existingPrimaryStorageUuid, scannedPrimaryStorageUuid));
         }
     }
 }

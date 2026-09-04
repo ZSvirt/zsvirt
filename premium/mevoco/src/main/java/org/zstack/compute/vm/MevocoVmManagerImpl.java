@@ -53,6 +53,9 @@ import org.zstack.kvm.KVMConstant;
 import org.zstack.resourceconfig.ResourceConfigFacade;
 import org.zstack.storage.ceph.CephConstants;
 import org.zstack.storage.encrypt.SnapshotGroupRevertVolumeEncryptionHelper;
+import org.zstack.storage.primary.StoragePathOwnershipHelper;
+import org.zstack.storage.primary.local.LocalStorageConstants;
+import org.zstack.storage.primary.local.LocalStoragePathOwnershipHelper;
 import org.zstack.tag.TagManager;
 import org.zstack.storage.snapshot.group.VolumeSnapshotGroupBase;
 import org.zstack.utils.Utils;
@@ -395,7 +398,7 @@ public class MevocoVmManagerImpl implements VmInstanceExtensionManager, BeforeVm
         thdf.chainSubmit(new ChainTask(msg) {
             @Override
             public String getSyncSignature() {
-                return "register-vm-from-metadata-" + msg.getMetadataPath();
+                return "register-vm-from-metadata-" + msg.getMetadataRegistrationKey();
             }
 
             @Override
@@ -506,7 +509,7 @@ public class MevocoVmManagerImpl implements VmInstanceExtensionManager, BeforeVm
                             vmUuid = rewriteResult.targetVmUuid;
                             regeneratedVmUuid = rewriteResult.changed;
                         } catch (Exception e) {
-                            trigger.fail(Platform.operr("failed to rewrite VM UUID in metadata: %s", e.getMessage()));
+                            trigger.fail(Platform.operr("failed to regenerate resource UUIDs in metadata: %s", e.getMessage()));
                             return;
                         }
 
@@ -621,6 +624,22 @@ public class MevocoVmManagerImpl implements VmInstanceExtensionManager, BeforeVm
                 });
 
                 flow(new NoRollbackFlow() {
+                    String __name__ = "validate-physical-volume-ownership";
+
+                    @Override
+                    public void run(FlowTrigger trigger, Map data) {
+                        ErrorCode error = validateTargetPathOwnership(
+                                dto, primaryStorageUuid, psType, hostUuid, metadataToCurrentPathMap);
+                        if (error != null) {
+                            trigger.fail(error);
+                            return;
+                        }
+
+                        trigger.next();
+                    }
+                });
+
+                flow(new NoRollbackFlow() {
                     String __name__ = "rebase-backing-file-prefixes";
 
                     @Override
@@ -688,6 +707,13 @@ public class MevocoVmManagerImpl implements VmInstanceExtensionManager, BeforeVm
 
                     @Override
                     public void run(FlowTrigger trigger, Map data) {
+                        ErrorCode ownershipError = validateTargetPathOwnership(
+                                dto, primaryStorageUuid, psType, hostUuid, metadataToCurrentPathMap);
+                        if (ownershipError != null) {
+                            trigger.fail(ownershipError);
+                            return;
+                        }
+
                         try {
                             MetadataRegistrationPersistHelper.PersistContext ctx =
                                     new MetadataRegistrationPersistHelper.PersistContext(dto, vmUuid, primaryStorageUuid,
@@ -824,6 +850,57 @@ public class MevocoVmManagerImpl implements VmInstanceExtensionManager, BeforeVm
                 });
             }
         }).start();
+    }
+
+    private ErrorCode validateTargetPathOwnership(VmInstanceMetadataDTO dto, String primaryStorageUuid,
+                                                  String psType, String hostUuid,
+                                                  Map<String, String> pathReplacements) {
+        Map<String, Set<String>> incomingOwnersByPath = new LinkedHashMap<>();
+        if (dto.getVolumes() != null) {
+            for (VolumeResourceMetadata volumeMetadata : dto.getVolumes()) {
+                VolumeVO volume = JSONObjectUtil.toObject(volumeMetadata.getVo(), VolumeVO.class);
+                addIncomingPhysicalPath(incomingOwnersByPath, volume.getInstallPath(),
+                        volume.getUuid(), pathReplacements);
+            }
+        }
+        if (dto.getSnapshots() != null) {
+            for (String snapshotJson : dto.getSnapshots()) {
+                VolumeSnapshotVO snapshot = JSONObjectUtil.toObject(snapshotJson, VolumeSnapshotVO.class);
+                addIncomingPhysicalPath(incomingOwnersByPath, snapshot.getPrimaryStorageInstallPath(),
+                        snapshot.getUuid(), pathReplacements);
+            }
+        }
+        for (Map.Entry<String, Set<String>> entry : incomingOwnersByPath.entrySet()) {
+            if (entry.getValue().size() > 1) {
+                return Platform.operr("metadata resources%s resolve to the same physical path[%s] on " +
+                                "primaryStorage[uuid:%s], refuse registration",
+                        entry.getValue(), entry.getKey(), primaryStorageUuid);
+            }
+            List<StoragePathOwnershipHelper.Owner> owners;
+            if (LocalStorageConstants.LOCAL_STORAGE_TYPE.equals(psType)) {
+                owners = LocalStoragePathOwnershipHelper.findOtherOwnersAtHost(
+                        primaryStorageUuid, hostUuid, entry.getKey(), Collections.emptySet());
+            } else {
+                owners = StoragePathOwnershipHelper.findOtherOwners(
+                        primaryStorageUuid, entry.getKey(), Collections.emptySet());
+            }
+            if (!owners.isEmpty()) {
+                return Platform.operr("physical path[%s] on primaryStorage[uuid:%s] is already owned by %s, " +
+                                "refuse metadata registration for resource%s",
+                        entry.getKey(), primaryStorageUuid, owners, entry.getValue());
+            }
+        }
+        return null;
+    }
+
+    private static void addIncomingPhysicalPath(Map<String, Set<String>> ownersByPath,
+                                                String metadataPath, String resourceUuid,
+                                                Map<String, String> pathReplacements) {
+        if (StringUtils.isBlank(metadataPath) || StringUtils.isBlank(resourceUuid)) {
+            return;
+        }
+        String finalPath = pathReplacements.getOrDefault(metadataPath, metadataPath);
+        ownersByPath.computeIfAbsent(finalPath, key -> new LinkedHashSet<>()).add(resourceUuid);
     }
 
     private void handle(UpdateVmInstanceMetadataMsg msg) {

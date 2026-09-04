@@ -1968,6 +1968,7 @@ public class VmInstanceBase extends AbstractVmInstance {
         amsg.setServiceId(bus.makeLocalServiceId(HostAllocatorConstant.SERVICE_ID));
         amsg.setAllocatorStrategy(HostAllocatorConstant.MIGRATE_VM_ALLOCATOR_TYPE);
         amsg.setVmOperation(VmOperation.Migrate.toString());
+        amsg.setAllocationScene(AllocatorDomainScene.Migrate);
         amsg.setL3NetworkUuids(VmNicHelper.getL3Uuids(VmNicInventory.valueOf(self.getVmNics())));
         amsg.setVmNicParams(VmNicHelper.getVmNicParamsWithVfNic(self));
         amsg.setDryRun(true);

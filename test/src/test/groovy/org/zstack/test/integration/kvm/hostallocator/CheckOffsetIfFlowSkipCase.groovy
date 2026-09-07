@@ -131,7 +131,7 @@ class CheckOffsetIfFlowSkipCase extends SubCase{
             vm = env.inventoryByName("vm") as VmInstanceInventory
             testLocalHostFilterPagination()
             /**
-             * 1. delete vm nic to skip AttachedL2NetworkAllocatorFlow
+             * 1. delete vm nic to skip AttachedL2NetworkAllocatorProducer
              * 2. set pagination and limit
              * 3. get candidate host
              */

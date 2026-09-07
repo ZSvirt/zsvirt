@@ -1,8 +1,5 @@
 package org.zstack.test.integration.stabilisation
 
-import org.junit.ClassRule
-import org.zapodot.junit.ldap.EmbeddedLdapRule
-import org.zapodot.junit.ldap.EmbeddedLdapRuleBuilder
 import org.zstack.testlib.SpringSpec
 import org.zstack.testlib.StabilityTest
 
@@ -16,12 +13,6 @@ import org.zstack.testlib.StabilityTest
  * A : search keyword is 'stability test fails', example: grep "stability test fails" management-server.log
  */
 class StabilityTestCase extends StabilityTest {
-
-    public static final String DOMAIN_DSN = "dc=example,dc=com"
-
-    @ClassRule
-    public static EmbeddedLdapRule embeddedLdapRule = EmbeddedLdapRuleBuilder.newInstance().bindingToPort(1888).
-            usingDomainDsn(DOMAIN_DSN).importingLdifs("users-import.ldif").build()
 
     @Override
     SpringSpec getDefaultSpringSpec(){

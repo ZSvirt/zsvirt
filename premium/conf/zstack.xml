@@ -34,6 +34,7 @@
     </bean>
 
     <import resource="springConfigXml/AccountManager.xml"/>
+    <import resource="springConfigXml/authentications/accountIam1Plugin.xml"/>
     <import resource="springConfigXml/acl.xml"/>
     <import resource="springConfigXml/agentManager.xml"/>
     <import resource="springConfigXml/ansibleFacade.xml"/>

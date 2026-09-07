@@ -10,12 +10,10 @@ import org.zstack.ldap.LdapErrors
 import org.zstack.sdk.ApiResult
 import org.zstack.sdk.ZSClient
 import org.zstack.sdk.identity.ldap.api.AddLdapServerAction
-import org.zstack.test.integration.ZStackTest
 import org.zstack.test.integration.stabilisation.StabilityTestCase
 import org.zstack.test.integration.stabilisation.TestCaseStabilityTest
 import org.zstack.testlib.EnvSpec
 import org.zstack.testlib.SubCase
-import org.zstack.testlib.Test
 
 class LdapExceptionCase extends SubCase {
     EnvSpec env
@@ -62,7 +60,7 @@ class LdapExceptionCase extends SubCase {
         }
 
         try {
-            return ZStackTest.embeddedLdapRule.ldapConnection()
+            return LdapTest.embeddedLdapRule.ldapConnection()
         }catch (Exception e){
         }
 
@@ -79,19 +77,19 @@ class LdapExceptionCase extends SubCase {
 
     void testAddLdap() {
         LDAPInterface ldapConnection = this.getLdapConn()
-        final SearchResult searchResult = ldapConnection.search(ZStackTest.DOMAIN_DSN, SearchScope.SUB, "(objectClass=person)")
+        final SearchResult searchResult = ldapConnection.search(LdapTest.DOMAIN_DSN, SearchScope.SUB, "(objectClass=person)")
         assert searchResult.getEntryCount() == 3
 
         AddLdapServerAction addLdapServerAction = new AddLdapServerAction(
                 name : "ldap0",
                 description : "test-ldap0",
-                base : ZStackTest.DOMAIN_DSN,
+                base : LdapTest.DOMAIN_DSN,
                 url : "ldap://localhost:1888",
                 username : "",
                 password : "",
                 encryption : "None",
                 systemTags : ["ephemeral::validationOnly"],
-                sessionId : Test.currentEnvSpec.session.uuid
+                sessionId : currentEnvSpec.session.uuid
         )
         ApiResult res = ZSClient.call(addLdapServerAction)
         assert res.error == null
@@ -99,13 +97,13 @@ class LdapExceptionCase extends SubCase {
         addLdapServerAction = new AddLdapServerAction(
                 name : "ldap0",
                 description : "test-ldap0",
-                base : ZStackTest.DOMAIN_DSN,
+                base : LdapTest.DOMAIN_DSN,
                 url : "ldap://localhost:1899",
                 username : "",
                 password : "",
                 encryption : "None",
                 systemTags : ["ephemeral::validationOnly"],
-                sessionId : Test.currentEnvSpec.session.uuid
+                sessionId : currentEnvSpec.session.uuid
         )
         res = ZSClient.call(addLdapServerAction)
         assert res.error != null
@@ -114,13 +112,13 @@ class LdapExceptionCase extends SubCase {
         addLdapServerAction = new AddLdapServerAction(
                 name : "ldap0",
                 description : "test-ldap0",
-                base : ZStackTest.DOMAIN_DSN,
+                base : LdapTest.DOMAIN_DSN,
                 url : "ldap://localhost:1888",
                 username : "cn=Micha Kops",
                 password : "wrongPassword",
                 encryption : "None",
                 systemTags : ["ephemeral::validationOnly"],
-                sessionId : Test.currentEnvSpec.session.uuid
+                sessionId : currentEnvSpec.session.uuid
         )
         res = ZSClient.call(addLdapServerAction)
         assert res.error != null

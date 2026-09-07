@@ -120,4 +120,9 @@ class SpringSpec {
     void console() {
         include("ConsoleManager.xml")
     }
+
+    void agents() {
+        include("agents/softwarePackagePlugin.xml")
+        include("agents/zmigratePlugin.xml")
+    }
 }

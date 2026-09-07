@@ -17,7 +17,6 @@ import org.zstack.sdk.ZSClient
 import org.zstack.sdk.identity.ldap.entity.LdapEntryAttributeInventory
 import org.zstack.sdk.identity.ldap.entity.LdapEntryInventory
 import org.zstack.sdk.identity.ldap.entity.LdapServerInventory
-import org.zstack.test.integration.ZStackTest
 import org.zstack.test.integration.stabilisation.StabilityTestCase
 import org.zstack.test.integration.stabilisation.TestCaseStabilityTest
 import org.zstack.testlib.EnvSpec
@@ -96,7 +95,7 @@ class LdapBasicCase extends SubCase {
         }
 
         try {
-            return ZStackTest.embeddedLdapRule.ldapConnection()
+            return LdapTest.embeddedLdapRule.ldapConnection()
         }catch (Exception e){
         }
 
@@ -273,13 +272,13 @@ class LdapBasicCase extends SubCase {
 
     void testAddLdapServer(){
         LDAPInterface ldapConnection = this.getLdapConn()
-        final SearchResult searchResult = ldapConnection.search(ZStackTest.DOMAIN_DSN, SearchScope.SUB, "(objectClass=person)")
+        final SearchResult searchResult = ldapConnection.search(LdapTest.DOMAIN_DSN, SearchScope.SUB, "(objectClass=person)")
         assert searchResult.getEntryCount() == 3
 
         def result = addLdapServer {
             name = "ldap0"
             description = "test-ldap0"
-            base = ZStackTest.DOMAIN_DSN
+            base = LdapTest.DOMAIN_DSN
             url = "ldap://localhost:1888"
             username = ""
             password = ""
@@ -298,13 +297,13 @@ class LdapBasicCase extends SubCase {
         AddLdapServerAction addLdapServerAction = new AddLdapServerAction(
                 name : "ldap0",
                 description : "test-ldap0",
-                base : ZStackTest.DOMAIN_DSN,
+                base : LdapTest.DOMAIN_DSN,
                 url : "ldap://localhost:1888",
                 username : "",
                 password : "",
                 encryption : "None",
                 systemTags : ["ephemeral::validationOnly"],
-                sessionId : Test.currentEnvSpec.session.uuid
+                sessionId : currentEnvSpec.session.uuid
         )
         ApiResult res = ZSClient.call(addLdapServerAction)
         assert res.error == null
@@ -312,41 +311,40 @@ class LdapBasicCase extends SubCase {
     }
 
     void testRepeatToAddLdapServer(){
-
         AddLdapServerAction addLdapServerAction = new AddLdapServerAction(
                 name : "ldap0",
                 description : "test-ldap0",
-                base : ZStackTest.DOMAIN_DSN,
+                base : LdapTest.DOMAIN_DSN,
                 url : "ldap://localhost:1888",
                 username : "",
                 password : "",
                 encryption : "None",
-                sessionId : Test.currentEnvSpec.session.uuid
+                sessionId : currentEnvSpec.session.uuid
         )
         assert null != addLdapServerAction.call().error
 
         addLdapServerAction = new AddLdapServerAction(
                 name : "ldap0",
                 description : "test-ldap1",
-                base : ZStackTest.DOMAIN_DSN,
+                base : LdapTest.DOMAIN_DSN,
                 url : "ldap://172.20.11.200:1888",
                 username : "uid=admin,cn=users,cn=accounts,dc=mevoco,dc=com",
                 password : "password",
                 encryption : "TLS",
                 systemTags : ["ephemeral::validationOnly"],
-                sessionId : Test.currentEnvSpec.session.uuid
+                sessionId : currentEnvSpec.session.uuid
         )
         assert null != addLdapServerAction.call().error
 
         addLdapServerAction = new AddLdapServerAction(
                 name : "ldap0",
                 description : "test-ldap1",
-                base : ZStackTest.DOMAIN_DSN,
+                base : LdapTest.DOMAIN_DSN,
                 url : "ldap://172.20.11.200:1888",
                 username : "uid=admin,cn=users,cn=accounts,dc=mevoco,dc=com",
                 password : "password",
                 encryption : "TLS",
-                sessionId : Test.currentEnvSpec.session.uuid
+                sessionId : currentEnvSpec.session.uuid
         )
         assert null != addLdapServerAction.call().error
     }
@@ -354,7 +352,7 @@ class LdapBasicCase extends SubCase {
     void testDeleteLdapServer(){
         deleteLdapServer {
             uuid = ldapUuid
-            sessionId = Test.currentEnvSpec.session.uuid
+            sessionId = currentEnvSpec.session.uuid
         }
     }
 }

@@ -5,7 +5,6 @@ import org.zapodot.junit.ldap.EmbeddedLdapRule
 import org.zapodot.junit.ldap.EmbeddedLdapRuleBuilder
 import org.zstack.ldap.LdapConstant
 import org.zstack.sdk.identity.ldap.entity.LdapServerInventory
-import org.zstack.test.integration.ZStackTest
 import org.zstack.testlib.EnvSpec
 import org.zstack.testlib.SubCase
 
@@ -28,7 +27,7 @@ class LdapFilterCase extends SubCase {
 
     @Override
     void setup() {
-        useSpring(ZStackTest.springSpec)
+        useSpring(LdapTest.springSpec)
     }
 
     @Override

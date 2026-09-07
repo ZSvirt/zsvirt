@@ -8,7 +8,6 @@ import org.zstack.ldap.LdapConstant
 import org.zstack.sdk.*
 import org.zstack.sdk.identity.ldap.api.AddLdapServerAction
 import org.zstack.sdk.identity.ldap.entity.LdapServerInventory
-import org.zstack.test.integration.ZStackTest
 import org.zstack.test.integration.stabilisation.StabilityTestCase
 import org.zstack.test.integration.stabilisation.TestCaseStabilityTest
 import org.zstack.testlib.EnvSpec
@@ -17,7 +16,6 @@ import org.zstack.testlib.SubCase
 /**
  * Created by lining on 2017-11-09.
  */
-
 class WindowsADCase extends SubCase {
     EnvSpec env
 
@@ -69,7 +67,7 @@ class WindowsADCase extends SubCase {
         }
 
         try {
-            return ZStackTest.embeddedLdapRule.ldapConnection()
+            return LdapTest.embeddedLdapRule.ldapConnection()
         }catch (Exception e){
         }
 
@@ -96,7 +94,7 @@ class WindowsADCase extends SubCase {
         def addLdapServerAction = new AddLdapServerAction(
                 name : "ldap0",
                 description : "test-ldap0",
-                base : ZStackTest.DOMAIN_DSN,
+                base : LdapTest.DOMAIN_DSN,
                 url : "ldap://localhost:1888",
                 username : "",
                 password : "",
@@ -110,7 +108,7 @@ class WindowsADCase extends SubCase {
         def result = addLdapServer {
             name = "ldap0"
             description = "test-ldap0"
-            base = ZStackTest.DOMAIN_DSN
+            base = LdapTest.DOMAIN_DSN
             url = "ldap://localhost:1888"
             username = ""
             password = ""

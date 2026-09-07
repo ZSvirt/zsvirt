@@ -18,6 +18,7 @@
         <module>sdk-tools</module>
         <module>testlib-simple</module>
         <module>test-simple</module>
+        <module>test-authentication</module>
     </modules>
 
     <artifactId>tests</artifactId>

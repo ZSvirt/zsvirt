@@ -11,11 +11,13 @@ import org.zstack.header.storage.snapshot.VolumeSnapshotVO;
 import org.zstack.header.storage.snapshot.group.VolumeSnapshotGroupRefVO;
 import org.zstack.header.storage.snapshot.group.VolumeSnapshotGroupVO;
 import org.zstack.header.storage.snapshot.reference.VolumeSnapshotReferenceTreeVO;
+import org.zstack.header.tag.SystemTagVO;
 import org.zstack.header.vm.VmInstanceVO;
 import org.zstack.header.vm.metadata.ResourceMetadata;
 import org.zstack.header.vm.metadata.VmInstanceMetadataDTO;
 import org.zstack.header.vm.metadata.VolumeResourceMetadata;
 import org.zstack.header.volume.VolumeVO;
+import org.zstack.storage.volume.VolumeSystemTags;
 import org.zstack.utils.gson.JSONObjectUtil;
 
 import java.nio.charset.StandardCharsets;
@@ -166,11 +168,13 @@ public class VmMetadataUuidRewriteHelper {
 
         for (VolumeResourceMetadata volumeMeta : dto.getVolumes()) {
             VolumeVO volume = JSONObjectUtil.toObject(volumeMeta.getVo(), VolumeVO.class);
-            String newVolumeUuid = uuidMapping.get(volume.getUuid());
+            String originalVolumeUuid = volume.getUuid();
+            String newVolumeUuid = uuidMapping.get(originalVolumeUuid);
             volume.setUuid(newVolumeUuid);
             volumeMeta.setResourceUuid(newVolumeUuid);
             volumeMeta.setVo(rewriteJsonString(JSONObjectUtil.toJsonString(volume), uuidMapping));
             rewriteTagsAndConfigs(volumeMeta, uuidMapping);
+            addOriginalVolumeUuidTag(volumeMeta, originalVolumeUuid, newVolumeUuid);
 
             if (volumeMeta.getSnapshotReferenceTree() != null) {
                 VolumeSnapshotReferenceTreeVO referenceTree = JSONObjectUtil.toObject(
@@ -334,5 +338,40 @@ public class VmMetadataUuidRewriteHelper {
         }
         return Base64.getEncoder().encodeToString(
                 JSONObjectUtil.toJsonString(rewritten).getBytes(StandardCharsets.UTF_8));
+    }
+
+    private static void addOriginalVolumeUuidTag(VolumeResourceMetadata volumeMeta,
+                                                 String originalVolumeUuid,
+                                                 String newVolumeUuid) {
+        List<Object> tags = decodeEncodedList(volumeMeta.getSystemTags());
+        String tagValue = VolumeSystemTags.OVERWRITED_VOLUME.instantiateTag(
+                Collections.singletonMap(VolumeSystemTags.OVERWRITED_VOLUME_TOKEN, originalVolumeUuid));
+
+        boolean alreadyPresent = tags.stream()
+                .filter(String.class::isInstance)
+                .map(String.class::cast)
+                .map(it -> JSONObjectUtil.toObject(it, SystemTagVO.class))
+                .anyMatch(it -> it != null && tagValue.equals(it.getTag()));
+        if (!alreadyPresent) {
+            SystemTagVO tag = new SystemTagVO();
+            tag.setResourceUuid(newVolumeUuid);
+            tag.setResourceType(VolumeVO.class.getSimpleName());
+            tag.setTag(tagValue);
+            tag.setInherent(false);
+            tags.add(JSONObjectUtil.toJsonString(tag));
+        }
+
+        volumeMeta.setSystemTags(Base64.getEncoder().encodeToString(
+                JSONObjectUtil.toJsonString(tags).getBytes(StandardCharsets.UTF_8)));
+    }
+
+    private static List<Object> decodeEncodedList(String encoded) {
+        if (StringUtils.isBlank(encoded)) {
+            return new ArrayList<>();
+        }
+
+        String decoded = new String(Base64.getDecoder().decode(encoded), StandardCharsets.UTF_8);
+        List<Object> values = JSONObjectUtil.toObject(decoded, ArrayList.class);
+        return values == null ? new ArrayList<>() : new ArrayList<>(values);
     }
 }

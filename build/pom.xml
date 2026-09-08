@@ -50,7 +50,6 @@
                                         <exclude>springConfigXml/NfsPrimaryStorage.xml</exclude>
                                         <exclude>springConfigXml/sharedMountPointPrimaryStorage.xml</exclude>
                                         <exclude>springConfigXml/ceph.xml</exclude>
-                                        <exclude>springConfigXml/AccountManager.xml</exclude>
                                         <exclude>searchConfig/indexConfig.xml</exclude>
                                     </excludes>
                                 </resource>
@@ -543,7 +542,6 @@
                                         <exclude>springConfigXml/NfsPrimaryStorage.xml</exclude>
                                         <exclude>springConfigXml/sharedMountPointPrimaryStorage.xml</exclude>
                                         <exclude>springConfigXml/ceph.xml</exclude>
-                                        <exclude>springConfigXml/AccountManager.xml</exclude>
                                         <exclude>searchConfig/indexConfig.xml</exclude>
                                     </excludes>
                                 </resource>

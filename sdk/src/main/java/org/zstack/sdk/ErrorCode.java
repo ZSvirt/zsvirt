@@ -37,15 +37,6 @@ public class ErrorCode  {
     }
 
     @Deprecated
-    public java.lang.String elaboration;
-    public void setElaboration(java.lang.String elaboration) {
-        this.elaboration = elaboration;
-    }
-    public java.lang.String getElaboration() {
-        return this.elaboration;
-    }
-
-    @Deprecated
     public ErrorCode cause;
     public void setCause(ErrorCode cause) {
         this.cause = cause;

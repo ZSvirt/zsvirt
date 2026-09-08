@@ -16,7 +16,85 @@ import static org.zstack.sns.system.SystemHTTPTopicAndEndpointCreator.systemHttp
 
 class ZWatchDBRemaining extends AllowedDBRemaining {
     @Deprecated
-    private static final String TICKET_TOPIC_UUID = "0db3c1800dd64df5a2c3a34c008e37b7";
+    private static final String TICKET_TOPIC_UUID = "0db3c1800dd64df5a2c3a34c008e37b7"
+
+    public static HashSet<String> systemAlarmNames = new HashSet<>([
+        SystemAlarmManager.DATA_DIR_CAPACITY_ALARM_NAME,
+        SystemAlarmManager.PRIMARY_STORAGE_AVAILABLE_CAPACITY_ALARM_NAME,
+        SystemAlarmManager.BACKUP_STORAGE_AVAILABLE_CAPACITY_ALARM_NAME,
+        SystemAlarmManager.HOST_ROOT_USED_CAPACITY_ALARM_NAME,
+        SystemAlarmManager.PRIMARY_STORAGE_PHYSICAL_AVAILABLE_CAPACITY_ALARM_NAME,
+        SystemAlarmManager.MANAGEMENT_NODE_DB_SYNCHRONIZATION_ALARM_NAME,
+        SystemAlarmManager.MANAGEMENT_NODE_DB_FENCER_IP_UNREACHABLE_ALARM_NAME,
+        SystemAlarmManager.HOST_CPU_AVERAGE_USED_UTILIZATION_ALARM_NAME,
+        SystemAlarmManager.VM_CPU_AVERAGE_USED_UTILIZATION_ALARM_NAME,
+        SystemAlarmManager.VM_CPU_AVERAGE_USED_UTILIZATION_IN_GUEST_TOOLS_ALARM_NAME,
+        SystemAlarmManager.VM_MEMORY_USED_UTILIZATION_IN_GUEST_TOOLS_ALARM_NAME,
+        SystemAlarmManager.VM_MEMORY_USED_ALARM_NAME,
+        SystemAlarmManager.HOST_CPU_TEMPERATURE_ALARM_NAME,
+        SystemAlarmManager.HOST_SSD_LIFE_LEFT_ALARM_NAME,
+        SystemAlarmManager.HOST_SSD_TEMPERATURE_ALARM_NAME,
+        SystemAlarmManager.HOST_MEMORY_USED_ALARM_NAME,
+        SystemAlarmManager.HOST_GPU_TEMPERATURE_ALARM_NAME,
+        SystemAlarmManager.SHARED_BLOCK_STATE_CHANGED_EVENT_ALARM_NAME,
+        SystemAlarmManager.HOST_SHARED_BLOCK_STATE_CHANGED_EVENT_ALARM_NAME,
+        SystemAlarmManager.HOST_PROCESS_PHYSICAL_MEMORY_USAGE_NAME,
+        SystemAlarmManager.DISASTER_RECOVERY_STORAGE_AVAILABLE_CAPACITY_ALARM_NAME,
+    ])
+
+    public static HashSet<String> eventSubscriptionNames = new HashSet<>([
+        SystemAlarmManager.PRIMARY_STORAGE_DISCONNECT_EVENT_ALARM_NAME,
+        SystemAlarmManager.PRIMARY_STORAGE_CONNECTED_EVENT_ALARM_NAME,
+        SystemAlarmManager.BACKUP_STORAGE_DISCONNECT_EVENT_ALARM_NAME,
+        SystemAlarmManager.BACKUP_STORAGE_CONNECTED_EVENT_ALARM_NAME,
+        SystemAlarmManager.MANAGEMENT_NODE_LEFT_EVENT_ALARM_NAME,
+        SystemAlarmManager.MANAGEMENT_NODE_JOIN_EVENT_ALARM_NAME,
+        SystemAlarmManager.MANAGEMENT_NODE_DB_FENCER_IP_UNREACHABLE_ALARM_NAME,
+        SystemAlarmManager.MANAGEMENT_NODE_DB_SYNCHRONIZATION_ALARM_NAME,
+        SystemAlarmManager.HOST_DISCONNECT_ALARM_NAME,
+        SystemAlarmManager.HOST_CONNECTED_ALARM_NAME,
+        SystemAlarmManager.VM_CRASH_EVENT_ALARM_NAME,
+        SystemAlarmManager.HOST_PHYSICAL_NIC_STATUS_UP_EVENT_ALARM_NAME,
+        SystemAlarmManager.HOST_PHYSICAL_NIC_STATUS_DOWN_EVENT_ALARM_NAME,
+        SystemAlarmManager.VM_HA_START_EVENT_ALARM_NAME,
+        SystemAlarmManager.VM_STATE_IN_SHUTDOWN_EVENT_ALARM_NAME,
+        SystemAlarmManager.HOST_UNKNOWN_VM_DETECTED_EVENT_ALARM_NAME,
+        SystemAlarmManager.MIGRATE_VM_FAILED_WITH_HOST_MAINTAIN_EVENT_ALARM_NAME,
+        SystemAlarmManager.PRIMARY_STORAGE_HOST_DISCONNECTED_EVENT_ALARM_NAME,
+        SystemAlarmManager.FAULT_MOUNT_POINT_ON_HOST_EVENT_ALARM_NAME,
+        SystemAlarmManager.ABNORMAL_RUNNING_VM_STATE_CHANGE_EVENT_ALARM_NAME,
+        SystemAlarmManager.CLUSTER_QEMU_VERSION_MISMATCH_EVENT_ALARM_NAME,
+        SystemAlarmManager.VM_INTERNAL_IP_CHANGED_EVENT_ALARM_NAME,
+        SystemAlarmManager.VM_INTERNAL_IP_DUPLICATE_EVENT_ALARM_NAME,
+        SystemAlarmManager.VM_INTERNAL_IP_RANGE_CONFLICT_EVENT_ALARM_NAME,
+        SystemAlarmManager.SECURITY_MACHINE_STATE_CHANGE_EVENT_ALARM_NAME,
+        SystemAlarmManager.SECRET_RESOURCE_POOL_STATUS_CHANGE_EVENT_ALARM_NAME,
+        SystemAlarmManager.KEY_PROVIDER_DEFAULT_SERVICE_UNAVAILABLE_EVENT_ALARM_NAME,
+        SystemAlarmManager.KEY_PROVIDER_DEFAULT_SERVICE_RECOVERED_EVENT_ALARM_NAME,
+        SystemAlarmManager.KEY_PROVIDER_CERTIFICATE_EXPIRING_EVENT_ALARM_NAME,
+        SystemAlarmManager.KEY_PROVIDER_CERTIFICATE_RECOVERED_EVENT_ALARM_NAME,
+        SystemAlarmManager.KEY_PROVIDER_RESOURCE_SERVICE_UNAVAILABLE_EVENT_ALARM_NAME,
+        SystemAlarmManager.KEY_PROVIDER_RESOURCE_SERVICE_RECOVERED_EVENT_ALARM_NAME,
+        SystemAlarmManager.HOST_PHYSICAL_MEMORY_ECC_ERROR_EVENT_ALARM_NAME,
+        SystemAlarmManager.HOST_PHYSICAL_CPU_STATUS_ABNORMAL_EVENT_ALARM_NAME,
+        SystemAlarmManager.HOST_PHYSICAL_MEMORY_STATUS_ABNORMAL_EVENT_ALARM_NAME,
+        SystemAlarmManager.HOST_PHYSICAL_DISK_STATUS_ABNORMAL_EVENT_ALARM_NAME,
+        SystemAlarmManager.HOST_PHYSICAL_DISK_INSERTED_EVENT_ALARM_NAME,
+        SystemAlarmManager.HOST_PHYSICAL_DISK_REMOVED_EVENT_ALARM_NAME,
+        SystemAlarmManager.HOST_HARDWARE_CHANGED_ALARM_NAME,
+        SystemAlarmManager.HOST_PHYSICAL_POWER_SUPPLY_STATUS_ABNORMAL_EVENT_ALARM_NAME,
+        SystemAlarmManager.HOST_PHYSICAL_GPU_STATUS_ABNORMAL_EVENT_ALARM_NAME,
+        SystemAlarmManager.HOST_PHYSICAL_GPU_REMOVE_EVENT_ALARM_NAME,
+        SystemAlarmManager.HOST_PHYSICAL_VGPU_STATUS_ABNORMAL_EVENT_ALARM_NAME,
+        SystemAlarmManager.HOST_PHYSICAL_RAID_STATUS_ABNORMAL_EVENT_ALARM_NAME,
+        SystemAlarmManager.HOST_HBA_PORT_STATE_ABNORMAL_EVENT_ALARM_NAME,
+        SystemAlarmManager.SHARED_BLOCK_STATE_CHANGED_EVENT_ALARM_NAME,
+        SystemAlarmManager.HOST_SHARED_BLOCK_STATE_CHANGED_EVENT_ALARM_NAME,
+        SystemAlarmManager.HOST_PROCESS_PHYSICAL_MEMORY_USAGE_NAME,
+        SystemAlarmManager.SCHEDULER_JOB_GROUP_EXECUTED_RESULT_EVENT_ALARM_NAME,
+        SystemAlarmManager.DISASTER_RECOVERY_STORAGE_CONNECTED_EVENT_ALARM_NAME,
+        SystemAlarmManager.DISASTER_RECOVERY_STORAGE_DISCONNECT_EVENT_ALARM_NAME,
+    ])
 
     @Override
     void remaining() {
@@ -61,27 +139,7 @@ class ZWatchDBRemaining extends AllowedDBRemaining {
             tableVOClass = AlarmVO.class
 
             checker = { List<AlarmVO> vos ->
-                return vos.findAll { it.name != SystemAlarmManager.DATA_DIR_CAPACITY_ALARM_NAME &&
-                        it.name != SystemAlarmManager.PRIMARY_STORAGE_AVAILABLE_CAPACITY_ALARM_NAME &&
-                        it.name != SystemAlarmManager.BACKUP_STORAGE_AVAILABLE_CAPACITY_ALARM_NAME &&
-                        it.name != SystemAlarmManager.HOST_ROOT_USED_CAPACITY_ALARM_NAME &&
-                        it.name != SystemAlarmManager.PRIMARY_STORAGE_PHYSICAL_AVAILABLE_CAPACITY_ALARM_NAME &&
-                        it.name != SystemAlarmManager.MANAGEMENT_NODE_DB_SYNCHRONIZATION_ALARM_NAME &&
-                        it.name != SystemAlarmManager.MANAGEMENT_NODE_DB_FENCER_IP_UNREACHABLE_ALARM_NAME &&
-                        it.name != SystemAlarmManager.HOST_CPU_AVERAGE_USED_UTILIZATION_ALARM_NAME &&
-                        it.name != SystemAlarmManager.VM_CPU_AVERAGE_USED_UTILIZATION_ALARM_NAME &&
-                        it.name != SystemAlarmManager.VM_CPU_AVERAGE_USED_UTILIZATION_IN_GUEST_TOOLS_ALARM_NAME &&
-                        it.name != SystemAlarmManager.VM_MEMORY_USED_UTILIZATION_IN_GUEST_TOOLS_ALARM_NAME &&
-                        it.name != SystemAlarmManager.VM_MEMORY_USED_ALARM_NAME &&
-                        it.name != SystemAlarmManager.HOST_CPU_TEMPERATURE_ALARM_NAME &&
-                        it.name != SystemAlarmManager.HOST_SSD_LIFE_LEFT_ALARM_NAME &&
-                        it.name != SystemAlarmManager.HOST_SSD_TEMPERATURE_ALARM_NAME &&
-                        it.name != SystemAlarmManager.HOST_MEMORY_USED_ALARM_NAME &&
-                        it.name != SystemAlarmManager.HOST_GPU_TEMPERATURE_ALARM_NAME &&
-                        it.name != SystemAlarmManager.SHARED_BLOCK_STATE_CHANGED_EVENT_ALARM_NAME &&
-                        it.name != SystemAlarmManager.HOST_SHARED_BLOCK_STATE_CHANGED_EVENT_ALARM_NAME &&
-                        it.name != SystemAlarmManager.HOST_PROCESS_PHYSICAL_MEMORY_USAGE_NAME
-                }
+                return vos.findAll { !systemAlarmNames.contains(it.name) }
             }
         }
 
@@ -90,57 +148,7 @@ class ZWatchDBRemaining extends AllowedDBRemaining {
             tableVOClass = EventSubscriptionVO.class
 
             checker = { List<EventSubscriptionVO> vos ->
-                return vos.findAll { vo ->
-                    ![SystemAlarmManager.PRIMARY_STORAGE_DISCONNECT_EVENT_ALARM_NAME,
-                      SystemAlarmManager.PRIMARY_STORAGE_CONNECTED_EVENT_ALARM_NAME,
-                      SystemAlarmManager.BACKUP_STORAGE_DISCONNECT_EVENT_ALARM_NAME,
-                      SystemAlarmManager.BACKUP_STORAGE_CONNECTED_EVENT_ALARM_NAME,
-                      SystemAlarmManager.MANAGEMENT_NODE_LEFT_EVENT_ALARM_NAME,
-                      SystemAlarmManager.MANAGEMENT_NODE_JOIN_EVENT_ALARM_NAME,
-                      SystemAlarmManager.MANAGEMENT_NODE_DB_FENCER_IP_UNREACHABLE_ALARM_NAME,
-                      SystemAlarmManager.MANAGEMENT_NODE_DB_SYNCHRONIZATION_ALARM_NAME,
-                      SystemAlarmManager.HOST_DISCONNECT_ALARM_NAME,
-                      SystemAlarmManager.HOST_CONNECTED_ALARM_NAME,
-                      SystemAlarmManager.VM_CRASH_EVENT_ALARM_NAME,
-                      SystemAlarmManager.HOST_PHYSICAL_NIC_STATUS_UP_EVENT_ALARM_NAME,
-                      SystemAlarmManager.HOST_PHYSICAL_NIC_STATUS_DOWN_EVENT_ALARM_NAME,
-                      SystemAlarmManager.VM_HA_START_EVENT_ALARM_NAME,
-                      SystemAlarmManager.VM_STATE_IN_SHUTDOWN_EVENT_ALARM_NAME,
-                      SystemAlarmManager.HOST_UNKNOWN_VM_DETECTED_EVENT_ALARM_NAME,
-                      SystemAlarmManager.MIGRATE_VM_FAILED_WITH_HOST_MAINTAIN_EVENT_ALARM_NAME,
-                      SystemAlarmManager.PRIMARY_STORAGE_HOST_DISCONNECTED_EVENT_ALARM_NAME,
-                      SystemAlarmManager.FAULT_MOUNT_POINT_ON_HOST_EVENT_ALARM_NAME,
-                      SystemAlarmManager.ABNORMAL_RUNNING_VM_STATE_CHANGE_EVENT_ALARM_NAME,
-                      SystemAlarmManager.CLUSTER_QEMU_VERSION_MISMATCH_EVENT_ALARM_NAME,
-                      SystemAlarmManager.VM_INTERNAL_IP_CHANGED_EVENT_ALARM_NAME,
-                      SystemAlarmManager.VM_INTERNAL_IP_DUPLICATE_EVENT_ALARM_NAME,
-                      SystemAlarmManager.VM_INTERNAL_IP_RANGE_CONFLICT_EVENT_ALARM_NAME,
-                      SystemAlarmManager.SECURITY_MACHINE_STATE_CHANGE_EVENT_ALARM_NAME,
-                      SystemAlarmManager.SECRET_RESOURCE_POOL_STATUS_CHANGE_EVENT_ALARM_NAME,
-                      SystemAlarmManager.KEY_PROVIDER_DEFAULT_SERVICE_UNAVAILABLE_EVENT_ALARM_NAME,
-                      SystemAlarmManager.KEY_PROVIDER_DEFAULT_SERVICE_RECOVERED_EVENT_ALARM_NAME,
-                      SystemAlarmManager.KEY_PROVIDER_CERTIFICATE_EXPIRING_EVENT_ALARM_NAME,
-                      SystemAlarmManager.KEY_PROVIDER_CERTIFICATE_RECOVERED_EVENT_ALARM_NAME,
-                      SystemAlarmManager.KEY_PROVIDER_RESOURCE_SERVICE_UNAVAILABLE_EVENT_ALARM_NAME,
-                      SystemAlarmManager.KEY_PROVIDER_RESOURCE_SERVICE_RECOVERED_EVENT_ALARM_NAME,
-                      SystemAlarmManager.HOST_PHYSICAL_MEMORY_ECC_ERROR_EVENT_ALARM_NAME,
-                      SystemAlarmManager.HOST_PHYSICAL_CPU_STATUS_ABNORMAL_EVENT_ALARM_NAME,
-                      SystemAlarmManager.HOST_PHYSICAL_MEMORY_STATUS_ABNORMAL_EVENT_ALARM_NAME,
-                      SystemAlarmManager.HOST_PHYSICAL_DISK_STATUS_ABNORMAL_EVENT_ALARM_NAME,
-                      SystemAlarmManager.HOST_PHYSICAL_DISK_INSERTED_EVENT_ALARM_NAME,
-                      SystemAlarmManager.HOST_PHYSICAL_DISK_REMOVED_EVENT_ALARM_NAME,
-                      SystemAlarmManager.HOST_HARDWARE_CHANGED_ALARM_NAME,
-                      SystemAlarmManager.HOST_PHYSICAL_POWER_SUPPLY_STATUS_ABNORMAL_EVENT_ALARM_NAME,
-                      SystemAlarmManager.HOST_PHYSICAL_GPU_STATUS_ABNORMAL_EVENT_ALARM_NAME,
-                      SystemAlarmManager.HOST_PHYSICAL_GPU_REMOVE_EVENT_ALARM_NAME,
-                      SystemAlarmManager.HOST_PHYSICAL_VGPU_STATUS_ABNORMAL_EVENT_ALARM_NAME,
-                      SystemAlarmManager.HOST_PHYSICAL_RAID_STATUS_ABNORMAL_EVENT_ALARM_NAME,
-                      SystemAlarmManager.HOST_HBA_PORT_STATE_ABNORMAL_EVENT_ALARM_NAME,
-                      SystemAlarmManager.SHARED_BLOCK_STATE_CHANGED_EVENT_ALARM_NAME,
-                      SystemAlarmManager.HOST_SHARED_BLOCK_STATE_CHANGED_EVENT_ALARM_NAME,
-                      SystemAlarmManager.HOST_PROCESS_PHYSICAL_MEMORY_USAGE_NAME,
-                    ].contains(vo.name)
-                }
+                return vos.findAll { vo -> !eventSubscriptionNames.contains(vo.name) }
             }
         }
 
@@ -157,57 +165,8 @@ class ZWatchDBRemaining extends AllowedDBRemaining {
 
             checker = { List<EventSubscriptionActionVO> vos ->
                 List<EventSubscriptionVO> evos = Q.New(EventSubscriptionVO.class)
-                        .in(EventSubscriptionVO_.@name,
-                        [SystemAlarmManager.PRIMARY_STORAGE_DISCONNECT_EVENT_ALARM_NAME,
-                         SystemAlarmManager.PRIMARY_STORAGE_CONNECTED_EVENT_ALARM_NAME,
-                         SystemAlarmManager.BACKUP_STORAGE_DISCONNECT_EVENT_ALARM_NAME,
-                         SystemAlarmManager.BACKUP_STORAGE_CONNECTED_EVENT_ALARM_NAME,
-                         SystemAlarmManager.MANAGEMENT_NODE_LEFT_EVENT_ALARM_NAME,
-                         SystemAlarmManager.MANAGEMENT_NODE_JOIN_EVENT_ALARM_NAME,
-                         SystemAlarmManager.MANAGEMENT_NODE_DB_FENCER_IP_UNREACHABLE_ALARM_NAME,
-                         SystemAlarmManager.MANAGEMENT_NODE_DB_SYNCHRONIZATION_ALARM_NAME,
-                         SystemAlarmManager.HOST_DISCONNECT_ALARM_NAME,
-                         SystemAlarmManager.HOST_CONNECTED_ALARM_NAME,
-                         SystemAlarmManager.PRIMARY_STORAGE_PHYSICAL_AVAILABLE_CAPACITY_ALARM_NAME,
-                         SystemAlarmManager.VM_CRASH_EVENT_ALARM_NAME,
-                         SystemAlarmManager.HOST_PHYSICAL_NIC_STATUS_UP_EVENT_ALARM_NAME,
-                         SystemAlarmManager.HOST_PHYSICAL_NIC_STATUS_DOWN_EVENT_ALARM_NAME,
-                         SystemAlarmManager.VM_HA_START_EVENT_ALARM_NAME,
-                         SystemAlarmManager.VM_STATE_IN_SHUTDOWN_EVENT_ALARM_NAME,
-                         SystemAlarmManager.HOST_UNKNOWN_VM_DETECTED_EVENT_ALARM_NAME,
-                         SystemAlarmManager.MIGRATE_VM_FAILED_WITH_HOST_MAINTAIN_EVENT_ALARM_NAME,
-                         SystemAlarmManager.PRIMARY_STORAGE_HOST_DISCONNECTED_EVENT_ALARM_NAME,
-                         SystemAlarmManager.FAULT_MOUNT_POINT_ON_HOST_EVENT_ALARM_NAME,
-                         SystemAlarmManager.ABNORMAL_RUNNING_VM_STATE_CHANGE_EVENT_ALARM_NAME,
-                         SystemAlarmManager.CLUSTER_QEMU_VERSION_MISMATCH_EVENT_ALARM_NAME,
-                         SystemAlarmManager.VM_INTERNAL_IP_CHANGED_EVENT_ALARM_NAME,
-                         SystemAlarmManager.VM_INTERNAL_IP_DUPLICATE_EVENT_ALARM_NAME,
-                         SystemAlarmManager.VM_INTERNAL_IP_RANGE_CONFLICT_EVENT_ALARM_NAME,
-                         SystemAlarmManager.SECURITY_MACHINE_STATE_CHANGE_EVENT_ALARM_NAME,
-                         SystemAlarmManager.SECRET_RESOURCE_POOL_STATUS_CHANGE_EVENT_ALARM_NAME,
-                         SystemAlarmManager.KEY_PROVIDER_DEFAULT_SERVICE_UNAVAILABLE_EVENT_ALARM_NAME,
-                         SystemAlarmManager.KEY_PROVIDER_DEFAULT_SERVICE_RECOVERED_EVENT_ALARM_NAME,
-                         SystemAlarmManager.KEY_PROVIDER_CERTIFICATE_EXPIRING_EVENT_ALARM_NAME,
-                         SystemAlarmManager.KEY_PROVIDER_CERTIFICATE_RECOVERED_EVENT_ALARM_NAME,
-                         SystemAlarmManager.KEY_PROVIDER_RESOURCE_SERVICE_UNAVAILABLE_EVENT_ALARM_NAME,
-                         SystemAlarmManager.KEY_PROVIDER_RESOURCE_SERVICE_RECOVERED_EVENT_ALARM_NAME,
-                         SystemAlarmManager.HOST_PHYSICAL_MEMORY_ECC_ERROR_EVENT_ALARM_NAME,
-                         SystemAlarmManager.HOST_PHYSICAL_CPU_STATUS_ABNORMAL_EVENT_ALARM_NAME,
-                         SystemAlarmManager.HOST_PHYSICAL_MEMORY_STATUS_ABNORMAL_EVENT_ALARM_NAME,
-                         SystemAlarmManager.HOST_PHYSICAL_DISK_STATUS_ABNORMAL_EVENT_ALARM_NAME,
-                         SystemAlarmManager.HOST_PHYSICAL_DISK_INSERTED_EVENT_ALARM_NAME,
-                         SystemAlarmManager.HOST_PHYSICAL_DISK_REMOVED_EVENT_ALARM_NAME,
-                         SystemAlarmManager.HOST_HARDWARE_CHANGED_ALARM_NAME,
-                         SystemAlarmManager.HOST_PHYSICAL_POWER_SUPPLY_STATUS_ABNORMAL_EVENT_ALARM_NAME,
-                         SystemAlarmManager.HOST_PHYSICAL_GPU_STATUS_ABNORMAL_EVENT_ALARM_NAME,
-                         SystemAlarmManager.HOST_PHYSICAL_GPU_REMOVE_EVENT_ALARM_NAME,
-                         SystemAlarmManager.HOST_PHYSICAL_VGPU_STATUS_ABNORMAL_EVENT_ALARM_NAME,
-                         SystemAlarmManager.HOST_PHYSICAL_RAID_STATUS_ABNORMAL_EVENT_ALARM_NAME,
-                         SystemAlarmManager.HOST_HBA_PORT_STATE_ABNORMAL_EVENT_ALARM_NAME,
-                         SystemAlarmManager.SHARED_BLOCK_STATE_CHANGED_EVENT_ALARM_NAME,
-                         SystemAlarmManager.HOST_SHARED_BLOCK_STATE_CHANGED_EVENT_ALARM_NAME,
-                         SystemAlarmManager.HOST_PROCESS_PHYSICAL_MEMORY_USAGE_NAME,
-                        ]).list()
+                        .in(EventSubscriptionVO_.@name, eventSubscriptionNames)
+                        .list()
                 if (!evos.isEmpty()) {
                     return vos.findAll { vo -> !evos.any { it.uuid == vo.subscriptionUuid }}
                 } else {
@@ -233,23 +192,7 @@ class ZWatchDBRemaining extends AllowedDBRemaining {
 
             checker = { List<AlarmActionVO> vos ->
                 List<AlarmVO> avos = Q.New(AlarmVO.class)
-                        .in(AlarmVO_.@name, [SystemAlarmManager.DATA_DIR_CAPACITY_ALARM_NAME,
-                                             SystemAlarmManager.BACKUP_STORAGE_AVAILABLE_CAPACITY_ALARM_NAME,
-                                             SystemAlarmManager.PRIMARY_STORAGE_AVAILABLE_CAPACITY_ALARM_NAME,
-                                             SystemAlarmManager.HOST_ROOT_USED_CAPACITY_ALARM_NAME,
-                                             SystemAlarmManager.PRIMARY_STORAGE_PHYSICAL_AVAILABLE_CAPACITY_ALARM_NAME,
-                                             SystemAlarmManager.MANAGEMENT_NODE_DB_FENCER_IP_UNREACHABLE_ALARM_NAME,
-                                             SystemAlarmManager.MANAGEMENT_NODE_DB_SYNCHRONIZATION_ALARM_NAME,
-                                             SystemAlarmManager.HOST_CPU_AVERAGE_USED_UTILIZATION_ALARM_NAME,
-                                             SystemAlarmManager.VM_CPU_AVERAGE_USED_UTILIZATION_ALARM_NAME,
-                                             SystemAlarmManager.VM_CPU_AVERAGE_USED_UTILIZATION_IN_GUEST_TOOLS_ALARM_NAME,
-                                             SystemAlarmManager.VM_MEMORY_USED_UTILIZATION_IN_GUEST_TOOLS_ALARM_NAME,
-                                             SystemAlarmManager.VM_MEMORY_USED_ALARM_NAME,
-                                             SystemAlarmManager.HOST_MEMORY_USED_ALARM_NAME,
-                                             SystemAlarmManager.HOST_CPU_TEMPERATURE_ALARM_NAME,
-                                             SystemAlarmManager.HOST_SSD_LIFE_LEFT_ALARM_NAME,
-                                             SystemAlarmManager.HOST_SSD_TEMPERATURE_ALARM_NAME,
-                                             SystemAlarmManager.HOST_GPU_TEMPERATURE_ALARM_NAME])
+                        .in(AlarmVO_.@name, systemAlarmNames)
                         .list()
                 if (!avos.isEmpty()) {
                     return vos.findAll { vo -> !avos.any { it.uuid == vo.alarmUuid } }
@@ -276,137 +219,20 @@ class ZWatchDBRemaining extends AllowedDBRemaining {
             tableVOClass = AccountResourceRefVO.class
 
             checker = { List<AccountResourceRefVO> vos ->
+
+                def allNames = new HashSet<>()
+                allNames.addAll(systemAlarmNames)
+                allNames.addAll(eventSubscriptionNames)
+
                 List<String> alarmUuids = Q.New(AlarmVO.class)
                         .select(AlarmVO_.@uuid)
-                        .in(AlarmVO_.@name, [SystemAlarmManager.DATA_DIR_CAPACITY_ALARM_NAME,
-                                             SystemAlarmManager.BACKUP_STORAGE_AVAILABLE_CAPACITY_ALARM_NAME,
-                                             SystemAlarmManager.PRIMARY_STORAGE_AVAILABLE_CAPACITY_ALARM_NAME,
-                                             SystemAlarmManager.PRIMARY_STORAGE_DISCONNECT_EVENT_ALARM_NAME,
-                                             SystemAlarmManager.PRIMARY_STORAGE_CONNECTED_EVENT_ALARM_NAME,
-                                             SystemAlarmManager.HOST_ROOT_USED_CAPACITY_ALARM_NAME,
-                                             SystemAlarmManager.BACKUP_STORAGE_DISCONNECT_EVENT_ALARM_NAME,
-                                             SystemAlarmManager.BACKUP_STORAGE_CONNECTED_EVENT_ALARM_NAME,
-                                             SystemAlarmManager.MANAGEMENT_NODE_LEFT_EVENT_ALARM_NAME,
-                                             SystemAlarmManager.MANAGEMENT_NODE_JOIN_EVENT_ALARM_NAME,
-                                             SystemAlarmManager.MANAGEMENT_NODE_DB_FENCER_IP_UNREACHABLE_ALARM_NAME,
-                                             SystemAlarmManager.MANAGEMENT_NODE_DB_SYNCHRONIZATION_ALARM_NAME,
-                                             SystemAlarmManager.HOST_DISCONNECT_ALARM_NAME,
-                                             SystemAlarmManager.HOST_CONNECTED_ALARM_NAME,
-                                             SystemAlarmManager.PRIMARY_STORAGE_PHYSICAL_AVAILABLE_CAPACITY_ALARM_NAME,
-                                             SystemAlarmManager.VM_CRASH_EVENT_ALARM_NAME,
-                                             SystemAlarmManager.HOST_PHYSICAL_NIC_STATUS_UP_EVENT_ALARM_NAME,
-                                             SystemAlarmManager.HOST_PHYSICAL_NIC_STATUS_DOWN_EVENT_ALARM_NAME,
-                                             SystemAlarmManager.HOST_CPU_AVERAGE_USED_UTILIZATION_ALARM_NAME,
-                                             SystemAlarmManager.VM_CPU_AVERAGE_USED_UTILIZATION_ALARM_NAME,
-                                             SystemAlarmManager.VM_CPU_AVERAGE_USED_UTILIZATION_IN_GUEST_TOOLS_ALARM_NAME,
-                                             SystemAlarmManager.VM_MEMORY_USED_UTILIZATION_IN_GUEST_TOOLS_ALARM_NAME,
-                                             SystemAlarmManager.VM_MEMORY_USED_ALARM_NAME,
-                                             SystemAlarmManager.HOST_MEMORY_USED_ALARM_NAME,
-                                             SystemAlarmManager.HOST_CPU_TEMPERATURE_ALARM_NAME,
-                                             SystemAlarmManager.HOST_SSD_LIFE_LEFT_ALARM_NAME,
-                                             SystemAlarmManager.HOST_SSD_TEMPERATURE_ALARM_NAME,
-                                             SystemAlarmManager.VM_HA_START_EVENT_ALARM_NAME,
-                                             SystemAlarmManager.VM_STATE_IN_SHUTDOWN_EVENT_ALARM_NAME,
-                                             SystemAlarmManager.HOST_UNKNOWN_VM_DETECTED_EVENT_ALARM_NAME,
-                                             SystemAlarmManager.MIGRATE_VM_FAILED_WITH_HOST_MAINTAIN_EVENT_ALARM_NAME,
-                                             SystemAlarmManager.PRIMARY_STORAGE_HOST_DISCONNECTED_EVENT_ALARM_NAME,
-                                             SystemAlarmManager.FAULT_MOUNT_POINT_ON_HOST_EVENT_ALARM_NAME,
-                                             SystemAlarmManager.ABNORMAL_RUNNING_VM_STATE_CHANGE_EVENT_ALARM_NAME,
-                                             SystemAlarmManager.CLUSTER_QEMU_VERSION_MISMATCH_EVENT_ALARM_NAME,
-                                             SystemAlarmManager.VM_INTERNAL_IP_CHANGED_EVENT_ALARM_NAME,
-                                             SystemAlarmManager.VM_INTERNAL_IP_DUPLICATE_EVENT_ALARM_NAME,
-                                             SystemAlarmManager.VM_INTERNAL_IP_RANGE_CONFLICT_EVENT_ALARM_NAME,
-                                             SystemAlarmManager.SECURITY_MACHINE_STATE_CHANGE_EVENT_ALARM_NAME,
-                                             SystemAlarmManager.SECRET_RESOURCE_POOL_STATUS_CHANGE_EVENT_ALARM_NAME,
-                                             SystemAlarmManager.KEY_PROVIDER_DEFAULT_SERVICE_UNAVAILABLE_EVENT_ALARM_NAME,
-                                             SystemAlarmManager.KEY_PROVIDER_DEFAULT_SERVICE_RECOVERED_EVENT_ALARM_NAME,
-                                             SystemAlarmManager.KEY_PROVIDER_CERTIFICATE_EXPIRING_EVENT_ALARM_NAME,
-                                             SystemAlarmManager.KEY_PROVIDER_CERTIFICATE_RECOVERED_EVENT_ALARM_NAME,
-                                             SystemAlarmManager.KEY_PROVIDER_RESOURCE_SERVICE_UNAVAILABLE_EVENT_ALARM_NAME,
-                                             SystemAlarmManager.KEY_PROVIDER_RESOURCE_SERVICE_RECOVERED_EVENT_ALARM_NAME,
-                                             SystemAlarmManager.HOST_PHYSICAL_MEMORY_ECC_ERROR_EVENT_ALARM_NAME,
-                                             SystemAlarmManager.HOST_PHYSICAL_CPU_STATUS_ABNORMAL_EVENT_ALARM_NAME,
-                                             SystemAlarmManager.HOST_PHYSICAL_MEMORY_STATUS_ABNORMAL_EVENT_ALARM_NAME,
-                                             SystemAlarmManager.HOST_PHYSICAL_DISK_STATUS_ABNORMAL_EVENT_ALARM_NAME,
-                                             SystemAlarmManager.HOST_PHYSICAL_DISK_INSERTED_EVENT_ALARM_NAME,
-                                             SystemAlarmManager.HOST_PHYSICAL_DISK_REMOVED_EVENT_ALARM_NAME,
-                                             SystemAlarmManager.HOST_HARDWARE_CHANGED_ALARM_NAME,
-                                             SystemAlarmManager.HOST_PHYSICAL_POWER_SUPPLY_STATUS_ABNORMAL_EVENT_ALARM_NAME,
-                                             SystemAlarmManager.HOST_PHYSICAL_GPU_STATUS_ABNORMAL_EVENT_ALARM_NAME,
-                                             SystemAlarmManager.HOST_PHYSICAL_GPU_REMOVE_EVENT_ALARM_NAME,
-                                             SystemAlarmManager.HOST_PHYSICAL_VGPU_STATUS_ABNORMAL_EVENT_ALARM_NAME,
-                                             SystemAlarmManager.HOST_GPU_TEMPERATURE_ALARM_NAME,
-                                             SystemAlarmManager.HOST_PHYSICAL_RAID_STATUS_ABNORMAL_EVENT_ALARM_NAME,
-                                             SystemAlarmManager.HOST_HBA_PORT_STATE_ABNORMAL_EVENT_ALARM_NAME,
-                                             SystemAlarmManager.SHARED_BLOCK_STATE_CHANGED_EVENT_ALARM_NAME,
-                                             SystemAlarmManager.HOST_SHARED_BLOCK_STATE_CHANGED_EVENT_ALARM_NAME,
-                                             SystemAlarmManager.HOST_PROCESS_PHYSICAL_MEMORY_USAGE_NAME,
-                        ])
+                        .in(AlarmVO_.@name, allNames)
                         .listValues()
                 List<String> activeAlarmUuids = []
                 List<String> subscriptionUuids = Q.New(EventSubscriptionVO.class)
                         .select(EventSubscriptionVO_.uuid)
-                        .in(EventSubscriptionVO_.@name, [
-                                SystemAlarmManager.PRIMARY_STORAGE_DISCONNECT_EVENT_ALARM_NAME,
-                                SystemAlarmManager.PRIMARY_STORAGE_CONNECTED_EVENT_ALARM_NAME,
-                                SystemAlarmManager.BACKUP_STORAGE_DISCONNECT_EVENT_ALARM_NAME,
-                                SystemAlarmManager.BACKUP_STORAGE_CONNECTED_EVENT_ALARM_NAME,
-                                SystemAlarmManager.MANAGEMENT_NODE_LEFT_EVENT_ALARM_NAME,
-                                SystemAlarmManager.MANAGEMENT_NODE_JOIN_EVENT_ALARM_NAME,
-                                SystemAlarmManager.MANAGEMENT_NODE_DB_FENCER_IP_UNREACHABLE_ALARM_NAME,
-                                SystemAlarmManager.MANAGEMENT_NODE_DB_SYNCHRONIZATION_ALARM_NAME,
-                                SystemAlarmManager.HOST_DISCONNECT_ALARM_NAME,
-                                SystemAlarmManager.HOST_CONNECTED_ALARM_NAME,
-                                SystemAlarmManager.PRIMARY_STORAGE_PHYSICAL_AVAILABLE_CAPACITY_ALARM_NAME,
-                                SystemAlarmManager.VM_CRASH_EVENT_ALARM_NAME,
-                                SystemAlarmManager.HOST_PHYSICAL_NIC_STATUS_UP_EVENT_ALARM_NAME,
-                                SystemAlarmManager.HOST_PHYSICAL_NIC_STATUS_DOWN_EVENT_ALARM_NAME,
-                                SystemAlarmManager.HOST_CPU_AVERAGE_USED_UTILIZATION_ALARM_NAME,
-                                SystemAlarmManager.VM_CPU_AVERAGE_USED_UTILIZATION_ALARM_NAME,
-                                SystemAlarmManager.VM_CPU_AVERAGE_USED_UTILIZATION_IN_GUEST_TOOLS_ALARM_NAME,
-                                SystemAlarmManager.VM_MEMORY_USED_UTILIZATION_IN_GUEST_TOOLS_ALARM_NAME,
-                                SystemAlarmManager.VM_MEMORY_USED_ALARM_NAME,
-                                SystemAlarmManager.HOST_MEMORY_USED_ALARM_NAME,
-                                SystemAlarmManager.HOST_CPU_TEMPERATURE_ALARM_NAME,
-                                SystemAlarmManager.HOST_SSD_LIFE_LEFT_ALARM_NAME,
-                                SystemAlarmManager.HOST_SSD_TEMPERATURE_ALARM_NAME,
-                                SystemAlarmManager.HOST_PHYSICAL_MEMORY_ECC_ERROR_EVENT_ALARM_NAME,
-                                SystemAlarmManager.HOST_PHYSICAL_CPU_STATUS_ABNORMAL_EVENT_ALARM_NAME,
-                                SystemAlarmManager.HOST_PHYSICAL_MEMORY_STATUS_ABNORMAL_EVENT_ALARM_NAME,
-                                SystemAlarmManager.HOST_PHYSICAL_DISK_STATUS_ABNORMAL_EVENT_ALARM_NAME,
-                                SystemAlarmManager.HOST_PHYSICAL_DISK_INSERTED_EVENT_ALARM_NAME,
-                                SystemAlarmManager.HOST_PHYSICAL_DISK_REMOVED_EVENT_ALARM_NAME,
-                                SystemAlarmManager.VM_HA_START_EVENT_ALARM_NAME,
-                                SystemAlarmManager.VM_STATE_IN_SHUTDOWN_EVENT_ALARM_NAME,
-                                SystemAlarmManager.HOST_UNKNOWN_VM_DETECTED_EVENT_ALARM_NAME,
-                                SystemAlarmManager.MIGRATE_VM_FAILED_WITH_HOST_MAINTAIN_EVENT_ALARM_NAME,
-                                SystemAlarmManager.PRIMARY_STORAGE_HOST_DISCONNECTED_EVENT_ALARM_NAME,
-                                SystemAlarmManager.FAULT_MOUNT_POINT_ON_HOST_EVENT_ALARM_NAME,
-                                SystemAlarmManager.ABNORMAL_RUNNING_VM_STATE_CHANGE_EVENT_ALARM_NAME,
-                                SystemAlarmManager.CLUSTER_QEMU_VERSION_MISMATCH_EVENT_ALARM_NAME,
-                                SystemAlarmManager.VM_INTERNAL_IP_CHANGED_EVENT_ALARM_NAME,
-                                SystemAlarmManager.VM_INTERNAL_IP_DUPLICATE_EVENT_ALARM_NAME,
-                                SystemAlarmManager.VM_INTERNAL_IP_RANGE_CONFLICT_EVENT_ALARM_NAME,
-                                SystemAlarmManager.SECURITY_MACHINE_STATE_CHANGE_EVENT_ALARM_NAME,
-                                SystemAlarmManager.SECRET_RESOURCE_POOL_STATUS_CHANGE_EVENT_ALARM_NAME,
-                                SystemAlarmManager.KEY_PROVIDER_DEFAULT_SERVICE_UNAVAILABLE_EVENT_ALARM_NAME,
-                                SystemAlarmManager.KEY_PROVIDER_DEFAULT_SERVICE_RECOVERED_EVENT_ALARM_NAME,
-                                SystemAlarmManager.KEY_PROVIDER_CERTIFICATE_EXPIRING_EVENT_ALARM_NAME,
-                                SystemAlarmManager.KEY_PROVIDER_CERTIFICATE_RECOVERED_EVENT_ALARM_NAME,
-                                SystemAlarmManager.KEY_PROVIDER_RESOURCE_SERVICE_UNAVAILABLE_EVENT_ALARM_NAME,
-                                SystemAlarmManager.KEY_PROVIDER_RESOURCE_SERVICE_RECOVERED_EVENT_ALARM_NAME,
-                                SystemAlarmManager.HOST_HARDWARE_CHANGED_ALARM_NAME,
-                                SystemAlarmManager.HOST_PHYSICAL_POWER_SUPPLY_STATUS_ABNORMAL_EVENT_ALARM_NAME,
-                                SystemAlarmManager.HOST_PHYSICAL_GPU_STATUS_ABNORMAL_EVENT_ALARM_NAME,
-                                SystemAlarmManager.HOST_PHYSICAL_GPU_REMOVE_EVENT_ALARM_NAME,
-                                SystemAlarmManager.HOST_PHYSICAL_VGPU_STATUS_ABNORMAL_EVENT_ALARM_NAME,
-                                SystemAlarmManager.HOST_GPU_TEMPERATURE_ALARM_NAME,
-                                SystemAlarmManager.HOST_PHYSICAL_RAID_STATUS_ABNORMAL_EVENT_ALARM_NAME,
-                                SystemAlarmManager.HOST_HBA_PORT_STATE_ABNORMAL_EVENT_ALARM_NAME,
-                                SystemAlarmManager.SHARED_BLOCK_STATE_CHANGED_EVENT_ALARM_NAME,
-                                SystemAlarmManager.HOST_SHARED_BLOCK_STATE_CHANGED_EVENT_ALARM_NAME,
-                                SystemAlarmManager.HOST_PROCESS_PHYSICAL_MEMORY_USAGE_NAME,
-                        ]).listValues()
+                        .in(EventSubscriptionVO_.@name, allNames)
+                        .listValues()
                 List<String> topicUuids = Q.New(SNSTopicVO.class)
                         .select(SNSTopicVO_.uuid)
                         .in(SNSTopicVO_.@name, ["api", "system-alarm", "topic-for-ticket"])

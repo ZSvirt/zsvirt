@@ -56,3 +56,8 @@ for module in `ls test/src/test/resources/UTCapabilities`; do
         fi
     done
 done
+
+ee_script="zsvirt-ee/build-ee/scripts/ut/find_all_cases_ee.sh"
+if [ -f "$ee_script" ]; then
+    bash "$ee_script"
+fi

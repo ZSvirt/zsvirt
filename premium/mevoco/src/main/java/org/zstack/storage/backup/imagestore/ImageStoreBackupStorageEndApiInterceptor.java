@@ -1,17 +1,12 @@
-package org.zstack.apimediator;
+package org.zstack.storage.backup.imagestore;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.zstack.core.db.DatabaseFacade;
-import org.zstack.core.db.SimpleQuery;
-import org.zstack.core.db.SimpleQuery.Op;
+import org.zstack.core.db.Q;
 import org.zstack.core.errorcode.ErrorFacade;
 import org.zstack.header.apimediator.ApiMessageInterceptionException;
 import org.zstack.header.apimediator.GlobalApiMessageInterceptor;
-import org.zstack.header.errorcode.SysErrors;
 import org.zstack.header.message.APIMessage;
-import org.zstack.storage.backup.imagestore.APIAddImageStoreBackupStorageMsg;
-import org.zstack.storage.backup.imagestore.ImageStoreBackupStorageVO;
-import org.zstack.storage.backup.imagestore.ImageStoreBackupStorageVO_;
 import org.zstack.storage.backup.sftp.APIAddSftpBackupStorageMsg;
 import org.zstack.storage.backup.sftp.SftpBackupStorageVO;
 import org.zstack.storage.backup.sftp.SftpBackupStorageVO_;
@@ -23,7 +18,7 @@ import java.util.List;
 
 /**
  */
-public class ApiValidator implements GlobalApiMessageInterceptor {
+public class ImageStoreBackupStorageEndApiInterceptor implements GlobalApiMessageInterceptor {
     @Autowired
     private DatabaseFacade dbf;
     @Autowired
@@ -54,17 +49,19 @@ public class ApiValidator implements GlobalApiMessageInterceptor {
     }
 
     private void validateMoreThanOneBackupStorageOnSameHost(String hostname, String newBS) {
-        SimpleQuery<SftpBackupStorageVO> q = dbf.createQuery(SftpBackupStorageVO.class);
-        q.add(SftpBackupStorageVO_.hostname, Op.EQ, hostname);
-        if (q.isExists()) {
+        boolean sftpExists = Q.New(SftpBackupStorageVO.class)
+                .eq(SftpBackupStorageVO_.hostname, hostname)
+                .isExists();
+        if (sftpExists) {
             throw new ApiMessageInterceptionException(operr("More than one BackupStorage on the same host identified by hostname. " +
                             "There has been a SftpBackupStorage [hostname:%s] existing. " +
                             "The BackupStorage type to be added is %s. ", hostname, newBS));
         }
 
-        SimpleQuery<ImageStoreBackupStorageVO> q1 = dbf.createQuery(ImageStoreBackupStorageVO.class);
-        q1.add(ImageStoreBackupStorageVO_.hostname, Op.EQ, hostname);
-        if (q1.isExists()) {
+        boolean iStoreExists = Q.New(ImageStoreBackupStorageVO.class)
+                .eq(ImageStoreBackupStorageVO_.hostname, hostname)
+                .isExists();
+        if (iStoreExists) {
             throw new ApiMessageInterceptionException(operr("More than one BackupStorage on the same host identified by hostname. " +
                             "There has been an ImageStoreBackupStorage [hostname:%s] existing. " +
                             "The BackupStorage type to be added is %s. ", hostname, newBS));

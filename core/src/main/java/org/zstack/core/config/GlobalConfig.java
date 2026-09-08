@@ -36,7 +36,7 @@ import static org.zstack.utils.StringDSL.s;
 /**
  */
 @Configurable(preConstruction = true, autowire = Autowire.BY_TYPE)
-public class GlobalConfig {
+public class GlobalConfig implements ConfigDefinition {
     private static final CLogger logger = Utils.getLogger(GlobalConfig.class);
 
     private String name;

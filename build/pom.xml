@@ -527,29 +527,13 @@
                                 WEB-INF/lib/sisu-guava-0.9.9.jar,
                                 WEB-INF/lib/groovy-sandbox-1.19.jar,
                             </packagingExcludes>
+                            <!-- First-win: earlier webResources take precedence. Overlay order: zsvirt-ee > premium > community conf. -->
                             <webResources>
                                 <resource>
-                                    <directory>../conf</directory>
+                                    <directory>../zsvirt-ee/conf</directory>
                                     <targetPath>WEB-INF/classes</targetPath>
                                     <includes>
                                         <include>**/*</include>
-                                    </includes>
-                                    <excludes>
-                                        <exclude>zstack.xml</exclude>
-                                        <exclude>persistence.xml</exclude>
-                                        <exclude>springConfigXml/localStorage.xml</exclude>
-                                        <exclude>springConfigXml/HostAllocatorManager.xml</exclude>
-                                        <exclude>springConfigXml/NfsPrimaryStorage.xml</exclude>
-                                        <exclude>springConfigXml/sharedMountPointPrimaryStorage.xml</exclude>
-                                        <exclude>springConfigXml/ceph.xml</exclude>
-                                        <exclude>searchConfig/indexConfig.xml</exclude>
-                                    </excludes>
-                                </resource>
-                                <resource>
-                                    <directory>../conf</directory>
-                                    <targetPath>WEB-INF/</targetPath>
-                                    <includes>
-                                        <include>urlrewrite.xml</include>
                                     </includes>
                                 </resource>
                                 <resource>
@@ -560,10 +544,17 @@
                                     </includes>
                                 </resource>
                                 <resource>
-                                    <directory>../zsvirt-ee/conf</directory>
+                                    <directory>../conf</directory>
                                     <targetPath>WEB-INF/classes</targetPath>
                                     <includes>
                                         <include>**/*</include>
+                                    </includes>
+                                </resource>
+                                <resource>
+                                    <directory>../conf</directory>
+                                    <targetPath>WEB-INF/</targetPath>
+                                    <includes>
+                                        <include>urlrewrite.xml</include>
                                     </includes>
                                 </resource>
                                 <resource>

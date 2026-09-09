@@ -4,7 +4,6 @@ import org.zstack.header.errorcode.ErrorCode
 import org.zstack.header.host.HostInventory
 import org.zstack.header.cluster.ClusterInventory
 import org.zstack.header.storage.primary.PrimaryStorageInventory
-import org.zstack.header.storage.backup.BackupStorageInventory
 import org.zstack.header.network.l3.L3NetworkInventory
 
 doc {
@@ -48,14 +47,6 @@ doc {
 		type "List"
 		since "1.0.1, zsv 5.2.0"
 		clz PrimaryStorageInventory.class
-	}
-	ref {
-		name "backupStorages"
-		path "org.zstack.allocator.domain.api.APIGetAllocatorDomainCandidatesReply.backupStorages"
-		desc "可加入域的镜像存储列表"
-		type "List"
-		since "1.0.1, zsv 5.2.0"
-		clz BackupStorageInventory.class
 	}
 	ref {
 		name "l3Networks"

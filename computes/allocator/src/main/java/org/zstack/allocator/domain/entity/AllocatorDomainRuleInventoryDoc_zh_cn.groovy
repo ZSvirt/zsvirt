@@ -32,7 +32,7 @@ doc {
 	}
 	field {
 		name "resourceType"
-		desc "资源类型：HostVO / ClusterVO / PrimaryStorageVO / BackupStorageVO / L3NetworkVO"
+		desc "资源类型：HostVO / ClusterVO / PrimaryStorageVO / L3NetworkVO"
 		type "String"
 		since "1.0.1, zsv 5.2.0"
 	}

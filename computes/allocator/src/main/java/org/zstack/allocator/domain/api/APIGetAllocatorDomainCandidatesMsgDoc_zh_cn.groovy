@@ -7,7 +7,7 @@ doc {
 
 	category "allocator.domain"
 
-	desc """按区域返回可加入调度域的 host / cluster / 主存储 / 镜像存储 / L3 候选（已挂到该区域、状态可用）。L3 候选含 PortGroup"""
+	desc """按区域返回可加入调度域的 host / cluster / 主存储 / L3 候选（已挂到该区域、状态可用）。L3 候选含 PortGroup"""
 
 	rest {
 		request {

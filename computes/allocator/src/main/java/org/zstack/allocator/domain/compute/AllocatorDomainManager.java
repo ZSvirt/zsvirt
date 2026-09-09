@@ -61,13 +61,6 @@ import org.zstack.header.network.l3.L3NetworkInventory;
 import org.zstack.header.network.l3.L3NetworkState;
 import org.zstack.header.network.l3.L3NetworkVO;
 import org.zstack.header.network.l3.L3NetworkVO_;
-import org.zstack.header.storage.backup.BackupStorageInventory;
-import org.zstack.header.storage.backup.BackupStorageState;
-import org.zstack.header.storage.backup.BackupStorageStatus;
-import org.zstack.header.storage.backup.BackupStorageVO;
-import org.zstack.header.storage.backup.BackupStorageVO_;
-import org.zstack.header.storage.backup.BackupStorageZoneRefVO;
-import org.zstack.header.storage.backup.BackupStorageZoneRefVO_;
 import org.zstack.header.storage.primary.PrimaryStorageInventory;
 import org.zstack.header.storage.primary.PrimaryStorageState;
 import org.zstack.header.storage.primary.PrimaryStorageStatus;
@@ -450,7 +443,6 @@ public class AllocatorDomainManager extends AbstractService {
                 .eq(PrimaryStorageVO_.state, PrimaryStorageState.Enabled)
                 .eq(PrimaryStorageVO_.status, PrimaryStorageStatus.Connected)
                 .list()));
-        reply.setBackupStorages(listBackupStorages(zoneUuid));
         reply.setL3Networks(L3NetworkInventory.valueOf(Q.New(L3NetworkVO.class)
                 .eq(L3NetworkVO_.zoneUuid, zoneUuid)
                 .eq(L3NetworkVO_.state, L3NetworkState.Enabled)
@@ -459,21 +451,6 @@ public class AllocatorDomainManager extends AbstractService {
     }
 
     // ------------------------------------- Utility Handers ------------------------------------
-
-    private List<BackupStorageInventory> listBackupStorages(String zoneUuid) {
-        List<String> bsUuids = Q.New(BackupStorageZoneRefVO.class)
-                .eq(BackupStorageZoneRefVO_.zoneUuid, zoneUuid)
-                .select(BackupStorageZoneRefVO_.backupStorageUuid)
-                .listValues();
-        if (bsUuids.isEmpty()) {
-            return new ArrayList<>();
-        }
-        return BackupStorageInventory.valueOf(Q.New(BackupStorageVO.class)
-                .in(BackupStorageVO_.uuid, bsUuids)
-                .eq(BackupStorageVO_.state, BackupStorageState.Enabled)
-                .eq(BackupStorageVO_.status, BackupStorageStatus.Connected)
-                .list());
-    }
 
     private void persistRules(String domainUuid, List<AllocatorDomainRuleParam> rules, Timestamp now) {
         List<AllocatorDomainRuleVO> vos = buildRuleVOs(domainUuid, rules, now);

@@ -67,7 +67,7 @@
 		<name>videoType</name>
 		<description>video type for VM. "virtio" supply basic video type. "vga" supply more high resolution for VM. "qxl" supply high performance when use SPICE protocal. "cirrus" mark as deprecated, reserved for compatibility.  Options:[vga, cirrus, qxl, virtio]</description>
 		<category>vm</category>
-		<defaultValue>virtio</defaultValue>
+		<defaultValue>vga</defaultValue>
 		<type>java.lang.String</type>
 	</config>
 

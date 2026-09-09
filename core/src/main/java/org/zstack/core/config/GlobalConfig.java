@@ -349,6 +349,18 @@ public class GlobalConfig implements ConfigDefinition {
         return conf;
     }
 
+    public static GlobalConfig valueOf(GlobalConfigDescription d) {
+        GlobalConfig conf = new GlobalConfig();
+        conf.setName(d.name);
+        conf.setCategory(d.category);
+        conf.setDefaultValue(d.defaultValue);
+        conf.setDescription(d.description);
+        conf.setValue(d.defaultValue);
+        conf.setType(d.type);
+        conf.setValidatorRegularExpression(d.regularExpression);
+        return conf;
+    }
+
     public String getIdentity() {
         return produceIdentity(category, name);
     }

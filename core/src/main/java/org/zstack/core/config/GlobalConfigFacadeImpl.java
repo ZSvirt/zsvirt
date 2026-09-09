@@ -18,12 +18,7 @@ import org.zstack.utils.TypeUtils;
 import org.zstack.utils.Utils;
 import org.zstack.utils.data.StringTemplate;
 import org.zstack.utils.logging.CLogger;
-import org.zstack.utils.path.PathUtil;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
-import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -46,11 +41,7 @@ public class GlobalConfigFacadeImpl extends AbstractService implements GlobalCon
     @Autowired
     private PluginRegistry pluginRgty;
 
-    private JAXBContext context;
     private Map<String, GlobalConfig> allConfig = new ConcurrentHashMap<>();
-
-    private static final String CONFIG_FOLDER = "globalConfig";
-    private static final String OTHER_CATEGORY = "Others";
 
     @Override
     @MessageSafe
@@ -148,8 +139,7 @@ public class GlobalConfigFacadeImpl extends AbstractService implements GlobalCon
                 try {
                     loadSystemProperties();
                     parseGlobalConfigFields();
-                    loadConfigFromXml();
-                    loadConfigFromJava();
+                    loadConfigFromScan();
                     loadConfigFromAutoGeneration();
                     loadConfigFromDatabase();
                     createValidatorForBothXmlAndDatabase();
@@ -206,44 +196,16 @@ public class GlobalConfigFacadeImpl extends AbstractService implements GlobalCon
                 }
             }
 
-            private void loadConfigFromJava() {
-                for (Field field : globalConfigFields) {
-                    try {
-                        GlobalConfig config = (GlobalConfig) field.get(null);
-                        if (config == null) {
-                            throw new CloudRuntimeException(String.format("GlobalConfigDefinition[%s] defines a null GlobalConfig[%s]." +
-                                            "You must assign a value to it using new GlobalConfig(category, name)",
-                                    field.getDeclaringClass().getName(), field.getName()));
-                        }
-
-                        GlobalConfigDef d = field.getAnnotation(GlobalConfigDef.class);
-                        if (d == null) {
-                            continue;
-                        }
-                        // substitute system properties in defaultValue
-                        String defaultValue = StringTemplate.substitute(d.defaultValue(), propertiesMap);
-
-                        GlobalConfig c = new GlobalConfig();
-                        c.setCategory(config.getCategory());
-                        c.setName(config.getName());
-                        c.setDescription(d.description());
-                        c.setDefaultValue(defaultValue);
-                        c.setValue(defaultValue);
-                        c.setType(d.type().getName());
-                        if (!"".equals(d.validatorRegularExpression())) {
-                            c.setValidatorRegularExpression(d.validatorRegularExpression());
-                        }
-
-                        if (configsFromXml.containsKey(c.getIdentity())) {
-                            throw new CloudRuntimeException(String.format("duplicate global configuration. %s defines a" +
-                                    " global config[category: %s, name: %s] that has been defined by a XML configure or" +
-                                    " another java class", field.getDeclaringClass().getName(), c.getCategory(), c.getName()));
-                        }
-
-                        configsFromXml.put(c.getIdentity(), c);
-                    } catch (IllegalAccessException e) {
-                        throw new CloudRuntimeException(e);
+            private void loadConfigFromScan() {
+                for (GlobalConfigDescription d : GlobalConfigDefinitionScanner.scan()) {
+                    if (d.defaultValue == null) {
+                        continue;
                     }
+                    String defaultValue = StringTemplate.substitute(d.defaultValue, propertiesMap);
+                    GlobalConfig c = GlobalConfig.valueOf(d);
+                    c.setDefaultValue(defaultValue);
+                    c.setValue(defaultValue);
+                    configsFromXml.put(c.getIdentity(), c);
                 }
             }
 
@@ -389,15 +351,6 @@ public class GlobalConfigFacadeImpl extends AbstractService implements GlobalCon
                 }
             }
 
-            private void loadConfigFromXml() throws JAXBException {
-                context = JAXBContext.newInstance("org.zstack.core.config.schema");
-                List<String> filePaths = PathUtil.scanFolderOnClassPath(CONFIG_FOLDER);
-                for (String path : filePaths) {
-                    File f = new File(path);
-                    parseConfig(f);
-                }
-            }
-
             private void createValidator(final GlobalConfig g) throws ClassNotFoundException {
                 g.installValidateExtension(new GlobalConfigValidatorExtensionPoint() {
                     Class<?> typeClass;
@@ -496,37 +449,6 @@ public class GlobalConfigFacadeImpl extends AbstractService implements GlobalCon
                 }
                 for (GlobalConfig g : configsFromDatabase.values()) {
                     createValidator(g);
-                }
-            }
-
-            private void parseConfig(File file) throws JAXBException {
-                if (!file.getName().endsWith("xml")) {
-                    logger.warn(String.format("file[%s] in global config folder is not end with .xml, skip it", file.getAbsolutePath()));
-                    return;
-                }
-
-                Unmarshaller unmarshaller = context.createUnmarshaller();
-                org.zstack.core.config.schema.GlobalConfig gb = (org.zstack.core.config.schema.GlobalConfig) unmarshaller.unmarshal(file);
-                for (org.zstack.core.config.schema.GlobalConfig.Config c : gb.getConfig()) {
-                    String category = c.getCategory();
-                    category = category == null ? OTHER_CATEGORY : category;
-                    c.setCategory(category);
-                    // substitute system properties in value and defaultValue
-                    if (c.getDefaultValue() == null) {
-                        throw new IllegalArgumentException(String.format("GlobalConfig[category:%s, name:%s] must have a default value", c.getCategory(), c.getName()));
-                    } else {
-                        c.setDefaultValue(StringTemplate.substitute(c.getDefaultValue(), propertiesMap));
-                    }
-                    if (c.getValue() == null) {
-                        c.setValue(c.getDefaultValue());
-                    } else {
-                        c.setValue(StringTemplate.substitute(c.getValue(), propertiesMap));
-                    }
-                    GlobalConfig config = GlobalConfig.valueOf(c);
-                    if (configsFromXml.containsKey(config.getIdentity())) {
-                        throw new IllegalArgumentException(String.format("duplicate GlobalConfig[category: %s, name: %s]", config.getCategory(), config.getName()));
-                    }
-                    configsFromXml.put(config.getIdentity(), config);
                 }
             }
 

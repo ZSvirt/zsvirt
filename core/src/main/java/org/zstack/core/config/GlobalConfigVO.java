@@ -82,14 +82,4 @@ public class GlobalConfigVO {
 		 c.setDescription(this.getDescription());
 		 return c;
 	}
-	
-	public GlobalConfigVO fromConfigSchema(org.zstack.core.config.schema.GlobalConfig.Config c) {
-		GlobalConfigVO vo = this;
-		vo.setCategory(c.getCategory());
-		vo.setDefaultValue(c.getDefaultValue());
-		vo.setDescription(c.getDescription());
-		vo.setName(c.getName());
-		vo.setValue(c.getValue());
-		return vo;
-	}
 }

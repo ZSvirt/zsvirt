@@ -6,7 +6,6 @@
 		<defaultValue>86400</defaultValue>
         <category>primaryStorage</category>
 		<type>java.lang.Integer</type>
-		<validatorRegularExpression>^/(.*)</validatorRegularExpression>
 	</config>
 
     <config>

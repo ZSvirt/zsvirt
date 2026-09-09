@@ -2,7 +2,6 @@ package org.zstack.test.integration.allocator.domain
 
 import org.zstack.allocator.domain.header.AllocatorDomainConstant
 import org.zstack.allocator.domain.header.AllocatorDomainErrors
-import org.zstack.sdk.BackupStorageInventory
 import org.zstack.sdk.ClusterInventory
 import org.zstack.sdk.HostInventory
 import org.zstack.sdk.L3NetworkInventory
@@ -26,8 +25,6 @@ class AllocatorDomainNegativeCreateCase extends SubCase {
     PrimaryStorageInventory ps2
     L3NetworkInventory l31
     L3NetworkInventory l32
-    BackupStorageInventory bs1
-    BackupStorageInventory bs2
     String missingUuid = "11111111111111111111111111111111"
 
     @Override
@@ -44,14 +41,6 @@ class AllocatorDomainNegativeCreateCase extends SubCase {
                 username = "root"
                 password = "password"
                 hostname = "localhost"
-            }
-
-            sftpBackupStorage {
-                name = "sftp2"
-                url = "/sftp2"
-                username = "root"
-                password = "password"
-                hostname = "127.0.0.3"
             }
 
             zone {
@@ -136,8 +125,6 @@ class AllocatorDomainNegativeCreateCase extends SubCase {
                         }
                     }
                 }
-
-                attachBackupStorage("sftp2")
             }
         }
     }
@@ -167,8 +154,6 @@ class AllocatorDomainNegativeCreateCase extends SubCase {
         ps2 = env.inventoryByName("local2") as PrimaryStorageInventory
         l31 = env.inventoryByName("l3-1") as L3NetworkInventory
         l32 = env.inventoryByName("l3-2") as L3NetworkInventory
-        bs1 = env.inventoryByName("sftp1") as BackupStorageInventory
-        bs2 = env.inventoryByName("sftp2") as BackupStorageInventory
     }
 
     void testCreateResourceNotFound() {
@@ -241,24 +226,6 @@ class AllocatorDomainNegativeCreateCase extends SubCase {
             assert delegate.opaque
             assert delegate.opaque[AllocatorDomainConstant.Opaque.L3_UUID] == missingUuid
             assert delegate.opaque[AllocatorDomainConstant.Opaque.RESOURCE_TYPE] == "L3NetworkVO"
-        }
-        assert queryAllocatorDomain { delegate.conditions = ["name=${name}"] }.isEmpty()
-
-        logger.info("Test 005: create with missing backup storage uuid, expect API failure 3503 and no domain row")
-        name = "bad-create-bs-missing"
-        expectApiFailure({
-            createAllocatorDomain {
-                delegate.name = name
-                delegate.zoneUuid = zone1.uuid
-                delegate.rules = [
-                        new AllocatorDomainRuleParam(resourceUuid: missingUuid, resourceType: "BackupStorageVO", effect: "Include")
-                ]
-            }
-        }) {
-            assert delegate.code == AllocatorDomainErrors.BACKUP_STORAGE_NOT_FOUND.toString()
-            assert delegate.opaque
-            assert delegate.opaque[AllocatorDomainConstant.Opaque.BACKUP_STORAGE_UUID] == missingUuid
-            assert delegate.opaque[AllocatorDomainConstant.Opaque.RESOURCE_TYPE] == "BackupStorageVO"
         }
         assert queryAllocatorDomain { delegate.conditions = ["name=${name}"] }.isEmpty()
     }
@@ -335,24 +302,6 @@ class AllocatorDomainNegativeCreateCase extends SubCase {
             assert delegate.opaque[AllocatorDomainConstant.Opaque.RESOURCE_TYPE] == "L3NetworkVO"
         }
         assert queryAllocatorDomain { delegate.conditions = ["name=${name}"] }.isEmpty()
-
-        logger.info("Test 105: create with host uuid as BackupStorageVO, expect API failure 3503 and no domain row")
-        name = "bad-create-bs-wrong-type"
-        expectApiFailure({
-            createAllocatorDomain {
-                delegate.name = name
-                delegate.zoneUuid = zone1.uuid
-                delegate.rules = [
-                        new AllocatorDomainRuleParam(resourceUuid: host1.uuid, resourceType: "BackupStorageVO", effect: "Include")
-                ]
-            }
-        }) {
-            assert delegate.code == AllocatorDomainErrors.BACKUP_STORAGE_NOT_FOUND.toString()
-            assert delegate.opaque
-            assert delegate.opaque[AllocatorDomainConstant.Opaque.BACKUP_STORAGE_UUID] == host1.uuid
-            assert delegate.opaque[AllocatorDomainConstant.Opaque.RESOURCE_TYPE] == "BackupStorageVO"
-        }
-        assert queryAllocatorDomain { delegate.conditions = ["name=${name}"] }.isEmpty()
     }
 
     void testCreateResourceNotInZone() {
@@ -427,24 +376,6 @@ class AllocatorDomainNegativeCreateCase extends SubCase {
             assert delegate.opaque[AllocatorDomainConstant.Opaque.ZONE_UUID] == zone1.uuid
         }
         assert queryAllocatorDomain { delegate.conditions = ["name=${name}"] }.isEmpty()
-
-        logger.info("Test 205: create with backup storage not attached to the zone, expect API failure 3501 and no domain row")
-        name = "bad-create-bs-zone"
-        expectApiFailure({
-            createAllocatorDomain {
-                delegate.name = name
-                delegate.zoneUuid = zone1.uuid
-                delegate.rules = [
-                        new AllocatorDomainRuleParam(resourceUuid: bs2.uuid, resourceType: "BackupStorageVO", effect: "Include")
-                ]
-            }
-        }) {
-            assert delegate.code == AllocatorDomainErrors.BACKUP_STORAGE_NOT_IN_ZONE.toString()
-            assert delegate.opaque
-            assert delegate.opaque[AllocatorDomainConstant.Opaque.BACKUP_STORAGE_UUID] == bs2.uuid
-            assert delegate.opaque[AllocatorDomainConstant.Opaque.ZONE_UUID] == zone1.uuid
-        }
-        assert queryAllocatorDomain { delegate.conditions = ["name=${name}"] }.isEmpty()
     }
 
     void testCreateIllegalQualifier() {
@@ -516,24 +447,6 @@ class AllocatorDomainNegativeCreateCase extends SubCase {
             assert delegate.code == AllocatorDomainErrors.L3_QUALIFIER_NOT_ALLOWED.toString()
             assert delegate.opaque
             assert delegate.opaque[AllocatorDomainConstant.Opaque.L3_UUID] == l31.uuid
-            assert delegate.opaque[AllocatorDomainConstant.Opaque.RESOURCE_QUALIFIER] == "Root"
-        }
-        assert queryAllocatorDomain { delegate.conditions = ["name=${name}"] }.isEmpty()
-
-        logger.info("Test 305: create backup storage rule with resourceQualifier, expect API failure 3502 and no domain row")
-        name = "bad-create-bs-qualifier"
-        expectApiFailure({
-            createAllocatorDomain {
-                delegate.name = name
-                delegate.zoneUuid = zone1.uuid
-                delegate.rules = [
-                        new AllocatorDomainRuleParam(resourceUuid: bs1.uuid, resourceType: "BackupStorageVO", resourceQualifier: "Root", effect: "Include")
-                ]
-            }
-        }) {
-            assert delegate.code == AllocatorDomainErrors.BACKUP_STORAGE_QUALIFIER_NOT_ALLOWED.toString()
-            assert delegate.opaque
-            assert delegate.opaque[AllocatorDomainConstant.Opaque.BACKUP_STORAGE_UUID] == bs1.uuid
             assert delegate.opaque[AllocatorDomainConstant.Opaque.RESOURCE_QUALIFIER] == "Root"
         }
         assert queryAllocatorDomain { delegate.conditions = ["name=${name}"] }.isEmpty()

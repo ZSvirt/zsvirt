@@ -20,10 +20,6 @@ import org.zstack.header.host.HostVO;
 import org.zstack.header.host.HostVO_;
 import org.zstack.header.network.l3.L3NetworkVO;
 import org.zstack.header.network.l3.L3NetworkVO_;
-import org.zstack.header.storage.backup.BackupStorageVO;
-import org.zstack.header.storage.backup.BackupStorageVO_;
-import org.zstack.header.storage.backup.BackupStorageZoneRefVO;
-import org.zstack.header.storage.backup.BackupStorageZoneRefVO_;
 import org.zstack.header.storage.primary.PrimaryStorageVO;
 import org.zstack.header.storage.primary.PrimaryStorageVO_;
 
@@ -155,9 +151,6 @@ public class AllocatorDomainValidator {
             case L3NetworkVO:
                 validateL3(zoneUuid, rule);
                 break;
-            case BackupStorageVO:
-                validateBackupStorage(zoneUuid, rule);
-                break;
             default:
                 intercept(err(AllocatorDomainErrors.INVALID_RULE,
                         "resourceType[%s] is not a supported allocator domain resource type", rule.getResourceType())
@@ -238,27 +231,6 @@ public class AllocatorDomainValidator {
             intercept(notInZone(AllocatorDomainErrors.L3_NOT_IN_ZONE,
                     AllocatorDomainConstant.Opaque.L3_UUID, rule.getResourceUuid(), zoneUuid,
                     "l3[uuid:%s] is not in zone[uuid:%s]"));
-        }
-    }
-
-    private void validateBackupStorage(String zoneUuid, AllocatorDomainRuleParam rule) {
-        rejectQualifierIfPresent(rule, AllocatorDomainErrors.BACKUP_STORAGE_QUALIFIER_NOT_ALLOWED,
-                AllocatorDomainConstant.Opaque.BACKUP_STORAGE_UUID,
-                "backup storage[uuid:%s] allocator domain rule must not set resourceQualifier");
-        BackupStorageVO vo = Q.New(BackupStorageVO.class).eq(BackupStorageVO_.uuid, rule.getResourceUuid()).find();
-        if (vo == null) {
-            intercept(notFound(AllocatorDomainErrors.BACKUP_STORAGE_NOT_FOUND,
-                    AllocatorDomainConstant.Opaque.BACKUP_STORAGE_UUID, rule,
-                    "backup storage[uuid:%s] is not found or is not a BackupStorageVO"));
-        }
-        boolean inZone = Q.New(BackupStorageZoneRefVO.class)
-                .eq(BackupStorageZoneRefVO_.backupStorageUuid, rule.getResourceUuid())
-                .eq(BackupStorageZoneRefVO_.zoneUuid, zoneUuid)
-                .isExists();
-        if (!inZone) {
-            intercept(notInZone(AllocatorDomainErrors.BACKUP_STORAGE_NOT_IN_ZONE,
-                    AllocatorDomainConstant.Opaque.BACKUP_STORAGE_UUID, rule.getResourceUuid(), zoneUuid,
-                    "backup storage[uuid:%s] is not attached to zone[uuid:%s]"));
         }
     }
 

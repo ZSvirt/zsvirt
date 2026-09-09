@@ -132,26 +132,6 @@
     </code>
 
     <code>
-        <id>3500</id>
-        <description>Invalid backup storage allocator domain rule</description>
-    </code>
-
-    <code>
-        <id>3501</id>
-        <description>Backup storage is not attached to the allocator domain zone</description>
-    </code>
-
-    <code>
-        <id>3502</id>
-        <description>Backup storage allocator domain rule must not set resourceQualifier</description>
-    </code>
-
-    <code>
-        <id>3503</id>
-        <description>Backup storage is not found or is not a BackupStorageVO</description>
-    </code>
-
-    <code>
         <id>4000</id>
         <description>Allocator domain allocation related error</description>
     </code>

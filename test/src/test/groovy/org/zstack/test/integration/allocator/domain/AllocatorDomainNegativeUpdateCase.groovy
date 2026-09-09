@@ -2,7 +2,6 @@ package org.zstack.test.integration.allocator.domain
 
 import org.zstack.allocator.domain.header.AllocatorDomainConstant
 import org.zstack.allocator.domain.header.AllocatorDomainErrors
-import org.zstack.sdk.BackupStorageInventory
 import org.zstack.sdk.ClusterInventory
 import org.zstack.sdk.HostInventory
 import org.zstack.sdk.L3NetworkInventory
@@ -26,8 +25,6 @@ class AllocatorDomainNegativeUpdateCase extends SubCase {
     PrimaryStorageInventory ps2
     L3NetworkInventory l31
     L3NetworkInventory l32
-    BackupStorageInventory bs1
-    BackupStorageInventory bs2
     AllocatorDomainInventory domain
     String missingUuid = "11111111111111111111111111111111"
 
@@ -45,14 +42,6 @@ class AllocatorDomainNegativeUpdateCase extends SubCase {
                 username = "root"
                 password = "password"
                 hostname = "localhost"
-            }
-
-            sftpBackupStorage {
-                name = "sftp2"
-                url = "/sftp2"
-                username = "root"
-                password = "password"
-                hostname = "127.0.0.3"
             }
 
             zone {
@@ -137,8 +126,6 @@ class AllocatorDomainNegativeUpdateCase extends SubCase {
                         }
                     }
                 }
-
-                attachBackupStorage("sftp2")
             }
         }
     }
@@ -166,8 +153,6 @@ class AllocatorDomainNegativeUpdateCase extends SubCase {
         ps2 = env.inventoryByName("local2") as PrimaryStorageInventory
         l31 = env.inventoryByName("l3-1") as L3NetworkInventory
         l32 = env.inventoryByName("l3-2") as L3NetworkInventory
-        bs1 = env.inventoryByName("sftp1") as BackupStorageInventory
-        bs2 = env.inventoryByName("sftp2") as BackupStorageInventory
 
         domain = createAllocatorDomain {
             delegate.name = "keep-name"
@@ -304,37 +289,6 @@ class AllocatorDomainNegativeUpdateCase extends SubCase {
         assert after004.rules[0].effect == "Include"
         assert after004.scenes.size() == 1
         assert after004.scenes[0].scene == "Start"
-
-        logger.info("Test 005: update name plus missing backup storage uuid, expect API failure 3503 and unchanged domain")
-        expectApiFailure({
-            updateAllocatorDomain {
-                delegate.uuid = domain.uuid
-                delegate.name = "should-not-stick"
-                delegate.rules = [
-                        new AllocatorDomainRuleParam(resourceUuid: missingUuid, resourceType: "BackupStorageVO", effect: "Include")
-                ]
-            }
-        }) {
-            assert delegate.code == AllocatorDomainErrors.BACKUP_STORAGE_NOT_FOUND.toString()
-            assert delegate.opaque
-            assert delegate.opaque[AllocatorDomainConstant.Opaque.BACKUP_STORAGE_UUID] == missingUuid
-            assert delegate.opaque[AllocatorDomainConstant.Opaque.RESOURCE_TYPE] == "BackupStorageVO"
-        }
-        def after005s = queryAllocatorDomain { delegate.conditions = ["uuid=${domain.uuid}"] } as List<AllocatorDomainInventory>
-        assert after005s.size() == 1
-        def after005 = after005s[0]
-        assert after005.name == "keep-name"
-        assert after005.description == "keep-desc"
-        assert after005.state == "Enabled"
-        assert after005.zoneUuid == zone1.uuid
-        assert after005.rules.size() == 1
-        assert after005.rules[0] instanceof AllocatorDomainRuleInventory
-        assert after005.rules[0].priority == 0
-        assert after005.rules[0].resourceType == "HostVO"
-        assert after005.rules[0].resourceUuid == host1.uuid
-        assert after005.rules[0].effect == "Include"
-        assert after005.scenes.size() == 1
-        assert after005.scenes[0].scene == "Start"
     }
 
     void testUpdateResourceWrongType() {
@@ -494,37 +448,6 @@ class AllocatorDomainNegativeUpdateCase extends SubCase {
         assert after204.rules[0].effect == "Include"
         assert after204.scenes.size() == 1
         assert after204.scenes[0].scene == "Start"
-
-        logger.info("Test 205: update name plus backup storage not attached to the zone, expect API failure 3501 and unchanged domain")
-        expectApiFailure({
-            updateAllocatorDomain {
-                delegate.uuid = domain.uuid
-                delegate.name = "should-not-stick"
-                delegate.rules = [
-                        new AllocatorDomainRuleParam(resourceUuid: bs2.uuid, resourceType: "BackupStorageVO", effect: "Include")
-                ]
-            }
-        }) {
-            assert delegate.code == AllocatorDomainErrors.BACKUP_STORAGE_NOT_IN_ZONE.toString()
-            assert delegate.opaque
-            assert delegate.opaque[AllocatorDomainConstant.Opaque.BACKUP_STORAGE_UUID] == bs2.uuid
-            assert delegate.opaque[AllocatorDomainConstant.Opaque.ZONE_UUID] == zone1.uuid
-        }
-        def after205s = queryAllocatorDomain { delegate.conditions = ["uuid=${domain.uuid}"] } as List<AllocatorDomainInventory>
-        assert after205s.size() == 1
-        def after205 = after205s[0]
-        assert after205.name == "keep-name"
-        assert after205.description == "keep-desc"
-        assert after205.state == "Enabled"
-        assert after205.zoneUuid == zone1.uuid
-        assert after205.rules.size() == 1
-        assert after205.rules[0] instanceof AllocatorDomainRuleInventory
-        assert after205.rules[0].priority == 0
-        assert after205.rules[0].resourceType == "HostVO"
-        assert after205.rules[0].resourceUuid == host1.uuid
-        assert after205.rules[0].effect == "Include"
-        assert after205.scenes.size() == 1
-        assert after205.scenes[0].scene == "Start"
     }
 
     void testUpdateIllegalQualifier() {

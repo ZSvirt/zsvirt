@@ -191,6 +191,10 @@ class CleanImageCacheOnLocalPrimaryStorageCase extends SubCase{
 
         def checked = false
         def cmdTemp
+        LocalStorageKvmBackend.GetQCOW2ReferenceCmd referenceCmd
+        env.preSimulator(LocalStorageKvmBackend.GET_QCOW2_REFERENCE) { HttpEntity<String> e ->
+            referenceCmd = JSONObjectUtil.toObject(e.body, LocalStorageKvmBackend.GetQCOW2ReferenceCmd.class)
+        }
         env.hijackSimulator(LocalStorageKvmBackend.DELETE_BITS_PATH){rsp,HttpEntity<String> e ->
             LocalStorageKvmBackend.DeleteBitsCmd cmd = JSONObjectUtil.toObject(e.body, LocalStorageKvmBackend.DeleteBitsCmd.class)
             cmdTemp = cmd
@@ -214,6 +218,9 @@ class CleanImageCacheOnLocalPrimaryStorageCase extends SubCase{
 
         PrimaryStorageGlobalConfig.IMAGE_CACHE_GARBAGE_COLLECTOR_INTERVAL.updateValue(1)
         retryInSecs {
+            assert referenceCmd != null
+            assert referenceCmd.uuid == localps.uuid
+            assert referenceCmd.storagePath == localps.url
             assert Q.New(ImageCacheShadowVO.class).eq(ImageCacheShadowVO_.imageUuid, image1.getUuid()).find() == null
             assert Q.New(ImageCacheVO.class).eq(ImageCacheVO_.imageUuid, image1.getUuid()).find() == null
         }

@@ -352,8 +352,9 @@ class CreateDataVolumeTemplateCase extends SubCase {
                 .select(LocalStorageHostRefVO_.availableCapacity)
                 .findValue()
 
-
+        LocalStorageKvmBackend.GetVolumeSizeCmd getVolumeSizeCmd
         env.hijackSimulator(LocalStorageKvmBackend.GET_VOLUME_SIZE) { rsp, HttpEntity<String> e ->
+            getVolumeSizeCmd = JSONObjectUtil.toObject(e.body, LocalStorageKvmBackend.GetVolumeSizeCmd.class)
             rsp.size = image.size
             rsp.actualSize = image.actualSize
             return rsp
@@ -369,6 +370,8 @@ class CreateDataVolumeTemplateCase extends SubCase {
 
         assert volume.size == image.size
         assert volume.actualSize == image.actualSize
+        assert getVolumeSizeCmd.uuid == ps.uuid
+        assert getVolumeSizeCmd.storagePath == ps.url
 
         GetPrimaryStorageCapacityResult currentPsCapacity = getPrimaryStorageCapacity {
             primaryStorageUuids = [ps.uuid]

@@ -1,5 +1,6 @@
 package org.zstack.test.integration.storage.primary.local
 
+import org.springframework.http.HttpEntity
 import org.zstack.core.db.Q
 import org.zstack.core.gc.GCStatus
 import org.zstack.header.volume.VolumeDeletionPolicyManager
@@ -12,6 +13,7 @@ import org.zstack.storage.volume.VolumeGlobalConfig
 import org.zstack.test.integration.storage.Env
 import org.zstack.test.integration.storage.StorageTest
 import org.zstack.testlib.*
+import org.zstack.utils.gson.JSONObjectUtil
 /**
  * Created by xing5 on 2017/3/6.
  */
@@ -62,7 +64,9 @@ class LocalStorageGCCase extends SubCase {
         }
 
         boolean called = false
-        env.preSimulator(LocalStorageKvmBackend.DELETE_BITS_PATH) {
+        LocalStorageKvmBackend.DeleteBitsCmd deleteBitsCmd
+        env.preSimulator(LocalStorageKvmBackend.DELETE_BITS_PATH) { HttpEntity<String> e ->
+            deleteBitsCmd = JSONObjectUtil.toObject(e.body, LocalStorageKvmBackend.DeleteBitsCmd.class)
             called = true
         }
 
@@ -74,6 +78,8 @@ class LocalStorageGCCase extends SubCase {
         retryInSecs {
             assert called
         }
+        assert deleteBitsCmd.uuid == local.uuid
+        assert deleteBitsCmd.storagePath == local.url
 
         retryInSecs {
             GarbageCollectorInventory inv = queryGCJob {

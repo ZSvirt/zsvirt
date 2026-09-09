@@ -9,6 +9,13 @@ import org.zstack.header.message.NeedJsonSchema;
 public class BackupStorageCanonicalEvents {
     public static final String BACKUP_STORAGE_STATUS_CHANGED = "/backup-storage/status/change";
     public static final String BACKUP_STORAGE_DISCONNECTED = "/backup-storage/disconnected";
+    public static final String BACKUP_STORAGE_CHECK_INITIALIZED_FAILED = "/backup-storage/check/initialized/failed";
+
+    @NeedJsonSchema
+    public static class BackupStorageMountData {
+        public String backupStorageUuid;
+        public String details;
+    }
 
     public static class DisconnectedData {
         private String backupStorageUuid;

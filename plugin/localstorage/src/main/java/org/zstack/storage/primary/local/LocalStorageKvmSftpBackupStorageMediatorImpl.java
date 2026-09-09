@@ -183,6 +183,7 @@ public class LocalStorageKvmSftpBackupStorageMediatorImpl implements LocalStorag
                 cmd.setSshPort(greply.getSshPort());
                 cmd.setBackupStorageInstallPath(backupStorageInstallPath);
                 cmd.setPrimaryStorageInstallPath(primaryStorageInstallPath);
+                cmd.uuid = pinv.getUuid();
                 cmd.storagePath =  pinv.getUrl();
 
                 KVMHostAsyncHttpCallMsg msg = new KVMHostAsyncHttpCallMsg();
@@ -232,6 +233,7 @@ public class LocalStorageKvmSftpBackupStorageMediatorImpl implements LocalStorag
                 cmd.setSshKey(r.getSshKey());
                 cmd.setSshPort(r.getSshPort());
                 cmd.setUsername(r.getUsername());
+                cmd.uuid = pinv.getUuid();
                 cmd.storagePath = pinv.getUrl();
 
                 KVMHostAsyncHttpCallMsg msg = new KVMHostAsyncHttpCallMsg();

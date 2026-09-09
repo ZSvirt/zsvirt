@@ -2128,7 +2128,9 @@ public class LocalStorageKvmBackend extends LocalStorageHypervisorBackend {
         InitCmd cmd = new InitCmd();
         cmd.setHostUuid(msg.getHostUuid());
         cmd.setPath(self.getUrl());
-        cmd.setInitFilePath(makeInitializedFilePath());
+        if (msg.isNewAddedHost()) {
+            cmd.setInitFilePath(makeInitializedFilePath());
+        }
 
         httpCall(INIT_PATH, msg.getHostUuid(), cmd, true, InitRsp.class,
                 new ReturnValueCompletion<InitRsp>(completion) {
@@ -2571,6 +2573,7 @@ public class LocalStorageKvmBackend extends LocalStorageHypervisorBackend {
         GetVolumeSizeCmd cmd = new GetVolumeSizeCmd();
         cmd.installPath = msg.getInstallPath();
         cmd.volumeUuid = msg.getVolumeUuid();
+        cmd.uuid = self.getUuid();
         cmd.storagePath = self.getUrl();
 
         KvmCommandSender sender = new KvmCommandSender(hostUuid);
@@ -2783,6 +2786,7 @@ public class LocalStorageKvmBackend extends LocalStorageHypervisorBackend {
                         GetQCOW2ReferenceCmd cmd = new GetQCOW2ReferenceCmd();
                         cmd.searchingDir = self.getUrl();
                         cmd.path = msg.getInstallPath();
+                        cmd.uuid = ps.getUuid();
                         cmd.storagePath = ps.getUrl();
 
                         new KvmCommandSender(msg.getHostUuid()).send(cmd, GET_QCOW2_REFERENCE, new KvmCommandFailureChecker() {

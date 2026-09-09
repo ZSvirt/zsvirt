@@ -22,6 +22,7 @@ public class JobResultError {
         return parseErrorCode(error);
     }
 
+    @Deprecated
     private static JobResultError parseErrorCode(ErrorCode error) {
         JobResultError result = new JobResultError(error.getDetails());
         result.setCause(error.getRootCauseDetails());

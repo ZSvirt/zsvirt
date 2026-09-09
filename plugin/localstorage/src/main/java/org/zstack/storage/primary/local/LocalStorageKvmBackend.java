@@ -3914,7 +3914,8 @@ public class LocalStorageKvmBackend extends LocalStorageHypervisorBackend {
 
             @Override
             public void fail(ErrorCode errorCode) {
-                completion.fail(operr("cannot find flag file [%s] on host [%s], because: %s", makeInitializedFilePath(), hostUuid, errorCode.getCause().getDetails()));
+                completion.fail(operr("cannot find flag file [%s] on host [%s]", makeInitializedFilePath(), hostUuid)
+                        .withCause(errorCode));
             }
         });
     }
@@ -3935,7 +3936,8 @@ public class LocalStorageKvmBackend extends LocalStorageHypervisorBackend {
 
             @Override
             public void fail(ErrorCode errorCode) {
-                completion.fail(operr("cannot create flag file [%s] on host [%s], because: %s", makeInitializedFilePath(), hostUuid, errorCode.getCause().getDetails()));
+                completion.fail(operr("cannot create flag file [%s] on host [%s]", makeInitializedFilePath(), hostUuid)
+                        .withCause(errorCode));
             }
         });
     }

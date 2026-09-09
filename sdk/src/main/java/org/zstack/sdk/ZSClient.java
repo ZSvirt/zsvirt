@@ -93,10 +93,6 @@ public class ZSClient {
             if (item != null && item.isJsonPrimitive()) {
                 wrapper.setI18nDetails(item.getAsString());
             }
-            item = object.get("elaboration");
-            if (item != null && item.isJsonPrimitive()) {
-                wrapper.setElaboration(item.getAsString());
-            }
             item = object.get("cause");
             if (item != null && item.isJsonObject()) {
                 wrapper.setCause(context.deserialize(item, ErrorCode.class));

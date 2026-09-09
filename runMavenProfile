@@ -44,6 +44,8 @@ Options:
 
   premium             run profile under premium, build with enterprise modules
 
+  ee                  run profile under ee, build with enterprise + zsvirt-ee modules
+
   py                  generate API Python classes and JSON templates
 
   pysdk               generate Python SDK
@@ -527,7 +529,7 @@ run_profile() {
   if test x$1 = x'premium'; then
     mvn -Dmaven.test.skip=true -P premium clean install
   elif test x$1 = x'ee'; then
-    mvn -Dmaven.test.skip=true -P premium,ee clean install
+    mvn -Dmaven.test.skip=true -P ee clean install
   elif test x$1 = x'md'; then
     md
   elif test x$1 = x'sdk'; then

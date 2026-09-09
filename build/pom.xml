@@ -511,7 +511,7 @@
                     <plugin>
                         <artifactId>maven-war-plugin</artifactId>
                         <version>${maven.war.version}</version>
-                        <configuration>
+                        <configuration combine.self="override">
                             <packagingExcludes>
                                 %regex[WEB-INF/lib/maven(?!-artifact).*.jar],
                                 WEB-INF/lib/plexus*.jar,

@@ -31,10 +31,9 @@ public class RecommendedLocationFlow extends AbstractHostAllocatorFlow {
 
         mark();
 
-        // handle not recommended hosts
+        // notRecommendBy means deprioritize: keep unmarked hosts first; if none left, keep all (soft).
         List<HostCandidate> from = new ArrayList<>(candidates);
-        List<HostCandidate> to = filter(from, h -> h.notRecommendBy != null);
-        to = to.isEmpty() ? filter(from, h -> h.notRecommendBy != null && h.recommendBy == null) : to;
+        List<HostCandidate> to = filter(from, h -> h.notRecommendBy == null);
 
         if (to.isEmpty()) {
             to = from;
@@ -100,7 +99,7 @@ public class RecommendedLocationFlow extends AbstractHostAllocatorFlow {
         }
 
         for (HostCandidate host : list) {
-            if (!uuidSet.contains(host.getUuid())) {
+            if (uuidSet.contains(host.getUuid())) {
                 host.markAsNotRecommended(getClass().getSimpleName() + "-notRecommendedHosts");
             }
         }
@@ -129,7 +128,7 @@ public class RecommendedLocationFlow extends AbstractHostAllocatorFlow {
         }
 
         for (HostCandidate candidate : list) {
-            if (!uuidSet.contains(candidate.host.getClusterUuid())) {
+            if (uuidSet.contains(candidate.host.getClusterUuid())) {
                 candidate.markAsNotRecommended(getClass().getSimpleName() + "-notRecommendedClusters");
             }
         }

@@ -81,6 +81,9 @@
 				<value>org.zstack.compute.allocator.HostPrimaryStorageAllocatorFlow</value>
 				<value>org.zstack.compute.allocator.AvoidHostAllocatorFlow</value>
 				<value>org.zstack.compute.allocator.TagAllocatorFlow</value>
+				<value>org.zstack.allocator.domain.compute.flows.DomainHostAllocatorFlow</value>
+				<value>org.zstack.allocator.domain.compute.flows.DomainPrimaryStorageHostAllocatorFlow</value>
+				<value>org.zstack.allocator.domain.compute.flows.DomainL3NetworkHostAllocatorFlow</value>
 				<value>org.zstack.compute.allocator.FilterFlow</value>
 			</list>
 		</property>

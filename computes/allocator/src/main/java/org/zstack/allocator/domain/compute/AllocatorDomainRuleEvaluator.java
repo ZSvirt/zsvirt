@@ -36,6 +36,13 @@ public class AllocatorDomainRuleEvaluator {
         }
     }
 
+    public boolean hasHostChain(Collection<AllocatorDomainRuleVO> rules) {
+        if (rules == null) {
+            return false;
+        }
+        return rules.stream().anyMatch(this::isHostChainRule);
+    }
+
     public HostDecision evaluateHosts(Collection<AllocatorDomainRuleVO> rules, List<HostVO> candidates) {
         return evaluateHosts(rules, candidates, null);
     }

@@ -3,7 +3,7 @@ package org.zstack.allocator.domain.compute.flows;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.zstack.allocator.domain.compute.AllocatorDomainRuleEvaluator;
-import org.zstack.allocator.domain.entity.AllocatorDomainVO;
+import org.zstack.allocator.domain.entity.AllocatorHostRuleSet;
 import org.zstack.header.allocator.HostCandidate;
 import org.zstack.utils.Utils;
 import org.zstack.utils.logging.CLogger;
@@ -15,22 +15,21 @@ public class DomainHostAllocatorFlow extends AbstractDomainAllocatorFlow {
     private static final CLogger logger = Utils.getLogger(DomainHostAllocatorFlow.class);
 
     @Override
-    protected void allocate(AllocatorDomainVO domain) {
-        if (!evaluator.hasHostChain(domain.getRules())) {
-            next();
+    protected void allocate(AllocatorHostRuleSet domain) {
+        if (!evaluator.hasHostChain(domain.rules)) {
             return;
         }
 
         String vmUuid = spec.getVmInstance() == null ? null : spec.getVmInstance().getUuid();
         logger.debug(String.format("allocator domain[uuid:%s, zone:%s] constrains hosts for vm[uuid:%s] scene[%s]",
-                domain.getUuid(), domain.getZoneUuid(), vmUuid, spec.getAllocationScene()));
+                domain.domainUuid, domain.zoneUuid, vmUuid, spec.getAllocationScene()));
 
         AllocatorDomainRuleEvaluator.HostDecision decision = evaluator.evaluateHosts(
-                domain.getRules(), candidateHosts(), domain.getZoneUuid());
+                domain.rules, candidateHosts(), domain.zoneUuid);
         for (HostCandidate candidate : candidates) {
             String uuid = candidate.getUuid();
             if (!decision.allowedHostUuids.contains(uuid)) {
-                reject(candidate, i18m("not in allocator domain[uuid:%s]", domain.getUuid()));
+                reject(candidate, i18m("not in allocator domain[uuid:%s]", domain.domainUuid));
                 continue;
             }
             if (decision.recommendedHostUuids.contains(uuid)) {
@@ -39,6 +38,5 @@ public class DomainHostAllocatorFlow extends AbstractDomainAllocatorFlow {
                 notRecommend(candidate);
             }
         }
-        next();
     }
 }

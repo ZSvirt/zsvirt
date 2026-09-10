@@ -10,7 +10,6 @@ import org.zstack.allocator.domain.header.AllocatorDomainState;
 import org.zstack.allocator.domain.header.AllocatorDomainSystemTags;
 import org.zstack.core.db.DatabaseFacade;
 import org.zstack.header.allocator.AllocateHostBeforeExtensionPoint;
-import org.zstack.header.allocator.AllocateHostMsg;
 import org.zstack.header.allocator.AllocatorDomainScene;
 import org.zstack.header.allocator.HostAllocatorSpec;
 import org.zstack.header.host.HostAllocateExtensionPoint;
@@ -28,9 +27,9 @@ public class AllocatorDomainAllocateExtension implements AllocateHostBeforeExten
     private AllocatorDomainConstraintResolver constraintResolver;
 
     @Override
-    public void beforeAllocateHost(AllocateHostMsg msg) {
-        AllocatorDomainScene scene = msg.getAllocationScene();
-        VmInstanceInventory vm = msg.getVmInstance();
+    public void beforeAllocateHost(HostAllocatorSpec spec) {
+        AllocatorDomainScene scene = spec.getAllocationScene();
+        VmInstanceInventory vm = spec.getVmInstance();
         if (scene == null || vm == null || StringUtils.isEmpty(vm.getUuid())) {
             return;
         }
@@ -40,10 +39,10 @@ public class AllocatorDomainAllocateExtension implements AllocateHostBeforeExten
 
         AllocatorDomainConstraint constraint = constraintResolver.resolve(vm.getUuid(), scene);
         if (constraint.kind == AllocatorDomainConstraint.Kind.ACTIVE) {
-            putDomainRuleSet(msg, constraint.domain.getUuid());
+            spec.addRuleSet(AllocatorDomains.transform(constraint.domain));
             return;
         }
-        if (!msg.isDryRun()
+        if (!spec.isDryRun()
                 && (scene == AllocatorDomainScene.NewCreate || scene == AllocatorDomainScene.Start)
                 && (constraint.kind == AllocatorDomainConstraint.Kind.NONE
                 || constraint.kind == AllocatorDomainConstraint.Kind.SCENE_NOT_IN_TABLE)) {
@@ -119,10 +118,6 @@ public class AllocatorDomainAllocateExtension implements AllocateHostBeforeExten
             }
         }
         return null;
-    }
-
-    private void putDomainRuleSet(AllocateHostMsg msg, String domainUuid) {
-        msg.addRuleSet(AllocatorHostRuleSet.domain(domainUuid));
     }
 
     private void writeSchedulingDomainTag(String vmUuid, String domainUuid) {

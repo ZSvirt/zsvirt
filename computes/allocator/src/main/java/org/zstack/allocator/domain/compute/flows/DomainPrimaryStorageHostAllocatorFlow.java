@@ -3,7 +3,7 @@ package org.zstack.allocator.domain.compute.flows;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.zstack.allocator.domain.compute.AllocatorDomainRuleEvaluator;
-import org.zstack.allocator.domain.entity.AllocatorDomainVO;
+import org.zstack.allocator.domain.entity.AllocatorHostRuleSet;
 import org.zstack.allocator.domain.header.AllocatorDomainConstant;
 import org.zstack.allocator.domain.header.AllocatorDomainErrors;
 import org.zstack.core.db.Q;
@@ -27,12 +27,11 @@ import static org.zstack.core.Platform.i18m;
 @Configurable(preConstruction = true, autowire = Autowire.BY_TYPE)
 public class DomainPrimaryStorageHostAllocatorFlow extends AbstractDomainAllocatorFlow {
     @Override
-    protected void allocate(AllocatorDomainVO domain) {
-        List<String> zonePrimaryStorages = listZonePrimaryStorageUuids(domain.getZoneUuid());
+    protected void allocate(AllocatorHostRuleSet domain) {
+        List<String> zonePrimaryStorages = listZonePrimaryStorageUuids(domain.zoneUuid);
         AllocatorDomainRuleEvaluator.UuidDecision psDecision = evaluator.evaluatePrimaryStorages(
-                domain.getRules(), zonePrimaryStorages);
+                domain.rules, zonePrimaryStorages);
         if (!psDecision.hasChain) {
-            next();
             return;
         }
 
@@ -41,8 +40,8 @@ public class DomainPrimaryStorageHostAllocatorFlow extends AbstractDomainAllocat
         for (String psUuid : required) {
             if (!psDecision.allowedUuids.contains(psUuid)) {
                 fail(err(AllocatorDomainErrors.RESOURCE_OUT_OF_DOMAIN,
-                        "primary storage[uuid:%s] is not in allocator domain[uuid:%s]", psUuid, domain.getUuid())
-                        .withOpaque(AllocatorDomainConstant.Opaque.DOMAIN_UUID, domain.getUuid())
+                        "primary storage[uuid:%s] is not in allocator domain[uuid:%s]", psUuid, domain.domainUuid)
+                        .withOpaque(AllocatorDomainConstant.Opaque.DOMAIN_UUID, domain.domainUuid)
                         .withOpaque(AllocatorDomainConstant.Opaque.PRIMARY_STORAGE_UUID, psUuid));
                 return;
             }
@@ -52,8 +51,7 @@ public class DomainPrimaryStorageHostAllocatorFlow extends AbstractDomainAllocat
                 ? clustersAttachedToAny(psDecision.allowedUuids)
                 : clustersAttachedToAllPrimaryStorages(required);
         rejectHostsNotInClusters(allowedClusters,
-                i18m("cluster not attached to allocator domain[uuid:%s] primary storage", domain.getUuid()));
-        next();
+                i18m("cluster not attached to allocator domain[uuid:%s] primary storage", domain.domainUuid));
     }
 
     private List<String> listZonePrimaryStorageUuids(String zoneUuid) {

@@ -3,7 +3,7 @@ package org.zstack.allocator.domain.compute.flows;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.zstack.allocator.domain.compute.AllocatorDomainRuleEvaluator;
-import org.zstack.allocator.domain.entity.AllocatorDomainVO;
+import org.zstack.allocator.domain.entity.AllocatorHostRuleSet;
 import org.zstack.allocator.domain.header.AllocatorDomainConstant;
 import org.zstack.allocator.domain.header.AllocatorDomainErrors;
 import org.zstack.core.db.Q;
@@ -26,33 +26,30 @@ import static org.zstack.core.Platform.i18m;
 @Configurable(preConstruction = true, autowire = Autowire.BY_TYPE)
 public class DomainL3NetworkHostAllocatorFlow extends AbstractDomainAllocatorFlow {
     @Override
-    protected void allocate(AllocatorDomainVO domain) {
-        List<String> zoneL3s = listZoneL3NetworkUuids(domain.getZoneUuid());
-        AllocatorDomainRuleEvaluator.UuidDecision l3Decision = evaluator.evaluateL3Networks(domain.getRules(), zoneL3s);
+    protected void allocate(AllocatorHostRuleSet domain) {
+        List<String> zoneL3s = listZoneL3NetworkUuids(domain.zoneUuid);
+        AllocatorDomainRuleEvaluator.UuidDecision l3Decision = evaluator.evaluateL3Networks(domain.rules, zoneL3s);
         if (!l3Decision.hasChain) {
-            next();
             return;
         }
 
         List<String> specified = spec.getL3NetworkUuids();
         if (specified == null || specified.isEmpty()) {
-            next();
             return;
         }
 
         for (String l3Uuid : specified) {
             if (!l3Decision.allowedUuids.contains(l3Uuid)) {
                 fail(err(AllocatorDomainErrors.RESOURCE_OUT_OF_DOMAIN,
-                        "l3 network[uuid:%s] is not in allocator domain[uuid:%s]", l3Uuid, domain.getUuid())
-                        .withOpaque(AllocatorDomainConstant.Opaque.DOMAIN_UUID, domain.getUuid())
+                        "l3 network[uuid:%s] is not in allocator domain[uuid:%s]", l3Uuid, domain.domainUuid)
+                        .withOpaque(AllocatorDomainConstant.Opaque.DOMAIN_UUID, domain.domainUuid)
                         .withOpaque(AllocatorDomainConstant.Opaque.L3_UUID, l3Uuid));
                 return;
             }
         }
 
         rejectHostsNotInClusters(clustersAttachedToAllL3Networks(specified),
-                i18m("cluster not attached to specified l3 of allocator domain[uuid:%s]", domain.getUuid()));
-        next();
+                i18m("cluster not attached to specified l3 of allocator domain[uuid:%s]", domain.domainUuid));
     }
 
     private List<String> listZoneL3NetworkUuids(String zoneUuid) {

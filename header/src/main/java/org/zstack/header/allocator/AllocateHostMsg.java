@@ -37,7 +37,7 @@ public class AllocateHostMsg extends NeedReplyMessage {
     private boolean fullAllocate = true;
     private long oldMemoryCapacity = 0;
     private AllocatorDomainScene allocationScene;
-    private List<AllocatorHostRuleSet> ruleSets = new ArrayList<AllocatorHostRuleSet>();
+    private List<AllocatorHostRuleSet> ruleSets = new ArrayList<>();
     private String architecture;
 
     public List<VmLocationSpec> getLocationSpecs() {

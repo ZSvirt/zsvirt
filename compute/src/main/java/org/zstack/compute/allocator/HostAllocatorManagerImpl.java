@@ -445,9 +445,12 @@ public class HostAllocatorManagerImpl extends AbstractService implements HostAll
     }
 
     private void doHandleAllocateHost(final AllocateHostMsg msg, Completion completion) {
+        HostAllocatorSpec spec = HostAllocatorSpec.fromAllocationMsg(msg);
+        spec.setBackupStoragePrimaryStorageMetrics(backupStoragePrimaryStorageMetrics);
+
         try {
             for (AllocateHostBeforeExtensionPoint ext : pluginRgty.getExtensionList(AllocateHostBeforeExtensionPoint.class)) {
-                ext.beforeAllocateHost(msg);
+                ext.beforeAllocateHost(spec);
             }
         } catch (OperationFailureException e) {
             replyAllocateHostFailure(msg, e.getErrorCode(), completion);
@@ -457,10 +460,7 @@ public class HostAllocatorManagerImpl extends AbstractService implements HostAll
             return;
         }
 
-        logger.debug("allocate host rule sets:\n" + AllocatorHostRuleSet.toString(msg.getRuleSets()));
-
-        HostAllocatorSpec spec = HostAllocatorSpec.fromAllocationMsg(msg);
-        spec.setBackupStoragePrimaryStorageMetrics(backupStoragePrimaryStorageMetrics);
+        logger.debug("allocate host rule sets:\n" + AllocatorHostRuleSet.toString(spec.getRuleSets()));
 
         String hvType = spec.getHypervisorType();
         if (hvType == null && msg instanceof DesignatedAllocateHostMsg) {

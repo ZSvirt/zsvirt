@@ -1,13 +1,13 @@
 package org.zstack.allocator.domain.compute;
 
-import org.zstack.allocator.domain.entity.AllocatorDomainRuleVO;
+import org.zstack.allocator.domain.entity.AllocatorHostRule;
+import org.zstack.allocator.domain.header.AllocatorDomainConstant;
 import org.zstack.allocator.domain.header.AllocatorDomainResourceType;
 import org.zstack.allocator.domain.header.AllocatorDomainRuleEffect;
 import org.zstack.header.host.HostVO;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 /**
  * Hard membership is "what this domain includes":
  * {@code (∪ Include) − (∪ Exclude)} if any Include exists, otherwise {@code all candidates − ∪ Exclude}.
- * Priority does not affect Hard. Soft (Recommend / NotRecommend) is still first-match by priority.
+ * Priority does not affect Hard. Soft (Recommend / NotRecommend) is first-match by list order.
  * {@code domainZoneUuid} is an AND bound, not a union Include.
  */
 public class AllocatorDomainRuleEvaluator {
@@ -35,24 +35,31 @@ public class AllocatorDomainRuleEvaluator {
         }
     }
 
-    public HostDecision evaluateHosts(Collection<AllocatorDomainRuleVO> rules, List<HostVO> candidates) {
+    public boolean hasHostChain(Collection<AllocatorHostRule> rules) {
+        if (rules == null) {
+            return false;
+        }
+        return rules.stream().anyMatch(this::isHostChainRule);
+    }
+
+    public HostDecision evaluateHosts(Collection<AllocatorHostRule> rules, List<HostVO> candidates) {
         return evaluateHosts(rules, candidates, null);
     }
 
     /**
      * {@code domainZoneUuid} is an AND bound (not a union Include): hosts outside that zone are dropped.
+     * Soft first-match follows {@code rules} list order.
      */
-    public HostDecision evaluateHosts(Collection<AllocatorDomainRuleVO> rules, List<HostVO> candidates,
+    public HostDecision evaluateHosts(Collection<AllocatorHostRule> rules, List<HostVO> candidates,
                                       String domainZoneUuid) {
-        List<AllocatorDomainRuleVO> hostChain = rules == null ? new ArrayList<>() : rules.stream()
+        List<AllocatorHostRule> hostChain = rules == null ? new ArrayList<>() : rules.stream()
                 .filter(this::isHostChainRule)
-                .sorted(Comparator.comparingInt(AllocatorDomainRuleVO::getPriority))
                 .collect(Collectors.toList());
-        List<AllocatorDomainRuleVO> includes = hostChain.stream()
-                .filter(rule -> rule.getEffect() == AllocatorDomainRuleEffect.Include)
+        List<AllocatorHostRule> includes = hostChain.stream()
+                .filter(rule -> effectOf(rule) == AllocatorDomainRuleEffect.Include)
                 .collect(Collectors.toList());
-        List<AllocatorDomainRuleVO> excludes = hostChain.stream()
-                .filter(rule -> rule.getEffect() == AllocatorDomainRuleEffect.Exclude)
+        List<AllocatorHostRule> excludes = hostChain.stream()
+                .filter(rule -> effectOf(rule) == AllocatorDomainRuleEffect.Exclude)
                 .collect(Collectors.toList());
         boolean hasInclude = !includes.isEmpty();
 
@@ -82,29 +89,111 @@ public class AllocatorDomainRuleEvaluator {
         return new HostDecision(allowed, recommended, notRecommended, hasInclude);
     }
 
-    private AllocatorDomainRuleEffect firstSoft(List<AllocatorDomainRuleVO> hostChain, HostVO host) {
-        for (AllocatorDomainRuleVO rule : hostChain) {
-            if (isSoft(rule.getEffect()) && hits(rule, host)) {
-                return rule.getEffect();
+    public static class UuidDecision {
+        public boolean hasChain;
+        public boolean hasInclude;
+        public Set<String> allowedUuids;
+
+        public UuidDecision(boolean hasChain, boolean hasInclude, Set<String> allowedUuids) {
+            this.hasChain = hasChain;
+            this.hasInclude = hasInclude;
+            this.allowedUuids = allowedUuids;
+        }
+    }
+
+    public UuidDecision evaluatePrimaryStorages(Collection<AllocatorHostRule> rules, Collection<String> candidateUuids) {
+        return evaluateUuidChain(rules, candidateUuids, AllocatorDomainResourceType.PrimaryStorageVO.name());
+    }
+
+    public UuidDecision evaluateL3Networks(Collection<AllocatorHostRule> rules, Collection<String> candidateUuids) {
+        return evaluateUuidChain(rules, candidateUuids, AllocatorDomainResourceType.L3NetworkVO.name());
+    }
+
+    /**
+     * Hard membership for a uuid resource type, no qualifier split:
+     * {@code (∪ Include) − (∪ Exclude)} if any Include exists, otherwise {@code all candidates − ∪ Exclude}.
+     * Soft rules of this type do not change membership. {@code hasChain} is false when the domain has no rules of this type.
+     */
+    private UuidDecision evaluateUuidChain(Collection<AllocatorHostRule> rules, Collection<String> candidateUuids,
+                                           String resourceType) {
+        List<AllocatorHostRule> chain = rules == null ? new ArrayList<>() : rules.stream()
+                .filter(rule -> isUuidChainRule(rule, resourceType))
+                .collect(Collectors.toList());
+        if (chain.isEmpty()) {
+            return new UuidDecision(false, false, new LinkedHashSet<>());
+        }
+
+        List<AllocatorHostRule> includes = chain.stream()
+                .filter(rule -> effectOf(rule) == AllocatorDomainRuleEffect.Include)
+                .collect(Collectors.toList());
+        List<AllocatorHostRule> excludes = chain.stream()
+                .filter(rule -> effectOf(rule) == AllocatorDomainRuleEffect.Exclude)
+                .collect(Collectors.toList());
+        boolean hasInclude = !includes.isEmpty();
+
+        Set<String> allowed = new LinkedHashSet<>();
+        Collection<String> candidates = candidateUuids == null ? new ArrayList<>() : candidateUuids;
+        for (String uuid : candidates) {
+            if (uuid == null) {
+                continue;
+            }
+            if (excludes.stream().anyMatch(rule -> uuid.equals(rule.resourceUuid))) {
+                continue;
+            }
+            if (hasInclude && includes.stream().noneMatch(rule -> uuid.equals(rule.resourceUuid))) {
+                continue;
+            }
+            allowed.add(uuid);
+        }
+        return new UuidDecision(true, hasInclude, allowed);
+    }
+
+    private AllocatorDomainRuleEffect firstSoft(List<AllocatorHostRule> hostChain, HostVO host) {
+        for (AllocatorHostRule rule : hostChain) {
+            AllocatorDomainRuleEffect effect = effectOf(rule);
+            if (isSoft(effect) && hits(rule, host)) {
+                return effect;
             }
         }
         return null;
     }
 
-    private boolean isHostChainRule(AllocatorDomainRuleVO rule) {
-        if (rule == null || rule.getResourceType() == null) {
-            return false;
+    private AllocatorDomainRuleEffect effectOf(AllocatorHostRule rule) {
+        if (rule == null || rule.effect == null) {
+            return null;
         }
-        return AllocatorDomainResourceType.HostVO.name().equals(rule.getResourceType())
-                || AllocatorDomainResourceType.ClusterVO.name().equals(rule.getResourceType());
+        try {
+            return AllocatorDomainRuleEffect.valueOf(rule.effect);
+        } catch (IllegalArgumentException ignored) {
+            return null;
+        }
     }
 
-    private boolean hits(AllocatorDomainRuleVO rule, HostVO host) {
-        if (AllocatorDomainResourceType.HostVO.name().equals(rule.getResourceType())) {
-            return host.getUuid().equals(rule.getResourceUuid());
+    private boolean isHostChainRule(AllocatorHostRule rule) {
+        if (rule == null || rule.resourceType == null) {
+            return false;
         }
-        if (AllocatorDomainResourceType.ClusterVO.name().equals(rule.getResourceType())) {
-            return host.getClusterUuid() != null && host.getClusterUuid().equals(rule.getResourceUuid());
+        return AllocatorDomainResourceType.HostVO.name().equals(rule.resourceType)
+                || AllocatorDomainResourceType.ClusterVO.name().equals(rule.resourceType);
+    }
+
+    private boolean isUuidChainRule(AllocatorHostRule rule, String resourceType) {
+        if (rule == null || rule.resourceType == null) {
+            return false;
+        }
+        if (resourceType.equals(rule.resourceType)) {
+            return true;
+        }
+        return AllocatorDomainResourceType.L3NetworkVO.name().equals(resourceType)
+                && AllocatorDomainConstant.PORT_GROUP_RESOURCE_TYPE.equals(rule.resourceType);
+    }
+
+    private boolean hits(AllocatorHostRule rule, HostVO host) {
+        if (AllocatorDomainResourceType.HostVO.name().equals(rule.resourceType)) {
+            return host.getUuid().equals(rule.resourceUuid);
+        }
+        if (AllocatorDomainResourceType.ClusterVO.name().equals(rule.resourceType)) {
+            return host.getClusterUuid() != null && host.getClusterUuid().equals(rule.resourceUuid);
         }
         return false;
     }

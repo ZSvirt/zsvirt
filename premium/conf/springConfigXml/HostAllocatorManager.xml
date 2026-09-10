@@ -128,6 +128,9 @@
                 <value>org.zstack.compute.allocator.AvoidHostAllocatorFlow</value>
                 <value>org.zstack.compute.allocator.TagAllocatorFlow</value>
                 <value>org.zstack.compute.allocator.ResourceBindingAllocatorFlow</value>
+                <value>org.zstack.allocator.domain.compute.flows.DomainHostAllocatorFlow</value>
+                <value>org.zstack.allocator.domain.compute.flows.DomainPrimaryStorageHostAllocatorFlow</value>
+                <value>org.zstack.allocator.domain.compute.flows.DomainL3NetworkHostAllocatorFlow</value>
                 <value>org.zstack.compute.allocator.FilterFlow</value>
             </list>
         </property>
@@ -170,6 +173,9 @@
                 <value>org.zstack.compute.allocator.AvoidHostAllocatorFlow</value>
                 <value>org.zstack.compute.allocator.TagAllocatorFlow</value>
                 <value>org.zstack.compute.allocator.ResourceBindingAllocatorFlow</value>
+                <value>org.zstack.allocator.domain.compute.flows.DomainHostAllocatorFlow</value>
+                <value>org.zstack.allocator.domain.compute.flows.DomainPrimaryStorageHostAllocatorFlow</value>
+                <value>org.zstack.allocator.domain.compute.flows.DomainL3NetworkHostAllocatorFlow</value>
                 <value>org.zstack.compute.allocator.FilterFlow</value>
             </list>
         </property>
@@ -210,6 +216,9 @@
                 <value>org.zstack.compute.allocator.AvoidHostAllocatorFlow</value>
                 <value>org.zstack.compute.allocator.TagAllocatorFlow</value>
                 <value>org.zstack.compute.allocator.ResourceBindingAllocatorFlow</value>
+                <value>org.zstack.allocator.domain.compute.flows.DomainHostAllocatorFlow</value>
+                <value>org.zstack.allocator.domain.compute.flows.DomainPrimaryStorageHostAllocatorFlow</value>
+                <value>org.zstack.allocator.domain.compute.flows.DomainL3NetworkHostAllocatorFlow</value>
                 <value>org.zstack.compute.allocator.FilterFlow</value>
             </list>
         </property>
@@ -249,6 +258,9 @@
                 <value>org.zstack.compute.allocator.AvoidHostAllocatorFlow</value>
                 <value>org.zstack.compute.allocator.TagAllocatorFlow</value>
                 <value>org.zstack.compute.allocator.ResourceBindingAllocatorFlow</value>
+                <value>org.zstack.allocator.domain.compute.flows.DomainHostAllocatorFlow</value>
+                <value>org.zstack.allocator.domain.compute.flows.DomainPrimaryStorageHostAllocatorFlow</value>
+                <value>org.zstack.allocator.domain.compute.flows.DomainL3NetworkHostAllocatorFlow</value>
                 <value>org.zstack.compute.allocator.FilterFlow</value>
                 <value>org.zstack.compute.allocator.LastHostAllocatorFlow</value>
             </list>
@@ -282,6 +294,9 @@
                 <value>org.zstack.compute.allocator.AvoidHostAllocatorFlow</value>
                 <value>org.zstack.compute.allocator.TagAllocatorFlow</value>
                 <value>org.zstack.compute.allocator.ResourceBindingAllocatorFlow</value>
+                <value>org.zstack.allocator.domain.compute.flows.DomainHostAllocatorFlow</value>
+                <value>org.zstack.allocator.domain.compute.flows.DomainPrimaryStorageHostAllocatorFlow</value>
+                <value>org.zstack.allocator.domain.compute.flows.DomainL3NetworkHostAllocatorFlow</value>
                 <value>org.zstack.compute.allocator.FilterFlow</value>
                 <value>org.zstack.compute.allocator.LastHostAllocatorFlow</value>
             </list>
@@ -315,6 +330,9 @@
                 <value>org.zstack.compute.allocator.HostOsVersionAllocatorFlow</value>
                 <value>org.zstack.compute.allocator.TagAllocatorFlow</value>
                 <value>org.zstack.compute.allocator.ResourceBindingAllocatorFlow</value>
+                <value>org.zstack.allocator.domain.compute.flows.DomainHostAllocatorFlow</value>
+                <value>org.zstack.allocator.domain.compute.flows.DomainPrimaryStorageHostAllocatorFlow</value>
+                <value>org.zstack.allocator.domain.compute.flows.DomainL3NetworkHostAllocatorFlow</value>
                 <value>org.zstack.compute.allocator.FilterFlow</value>
                 <value>org.zstack.compute.host.HostCpuFunctionFilterFlow</value>
             </list>
@@ -357,6 +375,9 @@
                 <value>org.zstack.compute.allocator.AvoidHostAllocatorFlow</value>
                 <value>org.zstack.compute.allocator.TagAllocatorFlow</value>
                 <value>org.zstack.compute.allocator.ResourceBindingAllocatorFlow</value>
+                <value>org.zstack.allocator.domain.compute.flows.DomainHostAllocatorFlow</value>
+                <value>org.zstack.allocator.domain.compute.flows.DomainPrimaryStorageHostAllocatorFlow</value>
+                <value>org.zstack.allocator.domain.compute.flows.DomainL3NetworkHostAllocatorFlow</value>
                 <value>org.zstack.compute.allocator.FilterFlow</value>
             </list>
         </property>
@@ -399,6 +420,9 @@
                 <value>org.zstack.compute.allocator.AvoidHostAllocatorFlow</value>
                 <value>org.zstack.compute.allocator.TagAllocatorFlow</value>
                 <value>org.zstack.compute.allocator.ResourceBindingAllocatorFlow</value>
+                <value>org.zstack.allocator.domain.compute.flows.DomainHostAllocatorFlow</value>
+                <value>org.zstack.allocator.domain.compute.flows.DomainPrimaryStorageHostAllocatorFlow</value>
+                <value>org.zstack.allocator.domain.compute.flows.DomainL3NetworkHostAllocatorFlow</value>
                 <value>org.zstack.compute.allocator.FilterFlow</value>
             </list>
         </property>
@@ -441,6 +465,9 @@
                 <value>org.zstack.compute.allocator.AvoidHostAllocatorFlow</value>
                 <value>org.zstack.compute.allocator.TagAllocatorFlow</value>
                 <value>org.zstack.compute.allocator.ResourceBindingAllocatorFlow</value>
+                <value>org.zstack.allocator.domain.compute.flows.DomainHostAllocatorFlow</value>
+                <value>org.zstack.allocator.domain.compute.flows.DomainPrimaryStorageHostAllocatorFlow</value>
+                <value>org.zstack.allocator.domain.compute.flows.DomainL3NetworkHostAllocatorFlow</value>
                 <value>org.zstack.compute.allocator.FilterFlow</value>
                 <value>org.zstack.pluginpremium.compute.allocator.MaxInstancePerHostAllocatorFlow</value>
             </list>

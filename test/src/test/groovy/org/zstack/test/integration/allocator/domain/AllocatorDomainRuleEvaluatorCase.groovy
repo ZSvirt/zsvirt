@@ -1,7 +1,7 @@
 package org.zstack.test.integration.allocator.domain
 
 import org.zstack.allocator.domain.compute.AllocatorDomainRuleEvaluator
-import org.zstack.allocator.domain.entity.AllocatorDomainRuleVO
+import org.zstack.allocator.domain.entity.AllocatorHostRule
 import org.zstack.header.host.HostVO
 import org.zstack.testlib.SubCase
 
@@ -21,6 +21,7 @@ class AllocatorDomainRuleEvaluatorCase extends SubCase {
         testHardExcludeWinsOverInclude()
         testDomainZoneBoundsSoftOnlyCandidates()
         testIncludeKeepsRecommend()
+        testUuidHardMembership()
     }
 
     void testHardUnionInclude() {
@@ -38,7 +39,7 @@ class AllocatorDomainRuleEvaluatorCase extends SubCase {
         AllocatorDomainRuleEvaluator.HostDecision clusterThenHost = evaluator.evaluateHosts(json("""[
             {"priority": 0, "resourceUuid": "cluster-2", "resourceType": "ClusterVO", "effect": "Include"},
             {"priority": 1, "resourceUuid": "host-1",    "resourceType": "HostVO",    "effect": "Include"}
-        ]""", AllocatorDomainRuleVO[].class) as List<AllocatorDomainRuleVO>, hosts)
+        ]""", AllocatorHostRule[].class) as List<AllocatorHostRule>, hosts)
         assert clusterThenHost.allowedHostUuids.size() == 4
         assert clusterThenHost.allowedHostUuids.contains("host-1")
         assert !clusterThenHost.allowedHostUuids.contains("host-2")
@@ -50,7 +51,7 @@ class AllocatorDomainRuleEvaluatorCase extends SubCase {
         AllocatorDomainRuleEvaluator.HostDecision hostThenCluster = evaluator.evaluateHosts(json("""[
             {"priority": 0, "resourceUuid": "host-1",    "resourceType": "HostVO",    "effect": "Include"},
             {"priority": 1, "resourceUuid": "cluster-2", "resourceType": "ClusterVO", "effect": "Include"}
-        ]""", AllocatorDomainRuleVO[].class) as List<AllocatorDomainRuleVO>, hosts)
+        ]""", AllocatorHostRule[].class) as List<AllocatorHostRule>, hosts)
         assert hostThenCluster.allowedHostUuids.size() == 4
         assert hostThenCluster.allowedHostUuids.contains("host-1")
         assert !hostThenCluster.allowedHostUuids.contains("host-2")
@@ -76,7 +77,7 @@ class AllocatorDomainRuleEvaluatorCase extends SubCase {
             {"priority": 0, "resourceUuid": "cluster-2", "resourceType": "ClusterVO", "effect": "Include"},
             {"priority": 1, "resourceUuid": "host-1",    "resourceType": "HostVO",    "effect": "Include"},
             {"priority": 2, "resourceUuid": "host-20",   "resourceType": "HostVO",    "effect": "Exclude"}
-        ]""", AllocatorDomainRuleVO[].class) as List<AllocatorDomainRuleVO>, hosts)
+        ]""", AllocatorHostRule[].class) as List<AllocatorHostRule>, hosts)
         assert decision.allowedHostUuids.size() == 3
         assert decision.allowedHostUuids.contains("host-1")
         assert !decision.allowedHostUuids.contains("host-2")
@@ -100,7 +101,7 @@ class AllocatorDomainRuleEvaluatorCase extends SubCase {
 
         AllocatorDomainRuleEvaluator.HostDecision decision = evaluator.evaluateHosts(json("""[
             {"priority": 0, "resourceUuid": "host-1", "resourceType": "HostVO", "effect": "Recommend"}
-        ]""", AllocatorDomainRuleVO[].class) as List<AllocatorDomainRuleVO>, hosts, "zone-1")
+        ]""", AllocatorHostRule[].class) as List<AllocatorHostRule>, hosts, "zone-1")
         assert decision.allowedHostUuids.size() == 3
         assert decision.allowedHostUuids.contains("host-1")
         assert decision.allowedHostUuids.contains("host-2")
@@ -128,7 +129,7 @@ class AllocatorDomainRuleEvaluatorCase extends SubCase {
         AllocatorDomainRuleEvaluator.HostDecision decision = evaluator.evaluateHosts(json("""[
             {"priority": 0, "resourceUuid": "cluster-1", "resourceType": "ClusterVO", "effect": "Include"},
             {"priority": 1, "resourceUuid": "host-1",    "resourceType": "HostVO",    "effect": "Recommend"}
-        ]""", AllocatorDomainRuleVO[].class) as List<AllocatorDomainRuleVO>, hosts)
+        ]""", AllocatorHostRule[].class) as List<AllocatorHostRule>, hosts)
         assert decision.hasInclude
         assert decision.allowedHostUuids.size() == 3
         assert decision.allowedHostUuids.contains("host-1")
@@ -141,6 +142,40 @@ class AllocatorDomainRuleEvaluatorCase extends SubCase {
         assert decision.recommendedHostUuids.contains("host-1")
         assert !decision.recommendedHostUuids.contains("host-2")
         assert !decision.recommendedHostUuids.contains("host-3")
+    }
+
+    void testUuidHardMembership() {
+        logger.info("Test 000e: PS/L3 Hard is union Include minus Exclude; no rules of that type means no chain")
+        AllocatorDomainRuleEvaluator evaluator = new AllocatorDomainRuleEvaluator()
+        List<String> candidates = ["ps-1", "ps-2", "ps-3"]
+
+        AllocatorDomainRuleEvaluator.UuidDecision noChain = evaluator.evaluatePrimaryStorages(json("""[
+            {"priority": 0, "resourceUuid": "host-1", "resourceType": "HostVO", "effect": "Include"}
+        ]""", AllocatorHostRule[].class) as List<AllocatorHostRule>, candidates)
+        assert !noChain.hasChain
+        assert noChain.allowedUuids.isEmpty()
+
+        AllocatorDomainRuleEvaluator.UuidDecision union = evaluator.evaluatePrimaryStorages(json("""[
+            {"priority": 0, "resourceUuid": "ps-1", "resourceType": "PrimaryStorageVO", "effect": "Include"},
+            {"priority": 1, "resourceUuid": "ps-2", "resourceType": "PrimaryStorageVO", "effect": "Include"}
+        ]""", AllocatorHostRule[].class) as List<AllocatorHostRule>, candidates)
+        assert union.hasChain
+        assert union.hasInclude
+        assert union.allowedUuids.size() == 2
+        assert union.allowedUuids.contains("ps-1")
+        assert union.allowedUuids.contains("ps-2")
+        assert !union.allowedUuids.contains("ps-3")
+
+        AllocatorDomainRuleEvaluator.UuidDecision excludeWins = evaluator.evaluateL3Networks(json("""[
+            {"priority": 0, "resourceUuid": "l3-1", "resourceType": "L3NetworkVO", "effect": "Include"},
+            {"priority": 1, "resourceUuid": "l3-2", "resourceType": "L3NetworkVO", "effect": "Include"},
+            {"priority": 2, "resourceUuid": "l3-2", "resourceType": "L3NetworkVO", "effect": "Exclude"}
+        ]""", AllocatorHostRule[].class) as List<AllocatorHostRule>, ["l3-1", "l3-2", "l3-3"])
+        assert excludeWins.hasChain
+        assert excludeWins.allowedUuids.size() == 1
+        assert excludeWins.allowedUuids.contains("l3-1")
+        assert !excludeWins.allowedUuids.contains("l3-2")
+        assert !excludeWins.allowedUuids.contains("l3-3")
     }
 
     @Override

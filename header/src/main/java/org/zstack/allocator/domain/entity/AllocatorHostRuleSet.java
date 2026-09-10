@@ -18,6 +18,7 @@ public class AllocatorHostRuleSet implements Serializable {
 
     public String name;
     public String domainUuid;
+    public String zoneUuid;
     public List<AllocatorHostRule> rules = new ArrayList<>();
 
     public AllocatorHostRuleSet() {
@@ -36,6 +37,9 @@ public class AllocatorHostRuleSet implements Serializable {
         sb.append('[').append(name).append(']');
         if (domainUuid != null && !domainUuid.isEmpty()) {
             sb.append("\n* domain=").append(domainUuid);
+        }
+        if (zoneUuid != null && !zoneUuid.isEmpty()) {
+            sb.append("\n* zone=").append(zoneUuid);
         }
         if (rules != null) {
             for (AllocatorHostRule rule : rules) {

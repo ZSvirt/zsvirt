@@ -2,11 +2,12 @@ package org.zstack.allocator.domain.compute;
 
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.zstack.allocator.domain.compute.evaluator.AllocatorDomainConstraint;
+import org.zstack.allocator.domain.compute.evaluator.AllocatorDomainConstraintResolver;
 import org.zstack.allocator.domain.entity.AllocatorDomainVO;
 import org.zstack.allocator.domain.entity.AllocatorHostRuleSet;
 import org.zstack.allocator.domain.header.AllocatorDomainConstant;
 import org.zstack.allocator.domain.header.AllocatorDomainErrors;
-import org.zstack.allocator.domain.header.AllocatorDomainGlobalConfig;
 import org.zstack.allocator.domain.header.AllocatorDomainState;
 import org.zstack.allocator.domain.header.AllocatorDomainSystemTags;
 import org.zstack.core.db.DatabaseFacade;
@@ -34,7 +35,6 @@ import org.zstack.header.storage.primary.PrimaryStorageVO_;
 import org.zstack.header.vm.VmInstanceConstant;
 import org.zstack.header.vm.VmInstanceInventory;
 import org.zstack.header.vm.VmLocationSpec;
-import org.zstack.resourceconfig.ResourceConfigFacade;
 import org.zstack.tag.SystemTagCreator;
 import org.zstack.utils.Utils;
 import org.zstack.utils.logging.CLogger;
@@ -54,7 +54,7 @@ public class AllocatorDomainAllocateExtension implements AllocateHostBeforeExten
     @Autowired
     private DatabaseFacade dbf;
     @Autowired
-    private ResourceConfigFacade rcf;
+    private AllocatorDomainConstraintResolver constraintResolver;
 
     private final AllocatorDomainRuleEvaluator evaluator = new AllocatorDomainRuleEvaluator();
 
@@ -69,70 +69,18 @@ public class AllocatorDomainAllocateExtension implements AllocateHostBeforeExten
             return;
         }
 
-        switch (scene) {
-            case NewCreate: case Start:
-                String configUuid = readConfigDomainUuid(vm.getUuid());
-                if (msg.isDryRun()) {
-                    applyDryRun(msg, scene, configUuid);
-                } else {
-                    applyNonDryRun(msg, scene, vm.getUuid(), configUuid);
-                }
-                break;
-            case Migrate: case Ha: case HostMaintenance: case Drs:
-                applyRunning(msg, scene);
-                break;
-            default:
-                break;
-        }
-    }
-
-    private void applyDryRun(AllocateHostMsg msg, AllocatorDomainScene scene, String configUuid) {
-        if (configUuid == null) {
+        AllocatorDomainConstraint constraint = constraintResolver.resolve(vm.getUuid(), scene);
+        if (constraint.kind == AllocatorDomainConstraint.Kind.ACTIVE) {
+            putDomainRuleSet(msg, constraint.domain.getUuid());
+            applyHostFilter(msg, constraint.domain);
             return;
         }
-
-        AllocatorDomainVO domain = requireDomain(configUuid);
-        if (domain.getState() == AllocatorDomainState.Disabled || !sceneInTable(domain, scene)) {
-            return;
+        if (!msg.isDryRun()
+                && (scene == AllocatorDomainScene.NewCreate || scene == AllocatorDomainScene.Start)
+                && (constraint.kind == AllocatorDomainConstraint.Kind.NONE
+                || constraint.kind == AllocatorDomainConstraint.Kind.SCENE_NOT_IN_TABLE)) {
+            deleteSchedulingDomainTag(vm.getUuid());
         }
-
-        putDomainRuleSet(msg, configUuid);
-        applyHostFilter(msg, domain);
-    }
-
-    private void applyNonDryRun(AllocateHostMsg msg, AllocatorDomainScene scene, String vmUuid, String configUuid) {
-        if (configUuid == null) {
-            deleteSchedulingDomainTag(vmUuid);
-            return;
-        }
-
-        AllocatorDomainVO domain = requireDomain(configUuid);
-        if (domain.getState() == AllocatorDomainState.Disabled) {
-            return;
-        }
-
-        if (!sceneInTable(domain, scene)) {
-            deleteSchedulingDomainTag(vmUuid);
-            return;
-        }
-
-        putDomainRuleSet(msg, configUuid);
-        applyHostFilter(msg, domain);
-    }
-
-    private void applyRunning(AllocateHostMsg msg, AllocatorDomainScene scene) {
-        String tagUuid = readTagDomainUuid(msg.getVmInstance().getUuid());
-        if (tagUuid == null) {
-            return;
-        }
-
-        AllocatorDomainVO domain = requireDomain(tagUuid);
-        if (domain.getState() == AllocatorDomainState.Disabled || !sceneInTable(domain, scene)) {
-            return;
-        }
-
-        putDomainRuleSet(msg, domain.getUuid());
-        applyHostFilter(msg, domain);
     }
 
     @Override
@@ -174,7 +122,7 @@ public class AllocatorDomainAllocateExtension implements AllocateHostBeforeExten
             return;
         }
 
-        String tagUuid = readTagDomainUuid(vmUuid);
+        String tagUuid = constraintResolver.readTagDomainUuid(vmUuid);
         if (tagUuid == null) {
             return;
         }
@@ -187,7 +135,7 @@ public class AllocatorDomainAllocateExtension implements AllocateHostBeforeExten
         if (domain.getState() == AllocatorDomainState.Disabled) {
             return;
         }
-        if (!sceneInTable(domain, spec.getAllocationScene())) {
+        if (!constraintResolver.sceneInTable(domain, spec.getAllocationScene())) {
             deleteSchedulingDomainTag(vmUuid);
         }
     }
@@ -392,41 +340,6 @@ public class AllocatorDomainAllocateExtension implements AllocateHostBeforeExten
                 .select(L2NetworkClusterRefVO_.clusterUuid)
                 .listValues();
         return values == null ? new ArrayList<>() : values;
-    }
-
-    private AllocatorDomainVO requireDomain(String domainUuid) {
-        AllocatorDomainVO domain = dbf.findByUuid(domainUuid, AllocatorDomainVO.class);
-        if (domain == null) {
-            throw err(AllocatorDomainErrors.DOMAIN_NOT_FOUND,
-                    "allocator domain[uuid:%s] not found", domainUuid)
-                    .withOpaque(AllocatorDomainConstant.Opaque.DOMAIN_UUID, domainUuid)
-                    .toException();
-        }
-        return domain;
-    }
-
-    private boolean sceneInTable(AllocatorDomainVO domain, AllocatorDomainScene scene) {
-        if (domain.getScenes() == null) {
-            return false;
-        }
-        return domain.getScenes().stream().anyMatch(s -> s.getScene() == scene);
-    }
-
-    private String readConfigDomainUuid(String vmUuid) {
-        String value = rcf.getResourceConfigValue(AllocatorDomainGlobalConfig.SCHEDULING_DOMAIN_UUID, vmUuid, String.class);
-        if (StringUtils.isEmpty(value) || AllocatorDomainConstant.UNBOUND_DOMAIN_UUID.equals(value)) {
-            return null;
-        }
-        return value;
-    }
-
-    private String readTagDomainUuid(String vmUuid) {
-        String value = AllocatorDomainSystemTags.SCHEDULING_DOMAIN.getTokenByResourceUuid(
-                vmUuid, AllocatorDomainSystemTags.DOMAIN_UUID_TOKEN);
-        if (StringUtils.isEmpty(value)) {
-            return null;
-        }
-        return value;
     }
 
     private void writeSchedulingDomainTag(String vmUuid, String domainUuid) {

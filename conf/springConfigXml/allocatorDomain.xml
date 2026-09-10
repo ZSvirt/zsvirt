@@ -28,6 +28,8 @@
         </zstack:plugin>
     </bean>
 
+    <bean id="AllocatorDomainConstraintResolver" class="org.zstack.allocator.domain.compute.evaluator.AllocatorDomainConstraintResolver"/>
+
     <bean id="AllocatorDomainAllocateExtension" class="org.zstack.allocator.domain.compute.AllocatorDomainAllocateExtension">
         <zstack:plugin>
             <zstack:extension interface="org.zstack.header.allocator.AllocateHostBeforeExtensionPoint"/>

@@ -36,7 +36,7 @@ import static org.zstack.core.Platform.operr;
 public class MttyDeviceKvmBackend implements MttyDeviceBackend {
     public static final String GET_MTTY_DEVICES = "/mttydevice/get";
     public static final String GENERATE_SE_VFIO_MDEV_DEVICES = "/semdevdevice/generate";
-    private static final String UNGENERATE_SE_VFIO_MDEV_DEVICES = "/semdevdevice/ungenerate";
+    public static final String UNGENERATE_SE_VFIO_MDEV_DEVICES = "/semdevdevice/ungenerate";
     private static CLogger logger = Utils.getLogger(MttyDeviceKvmBackend.class);
     
     @Autowired

@@ -94,6 +94,7 @@ class ZWatchDBRemaining extends AllowedDBRemaining {
         SystemAlarmManager.SCHEDULER_JOB_GROUP_EXECUTED_RESULT_EVENT_ALARM_NAME,
         SystemAlarmManager.DISASTER_RECOVERY_STORAGE_CONNECTED_EVENT_ALARM_NAME,
         SystemAlarmManager.DISASTER_RECOVERY_STORAGE_DISCONNECT_EVENT_ALARM_NAME,
+        SystemAlarmManager.FAULT_MOUNT_POINT_ON_BACKUP_STORAGE_EVENT_ALARM_NAME,
     ])
 
     @Override

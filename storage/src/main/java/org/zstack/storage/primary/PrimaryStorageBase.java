@@ -1954,6 +1954,7 @@ public abstract class PrimaryStorageBase extends AbstractPrimaryStorage {
                 .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
         if (vmUuids.isEmpty()) {
+            VmMetadataRegistrationHelper.enrich(metadata, Collections.emptyMap(), scannedPrimaryStorageUuid);
             return;
         }
 
@@ -1970,19 +1971,7 @@ public abstract class PrimaryStorageBase extends AbstractPrimaryStorage {
                 existingVmRootPrimaryStorageUuids.put(vmUuid, primaryStorageUuid);
             }
         }
-
-        if (existingVmRootPrimaryStorageUuids.isEmpty()) {
-            return;
-        }
-
-        for (VmMetadataScanEntry entry : metadata) {
-            String existingPrimaryStorageUuid = existingVmRootPrimaryStorageUuids.get(entry.getVmUuid());
-            if (existingPrimaryStorageUuid == null) {
-                continue;
-            }
-
-            entry.setRegenerateUuidRequired(entry.isRegenerateUuidRequired()
-                    || !Objects.equals(existingPrimaryStorageUuid, scannedPrimaryStorageUuid));
-        }
+        VmMetadataRegistrationHelper.enrich(
+                metadata, existingVmRootPrimaryStorageUuids, scannedPrimaryStorageUuid);
     }
 }

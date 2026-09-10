@@ -11,7 +11,15 @@ public class VmMetadataScanEntry {
     private long sizeBytes;
     private long lastUpdateTime;
     private boolean incomplete;
-    private boolean regenerateUuidRequired;
+    private String registrationStatus;
+
+    public String getRegistrationStatus() {
+        return registrationStatus;
+    }
+
+    public void setRegistrationStatus(String registrationStatus) {
+        this.registrationStatus = registrationStatus;
+    }
 
     public String getVmUuid() {
         return vmUuid;
@@ -93,11 +101,4 @@ public class VmMetadataScanEntry {
         this.incomplete = incomplete;
     }
 
-    public boolean isRegenerateUuidRequired() {
-        return regenerateUuidRequired;
-    }
-
-    public void setRegenerateUuidRequired(boolean regenerateUuidRequired) {
-        this.regenerateUuidRequired = regenerateUuidRequired;
-    }
 }

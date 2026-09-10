@@ -3675,7 +3675,7 @@ public class LocalStorageBase extends PrimaryStorageBase {
             String existingHostUuid = rootVolumeHostUuids.get(rootVolumeUuid);
             if (existingHostUuid != null && entry.getHostUuid() != null
                     && !Objects.equals(existingHostUuid, entry.getHostUuid())) {
-                entry.setRegenerateUuidRequired(true);
+                entry.setRegistrationStatus(VmMetadataRegistrationStatus.UUID_CONFLICT.name());
             }
         }
     }

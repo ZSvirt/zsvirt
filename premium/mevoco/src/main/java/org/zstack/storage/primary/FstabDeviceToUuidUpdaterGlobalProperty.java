@@ -8,4 +8,7 @@ import org.zstack.core.GlobalPropertyDefinition;
 public class FstabDeviceToUuidUpdaterGlobalProperty {
     @GlobalProperty(name = "fstabDeviceToUuidUpdater", defaultValue = "false")
     public static boolean FSTAB_DEVICE_TO_UUID_UPDATER;
+
+    @GlobalProperty(name = "fstabNonBlockingMountOptionsUpdater", defaultValue = "false")
+    public static boolean FSTAB_NON_BLOCKING_MOUNT_OPTIONS_UPDATER;
 }

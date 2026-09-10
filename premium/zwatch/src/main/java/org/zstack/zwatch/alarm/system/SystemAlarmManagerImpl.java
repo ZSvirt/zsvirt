@@ -403,6 +403,15 @@ public class SystemAlarmManagerImpl implements SystemAlarmManager,
                         .build();
                 eventBuilder.reset();
 
+                eventBuilder.uuid(FAULT_MOUNT_POINT_ON_BACKUP_STORAGE_EVENT_ALARM_UUID)
+                        .name(FAULT_MOUNT_POINT_ON_BACKUP_STORAGE_EVENT_ALARM_NAME)
+                        .nameCN(FAULT_MOUNT_POINT_ON_BACKUP_STORAGE_EVENT_ALARM_NAME_CN)
+                        .eventName(BackupStorageNamespace.FaultMountPointOnBackupStorage.getName())
+                        .namespace(backupStorageNamespace.getName())
+                        .emergencyLevel(EmergencyLevel.Emergent)
+                        .build();
+                eventBuilder.reset();
+
                 eventBuilder.uuid(PRIMARY_STORAGE_DISCONNECT_EVENT_ALARM_UUID)
                         .name(PRIMARY_STORAGE_DISCONNECT_EVENT_ALARM_NAME)
                         .nameCN(PRIMARY_STORAGE_DISCONNECT_EVENT_ALARM_NAME_CN)

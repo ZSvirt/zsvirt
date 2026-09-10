@@ -1,5 +1,6 @@
 ZStack/BackupStorage/BackupStorageDisconnected: BackupStorageDisconnected
 ZStack/BackupStorage/BackupStorageConnected: BackupStorageConnected
+ZStack/BackupStorage/FaultMountPointOnBackupStorage: ImageStoreMountPathFault
 ZStack/SNS/SendSmsFailed: SendSmsFailed
 ZStack/VCenter/VCenterHostWrongDateTime: VCenterHostWrongDateTime
 ZStack/VCenter/VCenterResourceEvent: VCenterResourceEvent

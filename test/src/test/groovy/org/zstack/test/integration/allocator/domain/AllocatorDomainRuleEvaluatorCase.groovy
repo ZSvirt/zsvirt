@@ -21,6 +21,7 @@ class AllocatorDomainRuleEvaluatorCase extends SubCase {
         testHardExcludeWinsOverInclude()
         testDomainZoneBoundsSoftOnlyCandidates()
         testIncludeKeepsRecommend()
+        testUuidHardMembership()
     }
 
     void testHardUnionInclude() {
@@ -141,6 +142,40 @@ class AllocatorDomainRuleEvaluatorCase extends SubCase {
         assert decision.recommendedHostUuids.contains("host-1")
         assert !decision.recommendedHostUuids.contains("host-2")
         assert !decision.recommendedHostUuids.contains("host-3")
+    }
+
+    void testUuidHardMembership() {
+        logger.info("Test 000e: PS/L3 Hard is union Include minus Exclude; no rules of that type means no chain")
+        AllocatorDomainRuleEvaluator evaluator = new AllocatorDomainRuleEvaluator()
+        List<String> candidates = ["ps-1", "ps-2", "ps-3"]
+
+        AllocatorDomainRuleEvaluator.UuidDecision noChain = evaluator.evaluatePrimaryStorages(json("""[
+            {"priority": 0, "resourceUuid": "host-1", "resourceType": "HostVO", "effect": "Include"}
+        ]""", AllocatorDomainRuleVO[].class) as List<AllocatorDomainRuleVO>, candidates)
+        assert !noChain.hasChain
+        assert noChain.allowedUuids.isEmpty()
+
+        AllocatorDomainRuleEvaluator.UuidDecision union = evaluator.evaluatePrimaryStorages(json("""[
+            {"priority": 0, "resourceUuid": "ps-1", "resourceType": "PrimaryStorageVO", "effect": "Include"},
+            {"priority": 1, "resourceUuid": "ps-2", "resourceType": "PrimaryStorageVO", "effect": "Include"}
+        ]""", AllocatorDomainRuleVO[].class) as List<AllocatorDomainRuleVO>, candidates)
+        assert union.hasChain
+        assert union.hasInclude
+        assert union.allowedUuids.size() == 2
+        assert union.allowedUuids.contains("ps-1")
+        assert union.allowedUuids.contains("ps-2")
+        assert !union.allowedUuids.contains("ps-3")
+
+        AllocatorDomainRuleEvaluator.UuidDecision excludeWins = evaluator.evaluateL3Networks(json("""[
+            {"priority": 0, "resourceUuid": "l3-1", "resourceType": "L3NetworkVO", "effect": "Include"},
+            {"priority": 1, "resourceUuid": "l3-2", "resourceType": "L3NetworkVO", "effect": "Include"},
+            {"priority": 2, "resourceUuid": "l3-2", "resourceType": "L3NetworkVO", "effect": "Exclude"}
+        ]""", AllocatorDomainRuleVO[].class) as List<AllocatorDomainRuleVO>, ["l3-1", "l3-2", "l3-3"])
+        assert excludeWins.hasChain
+        assert excludeWins.allowedUuids.size() == 1
+        assert excludeWins.allowedUuids.contains("l3-1")
+        assert !excludeWins.allowedUuids.contains("l3-2")
+        assert !excludeWins.allowedUuids.contains("l3-3")
     }
 
     @Override

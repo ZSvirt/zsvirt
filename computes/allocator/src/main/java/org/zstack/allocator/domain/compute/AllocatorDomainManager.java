@@ -68,7 +68,9 @@ import org.zstack.header.storage.primary.PrimaryStorageVO;
 import org.zstack.header.storage.primary.PrimaryStorageVO_;
 import org.zstack.header.tag.SystemTagVO;
 import org.zstack.header.tag.SystemTagVO_;
+import org.zstack.header.vm.VmInstanceConstant;
 import org.zstack.header.vm.VmInstanceVO;
+import org.zstack.header.vm.VmInstanceVO_;
 import org.zstack.resourceconfig.ResourceConfig;
 import org.zstack.resourceconfig.ResourceConfigFacade;
 import org.zstack.resourceconfig.ResourceConfigVO;
@@ -150,6 +152,15 @@ public class AllocatorDomainManager extends AbstractService {
         rc.installValidatorExtension((resourceUuid, oldValue, newValue) -> {
             if (StringUtils.isEmpty(newValue) || AllocatorDomainConstant.UNBOUND_DOMAIN_UUID.equals(newValue)) {
                 return;
+            }
+            VmInstanceVO vm = Q.New(VmInstanceVO.class).eq(VmInstanceVO_.uuid, resourceUuid).find();
+            if (vm != null && !VmInstanceConstant.USER_VM_TYPE.equals(vm.getType())) {
+                throw err(AllocatorDomainErrors.DOMAIN_RELATED_ERROR,
+                        "allocator domain can only be bound to UserVm, resource[uuid:%s, type:%s]",
+                        resourceUuid, vm.getType())
+                        .withOpaque(AllocatorDomainConstant.Opaque.RESOURCE_UUID, resourceUuid)
+                        .withOpaque(AllocatorDomainConstant.Opaque.RESOURCE_TYPE, vm.getType())
+                        .toException();
             }
             boolean exists = Q.New(AllocatorDomainVO.class)
                     .eq(AllocatorDomainVO_.uuid, newValue)

@@ -644,7 +644,7 @@ public class ZSClient {
                             }
 
                             // 200 means the task has been completed successfully,
-                            // or a 505 indicates a failure,
+                            // or a 503 indicates a failure,
                             // otherwise a 202 returned means it is still
                             // in processing
                             if (response.code() == 200 || response.code() == 503) {

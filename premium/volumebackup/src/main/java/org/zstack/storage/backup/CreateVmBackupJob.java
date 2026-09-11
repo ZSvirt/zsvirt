@@ -289,6 +289,7 @@ public class CreateVmBackupJob extends AbstractSchedulerJob<VmBackupLongJobParam
         params.setAlternativeBackupStorageUuids(backupStorageUuids);
         params.setBackupQosStruct(backupQosStruct);
         params.setMode(getBackupMode());
+        params.setRemoteBackupStorageUuid(remoteBackupStorageUuid);
         return params;
     }
 

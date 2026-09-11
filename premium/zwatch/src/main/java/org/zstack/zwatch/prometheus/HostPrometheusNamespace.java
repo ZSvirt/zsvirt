@@ -265,6 +265,13 @@ public class HostPrometheusNamespace extends AbstractPrometheusNamespace {
             rule.setExpression("avg((sum(collectd_cpu_percent{type=\"system\", hostUuid!=\"\"}) by(hostUuid) / sum(collectd_cpu_percent{hostUuid!=\"\"}) by(hostUuid)) * 100) by (hostUuid)");
         } else if (metric == HostNamespace.CPUAverageIdleUtilization) {
             rule.setExpression("avg((sum(collectd_cpu_percent{type=\"idle\", hostUuid!=\"\"}) by(hostUuid) / sum(collectd_cpu_percent{hostUuid!=\"\"}) by(hostUuid)) * 100) by (hostUuid)");
+        } else if (metric == HostNamespace.CPUReadyTimeMilliseconds) {
+            rule.setExpression("zstack_host_cpu_ready_time_milliseconds");
+        } else if (metric == HostNamespace.CPUReadinessPercent) {
+            rule.setExpression("zstack_host_cpu_readiness_percent");
+        } else if (metric == HostNamespace.CPUReadyTimeMillisecondsByCPU) {
+            rule.setExpression("zstack_host_cpu_ready_time_milliseconds_by_cpu");
+            rule.labelMapping("cpu_id", HostNamespace.LabelNames.CPUNum.toString());
         } else if (metric == HostNamespace.DiskFreeCapacityInBytes) {
             rule.setExpression(String.format("node_filesystem_avail{hostUuid!=\"\", fstype!~\"%s\", mountpoint!~\"%s\"}", ignoredFSType, zstackMountPointPrefix));
             rule.labelMapping("device", HostNamespace.LabelNames.DiskDeviceLetter.toString());
@@ -336,6 +343,12 @@ public class HostPrometheusNamespace extends AbstractPrometheusNamespace {
             rule.labelMapping("disk", HostNamespace.LabelNames.DiskDeviceLetter.toString());
         } else if (metric == HostNamespace.DiskAllWriteOps) {
             rule.setExpression("sum(irate(collectd_disk_disk_ops_1{hostUuid!=\"\"}[10m])) by(hostUuid)");
+        } else if (metric == HostNamespace.DiskReadLatencyMilliseconds) {
+            rule.setExpression("zstack_host_disk_read_latency_milliseconds");
+            rule.labelMapping("disk_name", HostAbstractNamespace.LabelNames.DiskName.toString());
+        } else if (metric == HostNamespace.DiskWriteLatencyMilliseconds) {
+            rule.setExpression("zstack_host_disk_write_latency_milliseconds");
+            rule.labelMapping("disk_name", HostAbstractNamespace.LabelNames.DiskName.toString());
         } else if (metric == HostNamespace.DiskLatency) {
             rule.setExpression("(delta(collectd_disk_disk_io_time_0[1m]) + delta(collectd_disk_disk_io_time_1[1m])+1) / (delta(collectd_disk_disk_ops_0[1m]) + delta(collectd_disk_disk_ops_1[1m])+1)");
             rule.labelMapping("disk", HostNamespace.LabelNames.DiskDeviceLetter.toString());
@@ -443,6 +456,12 @@ public class HostPrometheusNamespace extends AbstractPrometheusNamespace {
         } else if (metric == HostNamespace.NetworkOutDropped) {
             rule.setExpression("irate(collectd_interface_if_dropped_1{hostUuid!=\"\"}[10m])");
             rule.labelMapping("interface", HostNamespace.LabelNames.NetworkDeviceLetter.toString());
+        } else if (metric == HostNamespace.NetworkReceiveDroppedPackets) {
+            rule.setExpression("zstack_host_network_receive_dropped_packets");
+            rule.labelMapping("nic_name", HostAbstractNamespace.LabelNames.NicName.toString());
+        } else if (metric == HostNamespace.NetworkTransmitDroppedPackets) {
+            rule.setExpression("zstack_host_network_transmit_dropped_packets");
+            rule.labelMapping("nic_name", HostAbstractNamespace.LabelNames.NicName.toString());
         } else if (metric == HostNamespace.NetworkAllOutErrors) {
             rule.setExpression("sum(irate(host_network_all_out_errors{hostUuid!=\"\"}[10m])) by(hostUuid)");
         }  else if (metric == HostNamespace.NetworkAllOutErrorsByServiceType) {

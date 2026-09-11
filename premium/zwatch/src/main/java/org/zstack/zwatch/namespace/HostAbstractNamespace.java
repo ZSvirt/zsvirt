@@ -26,6 +26,8 @@ public abstract class HostAbstractNamespace extends AbstractNamespace {
     public enum LabelNames {
         HostUuid,
         CPUNum,
+        DiskName,
+        NicName,
         DiskDeviceLetter,
         NetworkDeviceLetter,
         NetworkServiceType,
@@ -94,6 +96,15 @@ public abstract class HostAbstractNamespace extends AbstractNamespace {
     public static final Metric CPUAverageIdleUtilization = new PercentMetric("CPUAverageIdleUtilization", metrics,
             LabelNames.HostUuid
     );
+    public static final Metric CPUReadyTimeMilliseconds = new TimeDurationMetric("CPUReadyTimeMilliseconds", metrics,
+            LabelNames.HostUuid
+    );
+    public static final Metric CPUReadinessPercent = new PercentMetric("CPUReadinessPercent", metrics,
+            LabelNames.HostUuid
+    );
+    public static final Metric CPUReadyTimeMillisecondsByCPU = new TimeDurationMetric(
+            "CPUReadyTimeMillisecondsByCPU", metrics, LabelNames.HostUuid, LabelNames.CPUNum
+    );
     public static final Metric MemoryFreeBytes = new ByteSizeMetric("MemoryFreeBytes", metrics, LabelNames.HostUuid);
     public static final Metric MemoryFreeInPercent = new PercentMetric("MemoryFreeInPercent", metrics,
             LabelNames.HostUuid
@@ -121,6 +132,12 @@ public abstract class HostAbstractNamespace extends AbstractNamespace {
     );
     public static final Metric DiskAllWriteBytes = new ByteRateMetric("DiskAllWriteBytes", metrics,
             LabelNames.HostUuid
+    );
+    public static final Metric DiskReadLatencyMilliseconds = new TimeDurationMetric("DiskReadLatencyMilliseconds",
+            metrics, LabelNames.HostUuid, LabelNames.DiskName
+    );
+    public static final Metric DiskWriteLatencyMilliseconds = new TimeDurationMetric("DiskWriteLatencyMilliseconds",
+            metrics, LabelNames.HostUuid, LabelNames.DiskName
     );
     public static final Metric NetworkInBytes = new ByteRateMetric("NetworkInBytes", metrics, LabelNames.HostUuid,
             LabelNames.NetworkDeviceLetter
@@ -175,6 +192,12 @@ public abstract class HostAbstractNamespace extends AbstractNamespace {
     );
     public static final Metric NetworkOutDropped = new PacketRateMetric("NetworkOutDropped", metrics, LabelNames.HostUuid,
             LabelNames.NetworkDeviceLetter
+    );
+    public static final Metric NetworkReceiveDroppedPackets = new CountMetric("NetworkReceiveDroppedPackets", metrics,
+            LabelNames.HostUuid, LabelNames.NicName
+    );
+    public static final Metric NetworkTransmitDroppedPackets = new CountMetric("NetworkTransmitDroppedPackets", metrics,
+            LabelNames.HostUuid, LabelNames.NicName
     );
     public static final Metric NetworkAllOutErrors = new PacketRateMetric("NetworkAllOutErrors", metrics,
             LabelNames.HostUuid

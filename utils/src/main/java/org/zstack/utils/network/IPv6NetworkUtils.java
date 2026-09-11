@@ -210,7 +210,7 @@ public class IPv6NetworkUtils {
             IPv6AddressRange range2 = IPv6AddressRange.fromFirstAndLast(s2, e2);
             return range1.overlaps(range2);
         } catch (Exception e) {
-            return true;
+            return false;
         }
     }
 

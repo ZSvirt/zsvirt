@@ -12,9 +12,9 @@ import java.util.Map;
 public class ExpandedQueryAliasInfo {
     Class<?> queryMessageClass;
     Class<?> inventoryClassDefiningThisAlias;
-    Class<?> inventoryClass;
+    public Class<?> inventoryClass;
     String expandField;
-    String alias;
+    public String alias;
     boolean isFromAnnotation;
 
     void check(Map<Class<?>, List<ExpandedQueryStruct>> expandedQueryStructs) {

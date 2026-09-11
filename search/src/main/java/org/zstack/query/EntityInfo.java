@@ -33,19 +33,19 @@ public class EntityInfo {
     Inventory inventoryAnnotation;
     Class<?> entityClass;
     Class<?> jpaMetaClass;
-    Class<?> inventoryClass;
+    public Class<?> inventoryClass;
     String primaryKey;
     Field entityPrimaryKeyField;
     Field inventoryPrimaryKeyField;
     Field inventoryTypeField;
     Field entityTypeField;
-    Map<String, ExpandedQueryStruct> expandedQueries = new HashMap<>();
+    public final Map<String, ExpandedQueryStruct> expandedQueries = new HashMap<>();
     Map<String, EntityInfo> flatTypeEntityMap = new HashMap<>();
     Method inventoryValueOf;
     Method inventoryCollectionValueOf;
     ObjectInstantiator<?> objectInstantiator;
-    Map<String, Field> allFieldsMap = new HashMap<>();
-    Map<String, ExpandedQueryAliasInfo> aliases = new HashMap<>();
+    public final Map<String, Field> allFieldsMap = new HashMap<>();
+    public final Map<String, ExpandedQueryAliasInfo> aliases = new HashMap<>();
     List<String> primitiveFieldNames = new ArrayList<>();
 
     EntityInfo(InventoryCollector collector, Class<?> invClass) throws NoSuchMethodException {

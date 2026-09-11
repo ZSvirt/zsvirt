@@ -50,7 +50,7 @@ public class ApiResult {
                 return val;
             }
         } catch (NoSuchMethodException e) {
-            logger.log(Level.WARNING, "Warning: NoSuchMethodException occurred. Details: ", e.getMessage());
+            logger.log(Level.WARNING, "Warning: NoSuchMethodException occurred. Details: {0}", e.getMessage());
             return null;
         }
     }

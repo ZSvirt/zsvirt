@@ -727,7 +727,8 @@ public class ZSClient {
                         current += interval;
                     }
                 } catch (InterruptedException e) {
-                    //ignore
+                    Thread.currentThread().interrupt();
+                    throw new ApiException(e);
                 } catch (IOException e) {
                     Thread.currentThread().interrupt();
                     throw new ApiException(e);

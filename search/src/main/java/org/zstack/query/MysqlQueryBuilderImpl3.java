@@ -1,9 +1,6 @@
 package org.zstack.query;
 
 import org.apache.commons.lang.StringUtils;
-import org.objenesis.Objenesis;
-import org.objenesis.ObjenesisStd;
-import org.objenesis.instantiator.ObjectInstantiator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.zstack.core.componentloader.PluginRegistry;
@@ -13,15 +10,12 @@ import org.zstack.header.Component;
 import org.zstack.header.apimediator.ApiMessageInterceptionException;
 import org.zstack.header.apimediator.GlobalApiMessageInterceptor;
 import org.zstack.header.configuration.PythonApiBindingWriter;
-import org.zstack.header.description.PackageDescriptionRegistry;
 import org.zstack.header.errorcode.OperationFailureException;
 import org.zstack.header.exception.CloudRuntimeException;
 import org.zstack.header.message.APIMessage;
 import org.zstack.header.query.*;
 import org.zstack.header.rest.APINoSee;
 import org.zstack.header.search.Inventory;
-import org.zstack.header.search.Parent;
-import org.zstack.header.search.TypeField;
 import org.zstack.utils.*;
 import org.zstack.utils.gson.JSONObjectUtil;
 import org.zstack.utils.logging.CLogger;
@@ -29,13 +23,11 @@ import org.zstack.utils.logging.CLogger;
 import static org.zstack.core.Platform.argerr;
 
 import javax.persistence.*;
-import javax.persistence.metamodel.StaticMetamodel;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.Timestamp;
 import java.util.*;
-import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import static org.zstack.utils.CollectionUtils.transformAndRemoveNull;
@@ -52,8 +44,6 @@ public class MysqlQueryBuilderImpl3 implements Component, QueryBuilder, GlobalAp
     private ErrorFacade errf;
     @Autowired
     private PluginRegistry pluginRgty;
-
-    private Objenesis objenesis = new ObjenesisStd();
 
     private static final String USER_TAG = "__userTag__";
     private static final String SYSTEM_TAG = "__systemTag__";
@@ -87,190 +77,6 @@ public class MysqlQueryBuilderImpl3 implements Component, QueryBuilder, GlobalAp
         return msg;
     }
 
-    private class ExpandedQueryAliasInfo {
-        Class queryMessageClass;
-        Class inventoryClassDefiningThisAlias;
-        Class inventoryClass;
-        String expandField;
-        String alias;
-        boolean isFromAnnotation;
-
-        void check() {
-            String[] slices = expandField.split("\\.");
-            String firstExpand = slices[0];
-
-            if (isFromAnnotation) {
-                ExpandedQueries eqs = (ExpandedQueries) inventoryClassDefiningThisAlias.getAnnotation(ExpandedQueries.class);
-                DebugUtils.Assert(eqs != null, String.format("inventory[%s] having annotation[ExpandedQueryAliases] must also have annotation[ExpandedQueries]",
-                        inventoryClassDefiningThisAlias.getName()));
-
-                for (ExpandedQuery at : eqs.value()) {
-                    if (at.expandedField().equals(firstExpand)) {
-                        return;
-                    }
-                }
-
-                throw new CloudRuntimeException(String.format("inventory[%s] has an expanded query alias[%s]," +
-                                " but it doesn't have an expand query that has expandedField[%s]",
-                        inventoryClassDefiningThisAlias.getName(), alias, firstExpand));
-            } else {
-                List<ExpandedQueryStruct> expds = expandedQueryStructs.get(inventoryClassDefiningThisAlias);
-                for (ExpandedQueryStruct s : expds) {
-                    if (s.getExpandedField().equals(firstExpand)) {
-                        return;
-                    }
-                }
-
-                throw new CloudRuntimeException(String.format("inventory[%s] has an expanded query alias[%s](added by package description]," +
-                                " but the extension doesn't declare any expanded query having expandedField[%s]",
-                        inventoryClassDefiningThisAlias.getClass(), alias, firstExpand));
-            }
-        }
-    }
-
-    private class EntityInfo {
-        EntityInfo parent;
-        List<EntityInfo> children = new ArrayList<EntityInfo>();
-        Inventory inventoryAnnotation;
-        Class entityClass;
-        Class jpaMetaClass;
-        Class inventoryClass;
-        String primaryKey;
-        Field entityPrimaryKeyField;
-        Field inventoryPrimaryKeyField;
-        Field inventoryTypeField;
-        Field entityTypeField;
-        Map<String, ExpandedQueryStruct> expandedQueries = new HashMap<String, ExpandedQueryStruct>();
-        Map<String, EntityInfo> flatTypeEntityMap = new HashMap<String, EntityInfo>();
-        Method inventoryValueOf;
-        Method inventoryCollectionValueOf;
-        ObjectInstantiator objectInstantiator;
-        Map<String, Field> allFieldsMap = new HashMap<String, Field>();
-        Map<String, ExpandedQueryAliasInfo> aliases = new HashMap<String, ExpandedQueryAliasInfo>();
-        List<String> premitiveFieldNames = new ArrayList<String>();
-
-        EntityInfo(Class invClass) throws NoSuchMethodException {
-            inventoryAnnotation = (Inventory) invClass.getAnnotation(Inventory.class);
-            entityClass = inventoryAnnotation.mappingVOClass();
-            if (!entityClass.isAnnotationPresent(Entity.class)) {
-                throw new CloudRuntimeException(String.format("class[%s] is not annotated by @Entity, but it's stated as entity class by @Inventory of %s",
-                        entityClass.getName(), invClass.getName()));
-
-            }
-
-            jpaMetaClass = metaModelClasses.get(entityClass);
-            if (jpaMetaClass == null) {
-                throw new CloudRuntimeException(String.format("cannot find JPA meta model class for entity class[%s], the meta model class is expected as %s",
-                        entityClass.getName(), entityClass.getName() + "_"));
-            }
-            inventoryClass = invClass;
-            entityPrimaryKeyField = FieldUtils.getAnnotatedField(Id.class, entityClass);
-            primaryKey = entityPrimaryKeyField.getName();
-            entityPrimaryKeyField.setAccessible(true);
-            inventoryPrimaryKeyField = FieldUtils.getField(primaryKey, inventoryClass);
-            if (inventoryPrimaryKeyField != null) {
-                inventoryPrimaryKeyField.setAccessible(true);
-            }
-
-            inventoryTypeField = FieldUtils.getAnnotatedFieldOfThisClass(TypeField.class, invClass);
-            if (inventoryTypeField != null) {
-                inventoryTypeField.setAccessible(true);
-                entityTypeField = FieldUtils.getField(inventoryTypeField.getName(), entityClass);
-                DebugUtils.Assert(entityTypeField != null, String.format("the type field[%s] of inventory class[%s] is not on entity class[%s]", inventoryTypeField.getName(), inventoryClass.getName(), entityClass.getName()));
-                entityTypeField.setAccessible(true);
-            }
-
-
-            String methodName = inventoryAnnotation.collectionValueOfMethod();
-            if (methodName.equals("")) {
-                methodName = "valueOf";
-            }
-            inventoryCollectionValueOf = invClass.getMethod(methodName, Collection.class);
-            inventoryValueOf = invClass.getMethod("valueOf", entityClass);
-
-            List<ExpandedQueryStruct> structs = expandedQueryStructs.get(inventoryClass);
-            if (structs != null) {
-                for (ExpandedQueryStruct s : structs) {
-                    s.check();
-                    this.expandedQueries.put(s.getExpandedField(), s);
-                }
-            }
-
-            ExpandedQueries expandedQueries = (ExpandedQueries) invClass.getAnnotation(ExpandedQueries.class);
-            if (expandedQueries != null) {
-                for (ExpandedQuery e : expandedQueries.value()) {
-                    Class iclass = e.target() == Object.class ? inventoryClass : e.target();
-                    ExpandedQueryStruct s = ExpandedQueryStruct.fromExpandedQueryAnnotation(iclass, e);
-                    s.check();
-                    this.expandedQueries.put(s.getExpandedField(), s);
-                }
-            }
-
-            objectInstantiator = objenesis.getInstantiatorOf(inventoryClass);
-            List<Field> allFields = FieldUtils.getAllFields(inventoryClass);
-            for (Field f : allFields) {
-                f.setAccessible(true);
-                allFieldsMap.put(f.getName(), f);
-
-                if (!f.isAnnotationPresent(Unqueryable.class) && !f.isAnnotationPresent(Queryable.class)) {
-                    premitiveFieldNames.add(f.getName());
-                }
-            }
-
-            for (List<ExpandedQueryAliasInfo> aliasList : aliasInfos.values()) {
-                for (ExpandedQueryAliasInfo struct : aliasList) {
-                    if (struct.inventoryClassDefiningThisAlias == inventoryClass) {
-                        aliases.put(struct.alias, struct);
-                    }
-                }
-            }
-        }
-
-        void buildFlatTypeEntityMap() {
-            for (EntityInfo e : children) {
-                Parent pat = e.inventoryAnnotation.parent()[0];
-                flatTypeEntityMap.put(pat.type(), e);
-            }
-        }
-
-        Object getPrimaryKeyValue(Object vo) {
-            try {
-                return entityPrimaryKeyField.get(vo);
-            } catch (IllegalAccessException e) {
-                throw new CloudRuntimeException(e);
-            }
-        }
-
-        Class selectInventoryClass(final APIQueryMessage msg) {
-            if (inventoryTypeField == null) {
-                return inventoryClass;
-            }
-
-            QueryCondition typeCondition = null;
-            for (QueryCondition cond : msg.getConditions()) {
-                if (QueryOp.EQ.equals(cond.getOp()) && inventoryTypeField.getName().equals(cond.getName())) {
-                    typeCondition = cond;
-                    break;
-                }
-            }
-
-            if (typeCondition != null) {
-                EntityInfo child = flatTypeEntityMap.get(typeCondition.getValue());
-                if (child != null) {
-                    return child.inventoryClass;
-                }
-            }
-
-            return inventoryClass;
-        }
-
-        void addQueryAliases(List<ExpandedQueryAliasInfo> aliases) {
-            for (ExpandedQueryAliasInfo info : aliases) {
-                this.aliases.put(info.alias, info);
-            }
-        }
-    }
-
     private class SubQueryInfo {
         Class joinInventoryClass;
     }
@@ -284,54 +90,14 @@ public class MysqlQueryBuilderImpl3 implements Component, QueryBuilder, GlobalAp
         Field parentField;
     }
 
-    private Map<Class, EntityInfo> entityInfos = new HashMap<Class, EntityInfo>();
-    private Map<Class, Class> metaModelClasses = new HashMap<Class, Class>();
-    private List<String> escapeConditionNames = new ArrayList<String>();
-    private List<MysqlQuerySubQueryExtension> subQueryExtensions = new ArrayList<MysqlQuerySubQueryExtension>();
-    private Map<Class, List<ExpandedQueryStruct>> expandedQueryStructs = new HashMap<Class, List<ExpandedQueryStruct>>();
-    private Map<Class, List<AddExtraConditionToQueryExtensionPoint>> extraConditionsExts = new HashMap<Class, List<AddExtraConditionToQueryExtensionPoint>>();
-    private Map<Class, List<ExpandedQueryAliasInfo>> aliasInfos = new HashMap<Class, List<ExpandedQueryAliasInfo>>();
-    private Map<Class, Class> inventoryQueryMessageMap = new HashMap<Class, Class>();
-
-    private EntityInfo buildEntityInfo(Class invClass) throws NoSuchMethodException {
-        EntityInfo info = entityInfos.get(invClass);
-        if (info != null) {
-            return info;
-        }
-
-        info = new EntityInfo(invClass);
-        entityInfos.put(invClass, info);
-
-        return info;
-    }
-
-    private void populateEntityInfo() throws NoSuchMethodException {
-        Set<Class<?>> metaClasses = BeanUtils.reflections.getTypesAnnotatedWith(StaticMetamodel.class);
-        for (Class it : metaClasses) {
-            StaticMetamodel at = (StaticMetamodel) it.getAnnotation(StaticMetamodel.class);
-            metaModelClasses.put(at.value(), it);
-        }
-
-        Set<Class<?>> invClasses = BeanUtils.reflections.getTypesAnnotatedWith(Inventory.class);
-
-        for (Class invClass : invClasses) {
-            EntityInfo info = buildEntityInfo(invClass);
-
-            if (info.inventoryAnnotation.parent().length > 0) {
-                Parent pat = info.inventoryAnnotation.parent()[0];
-                Class pinvClass = pat.inventoryClass();
-                DebugUtils.Assert(pinvClass.isAnnotationPresent(Inventory.class), String.format("inventory[%s]'s parent inventory class[%s] is not annotated by @Inventory", info.inventoryClass.getName(), pinvClass.getName()));
-                EntityInfo pinfo = buildEntityInfo(pinvClass);
-                info.parent = pinfo;
-                pinfo.children.add(info);
-            }
-
-        }
-
-        for (EntityInfo e : entityInfos.values()) {
-            e.buildFlatTypeEntityMap();
-        }
-    }
+    private Map<Class<?>, EntityInfo> entityInfos = new HashMap<>();
+    private Map<Class<?>, Class<?>> metaModelClasses = new HashMap<>();
+    private List<String> escapeConditionNames = new ArrayList<>();
+    private List<MysqlQuerySubQueryExtension> subQueryExtensions = new ArrayList<>();
+    private Map<Class<?>, List<ExpandedQueryStruct>> expandedQueryStructs = new HashMap<>();
+    private Map<Class<?>, List<AddExtraConditionToQueryExtensionPoint>> extraConditionsExts = new HashMap<>();
+    private Map<Class<?>, List<ExpandedQueryAliasInfo>> aliasInfos = new HashMap<>();
+    private Map<Class<?>, Class<?>> inventoryQueryMessageMap = new HashMap<>();
 
     private class MetaCondition {
         String attr;
@@ -992,9 +758,9 @@ public class MysqlQueryBuilderImpl3 implements Component, QueryBuilder, GlobalAp
         private void validateFields() {
             EntityInfo info = entityInfos.get(inventoryClass);
             for (String f : msg.getFields()) {
-                if (!info.premitiveFieldNames.contains(f)) {
+                if (!info.primitiveFieldNames.contains(f)) {
                     throw new OperationFailureException(argerr("field[%s] is not a primitive of the inventory %s; you cannot specify it in the parameter 'fields';" +
-                                    "valid fields are %s", f, info.inventoryClass.getSimpleName(), info.premitiveFieldNames));
+                                    "valid fields are %s", f, info.inventoryClass.getSimpleName(), info.primitiveFieldNames));
                 }
             }
         }
@@ -1072,20 +838,12 @@ public class MysqlQueryBuilderImpl3 implements Component, QueryBuilder, GlobalAp
         }
     }
 
-    private void populateExtensions() {
+    private void populatePluginExtensions() {
         subQueryExtensions.addAll(pluginRgty.getExtensionList(MysqlQuerySubQueryExtension.class));
         for (MysqlQuerySubQueryExtension ext : subQueryExtensions) {
             if (ext.getEscapeConditionNames() != null) {
                 escapeConditionNames.addAll(ext.getEscapeConditionNames());
             }
-        }
-
-        for (org.zstack.header.description.query.ExpandedQuery eq : PackageDescriptionRegistry.expandedQueries) {
-            addExpandedQueryStruct(toExpandedQueryStruct(eq), "PackageDescriptionRegistry");
-        }
-        for (org.zstack.header.description.query.ExpandedQueryAlias alias : PackageDescriptionRegistry.expandedQueryAliases) {
-            addExpandedQueryAlias(alias.inventoryClass, alias.alias, alias.expandedField,
-                    "PackageDescriptionRegistry");
         }
 
         for (AddExtraConditionToQueryExtensionPoint ext : pluginRgty.getExtensionList(AddExtraConditionToQueryExtensionPoint.class)) {
@@ -1100,211 +858,17 @@ public class MysqlQueryBuilderImpl3 implements Component, QueryBuilder, GlobalAp
         }
     }
 
-    private static ExpandedQueryStruct toExpandedQueryStruct(org.zstack.header.description.query.ExpandedQuery eq) {
-        ExpandedQueryStruct s = new ExpandedQueryStruct();
-        s.setInventoryClassToExpand(eq.inventoryClassToExpand);
-        s.setExpandedField(eq.expandedField);
-        s.setInventoryClass(eq.inventoryClass);
-        s.setForeignKey(eq.foreignKey);
-        s.setExpandedInventoryKey(eq.expandedInventoryKey);
-        s.setHidden(eq.hidden);
-        s.setSuppressedInventoryClass(eq.suppressedInventoryClass);
-        return s;
-    }
-
-    private void addExpandedQueryStruct(ExpandedQueryStruct s, String source) {
-        List<ExpandedQueryStruct> exts = expandedQueryStructs.computeIfAbsent(
-                s.getInventoryClassToExpand(), k -> new ArrayList<>());
-        for (ExpandedQueryStruct existing : exts) {
-            if (existing.getExpandedField().equals(s.getExpandedField())) {
-                if (existing.getInventoryClass().equals(s.getInventoryClass())
-                        && Objects.equals(existing.getForeignKey(), s.getForeignKey())
-                        && Objects.equals(existing.getExpandedInventoryKey(), s.getExpandedInventoryKey())
-                        && existing.isHidden() == s.isHidden()
-                        && Objects.equals(existing.getSuppressedInventoryClass(), s.getSuppressedInventoryClass())) {
-                    return;
-                }
-                throw new CloudRuntimeException(String.format(
-                        "duplicate expanded query on %s field[%s] from %s conflicts with an existing declaration",
-                        s.getInventoryClassToExpand().getName(), s.getExpandedField(), source));
-            }
-        }
-        exts.add(s);
-    }
-
-    private void addExpandedQueryAlias(Class inventoryClass, String alias, String expandField, String source) {
-        ExpandedQueryAliasInfo info = new ExpandedQueryAliasInfo();
-        info.isFromAnnotation = false;
-        info.inventoryClassDefiningThisAlias = inventoryClass;
-        info.queryMessageClass = inventoryQueryMessageMap.get(info.inventoryClassDefiningThisAlias);
-        DebugUtils.Assert(info.queryMessageClass != null, String.format(
-                "%s defines an expanded query alias[%s], but no query message declares inventory class[%s] to which the alias maps",
-                source, alias, inventoryClass));
-        info.expandField = expandField;
-        info.alias = alias;
-
-        List<ExpandedQueryAliasInfo> infos = aliasInfos.computeIfAbsent(info.queryMessageClass, k -> new ArrayList<>());
-        for (ExpandedQueryAliasInfo existing : infos) {
-            if (existing.alias.equals(alias)) {
-                if (existing.expandField.equals(expandField)
-                        && existing.inventoryClassDefiningThisAlias.equals(inventoryClass)) {
-                    return;
-                }
-                throw new CloudRuntimeException(String.format(
-                        "duplicate expanded query alias[%s] on %s from %s conflicts with an existing declaration",
-                        alias, inventoryClass.getName(), source));
-            }
-        }
-        infos.add(info);
-    }
-
-    private void buildExpandedQueryAliasInfo() {
-        Set<Class<?>> invClasses = BeanUtils.reflections.getTypesAnnotatedWith(Inventory.class);
-
-        for (Class invClass : invClasses) {
-            ExpandedQueryAliases aliases = (ExpandedQueryAliases) invClass.getAnnotation(ExpandedQueryAliases.class);
-            if (aliases == null) {
-                continue;
-            }
-
-            for (ExpandedQueryAlias alias : aliases.value()) {
-                Class aliasInventoryClass = alias.target() == Object.class ? invClass : alias.target();
-
-                ExpandedQueryAliasInfo info = new ExpandedQueryAliasInfo();
-                info.alias = alias.alias();
-                info.expandField = alias.expandedField();
-                info.queryMessageClass = inventoryQueryMessageMap.get(aliasInventoryClass);
-                info.inventoryClassDefiningThisAlias = aliasInventoryClass;
-                info.isFromAnnotation = true;
-                if (info.queryMessageClass == null) {
-                    throw new CloudRuntimeException(String.format("inventory[%s] declares expanded query alias, but not query message declare this inventory class in AutoQuery annotation",
-                            aliasInventoryClass.getName()));
-                }
-
-                List<ExpandedQueryAliasInfo> lst = aliasInfos.computeIfAbsent(info.queryMessageClass, k -> new ArrayList<>());
-                lst.add(info);
-            }
-        }
-    }
-
     @Override
     public boolean start() {
-        try {
-            BeanUtils.reflections.getSubTypesOf(APIQueryMessage.class).forEach(msgClass -> {
-                AutoQuery at = msgClass.getAnnotation(AutoQuery.class);
-                if (at == null) {
-                    logger.warn(String.format("query message[%s] doesn't have AutoQuery annotation, expanded query alias would not take effect", msgClass.getName()));
-                    return;
-                }
-
-                inventoryQueryMessageMap.put(at.inventoryClass(), msgClass);
-            });
-
-            // NOTE: don't change the order
-            populateExtensions();
-            buildExpandedQueryAliasInfo();
-            populateEntityInfo();
-            completeAliasInfo();
-            inheritExpandedQueryAndAliases();
-            removeSuppressedExpandedQuery();
-        } catch (Exception e) {
-            throw new CloudRuntimeException(e);
-        }
-
+        InventoryCollector c = new InventoryCollector();
+        c.collect();
+        this.entityInfos = c.entityInfos;
+        this.inventoryQueryMessageMap = c.inventoryQueryMessageMap;
+        this.aliasInfos = c.aliasInfos;
+        this.expandedQueryStructs = c.expandedQueryStructs;
+        this.metaModelClasses = c.metaModelClasses;
+        populatePluginExtensions();
         return true;
-    }
-
-    private void removeSuppressedExpandedQuery() {
-        for (EntityInfo info : entityInfos.values()) {
-            Map<String, ExpandedQueryStruct> ess = new HashMap<String, ExpandedQueryStruct>();
-            ess.putAll(info.expandedQueries);
-            for (Entry<String, ExpandedQueryStruct> e : ess.entrySet()) {
-                if (e.getValue().getSuppressedInventoryClass() != null) {
-                    ExpandedQueryStruct toSuppressed = null;
-                    for (ExpandedQueryStruct s : info.expandedQueries.values()) {
-                        if (s.getInventoryClass() == e.getValue().getSuppressedInventoryClass()) {
-                            toSuppressed = s;
-                            break;
-                        }
-                    }
-
-                    DebugUtils.Assert(toSuppressed != null, String.format("ExpandedQuery[%s] of %s is going to suppress a undefined ExpandedQuery that has inventory class[%s]",
-                            e.getValue().getExpandedField(), info.inventoryClass, e.getValue().getSuppressedInventoryClass()));
-
-                    info.expandedQueries.remove(toSuppressed.getExpandedField());
-                    logger.debug(String.format("ExpandedQuery[%s] of %s suppresses ExpandedQuery[%s]",
-                            e.getValue().getExpandedField(), info.inventoryClass, toSuppressed.getExpandedField()));
-                }
-            }
-        }
-    }
-
-    private void completeAliasInfo() {
-        class ExpandedQueryAliasInfoCompletion {
-            ExpandedQueryAliasInfo alias;
-
-            ExpandedQueryAliasInfoCompletion(ExpandedQueryAliasInfo alias) {
-                this.alias = alias;
-            }
-
-            private ExpandedQueryStruct findTargetExpandedQueryStruct(String[] expandedFields, EntityInfo entityInfo) {
-                ExpandedQueryStruct struct = null;
-                for (String exf : expandedFields) {
-                    struct = entityInfo.expandedQueries.get(exf);
-                    if (struct == null) {
-                        ExpandedQueryAliasInfo exalias = entityInfo.aliases.get(exf);
-                        DebugUtils.Assert(exalias != null, String.format("cannot find expanded query or alias[%s] on %s", exf, entityInfo.inventoryClass));
-                        struct = findTargetExpandedQueryStruct(exalias.expandField.split("\\."), entityInfo);
-                    }
-                    entityInfo = entityInfos.get(struct.getInventoryClass());
-                }
-                return struct;
-            }
-
-            void complete() {
-                EntityInfo entityInfo = entityInfos.get(alias.inventoryClassDefiningThisAlias);
-                String[] expandedFields = alias.expandField.split("\\.");
-                DebugUtils.Assert(expandedFields.length != 0, String.format("alias[%s] defined in %s is invalid", alias.expandField, alias.inventoryClassDefiningThisAlias));
-                ExpandedQueryStruct struct = findTargetExpandedQueryStruct(expandedFields, entityInfo);
-                alias.inventoryClass = struct.getInventoryClass();
-                alias.check();
-            }
-        }
-
-        for (List<ExpandedQueryAliasInfo> infos : aliasInfos.values()) {
-            for (ExpandedQueryAliasInfo alias : infos) {
-                new ExpandedQueryAliasInfoCompletion(alias).complete();
-            }
-        }
-    }
-
-    private void inheritExpandedQueryAndAliases(EntityInfo current, EntityInfo ancestor) {
-        if (ancestor == null) {
-            return;
-        }
-
-        if (!ancestor.aliases.isEmpty()) {
-            Class msgClz = inventoryQueryMessageMap.get(current.inventoryClass);
-            List<ExpandedQueryAliasInfo> aliases = aliasInfos.get(msgClz);
-            if (aliases == null) {
-                aliases = new ArrayList<ExpandedQueryAliasInfo>();
-            }
-            aliases.addAll(ancestor.aliases.values());
-
-            current.addQueryAliases(aliases);
-        }
-
-        if (!ancestor.expandedQueries.isEmpty()) {
-            current.expandedQueries.putAll(ancestor.expandedQueries);
-        }
-
-        inheritExpandedQueryAndAliases(current, ancestor.parent);
-    }
-
-    private void inheritExpandedQueryAndAliases() {
-        for (EntityInfo info : entityInfos.values()) {
-            inheritExpandedQueryAndAliases(info, info.parent);
-        }
     }
 
     @Override
@@ -1446,7 +1010,7 @@ public class MysqlQueryBuilderImpl3 implements Component, QueryBuilder, GlobalAp
             }
         }
 
-        for (Map.Entry<Class, Class> e : inventoryQueryMessageMap.entrySet()) {
+        for (Map.Entry<Class<?>, Class<?>> e : inventoryQueryMessageMap.entrySet()) {
             QueryableBuilder builder = new QueryableBuilder();
             builder.inventoryClass = e.getKey();
             List<String> queryables = builder.build();
@@ -1473,7 +1037,7 @@ public class MysqlQueryBuilderImpl3 implements Component, QueryBuilder, GlobalAp
     public void writePython(final StringBuilder sb) {
         class PythonQueryObjectWriter {
 
-            private String makeClassName(Class clazz) {
+            private String makeClassName(Class<?> clazz) {
                 return String.format("QueryObject%s", clazz.getSimpleName());
             }
 
@@ -1494,12 +1058,9 @@ public class MysqlQueryBuilderImpl3 implements Component, QueryBuilder, GlobalAp
                 }
 
                 sb.append("\n\n").append("#QueryMessageInventoryMap").append("\nqueryMessageInventoryMap = {");
-                for (Map.Entry<Class, Class> e : inventoryQueryMessageMap.entrySet()
+                for (Map.Entry<Class<?>, Class<?>> e : inventoryQueryMessageMap.entrySet()
                         .stream()
-                        .sorted((e1, e2) ->
-                        {
-                            return e1.getValue().getSimpleName().compareTo(e2.getValue().getSimpleName());
-                        })
+                        .sorted(Comparator.comparing(e -> e.getValue().getSimpleName()))
                         .collect(Collectors.toList())) {
                     sb.append(String.format("\n%s '%s' : %s,", StringUtils.repeat(" ", 4), e.getValue().getSimpleName(), makeClassName(e.getKey())));
                 }
@@ -1511,7 +1072,7 @@ public class MysqlQueryBuilderImpl3 implements Component, QueryBuilder, GlobalAp
                 List<String> primitiveFields = new ArrayList<>();
                 List<String> expandedFields = new ArrayList<>();
 
-                Map<String, Class> nestedAndExpandedFields = new HashMap<>();
+                Map<String, Class<?>> nestedAndExpandedFields = new HashMap<>();
 
                 for (Field f : info.allFieldsMap.values()) {
                     if (f.isAnnotationPresent(Unqueryable.class)) {
@@ -1554,7 +1115,7 @@ public class MysqlQueryBuilderImpl3 implements Component, QueryBuilder, GlobalAp
                 sb.append(String.format("\n%s EXPANDED_FIELDS = [%s]", StringUtils.repeat(" ", 4), StringUtils.join(expandedFields, ",")));
 
                 sb.append(String.format("\n%s QUERY_OBJECT_MAP = {", StringUtils.repeat(" ", 4)));
-                for (Map.Entry<String, Class> e : nestedAndExpandedFields.entrySet()) {
+                for (Map.Entry<String, Class<?>> e : nestedAndExpandedFields.entrySet()) {
                     sb.append(String.format("\n%s'%s' : '%s',", StringUtils.repeat(" ", 8), e.getKey(), makeClassName(e.getValue())));
                 }
                 sb.append(String.format("\n%s}\n", StringUtils.repeat(" ", 5)));

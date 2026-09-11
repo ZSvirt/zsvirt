@@ -40,8 +40,6 @@ Options:
 
   mdpremium           generate markdown docs from API Groovy doc templates (including premium)
 
-  openapi             generate API swagger specs (stale)
-
   premium             run profile under premium, build with enterprise modules
 
   ee                  run profile under ee, build with enterprise + zsvirt-ee modules
@@ -68,8 +66,14 @@ Options:
 MVNTest="mvn test -Djacoco.skip=true"
 
 py() {
-  cd tests/checker
-  $MVNTest -Dtest=TestGenerateApiPython2ClassAndJsonTemplate
+  if [ -d zsvirt-ee/tests-ee/sdk-tools-ee ]; then
+    cd zsvirt-ee/tests-ee/sdk-tools-ee
+    $MVNTest -Dtest=TestGeneratePython2ApiBindingEe
+  else
+    cd tests/sdk-tools
+    $MVNTest -Dtest=TestGeneratePython2ApiBinding
+  fi
+
   cd - >/dev/null
 }
 
@@ -116,36 +120,6 @@ doc() {
   cd test
   $MVNTest -Dtest=TestGenerateDocTemplate
   cd - >/dev/null
-}
-
-openapi() {
-  if [ ! -d premium/test-premium ]; then
-    echo "This tool is not available in zstack of the opensource version"
-    exit 1
-  fi
-
-  cd tool/doclet
-  mvn -Dmaven.test.skip=true package
-  cd -
-
-  javadoc -private -doclet org.zstack.tool.doclet.JsonDocLet -docletpath tool/doclet/target/doclet-*-jar-with-dependencies.jar $(find -name *.java)
-
-  DOC_OUTPUT=$(echo ~/zstack-doclet-output.json)
-  if [ ! -f $DOC_OUTPUT ]; then
-    echo "$DOC_OUTPUT not found"
-    exit 1
-  fi
-
-  cd premium/test-premium
-  $MVNTest -Dtest=GenerateSwaggerSpec -DdocletDoc=$DOC_OUTPUT
-  cd -
-
-  echo ""
-  echo ""
-  echo ""
-  echo "***********************************************"
-  echo "openapi spec is generated at ~/zstack-api.yaml"
-  echo "***********************************************"
 }
 
 docpremium() {
@@ -406,15 +380,15 @@ gitconfig() {
 
     zprint "============================"
     if test x$update = x'y'; then
-      zprint "updating repo zstack ..."
+      zprint "updating repo zstack (zsvirt) ..."
       timeout 20 git fetch --all >/dev/null 2>&1
     fi
 
-    zprint "searching in repo zstack ..."
+    zprint "searching in repo zstack (zsvirt) ..."
     zprint "============================"
     sha1s=$(git log --oneline --all --grep "$3" | cut -d" " -f1 | tr '\n' ' ')
     if test x$(echo $sha1s | tr -d ' ') = x''; then
-      zprint "\033[33mcan not find any related commits in repo zstack\033[0m"
+      zprint "\033[33mcan not find any related commits in repo zstack (zsvirt)\033[0m"
     else
       zprint "\n\033[32mfind commits \033[34m$sha1s\033[0mrelated to \033[34m$3\033[0m \033[0m"
       for sha1 in $sha1s; do
@@ -423,18 +397,18 @@ gitconfig() {
       done
     fi
 
-    cd ./premium
+    cd ./zsvirt-ee
     zprint "\n============================"
     if test x$update = x'y'; then
-      zprint "updating repo premium ..."
+      zprint "updating repo ee ..."
       timeout 20 git fetch --all >/dev/null 2>&1
     fi
 
-    zprint "searching in repo premium ..."
+    zprint "searching in repo ee ..."
     zprint "============================"
     sha1s=$(git log --oneline --grep "$3" | cut -d" " -f1 | tr '\n' ' ')
     if test x$(zprint $sha1s | tr -d ' ') = x''; then
-      zprint "\n\033[33mcan not find any related commits in repo premium\033[0m"
+      zprint "\n\033[33mcan not find any related commits in repo ee\033[0m"
       exit 0
     fi
     zprint "\n\033[32mfind commits \033[34m$sha1s\033[0mrelated to \033[34m$3\033[0m \033[0m"
@@ -564,8 +538,6 @@ run_profile() {
     cloudwatchfunction
   elif test x$1 = x'zwatchzql'; then
     zwatchzql
-  elif test x$1 = x'openapi'; then
-    openapi
   elif test x$1 = x'errorcode'; then
     errorcode
   elif test x$1 = x'ts'; then

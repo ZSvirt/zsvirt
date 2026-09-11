@@ -574,7 +574,7 @@ public class ZSClient {
         private ApiResult pollResult(Response response) throws IOException {
             if (!info.needPoll) {
                 throw new ApiException(String.format("[Internal Error] the api[%s] is not an async API but" +
-                        " the server returns 201 status code", action.getClass().getSimpleName()));
+                        " the server returns 202 status code", action.getClass().getSimpleName()));
             }
 
             Map body = gson.fromJson(response.body().string(), LinkedHashMap.class);

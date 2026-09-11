@@ -16,8 +16,12 @@ import java.util.stream.Collectors
 
 /**
  * Offline copy of {@code MysqlQueryBuilderImpl3.writePython}.
- * Uses {@link InventoryCollector}; does not instantiate the Spring query bean.
+ * Not used by {@link Python2ApiBindingGenerator}; py2 QueryObject comes from {@code ZQLPythonWriter}.
+ *
+ * @deprecated InventoryCollector is not part of py2 generation. Historical PluginRegistry
+ * never invoked {@code MysqlQueryBuilderImpl3.writePython}.
  */
+@Deprecated
 class Python2QueryObjectWriter {
     static void writePython(StringBuilder sb) {
         InventoryCollector collector = new InventoryCollector()

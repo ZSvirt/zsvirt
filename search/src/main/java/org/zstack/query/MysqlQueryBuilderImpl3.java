@@ -34,7 +34,12 @@ import static org.zstack.utils.CollectionUtils.transformAndRemoveNull;
 import static org.zstack.utils.StringDSL.s;
 
 /**
+ * Not defined in Spring XML. Query now goes through ZQL.
+ * Python QueryObject generation uses {@code ZQLPythonWriter}, not {@link #writePython}.
+ *
+ * @deprecated not a Spring bean; py2 SDK generation does not call this writer.
  */
+@Deprecated
 public class MysqlQueryBuilderImpl3 implements Component, QueryBuilder, GlobalApiMessageInterceptor, PythonApiBindingWriter {
     private static final CLogger logger = Utils.getLogger(MysqlQueryBuilderImpl3.class);
 
@@ -1033,6 +1038,7 @@ public class MysqlQueryBuilderImpl3 implements Component, QueryBuilder, GlobalAp
     }
 
 
+    @Deprecated
     @Override
     public void writePython(final StringBuilder sb) {
         class PythonQueryObjectWriter {

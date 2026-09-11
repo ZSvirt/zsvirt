@@ -861,6 +861,10 @@ public class L3BasicNetwork implements L3Network {
         int limit = msg.getLimit();
         String start = msg.getStart();
         for ( IpRangeVO ipRangeVO : ipRangeVOs) {
+            if (limit <= 0) {
+                break;
+            }
+
             if( msg.getStart() == null){
                 if ( ipRangeVO.getIpVersion() == IPv6Constants.IPv6) {
                     start = "::";
@@ -873,7 +877,7 @@ public class L3BasicNetwork implements L3Network {
             if (freeIpInventorys.size() >= msg.getLimit()) {
                 break;
             }
-            limit -= freeIpInventorys.size();
+            limit -= tempFreeIpInventorys.size();
         }
         reply.setInventories(freeIpInventorys);
 

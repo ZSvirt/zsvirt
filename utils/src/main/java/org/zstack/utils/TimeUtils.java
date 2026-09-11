@@ -6,6 +6,7 @@ import org.zstack.utils.logging.CLogger;
 
 import java.text.DateFormat;
 import java.text.ParseException;
+import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -142,22 +143,18 @@ public class TimeUtils {
     private static final String DEFAULT_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
 
     public static boolean isValidTimestampFormat(String timestamp) {
-        try {
-            new SimpleDateFormat(DEFAULT_TIME_FORMAT).parse(timestamp);
-            return true;
-        } catch (ParseException e) {
-            return false;
-        }
+        return isValidTimestampFormat(timestamp, DEFAULT_TIME_FORMAT);
     }
 
     public static boolean isValidTimestampFormat(String timestamp, String dformat) {
-        try {
-            DateFormat dateFormat = new SimpleDateFormat(dformat);
-            dateFormat.parse(timestamp);
-            return true;
-        } catch (ParseException e) {
+        if (timestamp == null || dformat == null) {
             return false;
         }
+
+        SimpleDateFormat dateFormat = new SimpleDateFormat(dformat);
+        dateFormat.setLenient(false);
+        ParsePosition position = new ParsePosition(0);
+        return dateFormat.parse(timestamp, position) != null && position.getIndex() == timestamp.length();
     }
 
     public static long parseFormatStringToTimeStamp(String timestamp, String dformat) {

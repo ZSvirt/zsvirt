@@ -784,7 +784,7 @@ public class ZSClient {
 
     private static void errorIfNotConfigured() {
         if (config == null) {
-            throw new RuntimeException("setConfig() must be called before any methods");
+            throw new RuntimeException("configure() must be called before any methods");
         }
     }
 

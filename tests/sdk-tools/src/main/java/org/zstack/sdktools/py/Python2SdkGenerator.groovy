@@ -1,4 +1,4 @@
-package org.zstack.testlib
+package org.zstack.sdktools.py
 
 import com.google.common.base.Charsets
 import com.google.common.io.Resources
@@ -15,15 +15,12 @@ import org.zstack.utils.FieldUtils
 import java.lang.reflect.Field
 import java.util.stream.Collectors
 
-/**
- * Created by xing5 on 2017/3/31.
- */
-class PythonSdkGenerator {
-    private String toPythonBoolean(boolean bool) {
+class Python2SdkGenerator {
+    private static String toPythonBoolean(boolean bool) {
         return StringUtils.capitalize(String.valueOf(bool))
     }
 
-    private generateFields(Class clz, List fieldList, List annotationList) {
+    private static generateFields(Class clz, List fieldList, List annotationList) {
         def fields = FieldUtils.getAllFields(clz)
 
         OverriddenApiParams oap = clz.getAnnotation(OverriddenApiParams.class)

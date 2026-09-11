@@ -136,7 +136,7 @@ public abstract class AbstractAction {
                 if (value != null && at.maxLength() != Integer.MIN_VALUE && (value instanceof String)) {
                     String str = (String) value;
                     if (str.length() > at.maxLength()) {
-                        throw new ApiException(String.format("filed[%s] exceeds the max length[%s chars] of string",
+                        throw new ApiException(String.format("field[%s] exceeds the max length[%s chars] of string",
                                 p.field.getName(), at.maxLength()));
                     }
                 }
@@ -144,7 +144,7 @@ public abstract class AbstractAction {
                 if (value != null && at.minLength() != 0 && (value instanceof String)) {
                     String str = (String) value;
                     if (str.length() < at.minLength()) {
-                        throw new ApiException(String.format("filed[%s] less than the min length[%s chars] of string",
+                        throw new ApiException(String.format("field[%s] less than the min length[%s chars] of string",
                                 p.field.getName(), at.minLength()));
                     }
                 }

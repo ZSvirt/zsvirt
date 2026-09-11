@@ -126,7 +126,6 @@ class Python2ApiBindingGenerator {
         generateInventoryPythonClass(pysb, basePkgs)
         generateConstantPythonClass(pysb, basePkgs)
         generateGlobalConfigPythonConstant(pysb)
-        Python2QueryObjectWriter.writePython(pysb)
         pysb.append("\n")
         new ZQLPythonWriter().writePython(pysb)
         String pyStr = pysb.toString()

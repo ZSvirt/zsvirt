@@ -806,7 +806,8 @@ public class SecurityGroupApiInterceptor implements ApiMessageInterceptor, Globa
                 if (ipVersion == IPv6Constants.IPv4) {
                     NetworkUtils.validateIpRange(startIp, endIp);
                 } else {
-                    if (!IPv6NetworkUtils.isIpv6Address(startIp) || !IPv6NetworkUtils.isIpv6Address(endIp) || startIp.compareTo(endIp) > 0) {
+                    if (!IPv6NetworkUtils.isIpv6Address(startIp) || !IPv6NetworkUtils.isIpv6Address(endIp) ||
+                            !IPv6NetworkUtils.isValidIpRange(startIp, endIp)) {
                         throw new ApiMessageInterceptionException(err(SecurityGroupErrors.RULE_IP_FIELD_ERROR, "invalid ip range[%s]", ip));
                     }
                 }

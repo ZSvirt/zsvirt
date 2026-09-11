@@ -74,12 +74,12 @@ py() {
 }
 
 pysdk() {
-  if [ -d tests/sdk-tools ]; then
+  if [ -d zsvirt-ee/tests-ee/sdk-tools-ee ]; then
+    cd zsvirt-ee/tests-ee/sdk-tools-ee
+    $MVNTest -Dtest=TestGeneratePython2SDKEe
+  else
     cd tests/sdk-tools
     $MVNTest -Dtest=TestGeneratePython2SDK
-  else
-    cd test
-    $MVNTest -Dtest=TestGeneratePythonSDK
   fi
 
   cd - >/dev/null

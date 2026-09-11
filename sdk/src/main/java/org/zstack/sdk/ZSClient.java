@@ -580,7 +580,7 @@ public class ZSClient {
             Map body = gson.fromJson(response.body().string(), LinkedHashMap.class);
             String pollingUrl = (String) body.get(Constants.LOCATION);
             if (pollingUrl == null) {
-                throw new ApiException(String.format("Internal Error] the api[%s] is an async API but the server" +
+                throw new ApiException(String.format("[Internal Error] the api[%s] is an async API but the server" +
                         " doesn't return the polling location url", action.getClass().getSimpleName()));
             }
 

@@ -561,8 +561,8 @@ public class ZSClient {
                 return;
             }
 
-            String accessKeyId = (String) action.getParameterValue(Constants.ACCESS_KEY_KEYID);;
-            String accessKeySecret = (String) action.getParameterValue(Constants.ACCESS_KEY_KEY_SECRET);;
+            String accessKeyId = (String) action.getParameterValue(Constants.ACCESS_KEY_KEYID);
+            String accessKeySecret = (String) action.getParameterValue(Constants.ACCESS_KEY_KEY_SECRET);
             if (accessKeyId != null && accessKeySecret != null) {
                 calculateAccessKeySignature(reqBuilder, accessKeyId, accessKeySecret, path);
             } else {

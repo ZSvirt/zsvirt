@@ -2,7 +2,6 @@ package org.zstack.test.integration.zql
 
 import org.zstack.sdk.CephPrimaryStorageInventory
 import org.zstack.storage.ceph.CephConstants
-import org.zstack.test.integration.kvm.KvmTest
 import org.zstack.testlib.EnvSpec
 import org.zstack.testlib.SubCase
 
@@ -11,7 +10,7 @@ class QueryChildrenClassZQLCase extends SubCase{
 
     @Override
     void setup() {
-        useSpring(KvmTest.springSpec)
+        useSpring(ZqlTest.springSpec)
     }
 
     @Override

@@ -27,7 +27,7 @@ class ResourceCase extends SubCase {
 
     @Override
     void environment() {
-        envSpec = env {
+        envSpec = makeEnv {
             zone {
                 name = "zone"
 

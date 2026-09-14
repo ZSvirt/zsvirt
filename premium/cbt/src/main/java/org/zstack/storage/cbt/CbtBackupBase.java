@@ -8,7 +8,6 @@ import org.zstack.core.cloudbus.CloudBus;
 import org.zstack.core.cloudbus.CloudBusCallBack;
 import org.zstack.core.cloudbus.MessageSafe;
 import org.zstack.core.db.DatabaseFacade;
-import org.zstack.core.db.Q;
 import org.zstack.core.db.SQLBatch;
 import org.zstack.core.db.SQLBatchWithReturn;
 import org.zstack.core.thread.ChainTask;
@@ -25,7 +24,6 @@ import org.zstack.header.message.Message;
 import org.zstack.header.message.MessageReply;
 import org.zstack.header.vm.VmInstanceState;
 import org.zstack.header.vm.VmInstanceVO;
-import org.zstack.header.vm.VmInstanceVO_;
 import org.zstack.header.vo.ResourceVO;
 import org.zstack.header.vo.ResourceVO_;
 import org.zstack.utils.Utils;
@@ -36,6 +34,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static org.zstack.storage.backup.BackupOperationConflictManager.sendBackupInVmQueue;
 import static org.zstack.core.Platform.operr;
 
 @Configurable(preConstruction = true, autowire = Autowire.BY_TYPE)
@@ -90,8 +89,10 @@ public class CbtBackupBase {
         emsg.setUuid(msg.getUuid());
         emsg.setAccountUuid(msg.getSession().getAccountUuid());
         emsg.setBitmapName(msg.getBitmapName());
-        bus.makeLocalServiceId(emsg, CbtBackupConstant.SERVICE_ID);
-        bus.send(emsg, new CloudBusCallBack(emsg) {
+        String vmUuid = getVmUuid();
+        bus.makeTargetServiceIdByResourceUuid(emsg, CbtBackupConstant.SERVICE_ID, vmUuid);
+
+        sendBackupInVmQueue(bus, emsg, vmUuid, new CloudBusCallBack(emsg) {
             @Override
             public void run(MessageReply reply) {
                 if (reply.isSuccess()) {
@@ -104,6 +105,15 @@ public class CbtBackupBase {
                 }
             }
         });
+    }
+
+    private String getVmUuid() {
+        for (CbtTaskResourceRefVO ref : self.getResourceRefs()) {
+            if (VmInstanceVO.class.getSimpleName().equals(ref.getResourceType())) {
+                return ref.getResourceUuid();
+            }
+        }
+        return null;
     }
 
     private void handle(final APIDeleteCbtTaskMsg msg) {

@@ -74,6 +74,12 @@
         <property name="supportSharedVolumePrimaryStorage" ref="SupportSharedVolumePrimaryStorage"/>
     </bean>
 
+    <bean id="BackupOperationConflictManager" class="org.zstack.storage.backup.BackupOperationConflictManager">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.apimediator.GlobalApiMessageInterceptor"/>
+        </zstack:plugin>
+    </bean>
+
     <bean id="VmMevecoApiInterceptor" class="org.zstack.compute.vm.VmMevocoApiInterceptor">
         <zstack:plugin>
             <zstack:extension interface="org.zstack.header.apimediator.ApiMessageInterceptor"/>

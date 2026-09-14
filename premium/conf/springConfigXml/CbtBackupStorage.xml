@@ -30,6 +30,14 @@
             <zstack:extension interface="org.zstack.header.Component" />
             <zstack:extension interface="org.zstack.header.Service" />
             <zstack:extension interface="org.zstack.storage.cbt.CbtBackupManager" />
+            <zstack:extension interface="org.zstack.header.storage.backup.BackupOperationConflictChecker" order="0" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="CbtTaskMonitor" class="org.zstack.storage.cbt.CbtTaskMonitor" >
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.vm.VmStateChangedExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.volume.ResizeVolumeExtensionPoint" />
         </zstack:plugin>
     </bean>
 

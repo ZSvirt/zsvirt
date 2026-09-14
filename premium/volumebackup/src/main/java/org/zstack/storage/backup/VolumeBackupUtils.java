@@ -1,8 +1,13 @@
 package org.zstack.storage.backup;
 
+import org.zstack.core.cloudbus.CloudBus;
+import org.zstack.core.cloudbus.CloudBusCallBack;
 import org.zstack.core.db.Q;
 import org.zstack.core.db.SQL;
+import org.zstack.header.message.NeedReplyMessage;
 import org.zstack.header.storage.backup.*;
+import org.zstack.header.volume.VolumeVO;
+import org.zstack.header.volume.VolumeVO_;
 import org.zstack.utils.Utils;
 import org.zstack.utils.logging.CLogger;
 
@@ -11,6 +16,17 @@ import java.util.*;
 
 public class VolumeBackupUtils {
     private static final CLogger logger = Utils.getLogger(VolumeBackupUtils.class);
+
+    static void sendBackupInVmQueue(CloudBus bus, NeedReplyMessage msg, String volumeUuid, CloudBusCallBack callback) {
+        String vmUuid = Q.New(VolumeVO.class)
+                .eq(VolumeVO_.uuid, volumeUuid)
+                .select(VolumeVO_.vmInstanceUuid)
+                .findValue();
+        if (vmUuid != null) {
+            bus.makeTargetServiceIdByResourceUuid(msg, VolumeBackupConstant.SERVICE_ID, volumeUuid);
+        }
+        BackupOperationConflictManager.sendBackupInVmQueue(bus, msg, vmUuid, callback);
+    }
 
     public static List<String> filterDeletableBackupOrOnlyUpdateStatus(Set<String> toDeleteBackupUuids, String volumeUuid, List<String> backupStorageUuids) {
         if (toDeleteBackupUuids.isEmpty()) {

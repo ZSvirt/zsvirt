@@ -39,16 +39,21 @@ import org.zstack.header.message.APIMessage;
 import org.zstack.header.message.Message;
 import org.zstack.header.message.MessageReply;
 import org.zstack.header.scheduler.*;
+import org.zstack.header.storage.backup.BackupOperationConflictChecker;
 import org.zstack.header.vm.*;
 import org.zstack.header.vo.ResourceVO;
+import org.zstack.header.vo.ResourceVO_;
 import org.zstack.header.volume.VolumeBeforeExpungeExtensionPoint;
 import org.zstack.header.volume.VolumeDeletionExtensionPoint;
 import org.zstack.header.volume.VolumeInventory;
 import org.zstack.header.volume.VolumeJustBeforeDeleteFromDbExtensionPoint;
+import org.zstack.header.volume.VolumeVO;
+import org.zstack.header.volume.VolumeVO_;
 import org.zstack.identity.Account;
 import org.zstack.identity.AccountManager;
 import org.zstack.scheduler.quota.SchedulerJobNumQuotaDefinition;
 import org.zstack.scheduler.quota.SchedulerTriggerNumQuotaDefinition;
+import org.zstack.storage.backup.BackupOperationConflictManager;
 import org.zstack.utils.DebugUtils;
 import org.zstack.utils.Utils;
 import org.zstack.utils.gson.JSONObjectUtil;
@@ -61,6 +66,7 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import static org.zstack.storage.backup.BackupOperationConflictManager.sendBackupInVmQueue;
 import static org.quartz.CronScheduleBuilder.cronSchedule;
 import static org.quartz.JobBuilder.newJob;
 import static org.quartz.JobKey.jobKey;
@@ -75,8 +81,15 @@ import static org.zstack.utils.CollectionDSL.list;
 public class SchedulerFacadeImpl extends AbstractService implements SchedulerFacade, ManagementNodeReadyExtensionPoint,
         ManagementNodeChangeListener, ResourceOwnerAfterChangeExtensionPoint, VmStateChangedExtensionPoint,
         VmBeforeExpungeExtensionPoint, VmInstanceDestroyExtensionPoint, RecoverVmExtensionPoint, VolumeDeletionExtensionPoint,
-        VolumeBeforeExpungeExtensionPoint, ReportQuotaExtensionPoint, VolumeJustBeforeDeleteFromDbExtensionPoint, VmJustBeforeDeleteFromDbExtensionPoint {
+        VolumeBeforeExpungeExtensionPoint, ReportQuotaExtensionPoint, VolumeJustBeforeDeleteFromDbExtensionPoint,
+        VmJustBeforeDeleteFromDbExtensionPoint, BackupOperationConflictChecker {
     private static final CLogger logger = Utils.getLogger(SchedulerFacadeImpl.class);
+    private static final List<String> BACKUP_CONFLICT_SCHEDULER_TYPES = Arrays.asList(
+            SchedulerType.VM_BACKUP,
+            SchedulerType.ROOT_VOLUME_BACKUP,
+            SchedulerType.VOLUME_BACKUP,
+            SchedulerType.VOLUME_SNAPSHOT,
+            SchedulerType.VOLUME_SNAPSHOT_GROUP);
 
     @Autowired
     private transient CloudBus bus;
@@ -235,12 +248,22 @@ public class SchedulerFacadeImpl extends AbstractService implements SchedulerFac
 
     private void handle(CreateSchedulerJobMsg msg) {
         CreateSchedulerJobReply reply = new CreateSchedulerJobReply();
+        String vmUuid = BACKUP_CONFLICT_SCHEDULER_TYPES.contains(msg.getType())
+                ? getSchedulerJobVmUuid(msg.getTargetResourceUuid()) : null;
+        ErrorCode conflict = BackupOperationConflictManager.check(pluginRgty, vmUuid, null);
+        if (conflict != null) {
+            reply.setError(conflict);
+            bus.reply(msg, reply);
+            return;
+        }
+
         SchedulerJobFactory factory = this.getSchedulerJobFactory(msg.getType());
         SchedulerJob job = factory.createSchedulerJob(msg);
         if (job.getQueueName() == null) {
             SchedulerJobInventory jobInventory = doPersistSchedulerJob(msg, msg.getTargetResourceUuid(), job);
             reply.setInventory(jobInventory);
             bus.reply(msg, reply);
+            return;
         }
         thdf.chainSubmit(new ChainTask(msg) {
             @Override
@@ -874,14 +897,32 @@ public class SchedulerFacadeImpl extends AbstractService implements SchedulerFac
         APICreateSchedulerJobEvent evt = new APICreateSchedulerJobEvent(msg.getId());
         SchedulerJobFactory factory = this.getSchedulerJobFactory(msg.getType());
         SchedulerJob job = factory.createSchedulerJob(msg);
-        if (job.getQueueName() == null) {
+        String vmUuid = BACKUP_CONFLICT_SCHEDULER_TYPES.contains(msg.getType())
+                ? getSchedulerJobVmUuid(msg.getTargetResourceUuid()) : null;
+        if (vmUuid == null && job.getQueueName() == null) {
             SchedulerJobInventory jobInventory = doPersistSchedulerJob(msg, msg.getTargetResourceUuid(), job);
             evt.setInventory(jobInventory);
             bus.publish(evt);
             return;
         }
-        CreateSchedulerJobMsg createSchedulerJobMsg = buildCreateSchedulerJobMsg(msg, job);
-        bus.send(createSchedulerJobMsg, new CloudBusCallBack(msg) {
+        CreateSchedulerJobMsg createSchedulerJobMsg = new CreateSchedulerJobMsg();
+        if (msg.getResourceUuid() != null) {
+            createSchedulerJobMsg.setUuid(msg.getResourceUuid());
+        } else {
+            createSchedulerJobMsg.setUuid(Platform.getUuid());
+        }
+        createSchedulerJobMsg.setType(msg.getType());
+        createSchedulerJobMsg.setTargetResourceUuid(msg.getTargetResourceUuid());
+        createSchedulerJobMsg.setName(msg.getName());
+        createSchedulerJobMsg.setParameters(msg.getParameters());
+        createSchedulerJobMsg.setAccountUuid(msg.getAccountUuid());
+        if (job.getQueueName() != null) {
+            bus.makeTargetServiceIdByResourceUuid(createSchedulerJobMsg, SchedulerConstant.SERVICE_ID, job.getQueueName());
+        }
+        if (job.getQueueName() == null) {
+            bus.makeTargetServiceIdByResourceUuid(createSchedulerJobMsg, SchedulerConstant.SERVICE_ID, vmUuid);
+        }
+        sendBackupInVmQueue(bus, createSchedulerJobMsg, vmUuid, new CloudBusCallBack(msg) {
             @Override
             public void run(MessageReply reply) {
                 if (reply.isSuccess()) {
@@ -895,21 +936,44 @@ public class SchedulerFacadeImpl extends AbstractService implements SchedulerFac
         });
     }
 
-    private CreateSchedulerJobMsg buildCreateSchedulerJobMsg(APICreateSchedulerJobMsg msg, SchedulerJob job) {
-        CreateSchedulerJobMsg csJobMsg = new CreateSchedulerJobMsg();
-        if (msg.getResourceUuid() != null) {
-            csJobMsg.setUuid(msg.getResourceUuid());
-        } else {
-            csJobMsg.setUuid(Platform.getUuid());
+    private String getSchedulerJobVmUuid(String targetResourceUuid) {
+        String vmUuid = Q.New(VolumeVO.class)
+                .eq(VolumeVO_.uuid, targetResourceUuid)
+                .select(VolumeVO_.vmInstanceUuid)
+                .findValue();
+        if (vmUuid != null) {
+            return vmUuid;
         }
-        csJobMsg.setType(msg.getType());
-        csJobMsg.setTargetResourceUuid(msg.getTargetResourceUuid());
-        csJobMsg.setName(msg.getName());
-        csJobMsg.setParameters(msg.getParameters());
-        csJobMsg.setAccountUuid(msg.getAccountUuid());
-        /* use const string as uuid to make all APICreateSchedulerJobMsg that need to be queued is handled by same management node */
-        bus.makeTargetServiceIdByResourceUuid(csJobMsg, SchedulerConstant.SERVICE_ID, job.getQueueName());
-        return csJobMsg;
+
+        String resourceType = Q.New(ResourceVO.class)
+                .eq(ResourceVO_.uuid, targetResourceUuid)
+                .select(ResourceVO_.resourceType)
+                .findValue();
+        return VmInstanceVO.class.getSimpleName().equals(resourceType) ? targetResourceUuid : null;
+    }
+
+    @Override
+    public ErrorCode check(String vmUuid, String currentResourceUuid) {
+        if (currentResourceUuid == null) {
+            return null;
+        }
+
+        List<String> resourceUuids = Q.New(VolumeVO.class)
+                .eq(VolumeVO_.vmInstanceUuid, vmUuid)
+                .select(VolumeVO_.uuid)
+                .listValues();
+        resourceUuids.add(vmUuid);
+        boolean conflict = Q.New(SchedulerJobVO.class)
+                .in(SchedulerJobVO_.targetResourceUuid, resourceUuids)
+                .in(SchedulerJobVO_.jobClassName, getJobClassNames(BACKUP_CONFLICT_SCHEDULER_TYPES))
+                .isExists();
+        if (!conflict) {
+            return null;
+        }
+
+        return operr("VM[uuid: %s] has already created a backup or snapshot scheduler job, "
+                        + "cannot create or enable task[uuid: %s] at the same time.",
+                vmUuid, currentResourceUuid);
     }
 
     private void handle(APIRunSchedulerTriggerMsg msg) {

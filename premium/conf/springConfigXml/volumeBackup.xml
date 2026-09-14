@@ -17,6 +17,7 @@
             <zstack:extension interface="org.zstack.header.vm.VmBeforeStartOnHypervisorExtensionPoint"/>
             <zstack:extension interface="org.zstack.header.imagestore.ImageStoreReclaimSpaceExtensionPoint"/>
             <zstack:extension interface="org.zstack.header.identity.ReportQuotaExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.storage.backup.BackupOperationConflictChecker" order="20"/>
         </zstack:plugin>
     </bean>
 

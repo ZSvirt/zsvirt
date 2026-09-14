@@ -28,8 +28,10 @@ import org.zstack.header.exception.CloudRuntimeException;
 import org.zstack.header.message.APIMessage;
 import org.zstack.header.message.Message;
 import org.zstack.header.message.MessageReply;
+import org.zstack.header.storage.backup.BackupOperationConflictChecker;
 import org.zstack.header.storage.primary.PrimaryStorageVO;
 import org.zstack.header.storage.primary.PrimaryStorageVO_;
+import org.zstack.header.vm.VmInstanceConstant;
 import org.zstack.header.vm.VmInstanceState;
 import org.zstack.header.vm.VmInstanceVO;
 import org.zstack.header.vm.VmInstanceVO_;
@@ -41,6 +43,7 @@ import org.zstack.kvm.KVMHostVO;
 import org.zstack.kvm.VolumeTO;
 import org.zstack.storage.primary.local.LocalStorageConstants;
 import org.zstack.storage.primary.local.LocalStorageSystemTags;
+import org.zstack.storage.backup.BackupOperationConflictManager;
 import org.zstack.storage.volume.VolumeSystemTags;
 import org.zstack.tag.SystemTagCreator;
 import org.zstack.utils.CollectionUtils;
@@ -55,10 +58,11 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import static java.util.Arrays.asList;
 import static org.zstack.core.Platform.operr;
+import static org.zstack.storage.backup.BackupOperationConflictManager.sendBackupInVmQueue;
 import static org.zstack.utils.CollectionDSL.e;
 import static org.zstack.utils.CollectionDSL.map;
 
-public class CbtBackupManagerImpl extends AbstractService implements Component, CbtBackupManager {
+public class CbtBackupManagerImpl extends AbstractService implements Component, CbtBackupManager, BackupOperationConflictChecker {
     private static final CLogger logger = Utils.getLogger(CbtBackupManagerImpl.class);
     private static final String CBT_HOST_OPERATION_SYNC_SIGNATURE = "cbt-host-operation-on-host-%s";
     private final Map<String, CbtBackupFactory> bkFactories = new ConcurrentHashMap<>();
@@ -71,6 +75,8 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
     protected ThreadFacade thdf;
     @Autowired
     private PluginRegistry pluginRgty;
+    @Autowired
+    private BackupOperationConflictManager conflictManager;
 
     @Override
     public void handleMessage(Message msg) {
@@ -109,6 +115,8 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
     private void handleLocalMessage(Message msg) {
         if (msg instanceof DisableCbtTaskMsg) {
             handle((DisableCbtTaskMsg) msg);
+        } else if (msg instanceof CreateCbtTaskMsg) {
+            handle((CreateCbtTaskMsg) msg);
         } else if (msg instanceof EnableCbtTaskMsg) {
             handle((EnableCbtTaskMsg) msg);
         } else if (msg instanceof EnableCbtTaskOnHostMsg) {
@@ -252,42 +260,59 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
     }
 
     private void handle(final APICreateCbtTaskMsg msg) {
-        thdf.chainSubmit(new ChainTask(msg) {
+        CreateCbtTaskMsg cmsg = new CreateCbtTaskMsg();
+        cmsg.setUuid(msg.getResourceUuid() == null ? Platform.getUuid() : msg.getResourceUuid());
+        cmsg.setName(msg.getName());
+        cmsg.setDescription(msg.getDescription());
+        cmsg.setVmInstanceUuid(msg.getVmInstanceUuid());
+        bus.makeTargetServiceIdByResourceUuid(cmsg, CbtBackupConstant.SERVICE_ID, cmsg.getVmInstanceUuid());
+
+        sendBackupInVmQueue(bus, cmsg, cmsg.getVmInstanceUuid(), new CloudBusCallBack(msg) {
             @Override
-            public String getSyncSignature() {
-                return "create-cbt-task";
+            public void run(MessageReply reply) {
+                APICreateCbtTaskEvent evt = new APICreateCbtTaskEvent(msg.getId());
+                if (!reply.isSuccess()) {
+                    evt.setError(reply.getError());
+                } else {
+                    CreateCbtTaskReply r = reply.castReply();
+                    evt.setInventory(r.getInventory());
+                }
+                bus.publish(evt);
+            }
+        });
+    }
+
+    private void handle(final CreateCbtTaskMsg msg) {
+        ErrorCode error = conflictManager.check(msg.getVmInstanceUuid(), msg.getUuid());
+        if (error != null) {
+            bus.replyErrorByMessageType(msg, error);
+            return;
+        }
+
+        doCreateCbtTask(msg, new ReturnValueCompletion<CbtTaskInventory>(msg) {
+            @Override
+            public void success(CbtTaskInventory inventory) {
+                CreateCbtTaskReply reply = new CreateCbtTaskReply();
+                reply.setInventory(inventory);
+                bus.reply(msg, reply);
             }
 
             @Override
-            public void run(SyncTaskChain chain) {
-                doCreateCbtTask(msg, new ReturnValueCompletion<CbtTaskInventory>(chain) {
-                    final APICreateCbtTaskEvent evt = new APICreateCbtTaskEvent(msg.getId());
-
-                    @Override
-                    public void success(CbtTaskInventory inv) {
-                        evt.setInventory(inv);
-                        bus.publish(evt);
-                        chain.next();
-                    }
-
-                    @Override
-                    public void fail(ErrorCode errorCode) {
-                        evt.setError(errorCode);
-                        bus.publish(evt);
-                        chain.next();
-                    }
-                });
-            }
-
-            @Override
-            public String getName() {
-                return String.format("create-cbt-task-%s", msg.getName());
+            public void fail(ErrorCode errorCode) {
+                bus.replyErrorByMessageType(msg, errorCode);
             }
         });
     }
 
     private void handle(final EnableCbtTaskMsg msg) {
         final CbtTaskVO taskVO = dbf.findByUuid(msg.getUuid(), CbtTaskVO.class);
+        if (taskVO == null) {
+            EnableCbtTaskReply reply = new EnableCbtTaskReply();
+            reply.setError(operr("Cbt task not found[uuid: %s]", msg.getUuid()));
+            bus.reply(msg, reply);
+            return;
+        }
+
         thdf.chainSubmit(new ChainTask(msg) {
             @Override
             public String getSyncSignature() {
@@ -301,6 +326,24 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
 
             @Override
             public void run(SyncTaskChain chain) {
+                String vmUuid = getVmUuidByCbtTaskUuid(msg.getUuid());
+                if (vmUuid == null) {
+                    EnableCbtTaskReply reply = new EnableCbtTaskReply();
+                    reply.setError(operr("CBT task[uuid: %s] has no VM attached", msg.getUuid()));
+                    bus.reply(msg, reply);
+                    chain.next();
+                    return;
+                }
+
+                ErrorCode err = conflictManager.check(vmUuid, msg.getUuid());
+                if (err != null) {
+                    EnableCbtTaskReply reply = new EnableCbtTaskReply();
+                    reply.setError(err);
+                    bus.reply(msg, reply);
+                    chain.next();
+                    return;
+                }
+
                 EnableCbtTaskOnHostMsg emsg = new EnableCbtTaskOnHostMsg();
                 emsg.setBitmapName(msg.getBitmapName());
                 emsg.setUuid(msg.getUuid());
@@ -968,19 +1011,10 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
         });
     }
 
-    private void doCreateCbtTask(final APICreateCbtTaskMsg msg,
+    private void doCreateCbtTask(final CreateCbtTaskMsg msg,
                                  ReturnValueCompletion<CbtTaskInventory> completion) {
-        final String uuid = msg.getResourceUuid() == null ? Platform.getUuid() : msg.getResourceUuid();
+        final String uuid = msg.getUuid();
         final String vmUuid = msg.getVmInstanceUuid();
-        List<String> tasks = Q.New(CbtTaskResourceRefVO.class)
-                .eq(CbtTaskResourceRefVO_.resourceUuid, vmUuid)
-                .select(CbtTaskResourceRefVO_.taskUuid)
-                .listValues();
-        if (!tasks.isEmpty()) {
-            completion.fail(operr("VM [uuid: %s] have been protected by task: %s", vmUuid, tasks.get(0)));
-            return;
-        }
-
         CbtTaskVO taskVO = new SQLBatchWithReturn<CbtTaskVO>() {
             @Override
             protected CbtTaskVO scripts() {
@@ -1249,6 +1283,25 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
                 .eq(VmInstanceVO_.uuid, vmUuid)
                 .select(VmInstanceVO_.lastHostUuid)
                 .findValue();
+    }
+
+
+    @Override
+    public ErrorCode check(String vmUuid, String currentResourceUuid) {
+        List<String> taskUuids = Q.New(CbtTaskResourceRefVO.class)
+                .eq(CbtTaskResourceRefVO_.resourceType, VmInstanceVO.class.getSimpleName())
+                .eq(CbtTaskResourceRefVO_.resourceUuid, vmUuid)
+                .select(CbtTaskResourceRefVO_.taskUuid)
+                .listValues();
+        if (currentResourceUuid != null) {
+            taskUuids.removeIf(currentResourceUuid::equals);
+        }
+        if (taskUuids.isEmpty()) {
+            return null;
+        }
+
+        return operr("VM[uuid: %s] has already created a CBT task[uuid: %s], cannot perform another backup operation at the same time.",
+                vmUuid, taskUuids.get(0));
     }
 
     @Override

@@ -28,7 +28,7 @@ public class PatternedSystemTag extends SystemTag {
     }
 
     public static PatternedSystemTag makeEphemeralTag(String tagFormatWithoutPrefix) {
-        String tagFormat = String.format("%s::%s", TagConstant.EPHEMERAL_TAG_PREFIX, tagFormatWithoutPrefix);
+        String tagFormat = Tags.prefix(TagConstant.EPHEMERAL_TAG_PREFIX) + tagFormatWithoutPrefix;
         PatternedSystemTag tag = new PatternedSystemTag(tagFormat, SystemTagVO.class);
         tag.markAsEphemeral();
         return tag;

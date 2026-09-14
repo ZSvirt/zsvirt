@@ -57,7 +57,7 @@ public class SystemTag {
     }
 
     public static SystemTag makeEphemeralTag(String tagScript) {
-        String tagFormat = String.format("%s::%s", TagConstant.EPHEMERAL_TAG_PREFIX, tagScript);
+        String tagFormat = Tags.prefix(TagConstant.EPHEMERAL_TAG_PREFIX) + tagScript;
         return new SystemTag(tagFormat, SystemTagVO.class).markAsEphemeral();
     }
 

@@ -18,11 +18,11 @@ public class ResourceConfigSystemTag extends PatternedSystemTag {
     private ResourceConfigFacade rcf;
 
     public ResourceConfigSystemTag() {
-        super(String.format("%s::{%s}::{%s}::{%s}",
+        super(Tags.join(
                 TagConstant.RESOURCE_CONFIG_TAG_PREFIX,
-                TagConstant.RESOURCE_CONFIG_CATEGORY_TOKEN,
-                TagConstant.RESOURCE_CONFIG_NAME_TOKEN,
-                TagConstant.RESOURCE_CONFIG_VALUE_TOKEN), SystemTagVO.class);
+                Tags.placeholder(TagConstant.RESOURCE_CONFIG_CATEGORY_TOKEN),
+                Tags.placeholder(TagConstant.RESOURCE_CONFIG_NAME_TOKEN),
+                Tags.placeholder(TagConstant.RESOURCE_CONFIG_VALUE_TOKEN)), SystemTagVO.class);
         this.markAsEphemeral();
     }
 
@@ -54,6 +54,6 @@ public class ResourceConfigSystemTag extends PatternedSystemTag {
     }
 
     public static String buildResourceConfig(String category, String name, String value) {
-        return String.format("%s::%s::%s::%s", TagConstant.RESOURCE_CONFIG_TAG_PREFIX, category, name, value);
+        return Tags.join(TagConstant.RESOURCE_CONFIG_TAG_PREFIX, category, name, value);
     }
 }

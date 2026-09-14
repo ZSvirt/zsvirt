@@ -25,8 +25,15 @@ public class AllocatorDomainConstraintResolver {
     private ResourceConfigFacade rcf;
 
     public AllocatorDomainConstraint resolve(String vmUuid, AllocatorDomainScene scene) {
-        String domainUuid = readConstraintUuid(vmUuid, scene);
-        if (domainUuid == null) {
+        return resolveByDomainUuid(readConstraintUuid(vmUuid, scene), scene);
+    }
+
+    /**
+     * Resolve by domain uuid. When {@code scene} is null, Enabled domains are active
+     * without checking the scenes table (attach nic/volume).
+     */
+    public AllocatorDomainConstraint resolveByDomainUuid(String domainUuid, AllocatorDomainScene scene) {
+        if (StringUtils.isEmpty(domainUuid) || AllocatorDomainConstant.UNBOUND_DOMAIN_UUID.equals(domainUuid)) {
             return AllocatorDomainConstraint.none();
         }
 
@@ -34,7 +41,7 @@ public class AllocatorDomainConstraintResolver {
         if (domain.getState() == AllocatorDomainState.Disabled) {
             return AllocatorDomainConstraint.disabled(domain);
         }
-        if (!sceneInTable(domain, scene)) {
+        if (scene != null && !sceneInTable(domain, scene)) {
             return AllocatorDomainConstraint.sceneNotInTable(domain);
         }
         return AllocatorDomainConstraint.active(domain);
@@ -74,7 +81,7 @@ public class AllocatorDomainConstraintResolver {
         }
     }
 
-    private String readConfigDomainUuid(String vmUuid) {
+    public String readConfigDomainUuid(String vmUuid) {
         String value = rcf.getResourceConfigValue(AllocatorDomainGlobalConfig.SCHEDULING_DOMAIN_UUID, vmUuid, String.class);
         if (StringUtils.isEmpty(value) || AllocatorDomainConstant.UNBOUND_DOMAIN_UUID.equals(value)) {
             return null;

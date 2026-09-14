@@ -68,7 +68,7 @@ class BatchDeleteHostCase extends SubCase {
             def thread = Thread.start {
                 DeleteHostAction action = new DeleteHostAction(
                         uuid: uuid,
-                        sessionId: Test.currentEnvSpec.session.uuid,
+                        sessionId: currentEnvSpec.session.uuid,
                 )
                 action.call()
                 count.incrementAndGet()

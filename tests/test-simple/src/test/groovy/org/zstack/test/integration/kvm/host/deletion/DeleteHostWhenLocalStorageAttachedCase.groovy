@@ -12,9 +12,7 @@ import org.zstack.utils.data.SizeUnit
 /**
  * Created by lining on 2017/7/23.
  */
-
 class DeleteHostWhenLocalStorageAttachedCase extends SubCase{
-
     EnvSpec env
 
     DatabaseFacade dbf
@@ -26,7 +24,7 @@ class DeleteHostWhenLocalStorageAttachedCase extends SubCase{
 
     @Override
     void environment() {
-        env = env {
+        env = makeEnv {
             sftpBackupStorage {
                 name = "sftp"
                 url = "/sftp"

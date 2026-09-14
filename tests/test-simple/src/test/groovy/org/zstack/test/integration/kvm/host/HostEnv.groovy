@@ -9,12 +9,6 @@ import org.zstack.utils.data.SizeUnit
 class HostEnv {
     static EnvSpec noHostBasicEnv() {
         return Test.makeEnv {
-            instanceOffering {
-                name = "instanceOffering"
-                memory = SizeUnit.GIGABYTE.toByte(8)
-                cpu = 4
-            }
-
             sftpBackupStorage {
                 name = "sftp"
                 url = "/sftp"
@@ -68,12 +62,6 @@ class HostEnv {
 
     static EnvSpec oneHostEnv() {
         return Test.makeEnv {
-            instanceOffering {
-                name = "instanceOffering"
-                memory = SizeUnit.GIGABYTE.toByte(8)
-                cpu = 4
-            }
-
             sftpBackupStorage {
                 name = "sftp"
                 url = "/sftp"
@@ -136,12 +124,6 @@ class HostEnv {
 
     static EnvSpec twoHostEnv() {
         return Test.makeEnv {
-            instanceOffering {
-                name = "instanceOffering"
-                memory = SizeUnit.GIGABYTE.toByte(8)
-                cpu = 4
-            }
-
             sftpBackupStorage {
                 name = "sftp"
                 url = "/sftp"

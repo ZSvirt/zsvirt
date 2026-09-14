@@ -1,4 +1,4 @@
-package org.zstack.test.integration.kvm.capacity
+package org.zstack.test.integration.kvm.host.capacity
 
 import org.springframework.http.HttpEntity
 import org.zstack.core.db.Q
@@ -9,9 +9,11 @@ import org.zstack.kvm.KVMConstant
 import org.zstack.kvm.KVMGlobalConfig
 import org.zstack.sdk.AddKVMHostAction
 import org.zstack.sdk.GetCpuMemoryCapacityResult
+import org.zstack.sdk.ImageInventory
+import org.zstack.sdk.L3NetworkInventory
 import org.zstack.test.integration.kvm.KvmTest
-import org.zstack.test.integration.kvm.host.HostEnv
 import org.zstack.sdk.ClusterInventory
+import org.zstack.test.integration.kvm.host.HostEnv
 import org.zstack.testlib.EnvSpec
 import org.zstack.testlib.SubCase
 import org.zstack.utils.data.SizeUnit
@@ -41,17 +43,17 @@ class CheckHostCapacityWhenAddHostCase extends SubCase {
     }
 
     void testCreateVmWithReserveCapacity() {
-        def image = env.inventoryByName("image1")
-        def l3 = env.inventoryByName("l3")
-        def instanceOffering = env.inventoryByName("instanceOffering")
-        def cluster = env.inventoryByName("cluster")
+        def image = env.inventoryByName("image1") as ImageInventory
+        def l3 = env.inventoryByName("l3") as L3NetworkInventory
+        def cluster = env.inventoryByName("cluster") as ClusterInventory
 
         expect(AssertionError.class) {
             createVmInstance {
                 name = "vm"
                 imageUuid = image.uuid
                 l3NetworkUuids = [l3.uuid]
-                instanceOfferingUuid = instanceOffering.uuid
+                cpuNum = 4
+                memorySize = gb(8)
                 clusterUuid = cluster.uuid
             }
         }
@@ -63,9 +65,9 @@ class CheckHostCapacityWhenAddHostCase extends SubCase {
             resourceUuid = cluster.uuid
         }
 
-        GetCpuMemoryCapacityResult result = getCpuMemoryCapacity {
+        def result = getCpuMemoryCapacity {
             clusterUuids = [cluster.uuid]
-        }
+        } as GetCpuMemoryCapacityResult
 
         KVMGlobalConfig.RESERVED_CPU_CAPACITY.updateValue(result.availableCpu)
 
@@ -73,13 +75,14 @@ class CheckHostCapacityWhenAddHostCase extends SubCase {
             name = "vm"
             imageUuid = image.uuid
             l3NetworkUuids = [l3.uuid]
-            instanceOfferingUuid = instanceOffering.uuid
+            cpuNum = 4
+            memorySize = gb(8)
             clusterUuid = cluster.uuid
         }
     }
 
     void testCheckCapacityWhenAddHost() {
-        ClusterInventory cluster = env.inventoryByName("cluster")
+        def cluster = env.inventoryByName("cluster") as ClusterInventory
         KVMGlobalConfig.RESERVED_MEMORY_CAPACITY.updateValue("1024G")
 
         env.afterSimulator(KVMConstant.KVM_HOST_CAPACITY_PATH) { rsp, HttpEntity<String> e ->

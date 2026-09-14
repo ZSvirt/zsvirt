@@ -21,7 +21,7 @@ class ChangeCpuOverProvisioningRatioCase extends SubCase {
 
     @Override
     void environment() {
-        env = env {
+        env = makeEnv {
             sftpBackupStorage {
                 name = "sftp"
                 url = "/sftp"

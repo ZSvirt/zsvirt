@@ -6,7 +6,6 @@ import org.zstack.sdk.GetCpuMemoryCapacityResult
 import org.zstack.sdk.KVMHostInventory
 import org.zstack.sdk.ZoneInventory
 import org.zstack.test.integration.kvm.KvmTest
-import org.zstack.test.integration.kvm.hostallocator.Env
 import org.zstack.testlib.EnvSpec
 import org.zstack.testlib.SubCase
 import org.zstack.utils.data.SizeUnit
@@ -29,13 +28,7 @@ class GetCpuMemoryWithHypervisorCase extends SubCase {
 
     @Override
     void environment() {
-        env = env {
-            instanceOffering {
-                name = "instanceOffering"
-                memory = SizeUnit.GIGABYTE.toByte(2)
-                cpu = 2
-            }
-
+        env = makeEnv {
             sftpBackupStorage {
                 name = "sftp"
                 url = "/sftp"

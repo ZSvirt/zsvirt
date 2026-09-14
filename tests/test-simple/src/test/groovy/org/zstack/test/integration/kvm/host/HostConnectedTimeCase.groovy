@@ -8,7 +8,6 @@ import org.zstack.header.tag.SystemTagVO_
 import org.zstack.kvm.KVMAgentCommands
 import org.zstack.kvm.KVMConstant
 import org.zstack.sdk.HostInventory
-import org.zstack.test.integration.kvm.Env
 import org.zstack.test.integration.kvm.KvmTest
 import org.zstack.testlib.EnvSpec
 import org.zstack.testlib.SubCase
@@ -33,7 +32,7 @@ class HostConnectedTimeCase extends SubCase {
 
     @Override
     void environment() {
-        env = Env.oneVmBasicEnv()
+        env = KvmTest.oneVmBasicEnv()
     }
 
     @Override

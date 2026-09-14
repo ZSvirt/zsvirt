@@ -13,10 +13,11 @@ import org.zstack.header.host.HostVO
 import org.zstack.header.host.HostVO_
 import org.zstack.header.host.ReconnectHostMsg
 import org.zstack.header.message.MessageReply
+import org.zstack.header.network.service.NetworkServiceType
 import org.zstack.kvm.KVMAgentCommands
 import org.zstack.kvm.KVMConstant
+import org.zstack.network.service.virtualrouter.VirtualRouterConstant
 import org.zstack.sdk.HostInventory
-import org.zstack.test.integration.kvm.Env
 import org.zstack.test.integration.kvm.KvmTest
 import org.zstack.testlib.EnvSpec
 import org.zstack.testlib.SubCase
@@ -42,7 +43,87 @@ class ConnectHostMultiTimesCase extends SubCase {
 
     @Override
     void environment() {
-        env = Env.noVmTwoHostsEnv()
+        env = makeEnv {
+            sftpBackupStorage {
+                name = "sftp"
+                url = "/sftp"
+                username = "root"
+                password = "password"
+                hostname = "localhost"
+
+                image {
+                    name = "image1"
+                    url = "http://zstack.org/download/test.qcow2"
+                }
+            }
+
+            zone {
+                name = "zone"
+                description = "test"
+
+                cluster {
+                    name = "cluster"
+                    hypervisorType = "KVM"
+
+                    kvm {
+                        name = "kvm1"
+                        managementIp = "127.0.0.1"
+                        username = "root"
+                        password = "password"
+                    }
+
+                    kvm {
+                        name = "kvm2"
+                        managementIp = "127.0.0.2"
+                        username = "root"
+                        password = "password"
+                    }
+
+                    attachPrimaryStorage("local")
+                    attachL2Network("l2")
+                }
+
+                localPrimaryStorage {
+                    name = "local"
+                    url = "/local_ps"
+                }
+
+                l2NoVlanNetwork {
+                    name = "l2"
+                    physicalInterface = "eth0"
+
+                    l3Network {
+                        name = "l3"
+
+                        service {
+                            provider = VirtualRouterConstant.PROVIDER_TYPE
+                            types = [NetworkServiceType.DHCP.toString(), NetworkServiceType.DNS.toString()]
+                        }
+
+                        ip {
+                            startIp = "192.168.100.10"
+                            endIp = "192.168.100.100"
+                            netmask = "255.255.255.0"
+                            gateway = "192.168.100.1"
+                        }
+                    }
+
+                    l3Network {
+                        name = "pubL3"
+
+                        ip {
+                            startIp = "12.16.10.10"
+                            endIp = "12.16.10.100"
+                            netmask = "255.255.255.0"
+                            gateway = "12.16.10.1"
+                        }
+                    }
+                }
+
+                attachBackupStorage("sftp")
+            }
+
+        }
     }
 
     @Override

@@ -8,14 +8,13 @@ import org.zstack.header.tag.SystemTagVO_
 import org.zstack.kvm.KVMAgentCommands
 import org.zstack.kvm.KVMConstant
 import org.zstack.sdk.HostInventory
-import org.zstack.test.integration.kvm.Env
 import org.zstack.test.integration.kvm.KvmTest
 import org.zstack.testlib.EnvSpec
 import org.zstack.testlib.SubCase
 import org.zstack.utils.gson.JSONObjectUtil
 
 
-class GetCpuInfoAndPowerSupplyInfoCase extends SubCase {
+class GetHostIpmiAddressCase extends SubCase {
 
     EnvSpec env
 
@@ -26,13 +25,13 @@ class GetCpuInfoAndPowerSupplyInfoCase extends SubCase {
 
     @Override
     void environment() {
-        env = Env.oneVmBasicEnv()
+        env = KvmTest.oneVmBasicEnv()
     }
 
     @Override
     void test() {
         env.create {
-            testCpuInfoByReConnectHostOrAddHost()
+            testGetHostIpmiAddress()
         }
     }
 
@@ -41,7 +40,7 @@ class GetCpuInfoAndPowerSupplyInfoCase extends SubCase {
         env.delete()
     }
 
-    void testCpuInfoByReConnectHostOrAddHost() {
+    void testGetHostIpmiAddress() {
 
         HostInventory host = env.inventoryByName("kvm")
 
@@ -56,8 +55,10 @@ class GetCpuInfoAndPowerSupplyInfoCase extends SubCase {
             uuid = host.uuid
         }
 
-        assert Q.New(SystemTagVO.class).eq(SystemTagVO_.resourceUuid, host.uuid).eq(SystemTagVO_.resourceType, HostVO.getSimpleName()).like(SystemTagVO_.tag, "cpuProcessorNum::%").isExists()
-
+        assert Q.New(SystemTagVO.class)
+                .eq(SystemTagVO_.resourceUuid, host.uuid)
+                .eq(SystemTagVO_.resourceType, HostVO.getSimpleName())
+                .like(SystemTagVO_.tag, "ipmiAddress::%")
+                .isExists()
     }
-
 }

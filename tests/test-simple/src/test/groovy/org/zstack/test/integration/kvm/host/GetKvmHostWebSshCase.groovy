@@ -1,7 +1,6 @@
 package org.zstack.test.integration.kvm.host
 
 import org.zstack.kvm.KVMGlobalConfig
-import org.zstack.kvm.KVMHost
 import org.zstack.sdk.ClusterInventory
 import org.zstack.sdk.GetHostWebSshUrlResult
 import org.zstack.sdk.KVMHostInventory

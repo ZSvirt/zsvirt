@@ -34,7 +34,7 @@ class UpdateHostCase extends SubCase {
     }
 
     void testUpdateHost() {
-        HostInventory kvm = env.inventoryByName("kvm1")
+        def kvm = env.inventoryByName("kvm1") as HostInventory
         assert kvm.name == "kvm1"
         assert kvm.description == null
         assert kvm.managementIp == "127.0.0.2"

@@ -13,7 +13,6 @@ import org.zstack.sdk.GetCpuMemoryCapacityAction
 import org.zstack.sdk.HostInventory
 import org.zstack.sdk.ReconnectHostAction
 import org.zstack.test.integration.kvm.KvmTest
-import org.zstack.test.integration.kvm.hostallocator.Env
 import org.zstack.testlib.EnvSpec
 import org.zstack.testlib.HostSpec
 import org.zstack.testlib.SubCase
@@ -38,7 +37,7 @@ class CpuMemoryCapacityCase extends SubCase {
 
     @Override
     void environment() {
-        env = Env.noVmThreeHostEnv()
+        env = KvmTest.noVmThreeHostEnv()
     }
 
     @Override
@@ -115,6 +114,4 @@ class CpuMemoryCapacityCase extends SubCase {
         result = res.value.availableMemory
         assert result == SizeUtils.sizeStringToBytes("9G")
     }
-
-
 }

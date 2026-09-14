@@ -8,7 +8,6 @@ import org.zstack.sdk.VmInstanceInventory
 import org.zstack.test.integration.kvm.KvmTest
 import org.zstack.testlib.EnvSpec
 import org.zstack.testlib.SubCase
-import org.zstack.utils.data.SizeUnit
 
 /**
  * Created by lining on 2017/7/23.
@@ -27,13 +26,7 @@ class DeleteHostWhenLocalStorageDetachedCase extends SubCase{
 
     @Override
     void environment() {
-        env = env {
-            instanceOffering {
-                name = "instanceOffering"
-                memory = SizeUnit.GIGABYTE.toByte(8)
-                cpu = 4
-            }
-
+        env = makeEnv {
             sftpBackupStorage {
                 name = "sftp"
                 url = "/sftp"
@@ -98,7 +91,8 @@ class DeleteHostWhenLocalStorageDetachedCase extends SubCase{
 
             vm {
                 name = "vm"
-                useInstanceOffering("instanceOffering")
+                cpu = 4
+                memoryGB(8)
                 useImage("image")
                 useL3Networks("l3")
                 useHost("kvm")
@@ -106,7 +100,8 @@ class DeleteHostWhenLocalStorageDetachedCase extends SubCase{
 
             vm {
                 name = "vm2"
-                useInstanceOffering("instanceOffering")
+                cpu = 4
+                memoryGB(8)
                 useImage("image")
                 useL3Networks("l3")
                 useHost("kvm2")

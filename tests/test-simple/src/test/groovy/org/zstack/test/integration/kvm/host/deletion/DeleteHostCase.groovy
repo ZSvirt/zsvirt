@@ -11,7 +11,6 @@ import org.zstack.header.volume.VolumeStatus
 import org.zstack.header.volume.VolumeVO
 import org.zstack.network.securitygroup.SecurityGroupConstant
 import org.zstack.network.service.virtualrouter.VirtualRouterConstant
-import org.zstack.sdk.DiskOfferingInventory
 import org.zstack.sdk.HostInventory
 import org.zstack.sdk.VmInstanceInventory
 import org.zstack.sdk.VolumeInventory
@@ -47,7 +46,7 @@ class DeleteHostCase extends SubCase{
 
     @Override
     void environment() {
-        env = env {
+        env = makeEnv {
             sftpBackupStorage {
                 name = "sftp"
                 url = "/sftp"
@@ -201,7 +200,6 @@ class DeleteHostCase extends SubCase{
             vmInstanceUuid = newVm.uuid
             volumeUuid = newVol.uuid
         }
-
 
         // delete host1: expected vm and vm.dataVolume also deleted, but newVm and newVm.volume still exist
         deleteHost {

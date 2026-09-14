@@ -1,7 +1,6 @@
 package org.zstack.test.integration.zql
 
 import org.zstack.zql.ZQLQueryReturn
-import org.zstack.test.integration.kvm.KvmTest
 import org.zstack.testlib.EnvSpec
 import org.zstack.testlib.SubCase
 import org.zstack.utils.data.SizeUnit
@@ -17,7 +16,7 @@ class CountGroupByCase extends SubCase {
 
     @Override
     void setup() {
-        useSpring(KvmTest.springSpec)
+        useSpring(ZqlTest.springSpec)
     }
 
     @Override

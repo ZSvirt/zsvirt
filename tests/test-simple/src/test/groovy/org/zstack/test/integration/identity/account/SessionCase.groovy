@@ -36,7 +36,7 @@ class SessionCase extends SubCase {
 
     @Override
     void environment() {
-        env = env {}
+        env = makeEnv {}
     }
 
     @Override

@@ -1,7 +1,6 @@
 package org.zstack.test.integration.zql
 
 import org.zstack.sdk.QueryZoneAction
-import org.zstack.test.integration.ZStackTest
 import org.zstack.testlib.EnvSpec
 import org.zstack.testlib.SubCase
 
@@ -15,14 +14,12 @@ class QueryWithReplyCountCase extends SubCase {
 
     @Override
     void setup() {
-        useSpring(ZStackTest.springSpec)
+        useSpring(ZqlTest.springSpec)
     }
 
     @Override
     void environment() {
-        env = env {
-
-        }
+        env = makeEnv {}
     }
 
     @Override

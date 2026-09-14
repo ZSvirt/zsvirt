@@ -217,7 +217,7 @@ public class MevocoVmInstanceBase extends VmInstanceBase {
         } else if (msg instanceof APISyncVmClockMsg) {
             handle((APISyncVmClockMsg) msg);
         } else {
-            bus.dealWithUnknownMessage(msg);
+            super.handleApiMessage(msg);
         }
     }
 
@@ -241,7 +241,7 @@ public class MevocoVmInstanceBase extends VmInstanceBase {
         } else if (msg instanceof SetVmNicQosMsg) {
             handle((SetVmNicQosMsg) msg);
         } else {
-            bus.dealWithUnknownMessage(msg);
+            super.handleLocalMessage(msg);
         }
     }
 

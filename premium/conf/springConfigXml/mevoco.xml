@@ -307,6 +307,12 @@
         </zstack:plugin>
     </bean>
 
+    <bean id="MevocoApplicationVmNicQosConfigBackend" class="org.zstack.compute.vm.MevocoApplicationVmNicQosConfigBackend">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.compute.vm.VmNicQosConfigBackend"/>
+        </zstack:plugin>
+    </bean>
+
     <bean id="MevocoVmDnsBackend" class="org.zstack.compute.vm.MevocoVmDnsBackend">
         <zstack:plugin>
             <zstack:extension interface="org.zstack.compute.vm.VmDnsBackend"/>

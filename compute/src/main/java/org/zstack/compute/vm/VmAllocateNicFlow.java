@@ -163,7 +163,6 @@ public class VmAllocateNicFlow implements Flow {
                             : VmNicState.enable.toString()
             );
             final NicIpAddressInfo nicIpAddressInfo = !nw.enableIpAllocation()
-                    && spec.getVmInventory().getType().equals(VmInstanceConstant.USER_VM_TYPE)
                     ? getNicNetworkInfo(nw.getUuid(), nicParam, nicNetworkInfoMap, vmNicParamIpVersions)
                     : null;
             final String vmNicUuid = new SQLBatchWithReturn<String>() {

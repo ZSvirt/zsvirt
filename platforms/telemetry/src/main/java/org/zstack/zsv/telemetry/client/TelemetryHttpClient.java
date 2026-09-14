@@ -236,7 +236,7 @@ public class TelemetryHttpClient {
     private static String resolveBaseUrlWithPort() {
         String configured = TelemetryGlobalConfig.CLOUD_BASE_URL.value();
         if (configured == null || TelemetryConstant.CONSENT_NOT_GRANTED.equals(configured) || configured.trim().isEmpty()) {
-            return TelemetryConstant.MOCK_CLOUD_BASE_URL;
+            return TelemetryConstant.MOCK_CLOUD_BASE_URL + ":" + TelemetryConstant.MOCK_CLOUD_BASE_PORT;
         }
         String url = trimTrailingSlash(configured.trim());
         requireHttpsUrl(url);

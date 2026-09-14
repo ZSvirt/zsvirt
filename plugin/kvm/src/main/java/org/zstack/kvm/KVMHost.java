@@ -6215,6 +6215,7 @@ public class KVMHost extends HostBase implements Host {
         chain.allowWatch();
         chain.then(new ShareFlow() {
             boolean deployed = false;
+            boolean libvirtRestarted = false;
             @Override
             public void setup() {
                 flow(new NoRollbackFlow() {
@@ -6490,6 +6491,10 @@ public class KVMHost extends HostBase implements Host {
                                 if (run != null) {
                                     deployed = run;
                                 }
+                                if (deployed) {
+                                    libvirtRestarted = Objects.equals(deployArguments.getInit(), "true")
+                                            || Objects.equals(deployArguments.getRestartLibvirtd(), "true");
+                                }
                                 trigger.next();
                             }
 
@@ -6550,6 +6555,10 @@ public class KVMHost extends HostBase implements Host {
 
                     @Override
                     public void run(final FlowTrigger trigger, Map data) {
+                        final long echoTimeout = libvirtRestarted
+                                ? KVMHostUtils.libvirtRestartedEchoTimeoutMillis(self.getUuid())
+                                : TimeUnit.SECONDS.toMillis(CoreGlobalProperty.REST_FACADE_ECHO_TIMEOUT);
+
                         restf.echo(echoPath, new Completion(trigger) {
                             @Override
                             public void success() {
@@ -6582,7 +6591,7 @@ public class KVMHost extends HostBase implements Host {
                                                 public void fail(ErrorCode errorCode) {
                                                     trigger.fail(errorCode);
                                                 }
-                                            });
+                                            }, TimeUnit.SECONDS.toMillis(1), echoTimeout);
                                         }
 
                                         @Override
@@ -6594,7 +6603,7 @@ public class KVMHost extends HostBase implements Host {
                                     trigger.fail(errorCode);
                                 }
                             }
-                        });
+                        }, TimeUnit.SECONDS.toMillis(1), echoTimeout);
                     }
                 });
 

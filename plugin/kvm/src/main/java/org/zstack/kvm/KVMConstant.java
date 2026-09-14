@@ -219,6 +219,10 @@ public interface KVMConstant {
     String KVM_AGENT_STATUS_BUSY = "busy";
     String KVM_AGENT_STATUS_AVAILABLE = "available";
 
+    long LIBVIRT_RESTART_ECHO_TIMEOUT_VM_THRESHOLD = 100;
+    long LIBVIRT_RESTART_ECHO_TIMEOUT_PER_VM_SECONDS = 1;
+    long LIBVIRT_RESTART_ECHO_TIMEOUT_MAX_SECONDS = 180;
+
     public static final String L2_PROVIDER_TYPE_LINUX_BRIDGE = "LinuxBridge";
     public static final String L2_PROVIDER_TYPE_OVS_DPDK = "OvsDpdk";
     public static final String L2_PROVIDER_TYPE_MACVLAN = "MacVlan";

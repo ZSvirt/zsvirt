@@ -204,6 +204,28 @@ Please update documentation when:
 
 Documentation should be clear, accurate, and easy to follow.
 
+### README Translations
+
+The English [README.md](README.md) is the source for translations. Translated
+READMEs live in the repository root as `README.<language>.md`, except Simplified
+Chinese, which keeps the existing [README_zh.md](README_zh.md). The language set,
+language suffixes (apart from the existing Chinese filename), and selector order follow [OpenCode](https://github.com/anomalyco/opencode)
+(as checked on 2026-09-15): English plus `zh`, `zht`, `ko`, `de`, `es`, `fr`, `it`,
+`da`, `ja`, `pl`, `ru`, `bs`, `ar`, `no`, `br`, `th`, `tr`, `uk`, `bn`, `gr`, and `vi`.
+The inherited suffixes `br` and `gr` refer to Brazilian Portuguese and Greek;
+`zh` and `zht` refer to Simplified and Traditional Chinese.
+
+When changing README content, update the corresponding sections in every
+translation. Keep section order, product claims, images, and link destinations
+aligned; use existing localized website or documentation URLs where available.
+Translate visible text and image descriptions, but preserve product names,
+commands, code identifiers, and actual UI labels such as `Demo Login`. Shared
+screenshots may remain in their original language.
+
+When adding a language, translate the complete README and add its native language
+name to the language selector in every README. Check that all relative links
+resolve and review the rendered Markdown before submitting.
+
 ## Code Review
 
 Maintainers review pull requests for:

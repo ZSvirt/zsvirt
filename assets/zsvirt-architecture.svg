@@ -1,0 +1,1305 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   width="1400"
+   height="1700"
+   viewBox="0 0 1400 1700"
+   version="1.1"
+   id="svg81"
+   sodipodi:docname="zsvirt-architecture.svg"
+   inkscape:version="1.4.4 (dcaf3e7, 2026-05-05)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview81"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="0.84603245"
+     inkscape:cx="521.2566"
+     inkscape:cy="772.429"
+     inkscape:window-width="2240"
+     inkscape:window-height="1294"
+     inkscape:window-x="-11"
+     inkscape:window-y="-11"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg81" />
+  <defs
+     id="defs1">
+    <rect
+       x="849.25819"
+       y="322.68265"
+       width="34.868638"
+       height="122.92672"
+       id="rect98" />
+    <rect
+       x="997.59765"
+       y="612.26965"
+       width="37.823608"
+       height="351.05036"
+       id="rect92" />
+    <rect
+       x="873.48894"
+       y="627.63549"
+       width="586.26592"
+       height="137.11058"
+       id="rect91" />
+    <rect
+       x="1037.1942"
+       y="949.72715"
+       width="196.80096"
+       height="196.20996"
+       id="rect90" />
+    <rect
+       x="998.77964"
+       y="857.5321"
+       width="283.08606"
+       height="327.4106"
+       id="rect89" />
+    <rect
+       x="1131.1623"
+       y="686.14388"
+       width="15.365841"
+       height="177.29816"
+       id="rect88" />
+    <rect
+       x="958.00106"
+       y="836.25632"
+       width="349.86837"
+       height="350.45936"
+       id="rect87" />
+    <rect
+       x="1084.8574"
+       y="693.70698"
+       width="38.446411"
+       height="254.91642"
+       id="rect86" />
+    <rect
+       x="1022.1731"
+       y="830.77679"
+       width="269.12488"
+       height="374.43461"
+       id="rect85" />
+    <rect
+       x="1069.9944"
+       y="631.77245"
+       width="174.34319"
+       height="220.73621"
+       id="rect84" />
+    <rect
+       x="1019.4644"
+       y="607.2462"
+       width="177.59366"
+       height="148.63496"
+       id="rect83" />
+    <rect
+       x="1025.3744"
+       y="627.33999"
+       width="232.85158"
+       height="277.76712"
+       id="rect82" />
+    <style
+       id="style1">
+      .title { font: 700 46px Arial, sans-serif; fill: #536170; }
+      .subtitle { font: 400 16px Arial, sans-serif; fill: #7d8794; }
+      .zone-title { font: 700 15px Arial, sans-serif; fill: #668096; }
+      .box-title { font: 700 13px Arial, sans-serif; fill: #3f7da8; }
+      .label { font: 600 14px Arial, sans-serif; fill: #42546a; }
+      .small { font: 600 12px Arial, sans-serif; fill: #42546a; }
+      .tiny { font: 500 11px Arial, sans-serif; fill: #526579; }
+      .hint { font: 500 10px Arial, sans-serif; fill: #718094; }
+      .panel { fill: #f1f5f9; stroke: #cbd5e1; stroke-width: 1.2; }
+      .soft-panel { fill: #f4fbff; stroke: #cbdfee; stroke-width: 1; }
+      .service-core { fill: #dff2ff; stroke: #a8d2ef; stroke-width: 1; }
+      .service-premium { fill: #f3e2fa; stroke: #d8aee8; stroke-width: 1; }
+      .service-ui { fill: #e8f8d9; stroke: #b9df9d; stroke-width: 1; }
+      .service-tool { fill: #e8efff; stroke: #bdcbef; stroke-width: 1; }
+      .dependency { fill: #d8e6ff; stroke: #b5c9ee; stroke-width: 1; }
+      .line { fill: none; stroke: #a9b4bf; stroke-width: 1.1; marker-end: url(#arrow); }
+      .dash { fill: none; stroke: #b5bec8; stroke-width: 1; stroke-dasharray: 5 5; marker-end: url(#arrow); }
+    </style>
+    <marker
+       id="arrow"
+       markerWidth="8"
+       markerHeight="8"
+       refX="7"
+       refY="3"
+       orient="auto">
+      <path
+         d="M0,0 L0,6 L7,3 z"
+         fill="#a9b4bf"
+         id="path1" />
+    </marker>
+    <marker
+       id="arrow-8"
+       markerWidth="8"
+       markerHeight="8"
+       refX="7"
+       refY="3"
+       orient="auto">
+      <path
+         d="M 0,0 V 6 L 7,3 Z"
+         fill="#a9b4bf"
+         id="path1-5" />
+    </marker>
+  </defs>
+  <text
+     x="88.821739"
+     y="342.84784"
+     class="title"
+     id="text1"
+     style="font-style:normal;font-variant:normal;font-weight:700;font-stretch:normal;font-size:46px;line-height:normal;font-family:Arial, sans-serif">ZSvirt Architecture</text>
+  <!-- Access path -->
+  <rect
+     x="749.94934"
+     y="173.9286"
+     width="78"
+     height="58"
+     rx="3"
+     class="service-premium"
+     id="rect2" />
+  <text
+     x="791.9043"
+     y="209.70157"
+     text-anchor="middle"
+     class="small"
+     id="text2"
+     style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-size:12px;line-height:normal;font-family:Arial, sans-serif">User</text>
+  <path
+     d="m 791.31335,233.70157 v 43.22889"
+     class="line"
+     id="path2" />
+  <rect
+     x="697.72229"
+     y="274.07138"
+     width="186"
+     height="80"
+     rx="3"
+     class="service-tool"
+     id="rect7"
+     style="fill:#d6fae2;fill-opacity:1" />
+  <text
+     x="790.96863"
+     y="315.547"
+     text-anchor="middle"
+     class="label"
+     fill="#4f9b35"
+     id="text6"
+     style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-size:14px;line-height:normal;font-family:Arial, sans-serif;fill:#42546a">Web Console</text>
+  <path
+     d="m 791.90434,475.81615 v 37.81428"
+     class="line"
+     id="path9" />
+  <!-- Main service area -->
+  <rect
+     x="66.363968"
+     y="513.88116"
+     width="1272"
+     height="720"
+     class="panel"
+     id="rect9" />
+  <rect
+     x="1049.7982"
+     y="926.32135"
+     width="205.61003"
+     height="255.61053"
+     class="soft-panel"
+     id="rect28-4"
+     style="fill:#f4fbff;stroke:#cbdfee;stroke-width:0.972069" />
+  <text
+     x="1148.9558"
+     y="951.68768"
+     text-anchor="middle"
+     class="box-title"
+     id="text29-8"
+     style="font-style:normal;font-variant:normal;font-weight:700;font-stretch:normal;font-size:13px;line-height:normal;font-family:Arial, sans-serif;fill:#3f7da8"><tspan
+       sodipodi:role="line"
+       id="tspan97"
+       x="1148.9558"
+       y="951.68768">Operations Service</tspan></text>
+  <rect
+     x="1070.9199"
+     y="974.87006"
+     width="156"
+     height="26"
+     rx="2"
+     class="service-core"
+     id="rect29-8"
+     style="fill:#dff2ff;stroke:#a8d2ef;stroke-width:1" />
+  <text
+     x="1149.7494"
+     y="991.54468"
+     text-anchor="middle"
+     class="tiny"
+     id="text30-2"
+     style="font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;font-size:11px;line-height:normal;font-family:Arial, sans-serif;fill:#526579">ZOPS</text>
+  <rect
+     x="1072.1736"
+     y="1017.6937"
+     width="156"
+     height="26"
+     rx="2"
+     class="service-core"
+     id="rect30-4"
+     style="fill:#dff2ff;stroke:#a8d2ef;stroke-width:1" />
+  <text
+     x="1153.1644"
+     y="1032.9772"
+     text-anchor="middle"
+     class="tiny"
+     id="text31-5"
+     style="font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;font-size:11px;line-height:normal;font-family:Arial, sans-serif;fill:#526579">Log Management</text>
+  <rect
+     x="1072.4542"
+     y="1059.5381"
+     width="156"
+     height="26"
+     rx="2"
+     class="service-core"
+     id="rect31-5"
+     style="fill:#dff2ff;stroke:#a8d2ef;stroke-width:1" />
+  <text
+     x="1153.9347"
+     y="1075.5203"
+     text-anchor="middle"
+     class="tiny"
+     id="text32-1"
+     style="font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;font-size:11px;line-height:normal;font-family:Arial, sans-serif;fill:#526579">SNMP</text>
+  <rect
+     x="1073.1515"
+     y="1096.0919"
+     width="155.16682"
+     height="26.002623"
+     rx="1.9893184"
+     class="service-core"
+     id="rect32-7"
+     style="fill:#dff2ff;stroke:#a8d2ef;stroke-width:0.997379" />
+  <text
+     x="1153.5167"
+     y="1112.7021"
+     text-anchor="middle"
+     class="tiny"
+     id="text33-1"
+     style="font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;font-size:11px;line-height:normal;font-family:Arial, sans-serif;fill:#526579">SNS</text>
+  <rect
+     x="1074.0603"
+     y="1137.3108"
+     width="156"
+     height="26"
+     rx="2"
+     class="service-core"
+     id="rect33-1"
+     style="fill:#dff2ff;stroke:#a8d2ef;stroke-width:1" />
+  <text
+     x="1150.5198"
+     y="1153.7825"
+     text-anchor="middle"
+     class="tiny"
+     id="text34-5"
+     style="font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;font-size:11px;line-height:normal;font-family:Arial, sans-serif;fill:#526579"><tspan
+       sodipodi:role="line"
+       id="tspan95"
+       x="1150.5198"
+       y="1153.7825">Managment Node HA</tspan></text>
+  <text
+     x="90"
+     y="542"
+     text-anchor="start"
+     class="zone-title"
+     id="text10">Management Node - Tomcat WAR / Single JVM</text>
+  <rect
+     x="732"
+     y="555"
+     width="186"
+     height="50"
+     rx="3"
+     class="service-tool"
+     id="rect10" />
+  <text
+     x="825"
+     y="575"
+     text-anchor="middle"
+     class="label"
+     fill="#3c73af"
+     id="text11">ApiMediator</text>
+  <text
+     x="825"
+     y="595"
+     text-anchor="middle"
+     class="tiny"
+     id="text12">api.portal</text>
+  <!-- Extension service column -->
+  <rect
+     x="135.09096"
+     y="635.09094"
+     width="177.8181"
+     height="72.712883"
+     rx="2.9969342"
+     class="service-premium"
+     id="rect12"
+     style="fill:#f3e1fa;fill-opacity:1" />
+  <text
+     x="224"
+     y="664.01477"
+     text-anchor="middle"
+     class="label"
+     fill="#a248bd"
+     id="text13"
+     style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-size:14px;line-height:normal;font-family:Arial, sans-serif">Identity / Access</text>
+  <text
+     x="224"
+     y="688.19373"
+     text-anchor="middle"
+     class="tiny"
+     id="text14"
+     style="font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;font-size:11px;line-height:normal;font-family:Arial, sans-serif">Account, Login, RBAC, Quota</text>
+  <rect
+     x="134.16422"
+     y="737.56635"
+     width="178"
+     height="70"
+     rx="3"
+     class="service-premium"
+     id="rect14"
+     style="fill:#f3e2fa;fill-opacity:1" />
+  <text
+     x="220.65685"
+     y="769.40216"
+     text-anchor="middle"
+     class="label"
+     fill="#a248bd"
+     id="text15"
+     style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-size:14px;line-height:normal;font-family:Arial, sans-serif">Monitor / ZWatch</text>
+  <text
+     x="220.65685"
+     y="794.41693"
+     text-anchor="middle"
+     class="tiny"
+     id="text16"
+     style="font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;font-size:11px;line-height:normal;font-family:Arial, sans-serif">Events, Alarms, SNS</text>
+  <rect
+     x="132.49263"
+     y="834.23792"
+     width="178"
+     height="64"
+     rx="3"
+     class="service-premium"
+     id="rect16"
+     style="fill:#f3e2fa;fill-opacity:1" />
+  <text
+     x="217.31367"
+     y="873.74536"
+     text-anchor="middle"
+     class="label"
+     fill="#a248bd"
+     id="text17"
+     style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-size:14px;line-height:normal;font-family:Arial, sans-serif">Scheduler</text>
+  <rect
+     x="131.65683"
+     y="925.90948"
+     width="178"
+     height="72"
+     rx="3"
+     class="service-premium"
+     id="rect17" />
+  <text
+     x="219.82104"
+     y="961.08844"
+     text-anchor="middle"
+     class="label"
+     fill="#a248bd"
+     id="text18"
+     style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-size:14px;line-height:normal;font-family:Arial, sans-serif">Migration Tools</text>
+  <text
+     x="213.9705"
+     y="986.93903"
+     text-anchor="middle"
+     class="tiny"
+     id="text19"
+     style="font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;font-size:11px;line-height:normal;font-family:Arial, sans-serif">VMware Migration</text>
+  <rect
+     x="129.08751"
+     y="1027.5371"
+     width="178.12387"
+     height="62.900658"
+     rx="3.0020876"
+     class="service-premium"
+     id="rect19" />
+  <text
+     x="214.94969"
+     y="1062.5149"
+     text-anchor="middle"
+     class="label"
+     fill="#a248bd"
+     id="text20"
+     style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-size:14px;line-height:normal;font-family:Arial, sans-serif">Backup / DR</text>
+  <rect
+     x="128.31367"
+     y="1120.3727"
+     width="178"
+     height="70"
+     rx="3"
+     class="service-premium"
+     id="rect21" />
+  <text
+     x="213.9705"
+     y="1151.2085"
+     text-anchor="middle"
+     class="label"
+     fill="#a248bd"
+     id="text22"
+     style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-size:14px;line-height:normal;font-family:Arial, sans-serif">Crypto / Key</text>
+  <text
+     x="211.46313"
+     y="1179.5664"
+     text-anchor="middle"
+     class="tiny"
+     id="text23"
+     style="font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;font-size:11px;line-height:normal;font-family:Arial, sans-serif">Key Provider</text>
+  <!-- Network service -->
+  <rect
+     x="405.06094"
+     y="635.06091"
+     width="205.87813"
+     height="226.68245"
+     class="soft-panel"
+     id="rect23" />
+  <text
+     x="505.49261"
+     y="663.50739"
+     text-anchor="middle"
+     class="box-title"
+     id="text24"
+     style="font-style:normal;font-variant:normal;font-weight:700;font-stretch:normal;font-size:13px;line-height:normal;font-family:Arial, sans-serif">Network Service</text>
+  <rect
+     x="433.34317"
+     y="683.35791"
+     width="156"
+     height="26"
+     rx="2"
+     class="service-core"
+     id="rect24" />
+  <text
+     x="507.16422"
+     y="699.68634"
+     text-anchor="middle"
+     class="tiny"
+     id="text25"
+     style="font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;font-size:11px;line-height:normal;font-family:Arial, sans-serif">Distributed Switch</text>
+  <rect
+     x="433.34317"
+     y="728.05902"
+     width="156"
+     height="26"
+     rx="2"
+     class="service-core"
+     id="rect25" />
+  <text
+     x="506.32843"
+     y="747.73059"
+     text-anchor="middle"
+     class="tiny"
+     id="text26"
+     style="font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;font-size:11px;line-height:normal;font-family:Arial, sans-serif">Distributed Port Group</text>
+  <rect
+     x="431.67157"
+     y="773.59589"
+     width="156"
+     height="26"
+     rx="2"
+     class="service-core"
+     id="rect26" />
+  <text
+     x="505.49261"
+     y="790.76007"
+     text-anchor="middle"
+     class="tiny"
+     id="text27"
+     style="font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;font-size:11px;line-height:normal;font-family:Arial, sans-serif">VXLAN /</text>
+  <rect
+     x="434.17896"
+     y="821.64008"
+     width="156"
+     height="26"
+     rx="2"
+     class="service-core"
+     id="rect27" />
+  <text
+     x="507.16422"
+     y="837.96857"
+     text-anchor="middle"
+     class="tiny"
+     id="text28"
+     style="font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;font-size:11px;line-height:normal;font-family:Arial, sans-serif">Security Group</text>
+  <!-- Storage service -->
+  <rect
+     x="1049.1587"
+     y="634.72992"
+     width="206"
+     height="270"
+     class="soft-panel"
+     id="rect28" />
+  <text
+     x="1146.8397"
+     y="657.36597"
+     text-anchor="middle"
+     class="box-title"
+     id="text29"
+     style="font-style:normal;font-variant:normal;font-weight:700;font-stretch:normal;font-size:13px;line-height:normal;font-family:Arial, sans-serif">Primary Storage Service</text>
+  <rect
+     x="1069.4307"
+     y="669.68304"
+     width="156"
+     height="26"
+     rx="2"
+     class="service-core"
+     id="rect29" />
+  <text
+     x="1150.9764"
+     y="688.86505"
+     text-anchor="middle"
+     class="tiny"
+     id="text30"
+     style="font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;font-size:11px;line-height:normal;font-family:Arial, sans-serif">NFS Manager</text>
+  <rect
+     x="1069.4307"
+     y="706.86505"
+     width="156"
+     height="26"
+     rx="2"
+     class="service-core"
+     id="rect30" />
+  <text
+     x="1149.7946"
+     y="724.86505"
+     text-anchor="middle"
+     class="tiny"
+     id="text31"
+     style="font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;font-size:11px;line-height:normal;font-family:Arial, sans-serif">Ceph Manager</text>
+  <rect
+     x="1068.2487"
+     y="746.41101"
+     width="156"
+     height="26"
+     rx="2"
+     class="service-core"
+     id="rect31" />
+  <text
+     x="1147.4307"
+     y="763.229"
+     text-anchor="middle"
+     class="tiny"
+     id="text32"
+     style="font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;font-size:11px;line-height:normal;font-family:Arial, sans-serif">SharedBlock</text>
+  <rect
+     x="1067.0667"
+     y="783.59296"
+     width="156"
+     height="26"
+     rx="2"
+     class="service-core"
+     id="rect32" />
+  <text
+     x="1147.4307"
+     y="800.41095"
+     text-anchor="middle"
+     class="tiny"
+     id="text33"
+     style="font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;font-size:11px;line-height:normal;font-family:Arial, sans-serif">Local Storage</text>
+  <rect
+     x="1065.8846"
+     y="823.13898"
+     width="156"
+     height="26"
+     rx="2"
+     class="service-core"
+     id="rect33" />
+  <text
+     x="1148.6125"
+     y="838.77496"
+     text-anchor="middle"
+     class="tiny"
+     id="text34"
+     style="font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;font-size:11px;line-height:normal;font-family:Arial, sans-serif">ZBS / CBD</text>
+  <rect
+     x="1067.0667"
+     y="861.50287"
+     width="156"
+     height="26"
+     rx="2"
+     class="service-core"
+     id="rect34" />
+  <text
+     x="1145.0667"
+     y="878.32092"
+     text-anchor="middle"
+     class="tiny"
+     id="text35"
+     style="font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;font-size:11px;line-height:normal;font-family:Arial, sans-serif">iSCSI / vHost</text>
+  <!-- Compute service -->
+  <rect
+     x="730"
+     y="635"
+     width="190"
+     height="250"
+     class="soft-panel"
+     id="rect35" />
+  <text
+     x="825"
+     y="661"
+     text-anchor="middle"
+     class="box-title"
+     id="text36">Compute Service</text>
+  <rect
+     x="755"
+     y="685"
+     width="140"
+     height="26"
+     rx="2"
+     class="service-core"
+     id="rect36" />
+  <text
+     x="825"
+     y="703"
+     text-anchor="middle"
+     class="tiny"
+     id="text37"
+     style="font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;font-size:11px;line-height:normal;font-family:Arial, sans-serif">Data Center Manager</text>
+  <rect
+     x="755"
+     y="721"
+     width="140"
+     height="26"
+     rx="2"
+     class="service-core"
+     id="rect37" />
+  <text
+     x="825"
+     y="739"
+     text-anchor="middle"
+     class="tiny"
+     id="text38">Cluster Manager</text>
+  <rect
+     x="755"
+     y="757"
+     width="140"
+     height="26"
+     rx="2"
+     class="service-core"
+     id="rect38" />
+  <text
+     x="825"
+     y="775"
+     text-anchor="middle"
+     class="tiny"
+     id="text39">Host Manager</text>
+  <rect
+     x="755"
+     y="793"
+     width="140"
+     height="26"
+     rx="2"
+     class="service-core"
+     id="rect39" />
+  <text
+     x="825"
+     y="811"
+     text-anchor="middle"
+     class="tiny"
+     id="text40">VM Manager</text>
+  <rect
+     x="755"
+     y="829"
+     width="140"
+     height="26"
+     rx="2"
+     class="service-core"
+     id="rect40" />
+  <text
+     x="825"
+     y="847"
+     text-anchor="middle"
+     class="tiny"
+     id="text41">Image Manager</text>
+  <!-- Volume and snapshot -->
+  <rect
+     x="410.06104"
+     y="925.82922"
+     width="201.7823"
+     height="116.77436"
+     rx="2.9994419"
+     class="service-core"
+     id="rect41" />
+  <text
+     x="508.93442"
+     y="947.66217"
+     text-anchor="middle"
+     class="label"
+     fill="#3c73af"
+     id="text42"
+     style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-size:14px;line-height:normal;font-family:Arial, sans-serif">Volume / Snapshot</text>
+  <rect
+     x="443.11334"
+     y="969.08929"
+     width="140"
+     height="26"
+     rx="2"
+     class="service-core"
+     id="rect42" />
+  <text
+     x="503.68152"
+     y="992.38757"
+     text-anchor="middle"
+     class="tiny"
+     id="text43"
+     style="font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;font-size:11px;line-height:normal;font-family:Arial, sans-serif;stroke-width:1.00707"
+     transform="scale(1.0070729,0.99297677)">Volume Manager</text>
+  <rect
+     x="441.4418"
+     y="1007.202"
+     width="140"
+     height="26"
+     rx="2"
+     class="service-core"
+     id="rect43" />
+  <text
+     x="480.59225"
+     y="1090.449"
+     text-anchor="middle"
+     class="tiny"
+     id="text44"
+     style="font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;font-size:11px;line-height:normal;font-family:Arial, sans-serif;stroke-width:1.06212"
+     transform="scale(1.0621214,0.94151196)">VolumeSnapshot</text>
+  <rect
+     x="409.57086"
+     y="1071.6399"
+     width="204.17204"
+     height="91.963577"
+     rx="3.2237689"
+     class="service-core"
+     id="rect44" />
+  <text
+     x="501.41229"
+     y="1103.1025"
+     text-anchor="middle"
+     class="label"
+     fill="#3c73af"
+     id="text45"
+     style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-size:14px;line-height:normal;font-family:Arial, sans-serif">ResourceConfig</text>
+  <text
+     x="500.57648"
+     y="1135.7405"
+     text-anchor="middle"
+     class="tiny"
+     id="text46"
+     style="font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;font-size:11px;line-height:normal;font-family:Arial, sans-serif">Configuration Model</text>
+  <!-- NFV / VPC -->
+  <!-- Backup storage -->
+  <rect
+     x="721.33307"
+     y="928.26385"
+     width="199.74609"
+     height="250.02"
+     class="soft-panel"
+     id="rect52" />
+  <text
+     x="821.04529"
+     y="948.36395"
+     text-anchor="middle"
+     class="box-title"
+     id="text53"
+     style="font-style:normal;font-variant:normal;font-weight:700;font-stretch:normal;font-size:13px;line-height:normal;font-family:Arial, sans-serif">Backup Storage Service</text>
+  <rect
+     x="743.02441"
+     y="968.19977"
+     width="156"
+     height="26"
+     rx="2"
+     class="service-core"
+     id="rect53" />
+  <text
+     x="820.04529"
+     y="985.36395"
+     text-anchor="middle"
+     class="tiny"
+     id="text54"
+     style="font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;font-size:11px;line-height:normal;font-family:Arial, sans-serif">NFS Manager</text>
+  <rect
+     x="745.03564"
+     y="1009.2673"
+     width="151.83423"
+     height="26.013191"
+     rx="1.9465927"
+     class="service-core"
+     id="rect54" />
+  <text
+     x="812.95337"
+     y="1026.0919"
+     text-anchor="middle"
+     class="tiny"
+     id="text55"
+     style="font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;font-size:11px;line-height:normal;font-family:Arial, sans-serif">Ceph Manager</text>
+  <rect
+     x="744.40924"
+     y="1051.184"
+     width="156"
+     height="26"
+     rx="2"
+     class="service-core"
+     id="rect55" />
+  <text
+     x="815.31732"
+     y="1068.0021"
+     text-anchor="middle"
+     class="tiny"
+     id="text56"
+     style="font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;font-size:11px;line-height:normal;font-family:Arial, sans-serif">SFTP Manager</text>
+  <rect
+     x="744.4093"
+     y="1096.6398"
+     width="156"
+     height="26"
+     rx="2"
+     class="service-core"
+     id="rect56" />
+  <text
+     x="814.13531"
+     y="1113.4578"
+     text-anchor="middle"
+     class="tiny"
+     id="text57"
+     style="font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;font-size:11px;line-height:normal;font-family:Arial, sans-serif">ImageStore Manager</text>
+  <rect
+     x="744.07532"
+     y="1140.8544"
+     width="156"
+     height="26"
+     rx="2"
+     class="service-core"
+     id="rect57" />
+  <text
+     x="815.38898"
+     y="1153.2905"
+     text-anchor="middle"
+     class="tiny"
+     id="text58"
+     style="font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;font-size:11px;line-height:normal;font-family:Arial, sans-serif">ZBox / External Backup</text>
+  <!-- Management-node internal message lines are intentionally omitted for README readability. -->
+  <!-- Framework -->
+  <rect
+     x="64"
+     y="1270"
+     width="1272"
+     height="180"
+     fill="#eef7fc"
+     stroke="none"
+     id="rect58" />
+  <text
+     x="700"
+     y="1308"
+     text-anchor="middle"
+     font="700 22px Arial, sans-serif"
+     fill="#4988b4"
+     id="text59">Framework</text>
+  <rect
+     x="175"
+     y="1332"
+     width="158"
+     height="42"
+     rx="2"
+     class="service-core"
+     id="rect59" />
+  <text
+     x="254"
+     y="1358"
+     text-anchor="middle"
+     class="label"
+     fill="#3c73af"
+     id="text60">CloudBusImpl3</text>
+  <rect
+     x="352"
+     y="1332"
+     width="158"
+     height="42"
+     rx="2"
+     class="service-core"
+     id="rect60" />
+  <text
+     x="431"
+     y="1358"
+     text-anchor="middle"
+     class="label"
+     fill="#3c73af"
+     id="text61">Async Framework</text>
+  <rect
+     x="529"
+     y="1332"
+     width="158"
+     height="42"
+     rx="2"
+     class="service-core"
+     id="rect61" />
+  <text
+     x="608"
+     y="1358"
+     text-anchor="middle"
+     class="label"
+     fill="#3c73af"
+     id="text62">WorkFlow</text>
+  <rect
+     x="706"
+     y="1332"
+     width="158"
+     height="42"
+     rx="2"
+     class="service-core"
+     id="rect62" />
+  <text
+     x="785"
+     y="1358"
+     text-anchor="middle"
+     class="label"
+     fill="#3c73af"
+     id="text63">GlobalConfig</text>
+  <rect
+     x="883"
+     y="1332"
+     width="158"
+     height="42"
+     rx="2"
+     class="service-core"
+     id="rect63" />
+  <text
+     x="962"
+     y="1358"
+     text-anchor="middle"
+     class="label"
+     fill="#3c73af"
+     id="text64">Database Facade</text>
+  <rect
+     x="1060"
+     y="1332"
+     width="158"
+     height="42"
+     rx="2"
+     class="service-core"
+     id="rect64" />
+  <text
+     x="1139"
+     y="1358"
+     text-anchor="middle"
+     class="label"
+     fill="#3c73af"
+     id="text65">Garbage Collector</text>
+  <rect
+     x="250"
+     y="1390"
+     width="158"
+     height="42"
+     rx="2"
+     class="service-core"
+     id="rect65" />
+  <text
+     x="329"
+     y="1416"
+     text-anchor="middle"
+     class="label"
+     fill="#3c73af"
+     id="text66">Error Facade</text>
+  <rect
+     x="427"
+     y="1390"
+     width="158"
+     height="42"
+     rx="2"
+     class="service-core"
+     id="rect66" />
+  <text
+     x="506"
+     y="1416"
+     text-anchor="middle"
+     class="label"
+     fill="#3c73af"
+     id="text67">Tag Manager</text>
+  <rect
+     x="604"
+     y="1390"
+     width="158"
+     height="42"
+     rx="2"
+     class="service-core"
+     id="rect67" />
+  <text
+     x="683"
+     y="1416"
+     text-anchor="middle"
+     class="label"
+     fill="#3c73af"
+     id="text68">Cascade</text>
+  <rect
+     x="781"
+     y="1390"
+     width="158"
+     height="42"
+     rx="2"
+     class="service-core"
+     id="rect68" />
+  <text
+     x="860"
+     y="1416"
+     text-anchor="middle"
+     class="label"
+     fill="#3c73af"
+     id="text69">Thread Facade</text>
+  <rect
+     x="958"
+     y="1390"
+     width="158"
+     height="42"
+     rx="2"
+     class="service-core"
+     id="rect69" />
+  <text
+     x="1037"
+     y="1416"
+     text-anchor="middle"
+     class="label"
+     fill="#3c73af"
+     id="text70">Plugin Registry</text>
+  <rect
+     x="1135"
+     y="1390"
+     width="158"
+     height="42"
+     rx="2"
+     class="service-core"
+     id="rect70" />
+  <text
+     x="1214"
+     y="1416"
+     text-anchor="middle"
+     class="label"
+     fill="#3c73af"
+     id="text71">QueryFacade / ZQL</text>
+  <!-- Utility and agents -->
+  <rect
+     x="64"
+     y="1472"
+     width="1272"
+     height="96"
+     fill="#f1f7ff"
+     stroke="none"
+     id="rect71" />
+  <text
+     x="700"
+     y="1505"
+     text-anchor="middle"
+     font="700 22px Arial, sans-serif"
+     fill="#4988b4"
+     id="text72">ZSvirt Utility / Agent Layer</text>
+  <rect
+     x="150"
+     y="1525"
+     width="144"
+     height="34"
+     rx="2"
+     class="service-tool"
+     id="rect72" />
+  <text
+     x="222"
+     y="1547"
+     text-anchor="middle"
+     class="small"
+     id="text73">zstackctl / CLI</text>
+  <rect
+     x="315"
+     y="1525"
+     width="144"
+     height="34"
+     rx="2"
+     class="service-tool"
+     id="rect73" />
+  <text
+     x="387"
+     y="1547"
+     text-anchor="middle"
+     class="small"
+     id="text74">KVM Agent</text>
+  <rect
+     x="480"
+     y="1525"
+     width="144"
+     height="34"
+     rx="2"
+     class="service-tool"
+     id="rect74" />
+  <text
+     x="552"
+     y="1547"
+     text-anchor="middle"
+     class="small"
+     id="text75">Virtual Router</text>
+  <rect
+     x="645"
+     y="1525"
+     width="144"
+     height="34"
+     rx="2"
+     class="service-tool"
+     id="rect75" />
+  <text
+     x="717"
+     y="1547"
+     text-anchor="middle"
+     class="small"
+     id="text76">Console Proxy</text>
+  <rect
+     x="810"
+     y="1525"
+     width="144"
+     height="34"
+     rx="2"
+     class="service-tool"
+     id="rect76" />
+  <text
+     x="882"
+     y="1547"
+     text-anchor="middle"
+     class="small"
+     id="text77">Storage Agents</text>
+  <rect
+     x="975"
+     y="1525"
+     width="144"
+     height="34"
+     rx="2"
+     class="service-tool"
+     id="rect77" />
+  <text
+     x="1047"
+     y="1547"
+     text-anchor="middle"
+     class="small"
+     id="text78">Ansible Install</text>
+  <!-- Dependencies -->
+  <rect
+     x="64"
+     y="1586"
+     width="1272"
+     height="104"
+     fill="#eef7ff"
+     stroke="none"
+     id="rect78" />
+  <text
+     x="700"
+     y="1618"
+     text-anchor="middle"
+     font="700 22px Arial, sans-serif"
+     fill="#4988b4"
+     id="text79">Dependency Service</text>
+  <rect
+     x="390"
+     y="1640"
+     width="280"
+     height="38"
+     rx="2"
+     class="dependency"
+     id="rect79" />
+  <text
+     x="530"
+     y="1665"
+     text-anchor="middle"
+     class="label"
+     fill="#3575bd"
+     id="text80">MySQL</text>
+  <rect
+     x="730"
+     y="1640"
+     width="280"
+     height="38"
+     rx="2"
+     class="dependency"
+     id="rect80" />
+  <text
+     x="870"
+     y="1665"
+     text-anchor="middle"
+     class="label"
+     fill="#3575bd"
+     id="text81">Tomcat</text>
+  <text
+     xml:space="preserve"
+     id="text82"
+     style="writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect82);display:inline;fill:#000000" />
+  <text
+     xml:space="preserve"
+     id="text83"
+     style="writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect83);display:inline;fill:#000000" />
+  <text
+     xml:space="preserve"
+     id="text84"
+     style="writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect84);display:inline;fill:#000000" />
+  <text
+     xml:space="preserve"
+     id="text85"
+     style="writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect85);display:inline;fill:#000000" />
+  <text
+     xml:space="preserve"
+     id="text86"
+     style="writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect86);display:inline;fill:#000000" />
+  <text
+     xml:space="preserve"
+     id="text87"
+     style="writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect87);display:inline;fill:#000000" />
+  <text
+     xml:space="preserve"
+     id="text88"
+     style="writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect88);display:inline;fill:#000000" />
+  <text
+     xml:space="preserve"
+     id="text89"
+     style="writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect89);display:inline;fill:#000000" />
+  <text
+     xml:space="preserve"
+     id="text90"
+     style="writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect90);display:inline;fill:#000000" />
+  <text
+     xml:space="preserve"
+     id="text91"
+     style="writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect91);display:inline;fill:#000000" />
+  <text
+     xml:space="preserve"
+     id="text92"
+     style="writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect92);display:inline;fill:#000000" />
+  <rect
+     x="698.427"
+     y="399.6969"
+     width="186"
+     height="80"
+     rx="3"
+     class="service-tool"
+     id="rect7-4"
+     style="fill:#d6fae2;fill-opacity:1;stroke:#bdcbef;stroke-width:1" />
+  <text
+     x="791.75916"
+     y="441.35178"
+     text-anchor="middle"
+     class="label"
+     fill="#3c73af"
+     id="text8-2"
+     style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-size:14px;line-height:normal;font-family:Arial, sans-serif;fill:#426a4f;fill-opacity:1">API Gateway</text>
+  <text
+     xml:space="preserve"
+     id="text98"
+     style="writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect98);display:inline;fill:#d3d319;fill-opacity:1" />
+  <path
+     d="m 791.78677,352.90808 v 46.18386"
+     class="line"
+     id="path2-6"
+     style="fill:none;stroke:#a9b4bf;stroke-width:1.32148;marker-end:url(#arrow-8)" />
+</svg>

@@ -8,7 +8,7 @@ import org.zstack.header.tag.SystemTagVO;
 import org.zstack.header.tag.TagConstant;
 import org.zstack.resourceconfig.ResourceConfig;
 import org.zstack.resourceconfig.ResourceConfigFacade;
-import org.zstack.utils.TagUtils;
+import org.zstack.utils.Tags;
 
 import java.util.Map;
 
@@ -33,7 +33,7 @@ public class ResourceConfigSystemTag extends PatternedSystemTag {
 
     @Override
     public boolean isMatch(String tag) {
-        return TagUtils.isMatch(tagFormat, tag) && tag.startsWith(TagConstant.RESOURCE_CONFIG_TAG_PREFIX);
+        return Tags.isMatch(tagFormat, tag) && tag.startsWith(TagConstant.RESOURCE_CONFIG_TAG_PREFIX);
     }
 
     public void validateResourceConfig(String tag) {

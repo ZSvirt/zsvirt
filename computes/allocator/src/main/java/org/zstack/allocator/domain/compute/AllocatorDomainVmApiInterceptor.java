@@ -43,7 +43,7 @@ import org.zstack.header.volume.APIAttachDataVolumeToVmMsg;
 import org.zstack.header.volume.VolumeType;
 import org.zstack.header.volume.VolumeVO;
 import org.zstack.header.volume.VolumeVO_;
-import org.zstack.tag.Tags;
+import org.zstack.utils.Tags;
 
 import java.util.ArrayList;
 import java.util.Collection;

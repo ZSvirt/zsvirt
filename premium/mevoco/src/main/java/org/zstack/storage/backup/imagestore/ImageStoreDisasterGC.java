@@ -7,6 +7,7 @@ import org.zstack.header.image.ImageVO;
 import org.zstack.header.imagestore.SyncTaskStatus;
 import org.zstack.header.tag.SystemTagInventory;
 import org.zstack.header.tag.SystemTagVO;
+import org.zstack.utils.Tags;
 import org.zstack.utils.DebugUtils;
 import org.zstack.utils.Utils;
 import org.zstack.utils.logging.CLogger;
@@ -24,7 +25,7 @@ public class ImageStoreDisasterGC extends CycleBasedGarbageCollector {
     }
 
     private void gcTags(final SystemTagInventory tag) {
-        String[] tokens = tag.getTag().split("::");
+        String[] tokens = Tags.split(tag.getTag());
 
         DebugUtils.Assert(tokens.length == 8, String.format("system tag ill formated: %s", tag.getTag()));
         if (tokens[7].equals(SyncTaskStatus.TsSuccess.toString())) {

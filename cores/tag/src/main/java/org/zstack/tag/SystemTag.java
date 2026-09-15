@@ -19,6 +19,7 @@ import org.zstack.header.exception.CloudRuntimeException;
 import org.zstack.header.tag.*;
 import org.zstack.utils.DebugUtils;
 import org.zstack.utils.ExceptionDSL;
+import org.zstack.utils.Tags;
 import org.zstack.utils.Utils;
 import org.zstack.utils.logging.CLogger;
 

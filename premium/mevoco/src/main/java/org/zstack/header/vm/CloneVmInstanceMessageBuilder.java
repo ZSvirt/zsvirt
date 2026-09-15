@@ -30,6 +30,7 @@ import org.zstack.resourceconfig.ResourceConfigVO_;
 import org.zstack.storage.volume.VolumeSystemTags;
 import org.zstack.tag.ResourceConfigSystemTag;
 import org.zstack.tag.SystemTag;
+import org.zstack.utils.Tags;
 import org.zstack.utils.CollectionUtils;
 import org.zstack.utils.TagUtils;
 import org.zstack.utils.WwnUtils;
@@ -281,9 +282,11 @@ public class CloneVmInstanceMessageBuilder {
     private static List<String> buildResourceConfigsForClone(String resourceUuid, String resourceType, List<String> incomingConfigs) {
         List<String> incomingSystemTags = new ArrayList<>();
         List<String> incomingResourceConfigs = new ArrayList<>();
+
+        final String prefix = Tags.prefix("resourceConfig");
         if (!CollectionUtils.isEmpty(incomingConfigs)) {
             incomingConfigs.forEach(tag -> {
-                if (tag.contains("resourceConfig::")) {
+                if (tag.contains(prefix)) {
                     incomingResourceConfigs.add(tag);
                     return;
                 }
@@ -357,12 +360,12 @@ public class CloneVmInstanceMessageBuilder {
         incomingResourceConfigs.forEach(existedConfigName -> {
             String configName;
             if (existedConfigName.startsWith("-")) {
-                configName = existedConfigName.replaceFirst("-", "").split("::")[2];
+                configName = existedConfigName.replaceFirst("-", "").split(Tags.SEPARATOR)[2];
                 resourceConfigByName.remove(configName);
                 return;
             }
 
-            configName = existedConfigName.split("::")[2];
+            configName = existedConfigName.split(Tags.SEPARATOR)[2];
             if (resourceConfigByName.get(configName) == null) {
                 newResourceConfigs.add(existedConfigName);
                 return;

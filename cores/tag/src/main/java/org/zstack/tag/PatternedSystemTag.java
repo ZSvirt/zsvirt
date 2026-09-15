@@ -7,7 +7,7 @@ import org.zstack.header.tag.SystemTagInventory;
 import org.zstack.header.tag.SystemTagVO;
 import org.zstack.header.tag.SystemTagVO_;
 import org.zstack.header.tag.TagConstant;
-import org.zstack.utils.TagUtils;
+import org.zstack.utils.Tags;
 import org.zstack.utils.Utils;
 import org.zstack.utils.logging.CLogger;
 
@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static org.zstack.utils.StringDSL.s;
 
@@ -36,7 +37,7 @@ public class PatternedSystemTag extends SystemTag {
 
     @Override
     protected String useTagFormat() {
-        return TagUtils.tagPatternToSqlPattern(tagFormat);
+        return Tags.tagPatternToSqlPattern(tagFormat);
     }
 
     @Override
@@ -46,7 +47,7 @@ public class PatternedSystemTag extends SystemTag {
 
     @Override
     public boolean isMatch(String tag) {
-        return TagUtils.isMatch(tagFormat, tag);
+        return Tags.isMatch(tagFormat, tag);
     }
 
     @Override
@@ -78,7 +79,7 @@ public class PatternedSystemTag extends SystemTag {
     }
 
     public Map<String, String> getTokensByTag(String tag) {
-        return TagUtils.parseIfMatch(tagFormat, tag);
+        return Tags.parseIfMatch(tagFormat, tag);
     }
 
     public String getTokenByTag(String tag, String tokenName) {
@@ -94,8 +95,7 @@ public class PatternedSystemTag extends SystemTag {
         if (value == null || tagMgr == null) {
             return value;
         }
-        int idx = tag.indexOf("::");
-        String tagHead = idx > 0 ? tag.substring(0, idx) : tokenName;
+        String tagHead = Tags.first(tag);
         return tagMgr.decryptTokenValue(resourceClass.getSimpleName(), tagHead, tokenName, value);
     }
 
@@ -105,8 +105,8 @@ public class PatternedSystemTag extends SystemTag {
             return tokens;
         }
 
-        int idx = tag.indexOf("::");
-        String tagHead = idx > 0 ? tag.substring(0, idx) : null;
+        String tagHead = Tags.first(tag);
+        tagHead = Objects.equals(tagHead, tag) ? null : tagHead;
         Map<String, String> decrypted = new HashMap<>();
         for (Map.Entry<String, String> entry : tokens.entrySet()) {
             String tokenName = entry.getKey();

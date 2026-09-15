@@ -552,7 +552,7 @@ public class TagManagerImpl extends AbstractService implements TagManager,
     }
 
     private String findHeadForSystemTag(@NonNull String tag) {
-        return tag.split("::")[0];
+        return Tags.split(tag)[0];
     }
 
     @Override

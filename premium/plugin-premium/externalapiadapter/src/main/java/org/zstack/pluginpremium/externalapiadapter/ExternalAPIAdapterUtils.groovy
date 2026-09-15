@@ -10,6 +10,7 @@ import org.zstack.pluginpremium.externalapiadapter.exception.APIAdapterGlobalPro
 import org.zstack.pluginpremium.externalapiadapter.exception.APIAdapterSpecifiedErrorException
 import org.zstack.pluginpremium.externalapiadapter.exception.InvalidParameterException
 import org.zstack.sdk.ErrorCode
+import org.zstack.utils.Tags
 import org.zstack.utils.Utils
 import org.zstack.utils.logging.CLogger
 
@@ -210,7 +211,7 @@ class ExternalAPIAdapterUtils {
     }
 
     static String[] splitAccountAccessConfig(String config) {
-        return config.split("::")
+        return Tags.split(config)
     }
 
     static String formatZonedDateTime(ZonedDateTime time) {

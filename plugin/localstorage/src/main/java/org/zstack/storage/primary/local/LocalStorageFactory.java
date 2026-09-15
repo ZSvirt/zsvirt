@@ -5,8 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.zstack.compute.host.MigrateNetworkExtensionPoint;
 import org.zstack.compute.vm.*;
-import org.zstack.configuration.DiskOfferingSystemTags;
-import org.zstack.configuration.OfferingUserConfigUtils;
 import org.zstack.core.cloudbus.CloudBus;
 import org.zstack.core.cloudbus.CloudBusCallBack;
 import org.zstack.core.cloudbus.CloudBusListCallBack;
@@ -17,8 +15,6 @@ import org.zstack.core.errorcode.ErrorFacade;
 import org.zstack.core.trash.CreateRecycleExtensionPoint;
 import org.zstack.core.trash.DeleteRecycleExtensionPoint;
 import org.zstack.header.Component;
-import org.zstack.header.allocator.HostAllocatorError;
-import org.zstack.header.configuration.userconfig.DiskOfferingUserConfig;
 import org.zstack.header.core.*;
 import org.zstack.header.core.trash.InstallPathRecycleInventory;
 import org.zstack.header.core.trash.InstallPathRecycleVO;
@@ -44,7 +40,6 @@ import org.zstack.header.vm.*;
 import org.zstack.header.vm.VmInstanceConstant.VmOperation;
 import org.zstack.header.volume.*;
 import org.zstack.kvm.KVMConstant;
-import org.zstack.storage.primary.PrimaryStorageCapacityChecker;
 import org.zstack.storage.snapshot.PostMarkRootVolumeAsSnapshotExtension;
 import org.zstack.storage.snapshot.reference.VolumeSnapshotReferenceUtils;
 import org.zstack.tag.SystemTagCreator;
@@ -58,7 +53,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static org.zstack.core.Platform.argerr;
-import static org.zstack.core.Platform.err;
 import static org.zstack.core.Platform.operr;
 import static org.zstack.utils.CollectionDSL.*;
 import static org.zstack.utils.CollectionUtils.isEmpty;
@@ -1272,45 +1266,6 @@ public class LocalStorageFactory implements PrimaryStorageFactory, Component,
 
     @Override
     public void preCreateVolume(VolumeCreateMessage msg) {
-        String diskOffering = msg.getDiskOfferingUuid();
-        if (diskOffering == null || !DiskOfferingSystemTags.DISK_OFFERING_USER_CONFIG.hasTag(diskOffering)) {
-            return;
-        }
-
-        DiskOfferingUserConfig config = OfferingUserConfigUtils.getDiskOfferingConfig(diskOffering, DiskOfferingUserConfig.class);
-        if (config.getAllocate() == null || config.getAllocate().getPrimaryStorage() == null) {
-            return;
-        }
-
-        msg.setPrimaryStorageUuid(config.getAllocate().getPrimaryStorage().getUuid());
-        String psUuid = msg.getPrimaryStorageUuid();
-        String psType = Q.New(PrimaryStorageVO.class).select(PrimaryStorageVO_.type)
-                .eq(PrimaryStorageVO_.uuid,psUuid)
-                .findValue();
-        if (!type.toString().equals(psType)) {
-            return;
-        }
-
-        long total = Q.New(LocalStorageHostRefVO.class).eq(LocalStorageHostRefVO_.primaryStorageUuid, psUuid).count();
-        List<LocalStorageHostRefVO> filterRefs = SQL.New("select ref from LocalStorageHostRefVO ref" +
-                " where ref.primaryStorageUuid = :psUuid", LocalStorageHostRefVO.class)
-                .param("psUuid", psUuid)
-                .limit(100)
-                .paginateCollectionUntil(total, (LocalStorageHostRefVO ref) -> PrimaryStorageCapacityChecker.New(psUuid,
-                                ref.getAvailableCapacity(), ref.getTotalPhysicalCapacity(), ref.getAvailablePhysicalCapacity())
-                                .checkRequiredSize(msg.getDiskSize()), 10);
-
-        if (filterRefs.isEmpty()) {
-            throw new OperationFailureException(err(HostAllocatorError.NO_AVAILABLE_HOST,
-                    "the local primary storage[uuid:%s] has no hosts with enough disk capacity[%s bytes] required by the disk offering[uuid:%s]",
-                    psUuid, msg.getDiskSize(), diskOffering
-            ));
-        }
-
-        msg.addSystemTag(LocalStorageSystemTags.DEST_HOST_FOR_CREATING_DATA_VOLUME.instantiateTag(
-                Collections.singletonMap(LocalStorageSystemTags.DEST_HOST_FOR_CREATING_DATA_VOLUME_TOKEN,
-                        filterRefs.get(new Random().nextInt(filterRefs.size())).getHostUuid())
-        ));
     }
 
     @Override

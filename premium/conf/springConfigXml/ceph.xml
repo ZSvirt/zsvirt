@@ -49,7 +49,6 @@
             <zstack:extension interface="org.zstack.header.vm.VmInstanceCreateExtensionPoint" />
             <zstack:extension interface="org.zstack.header.volume.CreateDataVolumeExtensionPoint" />
             <zstack:extension interface="org.zstack.header.configuration.userconfig.InstanceOfferingUserConfigValidator" />
-            <zstack:extension interface="org.zstack.header.configuration.userconfig.DiskOfferingUserConfigValidator" />
             <zstack:extension interface="org.zstack.storage.snapshot.MarkRootVolumeAsSnapshotExtension" />
             <zstack:extension interface="org.zstack.header.vm.PreVmInstantiateResourceExtensionPoint" />
             <zstack:extension interface="org.zstack.header.storage.primary.PSCapacityExtensionPoint"/>

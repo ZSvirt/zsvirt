@@ -23,7 +23,6 @@
             <zstack:extension interface="org.zstack.header.vm.extension.VmInstancePreStartExtensionPoint" />
             <zstack:extension interface="org.zstack.header.vm.VmInstanceCreateExtensionPoint" />
             <zstack:extension interface="org.zstack.header.configuration.userconfig.InstanceOfferingUserConfigValidator" />
-            <zstack:extension interface="org.zstack.header.configuration.userconfig.DiskOfferingUserConfigValidator" />
             <zstack:extension interface="org.zstack.header.storage.primary.PrimaryStorageSortExtensionPoint"/>
             <zstack:extension interface="org.zstack.storage.primary.PrimaryStorageFeatureAllocatorExtensionPoint"/>
         </zstack:plugin>

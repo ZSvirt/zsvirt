@@ -3,8 +3,6 @@ package org.zstack.storage.volume;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
-import org.zstack.configuration.DiskOfferingSystemTags;
-import org.zstack.configuration.OfferingUserConfigUtils;
 import org.zstack.core.cloudbus.CloudBus;
 import org.zstack.core.componentloader.PluginRegistry;
 import org.zstack.core.db.DatabaseFacade;
@@ -21,7 +19,6 @@ import org.zstack.header.cluster.ClusterVO;
 import org.zstack.header.cluster.ClusterVO_;
 import org.zstack.header.configuration.DiskOfferingVO;
 import org.zstack.header.configuration.DiskOfferingVO_;
-import org.zstack.header.configuration.userconfig.DiskOfferingUserConfig;
 import org.zstack.header.errorcode.ErrorCode;
 import org.zstack.header.host.HostStatus;
 import org.zstack.header.host.HostVO;
@@ -32,7 +29,6 @@ import org.zstack.header.image.ImageState;
 import org.zstack.header.image.ImageStatus;
 import org.zstack.header.image.ImageVO;
 import org.zstack.header.message.APIMessage;
-import org.zstack.header.storage.primary.PrimaryStorageAllocateConfig;
 import org.zstack.header.storage.primary.PrimaryStorageClusterRefVO;
 import org.zstack.header.storage.primary.PrimaryStorageClusterRefVO_;
 import org.zstack.header.storage.primary.PrimaryStorageHostRefVO;
@@ -69,7 +65,6 @@ import org.zstack.header.volume.APIGetDataVolumeAttachableVmMsg;
 import org.zstack.header.volume.APIRecoverDataVolumeMsg;
 import org.zstack.header.volume.APIUndoSnapshotCreationMsg;
 import org.zstack.header.volume.VolumeConstant;
-import org.zstack.header.volume.VolumeCreateMessage;
 import org.zstack.header.volume.VolumeFormat;
 import org.zstack.header.volume.VolumeHostRefVO;
 import org.zstack.header.volume.VolumeHostRefVO_;
@@ -118,9 +113,6 @@ public class VolumeApiInterceptor implements Component, GlobalApiMessageIntercep
 
     @Override
     public APIMessage intercept(APIMessage msg) throws ApiMessageInterceptionException {
-        if (msg instanceof VolumeCreateMessage) {
-            validate((VolumeCreateMessage) msg);
-        }
         if (msg instanceof APIChangeVolumeStateMsg) {
             validate((APIChangeVolumeStateMsg) msg);
         } else if (msg instanceof APIDeleteDataVolumeMsg) {
@@ -159,27 +151,6 @@ public class VolumeApiInterceptor implements Component, GlobalApiMessageIntercep
 
         setServiceId(msg);
         return msg;
-    }
-
-    private void validate(VolumeCreateMessage msg) {
-        String diskOffering = msg.getDiskOfferingUuid();
-        if (diskOffering == null || !DiskOfferingSystemTags.DISK_OFFERING_USER_CONFIG.hasTag(diskOffering)) {
-            return;
-        }
-
-        DiskOfferingUserConfig config = OfferingUserConfigUtils.getDiskOfferingConfig(diskOffering, DiskOfferingUserConfig.class);
-        if (config.getAllocate() == null) {
-            return;
-        }
-
-        if (!config.getAllocate().getAllPrimaryStorages().isEmpty()) {
-            List<String> requiredPrimaryStorageUuids = config.getAllocate().getAllPrimaryStorages().stream()
-                    .map(PrimaryStorageAllocateConfig::getUuid).collect(Collectors.toList());
-            if (msg.getPrimaryStorageUuid() != null && !requiredPrimaryStorageUuids.contains(msg.getPrimaryStorageUuid())) {
-                throw new ApiMessageInterceptionException(operr("primary storage uuid conflict, the primary storage specified by the disk offering are %s, and the primary storage specified in the creation parameter is %s",
-                        requiredPrimaryStorageUuids, msg.getPrimaryStorageUuid()));
-            }
-        }
     }
 
     private void validate(APICreateVolumeSnapshotMsg msg) {

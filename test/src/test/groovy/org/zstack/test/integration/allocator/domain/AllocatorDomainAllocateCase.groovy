@@ -5,7 +5,6 @@ import org.zstack.allocator.domain.header.AllocatorDomainErrors
 import org.zstack.allocator.domain.header.AllocatorDomainGlobalConfig
 import org.zstack.allocator.domain.header.AllocatorDomainState
 import org.zstack.allocator.domain.header.AllocatorDomainSystemTags
-import org.zstack.sdk.ErrorCode
 import org.zstack.sdk.HostInventory
 import org.zstack.sdk.L3NetworkInventory
 import org.zstack.sdk.PrimaryStorageInventory
@@ -563,14 +562,10 @@ class AllocatorDomainAllocateCase extends SubCase {
                 ]
             }
         }) {
-            // TODO: should reject in interceptor soon
-            assert delegate.causes.size() == 1
-            assert delegate.causes[0] instanceof ErrorCode
-            def error = delegate.causes[0] as ErrorCode
-            assert error.code == AllocatorDomainErrors.RESOURCE_OUT_OF_DOMAIN.toString()
-            assert error.opaque
-            assert error.opaque[AllocatorDomainConstant.Opaque.DOMAIN_UUID] == domain.uuid
-            assert error.opaque[AllocatorDomainConstant.Opaque.L3_UUID] == l3.uuid
+            assert delegate.code == AllocatorDomainErrors.RESOURCE_OUT_OF_DOMAIN.toString()
+            assert delegate.opaque
+            assert delegate.opaque[AllocatorDomainConstant.Opaque.DOMAIN_UUID] == domain.uuid
+            assert delegate.opaque[AllocatorDomainConstant.Opaque.L3_UUID] == l3.uuid
         }
 
         deleteAllocatorDomain {

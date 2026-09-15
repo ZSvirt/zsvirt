@@ -1,6 +1,7 @@
 package org.zstack.test.integration.allocator.domain
 
 import org.zstack.allocator.domain.header.AllocatorDomainConstant
+import org.zstack.allocator.domain.header.AllocatorDomainErrors
 import org.zstack.allocator.domain.header.AllocatorDomainGlobalConfig
 import org.zstack.allocator.domain.header.AllocatorDomainSystemTags
 import org.zstack.header.allocator.HostAllocatorError
@@ -157,7 +158,7 @@ class AllocatorDomainNegativeMigrateAllocateCase extends SubCase {
                 delegate.hostUuid = host2.uuid
             }
         }) {
-            assert delegate.code == HostAllocatorError.NO_AVAILABLE_HOST.toString()
+            assert delegate.code == AllocatorDomainErrors.RESOURCE_OUT_OF_DOMAIN.toString()
         }
 
         List<VmInstanceInventory> afterFail = queryVmInstance {

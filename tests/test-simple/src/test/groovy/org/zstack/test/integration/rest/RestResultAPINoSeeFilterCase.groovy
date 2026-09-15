@@ -5,7 +5,7 @@ import org.zstack.core.db.SQL
 import org.zstack.rest.AsyncRestVO
 import org.zstack.rest.AsyncRestVO_
 import org.zstack.sdk.KVMHostInventory
-import org.zstack.test.integration.ZStackTest
+import org.zstack.test.integration.SimpleTest
 import org.zstack.testlib.EnvSpec
 import org.zstack.testlib.SubCase
 
@@ -23,12 +23,12 @@ class RestResultAPINoSeeFilterCase extends SubCase {
 
     @Override
     void setup() {
-        useSpring(ZStackTest.springSpec)
+        useSpring(SimpleTest.springSpec)
     }
 
     @Override
     void environment() {
-        env = env {
+        env = makeEnv {
             zone {
                 name = "zone"
                 description = "test"

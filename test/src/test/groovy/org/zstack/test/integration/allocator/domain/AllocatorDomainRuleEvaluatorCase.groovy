@@ -1,6 +1,6 @@
 package org.zstack.test.integration.allocator.domain
 
-import org.zstack.allocator.domain.compute.AllocatorDomainRuleEvaluator
+import org.zstack.allocator.domain.compute.evaluator.AllocatorDomainRuleEvaluator
 import org.zstack.allocator.domain.entity.AllocatorHostRule
 import org.zstack.header.host.HostVO
 import org.zstack.testlib.SubCase
@@ -22,6 +22,7 @@ class AllocatorDomainRuleEvaluatorCase extends SubCase {
         testDomainZoneBoundsSoftOnlyCandidates()
         testIncludeKeepsRecommend()
         testUuidHardMembership()
+        testPrimaryStorageQualifier()
     }
 
     void testHardUnionInclude() {
@@ -176,6 +177,44 @@ class AllocatorDomainRuleEvaluatorCase extends SubCase {
         assert excludeWins.allowedUuids.contains("l3-1")
         assert !excludeWins.allowedUuids.contains("l3-2")
         assert !excludeWins.allowedUuids.contains("l3-3")
+    }
+
+    void testPrimaryStorageQualifier() {
+        logger.info("Test 000f: Root qualifier ignores Data-only Include; empty qualifier applies to both")
+        AllocatorDomainRuleEvaluator evaluator = new AllocatorDomainRuleEvaluator()
+        List<String> candidates = ["ps-1", "ps-2", "ps-3"]
+        List<AllocatorHostRule> rules = json("""[
+            {"resourceUuid": "ps-1", "resourceType": "PrimaryStorageVO", "effect": "Include", "resourceQualifier": "Root"},
+            {"resourceUuid": "ps-2", "resourceType": "PrimaryStorageVO", "effect": "Include", "resourceQualifier": "Data"},
+            {"resourceUuid": "ps-3", "resourceType": "PrimaryStorageVO", "effect": "Include"}
+        ]""", AllocatorHostRule[].class) as List<AllocatorHostRule>
+
+        AllocatorDomainRuleEvaluator.UuidDecision all = evaluator.evaluatePrimaryStorages(rules, candidates)
+        assert all.hasChain
+        assert all.allowedUuids.size() == 3
+        assert all.allowedUuids.contains("ps-1")
+        assert all.allowedUuids.contains("ps-2")
+        assert all.allowedUuids.contains("ps-3")
+
+        AllocatorDomainRuleEvaluator.UuidDecision root = evaluator.evaluatePrimaryStorages(rules, candidates, "Root")
+        assert root.hasChain
+        assert root.allowedUuids.size() == 2
+        assert root.allowedUuids.contains("ps-1")
+        assert !root.allowedUuids.contains("ps-2")
+        assert root.allowedUuids.contains("ps-3")
+
+        AllocatorDomainRuleEvaluator.UuidDecision data = evaluator.evaluatePrimaryStorages(rules, candidates, "Data")
+        assert data.hasChain
+        assert data.allowedUuids.size() == 2
+        assert !data.allowedUuids.contains("ps-1")
+        assert data.allowedUuids.contains("ps-2")
+        assert data.allowedUuids.contains("ps-3")
+
+        AllocatorDomainRuleEvaluator.UuidDecision dataOnlyForRoot = evaluator.evaluatePrimaryStorages(json("""[
+            {"resourceUuid": "ps-2", "resourceType": "PrimaryStorageVO", "effect": "Include", "resourceQualifier": "Data"}
+        ]""", AllocatorHostRule[].class) as List<AllocatorHostRule>, candidates, "Root")
+        assert !dataOnlyForRoot.hasChain
+        assert dataOnlyForRoot.allowedUuids.isEmpty()
     }
 
     @Override

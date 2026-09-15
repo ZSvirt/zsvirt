@@ -1,4 +1,4 @@
-package org.zstack.allocator.domain.compute;
+package org.zstack.allocator.domain.compute.evaluator;
 
 import org.zstack.allocator.domain.entity.AllocatorHostRule;
 import org.zstack.allocator.domain.header.AllocatorDomainConstant;
@@ -102,22 +102,32 @@ public class AllocatorDomainRuleEvaluator {
     }
 
     public UuidDecision evaluatePrimaryStorages(Collection<AllocatorHostRule> rules, Collection<String> candidateUuids) {
-        return evaluateUuidChain(rules, candidateUuids, AllocatorDomainResourceType.PrimaryStorageVO.name());
-    }
-
-    public UuidDecision evaluateL3Networks(Collection<AllocatorHostRule> rules, Collection<String> candidateUuids) {
-        return evaluateUuidChain(rules, candidateUuids, AllocatorDomainResourceType.L3NetworkVO.name());
+        return evaluateUuidChain(rules, candidateUuids, AllocatorDomainResourceType.PrimaryStorageVO.name(), null);
     }
 
     /**
-     * Hard membership for a uuid resource type, no qualifier split:
+     * {@code qualifier} Root / Data keeps empty-qualifier rules plus that qualifier.
+     * Null qualifier keeps every PrimaryStorageVO rule (host chain / interceptor).
+     */
+    public UuidDecision evaluatePrimaryStorages(Collection<AllocatorHostRule> rules, Collection<String> candidateUuids,
+                                                String qualifier) {
+        return evaluateUuidChain(rules, candidateUuids, AllocatorDomainResourceType.PrimaryStorageVO.name(), qualifier);
+    }
+
+    public UuidDecision evaluateL3Networks(Collection<AllocatorHostRule> rules, Collection<String> candidateUuids) {
+        return evaluateUuidChain(rules, candidateUuids, AllocatorDomainResourceType.L3NetworkVO.name(), null);
+    }
+
+    /**
+     * Hard membership for a uuid resource type:
      * {@code (∪ Include) − (∪ Exclude)} if any Include exists, otherwise {@code all candidates − ∪ Exclude}.
      * Soft rules of this type do not change membership. {@code hasChain} is false when the domain has no rules of this type.
      */
     private UuidDecision evaluateUuidChain(Collection<AllocatorHostRule> rules, Collection<String> candidateUuids,
-                                           String resourceType) {
+                                           String resourceType, String qualifier) {
         List<AllocatorHostRule> chain = rules == null ? new ArrayList<>() : rules.stream()
                 .filter(rule -> isUuidChainRule(rule, resourceType))
+                .filter(rule -> appliesToQualifier(rule, qualifier))
                 .collect(Collectors.toList());
         if (chain.isEmpty()) {
             return new UuidDecision(false, false, new LinkedHashSet<>());
@@ -175,6 +185,14 @@ public class AllocatorDomainRuleEvaluator {
         }
         return AllocatorDomainResourceType.HostVO.name().equals(rule.resourceType)
                 || AllocatorDomainResourceType.ClusterVO.name().equals(rule.resourceType);
+    }
+
+    private boolean appliesToQualifier(AllocatorHostRule rule, String qualifier) {
+        if (qualifier == null) {
+            return true;
+        }
+        String ruleQualifier = rule.resourceQualifier;
+        return ruleQualifier == null || ruleQualifier.isEmpty() || qualifier.equals(ruleQualifier);
     }
 
     private boolean isUuidChainRule(AllocatorHostRule rule, String resourceType) {

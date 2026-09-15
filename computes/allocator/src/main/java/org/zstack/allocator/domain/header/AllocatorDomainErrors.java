@@ -40,6 +40,7 @@ public enum AllocatorDomainErrors {
     ALLOCATION_RELATED_ERROR(4000),
     RESOURCE_OUT_OF_DOMAIN(4001),
     DOMAIN_UUID_CHANGE_NOT_ALLOWED(4002),
+    NO_AVAILABLE_RESOURCE_IN_DOMAIN(4003),
     ;
 
     private final String code;

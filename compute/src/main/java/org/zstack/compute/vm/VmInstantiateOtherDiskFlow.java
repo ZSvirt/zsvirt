@@ -131,6 +131,7 @@ public class VmInstantiateOtherDiskFlow implements Flow {
                         amsg.setPurpose(PrimaryStorageAllocationPurpose.CreateDataVolume.toString());
                         amsg.setTags(diskAO.getSystemTags());
                         if (Boolean.TRUE.equals(diskAO.getEncrypted()) && diskAO.getPrimaryStorageUuid() == null) {
+                            // TODO: FIX — allocate should only allocate. requiredFeatures is a caller stamp, not a capability check.
                             amsg.addRequiredFeature(PrimaryStorageFeature.ENCRYPTED_VOLUME);
                         }
                         bus.makeLocalServiceId(amsg, PrimaryStorageConstant.SERVICE_ID);
@@ -284,6 +285,7 @@ public class VmInstantiateOtherDiskFlow implements Flow {
                                 .map(ImageBackupStorageRefVO::getBackupStorageUuid).collect(Collectors.toList());
                         amsg.setPossiblePrimaryStorageTypes(possiblePrimaryStorageTypes(bsUuids));
                         if (Boolean.TRUE.equals(diskAO.getEncrypted())) {
+                            // TODO: FIX — allocate should only allocate. requiredFeatures is a caller stamp, not a capability check.
                             amsg.addRequiredFeature(PrimaryStorageFeature.ENCRYPTED_VOLUME);
                         }
 

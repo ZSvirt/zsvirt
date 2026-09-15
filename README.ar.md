@@ -1,3 +1,4 @@
+<!-- synced-with: README.md@89c5cfc6 -->
 <div align="center" dir="rtl">
   <a href="https://zsvirt.io">
     <img

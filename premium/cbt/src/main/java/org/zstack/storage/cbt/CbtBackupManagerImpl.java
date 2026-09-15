@@ -355,12 +355,10 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
                         if (reply.isSuccess()) {
                             EnableCbtTaskReply ereply = new EnableCbtTaskReply();
                             EnableCbtTaskOnHostReply r = reply.castReply();
-                            changeCbtTaskStatus(msg.getUuid(), CbtTaskStatus.Running);
                             ereply.setVolumeCbtBackupInfos(r.getVolumeCbtBackupInfos());
                             bus.reply(msg, ereply);
                             chain.next();
                         } else {
-                            changeCbtTaskStatus(msg.getUuid(), CbtTaskStatus.Failed);
                             reply.setError(reply.getError());
                             bus.reply(msg, reply);
                             chain.next();
@@ -393,7 +391,6 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
     }
 
     private void handle(final EnableCbtTaskOnHostMsg msg) {
-        final CbtTaskVO taskVO = dbf.findByUuid(msg.getUuid(), CbtTaskVO.class);
         final EnableCbtTaskOnHostReply reply = new EnableCbtTaskOnHostReply();
         final String vmUuid = Q.New(CbtTaskResourceRefVO.class)
                 .eq(CbtTaskResourceRefVO_.resourceType, VmInstanceVO.class.getSimpleName())
@@ -417,7 +414,22 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
 
                 String hostUuid = getVmHostUuid(vmUuid);
                 if (hostUuid == null) {
+                    changeCbtTaskStatus(msg.getUuid(), CbtTaskStatus.Failed);
                     reply.setError(operr("host not found for VM: %s", vmUuid));
+                    bus.reply(msg, reply);
+                    chain.next();
+                    return;
+                }
+
+                CbtTaskVO taskVO = dbf.findByUuid(msg.getUuid(), CbtTaskVO.class);
+                if (taskVO == null) {
+                    reply.setError(operr("Cbt task not found[uuid: %s]", msg.getUuid()));
+                    bus.reply(msg, reply);
+                    chain.next();
+                    return;
+                }
+                if (taskVO.getStatus() == CbtTaskStatus.Running) {
+                    reply.setError(operr("Cbt task[uuid: %s] has already enabled, please disable it.", msg.getUuid()));
                     bus.reply(msg, reply);
                     chain.next();
                     return;
@@ -445,7 +457,7 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
 
             @Override
             public String getName() {
-                return String.format("running-cbt-task-%s", taskVO.getUuid());
+                return String.format("running-cbt-task-%s", msg.getUuid());
             }
         });
     }

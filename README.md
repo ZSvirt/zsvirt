@@ -249,41 +249,17 @@ Proxmox VE vs VMware vSphere vs ZSvirt
   >
 </p>
 
-### Roadmap
+## Roadmap
 
 #### 2026H2
 
-**Security**
-
-- Add virtual machine disk encryption
-- Add virtual machine migration encryption
-
-**DRS & VM Migration**
-
-- Add more flexible migration options
-  - Able to migrate disks individually
-  - Support both hot and cold migration for SAN to SAN scenario
-
-**ZMigrate**
-
-- ZMigrate 2.1
-  - Add pre-check to mitigate risks for complex migration
-  - Simpler and smarter migration workflows
-
-**Operations**
-
-- Add more monitoring metrics
-  - VM CPU ready time
-  - VM disk read/write latency
-  - Network packet drop rate
-  - Host CPU ready time
-- Support more granular log levels for external syslog forwarding
-- Add NVMe and FC devices monitoring including IOPS and latency
-- Add built-in QXL drivers in VMTools to enable better display and resolution of VM console
-
-**Inventory Management**
-
-- Extend storage and VM registration capability to cover same site registration
+| Area | Planned work |
+|---|---|
+| **Security** | Add virtual machine disk encryption<br>Add virtual machine migration encryption |
+| **DRS & VM Migration** | Add more flexible migration options:<br>• Able to migrate disks individually<br>• Support both hot and cold migration for SAN to SAN scenario |
+| **ZMigrate** | **ZMigrate 2.1**:<br>• Add pre-check to mitigate risks for complex migration<br>• Simpler and smarter migration workflows |
+| **Operations** | Add VM CPU ready time, VM disk read/write latency, network packet drop rate, and host CPU ready time metrics<br>Support more granular log levels for external syslog forwarding<br>Add NVMe and FC device monitoring, including IOPS and latency<br>Add built-in QXL drivers in VMTools for improved VM console display and resolution |
+| **Inventory Management** | Extend storage and VM registration capability to cover same-site registration |
 
 ## Governance
 

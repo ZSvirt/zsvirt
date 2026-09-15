@@ -8,7 +8,6 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.zstack.compute.host.HostSystemTags;
 import org.zstack.compute.vm.VmCapabilitiesExtensionPoint;
-import org.zstack.configuration.DiskOfferingSystemTags;
 import org.zstack.configuration.InstanceOfferingSystemTags;
 import org.zstack.configuration.OfferingUserConfigUtils;
 import org.zstack.core.CoreGlobalProperty;
@@ -27,8 +26,6 @@ import org.zstack.core.errorcode.ErrorFacade;
 import org.zstack.core.thread.ThreadFacade;
 import org.zstack.core.trash.StorageTrash;
 import org.zstack.header.Component;
-import org.zstack.header.configuration.userconfig.DiskOfferingUserConfig;
-import org.zstack.header.configuration.userconfig.DiskOfferingUserConfigValidator;
 import org.zstack.header.configuration.userconfig.InstanceOfferingUserConfig;
 import org.zstack.header.configuration.userconfig.InstanceOfferingUserConfigValidator;
 import org.zstack.header.core.Completion;
@@ -86,7 +83,7 @@ public class CephPrimaryStorageFactory implements PrimaryStorageFactory, CephCap
         KVMAttachVolumeExtensionPoint, KVMDetachVolumeExtensionPoint, CreateTemplateFromVolumeSnapshotExtensionPoint,
         KvmSetupSelfFencerExtensionPoint, KVMPreAttachIsoExtensionPoint, Component, PostMarkRootVolumeAsSnapshotExtension,
         BeforeTakeLiveSnapshotsOnVolumes, VmInstanceCreateExtensionPoint, CreateDataVolumeExtensionPoint,
-        InstanceOfferingUserConfigValidator, DiskOfferingUserConfigValidator, MarkRootVolumeAsSnapshotExtension,
+        InstanceOfferingUserConfigValidator, MarkRootVolumeAsSnapshotExtension,
         VmCapabilitiesExtensionPoint, PreVmInstantiateResourceExtensionPoint, PSCapacityExtensionPoint,
         RecalculatePrimaryStorageCapacityExtensionPoint {
     private static final CLogger logger = Utils.getLogger(CephPrimaryStorageFactory.class);
@@ -797,59 +794,17 @@ public class CephPrimaryStorageFactory implements PrimaryStorageFactory, CephCap
     @Override
     public void preCreateVmInstance(CreateVmInstanceMsg msg) {
         settingRootVolume(msg);
-        settingDataVolume(msg);
-        settingDataDisks(msg);
     }
 
     private void settingRootVolume(CreateVmInstanceMsg msg) {
         String instanceOffering = msg.getInstanceOfferingUuid();
 
-        if (InstanceOfferingSystemTags.INSTANCE_OFFERING_USER_CONFIG.hasTag(instanceOffering)) {
-            InstanceOfferingUserConfig config = OfferingUserConfigUtils.getInstanceOfferingConfig(instanceOffering, InstanceOfferingUserConfig.class);
-            if (config.getAllocate() != null && config.getAllocate().getPrimaryStorage() != null) {
-                msg.setPrimaryStorageUuidForRootVolume(config.getAllocate().getPrimaryStorage().getUuid());
-
-                if (msg.getRootVolumeSystemTags() == null) {
-                    msg.setRootVolumeSystemTags(new ArrayList<>());
-                }
-
-                if (config.getAllocate().getPrimaryStorage() instanceof CephPrimaryStorageAllocateConfig) {
-                    CephPrimaryStorageAllocateConfig primaryStorageAllocateConfig = (CephPrimaryStorageAllocateConfig) config.getAllocate().getPrimaryStorage();
-                    if (primaryStorageAllocateConfig.getPoolNames() == null || primaryStorageAllocateConfig.getPoolNames().isEmpty()) {
-                        return;
-                    }
-
-                    String cephPoolName = SystemTagUtils.findTagValue(msg.getRootVolumeSystemTags(), CephSystemTags.USE_CEPH_ROOT_POOL, CephSystemTags.USE_CEPH_ROOT_POOL_TOKEN);
-                    String targetCephPoolName = primaryStorageAllocateConfig.getPoolNames().get(0);
-                    if (cephPoolName != null && !cephPoolName.equals(targetCephPoolName)) {
-                        throw new OperationFailureException(operr("ceph pool conflict, the ceph pool specified by the instance offering is %s, and the ceph pool specified in the creation parameter is %s"
-                                ,targetCephPoolName, cephPoolName));
-                    }
-
-                    msg.getRootVolumeSystemTags().add(CephSystemTags.USE_CEPH_ROOT_POOL.instantiateTag(
-                            map(
-                                    e(CephSystemTags.USE_CEPH_ROOT_POOL_TOKEN, targetCephPoolName)
-                            )
-                    ));
-                }
-            }
-        }
-
-        String rootDiskOffering = msg.getRootDiskOfferingUuid();
-        if (rootDiskOffering == null) {
+        if (!InstanceOfferingSystemTags.INSTANCE_OFFERING_USER_CONFIG.hasTag(instanceOffering)) {
             return;
         }
 
-        if (!DiskOfferingSystemTags.DISK_OFFERING_USER_CONFIG.hasTag(rootDiskOffering)) {
-            return;
-        }
-
-        DiskOfferingUserConfig config = OfferingUserConfigUtils.getDiskOfferingConfig(rootDiskOffering, DiskOfferingUserConfig.class);
-        if (config.getAllocate() == null) {
-            return;
-        }
-
-        if (config.getAllocate().getPrimaryStorage() == null) {
+        InstanceOfferingUserConfig config = OfferingUserConfigUtils.getInstanceOfferingConfig(instanceOffering, InstanceOfferingUserConfig.class);
+        if (config.getAllocate() == null || config.getAllocate().getPrimaryStorage() == null) {
             return;
         }
 
@@ -871,7 +826,7 @@ public class CephPrimaryStorageFactory implements PrimaryStorageFactory, CephCap
         String cephPoolName = SystemTagUtils.findTagValue(msg.getRootVolumeSystemTags(), CephSystemTags.USE_CEPH_ROOT_POOL, CephSystemTags.USE_CEPH_ROOT_POOL_TOKEN);
         String targetCephPoolName = primaryStorageAllocateConfig.getPoolNames().get(0);
         if (cephPoolName != null && !cephPoolName.equals(targetCephPoolName)) {
-            throw new OperationFailureException(operr("ceph pool conflict, the ceph pool specified by the disk offering is %s, and the ceph pool specified in the creation parameter is %s"
+            throw new OperationFailureException(operr("ceph pool conflict, the ceph pool specified by the instance offering is %s, and the ceph pool specified in the creation parameter is %s"
                     ,targetCephPoolName, cephPoolName));
         }
 
@@ -882,115 +837,8 @@ public class CephPrimaryStorageFactory implements PrimaryStorageFactory, CephCap
         ));
     }
 
-    private void settingDataVolume(CreateVmInstanceMsg msg) {
-        if (isEmpty(msg.getDeprecatedDataVolumeSpecs())) {
-            return;
-        }
-
-        String diskOffering = msg.getDeprecatedDataVolumeSpecs().get(0).getDiskOfferingUuid();
-        if (diskOffering == null) {
-            return;
-        }
-
-        if (DiskOfferingSystemTags.DISK_OFFERING_USER_CONFIG.hasTag(diskOffering)) {
-            DiskOfferingUserConfig config = OfferingUserConfigUtils.getDiskOfferingConfig(diskOffering, DiskOfferingUserConfig.class);
-
-            if (config.getAllocate() == null) {
-                return;
-            }
-
-            if (config.getAllocate().getPrimaryStorage() != null) {
-                msg.setPrimaryStorageUuidForDataVolume(config.getAllocate().getPrimaryStorage().getUuid());
-            }
-
-            if (msg.getDataVolumeSystemTags() == null) {
-                msg.setDataVolumeSystemTags(new ArrayList<>());
-            }
-
-            if (config.getAllocate().getPrimaryStorage() instanceof CephPrimaryStorageAllocateConfig) {
-                CephPrimaryStorageAllocateConfig primaryStorageAllocateConfig = (CephPrimaryStorageAllocateConfig) config.getAllocate().getPrimaryStorage();
-                if (!isEmpty(primaryStorageAllocateConfig.getPoolNames())) {
-                    msg.getDataVolumeSystemTags().add(CephSystemTags.USE_CEPH_PRIMARY_STORAGE_POOL.instantiateTag(
-                            map(
-                                    e(CephSystemTags.USE_CEPH_PRIMARY_STORAGE_POOL_TOKEN, primaryStorageAllocateConfig.getPoolNames().get(0))
-                            )
-                    ));
-                }
-            }
-        }
-    }
-
-    private void settingDataDisks(CreateVmInstanceMsg msg) {
-        List<DiskAO> diskAOs = msg.getDataDisks();
-        if (diskAOs == null) {
-            return;
-        }
-        for (DiskAO diskAO : diskAOs) {
-            String diskOffering = diskAO.getDiskOfferingUuid();
-            if (diskOffering == null || !DiskOfferingSystemTags.DISK_OFFERING_USER_CONFIG.hasTag(diskOffering)) {
-                continue;
-            }
-            DiskOfferingUserConfig config = OfferingUserConfigUtils.getDiskOfferingConfig(diskOffering, DiskOfferingUserConfig.class);
-            if (config.getAllocate() == null) {
-                continue;
-            }
-
-            if (diskAO.getSystemTags() == null) {
-                diskAO.setSystemTags(new ArrayList<>());
-            }
-
-            if (config.getAllocate().getPrimaryStorage() instanceof CephPrimaryStorageAllocateConfig) {
-                CephPrimaryStorageAllocateConfig primaryStorageAllocateConfig = (CephPrimaryStorageAllocateConfig) config.getAllocate().getPrimaryStorage();
-                if (!isEmpty(primaryStorageAllocateConfig.getPoolNames())) {
-                    diskAO.getSystemTags().add(CephSystemTags.USE_CEPH_PRIMARY_STORAGE_POOL.instantiateTag(
-                            map(
-                                    e(CephSystemTags.USE_CEPH_PRIMARY_STORAGE_POOL_TOKEN, primaryStorageAllocateConfig.getPoolNames().get(0))
-                            )
-                    ));
-                }
-            }
-        }
-    }
     @Override
     public void preCreateVolume(VolumeCreateMessage msg) {
-        String diskOffering = msg.getDiskOfferingUuid();
-        if (diskOffering == null) {
-            return;
-        }
-
-        if (DiskOfferingSystemTags.DISK_OFFERING_USER_CONFIG.hasTag(diskOffering)) {
-            DiskOfferingUserConfig config = OfferingUserConfigUtils.getDiskOfferingConfig(diskOffering, DiskOfferingUserConfig.class);
-
-            if (config.getAllocate() == null) {
-                return;
-            }
-
-            if (config.getAllocate().getPrimaryStorage() == null) {
-                return;
-            }
-            msg.setPrimaryStorageUuid(config.getAllocate().getPrimaryStorage().getUuid());
-            if (!(config.getAllocate().getPrimaryStorage() instanceof CephPrimaryStorageAllocateConfig)) {
-                return;
-            }
-
-            CephPrimaryStorageAllocateConfig primaryStorageAllocateConfig = (CephPrimaryStorageAllocateConfig) config.getAllocate().getPrimaryStorage();
-            if (primaryStorageAllocateConfig.getPoolNames() == null || primaryStorageAllocateConfig.getPoolNames().isEmpty()) {
-                return;
-            }
-
-            String cephPoolName = SystemTagUtils.findTagValue(msg.getSystemTags(), CephSystemTags.USE_CEPH_ROOT_POOL, CephSystemTags.USE_CEPH_ROOT_POOL_TOKEN);
-            String targetCephPoolName = primaryStorageAllocateConfig.getPoolNames().get(0);
-            if (cephPoolName != null && !cephPoolName.equals(targetCephPoolName)) {
-                throw new OperationFailureException(operr("ceph pool conflict, the ceph pool specified by the disk offering is %s, and the ceph pool specified in the creation parameter is %s"
-                        ,targetCephPoolName, cephPoolName));
-            }
-
-            msg.addSystemTag(CephSystemTags.USE_CEPH_PRIMARY_STORAGE_POOL.instantiateTag(
-                    map(
-                            e(CephSystemTags.USE_CEPH_PRIMARY_STORAGE_POOL_TOKEN, primaryStorageAllocateConfig.getPoolNames().get(0))
-                    )
-            ));
-        }
     }
 
     @Override
@@ -1015,63 +863,6 @@ public class CephPrimaryStorageFactory implements PrimaryStorageFactory, CephCap
             config = OfferingUserConfigUtils.toObject(userConfig, InstanceOfferingUserConfig.class);
         } catch (JsonSyntaxException e) {
             throw new IllegalArgumentException("Syntax error(s) in billing instance offering user configuration, user configuration should write in json format.", e);
-        }
-
-        if (config.getAllocate() == null) {
-            return;
-        }
-
-        PrimaryStorageAllocateConfig primaryStorageAllocateConfig = config.getAllocate().getPrimaryStorage();
-        if (primaryStorageAllocateConfig == null) {
-            return;
-        }
-
-        if (primaryStorageAllocateConfig.getType() == null) {
-            throw new IllegalArgumentException("primaryStorage type cannot be empty");
-        }
-
-        if (primaryStorageAllocateConfig.getUuid() == null) {
-            throw new IllegalArgumentException("primaryStorage uuid cannot be empty");
-        }
-
-        String psUuid = primaryStorageAllocateConfig.getUuid();
-        PrimaryStorageVO primaryStorageVO = dbf.findByUuid(psUuid, PrimaryStorageVO.class);
-        if (primaryStorageVO == null) {
-            throw new IllegalArgumentException(String.format("primaryStorage[uuid=%s] does not exist", psUuid));
-        }
-
-        if (!(config.getAllocate().getPrimaryStorage() instanceof CephPrimaryStorageAllocateConfig)) {
-            return;
-        }
-
-        CephPrimaryStorageAllocateConfig cephAllocateConfig = (CephPrimaryStorageAllocateConfig) config.getAllocate().getPrimaryStorage();
-        if (cephAllocateConfig.getPoolNames() == null || cephAllocateConfig.getPoolNames().isEmpty()) {
-            return;
-        }
-
-        for (String poolName : cephAllocateConfig.getPoolNames()) {
-            boolean exists = Q.New(CephPrimaryStoragePoolVO.class)
-                    .eq(CephPrimaryStoragePoolVO_.poolName, poolName)
-                    .eq(CephPrimaryStoragePoolVO_.primaryStorageUuid, psUuid)
-                    .isExists();
-            if (!exists) {
-                throw new IllegalArgumentException(String.format("cephPrimaryStorage[uuid=%s] cephPool[name=%s] does not exist", psUuid, poolName));
-            }
-        }
-    }
-
-    @Override
-    public void validateDiskOfferingUserConfig(String userConfig, String diskOfferingUuid) {
-        if (StringUtils.isBlank(userConfig)) {
-            return;
-        }
-
-        DiskOfferingUserConfig config;
-
-        try {
-            config = OfferingUserConfigUtils.toObject(userConfig, DiskOfferingUserConfig.class);
-        } catch (JsonSyntaxException e) {
-            throw new IllegalArgumentException("Syntax error(s) in disk offering user configuration, user configuration should write in json format.", e);
         }
 
         if (config.getAllocate() == null) {

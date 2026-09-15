@@ -11,12 +11,14 @@ import org.zstack.header.vm.VmCanonicalEvents;
 import org.zstack.header.vm.VmInstanceVO;
 import org.zstack.tag.PatternedSystemTag;
 import org.zstack.tag.SystemTagCreator;
+import org.zstack.utils.Tags;
 import org.zstack.utils.Utils;
 import org.zstack.utils.logging.CLogger;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static org.zstack.utils.CollectionDSL.e;
 import static org.zstack.utils.CollectionDSL.map;
@@ -281,7 +283,7 @@ public class VmSensitiveTagEncryptor {
 
     private String encryptValueForTag(String tokenName, String plainValue, String vmUuid) {
         String encrypted = ENC_PREFIX + encryptFacade.encrypt(plainValue);
-        String candidateTag = tokenName + "::" + encrypted;
+        String candidateTag = Tags.join(tokenName, encrypted);
         if (candidateTag.length() > MAX_TAG_LENGTH) {
             if (VmSystemTags.USERDATA_TOKEN.equals(tokenName)) {
                 logger.error(String.format(
@@ -318,16 +320,16 @@ public class VmSensitiveTagEncryptor {
             return null;
         }
 
-        String tagHead = tag.substring(0, tag.indexOf("::"));
+        String tagHead = Tags.first(tag);
         return new SensitiveTagContext(patternedTag, tagHead, tokens);
     }
 
     private PatternedSystemTag findSensitivePatternedTag(String tag) {
-        int idx = tag.indexOf("::");
-        if (idx <= 0) {
+        String tagHead = Tags.first(tag);
+        if (Objects.equals(tagHead, tag)) {
             return null;
         }
-        PatternedSystemTag patternedTag = VmSystemTags.getSensitivePatternedTagByHead(tag.substring(0, idx));
+        PatternedSystemTag patternedTag = VmSystemTags.getSensitivePatternedTagByHead(tagHead);
         if (patternedTag != null && patternedTag.isMatch(tag)) {
             return patternedTag;
         }

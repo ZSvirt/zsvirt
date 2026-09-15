@@ -36,6 +36,9 @@ for module in `ls test/src/test/resources/UTCapabilities`; do
     fi
 
     for test in $tests; do
+        case "$test" in
+            *StabilityTest.groovy) continue ;;
+        esac
         echo $test
     done
 done

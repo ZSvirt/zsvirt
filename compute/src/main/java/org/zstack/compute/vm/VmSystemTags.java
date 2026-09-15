@@ -10,6 +10,7 @@ import org.zstack.tag.PatternedSystemTag;
 import org.zstack.tag.SensitiveTagOutputHandler;
 import org.zstack.tag.SensitiveTag;
 import org.zstack.tag.SystemTag;
+import org.zstack.utils.Tags;
 
 import java.util.Arrays;
 import java.util.Base64;
@@ -18,6 +19,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -42,11 +44,11 @@ public class VmSystemTags {
         if (tag == null) {
             return false;
         }
-        int idx = tag.indexOf("::");
-        if (idx <= 0) {
+        String tagHead = Tags.first(tag);
+        if (Objects.equals(tagHead, tag)) {
             return false;
         }
-        return isSensitiveTagHead(tag.substring(0, idx));
+        return isSensitiveTagHead(tagHead);
     }
 
     public static String HOSTNAME_TOKEN = "hostname";
@@ -150,7 +152,7 @@ public class VmSystemTags {
         }
 
         PatternedSystemTag patternedTag = (PatternedSystemTag) systemTag;
-        String tagHead = rawTag.substring(0, rawTag.indexOf("::"));
+        String tagHead = Tags.first(rawTag);
         String plain = patternedTag.getTokenByResourceUuid(resourceUuid, tagHead);
         if (plain == null) {
             return rawTag;

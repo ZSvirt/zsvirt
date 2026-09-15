@@ -145,4 +145,9 @@
         <id>4002</id>
         <description>Changing the VM allocator domain to another domain uuid is not allowed via this API</description>
     </code>
+
+    <code>
+        <id>4003</id>
+        <description>No candidate resource remains in the allocator domain</description>
+    </code>
 </error>

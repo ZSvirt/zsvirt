@@ -4,6 +4,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
+import org.zstack.allocator.domain.compute.flows.DomainFilterPrimaryStorageFlow;
 import org.zstack.core.Platform;
 import org.zstack.core.asyncbatch.While;
 import org.zstack.core.cloudbus.CloudBus;
@@ -396,6 +397,9 @@ public class VmAllocateHostAndPrimaryStorageFlow implements Flow {
             @Override
             public void setup() {
                 flow(new VmAllocateHostFlow());
+
+                // TODO: FIX — insert via extension when allocatorDomain.xml is loaded; do not new this flow here.
+                flow(new DomainFilterPrimaryStorageFlow());
 
                 flow(new VmAllocatePrimaryStorageFlow());
             }

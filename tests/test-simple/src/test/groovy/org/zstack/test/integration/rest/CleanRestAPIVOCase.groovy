@@ -4,7 +4,7 @@ import org.zstack.core.rest.RESTApiFacadeImpl
 import org.zstack.core.rest.RESTApiGlobalProperty
 import org.zstack.header.rest.RestAPIState
 import org.zstack.header.rest.RestAPIVO
-import org.zstack.test.integration.ZStackTest
+import org.zstack.test.integration.SimpleTest
 import org.zstack.testlib.EnvSpec
 import org.zstack.testlib.SubCase
 
@@ -29,7 +29,7 @@ class CleanRestAPIVOCase extends SubCase{
 
     @Override
     void setup() {
-        useSpring(ZStackTest.springSpec)
+        useSpring(SimpleTest.springSpec)
         spring {
             include("RESTFacade.xml")
         }
@@ -37,8 +37,7 @@ class CleanRestAPIVOCase extends SubCase{
 
     @Override
     void environment() {
-        env = env {
-        }
+        env = makeEnv {}
     }
 
     @Override

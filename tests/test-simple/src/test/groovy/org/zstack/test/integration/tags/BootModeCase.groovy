@@ -1,4 +1,4 @@
-package org.zstack.test.integration.configuration.systemTag
+package org.zstack.test.integration.tags
 
 import org.zstack.header.image.ImageConstant
 import org.zstack.header.image.ImagePlatform
@@ -18,7 +18,7 @@ class BootModeCase extends SubCase {
 
     @Override
     void environment() {
-        env = env {
+        env = makeEnv {
             zone {
                 name = "zone"
                 attachBackupStorage("sftp")

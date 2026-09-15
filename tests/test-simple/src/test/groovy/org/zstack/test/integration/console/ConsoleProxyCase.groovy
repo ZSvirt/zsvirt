@@ -16,7 +16,7 @@ import org.zstack.sdk.ConsoleInventory
 import org.zstack.sdk.GarbageCollectorInventory
 import org.zstack.sdk.SessionInventory
 import org.zstack.sdk.VmInstanceInventory
-import org.zstack.test.integration.ZStackTest
+import org.zstack.test.integration.SimpleTest
 import org.zstack.testlib.EnvSpec
 import org.zstack.testlib.HttpError
 import org.zstack.testlib.SubCase
@@ -27,13 +27,13 @@ class ConsoleProxyCase extends SubCase {
 
     @Override
     void setup() {
-        useSpring(ZStackTest.springSpec)
+        useSpring(SimpleTest.springSpec)
     }
 
     @Override
     void environment() {
         dbf = bean(DatabaseFacade.class)
-        env = env {
+        env = makeEnv {
             account {
                 name = "test"
                 password = "password"

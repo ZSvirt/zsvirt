@@ -1,4 +1,4 @@
-package org.zstack.test.integration.configuration.systemTag
+package org.zstack.test.integration.tags
 
 import org.zstack.header.identity.AccountVO
 import org.zstack.header.zone.ZoneVO
@@ -19,7 +19,7 @@ class SystemTagCase extends SubCase{
 
     @Override
     void environment() {
-        env = env{
+        env = makeEnv {
             zone{
                 name = "zone"
             }
@@ -38,17 +38,16 @@ class SystemTagCase extends SubCase{
             testRepeatCreateSameResourceUuidSystemTag()
             testCreateSystemTagForTypeNotMatchedResource()
         }
-
     }
 
     void testCreateSystemTag(){
-        ZoneSpec zone = env.specByName('zone')
+        def zone = env.specByName('zone') as ZoneSpec
 
         CreateSystemTagAction a = new CreateSystemTagAction(
                 resourceType: ZoneVO.getSimpleName(),
                 resourceUuid: zone.inventory.uuid,
                 tag: "host::reservedCpu::{capacity}",
-                sessionId: Test.currentEnvSpec.session.uuid
+                sessionId: currentEnvSpec.session.uuid
         )
         CreateSystemTagAction.Result res = a.call()
 
@@ -59,13 +58,13 @@ class SystemTagCase extends SubCase{
     }
 
     void testRepeatCreateSameResourceUuidSystemTag(){
-        ZoneSpec zone = env.specByName('zone')
+        def zone = env.specByName('zone') as ZoneSpec
 
         CreateSystemTagAction a = new CreateSystemTagAction(
                 resourceType: ZoneVO.getSimpleName(),
                 resourceUuid: zone.inventory.uuid,
                 tag: "host::reservedCpu::{capacity}",
-                sessionId: Test.currentEnvSpec.session.uuid
+                sessionId: currentEnvSpec.session.uuid
         )
 
         CreateSystemTagAction.Result res = a.call()

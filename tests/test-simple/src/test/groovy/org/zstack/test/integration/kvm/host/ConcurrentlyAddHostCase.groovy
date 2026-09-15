@@ -27,7 +27,7 @@ class ConcurrentlyAddHostCase extends SubCase{
 
     @Override
     void environment() {
-        env = env {
+        env = makeEnv {
             cephBackupStorage {
                 name="bs"
                 totalCapacity = SizeUnit.GIGABYTE.toByte(100)

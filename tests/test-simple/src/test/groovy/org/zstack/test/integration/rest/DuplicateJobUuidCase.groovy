@@ -1,18 +1,11 @@
 package org.zstack.test.integration.rest
 
-import org.zstack.core.db.Q
-import org.zstack.core.db.SQL
+
 import org.zstack.header.network.l2.L2NetworkConstant
-import org.zstack.header.vo.Uuid
-import org.zstack.rest.AsyncRestVO
-import org.zstack.rest.AsyncRestVO_
 import org.zstack.sdk.CreateL2NoVlanNetworkAction
-import org.zstack.sdk.HostInventory
-import org.zstack.sdk.KVMHostInventory
 import org.zstack.sdk.QueryL2NetworkAction
-import org.zstack.sdk.QueryL2NetworkResult
 import org.zstack.sdk.ZoneInventory
-import org.zstack.test.integration.ZStackTest
+import org.zstack.test.integration.SimpleTest
 import org.zstack.testlib.EnvSpec
 import org.zstack.testlib.SubCase
 
@@ -30,12 +23,12 @@ class DuplicateJobUuidCase extends SubCase {
 
     @Override
     void setup() {
-        useSpring(ZStackTest.springSpec)
+        useSpring(SimpleTest.springSpec)
     }
 
     @Override
     void environment() {
-        env = env {
+        env = makeEnv {
             zone {
                 name = "zone"
                 description = "test"
@@ -46,7 +39,7 @@ class DuplicateJobUuidCase extends SubCase {
     @Override
     void test() {
         env.create {
-            zoneInventory = env.inventoryByName("zone")
+            zoneInventory = env.inventoryByName("zone") as ZoneInventory
             testDuplicateApiId()
         }
     }

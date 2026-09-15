@@ -5,8 +5,6 @@ import org.zstack.testlib.vfs.Qcow2
 import org.zstack.testlib.vfs.VFS
 import org.zstack.testlib.vfs.tree.Qcow2Tree
 
-import java.util.concurrent.TimeUnit
-
 class VFSCase extends SubCase {
     VFS vfs
 

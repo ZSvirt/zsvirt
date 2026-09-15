@@ -1,7 +1,7 @@
 package org.zstack.test.integration.rest
 
 import org.zstack.rest.TypeVerifier
-import org.zstack.test.integration.ZStackTest
+import org.zstack.test.integration.SimpleTest
 import org.zstack.testlib.SubCase
 
 class TypeVerifierCase extends SubCase {
@@ -12,7 +12,7 @@ class TypeVerifierCase extends SubCase {
 
     @Override
     void setup() {
-        useSpring(ZStackTest.springSpec)
+        useSpring(SimpleTest.springSpec)
     }
 
     @Override

@@ -1,6 +1,7 @@
 package org.zstack.test.integration.offerings
 
 import org.zstack.sdk.*
+import org.zstack.test.integration.SimpleTest
 import org.zstack.test.integration.kvm.KvmTest
 import org.zstack.testlib.EnvSpec
 import org.zstack.testlib.SubCase
@@ -27,12 +28,12 @@ class ConcurrentCreateVirtualRouterOfferingCase extends SubCase {
 
     @Override
     void setup() {
-        useSpring(KvmTest.springSpec)
+        useSpring(SimpleTest.springSpec)
     }
 
     @Override
     void environment() {
-        env = env {
+        env = makeEnv {
             sftpBackupStorage {
                 name = "sftp"
                 url = "/sftp"
@@ -52,8 +53,8 @@ class ConcurrentCreateVirtualRouterOfferingCase extends SubCase {
         int num = 100
         CountDownLatch latch = new CountDownLatch(num)
 
-        BackupStorageInventory bs = env.inventoryByName("sftp")
-        ImageInventory image = env.inventoryByName("vr")
+        def bs = env.inventoryByName("sftp") as BackupStorageInventory
+        def image = env.inventoryByName("vr") as ImageInventory
 
         List<Closure> createOffering = []
 

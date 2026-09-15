@@ -775,7 +775,8 @@ public class HaManagerImpl extends AbstractService implements HaManager, Compone
                                 .find();
 
                         if (ha.getInhibitionReason() != null) {
-                            logger.debug(String.format("Skip VM [%s] GC job for HA", inv.getUuid()));
+                            logger.debug(String.format("Skip VM [%s] GC job for HA: %s",
+                                    inv.getUuid(), ha.getInhibitionReason()));
                             continue;
                         }
 

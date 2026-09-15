@@ -241,6 +241,7 @@ public class ZSClient {
                     res.error.details = t.getMessage();
                     completion.complete(res);
                 }
+                waittingApis.remove(jobUuid);
             }
         }
 

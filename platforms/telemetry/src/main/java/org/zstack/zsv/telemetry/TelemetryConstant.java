@@ -1,5 +1,7 @@
 package org.zstack.zsv.telemetry;
 
+import org.zstack.core.CoreGlobalProperty;
+
 public class TelemetryConstant {
     private TelemetryConstant() {
     }
@@ -50,7 +52,15 @@ public class TelemetryConstant {
      * Initial delay (seconds) before the first upload tick after tasks start.
      * Collect starts immediately; upload waits so the first pending report is more likely ready.
      */
-    public static final long UPLOAD_INITIAL_DELAY_SECONDS = 30L;
+    public static final long COLLECT_INITIAL_DELAY_SECONDS = 10L;
+    public static final long UPLOAD_INITIAL_DELAY_SECONDS = 40L;
+
+    public static long getCollectInitialDelaySeconds() {
+        return CoreGlobalProperty.UNIT_TEST_ON ? 0L : COLLECT_INITIAL_DELAY_SECONDS;
+    }
+    public static long getUploadInitialDelaySeconds() {
+        return CoreGlobalProperty.UNIT_TEST_ON ? 1L : UPLOAD_INITIAL_DELAY_SECONDS;
+    }
 
     public static final String CLOUD_HEALTH_PATH = "/health";
     public static final String CLOUD_REPORTS_PATH = "/v1/reports";

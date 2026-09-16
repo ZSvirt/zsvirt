@@ -1,4 +1,4 @@
-package org.zstack.test.integration.core.branchcascade;
+package org.zstack.testlib.cloudbus;
 
 import org.zstack.core.cascade.AsyncBranchCascadeExtensionPoint;
 import org.zstack.core.cascade.CascadeAction;

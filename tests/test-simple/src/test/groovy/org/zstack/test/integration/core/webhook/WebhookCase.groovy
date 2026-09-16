@@ -26,7 +26,7 @@ class WebhookCase extends SubCase {
 
     @Override
     void environment() {
-        envSpec = env {
+        envSpec = makeEnv {
             // nothing
         }
     }

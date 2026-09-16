@@ -9,7 +9,7 @@
        default-init-method="init" default-destroy-method="destroy">
 
     <!-- for AsyncBranchCascadeExtensionPointCase -->
-    <bean id="BypassVmDetachNicBranchCascadeExtension" class="org.zstack.test.integration.core.branchcascade.BypassVmDetachNicBranchCascadeExtension">
+    <bean id="BypassVmDetachNicBranchCascadeExtension" class="org.zstack.testlib.cloudbus.BypassVmDetachNicBranchCascadeExtension">
         <zstack:plugin>
             <zstack:extension interface="org.zstack.core.cascade.AsyncBranchCascadeExtensionPoint" />
         </zstack:plugin>

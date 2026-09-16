@@ -29,7 +29,7 @@ class CanonicalEventWebhookCase extends SubCase {
 
     String WEBHOOK_PATH = "/canonical-event-webhook"
 
-    void testErrorToCreateWebhookifOpaqueFieldMissing() {
+    void testErrorToCreateWebhookIfOpaqueFieldMissing() {
         expect(AssertionError.class) {
             createWebhook {
                 name = "webhook1"
@@ -162,7 +162,7 @@ class CanonicalEventWebhookCase extends SubCase {
 
     @Override
     void environment() {
-        envSpec = env {
+        envSpec = makeEnv {
             // nothing
         }
     }
@@ -172,7 +172,7 @@ class CanonicalEventWebhookCase extends SubCase {
         envSpec.create {
             testCanonicalEventUseWebhook()
             testCanonicalEventWithVariableInPath()
-            testErrorToCreateWebhookifOpaqueFieldMissing()
+            testErrorToCreateWebhookIfOpaqueFieldMissing()
         }
     }
 }

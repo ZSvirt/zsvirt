@@ -112,7 +112,7 @@ class CloudBusShardingCase extends SubCase {
         try {
             bus.makeTargetServiceIdByResourceUuid(msg, servId, Platform.getUuid())
         } catch (Exception exception) {
-            assert exception instanceof CloudRuntimeException
+            assert (exception instanceof CloudRuntimeException)
             catched = true
         }
 

@@ -1,9 +1,6 @@
 package org.zstack.test.integration.core
 
-import org.zstack.sdk.L3NetworkInventory
 import org.zstack.sdk.ZoneInventory
-import org.zstack.test.integration.kvm.Env
-import org.zstack.test.integration.networkservice.provider.NetworkServiceProviderTest
 import org.zstack.testlib.EnvSpec
 import org.zstack.testlib.SubCase
 

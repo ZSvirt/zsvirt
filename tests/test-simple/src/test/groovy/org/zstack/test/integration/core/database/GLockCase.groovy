@@ -3,7 +3,7 @@ package org.zstack.test.integration.core.database
 
 import org.zstack.core.db.GLock
 import org.zstack.header.exception.CloudRuntimeException
-import org.zstack.test.integration.ZStackTest
+import org.zstack.test.integration.SimpleTest
 import org.zstack.testlib.EnvSpec
 import org.zstack.testlib.SubCase
 /**
@@ -21,12 +21,12 @@ class GLockCase extends SubCase {
 
     @Override
     void setup() {
-        useSpring(ZStackTest.springSpec)
+        useSpring(SimpleTest.springSpec)
     }
 
     @Override
     void environment() {
-        env = env {}
+        env = makeEnv {}
     }
 
     @Override

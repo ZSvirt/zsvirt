@@ -56,7 +56,11 @@ public class CreateVmBackupLongJob implements LongJob {
                 public void run(MessageReply reply) {
                     if (reply.isSuccess()) {
                         CreateVmBackupReply r = reply.castReply();
-                        evt.setInventories(r.getInventories());
+                        List<VolumeBackupInventory> inventories = r.getInventories();
+                        if (inventories != null) {
+                            inventories.forEach(inv -> inv.setMetadata(null));
+                        }
+                        evt.setInventories(inventories);
                         evt.setActualExecuteTime(r.getActualExecuteTime());
                         compl.allDone();
                     } else {
@@ -115,7 +119,11 @@ public class CreateVmBackupLongJob implements LongJob {
             public void done(ErrorCodeList errorCodeList) {
                 List<String> voUuids = evt.getInventories().stream().map(VolumeBackupInventory::getUuid).collect(Collectors.toList());
                 List<VolumeBackupVO> vos = Q.New(VolumeBackupVO.class).in(VolumeBackupVO_.uuid, voUuids).list();
-                evt.setInventories(VolumeBackupInventory.valueOf(vos));
+                List<VolumeBackupInventory> inventories = VolumeBackupInventory.valueOf(vos);
+                if (inventories != null) {
+                    inventories.forEach(inv -> inv.setMetadata(null));
+                }
+                evt.setInventories(inventories);
                 completion.success(evt);
             }
         });

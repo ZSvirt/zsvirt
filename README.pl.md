@@ -1,4 +1,4 @@
-<!-- synced-with: README.md@89c5cfc6 -->
+<!-- synced-with: README.md@e9235837 -->
 <div align="center">
   <a href="https://zsvirt.io">
     <img
@@ -234,6 +234,17 @@ Porównanie Proxmox VE, VMware vSphere i ZSvirt
   >
 </p>
 
+## Plan rozwoju
+
+#### II połowa 2026
+
+| Obszar | Planowane prace |
+|---|---|
+| **Bezpieczeństwo** | Dodanie szyfrowania dysków VM<br>Dodanie szyfrowania migracji VM |
+| **DRS i migracja VM** | Dodanie bardziej elastycznych opcji migracji:<br>• Możliwość migracji dysków pojedynczo<br>• Obsługa migracji na gorąco i na zimno w scenariuszu SAN do SAN |
+| **ZMigrate** | **ZMigrate 2.1**:<br>• Dodanie wstępnej weryfikacji zmniejszającej ryzyko złożonych migracji<br>• Prostsze i inteligentniejsze przepływy migracji |
+| **Operacje** | Dodanie metryk czasu CPU Ready VM, opóźnienia odczytu/zapisu dysku VM, wskaźnika utraty pakietów sieciowych i czasu CPU Ready hosta<br>Obsługa bardziej szczegółowych poziomów dziennika przy przekazywaniu do zewnętrznego syslog<br>Dodanie monitorowania urządzeń NVMe i FC, w tym IOPS i opóźnienia<br>Dodanie wbudowanych sterowników QXL w VMTools dla lepszego wyświetlania i rozdzielczości konsoli VM |
+| **Zarządzanie zasobami** | Rozszerzenie rejestracji pamięci masowej i VM o rejestrację w tej samej lokalizacji |
 
 ## Zarządzanie projektem
 

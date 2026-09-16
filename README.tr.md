@@ -1,4 +1,4 @@
-<!-- synced-with: README.md@89c5cfc6 -->
+<!-- synced-with: README.md@e9235837 -->
 <div align="center">
   <a href="https://zsvirt.io">
     <img
@@ -234,6 +234,17 @@ Proxmox VE, VMware vSphere ve ZSvirt karşılaştırması
   >
 </p>
 
+## Yol Haritası
+
+#### 2026 2. yarı
+
+| Alan | Planlanan çalışmalar |
+|---|---|
+| **Güvenlik** | VM disk şifrelemesi ekleme<br>VM taşıma şifrelemesi ekleme |
+| **DRS ve VM taşıma** | Daha esnek taşıma seçenekleri ekleme:<br>• Diskleri tek tek taşıyabilme<br>• SAN'dan SAN'a senaryosu için sıcak ve soğuk taşıma desteği |
+| **ZMigrate** | **ZMigrate 2.1**:<br>• Karmaşık taşımalarda riski azaltmak için ön kontrol ekleme<br>• Daha basit ve daha akıllı taşıma iş akışları |
+| **Operasyonlar** | VM CPU Ready süresi, VM disk okuma/yazma gecikmesi, ağ paket kayıp oranı ve ana makine CPU Ready süresi metriklerini ekleme<br>Harici syslog yönlendirmesi için daha ayrıntılı günlük seviyeleri desteği<br>IOPS ve gecikme dahil NVMe ve FC aygıt izleme ekleme<br>VM konsolu görüntüsünü ve çözünürlüğünü iyileştirmek için VMTools'a yerleşik QXL sürücüleri ekleme |
+| **Envanter yönetimi** | Depolama ve VM kaydını aynı sahada kaydı kapsayacak şekilde genişletme |
 
 ## Yönetişim
 

@@ -1,4 +1,4 @@
-<!-- synced-with: README.md@89c5cfc6 -->
+<!-- synced-with: README.md@e9235837 -->
 <div align="center">
   <a href="https://zsvirt.io">
     <img
@@ -234,6 +234,17 @@ Proxmox VE, VMware vSphere, ZSvirt 비교
   >
 </p>
 
+## 로드맵
+
+#### 2026년 하반기
+
+| 영역 | 계획된 작업 |
+|---|---|
+| **보안** | VM 디스크 암호화 추가<br>VM 마이그레이션 암호화 추가 |
+| **DRS 및 VM 마이그레이션** | 더 유연한 마이그레이션 옵션 추가:<br>• 디스크 개별 마이그레이션 지원<br>• SAN 대 SAN 시나리오의 핫 마이그레이션과 콜드 마이그레이션 지원 |
+| **ZMigrate** | **ZMigrate 2.1**:<br>• 복잡한 마이그레이션의 위험을 줄이는 사전 점검 추가<br>• 더 단순하고 스마트한 마이그레이션 워크플로 |
+| **운영** | VM CPU Ready 시간, VM 디스크 읽기/쓰기 지연 시간, 네트워크 패킷 손실률, 호스트 CPU Ready 시간 메트릭 추가<br>외부 syslog 전달 시 더 세분화된 로그 수준 지원<br>IOPS와 지연 시간을 포함한 NVMe 및 FC 장치 모니터링 추가<br>VM 콘솔 표시와 해상도를 개선하기 위해 VMTools에 QXL 드라이버 내장 |
+| **인벤토리 관리** | 스토리지 및 VM 등록 기능을 동일 사이트 등록까지 확장 |
 
 ## 거버넌스
 

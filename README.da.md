@@ -1,4 +1,4 @@
-<!-- synced-with: README.md@89c5cfc6 -->
+<!-- synced-with: README.md@e9235837 -->
 <div align="center">
   <a href="https://zsvirt.io">
     <img
@@ -234,6 +234,17 @@ Proxmox VE sammenlignet med VMware vSphere og ZSvirt
   >
 </p>
 
+## Roadmap
+
+#### 2. halvår 2026
+
+| Område | Planlagt arbejde |
+|---|---|
+| **Sikkerhed** | Tilføj kryptering af VM-diske<br>Tilføj kryptering af VM-migrering |
+| **DRS og VM-migrering** | Tilføj mere fleksible migreringsmuligheder:<br>• Mulighed for at migrere diske enkeltvis<br>• Understøt både varm og kold migrering for SAN-til-SAN-scenariet |
+| **ZMigrate** | **ZMigrate 2.1**:<br>• Tilføj forhåndskontrol for at mindske risici ved komplekse migreringer<br>• Enklere og smartere migreringsworkflows |
+| **Drift** | Tilføj målinger for VM-CPU-ready-tid, VM-diskens læse-/skrivelatens, netværkspakketab og værtens CPU-ready-tid<br>Understøt finere logniveauer ved videresendelse til ekstern syslog<br>Tilføj overvågning af NVMe- og FC-enheder, herunder IOPS og latens<br>Tilføj indbyggede QXL-drivere i VMTools for bedre visning og opløsning i VM-konsollen |
+| **Lagerstyring** | Udvid registrering af lager og VM'er til også at dække registrering på samme lokation |
 
 ## Styring
 

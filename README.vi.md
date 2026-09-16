@@ -1,4 +1,4 @@
-<!-- synced-with: README.md@89c5cfc6 -->
+<!-- synced-with: README.md@e9235837 -->
 <div align="center">
   <a href="https://zsvirt.io">
     <img
@@ -234,6 +234,17 @@ So sánh Proxmox VE, VMware vSphere và ZSvirt
   >
 </p>
 
+## Lộ trình
+
+#### Nửa cuối năm 2026
+
+| Lĩnh vực | Công việc dự kiến |
+|---|---|
+| **Bảo mật** | Bổ sung mã hóa đĩa của VM<br>Bổ sung mã hóa quá trình di chuyển VM |
+| **DRS và di chuyển VM** | Bổ sung các tùy chọn di chuyển linh hoạt hơn:<br>• Có thể di chuyển từng đĩa riêng lẻ<br>• Hỗ trợ cả di chuyển nóng và lạnh cho kịch bản SAN sang SAN |
+| **ZMigrate** | **ZMigrate 2.1**:<br>• Bổ sung bước kiểm tra trước để giảm rủi ro cho các đợt di chuyển phức tạp<br>• Quy trình di chuyển đơn giản và thông minh hơn |
+| **Vận hành** | Bổ sung các chỉ số thời gian CPU Ready của VM, độ trễ đọc/ghi đĩa của VM, tỷ lệ mất gói mạng và thời gian CPU Ready của máy chủ<br>Hỗ trợ mức log chi tiết hơn khi chuyển tiếp tới syslog bên ngoài<br>Bổ sung giám sát thiết bị NVMe và FC, bao gồm IOPS và độ trễ<br>Bổ sung trình điều khiển QXL tích hợp trong VMTools để cải thiện hiển thị và độ phân giải của bảng điều khiển VM |
+| **Quản lý tài nguyên** | Mở rộng khả năng đăng ký lưu trữ và VM để bao gồm đăng ký trong cùng một site |
 
 ## Quản trị dự án
 

@@ -1,7 +1,6 @@
 package org.zstack.test.integration.core.taskqueue;
 
 import groovy.lang.Closure;
-import org.apache.logging.log4j.ThreadContext;
 import org.zstack.core.Platform;
 import org.zstack.core.thread.ThreadFacadeImpl;
 import org.zstack.testlib.SubCase;

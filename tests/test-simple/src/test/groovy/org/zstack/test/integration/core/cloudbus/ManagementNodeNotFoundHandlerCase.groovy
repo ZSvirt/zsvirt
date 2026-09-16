@@ -15,7 +15,7 @@ import org.zstack.header.vm.StartVmInstanceMsg
 import org.zstack.header.vm.StartVmInstanceReply
 import org.zstack.portal.managementnode.ManagementNodeGlobalConfig
 import org.zstack.portal.managementnode.ManagementNodeManagerImpl
-import org.zstack.test.integration.ZStackTest
+import org.zstack.test.integration.SimpleTest
 import org.zstack.testlib.SubCase
 
 import java.util.concurrent.TimeUnit
@@ -29,7 +29,7 @@ class ManagementNodeNotFoundHandlerCase extends SubCase {
 
     @Override
     void setup() {
-        useSpring(ZStackTest.springSpec)
+        useSpring(SimpleTest.springSpec)
     }
 
     @Override

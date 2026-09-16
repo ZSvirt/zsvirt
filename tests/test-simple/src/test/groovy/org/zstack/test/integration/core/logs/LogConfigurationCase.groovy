@@ -5,7 +5,7 @@ import org.zstack.core.log.LogConstant
 import org.zstack.core.log.LogGlobalConfig
 import org.zstack.core.log.LogGlobalProperty
 import org.zstack.core.log.LogManagerImpl
-import org.zstack.test.integration.ZStackTest
+import org.zstack.test.integration.SimpleTest
 import org.zstack.testlib.EnvSpec
 import org.zstack.testlib.SubCase
 
@@ -19,12 +19,12 @@ class LogConfigurationCase extends SubCase {
 
     @Override
     void setup() {
-        useSpring(ZStackTest.springSpec)
+        useSpring(SimpleTest.springSpec)
     }
 
     @Override
     void environment() {
-        env = env {
+        env = makeEnv {
         }
     }
 

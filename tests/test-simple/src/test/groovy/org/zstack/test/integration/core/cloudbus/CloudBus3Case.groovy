@@ -17,7 +17,7 @@ import org.zstack.header.message.NeedReplyMessage
 import org.zstack.header.vm.APIQueryVmInstanceMsg
 import org.zstack.header.vm.APIStartVmInstanceMsg
 import org.zstack.header.vm.StartVmInstanceMsg
-import org.zstack.test.integration.ZStackTest
+import org.zstack.test.integration.SimpleTest
 import org.zstack.testlib.SubCase
 
 import java.util.concurrent.CountDownLatch
@@ -34,7 +34,7 @@ class CloudBus3Case extends SubCase {
 
     @Override
     void setup() {
-        useSpring(ZStackTest.springSpec)
+        useSpring(SimpleTest.springSpec)
     }
 
     @Override

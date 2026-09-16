@@ -1,6 +1,5 @@
 package org.zstack.test.integration.core
 
-import org.zstack.header.message.APIMessage
 import org.zstack.sdk.DeleteZoneAction
 import org.zstack.sdk.ZoneInventory
 import org.zstack.testlib.EnvSpec

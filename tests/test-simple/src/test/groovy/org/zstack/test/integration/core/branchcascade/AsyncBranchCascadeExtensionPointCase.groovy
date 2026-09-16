@@ -5,10 +5,10 @@ import org.zstack.header.vm.VmNicVO
 import org.zstack.header.vm.VmNicVO_
 import org.zstack.sdk.L3NetworkInventory
 import org.zstack.sdk.VmInstanceInventory
-import org.zstack.test.integration.kvm.Env
-import org.zstack.test.integration.kvm.KvmTest
+import org.zstack.test.integration.SimpleTest
 import org.zstack.testlib.EnvSpec
 import org.zstack.testlib.SubCase
+import org.zstack.testlib.cloudbus.BypassVmDetachNicBranchCascadeExtension
 
 class AsyncBranchCascadeExtensionPointCase extends SubCase {
     EnvSpec env
@@ -25,7 +25,7 @@ class AsyncBranchCascadeExtensionPointCase extends SubCase {
 
     @Override
     void environment() {
-        env = Env.oneVmBasicEnv()
+        env = SimpleTest.oneVmBasicEnv()
     }
 
     @Override

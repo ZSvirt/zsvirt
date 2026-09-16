@@ -45,7 +45,7 @@ class GlobalConfigCase extends SubCase {
 
     @Override
     void environment() {
-        env = env {
+        env = makeEnv {
             zone {
                 name = "zone"
             }

@@ -2,14 +2,12 @@ package org.zstack.test.integration.core
 
 import org.zstack.core.Platform
 import org.zstack.core.cloudbus.CloudBus
-import org.zstack.core.rest.RESTApiDecoder
 import org.zstack.header.zone.APICreateZoneEvent
 import org.zstack.header.zone.APICreateZoneMsg
 import org.zstack.header.zone.ZoneInventory
 import org.zstack.header.zone.ZoneState
 import org.zstack.testlib.EnvSpec
 import org.zstack.testlib.SubCase
-import org.zstack.utils.gson.GsonUtil
 import org.zstack.utils.gson.JSONObjectUtil
 
 /**

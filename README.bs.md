@@ -1,4 +1,4 @@
-<!-- synced-with: README.md@89c5cfc6 -->
+<!-- synced-with: README.md@e9235837 -->
 <div align="center">
   <a href="https://zsvirt.io">
     <img
@@ -234,6 +234,17 @@ Poređenje Proxmox VE, VMware vSphere i ZSvirt
   >
 </p>
 
+## Plan razvoja
+
+#### 2. polovina 2026.
+
+| Oblast | Planirani radovi |
+|---|---|
+| **Sigurnost** | Dodati šifriranje diskova VM-a<br>Dodati šifriranje migracije VM-a |
+| **DRS i migracija VM-a** | Dodati fleksibilnije opcije migracije:<br>• Mogućnost migracije diskova pojedinačno<br>• Podrška za toplu i hladnu migraciju za SAN-na-SAN scenarij |
+| **ZMigrate** | **ZMigrate 2.1**:<br>• Dodati prethodnu provjeru radi smanjenja rizika kod složenih migracija<br>• Jednostavniji i pametniji tokovi migracije |
+| **Operacije** | Dodati metrike vremena CPU Ready VM-a, latencije čitanja/pisanja diska VM-a, stope gubitka mrežnih paketa i vremena CPU Ready hosta<br>Podržati detaljnije nivoe zapisnika za prosljeđivanje na vanjski syslog<br>Dodati nadzor NVMe i FC uređaja, uključujući IOPS i latenciju<br>Dodati ugrađene QXL upravljačke programe u VMTools za bolji prikaz i rezoluciju konzole VM-a |
+| **Upravljanje inventarom** | Proširiti registraciju pohrane i VM-a na registraciju na istoj lokaciji |
 
 ## Upravljanje projektom
 

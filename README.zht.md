@@ -1,4 +1,4 @@
-<!-- synced-with: README.md@89c5cfc6 -->
+<!-- synced-with: README.md@e9235837 -->
 <div align="center">
   <a href="https://zsvirt.io">
     <img
@@ -239,6 +239,17 @@ Proxmox VE、VMware vSphere 與 ZSvirt 比較
   >
 </p>
 
+## 路線圖
+
+#### 2026 下半年
+
+| 領域 | 計畫內容 |
+|---|---|
+| **安全** | 增加虛擬機磁碟加密<br>增加虛擬機遷移加密 |
+| **DRS 與虛擬機遷移** | 增加更靈活的遷移選項：<br>• 支援單獨遷移磁碟<br>• 支援 SAN 對 SAN 情境下的熱遷移與冷遷移 |
+| **ZMigrate** | **ZMigrate 2.1**：<br>• 增加遷移前檢查，降低複雜遷移的風險<br>• 提供更簡單、更智慧的遷移流程 |
+| **維運** | 增加更多監控指標，包括虛擬機 CPU Ready 時間、虛擬機磁碟讀寫延遲、網路封包遺失率與主機 CPU Ready 時間<br>支援將更細緻的日誌等級轉送至外部 Syslog<br>增加 NVMe 與 FC 裝置監控，包括 IOPS 與延遲<br>在 VMTools 中內建 QXL 驅動程式，改善虛擬機主控台的顯示與解析度 |
+| **資源清單管理** | 擴充儲存與虛擬機註冊能力，支援同一站點註冊 |
 
 ## 社群治理
 

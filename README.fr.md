@@ -1,4 +1,4 @@
-<!-- synced-with: README.md@89c5cfc6 -->
+<!-- synced-with: README.md@e9235837 -->
 <div align="center">
   <a href="https://zsvirt.io">
     <img
@@ -234,6 +234,17 @@ Proxmox VE, VMware vSphere et ZSvirt
   >
 </p>
 
+## Feuille de route
+
+#### 2e semestre 2026
+
+| Domaine | Travaux prévus |
+|---|---|
+| **Sécurité** | Ajouter le chiffrement des disques de VM<br>Ajouter le chiffrement de la migration de VM |
+| **DRS et migration de VM** | Ajouter des options de migration plus flexibles :<br>• Pouvoir migrer les disques individuellement<br>• Prendre en charge la migration à chaud et à froid pour le scénario SAN vers SAN |
+| **ZMigrate** | **ZMigrate 2.1** :<br>• Ajouter une vérification préalable pour réduire les risques des migrations complexes<br>• Des flux de migration plus simples et plus intelligents |
+| **Exploitation** | Ajouter des métriques de temps CPU Ready de la VM, de latence de lecture/écriture du disque de la VM, de taux de perte de paquets réseau et de temps CPU Ready de l'hôte<br>Prendre en charge des niveaux de journal plus fins lors de la redirection vers un syslog externe<br>Ajouter la supervision des périphériques NVMe et FC, y compris les IOPS et la latence<br>Ajouter des pilotes QXL intégrés à VMTools pour améliorer l'affichage et la résolution de la console de la VM |
+| **Gestion de l'inventaire** | Étendre l'enregistrement du stockage et des VM à l'enregistrement sur le même site |
 
 ## Gouvernance
 

@@ -1,4 +1,4 @@
-<!-- synced-with: README.md@89c5cfc6 -->
+<!-- synced-with: README.md@e9235837 -->
 <div align="center">
   <a href="https://zsvirt.io">
     <img
@@ -250,6 +250,7 @@ Proxmox VE、VMware vSphere 与 ZSvirt 对比
 | **ZMigrate** | **ZMigrate 2.1**：<br>• 增加迁移前检查，降低复杂迁移的风险<br>• 提供更简单、更智能的迁移流程 |
 | **运维** | 增加更多监控指标，包括虚拟机 CPU Ready 时间、虚拟机磁盘读写延迟、网络丢包率和主机 CPU Ready 时间<br>支持向外部 Syslog 转发时使用更细粒度的日志级别<br>增加 NVMe 和 FC 设备监控，包括 IOPS 和延迟<br>在 VMTools 中内置 QXL 驱动，改善虚拟机控制台的显示效果和分辨率 |
 | **资源清单管理** | 扩展存储和虚拟机注册能力，支持同一站点注册 |
+
 ## 社区治理
 
 ZSvirt 采用轻量级开源治理模式，用于明确项目如何维护、如何制定决策，以及贡献者之间如何协作。

@@ -194,11 +194,12 @@ translated; the order and the link targets may not change.
 | 9 | Quick Start | |
 | 10 | Best Practices | |
 | 11 | Virtualization Platform Comparison | |
-| 12 | Governance | |
-| 13 | Contributing | |
-| 14 | Security | |
-| 15 | License | |
-| 16 | Resources | The two-column table of community links. |
+| 12 | Roadmap | |
+| 13 | Governance | |
+| 14 | Contributing | |
+| 15 | Security | |
+| 16 | License | |
+| 17 | Resources | The two-column table of community links. |
 
 ---
 

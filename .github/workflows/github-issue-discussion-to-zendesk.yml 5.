@@ -1,0 +1,139 @@
+name: Create Zendesk ticket for GitHub issue or discussion
+
+on:
+  issues:
+    types:
+      - opened
+  discussion:
+    types:
+      - created
+
+permissions:
+  contents: read
+  issues: read
+  discussions: read
+
+jobs:
+  create-zendesk-ticket:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Build Zendesk ticket payload
+        env:
+          REPOSITORY: ${{ github.repository }}
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          set -euo pipefail
+
+          jq \
+            --arg repository "$REPOSITORY" \
+            --arg event_name "$EVENT_NAME" \
+            '
+            (if $event_name == "issues" then .issue else .discussion end) as $item
+            |
+            (if $event_name == "issues" then "Issue" else "Discussion" end) as $source_type
+            |
+            (if $event_name == "issues" then "github_issue" else "github_discussion" end) as $source_tag
+            |
+            (if $event_name == "issues" then "github:" else "github-discussion:" end) as $external_prefix
+            |
+            ($repository | ascii_downcase | gsub("[^a-z0-9]+"; "_")) as $repository_tag
+            |
+            {
+              ticket: {
+                subject: (
+                  "[GitHub " + $source_type + " " + $repository + "#" +
+                  ($item.number | tostring) + "] " + $item.title
+                ),
+                comment: {
+                  public: false,
+                  body: (
+                    "A new GitHub " + ($source_type | ascii_downcase) + " was created.\n\n" +
+                    "Repository: " + $repository + "\n" +
+                    $source_type + ": #" + ($item.number | tostring) + "\n" +
+                    "Reporter: @" + $item.user.login + "\n" +
+                    "URL: " + $item.html_url + "\n" +
+                    (if $event_name == "issues" then
+                      "Labels: " +
+                      ([.issue.labels[].name] |
+                        if length > 0 then join(", ") else "None" end)
+                    else
+                      "Category: " + (.discussion.category.name // "None")
+                    end) +
+                    "\n\nDescription:\n" +
+                    ($item.body // "(No description provided)")
+                  )
+                },
+                status: "new",
+                external_id: (
+                  $external_prefix + $repository + "#" + ($item.number | tostring)
+                ),
+                tags: [
+                  $source_tag,
+                  "zsvirt",
+                  ("github_repo_" + $repository_tag)
+                ]
+              }
+            }
+            ' "$GITHUB_EVENT_PATH" > zendesk-ticket.json
+
+      - name: Get OAuth token and create Zendesk ticket
+        env:
+          ZENDESK_SUBDOMAIN: ${{ secrets.ZENDESK_SUBDOMAIN }}
+          ZENDESK_CLIENT_ID: ${{ secrets.ZENDESK_CLIENT_ID }}
+          ZENDESK_CLIENT_SECRET: ${{ secrets.ZENDESK_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+
+          TOKEN_RESPONSE_FILE="$(mktemp)"
+          CREATE_RESPONSE_FILE="$(mktemp)"
+          trap 'rm -f "$TOKEN_RESPONSE_FILE" "$CREATE_RESPONSE_FILE"' EXIT
+
+          TOKEN_HTTP_STATUS="$(
+            curl \
+              --silent \
+              --show-error \
+              --output "$TOKEN_RESPONSE_FILE" \
+              --write-out "%{http_code}" \
+              --request POST \
+              "https://${ZENDESK_SUBDOMAIN}.zendesk.com/oauth/tokens" \
+              --header "Content-Type: application/x-www-form-urlencoded" \
+              --data-urlencode "grant_type=client_credentials" \
+              --data-urlencode "client_id=${ZENDESK_CLIENT_ID}" \
+              --data-urlencode "client_secret=${ZENDESK_CLIENT_SECRET}" \
+              --data-urlencode "scope=tickets:write" \
+              --data-urlencode "expires_in=300"
+          )"
+
+          if [[ "$TOKEN_HTTP_STATUS" != "200" ]]; then
+            echo "::error::Zendesk OAuth request failed with HTTP ${TOKEN_HTTP_STATUS}"
+            jq '{error, error_description, description}' "$TOKEN_RESPONSE_FILE" 2>/dev/null ||
+              head -c 1000 "$TOKEN_RESPONSE_FILE"
+            exit 1
+          fi
+
+          ACCESS_TOKEN="$(jq --exit-status --raw-output '.access_token' "$TOKEN_RESPONSE_FILE")"
+
+          CREATE_HTTP_STATUS="$(
+            curl \
+              --silent \
+              --show-error \
+              --output "$CREATE_RESPONSE_FILE" \
+              --write-out "%{http_code}" \
+              --request POST \
+              "https://${ZENDESK_SUBDOMAIN}.zendesk.com/api/v2/tickets.json" \
+              --header "Authorization: Bearer ${ACCESS_TOKEN}" \
+              --header "Content-Type: application/json" \
+              --data @zendesk-ticket.json
+          )"
+
+          if [[ "$CREATE_HTTP_STATUS" != "201" ]]; then
+            echo "::error::Zendesk ticket creation failed with HTTP ${CREATE_HTTP_STATUS}"
+            jq '{error, error_description, description, details}' "$CREATE_RESPONSE_FILE" 2>/dev/null ||
+              head -c 1000 "$CREATE_RESPONSE_FILE"
+            exit 1
+          fi
+
+          TICKET_ID="$(jq --exit-status --raw-output '.ticket.id' "$CREATE_RESPONSE_FILE")"
+          echo "Zendesk ticket ${TICKET_ID} created successfully"

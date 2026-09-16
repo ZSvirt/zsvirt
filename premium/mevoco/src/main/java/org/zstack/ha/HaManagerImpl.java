@@ -295,7 +295,11 @@ public class HaManagerImpl extends AbstractService implements HaManager, Compone
     @Override
     public void beforeStopVmOnHypervisor(VmInstanceSpec spec, StopVmOnHypervisorMsg msg) {
         final Message parentMsg = spec.getMessage();
-        if (parentMsg instanceof APIStopVmInstanceMsg) {
+        // Reboot's guest shutdown is queued behind the VM reboot task; keep the
+        // uuid cached so the delayed event does not create a leftover inhibitHA tag.
+        if (parentMsg instanceof APIStopVmInstanceMsg
+                || parentMsg instanceof RebootVmInstanceMsg
+                || parentMsg instanceof APIRebootVmInstanceMsg) {
             apiStopVmCache.put(spec.getVmInventory().getUuid(), spec.getVmInventory().getUuid());
         }
 

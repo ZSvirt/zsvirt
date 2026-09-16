@@ -56,7 +56,7 @@ public class TelemetryTaskScheduler implements Component, ManagementNodeReadyExt
             public String getName() {
                 return "telemetry-collect";
             }
-        });
+        }, TelemetryConstant.getCollectInitialDelaySeconds());
 
         uploadTask = threadFacade.submitCancelablePeriodicTask(new CancelablePeriodicTask() {
             @Override
@@ -83,7 +83,7 @@ public class TelemetryTaskScheduler implements Component, ManagementNodeReadyExt
             public String getName() {
                 return "telemetry-upload";
             }
-        }, TelemetryConstant.UPLOAD_INITIAL_DELAY_SECONDS);
+        }, TelemetryConstant.getUploadInitialDelaySeconds());
 
         logger.debug("started collect/upload periodic tasks");
     }

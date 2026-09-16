@@ -58,6 +58,7 @@
         <property name="allocatorFlowNames">
             <list>
                 <value>org.zstack.storage.primary.local.LocalStorageMainAllocatorFlow</value>
+                <value>org.zstack.allocator.domain.compute.flows.DomainFilterPrimaryStorageFlow</value>
             </list>
         </property>
     </bean>

@@ -42,6 +42,7 @@
                 <value>org.zstack.storage.primary.PrimaryStorageMainAllocatorFlow</value>
                 <value>org.zstack.storage.primary.PrimaryStorageAvoidAllocatorFlow</value>
                 <value>org.zstack.storage.primary.PrimaryStorageFeatureAllocatorFlow</value>
+                <value>org.zstack.allocator.domain.compute.flows.DomainFilterPrimaryStorageFlow</value>
                 <value>org.zstack.storage.primary.PrimaryStorageTagAllocatorFlow</value>
                 <value>org.zstack.storage.primary.PrimaryStorageReservedCapacityAllocatorFlow</value>
             </list>
@@ -67,6 +68,7 @@
                 <value>org.zstack.storage.primary.PrimaryStorageMainAllocatorFlow</value>
                 <value>org.zstack.storage.primary.PrimaryStorageAvoidAllocatorFlow</value>
                 <value>org.zstack.storage.primary.PrimaryStorageFeatureAllocatorFlow</value>
+                <value>org.zstack.allocator.domain.compute.flows.DomainFilterPrimaryStorageFlow</value>
                 <value>org.zstack.storage.primary.PrimaryStorageTagAllocatorFlow</value>
                 <value>org.zstack.storage.primary.PrimaryStorageReservedCapacityAllocatorFlow</value>
             </list>
@@ -92,6 +94,7 @@
                 <value>org.zstack.storage.primary.PrimaryStorageMainAllocatorFlow</value>
                 <value>org.zstack.storage.primary.PrimaryStorageAvoidAllocatorFlow</value>
                 <value>org.zstack.storage.primary.PrimaryStorageFeatureAllocatorFlow</value>
+                <value>org.zstack.allocator.domain.compute.flows.DomainFilterPrimaryStorageFlow</value>
                 <value>org.zstack.storage.primary.PrimaryStorageTagAllocatorFlow</value>
                 <value>org.zstack.storage.primary.PrimaryStorageReservedCapacityAllocatorFlow</value>
             </list>
@@ -117,6 +120,7 @@
                 <value>org.zstack.storage.primary.PrimaryStorageMainAllocatorFlow</value>
                 <value>org.zstack.storage.primary.PrimaryStorageAvoidAllocatorFlow</value>
                 <value>org.zstack.storage.primary.PrimaryStorageFeatureAllocatorFlow</value>
+                <value>org.zstack.allocator.domain.compute.flows.DomainFilterPrimaryStorageFlow</value>
                 <value>org.zstack.storage.primary.PrimaryStorageTagAllocatorFlow</value>
                 <value>org.zstack.storage.primary.PrimaryStorageReservedCapacityAllocatorFlow</value>
             </list>

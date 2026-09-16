@@ -150,7 +150,6 @@ public class VmAllocatePrimaryStorageFlow implements Flow {
         }
         if (disk != null && Boolean.TRUE.equals(disk.getEncrypted())
                 && disk.getPrimaryStorageUuid() == null) {
-            // TODO: FIX — allocate should only allocate. requiredFeatures is a caller stamp, not a capability check.
             rmsg.addRequiredFeature(PrimaryStorageFeature.ENCRYPTED_VOLUME);
         }
 

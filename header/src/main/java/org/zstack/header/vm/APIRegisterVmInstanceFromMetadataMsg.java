@@ -51,6 +51,15 @@ public class APIRegisterVmInstanceFromMetadataMsg extends APIMessage {
         this.metadataPath = metadataPath;
     }
 
+    public String getMetadataName() {
+        int separatorIndex = metadataPath.lastIndexOf('/');
+        return metadataPath.substring(separatorIndex + 1);
+    }
+
+    public String getMetadataRegistrationKey() {
+        return primaryStorageUuid + "-" + getMetadataName();
+    }
+
     public String getPrimaryStorageUuid() {
         return primaryStorageUuid;
     }

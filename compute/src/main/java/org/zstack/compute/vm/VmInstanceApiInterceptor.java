@@ -88,7 +88,11 @@ public class VmInstanceApiInterceptor implements ApiMessageInterceptor {
     private PluginRegistry pluginRgty;
 
     private void setServiceId(APIMessage msg) {
-        if (msg instanceof VmInstanceMessage) {
+        if (msg instanceof APIRegisterVmInstanceFromMetadataMsg) {
+            APIRegisterVmInstanceFromMetadataMsg rmsg = (APIRegisterVmInstanceFromMetadataMsg) msg;
+            bus.makeTargetServiceIdByResourceUuid(
+                    msg, VmInstanceConstant.SERVICE_ID, rmsg.getMetadataRegistrationKey());
+        } else if (msg instanceof VmInstanceMessage) {
             VmInstanceMessage vmsg = (VmInstanceMessage) msg;
             bus.makeTargetServiceIdByResourceUuid(msg, VmInstanceConstant.SERVICE_ID, vmsg.getVmInstanceUuid());
         }

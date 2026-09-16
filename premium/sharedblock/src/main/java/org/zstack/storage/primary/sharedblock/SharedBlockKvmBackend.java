@@ -984,6 +984,15 @@ public class SharedBlockKvmBackend extends SharedBlockHypervisorBackend implemen
     @Override
     void
     handle(DeleteVolumeOnPrimaryStorageMsg msg, final ReturnValueCompletion<DeleteVolumeOnPrimaryStorageReply> completion) {
+        List<StoragePathOwnershipHelper.Owner> otherOwners = StoragePathOwnershipHelper.findOtherOwners(
+                self.getUuid(), msg.getVolume().getInstallPath(),
+                Collections.singleton(msg.getVolume().getUuid()));
+        if (!otherOwners.isEmpty()) {
+            completion.fail(Platform.err(VolumeErrors.VOLUME_IN_USE,
+                    "refuse to delete volume[uuid:%s, path:%s] because the physical path is still owned by %s",
+                    msg.getVolume().getUuid(), msg.getVolume().getInstallPath(), otherOwners));
+            return;
+        }
         deleteBits(msg.getVolume().getInstallPath(), new Completion(completion) {
             @Override
             public void success() {
@@ -1363,6 +1372,11 @@ public class SharedBlockKvmBackend extends SharedBlockHypervisorBackend implemen
 
     @Override
     void handle(DeleteSnapshotOnPrimaryStorageMsg msg, final ReturnValueCompletion<DeleteSnapshotOnPrimaryStorageReply> completion) {
+        ErrorCode ownershipError = validateSnapshotPathOwnership(msg.getSnapshot());
+        if (ownershipError != null) {
+            completion.fail(ownershipError);
+            return;
+        }
         deleteBits(msg.getSnapshot().getPrimaryStorageInstallPath(), new Completion(completion) {
             @Override
             public void success() {
@@ -6220,6 +6234,11 @@ public class SharedBlockKvmBackend extends SharedBlockHypervisorBackend implemen
 
     @Override
     public void protect(VolumeSnapshotInventory snapshot, Completion completion) {
+        ErrorCode ownershipError = validateSnapshotPathOwnership(snapshot);
+        if (ownershipError != null) {
+            completion.fail(ownershipError);
+            return;
+        }
         completion.success();
         //NOTE(weiw): skip sharedblock protector
 //        VolumeSnapshotTreeVO treeVO = Q.New(VolumeSnapshotTreeVO.class)
@@ -6272,6 +6291,18 @@ public class SharedBlockKvmBackend extends SharedBlockHypervisorBackend implemen
 //                completion.fail(errorCode);
 //            }
 //        });
+    }
+
+    private ErrorCode validateSnapshotPathOwnership(VolumeSnapshotInventory snapshot) {
+        List<StoragePathOwnershipHelper.Owner> otherOwners = StoragePathOwnershipHelper.findOtherOwners(
+                snapshot.getPrimaryStorageUuid(), snapshot.getPrimaryStorageInstallPath(),
+                Collections.singleton(snapshot.getUuid()));
+        if (!otherOwners.isEmpty()) {
+            return inerr("refuse to delete snapshot[name:%s, uuid:%s, path:%s] because the physical " +
+                            "path is still owned by %s",
+                    snapshot.getName(), snapshot.getUuid(), snapshot.getPrimaryStorageInstallPath(), otherOwners);
+        }
+        return null;
     }
 
     static class BlockCommitStruct {

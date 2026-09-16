@@ -15,6 +15,7 @@ import org.zstack.kvm.KVMSystemTags;
 import org.zstack.mevoco.MevocoGlobalConfig;
 import org.zstack.pciDevice.PciDeviceGlobalConfig;
 import org.zstack.resourceconfig.BindResourceConfig;
+import org.zstack.storage.volume.VolumeSystemTags;
 import org.zstack.tag.PatternedSystemTag;
 import org.zstack.tag.SystemTag;
 import org.zstack.utils.BeanUtils;
@@ -28,7 +29,10 @@ public class CoreMemorySnapshotConfigs implements ManagementNodeReadyExtensionPo
             // vm
             VmSystemTags.USERDATA, VmSystemTags.USB_REDIRECT, VmSystemTags.SSHKEY, VmSystemTags.BOOT_MODE, VmSystemTags.CLEAN_TRAFFIC,
             VmSystemTags.HOSTNAME, MevocoVmSystemTags.VM_CPU_PINNING, MevocoVmSystemTags.VM_NUMA_ENABLE, VmHardwareSystemTags.CPU_CORES,
-            VmSystemTags.VM_GUEST_TOOLS, VmSystemTags.MACHINE_TYPE
+            VmSystemTags.VM_GUEST_TOOLS, VmSystemTags.MACHINE_TYPE,
+
+            // volume
+            VolumeSystemTags.OVERWRITED_VOLUME
     ).collect(Collectors.toList());
 
     public static final List<SystemTag> restoreCandidateSystemTags = Stream.of(

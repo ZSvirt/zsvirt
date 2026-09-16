@@ -1995,6 +1995,16 @@ public class LocalStorageKvmBackend extends LocalStorageHypervisorBackend {
         final DeleteVolumeOnPrimaryStorageReply dreply = new DeleteVolumeOnPrimaryStorageReply();
         final String hostUuid = getHostUuidByResourceUuid(msg.getVolume().getUuid(), VolumeVO.class.getSimpleName());
 
+        List<StoragePathOwnershipHelper.Owner> otherOwners =
+                LocalStoragePathOwnershipHelper.findOtherOwnersAtHost(
+                        self.getUuid(), hostUuid, msg.getVolume().getInstallPath(),
+                        Collections.singleton(msg.getVolume().getUuid()));
+        if (!otherOwners.isEmpty()) {
+            completion.fail(Platform.err(VolumeErrors.VOLUME_IN_USE,
+                    "refuse to delete volume[uuid:%s, path:%s] because the physical path is still owned by %s",
+                    msg.getVolume().getUuid(), msg.getVolume().getInstallPath(), otherOwners));
+            return;
+        }
         boolean dir = msg.getVolume().getType().equals(VolumeType.Memory.toString());
 
         deleteBits(msg.getVolume().getInstallPath(), hostUuid, dir, new Completion(completion) {

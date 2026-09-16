@@ -78,7 +78,7 @@ doc {
 				column {
 					name "regenerateUuid"
 					enclosedIn "params"
-					desc "是否在注册时重新生成云主机UUID；默认为false，表示沿用元数据中的云主机UUID"
+					desc "是否修复虚拟机相关资源UUID；设置为true时，将为虚拟机及其卷、网卡、快照、快照树、快照组等相关资源重新生成无冲突UUID；默认为false，表示沿用元数据中的资源UUID"
 					location "body"
 					type "boolean"
 					optional true

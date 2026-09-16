@@ -10,8 +10,6 @@ import org.zstack.header.vo.ResourceVO;
 import org.zstack.header.vo.ResourceVO_;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -126,19 +124,6 @@ public class ResourceHelper {
 
     public static String findResourceOwner(String resourceUuid) {
         return Account.getAccountUuidOfResource(resourceUuid);
-    }
-
-    public static List<String> filterAccessibleResources(Collection<String> resourceUuidList, String accountUuid) {
-        if (resourceUuidList.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        return SQL.New("select distinct ref.resourceUuid from AccountResourceRefVO ref " +
-                "where (ref.accountUuid = :accountUuid or ref.type = 'SharePublic') and ref.resourceUuid in (:ruuids)",
-                String.class)
-                .param("ruuids", resourceUuidList)
-                .param("accountUuid", accountUuid)
-                .list();
     }
 
     public static void cleanShareRecords(String resourceUuid) {

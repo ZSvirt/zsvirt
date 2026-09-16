@@ -2,7 +2,7 @@ package org.zstack.zwatch;
 
 import org.zstack.header.identity.SessionInventory;
 import org.zstack.identity.Account;
-import org.zstack.identity.ResourceHelper;
+import org.zstack.identity.Resources;
 import org.zstack.utils.DebugUtils;
 import org.zstack.zwatch.datatype.*;
 import org.zstack.zwatch.datatype.metric.Metric;
@@ -36,9 +36,8 @@ public class GetMetricDataFunc {
             return data;
         }
 
-        Collection<String> resourceUuids = ResourceHelper.filterAccessibleResources(
-                data.stream().map(d->d.getLabels().get(filter.getLabelName())).collect(Collectors.toSet()),
-                session.getAccountUuid());
+        Collection<String> resourceUuids = Resources.filterAccessibleForSession(session,
+                data.stream().map(d->d.getLabels().get(filter.getLabelName())).collect(Collectors.toSet()));
 
         return data.stream().filter(d -> resourceUuids.contains(d.getLabels().get(filter.getLabelName()))).collect(Collectors.toList());
     }

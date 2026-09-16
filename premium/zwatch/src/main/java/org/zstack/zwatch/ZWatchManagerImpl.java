@@ -35,7 +35,7 @@ import org.zstack.header.message.MessageReply;
 import org.zstack.header.vm.*;
 import org.zstack.identity.Account;
 import org.zstack.identity.AccountManager;
-import org.zstack.identity.ResourceHelper;
+import org.zstack.identity.Resources;
 import org.zstack.sns.*;
 import org.zstack.utils.Bash;
 import org.zstack.utils.Utils;
@@ -1057,9 +1057,9 @@ public class ZWatchManagerImpl extends AbstractService implements ZWatchManager,
                 v -> v.getAccountUuid() == null)
                 .collect(Collectors.toList());
 
-        Collection<String> resourceUuids = ResourceHelper.filterAccessibleResources(
-                noAccountDatas.stream().map(EventData::getResourceId).collect(Collectors.toSet()),
-                msg.getSession().getAccountUuid()
+        Collection<String> resourceUuids = Resources.filterAccessibleForSession(
+                msg.getSession(),
+                noAccountDatas.stream().map(EventData::getResourceId).collect(Collectors.toSet())
         );
 
         belongToAccountDatas = noAccountDatas.stream().filter(d->resourceUuids.contains(d.getResourceId())).collect(Collectors.toList());

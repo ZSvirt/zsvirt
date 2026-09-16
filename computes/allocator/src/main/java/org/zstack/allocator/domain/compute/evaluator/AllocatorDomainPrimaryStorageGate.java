@@ -9,25 +9,23 @@ import org.zstack.allocator.domain.header.AllocatorDomainErrors;
 import org.zstack.core.db.Q;
 import org.zstack.header.allocator.AllocatorDomainScene;
 import org.zstack.header.errorcode.ErrorCode;
-import org.zstack.header.host.HostInventory;
-import org.zstack.header.storage.primary.PrimaryStorageClusterRefVO;
-import org.zstack.header.storage.primary.PrimaryStorageClusterRefVO_;
-import org.zstack.header.vm.DiskAO;
+import org.zstack.header.storage.primary.PrimaryStorageAllocationPurpose;
+import org.zstack.header.storage.primary.PrimaryStorageAllocationSpec;
+import org.zstack.header.storage.primary.PrimaryStorageVO;
 import org.zstack.header.vm.VmInstanceConstant;
-import org.zstack.header.vm.VmInstanceInventory;
 import org.zstack.header.vm.VmInstanceSpec;
+import org.zstack.header.vm.VmInstanceVO;
+import org.zstack.header.vm.VmInstanceVO_;
 import org.zstack.header.volume.VolumeType;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.zstack.core.Platform.err;
-import static org.zstack.utils.CollectionUtils.isEmpty;
 
 /**
- * Create-time PS membership for a volume type. Root is wired from
- * {@code DomainFilterPrimaryStorageFlow}. Data is not: product diskAO extra disks
- * allocate in OtherDisk / attach, not in {@code VmAllocatePrimaryStorageFlow}.
+ * PS membership for a volume type, applied on the primary-storage allocator candidate list.
+ * Root is wired from {@code DomainFilterPrimaryStorageFlow} in allocatorFlowNames.
  */
 public class AllocatorDomainPrimaryStorageGate {
     private final AllocatorDomainRuleEvaluator evaluator = new AllocatorDomainRuleEvaluator();
@@ -35,19 +33,19 @@ public class AllocatorDomainPrimaryStorageGate {
     @Autowired
     private AllocatorDomainConstraintResolver constraintResolver;
 
-    public ErrorCode filterRootVolume(VmInstanceSpec spec) {
-        if (spec == null) {
+    public ErrorCode filterRootVolume(PrimaryStorageAllocationSpec spec, List<PrimaryStorageVO> candidates) {
+        if (spec == null || candidates == null || candidates.isEmpty()) {
             return null;
         }
-        VmInstanceInventory vm = spec.getVmInventory();
-        if (vm == null || StringUtils.isEmpty(vm.getUuid())) {
+        if (!PrimaryStorageAllocationPurpose.CreateNewVm.toString().equals(spec.getPurpose())) {
             return null;
         }
-        if (!VmInstanceConstant.USER_VM_TYPE.equals(vm.getType())) {
+        String vmUuid = spec.getVmInstanceUuid();
+        if (StringUtils.isEmpty(vmUuid) || !isUserVm(vmUuid)) {
             return null;
         }
 
-        AllocatorDomainConstraint constraint = constraintResolver.resolve(vm.getUuid(), AllocatorDomainScene.NewCreate);
+        AllocatorDomainConstraint constraint = constraintResolver.resolve(vmUuid, AllocatorDomainScene.NewCreate);
         if (constraint.kind != AllocatorDomainConstraint.Kind.ACTIVE) {
             return null;
         }
@@ -57,16 +55,21 @@ public class AllocatorDomainPrimaryStorageGate {
             return null;
         }
 
-        DiskAO root = spec.getRootDisk();
-        String requiredPsUuid = root == null ? null : root.getPrimaryStorageUuid();
-        List<String> universe = universeForUnspecified(spec, requiredPsUuid);
+        List<String> universe = new ArrayList<>();
+        for (PrimaryStorageVO ps : candidates) {
+            if (ps != null && ps.getUuid() != null) {
+                universe.add(ps.getUuid());
+            }
+        }
         AllocatorDomainRuleEvaluator.UuidDecision decision = evaluator.evaluatePrimaryStorages(
                 set.rules, universe, VolumeType.Root.toString());
         if (!decision.hasChain) {
             return null;
         }
 
-        if (!StringUtils.isEmpty(requiredPsUuid)) {
+        List<String> specified = spec.getCandidatePrimaryStorageUuids();
+        if (specified.size() == 1) {
+            String requiredPsUuid = specified.get(0);
             if (!decision.allowedUuids.contains(requiredPsUuid)) {
                 return err(AllocatorDomainErrors.RESOURCE_OUT_OF_DOMAIN,
                         "primary storage[uuid:%s] is not in allocator domain[uuid:%s]",
@@ -77,48 +80,29 @@ public class AllocatorDomainPrimaryStorageGate {
             return null;
         }
 
-        List<String> filtered = new ArrayList<>();
-        for (String uuid : universe) {
-            if (uuid != null && decision.allowedUuids.contains(uuid)) {
-                filtered.add(uuid);
-            }
-        }
-        if (filtered.isEmpty()) {
+        candidates.removeIf(ps -> ps == null || ps.getUuid() == null || !decision.allowedUuids.contains(ps.getUuid()));
+        if (candidates.isEmpty()) {
             return err(AllocatorDomainErrors.NO_AVAILABLE_RESOURCE_IN_DOMAIN,
                     "cannot find primary storage in allocator domain[uuid:%s] for vm[uuid:%s] root volume",
-                    set.domainUuid, vm.getUuid())
+                    set.domainUuid, vmUuid)
                     .withOpaque(AllocatorDomainConstant.Opaque.DOMAIN_UUID, set.domainUuid);
         }
-        spec.setCandidatePrimaryStorageUuidsForRootVolume(filtered);
         return null;
     }
 
     /**
-     * TODO: constrain data-volume PS with {@link VolumeType#Data} qualifier.
-     * Call from OtherDisk / attach / deprecated allocate, not from DomainFilterPrimaryStorageFlow.
+     * TODO: constrain data-volume PS with {@link VolumeType#Data} qualifier in the same
+     * primary-storage allocatorFlowNames chain (CreateDataVolume / attach).
      */
     public ErrorCode filterDataVolume(VmInstanceSpec spec) {
         return null;
     }
 
-    private List<String> universeForUnspecified(VmInstanceSpec spec, String requiredPsUuid) {
-        if (!StringUtils.isEmpty(requiredPsUuid)) {
-            List<String> specified = new ArrayList<>();
-            specified.add(requiredPsUuid);
-            return specified;
-        }
-        List<String> candidates = spec.getCandidatePrimaryStorageUuidsForRootVolume();
-        if (!isEmpty(candidates)) {
-            return new ArrayList<>(candidates);
-        }
-        HostInventory destHost = spec.getDestHost();
-        if (destHost == null || StringUtils.isEmpty(destHost.getClusterUuid())) {
-            return new ArrayList<>();
-        }
-        List<String> attached = Q.New(PrimaryStorageClusterRefVO.class)
-                .eq(PrimaryStorageClusterRefVO_.clusterUuid, destHost.getClusterUuid())
-                .select(PrimaryStorageClusterRefVO_.primaryStorageUuid)
-                .listValues();
-        return attached == null ? new ArrayList<>() : new ArrayList<>(attached);
+    private boolean isUserVm(String vmUuid) {
+        String type = Q.New(VmInstanceVO.class)
+                .eq(VmInstanceVO_.uuid, vmUuid)
+                .select(VmInstanceVO_.type)
+                .findValue();
+        return VmInstanceConstant.USER_VM_TYPE.equals(type);
     }
 }

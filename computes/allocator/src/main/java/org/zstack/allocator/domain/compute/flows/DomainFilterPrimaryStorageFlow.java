@@ -7,11 +7,13 @@ import org.zstack.allocator.domain.compute.evaluator.AllocatorDomainPrimaryStora
 import org.zstack.header.core.workflow.FlowTrigger;
 import org.zstack.header.core.workflow.NoRollbackFlow;
 import org.zstack.header.errorcode.ErrorCode;
-import org.zstack.header.vm.VmInstanceConstant;
-import org.zstack.header.vm.VmInstanceSpec;
+import org.zstack.header.storage.primary.PrimaryStorageAllocationSpec;
+import org.zstack.header.storage.primary.PrimaryStorageConstant;
+import org.zstack.header.storage.primary.PrimaryStorageVO;
 import org.zstack.utils.Utils;
 import org.zstack.utils.logging.CLogger;
 
+import java.util.List;
 import java.util.Map;
 
 @Configurable(preConstruction = true, autowire = Autowire.BY_TYPE)
@@ -22,19 +24,21 @@ public class DomainFilterPrimaryStorageFlow extends NoRollbackFlow {
     private AllocatorDomainPrimaryStorageGate gate;
 
     @Override
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public void run(FlowTrigger trigger, Map data) {
         if (gate == null) {
-            logger.debug("skip DomainFilterPrimaryStorageFlow: AllocatorDomainPrimaryStorageGate bean is not loaded");
+            logger.warn("skip DomainFilterPrimaryStorageFlow: AllocatorDomainPrimaryStorageGate bean is not loaded");
             trigger.next();
             return;
         }
-        VmInstanceSpec spec = (VmInstanceSpec) data.get(VmInstanceConstant.Params.VmInstanceSpec.toString());
-        ErrorCode error = gate.filterRootVolume(spec);
+        PrimaryStorageAllocationSpec spec = (PrimaryStorageAllocationSpec) data.get(PrimaryStorageConstant.AllocatorParams.SPEC);
+        List<PrimaryStorageVO> candidates = (List<PrimaryStorageVO>) data.get(PrimaryStorageConstant.AllocatorParams.CANDIDATES);
+        ErrorCode error = gate.filterRootVolume(spec, candidates);
         if (error != null) {
             trigger.fail(error);
             return;
         }
+        data.put(PrimaryStorageConstant.AllocatorParams.CANDIDATES, candidates);
         trigger.next();
     }
 }

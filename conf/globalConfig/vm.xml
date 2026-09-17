@@ -315,7 +315,7 @@
 		<name>vm.metadata.enabled</name>
 		<description>enable vm metadata</description>
 		<type>java.lang.Boolean</type>
-		<defaultValue>false</defaultValue>
+		<defaultValue>true</defaultValue>
 	</config>
 
 	<config>

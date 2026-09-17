@@ -333,7 +333,9 @@ CREATE TABLE IF NOT EXISTS `zstack`.`VmMetadataCleanupBarrierVO` (
 INSERT IGNORE INTO `zstack`.`VmMetadataCleanupBarrierVO` (`id`, `state`, `createDate`)
 VALUES ('vm-metadata-cleanup', 'Idle', CURRENT_TIMESTAMP);
 
--- Feature: Volume LUKS encryption flag (API opt-in + EncryptedResourceKeyRefVO binding) | ZSPHER-222
+-- Volume LUKS encryption flag (API opt-in + EncryptedResourceKeyRefVO binding)
+-- VmInstanceEO.vmEncryption: VM sensitive system-tag encryption (consolePassword / sshkey / userdata)
+
 ALTER TABLE `zstack`.`VolumeEO` ADD COLUMN `encrypted` tinyint(1) NOT NULL DEFAULT 0;
 ALTER TABLE `zstack`.`VolumeSnapshotEO` ADD COLUMN `encrypted` tinyint(1) NOT NULL DEFAULT 0;
 ALTER TABLE `zstack`.`VolumeBackupVO` ADD COLUMN `encrypted` tinyint(1) NOT NULL DEFAULT 0;
@@ -429,15 +431,143 @@ CREATE TABLE IF NOT EXISTS `zstack`.`ScannerAlarmStateVO` (
     UNIQUE KEY `ukScannerAlarmState` (`scannerName`, `alarmType`, `alarmKey`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Key provider / scanner alarm state (persists ACTIVE/INACTIVE across MN restart)
+-- Cleanup | ZSV-12537
 
-CREATE TABLE IF NOT EXISTS `zstack`.`ScannerAlarmStateVO` (
-    `uuid` varchar(32) NOT NULL UNIQUE,
-    `scannerName` varchar(255) NOT NULL,
-    `alarmType` varchar(255) NOT NULL,
-    `alarmKey` varchar(255) NOT NULL,
-    `state` varchar(32) NOT NULL,
-    `lastUpdateTime` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    PRIMARY KEY (`uuid`),
-    UNIQUE KEY `ukScannerAlarmState` (`scannerName`, `alarmType`, `alarmKey`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+DROP TRIGGER IF EXISTS `trigger_attach_eip_for_ecsinstance`;
+DROP TRIGGER IF EXISTS `trigger_clean_AccountResourceRefVO_for_DiskOfferingEO`;
+DROP TRIGGER IF EXISTS `trigger_clean_AccountResourceRefVO_for_EipVO`;
+DROP TRIGGER IF EXISTS `trigger_clean_AccountResourceRefVO_for_ImageEO`;
+DROP TRIGGER IF EXISTS `trigger_clean_AccountResourceRefVO_for_InstanceOfferingEO`;
+DROP TRIGGER IF EXISTS `trigger_clean_AccountResourceRefVO_for_IpRangeEO`;
+DROP TRIGGER IF EXISTS `trigger_clean_AccountResourceRefVO_for_L3NetworkEO`;
+DROP TRIGGER IF EXISTS `trigger_clean_AccountResourceRefVO_for_LoadBalancerListenerVO`;
+DROP TRIGGER IF EXISTS `trigger_clean_AccountResourceRefVO_for_LoadBalancerVO`;
+DROP TRIGGER IF EXISTS `trigger_clean_AccountResourceRefVO_for_PolicyVO`;
+DROP TRIGGER IF EXISTS `trigger_clean_AccountResourceRefVO_for_PortForwardingRuleVO`;
+DROP TRIGGER IF EXISTS `trigger_clean_AccountResourceRefVO_for_QuotaVO`;
+DROP TRIGGER IF EXISTS `trigger_clean_AccountResourceRefVO_for_SchedulerVO`;
+DROP TRIGGER IF EXISTS `trigger_clean_AccountResourceRefVO_for_SecurityGroupVO`;
+DROP TRIGGER IF EXISTS `trigger_clean_AccountResourceRefVO_for_UserGroupVO`;
+DROP TRIGGER IF EXISTS `trigger_clean_AccountResourceRefVO_for_UserVO`;
+DROP TRIGGER IF EXISTS `trigger_clean_AccountResourceRefVO_for_VipVO`;
+DROP TRIGGER IF EXISTS `trigger_clean_AccountResourceRefVO_for_VmInstanceEO`;
+DROP TRIGGER IF EXISTS `trigger_clean_AccountResourceRefVO_for_VmNicVO`;
+DROP TRIGGER IF EXISTS `trigger_clean_AccountResourceRefVO_for_VolumeEO`;
+DROP TRIGGER IF EXISTS `trigger_clean_AccountResourceRefVO_for_VolumeSnapshotEO`;
+DROP TRIGGER IF EXISTS `trigger_cleanup_for_VmInstanceEO_hard_delete`;
+DROP TRIGGER IF EXISTS `trigger_cleanup_for_VolumeEO_hard_delete`;
+DROP TRIGGER IF EXISTS `trigger_cleanup_for_VolumeEO_soft_delete`;
+DROP TRIGGER IF EXISTS `trigger_decrease_vswitch_for_create_ecs`;
+
+DROP FUNCTION IF EXISTS `INET6_ATON`;
+DROP FUNCTION IF EXISTS `Json_simpleGetKeyValue`;
+DROP FUNCTION IF EXISTS `Separate_ceph_pool`;
+DROP FUNCTION IF EXISTS `Upgrade_Scheduler`;
+DROP FUNCTION IF EXISTS `update_policy`;
+
+DROP PROCEDURE IF EXISTS `AddFkPciDeviceVOVmInstanceEO`;
+DROP PROCEDURE IF EXISTS `AlterBlockScsiLunTable`;
+DROP PROCEDURE IF EXISTS `Alter_Ceph_Table`;
+DROP PROCEDURE IF EXISTS `Alter_SCSI_Table`;
+DROP PROCEDURE IF EXISTS `Alter_Volume_Snapshot_Tree_Table`;
+DROP PROCEDURE IF EXISTS `CheckAndCreateResourceConfig`;
+DROP PROCEDURE IF EXISTS `CreateGpuDeviceVO`;
+DROP PROCEDURE IF EXISTS `MdevDeviceAddVendor`;
+DROP PROCEDURE IF EXISTS `UPGRADE_VM_METADATA_TABLES_IDEMPOTENT`;
+DROP PROCEDURE IF EXISTS `UpdateVolumeBackupVmInstanceUuid`;
+DROP PROCEDURE IF EXISTS `Update_Vip_Account`;
+DROP PROCEDURE IF EXISTS `addColumnsToSNSTextTemplateVO`;
+DROP PROCEDURE IF EXISTS `addHaStrategyConditionOnVmHaLevel`;
+DROP PROCEDURE IF EXISTS `addHostHaStatus`;
+DROP PROCEDURE IF EXISTS `addLBServiceToPrivateBasicNetwork`;
+DROP PROCEDURE IF EXISTS `addLongJobVOIndex`;
+DROP PROCEDURE IF EXISTS `addMissingResourceRef`;
+DROP PROCEDURE IF EXISTS `addPciDeviceVendor`;
+DROP PROCEDURE IF EXISTS `addResourceConfigForVirtualRouter`;
+DROP PROCEDURE IF EXISTS `addServiceToPublicNetwork`;
+DROP PROCEDURE IF EXISTS `addSnatConfigForVirtualRouter`;
+DROP PROCEDURE IF EXISTS `addSnatConfigForVpcHa`;
+DROP PROCEDURE IF EXISTS `addZoneUuidOnAffinityGroupVO`;
+DROP PROCEDURE IF EXISTS `changeL3NetworkDefaultIpversion`;
+DROP PROCEDURE IF EXISTS `checkAllBlockHostInPrimaryHostRef`;
+DROP PROCEDURE IF EXISTS `checkHostInitiatorRefVO`;
+DROP PROCEDURE IF EXISTS `checkProjectAdminOfVirtualId`;
+DROP PROCEDURE IF EXISTS `checkVirtualhostsExist`;
+DROP PROCEDURE IF EXISTS `cleanDeprecatedGlobalConfig`;
+DROP PROCEDURE IF EXISTS `cleanExpireVmUsageVO`;
+DROP PROCEDURE IF EXISTS `copyDataNetworkTag`;
+DROP PROCEDURE IF EXISTS `createAutoScalingVmTemplate`;
+DROP PROCEDURE IF EXISTS `createRoleRefsInProject`;
+DROP PROCEDURE IF EXISTS `createThickProvisionVolumeTag`;
+DROP PROCEDURE IF EXISTS `createVmSchedulingRule`;
+DROP PROCEDURE IF EXISTS `createVmSchedulingRuleGroupRef`;
+DROP PROCEDURE IF EXISTS `deleteRoleReadAPI`;
+DROP PROCEDURE IF EXISTS `deleteVmLevelCpuModeIfAlreadySetClusterLevelCpuMode`;
+DROP PROCEDURE IF EXISTS `doFixResourceVOResourceType`;
+DROP PROCEDURE IF EXISTS `enableVnicMultipleQueuesForVirtualRouter`;
+DROP PROCEDURE IF EXISTS `fixMissingProjectAdminPolicy`;
+DROP PROCEDURE IF EXISTS `fixMissingShareResourceVO`;
+DROP PROCEDURE IF EXISTS `fixMissingTag2RoleInProjects`;
+DROP PROCEDURE IF EXISTS `fixResourceVOResourceType`;
+DROP PROCEDURE IF EXISTS `generateNetworkCategory`;
+DROP PROCEDURE IF EXISTS `generateNormalpRangeVO`;
+DROP PROCEDURE IF EXISTS `generatePciDeviceSpecVOAccountRef`;
+DROP PROCEDURE IF EXISTS `generatePciDeviceVOAccountRef`;
+DROP PROCEDURE IF EXISTS `generateVipForVirtualRouterPubIP`;
+DROP PROCEDURE IF EXISTS `generateVpcRouterVmVO`;
+DROP PROCEDURE IF EXISTS `getAdminAccountUUid`;
+DROP PROCEDURE IF EXISTS `getIpRangeUuidForNetwork`;
+DROP PROCEDURE IF EXISTS `getLinkedAccountUUid`;
+DROP PROCEDURE IF EXISTS `getMaxAccountResourceRefVO`;
+DROP PROCEDURE IF EXISTS `getProjectAccount`;
+DROP PROCEDURE IF EXISTS `getRoleUuid`;
+DROP PROCEDURE IF EXISTS `getServiceProviderForNetwork`;
+DROP PROCEDURE IF EXISTS `getUseIpUuid`;
+DROP PROCEDURE IF EXISTS `getVRouterGuestL3Network`;
+DROP PROCEDURE IF EXISTS `getVirtualRouterUuidFromNicUuid`;
+DROP PROCEDURE IF EXISTS `handleLegacyPciSpecUuidTags`;
+DROP PROCEDURE IF EXISTS `iam2_Organization_Quota`;
+DROP PROCEDURE IF EXISTS `initializeRecoveryTemplate`;
+DROP PROCEDURE IF EXISTS `insertApplianceVmAffinityGroup`;
+DROP PROCEDURE IF EXISTS `insertDefaultSecurityGroup`;
+DROP PROCEDURE IF EXISTS `insertIAM2ProjectRole`;
+DROP PROCEDURE IF EXISTS `insertIAM2ProjectRoleVOForProjectSystemRoles`;
+DROP PROCEDURE IF EXISTS `insertIAM2ProjectVirtualIDGroupRef`;
+DROP PROCEDURE IF EXISTS `insertIntoRole`;
+DROP PROCEDURE IF EXISTS `insertVirtualRouterEipRefVO`;
+DROP PROCEDURE IF EXISTS `insertVirtualRouterPortForwardingRuleRefVO`;
+DROP PROCEDURE IF EXISTS `migrateBlockPrimaryHostRef`;
+DROP PROCEDURE IF EXISTS `migrateClockTrackSystemTagToGlobalConfig`;
+DROP PROCEDURE IF EXISTS `migrateIPsecL3Network`;
+DROP PROCEDURE IF EXISTS `migrateIscsiLunVOToScsiLunVO`;
+DROP PROCEDURE IF EXISTS `migrateReserveMemTagVO`;
+DROP PROCEDURE IF EXISTS `migrateSchedulerJob`;
+DROP PROCEDURE IF EXISTS `migrateUserTagVO`;
+DROP PROCEDURE IF EXISTS `migrateVipPeerL3Network`;
+DROP PROCEDURE IF EXISTS `modifyHostXfsFragAlarmDefaultThreshold`;
+DROP PROCEDURE IF EXISTS `modifyVipNetworkServicesRefVO`;
+DROP PROCEDURE IF EXISTS `moveClusterCpuModeFromSystemTagToResourceConfig`;
+DROP PROCEDURE IF EXISTS `moveOsInfoToKVMHostVO`;
+DROP PROCEDURE IF EXISTS `securityGroupRule`;
+DROP PROCEDURE IF EXISTS `setApplianceVmCpuModeToNone`;
+DROP PROCEDURE IF EXISTS `setDefaultUsbAttachType`;
+DROP PROCEDURE IF EXISTS `splitHybridLicenseRecords`;
+DROP PROCEDURE IF EXISTS `syncSnatDefaultL3ConfigForVirtualRouter`;
+DROP PROCEDURE IF EXISTS `syncSnatDefaultL3ConfigForVpcHa`;
+DROP PROCEDURE IF EXISTS `updateArchiveTicketStatusHistoryVO`;
+DROP PROCEDURE IF EXISTS `updateClusterHostCpuModelCheckTag`;
+DROP PROCEDURE IF EXISTS `updateIAM2VirtualIDRoleRefCreateAccountUuid`;
+DROP PROCEDURE IF EXISTS `updateLoadBalancerListenerVO`;
+DROP PROCEDURE IF EXISTS `updatePlatformAdminsWithoutZoneRelation`;
+DROP PROCEDURE IF EXISTS `updateTicketStatusHistoryVO`;
+DROP PROCEDURE IF EXISTS `upgradeChild`;
+DROP PROCEDURE IF EXISTS `upgradeEmailAddressFromEndpoint`;
+DROP PROCEDURE IF EXISTS `upgradeIAM2ReadRole`;
+DROP PROCEDURE IF EXISTS `upgradeIpInBinaryColumn`;
+DROP PROCEDURE IF EXISTS `upgradeOrganization`;
+DROP PROCEDURE IF EXISTS `upgradePrivilegeAdmin`;
+DROP PROCEDURE IF EXISTS `upgradeProjectAdminSystemTags`;
+DROP PROCEDURE IF EXISTS `upgradeProjectOperatorSystemTags`;
+DROP PROCEDURE IF EXISTS `upgradeSystemEndpointNotifier`;
+DROP PROCEDURE IF EXISTS `upgradeVolumeSnapshotRefSystemTags`;
+

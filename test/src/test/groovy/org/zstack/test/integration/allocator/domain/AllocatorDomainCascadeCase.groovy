@@ -1,6 +1,5 @@
 package org.zstack.test.integration.allocator.domain
 
-import org.zstack.header.errorcode.SysErrors
 import org.zstack.sdk.AccountInventory
 import org.zstack.sdk.SessionInventory
 import org.zstack.sdk.ZoneInventory
@@ -85,7 +84,7 @@ class AllocatorDomainCascadeCase extends SubCase {
         env.create {
             prepare()
             testDeleteAccountRemovesOwnedDomain()
-            testDeleteZoneFailsWhileDomainExists()
+            testDeleteZoneRemovesDomain()
         }
     }
 
@@ -142,7 +141,7 @@ class AllocatorDomainCascadeCase extends SubCase {
         }.isEmpty()
     }
 
-    void testDeleteZoneFailsWhileDomainExists() {
+    void testDeleteZoneRemovesDomain() {
         logger.info("Test 101: create allocator domain on empty zone, expect success")
         AllocatorDomainInventory domain = createAllocatorDomain {
             delegate.name = "zone-domain"
@@ -154,29 +153,16 @@ class AllocatorDomainCascadeCase extends SubCase {
             delegate.conditions = ["uuid=${domain.uuid}"]
         }.size() == 1
 
-        logger.info("Test 102: delete zone while domain still exists, expect API failure")
-        expectApiFailure({
-            deleteZone {
-                delegate.uuid = emptyZone.uuid
-                delegate.sessionId = adminSession.uuid
-            }
-        }) {
-            assert delegate.code == SysErrors.DELETE_RESOURCE_ERROR.toString()
-        }
-        assert queryAllocatorDomain {
-            delegate.conditions = ["uuid=${domain.uuid}"]
-        }.size() == 1
-        assert queryZone {
-            delegate.conditions = ["uuid=${emptyZone.uuid}"]
-        }.size() == 1
-
-        logger.info("Test 199: delete allocator domain, expect it gone")
-        deleteAllocatorDomain {
-            delegate.uuid = domain.uuid
+        logger.info("Test 102: delete zone while domain still exists, expect zone and domain gone")
+        deleteZone {
+            delegate.uuid = emptyZone.uuid
             delegate.sessionId = adminSession.uuid
         }
         assert queryAllocatorDomain {
             delegate.conditions = ["uuid=${domain.uuid}"]
+        }.isEmpty()
+        assert queryZone {
+            delegate.conditions = ["uuid=${emptyZone.uuid}"]
         }.isEmpty()
     }
 

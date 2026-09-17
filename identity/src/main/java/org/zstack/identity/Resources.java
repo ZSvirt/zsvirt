@@ -54,9 +54,13 @@ public final class Resources {
         return filterInaccessibleForAccount(session.getAccountUuid(), resourceUuids);
     }
 
-    private static AccessibleResourceChecker checker(String accountUuid) {
+    public static AccessibleResourceChecker checker(String accountUuid) {
         return AccessibleResourceChecker.forAccount(accountUuid)
                 .allowGlobalReadableResource()
                 .asDetectedAdmin();
+    }
+
+    public static AccessibleResourceChecker checker(SessionInventory session) {
+        return checker(session.getAccountUuid());
     }
 }

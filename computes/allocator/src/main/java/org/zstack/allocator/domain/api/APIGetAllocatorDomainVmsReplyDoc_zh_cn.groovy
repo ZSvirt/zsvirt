@@ -27,6 +27,12 @@ doc {
 		since "1.0.1, zsv 5.2.0"
 	}
 	field {
+		name "candidateVms"
+		desc "当前不在域中的、运行中的、可以加入改域的虚拟机UUID列表"
+		type "List"
+		since "1.0.1, zsv 5.2.0"
+	}
+	field {
 		name "nextStartVms"
 		desc "下次启动会进入该域、且不在 currentVms 中的虚拟机UUID列表（ResourceConfig 配置值等于该域，当前值不是该域）"
 		type "List"

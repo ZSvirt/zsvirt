@@ -172,6 +172,7 @@ class AllocatorDomainBindCase extends SubCase {
         } as GetAllocatorDomainVmsResult
         assert (vms.currentVms ?: []).isEmpty()
         assert (vms.nextStartVms ?: []).contains(vm.uuid)
+        assert (vms.candidateVms ?: []).isEmpty()
 
         logger.info("Test 004: unbind VM by setting resource config to None, expect config None and GetVms empty")
         updateResourceConfig {
@@ -192,6 +193,7 @@ class AllocatorDomainBindCase extends SubCase {
         } as GetAllocatorDomainVmsResult
         assert (afterUnbind.currentVms ?: []).isEmpty()
         assert (afterUnbind.nextStartVms ?: []).isEmpty()
+        assert (afterUnbind.candidateVms ?: []).isEmpty()
 
         logger.info("Test 099: delete allocator domain, expect it gone")
         deleteAllocatorDomain {

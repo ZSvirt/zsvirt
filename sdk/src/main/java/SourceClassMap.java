@@ -103,9 +103,6 @@ public class SourceClassMap {
 			put("org.zstack.header.baremetal.network.BaremetalVlanNicInventory", "org.zstack.sdk.BaremetalVlanNicInventory");
 			put("org.zstack.header.baremetal.preconfiguration.PreconfigurationTemplateInventory", "org.zstack.sdk.PreconfigurationTemplateInventory");
 			put("org.zstack.header.baremetal.pxeserver.BaremetalPxeServerInventory", "org.zstack.sdk.BaremetalPxeServerInventory");
-			put("org.zstack.header.bootstrap.MiniCandidateHostStruct", "org.zstack.sdk.MiniCandidateHostStruct");
-			put("org.zstack.header.bootstrap.MiniHostInfo", "org.zstack.sdk.MiniHostInfo");
-			put("org.zstack.header.bootstrap.MiniNetworkConfigStruct", "org.zstack.sdk.MiniNetworkConfigStruct");
 			put("org.zstack.header.candidate.CandidateDecision", "org.zstack.sdk.CandidateDecision");
 			put("org.zstack.header.candidate.CandidateDecisionEntry", "org.zstack.sdk.CandidateDecisionEntry");
 			put("org.zstack.header.candidate.CandidateResult", "org.zstack.sdk.CandidateResult");
@@ -819,9 +816,6 @@ public class SourceClassMap {
 			put("org.zstack.sdk.MdevDeviceStatus", "org.zstack.pciDevice.virtual.vfio_mdev.MdevDeviceStatus");
 			put("org.zstack.sdk.MdevDeviceType", "org.zstack.pciDevice.virtual.vfio_mdev.MdevDeviceType");
 			put("org.zstack.sdk.MediaInventory", "org.zstack.monitoring.media.MediaInventory");
-			put("org.zstack.sdk.MiniCandidateHostStruct", "org.zstack.header.bootstrap.MiniCandidateHostStruct");
-			put("org.zstack.sdk.MiniHostInfo", "org.zstack.header.bootstrap.MiniHostInfo");
-			put("org.zstack.sdk.MiniNetworkConfigStruct", "org.zstack.header.bootstrap.MiniNetworkConfigStruct");
 			put("org.zstack.sdk.MonInfo", "org.zstack.storage.ceph.primary.KVMCephVolumeTO$MonInfo");
 			put("org.zstack.sdk.MonInfo", "org.zstack.storage.ceph.primary.KvmCephCdRomTO$MonInfo");
 			put("org.zstack.sdk.MonInfo", "org.zstack.storage.ceph.primary.KvmCephIsoTO$MonInfo");

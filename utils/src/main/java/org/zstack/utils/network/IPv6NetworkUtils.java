@@ -209,8 +209,10 @@ public class IPv6NetworkUtils {
             IPv6AddressRange range1 = IPv6AddressRange.fromFirstAndLast(s1, e1);
             IPv6AddressRange range2 = IPv6AddressRange.fromFirstAndLast(s2, e2);
             return range1.overlaps(range2);
-        } catch (Exception e) {
-            return true;
+        } catch (IllegalArgumentException e) {
+            logger.warn(String.format("invalid IPv6 range supplied: [%s, %s], [%s, %s]",
+                    startIp1, endIp1, startIp2, endIp2), e);
+            return false;
         }
     }
 

@@ -158,7 +158,6 @@
           "org.zstack.drs.**",
           "org.zstack.scheduler.**",
           "org.zstack.header.cluster.APIDeleteClusterMsg",
-          "org.zstack.header.cluster.APICreateMiniClusterMsg",
           "org.zstack.header.cluster.APIQueryClusterMsg",
           "org.zstack.header.cluster.APIUpdateClusterOSMsg",
           "org.zstack.header.cluster.APIChangeClusterStateMsg",

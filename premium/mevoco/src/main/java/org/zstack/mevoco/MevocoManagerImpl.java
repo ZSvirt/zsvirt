@@ -9,9 +9,7 @@ import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
-import org.zstack.bootstrap.BootstrapConstants;
 import org.zstack.compute.allocator.HostAllocatorManager;
-import org.zstack.compute.cluster.MiniClusterSystemTags;
 import org.zstack.compute.host.HostManager;
 import org.zstack.compute.host.HostSystemTags;
 import org.zstack.compute.vm.*;
@@ -35,15 +33,12 @@ import org.zstack.core.workflow.FlowChainBuilder;
 import org.zstack.core.workflow.ShareFlow;
 import org.zstack.expon.ExponConstants;
 import org.zstack.ha.*;
-import org.zstack.header.APIIsOpensourceVersionMsg;
-import org.zstack.header.APIIsOpensourceVersionReply;
 import org.zstack.header.AbstractService;
 import org.zstack.header.allocator.HostAllocatorConstant;
 import org.zstack.header.allocator.HostAllocatorStrategyType;
 import org.zstack.header.allocator.HostCapacityOverProvisioningManager;
 import org.zstack.header.apimediator.ApiMessageInterceptionException;
 import org.zstack.header.apimediator.GlobalApiMessageInterceptor;
-import org.zstack.header.bootstrap.*;
 import org.zstack.header.cluster.*;
 import org.zstack.header.configuration.APICreateInstanceOfferingMsg;
 import org.zstack.header.configuration.DiskOfferingVO;
@@ -150,7 +145,6 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.util.*;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -588,23 +582,6 @@ public class MevocoManagerImpl extends AbstractService implements MevocoManager,
                         ApiMessageInterceptionException apiMesException = new ApiMessageInterceptionException(argerr("[%s] is not a standard cidr", cidr));
                         apiMesException.initCause(e);
                         throw apiMesException;
-            }
-        });
-
-        MevocoSystemTags.CLUSTER_CBT_BACKUP_NETWORK_CIDR.installValidator((resourceUuid, resourceType, systemTag) -> {
-            String cidr = MevocoSystemTags.CLUSTER_CBT_BACKUP_NETWORK_CIDR.getTokenByTag(systemTag,
-                    MevocoSystemTags.CLUSTER_CBT_BACKUP_NETWORK_CIDR_TOKEN);
-            try {
-                String fmtCidr = NetworkUtils.fmtCidr(cidr);
-                if (!fmtCidr.equals(cidr)) {
-                    throw new ApiMessageInterceptionException(argerr("[%s] is not a standard cidr, do you mean [%s]?", cidr, fmtCidr));
-                }
-            } catch (ApiMessageInterceptionException apiException) {
-                throw apiException;
-            } catch (RuntimeException e) {
-                ApiMessageInterceptionException apiException = new ApiMessageInterceptionException(argerr("[%s] is not a standard cidr", cidr));
-                apiException.initCause(e);
-                throw apiException;
             }
         });
     }
@@ -1479,12 +1456,6 @@ public class MevocoManagerImpl extends AbstractService implements MevocoManager,
             handle((APISetVmCleanTrafficMsg) msg);
         } else if (msg instanceof APICreateVolumesSnapshotMsg) {
             handle((APICreateVolumesSnapshotMsg) msg);
-        } else if (msg instanceof APICreateMiniClusterMsg) {
-            handle((APICreateMiniClusterMsg) msg);
-        } else if (msg instanceof APIGetCandidateMiniHostsMsg) {
-            handle((APIGetCandidateMiniHostsMsg) msg);
-        } else if (msg instanceof APIBootstrapMiniHostMsg) {
-            handle((APIBootstrapMiniHostMsg) msg);
         } else if (msg instanceof APIGetVmInstanceFirstBootDeviceMsg) {
             handle((APIGetVmInstanceFirstBootDeviceMsg) msg);
         } else if (msg instanceof APIUpdateFactoryModeStateMsg) {
@@ -1829,315 +1800,6 @@ public class MevocoManagerImpl extends AbstractService implements MevocoManager,
 
     private void handle(final APICreateVolumesSnapshotMsg msg) {
         passToVolume(msg, msg.getVolumeUuids().get(0));
-    }
-
-    private void doAddHost(String managementIp, String clusterUuid,
-                           APICreateMiniClusterMsg msg,
-                           ConcurrentLinkedQueue<HostInventory> q,
-                           ErrorCodeList errList,
-                           WhileCompletion comp) {
-        AddKVMHostMsg amsg = new AddKVMHostMsg();
-        amsg.setName(String.format("%s/%s", msg.getName(), managementIp));
-        amsg.setClusterUuid(clusterUuid);
-        amsg.setUsername(msg.getUsername());
-        amsg.setPassword(msg.getPassword());
-        amsg.setSshPort(msg.getSshPort());
-        amsg.setManagementIp(managementIp);
-        amsg.setAccountUuid(msg.getSession().getAccountUuid());
-        amsg.setUserTags(msg.getUserTags());
-        bus.makeLocalServiceId(amsg, HostConstant.SERVICE_ID);
-        bus.send(amsg, new CloudBusCallBack(comp) {
-            @Override
-            public void run(MessageReply reply) {
-                if (reply.isSuccess()) {
-                    AddHostReply r = reply.castReply();
-                    q.add(r.getInventory());
-                    comp.done();
-                    return;
-                }
-
-                errList.getCauses().add(reply.getError());
-                comp.allDone();
-            }
-        });
-    }
-
-    private void handle(final APICreateMiniClusterMsg msg) {
-        final APICreateMiniClusterEvent evt = new APICreateMiniClusterEvent(msg.getId());
-        final Set<String> ips = new HashSet<>(msg.getHostManagementIps());
-
-        if (ips.size() < 2) {
-            evt.setError(argerr("unexpected host management IPs: [%s]", String.join(",", ips)));
-            bus.publish(evt);
-            return;
-        }
-
-        FlowChain chain = FlowChainBuilder.newShareFlowChain();
-        chain.setName("create-mini-cluster-" + msg.getName());
-
-        chain.then(new ShareFlow() {
-            final ConcurrentLinkedQueue<HostInventory> queue = new ConcurrentLinkedQueue<> ();
-            ClusterInventory inventory;
-
-            @Override
-            public void setup() {
-                flow(new Flow() {
-                    @Override
-                    public void run(FlowTrigger trigger, Map data) {
-                        CreateClusterMsg cmsg = new CreateClusterMsg();
-                        cmsg.setClusterName(msg.getName());
-                        cmsg.setDescription(msg.getDescription());
-                        cmsg.setHypervisorType(msg.getHypervisorType());
-                        cmsg.setType(ClusterConstant.ZSTACK_CLUSTER_TYPE);
-                        cmsg.setResourceUuid(msg.getResourceUuid());
-                        cmsg.setZoneUuid(msg.getZoneUuid());
-                        bus.makeLocalServiceId(cmsg, ClusterConstant.SERVICE_ID);
-                        bus.send(cmsg, new CloudBusCallBack(trigger) {
-                            @Override
-                            public void run(MessageReply reply) {
-                                if (reply.isSuccess()) {
-                                    CreateClusterReply r = reply.castReply();
-                                    inventory = r.getInventory();
-
-                                    tagMgr.createTagsFromAPICreateMessage(msg, inventory.getUuid(), ClusterVO.class.getSimpleName());
-
-                                    SystemTagCreator creator = MiniClusterSystemTags.HOST_NUMBERS.newSystemTagCreator(inventory.getUuid());
-                                    creator.setTagByTokens(Collections.singletonMap(MiniClusterSystemTags.HOST_NUMBERS_TOKEN, Integer.valueOf(ips.size()).toString()));
-                                    creator.inherent = false;
-                                    creator.recreate = false;
-                                    creator.create();
-
-                                    trigger.next();
-                                    return;
-                                }
-
-                                trigger.fail(reply.getError());
-                            }
-                        });
-                    }
-
-                    @Override
-                    public void rollback(FlowRollback trigger, Map data) {
-                        if (inventory == null) {
-                            trigger.rollback();
-                            return;
-                        }
-
-                        ClusterDeletionMsg dmsg = new ClusterDeletionMsg();
-                        dmsg.setClusterUuid(inventory.getUuid());
-                        bus.makeTargetServiceIdByResourceUuid(dmsg, ClusterConstant.SERVICE_ID, inventory.getUuid());
-                        bus.send(dmsg, new CloudBusCallBack(trigger) {
-                            @Override
-                            public void run(MessageReply reply) {
-                                dbf.removeByPrimaryKey(dmsg.getClusterUuid(), ClusterVO.class);
-                                trigger.rollback();
-                            }
-                        });
-                    }
-                });
-
-                flow(new Flow() {
-                    @Override
-                    public void run(FlowTrigger trigger, Map data) {
-                        ErrorCodeList errList = new ErrorCodeList();
-                        new While<>(ips).each((ip, comp) -> doAddHost(ip, inventory.getUuid(), msg, queue, errList, comp))
-                                .run(new WhileDoneCompletion(trigger) {
-                                    @Override
-                                    public void done(ErrorCodeList errorCodeList) {
-                                        if (errList.getCauses().isEmpty()) {
-                                            trigger.next();
-                                        } else {
-                                            trigger.fail(errList.getCauses().get(0));
-                                        }
-                                    }
-                                });
-                    }
-
-                    @Override
-                    public void rollback(FlowRollback trigger, Map data) {
-                        new While<>(queue).each((q, comp) -> {
-                            HostDeletionMsg dmsg = new HostDeletionMsg();
-                            dmsg.setHostUuid(q.getUuid());
-                            bus.makeTargetServiceIdByResourceUuid(dmsg, HostConstant.SERVICE_ID, q.getUuid());
-                            bus.send(dmsg, new CloudBusCallBack(comp) {
-                                @Override
-                                public void run(MessageReply reply) {
-                                    comp.allDone();
-                                }
-                            });
-                        }).run(new WhileDoneCompletion(trigger) {
-                            @Override
-                            public void done(ErrorCodeList errorCodeList) {
-                                dbf.removeByPrimaryKeys(queue.stream().map(HostInventory::getUuid).collect(Collectors.toList()),
-                                        HostVO.class);
-                                trigger.rollback();
-                            }
-                        });
-                    }
-                });
-
-                done(new FlowDoneHandler(msg) {
-                    @Override
-                    public void handle(Map data) {
-                        for (MiniClusterExtensionPoint ext : pluginRgty.getExtensionList(MiniClusterExtensionPoint.class)) {
-                            ext.afterCreateMiniCluster(inventory);
-                        }
-
-                        evt.setInventory(inventory);
-                        bus.publish(evt);
-                    }
-                });
-
-                error(new FlowErrorHandler(msg) {
-                    @Override
-                    public void handle(ErrorCode errCode, Map data) {
-                        evt.setError(errCode);
-                        bus.publish(evt);
-                    }
-                });
-            }
-        }).start();
-    }
-
-    private void handle(final APIGetCandidateMiniHostsMsg msg) {
-        APIGetCandidateMiniHostsReply reply = new APIGetCandidateMiniHostsReply();
-
-        if (msg.isLocal() && msg.isConfigure()) {
-            reply.setError(argerr("can not set local and configure at same time"));
-            bus.reply(msg, reply);
-            return;
-        }
-
-        List<String> validSn = new ArrayList<>();
-        if (msg.isLocal() || msg.isConfigure()) {
-            Map<String, Map> r = restf.syncJsonGet(
-                    BootstrapConstants.BOOTSTRAP_LOCAL_INTERFACE + BootstrapConstants.BOOTSTRAP_CONFIGURE_HOST_PATH, null, null, Map.class);
-            for (Map<String, String> s : r.values()) {
-                validSn.add(s.get("sn"));
-            }
-        }
-        Map<String, Map> result = restf.syncJsonGet(
-                BootstrapConstants.BOOTSTRAP_LOCAL_INTERFACE + BootstrapConstants.BOOTSTRAP_GET_ALL_HOST_PATH, null, null, Map.class);
-        List<String> hostUuids = Q.New(HostVO.class).select(HostVO_.uuid).listValues();
-        List<String> existsSerialNumbers = new ArrayList<>();
-        for (String hostUuid : hostUuids) {
-            String sn = SYSTEM_SERIAL_NUMBER.getTokenByResourceUuid(hostUuid, HostVO.class, SYSTEM_SERIAL_NUMBER_TOKEN);
-            if (sn != null) {
-                existsSerialNumbers.add(sn);
-            }
-        }
-
-        if (msg.isConfigure()) {
-            validSn.addAll(existsSerialNumbers);
-        }
-
-        Map<String, MiniCandidateHostStruct> finalResult = new HashMap<>();
-        for (Map.Entry<String, Map> s : result.entrySet()) {
-            if (msg.isConfigure() && validSn.contains(s.getValue().get("sn"))) {
-                finalResult.put(s.getKey(), MiniCandidateHostStruct.valueOf(s.getValue()));
-            } else if (!existsSerialNumbers.contains(s.getValue().get("sn")) && (validSn.isEmpty() || validSn.contains(s.getValue().get("sn")))) {
-                finalResult.put(s.getKey(), MiniCandidateHostStruct.valueOf(s.getValue()));
-            }
-        }
-        reply.setHosts(new ArrayList<>(finalResult.values()));
-        bus.reply(msg, reply);
-    }
-
-    private void handle(final APIBootstrapMiniHostMsg msg) {
-        APIBootstrapMiniHostEvent event = new APIBootstrapMiniHostEvent(msg.getId());
-
-        Map<String, Map> allHosts = restf.syncJsonGet(
-                BootstrapConstants.BOOTSTRAP_LOCAL_INTERFACE + BootstrapConstants.BOOTSTRAP_GET_ALL_HOST_PATH, null, null, Map.class);
-
-        MiniCandidateHostStruct target = new MiniCandidateHostStruct();
-        if (msg.getLocal().getSn().toLowerCase().endsWith("a")) {
-            target.setSn(msg.getLocal().getSn());
-        } else if (msg.getPeer().getSn().toLowerCase().endsWith("a")) {
-            target.setSn(msg.getPeer().getSn());
-        } else {
-            throw new ApiMessageInterceptionException(argerr("can not find node A config info"));
-        }
-
-        for (Map.Entry<String, Map> s : allHosts.entrySet()) {
-            if (target.getSn().equals(s.getValue().get("sn"))) {
-                target = MiniCandidateHostStruct.valueOf(s.getValue());
-            }
-        }
-
-        if (target.getIpv6Address() == null || target.getIpv6Address().isEmpty()) {
-            throw new ApiMessageInterceptionException(argerr("can not find node A address info from bootstrap agent"));
-        }
-
-        MiniBootstrapStruct s = new MiniBootstrapStruct();
-        s.setLocal(msg.getLocal());
-        s.setPeer(msg.getPeer());
-        s.setRole("compute");
-        s.setJobUuid(Platform.getUuid());
-
-        ShellResult ret = ShellUtils.runAndReturn(String.format(
-                "curl -d '%s' %s%%%s:7274%s", JSONObjectUtil.toJsonString(s), target.ipv6Address, target.ipv6Interface, BootstrapConstants.BOOTSTRAP_CONFIGURE_HOST_PATH));
-        String runLog = String.format("curl bootstrap agent finished, return code: %s, stdout: %s, stderr: %s", ret.getRetCode(), ret.getStdout(), ret.getStderr());
-        logger.debug(runLog);
-        MiniBootstrapResult r = null;
-
-        if (ret.getRetCode() == 0) {
-            r = JSONObjectUtil.toObject(ret.getStdout(), MiniBootstrapResult.class);
-        }
-        if (ret.getRetCode() != 0 && ret.getRetCode() != 52 || (r != null && !r.isSuccess())) {
-            event.setSuccess(false);
-            event.setStage(r == null ? null : r.getStage());
-            event.setError(argerr(r == null ? String.format("curl failed, %s", runLog) : r.getDetails()));
-            bus.publish(event);
-            return;
-        }
-
-        r = null;
-        for (int i=1; i < 90; i++) {
-            allHosts = restf.syncJsonGet(
-                    BootstrapConstants.BOOTSTRAP_LOCAL_INTERFACE + BootstrapConstants.BOOTSTRAP_GET_ALL_HOST_PATH, null, null, Map.class);
-
-            for (Map.Entry<String, Map> e : allHosts.entrySet()) {
-                if (target.getSn().equals(e.getValue().get("sn"))) {
-                    target = MiniCandidateHostStruct.valueOf(e.getValue());
-                }
-            }
-            try {
-                ret = ShellUtils.runAndReturn(String.format(
-                        "curl %s%%%s:7274%s/%s", target.ipv6Address, target.ipv6Interface, BootstrapConstants.BOOTSTRAP_JOB_PATH, s.getJobUuid()));
-            } catch (Exception e) {
-                ret = new ShellResult();
-                ret.setRetCode(-1);
-                ret.setStderr(e.getMessage());
-            }
-            logger.debug(String.format("curl bootstrap agent finished, return code: %s, stdout: %s, stderr: %s", ret.getRetCode(), ret.getStdout(), ret.getStderr()));
-
-            if (ret.getRetCode() != 0 || ret.getStdout().isEmpty()) {
-                try {
-                    TimeUnit.SECONDS.sleep(10);
-                } catch (InterruptedException e) {
-                    logger.warn("sleep got exception: %s", e.getCause());
-                    Thread.currentThread().interrupt();
-                }
-            } else {
-                r = JSONObjectUtil.toObject(ret.getStdout(), MiniBootstrapResult.class);
-                logger.debug(String.format("bootstrap return: %s", r));
-                break;
-            }
-        }
-
-        if (r == null) {
-            event.setSuccess(false);
-            event.setError(operr("can not get bootstrap job %s result after 900s", s.getJobUuid()));
-            bus.publish(event);
-            return;
-        }
-
-        event.setSuccess(r.isSuccess());
-        if (!r.isSuccess()) {
-            event.setStage(r.getStage());
-            event.setError(operr("curl bootstrap agent finished, return code: %s, stdout: %s, stderr: %s", ret.getRetCode(), ret.getStdout(), ret.getStderr()));
-        }
-        bus.publish(event);
     }
 
     private void handle(final APIGetImageQgaMsg msg) {

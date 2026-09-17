@@ -3,7 +3,6 @@ package org.zstack.mevoco;
 import org.zstack.header.description.PackageDescription;
 import org.zstack.header.search.SearchConstant;
 
-import org.zstack.header.cluster.APICreateMiniClusterMsg;
 import org.zstack.header.managementnode.APIGetFactoryModeStateMsg;
 import org.zstack.header.managementnode.APIGetPlatformTimeZoneMsg;
 import org.zstack.header.managementnode.APIUpdateFactoryModeStateMsg;
@@ -76,10 +75,6 @@ public class RBACInfo implements PackageDescription {
                 .toService(SearchConstant.QUERY_FACADE_SERVICE_ID)
                 .build();
 
-        apis()
-                .api(APICreateMiniClusterMsg.class)
-                .toService("mevoco")
-                .build();
         apis()
                 .api(
                         APIGetFactoryModeStateMsg.class,

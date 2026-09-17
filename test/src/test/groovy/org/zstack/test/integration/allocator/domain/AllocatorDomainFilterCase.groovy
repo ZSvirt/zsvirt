@@ -139,6 +139,7 @@ class AllocatorDomainFilterCase extends SubCase {
         } as GetAllocatorDomainVmsResult
         assert (result.currentVms ?: []).isEmpty()
         assert (result.nextStartVms ?: []).isEmpty()
+        assert (result.candidateVms ?: []).isEmpty()
 
         logger.info("Test 199: delete unused allocator domain, expect it gone")
         deleteAllocatorDomain {

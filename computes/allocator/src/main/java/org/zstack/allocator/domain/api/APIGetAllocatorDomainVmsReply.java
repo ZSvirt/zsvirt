@@ -22,6 +22,11 @@ public class APIGetAllocatorDomainVmsReply extends APIReply {
      */
     private List<String> nextStartVms;
 
+    /**
+     * Running VMs which not in domain, but can be attached to this domain
+     */
+    private List<String> candidateVms;
+
     public List<String> getCurrentVms() {
         return currentVms;
     }
@@ -38,10 +43,19 @@ public class APIGetAllocatorDomainVmsReply extends APIReply {
         this.nextStartVms = nextStartVms;
     }
 
+    public List<String> getCandidateVms() {
+        return candidateVms;
+    }
+
+    public void setCandidateVms(List<String> candidateVms) {
+        this.candidateVms = candidateVms;
+    }
+
     public static APIGetAllocatorDomainVmsReply __example__() {
         APIGetAllocatorDomainVmsReply reply = new APIGetAllocatorDomainVmsReply();
         reply.setCurrentVms(list(DocUtils.createFixedUuid(VmInstanceVO.class)));
         reply.setNextStartVms(new ArrayList<>());
+        reply.setCandidateVms(new ArrayList<>());
         return reply;
     }
 }

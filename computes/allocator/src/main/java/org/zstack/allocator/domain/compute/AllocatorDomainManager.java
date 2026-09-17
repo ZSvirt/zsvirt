@@ -1,7 +1,9 @@
 package org.zstack.allocator.domain.compute;
 
+import edu.emory.mathcs.backport.java.util.Collections;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.zstack.allocator.domain.api.APICreateAllocatorDomainEvent;
 import org.zstack.allocator.domain.api.APICreateAllocatorDomainMsg;
 import org.zstack.allocator.domain.api.APIDeleteAllocatorDomainEvent;
@@ -12,6 +14,9 @@ import org.zstack.allocator.domain.api.APIGetAllocatorDomainVmsMsg;
 import org.zstack.allocator.domain.api.APIGetAllocatorDomainVmsReply;
 import org.zstack.allocator.domain.api.APIUpdateAllocatorDomainEvent;
 import org.zstack.allocator.domain.api.APIUpdateAllocatorDomainMsg;
+import org.zstack.allocator.domain.compute.evaluator.AllocatorDomainRuleEvaluator;
+import org.zstack.allocator.domain.compute.evaluator.AllocatorDomainRuleEvaluator.HostDecision;
+import org.zstack.allocator.domain.compute.evaluator.AllocatorDomainRuleEvaluator.UuidDecision;
 import org.zstack.allocator.domain.entity.AllocatorDomainInventory;
 import org.zstack.allocator.domain.entity.AllocatorDomainRuleParam;
 import org.zstack.allocator.domain.entity.AllocatorDomainRuleVO;
@@ -20,6 +25,7 @@ import org.zstack.allocator.domain.entity.AllocatorDomainSceneVO;
 import org.zstack.allocator.domain.entity.AllocatorDomainSceneVO_;
 import org.zstack.allocator.domain.entity.AllocatorDomainVO;
 import org.zstack.allocator.domain.entity.AllocatorDomainVO_;
+import org.zstack.allocator.domain.entity.AllocatorHostRuleSet;
 import org.zstack.allocator.domain.header.AllocatorDomainConstant;
 import org.zstack.allocator.domain.header.AllocatorDomainErrors;
 import org.zstack.allocator.domain.header.AllocatorDomainGlobalConfig;
@@ -68,19 +74,28 @@ import org.zstack.header.storage.primary.PrimaryStorageVO;
 import org.zstack.header.storage.primary.PrimaryStorageVO_;
 import org.zstack.header.tag.SystemTagVO;
 import org.zstack.header.tag.SystemTagVO_;
-import org.zstack.header.vm.VmInstanceConstant;
 import org.zstack.header.vm.VmInstanceVO;
 import org.zstack.header.vm.VmInstanceVO_;
+import org.zstack.header.vm.VmNicVO;
+import org.zstack.header.vm.VmNicVO_;
+import org.zstack.header.volume.VolumeVO;
+import org.zstack.header.volume.VolumeVO_;
+import org.zstack.identity.Resources;
+import org.zstack.identity.rbac.AccessibleResourceChecker;
 import org.zstack.resourceconfig.ResourceConfig;
 import org.zstack.resourceconfig.ResourceConfigFacade;
 import org.zstack.resourceconfig.ResourceConfigVO;
 import org.zstack.resourceconfig.ResourceConfigVO_;
 import org.zstack.tag.TagManager;
+import org.zstack.utils.Tags;
 import org.zstack.utils.Utils;
 import org.zstack.utils.logging.CLogger;
 
+import javax.persistence.Tuple;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -88,8 +103,11 @@ import java.util.stream.Collectors;
 
 import static org.zstack.core.Platform.err;
 import static org.zstack.core.Platform.inerr;
-import static org.zstack.utils.CollectionDSL.e;
-import static org.zstack.utils.CollectionDSL.map;
+import static org.zstack.header.vm.VmInstanceConstant.USER_VM_TYPE;
+import static org.zstack.header.vm.VmInstanceState.*;
+import static org.zstack.header.volume.VolumeType.*;
+import static org.zstack.utils.CollectionDSL.*;
+import static org.zstack.utils.CollectionUtils.transformToSet;
 
 public class AllocatorDomainManager extends AbstractService {
     private static final CLogger logger = Utils.getLogger(AllocatorDomainManager.class);
@@ -154,7 +172,7 @@ public class AllocatorDomainManager extends AbstractService {
                 return;
             }
             VmInstanceVO vm = Q.New(VmInstanceVO.class).eq(VmInstanceVO_.uuid, resourceUuid).find();
-            if (vm != null && !VmInstanceConstant.USER_VM_TYPE.equals(vm.getType())) {
+            if (vm != null && !USER_VM_TYPE.equals(vm.getType())) {
                 throw err(AllocatorDomainErrors.DOMAIN_RELATED_ERROR,
                         "allocator domain can only be bound to UserVm, resource[uuid:%s, type:%s]",
                         resourceUuid, vm.getType())
@@ -425,6 +443,7 @@ public class AllocatorDomainManager extends AbstractService {
         dbf.remove(vo);
     }
 
+    @SuppressWarnings("unchecked")
     private void handle(APIGetAllocatorDomainVmsMsg msg) {
         APIGetAllocatorDomainVmsReply reply = new APIGetAllocatorDomainVmsReply();
         List<String> currentVms = listCurrentVmUuids(msg.getUuid());
@@ -432,8 +451,14 @@ public class AllocatorDomainManager extends AbstractService {
         List<String> nextStartVms = listConfigVmUuids(msg.getUuid()).stream()
                 .filter(uuid -> !currentSet.contains(uuid))
                 .collect(Collectors.toList());
-        reply.setCurrentVms(currentVms);
-        reply.setNextStartVms(nextStartVms);
+        List<String> candidateVms = listCandidateVmForDomain(msg.getUuid(), currentVms, nextStartVms);
+
+        AccessibleResourceChecker checker = Resources.checker(msg.getSession())
+                .withResourceType(VmInstanceVO.class);
+        reply.setCurrentVms(checker.filterAccessible(currentVms));
+        reply.setNextStartVms(checker.filterAccessible(nextStartVms));
+        reply.setCandidateVms(checker.filterAccessible(candidateVms));
+
         bus.reply(msg, reply);
     }
 
@@ -543,6 +568,118 @@ public class AllocatorDomainManager extends AbstractService {
                 .select(ResourceConfigVO_.resourceUuid)
                 .listValues();
         return uuids == null ? new ArrayList<>() : uuids;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Transactional(readOnly = true)
+    private List<String> listCandidateVmForDomain(String domainUuid, Collection<String>... excludeVmUuidList) {
+        Set<String> allExcludes = Arrays.stream(excludeVmUuidList)
+                .flatMap(Collection::stream)
+                .collect(Collectors.toSet());
+        AllocatorDomainVO domain = dbf.findByUuid(domainUuid, AllocatorDomainVO.class);
+        String zoneUuid = domain.getZoneUuid();
+
+        // TODO: paginate
+        List<Tuple> rawCandidates = (allExcludes.isEmpty()) ?
+                Q.New(VmInstanceVO.class)
+                        .eq(VmInstanceVO_.zoneUuid, zoneUuid)
+                        .eq(VmInstanceVO_.type, USER_VM_TYPE)
+                        .in(VmInstanceVO_.state, list(Running, Pausing, Paused, Resuming))
+                        .select(VmInstanceVO_.uuid, VmInstanceVO_.hostUuid)
+                        .listTuple() :
+                Q.New(VmInstanceVO.class)
+                        .eq(VmInstanceVO_.zoneUuid, zoneUuid)
+                        .eq(VmInstanceVO_.type, USER_VM_TYPE)
+                        .in(VmInstanceVO_.state, list(Running, Pausing, Paused, Resuming))
+                        .notIn(VmInstanceVO_.uuid, allExcludes)
+                        .select(VmInstanceVO_.uuid, VmInstanceVO_.hostUuid)
+                        .listTuple();
+        if (rawCandidates.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        // 1. not in any domain (by config)
+        List<String> vmListInAnyDomain = Q.New(ResourceConfigVO.class)
+                .in(ResourceConfigVO_.resourceUuid, transformToSet(rawCandidates, tuple -> tuple.get(0, String.class)))
+                .eq(ResourceConfigVO_.category, AllocatorDomainGlobalConfig.SCHEDULING_DOMAIN_UUID.getCategory())
+                .eq(ResourceConfigVO_.name, AllocatorDomainGlobalConfig.SCHEDULING_DOMAIN_UUID.getName())
+                .notNull(ResourceConfigVO_.value)
+                .select(ResourceConfigVO_.resourceUuid)
+                .listValues();
+        Set<String> vmsInAnyDomain = new HashSet<>(vmListInAnyDomain);
+        rawCandidates.removeIf(tuple -> vmsInAnyDomain.contains(tuple.get(0, String.class)));
+        if (rawCandidates.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        // 2. not in any domain (by tag)
+        vmListInAnyDomain = Q.New(SystemTagVO.class)
+                .in(SystemTagVO_.resourceUuid, transformToSet(rawCandidates, tuple -> tuple.get(0, String.class)))
+                .like(SystemTagVO_.tag, Tags.tagPatternToSqlPattern(AllocatorDomainSystemTags.SCHEDULING_DOMAIN.getTagFormat()))
+                .notEq(SystemTagVO_.tag, AllocatorDomainSystemTags.SCHEDULING_DOMAIN.instantiateTag(
+                        map(e(AllocatorDomainSystemTags.DOMAIN_UUID_TOKEN, AllocatorDomainConstant.UNBOUND_DOMAIN_UUID))))
+                .select(ResourceConfigVO_.resourceUuid)
+                .listValues();
+        Set<String> vmsInAnyDomain2 = new HashSet<>(vmListInAnyDomain);
+        rawCandidates.removeIf(tuple -> vmsInAnyDomain2.contains(tuple.get(0, String.class)));
+        if (rawCandidates.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        final AllocatorDomainRuleEvaluator evaluator = new AllocatorDomainRuleEvaluator();
+        final AllocatorHostRuleSet ruleSet = AllocatorDomains.transform(domain);
+        List<HostVO> allHosts = Q.New(HostVO.class)
+                .in(HostVO_.uuid, transformToSet(rawCandidates, tuple -> tuple.get(1, String.class)))
+                .list();
+
+        // 3. filter by hosts
+        HostDecision decision = evaluator.evaluateHosts(ruleSet.rules, allHosts, zoneUuid);
+        Set<String> filteredHostUuidSet = new HashSet<>(decision.allowedHostUuids);
+        filteredHostUuidSet.addAll(decision.recommendedHostUuids);
+        filteredHostUuidSet.addAll(decision.notRecommendedHostUuids);
+        rawCandidates.removeIf(tuple -> !filteredHostUuidSet.contains(tuple.get(1, String.class)));
+        if (rawCandidates.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        // 4. filter by ps
+        Set<String> vmUuidSet = transformToSet(rawCandidates, tuple -> tuple.get(0, String.class));
+        List<Tuple> vmPsTuple = Q.New(VolumeVO.class)
+                .in(VolumeVO_.vmInstanceUuid, vmUuidSet)
+                .select(VolumeVO_.vmInstanceUuid, VolumeVO_.primaryStorageUuid)
+                .in(VolumeVO_.type, list(Root, Data, Memory))
+                .listTuple();
+        UuidDecision psDecision = evaluator.evaluatePrimaryStorages(ruleSet.rules,
+                transformToSet(vmPsTuple, tuple -> tuple.get(1, String.class)));
+        if (psDecision.hasChain) {
+            Set<String> filteredPsUuidSet = psDecision.allowedUuids;
+            for (Tuple tuple : vmPsTuple) {
+                if (!filteredPsUuidSet.contains(tuple.get(1, String.class))) {
+                    vmUuidSet.remove(tuple.get(0, String.class));
+                }
+            }
+        }
+        if (vmUuidSet.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        // 5. filter by L3
+        List<Tuple> vmNicTuple = Q.New(VmNicVO.class)
+                .in(VmNicVO_.vmInstanceUuid, vmUuidSet)
+                .select(VmNicVO_.vmInstanceUuid, VmNicVO_.l3NetworkUuid)
+                .listTuple();
+        UuidDecision l3Decision = evaluator.evaluateL3Networks(ruleSet.rules,
+                transformToSet(vmNicTuple, tuple -> tuple.get(1, String.class)));
+        if (l3Decision.hasChain) {
+            Set<String> filteredL3UuidSet = l3Decision.allowedUuids;
+            for (Tuple tuple : vmNicTuple) {
+                if (!filteredL3UuidSet.contains(tuple.get(1, String.class))) {
+                    vmUuidSet.remove(tuple.get(0, String.class));
+                }
+            }
+        }
+
+        return new ArrayList<>(vmUuidSet);
     }
 
     @SuppressWarnings("unchecked")

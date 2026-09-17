@@ -16,5 +16,6 @@
     <modules>
         <module>description</module>
         <module>messages</module>
+        <module>header-ha</module>
     </modules>
 </project>

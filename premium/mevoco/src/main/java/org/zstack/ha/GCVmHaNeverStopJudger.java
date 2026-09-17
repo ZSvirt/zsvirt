@@ -1,6 +1,9 @@
 package org.zstack.ha;
 
 import org.zstack.core.db.Q;
+import org.zstack.ha.entity.VmHaVO;
+import org.zstack.ha.entity.VmHaVO_;
+import org.zstack.ha.header.VmHaLevel;
 import org.zstack.header.vm.HaStartVmJudger;
 import org.zstack.header.vm.VmInstanceInventory;
 import org.zstack.header.vm.VmInstanceState;

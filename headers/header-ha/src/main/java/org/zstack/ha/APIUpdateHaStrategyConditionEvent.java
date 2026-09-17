@@ -1,5 +1,6 @@
 package org.zstack.ha;
 
+import org.zstack.ha.entity.HaStrategyConditionInventory;
 import org.zstack.header.message.APIEvent;
 import org.zstack.header.rest.RestResponse;
 

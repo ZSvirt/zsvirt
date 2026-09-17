@@ -1,5 +1,6 @@
 package org.zstack.ha;
 
+import org.zstack.ha.entity.VmHaVO;
 import org.zstack.header.tag.TagDefinition;
 import org.zstack.header.vm.VmInstanceVO;
 import org.zstack.tag.PatternedSystemTag;

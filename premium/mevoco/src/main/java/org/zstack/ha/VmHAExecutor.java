@@ -1,5 +1,7 @@
 package org.zstack.ha;
 
+import org.zstack.ha.header.VmHaLevel;
+
 import java.util.Objects;
 
 public interface VmHAExecutor {

@@ -1,4 +1,4 @@
-package org.zstack.ha;
+package org.zstack.ha.entity;
 
 import org.zstack.header.configuration.PythonClassInventory;
 import org.zstack.header.search.Inventory;

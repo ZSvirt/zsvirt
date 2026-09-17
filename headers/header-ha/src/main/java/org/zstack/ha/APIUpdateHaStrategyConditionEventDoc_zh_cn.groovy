@@ -1,6 +1,6 @@
 package org.zstack.ha
 
-import org.zstack.ha.HaStrategyConditionInventory
+import org.zstack.ha.entity.HaStrategyConditionInventory
 import org.zstack.header.errorcode.ErrorCode
 
 doc {

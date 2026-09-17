@@ -1,6 +1,7 @@
 package org.zstack.ha;
 
 import org.springframework.http.HttpMethod;
+import org.zstack.ha.entity.HaStrategyConditionVO;
 import org.zstack.header.message.APIMessage;
 import org.zstack.header.message.APIParam;
 import org.zstack.header.rest.RestRequest;

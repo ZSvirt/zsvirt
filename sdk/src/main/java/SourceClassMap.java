@@ -89,7 +89,7 @@ public class SourceClassMap {
 			put("org.zstack.guesttools.GuestToolsInventory", "org.zstack.sdk.guesttools.GuestToolsInventory");
 			put("org.zstack.guesttools.GuestToolsStateInventory", "org.zstack.sdk.guesttools.GuestToolsStateInventory");
 			put("org.zstack.guesttools.advanced.VmCustomSpecificationInventory", "org.zstack.sdk.guesttools.advanced.VmCustomSpecificationInventory");
-			put("org.zstack.ha.HaStrategyConditionInventory", "org.zstack.sdk.HaStrategyConditionInventory");
+			put("org.zstack.ha.entity.HaStrategyConditionInventory", "org.zstack.sdk.HaStrategyConditionInventory");
 			put("org.zstack.header.acl.AccessControlListEntryInventory", "org.zstack.sdk.AccessControlListEntryInventory");
 			put("org.zstack.header.acl.AccessControlListInventory", "org.zstack.sdk.AccessControlListInventory");
 			put("org.zstack.header.affinitygroup.AffinityGroupInventory", "org.zstack.sdk.AffinityGroupInventory");
@@ -720,7 +720,7 @@ public class SourceClassMap {
 			put("org.zstack.sdk.GlobalConfigOptions", "org.zstack.core.config.GlobalConfigOptions");
 			put("org.zstack.sdk.GlobalConfigTemplateInventory", "org.zstack.templateConfig.GlobalConfigTemplateInventory");
 			put("org.zstack.sdk.GpuDeviceInventory", "org.zstack.pciDevice.gpu.GpuDeviceInventory");
-			put("org.zstack.sdk.HaStrategyConditionInventory", "org.zstack.ha.HaStrategyConditionInventory");
+			put("org.zstack.sdk.HaStrategyConditionInventory", "org.zstack.ha.entity.HaStrategyConditionInventory");
 			put("org.zstack.sdk.HbaDeviceInventory", "org.zstack.storage.device.hba.HbaDeviceInventory");
 			put("org.zstack.sdk.HostConnectedStatus", "org.zstack.zops.HostConnectedStatus");
 			put("org.zstack.sdk.HostDiskCapacity", "org.zstack.storage.primary.local.APIGetLocalStorageHostDiskCapacityReply$HostDiskCapacity");

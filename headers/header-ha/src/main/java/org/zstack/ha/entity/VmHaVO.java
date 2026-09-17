@@ -1,5 +1,6 @@
-package org.zstack.ha;
+package org.zstack.ha.entity;
 
+import org.zstack.ha.header.VmHaLevel;
 import org.zstack.header.vm.VmInstanceEO;
 import org.zstack.header.vo.EntityGraph;
 import org.zstack.header.vo.ForeignKey;

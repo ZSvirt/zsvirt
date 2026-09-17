@@ -1,4 +1,6 @@
-package org.zstack.ha;
+package org.zstack.ha.header;
+
+import org.zstack.ha.entity.VmHaVO;
 
 /**
  * Created by xing5 on 2016/3/28.
@@ -14,7 +16,7 @@ public enum VmHaLevel {
      * <p>Because when the VM was first created, the cluster to be created was not determined,
      * and it is not possible to determine whether the VM has enabled HA
      * based on the configuration of "whether the VM in this cluster has enabled HA"
-     * {@link org.zstack.ha.HaGlobalConfig#VM_HA_LEVEL}
+     * {@link VmHaVO#getHaLevel()}
      *
      * <p>The value 'Undefined' indicates that the VM needs to determine
      * the assigned cluster before deciding whether to enable HA

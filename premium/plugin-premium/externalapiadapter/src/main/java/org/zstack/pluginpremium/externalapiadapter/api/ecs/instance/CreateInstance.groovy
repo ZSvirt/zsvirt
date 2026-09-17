@@ -3,7 +3,7 @@ package org.zstack.pluginpremium.externalapiadapter.api.ecs.instance
 
 import org.zstack.compute.vm.VmSystemTags
 import org.zstack.ha.HaSystemTags
-import org.zstack.ha.VmHaLevel
+import org.zstack.ha.header.VmHaLevel
 import org.zstack.header.affinitygroup.AffinityGroupSystemTags
 import org.zstack.header.vm.VmCreationStrategy
 import org.zstack.pluginpremium.externalapiadapter.EcsSystemTags

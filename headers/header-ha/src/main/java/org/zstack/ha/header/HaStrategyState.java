@@ -1,4 +1,4 @@
-package org.zstack.ha;
+package org.zstack.ha.header;
 
 public enum HaStrategyState {
     Enable,

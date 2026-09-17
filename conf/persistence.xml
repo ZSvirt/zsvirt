@@ -227,5 +227,7 @@
         <class>org.zstack.allocator.domain.entity.AllocatorDomainVO</class>
         <class>org.zstack.allocator.domain.entity.AllocatorDomainRuleVO</class>
         <class>org.zstack.allocator.domain.entity.AllocatorDomainSceneVO</class>
+        <class>org.zstack.ha.entity.VmHaVO</class>
+        <class>org.zstack.ha.entity.HaStrategyConditionVO</class>
     </persistence-unit>
 </persistence>

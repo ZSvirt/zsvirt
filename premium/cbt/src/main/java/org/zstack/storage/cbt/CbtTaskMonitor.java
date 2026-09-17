@@ -11,17 +11,27 @@ import org.zstack.header.volume.*;
 import org.zstack.utils.Utils;
 import org.zstack.utils.logging.CLogger;
 
+import java.util.EnumSet;
+import java.util.Set;
+
 import static org.zstack.core.Platform.operr;
 
 public class CbtTaskMonitor implements VmStateChangedExtensionPoint, ResizeVolumeExtensionPoint {
     private static final CLogger logger = Utils.getLogger(CbtTaskMonitor.class);
+    private static final Set<VmInstanceState> CBT_DISABLE_VM_STATES = EnumSet.of(
+            VmInstanceState.Migrating,
+            VmInstanceState.VolumeMigrating,
+            VmInstanceState.Stopped,
+            VmInstanceState.Destroyed);
 
     @Autowired
     private CloudBus bus;
 
     @Override
     public void vmStateChanged(VmInstanceInventory vm, VmInstanceState oldState, VmInstanceState newState) {
-        if (newState != VmInstanceState.Migrating && newState != VmInstanceState.VolumeMigrating) {
+        if (!(CBT_DISABLE_VM_STATES.contains(newState)
+                || ((oldState == VmInstanceState.Running || oldState == VmInstanceState.Paused)
+                        && newState == VmInstanceState.Destroying))) {
             return;
         }
 
@@ -36,8 +46,8 @@ public class CbtTaskMonitor implements VmStateChangedExtensionPoint, ResizeVolum
         bus.makeTargetServiceIdByResourceUuid(msg, CbtBackupConstant.SERVICE_ID, vm.getUuid());
         MessageReply reply = bus.call(msg);
         if (!reply.isSuccess()) {
-            logger.warn(String.format("failed to disable CBT task[uuid: %s] before VM[uuid: %s] migration: %s",
-                    task.getUuid(), vm.getUuid(), reply.getError()));
+            logger.warn(String.format("failed to disable CBT task[uuid: %s] due to VM[uuid: %s] state change(old: %s, new: %s): %s",
+                    task.getUuid(), vm.getUuid(), oldState, newState, reply.getError()));
         }
     }
 

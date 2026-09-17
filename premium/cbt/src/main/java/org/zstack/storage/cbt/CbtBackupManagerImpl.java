@@ -934,18 +934,13 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
         }
 
         final String vmUuid = refVO.getResourceUuid();
-        ErrorCode err = validateVmStateForOperation(vmUuid, VmInstanceState.Running, "disable cbt task");
-        if (err != null) {
-            completion.fail(err);
-            return;
+        if (!vmNotRunning(vmUuid)) {
+            ErrorCode err = validateVmStateForOperation(vmUuid, VmInstanceState.Running, "disable cbt task");
+            if (err != null) {
+                completion.fail(err);
+                return;
+            }
         }
-
-        String hostUuid = getVmHostUuid(vmUuid);
-        if (hostUuid == null) {
-            completion.fail(operr("host not found for VM: %s", vmUuid));
-            return;
-        }
-        CbtBackupHypervisorBackend backend = getCbtBackend(vmUuid);
         FlowChain chain = FlowChainBuilder.newSimpleFlowChain();
         chain.setName(String.format("start-cbt-task-for-vm-%s", vmUuid));
         chain.then(new NoRollbackFlow() {
@@ -953,6 +948,12 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
 
             @Override
             public void run(final FlowTrigger trigger, Map data) {
+                String hostUuid = getVmHostUuid(vmUuid);
+                if (hostUuid == null) {
+                    trigger.fail(operr("host not found for VM: %s", vmUuid));
+                    return;
+                }
+                CbtBackupHypervisorBackend backend = getCbtBackend(vmUuid);
                 backend.disableVolumeCbtBackup(taskVO, vmUuid, hostUuid, new Completion(completion) {
                     @Override
                     public void success() {
@@ -964,6 +965,11 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
                         trigger.fail(errorCode);
                     }
                 });
+            }
+
+            @Override
+            public boolean skip(Map data) {
+                return vmNotRunning(vmUuid);
             }
         });
         chain.then(new NoRollbackFlow() {

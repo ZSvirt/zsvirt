@@ -20,9 +20,9 @@ public class ClusterManagementNodeRecoverExtension implements ManagementNodeReco
 
     @Override
     public Map<String, List<NonBackupInfo>> getNonBackupInfos() {
-        List<SystemTagInventory> tags = MevocoSystemTags.CLUSTER_MIGRATE_NETWORK_CIDR.getTagInventories(
-                Q.New(ClusterVO.class).select(ClusterVO_.uuid).listValues());
-        return Collections.singletonMap(SystemTagVO.class.getSimpleName(), tags.stream().map(it -> {
+        List<String> clusterUuids = Q.New(ClusterVO.class).select(ClusterVO_.uuid).listValues();
+        List<SystemTagInventory> tags = MevocoSystemTags.CLUSTER_MIGRATE_NETWORK_CIDR.getTagInventories(clusterUuids);
+        List<NonBackupInfo> infos = tags.stream().map(it -> {
             SystemTagNonBackupInfo info = new SystemTagNonBackupInfo();
             info.setTokenName(MevocoSystemTags.CLUSTER_MIGRATE_NETWORK_CIDR_TOKEN);
             info.setTagFormat(MevocoSystemTags.CLUSTER_MIGRATE_NETWORK_CIDR.getTagFormat());
@@ -30,7 +30,17 @@ public class ClusterManagementNodeRecoverExtension implements ManagementNodeReco
             info.setUuid(it.getUuid());
             info.setResourceDescription(String.format("migrate cidr of cluster[uuid:%s]", it.getResourceUuid()));
             return info;
+        }).collect(Collectors.toList());
+        infos.addAll(MevocoSystemTags.CLUSTER_CBT_BACKUP_NETWORK_CIDR.getTagInventories(clusterUuids).stream().map(it -> {
+            SystemTagNonBackupInfo info = new SystemTagNonBackupInfo();
+            info.setTokenName(MevocoSystemTags.CLUSTER_CBT_BACKUP_NETWORK_CIDR_TOKEN);
+            info.setTagFormat(MevocoSystemTags.CLUSTER_CBT_BACKUP_NETWORK_CIDR.getTagFormat());
+            info.setOldValue(MevocoSystemTags.CLUSTER_CBT_BACKUP_NETWORK_CIDR.getTokenByTag(it.getTag(), MevocoSystemTags.CLUSTER_CBT_BACKUP_NETWORK_CIDR_TOKEN));
+            info.setUuid(it.getUuid());
+            info.setResourceDescription(String.format("cbt backup cidr of cluster[uuid:%s]", it.getResourceUuid()));
+            return info;
         }).collect(Collectors.toList()));
+        return Collections.singletonMap(SystemTagVO.class.getSimpleName(), infos);
     }
 
     @Override

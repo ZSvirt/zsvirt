@@ -590,6 +590,23 @@ public class MevocoManagerImpl extends AbstractService implements MevocoManager,
                         throw apiMesException;
             }
         });
+
+        MevocoSystemTags.CLUSTER_CBT_BACKUP_NETWORK_CIDR.installValidator((resourceUuid, resourceType, systemTag) -> {
+            String cidr = MevocoSystemTags.CLUSTER_CBT_BACKUP_NETWORK_CIDR.getTokenByTag(systemTag,
+                    MevocoSystemTags.CLUSTER_CBT_BACKUP_NETWORK_CIDR_TOKEN);
+            try {
+                String fmtCidr = NetworkUtils.fmtCidr(cidr);
+                if (!fmtCidr.equals(cidr)) {
+                    throw new ApiMessageInterceptionException(argerr("[%s] is not a standard cidr, do you mean [%s]?", cidr, fmtCidr));
+                }
+            } catch (ApiMessageInterceptionException apiException) {
+                throw apiException;
+            } catch (RuntimeException e) {
+                ApiMessageInterceptionException apiException = new ApiMessageInterceptionException(argerr("[%s] is not a standard cidr", cidr));
+                apiException.initCause(e);
+                throw apiException;
+            }
+        });
     }
 
     public void exceptionIfQosNotSupportedOnKvm(String hostUuid) {

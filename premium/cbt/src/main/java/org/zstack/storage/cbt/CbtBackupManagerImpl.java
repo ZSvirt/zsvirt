@@ -959,6 +959,7 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
     public void prepareCbtVolumes(List<String> volumeUuids, String accountUuid, String hostUuid, String cbtTaskUuid, ReturnValueCompletion<List<VolumeCbtBackupInfo>> completion) {
         List<VolumeCbtBackupInfo> infos = new ArrayList<VolumeCbtBackupInfo>();
         KVMHostInventory inv = KVMHostInventory.valueOf(dbf.findByUuid(hostUuid, KVMHostVO.class));
+        String nbdServer = CbtBackupNetworkUtils.getBackupAddress(inv);
 
         List<ErrorCode> errs = new ArrayList<>();
         new While<>(volumeUuids).step((uuid, wcompl) -> {
@@ -994,7 +995,7 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
                     VolumeCbtBackupInfo info = new VolumeCbtBackupInfo();
                     info.setVolume(VolumeTO.valueOf(VolumeInventory.valueOf(vo), inv));
                     info.setTarget(cReply.getInventory().getInstallPath());
-                    info.setNbdServer(inv.getManagementIp());
+                    info.setNbdServer(nbdServer);
                     infos.add(info);
                     wcompl.done();
                 }

@@ -207,6 +207,7 @@ public class NfsPrimaryStorage extends PrimaryStorageBase {
         List<String> cuuids = q.listValue();
         if (cuuids.isEmpty()) {
             completion.success();
+            return;
         }
 
         for (UpdatePrimaryStorageExtensionPoint ext : pluginRgty.getExtensionList(UpdatePrimaryStorageExtensionPoint.class)) {

@@ -28,10 +28,9 @@
         <property name="ignoreUnresolvablePlaceholders" value="true"/>
     </bean>
 
-    <bean id="messageSource" class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
-        <property name="basename" value="i18n/messages"></property>
-        <property name="defaultEncoding" value="UTF-8"></property>
-        <property name="alwaysUseMessageFormat" value="true"></property>
+    <bean id="messageSource" class="org.zstack.core.i18n.ZSVirtI18nMessageSource">
+        <property name="defaultEncoding" value="UTF-8"/>
+        <property name="alwaysUseMessageFormat" value="true"/>
     </bean>
 
     <import resource="springConfigXml/AccountManager.xml"/>

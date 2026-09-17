@@ -442,10 +442,6 @@ abstract class ApiHelper {
         runAction(org.zstack.sdk.BatchSyncVolumeSizeAction, c)
     }
 
-    def bootstrapMiniHost(@DelegatesTo(strategy = Closure.OWNER_FIRST, value = org.zstack.sdk.BootstrapMiniHostAction.class) Closure c) {
-        runAction(org.zstack.sdk.BootstrapMiniHostAction, c)
-    }
-
     def calculateAccountBillingSpending(@DelegatesTo(strategy = Closure.OWNER_FIRST, value = org.zstack.sdk.CalculateAccountBillingSpendingAction.class) Closure c) {
         runAction(org.zstack.sdk.CalculateAccountBillingSpendingAction, c)
     }
@@ -932,10 +928,6 @@ abstract class ApiHelper {
 
     def createLoadBalancerServerGroup(@DelegatesTo(strategy = Closure.OWNER_FIRST, value = org.zstack.sdk.CreateLoadBalancerServerGroupAction.class) Closure c) {
         runAction(org.zstack.sdk.CreateLoadBalancerServerGroupAction, c)
-    }
-
-    def createMiniCluster(@DelegatesTo(strategy = Closure.OWNER_FIRST, value = org.zstack.sdk.CreateMiniClusterAction.class) Closure c) {
-        runAction(org.zstack.sdk.CreateMiniClusterAction, c)
     }
 
     def createMonitorTrigger(@DelegatesTo(strategy = Closure.OWNER_FIRST, value = org.zstack.sdk.CreateMonitorTriggerAction.class) Closure c) {
@@ -1852,10 +1844,6 @@ abstract class ApiHelper {
 
     def getCandidateL3NetworksForServerGroup(@DelegatesTo(strategy = Closure.OWNER_FIRST, value = org.zstack.sdk.GetCandidateL3NetworksForServerGroupAction.class) Closure c) {
         runAction(org.zstack.sdk.GetCandidateL3NetworksForServerGroupAction, c)
-    }
-
-    def getCandidateMiniHosts(@DelegatesTo(strategy = Closure.OWNER_FIRST, value = org.zstack.sdk.GetCandidateMiniHostsAction.class) Closure c) {
-        runAction(org.zstack.sdk.GetCandidateMiniHostsAction, c)
     }
 
     def getCandidateNetworkBondings(@DelegatesTo(strategy = Closure.OWNER_FIRST, value = org.zstack.sdk.GetCandidateNetworkBondingsAction.class) Closure c) {

@@ -6,7 +6,7 @@ import org.springframework.context.support.ReloadableResourceBundleMessageSource
 import java.util.HashSet;
 import java.util.Set;
 
-public class DeployModeI18nMessageSource extends ReloadableResourceBundleMessageSource {
+public class ZSVirtI18nMessageSource extends ReloadableResourceBundleMessageSource {
     private static Set<String> basenameSet = new HashSet<>();
 
     static {

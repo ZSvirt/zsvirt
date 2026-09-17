@@ -31,7 +31,7 @@ public class SystemPrometheusNamespace extends AbstractPrometheusNamespace  {
 
         @Override
         public boolean skipManagementNodeCheck() {
-            return false;
+            return true;
         }
 
         @Override

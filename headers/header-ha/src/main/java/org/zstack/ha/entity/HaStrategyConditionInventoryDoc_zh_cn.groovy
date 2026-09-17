@@ -1,6 +1,4 @@
-package org.zstack.ha
-
-import java.sql.Timestamp
+package org.zstack.ha.entity
 
 doc {
 

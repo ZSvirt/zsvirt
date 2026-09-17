@@ -4,6 +4,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.zstack.core.componentloader.PluginRegistry;
 import org.zstack.core.db.SQL;
 import org.zstack.core.timeout.TimeHelper;
+import org.zstack.ha.entity.VmHaVO;
+import org.zstack.ha.entity.VmHaVO_;
+import org.zstack.ha.header.VmHaLevel;
 import org.zstack.tag.SystemTagCreator;
 import org.zstack.utils.CollectionUtils;
 import org.zstack.utils.Utils;
@@ -12,7 +15,7 @@ import org.zstack.utils.logging.CLogger;
 import java.sql.Timestamp;
 
 import static org.zstack.ha.HaSystemTags.*;
-import static org.zstack.ha.VmHaLevel.*;
+import static org.zstack.ha.header.VmHaLevel.*;
 import static org.zstack.utils.CollectionDSL.e;
 import static org.zstack.utils.CollectionDSL.map;
 

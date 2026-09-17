@@ -1,5 +1,6 @@
 package org.zstack.ha;
 
+import org.zstack.ha.entity.VmHaVO;
 import org.zstack.header.configuration.PythonClassInventory;
 import org.zstack.header.search.Inventory;
 import org.zstack.utils.CollectionUtils;

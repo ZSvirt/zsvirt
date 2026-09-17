@@ -2,6 +2,9 @@ package org.zstack.ha;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.zstack.core.db.Q;
+import org.zstack.ha.entity.HaStrategyConditionVO;
+import org.zstack.ha.entity.HaStrategyConditionVO_;
+import org.zstack.ha.header.HaStrategyState;
 import org.zstack.utils.Utils;
 import org.zstack.utils.logging.CLogger;
 
@@ -26,5 +29,4 @@ public class HaHelper {
 
         return fencers;
     }
-
 }

@@ -1,5 +1,6 @@
-package org.zstack.ha;
+package org.zstack.ha.entity;
 
+import org.zstack.ha.header.HaStrategyState;
 import org.zstack.header.vo.ToInventory;
 
 import javax.persistence.*;

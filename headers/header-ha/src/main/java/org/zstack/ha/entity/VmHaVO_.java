@@ -1,4 +1,6 @@
-package org.zstack.ha;
+package org.zstack.ha.entity;
+
+import org.zstack.ha.header.VmHaLevel;
 
 import javax.persistence.metamodel.SingularAttribute;
 import javax.persistence.metamodel.StaticMetamodel;

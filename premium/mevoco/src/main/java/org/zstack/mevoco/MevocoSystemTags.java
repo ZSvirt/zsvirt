@@ -107,6 +107,10 @@ public class MevocoSystemTags {
     public static PatternedSystemTag CLUSTER_MIGRATE_NETWORK_CIDR = new PatternedSystemTag(String.format(
             "cluster::migrate::network::cidr::{%s}", CLUSTER_MIGRATE_NETWORK_CIDR_TOKEN), ClusterVO.class);
 
+    public static String CLUSTER_CBT_BACKUP_NETWORK_CIDR_TOKEN = "cbtBackupCidr";
+    public static PatternedSystemTag CLUSTER_CBT_BACKUP_NETWORK_CIDR = new PatternedSystemTag(String.format(
+            "cluster::cbt::backup::network::cidr::{%s}", CLUSTER_CBT_BACKUP_NETWORK_CIDR_TOKEN), ClusterVO.class);
+
     public static SystemTag CONFIRM_CALL_API = SystemTag.makeEphemeralTag("IReallyWantToCallThisApi");
 
     public static final Map<String, PatternedSystemTag> _volumeSystemTagMap = new HashMap<>();

@@ -100,12 +100,13 @@ public class CbtBackupKvmBackend implements CbtBackupHypervisorBackend {
         List<VolumeCbtBackupInfo> infos = new ArrayList<VolumeCbtBackupInfo>();
         String hostUuid = getVmHostUuid(vmUuid);
         KVMHostInventory inv = KVMHostInventory.valueOf(dbf.findByUuid(hostUuid, KVMHostVO.class));
+        String nbdServer = CbtBackupNetworkUtils.getBackupAddress(inv);
 
         for (String uuid : volumeUuids) {
             VolumeVO vo = getVolumeByUuid(uuid);
             VolumeCbtBackupInfo info = new VolumeCbtBackupInfo();
             info.setVolume(VolumeTO.valueOf(VolumeInventory.valueOf(vo), inv));
-            info.setNbdServer(inv.getManagementIp());
+            info.setNbdServer(nbdServer);
             infos.add(info);
         }
         ExportNbdVolumesCmd cmd = new ExportNbdVolumesCmd();

@@ -918,6 +918,11 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
             return;
         }
 
+        if (taskVO.getStatus() == CbtTaskStatus.Stopped) {
+            completion.success();
+            return;
+        }
+
         final CbtTaskResourceRefVO refVO = Q.New(CbtTaskResourceRefVO.class)
                 .eq(CbtTaskResourceRefVO_.taskUuid, msg.getUuid())
                 .eq(CbtTaskResourceRefVO_.resourceType, VmInstanceVO.class.getSimpleName())

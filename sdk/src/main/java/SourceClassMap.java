@@ -238,6 +238,8 @@ public class SourceClassMap {
 			put("org.zstack.header.storage.snapshot.group.VolumeSnapshotGroupAvailability", "org.zstack.sdk.VolumeSnapshotGroupAvailability");
 			put("org.zstack.header.storage.snapshot.group.VolumeSnapshotGroupInventory", "org.zstack.sdk.VolumeSnapshotGroupInventory");
 			put("org.zstack.header.storage.snapshot.group.VolumeSnapshotGroupRefInventory", "org.zstack.sdk.VolumeSnapshotGroupRefInventory");
+			put("org.zstack.header.storage.snapshot.group.VolumeSnapshotGroupTreeInventory", "org.zstack.sdk.VolumeSnapshotGroupTreeInventory");
+			put("org.zstack.header.storage.snapshot.group.VolumeSnapshotGroupTreeRefInventory", "org.zstack.sdk.VolumeSnapshotGroupTreeRefInventory");
 			put("org.zstack.header.storage.snapshot.reference.VolumeSnapshotReferenceTreeInventory", "org.zstack.sdk.VolumeSnapshotReferenceTreeInventory");
 			put("org.zstack.header.storageDevice.LunInventory", "org.zstack.sdk.LunInventory");
 			put("org.zstack.header.storageDevice.ScsiLunClusterStatusInventory", "org.zstack.sdk.ScsiLunClusterStatusInventory");
@@ -1045,6 +1047,8 @@ public class SourceClassMap {
 			put("org.zstack.sdk.VolumeSnapshotGroupAvailability", "org.zstack.header.storage.snapshot.group.VolumeSnapshotGroupAvailability");
 			put("org.zstack.sdk.VolumeSnapshotGroupInventory", "org.zstack.header.storage.snapshot.group.VolumeSnapshotGroupInventory");
 			put("org.zstack.sdk.VolumeSnapshotGroupRefInventory", "org.zstack.header.storage.snapshot.group.VolumeSnapshotGroupRefInventory");
+			put("org.zstack.sdk.VolumeSnapshotGroupTreeInventory", "org.zstack.header.storage.snapshot.group.VolumeSnapshotGroupTreeInventory");
+			put("org.zstack.sdk.VolumeSnapshotGroupTreeRefInventory", "org.zstack.header.storage.snapshot.group.VolumeSnapshotGroupTreeRefInventory");
 			put("org.zstack.sdk.VolumeSnapshotInventory", "org.zstack.header.storage.snapshot.VolumeSnapshotInventory");
 			put("org.zstack.sdk.VolumeSnapshotReferenceTreeInventory", "org.zstack.header.storage.snapshot.reference.VolumeSnapshotReferenceTreeInventory");
 			put("org.zstack.sdk.VolumeSnapshotTreeInventory", "org.zstack.header.storage.snapshot.VolumeSnapshotTreeInventory");

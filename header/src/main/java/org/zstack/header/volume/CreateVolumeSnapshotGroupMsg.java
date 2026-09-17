@@ -17,6 +17,7 @@ public class CreateVolumeSnapshotGroupMsg extends NeedReplyMessage implements Cr
     private ConsistentType consistentType = ConsistentType.None;
     private SessionInventory session;
     private VmInstanceInventory vmInstance;
+    private boolean allowPartialSuccess = true;
 
     public String getRootVolumeUuid() {
         return rootVolumeUuid;
@@ -86,6 +87,15 @@ public class CreateVolumeSnapshotGroupMsg extends NeedReplyMessage implements Cr
 
     public void setSession(SessionInventory session) {
         this.session = session;
+    }
+
+    @Override
+    public boolean isAllowPartialSuccess() {
+        return allowPartialSuccess;
+    }
+
+    public void setAllowPartialSuccess(boolean allowPartialSuccess) {
+        this.allowPartialSuccess = allowPartialSuccess;
     }
 
 }

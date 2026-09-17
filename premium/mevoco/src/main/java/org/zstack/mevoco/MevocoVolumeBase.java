@@ -3,7 +3,6 @@ package org.zstack.mevoco;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
 import org.zstack.compute.host.HostSystemTags;
 import org.zstack.compute.host.MevocoKVMAgentCommands;
 import org.zstack.compute.host.MevocoKVMConstant;
@@ -19,6 +18,7 @@ import org.zstack.core.componentloader.PluginRegistry;
 import org.zstack.core.db.DatabaseFacade;
 import org.zstack.core.db.Q;
 import org.zstack.core.db.SQL;
+import org.zstack.core.db.SQLBatch;
 import org.zstack.core.db.SimpleQuery;
 import org.zstack.core.thread.ChainTask;
 import org.zstack.core.thread.SyncTaskChain;
@@ -494,9 +494,162 @@ public class MevocoVolumeBase extends VolumeBase {
     }
 
     private static class CreateVolumesSnapshotOverlayInnerContext {
-        List<VolumeSnapshotInventory> volumeSnapshotList;
+        List<VolumeSnapshotInventory> volumeSnapshotList = new ArrayList<>();
         List<String> hostBackupFileUuidList;
+        List<CreateVolumesSnapshotsJobStruct> failedSnapshotJobs = Collections.synchronizedList(new ArrayList<>());
+        ErrorCode partialError;
         boolean backupHostFileIfNeeded;
+        boolean allowPartialSuccess;
+        boolean partialReplyAllowed;
+        boolean snapshotBackendPhaseCompleted;
+        boolean failedSnapshotJobsCleanedUp;
+    }
+
+    private void setCreateVolumesSnapshotOverlayInnerReply(CreateVolumesSnapshotOverlayInnerReply reply,
+                                                           CreateVolumesSnapshotOverlayInnerContext context) {
+        reply.setInventories(context.volumeSnapshotList);
+        reply.setHostBackupFileUuidList(context.hostBackupFileUuidList);
+        reply.setFailedSnapshotJobs(context.failedSnapshotJobs);
+        reply.setPartialError(context.partialError);
+    }
+
+    private boolean canReturnPartialCreateVolumesSnapshotReply(CreateVolumesSnapshotOverlayInnerContext context) {
+        return context.allowPartialSuccess
+                && context.partialReplyAllowed
+                && !CollectionUtils.isEmpty(context.volumeSnapshotList)
+                && !CollectionUtils.isEmpty(context.failedSnapshotJobs);
+    }
+
+    private boolean isSnapshotJobFailed(CreateVolumesSnapshotOverlayInnerContext context,
+                                        CreateVolumesSnapshotsJobStruct job) {
+        return context.failedSnapshotJobs.stream()
+                .anyMatch(it -> it.getVolumeUuid().equals(job.getVolumeUuid()));
+    }
+
+    private void addFailedSnapshotJobs(CreateVolumesSnapshotOverlayInnerContext context,
+                                       List<CreateVolumesSnapshotsJobStruct> failedJobs,
+                                       ErrorCode errorCode) {
+        Set<String> recordedVolumeUuids = context.failedSnapshotJobs.stream()
+                .map(CreateVolumesSnapshotsJobStruct::getVolumeUuid)
+                .collect(Collectors.toSet());
+        failedJobs.stream()
+                .filter(job -> recordedVolumeUuids.add(job.getVolumeUuid()))
+                .forEach(context.failedSnapshotJobs::add);
+        if (context.partialError == null) {
+            context.partialError = errorCode;
+        }
+    }
+
+    private List<CreateVolumesSnapshotsJobStruct> getFailedSnapshotJobs(CreateVolumesSnapshotOverlayInnerMsg msg,
+                                                                        Set<String> expectedVolumeUuids,
+                                                                        Set<String> succeededVolumeUuids) {
+        return msg.getVolumeSnapshotJobs().stream()
+                .filter(job -> expectedVolumeUuids.contains(job.getVolumeUuid()))
+                .filter(job -> !succeededVolumeUuids.contains(job.getVolumeUuid()))
+                .collect(Collectors.toList());
+    }
+
+    private Set<String> getKvmSnapshotVolumeUuids(TakeVolumesSnapshotOnKvmMsg msg) {
+        return msg.getSnapshotJobs().stream()
+                .map(TakeSnapshotsOnKvmJobStruct::getVolumeUuid)
+                .collect(Collectors.toSet());
+    }
+
+    private void rollbackSnapshotJob(CreateVolumesSnapshotsJobStruct job) {
+        if (job.getVolumeSnapshotStruct() == null || job.getVolumeSnapshotStruct().getCurrent() == null) {
+            return;
+        }
+        rollbackSnapshot(job.getVolumeSnapshotStruct().getCurrent().getUuid());
+    }
+
+    private List<VolumeSnapshotInventory> getCreatedSnapshotInventories(CreateVolumesSnapshotOverlayInnerMsg msg,
+                                                                        CreateVolumesSnapshotOverlayInnerContext context) {
+        Map<String, VolumeSnapshotVO> readySnapshots = loadReadySnapshotVOs(msg.getVolumeSnapshotJobs());
+        return msg.getVolumeSnapshotJobs().stream()
+                .filter(job -> !isSnapshotJobFailed(context, job))
+                .map(this::getSnapshotUuid)
+                .filter(Objects::nonNull)
+                .map(readySnapshots::get)
+                .filter(Objects::nonNull)
+                .map(VolumeSnapshotInventory::valueOf)
+                .collect(Collectors.toList());
+    }
+
+    private List<CreateVolumesSnapshotsJobStruct> getCreatedSnapshotJobs(
+            CreateVolumesSnapshotOverlayInnerMsg msg,
+            CreateVolumesSnapshotOverlayInnerContext context) {
+        Map<String, VolumeSnapshotVO> readySnapshots = loadReadySnapshotVOs(msg.getVolumeSnapshotJobs());
+        return msg.getVolumeSnapshotJobs().stream()
+                .filter(job -> !isSnapshotJobFailed(context, job))
+                .filter(job -> readySnapshots.containsKey(getSnapshotUuid(job)))
+                .collect(Collectors.toList());
+    }
+
+    private Map<String, VolumeSnapshotVO> loadReadySnapshotVOs(
+            Collection<CreateVolumesSnapshotsJobStruct> jobs) {
+        Set<String> snapshotUuids = jobs.stream()
+                .map(this::getSnapshotUuid)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+        if (snapshotUuids.isEmpty()) {
+            return Collections.emptyMap();
+        }
+
+        List<VolumeSnapshotVO> readySnapshots = Q.New(VolumeSnapshotVO.class)
+                .in(VolumeSnapshotVO_.uuid, snapshotUuids)
+                .eq(VolumeSnapshotVO_.status, VolumeSnapshotStatus.Ready)
+                .list();
+        return readySnapshots.stream()
+                .collect(Collectors.toMap(VolumeSnapshotVO::getUuid, snapshot -> snapshot));
+    }
+
+    private String getSnapshotUuid(CreateVolumesSnapshotsJobStruct job) {
+        return job.getVolumeSnapshotStruct() == null || job.getVolumeSnapshotStruct().getCurrent() == null ?
+                null : job.getVolumeSnapshotStruct().getCurrent().getUuid();
+    }
+
+    private List<CreateVolumesSnapshotsJobStruct> getUncreatedSnapshotJobs(CreateVolumesSnapshotOverlayInnerMsg msg) {
+        Map<String, VolumeSnapshotVO> readySnapshots = loadReadySnapshotVOs(msg.getVolumeSnapshotJobs());
+        return msg.getVolumeSnapshotJobs().stream()
+                .filter(job -> !readySnapshots.containsKey(getSnapshotUuid(job)))
+                .collect(Collectors.toList());
+    }
+
+    private CreateVolumesSnapshotOverlayInnerMsg makeSnapshotJobsMsg(
+            CreateVolumesSnapshotOverlayInnerMsg msg,
+            List<CreateVolumesSnapshotsJobStruct> jobs) {
+        CreateVolumesSnapshotOverlayInnerMsg jobsMsg = new CreateVolumesSnapshotOverlayInnerMsg();
+        jobsMsg.setAccountUuid(msg.getAccountUuid());
+        jobsMsg.setConsistentType(msg.getConsistentType());
+        jobsMsg.setVolumeSnapshotJobs(jobs);
+        jobsMsg.setLockedVmInstanceUuids(msg.getLockedVmInstanceUuids());
+        jobsMsg.setLockedVolumeUuids(msg.getLockedVolumeUuids());
+        jobsMsg.setBackupHostFileIfNeeded(msg.isBackupHostFileIfNeeded());
+        jobsMsg.setAllowPartialSuccess(msg.isAllowPartialSuccess());
+        return jobsMsg;
+    }
+
+    private void rollbackFailedSnapshotJobs(
+            List<CreateVolumesSnapshotsJobStruct> failedJobs,
+            Map<String, VolumeVO> volumeVOS,
+            Map<VolumeVO, Long> allocatedSize,
+            Map<VolumeVO, String> allocatedInstallUrls) {
+        for (CreateVolumesSnapshotsJobStruct job : failedJobs) {
+            rollbackSnapshotJob(job);
+            VolumeVO volumeVO = volumeVOS.get(job.getVolumeUuid());
+            if (volumeVO == null || !allocatedSize.containsKey(volumeVO)) {
+                continue;
+            }
+
+            ReleasePrimaryStorageSpaceMsg dmsg = new ReleasePrimaryStorageSpaceMsg();
+            dmsg.setPrimaryStorageUuid(volumeVO.getPrimaryStorageUuid());
+            dmsg.setDiskSize(allocatedSize.remove(volumeVO));
+            dmsg.setNoOverProvisioning(true);
+            dmsg.setAllocatedInstallUrl(allocatedInstallUrls.remove(volumeVO));
+            bus.makeTargetServiceIdByResourceUuid(
+                    dmsg, PrimaryStorageConstant.SERVICE_ID, volumeVO.getPrimaryStorageUuid());
+            bus.send(dmsg);
+        }
     }
 
     // all these logical should implement in a manager rather than base
@@ -513,6 +666,7 @@ public class MevocoVolumeBase extends VolumeBase {
             innerMsg.setLockedVmInstanceUuids(msg.getLockedVmInstanceUuids());
             innerMsg.setConsistentType(msg.getConsistentType());
             innerMsg.setBackupHostFileIfNeeded(msg.isBackupHostFileIfNeeded());
+            innerMsg.setAllowPartialSuccess(msg.isAllowPartialSuccess());
 
             List<String> lockedVolumeUuids = new ArrayList<>(msg.getLockedVolumeUuids());
             String newLockVolumeUuid = null;
@@ -545,6 +699,7 @@ public class MevocoVolumeBase extends VolumeBase {
 
         CreateVolumesSnapshotOverlayInnerContext context = new CreateVolumesSnapshotOverlayInnerContext();
         context.backupHostFileIfNeeded = msg.isBackupHostFileIfNeeded();
+        context.allowPartialSuccess = msg.isAllowPartialSuccess();
         CreateVolumesSnapshotOverlayInnerReply innerReply = new CreateVolumesSnapshotOverlayInnerReply();
 
         FlowChain chain = FlowChainBuilder.newSimpleFlowChain();
@@ -614,13 +769,17 @@ public class MevocoVolumeBase extends VolumeBase {
                 createVolumesSnapshotOnline(msg, context, new Completion(trigger) {
                     @Override
                     public void success() {
-                        innerReply.setInventories(context.volumeSnapshotList);
-                        innerReply.setHostBackupFileUuidList(context.hostBackupFileUuidList);
+                        setCreateVolumesSnapshotOverlayInnerReply(innerReply, context);
                         trigger.next();
                     }
 
                     @Override
                     public void fail(ErrorCode errorCode) {
+                        setCreateVolumesSnapshotOverlayInnerReply(innerReply, context);
+                        if (canReturnPartialCreateVolumesSnapshotReply(context)) {
+                            trigger.next();
+                            return;
+                        }
                         trigger.fail(errorCode);
                     }
                 });
@@ -638,13 +797,17 @@ public class MevocoVolumeBase extends VolumeBase {
                 createVolumesSnapshotOffline(msg, context, new Completion(trigger) {
                     @Override
                     public void success() {
-                        innerReply.setInventories(context.volumeSnapshotList);
-                        innerReply.setHostBackupFileUuidList(context.hostBackupFileUuidList);
+                        setCreateVolumesSnapshotOverlayInnerReply(innerReply, context);
                         trigger.next();
                     }
 
                     @Override
                     public void fail(ErrorCode errorCode) {
+                        setCreateVolumesSnapshotOverlayInnerReply(innerReply, context);
+                        if (canReturnPartialCreateVolumesSnapshotReply(context)) {
+                            trigger.next();
+                            return;
+                        }
                         trigger.fail(errorCode);
                     }
                 });
@@ -663,22 +826,54 @@ public class MevocoVolumeBase extends VolumeBase {
         }).start();
     }
 
-    private void beforeTakeVolumesSnapshot(final Iterator<BeforeTakeLiveSnapshotsOnVolumes> it, CreateVolumesSnapshotOverlayInnerMsg msg, TakeVolumesSnapshotOnKvmMsg tmsg, Map flowData, Completion completion) {
+    private void beforeTakeVolumesSnapshot(
+            final Iterator<BeforeTakeLiveSnapshotsOnVolumes> it,
+            CreateVolumesSnapshotOverlayInnerMsg msg,
+            TakeVolumesSnapshotOnKvmMsg tmsg,
+            Map flowData,
+            CreateVolumesSnapshotOverlayInnerContext context,
+            Map<String, VolumeVO> volumeVOS,
+            Map<VolumeVO, Long> allocatedSize,
+            Map<VolumeVO, String> allocatedInstallUrls,
+            Completion completion) {
         if(!it.hasNext()) {
             completion.success();
             return;
         }
 
+        Set<String> pendingVolumeUuids = getKvmSnapshotVolumeUuids(tmsg);
         BeforeTakeLiveSnapshotsOnVolumes ext = it.next();
         ext.beforeTakeLiveSnapshotsOnVolumes(msg, tmsg, flowData, new Completion(completion) {
             @Override
             public void success() {
-                beforeTakeVolumesSnapshot(it, msg, tmsg, flowData, completion);
+                beforeTakeVolumesSnapshot(it, msg, tmsg, flowData, context, volumeVOS,
+                        allocatedSize, allocatedInstallUrls, completion);
             }
 
             @Override
             public void fail(ErrorCode errorCode) {
-                completion.fail(errorCode);
+                Set<String> remainingVolumeUuids = getKvmSnapshotVolumeUuids(tmsg);
+                List<CreateVolumesSnapshotsJobStruct> handledJobs = getFailedSnapshotJobs(
+                        msg, pendingVolumeUuids, remainingVolumeUuids);
+                Map<String, VolumeSnapshotVO> readySnapshots = loadReadySnapshotVOs(handledJobs);
+                List<CreateVolumesSnapshotsJobStruct> failedJobs = handledJobs.stream()
+                        .filter(job -> !readySnapshots.containsKey(getSnapshotUuid(job)))
+                        .collect(Collectors.toList());
+                if (failedJobs.isEmpty()) {
+                    completion.fail(errorCode);
+                    return;
+                }
+
+                addFailedSnapshotJobs(context, failedJobs, errorCode);
+                rollbackFailedSnapshotJobs(failedJobs, volumeVOS, allocatedSize, allocatedInstallUrls);
+                if (!context.allowPartialSuccess || getCreatedSnapshotJobs(msg, context).isEmpty()) {
+                    completion.fail(errorCode);
+                    return;
+                }
+
+                context.partialReplyAllowed = true;
+                beforeTakeVolumesSnapshot(it, msg, tmsg, flowData, context, volumeVOS,
+                        allocatedSize, allocatedInstallUrls, completion);
             }
         });
     }
@@ -934,8 +1129,9 @@ public class MevocoVolumeBase extends VolumeBase {
 
             @Override
             public void rollback(FlowRollback trigger, Map data) {
-                // rollback when no snapshot created
-                if (data.containsKey(MevocoConstants.VOLUMES_SNAPSHOT_RESULTS)) {
+                if (data.containsKey(MevocoConstants.VOLUMES_SNAPSHOT_RESULTS)
+                        || (!context.snapshotBackendPhaseCompleted
+                        && !getCreatedSnapshotJobs(msg, context).isEmpty())) {
                     trigger.rollback();
                     return;
                 }
@@ -957,7 +1153,8 @@ public class MevocoVolumeBase extends VolumeBase {
             @Override
             public void run(FlowTrigger trigger, Map data) {
                 List<BeforeTakeLiveSnapshotsOnVolumes> exts = pluginRgty.getExtensionList(BeforeTakeLiveSnapshotsOnVolumes.class);
-                beforeTakeVolumesSnapshot(exts.iterator(), msg, tmsg, chain.getData(), new Completion(trigger) {
+                beforeTakeVolumesSnapshot(exts.iterator(), msg, tmsg, chain.getData(), context, volumeVOS,
+                        allocatedSize, allocatedInstallUrls, new Completion(trigger) {
                     @Override
                     public void success() {
                         trigger.next();
@@ -981,6 +1178,10 @@ public class MevocoVolumeBase extends VolumeBase {
             public void run(FlowTrigger trigger, Map data) {
                 ErrorCodeList errList = new ErrorCodeList();
                 new While<>(msg.getVolumeSnapshotJobs()).each((job, whileCompletion) -> {
+                    if (isSnapshotJobFailed(context, job)) {
+                        whileCompletion.done();
+                        return;
+                    }
                     if (!job.getVolumeSnapshotStruct().isFullSnapshot()) {
                         whileCompletion.done();
                         return;
@@ -1024,24 +1225,75 @@ public class MevocoVolumeBase extends VolumeBase {
                     @Override
                     public void run(MessageReply reply) {
                         if (!reply.isSuccess()) {
-                            trigger.fail(reply.getError());
+                            handleKvmFailure(reply.getError(), null, trigger, data);
                             return;
                         }
 
                         TakeVolumesSnapshotOnKvmReply treply = reply.castReply();
                         if (!treply.isSuccess()) {
-                            trigger.fail(treply.getError());
+                            ErrorCode errorCode = treply.getError() == null ?
+                                    operr("failed to create snapshots for volumes%s on host[uuid:%s]",
+                                            msg.getVolumeSnapshotJobs().stream()
+                                                    .map(CreateVolumesSnapshotsJobStruct::getVolumeUuid)
+                                                    .collect(Collectors.toList()), tmsg.getHostUuid()) : treply.getError();
+                            handleKvmFailure(errorCode, treply, trigger, data);
                             return;
                         }
 
+                        if (treply.getSnapshotsResults() == null) {
+                            treply.setSnapshotsResults(new ArrayList<>());
+                        }
+                        Set<String> succeededVolumeUuids = new HashSet<>();
                         for (TakeSnapshotsOnKvmResultStruct result: treply.getSnapshotsResults()) {
                             for (CreateVolumesSnapshotsJobStruct job : msg.getVolumeSnapshotJobs()) {
                                 if (job.getVolumeUuid().equals(result.getVolumeUuid())) {
                                     updateVolumeSnapshotInDB(result, job);
+                                    succeededVolumeUuids.add(job.getVolumeUuid());
+                                    break;
                                 }
                             }
                         }
+
+                        List<CreateVolumesSnapshotsJobStruct> failedJobs = getFailedSnapshotJobs(
+                                msg, getKvmSnapshotVolumeUuids(tmsg), succeededVolumeUuids);
+                        if (!failedJobs.isEmpty()) {
+                            ErrorCode partialError = operr("failed to create snapshots for volumes%s on host[uuid:%s]",
+                                    failedJobs.stream()
+                                            .map(CreateVolumesSnapshotsJobStruct::getVolumeUuid)
+                                            .collect(Collectors.toList()), tmsg.getHostUuid());
+                            addFailedSnapshotJobs(context, failedJobs, partialError);
+                            logger.warn(partialError.getReadableDetails());
+                            rollbackFailedSnapshotJobs(failedJobs, volumeVOS, allocatedSize, allocatedInstallUrls);
+                            if (!context.allowPartialSuccess || getCreatedSnapshotJobs(msg, context).isEmpty()) {
+                                trigger.fail(partialError);
+                                return;
+                            }
+                            context.partialReplyAllowed = true;
+                        }
                         data.put(MevocoConstants.VOLUMES_SNAPSHOT_RESULTS, treply);
+                        trigger.next();
+                    }
+
+                    private void handleKvmFailure(ErrorCode errorCode,
+                                                  TakeVolumesSnapshotOnKvmReply treply,
+                                                  FlowTrigger trigger,
+                                                  Map data) {
+                        ErrorCode cause = errorCode == null ?
+                                operr("failed to create snapshots for volumes%s on host[uuid:%s]",
+                                        getKvmSnapshotVolumeUuids(tmsg), tmsg.getHostUuid()) : errorCode;
+                        List<CreateVolumesSnapshotsJobStruct> failedJobs = getFailedSnapshotJobs(
+                                msg, getKvmSnapshotVolumeUuids(tmsg), Collections.emptySet());
+                        addFailedSnapshotJobs(context, failedJobs, cause);
+                        rollbackFailedSnapshotJobs(failedJobs, volumeVOS, allocatedSize, allocatedInstallUrls);
+                        if (!context.allowPartialSuccess || getCreatedSnapshotJobs(msg, context).isEmpty()) {
+                            trigger.fail(cause);
+                            return;
+                        }
+
+                        context.partialReplyAllowed = true;
+                        if (treply != null) {
+                            data.put(MevocoConstants.VOLUMES_SNAPSHOT_RESULTS, treply);
+                        }
                         trigger.next();
                     }
                 });
@@ -1081,6 +1333,33 @@ public class MevocoVolumeBase extends VolumeBase {
             }
 
         }).then(new NoRollbackFlow() {
+            String __name__ = "cleanup-failed-volume-snapshot-jobs";
+
+            @Override
+            public boolean skip(Map data) {
+                return context.failedSnapshotJobs.isEmpty();
+            }
+
+            @Override
+            public void run(FlowTrigger trigger, Map data) {
+                List<VolumeSnapshotCreationExtensionPoint> exts =
+                        pluginRgty.getExtensionList(VolumeSnapshotCreationExtensionPoint.class);
+                CreateVolumesSnapshotOverlayInnerMsg failedJobsMsg =
+                        makeSnapshotJobsMsg(msg, context.failedSnapshotJobs);
+                afterTakeVolumesSnapshotFailed(exts.iterator(), failedJobsMsg,
+                        (TakeVolumesSnapshotOnKvmReply) data.get(MevocoConstants.VOLUMES_SNAPSHOT_RESULTS));
+                context.failedSnapshotJobsCleanedUp = true;
+                trigger.next();
+            }
+        }).then(new NoRollbackFlow() {
+            String __name__ = "mark-snapshot-backend-phase-completed";
+
+            @Override
+            public void run(FlowTrigger trigger, Map data) {
+                context.snapshotBackendPhaseCompleted = true;
+                trigger.next();
+            }
+        }).then(new NoRollbackFlow() {
             String __name__ = "backup-vm-hostfile-on-hypervisor-when-snapshot-skipped";
 
             @Override
@@ -1119,6 +1398,11 @@ public class MevocoVolumeBase extends VolumeBase {
             @Override
             public void run(final FlowTrigger trigger, Map data) {
                 new While<>(msg.getVolumeSnapshotJobs()).each((job, compl) -> {
+                    if (isSnapshotJobFailed(context, job)) {
+                        compl.done();
+                        return;
+                    }
+
                     long size = job.getVolumeSnapshotStruct().getCurrent().getSize() -
                             allocatedSize.getOrDefault(volumeVOS.get(job.getVolumeUuid()), 0L);
 
@@ -1173,8 +1457,14 @@ public class MevocoVolumeBase extends VolumeBase {
 
             @Override
             public void run(FlowTrigger trigger, Map data) {
+                List<CreateVolumesSnapshotsJobStruct> successfulJobs = getCreatedSnapshotJobs(msg, context);
+                if (successfulJobs.isEmpty()) {
+                    trigger.next();
+                    return;
+                }
+
                 List<VolumeSnapshotCreationExtensionPoint> exts = pluginRgty.getExtensionList(VolumeSnapshotCreationExtensionPoint.class);
-                afterTakeVolumesSnapshot(exts.iterator(), msg,
+                afterTakeVolumesSnapshot(exts.iterator(), makeSnapshotJobsMsg(msg, successfulJobs),
                         (TakeVolumesSnapshotOnKvmReply) data.get(MevocoConstants.VOLUMES_SNAPSHOT_RESULTS), new Completion(trigger) {
                     @Override
                     public void success() {
@@ -1193,6 +1483,10 @@ public class MevocoVolumeBase extends VolumeBase {
             @Override
             public void run(FlowTrigger trigger, Map data) {
                 for (CreateVolumesSnapshotsJobStruct job : msg.getVolumeSnapshotJobs()) {
+                    if (isSnapshotJobFailed(context, job)) {
+                        continue;
+                    }
+
                     if (job.getVolumeSnapshotStruct().isNewChain()) {
                         VolumeSnapshotVO svo = dbf.findByUuid(job.getVolumeSnapshotStruct().getCurrent().getUuid(), VolumeSnapshotVO.class);
                         VolumeSnapshotReferenceUtils.updateReferenceAfterFirstSnapshot(svo);
@@ -1255,12 +1549,7 @@ public class MevocoVolumeBase extends VolumeBase {
         }).done(new FlowDoneHandler(completion) {
             @Override
             public void handle(Map data) {
-                List<VolumeSnapshotInventory> inventories = msg.getVolumeSnapshotJobs().stream()
-                        .map(job -> VolumeSnapshotInventory.valueOf(
-                                (VolumeSnapshotVO) Q.New(VolumeSnapshotVO.class)
-                                        .eq(VolumeSnapshotVO_.uuid, job.getVolumeSnapshotStruct().getCurrent().getUuid())
-                                        .find()))
-                        .collect(Collectors.toList());
+                List<VolumeSnapshotInventory> inventories = getCreatedSnapshotInventories(msg, context);
                 for (VolumeSnapshotInventory inventory: inventories) {
                     VolumeSnapshotManagerImpl.markSnapshotTreeCompleted(inventory);
                 }
@@ -1275,17 +1564,84 @@ public class MevocoVolumeBase extends VolumeBase {
                             .listValues();
                 }
 
+                context.partialReplyAllowed = !context.failedSnapshotJobs.isEmpty() && !inventories.isEmpty();
+                if (context.partialReplyAllowed && !context.allowPartialSuccess) {
+                    completion.fail(context.partialError == null ?
+                            operr("failed to create snapshots for volumes%s",
+                                    context.failedSnapshotJobs.stream()
+                                            .map(CreateVolumesSnapshotsJobStruct::getVolumeUuid)
+                                            .collect(Collectors.toList())) : context.partialError);
+                    return;
+                }
                 completion.success();
             }
         }).error(new FlowErrorHandler(completion) {
             @Override
             public void handle(ErrorCode errCode, Map data) {
-                for (CreateVolumesSnapshotsJobStruct jobStruct : msg.getVolumeSnapshotJobs()) {
-                    rollbackSnapshot(jobStruct.getVolumeSnapshotStruct().getCurrent().getUuid());
+                ErrorCode cause = errCode == null ?
+                        operr("failed to create snapshots for volumes%s",
+                                msg.getVolumeSnapshotJobs().stream()
+                                        .map(CreateVolumesSnapshotsJobStruct::getVolumeUuid)
+                                        .collect(Collectors.toList())) :
+                        errCode;
+                context.partialError = cause;
+                addFailedSnapshotJobs(context, getUncreatedSnapshotJobs(msg), cause);
+                context.volumeSnapshotList = getCreatedSnapshotInventories(msg, context);
+
+                TakeVolumesSnapshotOnKvmReply reply =
+                        (TakeVolumesSnapshotOnKvmReply) data.get(MevocoConstants.VOLUMES_SNAPSHOT_RESULTS);
+                boolean partialBackendFailure = context.allowPartialSuccess
+                        && !context.snapshotBackendPhaseCompleted
+                        && !CollectionUtils.isEmpty(context.failedSnapshotJobs)
+                        && !CollectionUtils.isEmpty(context.volumeSnapshotList);
+                if (partialBackendFailure) {
+                    context.partialReplyAllowed = true;
+                    rollbackFailedSnapshotJobs(
+                            context.failedSnapshotJobs, volumeVOS, allocatedSize, allocatedInstallUrls);
+                    for (VolumeSnapshotInventory inventory : context.volumeSnapshotList) {
+                        VolumeSnapshotManagerImpl.markSnapshotTreeCompleted(inventory);
+                    }
+                    if (!context.failedSnapshotJobsCleanedUp) {
+                        List<VolumeSnapshotCreationExtensionPoint> failureExts =
+                                pluginRgty.getExtensionList(VolumeSnapshotCreationExtensionPoint.class);
+                        afterTakeVolumesSnapshotFailed(failureExts.iterator(),
+                                makeSnapshotJobsMsg(msg, context.failedSnapshotJobs), reply);
+                        context.failedSnapshotJobsCleanedUp = true;
+                    }
+
+                    List<VolumeSnapshotCreationExtensionPoint> successExts =
+                            pluginRgty.getExtensionList(VolumeSnapshotCreationExtensionPoint.class);
+                    afterTakeVolumesSnapshot(successExts.iterator(),
+                            makeSnapshotJobsMsg(msg, getCreatedSnapshotJobs(msg, context)), reply,
+                            new Completion(completion) {
+                                @Override
+                                public void success() {
+                                    completion.fail(cause);
+                                }
+
+                                @Override
+                                public void fail(ErrorCode errorCode) {
+                                    completion.fail(cause);
+                                }
+                            });
+                } else {
+                    context.partialReplyAllowed = false;
+                    context.volumeSnapshotList = new ArrayList<>();
+                    for (CreateVolumesSnapshotsJobStruct jobStruct : msg.getVolumeSnapshotJobs()) {
+                        rollbackSnapshotJob(jobStruct);
+                    }
+                    List<CreateVolumesSnapshotsJobStruct> cleanupJobs = context.failedSnapshotJobsCleanedUp ?
+                            msg.getVolumeSnapshotJobs().stream()
+                                    .filter(job -> !isSnapshotJobFailed(context, job))
+                                    .collect(Collectors.toList()) : msg.getVolumeSnapshotJobs();
+                    if (!cleanupJobs.isEmpty()) {
+                        List<VolumeSnapshotCreationExtensionPoint> failureExts =
+                                pluginRgty.getExtensionList(VolumeSnapshotCreationExtensionPoint.class);
+                        afterTakeVolumesSnapshotFailed(failureExts.iterator(),
+                                makeSnapshotJobsMsg(msg, cleanupJobs), reply);
+                    }
+                    completion.fail(cause);
                 }
-                List<VolumeSnapshotCreationExtensionPoint> exts = pluginRgty.getExtensionList(VolumeSnapshotCreationExtensionPoint.class);
-                afterTakeVolumesSnapshotFailed(exts.iterator(), msg, (TakeVolumesSnapshotOnKvmReply) data.get(MevocoConstants.VOLUMES_SNAPSHOT_RESULTS));
-                completion.fail(errCode);
             }
         }).start();
     }
@@ -1389,6 +1745,10 @@ public class MevocoVolumeBase extends VolumeBase {
                                     CreateVolumeSnapshotReply reply1 = reply.castReply();
                                     context.volumeSnapshotList.add(reply1.getInventory());
                                 } else {
+                                    msg.getVolumeSnapshotJobs().stream()
+                                            .filter(job -> job.getVolumeUuid().equals(cmsg.getVolumeUuid()))
+                                            .findFirst()
+                                            .ifPresent(job -> context.failedSnapshotJobs.add(job));
                                     whileCompletion.addError(reply.getError());
                                 }
                                 whileCompletion.done();
@@ -1398,7 +1758,10 @@ public class MevocoVolumeBase extends VolumeBase {
                         @Override
                         public void done(ErrorCodeList errorCodeList) {
                             if (errorCodeList.hasError()) {
-                                trigger.fail(operr("failed to create volumes snapshots").withCause(errorCodeList));
+                                context.partialError = operr("failed to create volumes snapshots").withCause(errorCodeList);
+                                context.partialReplyAllowed = !CollectionUtils.isEmpty(context.volumeSnapshotList)
+                                        && !CollectionUtils.isEmpty(context.failedSnapshotJobs);
+                                trigger.fail(context.partialError);
                             } else {
                                 trigger.next();
                             }
@@ -1406,7 +1769,11 @@ public class MevocoVolumeBase extends VolumeBase {
                     })
                 )
                 .rollback(trigger -> {
-                    CollectionUtils.safeForEach(context.volumeSnapshotList, snapshot -> rollbackSnapshot(snapshot.getUuid()));
+                    if (!canReturnPartialCreateVolumesSnapshotReply(context)) {
+                        CollectionUtils.safeForEach(context.volumeSnapshotList,
+                                snapshot -> rollbackSnapshot(snapshot.getUuid()));
+                        context.volumeSnapshotList = new ArrayList<>();
+                    }
                     trigger.rollback();
                 })
                 .build())
@@ -1493,29 +1860,33 @@ public class MevocoVolumeBase extends VolumeBase {
             .start();
     }
 
-    @Transactional
     protected void rollbackSnapshot(String uuid) {
-        VolumeSnapshotVO vo = dbf.getEntityManager().find(VolumeSnapshotVO.class, uuid);
-        if (vo == null) {
-            return;
-        }
+        new SQLBatch() {
+            @Override
+            protected void scripts() {
+                VolumeSnapshotVO vo = dbf.getEntityManager().find(VolumeSnapshotVO.class, uuid);
+                if (vo == null) {
+                    return;
+                }
 
-        dbf.getEntityManager().remove(vo);
+                dbf.getEntityManager().remove(vo);
 
-        SQL.New(AccountResourceRefVO.class)
-                .eq(AccountResourceRefVO_.resourceUuid, uuid)
-                .eq(AccountResourceRefVO_.resourceType, VolumeSnapshotVO.class.getSimpleName())
-                .eq(AccountResourceRefVO_.type, AccessLevel.Own)
-                .delete();
+                SQL.New(AccountResourceRefVO.class)
+                        .eq(AccountResourceRefVO_.resourceUuid, uuid)
+                        .eq(AccountResourceRefVO_.resourceType, VolumeSnapshotVO.class.getSimpleName())
+                        .eq(AccountResourceRefVO_.type, AccessLevel.Own)
+                        .delete();
 
-        if (vo.getParentUuid() != null) {
-            VolumeSnapshotVO parent = dbf.getEntityManager().find(VolumeSnapshotVO.class, vo.getParentUuid());
-            parent.setLatest(true);
-            dbf.getEntityManager().merge(parent);
-        } else {
-            VolumeSnapshotTreeVO chain = dbf.getEntityManager().find(VolumeSnapshotTreeVO.class, vo.getTreeUuid());
-            dbf.getEntityManager().remove(chain);
-        }
+                if (vo.getParentUuid() != null) {
+                    VolumeSnapshotVO parent = dbf.getEntityManager().find(VolumeSnapshotVO.class, vo.getParentUuid());
+                    parent.setLatest(true);
+                    dbf.getEntityManager().merge(parent);
+                } else {
+                    VolumeSnapshotTreeVO chain = dbf.getEntityManager().find(VolumeSnapshotTreeVO.class, vo.getTreeUuid());
+                    dbf.getEntityManager().remove(chain);
+                }
+            }
+        }.execute();
     }
 
     private ErrorCode check(CreateVolumesSnapshotMsg msg) {
@@ -1577,6 +1948,7 @@ public class MevocoVolumeBase extends VolumeBase {
         innerMsg.setLockedVolumeUuids(new ArrayList<>());
         innerMsg.setLockedVmInstanceUuids(Collections.singletonList(volumeVO.getVmInstanceUuid()));
         innerMsg.setBackupHostFileIfNeeded(msg.isBackupHostFileIfNeeded());
+        innerMsg.setAllowPartialSuccess(msg.isAllowPartialSuccess());
         bus.makeTargetServiceIdByResourceUuid(innerMsg, VolumeConstant.SERVICE_ID, innerMsg.getVolumeUuid());
 
         CreateVolumesSnapshotOverlayVmMsg overlayVmMsg = new CreateVolumesSnapshotOverlayVmMsg();
@@ -1597,6 +1969,8 @@ public class MevocoVolumeBase extends VolumeBase {
                 if (errCode == null && innerReply != null) {
                     originalReply.setInventories(innerReply.getInventories());
                     originalReply.setHostBackupFileUuidList(innerReply.getHostBackupFileUuidList());
+                    originalReply.setFailedSnapshotJobs(innerReply.getFailedSnapshotJobs());
+                    originalReply.setPartialError(innerReply.getPartialError());
                 } else {
                     originalReply.setError(errCode);
                 }

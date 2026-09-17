@@ -22,7 +22,8 @@ import java.util.concurrent.TimeUnit;
 @DefaultTimeout(timeunit = TimeUnit.HOURS, value = 3)
 @MetadataImpact(value = MetadataImpact.Impact.STORAGE, resolver = "SnapshotGroupUuidToVmUuidResolver", field = "uuid", updateOnFailure = true)
 public class APIDeleteVolumeSnapshotGroupMsg extends APIDeleteMessage implements VolumeSnapshotGroupMessage {
-    @APIParam(resourceType = VolumeSnapshotGroupVO.class, successIfResourceNotExisting = true)
+    @APIParam(resourceType = VolumeSnapshotGroupVO.class, successIfResourceNotExisting = true,
+            scope = APIParam.SCOPE_ALLOWED_ALL)
     private String uuid;
 
     @APIParam(required = false, validValues = {"pull", "commit", "auto"})

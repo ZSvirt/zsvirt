@@ -2893,6 +2893,11 @@ public class VolumeBase extends AbstractVolume implements Volume {
                     @Override
                     public void success(VolumeSnapshotGroupInventory inv) {
                         evt.setInventory(inv);
+                        if (inv.getVolumeSnapshotRefs().size() != inv.getSnapshotCount()
+                                || inv.getVolumeSnapshotRefs().stream().anyMatch(VolumeSnapshotGroupRefInventory::isSnapshotDeleted)) {
+                            evt.setError(operr("failed to create complete volume snapshot group[uuid:%s]", inv.getUuid())
+                                    .withOpaque("volume.snapshot.group.inventory", inv));
+                        }
                         bus.publish(evt);
                         chain.next();
                     }
@@ -3122,6 +3127,7 @@ public class VolumeBase extends AbstractVolume implements Volume {
         List<CreateVolumesSnapshotsJobStruct> volumesSnapshotsJobs = new ArrayList<>();
         cmsg.setAccountUuid(msg.getSession().getAccountUuid());
         cmsg.setBackupHostFileIfNeeded(true);
+        cmsg.setAllowPartialSuccess(msg.isAllowPartialSuccess());
 
         VmInstanceInventory vm = msg.getVmInstance();
         Map<String, VolumeInventory> vols = vm.getAllVolumes().stream()
@@ -3135,7 +3141,7 @@ public class VolumeBase extends AbstractVolume implements Volume {
 
             volumesSnapshotsJob.setVolumeUuid(vol.getUuid());
             volumesSnapshotsJob.setPrimaryStorageUuid(vol.getPrimaryStorageUuid());
-            volumesSnapshotsJob.setResourceUuid(getUuid());
+            volumesSnapshotsJob.setResourceUuid(Platform.getUuid());
             volumesSnapshotsJob.setName(msg.getName() + "-" + vol.getName());
             volumesSnapshotsJob.setDescription(msg.getDescription());
             volumesSnapshotsJobs.add(volumesSnapshotsJob);
@@ -3144,6 +3150,7 @@ public class VolumeBase extends AbstractVolume implements Volume {
         cmsg.setConsistentType(msg.getConsistentType());
 
         List<VolumeSnapshotInventory> inventories = new ArrayList<>();
+        List<CreateVolumesSnapshotsJobStruct> failedSnapshotJobs = new ArrayList<>();
         List<String> hostBackupFileUuidList = new ArrayList<>();
         AtomicReference<VolumeSnapshotGroupVO> groupRef = new AtomicReference<>(null);
         String resourceUuid = msg.getResourceUuid() == null ? getUuid() : msg.getResourceUuid();
@@ -3159,7 +3166,22 @@ public class VolumeBase extends AbstractVolume implements Volume {
                             return;
                         }
                         CreateVolumesSnapshotReply r = reply.castReply();
-                        inventories.addAll(r.getInventories());
+                        if (!CollectionUtils.isEmpty(r.getInventories())) {
+                            inventories.addAll(r.getInventories());
+                        }
+                        if (!CollectionUtils.isEmpty(r.getFailedSnapshotJobs())) {
+                            failedSnapshotJobs.addAll(r.getFailedSnapshotJobs());
+                        }
+                        if (CollectionUtils.isEmpty(inventories) && !CollectionUtils.isEmpty(failedSnapshotJobs)) {
+                            trigger.fail(r.getPartialError() == null ?
+                                    operr("failed to create any snapshot for volume snapshot group[uuid:%s]", resourceUuid) :
+                                    r.getPartialError());
+                            return;
+                        }
+                        if (r.getPartialError() != null) {
+                            logger.warn(String.format("created volume snapshot group[uuid:%s] with %s failed snapshot jobs, partial error: %s",
+                                    resourceUuid, failedSnapshotJobs.size(), r.getPartialError().getReadableDetails()));
+                        }
                         if (!CollectionUtils.isEmpty(r.getHostBackupFileUuidList())) {
                             hostBackupFileUuidList.addAll(r.getHostBackupFileUuidList());
                         }
@@ -3170,6 +3192,8 @@ public class VolumeBase extends AbstractVolume implements Volume {
             .then(Flow.of("persist-snapshot-group")
                 .handle(trigger -> {
                     List<VolumeSnapshotGroupRefVO> refs = new ArrayList<>();
+                    Map<String, VolumeSnapshotInventory> invByVolumeUuid = inventories.stream()
+                            .collect(Collectors.toMap(VolumeSnapshotInventory::getVolumeUuid, inv -> inv, (oldValue, newValue) -> oldValue));
                     VolumeSnapshotGroupVO group = new VolumeSnapshotGroupVO();
                     group.setUuid(resourceUuid);
                     group.setSnapshotCount(cmsg.getVolumeSnapshotJobs().size());
@@ -3177,17 +3201,30 @@ public class VolumeBase extends AbstractVolume implements Volume {
                     group.setDescription(msg.getDescription());
                     group.setVmInstanceUuid(vm.getUuid());
                     group.setAccountUuid(msg.getSession().getAccountUuid());
-                    for (VolumeSnapshotInventory inv : inventories) {
+                    for (CreateVolumesSnapshotsJobStruct job : cmsg.getVolumeSnapshotJobs()) {
+                        VolumeInventory vol = vols.get(job.getVolumeUuid());
+                        VolumeSnapshotInventory inv = invByVolumeUuid.get(job.getVolumeUuid());
                         VolumeSnapshotGroupRefVO ref = new VolumeSnapshotGroupRefVO();
-                        ref.setVolumeUuid(inv.getVolumeUuid());
-                        ref.setVolumeName(vols.get(inv.getVolumeUuid()).getName());
-                        ref.setVolumeType(inv.getVolumeType());
+                        ref.setVolumeUuid(job.getVolumeUuid());
+                        ref.setVolumeName(vol.getName());
+                        ref.setVolumeType(inv == null ? vol.getType() : inv.getVolumeType());
                         ref.setVolumeSnapshotGroupUuid(group.getUuid());
-                        ref.setVolumeSnapshotUuid(inv.getUuid());
-                        ref.setVolumeSnapshotName(inv.getName());
-                        ref.setVolumeSnapshotInstallPath(inv.getPrimaryStorageInstallPath());
-                        ref.setDeviceId(vols.get(inv.getVolumeUuid()).getDeviceId());
-                        ref.setVolumeLastAttachDate(vols.get(inv.getVolumeUuid()).getLastAttachDate());
+                        if (inv == null) {
+                            boolean snapshotStructCreated = job.getVolumeSnapshotStruct() != null &&
+                                    job.getVolumeSnapshotStruct().getCurrent() != null;
+                            ref.setVolumeSnapshotUuid(snapshotStructCreated ?
+                                    job.getVolumeSnapshotStruct().getCurrent().getUuid() : job.getResourceUuid());
+                            ref.setVolumeSnapshotName(job.getName());
+                            ref.setVolumeSnapshotInstallPath(snapshotStructCreated ?
+                                    job.getVolumeSnapshotStruct().getCurrent().getPrimaryStorageInstallPath() : null);
+                            ref.setSnapshotDeleted(true);
+                        } else {
+                            ref.setVolumeSnapshotUuid(inv.getUuid());
+                            ref.setVolumeSnapshotName(inv.getName());
+                            ref.setVolumeSnapshotInstallPath(inv.getPrimaryStorageInstallPath());
+                        }
+                        ref.setDeviceId(vol.getDeviceId());
+                        ref.setVolumeLastAttachDate(vol.getLastAttachDate());
                         refs.add(ref);
                     }
 

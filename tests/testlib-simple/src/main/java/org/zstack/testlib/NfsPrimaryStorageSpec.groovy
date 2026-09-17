@@ -25,6 +25,7 @@ import org.zstack.utils.Utils
 import org.zstack.utils.gson.JSONObjectUtil
 import org.zstack.utils.logging.CLogger
 
+import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 /**
@@ -569,11 +570,17 @@ class NfsPrimaryStorageSpec extends PrimaryStorageSpec {
 
                 VFS dstVfs = vfs(cmd, spec)
                 List<VFSFile> fileList = new ArrayList<>()
-                dstVfs.walkFileSystem { f ->
-                    if (f.pathString().contains(cmd.dstVolumeFolderPath)
-                            || (cmd.dstImageCacheTemplateFolderPath != null &&
-                            f.pathString().contains(cmd.dstImageCacheTemplateFolderPath))) {
-                        fileList.add(f)
+                [cmd.dstVolumeFolderPath, cmd.dstImageCacheTemplateFolderPath].findAll { it != null }.each { String folderPath ->
+                    Path folder = dstVfs.getPath(folderPath)
+                    if (Files.exists(folder)) {
+                        def paths = Files.walk(folder)
+                        try {
+                            paths.filter { Files.isRegularFile(it) }.forEach {
+                                fileList.add(dstVfs.getFile(it, true))
+                            }
+                        } finally {
+                            paths.close()
+                        }
                     }
                 }
 

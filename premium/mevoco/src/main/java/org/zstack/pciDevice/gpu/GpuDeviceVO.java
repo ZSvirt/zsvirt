@@ -35,6 +35,31 @@ public class GpuDeviceVO extends PciDeviceVO {
         super(vo);
     }
 
+    public GpuDeviceVO update(PciDeviceVO vo) {
+        this.setName(vo.getName());
+        this.setDescription(vo.getDescription());
+        this.setHostUuid(vo.getHostUuid());
+        this.setParentUuid(vo.getParentUuid());
+        this.setVmInstanceUuid(vo.getVmInstanceUuid());
+        this.setPciSpecUuid(vo.getPciSpecUuid());
+        this.setType(vo.getType());
+        this.setState(vo.getState());
+        this.setStatus(vo.getStatus());
+        this.setVirtStatus(vo.getVirtStatus());
+        this.setPassThroughState(vo.getPassThroughState());
+        this.setChooser(vo.getChooser());
+        this.setVendorId(vo.getVendorId());
+        this.setVendor(vo.getVendor());
+        this.setDeviceId(vo.getDeviceId());
+        this.setSubvendorId(vo.getSubvendorId());
+        this.setSubdeviceId(vo.getSubdeviceId());
+        this.setPciDeviceAddress(vo.getPciDeviceAddress());
+        this.setIommuGroup(vo.getIommuGroup());
+        this.setMetaData(vo.getMetaData());
+        this.setDevice(vo.getDevice());
+        return this;
+    }
+
     public String getSerialNumber() {
         return serialNumber;
     }

@@ -373,6 +373,7 @@ class AllocatorDomainMigrateAllocateCase extends SubCase {
         haMsg.vmInstanceUuid = vm.uuid
         haMsg.judgerClassName = AlwaysHaStartVmJudger.class.name
         haMsg.softAvoidHostUuids = [host1.uuid]
+        haMsg.haReason = "for Test 203"
         bus.makeTargetServiceIdByResourceUuid(haMsg, VmInstanceConstant.SERVICE_ID, vm.uuid)
         HaStartVmInstanceReply haReply = bus.call(haMsg) as HaStartVmInstanceReply
         assert haReply.success

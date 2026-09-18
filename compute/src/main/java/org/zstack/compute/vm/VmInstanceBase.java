@@ -1007,7 +1007,7 @@ public class VmInstanceBase extends AbstractVmInstance {
                         if (!errList.getCauses().isEmpty()) {
                             reply.setError(errList.getCauses().get(0));
                             bus.reply(msg, reply);
-                            recorder.withFailReason(reply.getError().getDetails())
+                            recorder.withFailReason(reply.getError().getReadableDetails())
                                     .end(null);
                             chain.next();
                             return;
@@ -1039,7 +1039,7 @@ public class VmInstanceBase extends AbstractVmInstance {
                             public void fail(ErrorCode errorCode) {
                                 reply.setError(errorCode);
                                 bus.reply(msg, reply);
-                                recorder.withFailReason(errorCode.getDetails())
+                                recorder.withFailReason(errorCode.getReadableDetails())
                                         .end(null);
                                 chain.next();
                             }

@@ -32,7 +32,7 @@ class VirtualRouterOfferingCase extends SubCase {
 
     @Override
     void environment() {
-        env = env{
+        env = makeEnv {
             account {
                 name = "test1"
                 password = "password"

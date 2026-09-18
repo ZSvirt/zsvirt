@@ -35,7 +35,7 @@ class GetDhcpInfoForConnectedKvmHostCase extends SubCase {
 
     @Override
     void environment() {
-        env = env{
+        env = makeEnv {
             instanceOffering {
                 name = "instanceOffering"
                 memory = SizeUnit.GIGABYTE.toByte(8)

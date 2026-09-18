@@ -1,5 +1,4 @@
 import org.zstack.header.vm.APIStopVmInstanceMsg
-import org.zstack.testlib.DiskOfferingSpec
 import org.zstack.testlib.EnvSpec
 import org.zstack.testlib.Test
 import org.zstack.testlib.VmSpec
@@ -11,8 +10,6 @@ import org.zstack.utils.data.SizeUnit
  * 3
  */
 class Test3 extends Test {
-    boolean success
-    DiskOfferingSpec diskOfferingSpec
     EnvSpec envSpec
 
     @Override
@@ -34,7 +31,7 @@ class Test3 extends Test {
 
     @Override
     void environment() {
-        envSpec = env {
+        envSpec = makeEnv {
             account {
                 name = "xin"
                 password = "password"

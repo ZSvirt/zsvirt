@@ -4,8 +4,6 @@ import com.google.gson.Gson
 import org.springframework.http.HttpEntity
 import org.zstack.core.Platform
 import org.zstack.core.cloudbus.CloudBus
-import org.zstack.core.config.GlobalConfigVO
-import org.zstack.core.config.GlobalConfigVO_
 import org.zstack.core.db.Q
 import org.zstack.core.db.SQL
 import org.zstack.core.timeout.ApiTimeoutGlobalProperty
@@ -24,21 +22,16 @@ import org.zstack.header.message.CancelTaskResult
 import org.zstack.header.message.MessageReply
 import org.zstack.header.storage.backup.DownloadImageMsg
 import org.zstack.header.storage.backup.DownloadImageReply
-import org.zstack.header.storage.primary.APIAttachPrimaryStorageToClusterMsg
 import org.zstack.longjob.LongJobGlobalConfig
 import org.zstack.sdk.*
 import org.zstack.storage.backup.sftp.SftpBackupStorageCommands
 import org.zstack.storage.backup.sftp.SftpBackupStorageConstant
 import org.zstack.test.integration.ZStackTest
-import org.zstack.test.integration.storage.Env
 import org.zstack.testlib.EnvSpec
 import org.zstack.testlib.SubCase
-import org.zstack.utils.SizeUtils
 import org.zstack.utils.TimeUtils
 import org.zstack.utils.data.SizeUnit
 import org.zstack.utils.gson.JSONObjectUtil
-
-import javax.persistence.metamodel.SingularAttribute
 
 /**
  * Created by camile on 2/5/18.
@@ -61,7 +54,46 @@ class AddImageLongJobCase extends SubCase {
 
     @Override
     void environment() {
-        env = Env.localStorageOneVmEnv()
+        env = makeEnv {
+            sftpBackupStorage {
+                name = "sftp"
+                url = "/sftp"
+                username = "root"
+                password = "password"
+                hostname = "localhost"
+
+                image {
+                    name = "image1"
+                    url  = "http://zstack.org/download/test.qcow2"
+                }
+            }
+
+            zone {
+                name = "zone"
+                description = "test"
+
+                cluster {
+                    name = "cluster"
+                    hypervisorType = "KVM"
+
+                    kvm {
+                        name = "kvm"
+                        managementIp = "localhost"
+                        username = "root"
+                        password = "password"
+                    }
+
+                    attachPrimaryStorage("local")
+                }
+
+                localPrimaryStorage {
+                    name = "local"
+                    url = "/local_ps"
+                }
+
+                attachBackupStorage("sftp")
+            }
+        }
     }
 
     @Override

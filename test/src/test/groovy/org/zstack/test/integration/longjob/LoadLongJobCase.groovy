@@ -10,7 +10,6 @@ import org.zstack.header.longjob.LongJobVO_
 import org.zstack.longjob.LongJobManager
 import org.zstack.sdk.*
 import org.zstack.test.integration.ZStackTest
-import org.zstack.test.integration.storage.Env
 import org.zstack.testlib.EnvSpec
 import org.zstack.testlib.SubCase
 /**
@@ -36,7 +35,7 @@ class LoadLongJobCase extends SubCase {
 
     @Override
     void environment() {
-        env = Env.localStorageOneVmEnv()
+        env = LongJobTest.localStorageOneVmEnv()
     }
 
     @Override

@@ -17,7 +17,6 @@ import org.zstack.sdk.VmInstanceInventory
 import org.zstack.storage.backup.sftp.SftpBackupStorageConstant
 import org.zstack.storage.primary.local.LocalStorageKvmBackend
 import org.zstack.test.integration.ZStackTest
-import org.zstack.test.integration.storage.Env
 import org.zstack.testlib.EnvSpec
 import org.zstack.testlib.SubCase
 
@@ -43,7 +42,7 @@ class CreateRootVolumeTemplateLongJobCase extends SubCase {
 
     @Override
     void environment() {
-        env = Env.localStorageOneVmEnv()
+        env = LongJobTest.localStorageOneVmEnv()
     }
 
     @Override

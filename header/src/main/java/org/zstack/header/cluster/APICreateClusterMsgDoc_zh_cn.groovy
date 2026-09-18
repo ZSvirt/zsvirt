@@ -28,7 +28,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "name"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "description"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "hypervisorType"
@@ -55,7 +55,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "zsv 0.6"
+					since "zsv_0.6"
 					values ("KVM","Simulator","baremetal","baremetal2","xdragon")
 				}
 				column {
@@ -65,7 +65,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 					values ("zstack","baremetal","baremetal2")
 				}
 				column {
@@ -75,7 +75,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "systemTags"
@@ -84,7 +84,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "userTags"
@@ -93,7 +93,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "architecture"
@@ -102,7 +102,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 3.10"
+					since "zsv_3.10"
 					values ("x86_64","aarch64","mips64el","loongarch64")
 				}
 				column {
@@ -112,7 +112,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 3.4.0"
+					since "zsv_3.4.0"
 				}
 			}
 		}

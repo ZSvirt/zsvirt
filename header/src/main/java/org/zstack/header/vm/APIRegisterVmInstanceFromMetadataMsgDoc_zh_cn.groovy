@@ -28,7 +28,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "zsv 5.0.0"
+					since "zsv_5.0.0"
 				}
 				column {
 					name "primaryStorageUuid"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "zsv 5.0.0"
+					since "zsv_5.0.0"
 				}
 				column {
 					name "zoneUuid"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "zsv 5.0.0"
+					since "zsv_5.0.0"
 				}
 				column {
 					name "clusterUuid"
@@ -55,7 +55,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "zsv 5.0.0"
+					since "zsv_5.0.0"
 				}
 				column {
 					name "hostUuid"
@@ -64,7 +64,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 5.0.0"
+					since "zsv_5.0.0"
 				}
 				column {
 					name "name"
@@ -73,7 +73,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 5.0.0"
+					since "zsv_5.0.0"
 				}
 				column {
 					name "regenerateUuid"
@@ -82,7 +82,7 @@ doc {
 					location "body"
 					type "boolean"
 					optional true
-					since "1.0.1, zsv_5.1.0"
+					since "1.0.0, zsv_5.1.0"
 				}
 				column {
 					name "tagUuids"
@@ -91,7 +91,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 5.0.0"
+					since "zsv_5.0.0"
 				}
 				column {
 					name "systemTags"
@@ -100,7 +100,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 5.0.0"
+					since "zsv_5.0.0"
 				}
 				column {
 					name "userTags"
@@ -109,7 +109,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 5.0.0"
+					since "zsv_5.0.0"
 				}
 			}
 		}

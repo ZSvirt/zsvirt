@@ -28,7 +28,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "3.17.21"
+					since "zsv_3.17.21"
 					values ("v2c","v3")
 				}
 				column {
@@ -38,7 +38,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.17.21"
+					since "zsv_3.17.21"
 				}
 				column {
 					name "userName"
@@ -47,7 +47,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.17.21"
+					since "zsv_3.17.21"
 				}
 				column {
 					name "authAlgorithm"
@@ -56,7 +56,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.17.21"
+					since "zsv_3.17.21"
 					values ("MD5","SHA","SHA224","SHA256","SHA384","SHA512")
 				}
 				column {
@@ -66,7 +66,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.17.21"
+					since "zsv_3.17.21"
 				}
 				column {
 					name "privacyAlgorithm"
@@ -75,7 +75,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.17.21"
+					since "zsv_3.17.21"
 					values ("DES","AES128","AES192","AES256","3DES")
 				}
 				column {
@@ -85,7 +85,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.17.21"
+					since "zsv_3.17.21"
 				}
 				column {
 					name "port"
@@ -94,7 +94,7 @@ doc {
 					location "body"
 					type "int"
 					optional false
-					since "3.17.21"
+					since "zsv_3.17.21"
 				}
 				column {
 					name "resourceUuid"
@@ -103,7 +103,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.17.21"
+					since "zsv_3.17.21"
 				}
 				column {
 					name "tagUuids"
@@ -112,7 +112,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.17.21"
+					since "zsv_3.17.21"
 				}
 				column {
 					name "systemTags"
@@ -121,7 +121,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.17.21"
+					since "zsv_3.17.21"
 				}
 				column {
 					name "userTags"
@@ -130,7 +130,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.17.21"
+					since "zsv_3.17.21"
 				}
 			}
 		}

@@ -28,7 +28,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "2.1"
+					since "zsv_2.1"
 				}
 				column {
 					name "type"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "2.1"
+					since "zsv_2.1"
 					values ("UserStatic","UserBlackHole")
 				}
 				column {
@@ -47,7 +47,7 @@ doc {
 					location "url"
 					type "String"
 					optional false
-					since "2.1"
+					since "zsv_2.1"
 				}
 				column {
 					name "destination"
@@ -56,7 +56,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "2.1"
+					since "zsv_2.1"
 				}
 				column {
 					name "target"
@@ -65,7 +65,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "2.1"
+					since "zsv_2.1"
 				}
 				column {
 					name "distance"
@@ -74,7 +74,7 @@ doc {
 					location "body"
 					type "Integer"
 					optional true
-					since "2.1"
+					since "zsv_2.1"
 				}
 				column {
 					name "resourceUuid"
@@ -83,7 +83,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "2.1"
+					since "zsv_2.1"
 				}
 				column {
 					name "systemTags"
@@ -92,7 +92,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "2.1"
+					since "zsv_2.1"
 				}
 				column {
 					name "userTags"
@@ -101,7 +101,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "2.1"
+					since "zsv_2.1"
 				}
 				column {
 					name "tagUuids"
@@ -110,7 +110,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.4.0"
+					since "zsv_3.4.0"
 				}
 			}
 		}

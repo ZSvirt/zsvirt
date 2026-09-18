@@ -12,21 +12,21 @@ doc {
 		path "org.zstack.crypto.keyprovider.kms.api.APIQueryKmsReply.inventories"
 		desc "KMS密钥提供程序清单"
 		type "List"
-		since "5.0.0"
+		since "zsv_5.0.0"
 		clz KmsInventory.class
 	}
 	field {
 		name "success"
 		desc ""
 		type "boolean"
-		since "5.0.0"
+		since "zsv_5.0.0"
 	}
 	ref {
 		name "error"
 		path "org.zstack.crypto.keyprovider.kms.api.APIQueryKmsReply.error"
 		desc "错误码，若不为null，则表示操作失败, 操作成功时该字段为null"
 		type "ErrorCode"
-		since "5.0.0"
+		since "zsv_5.0.0"
 		clz ErrorCode.class
 	}
 }

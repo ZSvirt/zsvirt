@@ -28,7 +28,7 @@ doc {
 					location "query"
 					type "List"
 					optional false
-					since "zsv 3.16.0"
+					since "zsv_3.16.0"
 				}
 				column {
 					name "systemTags"
@@ -37,7 +37,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "zsv 3.16.0"
+					since "zsv_3.16.0"
 				}
 				column {
 					name "userTags"
@@ -46,7 +46,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "zsv 3.16.0"
+					since "zsv_3.16.0"
 				}
 				column {
 					name "syncSignatures"
@@ -55,7 +55,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "zsv 3.16.0"
+					since "zsv_3.16.0"
 				}
 			}
 		}

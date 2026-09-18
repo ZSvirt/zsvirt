@@ -28,7 +28,7 @@ doc {
 					location "url"
 					type "String"
 					optional false
-					since "1.0.1, zsv 5.2.0"
+					since "1.0.1, zsv_5.2.0"
 				}
 				column {
 					name "name"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "1.0.1, zsv 5.2.0"
+					since "1.0.1, zsv_5.2.0"
 				}
 				column {
 					name "description"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "1.0.1, zsv 5.2.0"
+					since "1.0.1, zsv_5.2.0"
 				}
 				column {
 					name "state"
@@ -55,7 +55,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "1.0.1, zsv 5.2.0"
+					since "1.0.1, zsv_5.2.0"
 					values ("Enabled","Disabled")
 				}
 				column {
@@ -65,7 +65,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "1.0.1, zsv 5.2.0"
+					since "1.0.1, zsv_5.2.0"
 				}
 				column {
 					name "scenes"
@@ -74,7 +74,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "1.0.1, zsv 5.2.0"
+					since "1.0.1, zsv_5.2.0"
 					values ("NewCreate","Start","Migrate","Ha","HostMaintenance","Drs")
 				}
 				column {
@@ -84,7 +84,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "1.0.1, zsv 5.2.0"
+					since "1.0.1, zsv_5.2.0"
 				}
 				column {
 					name "userTags"
@@ -93,7 +93,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "1.0.1, zsv 5.2.0"
+					since "1.0.1, zsv_5.2.0"
 				}
 			}
 		}

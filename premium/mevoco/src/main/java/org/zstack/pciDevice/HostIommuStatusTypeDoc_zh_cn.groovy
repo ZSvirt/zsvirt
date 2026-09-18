@@ -10,6 +10,6 @@ doc {
 		name "物理机IOMMU就绪状态类型"
 		desc "物理机的IOMMU就绪状态，有Active和Inactive两种"
 		type "String"
-		since "2.1"
+		since "zsv_2.1"
 	}
 }

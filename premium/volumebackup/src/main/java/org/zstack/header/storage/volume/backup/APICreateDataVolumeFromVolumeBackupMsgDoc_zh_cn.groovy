@@ -28,7 +28,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "3.18.0"
+					since "zsv_3.18.0"
 				}
 				column {
 					name "vmUuid"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "3.18.0"
+					since "zsv_3.18.0"
 				}
 				column {
 					name "backupUuid"
@@ -46,7 +46,7 @@ doc {
 					location "url"
 					type "String"
 					optional false
-					since "3.18.0"
+					since "zsv_3.18.0"
 				}
 				column {
 					name "backupStorageUuid"
@@ -55,7 +55,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.18.0"
+					since "zsv_3.18.0"
 				}
 				column {
 					name "primaryStorageUuid"
@@ -64,7 +64,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.18.0"
+					since "zsv_3.18.0"
 				}
 				column {
 					name "description"
@@ -73,7 +73,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.18.0"
+					since "zsv_3.18.0"
 				}
 				column {
 					name "resourceUuid"
@@ -82,7 +82,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.18.0"
+					since "zsv_3.18.0"
 				}
 				column {
 					name "tagUuids"
@@ -91,7 +91,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.18.0"
+					since "zsv_3.18.0"
 				}
 				column {
 					name "systemTags"
@@ -100,7 +100,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.18.0"
+					since "zsv_3.18.0"
 				}
 				column {
 					name "userTags"
@@ -109,7 +109,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.18.0"
+					since "zsv_3.18.0"
 				}
 			}
 		}

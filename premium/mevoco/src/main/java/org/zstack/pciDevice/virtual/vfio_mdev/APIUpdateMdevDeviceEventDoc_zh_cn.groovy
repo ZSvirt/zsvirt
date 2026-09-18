@@ -10,14 +10,14 @@ doc {
 		name "success"
 		desc ""
 		type "boolean"
-		since "0.6"
+		since "zsv_0.6"
 	}
 	ref {
 		name "error"
 		path "org.zstack.pciDevice.virtual.vfio_mdev.APIUpdateMdevDeviceEvent.error"
 		desc "错误码，若不为null，则表示操作失败, 操作成功时该字段为null",false
 		type "ErrorCode"
-		since "3.5.0"
+		since "zsv_3.5.0"
 		clz ErrorCode.class
 	}
 	ref {
@@ -25,7 +25,7 @@ doc {
 		path "org.zstack.pciDevice.virtual.vfio_mdev.APIUpdateMdevDeviceEvent.inventory"
 		desc "MDEV设备清单"
 		type "MdevDeviceInventory"
-		since "3.5.0"
+		since "zsv_3.5.0"
 		clz MdevDeviceInventory.class
 	}
 }

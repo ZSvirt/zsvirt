@@ -28,7 +28,7 @@ doc {
 					location "query"
 					type "String"
 					optional false
-					since "zsv 3.10.0"
+					since "zsv_3.10.0"
 				}
 				column {
 					name "resourceTypes"
@@ -37,7 +37,7 @@ doc {
 					location "query"
 					type "List"
 					optional false
-					since "zsv 3.10.0"
+					since "zsv_3.10.0"
 					values ("VolumeVO")
 				}
 				column {
@@ -47,7 +47,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "zsv 3.10.0"
+					since "zsv_3.10.0"
 				}
 				column {
 					name "userTags"
@@ -56,7 +56,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "zsv 3.10.0"
+					since "zsv_3.10.0"
 				}
 			}
 		}

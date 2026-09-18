@@ -10,12 +10,12 @@ doc {
 		name "pciDeviceUuid"
 		desc ""
 		type "String"
-		since "2.1"
+		since "zsv_2.1"
 	}
 	field {
 		name "pciDeviceOfferingUuid"
 		desc ""
 		type "String"
-		since "2.1"
+		since "zsv_2.1"
 	}
 }

@@ -28,7 +28,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "3.15.11"
+					since "zsv_3.15.11"
 				}
 				column {
 					name "metadata"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "3.15.11"
+					since "zsv_3.15.11"
 				}
 				column {
 					name "url"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "3.15.11"
+					since "zsv_3.15.11"
 				}
 				column {
 					name "name"
@@ -55,7 +55,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "3.15.11"
+					since "zsv_3.15.11"
 				}
 				column {
 					name "description"
@@ -64,7 +64,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.15.11"
+					since "zsv_3.15.11"
 				}
 				column {
 					name "type"
@@ -73,7 +73,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.15.11"
+					since "zsv_3.15.11"
 				}
 				column {
 					name "zoneUuid"
@@ -82,7 +82,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "3.15.11"
+					since "zsv_3.15.11"
 				}
 				column {
 					name "resourceUuid"
@@ -91,7 +91,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.15.11"
+					since "zsv_3.15.11"
 				}
 				column {
 					name "tagUuids"
@@ -100,7 +100,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.15.11"
+					since "zsv_3.15.11"
 				}
 				column {
 					name "systemTags"
@@ -109,7 +109,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.15.11"
+					since "zsv_3.15.11"
 				}
 				column {
 					name "userTags"
@@ -118,7 +118,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.15.11"
+					since "zsv_3.15.11"
 				}
 				column {
 					name "encryptGatewayIp"
@@ -127,7 +127,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.15.11"
+					since "zsv_3.15.11"
 				}
 				column {
 					name "encryptGatewayPort"
@@ -136,7 +136,7 @@ doc {
 					location "body"
 					type "Integer"
 					optional true
-					since "3.15.11"
+					since "zsv_3.15.11"
 				}
 				column {
 					name "encryptGatewayUsername"
@@ -145,7 +145,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.15.11"
+					since "zsv_3.15.11"
 				}
 				column {
 					name "encryptGatewayPassword"
@@ -154,7 +154,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.15.11"
+					since "zsv_3.15.11"
 				}
 			}
 		}

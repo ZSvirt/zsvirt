@@ -28,7 +28,7 @@ doc {
 					location "query"
 					type "String"
 					optional false
-					since "4.10.0"
+					since "zsv_4.10.0"
 				}
 				column {
 					name "password"
@@ -37,7 +37,7 @@ doc {
 					location "query"
 					type "String"
 					optional false
-					since "4.10.0"
+					since "zsv_4.10.0"
 				}
 				column {
 					name "captchaUuid"
@@ -46,7 +46,7 @@ doc {
 					location "query"
 					type "String"
 					optional true
-					since "4.10.0"
+					since "zsv_4.10.0"
 				}
 				column {
 					name "verifyCode"
@@ -55,7 +55,7 @@ doc {
 					location "query"
 					type "String"
 					optional true
-					since "4.10.0"
+					since "zsv_4.10.0"
 				}
 				column {
 					name "systemTags"
@@ -64,7 +64,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "4.10.0"
+					since "zsv_4.10.0"
 				}
 				column {
 					name "userTags"
@@ -73,7 +73,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "4.10.0"
+					since "zsv_4.10.0"
 				}
 				column {
 					name "type"
@@ -82,7 +82,7 @@ doc {
 					location "query"
 					type "String"
 					optional false
-					since "5.0.0"
+					since "zsv_5.0.0"
 					values ("account","ldap")
 				}
 			}

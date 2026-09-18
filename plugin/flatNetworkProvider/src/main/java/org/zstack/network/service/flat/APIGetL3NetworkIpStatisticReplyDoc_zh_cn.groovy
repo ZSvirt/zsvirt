@@ -14,7 +14,7 @@ doc {
         path "org.zstack.network.service.flat.APIGetL3NetworkIpStatisticReply.error"
         desc "错误码，若不为null，则表示操作失败, 操作成功时该字段为null",false
         type "ErrorCode"
-        since "3.7.0"
+        since "zsv_3.7.0"
         clz ErrorCode.class
     }
     ref {
@@ -22,19 +22,19 @@ doc {
         path "org.zstack.network.service.flat.APIGetL3NetworkIpStatisticReply.ipStatistics"
         desc "IP使用情况统计结果列表"
         type "List"
-        since "3.7.0"
+        since "zsv_3.7.0"
         clz IpStatisticData.class
     }
     field {
         name "total"
         desc "IP统计结果总数"
         type "Long"
-        since "3.7.0"
+        since "zsv_3.7.0"
     }
     field {
         name "success"
         desc "成功"
         type "boolean"
-        since "3.7.0"
+        since "zsv_3.7.0"
     }
 }

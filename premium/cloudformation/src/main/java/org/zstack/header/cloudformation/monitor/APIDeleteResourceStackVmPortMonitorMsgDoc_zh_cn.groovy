@@ -28,7 +28,7 @@ doc {
 					location "query"
 					type "String"
 					optional true
-					since "3.9.0"
+					since "zsv_3.9.0"
 				}
 				column {
 					name "vmInstanceUuid"
@@ -37,7 +37,7 @@ doc {
 					location "query"
 					type "String"
 					optional false
-					since "3.9.0"
+					since "zsv_3.9.0"
 				}
 				column {
 					name "port"
@@ -46,7 +46,7 @@ doc {
 					location "query"
 					type "Integer"
 					optional true
-					since "3.9.0"
+					since "zsv_3.9.0"
 				}
 				column {
 					name "deleteMode"
@@ -55,7 +55,7 @@ doc {
 					location "query"
 					type "String"
 					optional true
-					since "3.9.0"
+					since "zsv_3.9.0"
 				}
 				column {
 					name "systemTags"
@@ -64,7 +64,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "3.9.0"
+					since "zsv_3.9.0"
 				}
 				column {
 					name "userTags"
@@ -73,7 +73,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "3.9.0"
+					since "zsv_3.9.0"
 				}
 			}
 		}

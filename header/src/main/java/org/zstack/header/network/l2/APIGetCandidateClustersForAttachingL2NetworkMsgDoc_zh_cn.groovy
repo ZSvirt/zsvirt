@@ -28,7 +28,7 @@ doc {
 					location "url"
 					type "String"
 					optional false
-					since "zsv 3.10.0"
+					since "zsv_3.10.0"
 				}
 				column {
 					name "clusterTypes"
@@ -37,7 +37,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "zsv 3.10.0"
+					since "zsv_3.10.0"
 				}
 				column {
 					name "limit"
@@ -46,7 +46,7 @@ doc {
 					location "query"
 					type "Integer"
 					optional true
-					since "zsv 3.10.0"
+					since "zsv_3.10.0"
 				}
 				column {
 					name "start"
@@ -55,7 +55,7 @@ doc {
 					location "query"
 					type "Integer"
 					optional true
-					since "zsv 3.10.0"
+					since "zsv_3.10.0"
 				}
 				column {
 					name "systemTags"
@@ -64,7 +64,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "zsv 3.10.0"
+					since "zsv_3.10.0"
 				}
 				column {
 					name "userTags"
@@ -73,7 +73,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "zsv 3.10.0"
+					since "zsv_3.10.0"
 				}
 			}
 		}

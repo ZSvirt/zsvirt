@@ -28,7 +28,7 @@ doc {
 					location "url"
 					type "String"
 					optional false
-					since "3.17.21"
+					since "zsv_3.17.21"
 				}
 				column {
 					name "ingressPolicy"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.17.21"
+					since "zsv_3.17.21"
 					values ("DENY","ALLOW")
 				}
 				column {
@@ -47,7 +47,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.17.21"
+					since "zsv_3.17.21"
 					values ("DENY","ALLOW")
 				}
 				column {
@@ -57,7 +57,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.17.21"
+					since "zsv_3.17.21"
 				}
 				column {
 					name "userTags"
@@ -66,7 +66,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.17.21"
+					since "zsv_3.17.21"
 				}
 			}
 		}

@@ -28,7 +28,7 @@ doc {
 					location "url"
 					type "String"
 					optional true
-					since "2.3"
+					since "zsv_2.3"
 				}
 				column {
 					name "systemTags"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "2.3"
+					since "zsv_2.3"
 				}
 				column {
 					name "userTags"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "2.3"
+					since "zsv_2.3"
 				}
 				column {
 					name "smtpServer"
@@ -55,7 +55,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "4.10.0"
+					since "zsv_4.10.0"
 				}
 				column {
 					name "smtpPort"
@@ -64,7 +64,7 @@ doc {
 					location "body"
 					type "Integer"
 					optional true
-					since "4.10.0"
+					since "zsv_4.10.0"
 				}
 				column {
 					name "username"
@@ -73,7 +73,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "4.10.0"
+					since "zsv_4.10.0"
 				}
 				column {
 					name "password"
@@ -82,7 +82,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "4.10.0"
+					since "zsv_4.10.0"
 				}
 			}
 		}

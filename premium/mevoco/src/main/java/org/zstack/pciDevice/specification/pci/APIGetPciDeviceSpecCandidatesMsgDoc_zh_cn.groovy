@@ -28,7 +28,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "3.5.0"
+					since "zsv_3.5.0"
 				}
 				column {
 					name "hostUuid"
@@ -37,7 +37,7 @@ doc {
 					location "query"
 					type "String"
 					optional true
-					since "3.5.0"
+					since "zsv_3.5.0"
 				}
 				column {
 					name "vmInstanceUuid"
@@ -46,7 +46,7 @@ doc {
 					location "query"
 					type "String"
 					optional true
-					since "3.5.0"
+					since "zsv_3.5.0"
 				}
 				column {
 					name "types"
@@ -55,7 +55,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "3.5.0"
+					since "zsv_3.5.0"
 				}
 				column {
 					name "systemTags"
@@ -64,7 +64,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "3.5.0"
+					since "zsv_3.5.0"
 				}
 				column {
 					name "userTags"
@@ -73,7 +73,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "3.5.0"
+					since "zsv_3.5.0"
 				}
 				column {
 					name "vmInstanceUuids"
@@ -82,7 +82,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 			}
 		}

@@ -9,12 +9,12 @@ doc {
 		name "name"
 		desc "资源名称"
 		type "String"
-		since "zsv 0.6"
+		since "zsv_0.6"
 	}
 	field {
 		name "ordinal"
 		desc "序号"
 		type "int"
-		since "zsv 0.6"
+		since "zsv_0.6"
 	}
 }

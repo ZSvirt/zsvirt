@@ -28,7 +28,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "zsv 4.10.6"
+					since "zsv_4.10.6"
 				}
 				column {
 					name "identity"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 4.10.6"
+					since "zsv_4.10.6"
 				}
 				column {
 					name "config"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 4.10.6"
+					since "zsv_4.10.6"
 				}
 				column {
 					name "systemTags"
@@ -55,7 +55,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 4.10.6"
+					since "zsv_4.10.6"
 				}
 				column {
 					name "userTags"
@@ -64,7 +64,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 4.10.6"
+					since "zsv_4.10.6"
 				}
 			}
 		}

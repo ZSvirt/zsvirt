@@ -10,12 +10,12 @@ doc {
 		name "uuid"
 		desc "管理节点的 UUID，唯一标示该资源"
 		type "String"
-		since "4.10.7"
+		since "zsv_4.10.7"
 	}
 	field {
 		name "compute"
 		desc "是否是计算节点"
 		type "boolean"
-		since "4.10.7"
+		since "zsv_4.10.7"
 	}
 }

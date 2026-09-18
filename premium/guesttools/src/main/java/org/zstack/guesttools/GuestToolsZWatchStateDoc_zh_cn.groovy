@@ -10,18 +10,18 @@ doc {
 		name "NotInstalled"
 		desc "未安装"
 		type "GuestToolsZWatchState"
-		since "3.16"
+		since "zsv_3.16"
 	}
 	field {
 		name "Running"
 		desc "运行中"
 		type "GuestToolsZWatchState"
-		since "3.16"
+		since "zsv_3.16"
 	}
 	field {
 		name "NotRunning"
 		desc "未运行"
 		type "GuestToolsZWatchState"
-		since "3.16"
+		since "zsv_3.16"
 	}
 }

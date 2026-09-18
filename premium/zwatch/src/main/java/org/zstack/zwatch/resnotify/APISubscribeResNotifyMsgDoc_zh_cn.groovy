@@ -28,7 +28,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "1.0.1, zsv_5.1.0"
+					since "1.0.0, zsv_5.1.0"
 				}
 				column {
 					name "description"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "1.0.1, zsv_5.1.0"
+					since "1.0.0, zsv_5.1.0"
 				}
 				column {
 					name "resourceTypes"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "1.0.1, zsv_5.1.0"
+					since "1.0.0, zsv_5.1.0"
 				}
 				column {
 					name "eventTypes"
@@ -55,7 +55,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "1.0.1, zsv_5.1.0"
+					since "1.0.0, zsv_5.1.0"
 				}
 				column {
 					name "type"
@@ -64,7 +64,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "1.0.1, zsv_5.1.0"
+					since "1.0.0, zsv_5.1.0"
 					values ("WEBHOOK")
 				}
 				column {
@@ -74,7 +74,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "1.0.1, zsv_5.1.0"
+					since "1.0.0, zsv_5.1.0"
 				}
 				column {
 					name "secret"
@@ -83,7 +83,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "1.0.1, zsv_5.1.0"
+					since "1.0.0, zsv_5.1.0"
 				}
 				column {
 					name "customHeaders"
@@ -92,7 +92,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "1.0.1, zsv_5.1.0"
+					since "1.0.0, zsv_5.1.0"
 				}
 				column {
 					name "resourceUuid"
@@ -101,7 +101,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "1.0.1, zsv_5.1.0"
+					since "1.0.0, zsv_5.1.0"
 				}
 				column {
 					name "tagUuids"
@@ -110,7 +110,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "1.0.1, zsv_5.1.0"
+					since "1.0.0, zsv_5.1.0"
 				}
 				column {
 					name "systemTags"
@@ -119,7 +119,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "1.0.1, zsv_5.1.0"
+					since "1.0.0, zsv_5.1.0"
 				}
 				column {
 					name "userTags"
@@ -128,7 +128,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "1.0.1, zsv_5.1.0"
+					since "1.0.0, zsv_5.1.0"
 				}
 			}
 		}

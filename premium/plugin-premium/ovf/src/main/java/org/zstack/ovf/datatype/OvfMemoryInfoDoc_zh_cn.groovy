@@ -10,12 +10,12 @@ doc {
 		name "instanceId"
 		desc "硬件ID"
 		type "String"
-		since "3.14.6"
+		since "zsv_3.14.6"
 	}
 	field {
 		name "quantity"
 		desc "内存容量，单位Byte"
 		type "Long"
-		since "3.14.6"
+		since "zsv_3.14.6"
 	}
 }

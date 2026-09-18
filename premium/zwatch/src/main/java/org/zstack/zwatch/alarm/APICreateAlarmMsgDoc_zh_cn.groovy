@@ -28,7 +28,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "2.3"
+					since "zsv_2.3"
 				}
 				column {
 					name "description"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "2.3"
+					since "zsv_2.3"
 				}
 				column {
 					name "comparisonOperator"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "2.3"
+					since "zsv_2.3"
 					values ("GreaterThanOrEqualTo","GreaterThan","LessThan","LessThanOrEqualTo")
 				}
 				column {
@@ -56,7 +56,7 @@ doc {
 					location "body"
 					type "Integer"
 					optional true
-					since "2.3"
+					since "zsv_2.3"
 				}
 				column {
 					name "namespace"
@@ -65,7 +65,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "2.3"
+					since "zsv_2.3"
 				}
 				column {
 					name "metricName"
@@ -74,7 +74,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "2.3"
+					since "zsv_2.3"
 				}
 				column {
 					name "threshold"
@@ -83,7 +83,7 @@ doc {
 					location "body"
 					type "Double"
 					optional false
-					since "2.3"
+					since "zsv_2.3"
 				}
 				column {
 					name "repeatInterval"
@@ -92,7 +92,7 @@ doc {
 					location "body"
 					type "Integer"
 					optional true
-					since "2.3"
+					since "zsv_2.3"
 				}
 				column {
 					name "labels"
@@ -101,7 +101,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "2.3"
+					since "zsv_2.3"
 				}
 				column {
 					name "actions"
@@ -110,7 +110,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "2.3"
+					since "zsv_2.3"
 				}
 				column {
 					name "resourceUuid"
@@ -119,7 +119,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "2.3"
+					since "zsv_2.3"
 				}
 				column {
 					name "systemTags"
@@ -128,7 +128,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "2.3"
+					since "zsv_2.3"
 				}
 				column {
 					name "userTags"
@@ -137,7 +137,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "2.3"
+					since "zsv_2.3"
 				}
 				column {
 					name "repeatCount"
@@ -146,7 +146,7 @@ doc {
 					location "body"
 					type "Integer"
 					optional true
-					since "3.2"
+					since "zsv_3.2"
 				}
 				column {
 					name "type"
@@ -155,7 +155,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.1"
+					since "zsv_3.1"
 				}
 				column {
 					name "tagUuids"
@@ -164,7 +164,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.4.0"
+					since "zsv_3.4.0"
 				}
 				column {
 					name "emergencyLevel"
@@ -173,7 +173,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.8"
+					since "zsv_3.8"
 					values ("Emergent","Important","Normal")
 				}
 				column {
@@ -183,7 +183,7 @@ doc {
 					location "body"
 					type "Boolean"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 			}
 		}

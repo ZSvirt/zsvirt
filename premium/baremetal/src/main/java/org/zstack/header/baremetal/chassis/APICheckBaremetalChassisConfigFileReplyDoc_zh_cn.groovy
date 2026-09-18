@@ -12,13 +12,13 @@ doc {
 		path "org.zstack.header.baremetal.chassis.APICheckBaremetalChassisConfigFileReply.error"
 		desc "错误码，若不为null，则表示操作失败, 操作成功时该字段为null",false
 		type "ErrorCode"
-		since "3.1.1"
+		since "zsv_3.1.1"
 		clz ErrorCode.class
 	}
 	field {
 		name "success"
 		desc "是否成功"
 		type "boolean"
-		since "3.1.1"
+		since "zsv_3.1.1"
 	}
 }

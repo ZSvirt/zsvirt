@@ -10,14 +10,14 @@ doc {
 		name "success"
 		desc ""
 		type "boolean"
-		since "0.6"
+		since "zsv_0.6"
 	}
 	ref {
 		name "error"
 		path "APIUpdateBaremetalChassisEvent.error"
 		desc "错误码，若不为null，则表示操作失败, 操作成功时该字段为null",false
 		type "ErrorCode"
-		since "2.6.0"
+		since "zsv_2.6.0"
 		clz ErrorCode.class
 	}
 	ref {
@@ -25,7 +25,7 @@ doc {
 		path "APIUpdateBaremetalChassisEvent.inventory"
 		desc "裸机设备清单"
 		type "BaremetalChassisInventory"
-		since "2.6.0"
+		since "zsv_2.6.0"
 		clz BaremetalChassisInventory.class
 	}
 }

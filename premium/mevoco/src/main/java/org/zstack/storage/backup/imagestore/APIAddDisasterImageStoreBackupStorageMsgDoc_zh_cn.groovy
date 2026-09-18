@@ -28,7 +28,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "endPoint"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "hostname"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "username"
@@ -55,7 +55,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "password"
@@ -64,7 +64,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "sshPort"
@@ -73,7 +73,7 @@ doc {
 					location "body"
 					type "int"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "url"
@@ -82,7 +82,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "name"
@@ -91,7 +91,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "description"
@@ -100,7 +100,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "type"
@@ -109,7 +109,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "importImages"
@@ -118,7 +118,7 @@ doc {
 					location "body"
 					type "boolean"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "resourceUuid"
@@ -127,7 +127,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "tagUuids"
@@ -136,7 +136,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.4.0"
+					since "zsv_3.4.0"
 				}
 				column {
 					name "systemTags"
@@ -145,7 +145,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "userTags"
@@ -154,7 +154,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 			}
 		}

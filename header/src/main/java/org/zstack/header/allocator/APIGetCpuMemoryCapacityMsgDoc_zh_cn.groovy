@@ -28,7 +28,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "clusterUuids"
@@ -37,7 +37,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "hostUuids"
@@ -46,7 +46,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "all"
@@ -55,7 +55,7 @@ doc {
 					location "query"
 					type "boolean"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "systemTags"
@@ -64,7 +64,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "userTags"
@@ -73,7 +73,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "hypervisorType"
@@ -82,7 +82,7 @@ doc {
 					location "query"
 					type "String"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 					values ("KVM","ESX")
 				}
 			}

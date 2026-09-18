@@ -28,7 +28,7 @@ doc {
 					location "query"
 					type "String"
 					optional true
-					since "3.15"
+					since "zsv_3.15"
 				}
 				column {
 					name "softwareName"
@@ -37,7 +37,7 @@ doc {
 					location "query"
 					type "String"
 					optional false
-					since "3.15"
+					since "zsv_3.15"
 					values ("IPsec")
 				}
 				column {
@@ -47,7 +47,7 @@ doc {
 					location "query"
 					type "Boolean"
 					optional true
-					since "3.15"
+					since "zsv_3.15"
 				}
 				column {
 					name "systemTags"
@@ -56,7 +56,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "3.15"
+					since "zsv_3.15"
 				}
 				column {
 					name "userTags"
@@ -65,7 +65,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "3.15"
+					since "zsv_3.15"
 				}
 			}
 		}

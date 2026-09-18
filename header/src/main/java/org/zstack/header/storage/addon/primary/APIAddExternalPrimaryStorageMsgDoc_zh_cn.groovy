@@ -28,7 +28,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "zsv 4.10.6"
+					since "zsv_4.10.6"
 				}
 				column {
 					name "defaultOutputProtocol"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "zsv 4.10.6"
+					since "zsv_4.10.6"
 					values ("Vhost","Scsi","Nvme","CBD","file")
 				}
 				column {
@@ -47,7 +47,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 4.10.6"
+					since "zsv_4.10.6"
 				}
 				column {
 					name "url"
@@ -56,7 +56,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "zsv 4.10.6"
+					since "zsv_4.10.6"
 				}
 				column {
 					name "name"
@@ -65,7 +65,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "zsv 4.10.6"
+					since "zsv_4.10.6"
 				}
 				column {
 					name "description"
@@ -74,7 +74,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 4.10.6"
+					since "zsv_4.10.6"
 				}
 				column {
 					name "type"
@@ -83,7 +83,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 4.10.6"
+					since "zsv_4.10.6"
 				}
 				column {
 					name "zoneUuid"
@@ -92,7 +92,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "zsv 4.10.6"
+					since "zsv_4.10.6"
 				}
 				column {
 					name "resourceUuid"
@@ -101,7 +101,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 4.10.6"
+					since "zsv_4.10.6"
 				}
 				column {
 					name "tagUuids"
@@ -110,7 +110,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 4.10.6"
+					since "zsv_4.10.6"
 				}
 				column {
 					name "systemTags"
@@ -119,7 +119,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 4.10.6"
+					since "zsv_4.10.6"
 				}
 				column {
 					name "userTags"
@@ -128,7 +128,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 4.10.6"
+					since "zsv_4.10.6"
 				}
 			}
 		}

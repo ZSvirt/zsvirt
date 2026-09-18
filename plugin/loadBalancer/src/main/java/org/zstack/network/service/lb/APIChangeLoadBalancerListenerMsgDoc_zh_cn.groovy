@@ -28,7 +28,7 @@ doc {
 					location "url"
 					type "String"
 					optional false
-					since "3.4"
+					since "zsv_3.4"
 				}
 				column {
 					name "connectionIdleTimeout"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "Integer"
 					optional true
-					since "3.4"
+					since "zsv_3.4"
 				}
 				column {
 					name "maxConnection"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "Integer"
 					optional true
-					since "3.4"
+					since "zsv_3.4"
 				}
 				column {
 					name "balancerAlgorithm"
@@ -55,7 +55,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.4"
+					since "zsv_3.4"
 					values ("weightroundrobin","roundrobin","leastconn","source")
 				}
 				column {
@@ -65,7 +65,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.4"
+					since "zsv_3.4"
 				}
 				column {
 					name "healthyThreshold"
@@ -74,7 +74,7 @@ doc {
 					location "body"
 					type "Integer"
 					optional true
-					since "3.4"
+					since "zsv_3.4"
 				}
 				column {
 					name "unhealthyThreshold"
@@ -83,7 +83,7 @@ doc {
 					location "body"
 					type "Integer"
 					optional true
-					since "3.4"
+					since "zsv_3.4"
 				}
 				column {
 					name "healthCheckInterval"
@@ -92,7 +92,7 @@ doc {
 					location "body"
 					type "Integer"
 					optional true
-					since "3.4"
+					since "zsv_3.4"
 				}
 				column {
 					name "healthCheckProtocol"
@@ -101,7 +101,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.9"
+					since "zsv_3.9"
 					values ("tcp","udp","http")
 				}
 				column {
@@ -111,7 +111,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.9"
+					since "zsv_3.9"
 					values ("GET","HEAD")
 				}
 				column {
@@ -121,7 +121,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.9"
+					since "zsv_3.9"
 				}
 				column {
 					name "healthCheckHttpCode"
@@ -130,7 +130,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.9"
+					since "zsv_3.9"
 				}
 				column {
 					name "aclStatus"
@@ -139,7 +139,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.9"
+					since "zsv_3.9"
 					values ("enable","disable")
 				}
 				column {
@@ -149,7 +149,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.11"
+					since "zsv_3.11"
 					values ("tls_cipher_policy_default","tls_cipher_policy_1_0","tls_cipher_policy_1_1","tls_cipher_policy_1_2","tls_cipher_policy_1_2_strict","tls_cipher_policy_1_2_strict_with_1_3")
 				}
 				column {
@@ -159,7 +159,7 @@ doc {
 					location "body"
 					type "Integer"
 					optional true
-					since "3.11"
+					since "zsv_3.11"
 				}
 				column {
 					name "httpMode"
@@ -168,7 +168,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.11"
+					since "zsv_3.11"
 					values ("http-keep-alive","http-server-close","http-tunnel","httpclose","forceclose")
 				}
 				column {
@@ -178,7 +178,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.16"
+					since "zsv_3.16"
 					values ("disable","iphash","insert","rewrite")
 				}
 				column {
@@ -188,7 +188,7 @@ doc {
 					location "body"
 					type "Integer"
 					optional true
-					since "3.16"
+					since "zsv_3.16"
 				}
 				column {
 					name "cookieName"
@@ -197,7 +197,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.16"
+					since "zsv_3.16"
 				}
 				column {
 					name "systemTags"
@@ -206,7 +206,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.4"
+					since "zsv_3.4"
 				}
 				column {
 					name "userTags"
@@ -215,7 +215,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.4"
+					since "zsv_3.4"
 				}
 				column {
 					name "httpRedirectHttps"
@@ -224,7 +224,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.17.21"
+					since "zsv_3.17.21"
 					values ("disable","enable")
 				}
 				column {
@@ -234,7 +234,7 @@ doc {
 					location "body"
 					type "Integer"
 					optional true
-					since "3.17.21"
+					since "zsv_3.17.21"
 				}
 				column {
 					name "statusCode"
@@ -243,7 +243,7 @@ doc {
 					location "body"
 					type "Integer"
 					optional true
-					since "3.17.21"
+					since "zsv_3.17.21"
 					values ("301","302","303","307","308")
 				}
 			}

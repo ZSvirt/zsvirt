@@ -28,7 +28,7 @@ doc {
 					location "url"
 					type "String"
 					optional false
-					since "4.0.0"
+					since "zsv_4.0.0"
 				}
 				column {
 					name "name"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "4.0.0"
+					since "zsv_4.0.0"
 				}
 				column {
 					name "description"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "4.0.0"
+					since "zsv_4.0.0"
 				}
 				column {
 					name "automationLevel"
@@ -55,7 +55,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "4.0.0"
+					since "zsv_4.0.0"
 					values ("Automatic","Manual")
 				}
 				column {
@@ -65,7 +65,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "4.0.0"
+					since "zsv_4.0.0"
 				}
 				column {
 					name "thresholdDuration"
@@ -74,7 +74,7 @@ doc {
 					location "body"
 					type "Integer"
 					optional true
-					since "4.0.0"
+					since "zsv_4.0.0"
 				}
 				column {
 					name "state"
@@ -83,7 +83,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "4.0.0"
+					since "zsv_4.0.0"
 					values ("Enabled","Disabled")
 				}
 				column {
@@ -93,7 +93,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "4.0.0"
+					since "zsv_4.0.0"
 				}
 				column {
 					name "userTags"
@@ -102,7 +102,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "4.0.0"
+					since "zsv_4.0.0"
 				}
 			}
 		}

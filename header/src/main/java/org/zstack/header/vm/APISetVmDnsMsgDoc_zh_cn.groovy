@@ -28,7 +28,7 @@ doc {
 					location "url"
 					type "String"
 					optional false
-					since "zsv 4.10.10"
+					since "zsv_4.10.10"
 				}
 				column {
 					name "vmNicUuid"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 4.10.10"
+					since "zsv_4.10.10"
 				}
 				column {
 					name "dnsList"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "List"
 					optional false
-					since "zsv 4.10.10"
+					since "zsv_4.10.10"
 				}
 				column {
 					name "ipVersion"
@@ -55,7 +55,7 @@ doc {
 					location "body"
 					type "Integer"
 					optional true
-					since "zsv 4.10.10"
+					since "zsv_4.10.10"
 					values ("4","6")
 				}
 				column {
@@ -65,7 +65,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 4.10.10"
+					since "zsv_4.10.10"
 				}
 				column {
 					name "userTags"
@@ -74,7 +74,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 4.10.10"
+					since "zsv_4.10.10"
 				}
 			}
 		}

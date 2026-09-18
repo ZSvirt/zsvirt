@@ -28,7 +28,7 @@ doc {
 					location "url"
 					type "String"
 					optional false
-					since "3.7.0"
+					since "zsv_3.7.0"
 				}
 				column {
 					name "dateStart"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "Long"
 					optional true
-					since "3.7.0"
+					since "zsv_3.7.0"
 				}
 				column {
 					name "dateEnd"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "Long"
 					optional true
-					since "3.7.0"
+					since "zsv_3.7.0"
 				}
 				column {
 					name "resourceUuid"
@@ -55,7 +55,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.7.1"
+					since "zsv_3.7.1"
 				}
 				column {
 					name "simple"
@@ -64,7 +64,7 @@ doc {
 					location "body"
 					type "boolean"
 					optional true
-					since "3.7.1"
+					since "zsv_3.7.1"
 				}
 				column {
 					name "systemTags"
@@ -73,7 +73,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.7.0"
+					since "zsv_3.7.0"
 				}
 				column {
 					name "userTags"
@@ -82,7 +82,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.7.0"
+					since "zsv_3.7.0"
 				}
 			}
 		}

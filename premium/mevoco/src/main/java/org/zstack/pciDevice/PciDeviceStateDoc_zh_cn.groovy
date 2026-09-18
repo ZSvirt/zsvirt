@@ -10,12 +10,12 @@ doc {
 		name "Enabled"
 		desc "启用"
 		type "PciDeviceState"
-		since "2.1"
+		since "zsv_2.1"
 	}
 	field {
 		name "Disabled"
 		desc "停用"
 		type "PciDeviceState"
-		since "2.1"
+		since "zsv_2.1"
 	}
 }

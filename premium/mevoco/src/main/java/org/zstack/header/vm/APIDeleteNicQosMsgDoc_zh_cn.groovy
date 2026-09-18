@@ -28,7 +28,7 @@ doc {
 					location "url"
 					type "String"
 					optional false
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "direction"
@@ -37,7 +37,7 @@ doc {
 					location "query"
 					type "String"
 					optional false
-					since "0.6"
+					since "zsv_0.6"
 					values ("in","out")
 				}
 				column {
@@ -47,7 +47,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "userTags"
@@ -56,7 +56,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 			}
 		}

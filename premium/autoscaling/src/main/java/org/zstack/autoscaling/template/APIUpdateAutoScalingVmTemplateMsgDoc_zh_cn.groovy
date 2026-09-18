@@ -28,7 +28,7 @@ doc {
 					location "url"
 					type "String"
 					optional false
-					since "3.9.0"
+					since "zsv_3.9.0"
 				}
 				column {
 					name "name"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.9.0"
+					since "zsv_3.9.0"
 				}
 				column {
 					name "description"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.9.0"
+					since "zsv_3.9.0"
 				}
 				column {
 					name "vmInstanceName"
@@ -55,7 +55,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.9.0"
+					since "zsv_3.9.0"
 				}
 				column {
 					name "vmInstanceDescription"
@@ -64,7 +64,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.9.0"
+					since "zsv_3.9.0"
 				}
 				column {
 					name "vmInstanceOfferingUuid"
@@ -73,7 +73,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.9.0"
+					since "zsv_3.9.0"
 				}
 				column {
 					name "imageUuid"
@@ -82,7 +82,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.9.0"
+					since "zsv_3.9.0"
 				}
 				column {
 					name "systemTags"
@@ -91,7 +91,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.9.0"
+					since "zsv_3.9.0"
 				}
 				column {
 					name "userTags"
@@ -100,7 +100,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.9.0"
+					since "zsv_3.9.0"
 				}
 				column {
 					name "vmInstanceClusterUuid"
@@ -109,7 +109,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.10.0"
+					since "zsv_3.10.0"
 				}
 				column {
 					name "hostUuid"
@@ -118,7 +118,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.10.0"
+					since "zsv_3.10.0"
 				}
 			}
 		}

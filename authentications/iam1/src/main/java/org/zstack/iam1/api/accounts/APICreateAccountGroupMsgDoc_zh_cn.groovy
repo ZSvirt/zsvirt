@@ -28,7 +28,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "4.10.0"
+					since "zsv_4.10.0"
 				}
 				column {
 					name "description"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "4.10.0"
+					since "zsv_4.10.0"
 				}
 				column {
 					name "parentUuid"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "4.10.0"
+					since "zsv_4.10.0"
 				}
 				column {
 					name "resourceUuid"
@@ -55,7 +55,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "4.10.0"
+					since "zsv_4.10.0"
 				}
 				column {
 					name "tagUuids"
@@ -64,7 +64,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "4.10.0"
+					since "zsv_4.10.0"
 				}
 				column {
 					name "systemTags"
@@ -73,7 +73,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "4.10.0"
+					since "zsv_4.10.0"
 				}
 				column {
 					name "userTags"
@@ -82,7 +82,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "4.10.0"
+					since "zsv_4.10.0"
 				}
 			}
 		}

@@ -28,7 +28,7 @@ doc {
 					location "url"
 					type "String"
 					optional false
-					since "zsv 3.3"
+					since "zsv_3.3"
 				}
 				column {
 					name "vmInstanceUuid"
@@ -37,7 +37,7 @@ doc {
 					location "url"
 					type "String"
 					optional false
-					since "zsv 3.3"
+					since "zsv_3.3"
 				}
 				column {
 					name "systemTags"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 3.3"
+					since "zsv_3.3"
 				}
 				column {
 					name "userTags"
@@ -55,7 +55,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 3.3"
+					since "zsv_3.3"
 				}
 			}
 		}

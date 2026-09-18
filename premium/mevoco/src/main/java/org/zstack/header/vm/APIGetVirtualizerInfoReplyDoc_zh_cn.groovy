@@ -11,14 +11,14 @@ doc {
 		name "success"
 		desc "操作是否成功"
 		type "boolean"
-		since "3.16.21"
+		since "zsv_3.16.21"
 	}
 	ref {
 		name "error"
 		path "org.zstack.header.vm.APIGetVirtualizerInfoReply.error"
 		desc "错误码，若不为null，则表示操作失败, 操作成功时该字段为null"
 		type "ErrorCode"
-		since "3.16.21"
+		since "zsv_3.16.21"
 		clz ErrorCode.class
 	}
 	ref {
@@ -26,7 +26,7 @@ doc {
 		path "org.zstack.header.vm.APIGetVirtualizerInfoReply.inventories"
 		desc "虚拟机 / 主机的虚拟化软件基础设施信息查询结果列表"
 		type "List"
-		since "3.16.21"
+		since "zsv_3.16.21"
 		clz VirtualizerInfoInventory.class
 	}
 }

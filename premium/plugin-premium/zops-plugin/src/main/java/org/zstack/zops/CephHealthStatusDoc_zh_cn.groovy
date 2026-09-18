@@ -10,24 +10,24 @@ doc {
 		name "OK"
 		desc "健康"
 		type "CephHealthStatus"
-		since "3.17.21"
+		since "zsv_3.17.21"
 	}
 	field {
 		name "WARN"
 		desc "警告"
 		type "CephHealthStatus"
-		since "3.17.21"
+		since "zsv_3.17.21"
 	}
 	field {
 		name "ERR"
 		desc "错误"
 		type "CephHealthStatus"
-		since "3.17.21"
+		since "zsv_3.17.21"
 	}
 	field {
 		name "UNKNOWN"
 		desc "未知"
 		type "CephHealthStatus"
-		since "3.17.21"
+		since "zsv_3.17.21"
 	}
 }

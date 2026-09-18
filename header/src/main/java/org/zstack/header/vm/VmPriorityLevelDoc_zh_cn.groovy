@@ -10,12 +10,12 @@ doc {
 		name "Normal"
 		desc ""
 		type "VmPriorityLevel"
-		since "zsv 3.7"
+		since "zsv_3.7"
 	}
 	field {
 		name "High"
 		desc ""
 		type "VmPriorityLevel"
-		since "zsv 3.7"
+		since "zsv_3.7"
 	}
 }

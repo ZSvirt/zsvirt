@@ -10,12 +10,12 @@ doc {
 		name "Active"
 		desc "就绪"
 		type "MdevDeviceStatus"
-		since "3.5.0"
+		since "zsv_3.5.0"
 	}
 	field {
 		name "Attached"
 		desc "已挂载"
 		type "MdevDeviceStatus"
-		since "3.5.0"
+		since "zsv_3.5.0"
 	}
 }

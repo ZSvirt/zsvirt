@@ -11,26 +11,26 @@ doc {
 		name "hostKernelInterfaceUuid"
 		desc "Kernel适配器的UUID"
 		type "String"
-		since "4.1.0"
+		since "zsv_4.1.0"
 	}
 	ref {
 		name "trafficType"
 		path "org.zstack.network.l2.virtualSwitch.header.HostKernelInterfaceTrafficTypeInventory.trafficType"
 		desc "流量类型"
 		type "HostKernelInterfaceTrafficType"
-		since "4.1.0"
+		since "zsv_4.1.0"
 		clz HostKernelInterfaceTrafficType.class
 	}
 	field {
 		name "createDate"
 		desc "创建时间"
 		type "Timestamp"
-		since "4.1.0"
+		since "zsv_4.1.0"
 	}
 	field {
 		name "lastOpDate"
 		desc "最后一次修改时间"
 		type "Timestamp"
-		since "4.1.0"
+		since "zsv_4.1.0"
 	}
 }

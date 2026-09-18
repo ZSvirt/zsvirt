@@ -28,7 +28,7 @@ doc {
 					location "query"
 					type "String"
 					optional false
-					since "3.5.1"
+					since "zsv_3.5.1"
 				}
 				column {
 					name "loginType"
@@ -37,7 +37,7 @@ doc {
 					location "query"
 					type "String"
 					optional false
-					since "3.5.1"
+					since "zsv_3.5.1"
 				}
 				column {
 					name "systemTags"
@@ -46,7 +46,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "3.5.1"
+					since "zsv_3.5.1"
 				}
 				column {
 					name "userTags"
@@ -55,7 +55,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "3.5.1"
+					since "zsv_3.5.1"
 				}
 			}
 		}

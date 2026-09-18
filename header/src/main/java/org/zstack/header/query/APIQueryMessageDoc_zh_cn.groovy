@@ -85,7 +85,7 @@ start=0 limit=100 replyWithCount=true
 					type "List"
 					location "query"
 					optional false
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 
 				column {
@@ -94,7 +94,7 @@ start=0 limit=100 replyWithCount=true
 					type "Integer"
 					location "query"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 
 				column {
@@ -103,7 +103,7 @@ start=0 limit=100 replyWithCount=true
 					type "Integer"
 					location "query"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 
 				column {
@@ -112,7 +112,7 @@ start=0 limit=100 replyWithCount=true
 					type "Boolean"
 					location "query"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 
 				column {
@@ -121,7 +121,7 @@ start=0 limit=100 replyWithCount=true
 					type "String"
 					location "query"
 					optional true
-					since "zsv 1.9"
+					since "zsv_1.9"
 				}
 
 				column {
@@ -130,7 +130,7 @@ start=0 limit=100 replyWithCount=true
 					type "Boolean"
 					location "query"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 
 				column {
@@ -139,7 +139,7 @@ start=0 limit=100 replyWithCount=true
 					type "String"
 					location "query"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 
 				column {
@@ -148,7 +148,7 @@ start=0 limit=100 replyWithCount=true
 					type "String"
 					location "query"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 					values ("asc", "desc")
 				}
 
@@ -158,7 +158,7 @@ start=0 limit=100 replyWithCount=true
 					type "List"
 					location "query"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 			}
 		}

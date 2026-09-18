@@ -28,7 +28,7 @@ doc {
 					location "url"
 					type "String"
 					optional false
-					since "3.9.0"
+					since "zsv_3.9.0"
 				}
 				column {
 					name "vmNicType"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "3.9.0"
+					since "zsv_3.9.0"
 					values ("VNIC")
 				}
 				column {
@@ -47,7 +47,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.9.0"
+					since "zsv_3.9.0"
 				}
 				column {
 					name "userTags"
@@ -56,7 +56,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.9.0"
+					since "zsv_3.9.0"
 				}
 			}
 		}

@@ -10,12 +10,12 @@ doc {
 		name "Management"
 		desc "管理流量"
 		type "HostKernelInterfaceTrafficType"
-		since "4.1.0"
+		since "zsv_4.1.0"
 	}
 	field {
 		name "Storage"
 		desc "存储流量"
 		type "HostKernelInterfaceTrafficType"
-		since "4.1.0"
+		since "zsv_4.1.0"
 	}
 }

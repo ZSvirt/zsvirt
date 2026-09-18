@@ -28,7 +28,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "managementNetworkUuid"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "imageUuid"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "publicNetworkUuid"
@@ -55,7 +55,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "isDefault"
@@ -64,7 +64,7 @@ doc {
 					location "body"
 					type "Boolean"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "name"
@@ -73,7 +73,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "description"
@@ -82,7 +82,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "cpuNum"
@@ -91,7 +91,7 @@ doc {
 					location "body"
 					type "int"
 					optional false
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "cpuSpeed"
@@ -100,7 +100,7 @@ doc {
 					location "body"
 					type "int"
 					optional false
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "memorySize"
@@ -109,7 +109,7 @@ doc {
 					location "body"
 					type "long"
 					optional false
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "allocatorStrategy"
@@ -118,7 +118,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "sortKey"
@@ -127,7 +127,7 @@ doc {
 					location "body"
 					type "int"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "type"
@@ -136,7 +136,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "resourceUuid"
@@ -145,7 +145,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "systemTags"
@@ -154,7 +154,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "userTags"
@@ -163,7 +163,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "reservedMemorySize"
@@ -172,7 +172,7 @@ doc {
 					location "body"
 					type "long"
 					optional true
-					since "3.17.21"
+					since "zsv_3.17.21"
 				}
 				column {
 					name "tagUuids"
@@ -181,7 +181,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.17.21"
+					since "zsv_3.17.21"
 				}
 			}
 		}

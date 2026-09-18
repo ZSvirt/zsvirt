@@ -12,21 +12,21 @@ doc {
 		path "org.zstack.network.l2.virtualSwitch.header.APIUpdateVirtualSwitchUplinkBondingsEvent.inventories"
 		desc "绑定结果列表"
 		type "List"
-		since "3.18.0"
+		since "zsv_3.18.0"
 		clz HostNetworkBondingInventory.class
 	}
 	field {
 		name "success"
 		desc "请求是否成功"
 		type "boolean"
-		since "3.18.0"
+		since "zsv_3.18.0"
 	}
 	ref {
 		name "error"
 		path "org.zstack.network.l2.virtualSwitch.header.APIUpdateVirtualSwitchUplinkBondingsEvent.error"
 		desc "错误码，若不为null，则表示操作失败, 操作成功时该字段为null"
 		type "ErrorCode"
-		since "3.18.0"
+		since "zsv_3.18.0"
 		clz ErrorCode.class
 	}
 }

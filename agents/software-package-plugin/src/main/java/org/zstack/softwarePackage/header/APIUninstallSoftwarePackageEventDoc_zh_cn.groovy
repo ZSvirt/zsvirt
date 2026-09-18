@@ -10,14 +10,14 @@ doc {
 		name "success"
 		desc "操作成功时为true，否则为false"
 		type "boolean"
-		since "4.10.20"
+		since "zsv_4.10.20"
 	}
 	ref {
 		name "error"
 		path "org.zstack.softwarePackage.header.APIUninstallSoftwarePackageEvent.error"
 		desc "错误码，若不为null，则表示操作失败, 操作成功时该字段为null"
 		type "ErrorCode"
-		since "4.10.20"
+		since "zsv_4.10.20"
 		clz ErrorCode.class
 	}
 }

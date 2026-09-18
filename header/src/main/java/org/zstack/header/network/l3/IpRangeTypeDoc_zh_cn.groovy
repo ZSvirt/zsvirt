@@ -10,12 +10,12 @@ doc {
 		name "Normal"
 		desc "普通地址段"
 		type "IpRangeType"
-		since "zsv 3.9"
+		since "zsv_3.9"
 	}
 	field {
 		name "AddressPool"
 		desc "地址池段"
 		type "IpRangeType"
-		since "zsv 3.9"
+		since "zsv_3.9"
 	}
 }

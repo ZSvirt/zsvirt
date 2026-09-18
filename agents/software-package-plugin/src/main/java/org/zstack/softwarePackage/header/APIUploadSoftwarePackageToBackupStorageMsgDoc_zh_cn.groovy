@@ -26,7 +26,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "5.0.0"
+					since "zsv_5.0.0"
 				}
 				column {
 					name "type"
@@ -35,7 +35,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "5.0.0"
+					since "zsv_5.0.0"
 				}
 				column {
 					name "backupStorageUuid"
@@ -44,7 +44,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "5.0.0"
+					since "zsv_5.0.0"
 				}
 				column {
 					name "url"
@@ -53,7 +53,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "5.0.0"
+					since "zsv_5.0.0"
 				}
 				column {
 					name "installPath"
@@ -62,7 +62,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "5.0.0"
+					since "zsv_5.0.0"
 				}
 				column {
 					name "resourceUuid"
@@ -71,7 +71,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "5.0.0"
+					since "zsv_5.0.0"
 				}
 				column {
 					name "tagUuids"
@@ -80,7 +80,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "5.0.0"
+					since "zsv_5.0.0"
 				}
 				column {
 					name "systemTags"
@@ -89,7 +89,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "5.0.0"
+					since "zsv_5.0.0"
 				}
 				column {
 					name "userTags"
@@ -98,7 +98,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "5.0.0"
+					since "zsv_5.0.0"
 				}
 			}
 		}

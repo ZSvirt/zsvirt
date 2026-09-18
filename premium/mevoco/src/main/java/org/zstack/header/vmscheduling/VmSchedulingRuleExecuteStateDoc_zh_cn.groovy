@@ -10,18 +10,18 @@ doc {
 		name "Conflict"
 		desc ""
 		type "VmSchedulingRuleExecuteState"
-		since "0.6"
+		since "zsv_0.6"
 	}
 	field {
 		name "Normal"
 		desc ""
 		type "VmSchedulingRuleExecuteState"
-		since "0.6"
+		since "zsv_0.6"
 	}
 	field {
 		name "Invalid"
 		desc ""
 		type "VmSchedulingRuleExecuteState"
-		since "0.6"
+		since "zsv_0.6"
 	}
 }

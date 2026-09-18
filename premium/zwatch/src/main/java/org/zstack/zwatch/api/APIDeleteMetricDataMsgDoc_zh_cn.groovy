@@ -28,7 +28,7 @@ doc {
 					location "query"
 					type "String"
 					optional false
-					since "3.3.0"
+					since "zsv_3.3.0"
 				}
 				column {
 					name "metricName"
@@ -37,7 +37,7 @@ doc {
 					location "query"
 					type "String"
 					optional false
-					since "3.3.0"
+					since "zsv_3.3.0"
 				}
 				column {
 					name "labels"
@@ -46,7 +46,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "3.3.0"
+					since "zsv_3.3.0"
 				}
 				column {
 					name "systemTags"
@@ -55,7 +55,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "3.2.0"
+					since "zsv_3.2.0"
 				}
 				column {
 					name "userTags"
@@ -64,7 +64,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "3.2.0"
+					since "zsv_3.2.0"
 				}
 			}
 		}

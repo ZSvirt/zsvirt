@@ -10,18 +10,18 @@ doc {
 		name "Emergent"
 		desc "紧急"
 		type "EmergencyLevel"
-		since "0.6"
+		since "zsv_0.6"
 	}
 	field {
 		name "Important"
 		desc "严重"
 		type "EmergencyLevel"
-		since "0.6"
+		since "zsv_0.6"
 	}
 	field {
 		name "Normal"
 		desc "普通"
 		type "EmergencyLevel"
-		since "0.6"
+		since "zsv_0.6"
 	}
 }

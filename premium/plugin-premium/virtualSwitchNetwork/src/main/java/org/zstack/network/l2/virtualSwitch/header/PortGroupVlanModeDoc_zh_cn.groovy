@@ -10,18 +10,18 @@ doc {
 		name "ACCESS"
 		desc ""
 		type "PortGroupVlanMode"
-		since "3.12.0"
+		since "zsv_3.12.0"
 	}
 	field {
 		name "TRUNK"
 		desc ""
 		type "PortGroupVlanMode"
-		since "3.12.0"
+		since "zsv_3.12.0"
 	}
 	field {
 		name "PVLAN"
 		desc ""
 		type "PortGroupVlanMode"
-		since "3.12.0"
+		since "zsv_3.12.0"
 	}
 }

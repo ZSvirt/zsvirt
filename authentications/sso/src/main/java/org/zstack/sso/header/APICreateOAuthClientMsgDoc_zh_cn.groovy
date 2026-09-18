@@ -28,7 +28,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "4.3.0"
+					since "zsv_4.3.0"
 				}
 				column {
 					name "description"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "4.3.0"
+					since "zsv_4.3.0"
 				}
 				column {
 					name "clientId"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "4.3.0"
+					since "zsv_4.3.0"
 				}
 				column {
 					name "clientSecret"
@@ -55,7 +55,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "4.3.0"
+					since "zsv_4.3.0"
 				}
 				column {
 					name "authorizationUrl"
@@ -64,7 +64,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "4.3.0"
+					since "zsv_4.3.0"
 				}
 				column {
 					name "tokenUrl"
@@ -73,7 +73,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "4.3.0"
+					since "zsv_4.3.0"
 				}
 				column {
 					name "userinfoUrl"
@@ -82,7 +82,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "4.3.0"
+					since "zsv_4.3.0"
 				}
 				column {
 					name "redirectUrl"
@@ -91,7 +91,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "4.3.0"
+					since "zsv_4.3.0"
 				}
 				column {
 					name "logoutUrl"
@@ -100,7 +100,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "4.3.0"
+					since "zsv_4.3.0"
 				}
 				column {
 					name "grantType"
@@ -109,7 +109,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "4.3.0"
+					since "zsv_4.3.0"
 				}
 				column {
 					name "urlTemplate"
@@ -118,7 +118,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "4.3.0"
+					since "zsv_4.3.0"
 				}
 				column {
 					name "clientType"
@@ -127,7 +127,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "4.3.0"
+					since "zsv_4.3.0"
 				}
 				column {
 					name "resourceUuid"
@@ -136,7 +136,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "4.3.0"
+					since "zsv_4.3.0"
 				}
 				column {
 					name "tagUuids"
@@ -145,7 +145,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "4.3.0"
+					since "zsv_4.3.0"
 				}
 				column {
 					name "systemTags"
@@ -154,7 +154,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "4.3.0"
+					since "zsv_4.3.0"
 				}
 				column {
 					name "userTags"
@@ -163,7 +163,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "4.3.0"
+					since "zsv_4.3.0"
 				}
 			}
 		}

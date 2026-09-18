@@ -28,7 +28,7 @@ doc {
 					location "query"
 					type "String"
 					optional true
-					since "zsv 5.0.0"
+					since "zsv_5.0.0"
 				}
 				column {
 					name "vmInstanceUuid"
@@ -37,7 +37,7 @@ doc {
 					location "query"
 					type "String"
 					optional true
-					since "zsv 5.0.0"
+					since "zsv_5.0.0"
 				}
 				column {
 					name "systemTags"
@@ -46,7 +46,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "zsv 5.0.0"
+					since "zsv_5.0.0"
 				}
 				column {
 					name "userTags"
@@ -55,7 +55,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "zsv 5.0.0"
+					since "zsv_5.0.0"
 				}
 			}
 		}

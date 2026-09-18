@@ -28,7 +28,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "3.1.0"
+					since "zsv_3.1.0"
 				}
 				column {
 					name "description"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.1.0"
+					since "zsv_3.1.0"
 				}
 				column {
 					name "scalingResourceType"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "3.1.0"
+					since "zsv_3.1.0"
 					values ("VmInstance")
 				}
 				column {
@@ -56,7 +56,7 @@ doc {
 					location "body"
 					type "Integer"
 					optional false
-					since "3.1.0"
+					since "zsv_3.1.0"
 				}
 				column {
 					name "maxResourceSize"
@@ -65,7 +65,7 @@ doc {
 					location "body"
 					type "Integer"
 					optional false
-					since "3.1.0"
+					since "zsv_3.1.0"
 				}
 				column {
 					name "defaultCooldown"
@@ -74,7 +74,7 @@ doc {
 					location "body"
 					type "Long"
 					optional false
-					since "3.1.0"
+					since "zsv_3.1.0"
 				}
 				column {
 					name "removalPolicy"
@@ -83,7 +83,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "3.1.0"
+					since "zsv_3.1.0"
 					values ("OldestInstance","NewestInstance","OldestScalingConfiguration","MinimumCPUUsageInstance","MinimumMemoryUsageInstance")
 				}
 				column {
@@ -93,7 +93,7 @@ doc {
 					location "body"
 					type "boolean"
 					optional true
-					since "3.1.0"
+					since "zsv_3.1.0"
 				}
 				column {
 					name "resourceUuid"
@@ -102,7 +102,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.1.0"
+					since "zsv_3.1.0"
 				}
 				column {
 					name "tagUuids"
@@ -111,7 +111,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.1.0"
+					since "zsv_3.1.0"
 				}
 				column {
 					name "systemTags"
@@ -120,7 +120,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.1.0"
+					since "zsv_3.1.0"
 				}
 				column {
 					name "userTags"
@@ -129,7 +129,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.1.0"
+					since "zsv_3.1.0"
 				}
 			}
 		}

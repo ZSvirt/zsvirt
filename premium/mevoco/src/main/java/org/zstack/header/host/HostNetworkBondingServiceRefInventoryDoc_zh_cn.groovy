@@ -12,32 +12,32 @@ doc {
 		name "bondingUuid"
 		desc "bond网口Uuid"
 		type "String"
-		since "3.17.11"
+		since "zsv_3.17.11"
 	}
 	field {
 		name "vlanId"
 		desc "vlan子接口id"
 		type "Integer"
-		since "3.17.11"
+		since "zsv_3.17.11"
 	}
 	ref {
 		name "serviceType"
 		path "org.zstack.header.host.HostNetworkBondingServiceRefInventory.serviceType"
 		desc "网路服务类型"
 		type "HostNetworkInterfaceServiceType"
-		since "3.17.11"
+		since "zsv_3.17.11"
 		clz HostNetworkInterfaceServiceType.class
 	}
 	field {
 		name "createDate"
 		desc "创建时间"
 		type "Timestamp"
-		since "3.17.11"
+		since "zsv_3.17.11"
 	}
 	field {
 		name "lastOpDate"
 		desc "最后一次修改时间"
 		type "Timestamp"
-		since "3.17.11"
+		since "zsv_3.17.11"
 	}
 }

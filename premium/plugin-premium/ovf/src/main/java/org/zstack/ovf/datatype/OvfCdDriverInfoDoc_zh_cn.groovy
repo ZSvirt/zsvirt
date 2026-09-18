@@ -10,24 +10,24 @@ doc {
 		name "autoAllocation"
 		desc "是否自动分配"
 		type "Boolean"
-		since "3.14.6"
+		since "zsv_3.14.6"
 	}
 	field {
 		name "driverType"
 		desc "光驱控制器类型"
 		type "String"
-		since "3.14.6"
+		since "zsv_3.14.6"
 	}
 	field {
 		name "subType"
 		desc "子类型"
 		type "String"
-		since "3.14.6"
+		since "zsv_3.14.6"
 	}
 	field {
 		name "name"
 		desc "光驱名称"
 		type "String"
-		since "3.14.6"
+		since "zsv_3.14.6"
 	}
 }

@@ -10,14 +10,14 @@ doc {
 		name "numberOfClonedVm"
 		desc ""
 		type "int"
-		since "0.6"
+		since "zsv_0.6"
 	}
 	ref {
 		name "inventories"
 		path "org.zstack.header.vm.CloneVmInstanceResults.inventories"
 		desc "null"
 		type "List"
-		since "0.6"
+		since "zsv_0.6"
 		clz CloneVmInstanceInventory.class
 	}
 }

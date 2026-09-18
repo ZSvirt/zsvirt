@@ -28,7 +28,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "zsv 3.10"
+					since "zsv_3.10"
 				}
 				column {
 					name "ip"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 3.10"
+					since "zsv_3.10"
 				}
 				column {
 					name "resourceUuid"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 3.10"
+					since "zsv_3.10"
 				}
 				column {
 					name "systemTags"
@@ -55,7 +55,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 3.10"
+					since "zsv_3.10"
 				}
 				column {
 					name "userTags"
@@ -64,7 +64,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 3.10"
+					since "zsv_3.10"
 				}
 				column {
 					name "tagUuids"
@@ -73,7 +73,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 3.4.0"
+					since "zsv_3.4.0"
 				}
 			}
 		}

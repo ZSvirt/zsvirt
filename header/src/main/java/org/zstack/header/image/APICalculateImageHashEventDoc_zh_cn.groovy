@@ -12,21 +12,21 @@ doc {
 		path "org.zstack.header.image.APICalculateImageHashEvent.inventory"
 		desc "镜像清单"
 		type "ImageInventory"
-		since "zsv 4.1.0"
+		since "zsv_4.1.0"
 		clz ImageInventory.class
 	}
 	field {
 		name "success"
 		desc "请求是否成功"
 		type "boolean"
-		since "zsv 4.1.0"
+		since "zsv_4.1.0"
 	}
 	ref {
 		name "error"
 		path "org.zstack.header.image.APICalculateImageHashEvent.error"
 		desc "错误码，若不为null，则表示操作失败, 操作成功时该字段为null"
 		type "ErrorCode"
-		since "zsv 4.1.0"
+		since "zsv_4.1.0"
 		clz ErrorCode.class
 	}
 }

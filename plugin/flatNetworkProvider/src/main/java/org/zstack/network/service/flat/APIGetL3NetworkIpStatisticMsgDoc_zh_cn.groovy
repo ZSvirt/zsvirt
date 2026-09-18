@@ -28,7 +28,7 @@ doc {
 					location "url"
 					type "String"
 					optional false
-					since "3.7.0"
+					since "zsv_3.7.0"
 				}
 				column {
 					name "resourceType"
@@ -37,7 +37,7 @@ doc {
 					location "query"
 					type "String"
 					optional true
-					since "3.7.0"
+					since "zsv_3.7.0"
 					values ("All","Vip","VM","KernelInterface")
 				}
 				column {
@@ -47,7 +47,7 @@ doc {
 					location "query"
 					type "String"
 					optional true
-					since "3.7.0"
+					since "zsv_3.7.0"
 				}
 				column {
 					name "sortBy"
@@ -56,7 +56,7 @@ doc {
 					location "query"
 					type "String"
 					optional true
-					since "3.7.0"
+					since "zsv_3.7.0"
 					values ("Ip","CreateDate")
 				}
 				column {
@@ -66,7 +66,7 @@ doc {
 					location "query"
 					type "String"
 					optional true
-					since "3.7.0"
+					since "zsv_3.7.0"
 					values ("asc","desc")
 				}
 				column {
@@ -76,7 +76,7 @@ doc {
 					location "query"
 					type "Integer"
 					optional true
-					since "3.7.0"
+					since "zsv_3.7.0"
 				}
 				column {
 					name "limit"
@@ -85,7 +85,7 @@ doc {
 					location "query"
 					type "Integer"
 					optional true
-					since "3.7.0"
+					since "zsv_3.7.0"
 				}
 				column {
 					name "replyWithCount"
@@ -94,7 +94,7 @@ doc {
 					location "query"
 					type "boolean"
 					optional true
-					since "3.7.0"
+					since "zsv_3.7.0"
 				}
 				column {
 					name "systemTags"
@@ -103,7 +103,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "3.7.0"
+					since "zsv_3.7.0"
 				}
 				column {
 					name "userTags"
@@ -112,7 +112,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "3.7.0"
+					since "zsv_3.7.0"
 				}
 			}
 		}

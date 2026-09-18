@@ -28,7 +28,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "0.6"
+					since "zsv_0.6"
 					values ("cpu","memory","rootVolume","dataVolume","snapShot","gpu","pubIpVmNicBandwidthOut","pubIpVmNicBandwidthIn","pubIpVipBandwidthOut","pubIpVipBandwidthIn")
 				}
 				column {
@@ -38,7 +38,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "timeUnit"
@@ -47,7 +47,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "price"
@@ -56,7 +56,7 @@ doc {
 					location "body"
 					type "double"
 					optional false
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "accountUuid"
@@ -65,7 +65,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "dateInLong"
@@ -74,7 +74,7 @@ doc {
 					location "body"
 					type "Long"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "systemTags"
@@ -83,7 +83,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "userTags"
@@ -92,7 +92,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "tableUuid"
@@ -101,7 +101,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.7"
+					since "zsv_3.7"
 				}
 				column {
 					name "resourceUuid"
@@ -110,7 +110,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "tagUuids"
@@ -119,7 +119,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.4.0"
+					since "zsv_3.4.0"
 				}
 			}
 		}

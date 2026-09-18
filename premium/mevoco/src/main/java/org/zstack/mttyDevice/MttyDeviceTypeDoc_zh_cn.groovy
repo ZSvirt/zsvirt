@@ -10,6 +10,6 @@ doc {
 		name "SE_Controller"
 		desc "SE 控制器"
 		type "MttyDeviceType"
-		since "3.15.11"
+		since "zsv_3.15.11"
 	}
 }

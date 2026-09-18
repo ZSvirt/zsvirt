@@ -28,7 +28,7 @@ doc {
 					location "url"
 					type "String"
 					optional false
-					since "2.3"
+					since "zsv_2.3"
 				}
 				column {
 					name "actionUuid"
@@ -37,7 +37,7 @@ doc {
 					location "url"
 					type "String"
 					optional false
-					since "2.3"
+					since "zsv_2.3"
 				}
 				column {
 					name "deleteMode"
@@ -46,7 +46,7 @@ doc {
 					location "query"
 					type "String"
 					optional true
-					since "2.3"
+					since "zsv_2.3"
 				}
 				column {
 					name "systemTags"
@@ -55,7 +55,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "2.3"
+					since "zsv_2.3"
 				}
 				column {
 					name "userTags"
@@ -64,7 +64,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "2.3"
+					since "zsv_2.3"
 				}
 			}
 		}

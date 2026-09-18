@@ -28,7 +28,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "2.6.0"
+					since "zsv_2.6.0"
 				}
 				column {
 					name "description"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "2.6.0"
+					since "zsv_2.6.0"
 				}
 				column {
 					name "chassisUuid"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "2.6.0"
+					since "zsv_2.6.0"
 				}
 				column {
 					name "imageUuid"
@@ -55,7 +55,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "2.6.0"
+					since "zsv_2.6.0"
 				}
 				column {
 					name "templateUuid"
@@ -64,7 +64,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.4.0"
+					since "zsv_3.4.0"
 				}
 				column {
 					name "username"
@@ -73,7 +73,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.4.0"
+					since "zsv_3.4.0"
 				}
 				column {
 					name "password"
@@ -82,7 +82,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "2.6.0"
+					since "zsv_2.6.0"
 				}
 				column {
 					name "nicCfgs"
@@ -91,7 +91,7 @@ doc {
 					location "body"
 					type "Map"
 					optional true
-					since "2.6.0"
+					since "zsv_2.6.0"
 				}
 				column {
 					name "bondingCfgs"
@@ -100,7 +100,7 @@ doc {
 					location "body"
 					type "Map"
 					optional true
-					since "3.4.0"
+					since "zsv_3.4.0"
 				}
 				column {
 					name "customConfigurations"
@@ -109,7 +109,7 @@ doc {
 					location "body"
 					type "Map"
 					optional true
-					since "3.4.0"
+					since "zsv_3.4.0"
 				}
 				column {
 					name "strategy"
@@ -118,7 +118,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "2.6.0"
+					since "zsv_2.6.0"
 					values ("InstantStart","JustCreate")
 				}
 				column {
@@ -128,7 +128,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "2.6.0"
+					since "zsv_2.6.0"
 				}
 				column {
 					name "systemTags"
@@ -137,7 +137,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "2.6.0"
+					since "zsv_2.6.0"
 				}
 				column {
 					name "userTags"
@@ -146,7 +146,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "2.6.0"
+					since "zsv_2.6.0"
 				}
 				column {
 					name "tagUuids"
@@ -155,7 +155,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.4.0"
+					since "zsv_3.4.0"
 				}
 				column {
 					name "platform"
@@ -164,7 +164,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "4.10.13"
+					since "zsv_4.10.13"
 					values ("Linux","Windows","WindowsVirtio","Other","Paravirtualization")
 				}
 			}

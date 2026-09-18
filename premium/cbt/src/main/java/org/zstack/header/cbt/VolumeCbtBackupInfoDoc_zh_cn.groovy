@@ -11,55 +11,55 @@ doc {
 		path "org.zstack.header.cbt.VolumeCbtBackupInfo.volume"
 		desc "null"
 		type "VolumeTO"
-		since "4.10.10"
+		since "zsv_4.10.10"
 		clz VolumeTO.class
 	}
 	field {
 		name "bitmapBase64"
 		desc ""
 		type "String"
-		since "4.10.10"
+		since "zsv_4.10.10"
 	}
 	field {
 		name "target"
 		desc ""
 		type "String"
-		since "4.10.10"
+		since "zsv_4.10.10"
 	}
 	field {
 		name "scratchNodeName"
 		desc ""
 		type "String"
-		since "4.10.10"
+		since "zsv_4.10.10"
 	}
 	field {
 		name "metadata"
 		desc ""
 		type "String"
-		since "4.10.10"
+		since "zsv_4.10.10"
 	}
 	field {
 		name "nbdPort"
 		desc ""
 		type "Long"
-		since "4.10.10"
+		since "zsv_4.10.10"
 	}
 	field {
 		name "nbdServer"
 		desc ""
 		type "String"
-		since "4.10.10"
+		since "zsv_4.10.10"
 	}
 	field {
 		name "mode"
 		desc ""
 		type "String"
-		since "4.10.10"
+		since "zsv_4.10.10"
 	}
 	field {
 		name "bitmapName"
 		desc ""
 		type "String"
-		since "4.10.10"
+		since "zsv_4.10.10"
 	}
 }

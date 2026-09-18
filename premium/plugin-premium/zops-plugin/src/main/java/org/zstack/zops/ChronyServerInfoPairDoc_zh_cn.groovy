@@ -11,7 +11,7 @@ doc {
 		path "org.zstack.zops.ChronyServerInfoPair.internal"
 		desc "内部时间源服务器"
 		type "ChronyServerInfo"
-		since "3.17.21"
+		since "zsv_3.17.21"
 		clz ChronyServerInfo.class
 	}
 	ref {
@@ -19,7 +19,7 @@ doc {
 		path "org.zstack.zops.ChronyServerInfoPair.external"
 		desc "外部时间源服务器"
 		type "ChronyServerInfo"
-		since "3.17.21"
+		since "zsv_3.17.21"
 		clz ChronyServerInfo.class
 	}
 }

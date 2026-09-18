@@ -28,7 +28,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "3.14.6"
+					since "zsv_3.14.6"
 				}
 				column {
 					name "jsonImageInfos"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "3.14.6"
+					since "zsv_3.14.6"
 				}
 				column {
 					name "backupStorageUuid"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "3.14.6"
+					since "zsv_3.14.6"
 				}
 				column {
 					name "jsonCreateVmParam"
@@ -55,7 +55,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "3.14.6"
+					since "zsv_3.14.6"
 				}
 				column {
 					name "deleteImageAfterSuccess"
@@ -64,7 +64,7 @@ doc {
 					location "body"
 					type "boolean"
 					optional true
-					since "3.14.6"
+					since "zsv_3.14.6"
 				}
 				column {
 					name "deleteImageOnFail"
@@ -73,7 +73,7 @@ doc {
 					location "body"
 					type "boolean"
 					optional true
-					since "3.14.6"
+					since "zsv_3.14.6"
 				}
 				column {
 					name "vmEncryption"
@@ -82,7 +82,7 @@ doc {
 					location "body"
 					type "Boolean"
 					optional true
-					since "1.0.1, zsv 5.1.0"
+					since "1.0.0, zsv_5.1.0"
 				}
 				column {
 					name "resourceUuid"
@@ -91,7 +91,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.14.6"
+					since "zsv_3.14.6"
 				}
 				column {
 					name "tagUuids"
@@ -100,7 +100,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.14.6"
+					since "zsv_3.14.6"
 				}
 				column {
 					name "systemTags"
@@ -109,7 +109,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.14.6"
+					since "zsv_3.14.6"
 				}
 				column {
 					name "userTags"
@@ -118,7 +118,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.14.6"
+					since "zsv_3.14.6"
 				}
 			}
 		}

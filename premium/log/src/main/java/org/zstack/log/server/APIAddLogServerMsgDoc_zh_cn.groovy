@@ -28,7 +28,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "1.0.1, zsv 5.1.0"
+					since "1.0.0, zsv_5.1.0"
 				}
 				column {
 					name "description"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "1.0.1, zsv 5.1.0"
+					since "1.0.0, zsv_5.1.0"
 				}
 				column {
 					name "category"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "1.0.1, zsv 5.1.0"
+					since "1.0.0, zsv_5.1.0"
 					values ("ManagementNodeLog","PlatformOperationLog")
 				}
 				column {
@@ -56,7 +56,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "1.0.1, zsv 5.1.0"
+					since "1.0.0, zsv_5.1.0"
 					values ("Log4j2","FluentBit")
 				}
 				column {
@@ -66,7 +66,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "1.0.1, zsv 5.1.0"
+					since "1.0.0, zsv_5.1.0"
 					values ("OFF","FATAL","ERROR","WARN","INFO","DEBUG","TRACE","ALL")
 				}
 				column {
@@ -76,7 +76,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "1.0.1, zsv 5.1.0"
+					since "1.0.0, zsv_5.1.0"
 				}
 				column {
 					name "resourceUuid"
@@ -85,7 +85,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "1.0.1, zsv 5.1.0"
+					since "1.0.0, zsv_5.1.0"
 				}
 				column {
 					name "tagUuids"
@@ -94,7 +94,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "1.0.1, zsv 5.1.0"
+					since "1.0.0, zsv_5.1.0"
 				}
 				column {
 					name "systemTags"
@@ -103,7 +103,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "1.0.1, zsv 5.1.0"
+					since "1.0.0, zsv_5.1.0"
 				}
 				column {
 					name "userTags"
@@ -112,7 +112,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "1.0.1, zsv 5.1.0"
+					since "1.0.0, zsv_5.1.0"
 				}
 			}
 		}

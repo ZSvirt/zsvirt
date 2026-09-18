@@ -28,7 +28,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "description"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "volumeUuid"
@@ -46,7 +46,7 @@ doc {
 					location "url"
 					type "String"
 					optional false
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "backupStorageUuids"
@@ -55,7 +55,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "resourceUuid"
@@ -64,7 +64,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "systemTags"
@@ -73,7 +73,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "userTags"
@@ -82,7 +82,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "tagUuids"
@@ -91,7 +91,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 3.4.0"
+					since "zsv_3.4.0"
 				}
 			}
 		}

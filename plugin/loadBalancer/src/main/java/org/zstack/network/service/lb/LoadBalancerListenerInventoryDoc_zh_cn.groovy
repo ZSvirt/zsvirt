@@ -17,68 +17,68 @@ doc {
 		name "uuid"
 		desc "资源的UUID，唯一标示该资源"
 		type "String"
-		since "0.6"
+		since "zsv_0.6"
 	}
 	field {
 		name "name"
 		desc "资源名称"
 		type "String"
-		since "0.6"
+		since "zsv_0.6"
 	}
 	field {
 		name "description"
 		desc "资源的详细描述"
 		type "String"
-		since "0.6"
+		since "zsv_0.6"
 	}
 	field {
 		name "loadBalancerUuid"
 		desc "负载均衡器UUID"
 		type "String"
-		since "0.6"
+		since "zsv_0.6"
 	}
 	field {
 		name "instancePort"
 		desc ""
 		type "Integer"
-		since "0.6"
+		since "zsv_0.6"
 	}
 	field {
 		name "loadBalancerPort"
 		desc ""
 		type "Integer"
-		since "0.6"
+		since "zsv_0.6"
 	}
 	field {
 		name "protocol"
 		desc ""
 		type "String"
-		since "0.6"
+		since "zsv_0.6"
 	}
 	field {
 		name "serverGroupUuid"
 		desc ""
 		type "String"
-		since "4.0"
+		since "zsv_4.0"
 	}
 	field {
 		name "createDate"
 		desc "创建时间"
 		type "Timestamp"
-		since "0.6"
+		since "zsv_0.6"
 	}
 	field {
 		name "lastOpDate"
 		desc "最后一次修改时间"
 		type "Timestamp"
-		since "0.6"
+		since "zsv_0.6"
 	}
 	ref {
 		name "vmNicRefs"
 		path "org.zstack.network.service.lb.LoadBalancerListenerInventory.vmNicRefs"
 		desc "null"
 		type "List"
-		since "0.6"
+		since "zsv_0.6"
 		clz LoadBalancerListenerVmNicRefInventory.class
 	}
 	ref {
@@ -86,7 +86,7 @@ doc {
 		path "org.zstack.network.service.lb.LoadBalancerListenerInventory.aclRefs"
 		desc "访问控制策略组"
 		type "List"
-		since "3.9"
+		since "zsv_3.9"
 		clz LoadBalancerListenerACLRefInventory.class
 	}
 	ref {
@@ -94,7 +94,7 @@ doc {
 		path "org.zstack.network.service.lb.LoadBalancerListenerInventory.certificateRefs"
 		desc "null"
 		type "List"
-		since "0.6"
+		since "zsv_0.6"
 		clz LoadBalancerListenerCertificateRefInventory.class
 	}
 	ref {
@@ -102,7 +102,7 @@ doc {
 		path "org.zstack.network.service.lb.LoadBalancerListenerInventory.serverGroupRefs"
 		desc "null"
 		type "List"
-		since "4.0"
+		since "zsv_4.0"
 		clz LoadBalancerListenerServerGroupRefInventory.class
 	}
 }

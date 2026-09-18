@@ -22,6 +22,7 @@
         <hibernate.search.version>5.10.12.Final</hibernate.search.version>
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
+        <prometheus.simpleclient.version>0.16.0</prometheus.simpleclient.version>
     </properties>
 
     <modelVersion>4.0.0</modelVersion>
@@ -459,12 +460,12 @@
 	        <dependency>
 	            <groupId>io.prometheus</groupId>
 	            <artifactId>simpleclient</artifactId>
-	            <version>0.0.26</version>
+	            <version>${prometheus.simpleclient.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.prometheus</groupId>
                 <artifactId>simpleclient_httpserver</artifactId>
-                <version>0.0.26</version>
+                <version>${prometheus.simpleclient.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.dom4j</groupId>

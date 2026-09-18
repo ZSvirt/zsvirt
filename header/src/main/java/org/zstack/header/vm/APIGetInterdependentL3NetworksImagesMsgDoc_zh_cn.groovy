@@ -33,7 +33,7 @@ doc {
 					location "query"
 					type "String"
 					optional false
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "l3NetworkUuids"
@@ -42,7 +42,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "imageUuid"
@@ -51,7 +51,7 @@ doc {
 					location "query"
 					type "String"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "raiseException"
@@ -60,7 +60,7 @@ doc {
 					location "query"
 					type "boolean"
 					optional true
-					since "zsv 3.16.11"
+					since "zsv_3.16.11"
 				}
 				column {
 					name "systemTags"
@@ -69,7 +69,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "userTags"
@@ -78,7 +78,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 			}
 		}

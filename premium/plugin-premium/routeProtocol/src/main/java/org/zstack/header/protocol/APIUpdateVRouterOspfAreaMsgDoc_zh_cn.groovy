@@ -28,7 +28,7 @@ doc {
 					location "url"
 					type "String"
 					optional false
-					since "3.4"
+					since "zsv_3.4"
 				}
 				column {
 					name "areaAuth"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.4"
+					since "zsv_3.4"
 				}
 				column {
 					name "areaType"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.4"
+					since "zsv_3.4"
 				}
 				column {
 					name "password"
@@ -55,7 +55,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.4"
+					since "zsv_3.4"
 				}
 				column {
 					name "keyId"
@@ -64,7 +64,7 @@ doc {
 					location "body"
 					type "Integer"
 					optional true
-					since "3.4"
+					since "zsv_3.4"
 				}
 				column {
 					name "systemTags"
@@ -73,7 +73,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.4"
+					since "zsv_3.4"
 				}
 				column {
 					name "userTags"
@@ -82,7 +82,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.4"
+					since "zsv_3.4"
 				}
 			}
 		}

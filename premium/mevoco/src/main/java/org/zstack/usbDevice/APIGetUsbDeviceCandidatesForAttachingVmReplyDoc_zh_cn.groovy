@@ -13,7 +13,7 @@ doc {
 		path "org.zstack.usbDevice.APIGetUsbDeviceCandidatesForAttachingVmReply.error"
 		desc "错误码，若不为null，则表示操作失败, 操作成功时该字段为null",false
 		type "ErrorCode"
-		since "2.2"
+		since "zsv_2.2"
 		clz ErrorCode.class
 	}
 	ref {
@@ -21,13 +21,13 @@ doc {
 		path "org.zstack.usbDevice.APIGetUsbDeviceCandidatesForAttachingVmReply.inventories"
 		desc "USB设备"
 		type "List"
-		since "2.2"
+		since "zsv_2.2"
 		clz UsbDeviceInventory.class
 	}
 	field {
 		name "success"
 		desc "成功"
 		type "boolean"
-		since "2.2"
+		since "zsv_2.2"
 	}
 }

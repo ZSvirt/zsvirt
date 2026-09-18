@@ -12,7 +12,7 @@ doc {
 		path "org.zstack.billing.table.APIQueryPriceTableRely.error"
 		desc "错误码，若不为null，则表示操作失败, 操作成功时该字段为null",false
 		type "ErrorCode"
-		since "3.7"
+		since "zsv_3.7"
 		clz ErrorCode.class
 	}
 	ref {
@@ -20,7 +20,7 @@ doc {
 		path "org.zstack.billing.table.APIQueryPriceTableRely.inventories"
 		desc "null"
 		type "List"
-		since "3.7"
+		since "zsv_3.7"
 		clz PriceTableInventory.class
 	}
 }

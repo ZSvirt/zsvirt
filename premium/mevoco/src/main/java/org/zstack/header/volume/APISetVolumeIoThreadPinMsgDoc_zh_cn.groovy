@@ -28,7 +28,7 @@ doc {
 					location "url"
 					type "String"
 					optional false
-					since "3.16.31"
+					since "zsv_3.16.31"
 				}
 				column {
 					name "vmUuid"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "3.16.31"
+					since "zsv_3.16.31"
 				}
 				column {
 					name "pin"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "3.16.31"
+					since "zsv_3.16.31"
 				}
 				column {
 					name "ioThreadId"
@@ -55,7 +55,7 @@ doc {
 					location "body"
 					type "int"
 					optional false
-					since "3.16.31"
+					since "zsv_3.16.31"
 				}
 				column {
 					name "systemTags"
@@ -64,7 +64,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.16.31"
+					since "zsv_3.16.31"
 				}
 				column {
 					name "userTags"
@@ -73,7 +73,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.16.31"
+					since "zsv_3.16.31"
 				}
 			}
 		}

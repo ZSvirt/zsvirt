@@ -10,12 +10,12 @@ doc {
 		name "Enabled"
 		desc "启用"
 		type "MttyDeviceState"
-		since "3.15.11"
+		since "zsv_3.15.11"
 	}
 	field {
 		name "Disabled"
 		desc "停用"
 		type "MttyDeviceState"
-		since "3.15.11"
+		since "zsv_3.15.11"
 	}
 }

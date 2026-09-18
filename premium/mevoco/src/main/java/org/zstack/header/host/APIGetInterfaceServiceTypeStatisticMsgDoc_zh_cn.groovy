@@ -28,7 +28,7 @@ doc {
 					location "query"
 					type "String"
 					optional true
-					since "3.17.11"
+					since "zsv_3.17.11"
 				}
 				column {
 					name "vlanId"
@@ -37,7 +37,7 @@ doc {
 					location "query"
 					type "Integer"
 					optional true
-					since "3.17.11"
+					since "zsv_3.17.11"
 				}
 				column {
 					name "interfaceType"
@@ -46,7 +46,7 @@ doc {
 					location "query"
 					type "String"
 					optional true
-					since "3.17.11"
+					since "zsv_3.17.11"
 					values ("All","Interface","Bonding")
 				}
 				column {
@@ -56,7 +56,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "3.17.11"
+					since "zsv_3.17.11"
 					values ("All","ManagementNetwork","TenantNetwork","StorageNetwork","MigrationNetwork","BackupNetwork")
 				}
 				column {
@@ -66,7 +66,7 @@ doc {
 					location "query"
 					type "String"
 					optional true
-					since "3.17.11"
+					since "zsv_3.17.11"
 				}
 				column {
 					name "clusterUuid"
@@ -75,7 +75,7 @@ doc {
 					location "query"
 					type "String"
 					optional true
-					since "3.17.11"
+					since "zsv_3.17.11"
 				}
 				column {
 					name "hostUuid"
@@ -84,7 +84,7 @@ doc {
 					location "query"
 					type "String"
 					optional true
-					since "3.17.11"
+					since "zsv_3.17.11"
 				}
 				column {
 					name "sortBy"
@@ -93,7 +93,7 @@ doc {
 					location "query"
 					type "String"
 					optional true
-					since "3.17.11"
+					since "zsv_3.17.11"
 					values ("InterfaceName","VlanId","HostIp","HostName","ClusterName","CreateDate")
 				}
 				column {
@@ -103,7 +103,7 @@ doc {
 					location "query"
 					type "String"
 					optional true
-					since "3.17.11"
+					since "zsv_3.17.11"
 					values ("asc","desc")
 				}
 				column {
@@ -113,7 +113,7 @@ doc {
 					location "query"
 					type "Integer"
 					optional true
-					since "3.17.11"
+					since "zsv_3.17.11"
 				}
 				column {
 					name "limit"
@@ -122,7 +122,7 @@ doc {
 					location "query"
 					type "Integer"
 					optional true
-					since "3.17.11"
+					since "zsv_3.17.11"
 				}
 				column {
 					name "replyWithCount"
@@ -131,7 +131,7 @@ doc {
 					location "query"
 					type "boolean"
 					optional true
-					since "3.17.11"
+					since "zsv_3.17.11"
 				}
 				column {
 					name "systemTags"
@@ -140,7 +140,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "3.17.11"
+					since "zsv_3.17.11"
 				}
 				column {
 					name "userTags"
@@ -149,7 +149,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "3.17.11"
+					since "zsv_3.17.11"
 				}
 			}
 		}

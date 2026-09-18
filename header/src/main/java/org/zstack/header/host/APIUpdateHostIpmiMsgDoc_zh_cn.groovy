@@ -28,7 +28,7 @@ doc {
 					location "url"
 					type "String"
 					optional false
-					since "zsv 3.17.0"
+					since "zsv_3.17.0"
 				}
 				column {
 					name "ipmiAddress"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 3.17.0"
+					since "zsv_3.17.0"
 				}
 				column {
 					name "ipmiUsername"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 3.17.0"
+					since "zsv_3.17.0"
 				}
 				column {
 					name "ipmiPassword"
@@ -55,7 +55,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 3.17.0"
+					since "zsv_3.17.0"
 				}
 				column {
 					name "ipmiPort"
@@ -64,7 +64,7 @@ doc {
 					location "body"
 					type "int"
 					optional true
-					since "zsv 3.17.0"
+					since "zsv_3.17.0"
 				}
 				column {
 					name "systemTags"
@@ -73,7 +73,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 3.17.0"
+					since "zsv_3.17.0"
 				}
 				column {
 					name "userTags"
@@ -82,7 +82,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 3.17.0"
+					since "zsv_3.17.0"
 				}
 			}
 		}

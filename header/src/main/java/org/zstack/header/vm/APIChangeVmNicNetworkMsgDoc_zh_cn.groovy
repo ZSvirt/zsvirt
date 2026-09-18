@@ -28,7 +28,7 @@ doc {
 					location "url"
 					type "String"
 					optional false
-					since "zsv 3.11.0"
+					since "zsv_3.11.0"
 				}
 				column {
 					name "destL3NetworkUuid"
@@ -37,7 +37,7 @@ doc {
 					location "url"
 					type "String"
 					optional false
-					since "zsv 3.11.0"
+					since "zsv_3.11.0"
 				}
 				column {
 					name "systemTags"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 3.11.0"
+					since "zsv_3.11.0"
 				}
 				column {
 					name "userTags"
@@ -55,7 +55,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 3.11.0"
+					since "zsv_3.11.0"
 				}
 				column {
 					name "staticIp"
@@ -64,7 +64,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 3.11.0"
+					since "zsv_3.11.0"
 				}
 				column {
 					name "vmNicParams"
@@ -73,7 +73,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 4.2.0"
+					since "zsv_4.2.0"
 				}
 			}
 		}

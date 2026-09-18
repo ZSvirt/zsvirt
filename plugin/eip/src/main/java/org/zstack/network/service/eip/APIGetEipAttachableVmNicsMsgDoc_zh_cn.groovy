@@ -28,7 +28,7 @@ doc {
 					location "url"
 					type "String"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "vipUuid"
@@ -37,7 +37,7 @@ doc {
 					location "query"
 					type "String"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "vmUuid"
@@ -46,7 +46,7 @@ doc {
 					location "query"
 					type "String"
 					optional true
-					since "3.8"
+					since "zsv_3.8"
 				}
 				column {
 					name "vmName"
@@ -55,7 +55,7 @@ doc {
 					location "query"
 					type "String"
 					optional true
-					since "3.8"
+					since "zsv_3.8"
 				}
 				column {
 					name "limit"
@@ -64,7 +64,7 @@ doc {
 					location "query"
 					type "Integer"
 					optional true
-					since "3.8"
+					since "zsv_3.8"
 				}
 				column {
 					name "start"
@@ -73,7 +73,7 @@ doc {
 					location "query"
 					type "Integer"
 					optional true
-					since "3.8"
+					since "zsv_3.8"
 				}
 				column {
 					name "systemTags"
@@ -82,7 +82,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "userTags"
@@ -91,7 +91,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "networkServiceProvider"
@@ -100,7 +100,7 @@ doc {
 					location "query"
 					type "String"
 					optional true
-					since "3.9.0"
+					since "zsv_3.9.0"
 				}
 				column {
 					name "attachedToVm"
@@ -109,7 +109,7 @@ doc {
 					location "query"
 					type "boolean"
 					optional true
-					since "3.9.0"
+					since "zsv_3.9.0"
 				}
 			}
 		}

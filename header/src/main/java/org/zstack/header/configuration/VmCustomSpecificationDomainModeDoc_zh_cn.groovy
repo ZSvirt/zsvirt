@@ -10,12 +10,12 @@ doc {
 		name "WorkGroup"
 		desc "工作组"
 		type "VmCustomSpecificationDomainMode"
-		since "zsv 4.10.18"
+		since "zsv_4.10.18"
 	}
 	field {
 		name "Domain"
 		desc "域"
 		type "VmCustomSpecificationDomainMode"
-		since "zsv 4.10.18"
+		since "zsv_4.10.18"
 	}
 }

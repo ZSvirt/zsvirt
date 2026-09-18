@@ -28,7 +28,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "2.2"
+					since "zsv_2.2"
 				}
 				column {
 					name "description"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "2.2"
+					since "zsv_2.2"
 				}
 				column {
 					name "policy"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "2.2"
+					since "zsv_2.2"
 					values ("antiSoft")
 				}
 				column {
@@ -56,7 +56,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "2.2"
+					since "zsv_2.2"
 					values ("host")
 				}
 				column {
@@ -66,7 +66,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.16.0"
+					since "zsv_3.16.0"
 				}
 				column {
 					name "resourceUuid"
@@ -75,7 +75,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "2.2"
+					since "zsv_2.2"
 				}
 				column {
 					name "systemTags"
@@ -84,7 +84,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "2.2"
+					since "zsv_2.2"
 				}
 				column {
 					name "userTags"
@@ -93,7 +93,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "2.2"
+					since "zsv_2.2"
 				}
 				column {
 					name "tagUuids"
@@ -102,7 +102,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.4.0"
+					since "zsv_3.4.0"
 				}
 				column {
 					name "subType"
@@ -111,7 +111,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.16.0"
+					since "zsv_3.16.0"
 				}
 			}
 		}

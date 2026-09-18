@@ -28,7 +28,7 @@ doc {
 					location "url"
 					type "String"
 					optional false
-					since "4.3.0"
+					since "zsv_4.3.0"
 				}
 				column {
 					name "hostUuid"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "4.3.0"
+					since "zsv_4.3.0"
 				}
 				column {
 					name "slaveUuids"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "4.3.0"
+					since "zsv_4.3.0"
 				}
 				column {
 					name "slaveNames"
@@ -55,7 +55,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "4.3.0"
+					since "zsv_4.3.0"
 				}
 				column {
 					name "type"
@@ -64,7 +64,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "4.3.0"
+					since "zsv_4.3.0"
 					values ("LinuxBonding","OvsBonding")
 				}
 				column {
@@ -74,7 +74,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "4.3.0"
+					since "zsv_4.3.0"
 				}
 				column {
 					name "userTags"
@@ -83,7 +83,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "4.3.0"
+					since "zsv_4.3.0"
 				}
 			}
 		}

@@ -10,18 +10,18 @@ doc {
 		name "oldSize"
 		desc ""
 		type "long"
-		since "zsv 3.10"
+		since "zsv_3.10"
 	}
 	field {
 		name "size"
 		desc ""
 		type "long"
-		since "zsv 3.10"
+		since "zsv_3.10"
 	}
 	field {
 		name "deltaSize"
 		desc ""
 		type "long"
-		since "zsv 3.10"
+		since "zsv_3.10"
 	}
 }

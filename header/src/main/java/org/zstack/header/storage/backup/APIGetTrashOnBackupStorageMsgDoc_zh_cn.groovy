@@ -28,7 +28,7 @@ doc {
 					location "query"
 					type "String"
 					optional false
-					since "zsv 3.2.0"
+					since "zsv_3.2.0"
 				}
 				column {
 					name "resourceUuid"
@@ -37,7 +37,7 @@ doc {
 					location "query"
 					type "String"
 					optional true
-					since "zsv 3.5.0"
+					since "zsv_3.5.0"
 				}
 				column {
 					name "resourceType"
@@ -46,7 +46,7 @@ doc {
 					location "query"
 					type "String"
 					optional true
-					since "zsv 3.5.0"
+					since "zsv_3.5.0"
 				}
 				column {
 					name "trashType"
@@ -55,7 +55,7 @@ doc {
 					location "query"
 					type "String"
 					optional true
-					since "zsv 3.5.0"
+					since "zsv_3.5.0"
 					values ("MigrateImage")
 				}
 				column {
@@ -65,7 +65,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "zsv 3.2.0"
+					since "zsv_3.2.0"
 				}
 				column {
 					name "userTags"
@@ -74,7 +74,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "zsv 3.2.0"
+					since "zsv_3.2.0"
 				}
 			}
 		}

@@ -28,7 +28,7 @@ doc {
 					location "url"
 					type "String"
 					optional false
-					since "2.1"
+					since "zsv_2.1"
 				}
 				column {
 					name "schedulerTriggerUuid"
@@ -37,7 +37,7 @@ doc {
 					location "url"
 					type "String"
 					optional false
-					since "2.1"
+					since "zsv_2.1"
 				}
 				column {
 					name "systemTags"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "userTags"
@@ -55,7 +55,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "triggerNow"
@@ -64,7 +64,7 @@ doc {
 					location "body"
 					type "boolean"
 					optional true
-					since "3.2.0"
+					since "zsv_3.2.0"
 				}
 			}
 		}

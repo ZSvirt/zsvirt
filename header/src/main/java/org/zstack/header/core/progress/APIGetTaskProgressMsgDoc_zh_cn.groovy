@@ -28,7 +28,7 @@ doc {
 					location "url"
 					type "String"
 					optional true
-					since "zsv 1.11"
+					since "zsv_1.11"
 				}
 				column {
 					name "all"
@@ -37,7 +37,7 @@ doc {
 					location "query"
 					type "boolean"
 					optional true
-					since "zsv 1.11"
+					since "zsv_1.11"
 				}
 				column {
 					name "systemTags"
@@ -46,7 +46,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "zsv 1.11"
+					since "zsv_1.11"
 				}
 				column {
 					name "userTags"
@@ -55,7 +55,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "zsv 1.11"
+					since "zsv_1.11"
 				}
 			}
 		}

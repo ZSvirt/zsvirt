@@ -28,7 +28,7 @@ doc {
 					location "url"
 					type "String"
 					optional false
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "name"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "description"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "instancePort"
@@ -55,7 +55,7 @@ doc {
 					location "body"
 					type "Integer"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "loadBalancerPort"
@@ -64,7 +64,7 @@ doc {
 					location "body"
 					type "int"
 					optional false
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "protocol"
@@ -73,7 +73,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.0"
+					since "zsv_3.0"
 					values ("udp","tcp","http","https")
 				}
 				column {
@@ -83,7 +83,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "2.3"
+					since "zsv_2.3"
 				}
 				column {
 					name "healthCheckProtocol"
@@ -92,7 +92,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.9"
+					since "zsv_3.9"
 					values ("tcp","udp","http")
 				}
 				column {
@@ -102,7 +102,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.9"
+					since "zsv_3.9"
 					values ("GET","HEAD")
 				}
 				column {
@@ -112,7 +112,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.9"
+					since "zsv_3.9"
 				}
 				column {
 					name "healthCheckHttpCode"
@@ -121,7 +121,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.9"
+					since "zsv_3.9"
 				}
 				column {
 					name "aclStatus"
@@ -130,7 +130,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.9"
+					since "zsv_3.9"
 					values ("enable","disable")
 				}
 				column {
@@ -140,7 +140,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.9"
+					since "zsv_3.9"
 				}
 				column {
 					name "aclType"
@@ -149,7 +149,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.9"
+					since "zsv_3.9"
 					values ("white","black")
 				}
 				column {
@@ -159,7 +159,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "systemTags"
@@ -168,7 +168,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "userTags"
@@ -177,7 +177,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "tagUuids"
@@ -186,7 +186,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.4.0"
+					since "zsv_3.4.0"
 				}
 				column {
 					name "securityPolicyType"
@@ -195,7 +195,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.11"
+					since "zsv_3.11"
 					values ("tls_cipher_policy_default","tls_cipher_policy_1_0","tls_cipher_policy_1_1","tls_cipher_policy_1_2","tls_cipher_policy_1_2_strict","tls_cipher_policy_1_2_strict_with_1_3")
 				}
 			}

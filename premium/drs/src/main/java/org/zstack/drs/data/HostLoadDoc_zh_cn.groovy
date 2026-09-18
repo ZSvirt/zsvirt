@@ -11,18 +11,18 @@ doc {
 		name "hostUuid"
 		desc "物理机UUID"
 		type "String"
-		since "0.6"
+		since "zsv_0.6"
 	}
 	field {
 		name "usedCPUPercent"
 		desc ""
 		type "Float"
-		since "0.6"
+		since "zsv_0.6"
 	}
 	field {
 		name "usedMemoryPercent"
 		desc ""
 		type "Float"
-		since "0.6"
+		since "zsv_0.6"
 	}
 }

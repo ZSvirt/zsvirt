@@ -28,7 +28,7 @@ doc {
 					location "url"
 					type "String"
 					optional false
-					since "4.3.0"
+					since "zsv_4.3.0"
 				}
 				column {
 					name "name"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "4.3.0"
+					since "zsv_4.3.0"
 				}
 				column {
 					name "description"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "4.3.0"
+					since "zsv_4.3.0"
 				}
 				column {
 					name "url"
@@ -55,7 +55,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "4.3.0"
+					since "zsv_4.3.0"
 				}
 				column {
 					name "base"
@@ -64,7 +64,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "4.3.0"
+					since "zsv_4.3.0"
 				}
 				column {
 					name "username"
@@ -73,7 +73,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "4.3.0"
+					since "zsv_4.3.0"
 				}
 				column {
 					name "password"
@@ -82,7 +82,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "4.3.0"
+					since "zsv_4.3.0"
 				}
 				column {
 					name "encryption"
@@ -91,7 +91,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "4.3.0"
+					since "zsv_4.3.0"
 					values ("None","TLS")
 				}
 				column {
@@ -101,7 +101,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "4.3.0"
+					since "zsv_4.3.0"
 				}
 				column {
 					name "userTags"
@@ -110,7 +110,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "4.3.0"
+					since "zsv_4.3.0"
 				}
 				column {
 					name "serverType"
@@ -119,7 +119,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "4.3.0"
+					since "zsv_4.3.0"
 					values ("OpenLdap","WindowsAD","Unknown")
 				}
 				column {
@@ -129,7 +129,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "4.3.0"
+					since "zsv_4.3.0"
 				}
 				column {
 					name "filter"
@@ -138,7 +138,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "4.3.0"
+					since "zsv_4.3.0"
 				}
 				column {
 					name "syncCreatedAccountStrategy"
@@ -147,7 +147,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "4.3.0"
+					since "zsv_4.3.0"
 					values ("NoAction","CreateDisabledAccount","CreateAccount")
 				}
 				column {
@@ -157,7 +157,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "4.3.0"
+					since "zsv_4.3.0"
 					values ("NoAction","StaleAccount","DeleteAccount")
 				}
 			}

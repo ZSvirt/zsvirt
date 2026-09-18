@@ -12,7 +12,7 @@ doc {
 		path "org.zstack.guesttools.APIGetLatestGuestToolsForVmReply.error"
 		desc "错误码，若不为null，则表示操作失败, 操作成功时该字段为null",false
 		type "ErrorCode"
-		since "3.7.0"
+		since "zsv_3.7.0"
 		clz ErrorCode.class
 	}
 	ref {
@@ -20,13 +20,13 @@ doc {
 		path "org.zstack.guesttools.APIGetLatestGuestToolsForVmReply.inventory"
 		desc "可用最新增强工具清单"
 		type "GuestToolsInventory"
-		since "3.7.0"
+		since "zsv_3.7.0"
 		clz GuestToolsInventory.class
 	}
 	field {
 		name "success"
 		desc "成功"
 		type "boolean"
-		since "3.7.0"
+		since "zsv_3.7.0"
 	}
 }

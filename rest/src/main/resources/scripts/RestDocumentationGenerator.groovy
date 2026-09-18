@@ -513,18 +513,35 @@ class RestDocumentationGenerator implements DocumentGenerator {
     }
 
     void tryInitVersionOfCurrentRepo() {
-        def f = new File("${rootPath}/VERSION")
-        if (!f.exists()) {
-            println("missing version file[path: ${rootPath}/VERSION]")
-            return
+        def openVersionFile = new File("${rootPath}/VERSION")
+        String openVersion = "???"
+        if (openVersionFile.exists() && openVersionFile.canRead()) {
+            def versionNumber = []
+            FileUtils.readLines(openVersionFile).each { String line ->
+                versionNumber.add(line.split("=")[1].trim())
+            }
+            openVersion = versionNumber.join(".")
+        } else {
+            println("failed to read open version file[path: ${openVersionFile.path}]")
         }
 
-        def versionNumber = []
-        FileUtils.readLines(f).each { String line ->
-            versionNumber.add(line.split("=")[1].trim())
+        def eeVersionFile = new File("${rootPath}/zsvirt-ee/VERSION")
+        String eeVersion = ""
+        if (eeVersionFile.exists() && eeVersionFile.canRead()) {
+            def versionNumber = []
+            FileUtils.readLines(eeVersionFile).each { String line ->
+                versionNumber.add(line.split("=")[1].trim())
+            }
+            eeVersion = versionNumber.join(".")
+        } else {
+            println("failed to read ee version file[path: ${eeVersionFile.path}]")
         }
 
-        projectVersion = versionNumber.join(".")
+        if (eeVersion == "") {
+            projectVersion = "${openVersion}".toString()
+        } else {
+            projectVersion = "${openVersion}, zsv_${eeVersion}".toString()
+        }
     }
 
     @Override

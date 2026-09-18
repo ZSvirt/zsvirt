@@ -28,7 +28,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "2.5.0"
+					since "zsv_2.5.0"
 				}
 				column {
 					name "description"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "2.5.0"
+					since "zsv_2.5.0"
 				}
 				column {
 					name "type"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "2.5.0"
+					since "zsv_2.5.0"
 					values ("zstack")
 				}
 				column {
@@ -56,7 +56,7 @@ doc {
 					location "body"
 					type "Boolean"
 					optional true
-					since "2.5.0"
+					since "zsv_2.5.0"
 				}
 				column {
 					name "templateContent"
@@ -65,7 +65,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "2.5.0"
+					since "zsv_2.5.0"
 				}
 				column {
 					name "templateUuid"
@@ -74,7 +74,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "2.5.0"
+					since "zsv_2.5.0"
 				}
 				column {
 					name "parameters"
@@ -83,7 +83,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "2.5.0"
+					since "zsv_2.5.0"
 				}
 				column {
 					name "resourceUuid"
@@ -92,7 +92,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "2.5.0"
+					since "zsv_2.5.0"
 				}
 				column {
 					name "systemTags"
@@ -101,7 +101,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "2.5.0"
+					since "zsv_2.5.0"
 				}
 				column {
 					name "userTags"
@@ -110,7 +110,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "2.5.0"
+					since "zsv_2.5.0"
 				}
 				column {
 					name "tagUuids"
@@ -119,7 +119,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.6.0"
+					since "zsv_3.6.0"
 				}
 			}
 		}

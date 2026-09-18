@@ -12,21 +12,21 @@ doc {
 		path "org.zstack.header.cbt.APIEnableCbtTaskEvent.inventory"
 		desc "CBT 任务清单"
 		type "CbtTaskInventory"
-		since "4.10.10"
+		since "zsv_4.10.10"
 		clz CbtTaskInventory.class
 	}
 	field {
 		name "success"
 		desc "请求是否成功"
 		type "boolean"
-		since "4.10.10"
+		since "zsv_4.10.10"
 	}
 	ref {
 		name "error"
 		path "org.zstack.header.cbt.APIEnableCbtTaskEvent.error"
 		desc "错误码，若不为null，则表示操作失败, 操作成功时该字段为null"
 		type "ErrorCode"
-		since "4.10.10"
+		since "zsv_4.10.10"
 		clz ErrorCode.class
 	}
 }

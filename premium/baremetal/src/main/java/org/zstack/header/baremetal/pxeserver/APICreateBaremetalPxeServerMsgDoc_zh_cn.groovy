@@ -28,7 +28,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "2.6.0"
+					since "zsv_2.6.0"
 				}
 				column {
 					name "description"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "2.6.0"
+					since "zsv_2.6.0"
 				}
 				column {
 					name "dhcpInterface"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "2.6.0"
+					since "zsv_2.6.0"
 				}
 				column {
 					name "dhcpRangeBegin"
@@ -55,7 +55,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "2.6.0"
+					since "zsv_2.6.0"
 				}
 				column {
 					name "dhcpRangeEnd"
@@ -64,7 +64,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "2.6.0"
+					since "zsv_2.6.0"
 				}
 				column {
 					name "dhcpRangeNetmask"
@@ -73,7 +73,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "2.6.0"
+					since "zsv_2.6.0"
 				}
 				column {
 					name "systemTags"
@@ -82,7 +82,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "2.6.0"
+					since "zsv_2.6.0"
 				}
 				column {
 					name "userTags"
@@ -91,7 +91,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "2.6.0"
+					since "zsv_2.6.0"
 				}
 				column {
 					name "zoneUuid"
@@ -100,7 +100,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "hostname"
@@ -109,7 +109,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "sshUsername"
@@ -118,7 +118,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "sshPassword"
@@ -127,7 +127,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "sshPort"
@@ -136,7 +136,7 @@ doc {
 					location "body"
 					type "Integer"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "storagePath"
@@ -145,7 +145,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "resourceUuid"
@@ -154,7 +154,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "tagUuids"
@@ -163,7 +163,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.4.0"
+					since "zsv_3.4.0"
 				}
 			}
 		}

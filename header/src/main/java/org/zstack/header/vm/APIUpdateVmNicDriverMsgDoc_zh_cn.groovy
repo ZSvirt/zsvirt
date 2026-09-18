@@ -28,7 +28,7 @@ doc {
 					location "url"
 					type "String"
 					optional false
-					since "zsv 3.9"
+					since "zsv_3.9"
 				}
 				column {
 					name "vmNicUuid"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "zsv 3.9"
+					since "zsv_3.9"
 				}
 				column {
 					name "driverType"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "zsv 3.9"
+					since "zsv_3.9"
 				}
 				column {
 					name "systemTags"
@@ -55,7 +55,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 3.9"
+					since "zsv_3.9"
 				}
 				column {
 					name "userTags"
@@ -64,7 +64,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 3.9"
+					since "zsv_3.9"
 				}
 			}
 		}

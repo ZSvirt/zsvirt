@@ -10,12 +10,12 @@ doc {
 		name "uuid"
 		desc "资源的UUID，唯一标示该资源"
 		type "String"
-		since "3.6"
+		since "zsv_3.6"
 	}
 	field {
 		name "vpcHaRouterUuid"
 		desc ""
 		type "String"
-		since "3.6"
+		since "zsv_3.6"
 	}
 }

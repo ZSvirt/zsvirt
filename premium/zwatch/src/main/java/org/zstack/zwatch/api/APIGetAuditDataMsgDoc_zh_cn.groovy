@@ -28,7 +28,7 @@ doc {
 					location "query"
 					type "Long"
 					optional true
-					since "2.3"
+					since "zsv_2.3"
 				}
 				column {
 					name "endTime"
@@ -37,7 +37,7 @@ doc {
 					location "query"
 					type "Long"
 					optional true
-					since "2.3"
+					since "zsv_2.3"
 				}
 				column {
 					name "limit"
@@ -46,7 +46,7 @@ doc {
 					location "query"
 					type "Integer"
 					optional true
-					since "2.3"
+					since "zsv_2.3"
 				}
 				column {
 					name "labels"
@@ -55,7 +55,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "2.3"
+					since "zsv_2.3"
 				}
 				column {
 					name "auditType"
@@ -64,7 +64,7 @@ doc {
 					location "query"
 					type "AuditType"
 					optional true
-					since "3.5.0"
+					since "zsv_3.5.0"
 					values ("Login","Resource")
 				}
 				column {
@@ -74,7 +74,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "2.3"
+					since "zsv_2.3"
 				}
 				column {
 					name "userTags"
@@ -83,7 +83,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "2.3"
+					since "zsv_2.3"
 				}
 			}
 		}

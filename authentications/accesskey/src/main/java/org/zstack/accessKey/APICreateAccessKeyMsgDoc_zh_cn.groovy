@@ -28,7 +28,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "zsv 4.0.0"
+					since "zsv_4.0.0"
 				}
 				column {
 					name "userUuid"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 4.0.0"
+					since "zsv_4.0.0"
 				}
 				column {
 					name "description"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 4.0.0"
+					since "zsv_4.0.0"
 				}
 				column {
 					name "AccessKeyID"
@@ -55,7 +55,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 4.0.0"
+					since "zsv_4.0.0"
 				}
 				column {
 					name "AccessKeySecret"
@@ -64,7 +64,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 4.0.0"
+					since "zsv_4.0.0"
 				}
 				column {
 					name "resourceUuid"
@@ -73,7 +73,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 4.0.0"
+					since "zsv_4.0.0"
 				}
 				column {
 					name "systemTags"
@@ -82,7 +82,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 4.0.0"
+					since "zsv_4.0.0"
 				}
 				column {
 					name "userTags"
@@ -91,7 +91,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 4.0.0"
+					since "zsv_4.0.0"
 				}
 				column {
 					name "tagUuids"
@@ -100,7 +100,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 4.0.0"
+					since "zsv_4.0.0"
 				}
 				column {
 					name "accessKeyType"
@@ -109,7 +109,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "1.0.1, zsv_5.1.0"
+					since "1.0.0, zsv_5.1.0"
 					values ("User","System")
 				}
 			}

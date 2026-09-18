@@ -10,6 +10,6 @@ doc {
 		name "GPU_Video_Controller"
 		desc "GPU显卡控制器"
 		type "MdevDeviceType"
-		since "3.5.0"
+		since "zsv_3.5.0"
 	}
 }

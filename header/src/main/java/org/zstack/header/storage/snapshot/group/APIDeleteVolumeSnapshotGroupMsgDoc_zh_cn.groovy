@@ -28,7 +28,7 @@ doc {
 					location "url"
 					type "String"
 					optional false
-					since "zsv 3.6.0"
+					since "zsv_3.6.0"
 				}
 				column {
 					name "direction"
@@ -37,7 +37,7 @@ doc {
 					location "query"
 					type "String"
 					optional true
-					since "zsv 4.10.6"
+					since "zsv_4.10.6"
 				}
 				column {
 					name "scope"
@@ -46,7 +46,7 @@ doc {
 					location "query"
 					type "String"
 					optional true
-					since "zsv 4.10.6"
+					since "zsv_4.10.6"
 				}
 				column {
 					name "deleteMode"
@@ -55,7 +55,7 @@ doc {
 					location "query"
 					type "String"
 					optional true
-					since "zsv 3.6.0"
+					since "zsv_3.6.0"
 				}
 				column {
 					name "systemTags"
@@ -64,7 +64,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "zsv 3.6.0"
+					since "zsv_3.6.0"
 				}
 				column {
 					name "userTags"
@@ -73,7 +73,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "zsv 3.6.0"
+					since "zsv_3.6.0"
 				}
 			}
 		}

@@ -10,18 +10,18 @@ doc {
 		name "uuid"
 		desc "VIP UUID"
 		type "String"
-		since "0.6"
+		since "zsv_0.6"
 	}
 	field {
 		name "protocol"
 		desc ""
 		type "String"
-		since "0.6"
+		since "zsv_0.6"
 	}
 	field {
 		name "usedPorts"
 		desc ""
 		type "List"
-		since "0.6"
+		since "zsv_0.6"
 	}
 }

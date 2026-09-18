@@ -10,14 +10,14 @@ doc {
 		name "metaData"
 		desc ""
 		type "String"
-		since "2.1"
+		since "zsv_2.1"
 	}
 	ref {
 		name "metaDataEntries"
 		path "org.zstack.pciDevice.PciDeviceMetaData.metaDataEntries"
 		desc "元数据项"
 		type "List"
-		since "2.1"
+		since "zsv_2.1"
 		clz PciDeviceMetaDataEntry.class
 	}
 }

@@ -28,7 +28,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "3.7.0"
+					since "zsv_3.7.0"
 				}
 				column {
 					name "alarmTemplateCode"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "3.7.0"
+					since "zsv_3.7.0"
 				}
 				column {
 					name "eventTemplateCode"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "3.7.0"
+					since "zsv_3.7.0"
 				}
 				column {
 					name "eventTemplate"
@@ -55,7 +55,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.7.0"
+					since "zsv_3.7.0"
 				}
 				column {
 					name "name"
@@ -64,7 +64,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "3.7.0"
+					since "zsv_3.7.0"
 				}
 				column {
 					name "description"
@@ -73,7 +73,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.7.0"
+					since "zsv_3.7.0"
 				}
 				column {
 					name "applicationPlatformType"
@@ -82,7 +82,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "3.7.0"
+					since "zsv_3.7.0"
 				}
 				column {
 					name "template"
@@ -91,7 +91,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "3.7.0"
+					since "zsv_3.7.0"
 				}
 				column {
 					name "recoveryTemplate"
@@ -100,7 +100,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.7.0"
+					since "zsv_3.7.0"
 				}
 				column {
 					name "defaultTemplate"
@@ -109,7 +109,7 @@ doc {
 					location "body"
 					type "Boolean"
 					optional true
-					since "3.7.0"
+					since "zsv_3.7.0"
 				}
 				column {
 					name "resourceUuid"
@@ -118,7 +118,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.7.0"
+					since "zsv_3.7.0"
 				}
 				column {
 					name "tagUuids"
@@ -127,7 +127,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.7.0"
+					since "zsv_3.7.0"
 				}
 				column {
 					name "systemTags"
@@ -136,7 +136,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.7.0"
+					since "zsv_3.7.0"
 				}
 				column {
 					name "userTags"
@@ -145,7 +145,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.7.0"
+					since "zsv_3.7.0"
 				}
 				column {
 					name "type"
@@ -154,7 +154,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 					values ("alarm","event","combined")
 				}
 				column {
@@ -164,7 +164,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.16.11"
+					since "zsv_3.16.11"
 				}
 				column {
 					name "recoverySubject"
@@ -173,7 +173,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.16.11"
+					since "zsv_3.16.11"
 				}
 			}
 		}

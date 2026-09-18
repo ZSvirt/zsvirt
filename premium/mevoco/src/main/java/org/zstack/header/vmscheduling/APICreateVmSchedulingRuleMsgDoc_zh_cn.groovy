@@ -28,7 +28,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "3.16.0"
+					since "zsv_3.16.0"
 					values ("AFFINITY","ANTIAFFINITY")
 				}
 				column {
@@ -38,7 +38,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "3.16.0"
+					since "zsv_3.16.0"
 					values ("SOFT","HARD")
 				}
 				column {
@@ -48,7 +48,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "3.16.0"
+					since "zsv_3.16.0"
 				}
 				column {
 					name "hostGroupUuid"
@@ -57,7 +57,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.16.0"
+					since "zsv_3.16.0"
 				}
 				column {
 					name "name"
@@ -66,7 +66,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "3.16.0"
+					since "zsv_3.16.0"
 				}
 				column {
 					name "description"
@@ -75,7 +75,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.16.0"
+					since "zsv_3.16.0"
 				}
 				column {
 					name "policy"
@@ -84,7 +84,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.16.0"
+					since "zsv_3.16.0"
 					values ("antiSoft","antiHard")
 				}
 				column {
@@ -94,7 +94,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.16.0"
+					since "zsv_3.16.0"
 					values ("host")
 				}
 				column {
@@ -104,7 +104,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.16.0"
+					since "zsv_3.16.0"
 				}
 				column {
 					name "subType"
@@ -113,7 +113,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.16.0"
+					since "zsv_3.16.0"
 				}
 				column {
 					name "resourceUuid"
@@ -122,7 +122,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.16.0"
+					since "zsv_3.16.0"
 				}
 				column {
 					name "tagUuids"
@@ -131,7 +131,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.16.0"
+					since "zsv_3.16.0"
 				}
 				column {
 					name "systemTags"
@@ -140,7 +140,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.16.0"
+					since "zsv_3.16.0"
 				}
 				column {
 					name "userTags"
@@ -149,7 +149,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.16.0"
+					since "zsv_3.16.0"
 				}
 			}
 		}

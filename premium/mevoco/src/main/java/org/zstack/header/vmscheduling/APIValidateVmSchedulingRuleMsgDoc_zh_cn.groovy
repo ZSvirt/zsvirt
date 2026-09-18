@@ -28,7 +28,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "3.16.0"
+					since "zsv_3.16.0"
 				}
 				column {
 					name "hostGroupUuid"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.16.0"
+					since "zsv_3.16.0"
 				}
 				column {
 					name "rule"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "3.16.0"
+					since "zsv_3.16.0"
 					values ("AFFINITY","ANTIAFFINITY")
 				}
 				column {
@@ -56,7 +56,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "3.16.0"
+					since "zsv_3.16.0"
 					values ("SOFT","HARD")
 				}
 				column {
@@ -66,7 +66,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.16.0"
+					since "zsv_3.16.0"
 				}
 				column {
 					name "systemTags"
@@ -75,7 +75,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.16.0"
+					since "zsv_3.16.0"
 				}
 				column {
 					name "userTags"
@@ -84,7 +84,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.16.0"
+					since "zsv_3.16.0"
 				}
 			}
 		}

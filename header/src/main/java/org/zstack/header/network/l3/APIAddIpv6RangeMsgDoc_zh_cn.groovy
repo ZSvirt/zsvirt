@@ -28,7 +28,7 @@ doc {
 					location "url"
 					type "String"
 					optional false
-					since "zsv 3.1"
+					since "zsv_3.1"
 				}
 				column {
 					name "name"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "zsv 3.1"
+					since "zsv_3.1"
 				}
 				column {
 					name "description"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 3.1"
+					since "zsv_3.1"
 				}
 				column {
 					name "startIp"
@@ -55,7 +55,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "zsv 3.1"
+					since "zsv_3.1"
 				}
 				column {
 					name "endIp"
@@ -64,7 +64,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "zsv 3.1"
+					since "zsv_3.1"
 				}
 				column {
 					name "gateway"
@@ -73,7 +73,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "zsv 3.1"
+					since "zsv_3.1"
 				}
 				column {
 					name "prefixLen"
@@ -82,7 +82,7 @@ doc {
 					location "body"
 					type "Integer"
 					optional false
-					since "zsv 3.1"
+					since "zsv_3.1"
 				}
 				column {
 					name "addressMode"
@@ -91,7 +91,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "zsv 3.1"
+					since "zsv_3.1"
 					values ("SLAAC","Stateful-DHCP","Stateless-DHCP")
 				}
 				column {
@@ -101,7 +101,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 3.9"
+					since "zsv_3.9"
 					values ("Normal","AddressPool")
 				}
 				column {
@@ -111,7 +111,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 3.1"
+					since "zsv_3.1"
 				}
 				column {
 					name "systemTags"
@@ -120,7 +120,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 3.1"
+					since "zsv_3.1"
 				}
 				column {
 					name "userTags"
@@ -129,7 +129,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 3.1"
+					since "zsv_3.1"
 				}
 				column {
 					name "tagUuids"
@@ -138,7 +138,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 3.4.0"
+					since "zsv_3.4.0"
 				}
 			}
 		}

@@ -28,7 +28,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "zsv 3.11.0"
+					since "zsv_3.11.0"
 				}
 				column {
 					name "description"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 3.11.0"
+					since "zsv_3.11.0"
 				}
 				column {
 					name "instanceOfferingUuid"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 3.11.0"
+					since "zsv_3.11.0"
 				}
 				column {
 					name "cpuNum"
@@ -55,7 +55,7 @@ doc {
 					location "body"
 					type "Integer"
 					optional true
-					since "zsv 3.11.0"
+					since "zsv_3.11.0"
 				}
 				column {
 					name "memorySize"
@@ -64,7 +64,7 @@ doc {
 					location "body"
 					type "Long"
 					optional true
-					since "zsv 3.11.0"
+					since "zsv_3.11.0"
 				}
 				column {
 					name "l3NetworkUuids"
@@ -73,7 +73,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 3.11.0"
+					since "zsv_3.11.0"
 				}
 				column {
 					name "vmNicParams"
@@ -82,7 +82,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 3.17.0"
+					since "zsv_3.17.0"
 				}
 				column {
 					name "type"
@@ -91,7 +91,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 3.11.0"
+					since "zsv_3.11.0"
 					values ("UserVm","ApplianceVm")
 				}
 				column {
@@ -101,7 +101,7 @@ doc {
 					location "url"
 					type "String"
 					optional false
-					since "zsv 3.11.0"
+					since "zsv_3.11.0"
 				}
 				column {
 					name "platform"
@@ -110,7 +110,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 3.11.0"
+					since "zsv_3.11.0"
 					values ("Linux","Windows","Other","Paravirtualization","WindowsVirtio")
 				}
 				column {
@@ -120,7 +120,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 3.11.0"
+					since "zsv_3.11.0"
 				}
 				column {
 					name "clusterUuid"
@@ -129,7 +129,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 3.11.0"
+					since "zsv_3.11.0"
 				}
 				column {
 					name "hostUuid"
@@ -138,7 +138,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 3.11.0"
+					since "zsv_3.11.0"
 				}
 				column {
 					name "primaryStorageUuid"
@@ -147,7 +147,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 3.11.0"
+					since "zsv_3.11.0"
 				}
 				column {
 					name "defaultL3NetworkUuid"
@@ -156,7 +156,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 3.11.0"
+					since "zsv_3.11.0"
 				}
 				column {
 					name "strategy"
@@ -165,7 +165,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 3.11.0"
+					since "zsv_3.11.0"
 					values ("InstantStart","CreateStopped")
 				}
 				column {
@@ -175,7 +175,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 3.11.0"
+					since "zsv_3.11.0"
 				}
 				column {
 					name "tagUuids"
@@ -184,7 +184,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 3.11.0"
+					since "zsv_3.11.0"
 				}
 				column {
 					name "systemTags"
@@ -193,7 +193,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 3.11.0"
+					since "zsv_3.11.0"
 				}
 				column {
 					name "userTags"
@@ -202,7 +202,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 3.11.0"
+					since "zsv_3.11.0"
 				}
 				column {
 					name "rootVolumeSystemTags"
@@ -211,7 +211,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 3.11.0"
+					since "zsv_3.11.0"
 				}
 				column {
 					name "reservedMemorySize"
@@ -220,7 +220,7 @@ doc {
 					location "body"
 					type "Long"
 					optional true
-					since "zsv 3.17.21"
+					since "zsv_3.17.21"
 				}
 				column {
 					name "vmEncryption"
@@ -229,7 +229,7 @@ doc {
 					location "body"
 					type "Boolean"
 					optional true
-					since "1.0.1, zsv_5.1.0"
+					since "1.0.0, zsv_5.1.0"
 				}
 			}
 		}

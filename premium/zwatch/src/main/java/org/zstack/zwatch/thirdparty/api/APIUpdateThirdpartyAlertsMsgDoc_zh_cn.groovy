@@ -28,7 +28,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.10"
+					since "zsv_3.10"
 				}
 				column {
 					name "startTimeMillis"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "Long"
 					optional true
-					since "3.10"
+					since "zsv_3.10"
 				}
 				column {
 					name "endTimeMillis"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "Long"
 					optional true
-					since "3.10"
+					since "zsv_3.10"
 				}
 				column {
 					name "updateReadStatus"
@@ -55,7 +55,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.10"
+					since "zsv_3.10"
 					values ("Unread","Read")
 				}
 				column {
@@ -65,7 +65,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.10"
+					since "zsv_3.10"
 				}
 				column {
 					name "userTags"
@@ -74,7 +74,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.10"
+					since "zsv_3.10"
 				}
 			}
 		}

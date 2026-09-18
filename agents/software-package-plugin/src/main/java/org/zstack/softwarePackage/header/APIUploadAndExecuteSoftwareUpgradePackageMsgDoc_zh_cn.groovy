@@ -26,7 +26,7 @@ doc {
 					location "url"
 					type "String"
 					optional false
-					since "5.0.0"
+					since "zsv_5.0.0"
 				}
 				column {
 					name "backupStorageUuid"
@@ -35,7 +35,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "5.0.0"
+					since "zsv_5.0.0"
 				}
 				column {
 					name "url"
@@ -44,7 +44,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "5.0.0"
+					since "zsv_5.0.0"
 				}
 				column {
 					name "installPath"
@@ -53,7 +53,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "5.0.0"
+					since "zsv_5.0.0"
 				}
 				column {
 					name "upgradeType"
@@ -62,7 +62,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "5.0.0"
+					since "zsv_5.0.0"
 					values ("Normal","Reexecute")
 				}
 				column {
@@ -72,7 +72,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "5.0.0"
+					since "zsv_5.0.0"
 				}
 				column {
 					name "userTags"
@@ -81,7 +81,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "5.0.0"
+					since "zsv_5.0.0"
 				}
 			}
 		}

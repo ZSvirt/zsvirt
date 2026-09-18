@@ -10,6 +10,6 @@ doc {
 		name "uuid"
 		desc "账户UUID"
 		type "String"
-		since "4.10.0"
+		since "zsv_4.10.0"
 	}
 }

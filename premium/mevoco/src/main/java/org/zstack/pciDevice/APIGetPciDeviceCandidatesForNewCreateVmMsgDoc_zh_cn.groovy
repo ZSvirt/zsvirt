@@ -28,7 +28,7 @@ doc {
 					location "query"
 					type "String"
 					optional true
-					since "2.4"
+					since "zsv_2.4"
 				}
 				column {
 					name "clusterUuids"
@@ -37,7 +37,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "2.4"
+					since "zsv_2.4"
 				}
 				column {
 					name "types"
@@ -46,7 +46,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "2.4"
+					since "zsv_2.4"
 				}
 				column {
 					name "systemTags"
@@ -55,7 +55,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "2.4"
+					since "zsv_2.4"
 				}
 				column {
 					name "userTags"
@@ -64,7 +64,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "2.4"
+					since "zsv_2.4"
 				}
 			}
 		}

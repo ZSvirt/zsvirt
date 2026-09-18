@@ -28,7 +28,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "3.0.0"
+					since "zsv_3.0.0"
 				}
 				column {
 					name "groupUuid"
@@ -37,7 +37,7 @@ doc {
 					location "url"
 					type "String"
 					optional false
-					since "3.0.0"
+					since "zsv_3.0.0"
 				}
 				column {
 					name "backupStorageUuid"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "instanceOfferingUuid"
@@ -55,7 +55,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.0.0"
+					since "zsv_3.0.0"
 				}
 				column {
 					name "l3NetworkUuids"
@@ -64,7 +64,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.0.0"
+					since "zsv_3.0.0"
 				}
 				column {
 					name "vmNicParams"
@@ -73,7 +73,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.17.0"
+					since "zsv_3.17.0"
 				}
 				column {
 					name "type"
@@ -82,7 +82,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.0.0"
+					since "zsv_3.0.0"
 					values ("UserVm","ApplianceVm")
 				}
 				column {
@@ -92,7 +92,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.0.0"
+					since "zsv_3.0.0"
 				}
 				column {
 					name "clusterUuid"
@@ -101,7 +101,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.0.0"
+					since "zsv_3.0.0"
 				}
 				column {
 					name "hostUuid"
@@ -110,7 +110,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.0.0"
+					since "zsv_3.0.0"
 				}
 				column {
 					name "primaryStorageUuidForRootVolume"
@@ -119,7 +119,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.0.0"
+					since "zsv_3.0.0"
 				}
 				column {
 					name "primaryStorageUuidForDataVolume"
@@ -128,7 +128,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.0.0"
+					since "zsv_3.0.0"
 				}
 				column {
 					name "description"
@@ -137,7 +137,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.0.0"
+					since "zsv_3.0.0"
 				}
 				column {
 					name "rootVolumeSystemTags"
@@ -146,7 +146,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.0.0"
+					since "zsv_3.0.0"
 				}
 				column {
 					name "dataVolumeSystemTags"
@@ -155,7 +155,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.0.0"
+					since "zsv_3.0.0"
 				}
 				column {
 					name "diskAOs"
@@ -164,7 +164,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "5.0.0"
+					since "zsv_5.0.0"
 				}
 				column {
 					name "defaultL3NetworkUuid"
@@ -173,7 +173,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.0.0"
+					since "zsv_3.0.0"
 				}
 				column {
 					name "resourceUuid"
@@ -182,7 +182,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.0.0"
+					since "zsv_3.0.0"
 				}
 				column {
 					name "systemTags"
@@ -191,7 +191,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.0.0"
+					since "zsv_3.0.0"
 				}
 				column {
 					name "userTags"
@@ -200,7 +200,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.0.0"
+					since "zsv_3.0.0"
 				}
 				column {
 					name "tagUuids"
@@ -209,7 +209,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.4.0"
+					since "zsv_3.4.0"
 				}
 				column {
 					name "strategy"
@@ -218,7 +218,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "4.10.0"
+					since "zsv_4.10.0"
 					values ("InstantStart","JustCreate","CreateStopped")
 				}
 				column {
@@ -228,7 +228,7 @@ doc {
 					location "body"
 					type "Integer"
 					optional true
-					since "zsv 4.3.0"
+					since "zsv_4.3.0"
 				}
 				column {
 					name "memorySize"
@@ -237,7 +237,7 @@ doc {
 					location "body"
 					type "Long"
 					optional true
-					since "zsv 4.3.0"
+					since "zsv_4.3.0"
 				}
 				column {
 					name "reservedMemorySize"
@@ -246,7 +246,7 @@ doc {
 					location "body"
 					type "Long"
 					optional true
-					since "zsv 4.3.0"
+					since "zsv_4.3.0"
 				}
 				column {
 					name "resetTpm"
@@ -255,7 +255,7 @@ doc {
 					location "body"
 					type "Boolean"
 					optional true
-					since "zsv 5.0.3"
+					since "zsv_5.0.3"
 				}
 				column {
 					name "vmEncryption"
@@ -264,7 +264,7 @@ doc {
 					location "body"
 					type "Boolean"
 					optional true
-					since "1.0.1, zsv 5.1.0"
+					since "1.0.0, zsv_5.1.0"
 				}
 			}
 		}

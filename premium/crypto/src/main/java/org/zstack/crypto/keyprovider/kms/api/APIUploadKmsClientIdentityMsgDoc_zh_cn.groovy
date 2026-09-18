@@ -28,7 +28,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "5.0.0"
+					since "zsv_5.0.0"
 					values ("UPLOADED","PLATFORM")
 				}
 				column {
@@ -38,7 +38,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "5.0.0"
+					since "zsv_5.0.0"
 				}
 				column {
 					name "kmsClientKeyPem"
@@ -47,7 +47,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "5.0.0"
+					since "zsv_5.0.0"
 				}
 				column {
 					name "uuid"
@@ -56,7 +56,7 @@ doc {
 					location "url"
 					type "String"
 					optional false
-					since "5.0.0"
+					since "zsv_5.0.0"
 				}
 				column {
 					name "systemTags"
@@ -65,7 +65,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "5.0.0"
+					since "zsv_5.0.0"
 				}
 				column {
 					name "userTags"
@@ -74,7 +74,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "5.0.0"
+					since "zsv_5.0.0"
 				}
 			}
 		}

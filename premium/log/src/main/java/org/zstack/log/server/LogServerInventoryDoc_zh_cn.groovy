@@ -13,26 +13,26 @@ doc {
 		name "uuid"
 		desc "资源的UUID，唯一标示该资源"
 		type "String"
-		since "1.0.1, zsv 5.1.0"
+		since "1.0.0, zsv_5.1.0"
 	}
 	field {
 		name "name"
 		desc "资源名称"
 		type "String"
-		since "1.0.1, zsv 5.1.0"
+		since "1.0.0, zsv_5.1.0"
 	}
 	field {
 		name "description"
 		desc "资源的详细描述"
 		type "String"
-		since "1.0.1, zsv 5.1.0"
+		since "1.0.0, zsv_5.1.0"
 	}
 	ref {
 		name "category"
 		path "org.zstack.log.server.LogServerInventory.category"
 		desc "null"
 		type "LogCategory"
-		since "1.0.1, zsv 5.1.0"
+		since "1.0.0, zsv_5.1.0"
 		clz LogCategory.class
 	}
 	ref {
@@ -40,7 +40,7 @@ doc {
 		path "org.zstack.log.server.LogServerInventory.type"
 		desc "null"
 		type "LogType"
-		since "1.0.1, zsv 5.1.0"
+		since "1.0.0, zsv_5.1.0"
 		clz LogType.class
 	}
 	ref {
@@ -48,25 +48,25 @@ doc {
 		path "org.zstack.log.server.LogServerInventory.level"
 		desc "null"
 		type "LogLevel"
-		since "1.0.1, zsv 5.1.0"
+		since "1.0.0, zsv_5.1.0"
 		clz LogLevel.class
 	}
 	field {
 		name "configuration"
 		desc ""
 		type "String"
-		since "1.0.1, zsv 5.1.0"
+		since "1.0.0, zsv_5.1.0"
 	}
 	field {
 		name "createDate"
 		desc "创建时间"
 		type "Timestamp"
-		since "1.0.1, zsv 5.1.0"
+		since "1.0.0, zsv_5.1.0"
 	}
 	field {
 		name "lastOpDate"
 		desc "最后一次修改时间"
 		type "Timestamp"
-		since "1.0.1, zsv 5.1.0"
+		since "1.0.0, zsv_5.1.0"
 	}
 }

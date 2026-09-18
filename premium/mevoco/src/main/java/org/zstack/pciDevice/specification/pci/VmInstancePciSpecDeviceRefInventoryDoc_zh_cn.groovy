@@ -8,30 +8,30 @@ doc {
 		name "vmInstanceUuid"
 		desc "云主机UUID"
 		type "String"
-		since "3.5.0"
+		since "zsv_3.5.0"
 	}
 	field {
 		name "pciSpecUuid"
 		desc "PCI设备规格UUID"
 		type "String"
-		since "3.5.0"
+		since "zsv_3.5.0"
 	}
 	field {
 		name "pciDeviceUuid"
 		desc "PCI设备UUID"
 		type "String"
-		since "3.5.0"
+		since "zsv_3.5.0"
 	}
 	field {
 		name "createDate"
 		desc "创建时间"
 		type "Timestamp"
-		since "3.5.0"
+		since "zsv_3.5.0"
 	}
 	field {
 		name "lastOpDate"
 		desc "最后一次修改时间"
 		type "Timestamp"
-		since "3.5.0"
+		since "zsv_3.5.0"
 	}
 }

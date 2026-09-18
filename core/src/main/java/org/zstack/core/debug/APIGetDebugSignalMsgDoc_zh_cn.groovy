@@ -28,7 +28,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "3.6.0"
+					since "zsv_3.6.0"
 				}
 				column {
 					name "userTags"
@@ -37,7 +37,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "3.6.0"
+					since "zsv_3.6.0"
 				}
 			}
 		}

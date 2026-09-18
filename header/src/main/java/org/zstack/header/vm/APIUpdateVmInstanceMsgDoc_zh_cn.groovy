@@ -28,7 +28,7 @@ doc {
 					location "url"
 					type "String"
 					optional false
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "name"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "description"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "state"
@@ -55,7 +55,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 					values ("Stopped","Running")
 				}
 				column {
@@ -65,7 +65,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "platform"
@@ -74,7 +74,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 					values ("Linux","Windows","Other","Paravirtualization","WindowsVirtio")
 				}
 				column {
@@ -84,7 +84,7 @@ doc {
 					location "body"
 					type "Integer"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "memorySize"
@@ -93,7 +93,7 @@ doc {
 					location "body"
 					type "Long"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "systemTags"
@@ -102,7 +102,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "userTags"
@@ -111,7 +111,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "guestOsType"
@@ -120,7 +120,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 3.11.2"
+					since "zsv_3.11.2"
 				}
 				column {
 					name "reservedMemorySize"
@@ -129,7 +129,7 @@ doc {
 					location "body"
 					type "Long"
 					optional true
-					since "zsv 3.17.21"
+					since "zsv_3.17.21"
 				}
 				column {
 					name "allocatorStrategy"
@@ -138,7 +138,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 4.10.10"
+					since "zsv_4.10.10"
 				}
 				column {
 					name "vmEncryption"
@@ -147,7 +147,7 @@ doc {
 					location "body"
 					type "Boolean"
 					optional true
-					since "1.0.1, zsv 5.1.0"
+					since "1.0.0, zsv_5.1.0"
 				}
 			}
 		}

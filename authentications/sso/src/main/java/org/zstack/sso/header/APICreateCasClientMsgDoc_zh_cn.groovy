@@ -28,7 +28,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "4.10.6"
+					since "zsv_4.10.6"
 				}
 				column {
 					name "description"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "4.10.6"
+					since "zsv_4.10.6"
 				}
 				column {
 					name "casServerLoginUrl"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "4.10.6"
+					since "zsv_4.10.6"
 				}
 				column {
 					name "casServerUrlPrefix"
@@ -55,7 +55,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "4.10.6"
+					since "zsv_4.10.6"
 				}
 				column {
 					name "serverName"
@@ -64,7 +64,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "4.10.6"
+					since "zsv_4.10.6"
 				}
 				column {
 					name "usernameProperty"
@@ -73,7 +73,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "4.10.6"
+					since "zsv_4.10.6"
 				}
 				column {
 					name "urlTemplate"
@@ -82,7 +82,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "4.10.6"
+					since "zsv_4.10.6"
 				}
 				column {
 					name "resourceUuid"
@@ -91,7 +91,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "4.10.6"
+					since "zsv_4.10.6"
 				}
 				column {
 					name "tagUuids"
@@ -100,7 +100,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "4.10.6"
+					since "zsv_4.10.6"
 				}
 				column {
 					name "systemTags"
@@ -109,7 +109,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "4.10.6"
+					since "zsv_4.10.6"
 				}
 				column {
 					name "userTags"
@@ -118,7 +118,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "4.10.6"
+					since "zsv_4.10.6"
 				}
 			}
 		}

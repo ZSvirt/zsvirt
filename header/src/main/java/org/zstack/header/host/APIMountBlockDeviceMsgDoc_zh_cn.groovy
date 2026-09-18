@@ -28,7 +28,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "zsv 4.3.0"
+					since "zsv_4.3.0"
 				}
 				column {
 					name "password"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 4.3.0"
+					since "zsv_4.3.0"
 				}
 				column {
 					name "sshPort"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "Integer"
 					optional false
-					since "zsv 4.3.0"
+					since "zsv_4.3.0"
 				}
 				column {
 					name "hostName"
@@ -55,7 +55,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "zsv 4.3.0"
+					since "zsv_4.3.0"
 				}
 				column {
 					name "path"
@@ -64,7 +64,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "zsv 4.3.0"
+					since "zsv_4.3.0"
 				}
 				column {
 					name "mountPoint"
@@ -73,7 +73,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "zsv 4.3.0"
+					since "zsv_4.3.0"
 				}
 				column {
 					name "filesystemType"
@@ -82,7 +82,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 4.3.0"
+					since "zsv_4.3.0"
 					values ("ext4","xfs")
 				}
 				column {
@@ -92,7 +92,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 4.3.0"
+					since "zsv_4.3.0"
 				}
 				column {
 					name "userTags"
@@ -101,7 +101,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 4.3.0"
+					since "zsv_4.3.0"
 				}
 			}
 		}

@@ -11,21 +11,21 @@ doc {
 		path "org.zstack.softwarePackage.header.APIUploadSoftwarePackageToBackupStorageEvent.inventory"
 		desc "null"
 		type "SoftwarePackageInventory"
-		since "5.0.0"
+		since "zsv_5.0.0"
 		clz SoftwarePackageInventory.class
 	}
 	field {
 		name "success"
 		desc ""
 		type "boolean"
-		since "5.0.0"
+		since "zsv_5.0.0"
 	}
 	ref {
 		name "error"
 		path "org.zstack.softwarePackage.header.APIUploadSoftwarePackageToBackupStorageEvent.error"
 		desc "错误码，若不为null，则表示操作失败, 操作成功时该字段为null"
 		type "ErrorCode"
-		since "5.0.0"
+		since "zsv_5.0.0"
 		clz ErrorCode.class
 	}
 }

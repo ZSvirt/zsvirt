@@ -28,7 +28,7 @@ doc {
 					location "url"
 					type "String"
 					optional false
-					since "2.6.0"
+					since "zsv_2.6.0"
 				}
 				column {
 					name "name"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "2.6.0"
+					since "zsv_2.6.0"
 				}
 				column {
 					name "description"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "2.6.0"
+					since "zsv_2.6.0"
 				}
 				column {
 					name "password"
@@ -55,7 +55,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "2.6.0"
+					since "zsv_2.6.0"
 				}
 				column {
 					name "platform"
@@ -64,7 +64,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "2.6.0"
+					since "zsv_2.6.0"
 					values ("Linux")
 				}
 				column {
@@ -74,7 +74,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "2.6.0"
+					since "zsv_2.6.0"
 				}
 				column {
 					name "userTags"
@@ -83,7 +83,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "2.6.0"
+					since "zsv_2.6.0"
 				}
 			}
 		}

@@ -28,7 +28,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "2.2.2"
+					since "zsv_2.2.2"
 				}
 				column {
 					name "virtualRouterOfferingUuid"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "2.2.2"
+					since "zsv_2.2.2"
 				}
 				column {
 					name "description"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "2.2.2"
+					since "zsv_2.2.2"
 				}
 				column {
 					name "resourceUuid"
@@ -55,7 +55,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "2.2.2"
+					since "zsv_2.2.2"
 				}
 				column {
 					name "systemTags"
@@ -64,7 +64,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "2.2.2"
+					since "zsv_2.2.2"
 				}
 				column {
 					name "userTags"
@@ -73,7 +73,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "2.2.2"
+					since "zsv_2.2.2"
 				}
 				column {
 					name "zoneUuid"
@@ -82,7 +82,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.10.0"
+					since "zsv_3.10.0"
 				}
 				column {
 					name "clusterUuid"
@@ -91,7 +91,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.10.0"
+					since "zsv_3.10.0"
 				}
 				column {
 					name "hostUuid"
@@ -100,7 +100,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.10.0"
+					since "zsv_3.10.0"
 				}
 				column {
 					name "primaryStorageUuidForRootVolume"
@@ -109,7 +109,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.14.12"
+					since "zsv_3.14.12"
 				}
 				column {
 					name "rootVolumeSystemTags"
@@ -118,7 +118,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.14.12"
+					since "zsv_3.14.12"
 				}
 				column {
 					name "tagUuids"
@@ -127,7 +127,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.4.0"
+					since "zsv_3.4.0"
 				}
 				column {
 					name "vmNicParams"
@@ -136,7 +136,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "4.2.0"
+					since "zsv_4.2.0"
 				}
 			}
 		}

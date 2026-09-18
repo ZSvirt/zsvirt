@@ -28,7 +28,7 @@ doc {
 					location "query"
 					type "String"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "imageUuid"
@@ -37,7 +37,7 @@ doc {
 					location "query"
 					type "String"
 					optional false
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "l3NetworkUuids"
@@ -46,7 +46,7 @@ doc {
 					location "query"
 					type "List"
 					optional false
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "rootDiskOfferingUuid"
@@ -55,7 +55,7 @@ doc {
 					location "query"
 					type "String"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "dataDiskOfferingUuids"
@@ -64,7 +64,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "zoneUuid"
@@ -73,7 +73,7 @@ doc {
 					location "query"
 					type "String"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "clusterUuid"
@@ -82,7 +82,7 @@ doc {
 					location "query"
 					type "String"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "defaultL3NetworkUuid"
@@ -91,7 +91,7 @@ doc {
 					location "query"
 					type "String"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "cpuNum"
@@ -100,7 +100,7 @@ doc {
 					location "query"
 					type "Integer"
 					optional true
-					since "zsv 3.10.0"
+					since "zsv_3.10.0"
 				}
 				column {
 					name "memorySize"
@@ -109,7 +109,7 @@ doc {
 					location "query"
 					type "Long"
 					optional true
-					since "zsv 3.10.0"
+					since "zsv_3.10.0"
 				}
 				column {
 					name "systemTags"
@@ -118,7 +118,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "userTags"
@@ -127,7 +127,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "rootDiskSize"
@@ -136,7 +136,7 @@ doc {
 					location "query"
 					type "Long"
 					optional true
-					since "zsv 3.11.2"
+					since "zsv_3.11.2"
 				}
 			}
 		}

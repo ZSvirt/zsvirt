@@ -10,18 +10,18 @@ doc {
 		name "l3NetworkUuid"
 		desc "三层网络UUID"
 		type "String"
-		since "zsv 0.6"
+		since "zsv_0.6"
 	}
 	field {
 		name "networkServiceProviderUuid"
 		desc "网络服务提供模块UUID"
 		type "String"
-		since "zsv 0.6"
+		since "zsv_0.6"
 	}
 	field {
 		name "networkServiceType"
 		desc ""
 		type "String"
-		since "zsv 0.6"
+		since "zsv_0.6"
 	}
 }

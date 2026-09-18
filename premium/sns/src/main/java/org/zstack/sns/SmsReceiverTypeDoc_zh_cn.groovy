@@ -10,6 +10,6 @@ doc {
 		name "AliyunSms"
 		desc "阿里云短信"
 		type "SmsReceiverType"
-		since "3.7.0"
+		since "zsv_3.7.0"
 	}
 }

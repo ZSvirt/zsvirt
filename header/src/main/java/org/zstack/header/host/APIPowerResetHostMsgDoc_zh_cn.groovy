@@ -28,7 +28,7 @@ doc {
 					location "url"
 					type "String"
 					optional false
-					since "zsv 3.17.0"
+					since "zsv_3.17.0"
 				}
 				column {
 					name "method"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 3.17.0"
+					since "zsv_3.17.0"
 					values ("AUTO","AGENT","IPMI")
 				}
 				column {
@@ -47,7 +47,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 3.17.0"
+					since "zsv_3.17.0"
 				}
 				column {
 					name "userTags"
@@ -56,7 +56,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 3.17.0"
+					since "zsv_3.17.0"
 				}
 				column {
 					name "returnEarly"
@@ -65,7 +65,7 @@ doc {
 					location "body"
 					type "boolean"
 					optional true
-					since "zsv 3.17.0"
+					since "zsv_3.17.0"
 				}
 			}
 		}

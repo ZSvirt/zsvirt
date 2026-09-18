@@ -27,7 +27,7 @@ doc {
 					location "url"
 					type "String"
 					optional false
-					since "zsv 0.6"
+					since "zsv_0.6"
 					
 				}
 				column {
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "zsv 0.6"
+					since "zsv_0.6"
 					
 				}
 				column {
@@ -47,7 +47,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 					
 				}
 				column {
@@ -57,7 +57,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "zsv 0.6"
+					since "zsv_0.6"
 					
 				}
 				column {
@@ -67,7 +67,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 					
 				}
 				column {
@@ -77,7 +77,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "zsv 0.6"
+					since "zsv_0.6"
 					values ("simple","cron")
 				}
 				column {
@@ -87,7 +87,7 @@ doc {
 					location "body"
 					type "Integer"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 					
 				}
 				column {
@@ -97,7 +97,7 @@ doc {
 					location "body"
 					type "Integer"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 					
 				}
 				column {
@@ -107,7 +107,7 @@ doc {
 					location "body"
 					type "Long"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 					
 				}
 				column {
@@ -117,7 +117,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 					
 				}
 				column {
@@ -127,7 +127,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 					
 				}
 				column {
@@ -137,7 +137,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 					
 				}
 				column {
@@ -147,7 +147,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 					
 				}
 			}

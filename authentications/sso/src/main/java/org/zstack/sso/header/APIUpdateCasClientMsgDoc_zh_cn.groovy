@@ -28,7 +28,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "4.3.0"
+					since "zsv_4.3.0"
 				}
 				column {
 					name "description"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "4.3.0"
+					since "zsv_4.3.0"
 				}
 				column {
 					name "name"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "4.3.0"
+					since "zsv_4.3.0"
 				}
 				column {
 					name "casServerLoginUrl"
@@ -55,7 +55,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "4.3.0"
+					since "zsv_4.3.0"
 				}
 				column {
 					name "casServerUrlPrefix"
@@ -64,7 +64,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "4.3.0"
+					since "zsv_4.3.0"
 				}
 				column {
 					name "serverName"
@@ -73,7 +73,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "4.3.0"
+					since "zsv_4.3.0"
 				}
 				column {
 					name "usernameProperty"
@@ -82,7 +82,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "4.10.6"
+					since "zsv_4.10.6"
 				}
 				column {
 					name "systemTags"
@@ -91,7 +91,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "4.3.0"
+					since "zsv_4.3.0"
 				}
 				column {
 					name "userTags"
@@ -100,7 +100,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "4.3.0"
+					since "zsv_4.3.0"
 				}
 			}
 		}

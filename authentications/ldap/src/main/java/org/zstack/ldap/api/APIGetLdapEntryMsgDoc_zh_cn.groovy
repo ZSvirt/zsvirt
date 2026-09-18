@@ -28,7 +28,7 @@ doc {
 					location "query"
 					type "String"
 					optional false
-					since "4.3.0"
+					since "zsv_4.3.0"
 				}
 				column {
 					name "systemTags"
@@ -37,7 +37,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "4.3.0"
+					since "zsv_4.3.0"
 				}
 				column {
 					name "userTags"
@@ -46,7 +46,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "4.3.0"
+					since "zsv_4.3.0"
 				}
 				column {
 					name "limit"
@@ -55,7 +55,7 @@ doc {
 					location "query"
 					type "Integer"
 					optional true
-					since "4.3.0"
+					since "zsv_4.3.0"
 				}
 				column {
 					name "ldapServerUuid"
@@ -64,7 +64,7 @@ doc {
 					location "query"
 					type "String"
 					optional true
-					since "4.3.0"
+					since "zsv_4.3.0"
 				}
 				column {
 					name "searchAllAttributes"
@@ -73,7 +73,7 @@ doc {
 					location "query"
 					type "boolean"
 					optional true
-					since "4.10.28"
+					since "zsv_4.10.28"
 				}
 				column {
 					name "returningAttributes"
@@ -82,7 +82,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "4.10.28"
+					since "zsv_4.10.28"
 				}
 			}
 		}

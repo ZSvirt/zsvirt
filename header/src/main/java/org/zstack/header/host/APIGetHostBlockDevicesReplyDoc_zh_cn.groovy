@@ -12,21 +12,21 @@ doc {
 		path "org.zstack.header.host.APIGetHostBlockDevicesReply.blockDevices"
 		desc "null"
 		type "List"
-		since "zsv 4.10.0"
+		since "zsv_4.10.0"
 		clz BlockDevice.class
 	}
 	field {
 		name "success"
 		desc ""
 		type "boolean"
-		since "zsv 4.10.0"
+		since "zsv_4.10.0"
 	}
 	ref {
 		name "error"
 		path "org.zstack.header.host.APIGetHostBlockDevicesReply.error"
 		desc "错误码，若不为null，则表示操作失败, 操作成功时该字段为null",false
 		type "ErrorCode"
-		since "zsv 4.10.0"
+		since "zsv_4.10.0"
 		clz ErrorCode.class
 	}
 }

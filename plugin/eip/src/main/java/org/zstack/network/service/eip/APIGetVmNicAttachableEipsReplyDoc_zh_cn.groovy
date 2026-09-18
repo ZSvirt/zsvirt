@@ -12,21 +12,21 @@ doc {
 		path "org.zstack.network.service.eip.APIGetVmNicAttachableEipsReply.inventories"
 		desc "虚拟机弹性 IP 清单列表"
 		type "List"
-		since "3.13.18"
+		since "zsv_3.13.18"
 		clz EipInventory.class
 	}
 	field {
 		name "success"
 		desc "请求是否成功"
 		type "boolean"
-		since "3.13.18"
+		since "zsv_3.13.18"
 	}
 	ref {
 		name "error"
 		path "org.zstack.network.service.eip.APIGetVmNicAttachableEipsReply.error"
 		desc "错误码，若不为null，则表示操作失败, 操作成功时该字段为null"
 		type "ErrorCode"
-		since "3.13.18"
+		since "zsv_3.13.18"
 		clz ErrorCode.class
 	}
 }

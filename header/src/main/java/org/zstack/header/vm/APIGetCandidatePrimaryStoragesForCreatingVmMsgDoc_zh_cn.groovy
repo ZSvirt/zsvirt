@@ -28,7 +28,7 @@ doc {
 					location "query"
 					type "String"
 					optional false
-					since "zsv 2.1"
+					since "zsv_2.1"
 				}
 				column {
 					name "l3NetworkUuids"
@@ -37,7 +37,7 @@ doc {
 					location "query"
 					type "List"
 					optional false
-					since "zsv 2.1"
+					since "zsv_2.1"
 				}
 				column {
 					name "rootDiskOfferingUuid"
@@ -46,7 +46,7 @@ doc {
 					location "query"
 					type "String"
 					optional true
-					since "zsv 2.1"
+					since "zsv_2.1"
 				}
 				column {
 					name "rootDiskSize"
@@ -55,7 +55,7 @@ doc {
 					location "query"
 					type "Long"
 					optional true
-					since "zsv 3.11.2"
+					since "zsv_3.11.2"
 				}
 				column {
 					name "dataDiskOfferingUuids"
@@ -64,7 +64,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "zsv 2.1"
+					since "zsv_2.1"
 				}
 				column {
 					name "dataDiskSizes"
@@ -73,7 +73,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "zsv 3.13.9"
+					since "zsv_3.13.9"
 				}
 				column {
 					name "zoneUuid"
@@ -82,7 +82,7 @@ doc {
 					location "query"
 					type "String"
 					optional true
-					since "zsv 2.1"
+					since "zsv_2.1"
 				}
 				column {
 					name "clusterUuid"
@@ -91,7 +91,7 @@ doc {
 					location "query"
 					type "String"
 					optional true
-					since "zsv 2.1"
+					since "zsv_2.1"
 				}
 				column {
 					name "defaultL3NetworkUuid"
@@ -100,7 +100,7 @@ doc {
 					location "query"
 					type "String"
 					optional true
-					since "zsv 2.1"
+					since "zsv_2.1"
 				}
 				column {
 					name "systemTags"
@@ -109,7 +109,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "zsv 2.1"
+					since "zsv_2.1"
 				}
 				column {
 					name "userTags"
@@ -118,7 +118,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "zsv 2.1"
+					since "zsv_2.1"
 				}
 			}
 		}

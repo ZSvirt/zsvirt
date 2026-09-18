@@ -10,12 +10,12 @@ doc {
 		name "Log4j2"
 		desc ""
 		type "LogType"
-		since "1.0.1, zsv 5.1.0"
+		since "1.0.0, zsv_5.1.0"
 	}
 	field {
 		name "FluentBit"
 		desc ""
 		type "LogType"
-		since "1.0.1, zsv 5.1.0"
+		since "1.0.0, zsv_5.1.0"
 	}
 }

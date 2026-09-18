@@ -28,7 +28,7 @@ doc {
 					location "query"
 					type "List"
 					optional false
-					since "4.10.20"
+					since "zsv_4.10.20"
 				}
 				column {
 					name "cidr"
@@ -37,7 +37,7 @@ doc {
 					location "query"
 					type "String"
 					optional true
-					since "4.10.20"
+					since "zsv_4.10.20"
 				}
 				column {
 					name "trafficTypes"
@@ -46,7 +46,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "4.10.20"
+					since "zsv_4.10.20"
 					values ("Management","Storage")
 				}
 				column {
@@ -56,7 +56,7 @@ doc {
 					location "query"
 					type "boolean"
 					optional true
-					since "4.10.20"
+					since "zsv_4.10.20"
 				}
 				column {
 					name "limit"
@@ -65,7 +65,7 @@ doc {
 					location "query"
 					type "Integer"
 					optional true
-					since "4.10.20"
+					since "zsv_4.10.20"
 				}
 				column {
 					name "start"
@@ -74,7 +74,7 @@ doc {
 					location "query"
 					type "Integer"
 					optional true
-					since "4.10.20"
+					since "zsv_4.10.20"
 				}
 				column {
 					name "systemTags"
@@ -83,7 +83,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "4.10.20"
+					since "zsv_4.10.20"
 				}
 				column {
 					name "userTags"
@@ -92,7 +92,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "4.10.20"
+					since "zsv_4.10.20"
 				}
 			}
 		}

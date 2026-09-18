@@ -10,12 +10,12 @@ doc {
 		name "Enabled"
 		desc "启用"
 		type "MonitorGroupState"
-		since "3.10.0"
+		since "zsv_3.10.0"
 	}
 	field {
 		name "Disabled"
 		desc "禁用"
 		type "MonitorGroupState"
-		since "3.10.0"
+		since "zsv_3.10.0"
 	}
 }

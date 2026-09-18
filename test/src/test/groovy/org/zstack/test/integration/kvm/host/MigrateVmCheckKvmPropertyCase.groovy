@@ -5,7 +5,7 @@ import org.zstack.kvm.KVMGlobalConfig
 import org.zstack.kvm.KVMSystemTags
 import org.zstack.sdk.HostInventory
 import org.zstack.sdk.VmInstanceInventory
-import org.zstack.test.integration.storage.StorageTest
+import org.zstack.test.integration.kvm.KvmTest
 import org.zstack.testlib.EnvSpec
 import org.zstack.testlib.SubCase
 import org.zstack.utils.data.SizeUnit
@@ -31,7 +31,7 @@ class MigrateVmCheckKvmPropertyCase extends SubCase {
 
     @Override
     void setup() {
-        useSpring(StorageTest.springSpec)
+        useSpring(KvmTest.springSpec)
     }
 
     @Override

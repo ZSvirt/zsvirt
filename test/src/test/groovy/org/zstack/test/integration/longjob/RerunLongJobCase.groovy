@@ -17,7 +17,6 @@ import org.zstack.sdk.BackupStorageInventory
 import org.zstack.sdk.LongJobInventory
 import org.zstack.sdk.RerunLongJobAction
 import org.zstack.test.integration.ZStackTest
-import org.zstack.test.integration.storage.Env
 import org.zstack.testlib.EnvSpec
 import org.zstack.testlib.SubCase
 
@@ -39,7 +38,7 @@ class RerunLongJobCase extends SubCase {
 
     @Override
     void environment() {
-        env = Env.localStorageOneVmEnv()
+        env = LongJobTest.localStorageOneVmEnv()
     }
 
     @Override

@@ -511,7 +511,7 @@ public abstract class HostBase extends AbstractHost {
                                 public void run(MessageReply reply) {
                                     if (!reply.isSuccess()) {
                                         vmFailedToMigrate.put(msg.getVmInstanceUuid(), reply.getError());
-                                        recorder.withFailReason(reply.getError().getDetails())
+                                        recorder.withFailReason(reply.getError().getReadableDetails())
                                                 .end(null);
                                     } else {
                                         recorder.end(getVmHostUuid(vmUuid));

@@ -17,6 +17,7 @@ import javax.persistence.Tuple;
 public class VmSchedHistoryRecorder {
     public static final String TYPE_HA = "VMHA";
     public static final String TYPE_HOST_MAINTENANCE = "HMT";
+    public static final int REASON_MAX_LENGTH = 10000;
 
     private final String vmInstanceUuid;
     private final String schedType;
@@ -84,12 +85,14 @@ public class VmSchedHistoryRecorder {
     }
 
     public VmSchedHistoryRecorder withSchedReason(String schedReason) {
-        this.schedReason = schedReason;
+        this.schedReason = (schedReason.length() > REASON_MAX_LENGTH) ?
+                schedReason.substring(0, REASON_MAX_LENGTH - 3) + "..." : schedReason;
         return this;
     }
 
     public VmSchedHistoryRecorder withFailReason(String failReason) {
-        this.failReason = failReason;
+        this.failReason = (failReason.length() > REASON_MAX_LENGTH) ?
+                failReason.substring(0, REASON_MAX_LENGTH - 3) + "..." : failReason;
         return this;
     }
 

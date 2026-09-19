@@ -38,7 +38,7 @@ class WindowsADCase extends SubCase {
 
     @Override
     void environment() {
-        env = env{
+        env = makeEnv {
             zone {
                 name = "zone"
                 description = "test"

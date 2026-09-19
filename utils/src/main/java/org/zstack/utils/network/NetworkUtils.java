@@ -814,7 +814,11 @@ public class NetworkUtils {
     }
 
     public static String convertNetmask(Integer prefix) {
-        int value = 0xffffffff << (32 - prefix);
+        if (prefix == null || prefix < 0 || prefix > 32) {
+            throw new IllegalArgumentException("IPv4 prefix length must be between 0 and 32");
+        }
+
+        int value = prefix == 0 ? 0 : 0xffffffff << (32 - prefix);
         byte[] bytes = new byte[]{
                 (byte) (value >>> 24),
                 (byte) (value >> 16 & 0xff),

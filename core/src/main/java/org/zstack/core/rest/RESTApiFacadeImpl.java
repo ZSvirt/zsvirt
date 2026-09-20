@@ -35,6 +35,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import javax.persistence.Query;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -48,6 +49,7 @@ public class RESTApiFacadeImpl extends AbstractService implements RESTApiFacade,
     private List<String> processingRequests = Collections.synchronizedList(new ArrayList<>(100));
     private Future<Void> restAPIVOCleanTask = null;
     private final static int restResultMaxLength = initMaxRestResultLength();
+    private static final int REST_RESULT_MEDIUMTEXT_MAX_BYTES = 16 * 1024 * 1024 - 1;
 
     private static final Set<String> maskSensitiveInfoClassNames = Platform.getReflections()
             .getTypesAnnotatedWith(MaskSensitiveInfo.class).stream()
@@ -260,6 +262,18 @@ public class RESTApiFacadeImpl extends AbstractService implements RESTApiFacade,
                     "the serialized REST API result[event:%s, length:%s characters] exceeds the maximum allowed length[%s characters]",
                     e.getClass().getName(), apiResult.length(), restResultMaxLength);
             return getFailedApiResult(e, errorCode);
+        }
+
+        // A UTF-16 code unit needs at most three UTF-8 bytes, so small results fit without encoding them again.
+        if (apiResult.length() > REST_RESULT_MEDIUMTEXT_MAX_BYTES / 3) {
+            int byteLength = apiResult.getBytes(StandardCharsets.UTF_8).length;
+            if (byteLength > REST_RESULT_MEDIUMTEXT_MAX_BYTES) {
+                ErrorCode errorCode = errf.instantiateErrorCode(
+                        SysErrors.REST_API_RESULT_TOO_LARGE,
+                        "the serialized REST API result[event:%s, length:%s UTF-8 bytes] exceeds the maximum database size[%s bytes]",
+                        e.getClass().getName(), byteLength, REST_RESULT_MEDIUMTEXT_MAX_BYTES);
+                return getFailedApiResult(e, errorCode);
+            }
         }
 
         return apiResult;

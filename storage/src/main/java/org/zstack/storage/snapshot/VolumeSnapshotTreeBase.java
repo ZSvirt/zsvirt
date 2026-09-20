@@ -837,6 +837,7 @@ public class VolumeSnapshotTreeBase {
         flow(new NoRollbackFlow() {
             VmInstanceState vmState;
             String srcSnapshotParentPath;
+            Long capacityToReturn;
 
             String __name__ = "delete-single-volume-snapshot";
 
@@ -1077,6 +1078,7 @@ public class VolumeSnapshotTreeBase {
                                 bus.send(rmsg);
 
                                 if (Objects.equals(srcSnapshotInv.getUuid(), volume.getUuid())) {
+                                    capacityToReturn = currentRoot.getSize();
                                     markSnapshotAsVolume(VolumeInventory.valueOf(volume), size, dstSnapshotInv.getPrimaryStorageInstallPath(), newInstallPathSize);
                                     return;
                                 }
@@ -1325,6 +1327,9 @@ public class VolumeSnapshotTreeBase {
                             public void run(FlowTrigger trigger, Map data) {
                                 VolumeSnapshotPrimaryStorageDeletionMsg pmsg = new VolumeSnapshotPrimaryStorageDeletionMsg();
                                 pmsg.setUuid(currentRoot.getUuid());
+                                if (capacityToReturn != null) {
+                                    pmsg.setCapacityToReturn(capacityToReturn);
+                                }
                                 bus.makeTargetServiceIdByResourceUuid(pmsg, VolumeSnapshotConstant.SERVICE_ID, currentRoot.getPrimaryStorageUuid());
                                 bus.send(pmsg, new CloudBusCallBack(trigger) {
                                     @Override

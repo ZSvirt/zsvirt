@@ -9,6 +9,8 @@ public class VolumeSnapshotPrimaryStorageDeletionMsg extends NeedReplyMessage im
     private boolean deleteOnPrimaryStorage;
     private String volumeUuid;
     private boolean volumeDelete = false;
+    private Long capacityToReturn;
+
     /**
      * @ignore
      */
@@ -60,5 +62,13 @@ public class VolumeSnapshotPrimaryStorageDeletionMsg extends NeedReplyMessage im
 
     public void setVolumeDelete(boolean volumeDelete) {
         this.volumeDelete = volumeDelete;
+    }
+
+    public Long getCapacityToReturn() {
+        return capacityToReturn;
+    }
+
+    public void setCapacityToReturn(long capacityToReturn) {
+        this.capacityToReturn = capacityToReturn;
     }
 }

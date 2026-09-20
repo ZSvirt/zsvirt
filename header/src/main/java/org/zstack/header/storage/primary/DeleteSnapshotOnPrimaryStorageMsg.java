@@ -7,6 +7,7 @@ import org.zstack.header.storage.snapshot.VolumeSnapshotInventory;
  */
 public class DeleteSnapshotOnPrimaryStorageMsg extends NeedReplyMessage implements PrimaryStorageMessage {
     private VolumeSnapshotInventory snapshot;
+    private Long capacityToReturn;
 
     @Override
     public String getPrimaryStorageUuid() {
@@ -19,5 +20,13 @@ public class DeleteSnapshotOnPrimaryStorageMsg extends NeedReplyMessage implemen
 
     public void setSnapshot(VolumeSnapshotInventory snapshot) {
         this.snapshot = snapshot;
+    }
+
+    public long getCapacityToReturn() {
+        return capacityToReturn == null ? snapshot.getSize() : capacityToReturn;
+    }
+
+    public void setCapacityToReturn(long capacityToReturn) {
+        this.capacityToReturn = capacityToReturn;
     }
 }

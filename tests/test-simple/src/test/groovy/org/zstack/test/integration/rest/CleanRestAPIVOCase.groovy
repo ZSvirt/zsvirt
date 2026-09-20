@@ -1,9 +1,15 @@
 package org.zstack.test.integration.rest
 
+import org.zstack.core.CoreGlobalProperty
+import org.zstack.core.cloudbus.CloudBus
+import org.zstack.core.rest.RESTApiDecoder
 import org.zstack.core.rest.RESTApiFacadeImpl
 import org.zstack.core.rest.RESTApiGlobalProperty
 import org.zstack.header.rest.RestAPIState
 import org.zstack.header.rest.RestAPIVO
+import org.zstack.header.zone.APICreateZoneEvent
+import org.zstack.header.zone.APICreateZoneMsg
+import org.zstack.header.zone.ZoneInventory
 import org.zstack.test.integration.SimpleTest
 import org.zstack.testlib.EnvSpec
 import org.zstack.testlib.SubCase
@@ -48,10 +54,48 @@ class CleanRestAPIVOCase extends SubCase{
             mgr = entityManagerFactory.createEntityManager()
             tran = mgr.getTransaction()
 
+            testOversizedRestAPIResultReturnsError()
             testCleanRestAPIVO()
             testNotCleanRestAPIVO()
             deleteRestAPIVO()
         }
+    }
+
+    void testOversizedRestAPIResultReturnsError() {
+        int maxLength = CoreGlobalProperty.REST_API_RESULT_MAX_LENGTH
+        String description = "x" * maxLength
+
+        env.message(APICreateZoneMsg.class) { APICreateZoneMsg request, CloudBus bus ->
+            APICreateZoneEvent event = new APICreateZoneEvent(request.id)
+            ZoneInventory inventory = new ZoneInventory()
+            inventory.name = request.name
+            inventory.description = description
+            event.inventory = inventory
+            assert RESTApiDecoder.dump(event).length() > maxLength
+            bus.publish(event)
+        }
+
+        APICreateZoneMsg request = new APICreateZoneMsg()
+        request.name = "oversized-rest-result"
+        def sent = restApiImpl.send(request)
+
+        def response
+        retryInSecs {
+            response = restApiImpl.getResult(sent.uuid)
+            assert response.state == RestAPIState.Done.toString()
+        }
+
+        APICreateZoneEvent failedEvent = RESTApiDecoder.loads(response.result) as APICreateZoneEvent
+        assert !failedEvent.success
+        assert failedEvent.inventory == null
+        assert failedEvent.error.code == "SYS.1020"
+        assert failedEvent.error.details.contains(APICreateZoneEvent.class.name)
+        assert failedEvent.error.details.contains("exceeds the maximum allowed length")
+        assert failedEvent.error.details.contains("$maxLength characters")
+
+        tran.begin()
+        mgr.remove(mgr.find(RestAPIVO.class, sent.uuid))
+        tran.commit()
     }
 
     void testCleanRestAPIVO() {

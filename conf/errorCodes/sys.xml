@@ -102,6 +102,11 @@
     </code>
 
     <code>
+        <id>1020</id>
+        <description>The REST API result exceeds the maximum allowed length</description>
+    </code>
+
+    <code>
         <id>1090</id>
         <description>Multiple reasons</description>
     </code>

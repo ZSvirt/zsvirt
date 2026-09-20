@@ -43,6 +43,7 @@ public class CbtTaskMonitor implements VmStateChangedExtensionPoint, ResizeVolum
         DisableCbtTaskMsg msg = new DisableCbtTaskMsg();
         msg.setUuid(task.getUuid());
         msg.setForce(true);
+        msg.setFromVmStateChange(true);
         bus.makeTargetServiceIdByResourceUuid(msg, CbtBackupConstant.SERVICE_ID, vm.getUuid());
         MessageReply reply = bus.call(msg);
         if (!reply.isSuccess()) {

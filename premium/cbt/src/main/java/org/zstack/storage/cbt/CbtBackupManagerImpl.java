@@ -399,7 +399,7 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
         thdf.chainSubmit(new ChainTask(msg) {
             @Override
             public String getSyncSignature() {
-                return getVmSyncSignature(vmUuid);
+                return String.format("enable-cbt-host-%s", msg.getUuid());
             }
 
             @Override
@@ -430,6 +430,13 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
                 }
                 if (taskVO.getStatus() == CbtTaskStatus.Running) {
                     reply.setError(operr("Cbt task[uuid: %s] has already enabled, please disable it.", msg.getUuid()));
+                    bus.reply(msg, reply);
+                    chain.next();
+                    return;
+                }
+                if (taskVO.getStatus() == CbtTaskStatus.Failed && hasPendingCbtCleanupRecords(msg.getUuid())) {
+                    reply.setError(operr("Cbt task[uuid: %s] has pending cleanup records, please disable it before enabling again.",
+                            msg.getUuid()));
                     bus.reply(msg, reply);
                     chain.next();
                     return;
@@ -513,7 +520,7 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
                 DisableCbtTaskMsg dmsg = new DisableCbtTaskMsg();
                 dmsg.setUuid(taskUuid);
                 dmsg.setForce(force);
-                bus.makeLocalServiceId(dmsg, CbtBackupConstant.SERVICE_ID);
+                bus.makeTargetServiceIdByResourceUuid(dmsg, CbtBackupConstant.SERVICE_ID, vmUuid);
                 bus.send(dmsg, new CloudBusCallBack(dmsg) {
                     @Override
                     public void run(MessageReply reply) {
@@ -528,7 +535,7 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
 
             @Override
             public boolean skip(Map data) {
-                return vmNotRunning(vmUuid) || cbtNotRunning(taskUuid);
+                return vmNotRunning(vmUuid) || (cbtNotRunning(taskUuid) && !hasCbtCleanupRecords(taskUuid));
             }
         }).then(new NoRollbackFlow() {
             final String __name__ = "destroy-retained-cbt-volumes";
@@ -735,6 +742,13 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
 
             @Override
             public void rollback(FlowRollback trigger, Map data) {
+                if (shouldRetainCbtVolumesAfterRollback(taskVO.getUuid())) {
+                    logger.warn(String.format("retain cbt[uuid:%s] volumes because runtime cleanup is pending",
+                            taskVO.getUuid()));
+                    trigger.rollback();
+                    return;
+                }
+
                 destroyCbtVolumes(taskVO.getUuid(), new Completion(trigger) {
                     @Override
                     public void success() {
@@ -779,9 +793,14 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
                     return;
                 }
 
+                List<VolumeCbtBackupRecordVO> rollbackRecords = buildVolumeCbtBackupRecords(
+                        taskVO.getUuid(), bitmapName, volumeInfos, true);
+                dbf.persistCollection(rollbackRecords);
+
                 backend.rollbackVolumeCbtBackup(vmUuid, hostUuid, bitmapName, volumeInfos, new Completion(trigger) {
                     @Override
                     public void success() {
+                        dbf.removeCollection(rollbackRecords, VolumeCbtBackupRecordVO.class);
                         trigger.rollback();
                     }
 
@@ -875,7 +894,9 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
 
     private void handle(final DisableCbtTaskMsg msg) {
         String vmUuid = getVmUuidByCbtTaskUuid(msg.getUuid());
-        final String syncSignature = vmUuid == null ? String.format("disable-cbt-task-%s", msg.getUuid()) : getVmSyncSignature(vmUuid);
+        // VM state-change callbacks hold the VM queue while waiting for forced disable.
+        final String syncSignature = msg.isFromVmStateChange() || vmUuid == null
+                ? String.format("disable-cbt-task-%s", msg.getUuid()) : getVmSyncSignature(vmUuid);
         thdf.chainSubmit(new ChainTask(msg) {
             @Override
             public String getSyncSignature() {
@@ -934,7 +955,7 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
         }
 
         final String vmUuid = refVO.getResourceUuid();
-        if (!vmNotRunning(vmUuid)) {
+        if (!msg.isForce() && !vmNotRunning(vmUuid)) {
             ErrorCode err = validateVmStateForOperation(vmUuid, VmInstanceState.Running, "disable cbt task");
             if (err != null) {
                 completion.fail(err);
@@ -1308,6 +1329,27 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
                 .findValue();
     }
 
+    private boolean hasCbtCleanupRecords(String taskUuid) {
+        return Q.New(VolumeCbtBackupRecordVO.class)
+                .eq(VolumeCbtBackupRecordVO_.taskUuid, taskUuid)
+                .isExists();
+    }
+
+    private boolean hasPendingCbtCleanupRecords(String taskUuid) {
+        return Q.New(VolumeCbtBackupRecordVO.class)
+                .eq(VolumeCbtBackupRecordVO_.taskUuid, taskUuid)
+                .notNull(VolumeCbtBackupRecordVO_.cleanupAttemptUuid)
+                .isExists();
+    }
+
+    private boolean shouldRetainCbtVolumesAfterRollback(String taskUuid) {
+        List<VolumeCbtBackupRecordVO> records = Q.New(VolumeCbtBackupRecordVO.class)
+                .eq(VolumeCbtBackupRecordVO_.taskUuid, taskUuid)
+                .notNull(VolumeCbtBackupRecordVO_.cleanupAttemptUuid)
+                .list();
+        return CbtCleanupRecordPolicy.shouldRetainScratchVolumes(records);
+    }
+
 
     @Override
     public ErrorCode check(String vmUuid, String currentResourceUuid) {
@@ -1357,9 +1399,25 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
     }
 
     protected void persistVolumeCbtBackupRecord(String cbtTaskUuid, String lastBitmapName,
-                                                List<VolumeCbtBackupInfo> backupInfos, Completion completion) {
+                                                 List<VolumeCbtBackupInfo> backupInfos, Completion completion) {
+        List<VolumeCbtBackupRecordVO> records = buildVolumeCbtBackupRecords(cbtTaskUuid, lastBitmapName, backupInfos, false);
+        if (records.isEmpty()) {
+            completion.success();
+            return;
+        }
+        dbf.persistCollection(records);
+        completion.success();
+    }
+
+    private List<VolumeCbtBackupRecordVO> buildVolumeCbtBackupRecords(String cbtTaskUuid, String lastBitmapName,
+                                                                      List<VolumeCbtBackupInfo> backupInfos,
+                                                                      boolean onlyStarted) {
         List<VolumeCbtBackupRecordVO> records = new ArrayList<>(backupInfos.size());
+        String cleanupAttemptUuid = onlyStarted ? Platform.getUuid() : null;
         for (VolumeCbtBackupInfo info : backupInfos) {
+            if (onlyStarted && Strings.isNullOrEmpty(info.getScratchNodeName())) {
+                continue;
+            }
             VolumeCbtBackupRecordVO recodeVO = new VolumeCbtBackupRecordVO();
             recodeVO.setTaskUuid(cbtTaskUuid);
             recodeVO.setMode(info.getMode());
@@ -1368,13 +1426,9 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
             recodeVO.setTarget(info.getTarget());
             recodeVO.setVolumeUuid(info.getVolume().getVolumeUuid());
             recodeVO.setScratchNodeName(info.getScratchNodeName());
+            recodeVO.setCleanupAttemptUuid(cleanupAttemptUuid);
             records.add(recodeVO);
         }
-        if (records.isEmpty()) {
-            completion.success();
-            return;
-        }
-        dbf.persistCollection(records);
-        completion.success();
+        return records;
     }
 }

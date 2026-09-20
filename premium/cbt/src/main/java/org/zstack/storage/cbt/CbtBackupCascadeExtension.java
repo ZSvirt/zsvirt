@@ -8,6 +8,7 @@ import org.zstack.core.cascade.CascadeAction;
 import org.zstack.core.cascade.CascadeConstant;
 import org.zstack.core.cloudbus.CloudBus;
 import org.zstack.core.cloudbus.CloudBusCallBack;
+import org.zstack.core.db.Q;
 import org.zstack.core.db.SQLBatchWithReturn;
 import org.zstack.core.workflow.SimpleFlowChain;
 import org.zstack.header.cbt.*;
@@ -26,6 +27,7 @@ import org.zstack.utils.Utils;
 import org.zstack.utils.logging.CLogger;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 public class CbtBackupCascadeExtension extends AbstractCascadeExtension {
@@ -54,23 +56,37 @@ public class CbtBackupCascadeExtension extends AbstractCascadeExtension {
     }
 
     private void handleDeletion(CascadeAction action, Completion completion) {
+        boolean force = action.isActionCode(CascadeConstant.DELETION_FORCE_DELETE_CODE);
         FlowChain chain = new SimpleFlowChain();
         chain.setName("delete-cbt-task");
         chain.then(new NoRollbackFlow() {
             @Override
             public void run(FlowTrigger trigger, Map data) {
                 List<DeleteCbtTaskMsg> msgs = cbtBackupsDeletionMessagesFromAction(action);
-                logger.info(String.format("delete (%d) CBT tasks due to vm deletion", msgs.size()));
                 if (msgs == null || msgs.isEmpty()) {
                     trigger.next();
                     return;
                 }
+                logger.info(String.format("delete (%d) CBT tasks due to vm deletion", msgs.size()));
 
                 new While<>(msgs).step((msg, com) -> bus.send(msg, new CloudBusCallBack(com) {
                     @Override
                     public void run(MessageReply reply) {
                         if (!reply.isSuccess()) {
                             logger.warn(String.format("failed to delete cbt backup[uuid:%s], %s", msg.getUuid(), reply.getError()));
+                            if (force) {
+                                try {
+                                    if (!submitCbtTaskCleanupGC(msg.getUuid())) {
+                                        com.addError(reply.getError());
+                                    }
+                                } catch (Throwable t) {
+                                    logger.warn(String.format("failed to submit cleanup GC for CBT task[uuid:%s]",
+                                            msg.getUuid()), t);
+                                    com.addError(reply.getError());
+                                }
+                            } else {
+                                com.addError(reply.getError());
+                            }
                         }
 
                         com.done();
@@ -78,7 +94,11 @@ public class CbtBackupCascadeExtension extends AbstractCascadeExtension {
                 }), 10).run(new WhileDoneCompletion(completion) {
                     @Override
                     public void done(ErrorCodeList errorCodeList) {
-                        trigger.next();
+                        if (!errorCodeList.getCauses().isEmpty()) {
+                            trigger.fail(errorCodeList.getCauses().get(0));
+                        } else {
+                            trigger.next();
+                        }
                     }
                 });
             }
@@ -96,13 +116,30 @@ public class CbtBackupCascadeExtension extends AbstractCascadeExtension {
                     public void run(MessageReply reply) {
                         if (!reply.isSuccess()) {
                             logger.warn(String.format("failed to unexport volumes of vm[uuid:%s], %s", msg.getVmInstanceUuid(), reply.getError()));
+                            if (force) {
+                                try {
+                                    if (!submitUnexportNbdVolumesGC(msg)) {
+                                        com.addError(reply.getError());
+                                    }
+                                } catch (Throwable t) {
+                                    logger.warn(String.format("failed to submit unexport NBD GC for vm[uuid:%s]",
+                                            msg.getVmInstanceUuid()), t);
+                                    com.addError(reply.getError());
+                                }
+                            } else {
+                                com.addError(reply.getError());
+                            }
                         }
                         com.done();
                     }
                 }), 10).run(new WhileDoneCompletion(completion) {
                     @Override
                     public void done(ErrorCodeList errorCodeList) {
-                        trigger.next();
+                        if (!errorCodeList.getCauses().isEmpty()) {
+                            trigger.fail(errorCodeList.getCauses().get(0));
+                        } else {
+                            trigger.next();
+                        }
                     }
                 });
             }
@@ -140,7 +177,8 @@ public class CbtBackupCascadeExtension extends AbstractCascadeExtension {
 
                         DeleteCbtTaskMsg msg = new DeleteCbtTaskMsg();
                         msg.setUuid(cbtTaskUuid);
-                        bus.makeLocalServiceId(msg, CbtBackupConstant.SERVICE_ID);
+                        msg.setForce(action.isActionCode(CascadeConstant.DELETION_FORCE_DELETE_CODE));
+                        bus.makeTargetServiceIdByResourceUuid(msg, CbtBackupConstant.SERVICE_ID, vmInstanceUuid);
                         msgs.add(msg);
                     }
                     return msgs;
@@ -149,6 +187,45 @@ public class CbtBackupCascadeExtension extends AbstractCascadeExtension {
                 }
             }
         }.execute();
+    }
+
+    private boolean submitCbtTaskCleanupGC(String taskUuid) {
+        String vmUuid = Q.New(CbtTaskResourceRefVO.class)
+                .eq(CbtTaskResourceRefVO_.taskUuid, taskUuid)
+                .eq(CbtTaskResourceRefVO_.resourceType, VmInstanceVO.class.getSimpleName())
+                .select(CbtTaskResourceRefVO_.resourceUuid)
+                .findValue();
+        if (StringUtils.isEmpty(vmUuid)) {
+            logger.warn(String.format("cannot create cleanup GC for CBT task[uuid:%s]: VM reference not found", taskUuid));
+            return false;
+        }
+
+        CbtTaskCleanupGC gc = new CbtTaskCleanupGC();
+        gc.prepare(taskUuid, vmUuid);
+        if (StringUtils.isEmpty(gc.hostUuid)) {
+            logger.warn(String.format("cannot create cleanup GC for CBT task[uuid:%s]: host not found", taskUuid));
+            return false;
+        }
+        gc.NAME = String.format("gc-cbt-task-%s-on-host-%s", taskUuid, gc.hostUuid);
+        if (!gc.existedAndNotCompleted()) {
+            gc.submit(CbtGlobalConfig.CLEANUP_GC_INTERVAL.value(Long.class), TimeUnit.SECONDS);
+        }
+        return true;
+    }
+
+    private boolean submitUnexportNbdVolumesGC(UnexportNbdVolumesMsg msg) {
+        UnexportNbdVolumesGC gc = new UnexportNbdVolumesGC();
+        gc.prepare(msg.getVmInstanceUuid(), msg.getVolumeUuids());
+        if (StringUtils.isEmpty(gc.hostUuid) || CollectionUtils.isEmpty(gc.volumes)) {
+            logger.warn(String.format("cannot create unexport NBD GC for vm[uuid:%s]: cleanup payload is empty",
+                    msg.getVmInstanceUuid()));
+            return false;
+        }
+        gc.NAME = String.format("gc-unexport-nbd-volumes-for-vm-%s-on-host-%s", msg.getVmInstanceUuid(), gc.hostUuid);
+        if (!gc.existedAndNotCompleted()) {
+            gc.submit(CbtGlobalConfig.CLEANUP_GC_INTERVAL.value(Long.class), TimeUnit.SECONDS);
+        }
+        return true;
     }
 
     private List<UnexportNbdVolumesMsg> getUnexportVolumeMessagesFromAction(CascadeAction action) {

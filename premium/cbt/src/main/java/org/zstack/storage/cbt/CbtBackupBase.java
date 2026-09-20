@@ -121,7 +121,7 @@ public class CbtBackupBase {
         DeleteCbtTaskMsg dmsg = new DeleteCbtTaskMsg();
         dmsg.setUuid(msg.getUuid());
         dmsg.setForce(msg.isForce());
-        bus.makeLocalServiceId(dmsg, CbtBackupConstant.SERVICE_ID);
+        bus.makeTargetServiceIdByResourceUuid(dmsg, CbtBackupConstant.SERVICE_ID, getVmUuid());
         bus.send(dmsg, new CloudBusCallBack(dmsg) {
             @Override
             public void run(MessageReply reply) {
@@ -140,7 +140,7 @@ public class CbtBackupBase {
         DisableCbtTaskMsg dmsg = new DisableCbtTaskMsg();
         dmsg.setUuid(msg.getUuid());
         dmsg.setForce(msg.isForce());
-        bus.makeLocalServiceId(dmsg, CbtBackupConstant.SERVICE_ID);
+        bus.makeTargetServiceIdByResourceUuid(dmsg, CbtBackupConstant.SERVICE_ID, getVmUuid());
         bus.send(dmsg, new CloudBusCallBack(dmsg) {
             @Override
             public void run(MessageReply reply) {

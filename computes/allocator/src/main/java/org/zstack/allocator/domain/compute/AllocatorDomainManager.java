@@ -107,6 +107,7 @@ import static org.zstack.header.vm.VmInstanceConstant.USER_VM_TYPE;
 import static org.zstack.header.vm.VmInstanceState.*;
 import static org.zstack.header.volume.VolumeType.*;
 import static org.zstack.utils.CollectionDSL.*;
+import static org.zstack.utils.CollectionUtils.transform;
 import static org.zstack.utils.CollectionUtils.transformToSet;
 
 public class AllocatorDomainManager extends AbstractService {
@@ -479,10 +480,16 @@ public class AllocatorDomainManager extends AbstractService {
                 .eq(PrimaryStorageVO_.state, PrimaryStorageState.Enabled)
                 .eq(PrimaryStorageVO_.status, PrimaryStorageStatus.Connected)
                 .list()));
-        reply.setL3Networks(L3NetworkInventory.valueOf(Q.New(L3NetworkVO.class)
+
+        List<L3NetworkVO> l3List = Q.New(L3NetworkVO.class)
                 .eq(L3NetworkVO_.zoneUuid, zoneUuid)
                 .eq(L3NetworkVO_.state, L3NetworkState.Enabled)
-                .list()));
+                .list();
+        AccessibleResourceChecker checker = Resources.checker(msg.getSession())
+                .withResourceType(L3NetworkVO.class);
+        Set<String> filtered = new HashSet<>(checker.filterAccessible(transform(l3List, L3NetworkVO::getUuid)));
+        l3List.removeIf(l3 -> !filtered.contains(l3.getUuid()));
+        reply.setL3Networks(L3NetworkInventory.valueOf(l3List));
         bus.reply(msg, reply);
     }
 

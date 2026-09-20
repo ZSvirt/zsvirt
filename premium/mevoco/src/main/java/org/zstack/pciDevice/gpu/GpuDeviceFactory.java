@@ -78,7 +78,7 @@ public class GpuDeviceFactory implements PciDeviceTypeFactory, Component {
             if (gpu == null) {
                 continue;
             }
-            gpu.setDevice(vo.getDevice());
+            gpu = gpu.update(vo);
             if (vo.getAddonInfo() != null && !vo.getAddonInfo().isEmpty()) {
                 gpu.setMemory(SizeUtils.sizeStringToBytes(vo.getAddonInfo().get(GpuConstant.GPU_MEMORY_NAME).trim()));
                 gpu.setPower(Double.valueOf(vo.getAddonInfo().get(GpuConstant.GPU_POWER_NAME)

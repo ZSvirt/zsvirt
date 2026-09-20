@@ -209,11 +209,7 @@ abstract class Test extends ApiHelper implements Retry {
     }
 
     protected EnvSpec env(@DelegatesTo(strategy=Closure.DELEGATE_FIRST, value=EnvSpec.class) Closure c) {
-        def spec = new EnvSpec()
-        c.delegate = spec
-        c.resolveStrategy = Closure.DELEGATE_FIRST
-        c()
-        return spec
+        throw new Exception("please use makeEnv()")
     }
 
     protected SimpleEnvSpec senv(@DelegatesTo(strategy = Closure.DELEGATE_FIRST, value = SimpleEnvSpec.class) Closure c) {

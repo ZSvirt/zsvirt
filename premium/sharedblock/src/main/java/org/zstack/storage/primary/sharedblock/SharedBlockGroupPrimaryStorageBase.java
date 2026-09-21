@@ -1885,8 +1885,6 @@ public class SharedBlockGroupPrimaryStorageBase extends PrimaryStorageBase imple
 
         FlowChain chain = FlowChainBuilder.newSimpleFlowChain();
         chain.setName(String.format("takeover-primary-storage-%s", self.getUuid()));
-        chain.setData(new HashMap<>());
-
         chain.then(new NoRollbackFlow() {
             String __name__ = "check-primary-storage-consistency";
 

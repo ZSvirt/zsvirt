@@ -567,7 +567,7 @@ public class CephPrimaryStorageFactory implements PrimaryStorageFactory, CephCap
             String __name__ = "create-temporary-template";
 
             @Override
-            public void run(final FlowTrigger trigger, final Map data) {
+            public void run(final FlowTrigger trigger, final Map<String, Object> data) {
                 SyncVolumeSizeMsg msg = new SyncVolumeSizeMsg();
                 msg.setVolumeUuid(paramIn.getSnapshot().getVolumeUuid());
                 bus.makeTargetServiceIdByResourceUuid(msg, VolumeConstant.SERVICE_ID, paramIn.getSnapshot().getVolumeUuid());
@@ -575,7 +575,7 @@ public class CephPrimaryStorageFactory implements PrimaryStorageFactory, CephCap
                     @Override
                     public void run(MessageReply reply) {
                         if (reply.isSuccess()) {
-                            ParamOut paramOut = (ParamOut) data.get(ParamOut.class);
+                            ParamOut paramOut = (ParamOut) data.get(ParamOut.class.getSimpleName());
                             SyncVolumeSizeReply gr = reply.castReply();
                             paramOut.setActualSize(gr.getActualSize());
                             paramOut.setSize(gr.getSize());
@@ -592,8 +592,8 @@ public class CephPrimaryStorageFactory implements PrimaryStorageFactory, CephCap
             String __name__ = "upload-to-backup-storage";
 
             @Override
-            public void run(final FlowTrigger trigger, Map data) {
-                final ParamOut out = (ParamOut) data.get(ParamOut.class);
+            public void run(final FlowTrigger trigger, Map<String, Object> data) {
+                final ParamOut out = (ParamOut) data.get(ParamOut.class.getSimpleName());
                 BackupStorageAskInstallPathMsg ask = new BackupStorageAskInstallPathMsg();
                 ask.setImageUuid(paramIn.getImage().getUuid());
                 ask.setBackupStorageUuid(paramIn.getBackupStorageUuid());
@@ -629,8 +629,8 @@ public class CephPrimaryStorageFactory implements PrimaryStorageFactory, CephCap
             }
 
             @Override
-            public void rollback(FlowRollback trigger, Map data) {
-                final ParamOut out = (ParamOut) data.get(ParamOut.class);
+            public void rollback(FlowRollback trigger, Map<String, Object> data) {
+                final ParamOut out = (ParamOut) data.get(ParamOut.class.getSimpleName());
                 if (out.getBackupStorageInstallPath() != null) {
                     DeleteBitsOnBackupStorageMsg msg = new DeleteBitsOnBackupStorageMsg();
                     msg.setInstallPath(out.getBackupStorageInstallPath());

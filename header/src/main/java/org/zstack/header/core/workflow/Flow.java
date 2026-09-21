@@ -11,11 +11,11 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 public interface Flow {
-    void run(FlowTrigger trigger, Map data);
+    void run(FlowTrigger trigger, Map<String, Object> data);
 
-    void rollback(FlowRollback trigger, Map data);
+    void rollback(FlowRollback trigger, Map<String, Object> data);
 
-    default boolean skip(Map data) {
+    default boolean skip(Map<String, Object> data) {
         return false;
     }
 

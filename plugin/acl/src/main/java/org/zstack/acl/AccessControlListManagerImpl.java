@@ -361,7 +361,7 @@ public class AccessControlListManagerImpl extends AbstractService implements Acc
                 if (mode == APIDeleteMessage.DeletionMode.Permissive) {
                     fchain.then(new NoRollbackFlow() {
                         @Override
-                        public void run(final FlowTrigger trigger, Map data) {
+                        public void run(final FlowTrigger trigger, Map<String, Object> data) {
                             casf.asyncCascade(CascadeConstant.DELETION_CHECK_CODE, issuer, ctx, new Completion(trigger) {
                                 @Override
                                 public void success() {
@@ -376,7 +376,7 @@ public class AccessControlListManagerImpl extends AbstractService implements Acc
                         }
                     }).then(new NoRollbackFlow() {
                         @Override
-                        public void run(final FlowTrigger trigger, Map data) {
+                        public void run(final FlowTrigger trigger, Map<String, Object> data) {
                             casf.asyncCascade(CascadeConstant.DELETION_DELETE_CODE, issuer, ctx, new Completion(trigger) {
                                 @Override
                                 public void success() {
@@ -393,7 +393,7 @@ public class AccessControlListManagerImpl extends AbstractService implements Acc
                 } else {
                     fchain.then(new NoRollbackFlow() {
                         @Override
-                        public void run(final FlowTrigger trigger, Map data) {
+                        public void run(final FlowTrigger trigger, Map<String, Object> data) {
                             casf.asyncCascade(CascadeConstant.DELETION_FORCE_DELETE_CODE, issuer, ctx, new Completion(trigger) {
                                 @Override
                                 public void success() {
@@ -410,14 +410,14 @@ public class AccessControlListManagerImpl extends AbstractService implements Acc
                 }
                 fchain.done(new FlowDoneHandler(completion) {
                     @Override
-                    public void handle(Map data) {
+                    public void handle(Map<String, Object> data) {
                         new SQLBatch() {
                             @Override
                             protected void scripts() {
                                 List<AccessControlListEntryVO> entrys = Q.New(AccessControlListEntryVO.class)
                                         .eq(AccessControlListEntryVO_.aclUuid, aclVO.getUuid()).list();
                                 if (!entrys.isEmpty()) {
-                                    entrys.forEach( entry-> remove(entry));
+                                    entrys.forEach(this::remove);
                                 }
                                 remove(aclVO);
                             }
@@ -427,7 +427,7 @@ public class AccessControlListManagerImpl extends AbstractService implements Acc
                     }
                 }).error(new FlowErrorHandler(completion) {
                     @Override
-                    public void handle(ErrorCode errCode, Map data) {
+                    public void handle(ErrorCode errCode, Map<String, Object> data) {
                         completion.fail(errCode);
                         chain.next();
                     }

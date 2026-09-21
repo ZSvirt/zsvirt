@@ -49,7 +49,6 @@ import org.zstack.utils.logging.CLogger;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static java.util.Arrays.asList;
 import static org.zstack.core.Platform.argerr;
 import static org.zstack.core.Platform.operr;
 
@@ -599,8 +598,8 @@ public class ExternalPrimaryStorageFactory implements PrimaryStorageFactory, Com
 
         template.setUploadToBackupStorage(new Flow() {
             @Override
-            public void run(FlowTrigger trigger, Map data) {
-                final ParamOut out = (ParamOut) data.get(ParamOut.class);
+            public void run(FlowTrigger trigger, Map<String, Object> data) {
+                final ParamOut out = (ParamOut) data.get(ParamOut.class.getSimpleName());
 
                 CreateTemplateFromVolumeSnapshotOnPrimaryStorageMsg cmsg = new CreateTemplateFromVolumeSnapshotOnPrimaryStorageMsg();
                 cmsg.setSnapshotUuid(paramIn.getSnapshot().getUuid());
@@ -628,8 +627,8 @@ public class ExternalPrimaryStorageFactory implements PrimaryStorageFactory, Com
             }
 
             @Override
-            public void rollback(FlowRollback trigger, Map data) {
-                final ParamOut out = (ParamOut) data.get(ParamOut.class);
+            public void rollback(FlowRollback trigger, Map<String, Object> data) {
+                final ParamOut out = (ParamOut) data.get(ParamOut.class.getSimpleName());
                 if (out.getBackupStorageInstallPath() == null) {
                     trigger.rollback();
                     return;

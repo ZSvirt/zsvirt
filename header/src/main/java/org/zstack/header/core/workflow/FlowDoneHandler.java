@@ -16,5 +16,5 @@ public abstract class FlowDoneHandler extends AbstractCompletion {
         super(one, others);
     }
 
-    public abstract void handle(Map data);
+    public abstract void handle(Map<String, Object> data);
 }

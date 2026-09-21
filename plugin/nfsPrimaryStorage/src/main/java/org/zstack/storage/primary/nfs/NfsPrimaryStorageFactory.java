@@ -418,8 +418,8 @@ public class NfsPrimaryStorageFactory implements NfsPrimaryStorageManager, Prima
             String __name__ = "create-temporary-template";
 
             @Override
-            public void run(final FlowTrigger trigger, Map data) {
-                final ParamOut out = (ParamOut) data.get(ParamOut.class);
+            public void run(final FlowTrigger trigger, Map<String, Object> data) {
+                final ParamOut out = (ParamOut) data.get(ParamOut.class.getSimpleName());
 
                 CreateTemporaryVolumeFromSnapshotMsg msg = new CreateTemporaryVolumeFromSnapshotMsg();
                 msg.setPrimaryStorageUuid(paramIn.getPrimaryStorageUuid());
@@ -462,8 +462,8 @@ public class NfsPrimaryStorageFactory implements NfsPrimaryStorageManager, Prima
             String __name__ = "upload-to-backup-storage";
 
             @Override
-            public void run(final FlowTrigger trigger, Map data) {
-                final ParamOut out = (ParamOut) data.get(ParamOut.class);
+            public void run(final FlowTrigger trigger, Map<String, Object> data) {
+                final ParamOut out = (ParamOut) data.get(ParamOut.class.getSimpleName());
 
                 BackupStorageAskInstallPathMsg ask = new BackupStorageAskInstallPathMsg();
                 ask.setImageUuid(paramIn.getImage().getUuid());
@@ -502,8 +502,8 @@ public class NfsPrimaryStorageFactory implements NfsPrimaryStorageManager, Prima
             }
 
             @Override
-            public void rollback(FlowRollback trigger, Map data) {
-                final ParamOut out = (ParamOut) data.get(ParamOut.class);
+            public void rollback(FlowRollback trigger, Map<String, Object> data) {
+                final ParamOut out = (ParamOut) data.get(ParamOut.class.getSimpleName());
                 if (out.getBackupStorageInstallPath() != null) {
                     DeleteBitsOnBackupStorageMsg msg = new DeleteBitsOnBackupStorageMsg();
                     msg.setInstallPath(out.getBackupStorageInstallPath());

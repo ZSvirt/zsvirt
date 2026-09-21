@@ -173,13 +173,10 @@ public class BlockPrimaryStorageBase extends PrimaryStorageBase {
                     String mountPath = BlockPrimaryStorageGlobalConfig.BLOCK_PRIMARY_STORAGE_TMP_FOLDER_FOR_IMAGE_CACHE.value() + image.getInventory().getUuid();
                     BlockPrimaryStorageHostRefVO blockPrimaryStorageHostRefVO = getBlockPrimaryStorageHostRefVO(destHostUuid);
 
-                    Map data = new HashMap();
-                    data.put(BlockPrimaryStorageConstants.Params.BlockPrimaryStorageHostRef, blockPrimaryStorageHostRefVO);
-                    data.put(BlockPrimaryStorageConstants.Params.BlockPrimaryStorageBackend, blockPrimaryStorageDeviceBackend);
-                    data.put(BlockPrimaryStorageConstants.Params.VolumeProvisioningStrategy, VolumeProvisioningStrategy.ThinProvisioning);
-                    data.put(needPullImageChainToken, false);
-
-                    fchain.setData(data);
+                    fchain.putData(needPullImageChainToken, false);
+                    fchain.putData(BlockPrimaryStorageConstants.Params.BlockPrimaryStorageHostRef, blockPrimaryStorageHostRefVO);
+                    fchain.putData(BlockPrimaryStorageConstants.Params.BlockPrimaryStorageBackend, blockPrimaryStorageDeviceBackend);
+                    fchain.putData(BlockPrimaryStorageConstants.Params.VolumeProvisioningStrategy, VolumeProvisioningStrategy.ThinProvisioning);
                     fchain.setName(String.format("prepare-image-cache-on-block-ps-%s", requiredPrimaryStorageUuid));
 
                     fchain.then(new NoRollbackFlow() {
@@ -608,13 +605,10 @@ public class BlockPrimaryStorageBase extends PrimaryStorageBase {
         BlockPrimaryStorageDeviceBackend blockPrimaryStorageDeviceBackend = getBlockPrimaryStorageDeviceBackend(primaryStorageUuid);
         VolumeProvisioningStrategy volumeProvisioningStrategy = blockPrimaryStorageFactory.getVolumeProvisioningStrategy(primaryStorageUuid);
 
-        Map data = new HashMap();
-        data.put(BlockPrimaryStorageConstants.Params.BlockPrimaryStorageBackend, blockPrimaryStorageDeviceBackend);
-        data.put(BlockPrimaryStorageConstants.Params.BlockScsiLun, blockScsiLunVO);
-        data.put(BlockPrimaryStorageConstants.Params.VolumeProvisioningStrategy, volumeProvisioningStrategy);
-
         FlowChain chain = FlowChainBuilder.newSimpleFlowChain();
-        chain.setData(data);
+        chain.putData(BlockPrimaryStorageConstants.Params.BlockPrimaryStorageBackend, blockPrimaryStorageDeviceBackend);
+        chain.putData(BlockPrimaryStorageConstants.Params.BlockScsiLun, blockScsiLunVO);
+        chain.putData(BlockPrimaryStorageConstants.Params.VolumeProvisioningStrategy, volumeProvisioningStrategy);
         chain.setName("create empty volume");
         chain.then(new CreateLunFlow());
         chain.done(new FlowDoneHandler(completion) {
@@ -680,16 +674,13 @@ public class BlockPrimaryStorageBase extends PrimaryStorageBase {
         BlockPrimaryStorageHostRefVO blockPrimaryStorageHostRefVO = getBlockPrimaryStorageHostRefVO(msg.getDestHost().getUuid(), msg.getPrimaryStorageUuid());
         VolumeProvisioningStrategy volumeProvisioningStrategy = blockPrimaryStorageFactory.getVolumeProvisioningStrategy(msg.getPrimaryStorageUuid());
 
-        Map data = new HashMap();
-        data.put(BlockPrimaryStorageConstants.Params.BlockPrimaryStorageBackend, blockPrimaryStorageDeviceBackend);
-        data.put(BlockPrimaryStorageConstants.Params.BlockScsiLun, blockScsiLunVO);
-        data.put(BlockPrimaryStorageConstants.Params.TemplateLun, blockScsiTemplateLunVO);
-        data.put(BlockPrimaryStorageConstants.Params.VolumeProvisioningStrategy, volumeProvisioningStrategy);
-        data.put(BlockPrimaryStorageConstants.Params.BlockPrimaryStorageHostRef, blockPrimaryStorageHostRefVO);
-
         FlowChain chain = FlowChainBuilder.newSimpleFlowChain();
         chain.setName(String.format("create-root-volume-%s", msg.getVolume().getUuid()));
-        chain.setData(data);
+        chain.putData(BlockPrimaryStorageConstants.Params.BlockPrimaryStorageBackend, blockPrimaryStorageDeviceBackend);
+        chain.putData(BlockPrimaryStorageConstants.Params.BlockScsiLun, blockScsiLunVO);
+        chain.putData(BlockPrimaryStorageConstants.Params.TemplateLun, blockScsiTemplateLunVO);
+        chain.putData(BlockPrimaryStorageConstants.Params.VolumeProvisioningStrategy, volumeProvisioningStrategy);
+        chain.putData(BlockPrimaryStorageConstants.Params.BlockPrimaryStorageHostRef, blockPrimaryStorageHostRefVO);
         chain.then(new NoRollbackFlow() {
             String __name__ = "download volume template to primary storage";
             @Override
@@ -966,13 +957,9 @@ public class BlockPrimaryStorageBase extends PrimaryStorageBase {
                 .eq(BlockScsiLunVO_.volumeUuid, volumeUuid)
                 .find();
 
-
-        Map data = new HashMap();
-        data.put(BlockPrimaryStorageConstants.Params.BlockPrimaryStorageBackend, bkd);
-        data.put(BlockPrimaryStorageConstants.Params.VolumeProvisioningStrategy, VolumeProvisioningStrategy.ThinProvisioning);
-
         FlowChain chain = FlowChainBuilder.newSimpleFlowChain();
-        chain.setData(data);
+        chain.putData(BlockPrimaryStorageConstants.Params.BlockPrimaryStorageBackend, bkd);
+        chain.putData(BlockPrimaryStorageConstants.Params.VolumeProvisioningStrategy, VolumeProvisioningStrategy.ThinProvisioning);
         chain.setName(String.format("create-image-from-volume-%s", volumeUuid));
         chain.then(new Flow() {
             @Override
@@ -1168,13 +1155,10 @@ public class BlockPrimaryStorageBase extends PrimaryStorageBase {
         BlockPrimaryStorageDeviceBackend blockPrimaryStorageDeviceBackend = getBlockPrimaryStorageDeviceBackend(msg.getPrimaryStorageUuid());
         VolumeProvisioningStrategy volumeProvisioningStrategy = blockPrimaryStorageFactory.getVolumeProvisioningStrategy(msg.getPrimaryStorageUuid());
 
-        Map data = new HashMap();
-        data.put(BlockPrimaryStorageConstants.Params.BlockPrimaryStorageBackend, blockPrimaryStorageDeviceBackend);
-        data.put(BlockPrimaryStorageConstants.Params.BlockScsiLun, blockScsiLunVO);
-        data.put(BlockPrimaryStorageConstants.Params.VolumeProvisioningStrategy, volumeProvisioningStrategy);
-
         FlowChain chain = FlowChainBuilder.newSimpleFlowChain();
-        chain.setData(data);
+        chain.putData(BlockPrimaryStorageConstants.Params.BlockPrimaryStorageBackend, blockPrimaryStorageDeviceBackend);
+        chain.putData(BlockPrimaryStorageConstants.Params.BlockScsiLun, blockScsiLunVO);
+        chain.putData(BlockPrimaryStorageConstants.Params.VolumeProvisioningStrategy, volumeProvisioningStrategy);
         chain.setName("get install path for data volume download");
         chain.then(new CreateLunFlow());
         chain.done(new FlowDoneHandler(msg) {
@@ -2246,15 +2230,12 @@ public class BlockPrimaryStorageBase extends PrimaryStorageBase {
         BlockScsiLunVO newBlockScsiLunVO = new BlockScsiLunVO();
         newBlockScsiLunVO.setName(generateImageCacheLunName(msg.getImageUuid()));
 
-        Map data = new HashMap();
-        data.put(BlockPrimaryStorageConstants.Params.BlockPrimaryStorageBackend, bkd);
-        data.put(BlockPrimaryStorageConstants.Params.BlockScsiLun, newBlockScsiLunVO);
-        data.put(BlockPrimaryStorageConstants.Params.TemplateLun, blockScsiTemplateLunVO);
-
         FlowChain chain = FlowChainBuilder.newSimpleFlowChain();
         chain.setName(String.format("commit-volume-%s-as-image", msg.getVolumeUuid()));
         chain.enableProgressReport();
-        chain.setData(data);
+        chain.putData(BlockPrimaryStorageConstants.Params.BlockPrimaryStorageBackend, bkd);
+        chain.putData(BlockPrimaryStorageConstants.Params.BlockScsiLun, newBlockScsiLunVO);
+        chain.putData(BlockPrimaryStorageConstants.Params.TemplateLun, blockScsiTemplateLunVO);
         chain.then(new NoRollbackFlow() {
             String __name__ = String.format("find-host-for-committing-volume-%s", msg.getVolumeUuid());
             @Override

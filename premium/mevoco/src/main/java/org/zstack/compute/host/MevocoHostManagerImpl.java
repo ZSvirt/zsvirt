@@ -1206,9 +1206,7 @@ public class MevocoHostManagerImpl implements HostExtensionManager, PostHostConn
     private void handle(SetIpOnHostNetworkInterfaceMsg msg) {
         SetIpOnHostNetworkInterfaceReply reply = new SetIpOnHostNetworkInterfaceReply();
 
-        Map data = new HashMap();
         FlowChain chain = FlowChainBuilder.newShareFlowChain();
-        chain.setData(data);
         chain.setName(String.format("add-ip-to-interface-%s", msg.getInterfaceUuid()));
         chain.then(new ShareFlow() {
             @Override
@@ -1309,9 +1307,7 @@ public class MevocoHostManagerImpl implements HostExtensionManager, PostHostConn
     private void handle(SetIpOnHostNetworkBondingMsg msg) {
         SetIpOnHostNetworkBondingReply reply = new SetIpOnHostNetworkBondingReply();
 
-        Map data = new HashMap();
         FlowChain chain = FlowChainBuilder.newShareFlowChain();
-        chain.setData(data);
         chain.setName(String.format("add-ip-to-bonding-%s", msg.getBondingUuid()));
         chain.then(new ShareFlow() {
             @Override
@@ -2419,7 +2415,6 @@ public class MevocoHostManagerImpl implements HostExtensionManager, PostHostConn
     @Override
     public void afterHostConnected(HostInventory host) {
         FlowChain chain = FlowChainBuilder.newShareFlowChain();
-        chain.setData(new HashMap<>());
         chain.setName(String.format("sync-interface-data-after-host-%s-connected", host.getUuid()));
 
         chain.then(new ShareFlow() {

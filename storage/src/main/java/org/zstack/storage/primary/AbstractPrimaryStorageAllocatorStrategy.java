@@ -18,8 +18,6 @@ import java.util.List;
 import java.util.Map;
 
 import static org.zstack.header.Constants.THREAD_CONTEXT_API;
-import static org.zstack.utils.CollectionDSL.e;
-import static org.zstack.utils.CollectionDSL.map;
 
 @Configurable(preConstruction = true, autowire = Autowire.BY_TYPE)
 public abstract class AbstractPrimaryStorageAllocatorStrategy implements PrimaryStorageAllocatorStrategy {
@@ -60,7 +58,7 @@ public abstract class AbstractPrimaryStorageAllocatorStrategy implements Primary
         final Result ret = new Result();
         FlowChain allocatorChain = allocateBuilder.build();
         allocatorChain.setName(String.format("allocate-primary-storage-msg-%s", spec.getAllocationMessage().getId()));
-        allocatorChain.setData(map(e(PrimaryStorageConstant.AllocatorParams.SPEC, spec)));
+        allocatorChain.putData(PrimaryStorageConstant.AllocatorParams.SPEC, spec);
         allocatorChain.done(new FlowDoneHandler(null) {
             @Override
             public void handle(Map data) {
@@ -96,7 +94,8 @@ public abstract class AbstractPrimaryStorageAllocatorStrategy implements Primary
         FlowChain sorterChain = sortBuilder.build();
         String apiId = ThreadContext.get(THREAD_CONTEXT_API);
         sorterChain.setName(String.format("sort-allocated-primary-storage-msg-%s", spec.getAllocationMessage() == null ? apiId : spec.getAllocationMessage().getId()));
-        sorterChain.setData(map(e(PrimaryStorageConstant.AllocatorParams.SPEC, spec), e(PrimaryStorageConstant.AllocatorParams.CANDIDATES, allocated)));
+        sorterChain.putData(PrimaryStorageConstant.AllocatorParams.SPEC, spec);
+        sorterChain.putData(PrimaryStorageConstant.AllocatorParams.CANDIDATES, allocated);
         sorterChain.done(new FlowDoneHandler(null) {
             @Override
             public void handle(Map data) {

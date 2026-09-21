@@ -17,5 +17,5 @@ public abstract class FlowErrorHandler extends AbstractCompletion {
         super(one, others);
     }
 
-    public abstract void handle(ErrorCode errCode, Map data);
+    public abstract void handle(ErrorCode errCode, Map<String, Object> data);
 }

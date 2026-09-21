@@ -433,13 +433,11 @@ public class BlockPrimaryStorageFactory implements PrimaryStorageFactory, Primar
                 String lunName = generateImageCacheLunName(isoUuid, primaryStorageUuid);
 
                 BlockPrimaryStorageHostRefVO blockPrimaryStorageHostRefVO = getBlockPrimaryStorageHostRefVO(destHostUuid, primaryStorageUuid);
-                Map data = new HashMap();
-                data.put(BlockPrimaryStorageConstants.Params.BlockPrimaryStorageBackend, bkd);
-                data.put(BlockPrimaryStorageConstants.Params.BlockPrimaryStorageHostRef, blockPrimaryStorageHostRefVO);
 
                 FlowChain chain = FlowChainBuilder.newSimpleFlowChain();
                 chain.setName("map iso to dest host before migrate");
-                chain.setData(data);
+                chain.putData(BlockPrimaryStorageConstants.Params.BlockPrimaryStorageBackend, bkd);
+                chain.putData(BlockPrimaryStorageConstants.Params.BlockPrimaryStorageHostRef, blockPrimaryStorageHostRefVO);
                 chain.then(new NoRollbackFlow() {
                     String __name__ = "get iso lun info";
 
@@ -495,14 +493,11 @@ public class BlockPrimaryStorageFactory implements PrimaryStorageFactory, Primar
         BlockPrimaryStorageDeviceBackend bkd = getBlockPrimaryStorageDeviceBackend(blockPrimaryStorageHostRefVO.getPrimaryStorageUuid());
         BlockScsiLunVO isoLun = new BlockScsiLunVO();
 
-        Map data = new HashMap();
-        data.put(BlockPrimaryStorageConstants.Params.BlockPrimaryStorageBackend, bkd);
-        data.put(BlockPrimaryStorageConstants.Params.BlockPrimaryStorageHostRef, blockPrimaryStorageHostRefVO);
-        data.put(BlockPrimaryStorageConstants.Params.CheckBeforeDeleteLunMap, true);
-
         FlowChain chain = FlowChainBuilder.newSimpleFlowChain();
         chain.setName("unmap iso from source host after migrating");
-        chain.setData(data);
+        chain.putData(BlockPrimaryStorageConstants.Params.BlockPrimaryStorageBackend, bkd);
+        chain.putData(BlockPrimaryStorageConstants.Params.BlockPrimaryStorageHostRef, blockPrimaryStorageHostRefVO);
+        chain.putData(BlockPrimaryStorageConstants.Params.CheckBeforeDeleteLunMap, true);
         chain.then(new NoRollbackFlow() {
             String __name__ = "get iso lun info";
 
@@ -629,14 +624,11 @@ public class BlockPrimaryStorageFactory implements PrimaryStorageFactory, Primar
             BlockPrimaryStorageDeviceBackend bkd = getBlockPrimaryStorageDeviceBackend(blockPrimaryStorageVO);
             BlockPrimaryStorageHostRefVO blockPrimaryStorageHostRefVO = getBlockPrimaryStorageHostRefVO(destHostUuid, volumeInventory.getPrimaryStorageUuid());
 
-            Map data = new HashMap();
-            data.put(BlockPrimaryStorageConstants.Params.BlockPrimaryStorageBackend, bkd);
-            data.put(BlockPrimaryStorageConstants.Params.BlockScsiLun, blockScsiLunVO);
-            data.put(BlockPrimaryStorageConstants.Params.BlockPrimaryStorageHostRef, blockPrimaryStorageHostRefVO);
-
             FlowChain chain = FlowChainBuilder.newSimpleFlowChain();
             chain.setName("pre-vm-migration-prepare-lun-on-new-host");
-            chain.setData(data);
+            chain.putData(BlockPrimaryStorageConstants.Params.BlockPrimaryStorageBackend, bkd);
+            chain.putData(BlockPrimaryStorageConstants.Params.BlockScsiLun, blockScsiLunVO);
+            chain.putData(BlockPrimaryStorageConstants.Params.BlockPrimaryStorageHostRef, blockPrimaryStorageHostRefVO);
             chain.then(new MapLunToHostFlow());
             chain.done(new FlowDoneHandler(whileCompletion) {
                 @Override
@@ -698,14 +690,11 @@ public class BlockPrimaryStorageFactory implements PrimaryStorageFactory, Primar
             BlockPrimaryStorageDeviceBackend bkd = getBlockPrimaryStorageDeviceBackend(blockPrimaryStorageVO);
             BlockPrimaryStorageHostRefVO blockPrimaryStorageHostRefVO = getBlockPrimaryStorageHostRefVO(srcHostUuid, volumeInventory.getPrimaryStorageUuid());
 
-            Map data = new HashMap();
-            data.put(BlockPrimaryStorageConstants.Params.BlockPrimaryStorageBackend, bkd);
-            data.put(BlockPrimaryStorageConstants.Params.BlockScsiLun, blockScsiLunVO);
-            data.put(BlockPrimaryStorageConstants.Params.BlockPrimaryStorageHostRef, blockPrimaryStorageHostRefVO);
-
             FlowChain chain = FlowChainBuilder.newSimpleFlowChain();
             chain.setName("pre-vm-migration-prepare-lun-on-new-host");
-            chain.setData(data);
+            chain.putData(BlockPrimaryStorageConstants.Params.BlockPrimaryStorageBackend, bkd);
+            chain.putData(BlockPrimaryStorageConstants.Params.BlockScsiLun, blockScsiLunVO);
+            chain.putData(BlockPrimaryStorageConstants.Params.BlockPrimaryStorageHostRef, blockPrimaryStorageHostRefVO);
             chain.then(new DeleteLunMapFlow());
             chain.done(new FlowDoneHandler(whileCompletion) {
                 @Override
@@ -853,12 +842,11 @@ public class BlockPrimaryStorageFactory implements PrimaryStorageFactory, Primar
                     .find();
             BlockPrimaryStorageDeviceBackend bkd = getBlockPrimaryStorageDeviceBackend(blockPrimaryStorageVO);
 
-            Map data = new HashMap();
-            data.put(BlockPrimaryStorageConstants.Params.BlockPrimaryStorageBackend, bkd);
-            data.put(BlockPrimaryStorageConstants.Params.BlockScsiLun, blockScsiLunVO);
             final Boolean[] alreadyMapped = {false};
 
             FlowChain chain = FlowChainBuilder.newSimpleFlowChain();
+            chain.putData(BlockPrimaryStorageConstants.Params.BlockPrimaryStorageBackend, bkd);
+            chain.putData(BlockPrimaryStorageConstants.Params.BlockScsiLun, blockScsiLunVO);
             chain.setName("init-lun-map-before-start-vm");
             chain.then(new NoRollbackFlow() {
                 @Override
@@ -884,12 +872,10 @@ public class BlockPrimaryStorageFactory implements PrimaryStorageFactory, Primar
             });
             if (!alreadyMapped[0] && spec.getSrcHost() != null) {
                 BlockPrimaryStorageHostRefVO lastBlockPrimaryStorageHostRefVO = getBlockPrimaryStorageHostRefVO(spec.getSrcHost().getUuid(), volumeInventory.getPrimaryStorageUuid());
-                data.put(BlockPrimaryStorageConstants.Params.BlockPrimaryStorageHostRef, lastBlockPrimaryStorageHostRefVO);
-                chain.setData(data);
+                chain.putData(BlockPrimaryStorageConstants.Params.BlockPrimaryStorageHostRef, lastBlockPrimaryStorageHostRefVO);
                 chain.then(new DeleteLunMapFlow());
             }
-            data.put(BlockPrimaryStorageConstants.Params.BlockPrimaryStorageHostRef, blockPrimaryStorageHostRefVO);
-            chain.setData(data);
+            chain.putData(BlockPrimaryStorageConstants.Params.BlockPrimaryStorageHostRef, blockPrimaryStorageHostRefVO);
             chain.then(new MapLunToHostFlow());
             chain.error(new FlowErrorHandler(whileCompletion) {
                 @Override
@@ -1033,14 +1019,11 @@ public class BlockPrimaryStorageFactory implements PrimaryStorageFactory, Primar
 
         BlockPrimaryStorageHostRefVO blockPrimaryStorageHostRefVO = getBlockPrimaryStorageHostRefVO(host.getUuid(), volume.getPrimaryStorageUuid());
 
-        Map data = new HashMap();
-        data.put(BlockPrimaryStorageConstants.Params.BlockPrimaryStorageBackend, bkd);
-        data.put(BlockPrimaryStorageConstants.Params.BlockScsiLun, blockScsiLunVO);
-        data.put(BlockPrimaryStorageConstants.Params.BlockPrimaryStorageHostRef, blockPrimaryStorageHostRefVO);
-
         FlowChain chain = FlowChainBuilder.newSimpleFlowChain();
         chain.setName("delete lun map after detach volume");
-        chain.setData(data);
+        chain.putData(BlockPrimaryStorageConstants.Params.BlockPrimaryStorageBackend, bkd);
+        chain.putData(BlockPrimaryStorageConstants.Params.BlockScsiLun, blockScsiLunVO);
+        chain.putData(BlockPrimaryStorageConstants.Params.BlockPrimaryStorageHostRef, blockPrimaryStorageHostRefVO);
         chain.then(new DeleteLunMapFlow());
         chain.error(new FlowErrorHandler(null) {
             @Override
@@ -1276,8 +1259,8 @@ public class BlockPrimaryStorageFactory implements PrimaryStorageFactory, Primar
             String __name__ = "upload-to-backup-storage";
 
             @Override
-            public void run(final FlowTrigger trigger, Map data) {
-                final ParamOut out = (ParamOut) data.get(ParamOut.class);
+            public void run(final FlowTrigger trigger, Map<String, Object> data) {
+                final ParamOut out = (ParamOut) data.get(ParamOut.class.getSimpleName());
                 BackupStorageAskInstallPathMsg ask = new BackupStorageAskInstallPathMsg();
 
                 ImageStoreBackupStorageBlockKvmUploader uploader = new ImageStoreBackupStorageBlockKvmUploader(
@@ -1311,8 +1294,8 @@ public class BlockPrimaryStorageFactory implements PrimaryStorageFactory, Primar
             }
 
             @Override
-            public void rollback(FlowRollback trigger, Map data) {
-                final ParamOut out = (ParamOut) data.get(ParamOut.class);
+            public void rollback(FlowRollback trigger, Map<String, Object> data) {
+                final ParamOut out = (ParamOut) data.get(ParamOut.class.getSimpleName());
                 if (out.getBackupStorageInstallPath() != null) {
                     DeleteBitsOnBackupStorageMsg msg = new DeleteBitsOnBackupStorageMsg();
                     msg.setInstallPath(out.getBackupStorageInstallPath());
@@ -1516,24 +1499,21 @@ public class BlockPrimaryStorageFactory implements PrimaryStorageFactory, Primar
         AttachDataVolumeToVmMsg attachDataVolumeToVmMsg = new AttachDataVolumeToVmMsg();
         FutureCompletion completion = new FutureCompletion(null);
 
-        Map newChainData = new HashMap();
-        newChainData.put(BlockPrimaryStorageConstants.Params.BlockPrimaryStorageBackend, bkd);
-        newChainData.put(BlockPrimaryStorageConstants.Params.BlockScsiLun, blockScsiLunVO);
-        newChainData.put(BlockPrimaryStorageConstants.Params.BlockPrimaryStorageHostRef, blockPrimaryStorageHostRefVO);
-
         FlowChain chain = FlowChainBuilder.newSimpleFlowChain();
         chain.setName("before-attach-volume-on-block-ps");
-        chain.setData(newChainData);
+        chain.putData(BlockPrimaryStorageConstants.Params.BlockPrimaryStorageBackend, bkd);
+        chain.putData(BlockPrimaryStorageConstants.Params.BlockScsiLun, blockScsiLunVO);
+        chain.putData(BlockPrimaryStorageConstants.Params.BlockPrimaryStorageHostRef, blockPrimaryStorageHostRefVO);
         chain.then(new MapLunToHostFlow());
         chain.done(new FlowDoneHandler(completion) {
             @Override
-            public void handle(Map data) {
-                logger.debug(String.format("all pre works have been done"));
+            public void handle(Map<String, Object> data) {
+                logger.debug("all pre works have been done");
                 completion.success();
             }
         }).error(new FlowErrorHandler(attachDataVolumeToVmMsg) {
             @Override
-            public void handle(ErrorCode errCode, Map data) {
+            public void handle(ErrorCode errCode, Map<String, Object> data) {
                 throw new OperationFailureException(operr("fail to map lun to host before attach volume to vm"));
             }
         }).start();

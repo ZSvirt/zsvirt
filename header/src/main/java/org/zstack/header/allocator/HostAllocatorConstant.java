@@ -16,8 +16,8 @@ public interface HostAllocatorConstant {
             "some allocator flow cannot find candidate hosts; given it's still in pagination process, will continue allocating"
     );
 
-    enum Param {
-        HOST,
-        SPEC,
+    class Param {
+        public static final String HOST = "HOST";
+        public static final String SPEC = "SPEC";
     }
 }

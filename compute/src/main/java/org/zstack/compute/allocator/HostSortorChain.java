@@ -108,12 +108,9 @@ public class HostSortorChain implements HostSortorStrategy {
     }
 
     private void reserveHost(HostInventory host, Completion cmpl){
-        Map data = new HashMap();
-        data.put(HostAllocatorConstant.Param.HOST, host);
-        data.put(HostAllocatorConstant.Param.SPEC, allocationSpec);
-
         FlowChain chain = FlowChainBuilder.newShareFlowChain();
-        chain.setData(data);
+        chain.putData(HostAllocatorConstant.Param.HOST, host);
+        chain.putData(HostAllocatorConstant.Param.SPEC, allocationSpec);
         chain.setName("hostAllocation-reserve-flow");
         chain.then(new ShareFlow() {
             @Override

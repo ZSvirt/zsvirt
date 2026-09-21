@@ -91,9 +91,7 @@ public class HostNetworkBondingManagerImpl extends AbstractService implements Ho
     private void handle(CreateBondingMsg msg) {
         CreateBondingReply reply = new CreateBondingReply();
 
-        Map data = new HashMap();
         FlowChain chain = FlowChainBuilder.newShareFlowChain();
-        chain.setData(data);
         chain.setName(String.format("add-bonding-%s-to-host-%s", msg.getBondingName(), msg.getHostUuid()));
         chain.then(new ShareFlow() {
             @Override

@@ -27,17 +27,28 @@ public interface FlowChain {
 
     FlowChain Finally(FlowFinallyHandler handler);
 
-    FlowChain setData(Map data);
+    FlowChain setData(Map<String, Object> data);
 
-    FlowChain putData(Map.Entry... es);
+    FlowChain putData(String key, Object value);
+
+    default FlowChain putData(Enum<?> key, Object value) {
+        return putData(key.toString(), value);
+    }
+
+    default FlowChain putData(Map.Entry<String, Object>... es) {
+        for (Map.Entry<String, Object> e : es) {
+            putData(e.getKey(), e.getValue());
+        }
+        return this;
+    }
 
     FlowChain setName(String name);
 
-    FlowChain preCheck(Function<Map, ErrorCode> checker);
+    FlowChain preCheck(Function<Map<String, Object>, ErrorCode> checker);
 
     void addProcessor(FlowChainProcessor processor);
 
-    Map getData();
+    Map<String, Object> getData();
 
     void start();
 

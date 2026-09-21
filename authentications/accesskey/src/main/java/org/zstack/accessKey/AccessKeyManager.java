@@ -161,7 +161,7 @@ public class AccessKeyManager extends AbstractService implements RestAuthenticat
                     String __name__ = "delete-console-proxy-by-access-key";
 
                     @Override
-                    public void run(final FlowTrigger trigger, Map data) {
+                    public void run(final FlowTrigger trigger, Map<String, Object> data) {
                         SessionInventory session = getAccessKeySession(AccessKeyInventory.valueOf(accessKey));
                         Platform.getComponentLoader().getComponent(PluginRegistry.class)
                                 .getExtensionList(SessionLogoutExtensionPoint.class)
@@ -172,14 +172,14 @@ public class AccessKeyManager extends AbstractService implements RestAuthenticat
 
                 done(new FlowDoneHandler(completion) {
                     @Override
-                    public void handle(Map data) {
+                    public void handle(Map<String, Object> data) {
                         completion.success();
                     }
                 });
 
                 error(new FlowErrorHandler(completion) {
                     @Override
-                    public void handle(ErrorCode errCode, Map data) {
+                    public void handle(ErrorCode errCode, Map<String, Object> data) {
                         completion.fail(errCode);
                     }
                 });

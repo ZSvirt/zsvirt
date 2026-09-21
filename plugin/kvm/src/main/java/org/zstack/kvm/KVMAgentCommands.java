@@ -4206,6 +4206,24 @@ public class KVMAgentCommands {
     }
 
     public static class VmCompareCpuFunctionResponse extends AgentResponse {
+        private boolean match = true;
+        private String compareError;
+
+        public boolean isMatch() {
+            return match;
+        }
+
+        public void setMatch(boolean match) {
+            this.match = match;
+        }
+
+        public String getCompareError() {
+            return compareError;
+        }
+
+        public void setCompareError(String compareError) {
+            this.compareError = compareError;
+        }
     }
 
     public static class MergeSnapshotRsp extends AgentResponse {

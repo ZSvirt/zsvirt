@@ -145,11 +145,16 @@ public class HostCpuFunctionFilterFlow extends AbstractHostAllocatorFlow {
                                 @Override
                                 public void run(MessageReply reply) {
                                     if (!reply.isSuccess()) {
+                                        compl.done();
+                                        return;
+                                    }
+                                    CompareCpuFunctionOnHostReply r = reply.castReply();
+                                    if (!r.isMatch()) {
                                         reject(uuidCandidateMap.remove(dstHostUuid),
                                                 i18m("failed to compare cpu function between this host and host %s",
                                                         spec.getVmInstance().getHostUuid()));
                                     }
-                                    dstHostSupportResult.put(dstHostUuid, reply.isSuccess() ? true : false);
+                                    dstHostSupportResult.put(dstHostUuid, r.isMatch());
                                     compl.done();
                                 }
                             });

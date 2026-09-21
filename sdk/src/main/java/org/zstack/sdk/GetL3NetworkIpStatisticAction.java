@@ -28,7 +28,7 @@ public class GetL3NetworkIpStatisticAction extends AbstractAction {
     @Param(required = true, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
     public java.lang.String l3NetworkUuid;
 
-    @Param(required = false, validValues = {"All","Vip","VM","KernelInterface"}, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
+    @Param(required = false, validValues = {"All","Vip","VM","KernelInterface","DHCP"}, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
     public java.lang.String resourceType = "All";
 
     @Param(required = false, nonempty = false, nullElements = false, emptyString = true, noTrim = false)

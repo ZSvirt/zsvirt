@@ -38,7 +38,7 @@ doc {
 					type "String"
 					optional true
 					since "zsv_3.7.0"
-					values ("All","Vip","VM","KernelInterface")
+					values ("All","Vip","VM","KernelInterface","DHCP")
 				}
 				column {
 					name "ip"

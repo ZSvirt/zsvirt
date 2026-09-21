@@ -401,6 +401,7 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
 
         switch (msg.getResourceType()) {
             case ResourceType.ALL:
+            case ResourceType.DHCP:
                 res = ipStatisticAll(msg, orderExpr);
                 break;
             case ResourceType.VIP:
@@ -420,6 +421,9 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
     private Long countResource(APIGetL3NetworkIpStatisticMsg msg) {
         Long res = null;
         switch (msg.getResourceType()) {
+            case ResourceType.DHCP:
+                res = countDhcp(msg);
+                break;
             case ResourceType.ALL:
                 res = countUsedIp(msg);
                 break;
@@ -455,6 +459,13 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
         }
         Map<String, String> dhcpMap = getExistingDhcpServerIp(msg.getL3NetworkUuid(), IPv6Constants.DUAL_STACK);
         Set<String> dhcp = dhcpMap.keySet();
+        Set<String> dhcpUuids = new HashSet<>(dhcpMap.values());
+        dhcpUuids.remove(null);
+        dhcpUuids.remove("");
+        boolean dhcpOnly = ResourceType.DHCP.equals(msg.getResourceType());
+        if (dhcpOnly && dhcpUuids.isEmpty()) {
+            return new ArrayList<>();
+        }
         StringBuilder sqlBuilder = new StringBuilder();
         sqlBuilder.append("select uip.ip, vip.uuid as vipUuid, vip.name as vipName, it.uuid as vmUuid, it.name as vmName, it.type, uip.createDate, uip.uuid ")
                 .append("from (select uuid, ip, ipInLong, ipInBinary, createDate, vmNicUuid from UsedIpVO where l3NetworkUuid = '")
@@ -462,6 +473,10 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
 
         if (StringUtils.isNotEmpty(msg.getIp())) {
             sqlBuilder.append(" and ip like '").append(msg.getIp()).append('\'');
+        }
+
+        if (dhcpOnly) {
+            sqlBuilder.append(" and uuid in (:dhcpUuids)");
         }
 
         sqlBuilder.append(" order by LENGTH(").append(sortBy).append(") ").append(msg.getSortDirection())
@@ -479,6 +494,9 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
                 .append(", ").append(sortBy).append(" ").append(msg.getSortDirection());
 
         Query q = dbf.getEntityManager().createNativeQuery(sqlBuilder.toString());
+        if (dhcpOnly) {
+            q.setParameter("dhcpUuids", dhcpUuids);
+        }
         List<Object[]> results = q.getResultList();
         List<IpStatisticData> ipStatistics = new ArrayList<>();
         List<String> vmUuids = new ArrayList<>();
@@ -604,6 +622,28 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
         ipStatistics.addAll(copiedElements);
 
         return ipStatistics;
+    }
+
+    private Set<String> getDhcpUsedIpUuids(String l3Uuid) {
+        Set<String> uuids = new HashSet<>(getExistingDhcpServerIp(l3Uuid, IPv6Constants.DUAL_STACK).values());
+        uuids.remove(null);
+        uuids.remove("");
+        return uuids;
+    }
+
+    private Long countDhcp(APIGetL3NetworkIpStatisticMsg msg) {
+        Set<String> uuids = getDhcpUsedIpUuids(msg.getL3NetworkUuid());
+        if (uuids.isEmpty()) {
+            return 0L;
+        }
+
+        Q query = Q.New(UsedIpVO.class)
+                .eq(UsedIpVO_.l3NetworkUuid, msg.getL3NetworkUuid())
+                .in(UsedIpVO_.uuid, uuids);
+        if (StringUtils.isNotEmpty(msg.getIp())) {
+            query.like(UsedIpVO_.ip, msg.getIp());
+        }
+        return query.count();
     }
 
     private Long countKernelInterface(APIGetL3NetworkIpStatisticMsg msg) {

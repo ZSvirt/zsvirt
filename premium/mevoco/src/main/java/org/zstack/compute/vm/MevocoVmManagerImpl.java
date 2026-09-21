@@ -191,11 +191,9 @@ public class MevocoVmManagerImpl implements VmInstanceExtensionManager, BeforeVm
         spec.setPrimaryStorageUuidForRootVolume(msg.getPrimaryStorageUuid());
         spec.setOriginVolumeUuidForRootVolume(msg.getVolumeUuid());
 
-        Map<String, Object> datas = new HashMap<>();
-        datas.put(PremiumVmInstanceConstant.VM_INSTANCE_FROM_VOLUME_SPEC, spec);
         FlowChain chain = getCreateVmFromVolumeWorkFlowChain();
+        chain.putData(PremiumVmInstanceConstant.VM_INSTANCE_FROM_VOLUME_SPEC, spec);
         chain.setName("create-vm-from-volume-" + msg.getVolumeUuid());
-        chain.setData(datas);
         chain.done(new FlowDoneHandler(msg) {
             @Override
             public void handle(Map data) {
@@ -225,11 +223,9 @@ public class MevocoVmManagerImpl implements VmInstanceExtensionManager, BeforeVm
         spec.setOriginVolumeUuidForRootVolume(volumeUuid);
         spec.setRootVolumeSystemTags(msg.getRootVolumeSystemTags());
 
-        Map<String, Object> datas = new HashMap<>();
-        datas.put(PremiumVmInstanceConstant.VM_INSTANCE_FROM_VOLUME_SPEC, spec);
         FlowChain chain = getCreateVmFromSnapshotWorkFlowChain();
+        chain.putData(PremiumVmInstanceConstant.VM_INSTANCE_FROM_VOLUME_SPEC, spec);
         chain.setName("create-vm-from-snapshot-" + msg.getVolumeSnapshotUuid());
-        chain.setData(datas);
         chain.done(new FlowDoneHandler(msg) {
             @Override
             public void handle(Map data) {
@@ -275,12 +271,10 @@ public class MevocoVmManagerImpl implements VmInstanceExtensionManager, BeforeVm
         spec.setOriginVolumeUuidForRootVolume(rootVolumeUuid);
         spec.setRootVolumeSystemTags(msg.getRootVolumeSystemTags());
 
-        Map<String, Object> datas = new HashMap<>();
-        datas.put(PremiumVmInstanceConstant.VM_INSTANCE_FROM_VOLUME_SPEC, spec);
-        datas.put(PremiumVmInstanceConstant.DATA_VOLUME_SNAPSHOT, snaps);
         FlowChain chain = getCreateVmFromSnapshotGroupWorkFlowChain();
+        chain.putData(PremiumVmInstanceConstant.VM_INSTANCE_FROM_VOLUME_SPEC, spec);
+        chain.putData(PremiumVmInstanceConstant.DATA_VOLUME_SNAPSHOT, snaps);
         chain.setName("create-vm-from-snaphost-group-" + msg.getVolumeSnapshotGroupUuid());
-        chain.setData(datas);
         chain.done(new FlowDoneHandler(msg) {
             @Override
             public void handle(Map data) {

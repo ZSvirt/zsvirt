@@ -3,8 +3,6 @@ package org.zstack.storage.primary.block;
 import edu.emory.mathcs.backport.java.util.Collections;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.zstack.core.Platform;
-import org.zstack.core.asyncbatch.While;
 import org.zstack.core.cloudbus.CloudBus;
 import org.zstack.core.cloudbus.CloudBusCallBack;
 import org.zstack.core.cloudbus.MessageSafe;
@@ -16,12 +14,8 @@ import org.zstack.header.AbstractService;
 import org.zstack.header.Component;
 import org.zstack.header.core.Completion;
 import org.zstack.header.core.ReturnValueCompletion;
-import org.zstack.header.core.WhileCompletion;
-import org.zstack.header.core.WhileDoneCompletion;
 import org.zstack.header.core.workflow.*;
 import org.zstack.header.errorcode.ErrorCode;
-import org.zstack.header.errorcode.ErrorCodeList;
-import org.zstack.header.host.HostInventory;
 import org.zstack.header.host.HostVO;
 import org.zstack.header.host.HostVO_;
 import org.zstack.header.message.APIMessage;
@@ -31,17 +25,14 @@ import org.zstack.header.storage.primary.*;
 import org.zstack.header.volume.VolumeInventory;
 import org.zstack.kvm.KvmSetupSelfFencerExtensionPoint;
 import org.zstack.storage.primary.block.message.*;
-import org.zstack.utils.gson.JSONObjectUtil;
 import org.zstack.utils.logging.CLogger;
 import org.zstack.utils.Utils;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import static org.zstack.core.Platform.err;
 import static org.zstack.core.Platform.operr;
 
 /**
@@ -123,11 +114,9 @@ public class BlockPrimaryStorageManagerImpl extends AbstractService implements C
 
         BlockPrimaryStorageDeviceBackend bkd = blockPrimaryStorageFactory.getBlockPrimaryStorageDeviceBackend(primaryStorageUuid);
         final String skipNextFlowsToken = "skipNextFlows";
-        Map data = new HashMap();
-        data.put(skipNextFlowsToken, false);
         List<String> hostUuids = new ArrayList<>();
         FlowChain chain = FlowChainBuilder.newSimpleFlowChain();
-        chain.setData(data);
+        chain.putData(skipNextFlowsToken, false);
         chain.setName("delete-volume-lun-on-block-primary-storage");
         chain.then(new NoRollbackFlow() {
             @Override

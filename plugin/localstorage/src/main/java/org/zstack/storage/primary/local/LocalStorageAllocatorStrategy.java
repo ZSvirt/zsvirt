@@ -56,7 +56,7 @@ public class LocalStorageAllocatorStrategy implements PrimaryStorageAllocatorStr
         final Result ret = new Result();
         FlowChain allocatorChain = builder.build();
         allocatorChain.setName(String.format("allocate-local-primary-storage-msg-%s", spec.getAllocationMessage().getId()));
-        allocatorChain.setData(map(e(AllocatorParams.SPEC, spec)));
+        allocatorChain.putData(AllocatorParams.SPEC, spec);
         allocatorChain.done(new FlowDoneHandler(null) {
             @Override
             public void handle(Map data) {

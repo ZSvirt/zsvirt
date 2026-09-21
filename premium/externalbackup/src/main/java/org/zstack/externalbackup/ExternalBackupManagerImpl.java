@@ -182,7 +182,6 @@ public class ExternalBackupManagerImpl extends AbstractService implements Extern
         FlowChain chain = factory.getCreateBackupFlowChain();
         chain.enableProgressReport();
 
-        Map data = new HashMap();
         ExternalBackupVO backup;
 
         if (msg.getSpec() == null) {
@@ -198,9 +197,8 @@ public class ExternalBackupManagerImpl extends AbstractService implements Extern
             backup = factory.getEntity(msg.getSpec().getBackupUuid());
         }
 
-        data.put(ExternalBackupConstants.EXTERNAL_BACKUP_SPEC, msg.getSpec());
-        data.put(ExternalBackupConstants.EXTERNAL_BACKUP_MSG, msg);
-        chain.setData(data);
+        chain.putData(ExternalBackupConstants.EXTERNAL_BACKUP_SPEC, msg.getSpec());
+        chain.putData(ExternalBackupConstants.EXTERNAL_BACKUP_MSG, msg);
         chain.preCheck(it -> {
             ExternalBackupContextReloader.saveContext((CreateExternalBackupMsg)it.get(ExternalBackupConstants.EXTERNAL_BACKUP_MSG));
             return LongJobUtils.buildErrIfCanceled();

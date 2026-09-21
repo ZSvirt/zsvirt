@@ -96,7 +96,7 @@ public class SblkToSblkMigrateVolumeFlow implements Flow {
         FlowChain chain = FlowChainBuilder.newSimpleFlowChain();
         chain.enableProgressReport();
         chain.setName(String.format("migrate-volume-%s-between-sblk-%s-and-sblk-%s", volumeUuid, srcPsUuid, dstPsUuid));
-        chain.setData(map(e(StorageMigrationConstant.SHAREDBLOCK_TO_SHAREDBLOCK_COPY_IMAGE_CACHE, false)));
+        chain.putData(StorageMigrationConstant.SHAREDBLOCK_TO_SHAREDBLOCK_COPY_IMAGE_CACHE, false);
         chain.preCheck(d -> outerData.containsKey(StorageMigrationConstant.VOLUME_MIGRATED) ?
                 null : LongJobUtils.buildErrIfCanceled());
         String dstVolumeFolderPath = volumeVO.getInstallPath().replace(srcPsUuid, dstPsUuid);

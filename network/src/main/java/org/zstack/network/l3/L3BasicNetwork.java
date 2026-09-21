@@ -1513,9 +1513,7 @@ public class L3BasicNetwork implements L3Network {
     private void handle(APIAddHostRouteToL3NetworkMsg msg) {
         final APIAddHostRouteToL3NetworkEvent evt = new APIAddHostRouteToL3NetworkEvent(msg.getId());
 
-        Map data = new HashMap();
         FlowChain chain = FlowChainBuilder.newShareFlowChain();
-        chain.setData(data);
         chain.setName(String.format("add-hostroute-prefix-%s-to-l3-%s", msg.getPrefix(), msg.getL3NetworkUuid()));
         chain.then(new ShareFlow() {
             @Override

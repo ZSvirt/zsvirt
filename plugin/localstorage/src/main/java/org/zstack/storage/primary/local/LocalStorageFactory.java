@@ -109,7 +109,7 @@ public class LocalStorageFactory implements PrimaryStorageFactory, Component,
             String __name__ = "create-temporary-template";
 
             @Override
-            public void run(final FlowTrigger trigger, final Map data) {
+            public void run(final FlowTrigger trigger, final Map<String, Object> data) {
                 CreateTemporaryVolumeFromSnapshotMsg msg = new CreateTemporaryVolumeFromSnapshotMsg();
                 msg.setSnapshot(paramIn.getSnapshot());
                 msg.setPrimaryStorageUuid(paramIn.getPrimaryStorageUuid());
@@ -121,7 +121,7 @@ public class LocalStorageFactory implements PrimaryStorageFactory, Component,
                         if (!reply.isSuccess()) {
                             trigger.fail(reply.getError());
                         } else {
-                            ParamOut out = (ParamOut) data.get(ParamOut.class);
+                            ParamOut out = (ParamOut) data.get(ParamOut.class.getSimpleName());
                             CreateTemporaryVolumeFromSnapshotReply r = reply.castReply();
                             out.setActualSize(r.getActualSize());
                             out.setSize(r.getSize());
@@ -177,7 +177,7 @@ public class LocalStorageFactory implements PrimaryStorageFactory, Component,
                 bus.send(msg, new CloudBusCallBack(trigger) {
                     @Override
                     public void run(MessageReply reply) {
-                        ParamOut out = (ParamOut) data.get(ParamOut.class);
+                        ParamOut out = (ParamOut) data.get(ParamOut.class.getSimpleName());
 
                         if (!reply.isSuccess()) {
                             trigger.fail(reply.getError());
@@ -192,7 +192,7 @@ public class LocalStorageFactory implements PrimaryStorageFactory, Component,
 
             @Override
             public void rollback(FlowRollback trigger, Map data) {
-                ParamOut out = (ParamOut) data.get(ParamOut.class);
+                ParamOut out = (ParamOut) data.get(ParamOut.class.getSimpleName());
                 if (out.getBackupStorageInstallPath() != null) {
                     DeleteBitsOnBackupStorageMsg msg = new DeleteBitsOnBackupStorageMsg();
                     msg.setBackupStorageUuid(paramIn.getBackupStorageUuid());

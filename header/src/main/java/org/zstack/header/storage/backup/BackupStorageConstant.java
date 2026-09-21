@@ -15,9 +15,10 @@ public interface BackupStorageConstant {
     public static final String DEFAULT_ALLOCATOR_STRATEGY = "defaultAllocatorStrategy";
     public static final BackupStorageAllocatorStrategyType DEFAULT_ALLOCATOR_STRATEGY_TYPE = new BackupStorageAllocatorStrategyType(DEFAULT_ALLOCATOR_STRATEGY);
 
-    public static enum AllocatorParams {
-        SPEC,
-        CANDIDATES,
+    public static class AllocatorParams {
+        public static final String
+            SPEC = "SPEC",
+            CANDIDATES = "CANDIDATES";
     }
 
     public static final String ACTION_CATEGORY = "backupStorage";

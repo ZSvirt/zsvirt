@@ -794,10 +794,8 @@ public class MevocoVolumeBase extends VolumeBase {
         chain.setName(String.format(
                 "create-snapshot-for-volumes-%s-on-vm-%s-online",
                 msg.getLockedVolumeUuids(), volumeVOS.values().iterator().next().getUuid()));
-        chain.putData(
-                e(VolumeSnapshotConstant.NEED_TAKE_SNAPSHOTS_ON_HYPERVISOR, true),
-                e(VolumeSnapshotConstant.NEED_BLOCK_STREAM_ON_HYPERVISOR, true)
-        );
+        chain.putData(VolumeSnapshotConstant.NEED_TAKE_SNAPSHOTS_ON_HYPERVISOR, true);
+        chain.putData(VolumeSnapshotConstant.NEED_BLOCK_STREAM_ON_HYPERVISOR, true);
         chain.then(new NoRollbackFlow() {
             String __name__ = "make-install-path-of-snapshots-by-ask-ps";
 

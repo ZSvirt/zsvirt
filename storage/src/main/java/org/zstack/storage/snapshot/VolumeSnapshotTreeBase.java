@@ -79,7 +79,6 @@ import java.util.stream.Collectors;
 import static org.zstack.core.Platform.err;
 import static org.zstack.core.Platform.multiErr;
 import static org.zstack.core.Platform.operr;
-import static org.zstack.utils.CollectionDSL.e;
 import static org.zstack.utils.CollectionDSL.list;
 import static org.zstack.utils.CollectionUtils.transform;
 import static org.zstack.utils.CollectionUtils.transformAndRemoveNull;
@@ -1750,10 +1749,8 @@ public class VolumeSnapshotTreeBase {
         FlowChain chain = FlowChainBuilder.newSimpleFlowChain();
         chain.setName(String.format("create-template-from-snapshot-%s-%s", currentLeaf.getInventory().getName(),
                 currentLeaf.getUuid()));
-        chain.putData(
-                e(ParamIn.class, paramIn),
-                e(ParamOut.class, paramOut)
-        );
+        chain.putData(ParamIn.class.getSimpleName(), paramIn);
+        chain.putData(ParamOut.class.getSimpleName(), paramOut);
         chain.then(workflowTemplate.getCreateTemporaryTemplate());
         chain.preCheck(data -> LongJobUtils.buildErrIfCanceled());
         chain.then(new Flow() {
@@ -1763,8 +1760,8 @@ public class VolumeSnapshotTreeBase {
             Long allocatedSize;
 
             @Override
-            public void run(FlowTrigger trigger, Map data) {
-                ParamOut out = (ParamOut) data.get(ParamOut.class);
+            public void run(FlowTrigger trigger, Map<String, Object> data) {
+                ParamOut out = (ParamOut) data.get(ParamOut.class.getSimpleName());
                 allocatedSize = out.getActualSize();
                 AllocateBackupStorageMsg amsg = new AllocateBackupStorageMsg();
                 amsg.setBackupStorageUuid(msg.getBackupStorageUuid());
@@ -1828,8 +1825,8 @@ public class VolumeSnapshotTreeBase {
         });
         chain.done(new FlowDoneHandler(msg, completion) {
             @Override
-            public void handle(Map data) {
-                ParamOut out = (ParamOut) data.get(ParamOut.class);
+            public void handle(Map<String, Object> data) {
+                ParamOut out = (ParamOut) data.get(ParamOut.class.getSimpleName());
                 reply.setActualSize(out.getActualSize());
                 reply.setSize(out.getSize());
                 reply.setBackupStorageInstallPath(out.getBackupStorageInstallPath());

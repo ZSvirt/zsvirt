@@ -22,11 +22,9 @@ import org.zstack.utils.logging.CLogger;
 
 import java.lang.reflect.Field;
 import java.util.*;
-import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import static org.zstack.core.Platform.inerr;
 
@@ -35,15 +33,18 @@ import static org.zstack.core.Platform.inerr;
  * User: frank
  * Time: 2:38 PM
  * To change this template use File | Settings | File Templates.
+ *
+ * Note: autowire = Autowire.NO by design.
+ * {@code autowire = Autowire.BY_TYPE} will treats Map<String, Object> setters as "inject every Spring bean"
  */
-@Configurable(preConstruction = true, autowire = Autowire.BY_TYPE)
+@Configurable(preConstruction = true, autowire = Autowire.NO)
 public class SimpleFlowChain implements FlowTrigger, FlowRollback, FlowChain, FlowChainMutable {
     private static final CLogger logger = Utils.getLogger(SimpleFlowChain.class);
 
     private String id;
     private List<Flow> flows = new ArrayList<>();
     private final Stack<Flow> rollBackFlows = new Stack<>();
-    private Map<Object, Object> data = new HashMap<>();
+    private final Map<String, Object> data = new HashMap<>();
     private int currentLoop = 0;
     private Iterator<Flow> it;
     private boolean isStart = false;
@@ -61,7 +62,7 @@ public class SimpleFlowChain implements FlowTrigger, FlowRollback, FlowChain, Fl
     private boolean enableDebugLog = true;
     private FlowMarshaller flowMarshaller;
     private List<FlowChainProcessor> processors;
-    private Function<Map, ErrorCode> preCheck;
+    private Function<Map<String, Object>, ErrorCode> preCheck;
     private List<List<Runnable>> afterDone = new ArrayList<>();
     private List<List<Runnable>> afterError = new ArrayList<>();
     private List<List<Runnable>> afterFinal = new ArrayList<>();
@@ -200,12 +201,12 @@ public class SimpleFlowChain implements FlowTrigger, FlowRollback, FlowChain, Fl
     }
 
     @Override
-    public Map getChainData() {
+    public Map<String, Object> getChainData() {
         return data;
     }
 
     @Override
-    public void setChainData(Map data) {
+    public void setChainData(Map<String, Object> data) {
         setData(data);
     }
 
@@ -283,16 +284,16 @@ public class SimpleFlowChain implements FlowTrigger, FlowRollback, FlowChain, Fl
     }
 
     @Override
-    public FlowChain setData(Map data) {
-        this.data.putAll(data);
+    public FlowChain setData(Map<String, Object> data) {
+        if (data != null) {
+            this.data.putAll(data);
+        }
         return this;
     }
 
     @Override
-    public FlowChain putData(Entry...es) {
-        for (Map.Entry e : es) {
-            data.put(e.getKey(), e.getValue());
-        }
+    public FlowChain putData(String key, Object value) {
+        this.data.put(key, value);
         return this;
     }
 
@@ -303,7 +304,7 @@ public class SimpleFlowChain implements FlowTrigger, FlowRollback, FlowChain, Fl
     }
 
     @Override
-    public FlowChain preCheck(java.util.function.Function<Map, ErrorCode> checker) {
+    public FlowChain preCheck(java.util.function.Function<Map<String, Object>, ErrorCode> checker) {
         this.preCheck = checker;
         return this;
     }
@@ -733,10 +734,6 @@ public class SimpleFlowChain implements FlowTrigger, FlowRollback, FlowChain, Fl
 
         if (flows.isEmpty()) {
             throw new CloudRuntimeException("you must call then() to add flow before calling start() or allowEmptyFlow() to run empty flow chain on purpose");
-        }
-
-        if (data == null) {
-            data = new HashMap<>();
         }
 
         isStart = true;

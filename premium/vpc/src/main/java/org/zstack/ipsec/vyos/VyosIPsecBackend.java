@@ -212,16 +212,13 @@ public class VyosIPsecBackend extends AbstractVirtualRouterBackend implements IP
         NetworkServiceProviderType providerType = nwServiceMgr.getTypeOfNetworkServiceProviderForService(l3Invs.get(0).getUuid(), IPsecConstants.IPSEC_NETWORK_SERVICE_TYPE);
         VirtualRouterVmInventory vr = vrMgr.getVirtualRouterVm(l3Invs.get(0));
 
-        Map data = new HashMap();
-        data.put(Param.VIP, vip);
-        data.put(Param.GUEST_L3, l3Invs);
-        data.put(Param.IPSEC_STRUCT, inv);
-        data.put(Param.UNLOCK_VIP, true);
-        data.put(Param.SERVICE_PROVIDER_TYPE, providerType.toString());
-        data.put(Param.VR, vr);
-
         FlowChain chain = FlowChainBuilder.newSimpleFlowChain();
-        chain.setData(data);
+        chain.putData(Param.VIP, vip);
+        chain.putData(Param.GUEST_L3, l3Invs);
+        chain.putData(Param.IPSEC_STRUCT, inv);
+        chain.putData(Param.UNLOCK_VIP, true);
+        chain.putData(Param.SERVICE_PROVIDER_TYPE, providerType.toString());
+        chain.putData(Param.VR, vr);
         chain.setName(String.format("delete-ipsec-connection-%s-for-vip-%s", inv.getUuid(), vip.getUuid()));
         chain.then(new VyosDeleteIPsecFlow());
         chain.done(new FlowDoneHandler(completion) {
@@ -552,15 +549,13 @@ public class VyosIPsecBackend extends AbstractVirtualRouterBackend implements IP
         VipInventory vip = VipInventory.valueOf(dbf.findByUuid(inv.getVipUuid(), VipVO.class));
         NetworkServiceProviderType providerType = nwServiceMgr.getTypeOfNetworkServiceProviderForService(L3Networks.get(0).getUuid(),
                 IPsecConstants.IPSEC_NETWORK_SERVICE_TYPE);
-        Map data = new HashMap();
-        data.put(Param.GUEST_L3, L3Networks);
-        data.put(Param.VIP, vip);
-        data.put(Param.IPSEC_STRUCT, inv);
-        data.put(Param.SERVICE_PROVIDER_TYPE, providerType.toString());
 
         FlowChain chain = createIPsecFlowBuilder.build();
         chain.setName(String.format("create-ipsec-connection-%s:%s-vip-%s", inv.getName(), inv.getUuid(), vip.getUuid()));
-        chain.setData(data);
+        chain.putData(Param.GUEST_L3, L3Networks);
+        chain.putData(Param.VIP, vip);
+        chain.putData(Param.IPSEC_STRUCT, inv);
+        chain.putData(Param.SERVICE_PROVIDER_TYPE, providerType.toString());
         chain.done(new FlowDoneHandler(completion) {
             @Override
             public void handle(Map data) {
@@ -580,17 +575,14 @@ public class VyosIPsecBackend extends AbstractVirtualRouterBackend implements IP
         IPsecInfo info = createIPsecInfo(inv, vrInv);
         NetworkServiceProviderType providerType = nwServiceMgr.getTypeOfNetworkServiceProviderForService(l3NetworkUuid, IPsecConstants.IPSEC_NETWORK_SERVICE_TYPE);
 
-        Map data = new HashMap();
-        data.put(Param.IPSEC_INFO, info);
-        data.put(Param.VIP, vip);
-        data.put(Param.IPSEC_STRUCT, inv);
-        data.put(Param.UNLOCK_VIP, true);
-        data.put(Param.SERVICE_PROVIDER_TYPE, providerType.toString());
-        data.put(Param.SKIP_VIP, skip_vip);
-        data.put(Param.VR, vrInv);
-
         FlowChain chain = deleteIPsecFlowBuilder.build();
-        chain.setData(data);
+        chain.putData(Param.IPSEC_INFO, info);
+        chain.putData(Param.VIP, vip);
+        chain.putData(Param.IPSEC_STRUCT, inv);
+        chain.putData(Param.UNLOCK_VIP, true);
+        chain.putData(Param.SERVICE_PROVIDER_TYPE, providerType.toString());
+        chain.putData(Param.SKIP_VIP, skip_vip);
+        chain.putData(Param.VR, vrInv);
         chain.setName(String.format("delete-ipsec-connection-%s:%s-vip-%s", inv.getName(), inv.getUuid(), vip.getUuid()));
         chain.done(new FlowDoneHandler(completion) {
             @Override

@@ -24,8 +24,8 @@ public class DomainFilterPrimaryStorageFlow extends NoRollbackFlow {
     private AllocatorDomainPrimaryStorageGate gate;
 
     @Override
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    public void run(FlowTrigger trigger, Map data) {
+    @SuppressWarnings({"unchecked"})
+    public void run(FlowTrigger trigger, Map<String, Object> data) {
         if (gate == null) {
             logger.warn("skip DomainFilterPrimaryStorageFlow: AllocatorDomainPrimaryStorageGate bean is not loaded");
             trigger.next();

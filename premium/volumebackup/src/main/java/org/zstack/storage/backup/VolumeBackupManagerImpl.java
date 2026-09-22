@@ -97,7 +97,8 @@ public class VolumeBackupManagerImpl extends AbstractService implements
         VmPreMigrationExtensionPoint,
         VmBeforeStartOnHypervisorExtensionPoint,
         ImageStoreReclaimSpaceExtensionPoint,
-        ReportQuotaExtensionPoint {
+        ReportQuotaExtensionPoint,
+        BackupOperationConflictChecker {
     private static final CLogger logger = Utils.getLogger(VolumeBackupManagerImpl.class);
 
     @Autowired
@@ -116,6 +117,8 @@ public class VolumeBackupManagerImpl extends AbstractService implements
     private CascadeFacade casf;
     @Autowired
     private VmInstanceResourceMetadataManager vidm;
+    @Autowired
+    private BackupOperationConflictManager conflictManager;
 
     final private Map<String, VolumeBackupFactory> bkFactories = Collections.synchronizedMap(new HashMap<>());
 
@@ -994,7 +997,38 @@ public class VolumeBackupManagerImpl extends AbstractService implements
         return factory;
     }
 
+    private String getVmUuidByVolumeUuid(String volumeUuid) {
+        return Q.New(VolumeVO.class)
+                .eq(VolumeVO_.uuid, volumeUuid)
+                .select(VolumeVO_.vmInstanceUuid)
+                .findValue();
+    }
+
+    @Override
+    public ErrorCode check(String vmUuid, String currentResourceUuid) {
+        List<String> backupUuids = Q.New(VolumeBackupVO.class)
+                .eq(VolumeBackupVO_.vmInstanceUuid, vmUuid)
+                .eq(VolumeBackupVO_.status, VolumeBackupStatus.Creating)
+                .select(VolumeBackupVO_.uuid)
+                .listValues();
+        if (backupUuids.isEmpty()) {
+            return null;
+        }
+
+        return operr("VM[uuid: %s] is creating a backup[uuid: %s], cannot perform another backup operation at the same time.",
+                vmUuid, backupUuids.get(0));
+    }
+
     private void passThrough(VolumeBackupMessage msg) {
+        if (msg instanceof CreateVmBackupMsg || msg instanceof CreateVolumeBackupMsg) {
+            String vmUuid = getVmUuidByVolumeUuid(msg.getVolumeUuid());
+            ErrorCode conflict = conflictManager.check(vmUuid, null);
+            if (conflict != null) {
+                bus.replyErrorByMessageType((Message) msg, conflict);
+                return;
+            }
+        }
+
         String hypervisor = getVolumeHypervisor(msg.getVolumeUuid());
         if (StringUtils.isNullOrEmpty(hypervisor)) {
             String err = String.format("hypervisor not found for volume: %s", msg.getVolumeUuid());

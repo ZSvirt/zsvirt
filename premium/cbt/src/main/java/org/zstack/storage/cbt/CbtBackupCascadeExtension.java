@@ -8,25 +8,26 @@ import org.zstack.core.cascade.CascadeAction;
 import org.zstack.core.cascade.CascadeConstant;
 import org.zstack.core.cloudbus.CloudBus;
 import org.zstack.core.cloudbus.CloudBusCallBack;
+import org.zstack.core.db.Q;
 import org.zstack.core.db.SQLBatchWithReturn;
-import org.zstack.header.cbt.CbtTaskResourceRefVO;
-import org.zstack.header.cbt.CbtTaskResourceRefVO_;
-import org.zstack.header.cbt.CbtTaskVO;
-import org.zstack.header.cbt.DeleteCbtTaskMsg;
+import org.zstack.core.workflow.SimpleFlowChain;
+import org.zstack.header.cbt.*;
 import org.zstack.header.core.Completion;
 import org.zstack.header.core.WhileDoneCompletion;
+import org.zstack.header.core.workflow.*;
+import org.zstack.header.errorcode.ErrorCode;
 import org.zstack.header.errorcode.ErrorCodeList;
 import org.zstack.header.message.MessageReply;
-import org.zstack.header.storage.backup.BackupStorageVO;
 import org.zstack.header.vm.VmDeletionStruct;
-import org.zstack.header.vm.VmInstanceInventory;
 import org.zstack.header.vm.VmInstanceVO;
+import org.zstack.header.volume.VolumeVO;
+import org.zstack.header.volume.VolumeVO_;
 import org.zstack.utils.CollectionUtils;
 import org.zstack.utils.Utils;
-import org.zstack.utils.function.Function;
 import org.zstack.utils.logging.CLogger;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 public class CbtBackupCascadeExtension extends AbstractCascadeExtension {
@@ -55,29 +56,104 @@ public class CbtBackupCascadeExtension extends AbstractCascadeExtension {
     }
 
     private void handleDeletion(CascadeAction action, Completion completion) {
-        List<DeleteCbtTaskMsg> msgs = cbtBackupsDeletionMessagesFromAction(action);
-        logger.info(String.format("delete (%d) CBT tasks due to vm deletion", msgs.size()));
-
-        if (msgs == null || msgs.isEmpty()) {
-            completion.success();
-            return;
-        }
-
-        new While<>(msgs).step((msg, com) -> bus.send(msg, new CloudBusCallBack(com) {
+        boolean force = action.isActionCode(CascadeConstant.DELETION_FORCE_DELETE_CODE);
+        FlowChain chain = new SimpleFlowChain();
+        chain.setName("delete-cbt-task");
+        chain.then(new NoRollbackFlow() {
             @Override
-            public void run(MessageReply reply) {
-                if (!reply.isSuccess()) {
-                    logger.warn(String.format("failed to delete cbt backup[uuid:%s], %s", msg.getUuid(), reply.getError()));
+            public void run(FlowTrigger trigger, Map data) {
+                List<DeleteCbtTaskMsg> msgs = cbtBackupsDeletionMessagesFromAction(action);
+                if (msgs == null || msgs.isEmpty()) {
+                    trigger.next();
+                    return;
+                }
+                logger.info(String.format("delete (%d) CBT tasks due to vm deletion", msgs.size()));
+
+                new While<>(msgs).step((msg, com) -> bus.send(msg, new CloudBusCallBack(com) {
+                    @Override
+                    public void run(MessageReply reply) {
+                        if (!reply.isSuccess()) {
+                            logger.warn(String.format("failed to delete cbt backup[uuid:%s], %s", msg.getUuid(), reply.getError()));
+                            if (force) {
+                                try {
+                                    if (!submitCbtTaskCleanupGC(msg.getUuid())) {
+                                        com.addError(reply.getError());
+                                    }
+                                } catch (Throwable t) {
+                                    logger.warn(String.format("failed to submit cleanup GC for CBT task[uuid:%s]",
+                                            msg.getUuid()), t);
+                                    com.addError(reply.getError());
+                                }
+                            } else {
+                                com.addError(reply.getError());
+                            }
+                        }
+
+                        com.done();
+                    }
+                }), 10).run(new WhileDoneCompletion(completion) {
+                    @Override
+                    public void done(ErrorCodeList errorCodeList) {
+                        if (!errorCodeList.getCauses().isEmpty()) {
+                            trigger.fail(errorCodeList.getCauses().get(0));
+                        } else {
+                            trigger.next();
+                        }
+                    }
+                });
+            }
+        }).then(new NoRollbackFlow() {
+            @Override
+            public void run(FlowTrigger trigger, Map data) {
+                List<UnexportNbdVolumesMsg> msgs = getUnexportVolumeMessagesFromAction(action);
+                if (msgs == null || msgs.isEmpty()) {
+                    trigger.next();
+                    return;
                 }
 
-                com.done();
+                new While<>(msgs).step((msg, com) -> bus.send(msg, new CloudBusCallBack(com) {
+                    @Override
+                    public void run(MessageReply reply) {
+                        if (!reply.isSuccess()) {
+                            logger.warn(String.format("failed to unexport volumes of vm[uuid:%s], %s", msg.getVmInstanceUuid(), reply.getError()));
+                            if (force) {
+                                try {
+                                    if (!submitUnexportNbdVolumesGC(msg)) {
+                                        com.addError(reply.getError());
+                                    }
+                                } catch (Throwable t) {
+                                    logger.warn(String.format("failed to submit unexport NBD GC for vm[uuid:%s]",
+                                            msg.getVmInstanceUuid()), t);
+                                    com.addError(reply.getError());
+                                }
+                            } else {
+                                com.addError(reply.getError());
+                            }
+                        }
+                        com.done();
+                    }
+                }), 10).run(new WhileDoneCompletion(completion) {
+                    @Override
+                    public void done(ErrorCodeList errorCodeList) {
+                        if (!errorCodeList.getCauses().isEmpty()) {
+                            trigger.fail(errorCodeList.getCauses().get(0));
+                        } else {
+                            trigger.next();
+                        }
+                    }
+                });
             }
-        }), 10).run(new WhileDoneCompletion(completion) {
+        }).done(new FlowDoneHandler(completion) {
             @Override
-            public void done(ErrorCodeList errorCodeList) {
+            public void handle(Map data) {
                 completion.success();
             }
-        });
+        }).error(new FlowErrorHandler(completion) {
+            @Override
+            public void handle(ErrorCode errCode, Map data) {
+                completion.fail(errCode);
+            }
+        }).start();
     }
 
     private List<DeleteCbtTaskMsg> cbtBackupsDeletionMessagesFromAction(CascadeAction action) {
@@ -101,10 +177,82 @@ public class CbtBackupCascadeExtension extends AbstractCascadeExtension {
 
                         DeleteCbtTaskMsg msg = new DeleteCbtTaskMsg();
                         msg.setUuid(cbtTaskUuid);
+                        msg.setForce(action.isActionCode(CascadeConstant.DELETION_FORCE_DELETE_CODE));
+                        bus.makeTargetServiceIdByResourceUuid(msg, CbtBackupConstant.SERVICE_ID, vmInstanceUuid);
+                        msgs.add(msg);
+                    }
+                    return msgs;
+                } else {
+                    return null;
+                }
+            }
+        }.execute();
+    }
+
+    private boolean submitCbtTaskCleanupGC(String taskUuid) {
+        String vmUuid = Q.New(CbtTaskResourceRefVO.class)
+                .eq(CbtTaskResourceRefVO_.taskUuid, taskUuid)
+                .eq(CbtTaskResourceRefVO_.resourceType, VmInstanceVO.class.getSimpleName())
+                .select(CbtTaskResourceRefVO_.resourceUuid)
+                .findValue();
+        if (StringUtils.isEmpty(vmUuid)) {
+            logger.warn(String.format("cannot create cleanup GC for CBT task[uuid:%s]: VM reference not found", taskUuid));
+            return false;
+        }
+
+        CbtTaskCleanupGC gc = new CbtTaskCleanupGC();
+        gc.prepare(taskUuid, vmUuid);
+        if (StringUtils.isEmpty(gc.hostUuid)) {
+            logger.warn(String.format("cannot create cleanup GC for CBT task[uuid:%s]: host not found", taskUuid));
+            return false;
+        }
+        gc.NAME = String.format("gc-cbt-task-%s-on-host-%s", taskUuid, gc.hostUuid);
+        if (!gc.existedAndNotCompleted()) {
+            gc.submit(CbtGlobalConfig.CLEANUP_GC_INTERVAL.value(Long.class), TimeUnit.SECONDS);
+        }
+        return true;
+    }
+
+    private boolean submitUnexportNbdVolumesGC(UnexportNbdVolumesMsg msg) {
+        UnexportNbdVolumesGC gc = new UnexportNbdVolumesGC();
+        gc.prepare(msg.getVmInstanceUuid(), msg.getVolumeUuids());
+        if (StringUtils.isEmpty(gc.hostUuid) || CollectionUtils.isEmpty(gc.volumes)) {
+            logger.warn(String.format("cannot create unexport NBD GC for vm[uuid:%s]: cleanup payload is empty",
+                    msg.getVmInstanceUuid()));
+            return false;
+        }
+        gc.NAME = String.format("gc-unexport-nbd-volumes-for-vm-%s-on-host-%s", msg.getVmInstanceUuid(), gc.hostUuid);
+        if (!gc.existedAndNotCompleted()) {
+            gc.submit(CbtGlobalConfig.CLEANUP_GC_INTERVAL.value(Long.class), TimeUnit.SECONDS);
+        }
+        return true;
+    }
+
+    private List<UnexportNbdVolumesMsg> getUnexportVolumeMessagesFromAction(CascadeAction action) {
+        return new SQLBatchWithReturn<List<UnexportNbdVolumesMsg>>() {
+
+            @Override
+            protected List<UnexportNbdVolumesMsg> scripts() {
+                if (VmInstanceVO.class.getSimpleName().equals(action.getParentIssuer())) {
+                    List<String> vmUuids = ((List<VmDeletionStruct>) action.getParentIssuerContext()).stream().map(v -> v.getInventory().getUuid()).collect(Collectors.toList());
+
+                    List<UnexportNbdVolumesMsg> msgs = new ArrayList<>();
+                    for (String vmInstanceUuid : vmUuids) {
+                        List<String> volumeUuids = q(VolumeVO.class)
+                                .select(VolumeVO_.uuid)
+                                .eq(VolumeVO_.vmInstanceUuid, vmInstanceUuid)
+                                .listValues();
+
+                        if (CollectionUtils.isEmpty(volumeUuids)) {
+                            continue;
+                        }
+
+                        UnexportNbdVolumesMsg msg = new UnexportNbdVolumesMsg();
+                        msg.setVmInstanceUuid(vmInstanceUuid);
+                        msg.setVolumeUuids(volumeUuids);
                         bus.makeLocalServiceId(msg, CbtBackupConstant.SERVICE_ID);
                         msgs.add(msg);
                     }
-
                     return msgs;
                 } else {
                     return null;

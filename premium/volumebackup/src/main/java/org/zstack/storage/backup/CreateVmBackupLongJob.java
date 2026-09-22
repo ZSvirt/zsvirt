@@ -51,7 +51,7 @@ public class CreateVmBackupLongJob implements LongJob {
             CreateVmBackupMsg msg = buildMsg(params);
             msg.setBackupStorageUuid(bsUuid);
             bus.makeTargetServiceIdByResourceUuid(msg, VolumeBackupConstant.SERVICE_ID, bsUuid);
-            bus.send(msg, new CloudBusCallBack(compl) {
+            VolumeBackupUtils.sendBackupInVmQueue(bus, msg, msg.getVolumeUuid(), new CloudBusCallBack(compl) {
                 @Override
                 public void run(MessageReply reply) {
                     if (reply.isSuccess()) {

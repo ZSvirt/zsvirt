@@ -14,6 +14,7 @@ import java.util.Map;
 public class CbtBackupKvmCommands {
     public static final String REST_API_TAKE_VOLUME_CBT_BACKUP_PATH = "/vm/volume/takecbtbackup";
     public static final String REST_API_STOP_VOLUME_CBT_BACKUP_PATH = "/vm/volume/cancelcbtbackup";
+    public static final String REST_API_ROLLBACK_VOLUME_CBT_BACKUP_PATH = "/vm/volume/rollbackcbtbackup";
     public static final String REST_API_GET_VOLUMES_BITMAPS_PATH = "/vm/volume/getvolumebitmaps";
     public static final String REST_API_EXPORT_NDB_VOLUMES_PATH = "/vm/volume/exportnbdvolumes";
     public static final String REST_API_UNEXPORT_NDB_VOLUMES_PATH = "/vm/volume/unexportnbdvolumes";

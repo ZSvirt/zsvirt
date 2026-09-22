@@ -46,3 +46,5 @@ CREATE TABLE IF NOT EXISTS `zstack`.`AllocatorDomainSceneVO` (
 -- Unused vm.resourceBinding.Scene (AllocationScene Auto/All removed)
 DELETE FROM `zstack`.`GlobalConfigVO`
  WHERE `category` = 'vm' AND `name` = 'resourceBinding.Scene';
+
+CALL ADD_COLUMN('VolumeCbtBackupRecordVO', 'cleanupAttemptUuid', 'varchar(32)', 1, NULL);

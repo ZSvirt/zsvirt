@@ -64,6 +64,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static org.zstack.core.Platform.operr;
+import static org.zstack.storage.backup.VolumeBackupUtils.sendBackupInVmQueue;
 import static org.zstack.storage.backup.VolumeBackupKvmCommands.*;
 import static org.zstack.utils.CollectionUtils.*;
 
@@ -134,7 +135,7 @@ public class VolumeBackupKvmBackend implements VolumeBackupHypervisorBackend {
         cmsg.setSystemTags(msg.getSystemTags());
         cmsg.addSystemTag(VolumeBackupSystemTag.MANUAL_CREATE_RESOURCE.instantiateTag(Collections.singletonMap(VolumeBackupSystemTag.API_ID_TOKEN, msg.getId())));
         bus.makeTargetServiceIdByResourceUuid(cmsg, VolumeBackupConstant.SERVICE_ID, msg.getVolumeUuid());
-        bus.send(cmsg, new CloudBusCallBack(msg) {
+        sendBackupInVmQueue(bus, cmsg, msg.getVolumeUuid(), new CloudBusCallBack(msg) {
             @Override
             public void run(MessageReply reply) {
                 APICreateVolumeBackupEvent evt = new APICreateVolumeBackupEvent(msg.getId());
@@ -173,7 +174,7 @@ public class VolumeBackupKvmBackend implements VolumeBackupHypervisorBackend {
         cmsg.setSystemTags(msg.getSystemTags());
         cmsg.addSystemTag(VolumeBackupSystemTag.MANUAL_CREATE_RESOURCE.instantiateTag(Collections.singletonMap(VolumeBackupSystemTag.API_ID_TOKEN, msg.getId())));
         bus.makeTargetServiceIdByResourceUuid(cmsg, VolumeBackupConstant.SERVICE_ID, msg.getVolumeUuid());
-        bus.send(cmsg, new CloudBusCallBack(msg) {
+        sendBackupInVmQueue(bus, cmsg, msg.getVolumeUuid(), new CloudBusCallBack(msg) {
             @Override
             public void run(MessageReply reply) {
                 APICreateVmBackupEvent evt = new APICreateVmBackupEvent(msg.getId());

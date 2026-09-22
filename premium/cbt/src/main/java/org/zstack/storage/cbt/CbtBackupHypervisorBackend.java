@@ -11,6 +11,7 @@ import java.util.Map;
 public interface CbtBackupHypervisorBackend {
     void takeVolumeCbtBackup(String vmUuid, String hostUuid, List<VolumeCbtBackupInfo> volumeInfos, String bitmapName, ReturnValueCompletion<List<VolumeCbtBackupInfo>> completion);
     void disableVolumeCbtBackup(CbtTaskVO vo, String vmUuid, String hostUuid, Completion completion);
+    void rollbackVolumeCbtBackup(String vmUuid, String hostUuid, String previousBitmapName, List<VolumeCbtBackupInfo> volumeInfos, Completion completion);
     void getVolumesBitmap(List<VolumeCbtBackupInfo> volumeInfos, String hostUuid, String bitmapName, ReturnValueCompletion<List<VolumeCbtBackupInfo>> completion);
     void exportNbdVolumesForRecovery(String vmUuid, List<String> volumeUuids, ReturnValueCompletion<List<VolumeCbtBackupInfo>> completion);
     void unexportNbdVolumesForRecovery(String vmUuid, List<String> volumeUuids, Completion completion);

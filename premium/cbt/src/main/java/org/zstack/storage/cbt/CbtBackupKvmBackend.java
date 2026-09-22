@@ -9,8 +9,8 @@ import org.zstack.core.cloudbus.CloudBus;
 import org.zstack.core.cloudbus.CloudBusCallBack;
 import org.zstack.core.db.DatabaseFacade;
 import org.zstack.core.db.Q;
-import org.zstack.core.db.SQL;
 import org.zstack.header.agent.AgentResponse;
+import org.zstack.header.cbt.CbtTaskStatus;
 import org.zstack.header.cbt.CbtTaskVO;
 import org.zstack.header.cbt.VolumeCbtBackupInfo;
 import org.zstack.header.cbt.VolumeCbtBackupRecordVO;
@@ -177,15 +177,76 @@ public class CbtBackupKvmBackend implements CbtBackupHypervisorBackend {
 
     @Override
     public void disableVolumeCbtBackup(CbtTaskVO vo, String vmUuid, String hostUuid, Completion completion) {
-        List<VolumeCbtBackupRecordVO> records = SQL.New("select vo from VolumeCbtBackupRecordVO vo" +
-                " where taskUuid = :taskUuid and id in (select max(id) from VolumeCbtBackupRecordVO group by volumeUuid)")
-                .param("taskUuid", vo.getUuid())
-                .list();
+        List<VolumeCbtBackupRecordVO> records = Q.New(VolumeCbtBackupRecordVO.class)
+                .eq(VolumeCbtBackupRecordVO_.taskUuid, vo.getUuid()).list();
+        if (vo.getStatus() == CbtTaskStatus.Failed) {
+            rollbackVolumeCbtBackupAttempts(vmUuid, hostUuid,
+                    CbtCleanupRecordPolicy.rollbackAttempts(records).iterator(), completion);
+            return;
+        }
+
+        doDisableVolumeCbtBackup(vmUuid, hostUuid, CbtCleanupRecordPolicy.stopRecords(records), completion);
+    }
+
+    private void rollbackVolumeCbtBackupAttempts(String vmUuid, String hostUuid,
+                                                  Iterator<List<VolumeCbtBackupRecordVO>> attempts,
+                                                  Completion completion) {
+        if (!attempts.hasNext()) {
+            completion.success();
+            return;
+        }
+
+        DisableVolumeCbtBackupCmd cmd = new DisableVolumeCbtBackupCmd();
+        cmd.vmUuid = vmUuid;
+        List<VolumeCbtBackupRecordVO> attempt = attempts.next();
+        cmd.records = attempt;
+        sendCbtCleanupRequest(hostUuid, cmd, CbtBackupKvmCommands.REST_API_ROLLBACK_VOLUME_CBT_BACKUP_PATH,
+                new Completion(completion) {
+                    @Override
+                    public void success() {
+                        dbf.removeCollection(attempt, VolumeCbtBackupRecordVO.class);
+                        rollbackVolumeCbtBackupAttempts(vmUuid, hostUuid, attempts, completion);
+                    }
+
+                    @Override
+                    public void fail(ErrorCode errorCode) {
+                        completion.fail(errorCode);
+                    }
+                });
+    }
+
+    @Override
+    public void rollbackVolumeCbtBackup(String vmUuid, String hostUuid, String previousBitmapName, List<VolumeCbtBackupInfo> volumeInfos, Completion completion) {
+        List<VolumeCbtBackupRecordVO> records = new ArrayList<VolumeCbtBackupRecordVO>();
+        for (VolumeCbtBackupInfo info : volumeInfos) {
+            if (info.getScratchNodeName() == null || info.getScratchNodeName().isEmpty()) {
+                continue;
+            }
+            VolumeCbtBackupRecordVO record = new VolumeCbtBackupRecordVO();
+            record.setScratchNodeName(info.getScratchNodeName());
+            record.setTarget(info.getTarget());
+            record.setBitmapName(info.getBitmapName());
+            record.setLastBitmapName(previousBitmapName);
+            record.setMode(info.getMode());
+            records.add(record);
+        }
+
+        if (records.isEmpty()) {
+            completion.success();
+            return;
+        }
 
         DisableVolumeCbtBackupCmd cmd = new DisableVolumeCbtBackupCmd();
         cmd.vmUuid = vmUuid;
         cmd.records = records;
-        doDisableCbtBackup(hostUuid, cmd, new Completion(completion) {
+        sendCbtCleanupRequest(hostUuid, cmd, CbtBackupKvmCommands.REST_API_ROLLBACK_VOLUME_CBT_BACKUP_PATH, completion);
+    }
+
+    private void doDisableVolumeCbtBackup(String vmUuid, String hostUuid, List<VolumeCbtBackupRecordVO> records, Completion completion) {
+        DisableVolumeCbtBackupCmd cmd = new DisableVolumeCbtBackupCmd();
+        cmd.vmUuid = vmUuid;
+        cmd.records = records;
+        sendCbtCleanupRequest(hostUuid, cmd, CbtBackupKvmCommands.REST_API_STOP_VOLUME_CBT_BACKUP_PATH, new Completion(completion) {
             @Override
             public void success() {
                 completion.success();
@@ -215,6 +276,10 @@ public class CbtBackupKvmBackend implements CbtBackupHypervisorBackend {
                 KVMHostAsyncHttpCallReply r = reply.castReply();
                 TakeVolumeCbtBackupResponse rsp = r.toResponse(TakeVolumeCbtBackupResponse.class);
                 if (!rsp.isSuccess()) {
+                    if (rsp.volumeInfos != null) {
+                        cmd.volumeInfos.clear();
+                        cmd.volumeInfos.addAll(rsp.volumeInfos);
+                    }
                     completion.fail(operr("%s", rsp.getError()));
                 } else {
                     completion.success(rsp.volumeInfos);
@@ -323,12 +388,12 @@ public class CbtBackupKvmBackend implements CbtBackupHypervisorBackend {
         });
     }
 
-    private void doDisableCbtBackup(String hostUuid, DisableVolumeCbtBackupCmd cmd, Completion completion) {
+    private void sendCbtCleanupRequest(String hostUuid, DisableVolumeCbtBackupCmd cmd, String path, Completion completion) {
         KVMHostAsyncHttpCallMsg kmsg = new KVMHostAsyncHttpCallMsg();
 
         kmsg.setCommand(cmd);
         kmsg.setHostUuid(hostUuid);
-        kmsg.setPath(CbtBackupKvmCommands.REST_API_STOP_VOLUME_CBT_BACKUP_PATH);
+        kmsg.setPath(path);
         bus.makeTargetServiceIdByResourceUuid(kmsg, HostConstant.SERVICE_ID, hostUuid);
         bus.send(kmsg, new CloudBusCallBack(completion) {
             @Override

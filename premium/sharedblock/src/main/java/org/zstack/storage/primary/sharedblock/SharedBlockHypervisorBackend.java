@@ -121,6 +121,12 @@ public abstract class SharedBlockHypervisorBackend extends SharedBlockGroupPrima
 
     abstract void handle(GetVolumeBackingChainFromPrimaryStorageMsg msg, ReturnValueCompletion<GetVolumeBackingChainFromPrimaryStorageReply> completion);
 
+    abstract void handle(GetSharedBlockVolumeSnapshotLanFreeLayoutMsg msg,
+                         ReturnValueCompletion<GetSharedBlockVolumeSnapshotLanFreeLayoutReply> completion);
+
+    abstract void handle(GetSharedBlockVolumeLanFreeLayoutMsg msg,
+                         ReturnValueCompletion<GetSharedBlockVolumeLanFreeLayoutReply> completion);
+
     abstract void handle(ConfigureFilterMsg msg, Completion completion);
 
     abstract void handle(ShrinkVolumeSnapshotOnPrimaryStorageMsg msg, ReturnValueCompletion<ShrinkVolumeSnapshotOnPrimaryStorageReply> completion);

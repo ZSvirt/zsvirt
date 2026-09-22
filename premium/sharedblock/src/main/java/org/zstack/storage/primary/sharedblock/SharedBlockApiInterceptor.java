@@ -77,9 +77,31 @@ public class SharedBlockApiInterceptor implements GlobalApiMessageInterceptor {
             validate((APIConvertVmInstanceToTemplatedVmInstanceMsg) msg);
         } else if (msg instanceof APICreateTemplatedVmInstanceFromVmInstanceMsg) {
             validate((APICreateTemplatedVmInstanceFromVmInstanceMsg) msg);
+        } else if (msg instanceof APIGetSharedBlockVolumeSnapshotLanFreeLayoutMsg) {
+            validate((APIGetSharedBlockVolumeSnapshotLanFreeLayoutMsg) msg);
+        } else if (msg instanceof APIGetSharedBlockVolumeLanFreeLayoutMsg) {
+            validate((APIGetSharedBlockVolumeLanFreeLayoutMsg) msg);
         }
 
         return msg;
+    }
+
+    private void validate(APIGetSharedBlockVolumeSnapshotLanFreeLayoutMsg msg) {
+        try {
+            SharedBlockVolumeSnapshotLanFreeLayoutValidator.validateRequest(
+                    msg.getSnapshotUuids());
+        } catch (IllegalArgumentException e) {
+            throw new ApiMessageInterceptionException(argerr(e.getMessage()));
+        }
+    }
+
+    private void validate(APIGetSharedBlockVolumeLanFreeLayoutMsg msg) {
+        try {
+            SharedBlockVolumeLanFreeLayoutValidator.validateRequest(
+                    msg.getVolumeUuids());
+        } catch (IllegalArgumentException e) {
+            throw new ApiMessageInterceptionException(argerr(e.getMessage()));
+        }
     }
 
     private void validate(APICreateTemplatedVmInstanceFromVmInstanceMsg msg) {
@@ -337,6 +359,8 @@ public class SharedBlockApiInterceptor implements GlobalApiMessageInterceptor {
                 APIAddSharedBlockToSharedBlockGroupMsg.class,
                 APIRefreshSharedblockDeviceCapacityMsg.class,
                 APIGetSharedBlockCandidateMsg.class,
+                APIGetSharedBlockVolumeSnapshotLanFreeLayoutMsg.class,
+                APIGetSharedBlockVolumeLanFreeLayoutMsg.class,
                 APIQuerySharedBlockGroupPrimaryStorageMsg.class,
                 APIQuerySharedBlockMsg.class,
                 APIQuerySharedBlockGroupPrimaryStorageHostRefMsg.class,

@@ -65,6 +65,10 @@ public class SharedBlockKvmCommands {
     public static final String DOWNLOAD_BITS_FROM_KVM_HOST_PATH = "/sharedblock/kvmhost/download";
     public static final String CANCEL_DOWNLOAD_BITS_FROM_KVM_HOST_PATH = "/sharedblock/kvmhost/download/cancel";
     public static final String GET_BACKING_CHAIN_PATH = "/sharedblock/volume/backingchain";
+    public static final String GET_VOLUME_SNAPSHOT_LAN_FREE_LAYOUTS_PATH =
+            "/sharedblock/volume/volume-snapshot-lan-free-layouts";
+    public static final String GET_VOLUME_LAN_FREE_LAYOUTS_PATH =
+            "/sharedblock/volume/volume-lan-free-layouts";
     public static final String CONVERT_VOLUME_PROVISIONING_PATH = "/sharedblock/volume/convertprovisioning";
     public static final String CONFIG_FILTER_PATH = "/sharedblock/disks/filter";
     public static final String CONVERT_VOLUME_FORMAT_PATH = "/sharedblock/volume/convertformat";
@@ -705,6 +709,24 @@ public class SharedBlockKvmCommands {
     public static class GetBackingChainRsp extends AgentRsp {
         public List<String> backingChain;
         public long totalSize;
+    }
+
+    public static class GetVolumeSnapshotLanFreeLayoutsCmd extends AgentCmd {
+        public List<SharedBlockVolumeSnapshotLanFreeTarget> targets;
+    }
+
+    public static class GetVolumeSnapshotLanFreeLayoutsRsp extends AgentRsp {
+        public List<SharedBlockLunDescriptor> luns = new ArrayList<>();
+        public List<SharedBlockVolumeSnapshotLanFreeLayout> layouts = new ArrayList<>();
+    }
+
+    public static class GetVolumeLanFreeLayoutsCmd extends AgentCmd {
+        public List<SharedBlockVolumeLanFreeTarget> targets;
+    }
+
+    public static class GetVolumeLanFreeLayoutsRsp extends AgentRsp {
+        public List<SharedBlockLunDescriptor> luns = new ArrayList<>();
+        public List<SharedBlockVolumeLanFreeLayout> layouts = new ArrayList<>();
     }
 
     public static class ConvertVolumeProvisioningCmd extends AgentCmd implements ProvisionSharedBlockVolumeCmd {

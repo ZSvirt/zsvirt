@@ -124,6 +124,10 @@ public class SharedBlockGroupPrimaryStorageBase extends PrimaryStorageBase imple
             handle((CancelDownloadBitsFromKVMHostToPrimaryStorageMsg) msg);
         } else if (msg instanceof GetVolumeBackingChainFromPrimaryStorageMsg) {
             handle((GetVolumeBackingChainFromPrimaryStorageMsg) msg);
+        } else if (msg instanceof GetSharedBlockVolumeSnapshotLanFreeLayoutMsg) {
+            handle((GetSharedBlockVolumeSnapshotLanFreeLayoutMsg) msg);
+        } else if (msg instanceof GetSharedBlockVolumeLanFreeLayoutMsg) {
+            handle((GetSharedBlockVolumeLanFreeLayoutMsg) msg);
         } else if ((msg instanceof GetDownloadBitsFromKVMHostProgressMsg)) {
             handle((GetDownloadBitsFromKVMHostProgressMsg) msg);
         } else if (msg instanceof ConfigureFilterMsg) {
@@ -1735,6 +1739,46 @@ public class SharedBlockGroupPrimaryStorageBase extends PrimaryStorageBase imple
             public void fail(ErrorCode errorCode) {
                 logger.error(String.format("failed to get volume backing chain from primary storage %s", msg.getPrimaryStorageUuid()));
                 GetVolumeBackingChainFromPrimaryStorageReply reply = new GetVolumeBackingChainFromPrimaryStorageReply();
+                reply.setError(errorCode);
+                bus.reply(msg, reply);
+            }
+        });
+    }
+
+    private void handle(GetSharedBlockVolumeSnapshotLanFreeLayoutMsg msg) {
+        SharedBlockHypervisorFactory factory = getHypervisorFactoryByHypervisorType(
+                KVMConstant.KVM_HYPERVISOR_TYPE);
+        SharedBlockHypervisorBackend backend = factory.getHypervisorBackend(self);
+        backend.handle(msg, new ReturnValueCompletion<GetSharedBlockVolumeSnapshotLanFreeLayoutReply>(msg) {
+            @Override
+            public void success(GetSharedBlockVolumeSnapshotLanFreeLayoutReply reply) {
+                bus.reply(msg, reply);
+            }
+
+            @Override
+            public void fail(ErrorCode errorCode) {
+                GetSharedBlockVolumeSnapshotLanFreeLayoutReply reply =
+                        new GetSharedBlockVolumeSnapshotLanFreeLayoutReply();
+                reply.setError(errorCode);
+                bus.reply(msg, reply);
+            }
+        });
+    }
+
+    private void handle(GetSharedBlockVolumeLanFreeLayoutMsg msg) {
+        SharedBlockHypervisorFactory factory = getHypervisorFactoryByHypervisorType(
+                KVMConstant.KVM_HYPERVISOR_TYPE);
+        SharedBlockHypervisorBackend backend = factory.getHypervisorBackend(self);
+        backend.handle(msg, new ReturnValueCompletion<GetSharedBlockVolumeLanFreeLayoutReply>(msg) {
+            @Override
+            public void success(GetSharedBlockVolumeLanFreeLayoutReply reply) {
+                bus.reply(msg, reply);
+            }
+
+            @Override
+            public void fail(ErrorCode errorCode) {
+                GetSharedBlockVolumeLanFreeLayoutReply reply =
+                        new GetSharedBlockVolumeLanFreeLayoutReply();
                 reply.setError(errorCode);
                 bus.reply(msg, reply);
             }

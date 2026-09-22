@@ -43,7 +43,7 @@ public class XDragonHost extends KVMHost {
     @Override
     public void connectHook(final ConnectHostInfo info, final Completion complete) {
         logger.info("connecting to xdragon host and skipping these packages: " + XDragonGlobalProperty.SKIP_PACKAGES);
-        info.setSkipPackages(XDragonGlobalProperty.SKIP_PACKAGES);
+        info.skipPackages = XDragonGlobalProperty.SKIP_PACKAGES;
         super.connectHook(info, complete);
     }
 

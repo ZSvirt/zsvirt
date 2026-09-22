@@ -30,10 +30,9 @@ public interface Flow {
         return String.format("%s", this.getClass().getSimpleName());
     }
 
-    @SuppressWarnings("rawtypes")
     public static class FlowBuilder {
         public final String flowName;
-        private Predicate<Map> skipPredicate;
+        private Predicate<Map<String, Object>> skipPredicate;
         private BiConsumer<FlowTrigger, Map<String, Object>> triggerConsumer;
         private BiConsumer<FlowRollback, Map<String, Object>> rollbackConsumer;
 
@@ -42,17 +41,17 @@ public interface Flow {
             this.flowName = flowName;
         }
 
-        public FlowBuilder withSkipPredicate(Predicate<Map> predicate) {
+        public FlowBuilder withSkipPredicate(Predicate<Map<String, Object>> predicate) {
             DebugUtils.Assert(predicate != null, "skipPredicate of FlowBuilder should not be null");
             this.skipPredicate = predicate;
             return this;
         }
 
-        public FlowBuilder skipIf(Predicate<Map> predicate) {
+        public FlowBuilder skipIf(Predicate<Map<String, Object>> predicate) {
             return withSkipPredicate(predicate);
         }
 
-        public FlowBuilder runIf(Predicate<Map> predicate) {
+        public FlowBuilder runIf(Predicate<Map<String, Object>> predicate) {
             DebugUtils.Assert(predicate != null, "predicate of FlowBuilder.runIf() should not be null");
             return withSkipPredicate(predicate.negate());
         }
@@ -89,13 +88,13 @@ public interface Flow {
 
         public Flow build() {
             DebugUtils.Assert(triggerConsumer != null, "handle() must be called before build()");
-            Predicate<Map> skipPredicateSnapshot = skipPredicate;
+            Predicate<Map<String, Object>> skipPredicateSnapshot = skipPredicate;
             BiConsumer<FlowTrigger, Map<String, Object>> triggerConsumerSnapshot = triggerConsumer;
             BiConsumer<FlowRollback, Map<String, Object>> rollbackConsumerSnapshot = rollbackConsumer;
 
             return new Flow() {
                 @Override
-                public boolean skip(Map data) {
+                public boolean skip(Map<String, Object> data) {
                     if (skipPredicateSnapshot == null) {
                         return false;
                     }

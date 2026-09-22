@@ -9,7 +9,7 @@ import java.util.Map;
  * Created by miao on 16-7-20.
  */
 public interface PostHostConnectExtensionPoint {
-    String KEY_INVENTORY = "HOST_INVENTORY";
+    String KEY_INVENTORY = PreHostConnectExtensionPoint.KEY_INVENTORY;
 
     Flow createPostHostConnectFlow();
 

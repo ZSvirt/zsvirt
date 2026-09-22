@@ -1381,13 +1381,16 @@ public abstract class HostBase extends AbstractHost {
 
         SimpleFlowChain chain = SimpleFlowChain.of("connect-host-" + self.getUuid());
         chain.allowWatch();
+        chain.putData(PreHostConnectExtensionPoint.KEY_INVENTORY, getSelfInventory());
+        chain.putData(PreHostConnectExtensionPoint.KEY_CONNECT_HOST_INFO, hostInfo);
+
         chain.then(Flow.of("check-conditions-of-connection")
             .handle(trigger -> checkConnectConditions(hostInfo, trigger.toCompletion()))
             .build());
 
         chain.then(Flow.nope("call-pre-connect-extensions-start"));
         for (PreHostConnectExtensionPoint p : pluginRgty.getExtensionList(PreHostConnectExtensionPoint.class)) {
-            Flow flow = p.createPreHostConnectFlow(msg);
+            Flow flow = p.createPreHostConnectFlow();
             if (flow != null) {
                 chain.then(flow);
             }
@@ -1407,7 +1410,7 @@ public abstract class HostBase extends AbstractHost {
         chain.then(Flow.of("call-post-connect-extensions-start")
             .handle((trigger, data) -> {
                 self = dbf.reload(self);
-                data.put(PostHostConnectExtensionPoint.KEY_INVENTORY, getSelfInventory());
+                data.put(PostHostConnectExtensionPoint.KEY_INVENTORY, getSelfInventory()); // overwrite
                 trigger.next();
             })
             .build());

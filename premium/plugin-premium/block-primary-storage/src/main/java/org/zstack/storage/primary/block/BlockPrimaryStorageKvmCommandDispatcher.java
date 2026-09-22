@@ -413,7 +413,7 @@ public class BlockPrimaryStorageKvmCommandDispatcher {
         cmd.strategy = param.getStrategy();
         cmd.installPath = installPath;
 
-        httpCall(KVM_HA_SETUP_SELF_FENCER, param.getHostUuid(), cmd, AgentRsp.class, new ReturnValueCompletion<AgentRsp>(completion) {
+        httpCall(KVM_HA_SETUP_SELF_FENCER, param.getHostUuid(), cmd, param.isSkipStatusCheck(), AgentRsp.class, new ReturnValueCompletion<AgentRsp>(completion) {
             @Override
             public void success(AgentRsp returnValue) {
                 completion.success();

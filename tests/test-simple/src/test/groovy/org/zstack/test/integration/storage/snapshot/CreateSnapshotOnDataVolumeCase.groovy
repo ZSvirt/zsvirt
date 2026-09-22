@@ -2,12 +2,16 @@ package org.zstack.test.integration.storage.snapshot
 
 import org.springframework.http.HttpEntity
 import org.zstack.core.db.Q
+import org.zstack.header.identity.AccountResourceRefVO
+import org.zstack.header.identity.AccountResourceRefVO_
 import org.zstack.header.storage.primary.PrimaryStorageCapacityVO
 import org.zstack.header.storage.primary.PrimaryStorageCapacityVO_
 import org.zstack.header.storage.snapshot.VolumeSnapshotTreeVO
 import org.zstack.header.storage.snapshot.VolumeSnapshotTreeVO_
 import org.zstack.header.storage.snapshot.VolumeSnapshotVO
 import org.zstack.header.storage.snapshot.VolumeSnapshotVO_
+import org.zstack.header.vo.ResourceVO
+import org.zstack.header.vo.ResourceVO_
 import org.zstack.header.volume.VolumeVO
 import org.zstack.header.volume.VolumeVO_
 import org.zstack.kvm.KVMAgentCommands
@@ -200,10 +204,10 @@ class CreateSnapshotOnDataVolumeCase extends SubCase{
             return rsp
         }
 
-        createVolumeSnapshot {
+        VolumeSnapshotInventory snapshot = createVolumeSnapshot {
             name = "vol-snapshot"
             volumeUuid = dataVolume.uuid
-        }
+        } as VolumeSnapshotInventory
 
         def afterCreateVolumePSAvailableCapacity = Q.New(PrimaryStorageCapacityVO.class)
                 .select(PrimaryStorageCapacityVO_.availableCapacity)
@@ -217,6 +221,21 @@ class CreateSnapshotOnDataVolumeCase extends SubCase{
         retryInSecs {
             assert afterCreateVolumePSAvailableCapacity == beforeCreateVolumePSAvailableCapacity - beforeCreateVolumeHostAvailableCapacity
             assert afterCreateVolumeHostAvailableCapacity == 0
+        }
+
+        deleteDataVolume {
+            uuid = dataVolume.uuid
+        }
+
+        expungeDataVolume {
+            uuid = dataVolume.uuid
+        }
+
+        retryInSecs {
+            assert !Q.New(VolumeVO.class).eq(VolumeVO_.uuid, dataVolume.uuid).isExists()
+            assert !Q.New(VolumeSnapshotVO.class).eq(VolumeSnapshotVO_.uuid, snapshot.uuid).isExists()
+            assert !Q.New(ResourceVO.class).eq(ResourceVO_.uuid, snapshot.uuid).isExists()
+            assert !Q.New(AccountResourceRefVO.class).eq(AccountResourceRefVO_.resourceUuid, snapshot.uuid).isExists()
         }
     }
 }

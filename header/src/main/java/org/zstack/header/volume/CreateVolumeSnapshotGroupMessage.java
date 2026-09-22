@@ -18,6 +18,9 @@ public interface CreateVolumeSnapshotGroupMessage {
     default SnapshotBackendOperation getBackendOperation() {
         return SnapshotBackendOperation.FILE_CREATION;
     }
+    default boolean isAllowPartialSuccess() {
+        return true;
+    }
 
     void setVmInstance(VmInstanceInventory inventory);
     VmInstanceInventory getVmInstance();

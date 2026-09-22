@@ -217,6 +217,9 @@ public class CreateVolumeSnapshotGroupJob extends AbstractSchedulerJob {
                                                 VOLUME_SNAPSHOT_GROUP_CREATED_BY_SYSTEM.getTagFormat(),
                                                 VolumeSnapshotGroupVO.class.getSimpleName());
                                         for (VolumeSnapshotGroupRefInventory ref : groupInv.getVolumeSnapshotRefs()) {
+                                            if (ref.isSnapshotDeleted()) {
+                                                continue;
+                                            }
                                             tagMgr.createNonInherentSystemTag(ref.getVolumeSnapshotUuid(),
                                                     VolumeSnapshotSystemTags.VOLUMESNAPSHOT_CREATED_BY_SYSTEM.getTagFormat(),
                                                     VolumeSnapshotVO.class.getSimpleName());

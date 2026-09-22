@@ -2450,6 +2450,10 @@ abstract class ApiHelper {
         runAction(org.zstack.sdk.GetVolumeQosAction, c)
     }
 
+    def getVolumeSnapshotGroupTree(@DelegatesTo(strategy = Closure.OWNER_FIRST, value = org.zstack.sdk.GetVolumeSnapshotGroupTreeAction.class) Closure c) {
+        runAction(org.zstack.sdk.GetVolumeSnapshotGroupTreeAction, c)
+    }
+
     def getVolumeSnapshotSize(@DelegatesTo(strategy = Closure.OWNER_FIRST, value = org.zstack.sdk.GetVolumeSnapshotSizeAction.class) Closure c) {
         runAction(org.zstack.sdk.GetVolumeSnapshotSizeAction, c)
     }

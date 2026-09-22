@@ -69,9 +69,12 @@ import org.zstack.header.storage.backup.BackupStorageVO_;
 import org.zstack.header.storage.primary.*;
 import org.zstack.header.storage.snapshot.APICreateVolumesSnapshotMsg;
 import org.zstack.header.storage.snapshot.ConsistentType;
+import org.zstack.header.storage.snapshot.VolumeSnapshotStatus;
 import org.zstack.header.storage.snapshot.VolumeSnapshotVO;
+import org.zstack.header.storage.snapshot.VolumeSnapshotVO_;
 import org.zstack.header.storage.snapshot.group.VolumeSnapshotGroupInventory;
 import org.zstack.header.storage.snapshot.group.VolumeSnapshotGroupRefInventory;
+import org.zstack.header.storage.snapshot.group.VolumeSnapshotGroupRefVO;
 import org.zstack.header.storage.snapshot.group.VolumeSnapshotGroupVO;
 import org.zstack.header.storage.snapshot.group.VolumeSnapshotGroupVO_;
 import org.zstack.header.tag.SystemTagCreateMessageValidator;
@@ -117,6 +120,7 @@ import org.zstack.storage.primary.local.LocalStorageHostRefVO_;
 import org.zstack.storage.primary.preallocation.PreallocationFactory;
 import org.zstack.storage.snapshot.VolumeSnapshotQuotaConstant;
 import org.zstack.storage.snapshot.VolumeSnapshotSystemTags;
+import org.zstack.storage.snapshot.group.VolumeSnapshotGroupChecker;
 import org.zstack.storage.snapshot.reference.VolumeSnapshotReferenceUtils;
 import org.zstack.storage.snapshot.group.VolumeSnapshotGroupOperationValidator;
 import org.zstack.storage.volume.MevocoVolumeSystemTags;
@@ -2338,8 +2342,25 @@ public class MevocoManagerImpl extends AbstractService implements MevocoManager,
         if (chunk.templatedCache != null) {
             List<VolumeSnapshotGroupVO> groups = Q.New(VolumeSnapshotGroupVO.class)
                     .eq(VolumeSnapshotGroupVO_.vmInstanceUuid, chunk.templatedCache.getCacheVmInstanceUuid()).list();
+            if (groups.size() != 1 || !isCompleteTemplatedVmCacheSnapshotGroup(groups.get(0).getUuid())) {
+                ErrorCode error = operr("the cache of templated vmInstance[uuid:%s] has no complete volume snapshot group",
+                        chunk.msg.getTemplatedVmInstanceUuid());
+                invalidateTemplatedVmCache(chunk.templatedCache, new Completion(completion) {
+                    @Override
+                    public void success() {
+                        completion.fail(error);
+                    }
+
+                    @Override
+                    public void fail(ErrorCode cleanupError) {
+                        completion.fail(multiErr(Arrays.asList(error, cleanupError)));
+                    }
+                });
+                return;
+            }
+
             chunk.msg.setTemplatedVmInstanceCache(chunk.templatedCache);
-            chunk.msg.setTemplatedCacheVolumeSnapshotGroup(groups.isEmpty() ? null : VolumeSnapshotGroupInventory.valueOf(groups.get(0)));
+            chunk.msg.setTemplatedCacheVolumeSnapshotGroup(VolumeSnapshotGroupInventory.valueOf(groups.get(0)));
             completion.success();
             return;
         }
@@ -2355,8 +2376,6 @@ public class MevocoManagerImpl extends AbstractService implements MevocoManager,
         FlowChain flowChain = FlowChainBuilder.newSimpleFlowChain();
         flowChain.setName(String.format("create-cache-for-templated-vm-%s", chunk.msg.getTemplatedVmInstanceUuid()));
         flowChain.then(new Flow() {
-            boolean isTemplateCacheCreated = false;
-
             @Override
             public void run(FlowTrigger trigger, Map data) {
                 doCloneVmInstance(clmsg, new ReturnValueCompletion<CloneVmInstanceResults>(completion) {
@@ -2368,7 +2387,6 @@ public class MevocoManagerImpl extends AbstractService implements MevocoManager,
                                     "because %s", chunk.msg.getTemplatedVmInstanceUuid(), inv.getError().getDetails()));
                             return;
                         }
-                        isTemplateCacheCreated = true;
                         trigger.next();
                     }
 
@@ -2381,28 +2399,14 @@ public class MevocoManagerImpl extends AbstractService implements MevocoManager,
 
             @Override
             public void rollback(FlowRollback trigger, Map data) {
-                if (isTemplateCacheCreated) {
-                    trigger.rollback();
-                    return;
-                }
-                String cacheUuid = chunk.templatedCache.getCacheVmInstanceUuid();
-
-                DestroyVmInstanceMsg dmsg = new DestroyVmInstanceMsg();
-                dmsg.setVmInstanceUuid(cacheUuid);
-                dmsg.setDeletionPolicy(VmInstanceDeletionPolicyManager.VmInstanceDeletionPolicy.Direct);
-                bus.makeTargetServiceIdByResourceUuid(dmsg, VmInstanceConstant.SERVICE_ID, cacheUuid);
-                bus.send(dmsg, new CloudBusCallBack(trigger) {
+                invalidateTemplatedVmCache(chunk.templatedCache, new Completion(trigger) {
                     @Override
-                    public void run(MessageReply reply) {
-                        if (!reply.isSuccess()) {
-                            logger.warn(String.format("failed to delete templated vmInstance cache[uuid: %s]", cacheUuid));
-                        }
-                        logger.info(String.format("success to delete templated vmInstance cache[uuid: %s]", cacheUuid));
+                    public void success() {
+                        trigger.rollback();
+                    }
 
-                        SQL.New(TemplatedVmInstanceCacheVO.class)
-                                .eq(TemplatedVmInstanceCacheVO_.templatedVmInstanceUuid, chunk.templatedCache.getTemplatedVmInstanceUuid())
-                                .eq(TemplatedVmInstanceCacheVO_.cacheVmInstanceUuid, chunk.templatedCache.getCacheVmInstanceUuid())
-                                .delete();
+                    @Override
+                    public void fail(ErrorCode errorCode) {
                         trigger.rollback();
                     }
                 });
@@ -2420,6 +2424,7 @@ public class MevocoManagerImpl extends AbstractService implements MevocoManager,
                 cmsg.setName("snapshot-groups-for-templated-vm-cache");
                 cmsg.setDescription(String.format("bulk snapshot for templated vm cache[%s]", cacheVm.getUuid()));
                 cmsg.setSession(chunk.msg.getSession());
+                cmsg.setAllowPartialSuccess(false);
 
                 bus.makeTargetServiceIdByResourceUuid(cmsg, VolumeConstant.SERVICE_ID, cmsg.getVolumeUuid());
                 bus.send(cmsg, new CloudBusCallBack(innerTrigger) {
@@ -2432,6 +2437,12 @@ public class MevocoManagerImpl extends AbstractService implements MevocoManager,
 
                         CreateVolumeSnapshotGroupReply cr = reply.castReply();
                         VolumeSnapshotGroupInventory group = cr.getInventory();
+                        if (!isCompleteTemplatedVmCacheSnapshotGroup(group.getUuid())) {
+                            innerTrigger.fail(operr("failed to create a complete volume snapshot group[uuid:%s] for templated vm cache[uuid:%s]",
+                                    group.getUuid(), cacheVm.getUuid()));
+                            return;
+                        }
+
                         for (VolumeSnapshotGroupRefInventory ref : group.getVolumeSnapshotRefs()) {
                             tagMgr.createNonInherentSystemTag(ref.getVolumeSnapshotUuid(),
                                     VolumeSnapshotSystemTags.VOLUMESNAPSHOT_CREATED_BY_SYSTEM.getTagFormat(),
@@ -2462,6 +2473,62 @@ public class MevocoManagerImpl extends AbstractService implements MevocoManager,
                 completion.fail(errCode);
             }
         }).start();
+    }
+
+    private boolean isCompleteTemplatedVmCacheSnapshotGroup(String groupUuid) {
+        VolumeSnapshotGroupVO group = Q.New(VolumeSnapshotGroupVO.class)
+                .eq(VolumeSnapshotGroupVO_.uuid, groupUuid).find();
+        if (group == null || !VolumeSnapshotGroupChecker.isAvailable(groupUuid)) {
+            return false;
+        }
+
+        List<VolumeSnapshotGroupRefVO> refs = group.getVolumeSnapshotRefs().stream()
+                .filter(ref -> !VolumeType.Memory.toString().equals(ref.getVolumeType()))
+                .collect(Collectors.toList());
+        Set<String> snapshotUuids = refs.stream()
+                .map(VolumeSnapshotGroupRefVO::getVolumeSnapshotUuid)
+                .collect(Collectors.toSet());
+        if (refs.size() != group.getSnapshotCount() || snapshotUuids.size() != refs.size()) {
+            return false;
+        }
+
+        return Q.New(VolumeSnapshotVO.class)
+                .in(VolumeSnapshotVO_.uuid, snapshotUuids)
+                .eq(VolumeSnapshotVO_.status, VolumeSnapshotStatus.Ready)
+                .count() == snapshotUuids.size();
+    }
+
+    private void invalidateTemplatedVmCache(TemplatedVmInstanceCacheVO cache, Completion completion) {
+        String cacheUuid = cache.getCacheVmInstanceUuid();
+        DestroyVmInstanceMsg dmsg = new DestroyVmInstanceMsg();
+        dmsg.setVmInstanceUuid(cacheUuid);
+        dmsg.setDeletionPolicy(VmInstanceDeletionPolicyManager.VmInstanceDeletionPolicy.Direct);
+        bus.makeTargetServiceIdByResourceUuid(dmsg, VmInstanceConstant.SERVICE_ID, cacheUuid);
+        bus.send(dmsg, new CloudBusCallBack(completion) {
+            @Override
+            public void run(MessageReply reply) {
+                if (!reply.isSuccess()) {
+                    logger.warn(String.format("failed to delete templated vmInstance cache[uuid: %s]: %s",
+                            cacheUuid, reply.getError()));
+                    if (Q.New(VmInstanceVO.class).eq(VmInstanceVO_.uuid, cacheUuid).isExists()) {
+                        completion.fail(reply.getError());
+                        return;
+                    }
+                }
+
+                SQL.New(TemplatedVmInstanceCacheVO.class)
+                        .eq(TemplatedVmInstanceCacheVO_.templatedVmInstanceUuid, cache.getTemplatedVmInstanceUuid())
+                        .eq(TemplatedVmInstanceCacheVO_.cacheVmInstanceUuid, cacheUuid)
+                        .delete();
+                if (!reply.isSuccess()) {
+                    completion.fail(reply.getError());
+                    return;
+                }
+
+                logger.info(String.format("success to delete templated vmInstance cache[uuid: %s]", cacheUuid));
+                completion.success();
+            }
+        });
     }
 
     private void handle(StorageMigrationMessage msg) {

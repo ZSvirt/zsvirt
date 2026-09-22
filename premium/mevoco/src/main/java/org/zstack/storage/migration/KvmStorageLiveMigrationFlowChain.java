@@ -687,19 +687,7 @@ public class KvmStorageLiveMigrationFlowChain {
                                     .in(VolumeSnapshotTreeVO_.volumeUuid, oldUuids)
                                     .hardDelete();
 
-                            boolean rootVolumeMigrated = finalVolumes.stream()
-                                    .anyMatch(v -> VolumeType.Root == v.getType());
-                            if (rootVolumeMigrated) {
-                                sql(VolumeSnapshotGroupRefVO.class)
-                                        .in(VolumeSnapshotGroupRefVO_.volumeSnapshotUuid, snapshotUuids)
-                                        .hardDelete();
-
-                                sql(VolumeSnapshotGroupVO.class)
-                                        .eq(VolumeSnapshotGroupVO_.vmInstanceUuid, msg.getVmInstanceUuid())
-                                        .hardDelete();
-                            } else {
-                                markDeletedSnapshotsInSnapshotGroup(snapshotUuids);
-                            }
+                            markDeletedSnapshotsInSnapshotGroup(snapshotUuids);
 
                             flush();
                         }

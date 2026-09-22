@@ -817,6 +817,7 @@ public class VolumeSnapshotTreeBase {
                         logger.debug("success to cleanup descendant memory snapshots");
                     }
                 }.execute();
+                ungroupAfterDeleted(memorySnapshotsOfDescendants);
             }
         });
     }
@@ -1445,6 +1446,9 @@ public class VolumeSnapshotTreeBase {
                 .eq(VolumeSnapshotGroupRefVO_.snapshotDeleted, false).count();
         if (count == 0) {
             cleanVmHostBackupFilesForGroup(list(volumeSnapshotInv.getGroupUuid()));
+            SQL.New(VolumeSnapshotGroupRefVO.class)
+                    .eq(VolumeSnapshotGroupRefVO_.volumeSnapshotGroupUuid, volumeSnapshotInv.getGroupUuid())
+                    .delete();
             dbf.removeByPrimaryKey(volumeSnapshotInv.getGroupUuid(), VolumeSnapshotGroupVO.class);
             logger.debug(String.format("snapshot group[uuid:%s] all volume snapshot has been deleted, " +
                     "delete snapshot group", volumeSnapshotInv.getGroupUuid()));
@@ -2161,22 +2165,31 @@ public class VolumeSnapshotTreeBase {
         List<String> uuids = snapshots.stream().map(VolumeSnapshotInventory::getUuid).collect(Collectors.toList());
         SQL.New(VolumeSnapshotGroupRefVO.class).in(VolumeSnapshotGroupRefVO_.volumeSnapshotUuid, uuids)
                 .set(VolumeSnapshotGroupRefVO_.snapshotDeleted, true).update();
-        if (currentRoot.getVolumeType().equals(VolumeType.Root.toString())) {
-            List<String> groupUuids = new ArrayList<>();
-            for (VolumeSnapshotInventory snapshot : snapshots) {
-                String groupUuid = snapshot.getGroupUuid();
-                if (groupUuid != null) {
-                    logger.debug(String.format("root volume snapshot[uuid:%s, name:%s] has been deleted, " +
-                            "ungroup snapshot group[uuid:%s]", snapshot.getUuid(), snapshot.getName(), groupUuid));
-                    groupUuids.add(groupUuid);
-                }
 
-            }
-
-            groupUuids.forEach(groupUuid -> vidm.deleteArchiveVmInstanceResourceMetadataGroup(groupUuid));
-            cleanVmHostBackupFilesForGroup(groupUuids);
-            dbf.removeByPrimaryKeys(groupUuids, VolumeSnapshotGroupVO.class);
+        List<String> groupUuids = snapshots.stream()
+                .map(VolumeSnapshotInventory::getGroupUuid)
+                .filter(Objects::nonNull)
+                .distinct()
+                .collect(Collectors.toList());
+        List<String> deletedGroupUuids = groupUuids.stream()
+                .filter(groupUuid -> Q.New(VolumeSnapshotGroupRefVO.class)
+                        .eq(VolumeSnapshotGroupRefVO_.volumeSnapshotGroupUuid, groupUuid)
+                        .eq(VolumeSnapshotGroupRefVO_.snapshotDeleted, false)
+                        .count() == 0)
+                .collect(Collectors.toList());
+        for (String groupUuid : deletedGroupUuids) {
+            logger.debug(String.format("all snapshots in snapshot group[uuid:%s] have been deleted, delete snapshot group", groupUuid));
         }
+        if (deletedGroupUuids.isEmpty()) {
+            return;
+        }
+
+        deletedGroupUuids.forEach(groupUuid -> vidm.deleteArchiveVmInstanceResourceMetadataGroup(groupUuid));
+        cleanVmHostBackupFilesForGroup(deletedGroupUuids);
+        SQL.New(VolumeSnapshotGroupRefVO.class)
+                .in(VolumeSnapshotGroupRefVO_.volumeSnapshotGroupUuid, deletedGroupUuids)
+                .delete();
+        dbf.removeByPrimaryKeys(deletedGroupUuids, VolumeSnapshotGroupVO.class);
     }
 
     private void cleanVmHostBackupFilesForGroup(List<String> groupUuids) {

@@ -12,17 +12,22 @@ import org.zstack.header.apimediator.InterceptorForService;
 import org.zstack.header.apimediator.StopRoutingException;
 import org.zstack.header.errorcode.ErrorCode;
 import org.zstack.header.message.APIMessage;
+import org.zstack.header.message.APIResourceScope;
 import org.zstack.header.storage.snapshot.*;
 import org.zstack.header.storage.snapshot.group.*;
 import org.zstack.header.vm.VmInstanceState;
 import org.zstack.header.vm.VmInstanceVO;
 import org.zstack.header.vm.VmInstanceVO_;
 import org.zstack.header.volume.*;
+import org.zstack.identity.Account;
+import org.zstack.identity.rbac.AccessibleResourceChecker;
 import org.zstack.utils.Utils;
 import org.zstack.utils.logging.CLogger;
 
 import static org.zstack.core.Platform.argerr;
+import static org.zstack.core.Platform.err;
 import static org.zstack.core.Platform.operr;
+import static org.zstack.header.errorcode.SysErrors.RESOURCE_NOT_ACCESSIBLE;
 import static org.zstack.storage.snapshot.VolumeSnapshotMessageRouter.getResourceIdToRouteMsg;
 
 import javax.persistence.Tuple;
@@ -70,12 +75,53 @@ public class VolumeSnapshotApiInterceptor implements ApiMessageInterceptor {
         } else if (msg instanceof APIBatchDeleteVolumeSnapshotMsg) {
             validate((APIBatchDeleteVolumeSnapshotMsg) msg);
         } else if (msg instanceof APIRevertVmFromSnapshotGroupMsg) {
+            validateSnapshotGroupAccess(msg, (APIRevertVmFromSnapshotGroupMsg) msg);
             validate((APIRevertVmFromSnapshotGroupMsg) msg);
+        } else if (msg instanceof APIDeleteVolumeSnapshotGroupMsg
+                || msg instanceof APIUngroupVolumeSnapshotGroupMsg
+                || msg instanceof APIUpdateVolumeSnapshotGroupMsg) {
+            validateSnapshotGroupAccess(msg, (VolumeSnapshotGroupMessage) msg);
+        } else if (msg instanceof APIGetVolumeSnapshotGroupTreeMsg) {
+            validate((APIGetVolumeSnapshotGroupTreeMsg) msg);
         }
 
         setServiceId(msg);
 
         return msg;
+    }
+
+    private void validateSnapshotGroupAccess(APIMessage msg, VolumeSnapshotGroupMessage groupMsg) {
+        if (Account.isAdminPermission(msg.getSession())) {
+            return;
+        }
+
+        String vmInstanceUuid = Q.New(VolumeSnapshotGroupVO.class)
+                .select(VolumeSnapshotGroupVO_.vmInstanceUuid)
+                .eq(VolumeSnapshotGroupVO_.uuid, groupMsg.getGroupUuid())
+                .findValue();
+        if (vmInstanceUuid == null) {
+            return;
+        }
+
+        if (!AccessibleResourceChecker.forAccount(msg.getSession().getAccountUuid())
+                .withScope(APIResourceScope.MustOwner)
+                .isAccessible(vmInstanceUuid)) {
+            throw new ApiMessageInterceptionException(err(RESOURCE_NOT_ACCESSIBLE,
+                    "account has no access to the VM[uuid:%s] of volume snapshot group[uuid:%s]",
+                    vmInstanceUuid, groupMsg.getGroupUuid()));
+        }
+    }
+
+    private void validate(APIGetVolumeSnapshotGroupTreeMsg msg) {
+        if (Account.isAllResourcesReadable(msg.getSession())) {
+            return;
+        }
+
+        if (!AccessibleResourceChecker.forAccount(msg.getSession().getAccountUuid())
+                .isAccessible(msg.getVmInstanceUuid())) {
+            throw new ApiMessageInterceptionException(err(RESOURCE_NOT_ACCESSIBLE,
+                    "account has no access to the VM[uuid:%s]", msg.getVmInstanceUuid()));
+        }
     }
 
     private boolean isWithMemoryForSnapshotGroup(VolumeSnapshotGroupVO groupVO) {

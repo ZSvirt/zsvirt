@@ -24,7 +24,7 @@ public class APIUpdateVolumeSnapshotGroupMsg extends APIMessage implements Volum
     @APIParam(required = false)
     private String description;
 
-    @APIParam(resourceType = VolumeSnapshotGroupVO.class)
+    @APIParam(resourceType = VolumeSnapshotGroupVO.class, scope = APIParam.SCOPE_ALLOWED_ALL)
     private String uuid;
 
     public String getName() {

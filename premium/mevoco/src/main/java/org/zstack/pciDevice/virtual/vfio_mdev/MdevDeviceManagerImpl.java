@@ -25,7 +25,6 @@ import org.zstack.header.core.WhileDoneCompletion;
 import org.zstack.header.core.workflow.Flow;
 import org.zstack.header.core.workflow.FlowRollback;
 import org.zstack.header.core.workflow.FlowTrigger;
-import org.zstack.header.core.workflow.NoRollbackFlow;
 import org.zstack.header.errorcode.ErrorCode;
 import org.zstack.header.errorcode.ErrorCodeList;
 import org.zstack.header.errorcode.OperationFailureException;
@@ -721,11 +720,11 @@ public class MdevDeviceManagerImpl extends AbstractService implements
     }
 
     @Override
-    public Flow createPostHostConnectFlow(HostInventory host) {
-        // try to re-splite pci devices in host because mdev devices cannot persist when the host is rebooted
-        return new NoRollbackFlow() {
-            @Override
-            public void run(FlowTrigger trigger, Map data) {
+    public Flow createPostHostConnectFlow() {
+        // try to re-split pci devices in host because mdev devices cannot persist when the host is rebooted
+        return Flow.of("split-pci-to-mdev-in-host")
+            .handle((trigger, data) -> {
+                HostInventory host = findInventoryFromFlowData(data);
                 List<PciDeviceVO> pcis = Q.New(PciDeviceVO.class)
                         .eq(PciDeviceVO_.hostUuid, host.getUuid())
                         .eq(PciDeviceVO_.virtStatus, PciDeviceVirtStatus.VFIO_MDEV_VIRTUALIZED)
@@ -735,7 +734,7 @@ public class MdevDeviceManagerImpl extends AbstractService implements
                     return;
                 }
 
-                logger.debug(String.format("try to re-splite pci devices[uuid:%s] into mdev devices",
+                logger.debug(String.format("try to re-split pci devices[uuid:%s] into mdev devices",
                         pcis.stream().map(PciDeviceVO::getUuid).collect(Collectors.toList())));
                 new While<>(pcis).each((pci, comp) -> {
                     PciDeviceBackend bkd = pciMgr.getPciDeviceBackendByHostUuid(host.getUuid());
@@ -752,13 +751,13 @@ public class MdevDeviceManagerImpl extends AbstractService implements
                     bkd.generateVfioMdevDevices(pci.getHostUuid(), pci.toInventory(), mdevSpec.toInventory(), mdevUuids, new Completion(comp) {
                         @Override
                         public void success() {
-                            logger.debug(String.format("tried to re-splited pci device[uuid:%s] into mdev devices", pci.getUuid()));
+                            logger.debug(String.format("tried to re-split pci device[uuid:%s] into mdev devices", pci.getUuid()));
                             comp.done();
                         }
 
                         @Override
                         public void fail(ErrorCode errorCode) {
-                            logger.error(String.format("failed to re-splited pci device[uuid:%s] into mdev devices", pci.getUuid()));
+                            logger.error(String.format("failed to re-split pci device[uuid:%s] into mdev devices", pci.getUuid()));
                             comp.done();
                         }
                     });
@@ -768,8 +767,8 @@ public class MdevDeviceManagerImpl extends AbstractService implements
                         trigger.next();
                     }
                 });
-            }
-        };
+            })
+            .build();
     }
 
     @Override

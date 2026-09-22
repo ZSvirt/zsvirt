@@ -13,8 +13,6 @@ import org.zstack.header.core.Completion;
 import org.zstack.header.core.NopeCompletion;
 import org.zstack.header.core.WhileDoneCompletion;
 import org.zstack.header.core.workflow.Flow;
-import org.zstack.header.core.workflow.FlowTrigger;
-import org.zstack.header.core.workflow.NoRollbackFlow;
 import org.zstack.header.errorcode.ErrorCode;
 import org.zstack.header.errorcode.ErrorCodeList;
 import org.zstack.header.host.HostConstant;
@@ -560,12 +558,10 @@ public class VmVfNicKvmBackend implements VmVfNicHypervisorBackend, VmInstanceSt
     }
 
     @Override
-    public Flow createPostHostConnectFlow(HostInventory host) {
-        return new NoRollbackFlow() {
-            String __name__ = "update-vnic-macs-for-sr-iov";
-
-            @Override
-            public void run(FlowTrigger trigger, Map data) {
+    public Flow createPostHostConnectFlow() {
+        return Flow.of("update-vnic-macs-for-sr-iov")
+            .handle((trigger, data) -> {
+                HostInventory host = findInventoryFromFlowData(data);
                 Map<String, List<VmNicInventory>> nicMaps = getSriovFdbInfoByHost(host);
                 if (nicMaps.isEmpty()) {
                     logger.debug(String.format("update sr-iov fdb for host[uuid:%s, name:%s] successfully",
@@ -596,7 +592,7 @@ public class VmVfNicKvmBackend implements VmVfNicHypervisorBackend, VmInstanceSt
                         }
                     });
                 }
-            }
-        };
+            })
+            .build();
     }
 }

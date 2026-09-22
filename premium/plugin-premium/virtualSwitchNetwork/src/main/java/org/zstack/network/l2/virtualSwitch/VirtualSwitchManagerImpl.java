@@ -1058,7 +1058,7 @@ public class VirtualSwitchManagerImpl extends AbstractService implements Virtual
     }
 
     @Override
-    public Flow createPostHostConnectFlow(HostInventory host) {
+    public Flow createPostHostConnectFlow() {
         class Context {
             boolean isPhysicalInterfaceChanged = false;
             boolean attachFailed = false;
@@ -1067,6 +1067,7 @@ public class VirtualSwitchManagerImpl extends AbstractService implements Virtual
             HostKernelInterfaceTO interfaceTO;
             L2VirtualSwitchNetworkVO vSwitchVO;
             PortGroupVO pvo;
+            HostInventory host;
 
             public ErrorCode initL2NetworkHostRefAndUpdateBridgeName() {
                 if (interfaceTO == null || pvo == null || vSwitchVO == null) {
@@ -1115,12 +1116,12 @@ public class VirtualSwitchManagerImpl extends AbstractService implements Virtual
             }
         }
 
-        return new NoRollbackFlow() {
-            String __name__ = "create-default-host-kernel-interface-on-host";
-            final Context ctx = new Context();
+        return Flow.of("create-default-host-kernel-interface-on-host")
+            .handle((extTrigger, data) -> {
+                HostInventory host = findInventoryFromFlowData(data);
+                final Context ctx = new Context();
+                ctx.host = host;
 
-            @Override
-            public void run(FlowTrigger extTrigger, Map data) {
                 FlowChain chain = new SimpleFlowChain();
                 chain.setName(String.format("create-host-kernel-interface-for-host[uuid:%s]", host.getUuid()));
 
@@ -1128,7 +1129,7 @@ public class VirtualSwitchManagerImpl extends AbstractService implements Virtual
                     String __name__ = String.format("get-host-kernel-interfaces-for-managetment-ip-%s", host.getManagementIp());
 
                     @Override
-                    public void run(FlowTrigger innerTrigger, Map data) {
+                    public void run(FlowTrigger innerTrigger, Map<String, Object> data) {
 
                         MevocoKVMAgentCommands.GetHostKernelInterfaceCmd cmd = new MevocoKVMAgentCommands.GetHostKernelInterfaceCmd();
                         cmd.setHostUuid(host.getUuid());
@@ -1164,7 +1165,7 @@ public class VirtualSwitchManagerImpl extends AbstractService implements Virtual
                     String __name__ = String.format("create-default-virtual-switch-for-host-%s", host.getManagementIp());
 
                     @Override
-                    public void run(FlowTrigger innerTrigger, Map data) {
+                    public void run(FlowTrigger innerTrigger, Map<String, Object> data) {
 
                         if (ctx.interfaceTO == null) {
                             innerTrigger.fail(inerr("failed to get the host interface for host[%s]", host.getManagementIp()));
@@ -1298,7 +1299,7 @@ public class VirtualSwitchManagerImpl extends AbstractService implements Virtual
                     }
 
                     @Override
-                    public void rollback(FlowRollback innerTrigger, Map data) {
+                    public void rollback(FlowRollback innerTrigger, Map<String, Object> data) {
                         if (ctx.createdVSwitchUuid != null) {
                             dbf.removeByPrimaryKey(ctx.createdVSwitchUuid, L2VirtualSwitchNetworkVO.class);
                             VirtualSwitchUtils.rollbackVirtualSwitchIndexOfZone(host.getZoneUuid());
@@ -1318,7 +1319,7 @@ public class VirtualSwitchManagerImpl extends AbstractService implements Virtual
                     String __name__ = "attach-port-group-of-default-virtual-switch";
 
                     @Override
-                    public void run(FlowTrigger innerTrigger, Map data) {
+                    public void run(FlowTrigger innerTrigger, Map<String, Object> data) {
 
                         if (ctx.interfaceTO == null) {
                             innerTrigger.fail(inerr("failed to get the host interface for host[%s]", host.getManagementIp()));
@@ -1418,7 +1419,7 @@ public class VirtualSwitchManagerImpl extends AbstractService implements Virtual
                     }
 
                     @Override
-                    public void rollback(FlowRollback innerTrigger, Map data) {
+                    public void rollback(FlowRollback innerTrigger, Map<String, Object> data) {
                         if (ctx.pvo != null) {
                             L2NetworkHostUtils.deleteL2NetworkHostRef(ctx.pvo.getL2NetworkUuid(), host.getUuid());
                         }
@@ -1429,12 +1430,12 @@ public class VirtualSwitchManagerImpl extends AbstractService implements Virtual
                     String __name__ = "create-default-port-group-if-not-exist";
 
                     @Override
-                    public boolean skip(Map data) {
+                    public boolean skip(Map<String, Object> data) {
                         return ctx.pvo != null;
                     }
 
                     @Override
-                    public void run(FlowTrigger innerTrigger, Map data) {
+                    public void run(FlowTrigger innerTrigger, Map<String, Object> data) {
 
                         if (ctx.interfaceTO == null) {
                             innerTrigger.fail(inerr("failed to get the host interface for host[%s]", host.getManagementIp()));
@@ -1502,7 +1503,7 @@ public class VirtualSwitchManagerImpl extends AbstractService implements Virtual
                     }
 
                     @Override
-                    public void rollback(FlowRollback innerTrigger, Map data) {
+                    public void rollback(FlowRollback innerTrigger, Map<String, Object> data) {
                         if (ctx.createdPortGroupUuid != null) {
                             DeleteL3NetworkMsg dmsg = new DeleteL3NetworkMsg();
                             dmsg.setForceDelete(true);
@@ -1522,12 +1523,12 @@ public class VirtualSwitchManagerImpl extends AbstractService implements Virtual
                     String __name__ = "create-default-host-kernel-interface";
 
                     @Override
-                    public boolean skip(Map data) {
+                    public boolean skip(Map<String, Object> data) {
                         return ctx.attachFailed || VirtualSwitchUtils.getDefaultKernelInterface(ctx.pvo.getL2NetworkUuid(), host.getUuid()) != null;
                     }
 
                     @Override
-                    public void run(FlowTrigger innerTrigger, Map data) {
+                    public void run(FlowTrigger innerTrigger, Map<String, Object> data) {
 
                         if (ctx.interfaceTO == null) {
                             innerTrigger.fail(inerr("failed to get the host interface for host[%s]", host.getManagementIp()));
@@ -1578,12 +1579,12 @@ public class VirtualSwitchManagerImpl extends AbstractService implements Virtual
                     String __name__ = "delete-default-host-kernel-interface-if-attach-failed";
 
                     @Override
-                    public boolean skip(Map data) {
+                    public boolean skip(Map<String, Object> data) {
                         return !ctx.attachFailed;
                     }
 
                     @Override
-                    public void run(FlowTrigger innerTrigger, Map data) {
+                    public void run(FlowTrigger innerTrigger, Map<String, Object> data) {
                         if (ctx.pvo == null) {
                             innerTrigger.fail(inerr("failed to get default port group for cluster[uuid:%s]", host.getClusterUuid()));
                             return;
@@ -1629,17 +1630,17 @@ public class VirtualSwitchManagerImpl extends AbstractService implements Virtual
                     }
                 }).done(new FlowDoneHandler(null) {
                     @Override
-                    public void handle(Map data) {
+                    public void handle(Map<String, Object> data) {
                         extTrigger.next();
                     }
                 }).error(new FlowErrorHandler(null) {
                     @Override
-                    public void handle(ErrorCode errCode, Map data) {
+                    public void handle(ErrorCode errCode, Map<String, Object> data) {
                         extTrigger.fail(errCode);
                     }
                 }).start();
-            }
-        };
+            })
+            .build();
     }
 
     @Override

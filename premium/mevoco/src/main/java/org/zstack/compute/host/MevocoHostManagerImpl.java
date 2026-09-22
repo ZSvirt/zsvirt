@@ -2324,10 +2324,10 @@ public class MevocoHostManagerImpl implements HostExtensionManager, PostHostConn
     }
 
     @Override
-    public Flow createPostHostConnectFlow(HostInventory host) {
-        return new NoRollbackFlow() {
-            @Override
-            public void run(FlowTrigger trigger, Map data) {
+    public Flow createPostHostConnectFlow() {
+        return Flow.of("mevoco-host-connect-flows")
+            .handle((trigger, data) -> {
+                HostInventory host = findInventoryFromFlowData(data);
                 FlowChain chain = FlowChainBuilder.newSimpleFlowChain();
                 chain.setName(String.format("get-host-facts-after-host-%s-connected", host.getUuid()));
                 chain.then(new NoRollbackFlow() {
@@ -2408,8 +2408,8 @@ public class MevocoHostManagerImpl implements HostExtensionManager, PostHostConn
                         trigger.next();
                     }
                 }).start();
-            }
-        };
+            })
+            .build();
     }
 
     @Override

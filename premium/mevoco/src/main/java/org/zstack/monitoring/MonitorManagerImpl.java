@@ -44,7 +44,6 @@ import org.zstack.monitoring.trigger.expression.TriggerExpression;
 import org.zstack.utils.CollectionUtils;
 import org.zstack.utils.DebugUtils;
 import org.zstack.utils.Utils;
-import org.zstack.utils.function.ForEachFunction;
 import org.zstack.utils.gson.JSONObjectUtil;
 import org.zstack.utils.logging.CLogger;
 
@@ -318,12 +317,7 @@ public class MonitorManagerImpl extends AbstractService implements
         }.execute();
 
         CollectionUtils.safeForEach(pluginRgty.getExtensionList(MonitorTriggerActionExtension.class),
-                new ForEachFunction<MonitorTriggerActionExtension>() {
-                    @Override
-                    public void run(MonitorTriggerActionExtension arg) {
-                        arg.afterCreateMonitorTriggerAction(vo);
-                    }
-                });
+                arg -> arg.afterCreateMonitorTriggerAction(vo));
 
         evt.setInventory(f.getInventory(vo.getUuid()));
         bus.publish(evt);

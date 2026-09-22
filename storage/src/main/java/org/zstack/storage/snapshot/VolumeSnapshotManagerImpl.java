@@ -1322,7 +1322,7 @@ public class VolumeSnapshotManagerImpl extends AbstractService implements
         }
 
         pluginRgty.saveExtensionAsMap(CreateTemplateFromVolumeSnapshotExtensionPoint.class,
-                (Function<Object, CreateTemplateFromVolumeSnapshotExtensionPoint>) arg -> arg.createTemplateFromVolumeSnapshotPrimaryStorageType());
+                CreateTemplateFromVolumeSnapshotExtensionPoint::createTemplateFromVolumeSnapshotPrimaryStorageType);
 
         bus.installBeforeDeliveryMessageInterceptor(new AbstractBeforeDeliveryMessageInterceptor() {
             @Override

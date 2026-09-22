@@ -51,7 +51,6 @@ import org.zstack.tag.TagManager;
 import org.zstack.utils.CollectionUtils;
 import org.zstack.utils.Utils;
 import org.zstack.utils.data.FieldPrinter;
-import org.zstack.utils.function.ForEachFunction;
 import org.zstack.utils.gson.JSONObjectUtil;
 import org.zstack.utils.logging.CLogger;
 import org.zstack.utils.network.IPv6Constants;
@@ -206,23 +205,13 @@ public class L3BasicNetwork implements L3Network {
             ext.preDeleteIpRange(inv);
         }
 
-        CollectionUtils.safeForEach(exts, new ForEachFunction<IpRangeDeletionExtensionPoint>() {
-            @Override
-            public void run(IpRangeDeletionExtensionPoint arg) {
-                arg.beforeDeleteIpRange(inv);
-            }
-        });
+        CollectionUtils.safeForEach(exts, arg -> arg.beforeDeleteIpRange(inv));
 
 
         dbf.remove(iprvo);
         IpRangeHelper.updateL3NetworkIpversion(iprvo);
 
-        CollectionUtils.safeForEach(exts, new ForEachFunction<IpRangeDeletionExtensionPoint>() {
-            @Override
-            public void run(IpRangeDeletionExtensionPoint arg) {
-                arg.afterDeleteIpRange(inv);
-            }
-        });
+        CollectionUtils.safeForEach(exts, arg -> arg.afterDeleteIpRange(inv));
 
         bus.reply(msg, reply);
 

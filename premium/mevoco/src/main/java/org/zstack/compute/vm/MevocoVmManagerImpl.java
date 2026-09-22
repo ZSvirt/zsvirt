@@ -59,7 +59,6 @@ import org.zstack.storage.primary.local.LocalStoragePathOwnershipHelper;
 import org.zstack.tag.TagManager;
 import org.zstack.storage.snapshot.group.VolumeSnapshotGroupBase;
 import org.zstack.utils.Utils;
-import org.zstack.utils.function.Function;
 import org.zstack.utils.gson.JSONObjectUtil;
 import org.zstack.utils.logging.CLogger;
 
@@ -144,18 +143,8 @@ public class MevocoVmManagerImpl implements VmInstanceExtensionManager, BeforeVm
 
     @Override
     public boolean start() {
-        pluginRgty.saveExtensionAsMap(VmMetadataPathBuildExtensionPoint.class, new Function<Object, VmMetadataPathBuildExtensionPoint>() {
-            @Override
-            public Object call(VmMetadataPathBuildExtensionPoint arg) {
-                return arg.getPrimaryStorageType();
-            }
-        });
-        pluginRgty.saveExtensionAsMap(VmMetadataPathReplacementExtensionPoint.class, new Function<Object, VmMetadataPathReplacementExtensionPoint>() {
-            @Override
-            public Object call(VmMetadataPathReplacementExtensionPoint arg) {
-                return arg.getPrimaryStorageType();
-            }
-        });
+        pluginRgty.saveExtensionAsMap(VmMetadataPathBuildExtensionPoint.class, VmMetadataPathBuildExtensionPoint::getPrimaryStorageType);
+        pluginRgty.saveExtensionAsMap(VmMetadataPathReplacementExtensionPoint.class, VmMetadataPathReplacementExtensionPoint::getPrimaryStorageType);
         createVmFlowChainBuilder();
         return true;
     }

@@ -9,7 +9,6 @@ import org.zstack.header.network.l2.L2NetworkInventory;
 import org.zstack.header.network.l2.L2NetworkUpdateExtensionPoint;
 import org.zstack.utils.CollectionUtils;
 import org.zstack.utils.Utils;
-import org.zstack.utils.function.ForEachFunction;
 import org.zstack.utils.logging.CLogger;
 
 import java.util.List;
@@ -36,21 +35,11 @@ public class L2NetworkExtensionPointEmitter implements Component {
     }
     
     public void beforeDelete(final L2NetworkInventory inv) {
-        CollectionUtils.safeForEach(extensions, new ForEachFunction<L2NetworkDeleteExtensionPoint>() {
-            @Override
-            public void run(L2NetworkDeleteExtensionPoint arg) {
-                arg.beforeDeleteL2Network(inv);
-            }
-        });
+        CollectionUtils.safeForEach(extensions, arg -> arg.beforeDeleteL2Network(inv));
     }
     
     public void afterDelete(final L2NetworkInventory inv) {
-        CollectionUtils.safeForEach(extensions, new ForEachFunction<L2NetworkDeleteExtensionPoint>() {
-            @Override
-            public void run(L2NetworkDeleteExtensionPoint arg) {
-                arg.afterDeleteL2Network(inv);
-            }
-        });
+        CollectionUtils.safeForEach(extensions, arg -> arg.afterDeleteL2Network(inv));
     }
 
     public void afterUpdate(final L2NetworkInventory inv) {

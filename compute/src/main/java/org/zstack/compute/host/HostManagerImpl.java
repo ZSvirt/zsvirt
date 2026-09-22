@@ -47,7 +47,6 @@ import org.zstack.resourceconfig.ResourceConfigFacade;
 import org.zstack.tag.TagManager;
 import org.zstack.utils.*;
 import org.zstack.utils.data.Pair;
-import org.zstack.utils.function.ForEachFunction;
 import org.zstack.utils.logging.CLogger;
 import org.zstack.utils.ssh.Ssh;
 import org.zstack.utils.ssh.SshResult;
@@ -442,12 +441,7 @@ public class HostManagerImpl extends AbstractService implements HostManager, Man
                 dbf.eoCleanup(HostVO.class, nvo.getUuid());
                 HostInventory inv = HostInventory.valueOf(nvo);
 
-                CollectionUtils.safeForEach(pluginRgty.getExtensionList(FailToAddHostExtensionPoint.class), new ForEachFunction<FailToAddHostExtensionPoint>() {
-                    @Override
-                    public void run(FailToAddHostExtensionPoint ext) {
-                        ext.failedToAddHost(inv, msg);
-                    }
-                });
+                CollectionUtils.safeForEach(pluginRgty.getExtensionList(FailToAddHostExtensionPoint.class), ext -> ext.failedToAddHost(inv, msg));
 
                 completion.fail(errCode);
             }

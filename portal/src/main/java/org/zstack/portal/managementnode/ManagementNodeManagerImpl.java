@@ -66,7 +66,6 @@ import org.zstack.utils.CollectionUtils;
 import org.zstack.utils.DebugUtils;
 import org.zstack.utils.StringDSL;
 import org.zstack.utils.Utils;
-import org.zstack.utils.function.ForEachFunction;
 import org.zstack.utils.gson.JSONObjectUtil;
 import org.zstack.utils.logging.CLogger;
 
@@ -172,12 +171,7 @@ public class ManagementNodeManagerImpl extends AbstractService implements Manage
             ManagementNodeChangeListener l = (ManagementNodeChangeListener) destinationMaker;
             l.nodeJoin(inv);
 
-            CollectionUtils.safeForEach(lifeCycleExtension, new ForEachFunction<ManagementNodeChangeListener>() {
-                @Override
-                public void run(ManagementNodeChangeListener arg) {
-                    arg.nodeJoin(inv);
-                }
-            });
+            CollectionUtils.safeForEach(lifeCycleExtension, arg -> arg.nodeJoin(inv));
         }
 
         @Override
@@ -191,12 +185,7 @@ public class ManagementNodeManagerImpl extends AbstractService implements Manage
             ManagementNodeChangeListener l = (ManagementNodeChangeListener) destinationMaker;
             l.nodeLeft(inv);
 
-            CollectionUtils.safeForEach(lifeCycleExtension, new ForEachFunction<ManagementNodeChangeListener>() {
-                @Override
-                public void run(ManagementNodeChangeListener arg) {
-                    arg.nodeLeft(inv);
-                }
-            });
+            CollectionUtils.safeForEach(lifeCycleExtension, arg -> arg.nodeLeft(inv));
         }
 
         @Override
@@ -204,12 +193,7 @@ public class ManagementNodeManagerImpl extends AbstractService implements Manage
             ManagementNodeChangeListener l = (ManagementNodeChangeListener) destinationMaker;
             l.iAmDead(inv);
 
-            CollectionUtils.safeForEach(lifeCycleExtension, new ForEachFunction<ManagementNodeChangeListener>() {
-                @Override
-                public void run(ManagementNodeChangeListener arg) {
-                    arg.iAmDead(inv);
-                }
-            });
+            CollectionUtils.safeForEach(lifeCycleExtension, arg -> arg.iAmDead(inv));
         }
 
         @Override
@@ -217,12 +201,7 @@ public class ManagementNodeManagerImpl extends AbstractService implements Manage
             ManagementNodeChangeListener l = (ManagementNodeChangeListener) destinationMaker;
             l.iJoin(inv);
 
-            CollectionUtils.safeForEach(lifeCycleExtension, new ForEachFunction<ManagementNodeChangeListener>() {
-                @Override
-                public void run(ManagementNodeChangeListener arg) {
-                    arg.iJoin(inv);
-                }
-            });
+            CollectionUtils.safeForEach(lifeCycleExtension, arg -> arg.iJoin(inv));
         }
     };
 

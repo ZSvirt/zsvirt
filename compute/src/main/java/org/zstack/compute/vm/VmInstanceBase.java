@@ -79,7 +79,6 @@ import org.zstack.utils.CollectionUtils;
 import org.zstack.utils.ExceptionDSL;
 import org.zstack.utils.ObjectUtils;
 import org.zstack.utils.Utils;
-import org.zstack.utils.function.ForEachFunction;
 import org.zstack.utils.gson.JSONObjectUtil;
 import org.zstack.utils.logging.CLogger;
 import org.zstack.utils.network.NicIpAddressInfo;
@@ -409,12 +408,7 @@ public class VmInstanceBase extends AbstractVmInstance {
 
             VmInstanceInventory inv = getSelfInventory();
             CollectionUtils.safeForEach(pluginRgty.getExtensionList(VmStateChangedExtensionPoint.class),
-                    new ForEachFunction<VmStateChangedExtensionPoint>() {
-                        @Override
-                        public void run(VmStateChangedExtensionPoint ext) {
-                            ext.vmStateChanged(inv, bs, self.getState());
-                        }
-                    });
+                    ext -> ext.vmStateChanged(inv, bs, self.getState()));
 
             //TODO: remove this
             notifyEmitter.notifyVmStateChange(VmInstanceInventory.valueOf(self), bs, state);
@@ -1224,12 +1218,7 @@ public class VmInstanceBase extends AbstractVmInstance {
                         final VmInstanceInventory vm = getSelfInventory();
                         final VmNicInventory nic = VmNicInventory.valueOf(targetNic);
                         CollectionUtils.safeForEach(pluginRgty.getExtensionList(VmIpChangedExtensionPoint.class),
-                                new ForEachFunction<VmIpChangedExtensionPoint>() {
-                                    @Override
-                                    public void run(VmIpChangedExtensionPoint ext) {
-                                        ext.vmIpChanged(vm, nic, oldIpMap, newIpMap);
-                                    }
-                                });
+                                ext -> ext.vmIpChanged(vm, nic, oldIpMap, newIpMap));
                         trigger.next();
                     }
                 });
@@ -2385,17 +2374,12 @@ public class VmInstanceBase extends AbstractVmInstance {
 
 
                 CollectionUtils.safeForEach(pluginRgty.getExtensionList(VmBeforeAttachL3NetworkExtensionPoint.class),
-                        new ForEachFunction<VmBeforeAttachL3NetworkExtensionPoint>() {
-                            @Override
-                            public void run(VmBeforeAttachL3NetworkExtensionPoint arg) {
-                                arg.vmBeforeAttachL3Network(vm, l3);
-                            }
-                        });
+                        arg -> arg.vmBeforeAttachL3Network(vm, l3));
 
                 FlowChain flowChain = FlowChainBuilder.newSimpleFlowChain();
                 setFlowMarshaller(flowChain);
                 flowChain.setName(String.format("attachNic-vm-%s-nic-%s", self.getUuid(), vmNicVO.getUuid()));
-                flowChain.getData().put(VmInstanceConstant.Params.VmInstanceSpec.toString(), spec);
+                flowChain.getData().put(VmInstanceConstant.Params.VmInstanceSpec, spec);
 
                 flowChain.then(new Flow() {
                     String __name__ = "update-nic";
@@ -2450,12 +2434,7 @@ public class VmInstanceBase extends AbstractVmInstance {
                     @Override
                     public void handle(Map data) {
                         CollectionUtils.safeForEach(pluginRgty.getExtensionList(VmAfterAttachL3NetworkExtensionPoint.class),
-                                new ForEachFunction<VmAfterAttachL3NetworkExtensionPoint>() {
-                                    @Override
-                                    public void run(VmAfterAttachL3NetworkExtensionPoint arg) {
-                                        arg.vmAfterAttachL3Network(vm, l3);
-                                    }
-                                });
+                                arg -> arg.vmAfterAttachL3Network(vm, l3));
                         VmNicInventory nic = spec.getDestNics().get(0);
                         completion.success(nic);
                         chain.next();
@@ -2464,12 +2443,7 @@ public class VmInstanceBase extends AbstractVmInstance {
                     @Override
                     public void handle(final ErrorCode errCode, Map data) {
                         CollectionUtils.safeForEach(pluginRgty.getExtensionList(VmFailToAttachL3NetworkExtensionPoint.class),
-                                new ForEachFunction<VmFailToAttachL3NetworkExtensionPoint>() {
-                                    @Override
-                                    public void run(VmFailToAttachL3NetworkExtensionPoint arg) {
-                                        arg.vmFailToAttachL3Network(vm, l3, errCode);
-                                    }
-                                });
+                                arg -> arg.vmFailToAttachL3Network(vm, l3, errCode));
                         setDefaultL3Network.rollback();
                         completion.fail(errCode);
                         chain.next();
@@ -4879,12 +4853,7 @@ public class VmInstanceBase extends AbstractVmInstance {
             ext.preRecoverVm(vm);
         }
 
-        CollectionUtils.forEach(exts, new ForEachFunction<RecoverVmExtensionPoint>() {
-            @Override
-            public void run(RecoverVmExtensionPoint ext) {
-                ext.beforeRecoverVm(vm);
-            }
-        });
+        CollectionUtils.forEach(exts, ext -> ext.beforeRecoverVm(vm));
 
         FlowChain chain = FlowChainBuilder.newShareFlowChain();
         chain.setName(String.format("recover-vm-%s", self.getUuid()));
@@ -4964,12 +4933,7 @@ public class VmInstanceBase extends AbstractVmInstance {
                     @Override
                     public void run(FlowTrigger trigger, Map data) {
                         self = changeVmStateInDb(VmInstanceStateEvent.stopped);
-                        CollectionUtils.forEach(exts, new ForEachFunction<RecoverVmExtensionPoint>() {
-                            @Override
-                            public void run(RecoverVmExtensionPoint ext) {
-                                ext.afterRecoverVm(vm);
-                            }
-                        });
+                        CollectionUtils.forEach(exts, ext -> ext.afterRecoverVm(vm));
 
                         trigger.next();
                     }
@@ -8031,25 +7995,20 @@ public class VmInstanceBase extends AbstractVmInstance {
         changeVmStateInDb(VmInstanceStateEvent.starting);
 
         CollectionUtils.safeForEach(pluginRgty.getExtensionList(BeforeStartNewCreatedVmExtensionPoint.class),
-                new ForEachFunction<BeforeStartNewCreatedVmExtensionPoint>() {
-                    @Override
-                    public void run(BeforeStartNewCreatedVmExtensionPoint ext) {
-                        ext.beforeStartNewCreatedVm(spec);
-                    }
-                });
+                ext -> ext.beforeStartNewCreatedVm(spec));
 
         extEmitter.beforeStartNewCreatedVm(VmInstanceInventory.valueOf(self));
         FlowChain chain = getCreateVmWorkFlowChain(getSelfInventory());
         setFlowMarshaller(chain);
 
         chain.setName(String.format("create-vm-%s", self.getUuid()));
-        chain.getData().put(VmInstanceConstant.Params.VmInstanceSpec.toString(), spec);
+        chain.getData().put(VmInstanceConstant.Params.VmInstanceSpec, spec);
         chain.then(new NoRollbackFlow() {
             String __name__ = "after-started-vm-" + self.getUuid();
 
             @Override
             public void run(FlowTrigger trigger, Map data) {
-                VmInstanceSpec spec = (VmInstanceSpec) data.get(VmInstanceConstant.Params.VmInstanceSpec.toString());
+                VmInstanceSpec spec = (VmInstanceSpec) data.get(VmInstanceConstant.Params.VmInstanceSpec);
                 changeVmStateInDb(struct.getStrategy() == VmCreationStrategy.InstantStart ?
                         VmInstanceStateEvent.running : VmInstanceStateEvent.paused, () -> {
                     self.setLastHostUuid(spec.getDestHost().getUuid());

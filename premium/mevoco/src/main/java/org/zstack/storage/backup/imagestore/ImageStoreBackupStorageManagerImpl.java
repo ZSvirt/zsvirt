@@ -49,7 +49,6 @@ import org.zstack.header.managementnode.ManagementNodeReadyExtensionPoint;
 import org.zstack.header.message.APIMessage;
 import org.zstack.header.message.Message;
 import org.zstack.header.message.MessageReply;
-import org.zstack.header.query.QueryOp;
 import org.zstack.header.storage.backup.*;
 import org.zstack.header.storage.database.backup.DatabaseBackupStatus;
 import org.zstack.header.storage.database.backup.DatabaseBackupStorageRefVO;
@@ -68,7 +67,6 @@ import org.zstack.storage.volume.VolumeManager;
 import org.zstack.tag.SystemTagCreator;
 import org.zstack.tag.TagManager;
 import org.zstack.utils.*;
-import org.zstack.utils.function.ForEachFunction;
 import org.zstack.utils.gson.JSONObjectUtil;
 import org.zstack.utils.logging.CLogger;
 import org.zstack.utils.network.NetworkUtils;
@@ -971,12 +969,8 @@ public class ImageStoreBackupStorageManagerImpl extends AbstractService
                         dbf.updateAndRefresh(ivo);
                         final ImageInventory inv = ImageInventory.valueOf(dbf.findByUuid(ivo.getUuid(), ImageVO.class));
                         evt.setInventory(inv);
-                        CollectionUtils.safeForEach(pluginRgty.getExtensionList(AddImageExtensionPoint.class), new ForEachFunction<AddImageExtensionPoint>() {
-                            @Override
-                            public void run(AddImageExtensionPoint ext) {
-                                ext.afterAddImage(inv);
-                            }
-                        });
+                        CollectionUtils.safeForEach(pluginRgty.getExtensionList(AddImageExtensionPoint.class),
+                                ext -> ext.afterAddImage(inv));
 
                         bus.publish(evt);
                     }
@@ -1149,12 +1143,8 @@ public class ImageStoreBackupStorageManagerImpl extends AbstractService
                         dbf.updateAndRefresh(ivo);
                         final ImageInventory inv = ImageInventory.valueOf(dbf.findByUuid(ivo.getUuid(), ImageVO.class));
 
-                        CollectionUtils.safeForEach(pluginRgty.getExtensionList(AddImageExtensionPoint.class), new ForEachFunction<AddImageExtensionPoint>() {
-                            @Override
-                            public void run(AddImageExtensionPoint ext) {
-                                ext.afterAddImage(inv);
-                            }
-                        });
+                        CollectionUtils.safeForEach(pluginRgty.getExtensionList(AddImageExtensionPoint.class),
+                                ext -> ext.afterAddImage(inv));
 
                         completion.success(inv);
                     }

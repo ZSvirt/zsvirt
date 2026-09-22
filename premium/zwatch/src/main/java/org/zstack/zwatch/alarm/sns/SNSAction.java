@@ -15,7 +15,6 @@ import org.zstack.sns.SNSTopicVO;
 import org.zstack.sns.SNSTopicVO_;
 import org.zstack.utils.CollectionUtils;
 import org.zstack.utils.Utils;
-import org.zstack.utils.function.ForEachFunction;
 import org.zstack.utils.logging.CLogger;
 import org.zstack.zwatch.alarm.AlarmAction;
 
@@ -48,29 +47,26 @@ public class SNSAction implements AlarmAction {
 
         String locale = Q.New(SNSTopicVO.class).select(SNSTopicVO_.locale).eq(SNSTopicVO_.uuid, topicVO.getUuid()).findValue();
 
-        CollectionUtils.safeForEach(factory.getAllTextTemplateFactory(), new ForEachFunction<TextTemplateFactory>() {
-            @Override
-            public void run(TextTemplateFactory f) {
-                SNSTextTemplateInventory inv = null;
+        CollectionUtils.safeForEach(factory.getAllTextTemplateFactory(), f -> {
+            SNSTextTemplateInventory inv = null;
 
-                if (f.isSupportCustomTemplate()) {
-                    SNSTextTemplateVO vo = Q.New(SNSTextTemplateVO.class)
-                            .eq(SNSTextTemplateVO_.applicationPlatformType, f.getApplicationPlatformType())
-                            .eq(SNSTextTemplateVO_.defaultTemplate, true)
-                            .eq(SNSTextTemplateVO_.type, SNSTextTemplateType.ALARM)
-                            .find();
+            if (f.isSupportCustomTemplate()) {
+                SNSTextTemplateVO vo = Q.New(SNSTextTemplateVO.class)
+                        .eq(SNSTextTemplateVO_.applicationPlatformType, f.getApplicationPlatformType())
+                        .eq(SNSTextTemplateVO_.defaultTemplate, true)
+                        .eq(SNSTextTemplateVO_.type, SNSTextTemplateType.ALARM)
+                        .find();
 
-                    if (vo != null) {
-                        inv = SNSTextTemplateInventory.valueOf(vo);
-                    }
+                if (vo != null) {
+                    inv = SNSTextTemplateInventory.valueOf(vo);
                 }
+            }
 
-                TextTemplate template = f.createAlarmTemplate(inv, param);
-                SNSTopicMessage s = template.createMessage(inv, param, locale);
-                messages.put(f.getApplicationPlatformType(), s.getMessage());
-                if (s.getMetadata() != null) {
-                    metadata.put(f.getApplicationPlatformType(), s.getMetadata());
-                }
+            TextTemplate template = f.createAlarmTemplate(inv, param);
+            SNSTopicMessage s = template.createMessage(inv, param, locale);
+            messages.put(f.getApplicationPlatformType(), s.getMessage());
+            if (s.getMetadata() != null) {
+                metadata.put(f.getApplicationPlatformType(), s.getMetadata());
             }
         });
 

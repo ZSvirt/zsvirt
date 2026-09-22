@@ -60,7 +60,6 @@ import org.zstack.storage.snapshot.reference.VolumeSnapshotReferenceUtils;
 import org.zstack.utils.CollectionUtils;
 import org.zstack.utils.DebugUtils;
 import org.zstack.utils.Utils;
-import org.zstack.utils.function.ForEachFunction;
 import org.zstack.utils.gson.JSONObjectUtil;
 import org.zstack.utils.logging.CLogger;
 
@@ -606,12 +605,8 @@ public class StorageMigrationBase implements Component {
 
             @Override
             public void run(FlowTrigger trigger, Map data) {
-                CollectionUtils.safeForEach(pluginRgty.getExtensionList(StorageMigrationExtensionPoint.class), new ForEachFunction<StorageMigrationExtensionPoint>() {
-                    @Override
-                    public void run(StorageMigrationExtensionPoint arg) {
-                        arg.afterStorageMigration(msg, vmInstanceVO);
-                    }
-                });
+                CollectionUtils.safeForEach(pluginRgty.getExtensionList(StorageMigrationExtensionPoint.class),
+                        arg -> arg.afterStorageMigration(msg, vmInstanceVO));
                 trigger.next();
             }
         });

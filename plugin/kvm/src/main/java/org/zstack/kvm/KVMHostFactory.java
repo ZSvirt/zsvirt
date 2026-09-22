@@ -361,7 +361,7 @@ public class KVMHostFactory extends AbstractService implements HypervisorFactory
         HostCanonicalEvents.HostPhysicalCpuStatusAbnormalData cdata = new HostCanonicalEvents.HostPhysicalCpuStatusAbnormalData();
         cdata.setCpuName(cmd.getAdditionalProperties().get(KVMConstant.CPU_NAME).toString());
         cdata.setHostUuid(cmd.getHost());
-        cdata.setStatus(cmd.getAdditionalProperties().get(KVMConstant.PHSICAL_DEVICE_STATUS_NAME).toString());
+        cdata.setStatus(cmd.getAdditionalProperties().get(KVMConstant.PHYSICAL_DEVICE_STATUS_NAME).toString());
         evf.fire(HostCanonicalEvents.HOST_PHYSICAL_CPU_STATUS_ABNORMAL, cdata);
     }
 
@@ -369,7 +369,7 @@ public class KVMHostFactory extends AbstractService implements HypervisorFactory
         HostCanonicalEvents.HostPhysicalMemoryStatusAbnormalData cdata = new HostCanonicalEvents.HostPhysicalMemoryStatusAbnormalData();
         cdata.setHostUuid(cmd.getHost());
         cdata.setLocator(cmd.getAdditionalProperties().get(KVMConstant.MEMORY_LOCATOR_NAME).toString());
-        cdata.setStatus(cmd.getAdditionalProperties().get(KVMConstant.PHSICAL_DEVICE_STATUS_NAME).toString());
+        cdata.setStatus(cmd.getAdditionalProperties().get(KVMConstant.PHYSICAL_DEVICE_STATUS_NAME).toString());
         evf.fire(HostCanonicalEvents.HOST_PHYSICAL_MEMORY_STATUS_ABNORMAL, cdata);
     }
 
@@ -377,14 +377,14 @@ public class KVMHostFactory extends AbstractService implements HypervisorFactory
         HostCanonicalEvents.HostPhysicalGpuStatusAbnormalData cdata = new HostCanonicalEvents.HostPhysicalGpuStatusAbnormalData();
         cdata.setHostUuid(cmd.getHost());
         cdata.setPcideviceAddress(cmd.getAdditionalProperties().get(KVMConstant.PCI_DEVICE_ADDRESS).toString());
-        cdata.setStatus(cmd.getAdditionalProperties().get(KVMConstant.PHSICAL_DEVICE_STATUS_NAME).toString());
+        cdata.setStatus(cmd.getAdditionalProperties().get(KVMConstant.PHYSICAL_DEVICE_STATUS_NAME).toString());
         evf.fire(HostCanonicalEvents.HOST_PHYSICAL_GPU_STATUS_ABNORMAL, cdata);
     }
 
     void physicalPowerSupplyStatusAlarmEvent(HostPhysicalDeviceStatusAlarmEventCmd cmd) {
         HostCanonicalEvents.HostPhysicalPowerSupplyStatusAbnormalData cdata = new HostCanonicalEvents.HostPhysicalPowerSupplyStatusAbnormalData();
         cdata.setHostUuid(cmd.getHost());
-        cdata.setStatus(cmd.getAdditionalProperties().get(KVMConstant.PHSICAL_DEVICE_STATUS_NAME).toString());
+        cdata.setStatus(cmd.getAdditionalProperties().get(KVMConstant.PHYSICAL_DEVICE_STATUS_NAME).toString());
         cdata.setName(cmd.getAdditionalProperties().get(KVMConstant.DEVICE_NAME).toString());
         evf.fire(HostCanonicalEvents.HOST_PHYSICAL_POWER_SUPPLY_STATUS_ABNORMAL, cdata);
     }
@@ -393,7 +393,7 @@ public class KVMHostFactory extends AbstractService implements HypervisorFactory
         HostCanonicalEvents.HostPhysicalFanStatusAbnormalData cdata = new HostCanonicalEvents.HostPhysicalFanStatusAbnormalData();
         cdata.setHostUuid(cmd.getHost());
         cdata.setFanName(cmd.getAdditionalProperties().get(KVMConstant.DEVICE_NAME).toString());
-        cdata.setStatus(cmd.getAdditionalProperties().get(KVMConstant.PHSICAL_DEVICE_STATUS_NAME).toString());
+        cdata.setStatus(cmd.getAdditionalProperties().get(KVMConstant.PHYSICAL_DEVICE_STATUS_NAME).toString());
         evf.fire(HostCanonicalEvents.HOST_PHYSICAL_FAN_STATUS_ABNORMAL, cdata);
     }
 
@@ -410,7 +410,7 @@ public class KVMHostFactory extends AbstractService implements HypervisorFactory
     void physicalRaidStatusAlarmEvent(HostPhysicalDeviceStatusAlarmEventCmd cmd) {
         HostCanonicalEvents.HostPhysicalRaidStatusAbnormalData cdata = new HostCanonicalEvents.HostPhysicalRaidStatusAbnormalData();
         cdata.setHostUuid(cmd.getHost());
-        cdata.setStatus(cmd.getAdditionalProperties().get(KVMConstant.PHSICAL_DEVICE_STATUS_NAME).toString());
+        cdata.setStatus(cmd.getAdditionalProperties().get(KVMConstant.PHYSICAL_DEVICE_STATUS_NAME).toString());
         cdata.setTargetId(cmd.getAdditionalProperties().get(KVMConstant.TARGET_ID).toString());
         evf.fire(HostCanonicalEvents.HOST_PHYSICAL_RAID_STATUS_ABNORMAL, cdata);
     }

@@ -5349,12 +5349,10 @@ public class CephPrimaryStorageBase extends PrimaryStorageBase {
         }
 
         final SetupSelfFencerOnKvmHostReply reply = new SetupSelfFencerOnKvmHostReply();
-        new KvmCommandSender(param.getHostUuid()).send(cmd, KVM_HA_SETUP_SELF_FENCER, new KvmCommandFailureChecker() {
-            @Override
-            public ErrorCode getError(KvmResponseWrapper wrapper) {
-                AgentResponse rsp = wrapper.getResponse(AgentResponse.class);
-                return rsp.isSuccess() ? null : operr("%s", rsp.getError());
-            }
+        new KvmCommandSender(param.getHostUuid(), param.isSkipStatusCheck())
+        .send(cmd, KVM_HA_SETUP_SELF_FENCER, wrapper -> {
+            AgentResponse rsp = wrapper.getResponse(AgentResponse.class);
+            return rsp.isSuccess() ? null : operr("%s", rsp.getError());
         }, new ReturnValueCompletion<KvmResponseWrapper>(msg) {
             @Override
             public void success(KvmResponseWrapper wrapper) {

@@ -175,6 +175,7 @@ public class SelfFencerKvmBackend implements SelfFencerHypervisorBackend {
         msg.setCommand(cmd);
         msg.setHostUuid(host.getUuid());
         msg.setPath(SETUP_SELF_FENCER_PATH);
+        msg.setNoStatusCheck(param.isSkipStatusCheck());
         bus.makeTargetServiceIdByResourceUuid(msg, HostConstant.SERVICE_ID, host.getUuid());
         bus.send(msg, new CloudBusCallBack(completion) {
             @Override

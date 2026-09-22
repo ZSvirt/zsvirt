@@ -38,6 +38,7 @@ public interface KvmSetupSelfFencerExtensionPoint {
         private PrimaryStorageInventory primaryStorage;
         private String strategy;
         private List<String> fencers;
+        private boolean skipStatusCheck; // "noStatusCheck" in cloud
 
         public String getHostUuid() {
             return hostUuid;
@@ -93,6 +94,14 @@ public interface KvmSetupSelfFencerExtensionPoint {
 
         public void setFencers(List<String> fencers) {
             this.fencers = fencers;
+        }
+
+        public boolean isSkipStatusCheck() {
+            return skipStatusCheck;
+        }
+
+        public void setSkipStatusCheck(boolean skipStatusCheck) {
+            this.skipStatusCheck = skipStatusCheck;
         }
     }
 

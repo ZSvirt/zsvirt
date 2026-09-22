@@ -13,6 +13,7 @@ public class SelfFencerStruct {
     private List<PrimaryStorageInventory> primaryStorage;
     private String strategy = HaGlobalConfig.SELF_FENCER_STRATEGY.value();
     private List<String> fencers;
+    private boolean skipStatusCheck; // "noStatusCheck" in cloud
 
     public HostInventory getHost() {
         return host;
@@ -44,5 +45,13 @@ public class SelfFencerStruct {
 
     public void setFencers(List<String> fencers) {
         this.fencers = fencers;
+    }
+
+    public boolean isSkipStatusCheck() {
+        return skipStatusCheck;
+    }
+
+    public void setSkipStatusCheck(boolean skipStatusCheck) {
+        this.skipStatusCheck = skipStatusCheck;
     }
 }

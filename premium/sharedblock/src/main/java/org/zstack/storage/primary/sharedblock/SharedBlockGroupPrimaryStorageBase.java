@@ -1574,12 +1574,10 @@ public class SharedBlockGroupPrimaryStorageBase extends PrimaryStorageBase imple
         cmd.fencers = param.getFencers();
 
         final SetupSelfFencerOnKvmHostReply reply = new SetupSelfFencerOnKvmHostReply();
-        new KvmCommandSender(param.getHostUuid()).send(cmd, KVM_HA_SETUP_SELF_FENCER, new KvmCommandFailureChecker() {
-            @Override
-            public ErrorCode getError(KvmResponseWrapper wrapper) {
-                SharedBlockKvmCommands.AgentRsp rsp = wrapper.getResponse(SharedBlockKvmCommands.AgentRsp.class);
-                return rsp.success ? null : operr("%s", rsp.error);
-            }
+        new KvmCommandSender(param.getHostUuid(), param.isSkipStatusCheck())
+        .send(cmd, KVM_HA_SETUP_SELF_FENCER, wrapper -> {
+            SharedBlockKvmCommands.AgentRsp rsp = wrapper.getResponse(SharedBlockKvmCommands.AgentRsp.class);
+            return rsp.success ? null : operr("%s", rsp.error);
         }, new ReturnValueCompletion<KvmResponseWrapper>(msg) {
             @Override
             public void success(KvmResponseWrapper wrapper) {

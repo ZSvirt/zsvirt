@@ -4,16 +4,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.zstack.core.cloudbus.CloudBus;
 import org.zstack.core.cloudbus.CloudBusCallBack;
 import org.zstack.core.db.Q;
-import org.zstack.core.db.SQL;
-import org.zstack.ha.CheckerStruct;
-import org.zstack.ha.HaGlobalConfig;
-import org.zstack.ha.HaHostChecker;
-import org.zstack.ha.HaHostStorageBasedChecker;
+import org.zstack.ha.message.CheckerStruct;
+import org.zstack.ha.spi.HaHostStorageBasedChecker;
 import org.zstack.header.core.HaCheckerCompletion;
 import org.zstack.header.host.*;
 import org.zstack.header.message.MessageReply;
-import org.zstack.header.network.l2.L2NetworkClusterRefVO;
-import org.zstack.header.network.l2.L2NetworkClusterRefVO_;
 import org.zstack.header.storage.primary.PrimaryStorageHostRefVO;
 import org.zstack.header.storage.primary.PrimaryStorageHostRefVO_;
 import org.zstack.header.storage.primary.PrimaryStorageVO;
@@ -24,10 +19,8 @@ import org.zstack.kvm.KVMAgentCommands;
 import org.zstack.kvm.KVMHostAsyncHttpCallMsg;
 import org.zstack.kvm.KVMHostAsyncHttpCallReply;
 import org.zstack.storage.primary.HaStoreFindHostUtils;
-import org.zstack.storage.primary.nfs.NfsPrimaryStorageConstant;
 import org.zstack.utils.Utils;
 import org.zstack.utils.logging.CLogger;
-import org.zstack.utils.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -66,9 +59,9 @@ public abstract class AbstractFileSystemHostHeartbeatChecker implements HaHostSt
 
 
     protected List<String> findSiblingHosts(CheckerStruct struct, List<String> currentVmUsedFileSystemStorageUuids) {
-        List<String> candidates = HaStoreFindHostUtils.findSiblingsFromSameCluster(struct.getHostUuid(), struct.getVmInstance().getClusterUuid());
+        List<String> candidates = HaStoreFindHostUtils.findSiblingsFromSameCluster(struct.hostUuid, struct.vmInstance.getClusterUuid());
         if (candidates == null || candidates.isEmpty()) {
-            return HaStoreFindHostUtils.findSiblingFromOtherCluster(struct.getVmInstance().getClusterUuid(), currentVmUsedFileSystemStorageUuids);
+            return HaStoreFindHostUtils.findSiblingFromOtherCluster(struct.vmInstance.getClusterUuid(), currentVmUsedFileSystemStorageUuids);
         } else {
             return candidates;
         }
@@ -77,12 +70,12 @@ public abstract class AbstractFileSystemHostHeartbeatChecker implements HaHostSt
     protected List<String> findCurrentVmUsedPrimaryStorageUuids(CheckerStruct struct) {
         List<String> failureHostRelatedPrimaryStorageUuids = Q.New(PrimaryStorageHostRefVO.class)
                 .select(PrimaryStorageHostRefVO_.primaryStorageUuid)
-                .eq(PrimaryStorageHostRefVO_.hostUuid, struct.getHostUuid())
+                .eq(PrimaryStorageHostRefVO_.hostUuid, struct.hostUuid)
                 .listValues();
 
         if (failureHostRelatedPrimaryStorageUuids.isEmpty()) {
             logger.debug(String.format("no related storage of host[uuid: %s] can be found",
-                    struct.getHostUuid()));
+                    struct.hostUuid));
             return Collections.emptyList();
         }
 
@@ -95,11 +88,11 @@ public abstract class AbstractFileSystemHostHeartbeatChecker implements HaHostSt
         if (failureHostRelatedPrimaryStorageUuids.isEmpty()) {
             logger.debug(String.format("no %s related to the failure host[uuid: %s] can be found",
                     getPrimaryStorageType(),
-                    struct.getHostUuid()));
+                    struct.hostUuid));
             return Collections.emptyList();
         }
 
-        List<String> currentVmUsedPrimaryStorageUuids = struct.getVmInstance()
+        List<String> currentVmUsedPrimaryStorageUuids = struct.vmInstance
                 .getAllDiskVolumes()
                 .stream()
                 .map(VolumeInventory::getPrimaryStorageUuid)
@@ -112,8 +105,8 @@ public abstract class AbstractFileSystemHostHeartbeatChecker implements HaHostSt
     }
 
     protected void doFileSystemVmStatusCheck(CheckerStruct struct, String peerHostUuid, HaCheckerCompletion<List<String>> completion) {
-        String primaryStorageUuid = struct.getVmInstance().getRootVolume().getPrimaryStorageUuid();
-        VmInstanceInventory vm = struct.getVmInstance();
+        String primaryStorageUuid = struct.vmInstance.getRootVolume().getPrimaryStorageUuid();
+        VmInstanceInventory vm = struct.vmInstance;
 
         String mountPath = Q.New(PrimaryStorageVO.class)
                 .eq(PrimaryStorageVO_.uuid, primaryStorageUuid)
@@ -121,10 +114,10 @@ public abstract class AbstractFileSystemHostHeartbeatChecker implements HaHostSt
                 .findValue();
 
         CheckFileSystemVmStateCmd cmd = new CheckFileSystemVmStateCmd();
-        cmd.interval = struct.getInterval();
-        cmd.times = struct.getMaxTimes();
+        cmd.interval = struct.interval;
+        cmd.times = struct.maxTimes;
         cmd.primaryStorageUuid = primaryStorageUuid;
-        cmd.storageCheckerTimeout = struct.getSuccessTimes();
+        cmd.storageCheckerTimeout = struct.successTimes;
         cmd.mountPath = mountPath;
         cmd.targetHostUuid = vm.getHostUuid();
 

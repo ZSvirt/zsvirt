@@ -28,7 +28,7 @@
 			<zstack:extension interface="org.zstack.header.identity.AddtionalResourceTypeExtensionPoint"/>
 			<zstack:extension interface="org.zstack.header.vm.VmInstanceMigrateExtensionPoint"/>
 			<zstack:extension interface="org.zstack.header.vm.VmAbnormalLifeCycleExtensionPoint"/>
-			<zstack:extension interface="org.zstack.ha.HaHostDeviceExtensionPoint"/>
+			<zstack:extension interface="org.zstack.ha.spi.HaHostDeviceExtensionPoint"/>
 			<zstack:extension interface="org.zstack.pciDevice.PciDeviceManagerInterface"/>
 			<zstack:extension interface="org.zstack.header.vm.KvmReportVmShutdownEventExtensionPoint"/>
 			<zstack:extension interface="org.zstack.network.hostNetworkInterface.HostNetworkCandidateFilterExtensionPoint" />
@@ -137,7 +137,7 @@
 			<zstack:extension interface="org.zstack.header.identity.AddtionalResourceTypeExtensionPoint"/>
 			<zstack:extension interface="org.zstack.header.vm.VmAbnormalLifeCycleExtensionPoint"/>
 			<zstack:extension interface="org.zstack.header.vm.VmInstanceMigrateExtensionPoint"/>
-			<zstack:extension interface="org.zstack.ha.HaHostDeviceExtensionPoint"/>
+			<zstack:extension interface="org.zstack.ha.spi.HaHostDeviceExtensionPoint"/>
 		</zstack:plugin>
 	</bean>
 

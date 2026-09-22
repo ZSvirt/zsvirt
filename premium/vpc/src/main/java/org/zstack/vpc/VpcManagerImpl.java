@@ -5,6 +5,12 @@ import com.google.gson.reflect.TypeToken;
 import com.googlecode.ipv6.IPv6Address;
 import org.zstack.compute.vm.VmSystemTags;
 import org.zstack.ha.*;
+import org.zstack.ha.header.HaConstants;
+import org.zstack.ha.header.SelfFencerStrategy;
+import org.zstack.ha.message.AddVmFencerRuleToHostMsg;
+import org.zstack.ha.message.RemoveVmFencerRuleFromHostMsg;
+import org.zstack.ha.message.VmRuleAttachFencer;
+import org.zstack.ha.spi.VmFencerRuleExtensionPoint;
 import org.zstack.header.host.HostConstant;
 import org.zstack.header.message.NeedReplyMessage;
 import org.zstack.header.rest.RESTFacade;
@@ -188,13 +194,13 @@ public class VpcManagerImpl extends AbstractService implements VpcManager, Befor
         List<VmRuleAttachFencer> allowRules = new ArrayList<>();
 
         VmRuleAttachFencer blockFencer = new VmRuleAttachFencer();
-        blockFencer.setFencerName(HaConstants.HOST_BUSINESS_NIC);
-        blockFencer.setVmUuids(vmUuidsOnHost);
+        blockFencer.fencerName = HaConstants.HOST_BUSINESS_NIC;
+        blockFencer.vmUuids = vmUuidsOnHost;
         blockRules.add(blockFencer);
 
         VmRuleAttachFencer allowFencer = new VmRuleAttachFencer();
-        allowFencer.setFencerName(HaConstants.HOST_STORAGE_STATE);
-        allowFencer.setVmUuids(vmUuidsOnHost);
+        allowFencer.fencerName = HaConstants.HOST_STORAGE_STATE;
+        allowFencer.vmUuids = vmUuidsOnHost;
         allowRules.add(allowFencer);
 
         return generateAddVmFencerRuleToHost(blockRules, allowRules, hostUuid);
@@ -212,15 +218,15 @@ public class VpcManagerImpl extends AbstractService implements VpcManager, Befor
         List<VmRuleAttachFencer> allowRules = new ArrayList<>();
 
         VmRuleAttachFencer blockFencer = new VmRuleAttachFencer();
-        blockFencer.setFencerName(HaConstants.HOST_BUSINESS_NIC);
+        blockFencer.fencerName = HaConstants.HOST_BUSINESS_NIC;
         List<String> vmUuids = new ArrayList<>();
         vmUuids.add(inv.getUuid());
-        blockFencer.setVmUuids(vmUuids);
+        blockFencer.vmUuids = vmUuids;
         blockRules.add(blockFencer);
 
         VmRuleAttachFencer allowFencer = new VmRuleAttachFencer();
-        allowFencer.setFencerName(HaConstants.HOST_STORAGE_STATE);
-        allowFencer.setVmUuids(vmUuids);
+        allowFencer.fencerName = HaConstants.HOST_STORAGE_STATE;
+        allowFencer.vmUuids = vmUuids;
         allowRules.add(allowFencer);
 
         return generateRemoveVmFencerRuleFromHost(blockRules, allowRules, inv.getHostUuid());

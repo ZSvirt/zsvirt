@@ -1,8 +1,6 @@
 package org.zstack.storage.primary.ceph;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.zstack.core.db.SQL;
 import org.zstack.header.core.HaCheckerCompletion;
 import org.zstack.core.asyncbatch.While;
 import org.zstack.core.cloudbus.CloudBus;
@@ -13,6 +11,8 @@ import org.zstack.core.thread.SyncTaskChain;
 import org.zstack.core.thread.ThreadFacade;
 import org.zstack.core.workflow.FlowChainBuilder;
 import org.zstack.ha.*;
+import org.zstack.ha.message.CheckerStruct;
+import org.zstack.ha.spi.HaHostStorageBasedChecker;
 import org.zstack.header.core.NoErrorCompletion;
 import org.zstack.header.core.WhileDoneCompletion;
 import org.zstack.header.core.workflow.*;
@@ -20,8 +20,6 @@ import org.zstack.header.errorcode.ErrorCode;
 import org.zstack.header.errorcode.ErrorCodeList;
 import org.zstack.header.host.*;
 import org.zstack.header.message.MessageReply;
-import org.zstack.header.network.l2.L2NetworkClusterRefVO;
-import org.zstack.header.network.l2.L2NetworkClusterRefVO_;
 import org.zstack.header.storage.primary.*;
 import org.zstack.header.volume.VolumeInventory;
 import org.zstack.kvm.KVMAgentCommands;
@@ -68,12 +66,12 @@ public class CephHostHeartbeatChecker implements HaHostStorageBasedChecker, Ceph
     public void check(CheckerStruct struct, HaCheckerCompletion completion) {
         List<String> failureHostRelatedPrimaryStorageUuids = Q.New(PrimaryStorageHostRefVO.class)
                 .select(PrimaryStorageHostRefVO_.primaryStorageUuid)
-                .eq(PrimaryStorageHostRefVO_.hostUuid, struct.getHostUuid())
+                .eq(PrimaryStorageHostRefVO_.hostUuid, struct.hostUuid)
                 .listValues();
 
         if (failureHostRelatedPrimaryStorageUuids.isEmpty()) {
             logger.debug(String.format("no related storage of host[uuid: %s] can be found",
-                    struct.getHostUuid()));
+                    struct.hostUuid));
             completion.noWay();
             return;
         }
@@ -86,12 +84,12 @@ public class CephHostHeartbeatChecker implements HaHostStorageBasedChecker, Ceph
 
         if (failureHostRelatedPrimaryStorageUuids.isEmpty()) {
             logger.debug(String.format("no ceph storage related to the failure host[uuid: %s] can be found",
-                    struct.getHostUuid()));
+                    struct.hostUuid));
             completion.noWay();
             return;
         }
 
-        List<String> currentVmUsedPrimaryStorageUuids = struct.getVmInstance()
+        List<String> currentVmUsedPrimaryStorageUuids = struct.vmInstance
                 .getAllDiskVolumes()
                 .stream()
                 .map(VolumeInventory::getPrimaryStorageUuid)
@@ -103,7 +101,7 @@ public class CephHostHeartbeatChecker implements HaHostStorageBasedChecker, Ceph
         currentVmUsedPrimaryStorageUuids.retainAll(failureHostRelatedPrimaryStorageUuids);
         if (currentVmUsedPrimaryStorageUuids.isEmpty()) {
             logger.debug(String.format("vm[uuid: %s] do not have any storage connected to current failure host's cluster",
-                    struct.getVmInstance().getUuid()));
+                    struct.vmInstance.getUuid()));
             completion.noWay();
             return;
         }
@@ -113,7 +111,7 @@ public class CephHostHeartbeatChecker implements HaHostStorageBasedChecker, Ceph
         final List<String> siblings = findSiblingHosts(struct, currentVmUsedPrimaryStorageUuids);
         if (siblings.isEmpty()) {
             logger.debug(String.format("no connected host in current cluster[uuid: %s] with host[uuid: %s]",
-                    struct.getVmInstance().getClusterUuid(), struct.getHostUuid()));
+                    struct.vmInstance.getClusterUuid(), struct.hostUuid));
             completion.noWay();
             return;
         }
@@ -121,13 +119,13 @@ public class CephHostHeartbeatChecker implements HaHostStorageBasedChecker, Ceph
         Collections.shuffle(siblings);
         Collections.shuffle(currentVmUsedPrimaryStorageUuids);
 
-        doCephHostHeartbeatCheck(struct.getHostUuid(), siblings.get(0), currentVmUsedPrimaryStorageUuids.get(0), completion);
+        doCephHostHeartbeatCheck(struct.hostUuid, siblings.get(0), currentVmUsedPrimaryStorageUuids.get(0), completion);
     }
 
     private List<String> findSiblingHosts(CheckerStruct struct, List<String> currentVmUsedCephStorageUuids) {
-        List<String> candidates = HaStoreFindHostUtils.findSiblingsFromSameCluster(struct.getHostUuid(), struct.getVmInstance().getClusterUuid());
+        List<String> candidates = HaStoreFindHostUtils.findSiblingsFromSameCluster(struct.hostUuid, struct.vmInstance.getClusterUuid());
         if (candidates == null || candidates.isEmpty()) {
-            return HaStoreFindHostUtils.findSiblingFromOtherCluster(struct.getVmInstance().getClusterUuid(), currentVmUsedCephStorageUuids);
+            return HaStoreFindHostUtils.findSiblingFromOtherCluster(struct.vmInstance.getClusterUuid(), currentVmUsedCephStorageUuids);
         } else {
             return candidates;
         }

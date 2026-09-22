@@ -26,7 +26,7 @@ import org.zstack.core.thread.ThreadFacade;
 import org.zstack.core.timeout.ApiTimeoutManager;
 import org.zstack.core.workflow.FlowChainBuilder;
 import org.zstack.core.workflow.ShareFlow;
-import org.zstack.ha.HaConstants;
+import org.zstack.ha.header.HaConstants;
 import org.zstack.header.Component;
 import org.zstack.header.cluster.ClusterConnectionStatus;
 import org.zstack.header.core.*;

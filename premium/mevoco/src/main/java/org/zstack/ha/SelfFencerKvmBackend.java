@@ -12,9 +12,11 @@ import org.zstack.core.db.UpdateQuery;
 import org.zstack.core.errorcode.ErrorFacade;
 import org.zstack.core.timeout.ApiTimeoutManager;
 import org.zstack.externalStorage.primary.ExternalStorageFencerType;
-import org.zstack.ha.hostHastate.HostHaState;
-import org.zstack.ha.hostHastate.HostHaStateVO;
-import org.zstack.ha.hostHastate.HostHaStateVO_;
+import org.zstack.ha.header.HostHaState;
+import org.zstack.ha.entity.HostHaStateVO;
+import org.zstack.ha.entity.HostHaStateVO_;
+import org.zstack.ha.message.SelfFencerStruct;
+import org.zstack.ha.spi.SelfFencerHypervisorBackend;
 import org.zstack.header.core.AsyncLatch;
 import org.zstack.header.core.Completion;
 import org.zstack.header.core.NoErrorCompletion;
@@ -104,7 +106,7 @@ public class SelfFencerKvmBackend implements SelfFencerHypervisorBackend {
 
         fileSystemStorage = new ArrayList<>();
         hasExtensions = new HashMap<>();
-        for (PrimaryStorageInventory ps : param.getPrimaryStorage()) {
+        for (PrimaryStorageInventory ps : param.primaryStorage) {
             KvmSetupSelfFencerExtensionPoint ext = pluginRgty.getExtensionFromMap(ps.getType(), KvmSetupSelfFencerExtensionPoint.class);
             if (ext != null) {
                 hasExtensions.put(ps, ext);
@@ -129,7 +131,7 @@ public class SelfFencerKvmBackend implements SelfFencerHypervisorBackend {
     }
 
     private void cancelForFileSystemPrimaryStorage(List<PrimaryStorageInventory> ps, final Completion completion) {
-        HostInventory host = param.getHost();
+        HostInventory host = param.host;
         CancelSelfFencerCmd cmd = new CancelSelfFencerCmd();
         cmd.hostUuid = host.getUuid();
         ps.forEach(it -> {
@@ -154,7 +156,7 @@ public class SelfFencerKvmBackend implements SelfFencerHypervisorBackend {
     }
 
     private void setupForFileSystemPrimaryStorage(List<PrimaryStorageInventory> ps, final Completion completion) {
-        HostInventory host = param.getHost();
+        HostInventory host = param.host;
         SetupSelfFencerCmd cmd = new SetupSelfFencerCmd();
         cmd.hostUuid = host.getUuid();
         cmd.interval = HaGlobalConfig.HOST_SELF_FENCER_INTERVAL.value(Long.class);
@@ -168,14 +170,14 @@ public class SelfFencerKvmBackend implements SelfFencerHypervisorBackend {
                     NfsSystemTags.MOUNT_OPTIONS_TOKEN)).orElse(""));
         });
         cmd.storageCheckerTimeout = HaGlobalConfig.STORAGE_CHECKER_TIMEOUT.value(Integer.class);
-        cmd.strategy = param.getStrategy();
-        cmd.fencers = param.getFencers();
+        cmd.strategy = param.strategy;
+        cmd.fencers = param.fencers;
 
         KVMHostAsyncHttpCallMsg msg = new KVMHostAsyncHttpCallMsg();
         msg.setCommand(cmd);
         msg.setHostUuid(host.getUuid());
         msg.setPath(SETUP_SELF_FENCER_PATH);
-        msg.setNoStatusCheck(param.isSkipStatusCheck());
+        msg.setNoStatusCheck(param.skipStatusCheck);
         bus.makeTargetServiceIdByResourceUuid(msg, HostConstant.SERVICE_ID, host.getUuid());
         bus.send(msg, new CloudBusCallBack(completion) {
             @Override
@@ -199,7 +201,7 @@ public class SelfFencerKvmBackend implements SelfFencerHypervisorBackend {
 
     private void updateHostHaState(HostHaState state) {
         UpdateQuery.New(HostHaStateVO.class)
-                .eq(HostHaStateVO_.uuid, param.getHost().getUuid())
+                .eq(HostHaStateVO_.uuid, param.host.getUuid())
                 .set(HostHaStateVO_.state, state)
                 .update();
     }
@@ -214,19 +216,19 @@ public class SelfFencerKvmBackend implements SelfFencerHypervisorBackend {
         final Result ret = new Result();
         updateHostHaState(HostHaState.Setuping);
         logger.debug(String.format("start setup self-fencer on the KVM host[uuid:%s, name: %s]",
-                param.getHost().getUuid(), param.getHost().getName()));
+                param.host.getUuid(), param.host.getName()));
         final AsyncLatch latch = new AsyncLatch(fileSystemStorage.size() + hasExtensions.size(), new NoErrorCompletion(completion) {
             @Override
             public void done() {
                 if (ret.success) {
                     updateHostHaState(HostHaState.Done);
                     logger.debug(String.format("setup self-fencer on the KVM host[uuid:%s, name: %s] end",
-                            param.getHost().getUuid(), param.getHost().getName()));
+                            param.host.getUuid(), param.host.getName()));
                     completion.success();
                 } else {
                     updateHostHaState(HostHaState.Fail);
                     completion.fail(errf.stringToOperationError(String.format("unable to setup self-fencer on the KVM host[uuid:%s, name: %s]",
-                            param.getHost().getUuid(), param.getHost().getName()), ret.errors));
+                            param.host.getUuid(), param.host.getName()), ret.errors));
                 }
             }
         });
@@ -252,13 +254,13 @@ public class SelfFencerKvmBackend implements SelfFencerHypervisorBackend {
             KvmSetupSelfFencerExtensionPoint ext = e.getValue();
 
             KvmSetupSelfFencerParam p = new KvmSetupSelfFencerParam();
-            p.setHostUuid(param.getHost().getUuid());
+            p.setHostUuid(param.host.getUuid());
             p.setInterval(HaGlobalConfig.HOST_SELF_FENCER_INTERVAL.value(Long.class));
             p.setMaxAttempts(HaGlobalConfig.HOST_SELF_FENCER_ATTEMPTS.value(Integer.class));
             p.setStorageCheckerTimeout(HaGlobalConfig.STORAGE_CHECKER_TIMEOUT.value(Integer.class));
             p.setPrimaryStorage(ps);
             p.setStrategy(HaStrategyHelper.getPrimaryStorageSelfFencerStrategy(ps.getUuid(), ps.getType()).toString());
-            p.setFencers(param.getFencers());
+            p.setFencers(param.fencers);
             ext.kvmSetupSelfFencer(p, new Completion(latch) {
                 @Override
                 public void success() {
@@ -285,19 +287,19 @@ public class SelfFencerKvmBackend implements SelfFencerHypervisorBackend {
         final Result ret = new Result();
         updateHostHaState(HostHaState.Cancelling);
         logger.debug(String.format("start cancel self-fencer on the KVM host[uuid:%s, name: %s]",
-                param.getHost().getUuid(), param.getHost().getName()));
+                param.host.getUuid(), param.host.getName()));
         final AsyncLatch latch = new AsyncLatch(fileSystemStorage.size() + hasExtensions.size(), new NoErrorCompletion(completion) {
             @Override
             public void done() {
                 if (ret.success) {
                     updateHostHaState(HostHaState.None);
                     logger.debug(String.format("cancel self-fencer on the KVM host[uuid:%s, name: %s] end",
-                            param.getHost().getUuid(), param.getHost().getName()));
+                            param.host.getUuid(), param.host.getName()));
                     completion.success();
                 } else {
                     updateHostHaState(HostHaState.Fail);
                     completion.fail(errf.stringToOperationError(String.format("unable to cancel self-fencer on the KVM host[uuid:%s, name: %s]",
-                            param.getHost().getUuid(), param.getHost().getName()), ret.errors));
+                            param.host.getUuid(), param.host.getName()), ret.errors));
                 }
             }
         });
@@ -323,7 +325,7 @@ public class SelfFencerKvmBackend implements SelfFencerHypervisorBackend {
             KvmSetupSelfFencerExtensionPoint ext = e.getValue();
 
             KvmCancelSelfFencerParam p = new KvmCancelSelfFencerParam();
-            p.setHostUuid(param.getHost().getUuid());
+            p.setHostUuid(param.host.getUuid());
             p.setPrimaryStorage(ps);
             ext.kvmCancelSelfFencer(p, new Completion(latch) {
                 @Override

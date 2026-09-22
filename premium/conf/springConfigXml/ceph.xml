@@ -152,7 +152,7 @@
 
     <bean id="CephHostHeartbeatChecker" class="org.zstack.storage.primary.ceph.CephHostHeartbeatChecker" >
         <zstack:plugin>
-            <zstack:extension interface="org.zstack.ha.HaHostChecker" />
+            <zstack:extension interface="org.zstack.ha.spi.HaHostChecker" />
             <zstack:extension interface="org.zstack.storage.ceph.primary.CephPrimaryStorageMonAfterModifiedExtensionPoint" />
         </zstack:plugin>
     </bean>

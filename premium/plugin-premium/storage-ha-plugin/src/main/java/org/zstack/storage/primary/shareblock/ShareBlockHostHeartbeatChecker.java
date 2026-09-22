@@ -5,8 +5,8 @@ import org.zstack.core.cloudbus.CloudBus;
 import org.zstack.core.cloudbus.CloudBusCallBack;
 import org.zstack.core.db.Q;
 import org.zstack.core.db.SQL;
-import org.zstack.ha.CheckerStruct;
-import org.zstack.ha.HaHostStorageBasedChecker;
+import org.zstack.ha.message.CheckerStruct;
+import org.zstack.ha.spi.HaHostStorageBasedChecker;
 import org.zstack.header.core.HaCheckerCompletion;
 import org.zstack.header.host.*;
 import org.zstack.header.message.MessageReply;
@@ -75,13 +75,13 @@ public class ShareBlockHostHeartbeatChecker implements HaHostStorageBasedChecker
 
     @Override
     public void check(CheckerStruct struct, HaCheckerCompletion completion) {
-        if (!isShareBlockPs(struct.getVmInstance().getRootVolume().getPrimaryStorageUuid())) {
+        if (!isShareBlockPs(struct.vmInstance.getRootVolume().getPrimaryStorageUuid())) {
             completion.noWay();
             return;
         }
 
-        final String clusterUuid = struct.getVmInstance().getClusterUuid();
-        final List<String> siblings = findSiblingsFromSameCluster(struct.getHostUuid(), clusterUuid);
+        final String clusterUuid = struct.vmInstance.getClusterUuid();
+        final List<String> siblings = findSiblingsFromSameCluster(struct.hostUuid, clusterUuid);
         if (siblings.isEmpty()) {
             completion.noWay();
             return;
@@ -89,11 +89,11 @@ public class ShareBlockHostHeartbeatChecker implements HaHostStorageBasedChecker
 
         Collections.shuffle(siblings);
         ShareBlockCheckHostHeartbeatCmd cmd = new ShareBlockCheckHostHeartbeatCmd();
-        cmd.storageCheckerTimeout = struct.getSuccessTimes();
-        cmd.interval = struct.getInterval();
-        cmd.times = struct.getMaxTimes();
-        cmd.psUuid = struct.getVmInstance().getRootVolume().getPrimaryStorageUuid();
-        cmd.hostUuid = struct.getHostUuid();
+        cmd.storageCheckerTimeout = struct.successTimes;
+        cmd.interval = struct.interval;
+        cmd.times = struct.maxTimes;
+        cmd.psUuid = struct.vmInstance.getRootVolume().getPrimaryStorageUuid();
+        cmd.hostUuid = struct.hostUuid;
         cmd.hostId = Q.New(SharedBlockGroupPrimaryStorageHostRefVO.class)
                 .select(SharedBlockGroupPrimaryStorageHostRefVO_.hostId)
                 .eq(SharedBlockGroupPrimaryStorageHostRefVO_.hostUuid, cmd.hostUuid)

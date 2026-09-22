@@ -7,6 +7,8 @@ import org.zstack.core.timeout.TimeHelper;
 import org.zstack.ha.entity.VmHaVO;
 import org.zstack.ha.entity.VmHaVO_;
 import org.zstack.ha.header.VmHaLevel;
+import org.zstack.ha.spi.VmInstanceHaLevelExtensionPoint;
+import org.zstack.ha.spi.VmHAExecutor;
 import org.zstack.tag.SystemTagCreator;
 import org.zstack.utils.CollectionUtils;
 import org.zstack.utils.Utils;

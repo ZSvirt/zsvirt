@@ -9,7 +9,7 @@ import org.zstack.core.CoreGlobalProperty;
 import org.zstack.core.componentloader.PluginRegistry;
 import org.zstack.core.db.Q;
 import org.zstack.core.db.SQL;
-import org.zstack.ha.HaConstants;
+import org.zstack.ha.header.HaConstants;
 import org.zstack.ha.entity.HaStrategyConditionVO;
 import org.zstack.ha.entity.HaStrategyConditionVO_;
 import org.zstack.ha.header.HaStrategyState;

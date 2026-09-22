@@ -61,7 +61,7 @@
 
     <bean id="HaBlockHostChecker" class="org.zstack.storage.primary.block.HaBlockHostChecker">
         <zstack:plugin>
-            <zstack:extension interface="org.zstack.ha.HaHostChecker" />
+            <zstack:extension interface="org.zstack.ha.spi.HaHostChecker" />
         </zstack:plugin>
     </bean>
 

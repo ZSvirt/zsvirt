@@ -86,7 +86,7 @@
 
     <bean id="SMPHaHostChecker" class="org.zstack.storage.primary.filesystem.smp.SMPHostHeartbeatChecker">
         <zstack:plugin>
-            <zstack:extension interface="org.zstack.ha.HaHostChecker"/>
+            <zstack:extension interface="org.zstack.ha.spi.HaHostChecker"/>
         </zstack:plugin>
     </bean>
 

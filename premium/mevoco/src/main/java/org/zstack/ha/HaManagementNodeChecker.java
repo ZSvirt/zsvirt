@@ -3,11 +3,12 @@ package org.zstack.ha;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.zstack.core.CoreGlobalProperty;
-import org.zstack.header.core.HaCheckerCompletion;
 import org.zstack.core.errorcode.ErrorFacade;
 import org.zstack.core.thread.SyncTask;
 import org.zstack.core.thread.ThreadFacade;
-import org.zstack.header.storage.primary.PrimaryStorageType;
+import org.zstack.ha.spi.HaHostChecker;
+import org.zstack.ha.message.CheckerStruct;
+import org.zstack.header.core.HaCheckerCompletion;
 import org.zstack.utils.ShellResult;
 import org.zstack.utils.ShellUtils;
 
@@ -35,7 +36,7 @@ public class HaManagementNodeChecker implements HaHostChecker {
 
             @Override
             public String getName() {
-                return String.format("HaManagementNodeChecker.check Host[uuid:%s, ip:%s]", struct.getHostUuid(), struct.getHostIp());
+                return String.format("HaManagementNodeChecker.check Host[uuid:%s, ip:%s]", struct.hostUuid, struct.hostIp);
             }
 
             @Override
@@ -52,7 +53,7 @@ public class HaManagementNodeChecker implements HaHostChecker {
     }
 
     private boolean arpingTargetHost(CheckerStruct struct) {
-        ShellResult res = ShellUtils.runAndReturn(String.format("ip r get %s | grep -Eo 'dev.*src' | awk '{print $2}'", struct.getHostIp()));
+        ShellResult res = ShellUtils.runAndReturn(String.format("ip r get %s | grep -Eo 'dev.*src' | awk '{print $2}'", struct.hostIp));
 
         if (!res.isReturnCode(0)) {
             return false;
@@ -60,13 +61,13 @@ public class HaManagementNodeChecker implements HaHostChecker {
 
         String networkInterface = StringUtils.strip(res.getStdout());
 
-        res = ShellUtils.runAndReturn(String.format("arping -I %s %s -c 1 -w 3", networkInterface, struct.getHostIp()));
+        res = ShellUtils.runAndReturn(String.format("arping -I %s %s -c 1 -w 3", networkInterface, struct.hostIp));
 
         return res.isReturnCode(0);
     }
 
     private boolean nmapScanTargetHost(CheckerStruct struct) {
-        ShellResult res = ShellUtils.runAndReturn(String.format("nmap -sP -PI %s | grep 'Host is up'", struct.getHostIp()));
+        ShellResult res = ShellUtils.runAndReturn(String.format("nmap -sP -PI %s | grep 'Host is up'", struct.hostIp));
 
         return res.isReturnCode(0);
     }
@@ -79,24 +80,24 @@ public class HaManagementNodeChecker implements HaHostChecker {
 
         int success = 0;
 
-        for (int i = 0; i < struct.getMaxTimes(); i++) {
+        for (int i = 0; i < struct.maxTimes; i++) {
             if (arpingTargetHost(struct) || nmapScanTargetHost(struct)) {
                 success++;
-                if (success >= struct.getSuccessTimes()) {
+                if (success >= struct.successTimes) {
                     completion.success(null);
                     return;
                 }
             }
 
             try {
-                TimeUnit.SECONDS.sleep(struct.getInterval());
+                TimeUnit.SECONDS.sleep(struct.interval);
             } catch (InterruptedException e) {
                 e.printStackTrace();
                 Thread.currentThread().interrupt();
             }
         }
 
-        if (success >= struct.getSuccessTimes()) {
+        if (success >= struct.successTimes) {
             completion.success(null);
         } else if (success == 0) {
             completion.fail(operr("the management node fails to scan the host"));

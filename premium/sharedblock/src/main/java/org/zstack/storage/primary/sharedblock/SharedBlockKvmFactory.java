@@ -2,15 +2,14 @@ package org.zstack.storage.primary.sharedblock;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
-import org.zstack.core.Platform;
 import org.zstack.core.asyncbatch.While;
 import org.zstack.core.cloudbus.CloudBus;
 import org.zstack.core.cloudbus.CloudBusCallBack;
 import org.zstack.core.db.DatabaseFacade;
 import org.zstack.core.db.Q;
 import org.zstack.core.db.SQL;
-import org.zstack.ha.CancelStorageHeartbeatFileAndGatewayPingOnHostMsg;
-import org.zstack.ha.HaConstants;
+import org.zstack.ha.header.HaConstants;
+import org.zstack.ha.message.CancelStorageHeartbeatFileAndGatewayPingOnHostMsg;
 import org.zstack.header.core.Completion;
 import org.zstack.header.core.NoErrorCompletion;
 import org.zstack.header.core.WhileDoneCompletion;

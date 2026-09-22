@@ -30,7 +30,6 @@ import org.zstack.network.service.virtualrouter.vyos.VyosConstants;
 import org.zstack.utils.CollectionUtils;
 import org.zstack.utils.DebugUtils;
 import org.zstack.utils.Utils;
-import org.zstack.utils.function.ForEachFunction;
 import org.zstack.utils.gson.JSONObjectUtil;
 import org.zstack.utils.logging.CLogger;
 
@@ -241,12 +240,9 @@ public class VirtualRouterVipBaseBackend extends VipBaseBackend {
                         vrUuid, vrState));
             } else {
                 CollectionUtils.safeForEach(pluginRgty.getExtensionList(AfterAcquireVipExtensionPoint.class),
-                        new ForEachFunction<AfterAcquireVipExtensionPoint>() {
-                            @Override
-                            public void run(AfterAcquireVipExtensionPoint ext) {
-                                logger.debug(String.format("execute after acquire vip extension point %s", ext));
-                                ext.afterAcquireVip(VipInventory.valueOf(getSelf()));
-                            }
+                        ext -> {
+                            logger.debug(String.format("execute after acquire vip extension point %s", ext));
+                            ext.afterAcquireVip(VipInventory.valueOf(getSelf()));
                         });
 
                 completion.success();
@@ -320,13 +316,10 @@ public class VirtualRouterVipBaseBackend extends VipBaseBackend {
                 final VirtualRouterVmInventory vr = (VirtualRouterVmInventory) data.get(VirtualRouterConstant.Param.VR.toString());
                 proxy.attachNetworkService(vr.getUuid(), VipVO.class.getSimpleName(), asList(self.getUuid()));
                 CollectionUtils.safeForEach(pluginRgty.getExtensionList(AfterAcquireVipExtensionPoint.class),
-                        new ForEachFunction<AfterAcquireVipExtensionPoint>() {
-                            @Override
-                            public void run(AfterAcquireVipExtensionPoint ext) {
-                                logger.debug(String.format("execute after acquire vip extension point %s", ext));
-                                ext.afterAcquireVip(VipInventory.valueOf(getSelf()));
-                            }
-                        });
+                    ext -> {
+                        logger.debug(String.format("execute after acquire vip extension point %s", ext));
+                        ext.afterAcquireVip(VipInventory.valueOf(getSelf()));
+                    });
 
                 acquireVipOnHaBackend(vr, completion);
             }

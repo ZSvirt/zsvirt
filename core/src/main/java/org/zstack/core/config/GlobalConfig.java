@@ -19,7 +19,6 @@ import org.zstack.utils.DebugUtils;
 import org.zstack.utils.TypeUtils;
 import org.zstack.utils.Utils;
 import org.zstack.utils.data.StringTemplate;
-import org.zstack.utils.function.ForEachFunction;
 import org.zstack.utils.gson.JSONObjectUtil;
 import org.zstack.utils.logging.CLogger;
 
@@ -447,12 +446,7 @@ public class GlobalConfig implements ConfigDefinition {
             dbf.update(vo);
 
             final GlobalConfig self = this;
-            CollectionUtils.safeForEach(localUpdateExtensions, new ForEachFunction<GlobalConfigUpdateExtensionPoint>() {
-                @Override
-                public void run(GlobalConfigUpdateExtensionPoint ext) {
-                    ext.updateGlobalConfig(origin, self);
-                }
-            });
+            CollectionUtils.safeForEach(localUpdateExtensions, ext -> ext.updateGlobalConfig(origin, self));
         }
 
         for (GlobalConfigUpdateExtensionPoint ext : updateExtensions) {

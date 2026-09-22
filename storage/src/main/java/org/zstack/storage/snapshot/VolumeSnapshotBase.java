@@ -26,7 +26,6 @@ import org.zstack.header.storage.snapshot.*;
 import org.zstack.header.storage.snapshot.VolumeSnapshotStatus.StatusEvent;
 import org.zstack.utils.CollectionUtils;
 import org.zstack.utils.Utils;
-import org.zstack.utils.function.ForEachFunction;
 import org.zstack.utils.logging.CLogger;
 
 import java.util.Map;
@@ -267,12 +266,8 @@ public class VolumeSnapshotBase implements VolumeSnapshot {
             }
 
             private void errors(ErrorCode errorCode) {
-                CollectionUtils.safeForEach(pluginRgty.getExtensionList(VolumeSnapshotAfterDeleteExtensionPoint.class), new ForEachFunction<VolumeSnapshotAfterDeleteExtensionPoint>() {
-                    @Override
-                    public void run(VolumeSnapshotAfterDeleteExtensionPoint arg) {
-                        arg.volumeSnapshotAfterFailedDeleteExtensionPoint(sp);
-                    }
-                });
+                CollectionUtils.safeForEach(pluginRgty.getExtensionList(VolumeSnapshotAfterDeleteExtensionPoint.class),
+                        arg -> arg.volumeSnapshotAfterFailedDeleteExtensionPoint(sp));
 
                 VolumeSnapshotPrimaryStorageDeletionReply dreply = new VolumeSnapshotPrimaryStorageDeletionReply();
                 dreply.setError(errorCode);

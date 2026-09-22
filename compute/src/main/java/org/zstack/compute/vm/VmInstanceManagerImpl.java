@@ -73,7 +73,6 @@ import org.zstack.network.l3.L3NetworkManager;
 import org.zstack.resourceconfig.*;
 import org.zstack.tag.*;
 import org.zstack.utils.*;
-import org.zstack.utils.function.Function;
 import org.zstack.utils.logging.CLogger;
 import org.zstack.utils.network.IPv6Constants;
 import org.zstack.utils.network.IPv6NetworkUtils;
@@ -1688,12 +1687,8 @@ public class VmInstanceManagerImpl extends AbstractService implements
             }, StartVmInstanceMsg.class);
 
             deleteMigrateSystemTagWhenVmStateChangedToRunning();
-            pluginRgty.saveExtensionAsMap(VmAttachOtherDiskExtensionPoint.class, new Function<Object, VmAttachOtherDiskExtensionPoint>() {
-                @Override
-                public Object call(VmAttachOtherDiskExtensionPoint arg) {
-                    return arg.getDiskType();
-                }
-            });
+            pluginRgty.saveExtensionAsMap(VmAttachOtherDiskExtensionPoint.class,
+                    VmAttachOtherDiskExtensionPoint::getDiskType);
 
             return true;
         } catch (Exception e) {

@@ -41,7 +41,6 @@ import org.zstack.network.service.vip.VipVO_;
 import org.zstack.tag.PatternedSystemTag;
 import org.zstack.tag.TagManager;
 import org.zstack.utils.*;
-import org.zstack.utils.function.ForEachFunction;
 import org.zstack.utils.logging.CLogger;
 import org.zstack.utils.logging.CLoggerImpl;
 import org.zstack.utils.network.IPv6Constants;
@@ -595,15 +594,12 @@ public class LoadBalancerApiInterceptor implements ApiMessageInterceptor, Global
                 LoadBalancerSystemTags.BALANCER_ALGORITHM.getTokenByResourceUuid(
                         msg.getListenerUuid(), LoadBalancerSystemTags.BALANCER_ALGORITHM_TOKEN))) {
             Map<String, Long> weight = new LoadBalancerWeightOperator().getWeight(msg.getSystemTags());
-            CollectionUtils.forEach(msg.getVmNicUuids(), new ForEachFunction<String>() {
-                @Override
-                public void run(String arg) {
-                    if (!weight.containsKey(arg)) {
-                        msg.addSystemTag(LoadBalancerSystemTags.BALANCER_WEIGHT.instantiateTag(
-                                map(e(LoadBalancerSystemTags.BALANCER_NIC_TOKEN, arg),
-                                        e(LoadBalancerSystemTags.BALANCER_WEIGHT_TOKEN, LoadBalancerConstants.BALANCER_WEIGHT_default)))
-                        );
-                    }
+            CollectionUtils.forEach(msg.getVmNicUuids(), arg -> {
+                if (!weight.containsKey(arg)) {
+                    msg.addSystemTag(LoadBalancerSystemTags.BALANCER_WEIGHT.instantiateTag(
+                            map(e(LoadBalancerSystemTags.BALANCER_NIC_TOKEN, arg),
+                                    e(LoadBalancerSystemTags.BALANCER_WEIGHT_TOKEN, BALANCER_WEIGHT_default)))
+                    );
                 }
             });
         }

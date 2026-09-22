@@ -50,7 +50,6 @@ import org.zstack.header.vm.*;
 import org.zstack.tag.SystemTagCreator;
 import org.zstack.utils.*;
 import org.zstack.utils.data.Pair;
-import org.zstack.utils.function.ForEachFunction;
 import org.zstack.utils.logging.CLogger;
 
 import java.util.*;
@@ -1295,12 +1294,7 @@ public abstract class HostBase extends AbstractHost {
         evtf.fire(HostCanonicalEvents.HOST_STATUS_CHANGED_PATH, data);
 
         CollectionUtils.safeForEach(pluginRgty.getExtensionList(AfterChangeHostStatusExtensionPoint.class),
-                new ForEachFunction<AfterChangeHostStatusExtensionPoint>() {
-                    @Override
-                    public void run(AfterChangeHostStatusExtensionPoint arg) {
-                        arg.afterChangeHostStatus(self.getUuid(), before, next);
-                    }
-                });
+                arg -> arg.afterChangeHostStatus(self.getUuid(), before, next));
         return true;
     }
 

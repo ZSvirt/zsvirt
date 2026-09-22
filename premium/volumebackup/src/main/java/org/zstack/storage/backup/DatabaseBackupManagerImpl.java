@@ -45,7 +45,6 @@ import org.zstack.mevoco.MevocoGlobalProperty;
 import org.zstack.storage.backup.imagestore.*;
 import org.zstack.tag.TagManager;
 import org.zstack.utils.*;
-import org.zstack.utils.function.Function;
 import org.zstack.utils.gson.JSONObjectUtil;
 import org.zstack.utils.logging.CLogger;
 import org.zstack.utils.path.PathUtil;
@@ -856,12 +855,8 @@ public class DatabaseBackupManagerImpl extends AbstractService implements Databa
 
         initSystemTags();
 
-        pluginRgty.saveExtensionAsMap(DatabaseBackupVersionExtensionPoint.class, new Function<Object, DatabaseBackupVersionExtensionPoint>() {
-            @Override
-            public Object call(DatabaseBackupVersionExtensionPoint arg) {
-                return arg.getDeployMode();
-            }
-        });
+        pluginRgty.saveExtensionAsMap(DatabaseBackupVersionExtensionPoint.class,
+                DatabaseBackupVersionExtensionPoint::getDeployMode);
         return true;
     }
 

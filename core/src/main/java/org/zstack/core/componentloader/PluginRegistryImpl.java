@@ -5,11 +5,11 @@ import org.zstack.core.componentloader.PluginDSL.ExtensionDefinition;
 import org.zstack.core.componentloader.PluginDSL.PluginDefinition;
 import org.zstack.header.exception.CloudRuntimeException;
 import org.zstack.utils.DebugUtils;
-import org.zstack.utils.function.Function;
 import org.zstack.utils.logging.CLogger;
 import org.zstack.utils.logging.CLoggerImpl;
 
 import java.util.*;
+import java.util.function.Function;
 
 
 public class PluginRegistryImpl implements PluginRegistryIN, BannedModule {
@@ -144,12 +144,12 @@ public class PluginRegistryImpl implements PluginRegistryIN, BannedModule {
     }
 
     @Override
-    public <T, K> void saveExtensionAsMap(Class<T> clazz, Function<K, T> func) {
+    public <T, K> void saveExtensionAsMap(Class<T> clazz, Function<T, K> func) {
         List<T> exts = getExtensionList(clazz);
         Map<Object, Object> m = new HashMap<>();
 
         for (T ext : exts) {
-            K key = func.call(ext);
+            K key = func.apply(ext);
             DebugUtils.Assert(key != null, "key cannot be null");
 
             m.put(key, ext);
@@ -169,11 +169,11 @@ public class PluginRegistryImpl implements PluginRegistryIN, BannedModule {
     }
 
     @Override
-    public <T, K> void saveExtensionListAsMap(Class<T> clazz, Function<K, T> func) {
+    public <T, K> void saveExtensionListAsMap(Class<T> clazz, Function<T, K> func) {
         List<T> exts = getExtensionList(clazz);
         Map<Object, List> m = new HashMap<>();
         for (T ext : exts) {
-            K key = func.call(ext);
+            K key = func.apply(ext);
             DebugUtils.Assert(key != null, "key cannot be null");
 
             List lst = m.computeIfAbsent(key, k -> new ArrayList<>());

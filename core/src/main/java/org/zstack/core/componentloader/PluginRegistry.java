@@ -1,6 +1,6 @@
 package org.zstack.core.componentloader;
 
-import org.zstack.utils.function.Function;
+import java.util.function.Function;
 
 import java.util.List;
 
@@ -9,11 +9,11 @@ public interface PluginRegistry {
 
     <T> List<T> getExtensionList(Class<T> clazz);
 
-    <T, K> void saveExtensionAsMap(Class<T> clazz, Function<K, T> func);
+    <T, K> void saveExtensionAsMap(Class<T> clazz, Function<T, K> func);
 
     <T> T getExtensionFromMap(Object key, Class<T> clazz);
 
-    <T, K> void saveExtensionListAsMap(Class<T> clazz, Function<K, T> func);
+    <T, K> void saveExtensionListAsMap(Class<T> clazz, Function<T, K> func);
 
     <T> List getExtensionListFromMap(Object key, Class<T> clazz);
 

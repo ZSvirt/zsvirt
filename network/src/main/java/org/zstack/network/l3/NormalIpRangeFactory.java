@@ -5,12 +5,10 @@ import org.zstack.core.Platform;
 import org.zstack.core.componentloader.PluginRegistry;
 import org.zstack.core.db.DatabaseFacade;
 import org.zstack.core.db.Q;
-import org.zstack.core.db.SQL;
 import org.zstack.core.db.SQLBatchWithReturn;
 import org.zstack.header.message.APICreateMessage;
 import org.zstack.header.network.l3.*;
 import org.zstack.utils.CollectionUtils;
-import org.zstack.utils.function.ForEachFunction;
 import org.zstack.utils.network.IPv6Constants;
 import org.zstack.utils.network.IPv6NetworkUtils;
 import org.zstack.utils.network.NetworkUtils;
@@ -59,12 +57,8 @@ public class NormalIpRangeFactory implements IpRangeFactory {
         IpRangeHelper.updateL3NetworkIpversion(ipr);
 
         final IpRangeInventory finalIpr = NormalIpRangeInventory.valueOf1(vo);
-        CollectionUtils.safeForEach(pluginRgty.getExtensionList(AfterAddIpRangeExtensionPoint.class), new ForEachFunction<AfterAddIpRangeExtensionPoint>() {
-            @Override
-            public void run(AfterAddIpRangeExtensionPoint ext) {
-                ext.afterAddIpRange(finalIpr, msg.getSystemTags());
-            }
-        });
+        CollectionUtils.safeForEach(pluginRgty.getExtensionList(AfterAddIpRangeExtensionPoint.class),
+                ext -> ext.afterAddIpRange(finalIpr, msg.getSystemTags()));
 
         List<UsedIpVO> usedIpVos = Q.New(UsedIpVO.class)
                 .eq(UsedIpVO_.l3NetworkUuid, finalIpr.getL3NetworkUuid())

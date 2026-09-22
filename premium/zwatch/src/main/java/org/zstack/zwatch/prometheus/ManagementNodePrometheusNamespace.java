@@ -16,7 +16,6 @@ import org.zstack.header.core.ExceptionSafe;
 import org.zstack.header.core.StaticInit;
 import org.zstack.utils.Bash;
 import org.zstack.utils.DebugUtils;
-import org.zstack.utils.function.ForEachFunction;
 import org.zstack.utils.gson.JSONObjectUtil;
 import org.zstack.zwatch.datatype.metric.Metric;
 import org.zstack.zwatch.datatype.Namespace;
@@ -24,6 +23,7 @@ import org.zstack.zwatch.namespace.ManagementNodeNamespace;
 
 import javax.persistence.Query;
 import java.util.*;
+import java.util.function.Consumer;
 
 public class ManagementNodePrometheusNamespace extends AbstractPrometheusNamespace {
     private static DatabaseFacade dbf;
@@ -217,14 +217,11 @@ public class ManagementNodePrometheusNamespace extends AbstractPrometheusNamespa
             l.add(mgmtIp);
             l.addAll(Arrays.asList(labels));
 
-            processMysqlResults(sql, new ForEachFunction<Map<String, String>>() {
-                @Override
-                public void run(Map<String, String> ret) {
-                    if (ret.get("name").trim().equalsIgnoreCase(key)) {
-                        metrics.addMetric(l, Double.parseDouble(ret.get("value").trim()));
-                    }
-
+            processMysqlResults(sql, (Consumer<Map<String, String>>) ret -> {
+                if (ret.get("name").trim().equalsIgnoreCase(key)) {
+                    metrics.addMetric(l, Double.parseDouble(ret.get("value").trim()));
                 }
+
             }, "name", "value");
         }
 
@@ -232,14 +229,11 @@ public class ManagementNodePrometheusNamespace extends AbstractPrometheusNamespa
         private void addMysqlProcesslist(CounterMetricFamily metrics) {
             String sql = "select db,command,count(1) from information_schema.processlist group by db,command";
             Map<String, Double> totals = new HashMap<>();
-            processMysqlResults(sql, new ForEachFunction<Map<String, String>>() {
-                @Override
-                public void run(Map<String, String> ret) {
-                    double num = Double.parseDouble(ret.get("count").trim());
-                    String db = ret.get("db");
-                    metrics.addMetric(Arrays.asList(mgmtIp, db, ret.get("command").trim().toLowerCase()), num);
-                    totals.compute(db, (k, v) -> v==null ? num : v + num);
-                }
+            processMysqlResults(sql, (Consumer<Map<String, String>>) ret -> {
+                double num = Double.parseDouble(ret.get("count").trim());
+                String db = ret.get("db");
+                metrics.addMetric(Arrays.asList(mgmtIp, db, ret.get("command").trim().toLowerCase()), num);
+                totals.compute(db, (k, v) -> v==null ? num : v + num);
             }, "db", "command", "count");
 
             totals.forEach((k, v) -> {
@@ -251,15 +245,12 @@ public class ManagementNodePrometheusNamespace extends AbstractPrometheusNamespa
         private void addMysqlQueryCache(CounterMetricFamily metrics) {
             String sql = "show status like 'qcache_%'";
             double[] caches = new double[2];
-            processMysqlResults(sql, new ForEachFunction<Map<String, String>>() {
-                @Override
-                public void run(Map<String, String> ret) {
-                    if (ret.get("name").equalsIgnoreCase("Qcache_hits")) {
-                        caches[0] = Double.parseDouble(ret.get("value").trim());
-                    }
-                    if (ret.get("name").equalsIgnoreCase("Qcache_inserts")) {
-                        caches[1] = Double.parseDouble(ret.get("value").trim());
-                    }
+            processMysqlResults(sql, (Consumer<Map<String, String>>) ret -> {
+                if (ret.get("name").equalsIgnoreCase("Qcache_hits")) {
+                    caches[0] = Double.parseDouble(ret.get("value").trim());
+                }
+                if (ret.get("name").equalsIgnoreCase("Qcache_inserts")) {
+                    caches[1] = Double.parseDouble(ret.get("value").trim());
                 }
             }, "name", "value");
             metrics.addMetric(Arrays.asList(mgmtIp, "hits"), caches[0]);
@@ -271,14 +262,11 @@ public class ManagementNodePrometheusNamespace extends AbstractPrometheusNamespa
         private void addMysqlOpentables(CounterMetricFamily metrics) {
             String sql = "show open tables where in_use > 0";
             double[] total = new double[1];
-            processMysqlResults(sql, new ForEachFunction<Map<String, String>>() {
-                @Override
-                public void run(Map<String, String> ret) {
-                    if (ret.get("in_use") != null) {
-                        double inUse = Double.parseDouble(ret.get("in_use").trim());
-                        metrics.addMetric(Arrays.asList(mgmtIp, ret.get("db") + "." + ret.get("table")), inUse);
-                        total[0] += inUse;
-                    }
+            processMysqlResults(sql, (Consumer<Map<String, String>>) ret -> {
+                if (ret.get("in_use") != null) {
+                    double inUse = Double.parseDouble(ret.get("in_use").trim());
+                    metrics.addMetric(Arrays.asList(mgmtIp, ret.get("db") + "." + ret.get("table")), inUse);
+                    total[0] += inUse;
                 }
             }, "db", "table", "in_use", "locked");
             metrics.addMetric(Arrays.asList(mgmtIp, "total"), total[0]);
@@ -287,10 +275,10 @@ public class ManagementNodePrometheusNamespace extends AbstractPrometheusNamespa
         @ExceptionSafe
         private void addMysqlTableSize(CounterMetricFamily metrics, String type) {
             String sql = String.format("SELECT TABLE_SCHEMA,sum(round((%s_LENGTH)/1024/1024,2)) FROM information_schema.TABLES WHERE TABLE_SCHEMA like 'zstack%%' group by TABLE_SCHEMA", type);
-            processMysqlResults(sql, (ForEachFunction<Map<String, String>>) ret -> metrics.addMetric(Arrays.asList(mgmtIp, ret.get("db"), type), Double.parseDouble(ret.get("sizeMB").trim())), "db", "sizeMB");
+            processMysqlResults(sql, (Consumer<Map<String, String>>) ret -> metrics.addMetric(Arrays.asList(mgmtIp, ret.get("db"), type), Double.parseDouble(ret.get("sizeMB").trim())), "db", "sizeMB");
         }
 
-        private <V> void processMysqlResults(String sql, ForEachFunction<V> addMetrics, String...args) {
+        private <V> void processMysqlResults(String sql, Consumer<V> addMetrics, String...args) {
             if (args.length == 0) {
                 return;
             }
@@ -317,7 +305,7 @@ public class ManagementNodePrometheusNamespace extends AbstractPrometheusNamespa
                 for (int i = 0; i < rets.size(); i ++) {
                     line.put(args[i], rets.get(i));
                 }
-                addMetrics.run((V)line);
+                addMetrics.accept((V)line);
             }
         }
 

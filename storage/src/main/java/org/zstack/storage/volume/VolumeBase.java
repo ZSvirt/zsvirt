@@ -68,7 +68,6 @@ import org.zstack.tag.TagManager;
 import org.zstack.utils.CollectionUtils;
 import org.zstack.utils.DebugUtils;
 import org.zstack.utils.Utils;
-import org.zstack.utils.function.ForEachFunction;
 import org.zstack.utils.logging.CLogger;
 import org.zstack.utils.path.PathUtil;
 
@@ -1200,12 +1199,8 @@ public class VolumeBase extends AbstractVolume implements Volume {
             extp.preDeleteVolume(getSelfInventory());
         }
 
-        CollectionUtils.safeForEach(pluginRgty.getExtensionList(VolumeDeletionExtensionPoint.class), new ForEachFunction<VolumeDeletionExtensionPoint>() {
-            @Override
-            public void run(VolumeDeletionExtensionPoint arg) {
-                arg.beforeDeleteVolume(getSelfInventory());
-            }
-        });
+        CollectionUtils.safeForEach(pluginRgty.getExtensionList(VolumeDeletionExtensionPoint.class),
+                arg -> arg.beforeDeleteVolume(getSelfInventory()));
 
 
         FlowChain chain = FlowChainBuilder.newShareFlowChain();
@@ -1395,12 +1390,7 @@ public class VolumeBase extends AbstractVolume implements Volume {
                     @Override
                     public void handle(final ErrorCode errCode, Map data) {
                         CollectionUtils.safeForEach(pluginRgty.getExtensionList(VolumeDeletionExtensionPoint.class),
-                                new ForEachFunction<VolumeDeletionExtensionPoint>() {
-                                    @Override
-                                    public void run(VolumeDeletionExtensionPoint arg) {
-                                        arg.failedToDeleteVolume(getSelfInventory(), errCode);
-                                    }
-                                });
+                                arg -> arg.failedToDeleteVolume(getSelfInventory(), errCode));
 
                         reply.setError(errCode);
                         bus.reply(msg, reply);
@@ -2339,20 +2329,8 @@ public class VolumeBase extends AbstractVolume implements Volume {
         final VolumeInventory vol = getSelfInventory();
         List<RecoverDataVolumeExtensionPoint> exts = pluginRgty.getExtensionList(RecoverDataVolumeExtensionPoint.class);
 
-        CollectionUtils.safeForEach(exts, new ForEachFunction<RecoverDataVolumeExtensionPoint>() {
-            @Override
-            public void run(RecoverDataVolumeExtensionPoint ext) {
-                ext.preRecoverDataVolume(vol);
-            }
-        });
-
-
-        CollectionUtils.safeForEach(exts, new ForEachFunction<RecoverDataVolumeExtensionPoint>() {
-            @Override
-            public void run(RecoverDataVolumeExtensionPoint ext) {
-                ext.beforeRecoverDataVolume(vol);
-            }
-        });
+        CollectionUtils.safeForEach(exts, ext -> ext.preRecoverDataVolume(vol));
+        CollectionUtils.safeForEach(exts, ext -> ext.beforeRecoverDataVolume(vol));
 
         VolumeStatus oldStatus = self.getStatus();
 
@@ -2365,12 +2343,7 @@ public class VolumeBase extends AbstractVolume implements Volume {
 
         new FireVolumeCanonicalEvent().fireVolumeStatusChangedEvent(oldStatus, getSelfInventory());
 
-        CollectionUtils.safeForEach(exts, new ForEachFunction<RecoverDataVolumeExtensionPoint>() {
-            @Override
-            public void run(RecoverDataVolumeExtensionPoint ext) {
-                ext.afterRecoverDataVolume(vol);
-            }
-        });
+        CollectionUtils.safeForEach(exts, ext -> ext.afterRecoverDataVolume(vol));
         completion.success();
     }
 

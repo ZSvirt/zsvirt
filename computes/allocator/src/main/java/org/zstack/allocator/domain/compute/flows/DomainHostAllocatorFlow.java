@@ -3,7 +3,7 @@ package org.zstack.allocator.domain.compute.flows;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.zstack.allocator.domain.compute.evaluator.AllocatorDomainRuleEvaluator;
-import org.zstack.allocator.domain.entity.AllocatorHostRuleSet;
+import org.zstack.header.allocator.domain.AllocatorHostRuleSet;
 import org.zstack.header.allocator.HostCandidate;
 import org.zstack.utils.Utils;
 import org.zstack.utils.logging.CLogger;

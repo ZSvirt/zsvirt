@@ -1,4 +1,4 @@
-package org.zstack.allocator.domain.entity;
+package org.zstack.header.allocator.domain;
 
 import java.io.Serializable;
 

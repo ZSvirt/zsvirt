@@ -25,7 +25,7 @@ import org.zstack.allocator.domain.entity.AllocatorDomainSceneVO;
 import org.zstack.allocator.domain.entity.AllocatorDomainSceneVO_;
 import org.zstack.allocator.domain.entity.AllocatorDomainVO;
 import org.zstack.allocator.domain.entity.AllocatorDomainVO_;
-import org.zstack.allocator.domain.entity.AllocatorHostRuleSet;
+import org.zstack.header.allocator.domain.AllocatorHostRuleSet;
 import org.zstack.allocator.domain.header.AllocatorDomainConstant;
 import org.zstack.allocator.domain.header.AllocatorDomainErrors;
 import org.zstack.allocator.domain.header.AllocatorDomainGlobalConfig;

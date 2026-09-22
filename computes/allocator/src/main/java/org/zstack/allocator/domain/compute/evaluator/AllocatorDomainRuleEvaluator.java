@@ -1,6 +1,6 @@
 package org.zstack.allocator.domain.compute.evaluator;
 
-import org.zstack.allocator.domain.entity.AllocatorHostRule;
+import org.zstack.header.allocator.domain.AllocatorHostRule;
 import org.zstack.allocator.domain.header.AllocatorDomainConstant;
 import org.zstack.allocator.domain.header.AllocatorDomainResourceType;
 import org.zstack.allocator.domain.header.AllocatorDomainRuleEffect;

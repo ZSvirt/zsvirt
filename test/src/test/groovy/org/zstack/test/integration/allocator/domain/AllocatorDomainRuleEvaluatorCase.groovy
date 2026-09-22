@@ -1,7 +1,7 @@
 package org.zstack.test.integration.allocator.domain
 
 import org.zstack.allocator.domain.compute.evaluator.AllocatorDomainRuleEvaluator
-import org.zstack.allocator.domain.entity.AllocatorHostRule
+import org.zstack.header.allocator.domain.AllocatorHostRule
 import org.zstack.header.host.HostVO
 import org.zstack.testlib.SubCase
 

@@ -5885,9 +5885,9 @@ public class KVMHost extends HostBase implements Host {
         for (KVMHostConnectExtensionPoint extp : factory.getConnectExtensions()) {
             KVMHostConnectedContext ctx = new KVMHostConnectedContext();
             ctx.setInventory((KVMHostInventory) getSelfInventory());
-            ctx.setNewAddedHost(info.isNewAdded());
+            ctx.setNewAddedHost(info.newAdded);
             ctx.setBaseUrl(baseUrl);
-            ctx.setSkipPackages(info.getSkipPackages());
+            ctx.setSkipPackages(info.skipPackages);
 
             chain.then(extp.createKvmHostConnectingFlow(ctx));
         }
@@ -6056,7 +6056,7 @@ public class KVMHost extends HostBase implements Host {
             String __name__ = "check-if-host-password-has-been-modified";
             @Override
             public boolean skip(Map data) {
-                return CoreGlobalProperty.UNIT_TEST_ON || info.isNewAdded();
+                return CoreGlobalProperty.UNIT_TEST_ON || info.newAdded;
             }
 
             @Override
@@ -6115,7 +6115,7 @@ public class KVMHost extends HostBase implements Host {
                 if (CoreGlobalProperty.UNIT_TEST_ON) {
                     return true;
                 }
-                if (!info.isNewAdded()) {
+                if (!info.newAdded) {
                     return true;
                 }
                 if (AnsibleGlobalProperty.ZSTACK_REPO.contains("zstack-mn") || AnsibleGlobalProperty.ZSTACK_REPO.equals("false")) {
@@ -6208,10 +6208,10 @@ public class KVMHost extends HostBase implements Host {
 
     @Override
     public void connectHook(final ConnectHostInfo info, final Completion complete) {
-        if (!info.isNewAdded()) {
-            String skipPackages = KVMGlobalProperty.SKIP_PACKAGES + " " + StringUtils.trimToEmpty(info.getSkipPackages());
+        if (!info.newAdded) {
+            String skipPackages = KVMGlobalProperty.SKIP_PACKAGES + " " + StringUtils.trimToEmpty(info.skipPackages);
             logger.info("connecting to KVM host and skipping these packages: " + skipPackages);
-            info.setSkipPackages(skipPackages);
+            info.skipPackages = skipPackages;
         }
 
         FlowChain chain = FlowChainBuilder.newShareFlowChain();
@@ -6227,7 +6227,7 @@ public class KVMHost extends HostBase implements Host {
 
                     @Override
                     public boolean skip(Map data) {
-                        return CoreGlobalProperty.UNIT_TEST_ON || !info.isNewAdded();
+                        return CoreGlobalProperty.UNIT_TEST_ON || !info.newAdded;
                     }
 
                     @Override
@@ -6326,7 +6326,7 @@ public class KVMHost extends HostBase implements Host {
                         }
 
                         // for upgrade case, prevent from add host failure.
-                        if (cluster.getArchitecture() == null && !info.isNewAdded()) {
+                        if (cluster.getArchitecture() == null && !info.newAdded) {
                             cluster.setArchitecture(hostArchitecture);
                             dbf.update(cluster);
                             ClusterInventory clusterInventory = ClusterInventory.valueOf(cluster);
@@ -6425,7 +6425,7 @@ public class KVMHost extends HostBase implements Host {
                         runner.setSshPort(getSelf().getPort());
 
                         KVMHostDeployArguments deployArguments = new KVMHostDeployArguments();
-                        if (info.isNewAdded()) {
+                        if (info.newAdded) {
                             deployArguments.setInit("true");
                             runner.setFullDeploy(true);
                         }
@@ -6476,7 +6476,7 @@ public class KVMHost extends HostBase implements Host {
 
                         deployArguments.setRestartLibvirtd(rcf.getResourceConfigValue(KVMGlobalConfig.RECONNECT_HOST_RESTART_LIBVIRTD_SERVICE, self.getUuid(), String.class));
                         deployArguments.setHostname(String.format("%s.zstack.org", self.getManagementIp().replaceAll("\\.", "-")));
-                        deployArguments.setSkipPackages(info.getSkipPackages());
+                        deployArguments.setSkipPackages(info.skipPackages);
                         deployArguments.setUpdatePackages(String.valueOf(CoreGlobalProperty.UPDATE_PKG_WHEN_CONNECT));
 
                         if (deployArguments.isForceRun()) {
@@ -6627,7 +6627,7 @@ public class KVMHost extends HostBase implements Host {
                         }
 
                         // new added need to update dependency if experimental repo enabled
-                        if (info.isNewAdded() && !rcf.getResourceConfigValue(
+                        if (info.newAdded && !rcf.getResourceConfigValue(
                                 ClusterGlobalConfig.ZSTACK_EXPERIMENTAL_REPO, self.getClusterUuid(), Boolean.class)) {
                             trigger.next();
                             return;
@@ -6637,7 +6637,7 @@ public class KVMHost extends HostBase implements Host {
                         cmd.hostUuid = self.getUuid();
                         cmd.zstackRepo = AnsibleGlobalProperty.ZSTACK_REPO;
 
-                        if (info.isNewAdded()) {
+                        if (info.newAdded) {
                             cmd.enableExpRepo = true;
                             cmd.updatePackages = rcf.getResourceConfigValue(
                                     ClusterGlobalConfig.ZSTACK_EXPERIMENTAL_UPDATE_DEPENDENCY, self.getClusterUuid(), String.class);
@@ -6665,7 +6665,7 @@ public class KVMHost extends HostBase implements Host {
 
                 flow(createCollectHostFactsFlow(info));
 
-                if (info.isNewAdded()) {
+                if (info.newAdded) {
                     flow(new NoRollbackFlow() {
                         String __name__ = "check-qemu-libvirt-version";
 
@@ -6862,7 +6862,7 @@ public class KVMHost extends HostBase implements Host {
                 }
 
                 // only log the hardware info change for existing host
-                if (info.isNewAdded()) {
+                if (info.newAdded) {
                     logger.debug(String.format("host[uuid:%s]'s hardware info changed, %s",
                             self.getUuid(), multiErr(hardwareChangedErrors).getReadableDetails()));
                     return;

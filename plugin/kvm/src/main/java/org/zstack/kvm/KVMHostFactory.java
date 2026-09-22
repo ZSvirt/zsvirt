@@ -1155,6 +1155,7 @@ public class KVMHostFactory extends AbstractService implements HypervisorFactory
         for (String huuid : hostUuids) {
             ConnectHostMsg msg = new ConnectHostMsg();
             msg.setNewAdd(false);
+            msg.setReconnect(true);
             msg.setUuid(huuid);
             bus.makeTargetServiceIdByResourceUuid(msg, HostConstant.SERVICE_ID, huuid);
             msgs.add(msg);

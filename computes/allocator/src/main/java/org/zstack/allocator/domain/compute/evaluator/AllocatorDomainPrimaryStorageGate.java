@@ -3,7 +3,7 @@ package org.zstack.allocator.domain.compute.evaluator;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.zstack.allocator.domain.compute.AllocatorDomains;
-import org.zstack.allocator.domain.entity.AllocatorHostRuleSet;
+import org.zstack.header.allocator.domain.AllocatorHostRuleSet;
 import org.zstack.allocator.domain.header.AllocatorDomainConstant;
 import org.zstack.allocator.domain.header.AllocatorDomainErrors;
 import org.zstack.core.db.Q;

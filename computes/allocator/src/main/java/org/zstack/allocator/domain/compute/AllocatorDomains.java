@@ -2,8 +2,8 @@ package org.zstack.allocator.domain.compute;
 
 import org.zstack.allocator.domain.entity.AllocatorDomainRuleVO;
 import org.zstack.allocator.domain.entity.AllocatorDomainVO;
-import org.zstack.allocator.domain.entity.AllocatorHostRule;
-import org.zstack.allocator.domain.entity.AllocatorHostRuleSet;
+import org.zstack.header.allocator.domain.AllocatorHostRule;
+import org.zstack.header.allocator.domain.AllocatorHostRuleSet;
 
 import java.util.ArrayList;
 import java.util.Comparator;

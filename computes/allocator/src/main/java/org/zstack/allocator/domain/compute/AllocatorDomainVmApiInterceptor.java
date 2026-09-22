@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.zstack.allocator.domain.compute.evaluator.AllocatorDomainConstraint;
 import org.zstack.allocator.domain.compute.evaluator.AllocatorDomainConstraintResolver;
 import org.zstack.allocator.domain.compute.evaluator.AllocatorDomainRuleEvaluator;
-import org.zstack.allocator.domain.entity.AllocatorHostRuleSet;
+import org.zstack.header.allocator.domain.AllocatorHostRuleSet;
 import org.zstack.allocator.domain.header.AllocatorDomainConstant;
 import org.zstack.allocator.domain.header.AllocatorDomainErrors;
 import org.zstack.allocator.domain.header.AllocatorDomainGlobalConfig;

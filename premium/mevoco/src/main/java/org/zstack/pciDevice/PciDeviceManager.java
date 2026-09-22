@@ -2036,12 +2036,10 @@ public class PciDeviceManager extends AbstractService implements
     }
 
     @Override
-    public Flow createPostHostConnectFlow(HostInventory host) {
-        return new NoRollbackFlow() {
-            String __name__ = "sync-pci-devices";
-
-            @Override
-            public void run(final FlowTrigger trigger, Map data) {
+    public Flow createPostHostConnectFlow() {
+        return Flow.of("sync-pci-devices")
+            .handle((trigger, data) -> {
+                HostInventory host = findInventoryFromFlowData(data);
                 String hostUuid = host.getUuid();
                 String hostIommu = new HostIommuGetter().getState(hostUuid).toString();
                 SyncPciDeviceMsg smsg = new SyncPciDeviceMsg();
@@ -2063,8 +2061,8 @@ public class PciDeviceManager extends AbstractService implements
                         }
                     }
                 });
-            }
-        };
+            })
+            .build();
     }
 
     public Flow createAttachPciDeviceToVmFlow(List<String> pciUuids, String vmUuid) {

@@ -16,8 +16,6 @@ import org.zstack.core.thread.ThreadFacade;
 import org.zstack.header.AbstractService;
 import org.zstack.header.core.Completion;
 import org.zstack.header.core.workflow.Flow;
-import org.zstack.header.core.workflow.FlowTrigger;
-import org.zstack.header.core.workflow.NoRollbackFlow;
 import org.zstack.header.errorcode.ErrorCode;
 import org.zstack.header.exception.CloudRuntimeException;
 import org.zstack.header.host.*;
@@ -66,13 +64,10 @@ public class MttyDeviceManager extends AbstractService implements
     }
 
     @Override
-    public Flow createPostHostConnectFlow(HostInventory host) {
-        return new NoRollbackFlow() {
-            String __name__ = "sync-mtty-devices";
-
-            @Override
-            public void run(FlowTrigger trigger, Map data) {
-                String hostUuid = host.getUuid();
+    public Flow createPostHostConnectFlow() {
+        return Flow.of("sync-mtty-devices")
+            .handle((trigger, data) -> {
+                String hostUuid = findInventoryFromFlowData(data).getUuid();
                 HostVO host = dbf.findByUuid(hostUuid, HostVO.class);
                 String hostArch = host.getArchitecture();
                 if (!CpuArchitecture.loongarch64.toString().equals(hostArch)) {
@@ -99,8 +94,8 @@ public class MttyDeviceManager extends AbstractService implements
                         }
                     }
                 });
-            }
-        };
+            })
+            .build();
     }
     
     public MttyDeviceBackend getMttyDeviceBackendByHostUuid(String hostUuid) {

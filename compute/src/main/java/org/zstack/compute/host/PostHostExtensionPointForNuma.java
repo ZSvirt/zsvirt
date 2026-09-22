@@ -7,8 +7,6 @@ import org.zstack.core.db.DatabaseFacade;
 import org.zstack.core.db.Q;
 import org.zstack.core.db.SQL;
 import org.zstack.header.core.workflow.Flow;
-import org.zstack.header.core.workflow.FlowTrigger;
-import org.zstack.header.core.workflow.NoRollbackFlow;
 import org.zstack.header.host.GetHostNumaTopologyMsg;
 import org.zstack.header.host.GetHostNumaTopologyReply;
 import org.zstack.header.host.HostConstant;
@@ -35,12 +33,11 @@ public class PostHostExtensionPointForNuma implements PostHostConnectExtensionPo
     protected static final CLogger logger = Utils.getLogger(PostHostExtensionPointForNuma.class);
 
     @Override
-    public Flow createPostHostConnectFlow(HostInventory host) {
-        return new NoRollbackFlow() {
-            String __name__ = "update-host-NUMA";
+    public Flow createPostHostConnectFlow() {
+        return Flow.of("update-host-NUMA")
+            .handle((trigger, data) -> {
+                HostInventory host = findInventoryFromFlowData(data);
 
-            @Override
-            public void run(FlowTrigger trigger, Map data) {
                 GetHostNumaTopologyMsg msg = new GetHostNumaTopologyMsg();
                 msg.setHostUuid(host.getUuid());
                 bus.makeTargetServiceIdByResourceUuid(msg, HostConstant.SERVICE_ID, msg.getHostUuid());
@@ -63,7 +60,7 @@ public class PostHostExtensionPointForNuma implements PostHostConnectExtensionPo
                             List<HostNumaNodeVO> oldHostNumaNodes = Q.New(HostNumaNodeVO.class)
                                     .eq(HostNumaNodeVO_.hostUuid, host.getUuid())
                                     .list();
-                            
+
                             List<HostNumaNodeVO> newHostNumaNodes = new ArrayList<>();
                             Iterator<Map.Entry<String, HostNUMANode>> nodeEntries = nodes.entrySet().iterator();
                             while (nodeEntries.hasNext()) {
@@ -117,7 +114,7 @@ public class PostHostExtensionPointForNuma implements PostHostConnectExtensionPo
                         }
                     }
                 });
-            }
-        };
+            })
+            .build();
     }
 }

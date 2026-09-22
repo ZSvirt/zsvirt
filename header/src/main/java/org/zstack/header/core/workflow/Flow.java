@@ -34,8 +34,8 @@ public interface Flow {
     public static class FlowBuilder {
         public final String flowName;
         private Predicate<Map> skipPredicate;
-        private BiConsumer<FlowTrigger, Map> triggerConsumer;
-        private BiConsumer<FlowRollback, Map> rollbackConsumer;
+        private BiConsumer<FlowTrigger, Map<String, Object>> triggerConsumer;
+        private BiConsumer<FlowRollback, Map<String, Object>> rollbackConsumer;
 
         private FlowBuilder(String flowName) {
             DebugUtils.Assert(flowName != null, "flowName should not be null");
@@ -57,7 +57,7 @@ public interface Flow {
             return withSkipPredicate(predicate.negate());
         }
 
-        public FlowBuilder handle(BiConsumer<FlowTrigger, Map> consumer) {
+        public FlowBuilder handle(BiConsumer<FlowTrigger, Map<String, Object>> consumer) {
             DebugUtils.Assert(consumer != null, "consumer of FlowBuilder.handle() should not be null");
             this.triggerConsumer = consumer;
             return this;
@@ -75,7 +75,7 @@ public interface Flow {
             return this;
         }
 
-        public FlowBuilder rollback(BiConsumer<FlowRollback, Map> consumer) {
+        public FlowBuilder rollback(BiConsumer<FlowRollback, Map<String, Object>> consumer) {
             DebugUtils.Assert(consumer != null, "consumer of FlowBuilder.rollback() should not be null");
             this.rollbackConsumer = consumer;
             return this;
@@ -90,8 +90,8 @@ public interface Flow {
         public Flow build() {
             DebugUtils.Assert(triggerConsumer != null, "handle() must be called before build()");
             Predicate<Map> skipPredicateSnapshot = skipPredicate;
-            BiConsumer<FlowTrigger, Map> triggerConsumerSnapshot = triggerConsumer;
-            BiConsumer<FlowRollback, Map> rollbackConsumerSnapshot = rollbackConsumer;
+            BiConsumer<FlowTrigger, Map<String, Object>> triggerConsumerSnapshot = triggerConsumer;
+            BiConsumer<FlowRollback, Map<String, Object>> rollbackConsumerSnapshot = rollbackConsumer;
 
             return new Flow() {
                 @Override
@@ -103,12 +103,12 @@ public interface Flow {
                 }
 
                 @Override
-                public void run(FlowTrigger trigger, Map data) {
+                public void run(FlowTrigger trigger, Map<String, Object> data) {
                     triggerConsumerSnapshot.accept(trigger, data);
                 }
 
                 @Override
-                public void rollback(FlowRollback trigger, Map data) {
+                public void rollback(FlowRollback trigger, Map<String, Object> data) {
                     if (rollbackConsumerSnapshot == null) {
                         trigger.rollback();
                     } else {
@@ -131,5 +131,9 @@ public interface Flow {
 
     public static FlowBuilder of(String flowName) {
         return new FlowBuilder(flowName);
+    }
+
+    public static Flow nope(String flowName) {
+        return of(flowName).handle(trigger -> trigger.next()).build();
     }
 }

@@ -421,12 +421,10 @@ public class MonitorManagerImpl extends AbstractService implements
     }
 
     @Override
-    public Flow createPostHostConnectFlow(HostInventory host) {
-        return new NoRollbackFlow() {
-            String __name__ = "setup-monitor";
-
-            @Override
-            public void run(FlowTrigger trigger, Map data) {
+    public Flow createPostHostConnectFlow() {
+        return Flow.of("setup-monitor")
+            .handle((trigger, data) -> {
+                HostInventory host = findInventoryFromFlowData(data);
                 HostTarget template = new HostTarget(host);
 
                 FlowChain chain = FlowChainBuilder.newSimpleFlowChain();
@@ -467,8 +465,8 @@ public class MonitorManagerImpl extends AbstractService implements
                         trigger.fail(errCode);
                     }
                 }).start();
-            }
-        };
+            })
+            .build();
     }
 
     @Override

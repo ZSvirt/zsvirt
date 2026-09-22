@@ -21,6 +21,7 @@ import org.zstack.core.errorcode.ErrorFacade;
 import org.zstack.core.thread.*;
 import org.zstack.core.workflow.FlowChainBuilder;
 import org.zstack.core.workflow.ShareFlow;
+import org.zstack.core.workflow.SimpleFlowChain;
 import org.zstack.header.agent.versioncontrol.AgentVersionVO;
 import org.zstack.header.allocator.AllocatorDomainScene;
 import org.zstack.header.allocator.HostAllocatorConstant;
@@ -1306,7 +1307,7 @@ public abstract class HostBase extends AbstractHost {
     private void handle(final ConnectHostMsg msg) {
         thdf.singleFlightSubmit(new SingleFlightTask(msg)
                 .setSyncSignature(String.format("connect-host-%s-single-flight", msg.getHostUuid()))
-                .run((completion) -> connect(msg, new Completion(completion) {
+                .run((completion) -> connectChain(msg, new Completion(completion) {
                     @Override
                     public void success() {
                         completion.success(null);
@@ -1332,173 +1333,28 @@ public abstract class HostBase extends AbstractHost {
         return String.format("connect-host-%s", self.getUuid());
     }
 
-    private void connect(final ConnectHostMsg msg, Completion completion) {
+    private void connectChain(final ConnectHostMsg msg, Completion completion) {
         thdf.chainSubmit(new ChainTask(completion) {
             @Override
-            public String getSyncSignature() {
-                return connectHostSignature();
+            public void run(SyncTaskChain chain) {
+                connect(msg, new Completion(chain, completion) {
+                    @Override
+                    public void success() {
+                        chain.next();
+                        completion.success();
+                    }
+
+                    @Override
+                    public void fail(ErrorCode errorCode) {
+                        chain.next();
+                        completion.fail(errorCode);
+                    }
+                });
             }
 
             @Override
-            public void run(SyncTaskChain chain) {
-                checkState();
-
-                if (skipConnectHost()) {
-                    completion.success();
-                    chain.next();
-                    return;
-                }
-
-                final FlowChain flowChain = FlowChainBuilder.newShareFlowChain();
-                flowChain.setName(String.format("connect-host-%s", self.getUuid()));
-                flowChain.allowWatch();
-                flowChain.then(new ShareFlow() {
-                    @Override
-                    public void setup() {
-                        flow(new NoRollbackFlow() {
-                            String __name__ = "check-conditions-of-connection";
-
-                            @Override
-                            public void run(final FlowTrigger trigger, Map data) {
-                                checkConnectConditions(ConnectHostInfo.fromConnectHostMsg(msg), new Completion(trigger) {
-                                    @Override
-                                    public void success() {
-                                        trigger.next();
-                                    }
-
-                                    @Override
-                                    public void fail(ErrorCode errorCode) {
-                                        trigger.fail(errorCode);
-                                    }
-                                });
-                            }
-                        });
-
-                        flow(new NoRollbackFlow() {
-                            String __name__ = "call-pre-connect-extensions";
-
-                            @Override
-                            public void run(FlowTrigger trigger, Map data) {
-                                FlowChain preConnectChain = FlowChainBuilder.newSimpleFlowChain();
-                                preConnectChain.allowEmptyFlow();
-
-                                for (PreHostConnectExtensionPoint p : pluginRgty.getExtensionList(PreHostConnectExtensionPoint.class)) {
-                                    Flow flow = p.createPreHostConnectFlow(msg);
-                                    if (flow != null) {
-                                        preConnectChain.then(flow);
-                                    }
-                                }
-
-                                preConnectChain.done(new FlowDoneHandler(trigger) {
-                                    @Override
-                                    public void handle(Map data) {
-                                        trigger.next();
-                                    }
-                                }).error(new FlowErrorHandler(trigger) {
-                                    @Override
-                                    public void handle(ErrorCode errCode, Map data) {
-                                        trigger.fail(errCode);
-                                    }
-                                }).start();
-                            }
-                        });
-
-                        flow(new NoRollbackFlow() {
-                            String __name__ = "call-host-connect-hooks";
-
-                            @Override
-                            public void run(final FlowTrigger trigger, Map data) {
-                                changeConnectionState(HostStatusEvent.connecting);
-                                connectHook(ConnectHostInfo.fromConnectHostMsg(msg), new Completion(trigger) {
-                                    @Override
-                                    public void success() {
-                                        trigger.next();
-                                    }
-
-                                    @Override
-                                    public void fail(ErrorCode errorCode) {
-                                        trigger.fail(errorCode);
-                                    }
-                                });
-                            }
-                        });
-
-                        flow(new NoRollbackFlow() {
-                            String __name__ = "call-post-connect-extensions";
-
-                            @Override
-                            public void run(FlowTrigger trigger, Map data) {
-                                FlowChain postConnectChain = FlowChainBuilder.newSimpleFlowChain();
-                                postConnectChain.allowEmptyFlow();
-
-                                self = dbf.reload(self);
-                                HostInventory inv = getSelfInventory();
-
-                                for (PostHostConnectExtensionPoint p : pluginRgty.getExtensionList(PostHostConnectExtensionPoint.class)) {
-                                    Flow flow = p.createPostHostConnectFlow(inv);
-                                    if (flow != null) {
-                                        postConnectChain.then(flow);
-                                    }
-                                }
-
-                                postConnectChain.done(new FlowDoneHandler(trigger) {
-                                    @Override
-                                    public void handle(Map data) {
-                                        trigger.next();
-                                    }
-                                }).error(new FlowErrorHandler(trigger) {
-                                    @Override
-                                    public void handle(ErrorCode errCode, Map data) {
-                                        trigger.fail(errCode);
-                                    }
-                                }).start();
-                            }
-                        });
-
-                        flow(new NoRollbackFlow() {
-                            String __name__ = "recalculate-host-capacity";
-
-                            @Override
-                            public void run(FlowTrigger trigger, Map data) {
-                                RecalculateHostCapacityMsg msg = new RecalculateHostCapacityMsg();
-                                msg.setHostUuid(self.getUuid());
-                                bus.makeLocalServiceId(msg, HostAllocatorConstant.SERVICE_ID);
-                                bus.send(msg);
-                                trigger.next();
-                            }
-                        });
-
-                        done(new FlowDoneHandler(completion) {
-                            @Override
-                            public void handle(Map data) {
-                                changeConnectionState(HostStatusEvent.connected);
-                                tracker.trackHost(self.getUuid());
-
-                                CollectionUtils.safeForEach(pluginRgty.getExtensionList(HostAfterConnectedExtensionPoint.class),
-                                        ext -> ext.afterHostConnected(getSelfInventory()));
-                                completion.success();
-                            }
-                        });
-
-                        error(new FlowErrorHandler(completion) {
-                            @Override
-                            public void handle(ErrorCode errCode, Map data) {
-                                changeConnectionState(HostStatusEvent.disconnected);
-                                if (!msg.isNewAdd()) {
-                                    connectHostFailHook(errCode);
-                                }
-                                completion.fail(errCode);
-                            }
-                        });
-
-                        Finally(new FlowFinallyHandler(chain) {
-                            @Override
-                            public void Finally() {
-                                chain.next();
-                            }
-                        });
-                    }
-                }).start();
+            public String getSyncSignature() {
+                return connectHostSignature();
             }
 
             @Override
@@ -1511,6 +1367,84 @@ public abstract class HostBase extends AbstractHost {
                 return String.format("connect-host-%s", self.getUuid());
             }
         });
+    }
+
+    private void connect(final ConnectHostMsg msg, Completion completion) {
+        checkState();
+
+        if (skipConnectHost()) {
+            completion.success();
+            return;
+        }
+
+        ConnectHostInfo hostInfo = ConnectHostInfo.fromConnectHostMsg(msg);
+
+        SimpleFlowChain chain = SimpleFlowChain.of("connect-host-" + self.getUuid());
+        chain.allowWatch();
+        chain.then(Flow.of("check-conditions-of-connection")
+            .handle(trigger -> checkConnectConditions(hostInfo, trigger.toCompletion()))
+            .build());
+
+        chain.then(Flow.nope("call-pre-connect-extensions-start"));
+        for (PreHostConnectExtensionPoint p : pluginRgty.getExtensionList(PreHostConnectExtensionPoint.class)) {
+            Flow flow = p.createPreHostConnectFlow(msg);
+            if (flow != null) {
+                chain.then(flow);
+            }
+        }
+        chain.then(Flow.nope("call-pre-connect-extensions-finished"));
+
+        chain.then(Flow.of("change-connect-state-to-connecting")
+            .handle(trigger -> {
+                changeConnectionState(HostStatusEvent.connecting);
+                trigger.next();
+            })
+            .build());
+        chain.then(Flow.of("call-host-connect-hooks")
+            .handle(trigger -> connectHook(hostInfo, trigger.toCompletion()))
+            .build());
+
+        chain.then(Flow.of("call-post-connect-extensions-start")
+            .handle((trigger, data) -> {
+                self = dbf.reload(self);
+                data.put(PostHostConnectExtensionPoint.KEY_INVENTORY, getSelfInventory());
+                trigger.next();
+            })
+            .build());
+
+        for (PostHostConnectExtensionPoint p : pluginRgty.getExtensionList(PostHostConnectExtensionPoint.class)) {
+            Flow flow = p.createPostHostConnectFlow();
+            if (flow != null) {
+                chain.then(flow);
+            }
+        }
+        chain.then(Flow.nope("call-post-connect-extensions-finished"));
+
+        chain.then(Flow.of("recalculate-host-capacity")
+            .handle(trigger -> {
+                RecalculateHostCapacityMsg capacityMsg = new RecalculateHostCapacityMsg();
+                capacityMsg.setHostUuid(self.getUuid());
+                bus.makeLocalServiceId(capacityMsg, HostAllocatorConstant.SERVICE_ID);
+                bus.send(capacityMsg); // ignore reply
+                trigger.next();
+            })
+            .build());
+        chain.propagateExceptionTo(completion)
+            .done(() -> {
+                changeConnectionState(HostStatusEvent.connected);
+                tracker.trackHost(self.getUuid());
+                CollectionUtils.safeForEach(pluginRgty.getExtensionList(HostAfterConnectedExtensionPoint.class),
+                        ext -> ext.afterHostConnected(getSelfInventory()));
+                completion.success();
+            })
+            .error(error -> {
+                changeConnectionState(HostStatusEvent.disconnected);
+                if (!msg.isNewAdd()) {
+                    connectHostFailHook(error);
+                }
+                completion.fail(error);
+            })
+            .start();
     }
 
     protected void connectHostFailHook(ErrorCode errorCode) {

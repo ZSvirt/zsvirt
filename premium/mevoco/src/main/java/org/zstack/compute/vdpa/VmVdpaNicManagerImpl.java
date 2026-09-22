@@ -730,12 +730,10 @@ public class VmVdpaNicManagerImpl extends AbstractService implements VmVdpaNicMa
     }
 
     @Override
-    public Flow createPostHostConnectFlow(HostInventory host) {
-
-        String __name__ = String.format("sync-vdpa-nic-to-host-%s", host.getUuid());
-        return new NoRollbackFlow() {
-            @Override
-            public void run(FlowTrigger trigger, Map data) {
+    public Flow createPostHostConnectFlow() {
+        return Flow.of("sync-vdpa-nic-to-host")
+            .handle((trigger, data) -> {
+                HostInventory host = findInventoryFromFlowData(data);
                 String clusterUuid = host.getClusterUuid();
                 Boolean isOvsSup = rcf.getResourceConfigValue(MevocoClusterGlobalConfig.OVS_DPDK_SUPPORT, clusterUuid, Boolean.class);
                 if (!isOvsSup) {
@@ -775,8 +773,8 @@ public class VmVdpaNicManagerImpl extends AbstractService implements VmVdpaNicMa
                         trigger.next();
                     }
                 });
-            }
-        };
+            })
+            .build();
     }
 
     private List<MevocoKVMAgentCommands.OvsDpdkBridgeTO> getVdpaNicInfoByHost(HostInventory host) {

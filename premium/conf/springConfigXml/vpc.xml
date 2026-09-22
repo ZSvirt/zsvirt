@@ -69,7 +69,7 @@
             <zstack:extension interface="org.zstack.header.network.service.DnsServiceExtensionPoint" />
             <zstack:extension interface="org.zstack.header.network.service.VirtualRouterHaGetCallbackExtensionPoint" />
             <zstack:extension interface="org.zstack.network.service.virtualrouter.vyos.VyosConnectExtensionPoint" />
-            <zstack:extension interface="org.zstack.ha.VmFencerRuleExtensionPoint" />
+            <zstack:extension interface="org.zstack.ha.spi.VmFencerRuleExtensionPoint" />
         </zstack:plugin>
     </bean>
 

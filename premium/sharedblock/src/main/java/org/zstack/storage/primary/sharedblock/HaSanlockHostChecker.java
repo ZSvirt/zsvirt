@@ -5,10 +5,9 @@ import org.zstack.core.cloudbus.CloudBus;
 import org.zstack.core.cloudbus.CloudBusCallBack;
 import org.zstack.core.db.Q;
 import org.zstack.core.db.SQL;
-import org.zstack.ha.CheckerStruct;
-import org.zstack.ha.HaHostStorageBasedChecker;
+import org.zstack.ha.message.CheckerStruct;
+import org.zstack.ha.spi.HaHostStorageBasedChecker;
 import org.zstack.header.core.HaCheckerCompletion;
-import org.zstack.ha.HaHostChecker;
 import org.zstack.header.host.*;
 import org.zstack.header.message.MessageReply;
 import org.zstack.header.storage.primary.PrimaryStorageType;
@@ -81,14 +80,14 @@ public class HaSanlockHostChecker implements HaHostStorageBasedChecker {
 
     @Override
     public void check(CheckerStruct struct, HaCheckerCompletion completion) {
-        final List<HostIdentifier> hostIds = getSanlockHostIds(struct.getHostUuid());
+        final List<HostIdentifier> hostIds = getSanlockHostIds(struct.hostUuid);
         if (hostIds.isEmpty()) {
             completion.noWay();
             return;
         }
 
-        final String clusterUuid = struct.getVmInstance().getClusterUuid();
-        final List<String> siblings = findSiblingsFromSameCluster(struct.getHostUuid(), clusterUuid);
+        final String clusterUuid = struct.vmInstance.getClusterUuid();
+        final List<String> siblings = findSiblingsFromSameCluster(struct.hostUuid, clusterUuid);
         if (siblings.isEmpty()) {
             completion.noWay();
             return;
@@ -97,11 +96,11 @@ public class HaSanlockHostChecker implements HaHostStorageBasedChecker {
         Collections.shuffle(siblings);
 
         ScanCmd cmd = new ScanCmd();
-        cmd.interval = struct.getInterval();
-        cmd.times = struct.getMaxTimes();
+        cmd.interval = struct.interval;
+        cmd.times = struct.maxTimes;
         cmd.hostIds = hostIds;
-        cmd.hostUuid = struct.getHostUuid();
-        cmd.psUuid = struct.getVmInstance().getRootVolume().getPrimaryStorageUuid();
+        cmd.hostUuid = struct.hostUuid;
+        cmd.psUuid = struct.vmInstance.getRootVolume().getPrimaryStorageUuid();
 
         doCheckWithSanlock(siblings.get(0), cmd, completion);
     }

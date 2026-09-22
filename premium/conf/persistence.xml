@@ -525,7 +525,7 @@
         <class>org.zstack.header.host.HostIpmiVO</class>
         <class>org.zstack.ha.entity.VmHaVO</class>
         <class>org.zstack.ha.entity.HaStrategyConditionVO</class>
-        <class>org.zstack.ha.hostHastate.HostHaStateVO</class>
+        <class>org.zstack.ha.entity.HostHaStateVO</class>
         <class>org.zstack.license.LicenseAppIdRefVO</class>
         <class>org.zstack.header.volume.block.BlockVolumeVO</class>
         <class>org.zstack.header.volume.block.XskyBlockVolumeVO</class>

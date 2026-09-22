@@ -1,6 +1,7 @@
 package org.zstack.ha;
 
 import org.apache.commons.lang.StringUtils;
+import org.zstack.ha.message.HostScanResult;
 import org.zstack.header.errorcode.ErrorCode;
 import org.zstack.header.storage.primary.PrimaryStorageType;
 import org.zstack.utils.CollectionUtils;
@@ -26,35 +27,6 @@ public class HostCheckResult {
     List<String> vmUuids = new ArrayList<>();
     Map<PrimaryStorageType, Boolean> isCheckVmOnHost = new ConcurrentHashMap<>();
 
-    public static class HostScanResult {
-        private boolean alive;
-        private String evidence;
-
-        private HostScanResult(boolean alive, String evidence) {
-            this.alive = alive;
-            this.evidence = evidence;
-        }
-
-        private static HostScanResult ofAlive(String evidence) {
-            return new HostScanResult(true, evidence);
-        }
-
-        private static HostScanResult ofDead(String evidence) {
-            return new HostScanResult(false, evidence);
-        }
-
-        public boolean isAlive() {
-            return alive;
-        }
-
-        public boolean isDead() {
-            return !isAlive();
-        }
-
-        public String getEvidence() {
-            return evidence;
-        }
-    }
 
     synchronized HostScanResult getCheckResult(String hostUuid) {
         if (result != null) {

@@ -159,13 +159,13 @@
 
     <!--<bean id="HaSanlockHostChecker" class="org.zstack.storage.primary.sharedblock.HaSanlockHostChecker" >
         <zstack:plugin>
-            <zstack:extension interface="org.zstack.ha.HaHostChecker" />
+            <zstack:extension interface="org.zstack.ha.spi.HaHostChecker" />
         </zstack:plugin>
     </bean>-->
 
     <bean id="ShareBlockHostHeartbeatChecker" class="org.zstack.storage.primary.shareblock.ShareBlockHostHeartbeatChecker" >
         <zstack:plugin>
-            <zstack:extension interface="org.zstack.ha.HaHostChecker" />
+            <zstack:extension interface="org.zstack.ha.spi.HaHostChecker" />
         </zstack:plugin>
     </bean>
 

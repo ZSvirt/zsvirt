@@ -1,5 +1,9 @@
 package org.zstack.ha;
 
+import org.zstack.ha.message.SelfFencerStruct;
+import org.zstack.ha.spi.HaHypervisorFactory;
+import org.zstack.ha.spi.HaHypervisorWorker;
+import org.zstack.ha.spi.SelfFencerHypervisorBackend;
 import org.zstack.header.vm.VmInstanceInventory;
 import org.zstack.kvm.KVMConstant;
 

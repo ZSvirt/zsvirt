@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Configurable;
 import org.zstack.core.cloudbus.CloudBus;
 import org.zstack.core.cloudbus.CloudBusCallBack;
 import org.zstack.core.cloudbus.EventFacade;
+import org.zstack.ha.header.VmHaCanonicalEvents;
 import org.zstack.header.core.Completion;
 import org.zstack.header.message.MessageReply;
 import org.zstack.header.vm.HaStartVmInstanceMsg;

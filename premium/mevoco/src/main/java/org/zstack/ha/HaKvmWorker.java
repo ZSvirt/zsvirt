@@ -3,23 +3,32 @@ package org.zstack.ha;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
-import org.zstack.core.db.Q;
-import org.zstack.ha.entity.VmHaVO;
-import org.zstack.ha.entity.VmHaVO_;
-import org.zstack.ha.fencers.KvmFencerManager;
-import org.zstack.ha.header.VmHaLevel;
-import org.zstack.header.core.HaCheckerCompletion;
-import org.zstack.header.core.HaCompletion;
 import org.zstack.core.cloudbus.CloudBus;
 import org.zstack.core.componentloader.PluginRegistry;
 import org.zstack.core.db.DatabaseFacade;
+import org.zstack.core.db.Q;
 import org.zstack.core.db.SQL;
 import org.zstack.core.db.SimpleQuery;
 import org.zstack.core.db.SimpleQuery.Op;
 import org.zstack.core.errorcode.ErrorFacade;
 import org.zstack.core.thread.AsyncThread;
+import org.zstack.ha.entity.VmHaVO;
+import org.zstack.ha.entity.VmHaVO_;
+import org.zstack.ha.fencers.KvmFencerManager;
+import org.zstack.ha.header.SelfFencerStrategy;
+import org.zstack.ha.header.VmHaLevel;
+import org.zstack.ha.message.CheckerStruct;
+import org.zstack.ha.message.HostScanResult;
+import org.zstack.ha.spi.HaCompletionCacher;
+import org.zstack.ha.spi.HaHostDeviceExtensionPoint;
+import org.zstack.ha.spi.HaHostStorageBasedChecker;
+import org.zstack.ha.spi.HaHostChecker;
+import org.zstack.ha.spi.HaHypervisorWorker;
+import org.zstack.ha.spi.HostScanExtensionPoint;
 import org.zstack.header.core.AsyncLatch;
 import org.zstack.header.core.Completion;
+import org.zstack.header.core.HaCheckerCompletion;
+import org.zstack.header.core.HaCompletion;
 import org.zstack.header.core.NoErrorCompletion;
 import org.zstack.header.core.ReturnValueCompletion;
 import org.zstack.header.errorcode.ErrorCode;
@@ -83,15 +92,15 @@ public class HaKvmWorker implements HaHypervisorWorker {
         }
 
 
-        HostCheckAliveTaskTracker tracker = new HostCheckAliveTaskTracker(s.getHostUuid());
+        HostCheckAliveTaskTracker tracker = new HostCheckAliveTaskTracker(s.hostUuid);
         final AsyncLatch latch = new AsyncLatch(checkers.size(), new NoErrorCompletion() {
             @Override
             public void done() {
-                HostCheckResult.HostScanResult status = ret.getCheckResult(s.getHostUuid());
+                HostScanResult status = ret.getCheckResult(s.hostUuid);
                 tracker.track(HostCheckAliveTaskTracker.Process.mapFrom(status), ret.details);
                 extensionPoints.forEach(ext -> {
                     try {
-                        ext.onScanResult(s.getHostUuid(), status);
+                        ext.onScanResult(s.hostUuid, status);
                     } catch (Throwable ignored) {}
                 });
                 completion.success(ret);
@@ -104,7 +113,7 @@ public class HaKvmWorker implements HaHypervisorWorker {
                     checkName, self.getName(), self.getUuid()));
 
             tracker.track(HostCheckAliveTaskTracker.Process.checking, i18n("(%d/%d) start HaHostChecker %s: predict time is [%d] seconds",
-                    checkers.indexOf(checker) + 1, checkers.size(), checker.getClass().getSimpleName(), s.getSuccessTimes() * s.getSuccessInterval()));
+                    checkers.indexOf(checker) + 1, checkers.size(), checker.getClass().getSimpleName(), s.successTimes * s.successInterval));
 
             if (checker instanceof HaHostStorageBasedChecker) {
                 doStorageBaseHostChecker((HaHostStorageBasedChecker) checker, s, ret, latch);
@@ -120,7 +129,7 @@ public class HaKvmWorker implements HaHypervisorWorker {
             public void noWay() {
                 logger.warn(String.format("[Ha worker]: checker[%s] says it has no way to check the host[uuid: %s, ip: %s]," +
                                 " remove the checker's weight",
-                        checker.getClass(), s.getHostUuid(), s.getHostIp()));
+                        checker.getClass(), s.hostUuid, s.hostIp));
                 ret.weightTotal.addAndGet(-checker.getWeight());
                 latch.ack();
             }
@@ -128,7 +137,7 @@ public class HaKvmWorker implements HaHypervisorWorker {
             @Override
             public void notStable() {
                 logger.warn(String.format("[Ha worker]: checker[%s] says it can check the host[uuid: %s, ip: %s], but the connection is not stable," +
-                        " so we consider the host is still alive", checker.getClass(), s.getHostUuid(), s.getHostIp()));
+                        " so we consider the host is still alive", checker.getClass(), s.hostUuid, s.hostIp));
                 ret.weight.addAndGet(checker.getWeight());
                 latch.ack();
             }
@@ -136,7 +145,7 @@ public class HaKvmWorker implements HaHypervisorWorker {
             @Override
             public void success(Void aVoid) {
                 logger.debug(String.format("[Ha worker]: checker[%s] confirm the host[uuid: %s, ip: %s] is still alive", checker.getClass(),
-                        s.getHostUuid(), s.getHostIp()));
+                        s.hostUuid, s.hostIp));
                 ret.weight.addAndGet(checker.getWeight());
                 latch.ack();
             }
@@ -144,7 +153,7 @@ public class HaKvmWorker implements HaHypervisorWorker {
             @Override
             public void fail(ErrorCode errorCode) {
                 logger.debug(String.format("[HA Worker]: checker[%s] failed to check the host[uuid: %s, ip: %s], %s",
-                        checker.getClass(), s.getHostUuid(), s.getHostIp(), errorCode));
+                        checker.getClass(), s.hostUuid, s.hostIp, errorCode));
                 ret.errors.add(errorCode);
                 latch.ack();
             }
@@ -157,7 +166,7 @@ public class HaKvmWorker implements HaHypervisorWorker {
             public void noWay() {
                 logger.warn(String.format("[Ha worker]: checker[%s] says it has no way to check the host[uuid: %s, ip: %s]," +
                                 " remove the checker's weight",
-                        checker.getClass(), s.getHostUuid(), s.getHostIp()));
+                        checker.getClass(), s.hostUuid, s.hostIp));
                 ret.weightTotal.addAndGet(-checker.getWeight());
                 latch.ack();
             }
@@ -165,7 +174,7 @@ public class HaKvmWorker implements HaHypervisorWorker {
             @Override
             public void notStable() {
                 logger.warn(String.format("[Ha worker]: checker[%s] says it can check the host[uuid: %s, ip: %s], but the connection is not stable," +
-                        " so we consider the host is still alive", checker.getClass(), s.getHostUuid(), s.getHostIp()));
+                        " so we consider the host is still alive", checker.getClass(), s.hostUuid, s.hostIp));
                 ret.weight.addAndGet(checker.getWeight());
                 latch.ack();
             }
@@ -173,7 +182,7 @@ public class HaKvmWorker implements HaHypervisorWorker {
             @Override
             public void success(List<String> vmUuids) {
                 logger.debug(String.format("[Ha worker]: checker[%s] confirm the host[uuid: %s, ip: %s] is still alive, vm[%s] is running on host", checker.getClass(),
-                        s.getHostUuid(), s.getHostIp(), CollectionUtils.isEmpty(vmUuids) ? " " : vmUuids.stream().collect(Collectors.joining(", "))));
+                        s.hostUuid, s.hostIp, CollectionUtils.isEmpty(vmUuids) ? " " : vmUuids.stream().collect(Collectors.joining(", "))));
                 ret.weight.addAndGet(checker.getWeight());
 
                 if (vmUuids != null && !vmUuids.isEmpty()) {
@@ -189,7 +198,7 @@ public class HaKvmWorker implements HaHypervisorWorker {
             @Override
             public void fail(ErrorCode errorCode) {
                 logger.debug(String.format("[HA Worker]: checker[%s] failed to check the host[uuid: %s, ip: %s], %s",
-                        checker.getClass(), s.getHostUuid(), s.getHostIp(), errorCode));
+                        checker.getClass(), s.hostUuid, s.hostIp, errorCode));
                 ret.errors.add(errorCode);
                 latch.ack();
             }
@@ -232,24 +241,24 @@ public class HaKvmWorker implements HaHypervisorWorker {
         String mgmtIp = q.findValue();
 
         final CheckerStruct s = new CheckerStruct();
-        s.setHostIp(mgmtIp);
-        s.setHostUuid(self.getHostUuid());
-        s.setVmInstance(VmInstanceInventory.valueOf(self));
-        s.setInterval(HaGlobalConfig.HOST_CHECK_INTERVAL.value(Long.class));
-        s.setMaxTimes(HaGlobalConfig.HOST_CHECK_MAX_ATTEMPTS.value(Integer.class));
-        s.setSuccessInterval(HaGlobalConfig.HOST_CHECK_SUCCESS_INTERVAL.value(Long.class));
-        s.setSuccessTimes(HaGlobalConfig.HOST_CHECK_SUCCESS_TIMES.value(Integer.class));
+        s.hostIp = mgmtIp;
+        s.hostUuid = self.getHostUuid();
+        s.vmInstance = VmInstanceInventory.valueOf(self);
+        s.interval = HaGlobalConfig.HOST_CHECK_INTERVAL.value(Long.class);
+        s.maxTimes = HaGlobalConfig.HOST_CHECK_MAX_ATTEMPTS.value(Integer.class);
+        s.successInterval = HaGlobalConfig.HOST_CHECK_SUCCESS_INTERVAL.value(Long.class);
+        s.successTimes = HaGlobalConfig.HOST_CHECK_SUCCESS_TIMES.value(Integer.class);
 
         // We need a single flight to avoid scan the same hosts repeatedly at the same time.
         // But we should *not* wait synchronously, as normal implementation does.
         final String psUuid = findVmRootVolumePsUuid(self.getUuid());
 
         // A quick hack for ZSTAC-14456
-        final String key = s.getHostUuid()+psUuid;
+        final String key = s.hostUuid+psUuid;
         boolean isFirst = cacher.enqueCompletion(completion, key);
 
         if (!isFirst) {
-            logger.info("queued an HA host scanner for host: "+s.getHostUuid());
+            logger.info("queued an HA host scanner for host: "+s.hostUuid);
             return;
         }
 
@@ -257,13 +266,13 @@ public class HaKvmWorker implements HaHypervisorWorker {
             @Override
             public void success(HostCheckResult returnValue) {
                 Collection<HaCompletion> rcs = cacher.dequeCompletions(key);
-                rcs.forEach(c -> tryHaWith(c, s.getHostUuid(), returnValue));
+                rcs.forEach(c -> tryHaWith(c, s.hostUuid, returnValue));
             }
 
             @Override
             public void fail(ErrorCode errorCode) {
                 Collection<HaCompletion> rcs = cacher.dequeCompletions(key);
-                rcs.forEach(c -> failHaWith(c, s.getHostUuid(), errorCode));
+                rcs.forEach(c -> failHaWith(c, s.hostUuid, errorCode));
             }
         });
     }
@@ -279,10 +288,10 @@ public class HaKvmWorker implements HaHypervisorWorker {
             return;
         }
 
-        final HostCheckResult.HostScanResult result = ret.getCheckResult(hostUuid);
+        final HostScanResult result = ret.getCheckResult(hostUuid);
         String reason = fencerManager.findVmFencedReasonByTag(completion.getVmUuid());
         if (result.isDead()) {
-            startHa(hostUuid, reason == null ? result.getEvidence() : reason, completion);
+            startHa(hostUuid, reason == null ? result.evidence : reason, completion);
             return;
         } else if (vmIsNotActiveOnStorage(ret, completion.getVmUuid())) {
             startHa(hostUuid, reason == null ? i18n("vm is not active on storage") : reason, completion);

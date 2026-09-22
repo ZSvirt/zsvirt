@@ -1,6 +1,6 @@
 package org.zstack.storage.primary.filesystem.nfs;
 
-import org.zstack.ha.CheckerStruct;
+import org.zstack.ha.message.CheckerStruct;
 import org.zstack.header.core.HaCheckerCompletion;
 import org.zstack.header.storage.primary.PrimaryStorageType;
 import org.zstack.storage.primary.filesystem.AbstractFileSystemHostHeartbeatChecker;
@@ -26,7 +26,7 @@ public class NFSHostHeartbeatChecker extends AbstractFileSystemHostHeartbeatChec
         List<String> currentVmUsedPrimaryStorageUuids = findCurrentVmUsedPrimaryStorageUuids(struct);
         if (currentVmUsedPrimaryStorageUuids.isEmpty()) {
             logger.trace(String.format("the vm[uuid:%s] does not use the primary storage[uuid:%s]",
-                    struct.getVmInstance().getUuid(), struct.getVmInstance().getRootVolume().getPrimaryStorageUuid()));
+                    struct.vmInstance.getUuid(), struct.vmInstance.getRootVolume().getPrimaryStorageUuid()));
             completion.noWay();
             return;
         }
@@ -34,7 +34,7 @@ public class NFSHostHeartbeatChecker extends AbstractFileSystemHostHeartbeatChec
         List<String> hostUuids = findSiblingHosts(struct, currentVmUsedPrimaryStorageUuids);
         if (hostUuids.isEmpty()) {
             logger.debug(String.format("unable to connect to the primary storage[uuid:%s]: no available hosts",
-                    struct.getVmInstance().getRootVolume().getPrimaryStorageUuid()));
+                    struct.vmInstance.getRootVolume().getPrimaryStorageUuid()));
             completion.notStable();
             return;
         }

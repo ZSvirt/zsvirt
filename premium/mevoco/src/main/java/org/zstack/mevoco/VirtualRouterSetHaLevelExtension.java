@@ -1,7 +1,7 @@
 package org.zstack.mevoco;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.zstack.ha.VmHAExecutor;
+import org.zstack.ha.spi.VmHAExecutor;
 import org.zstack.header.core.workflow.Flow;
 import org.zstack.header.core.workflow.FlowTrigger;
 import org.zstack.header.core.workflow.NoRollbackFlow;

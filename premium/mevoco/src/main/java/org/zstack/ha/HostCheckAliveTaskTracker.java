@@ -2,6 +2,7 @@ package org.zstack.ha;
 
 import org.zstack.core.Platform;
 import org.zstack.core.progress.TaskTracker;
+import org.zstack.ha.message.HostScanResult;
 import org.zstack.header.host.HostVO;
 
 public class HostCheckAliveTaskTracker extends TaskTracker {
@@ -17,8 +18,8 @@ public class HostCheckAliveTaskTracker extends TaskTracker {
         judgeAlive,
         checking;
 
-        static Process mapFrom(HostCheckResult.HostScanResult stage){
-            return stage.isAlive() ? judgeAlive : judgeDead;
+        static Process mapFrom(HostScanResult stage){
+            return stage.alive ? judgeAlive : judgeDead;
         }
     }
 

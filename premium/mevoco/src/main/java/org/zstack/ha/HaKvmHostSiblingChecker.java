@@ -7,6 +7,8 @@ import org.zstack.core.cloudbus.CloudBus;
 import org.zstack.core.cloudbus.CloudBusListCallBack;
 import org.zstack.core.db.Q;
 import org.zstack.core.timeout.ApiTimeoutManager;
+import org.zstack.ha.message.CheckerStruct;
+import org.zstack.ha.spi.HaHostChecker;
 import org.zstack.header.errorcode.ErrorCode;
 import org.zstack.header.host.*;
 import org.zstack.header.message.MessageReply;
@@ -116,7 +118,7 @@ public class HaKvmHostSiblingChecker implements HaHostChecker {
             return new ArrayList<>();
         }
 
-        VmInstanceInventory vm = struct.getVmInstance();
+        VmInstanceInventory vm = struct.vmInstance;
         List<String> psUuids = vm.getAllVolumes().stream()
                 .map(VolumeInventory::getPrimaryStorageUuid)
                 .distinct()
@@ -159,7 +161,7 @@ public class HaKvmHostSiblingChecker implements HaHostChecker {
     }
 
     private List<String> findSiblingHosts(CheckerStruct struct) {
-        List<String> candidates = findSilblingFromSameCluster(struct.getHostUuid(), struct.getVmInstance().getClusterUuid());
+        List<String> candidates = findSilblingFromSameCluster(struct.hostUuid, struct.vmInstance.getClusterUuid());
         if (candidates == null || candidates.isEmpty()) {
             return findSiblingFromOtherCluster(struct);
         } else {
@@ -170,10 +172,10 @@ public class HaKvmHostSiblingChecker implements HaHostChecker {
     private String getIpForScan(final CheckerStruct struct) {
         String psUuid = Q.New(VolumeVO.class)
                 .select(VolumeVO_.primaryStorageUuid)
-                .eq(VolumeVO_.uuid, struct.getVmInstance().getRootVolumeUuid())
+                .eq(VolumeVO_.uuid, struct.vmInstance.getRootVolumeUuid())
                 .findValue();
-        String ip = getHostStorageAddress(struct.getHostUuid(), psUuid);
-        return ip == null ? struct.getHostIp() : ip;
+        String ip = getHostStorageAddress(struct.hostUuid, psUuid);
+        return ip == null ? struct.hostIp : ip;
     }
 
     private String getHostStorageAddress(String hostUuid, String psUuid) {
@@ -219,22 +221,22 @@ public class HaKvmHostSiblingChecker implements HaHostChecker {
     public void check(final CheckerStruct struct, final HaCheckerCompletion completion) {
         List<String> hostUuids =  findSiblingHosts(struct);
         if (hostUuids.isEmpty()) {
-            logger.warn(String.format("No sibling hosts found for host: %s", struct.getHostUuid()));
+            logger.warn(String.format("No sibling hosts found for host: %s", struct.hostUuid));
             completion.noWay();
             return;
         }
 
         List<KVMHostAsyncHttpCallMsg> msgs = transform(hostUuids, huuid -> {
             ScanCmd cmd = new ScanCmd();
-            cmd.hostUuid = struct.getHostUuid();
+            cmd.hostUuid = struct.hostUuid;
             cmd.slibingHostUuid = huuid;
             cmd.ip = getIpForScan(struct);
             cmd.startPort = 1;
             cmd.endPort = 65535;
-            cmd.interval = struct.getInterval();
-            cmd.times = struct.getMaxTimes();
-            cmd.successInterval = struct.getSuccessInterval();
-            cmd.successTimes = struct.getSuccessTimes();
+            cmd.interval = struct.interval;
+            cmd.times = struct.maxTimes;
+            cmd.successInterval = struct.successInterval;
+            cmd.successTimes = struct.successTimes;
 
             KVMHostAsyncHttpCallMsg msg = new KVMHostAsyncHttpCallMsg();
             msg.setHostUuid(huuid);
@@ -278,13 +280,13 @@ public class HaKvmHostSiblingChecker implements HaHostChecker {
                 }
 
                 logger.debug(String.format("scan host[uuid:%s, ip:%s] result: success: %d, failure: %d, no way: %d, not stable: %d, total: %d",
-                        struct.getHostUuid(), struct.getHostIp(), success, failure, noway, notStable, total));
+                        struct.hostUuid, struct.hostIp, success, failure, noway, notStable, total));
 
                 if (success == total) {
                     completion.success(null);
                 } else if (failure == total) {
                     completion.fail(multiErr(errors, "hosts failed to port scan the failure host[uuid:%s, ip:%s]",
-                            struct.getHostUuid(), struct.getHostIp()));
+                            struct.hostUuid, struct.hostIp));
                 } else if (noway == total) {
                     completion.noWay();
                 } else {

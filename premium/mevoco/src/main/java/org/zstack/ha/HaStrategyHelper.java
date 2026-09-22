@@ -4,6 +4,7 @@ import org.zstack.core.Platform;
 import org.zstack.core.db.Q;
 import org.zstack.core.db.SQL;
 import org.zstack.core.upgrade.UpgradeGlobalConfig;
+import org.zstack.ha.header.SelfFencerStrategy;
 import org.zstack.header.volume.VolumeType;
 import org.zstack.network.service.virtualrouter.VirtualRouterVmVO;
 import org.zstack.network.service.virtualrouter.VirtualRouterVmVO_;

@@ -6,10 +6,9 @@ import org.zstack.core.cloudbus.CloudBusCallBack;
 import org.zstack.core.db.DatabaseFacade;
 import org.zstack.core.db.Q;
 import org.zstack.core.thread.ThreadFacade;
-import org.zstack.ha.CheckerStruct;
 import org.zstack.ha.HaGlobalConfig;
-import org.zstack.ha.HaHostChecker;
-import org.zstack.ha.HaHostStorageBasedChecker;
+import org.zstack.ha.message.CheckerStruct;
+import org.zstack.ha.spi.HaHostStorageBasedChecker;
 import org.zstack.header.core.HaCheckerCompletion;
 import org.zstack.header.host.HostConstant;
 import org.zstack.header.host.HostInventory;
@@ -66,12 +65,12 @@ public class IscsiHostHeartbeatChecker implements HaHostStorageBasedChecker {
     public void check(CheckerStruct struct, HaCheckerCompletion completion) {
         List<String> failureHostRelatedPrimaryStorageUuids = Q.New(PrimaryStorageClusterRefVO.class)
                 .select(PrimaryStorageClusterRefVO_.primaryStorageUuid)
-                .eq(PrimaryStorageClusterRefVO_.clusterUuid, struct.getVmInstance().getClusterUuid())
+                .eq(PrimaryStorageClusterRefVO_.clusterUuid, struct.vmInstance.getClusterUuid())
                 .listValues();
 
         if (failureHostRelatedPrimaryStorageUuids.isEmpty()) {
             logger.debug(String.format("no related storage of host[uuid: %s] can be found",
-                    struct.getHostUuid()));
+                    struct.hostUuid));
             completion.noWay();
             return;
         }
@@ -87,12 +86,12 @@ public class IscsiHostHeartbeatChecker implements HaHostStorageBasedChecker {
 
         if (failureHostRelatedPrimaryStorageUuids.isEmpty()) {
             logger.debug(String.format("no iscsi storage related to the failure host[uuid: %s] can be found",
-                    struct.getHostUuid()));
+                    struct.hostUuid));
             completion.noWay();
             return;
         }
 
-        List<String> currentVmUsedPrimaryStorageUuids = struct.getVmInstance()
+        List<String> currentVmUsedPrimaryStorageUuids = struct.vmInstance
                 .getAllDiskVolumes()
                 .stream()
                 .map(VolumeInventory::getPrimaryStorageUuid)
@@ -104,7 +103,7 @@ public class IscsiHostHeartbeatChecker implements HaHostStorageBasedChecker {
         currentVmUsedPrimaryStorageUuids.retainAll(failureHostRelatedPrimaryStorageUuids);
         if (currentVmUsedPrimaryStorageUuids.isEmpty()) {
             logger.debug(String.format("vm[uuid: %s] do not have any storage connected to current failure host's cluster",
-                    struct.getVmInstance().getUuid()));
+                    struct.vmInstance.getUuid()));
             completion.noWay();
             return;
         }
@@ -114,7 +113,7 @@ public class IscsiHostHeartbeatChecker implements HaHostStorageBasedChecker {
         final List<String> siblings = findSiblingHosts(struct, currentVmUsedPrimaryStorageUuids);
         if (siblings.isEmpty()) {
             logger.debug(String.format("no connected host in current cluster[uuid: %s] with host[uuid: %s]",
-                    struct.getVmInstance().getClusterUuid(), struct.getHostUuid()));
+                    struct.vmInstance.getClusterUuid(), struct.hostUuid));
             completion.notStable();
             return;
         }
@@ -122,13 +121,13 @@ public class IscsiHostHeartbeatChecker implements HaHostStorageBasedChecker {
         Collections.shuffle(siblings);
         Collections.shuffle(currentVmUsedPrimaryStorageUuids);
 
-        doIscsiHostHeartbeatCheck(struct.getHostUuid(), siblings.get(0), currentVmUsedPrimaryStorageUuids.get(0), completion);
+        doIscsiHostHeartbeatCheck(struct.hostUuid, siblings.get(0), currentVmUsedPrimaryStorageUuids.get(0), completion);
     }
 
     private List<String> findSiblingHosts(CheckerStruct struct, List<String> currentVmUsedStorageUuids) {
-        List<String> candidates = HaStoreFindHostUtils.findSiblingsFromSameCluster(struct.getHostUuid(), struct.getVmInstance().getClusterUuid());
+        List<String> candidates = HaStoreFindHostUtils.findSiblingsFromSameCluster(struct.hostUuid, struct.vmInstance.getClusterUuid());
         if (candidates == null || candidates.isEmpty()) {
-            return HaStoreFindHostUtils.findSiblingFromOtherCluster(struct.getVmInstance().getClusterUuid(), currentVmUsedStorageUuids);
+            return HaStoreFindHostUtils.findSiblingFromOtherCluster(struct.vmInstance.getClusterUuid(), currentVmUsedStorageUuids);
         } else {
             return candidates;
         }

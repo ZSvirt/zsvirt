@@ -144,6 +144,11 @@
         </dependency>
         <dependency>
             <groupId>org.zstack</groupId>
+            <artifactId>description</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.zstack</groupId>
             <artifactId>messages</artifactId>
             <version>${project.version}</version>
         </dependency>

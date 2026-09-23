@@ -14,6 +14,7 @@ import org.jsoup.select.Elements
 import org.markdown4j.Markdown4jProcessor
 import org.springframework.http.HttpMethod
 import org.zstack.core.Platform
+import org.zstack.core.config.BindResourceConfig
 import org.zstack.core.config.*
 import org.zstack.core.errorcode.ErrorFacadeImpl
 import org.zstack.header.core.NoDoc
@@ -29,7 +30,6 @@ import org.zstack.header.query.APIQueryMessage
 import org.zstack.header.rest.APINoSee
 import org.zstack.header.rest.RestRequest
 import org.zstack.header.rest.RestResponse
-import org.zstack.resourceconfig.BindResourceConfig
 import org.zstack.rest.RestConstants
 import org.zstack.rest.sdk.DocumentGenerator
 import org.zstack.utils.*

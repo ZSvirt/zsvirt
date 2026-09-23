@@ -1,12 +1,12 @@
 package org.zstack.network.l3;
 
+import org.zstack.core.config.BindResourceConfig;
 import org.zstack.core.config.GlobalConfig;
 import org.zstack.core.config.GlobalConfigDef;
 import org.zstack.core.config.GlobalConfigDefinition;
 import org.zstack.core.config.GlobalConfigValidation;
 import org.zstack.header.network.l3.L3NetworkVO;
 import org.zstack.header.network.l3.L3NetworkConstant;
-import org.zstack.resourceconfig.BindResourceConfig;
 
 @GlobalConfigDefinition
 public class L3NetworkGlobalConfig {

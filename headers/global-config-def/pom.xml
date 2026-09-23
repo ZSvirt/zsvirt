@@ -5,13 +5,13 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.zstack</groupId>
-        <artifactId>cores</artifactId>
+        <artifactId>headers</artifactId>
         <version>5.0.0</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>global-config</artifactId>
-    <name>global-config</name>
+    <artifactId>global-config-def</artifactId>
+    <name>global-config-def</name>
     <description>Global config definition annotations; upstream of core</description>
 
     <dependencies>
@@ -21,22 +21,13 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.zstack</groupId>
+            <artifactId>description</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-core</artifactId>
         </dependency>
     </dependencies>
-
-    <build>
-        <plugins>
-            <!-- Parent cores weaves with core.jar; this module is upstream of core. -->
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>aspectj-maven-plugin</artifactId>
-                <configuration>
-                    <skip>true</skip>
-                    <aspectLibraries combine.self="override"/>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
 </project>

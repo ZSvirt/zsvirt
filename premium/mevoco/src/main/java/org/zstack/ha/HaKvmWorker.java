@@ -15,6 +15,7 @@ import org.zstack.core.thread.AsyncThread;
 import org.zstack.ha.entity.VmHaVO;
 import org.zstack.ha.entity.VmHaVO_;
 import org.zstack.ha.fencers.KvmFencerManager;
+import org.zstack.ha.header.HaGlobalConfig;
 import org.zstack.ha.header.SelfFencerStrategy;
 import org.zstack.ha.header.VmHaLevel;
 import org.zstack.ha.message.CheckerStruct;

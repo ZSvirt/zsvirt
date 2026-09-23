@@ -84,8 +84,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.zstack.core.Platform.*;
-import static org.zstack.ha.HaGlobalConfig.*;
 import static org.zstack.ha.HaSystemTags.*;
+import static org.zstack.ha.header.HaGlobalConfig.*;
 import static org.zstack.ha.header.VmHaLevel.*;
 import static org.zstack.utils.CollectionDSL.*;
 import static org.zstack.utils.CollectionUtils.toMap;

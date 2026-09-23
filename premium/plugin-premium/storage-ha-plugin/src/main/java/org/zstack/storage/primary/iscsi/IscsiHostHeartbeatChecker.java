@@ -6,7 +6,7 @@ import org.zstack.core.cloudbus.CloudBusCallBack;
 import org.zstack.core.db.DatabaseFacade;
 import org.zstack.core.db.Q;
 import org.zstack.core.thread.ThreadFacade;
-import org.zstack.ha.HaGlobalConfig;
+import org.zstack.ha.header.HaGlobalConfig;
 import org.zstack.ha.message.CheckerStruct;
 import org.zstack.ha.spi.HaHostStorageBasedChecker;
 import org.zstack.header.core.HaCheckerCompletion;

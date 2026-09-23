@@ -1,11 +1,10 @@
 package org.zstack.network.service;
 
+import org.zstack.core.config.BindResourceConfig;
 import org.zstack.core.config.GlobalConfig;
-import org.zstack.core.config.GlobalConfigDef;
 import org.zstack.core.config.GlobalConfigDefinition;
 import org.zstack.core.config.GlobalConfigValidation;
 import org.zstack.header.network.l2.L2NetworkVO;
-import org.zstack.resourceconfig.BindResourceConfig;
 
 /**
  * Created by weiwang on 13/05/2017.

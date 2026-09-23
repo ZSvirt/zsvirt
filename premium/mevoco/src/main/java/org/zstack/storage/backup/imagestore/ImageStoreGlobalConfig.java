@@ -6,7 +6,7 @@ import org.zstack.core.config.GlobalConfigDefinition;
 import org.zstack.core.config.GlobalConfigValidation;
 import org.zstack.header.storage.backup.BackupStorageVO;
 import org.zstack.mevoco.PremiumGlobalConfig;
-import org.zstack.resourceconfig.BindResourceConfig;
+import org.zstack.core.config.BindResourceConfig;
 
 /**
  * Created by MaJin on 2019/4/18.

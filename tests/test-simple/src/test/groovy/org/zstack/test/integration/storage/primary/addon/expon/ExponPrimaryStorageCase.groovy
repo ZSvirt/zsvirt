@@ -171,6 +171,7 @@ class ExponPrimaryStorageCase extends SubCase {
             KVMGlobalConfig.VM_SYNC_ON_HOST_PING.updateValue(true)
             simulatorEnv()
             testCreateExponStorage()
+            testReconnectWithUpdatedPassword()
             testComplexPassword()
             testSessionExpired()
             testCreateVm()
@@ -279,6 +280,25 @@ class ExponPrimaryStorageCase extends SubCase {
         assert r.success
         assert Q.New(PrimaryStorageHostRefVO.class).eq(PrimaryStorageHostRefVO_.hostUuid, host1.uuid).find().status.toString() == "Connected"
 
+        reconnectPrimaryStorage {
+            uuid = ps.uuid
+        }
+    }
+
+    void testReconnectWithUpdatedPassword() {
+        updateExternalPrimaryStorage {
+            uuid = ps.uuid
+            url = exponUrl.replace("Admin123", "admin123")
+        }
+        expect(AssertionError.class) {
+            reconnectPrimaryStorage {
+                uuid = ps.uuid
+            }
+        }
+        updateExternalPrimaryStorage {
+            uuid = ps.uuid
+            url = exponUrl
+        }
         reconnectPrimaryStorage {
             uuid = ps.uuid
         }

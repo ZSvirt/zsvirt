@@ -140,6 +140,10 @@ public class ExponStorageController implements PrimaryStorageControllerSvc, Prim
         ExponClient client = new ExponClient();
         client.configure(clientConfig);
 
+        apiHelper = new ExponApiHelper(getAccountInfo(uri), client);
+    }
+
+    private AccountInfo getAccountInfo(URI uri) {
         AccountInfo accountInfo = new AccountInfo();
         accountInfo.username = uri.getUserInfo().split(":")[0];
         try {
@@ -148,7 +152,7 @@ public class ExponStorageController implements PrimaryStorageControllerSvc, Prim
             throw new RuntimeException(e);
         }
 
-        apiHelper = new ExponApiHelper(accountInfo, client);
+        return accountInfo;
     }
 
     private String protocolToString(VolumeProtocol protocol) {
@@ -839,6 +843,7 @@ public class ExponStorageController implements PrimaryStorageControllerSvc, Prim
 
     @Override
     public void connect(String config, String url, ReturnValueCompletion<LinkedHashMap> comp) {
+        apiHelper.accountInfo = getAccountInfo(URI.create(url));
         apiHelper.login();
         ExponAddonInfo info = new ExponAddonInfo();
 

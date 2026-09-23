@@ -2036,7 +2036,7 @@ public class KVMHost extends HostBase implements Host {
         checkStatus();
 
         ConfigPrimaryVmCmd cmd = new ConfigPrimaryVmCmd();
-        cmd.setConfigs(msg.getConfigs().stream().sorted(Comparator.comparing(VmNicRedirectConfig::getDeviceId)).collect(Collectors.toList()));
+        cmd.setConfigs(msg.getRedirectConfigs().stream().sorted(Comparator.comparing(VmNicRedirectConfig::getDeviceId)).collect(Collectors.toList()));
         cmd.setHostIp(msg.getHostIp());
         cmd.setVmInstanceUuid(msg.getVmInstanceUuid());
         new Http<>(configPrimaryVmPath, cmd, AgentResponse.class).call(new ReturnValueCompletion<AgentResponse>(msg, completion) {

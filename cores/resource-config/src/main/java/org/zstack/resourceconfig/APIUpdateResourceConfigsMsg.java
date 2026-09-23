@@ -1,6 +1,7 @@
 package org.zstack.resourceconfig;
 
 import org.springframework.http.HttpMethod;
+import org.zstack.header.configuration.ConfigAO;
 import org.zstack.header.configuration.PythonClassInventory;
 import org.zstack.header.message.APIMessage;
 import org.zstack.header.message.APIParam;
@@ -17,45 +18,19 @@ import java.util.List;
         responseClass = APIUpdateResourceConfigsEvent.class
 )
 public class APIUpdateResourceConfigsMsg extends APIMessage {
+    /**
+     * use ConfigAO
+     */
     @PythonClassInventory
-    public static class ResourceConfigAO {
-
-        private String category;
-
-        private String name;
-
-        private String value;
-
-        public String getCategory() {
-            return category;
-        }
-
-        public void setCategory(String category) {
-            this.category = category;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        public String getValue() {
-            return value;
-        }
-
-        public void setValue(String value) {
-            this.value = value;
-        }
+    @Deprecated
+    public static class ResourceConfigAO extends ConfigAO {
     }
 
     @APIParam(resourceType = ResourceVO.class)
     private String resourceUuid;
 
     @APIParam(nonempty = true)
-    private List<ResourceConfigAO> resourceConfigs;
+    private List<ConfigAO> resourceConfigs;
 
     public String getResourceUuid() {
         return resourceUuid;
@@ -65,18 +40,18 @@ public class APIUpdateResourceConfigsMsg extends APIMessage {
         this.resourceUuid = resourceUuid;
     }
 
-    public List<ResourceConfigAO> getResourceConfigs() {
+    public List<ConfigAO> getResourceConfigs() {
         return resourceConfigs;
     }
 
-    public void setResourceConfigs(List<ResourceConfigAO> resourceConfigs) {
+    public void setResourceConfigs(List<ConfigAO> resourceConfigs) {
         this.resourceConfigs = resourceConfigs;
     }
 
     public static APIUpdateResourceConfigsMsg __example__() {
         APIUpdateResourceConfigsMsg msg = new APIUpdateResourceConfigsMsg();
         msg.setResourceUuid(uuid());
-        ResourceConfigAO resourceConfigAO = new ResourceConfigAO();
+        ConfigAO resourceConfigAO = new ConfigAO();
         resourceConfigAO.setName("cleanTraffic");
         resourceConfigAO.setCategory("vm");
         resourceConfigAO.setValue("true");

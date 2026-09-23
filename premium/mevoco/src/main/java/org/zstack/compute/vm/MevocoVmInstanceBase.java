@@ -1333,6 +1333,7 @@ public class MevocoVmInstanceBase extends VmInstanceBase {
                         cvmsg.setMemorySize(msg.getMemorySize() != null ? msg.getMemorySize() : vivo.getMemorySize());
                         cvmsg.setDescription(msg.getDescription());
                         cvmsg.setSystemTags(msg.getSystemTags());
+                        cvmsg.setConfigs(msg.getConfigs());
                         cvmsg.setPlatform(msg.getPlatform());
                         cvmsg.setGuestOsType(msg.getGuestOsType());
                         cvmsg.setArchitecture(msg.getArchitecture());
@@ -1706,6 +1707,7 @@ public class MevocoVmInstanceBase extends VmInstanceBase {
                                     spec.snapshot.getVolumeUuid()));
                             cmsg.setVolumeSnapshotUuid(spec.snapshot.getUuid());
                             cmsg.setSystemTags(diskAO != null ? diskAO.getSystemTags() : null);
+                            cmsg.setConfigs(diskAO != null ? diskAO.getConfigs() : null);
                             cmsg.setEncrypted(diskAO == null ? null : diskAO.getEncrypted());
                             cmsg.addSystemTag(VolumeSystemTags.FAST_CREATE.getTagFormat());
                             cmsg.setSession(msg.getSession());
@@ -1724,6 +1726,7 @@ public class MevocoVmInstanceBase extends VmInstanceBase {
                                     spec.snapshot.getVolumeUuid()));
                             if (diskAO != null) {
                                 cmsg.setSystemTags(diskAO.getSystemTags() != null ? diskAO.getSystemTags() : null);
+                                cmsg.setConfigs(diskAO.getConfigs());
                                 cmsg.setPrimaryStorageUuid(diskAO.getPrimaryStorageUuid() != null ?
                                         diskAO.getPrimaryStorageUuid() : originVol.getPrimaryStorageUuid());
                                 cmsg.setEncrypted(diskAO.getEncrypted());

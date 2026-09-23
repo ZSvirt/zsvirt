@@ -20,6 +20,7 @@ import org.zstack.header.errorcode.ErrorCode;
 import org.zstack.header.errorcode.ErrorCodeList;
 import org.zstack.header.exception.CloudRuntimeException;
 import org.zstack.header.message.MessageReply;
+import org.zstack.header.configuration.ConfigAO;
 import org.zstack.header.vm.DiskAO;
 import org.zstack.header.vm.VmInstanceConstant;
 import org.zstack.header.vm.VmInstanceSpec;
@@ -85,6 +86,7 @@ public class VmAllocateVolumeFlow implements Flow {
         for (VolumeSpec vspec : volumeSpecs) {
             CreateVolumeMsg msg = new CreateVolumeMsg();
             Set<String> tags = new HashSet<>();
+            List<ConfigAO> configs = new ArrayList<>();
             if (vspec == null) {
                 continue;
             }
@@ -118,6 +120,9 @@ public class VmAllocateVolumeFlow implements Flow {
                 if (disk != null && !isEmpty(disk.getSystemTags())) {
                     tags.addAll(disk.getSystemTags());
                 }
+                if (disk != null && !isEmpty(disk.getConfigs())) {
+                    configs.addAll(disk.getConfigs());
+                }
                 Boolean volEnc = disk != null && Boolean.TRUE.equals(disk.getEncrypted());
                 msg.setEncrypted(volEnc);
             } else if (vspec.isData()) {
@@ -138,8 +143,14 @@ public class VmAllocateVolumeFlow implements Flow {
                 if (deprecatedDisk != null && !isEmpty(deprecatedDisk.getSystemTags())) {
                     tags.addAll(deprecatedDisk.getSystemTags());
                 }
+                if (deprecatedDisk != null && !isEmpty(deprecatedDisk.getConfigs())) {
+                    configs.addAll(deprecatedDisk.getConfigs());
+                }
                 if (disk != null && !isEmpty(disk.getSystemTags())) {
                     tags.addAll(disk.getSystemTags());
+                }
+                if (disk != null && !isEmpty(disk.getConfigs())) {
+                    configs.addAll(disk.getConfigs());
                 }
                 msg.setEncrypted(disk != null && Boolean.TRUE.equals(disk.getEncrypted()));
 
@@ -149,6 +160,9 @@ public class VmAllocateVolumeFlow implements Flow {
             }
 
             msg.setSystemTags(new ArrayList<>(tags));
+            if (!configs.isEmpty()) {
+                msg.setConfigs(configs);
+            }
             msg.setDiskOfferingUuid(vspec.getDiskOfferingUuid());
             msg.setSize(vspec.getSize());
             msg.setPrimaryStorageUuid(vspec.getPrimaryStorageInventory().getUuid());

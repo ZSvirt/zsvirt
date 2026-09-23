@@ -26,6 +26,18 @@
         </zstack:plugin>
     </bean>
 
+    <bean id="ResourceConfigTagAutoCompleter" class="org.zstack.resourceconfig.ResourceConfigTagAutoCompleter">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.apimediator.GlobalApiMessageInterceptor" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="ResourceConfigCreateApiInterceptor" class="org.zstack.resourceconfig.ResourceConfigCreateApiInterceptor">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.apimediator.GlobalApiMessageInterceptor" />
+        </zstack:plugin>
+    </bean>
+
     <bean id="ResourceConfigZQLExtension" class="org.zstack.resourceconfig.ResourceConfigZQLExtension">
         <zstack:plugin>
             <zstack:extension interface="org.zstack.header.zql.MarshalZQLASTTreeExtensionPoint"/>

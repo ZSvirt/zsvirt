@@ -51,6 +51,15 @@ public class ConfigAO {
         return tag.startsWith(RESOURCE_CONFIG_TAG_PREFIX);
     }
 
+    /**
+     * @deprecated Prefer {@link #of(String, String, String)} and message {@code configs}.
+     * Kept only for legacy tag-string construction (tests / peel-compat).
+     */
+    @Deprecated
+    public static String buildResourceConfig(String category, String name, String value) {
+        return Tags.join(RESOURCE_CONFIG_TAG_PREFIX, category, name, value);
+    }
+
     public static ConfigAO of(@NonNull String tag) {
         Map<String, String> tokens = Tags.parseIfMatch(TAG_FORMAT, tag);
         Objects.requireNonNull(tokens, () -> "invalid resource config tag: " + tag);
@@ -62,6 +71,14 @@ public class ConfigAO {
                 () -> "invalid name in resource config tag: " + tag));
         config.setValue(Objects.requireNonNull(tokens.get(RESOURCE_CONFIG_VALUE_TOKEN),
                 () -> "invalid value in resource config tag: " + tag));
+        return config;
+    }
+
+    public static ConfigAO of(String category, String name, String value) {
+        ConfigAO config = new ConfigAO();
+        config.setCategory(category);
+        config.setName(name);
+        config.setValue(value);
         return config;
     }
 }

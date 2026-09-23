@@ -14,7 +14,7 @@ import org.zstack.sdk.ZoneInventory
 import org.zstack.sdk.allocator.domain.api.GetAllocatorDomainVmsResult
 import org.zstack.sdk.allocator.domain.entity.AllocatorDomainInventory
 import org.zstack.sdk.allocator.domain.entity.AllocatorDomainRuleParam
-import org.zstack.tag.ResourceConfigSystemTag
+import org.zstack.header.configuration.ConfigAO
 import org.zstack.testlib.EnvSpec
 import org.zstack.testlib.SubCase
 
@@ -163,7 +163,7 @@ class AllocatorDomainAllocateCase extends SubCase {
                 ]
             ]
             delegate.systemTags = [
-                    ResourceConfigSystemTag.buildResourceConfig(
+                    ConfigAO.buildResourceConfig(
                             AllocatorDomainGlobalConfig.CATEGORY,
                             AllocatorDomainGlobalConfig.DOMAIN_UUID_NAME,
                             domain.uuid)
@@ -224,7 +224,7 @@ class AllocatorDomainAllocateCase extends SubCase {
                 ]
             ]
             delegate.systemTags = [
-                    ResourceConfigSystemTag.buildResourceConfig(
+                    ConfigAO.buildResourceConfig(
                             AllocatorDomainGlobalConfig.CATEGORY,
                             AllocatorDomainGlobalConfig.DOMAIN_UUID_NAME,
                             domain.uuid)
@@ -286,7 +286,7 @@ class AllocatorDomainAllocateCase extends SubCase {
                 ]
             ]
             delegate.systemTags = [
-                    ResourceConfigSystemTag.buildResourceConfig(
+                    ConfigAO.buildResourceConfig(
                             AllocatorDomainGlobalConfig.CATEGORY,
                             AllocatorDomainGlobalConfig.DOMAIN_UUID_NAME,
                             domain.uuid)
@@ -347,7 +347,7 @@ class AllocatorDomainAllocateCase extends SubCase {
                 ]
             ]
             delegate.systemTags = [
-                    ResourceConfigSystemTag.buildResourceConfig(
+                    ConfigAO.buildResourceConfig(
                             AllocatorDomainGlobalConfig.CATEGORY,
                             AllocatorDomainGlobalConfig.DOMAIN_UUID_NAME,
                             domain.uuid)
@@ -423,7 +423,7 @@ class AllocatorDomainAllocateCase extends SubCase {
                 ]
             ]
             delegate.systemTags = [
-                    ResourceConfigSystemTag.buildResourceConfig(
+                    ConfigAO.buildResourceConfig(
                             AllocatorDomainGlobalConfig.CATEGORY,
                             AllocatorDomainGlobalConfig.DOMAIN_UUID_NAME,
                             domain.uuid)
@@ -503,7 +503,7 @@ class AllocatorDomainAllocateCase extends SubCase {
                     ]
                 ]
                 delegate.systemTags = [
-                        ResourceConfigSystemTag.buildResourceConfig(
+                        ConfigAO.buildResourceConfig(
                                 AllocatorDomainGlobalConfig.CATEGORY,
                                 AllocatorDomainGlobalConfig.DOMAIN_UUID_NAME,
                                 domain.uuid)
@@ -555,7 +555,7 @@ class AllocatorDomainAllocateCase extends SubCase {
                     ]
                 ]
                 delegate.systemTags = [
-                        ResourceConfigSystemTag.buildResourceConfig(
+                        ConfigAO.buildResourceConfig(
                                 AllocatorDomainGlobalConfig.CATEGORY,
                                 AllocatorDomainGlobalConfig.DOMAIN_UUID_NAME,
                                 domain.uuid)

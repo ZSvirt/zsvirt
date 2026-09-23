@@ -15,6 +15,7 @@ import org.zstack.core.db.Q;
 import org.zstack.header.allocator.AllocatorDomainScene;
 import org.zstack.header.apimediator.ApiMessageInterceptionException;
 import org.zstack.header.apimediator.GlobalApiMessageInterceptor;
+import org.zstack.header.configuration.ConfigAO;
 import org.zstack.header.host.HostVO;
 import org.zstack.header.host.HostVO_;
 import org.zstack.header.message.APIMessage;
@@ -22,7 +23,6 @@ import org.zstack.header.storage.snapshot.VolumeSnapshotVO;
 import org.zstack.header.storage.snapshot.VolumeSnapshotVO_;
 import org.zstack.header.storage.snapshot.group.VolumeSnapshotGroupRefVO;
 import org.zstack.header.storage.snapshot.group.VolumeSnapshotGroupRefVO_;
-import org.zstack.header.tag.TagConstant;
 import org.zstack.header.vm.APIAttachL3NetworkToVmMsg;
 import org.zstack.header.vm.APIAttachVmNicToVmMsg;
 import org.zstack.header.vm.APIChangeVmNicNetworkMsg;
@@ -44,7 +44,6 @@ import org.zstack.header.volume.APIAttachDataVolumeToVmMsg;
 import org.zstack.header.volume.VolumeType;
 import org.zstack.header.volume.VolumeVO;
 import org.zstack.header.volume.VolumeVO_;
-import org.zstack.utils.Tags;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -61,12 +60,6 @@ import static org.zstack.utils.CollectionDSL.list;
  * Create VM carrying current-value tag {@code schedulingDomain::} → 4002.
  */
 public class AllocatorDomainVmApiInterceptor implements GlobalApiMessageInterceptor {
-    private static final String RESOURCE_CONFIG_DOMAIN_PREFIX = Tags.prefix(
-            TagConstant.RESOURCE_CONFIG_TAG_PREFIX,
-            AllocatorDomainGlobalConfig.CATEGORY,
-            AllocatorDomainGlobalConfig.DOMAIN_UUID_NAME
-    );
-
     @Autowired
     private DatabaseFacade dbf;
     @Autowired
@@ -156,7 +149,7 @@ public class AllocatorDomainVmApiInterceptor implements GlobalApiMessageIntercep
         }
         rejectCurrentValueTag(msg.getSystemTags());
         AllocatorHostRuleSet set = activeSet(constraintResolver.resolveByDomainUuid(
-                readCreateConfigDomainUuid(msg.getSystemTags()), AllocatorDomainScene.NewCreate));
+                readCreateConfigDomainUuid(msg), AllocatorDomainScene.NewCreate));
         if (set == null) {
             return;
         }
@@ -319,19 +312,30 @@ public class AllocatorDomainVmApiInterceptor implements GlobalApiMessageIntercep
         }
     }
 
-    private String readCreateConfigDomainUuid(List<String> systemTags) {
-        if (systemTags == null) {
+    private String readCreateConfigDomainUuid(NewVmInstanceMessage2 msg) {
+        if (!(msg instanceof APIMessage)) {
             return null;
         }
-        for (String tag : systemTags) {
-            if (tag == null || !tag.startsWith(RESOURCE_CONFIG_DOMAIN_PREFIX)) {
+        return readCreateConfigDomainUuidFromConfigs(((APIMessage) msg).getConfigs());
+    }
+
+    private String readCreateConfigDomainUuidFromConfigs(List<ConfigAO> configs) {
+        if (configs == null) {
+            return null;
+        }
+        for (ConfigAO config : configs) {
+            if (config == null) {
                 continue;
             }
-            String value = tag.substring(RESOURCE_CONFIG_DOMAIN_PREFIX.length());
-            if (StringUtils.isEmpty(value) || AllocatorDomainConstant.UNBOUND_DOMAIN_UUID.equals(value)) {
+            if (!AllocatorDomainGlobalConfig.CATEGORY.equals(config.getCategory())
+                    || !AllocatorDomainGlobalConfig.DOMAIN_UUID_NAME.equals(config.getName())) {
+                continue;
+            }
+            if (StringUtils.isEmpty(config.getValue())
+                    || AllocatorDomainConstant.UNBOUND_DOMAIN_UUID.equals(config.getValue())) {
                 return null;
             }
-            return value;
+            return config.getValue();
         }
         return null;
     }

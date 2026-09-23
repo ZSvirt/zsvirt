@@ -726,6 +726,7 @@ public class MevocoVmManagerImpl implements VmInstanceExtensionManager, BeforeVm
                     public void run(FlowTrigger trigger, Map data) {
                         try {
                             tagMgr.createTags(msg.getSystemTags(), msg.getUserTags(), vmUuid, VmInstanceVO.class.getSimpleName());
+                            tagMgr.createResourceConfigs(msg.getConfigs(), vmUuid);
                         } catch (Exception e) {
                             trigger.fail(Platform.operr(
                                     "failed to persist api tags for vm[uuid:%s]: %s", vmUuid, e.getMessage()));

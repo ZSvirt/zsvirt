@@ -13,6 +13,7 @@ import org.zstack.core.db.Q;
 import org.zstack.core.db.SimpleQuery;
 import org.zstack.ha.HaSystemTags;
 import org.zstack.header.apimediator.ApiMessageInterceptionException;
+import org.zstack.header.configuration.ConfigAO;
 import org.zstack.header.image.ImagePlatform;
 import org.zstack.header.message.APIMessage;
 import org.zstack.header.tag.SystemTagVO;
@@ -28,9 +29,7 @@ import org.zstack.network.securitygroup.*;
 import org.zstack.resourceconfig.ResourceConfigVO;
 import org.zstack.resourceconfig.ResourceConfigVO_;
 import org.zstack.storage.volume.VolumeSystemTags;
-import org.zstack.tag.ResourceConfigSystemTag;
 import org.zstack.tag.SystemTag;
-import org.zstack.utils.Tags;
 import org.zstack.utils.CollectionUtils;
 import org.zstack.utils.TagUtils;
 import org.zstack.utils.WwnUtils;
@@ -93,7 +92,8 @@ public class CloneVmInstanceMessageBuilder {
             clmsg.setVmInstanceUuid(msg.getVmInstanceUuid());
             clmsg.setNames(msg.getNames());
             clmsg.setStrategy(msg.getStrategy());
-            clmsg.setSystemTags(buildResourceConfigsForClone(msg.getVmInstanceUuid(), VmInstanceVO.class.getSimpleName(), msg.getSystemTags()));
+            applyTagsAndConfigsForClone(clmsg, msg.getVmInstanceUuid(), VmInstanceVO.class.getSimpleName(),
+                    msg.getSystemTags(), msg.getConfigs());
             clmsg.setUserTags(msg.getUserTags());
             clmsg.setFull(msg.getFull());
             clmsg.setDescription(msg.getDescription() != null ? msg.getDescription() : String.format("cloned from vm[uuid:%s]", msg.getVmInstanceUuid()));
@@ -113,7 +113,8 @@ public class CloneVmInstanceMessageBuilder {
             clmsg.setSession(msg.getSession());
             clmsg.setUserTags(msg.getUserTags());
             clmsg.setFull(true);
-            clmsg.setSystemTags(buildResourceConfigsForClone(msg.getVmInstanceUuid(), VmInstanceVO.class.getSimpleName(), msg.getSystemTags()));
+            applyTagsAndConfigsForClone(clmsg, msg.getVmInstanceUuid(), VmInstanceVO.class.getSimpleName(),
+                    msg.getSystemTags(), msg.getConfigs());
             clmsg.getSystemTags().add(VolumeSystemTags.FAST_CREATE.getTagFormat());
             clmsg.getSystemTags().add(VolumeSystemTags.FLATTEN.getTagFormat());
             clmsg.setDiskAOs(buildVmDiskAOsForClone(msg.getVmInstanceUuid()));
@@ -136,7 +137,8 @@ public class CloneVmInstanceMessageBuilder {
                     diskAO.getSystemTags().add(VolumeSystemTags.VOLUME_PROVISIONING_STRATEGY
                             .instantiateTag(map(e(VolumeSystemTags.VOLUME_PROVISIONING_STRATEGY_TOKEN, VolumeProvisioningStrategy.ThinProvisioning.toString()))));
                 });
-                clmsg.setSystemTags(buildResourceConfigsForClone(clmsg.getVmInstanceUuid(), VmInstanceVO.class.getSimpleName(), new ArrayList<>()));
+                applyTagsAndConfigsForClone(clmsg, clmsg.getVmInstanceUuid(), VmInstanceVO.class.getSimpleName(),
+                        new ArrayList<>(), null);
                 clmsg.getSystemTags().add(VolumeSystemTags.FAST_CREATE.getTagFormat());
                 clmsg.getSystemTags().add(VolumeSystemTags.FLATTEN.getTagFormat());
                 String name = String.format("cache for templated vmInstance %s", msg.getTemplatedVmInstanceUuid());
@@ -150,8 +152,9 @@ public class CloneVmInstanceMessageBuilder {
                 // build the diskAOs from templated vm
                 List<DiskAO> templatedVmDiskAOs = buildVmDiskAOsForClone(msg.getTemplatedVmInstanceUuid(), msg.getDiskAOs());
                 clmsg.setDiskAOs(mapTemplateDiskSourceUuidsToCacheVolumes(templatedVmDiskAOs, msg.getTemplatedVmInstanceUuid(), clmsg.getVmInstanceUuid()));
-                // build systemTags from templated vm
-                clmsg.setSystemTags(buildResourceConfigsForClone(msg.getTemplatedVmInstanceUuid(), VmInstanceVO.class.getSimpleName(), msg.getSystemTags()));
+                // build systemTags / configs from templated vm
+                applyTagsAndConfigsForClone(clmsg, msg.getTemplatedVmInstanceUuid(), VmInstanceVO.class.getSimpleName(),
+                        msg.getSystemTags(), msg.getConfigs());
                 clmsg.getSystemTags().add(VolumeSystemTags.FAST_CREATE.getTagFormat());
                 clmsg.setNames(msg.getNames());
                 clmsg.setCpuNum(msg.getCpuNum());
@@ -228,7 +231,8 @@ public class CloneVmInstanceMessageBuilder {
                 }
                 newDiskAO.setSourceUuid(volumeUuid);
                 newDiskAO.setPrimaryStorageUuid(diskAO.getPrimaryStorageUuid());
-                newDiskAO.setSystemTags(buildResourceConfigsForClone(volumeUuid, VolumeVO.class.getSimpleName(), diskAO.getSystemTags()));
+                applyTagsAndConfigsForClone(newDiskAO, volumeUuid, VolumeVO.class.getSimpleName(),
+                        diskAO.getSystemTags(), diskAO.getConfigs());
                 newDiskAO.setSize(diskAO.getSize());
                 newDiskAO.setEncrypted(diskAO.getEncrypted() != null ? diskAO.getEncrypted() : encrypted);
                 this.templatedVmVolumeDiskAOs.add(newDiskAO);
@@ -237,7 +241,8 @@ public class CloneVmInstanceMessageBuilder {
 
             diskAO = new DiskAO();
             diskAO.setSourceUuid(volumeUuid);
-            diskAO.setSystemTags(buildResourceConfigsForClone(volumeUuid, VolumeVO.class.getSimpleName(), new ArrayList<>()));
+            applyTagsAndConfigsForClone(diskAO, volumeUuid, VolumeVO.class.getSimpleName(),
+                    new ArrayList<>(), null);
             if (volumeType.equals(VolumeType.Root)) {
                 diskAO.setBoot(true);
                 diskAO.setPlatform(diskAO.getPlatform() != null ? diskAO.getPlatform() : vmTuples.get(0, String.class));
@@ -266,7 +271,8 @@ public class CloneVmInstanceMessageBuilder {
             Boolean encrypted = volumeTuple.get(2, Boolean.class);
             DiskAO diskAO = new DiskAO();
             diskAO.setSourceUuid(volumeUuid);
-            diskAO.setSystemTags(buildResourceConfigsForClone(volumeUuid, VolumeVO.class.getSimpleName(), new ArrayList<>()));
+            applyTagsAndConfigsForClone(diskAO, volumeUuid, VolumeVO.class.getSimpleName(),
+                    new ArrayList<>(), null);
             if (volumeType.equals(VolumeType.Root)) {
                 diskAO.setBoot(true);
                 diskAO.setPlatform(vmTuples.get(0, String.class));
@@ -279,29 +285,69 @@ public class CloneVmInstanceMessageBuilder {
         return diskAOs;
     }
 
-    private static List<String> buildResourceConfigsForClone(String resourceUuid, String resourceType, List<String> incomingConfigs) {
-        List<String> incomingSystemTags = new ArrayList<>();
-        List<String> incomingResourceConfigs = new ArrayList<>();
+    private static void applyTagsAndConfigsForClone(CloneVmInstanceMsg msg, String resourceUuid, String resourceType,
+                                                    List<String> incomingTags, List<ConfigAO> incomingConfigs) {
+        CloneTagsAndConfigs result = buildTagsAndConfigsForClone(resourceUuid, resourceType, incomingTags, incomingConfigs);
+        msg.setSystemTags(result.systemTags);
+        msg.setConfigs(result.configs);
+    }
 
-        final String prefix = Tags.prefix("resourceConfig");
+    private static void applyTagsAndConfigsForClone(DiskAO diskAO, String resourceUuid, String resourceType,
+                                                    List<String> incomingTags, List<ConfigAO> incomingConfigs) {
+        CloneTagsAndConfigs result = buildTagsAndConfigsForClone(resourceUuid, resourceType, incomingTags, incomingConfigs);
+        diskAO.setSystemTags(result.systemTags);
+        diskAO.setConfigs(result.configs);
+    }
+
+    private static class CloneTagsAndConfigs {
+        final List<String> systemTags;
+        final List<ConfigAO> configs;
+
+        CloneTagsAndConfigs(List<String> systemTags, List<ConfigAO> configs) {
+            this.systemTags = systemTags;
+            this.configs = configs;
+        }
+    }
+
+    private static CloneTagsAndConfigs buildTagsAndConfigsForClone(String resourceUuid, String resourceType,
+                                                                   List<String> incomingTags,
+                                                                   List<ConfigAO> incomingConfigs) {
+        List<String> incomingSystemTags = new ArrayList<>();
+        List<ConfigAO> parsedIncomingConfigs = new ArrayList<>();
+        Set<String> configsToRemove = new HashSet<>();
+
         if (!CollectionUtils.isEmpty(incomingConfigs)) {
-            incomingConfigs.forEach(tag -> {
-                if (tag.contains(prefix)) {
-                    incomingResourceConfigs.add(tag);
-                    return;
+            parsedIncomingConfigs.addAll(incomingConfigs);
+        }
+
+        if (!CollectionUtils.isEmpty(incomingTags)) {
+            for (String tag : incomingTags) {
+                if (tag.startsWith("-")) {
+                    String stripped = tag.substring(1);
+                    if (ConfigAO.match(stripped)) {
+                        configsToRemove.add(ConfigAO.of(stripped).getName());
+                        continue;
+                    }
+                    incomingSystemTags.add(tag);
+                    continue;
+                }
+                if (ConfigAO.match(tag)) {
+                    parsedIncomingConfigs.add(ConfigAO.of(tag));
+                    continue;
                 }
                 incomingSystemTags.add(tag);
-            });
+            }
         }
 
-        List<String> newConfigs = buildNewResourceConfigs(resourceUuid, incomingResourceConfigs);
+        List<ConfigAO> newConfigs = buildNewResourceConfigs(resourceUuid, parsedIncomingConfigs, configsToRemove);
+        List<String> newSystemTags = new ArrayList<>();
         if (Objects.equals(resourceType, VmInstanceVO.class.getSimpleName())) {
-            newConfigs.addAll(buildNewSystemTags(resourceUuid, incomingSystemTags, vmSystemTagsToCopy));
+            newSystemTags.addAll(buildNewSystemTags(resourceUuid, incomingSystemTags, vmSystemTagsToCopy));
         } else if (Objects.equals(resourceType, VolumeVO.class.getSimpleName())) {
-            newConfigs.addAll(buildNewSystemTags(resourceUuid, incomingSystemTags, volumeSystemTagsToCopy));
+            newSystemTags.addAll(buildNewSystemTags(resourceUuid, incomingSystemTags, volumeSystemTagsToCopy));
         }
 
-        return newConfigs;
+        return new CloneTagsAndConfigs(newSystemTags, newConfigs);
     }
 
     private static List<String> buildNewSystemTags(String resourceUuid, List<String> incomingSystemTags, List<SystemTag> systemTagsToCopy) {
@@ -353,26 +399,18 @@ public class CloneVmInstanceMessageBuilder {
         }
     }
 
-    private static List<String> buildNewResourceConfigs(String resourceUuid, List<String> incomingResourceConfigs) {
-        List<String> newResourceConfigs = new ArrayList<>();
+    private static List<ConfigAO> buildNewResourceConfigs(String resourceUuid, List<ConfigAO> incomingResourceConfigs,
+                                                          Set<String> configsToRemove) {
+        List<ConfigAO> newResourceConfigs = new ArrayList<>();
 
-        Map<String, String> resourceConfigByName = getResourceConfigMap(resourceUuid);
-        incomingResourceConfigs.forEach(existedConfigName -> {
-            String configName;
-            if (existedConfigName.startsWith("-")) {
-                configName = existedConfigName.replaceFirst("-", "").split(Tags.SEPARATOR)[2];
-                resourceConfigByName.remove(configName);
-                return;
-            }
+        Map<String, ConfigAO> resourceConfigByName = getResourceConfigMap(resourceUuid);
+        for (String name : configsToRemove) {
+            resourceConfigByName.remove(name);
+        }
 
-            configName = existedConfigName.split(Tags.SEPARATOR)[2];
-            if (resourceConfigByName.get(configName) == null) {
-                newResourceConfigs.add(existedConfigName);
-                return;
-            }
-
-            newResourceConfigs.add(existedConfigName);
-            resourceConfigByName.remove(configName);
+        incomingResourceConfigs.forEach(incoming -> {
+            resourceConfigByName.remove(incoming.getName());
+            newResourceConfigs.add(incoming);
         });
 
         if (!resourceConfigByName.isEmpty()) {
@@ -393,10 +431,11 @@ public class CloneVmInstanceMessageBuilder {
         return tagByFormat;
     }
 
-    private static Map<String, String> getResourceConfigMap(String resourceUuid) {
+    private static Map<String, ConfigAO> getResourceConfigMap(String resourceUuid) {
         List<ResourceConfigVO> resourceConfigVOs = Q.New(ResourceConfigVO.class).eq(ResourceConfigVO_.resourceUuid, resourceUuid).list();
-        Map<String, String> configByName = new HashMap<>();
-        resourceConfigVOs.forEach(vo -> configByName.put(vo.getName(), ResourceConfigSystemTag.buildResourceConfig(vo.getCategory(), vo.getName(), vo.getValue())));
+        Map<String, ConfigAO> configByName = new HashMap<>();
+        resourceConfigVOs.forEach(vo -> configByName.put(vo.getName(),
+                ConfigAO.of(vo.getCategory(), vo.getName(), vo.getValue())));
         return configByName;
     }
 
@@ -409,6 +448,7 @@ public class CloneVmInstanceMessageBuilder {
             List<DiskAO> requestedDiskAOs = new ArrayList<>();
             buildVmDiskAOsForClone(msg.getVmInstanceUuid()).forEach(diskAO -> {
                 diskAO.setSystemTags(null);
+                diskAO.setConfigs(null);
                 if (diskAO.isBoot()) {
                     diskAO.setPrimaryStorageUuid(msg.getPrimaryStorageUuidForRootVolume());
                     diskAO.setSystemTags(msg.getRootVolumeSystemTags());

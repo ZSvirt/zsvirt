@@ -1,5 +1,6 @@
 package org.zstack.tag;
 
+import org.zstack.header.configuration.ConfigAO;
 import org.zstack.header.message.APICreateMessage;
 import org.zstack.header.tag.SystemTagCreateMessageValidator;
 import org.zstack.header.tag.SystemTagInventory;
@@ -65,6 +66,13 @@ public interface TagManager {
     void validateSystemTag(String resourceUuid, String resourceType, String tag);
 
     boolean isResourceConfigSystemTag(String tag);
+
+    /**
+     * Persist resource configs for a resource.
+     * TODO: move to a more suitable place (e.g. ResourceConfigFacade) — temporarily hosted on TagManager
+     * because create/clone still applies configs alongside tags.
+     */
+    void createResourceConfigs(List<ConfigAO> configs, String resourceUuid);
 
     void installCreateMessageValidator(String resourceType, SystemTagCreateMessageValidator validator);
 

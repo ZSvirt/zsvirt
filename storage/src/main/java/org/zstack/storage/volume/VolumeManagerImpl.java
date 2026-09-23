@@ -53,7 +53,6 @@ import org.zstack.storage.primary.PrimaryStorageGlobalConfig;
 import org.zstack.tag.TagManager;
 import org.zstack.utils.CollectionUtils;
 import org.zstack.utils.Utils;
-import org.zstack.utils.function.Function;
 import org.zstack.utils.logging.CLogger;
 
 import javax.persistence.Tuple;
@@ -280,6 +279,7 @@ public class VolumeManagerImpl extends AbstractService implements VolumeManager,
         if (msg.getSystemTags() != null) {
             tagMgr.createNonInherentSystemTags(msg.getSystemTags(), vvo.getUuid(), VolumeVO.class.getSimpleName());
         }
+        tagMgr.createResourceConfigs(msg.getConfigs(), vvo.getUuid());
 
         new FireVolumeCanonicalEvent().fireVolumeStatusChangedEvent(null, VolumeInventory.valueOf(vvo));
 
@@ -685,6 +685,7 @@ public class VolumeManagerImpl extends AbstractService implements VolumeManager,
         if (msg.getSystemTags() != null) {
             tagMgr.createNonInherentSystemTags(msg.getSystemTags(), vo.getUuid(), VolumeVO.class.getSimpleName());
         }
+        tagMgr.createResourceConfigs(msg.getConfigs(), vo.getUuid());
 
         for (CreateDataVolumeExtensionPoint ext : exts) {
             ext.afterCreateVolume(vo);
@@ -1016,6 +1017,7 @@ public class VolumeManagerImpl extends AbstractService implements VolumeManager,
                     msg.setSystemTags(originSysTags);
                 }
                 tagMgr.createTags(msg.getSystemTags(), msg.getUserTags(), vo.getUuid(), VolumeVO.class.getSimpleName());
+                tagMgr.createResourceConfigs(msg.getConfigs(), vo.getUuid());
                 return vo;
             }
         }.execute();

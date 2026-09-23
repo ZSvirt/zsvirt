@@ -1080,6 +1080,7 @@ public class VmInstanceManagerImpl extends AbstractService implements
             tagMgr.createTagsFromAPICreateMessage(cmsg, finalVo.getUuid(), VmInstanceVO.class.getSimpleName());
         } else {
             tagMgr.createTags(msg.getSystemTags(), msg.getUserTags(), finalVo.getUuid(), VmInstanceVO.class.getSimpleName());
+            tagMgr.createResourceConfigs(msg.getConfigs(), finalVo.getUuid());
         }
 
         Boolean isVirtio = msg.getVirtio();

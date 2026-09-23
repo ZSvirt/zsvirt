@@ -28,5 +28,10 @@
             <artifactId>header</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.zstack</groupId>
+            <artifactId>global-config-def</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 </project>

@@ -1,6 +1,7 @@
 package org.zstack.ha;
 
 import org.apache.commons.lang.StringUtils;
+import org.zstack.ha.header.HaGlobalConfig;
 import org.zstack.ha.message.HostScanResult;
 import org.zstack.header.errorcode.ErrorCode;
 import org.zstack.header.storage.primary.PrimaryStorageType;

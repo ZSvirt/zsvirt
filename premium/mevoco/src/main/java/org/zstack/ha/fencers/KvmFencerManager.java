@@ -15,8 +15,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.zstack.core.Platform.i18n;
-import static org.zstack.ha.HaGlobalConfig.*;
 import static org.zstack.ha.HaSystemTags.VM_FENCED_BY;
+import static org.zstack.ha.header.HaGlobalConfig.*;
 import static org.zstack.utils.CollectionDSL.e;
 import static org.zstack.utils.CollectionDSL.map;
 import static org.zstack.utils.CollectionUtils.findOneOrNull;

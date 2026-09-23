@@ -12,6 +12,7 @@ import org.zstack.core.db.UpdateQuery;
 import org.zstack.core.errorcode.ErrorFacade;
 import org.zstack.core.timeout.ApiTimeoutManager;
 import org.zstack.externalStorage.primary.ExternalStorageFencerType;
+import org.zstack.ha.header.HaGlobalConfig;
 import org.zstack.ha.header.HostHaState;
 import org.zstack.ha.entity.HostHaStateVO;
 import org.zstack.ha.entity.HostHaStateVO_;

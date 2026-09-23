@@ -3,7 +3,7 @@ package org.zstack.storage.primary;
 
 import org.zstack.core.db.Q;
 import org.zstack.core.db.SQL;
-import org.zstack.ha.HaGlobalConfig;
+import org.zstack.ha.header.HaGlobalConfig;
 import org.zstack.header.host.HostState;
 import org.zstack.header.host.HostStatus;
 import org.zstack.header.host.HostVO;

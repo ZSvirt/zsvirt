@@ -1,10 +1,10 @@
 package org.zstack.drs;
 
+import org.zstack.core.config.BindResourceConfig;
 import org.zstack.core.config.GlobalConfigDefinition;
 import org.zstack.core.config.GlobalConfigValidation;
 import org.zstack.header.cluster.ClusterVO;
 import org.zstack.mevoco.PremiumGlobalConfig;
-import org.zstack.resourceconfig.BindResourceConfig;
 
 /**
  * Created by lining on 2019/12/12.

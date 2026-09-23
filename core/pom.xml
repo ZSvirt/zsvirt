@@ -13,7 +13,7 @@
     <dependencies>
         <dependency>
             <groupId>org.zstack</groupId>
-            <artifactId>global-config</artifactId>
+            <artifactId>global-config-def</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

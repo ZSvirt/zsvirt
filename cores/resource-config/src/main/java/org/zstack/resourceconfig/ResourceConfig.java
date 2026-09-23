@@ -11,6 +11,7 @@ import org.zstack.core.config.*;
 import org.zstack.core.db.*;
 import org.zstack.header.errorcode.OperationFailureException;
 import org.zstack.header.vo.ResourceVO;
+import org.zstack.header.vo.ResourceVODefinition;
 import org.zstack.header.vo.ResourceVO_;
 import org.zstack.utils.TypeUtils;
 import org.zstack.utils.Utils;
@@ -52,7 +53,11 @@ public class ResourceConfig {
     public static ResourceConfig valueOf(GlobalConfig globalConfig, BindResourceConfig bindInfo) {
         ResourceConfig result = new ResourceConfig();
         result.globalConfig = globalConfig;
-        result.resourceClasses = Arrays.asList(bindInfo.value());
+        List<Class<? extends ResourceVO>> classes = new ArrayList<>(bindInfo.value().length);
+        for (Class<? extends ResourceVODefinition> clz : bindInfo.value()) {
+            classes.add(clz.asSubclass(ResourceVO.class));
+        }
+        result.resourceClasses = classes;
         return result;
     }
 

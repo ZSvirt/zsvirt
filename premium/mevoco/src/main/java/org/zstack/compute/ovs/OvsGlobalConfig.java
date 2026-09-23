@@ -1,12 +1,12 @@
 package org.zstack.compute.ovs;
 
+import org.zstack.core.config.BindResourceConfig;
 import org.zstack.core.config.GlobalConfig;
 import org.zstack.core.config.GlobalConfigDef;
 import org.zstack.core.config.GlobalConfigDefinition;
 import org.zstack.core.config.GlobalConfigValidation;
 import org.zstack.header.cluster.ClusterVO;
 import org.zstack.header.host.HostVO;
-import org.zstack.resourceconfig.BindResourceConfig;
 
 /**
  * Created by haibiao.xiao on 5/24/2022

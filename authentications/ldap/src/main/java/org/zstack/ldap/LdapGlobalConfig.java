@@ -1,11 +1,11 @@
 package org.zstack.ldap;
 
+import org.zstack.core.config.BindResourceConfig;
 import org.zstack.core.config.GlobalConfig;
 import org.zstack.core.config.GlobalConfigDef;
 import org.zstack.core.config.GlobalConfigDefinition;
 import org.zstack.core.config.GlobalConfigValidation;
 import org.zstack.identity.imports.entity.ThirdPartyAccountSourceVO;
-import org.zstack.resourceconfig.BindResourceConfig;
 
 /**
  * Created by lining on 2017/11/03.

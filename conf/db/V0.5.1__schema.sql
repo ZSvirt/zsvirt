@@ -8266,7 +8266,6 @@ CREATE TABLE `VolumeCbtBackupRecordVO` (
   `scratchNodeName` varchar(255) NOT NULL,
   `bitmapName` varchar(255) NOT NULL,
   `lastBitmapName` varchar(255) DEFAULT NULL,
-  `cleanupAttemptUuid` varchar(32) DEFAULT NULL,
   `lastOpDate` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `createDate` timestamp NOT NULL DEFAULT '1999-12-31 23:59:59',
   PRIMARY KEY (`id`),

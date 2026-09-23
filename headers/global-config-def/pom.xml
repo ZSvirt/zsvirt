@@ -30,19 +30,4 @@
             <artifactId>hibernate-core</artifactId>
         </dependency>
     </dependencies>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>${project.compiler.version}</version>
-                <configuration>
-                    <source>${project.java.version}</source>
-                    <target>${project.java.version}</target>
-                    <debug>true</debug>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
 </project>

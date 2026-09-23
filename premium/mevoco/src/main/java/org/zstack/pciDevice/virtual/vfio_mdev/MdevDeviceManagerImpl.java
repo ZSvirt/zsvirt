@@ -822,18 +822,15 @@ public class MdevDeviceManagerImpl extends AbstractService implements
 
     @Override
     public void failedToMigrateVm(VmInstanceInventory inv, String destHostUuid, ErrorCode reason) {
-        // release mdev devices if vm failed to migrate
-        detachMdevDevicesFromVm(inv.getUuid(), true, true, new Completion(null) {
-            @Override
-            public void success() {
-                logger.debug(String.format("auto detached mdev devices from vm[uuid:%s] because it failed to migrate", inv.getUuid()));
-            }
-
-            @Override
-            public void fail(ErrorCode errorCode) {
-                logger.error(String.format("failed to auto detach mdev devices from vm[uuid:%s] because it's failed to migrate", inv.getUuid()));
-            }
-        });
+        List<MdevDeviceVO> devices = Q.New(MdevDeviceVO.class)
+                .eq(MdevDeviceVO_.vmInstanceUuid, inv.getUuid())
+                .eq(MdevDeviceVO_.hostUuid, destHostUuid)
+                .eq(MdevDeviceVO_.status, MdevDeviceStatus.Attached)
+                .list();
+        devices.forEach(device -> device.setStatus(MdevDeviceStatus.Reserved));
+        if (!devices.isEmpty()) {
+            dbf.updateCollection(devices);
+        }
     }
 
     @Override

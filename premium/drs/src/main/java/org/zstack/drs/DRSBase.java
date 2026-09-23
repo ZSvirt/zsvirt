@@ -62,8 +62,10 @@ import org.zstack.zwatch.ruleengine.RuleEvaluationResult;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.zstack.core.Platform.*;
@@ -523,6 +525,7 @@ public class DRSBase {
                 // filter out base on vm metric data
                 buildHostVmList(hostLoads, cpuUsedPercentThreshold, memUsedPercentThreshold);
                 List<HostNode> hostNodes = buildHostNodes(hostLoads);
+                excludeVmsBoundToHostByPassthroughDevice(hostNodes);
                 saveHostLoadOverThreshold(hostNodes, cpuUsedPercentThreshold, memUsedPercentThreshold);
 
                 DefaultBalanceAlgorithm balancer = new DefaultBalanceAlgorithm();
@@ -728,6 +731,28 @@ public class DRSBase {
         }
 
         return hostNodes;
+    }
+
+    private void excludeVmsBoundToHostByPassthroughDevice(List<HostNode> hostNodes) {
+        List<String> candidateVmUuids = hostNodes.stream()
+                .flatMap(hostNode -> hostNode.getVmList().stream())
+                .map(VmNode::getUuid)
+                .collect(Collectors.toList());
+        if (candidateVmUuids.isEmpty()) {
+            return;
+        }
+
+        Set<String> hostBoundVmUuids = new HashSet<>();
+        for (VmMigrateHostConstraintExtensionPoint ext : pluginRgty.getExtensionList(VmMigrateHostConstraintExtensionPoint.class)) {
+            hostBoundVmUuids.addAll(ext.getHostBoundVmUuids(new ArrayList<>(candidateVmUuids)));
+        }
+        if (hostBoundVmUuids.isEmpty()) {
+            return;
+        }
+
+        hostNodes.forEach(hostNode -> hostNode.getVmList().removeIf(vmNode -> hostBoundVmUuids.contains(vmNode.getUuid())));
+        logger.debug(String.format("DRS[%s] skips migrating vms%s bound to their host by passthrough devices",
+                self.getUuid(), hostBoundVmUuids));
     }
 
     private void makeAdvice(String adviceGroupUuid, List<MigrateTask> migrateTasks, List<HostNode> hostNodes) {

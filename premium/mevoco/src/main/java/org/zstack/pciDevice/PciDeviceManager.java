@@ -2377,18 +2377,16 @@ public class PciDeviceManager extends AbstractService implements
 
     @Override
     public void failedToMigrateVm(VmInstanceInventory inv, String destHostUuid, ErrorCode reason) {
-        // release pci devices if vm failed to migrate
-        detachPciDevicesFromVm(inv.getUuid(), true, true, true, new Completion(null) {
-            @Override
-            public void success() {
-                logger.debug(String.format("auto detached pci devices from vm[uuid:%s] because it failed to migrate", inv.getUuid()));
-            }
-
-            @Override
-            public void fail(ErrorCode errorCode) {
-                logger.error(String.format("failed to auto detach pci devices from vm[uuid:%s] because it's failed to migrate", inv.getUuid()));
-            }
-        });
+        List<PciDeviceVO> devices = Q.New(PciDeviceVO.class)
+                .eq(PciDeviceVO_.vmInstanceUuid, inv.getUuid())
+                .eq(PciDeviceVO_.hostUuid, destHostUuid)
+                .eq(PciDeviceVO_.status, PciDeviceStatus.Attached)
+                .notEq(PciDeviceVO_.type, PciDeviceType.Ethernet_Controller)
+                .list();
+        devices.forEach(device -> device.setStatus(PciDeviceStatus.Reserved));
+        if (!devices.isEmpty()) {
+            dbf.updateCollection(devices);
+        }
     }
 
     @Override

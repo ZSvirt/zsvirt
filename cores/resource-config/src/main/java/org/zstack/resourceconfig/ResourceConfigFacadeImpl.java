@@ -7,6 +7,7 @@ import org.zstack.core.config.BindResourceConfig;
 import org.zstack.core.config.GlobalConfig;
 import org.zstack.core.config.GlobalConfigException;
 import org.zstack.core.config.GlobalConfigFacade;
+import org.zstack.header.configuration.ConfigAO;
 import org.zstack.core.db.*;
 import org.zstack.header.AbstractService;
 import org.zstack.header.exception.CloudRuntimeException;
@@ -88,7 +89,7 @@ public class ResourceConfigFacadeImpl extends AbstractService implements Resourc
 
     private void handle(APIUpdateResourceConfigsMsg msg) {
         List<String> identities = new ArrayList<>();
-        for (APIUpdateResourceConfigsMsg.ResourceConfigAO resourceConfigAO : msg.getResourceConfigs()) {
+        for (ConfigAO resourceConfigAO : msg.getResourceConfigs()) {
             String identity = GlobalConfig.produceIdentity(resourceConfigAO.getCategory(), resourceConfigAO.getName());
             identities.add(identity);
             ResourceConfig rc = getResourceConfig(identity);

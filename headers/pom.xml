@@ -17,6 +17,7 @@
         <module>description</module>
         <module>messages</module>
         <module>global-config-def</module>
+        <module>tag-def</module>
         <module>header-ha</module>
     </modules>
 

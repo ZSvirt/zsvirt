@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.zstack.core.config.GlobalConfig;
 import org.zstack.core.config.GlobalConfigFacade;
+import org.zstack.header.configuration.ConfigAO;
 import org.zstack.header.apimediator.ApiMessageInterceptionException;
 import org.zstack.header.apimediator.ApiMessageInterceptor;
 import org.zstack.header.apimediator.InterceptorForService;
@@ -44,7 +45,7 @@ public class ResourceConfigApiInterceptor implements ApiMessageInterceptor {
     }
 
     private void validate(APIUpdateResourceConfigsMsg msg) {
-        for (APIUpdateResourceConfigsMsg.ResourceConfigAO resourceConfigAO: msg.getResourceConfigs()) {
+        for (ConfigAO resourceConfigAO: msg.getResourceConfigs()) {
             String identity = GlobalConfig.produceIdentity(resourceConfigAO.getCategory(), resourceConfigAO.getName());
 
             GlobalConfig gc = gcf.getAllConfig().get(identity);

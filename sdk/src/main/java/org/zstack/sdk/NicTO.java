@@ -29,6 +29,22 @@ public class NicTO extends org.zstack.sdk.BaseVirtualDeviceTO {
         return this.bridgeName;
     }
 
+    public java.lang.String bridgePortType;
+    public void setBridgePortType(java.lang.String bridgePortType) {
+        this.bridgePortType = bridgePortType;
+    }
+    public java.lang.String getBridgePortType() {
+        return this.bridgePortType;
+    }
+
+    public java.lang.String interfaceId;
+    public void setInterfaceId(java.lang.String interfaceId) {
+        this.interfaceId = interfaceId;
+    }
+    public java.lang.String getInterfaceId() {
+        return this.interfaceId;
+    }
+
     public java.lang.String physicalInterface;
     public void setPhysicalInterface(java.lang.String physicalInterface) {
         this.physicalInterface = physicalInterface;

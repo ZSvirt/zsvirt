@@ -98,3 +98,67 @@ DELETE FROM `zstack`.`GlobalConfigVO`
  WHERE `category` = 'vm' AND `name` = 'resourceBinding.Scene';
 
 CALL ADD_COLUMN('VolumeCbtBackupRecordVO', 'cleanupAttemptUuid', 'varchar(32)', 1, NULL);
+
+CREATE TABLE IF NOT EXISTS ZnsInfoVO (
+    uuid varchar(32) NOT NULL, computerManagerUuid varchar(64) NOT NULL,
+    name varchar(255), description varchar(2048), ip varchar(255), username varchar(255), password text,
+    vendorType varchar(255), vendorVersion varchar(255), accessKeyId varchar(64),
+    accessKeySecret text, status varchar(32), lastSyncDate timestamp NULL,
+    createDate timestamp NULL, lastOpDate timestamp NULL,
+    PRIMARY KEY (uuid), UNIQUE KEY uk_zns_info_cm_uuid (computerManagerUuid)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS ZnsTransportZoneRefVO (
+    vSwitchUuid varchar(32) NOT NULL, znsInfoUuid varchar(32) NOT NULL,
+    znsTransportZoneUuid varchar(64) NOT NULL,
+    name varchar(255), description varchar(2048), transportType varchar(32), physicalNetwork varchar(64),
+    status varchar(32), defaultZone bit NOT NULL DEFAULT 0, lastSyncDate timestamp NULL,
+    PRIMARY KEY (vSwitchUuid), UNIQUE KEY uk_zns_tz_uuid (znsInfoUuid, znsTransportZoneUuid),
+    KEY idx_zns_tz_info (znsInfoUuid),
+    CONSTRAINT fk_zns_tz_info FOREIGN KEY (znsInfoUuid) REFERENCES ZnsInfoVO (uuid) ON DELETE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS ZnsSegmentRefVO (
+    l2PortGroupUuid varchar(32) NOT NULL, znsInfoUuid varchar(32) NOT NULL, znsSegmentUuid varchar(64) NOT NULL,
+    znsTransportZoneUuid varchar(64), transportType varchar(32), virtualNetworkId int,
+    configVersion bigint, state varchar(32), lastOperation varchar(32), lastError varchar(2048), lastSyncDate timestamp NULL,
+    PRIMARY KEY (l2PortGroupUuid), UNIQUE KEY uk_zns_segment_uuid (znsInfoUuid, znsSegmentUuid),
+    KEY idx_zns_segment_info (znsInfoUuid),
+    CONSTRAINT fk_zns_segment_info FOREIGN KEY (znsInfoUuid) REFERENCES ZnsInfoVO (uuid) ON DELETE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS ZnsSegmentPortRefVO (
+    vmNicUuid varchar(32) NOT NULL, znsInfoUuid varchar(32) NOT NULL,
+    znsSegmentPortUuid varchar(64) NOT NULL, znsSegmentUuid varchar(64),
+    configVersion bigint, state varchar(32), lastOperation varchar(32), lastError varchar(2048), lastSyncDate timestamp NULL,
+    PRIMARY KEY (vmNicUuid), UNIQUE KEY uk_zns_segment_port_uuid (znsInfoUuid, znsSegmentPortUuid),
+    KEY idx_zns_segment_port_info (znsInfoUuid),
+    CONSTRAINT fk_zns_segment_port_info FOREIGN KEY (znsInfoUuid) REFERENCES ZnsInfoVO (uuid) ON DELETE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS ZnsTransportZoneHostRefVO (
+    uuid varchar(32) NOT NULL, znsInfoUuid varchar(32) NOT NULL,
+    hostUuid varchar(32) NOT NULL, vSwitchUuid varchar(32) NOT NULL,
+    znsTransportZoneUuid varchar(64) NOT NULL, datapathType varchar(32), available bit NOT NULL DEFAULT 0,
+    lastSeenDate timestamp NULL, PRIMARY KEY (uuid),
+    UNIQUE KEY uk_zns_host_tz (znsInfoUuid, hostUuid, znsTransportZoneUuid),
+    KEY idx_zns_host_tz_info (znsInfoUuid),
+    CONSTRAINT fk_zns_host_tz_info FOREIGN KEY (znsInfoUuid) REFERENCES ZnsInfoVO (uuid) ON DELETE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS `ZnsTenantRouterVO` (
+    `uuid` varchar(32) NOT NULL,
+    `znsInfoUuid` varchar(32) NOT NULL,
+    `znsResourceUuid` varchar(32) NOT NULL,
+    `name` varchar(255) DEFAULT NULL,
+    `description` varchar(255) DEFAULT NULL,
+    `state` varchar(255) DEFAULT NULL,
+    `createDate` timestamp NULL DEFAULT NULL,
+    `lastOpDate` timestamp NULL DEFAULT NULL,
+    PRIMARY KEY (`uuid`),
+    UNIQUE KEY `uk_zns_tenant_router_identity` (`znsInfoUuid`, `znsResourceUuid`),
+    CONSTRAINT `fk_zns_tenant_router_resource` FOREIGN KEY (`uuid`)
+        REFERENCES `ResourceVO` (`uuid`) ON DELETE CASCADE,
+    CONSTRAINT `fk_zns_tenant_router_info` FOREIGN KEY (`znsInfoUuid`)
+        REFERENCES `ZnsInfoVO` (`uuid`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;

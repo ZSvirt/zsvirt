@@ -44,6 +44,10 @@ public class VSwitchType {
         return vSwitchSupportNicTypesMap.get(typeName);
     }
 
+    public VmNicType getVmNicTypeWithCondition(String vmUuid, boolean enableSRIOV, boolean enableVhostUser) {
+        return getVmNicTypeWithCondition(enableSRIOV, enableVhostUser);
+    }
+
     public VmNicType getVmNicTypeWithCondition(boolean enableSRIOV, boolean enableVhostUser) {
         List<VmNicType> types = getSupVmNicTypes();
 

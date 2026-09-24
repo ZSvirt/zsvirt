@@ -300,11 +300,12 @@ public class GlobalConfigFacadeImpl extends AbstractService implements GlobalCon
                 }
 
                 for (GlobalConfig config : toRemove) {
-                    logger.debug(String.format("Will remove an old global config from database: %s", config.toString()));
+                    logger.debug(String.format("Will remove an old global config from database: %s", config.getIdentity()));
                     SQL.New(GlobalConfigVO.class)
                             .eq(GlobalConfigVO_.category, config.getCategory())
                             .eq(GlobalConfigVO_.name, config.getName())
                             .delete();
+                    configsFromDatabase.remove(config.getIdentity());
                 }
 
                 for (GlobalConfig config : toUpdate) {

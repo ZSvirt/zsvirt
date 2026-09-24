@@ -270,6 +270,9 @@ public class HostPrometheusNamespace extends AbstractPrometheusNamespace {
             rule.setExpression("zstack_host_cpu_ready_time_milliseconds");
         } else if (metric == HostNamespace.CPUReadinessPercent) {
             rule.setExpression("zstack_host_cpu_readiness_percent");
+        } else if (metric == HostNamespace.CPUReadyStatus) {
+            rule.setExpression("zstack_host_cpu_ready_status");
+            rule.labelMapping("status", HostAbstractNamespace.LabelNames.Status.toString());
         } else if (metric == HostNamespace.CPUReadyTimeMillisecondsByCPU) {
             rule.setExpression("zstack_host_cpu_ready_time_milliseconds_by_cpu");
             rule.labelMapping("cpu_id", HostNamespace.LabelNames.CPUNum.toString());

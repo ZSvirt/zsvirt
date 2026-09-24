@@ -90,6 +90,17 @@ ZSvirt brings [ZStack](https://www.zstack-cloud.com/)'s enterprise-proven ZSpher
 
 Install a management node, attach KVM-based hosts, and manage your whole environment — VMs, clusters, storage, and networks — through a web UI, a RESTful API (with Terraform and Go/Python/Java SDKs), or a CLI. VMware migration tooling — online migration, OVF import, and VMDK upload — is built in.
 
+## 🗣️ Pronunciation Guide
+
+We have heard "ZSvirt" said a few different ways in the community, and there
+is no wrong one. Our suggestion: blend the **Z** and the **S** into a single
+sound, so the name comes out as **"Z-s Virt"** — close to "zeese Virt".
+
+That is also where the name's playful spirit lives: read as one sound, it says
+**"This is Virtualization"**, which is the core idea behind the project. If you
+prefer to read it letter by letter as **"Z-S-virt,"** that works just as well.
+Say it however comes most naturally to you.
+
 ## Product Tour
 
 <details open>

@@ -477,7 +477,7 @@ public class LoadBalancerManagerImpl extends AbstractService implements LoadBala
     private void prepareSystemTags() {
         AbstractSystemTagOperationJudger judger = new AbstractSystemTagOperationJudger() {
             @Override
-            public void tagPreDeleted(SystemTagInventory tag) {
+            public void tagPreDeleted(SystemTagInventoryDefinition tag) {
                 throw new OperationFailureException(operr("cannot delete the system tag[%s]. The load balancer plugin relies on it, you can only update it", tag.getTag()));
             }
         };
@@ -528,17 +528,17 @@ public class LoadBalancerManagerImpl extends AbstractService implements LoadBala
 
         LoadBalancerSystemTags.HEALTH_PARAMETER.installLifeCycleListener(new SystemTagLifeCycleListener() {
             @Override
-            public void tagCreated(SystemTagInventory tag) {
+            public void tagCreated(SystemTagInventoryDefinition tag) {
                 /*miaozhanyong to be done*/
             }
 
             @Override
-            public void tagDeleted(SystemTagInventory tag) {
+            public void tagDeleted(SystemTagInventoryDefinition tag) {
 
             }
 
             @Override
-            public void tagUpdated(SystemTagInventory old, SystemTagInventory newTag) {
+            public void tagUpdated(SystemTagInventoryDefinition old, SystemTagInventoryDefinition newTag) {
                 if (!LoadBalancerSystemTags.HEALTH_PARAMETER.isMatch(newTag.getTag())) {
                     return;
                 }
@@ -548,17 +548,17 @@ public class LoadBalancerManagerImpl extends AbstractService implements LoadBala
 
         LoadBalancerSystemTags.BALANCER_ALGORITHM.installLifeCycleListener(new SystemTagLifeCycleListener() {
             @Override
-            public void tagCreated(SystemTagInventory tag) {
+            public void tagCreated(SystemTagInventoryDefinition tag) {
 
             }
 
             @Override
-            public void tagDeleted(SystemTagInventory tag) {
+            public void tagDeleted(SystemTagInventoryDefinition tag) {
 
             }
 
             @Override
-            public void tagUpdated(SystemTagInventory old, SystemTagInventory newTag) {
+            public void tagUpdated(SystemTagInventoryDefinition old, SystemTagInventoryDefinition newTag) {
                 if (!LoadBalancerSystemTags.BALANCER_ALGORITHM.isMatch(newTag.getTag())) {
                     return;
                 }

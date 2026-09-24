@@ -607,7 +607,7 @@ public class VirtualRouterManagerImpl extends AbstractService implements Virtual
 
         VirtualRouterSystemTags.VR_PARALLELISM_DEGREE.installLifeCycleListener(new SystemTagLifeCycleListener() {
             @Override
-            public void tagCreated(SystemTagInventory tag) {
+            public void tagCreated(SystemTagInventoryDefinition tag) {
                 if (VirtualRouterSystemTags.VR_PARALLELISM_DEGREE.isMatch(tag.getTag())) {
                     String value = VirtualRouterSystemTags.VR_PARALLELISM_DEGREE.getTokenByTag(tag.getTag(), VirtualRouterSystemTags.PARALLELISM_DEGREE_TOKEN);
                     vrParallelismDegrees.put(tag.getResourceUuid(), Integer.valueOf(value));
@@ -615,14 +615,14 @@ public class VirtualRouterManagerImpl extends AbstractService implements Virtual
             }
 
             @Override
-            public void tagDeleted(SystemTagInventory tag) {
+            public void tagDeleted(SystemTagInventoryDefinition tag) {
                 if (VirtualRouterSystemTags.VR_PARALLELISM_DEGREE.isMatch(tag.getTag())) {
                     vrParallelismDegrees.remove(tag.getResourceUuid());
                 }
             }
 
             @Override
-            public void tagUpdated(SystemTagInventory old, SystemTagInventory newTag) {
+            public void tagUpdated(SystemTagInventoryDefinition old, SystemTagInventoryDefinition newTag) {
             }
         });
 

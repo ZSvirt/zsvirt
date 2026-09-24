@@ -5,14 +5,14 @@ package org.zstack.header.tag;
  */
 public class AbstractSystemTagLifeCycleListener implements SystemTagLifeCycleListener {
     @Override
-    public void tagCreated(SystemTagInventory tag) {
+    public void tagCreated(SystemTagInventoryDefinition tag) {
     }
 
     @Override
-    public void tagDeleted(SystemTagInventory tag) {
+    public void tagDeleted(SystemTagInventoryDefinition tag) {
     }
 
     @Override
-    public void tagUpdated(SystemTagInventory old, SystemTagInventory newTag) {
+    public void tagUpdated(SystemTagInventoryDefinition old, SystemTagInventoryDefinition newTag) {
     }
 }

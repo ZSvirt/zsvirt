@@ -2727,18 +2727,18 @@ public class VolumeBackupManagerImpl extends AbstractService implements
                     CreateRootVolumeBackupJob.class, CreateVolumeBackupJob.class, CreateDatabaseBackupJob.class);
 
             @Override
-            public void tagCreated(SystemTagInventory tag) {
+            public void tagCreated(SystemTagInventoryDefinition tag) {
 
             }
 
             @Override
-            public void tagDeleted(SystemTagInventory tag) {
+            public void tagDeleted(SystemTagInventoryDefinition tag) {
                 deleteBackup(tag.getResourceUuid());
                 SchedulerJobParamCascadeUpdater.updateJobForResourceDisabled(tag.getResourceUuid(), BackupStorageVO.class.getSimpleName(), jobs);
             }
 
             @Override
-            public void tagUpdated(SystemTagInventory old, SystemTagInventory newTag) {
+            public void tagUpdated(SystemTagInventoryDefinition old, SystemTagInventoryDefinition newTag) {
 
             }
 

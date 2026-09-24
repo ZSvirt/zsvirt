@@ -45,7 +45,7 @@ import org.zstack.header.network.l2.L2NetworkType;
 import org.zstack.header.rest.RESTFacade;
 import org.zstack.header.rest.SyncHttpCallHandler;
 import org.zstack.header.tag.FormTagExtensionPoint;
-import org.zstack.header.tag.SystemTagInventory;
+import org.zstack.header.tag.SystemTagInventoryDefinition;
 import org.zstack.header.tag.SystemTagLifeCycleListener;
 import org.zstack.header.tag.SystemTagOperationJudger;
 import org.zstack.header.tag.SystemTagValidator;
@@ -743,17 +743,17 @@ public class KVMHostFactory extends AbstractService implements HypervisorFactory
 
         KVMSystemTags.VOLUME_VIRTIO_SCSI.installLifeCycleListener(new SystemTagLifeCycleListener() {
             @Override
-            public void tagCreated(SystemTagInventory tag) {
+            public void tagCreated(SystemTagInventoryDefinition tag) {
                 cleanDeviceAddress(tag);
             }
 
             @Override
-            public void tagDeleted(SystemTagInventory tag) {
+            public void tagDeleted(SystemTagInventoryDefinition tag) {
                 cleanDeviceAddress(tag);
             }
 
             @Override
-            public void tagUpdated(SystemTagInventory old, SystemTagInventory newTag) {
+            public void tagUpdated(SystemTagInventoryDefinition old, SystemTagInventoryDefinition newTag) {
 
             }
         });
@@ -808,34 +808,34 @@ public class KVMHostFactory extends AbstractService implements HypervisorFactory
 
         KVMSystemTags.VOLUME_SCSI.installJudger(new SystemTagOperationJudger() {
             @Override
-            public void tagPreCreated(SystemTagInventory tag) {
+            public void tagPreCreated(SystemTagInventoryDefinition tag) {
                 cleanUpVolumeAddressOnVolumeCapabilityTypeUpdate(tag.getResourceUuid());
             }
 
             @Override
-            public void tagPreDeleted(SystemTagInventory tag) {
+            public void tagPreDeleted(SystemTagInventoryDefinition tag) {
                 cleanUpVolumeAddressOnVolumeCapabilityTypeUpdate(tag.getResourceUuid());
             }
 
             @Override
-            public void tagPreUpdated(SystemTagInventory old, SystemTagInventory newTag) {
+            public void tagPreUpdated(SystemTagInventoryDefinition old, SystemTagInventoryDefinition newTag) {
                 // do-nothing
             }
         });
 
         KVMSystemTags.VOLUME_VIRTIO_SCSI.installJudger(new SystemTagOperationJudger() {
             @Override
-            public void tagPreCreated(SystemTagInventory tag) {
+            public void tagPreCreated(SystemTagInventoryDefinition tag) {
                 cleanUpVolumeAddressOnVolumeCapabilityTypeUpdate(tag.getResourceUuid());
             }
 
             @Override
-            public void tagPreDeleted(SystemTagInventory tag) {
+            public void tagPreDeleted(SystemTagInventoryDefinition tag) {
                 cleanUpVolumeAddressOnVolumeCapabilityTypeUpdate(tag.getResourceUuid());
             }
 
             @Override
-            public void tagPreUpdated(SystemTagInventory old, SystemTagInventory newTag) {
+            public void tagPreUpdated(SystemTagInventoryDefinition old, SystemTagInventoryDefinition newTag) {
                 // do-nothing
             }
         });
@@ -868,7 +868,7 @@ public class KVMHostFactory extends AbstractService implements HypervisorFactory
                 .delete();
     }
 
-    private void cleanDeviceAddress(SystemTagInventory tag) {
+    private void cleanDeviceAddress(SystemTagInventoryDefinition tag) {
         VolumeVO volume = dbf.findByUuid(tag.getResourceUuid(), VolumeVO.class);
         vidm.deleteVmResourceMetadata(volume.getUuid(), volume.getVmInstanceUuid());
     }

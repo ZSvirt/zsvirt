@@ -576,6 +576,10 @@ class KVMSimulator implements Simulator {
             return new KVMAgentCommands.RebootVmResponse()
         }
 
+        spec.simulator(KVMConstant.CLEAN_FIRMWARE_FLASH) {
+            return new KVMAgentCommands.AgentResponse()
+        }
+
         spec.simulator(KVMConstant.KVM_DESTROY_VM_PATH) {
             return new KVMAgentCommands.DestroyVmResponse()
         }

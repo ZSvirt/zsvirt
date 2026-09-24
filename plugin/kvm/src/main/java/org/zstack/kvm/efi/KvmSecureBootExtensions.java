@@ -14,6 +14,7 @@ import org.zstack.core.workflow.SimpleFlowChain;
 import org.zstack.header.core.Completion;
 import org.zstack.header.core.NoErrorCompletion;
 import org.zstack.header.core.ReturnValueCompletion;
+import org.zstack.header.core.workflow.Flow;
 import org.zstack.header.core.workflow.FlowDoneHandler;
 import org.zstack.header.core.workflow.FlowErrorHandler;
 import org.zstack.header.core.workflow.FlowTrigger;
@@ -26,6 +27,9 @@ import org.zstack.header.vm.PreVmInstantiateResourceExtensionPoint;
 import org.zstack.header.vm.VmInstanceVO;
 import org.zstack.header.vm.VmInstanceVO_;
 import org.zstack.header.vm.VmInstanceConstant;
+import org.zstack.header.vm.VmInstanceConstant.Params;
+import org.zstack.header.vm.VmInstanceConstant.VmOperation;
+import org.zstack.header.vm.VmInstanceDeletionPolicyManager.VmInstanceDeletionPolicy;
 import org.zstack.header.vm.AfterReimageVmInstanceExtensionPoint;
 import org.zstack.header.vm.BeforeHaStartVmInstanceExtensionPoint;
 import org.zstack.header.vm.VmInstanceInventory;
@@ -35,6 +39,7 @@ import org.zstack.header.vm.VmInstanceSpec;
 import org.zstack.header.vm.VmInstanceState;
 import org.zstack.header.vm.VmInstantiateResourceException;
 import org.zstack.header.vm.VmMigrationType;
+import org.zstack.header.vm.VmOperationAdditionalFlowExtensionPoint;
 import org.zstack.header.vm.VmPreMigrationExtensionPoint;
 import org.zstack.header.vm.VmReleaseResourceExtensionPoint;
 import org.zstack.header.vm.additions.VmHostBackupFileVO;
@@ -70,6 +75,7 @@ import org.zstack.utils.logging.CLogger;
 import javax.persistence.Tuple;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
@@ -90,7 +96,8 @@ public class KvmSecureBootExtensions implements KVMStartVmExtensionPoint,
         VmInstanceMigrateExtensionPoint,
         VolumeSnapshotCreationExtensionPoint,
         BeforeHaStartVmInstanceExtensionPoint,
-        ConvertVmInstanceToTemplatedVmExtensionPoint {
+        ConvertVmInstanceToTemplatedVmExtensionPoint,
+        VmOperationAdditionalFlowExtensionPoint {
     private static final CLogger logger = Utils.getLogger(KvmSecureBootExtensions.class);
 
     @Autowired
@@ -915,5 +922,89 @@ public class KvmSecureBootExtensions implements KVMStartVmExtensionPoint,
                 completion.fail(reply.getError());
             }
         });
+    }
+
+    @Override
+    public List<Flow> getBeforeFormalWorkFlows(VmInstanceSpec spec) {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public List<Flow> getAdditionalVmOperationFlows(VmInstanceSpec spec) {
+        VmInstanceInventory vm = spec.getVmInventory();
+        VmOperation operation = spec.getCurrentVmOperation();
+        if (!KVM_HYPERVISOR_TYPE.equals(vm.getHypervisorType())
+                || (operation != VmOperation.Destroy && operation != VmOperation.Expunge)) {
+            return Collections.emptyList();
+        }
+
+        String hostUuid = vm.getHostUuid() == null ? vm.getLastHostUuid() : vm.getHostUuid();
+        String responseKey = "firmwareFlashCleanupResponse";
+        String errorKey = "firmwareFlashCleanupError";
+        List<Flow> flows = new ArrayList<>();
+        Flow sendCleanupRequestFlow = new NoRollbackFlow() {
+            String __name__ = "send-firmware-flash-cleanup-request";
+
+            @Override
+            public boolean skip(Map<String, Object> data) {
+                return hostUuid == null
+                        || (operation == VmOperation.Destroy
+                        && data.get(Params.DeletionPolicy) != VmInstanceDeletionPolicy.Direct);
+            }
+
+            @Override
+            public void run(FlowTrigger trigger, Map<String, Object> data) {
+                CleanVmFirmwareFlashCmd cmd = new CleanVmFirmwareFlashCmd();
+                cmd.vmUuid = vm.getUuid();
+
+                ReturnValueCompletion<KvmResponseWrapper> callback = new ReturnValueCompletion<KvmResponseWrapper>(trigger) {
+                    @Override
+                    public void success(KvmResponseWrapper returnValue) {
+                        data.put(responseKey, returnValue);
+                        trigger.next();
+                    }
+
+                    @Override
+                    public void fail(ErrorCode errorCode) {
+                        data.put(errorKey, errorCode);
+                        trigger.next();
+                    }
+                };
+
+                new KvmCommandSender(hostUuid).send(cmd, CLEAN_FIRMWARE_FLASH, wrapper -> null, callback);
+            }
+        };
+
+        Flow handleCleanupResultFlow = new NoRollbackFlow() {
+            String __name__ = "handle-firmware-flash-cleanup-result";
+
+            @Override
+            public boolean skip(Map<String, Object> data) {
+                return !data.containsKey(responseKey) && !data.containsKey(errorKey);
+            }
+
+            @Override
+            public void run(FlowTrigger trigger, Map<String, Object> data) {
+                ErrorCode error = (ErrorCode) data.remove(errorKey);
+                if (error != null) {
+                    error.logWarn(logger);
+                    trigger.next();
+                    return;
+                }
+
+                KvmResponseWrapper wrapper = (KvmResponseWrapper) data.remove(responseKey);
+                AgentResponse response = wrapper.getResponse(AgentResponse.class);
+                if (!response.isSuccess()) {
+                    operr("failed to clean firmware flash for VM[uuid:%s]", vm.getUuid())
+                            .withException(response.getError())
+                            .logWarn(logger);
+                }
+                trigger.next();
+            }
+        };
+
+        flows.add(sendCleanupRequestFlow);
+        flows.add(handleCleanupResultFlow);
+        return flows;
     }
 }

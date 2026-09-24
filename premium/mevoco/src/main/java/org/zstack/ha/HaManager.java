@@ -56,6 +56,7 @@ import org.zstack.header.rest.RESTFacade;
 import org.zstack.header.rest.SyncHttpCallHandler;
 import org.zstack.header.storage.primary.*;
 import org.zstack.header.tag.SystemTagInventory;
+import org.zstack.header.tag.SystemTagInventoryDefinition;
 import org.zstack.header.tag.SystemTagOperationJudger;
 import org.zstack.header.vm.*;
 import org.zstack.header.vm.VmCanonicalEvents.VmStateChangedData;
@@ -507,7 +508,7 @@ public class HaManager extends AbstractService implements Component, HaCompletio
 
         HaSystemTags.HA.installJudger(new SystemTagOperationJudger() {
             @Override
-            public void tagPreCreated(SystemTagInventory tag) {
+            public void tagPreCreated(SystemTagInventoryDefinition tag) {
                 VmHaLevel level = validateHaTag(tag);
                 SQL.New(VmHaVO.class)
                         .eq(VmHaVO_.uuid, tag.getResourceUuid())
@@ -517,7 +518,7 @@ public class HaManager extends AbstractService implements Component, HaCompletio
             }
 
             @Override
-            public void tagPreDeleted(SystemTagInventory tag) {
+            public void tagPreDeleted(SystemTagInventoryDefinition tag) {
                 SQL.New(VmHaVO.class)
                         .eq(VmHaVO_.uuid, tag.getResourceUuid())
                         .set(VmHaVO_.haLevel, None)
@@ -526,7 +527,7 @@ public class HaManager extends AbstractService implements Component, HaCompletio
             }
 
             @Override
-            public void tagPreUpdated(SystemTagInventory old, SystemTagInventory newTag) {
+            public void tagPreUpdated(SystemTagInventoryDefinition old, SystemTagInventoryDefinition newTag) {
                 VmHaLevel level = validateHaTag(newTag);
                 SQL.New(VmHaVO.class)
                         .eq(VmHaVO_.uuid, newTag.getResourceUuid())
@@ -535,7 +536,7 @@ public class HaManager extends AbstractService implements Component, HaCompletio
                         .update();
             }
 
-            private VmHaLevel validateHaTag(SystemTagInventory tag) {
+            private VmHaLevel validateHaTag(SystemTagInventoryDefinition tag) {
                 final String haToken = HA.getTokenByTag(tag.getTag(), HA_TOKEN);
                 final VmHaLevel level = VmHaLevel.valueOfOrNull(haToken);
                 if (level == null) {

@@ -45,6 +45,7 @@ import org.zstack.header.network.l3.L3NetworkVO;
 import org.zstack.header.network.l3.L3NetworkVO_;
 import org.zstack.header.sriov.*;
 import org.zstack.header.tag.SystemTagInventory;
+import org.zstack.header.tag.SystemTagInventoryDefinition;
 import org.zstack.header.tag.SystemTagLifeCycleListener;
 import org.zstack.header.vdpa.VmVdpaNicVO;
 import org.zstack.header.vdpa.VmVdpaNicVO_;
@@ -360,7 +361,7 @@ public class VmVfNicManagerImpl extends AbstractService implements VmVfNicManage
     private void initSystemTags() {
         SystemTagLifeCycleListener listener = new SystemTagLifeCycleListener() {
             @Override
-            public void tagCreated(SystemTagInventory tag) {
+            public void tagCreated(SystemTagInventoryDefinition tag) {
                 thdf.chainSubmit(new ChainTask(null) {
                     @Override
                     public String getSyncSignature() {
@@ -422,12 +423,12 @@ public class VmVfNicManagerImpl extends AbstractService implements VmVfNicManage
             }
 
             @Override
-            public void tagDeleted(SystemTagInventory tag) {
+            public void tagDeleted(SystemTagInventoryDefinition tag) {
 
             }
 
             @Override
-            public void tagUpdated(SystemTagInventory old, SystemTagInventory newTag) {
+            public void tagUpdated(SystemTagInventoryDefinition old, SystemTagInventoryDefinition newTag) {
 
             }
         };

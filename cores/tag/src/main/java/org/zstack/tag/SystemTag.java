@@ -78,37 +78,37 @@ public class SystemTag {
         return this;
     }
 
-    void callCreatedJudger(SystemTagInventory tag) {
+    void callCreatedJudger(SystemTagInventoryDefinition tag) {
         for (SystemTagOperationJudger j : judgers) {
             j.tagPreCreated(tag);
         }
     }
 
-    void callTagCreatedListener(SystemTagInventory tag) {
+    void callTagCreatedListener(SystemTagInventoryDefinition tag) {
         for (SystemTagLifeCycleListener ext : lifeCycleListeners) {
             ext.tagCreated(tag);
         }
     }
 
-    void callDeletedJudger(SystemTagInventory tag) {
+    void callDeletedJudger(SystemTagInventoryDefinition tag) {
         for (SystemTagOperationJudger j : judgers) {
             j.tagPreDeleted(tag);
         }
     }
 
-    void callTagDeletedListener(SystemTagInventory tag) {
+    void callTagDeletedListener(SystemTagInventoryDefinition tag) {
         for (SystemTagLifeCycleListener ext : lifeCycleListeners) {
             ext.tagDeleted(tag);
         }
     }
 
-    void callUpdatedJudger(SystemTagInventory old, SystemTagInventory newTag) {
+    void callUpdatedJudger(SystemTagInventoryDefinition old, SystemTagInventoryDefinition newTag) {
         for (SystemTagOperationJudger j : judgers) {
             j.tagPreUpdated(old, newTag);
         }
     }
 
-    void callTagUpdatedListener(SystemTagInventory old, SystemTagInventory newTag) {
+    void callTagUpdatedListener(SystemTagInventoryDefinition old, SystemTagInventoryDefinition newTag) {
         for (SystemTagLifeCycleListener ext : lifeCycleListeners) {
             ext.tagUpdated(old, newTag);
         }

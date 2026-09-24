@@ -158,6 +158,11 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.zstack</groupId>
+            <artifactId>tag-def</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-web</artifactId>
         </dependency>

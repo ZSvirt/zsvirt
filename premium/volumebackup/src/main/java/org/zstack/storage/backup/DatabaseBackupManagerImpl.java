@@ -40,6 +40,7 @@ import org.zstack.header.message.MessageReply;
 import org.zstack.header.storage.backup.*;
 import org.zstack.header.storage.database.backup.*;
 import org.zstack.header.tag.SystemTagInventory;
+import org.zstack.header.tag.SystemTagInventoryDefinition;
 import org.zstack.header.tag.SystemTagLifeCycleListener;
 import org.zstack.mevoco.MevocoGlobalProperty;
 import org.zstack.storage.backup.imagestore.*;
@@ -809,12 +810,12 @@ public class DatabaseBackupManagerImpl extends AbstractService implements Databa
     private void initSystemTags() {
         SystemTagLifeCycleListener listener = new SystemTagLifeCycleListener() {
             @Override
-            public void tagCreated(SystemTagInventory tag) {
+            public void tagCreated(SystemTagInventoryDefinition tag) {
 
             }
 
             @Override
-            public void tagDeleted(SystemTagInventory tag) {
+            public void tagDeleted(SystemTagInventoryDefinition tag) {
                 List<String> databaseBackupUuids = Q.New(DatabaseBackupStorageRefVO.class)
                         .select(DatabaseBackupStorageRefVO_.databaseBackupUuid)
                         .eq(DatabaseBackupStorageRefVO_.backupStorageUuid, tag.getResourceUuid())
@@ -833,7 +834,7 @@ public class DatabaseBackupManagerImpl extends AbstractService implements Databa
             }
 
             @Override
-            public void tagUpdated(SystemTagInventory old, SystemTagInventory newTag) {
+            public void tagUpdated(SystemTagInventoryDefinition old, SystemTagInventoryDefinition newTag) {
 
             }
         };

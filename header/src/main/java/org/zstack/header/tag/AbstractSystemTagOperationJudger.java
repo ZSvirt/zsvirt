@@ -5,14 +5,14 @@ package org.zstack.header.tag;
  */
 public class AbstractSystemTagOperationJudger implements SystemTagOperationJudger {
     @Override
-    public void tagPreCreated(SystemTagInventory tag) {
+    public void tagPreCreated(SystemTagInventoryDefinition tag) {
     }
 
     @Override
-    public void tagPreDeleted(SystemTagInventory tag) {
+    public void tagPreDeleted(SystemTagInventoryDefinition tag) {
     }
 
     @Override
-    public void tagPreUpdated(SystemTagInventory old, SystemTagInventory newTag) {
+    public void tagPreUpdated(SystemTagInventoryDefinition old, SystemTagInventoryDefinition newTag) {
     }
 }

@@ -32,8 +32,8 @@ import static java.util.Arrays.asList;
 import static org.zstack.core.Platform.inerr;
 
 @Configurable(preConstruction = true, autowire = Autowire.BY_TYPE)
-public class SystemTag {
-    private static final CLogger logger = Utils.getLogger(SystemTag.class);
+public class SystemTagRuntime extends PatternedSystemTag {
+    private static final CLogger logger = Utils.getLogger(SystemTagRuntime.class);
 
     @Autowired
     protected DatabaseFacade dbf;
@@ -41,91 +41,40 @@ public class SystemTag {
     // TagManager must be explicitly set. use @Autowired will cause circular dependency
     protected TagManagerImpl tagMgr;
 
-    protected String tagFormat;
-    protected Class resourceClass;
-    protected List<SystemTagValidator> validators = new ArrayList<>();
-    protected List<SystemTagLifeCycleListener> lifeCycleListeners = new ArrayList<>();
-    protected List<SystemTagOperationJudger> judgers = new ArrayList<>();
-
-    private boolean ephemeral = false;
-    private boolean adminOnly = false;
-    private boolean cloneable = true;
-    private boolean sensitive = false;
-
-    public SystemTag(String tagFormat, Class resourceClass) {
-        this.tagFormat = tagFormat;
-        this.resourceClass = resourceClass;
+    public SystemTagRuntime(String tagFormat, Class resourceClass, boolean hasPattern) {
+        super(tagFormat, resourceClass);
+        this.hasPattern = hasPattern;
     }
 
-    public static SystemTag makeEphemeralTag(String tagScript) {
-        String tagFormat = Tags.prefix(TagConstant.EPHEMERAL_TAG_PREFIX) + tagScript;
-        return new SystemTag(tagFormat, SystemTagVO.class).markAsEphemeral();
+    public SystemTagRuntime(String tagFormat, Class resourceClass) {
+        this(tagFormat, resourceClass, true);
     }
 
-    public enum SystemTagOperation {
-        CREATE,
-        UPDATE,
-        DELETE
-    }
-
-    public SystemTag installLifeCycleListener(SystemTagLifeCycleListener listener) {
-        lifeCycleListeners.add(listener);
+    @Override
+    public SystemTagRuntime asRuntime() {
         return this;
     }
 
-    public SystemTag installJudger(SystemTagOperationJudger judger) {
-        judgers.add(judger);
-        return this;
-    }
-
-    void callCreatedJudger(SystemTagInventoryDefinition tag) {
-        for (SystemTagOperationJudger j : judgers) {
-            j.tagPreCreated(tag);
-        }
-    }
-
-    void callTagCreatedListener(SystemTagInventoryDefinition tag) {
-        for (SystemTagLifeCycleListener ext : lifeCycleListeners) {
-            ext.tagCreated(tag);
-        }
-    }
-
-    void callDeletedJudger(SystemTagInventoryDefinition tag) {
-        for (SystemTagOperationJudger j : judgers) {
-            j.tagPreDeleted(tag);
-        }
-    }
-
-    void callTagDeletedListener(SystemTagInventoryDefinition tag) {
-        for (SystemTagLifeCycleListener ext : lifeCycleListeners) {
-            ext.tagDeleted(tag);
-        }
-    }
-
-    void callUpdatedJudger(SystemTagInventoryDefinition old, SystemTagInventoryDefinition newTag) {
-        for (SystemTagOperationJudger j : judgers) {
-            j.tagPreUpdated(old, newTag);
-        }
-    }
-
-    void callTagUpdatedListener(SystemTagInventoryDefinition old, SystemTagInventoryDefinition newTag) {
-        for (SystemTagLifeCycleListener ext : lifeCycleListeners) {
-            ext.tagUpdated(old, newTag);
-        }
-    }
-
+    @Override
     protected String useTagFormat() {
-        return tagFormat;
+        return hasPattern ? Tags.tagPatternToSqlPattern(tagFormat) : tagFormat;
     }
 
-    protected Op useOp() {
-        return Op.EQ;
+    @Override
+    protected boolean useLikeOp() {
+        return hasPattern;
     }
 
+    private Op useOp() {
+        return useLikeOp() ? Op.LIKE : Op.EQ;
+    }
+
+    @Override
     public boolean hasTag(String resourceUuid) {
         return hasTag(resourceUuid, resourceClass);
     }
 
+    @Override
     public boolean hasTag(String resourceUuid, Class resourceClass) {
         SimpleQuery<SystemTagVO> q = dbf.createQuery(SystemTagVO.class);
         q.add(SystemTagVO_.resourceType, Op.EQ, resourceClass.getSimpleName());
@@ -134,6 +83,7 @@ public class SystemTag {
         return q.isExists();
     }
 
+    @Override
     public List<String> filterResourceHasTag(Collection<String> resourceUuids) {
         if (resourceUuids.isEmpty()) {
             return new ArrayList<>();
@@ -147,6 +97,7 @@ public class SystemTag {
         return q.listValue();
     }
 
+    @Override
     public void copy(String srcUuid, Class srcClass, String dstUuid, Class dstClass) {
         SimpleQuery<SystemTagVO> q = dbf.createQuery(SystemTagVO.class);
         q.add(SystemTagVO_.resourceType, Op.EQ, srcClass.getSimpleName());
@@ -164,6 +115,7 @@ public class SystemTag {
         }
     }
 
+    @Override
     public List<String> getTags(String resourceUuid, Class resourceClass) {
         SimpleQuery<SystemTagVO> q = dbf.createQuery(SystemTagVO.class);
         q.select(SystemTagVO_.tag);
@@ -173,10 +125,12 @@ public class SystemTag {
         return q.listValue();
     }
 
+    @Override
     public List<String> getTags(String resourceUuid) {
         return getTags(resourceUuid, resourceClass);
     }
 
+    @Override
     public String getTag(String resourceUuid, Class resourceClass) {
         List<String> tags = getTags(resourceUuid, resourceClass);
         if (tags.isEmpty()) {
@@ -185,10 +139,12 @@ public class SystemTag {
         return tags.get(0);
     }
 
+    @Override
     public String getTag(String resourceUuid) {
         return getTag(resourceUuid, resourceClass);
     }
 
+    @Override
     public Map<String, List<String>> getTags(Collection<String> resourceUuids, Class resourceClass) {
         SimpleQuery<SystemTagVO> q = dbf.createQuery(SystemTagVO.class);
         q.select(SystemTagVO_.tag, SystemTagVO_.resourceUuid);
@@ -209,59 +165,245 @@ public class SystemTag {
         return ret;
     }
 
+    @Override
     public Map<String, List<String>> getTags(Collection<String> resourceUuids) {
         DebugUtils.Assert(!resourceUuids.isEmpty(), "how can you pass an empty resourceUuids");
         return getTags(resourceUuids, resourceClass);
     }
 
-    public String getTagFormat() {
-        return tagFormat;
-    }
-
-    public Class getResourceClass() {
-        return resourceClass;
-    }
-
-    /**
-     * @return true if any tags have been deleted
-     */
+    @Override
     public boolean delete(String resourceUuid, Class resourceClass) {
+        if (hasPattern) {
+            return tagMgr.deleteSystemTagUseLike(useTagFormat(), resourceUuid, resourceClass.getSimpleName(), false);
+        }
         return tagMgr.deleteSystemTag(tagFormat, resourceUuid, resourceClass.getSimpleName(), false);
     }
 
-    /**
-     * @return true if any tags have been deleted
-     */
+    @Override
+    public boolean delete(String resourceUuid, String tagFormat) {
+        return tagMgr.deleteSystemTagUseLike(tagFormat, resourceUuid, resourceClass.getSimpleName(), false);
+    }
+
+    @Override
     public boolean delete(String resourceUuid) {
-        return tagMgr.deleteSystemTag(tagFormat, resourceUuid, resourceClass.getSimpleName(), false);
+        return delete(resourceUuid, resourceClass);
     }
 
-    /**
-     * @return true if any tags have been deleted
-     */
+    @Override
     public boolean deleteInherentTag(String resourceUuid) {
-        return tagMgr.deleteSystemTag(tagFormat, resourceUuid, resourceClass.getSimpleName(), true);
+        return deleteInherentTag(resourceUuid, resourceClass);
     }
 
-    /**
-     * @return true if any tags have been deleted
-     */
+    @Override
+    public boolean deleteInherentTag(String resourceUuid, String tagFormat) {
+        return tagMgr.deleteSystemTagUseLike(tagFormat, resourceUuid, resourceClass.getSimpleName(), true);
+    }
+
+    @Override
     public boolean deleteInherentTag(String resourceUuid, Class resourceClass) {
+        if (hasPattern) {
+            return tagMgr.deleteSystemTagUseLike(useTagFormat(), resourceUuid, resourceClass.getSimpleName(), true);
+        }
         return tagMgr.deleteSystemTag(tagFormat, resourceUuid, resourceClass.getSimpleName(), true);
     }
 
-    public String instantiateTag(Map tokens) {
-        return tagFormat;
+    private String getTokenByTag(String tag, String tokenName, Class resourceClass) {
+        Map<String, String> tokens = getTokensByTag(tag);
+        if (tokens == null) {
+            return null;
+        }
+        String value = tokens.get(tokenName);
+        if (value == null || tagMgr == null) {
+            return value;
+        }
+        String tagHead = Tags.first(tag);
+        return tagMgr.decryptTokenValue(resourceClass.getSimpleName(), tagHead, tokenName, value);
     }
 
+    private Map<String, String> getDecryptedTokensByTag(String tag, Class resourceClass) {
+        Map<String, String> tokens = getTokensByTag(tag);
+        if (tokens == null || tagMgr == null) {
+            return tokens;
+        }
+
+        String tagHead = Tags.first(tag);
+        tagHead = Objects.equals(tagHead, tag) ? null : tagHead;
+        Map<String, String> decrypted = new HashMap<>();
+        for (Map.Entry<String, String> entry : tokens.entrySet()) {
+            String tokenName = entry.getKey();
+            String value = entry.getValue();
+            decrypted.put(tokenName, value == null ? null :
+                    tagMgr.decryptTokenValue(resourceClass.getSimpleName(),
+                            tagHead == null ? tokenName : tagHead, tokenName, value));
+        }
+        return decrypted;
+    }
+
+    @Override
+    public Map<String, String> getTokensByResourceUuid(String resourceUuid, Class resourceClass) {
+        String tag = getTag(resourceUuid, resourceClass);
+        if (tag == null) {
+            return null;
+        }
+
+        return getDecryptedTokensByTag(tag, resourceClass);
+    }
+
+    @Override
+    public List<Map<String, String>> getTokensOfTagsByResourceUuid(String resourceUuid) {
+        return getTokensOfTagsByResourceUuid(resourceUuid, resourceClass);
+    }
+
+    @Override
+    public List<Map<String, String>> getTokensOfTagsByResourceUuid(String resourceUuid, Class resourceClass) {
+        List<Map<String, String>> res = new ArrayList<>();
+
+        List<String> tags = getTags(resourceUuid, resourceClass);
+        for (String tag : tags) {
+            res.add(getDecryptedTokensByTag(tag, resourceClass));
+        }
+
+        return res;
+    }
+
+    @Override
+    public Map<String, String> getTokensByResourceUuid(String resourceUuid) {
+        return getTokensByResourceUuid(resourceUuid, resourceClass);
+    }
+
+    @Override
+    public String getTokenByResourceUuid(String resourceUuid, Class resourceClass, String tokenName) {
+        String tag = getTag(resourceUuid, resourceClass);
+        if (tag == null) {
+            return null;
+        }
+        return getTokenByTag(tag, tokenName, resourceClass);
+    }
+
+    @Override
+    public String getTokenByResourceUuid(String resourceUuid, String tokenName) {
+        return getTokenByResourceUuid(resourceUuid, resourceClass, tokenName);
+    }
+
+    @Override
+    public SystemTagInventory getTagInventory(String resourceUuid) {
+        SystemTagVO vo;
+        if (hasPattern) {
+            vo = Q.New(SystemTagVO.class)
+                    .eq(SystemTagVO_.resourceUuid, resourceUuid)
+                    .eq(SystemTagVO_.resourceType, getResourceClass().getSimpleName())
+                    .like(SystemTagVO_.tag, useTagFormat())
+                    .find();
+        } else {
+            vo = Q.New(SystemTagVO.class)
+                    .eq(SystemTagVO_.resourceUuid, resourceUuid)
+                    .eq(SystemTagVO_.resourceType, getResourceClass().getSimpleName())
+                    .eq(SystemTagVO_.tag, useTagFormat())
+                    .find();
+        }
+        return vo == null ? null : SystemTagInventory.valueOf(vo);
+    }
+
+    @Override
+    public List<SystemTagInventory> getTagInventories(List<String> resourceUuids) {
+        List<SystemTagVO> list;
+        if (hasPattern) {
+            list = Q.New(SystemTagVO.class)
+                    .in(SystemTagVO_.resourceUuid, resourceUuids)
+                    .eq(SystemTagVO_.resourceType, getResourceClass().getSimpleName())
+                    .like(SystemTagVO_.tag, useTagFormat())
+                    .list();
+        } else {
+            list = Q.New(SystemTagVO.class)
+                    .in(SystemTagVO_.resourceUuid, resourceUuids)
+                    .eq(SystemTagVO_.resourceType, getResourceClass().getSimpleName())
+                    .eq(SystemTagVO_.tag, useTagFormat())
+                    .list();
+        }
+        return SystemTagInventory.valueOf(list);
+    }
+
+    @Override
+    public List<SystemTagInventory> getTagInventories(String resourceUuid) {
+        if (hasPattern) {
+            return SystemTagInventory.valueOf(Q.New(SystemTagVO.class).eq(SystemTagVO_.resourceType, getResourceClass().getSimpleName()).
+                    eq(SystemTagVO_.resourceUuid, resourceUuid).like(SystemTagVO_.tag, useTagFormat()).list());
+        }
+        return SystemTagInventory.valueOf(Q.New(SystemTagVO.class).eq(SystemTagVO_.resourceType, getResourceClass().getSimpleName()).
+                eq(SystemTagVO_.resourceUuid, resourceUuid).eq(SystemTagVO_.tag, useTagFormat()).list());
+    }
+
+    @Override
+    public void copyTagInventories(String srcUuid, Class srcResourceClass, String dstUuid, Class dstResourceClass, boolean inherent) {
+        if (!isCloneable()) {
+            return;
+        }
+
+        String rawTag = getTag(srcUuid, srcResourceClass);
+        if (rawTag == null) {
+            return;
+        }
+
+        if (getTag(dstUuid, dstResourceClass) != null) {
+            delete(dstUuid, dstResourceClass);
+        }
+
+        String dstTag = tagMgr.transformTagForCopy(srcUuid, srcResourceClass.getSimpleName(),
+                dstUuid, dstResourceClass.getSimpleName(), rawTag);
+        if (dstTag == null) {
+            return;
+        }
+
+        SystemTagVO svo = new SystemTagVO();
+        svo.setUuid(Platform.getUuid());
+        svo.setInherent(inherent);
+        svo.setResourceUuid(dstUuid);
+        svo.setResourceType(dstResourceClass.getSimpleName());
+        svo.setTag(dstTag);
+        dbf.persistAndRefresh(svo);
+    }
+
+    @Override
+    public boolean updateTagByToken(String resourceUuid, String tokenName, String newTag) {
+        SystemTagVO vo;
+        if (hasPattern) {
+            vo = Q.New(SystemTagVO.class)
+                    .eq(SystemTagVO_.resourceUuid, resourceUuid)
+                    .eq(SystemTagVO_.resourceType, getResourceClass().getSimpleName())
+                    .like(SystemTagVO_.tag, useTagFormat())
+                    .find();
+        } else {
+            vo = Q.New(SystemTagVO.class)
+                    .eq(SystemTagVO_.resourceUuid, resourceUuid)
+                    .eq(SystemTagVO_.resourceType, getResourceClass().getSimpleName())
+                    .eq(SystemTagVO_.tag, useTagFormat())
+                    .find();
+        }
+
+        if (vo == null) {
+            return false;
+        }
+
+        Map<String, String> rawTokens = getTokensByTag(vo.getTag());
+        String oldTag = rawTokens == null ? null : rawTokens.get(tokenName);
+        if (oldTag == null) {
+            return false;
+        }
+
+        tagMgr.updateSystemTag(vo.getUuid(), vo.getTag().replace(oldTag, newTag));
+
+        return true;
+    }
+
+    @Override
     public SystemTagCreator newSystemTagCreator(String resUuid) {
-        if (ephemeral) {
+        if (isEphemeral()) {
             throw new OperationFailureException(inerr("ephemeral tag cannot be persisted")
                     .withOpaque("resource.uuid", resUuid)
                     .withOpaque("tag.format", tagFormat));
         }
 
-        SystemTag self = this;
+        SystemTagRuntime self = this;
 
         return new SystemTagCreator() {
             private boolean exceptionCanBeIgnored;
@@ -309,7 +451,7 @@ public class SystemTag {
                 SystemTagVO keepSameTagVO = null;
                 if (recreate) {
                     String sql;
-                    if (useOp() == Op.LIKE) {
+                    if (useLikeOp()) {
                         sql = "select t from SystemTagVO t where t.tag like :tag" +
                                 " and t.resourceUuid = :resUuid and t.inherent = :inherent" +
                                 " and t.resourceType = :resType";
@@ -425,25 +567,12 @@ public class SystemTag {
         };
     }
 
-    public SystemTag installValidator(SystemTagValidator validator) {
-        validators.add(validator);
-        return this;
-    }
-
-    public boolean isMatch(String tag) {
-        return tagFormat.equals(tag);
-    }
-
-    void validate(String resourceUuid, Class resourceType, String tag) {
-        for (SystemTagValidator validator : validators) {
-            validator.validateSystemTag(resourceUuid, resourceType, tag);
-        }
-    }
-
+    @Override
     public SystemTagInventory updateByTagUuid(String tagUuid, String newTag) {
         return tagMgr.updateSystemTag(tagUuid, newTag);
     }
 
+    @Override
     public SystemTagInventory updateUnique(String resourceUuid, String oldTag, String newTag) {
         String tagUuid = Q.New(SystemTagVO.class).eq(SystemTagVO_.resourceUuid, resourceUuid).
                 eq(SystemTagVO_.resourceType, resourceClass.getSimpleName()).like(SystemTagVO_.tag, oldTag).
@@ -455,6 +584,7 @@ public class SystemTag {
         return tagMgr.updateSystemTag(tagUuid, newTag);
     }
 
+    @Override
     public SystemTagInventory update(String resourceUuid, String newTag) {
         SimpleQuery<SystemTagVO> q = dbf.createQuery(SystemTagVO.class);
         q.select(SystemTagVO_.uuid);
@@ -471,49 +601,5 @@ public class SystemTag {
 
     public void setTagMgr(TagManager tagMgr) {
         this.tagMgr = (TagManagerImpl) tagMgr;
-    }
-
-    public List<SystemTagValidator> getValidators() {
-        return validators;
-    }
-
-    public void setValidators(List<SystemTagValidator> validators) {
-        this.validators = validators;
-    }
-
-    public SystemTag markAsEphemeral() {
-        this.ephemeral = true;
-        return this;
-    }
-
-    public SystemTag markAsAdminOnly() {
-        this.adminOnly = true;
-        return this;
-    }
-
-    public SystemTag disableClone() {
-        this.cloneable = false;
-        return this;
-    }
-
-    public SystemTag markAsSensitive() {
-        this.sensitive = true;
-        return this;
-    }
-
-    public boolean isEphemeral() {
-        return ephemeral;
-    }
-
-    public boolean isAdminOnly() {
-        return adminOnly;
-    }
-
-    public boolean isCloneable() {
-        return cloneable;
-    }
-
-    public boolean isSensitive() {
-        return sensitive;
     }
 }

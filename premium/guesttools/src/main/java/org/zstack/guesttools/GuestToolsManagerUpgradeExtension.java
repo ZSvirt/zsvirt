@@ -42,8 +42,8 @@ public class GuestToolsManagerUpgradeExtension implements Component {
                 ));
 
         Map<String, VmGuestNetworkInfoVO> infoMap = new HashMap<>();
-        List<SystemTagInventory> tagInventories = VmNicSystemTags.VM_NIC_INTERNAL_IP.getTagInventories(new ArrayList<>(nicVmMap.keySet()));
-        tagInventories.addAll(VmNicSystemTags.VM_NIC_INTERNAL_IPV6.getTagInventories(new ArrayList<>(nicVmMap.keySet())));
+        List<SystemTagInventory> tagInventories = (List) VmNicSystemTags.VM_NIC_INTERNAL_IP.getTagInventories(new ArrayList<>(nicVmMap.keySet()));
+        tagInventories.addAll((List) VmNicSystemTags.VM_NIC_INTERNAL_IPV6.getTagInventories(new ArrayList<>(nicVmMap.keySet())));
         for (SystemTagInventory tagInv : tagInventories) {
             String nicUuid = tagInv.getResourceUuid();
             String vmUuid = nicVmMap.get(nicUuid);

@@ -24,7 +24,7 @@ public class PrimaryStorageManagementNodeRecoverExtension implements ManagementN
         Map<String, PrimaryStorageVO> ps = new HashMap<>();
         Q.New(PrimaryStorageVO.class).list().forEach(it -> ps.put(((PrimaryStorageVO)it).getUuid(), (PrimaryStorageVO)it));
 
-        List<SystemTagInventory> tags = PrimaryStorageSystemTags.PRIMARY_STORAGE_GATEWAY.getTagInventories(
+        List<SystemTagInventory> tags = (List) PrimaryStorageSystemTags.PRIMARY_STORAGE_GATEWAY.getTagInventories(
                 Q.New(PrimaryStorageVO.class).select(PrimaryStorageVO_.uuid).listValues());
         return Collections.singletonMap(SystemTagVO.class.getSimpleName(), tags.stream().map(it -> {
             SystemTagNonBackupInfo info = new SystemTagNonBackupInfo();

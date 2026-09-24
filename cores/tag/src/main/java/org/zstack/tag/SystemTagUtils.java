@@ -5,6 +5,7 @@ import org.zstack.header.identity.AccessLevel;
 import org.zstack.header.identity.AccountResourceRefVO;
 import org.zstack.header.identity.AccountResourceRefVO_;
 import org.zstack.header.tag.SystemTagInventory;
+import org.zstack.header.tag.SystemTagInventoryDefinition;
 import org.zstack.header.tag.SystemTagVO;
 import org.zstack.header.tag.TagAO_;
 import org.zstack.header.tag.UserTagVO;
@@ -79,13 +80,13 @@ public class SystemTagUtils {
         if (tagToken == null || !tag.isCloneable()) {
             return;
         }
-        List<SystemTagInventory> srcTags = tag.getTagInventories(srcUuid);
+        List<? extends SystemTagInventoryDefinition> srcTags = tag.getTagInventories(srcUuid);
 
         if (srcTags == null || srcTags.isEmpty()) {
             return;
         }
 
-        for(SystemTagInventory srcTag: srcTags) {
+        for(SystemTagInventoryDefinition srcTag: srcTags) {
             SystemTagCreator creator = tag.newSystemTagCreator(destUuid);
             creator.setTagByTokens(map(e(tagToken, tag.getTokenByResourceUuid(srcUuid, tagToken))));
             creator.inherent = srcTag.isInherent();
@@ -98,7 +99,7 @@ public class SystemTagUtils {
         if (!tag.isCloneable()) {
             return;
         }
-        List<SystemTagInventory> srcTags = tag.getTagInventories(srcUuid);
+        List<? extends SystemTagInventoryDefinition> srcTags = tag.getTagInventories(srcUuid);
 
         if (srcTags == null || srcTags.isEmpty()) {
             return;
@@ -109,7 +110,7 @@ public class SystemTagUtils {
             tokenMap.put(token, tag.getTokenByResourceUuid(srcUuid, token));
         }
 
-        for(SystemTagInventory srcTag: srcTags) {
+        for(SystemTagInventoryDefinition srcTag: srcTags) {
             SystemTagCreator creator = tag.newSystemTagCreator(destUuid);
             creator.setTagByTokens(tokenMap);
             creator.inherent = srcTag.isInherent();

@@ -5,10 +5,14 @@ import java.util.Map;
 public class SensitiveTokenTagOutputHandler implements SensitiveTagOutputHandler {
     @Override
     public String desensitizeTag(SystemTag systemTag, String tag) {
-        if (!(systemTag instanceof PatternedSystemTag)) {
+        if (!systemTag.hasPattern() || !(systemTag instanceof PatternedSystemTag)) {
             return tag;
         }
         PatternedSystemTag patternedSystemTag = (PatternedSystemTag) systemTag;
+
+        if (patternedSystemTag.annotation == null) {
+            return tag;
+        }
 
         String[] sensitiveTokens = patternedSystemTag.annotation.tokens();
         if (sensitiveTokens == null || sensitiveTokens.length == 0) {

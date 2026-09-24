@@ -107,10 +107,9 @@ public class TagManagerImpl extends AbstractService implements TagManager,
                 }
 
                 boolean ephemeral = stag.isEphemeral();
-                boolean hasPattern = stag.hasPattern();
 
                 // re-create system tag to autowired components by spring framework
-                SystemTagRuntime runtime = new SystemTagRuntime(stag.getTagFormat(), stag.getResourceClass(), hasPattern);
+                SystemTagRuntime runtime = new SystemTagRuntime(stag.getTagFormat(), stag.getResourceClass());
                 runtime.setValidators(stag.getValidators());
                 stag = runtime;
 
@@ -131,7 +130,7 @@ public class TagManagerImpl extends AbstractService implements TagManager,
                     stag.disableClone();
                 }
 
-                if (f.isAnnotationPresent(SensitiveTag.class) && hasPattern) {
+                if (f.isAnnotationPresent(SensitiveTag.class) && stag.hasPattern) {
                     stag.markAsSensitive();
                     runtime.annotation = f.getAnnotation(SensitiveTag.class);
                 }
@@ -146,7 +145,7 @@ public class TagManagerImpl extends AbstractService implements TagManager,
 
     void init() {
         for (EntityType<?> entity : dbf.getEntityManager().getMetamodel().getEntities()) {
-            Class type = entity.getJavaType();
+            Class<?> type = entity.getJavaType();
             String name = type.getSimpleName();
             resourceTypeClassMap.put(name, type);
             if (logger.isTraceEnabled()) {
@@ -188,8 +187,8 @@ public class TagManagerImpl extends AbstractService implements TagManager,
 
     private String hideSensitiveInfoInTag(String tag) {
         final SystemTag systemTag = findMatchingSystemTag(tag);
-        if (systemTag != null && systemTag.hasPattern() && systemTag.isSensitive()) {
-            return ((PatternedSystemTag) systemTag).hideSensitiveInfo(tag);
+        if (systemTag != null && systemTag.hasPattern && systemTag.isSensitive()) {
+            return systemTag.hideSensitiveInfo(tag);
         }
 
         return tag;

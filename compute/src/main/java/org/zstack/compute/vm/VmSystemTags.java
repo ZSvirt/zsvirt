@@ -147,7 +147,7 @@ public class VmSystemTags {
      * Returns a plaintext tag for create/clone messages. The persist hook encrypts when vmEncryption=true.
      */
     public static String plainTagForCreateMessage(String resourceUuid, SystemTag systemTag, String rawTag) {
-        if (!(systemTag.hasPattern()) || !isSensitiveVmTag(rawTag)) {
+        if (!(systemTag.hasPattern) || !isSensitiveVmTag(rawTag)) {
             return rawTag;
         }
 
@@ -313,7 +313,7 @@ public class VmSystemTags {
 
         @Override
         public String desensitizeTag(SystemTag systemTag, String tag) {
-            if (!systemTag.hasPattern() || !(systemTag instanceof PatternedSystemTag)) {
+            if (!systemTag.hasPattern || !(systemTag instanceof PatternedSystemTag)) {
                 return tag;
             }
             PatternedSystemTag patternedSystemTag = (PatternedSystemTag) systemTag;

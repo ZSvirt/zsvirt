@@ -12,39 +12,18 @@ import org.zstack.utils.logging.CLogger;
 public class PatternedSystemTag extends SystemTag {
     private static final CLogger logger = Utils.getLogger(PatternedSystemTag.class);
 
-    public SensitiveTag annotation;
-
-    public PatternedSystemTag(String tagFormat, Class resourceClass) {
-        super(tagFormat, resourceClass, true);
+    public PatternedSystemTag(String tagFormat, Class<?> resourceClass) {
+        super(tagFormat, resourceClass);
     }
 
+    /**
+     * use {@link SystemTag#makeEphemeralTag(String)}
+     */
+    @Deprecated
     public static PatternedSystemTag makeEphemeralTag(String tagFormatWithoutPrefix) {
         String tagFormat = Tags.prefix(EPHEMERAL_TAG_PREFIX) + tagFormatWithoutPrefix;
-        PatternedSystemTag tag = new PatternedSystemTag(tagFormat, resolveEphemeralResourceClass());
+        PatternedSystemTag tag = new PatternedSystemTag(tagFormat, resourceTypeForEphemeralTag());
         tag.markAsEphemeral();
         return tag;
-    }
-
-    private static Class resolveEphemeralResourceClass() {
-        try {
-            return Class.forName("org.zstack.header.tag.SystemTagVO");
-        } catch (ClassNotFoundException e) {
-            return Object.class;
-        }
-    }
-
-    public String hideSensitiveInfo(String tag) {
-        if (annotation == null) {
-            return tag;
-        }
-        Class<? extends SensitiveTagOutputHandler> clz = annotation.customizeOutput();
-        String result = tag;
-        try {
-            SensitiveTagOutputHandler sensitiveOutputHandler = clz.newInstance();
-            result = sensitiveOutputHandler.desensitizeTag(this, tag);
-        } catch (InstantiationException | IllegalAccessException e) {
-            logger.warn("exception happened :", e);
-        }
-        return result;
     }
 }

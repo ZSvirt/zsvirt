@@ -1,4 +1,4 @@
-<!-- synced-with: README.md@e9235837 -->
+<!-- synced-with: README.md@db599ce8 -->
 <div align="center">
   <a href="https://zsvirt.io">
     <img
@@ -90,6 +90,12 @@
 ZSvirt bringt die im Unternehmenseinsatz bewährte ZSphere-Virtualisierungsengine von [ZStack](https://www.zstack-cloud.com/) in die Open-Source-Welt. Mit Unterstützung des etablierten Infrastrukturanbieters [ZStack](https://www.zstack-cloud.com/) bietet ZSvirt eine schlanke, skalierbare Plattform zum Betrieb und zur Verwaltung virtueller Maschinen ohne Herstellerbindung.
 
 Installieren Sie einen Verwaltungsknoten, verbinden Sie KVM-basierte Hosts und verwalten Sie VMs, Cluster, Speicher und Netzwerke über eine Weboberfläche, eine RESTful API (mit Terraform und Go-/Python-/Java-SDKs) oder eine CLI. Werkzeuge für die VMware-Migration — Online-Migration, OVF-Import und VMDK-Upload — sind integriert.
+
+## 🗣️ Aussprache
+
+In der Community haben wir „ZSvirt“ schon auf einige verschiedene Arten aussprechen gehört, und keine davon ist falsch. Unser Vorschlag: Verschmelzen Sie das **Z** und das **S** zu einem einzigen Laut, sodass der Name als **"Z-s Virt"** herauskommt — nahe an "zeese Virt" (etwa „sihs Wört“; das „Z-s“ als eine einzige Silbe, wie der Anfang von „Zebra“).
+
+Genau darin liegt auch der verspielte Geist des Namens: als ein Laut gelesen sagt er **"This is Virtualization"**, und das ist der Kerngedanke des Projekts. Wenn Sie ihn lieber Buchstabe für Buchstabe als **"Z-S-virt,"** lesen, funktioniert das genauso gut. Sagen Sie ihn so, wie es Ihnen am natürlichsten kommt.
 
 ## Produktrundgang
 

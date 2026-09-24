@@ -1,4 +1,4 @@
-<!-- synced-with: README.md@e9235837 -->
+<!-- synced-with: README.md@db599ce8 -->
 <div align="center">
   <a href="https://zsvirt.io">
     <img
@@ -90,6 +90,12 @@
 ZSvirt đưa bộ máy ảo hóa ZSphere của [ZStack](https://www.zstack-cloud.com/), đã được kiểm chứng trong doanh nghiệp, đến với thế giới mã nguồn mở. Với sự hỗ trợ của nhà cung cấp hạ tầng lâu năm [ZStack](https://www.zstack-cloud.com/), ZSvirt là nền tảng gọn nhẹ, có khả năng mở rộng để chạy và quản lý máy ảo mà không bị ràng buộc với nhà cung cấp.
 
 Cài đặt nút quản lý, kết nối các máy chủ KVM và quản lý VM, cụm, lưu trữ, mạng qua giao diện web, RESTful API (cùng Terraform và SDK Go/Python/Java) hoặc CLI. Công cụ di chuyển VMware được tích hợp sẵn: di chuyển trực tuyến, nhập OVF và tải lên VMDK.
+
+## 🗣️ Hướng dẫn phát âm
+
+Chúng tôi đã nghe cộng đồng phát âm ZSvirt theo vài cách khác nhau, và không cách nào là sai. Gợi ý của chúng tôi: hòa **Z** và **S** thành một âm duy nhất, để tên đọc lên thành **"Z-s Virt"** — gần với "zeese Virt" (zi-zơ Vớt).
+
+Đây cũng là nơi tinh thần vui tươi của cái tên này sống: đọc như một âm, nó nói **"This is Virtualization"**, chính là ý tưởng cốt lõi của dự án. Nếu bạn thích đọc từng chữ cái là **"Z-S-virt,"** thì cũng hoàn toàn ổn. Hãy đọc theo cách tự nhiên nhất với bạn.
 
 ## Khám phá sản phẩm
 

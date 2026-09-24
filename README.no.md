@@ -1,4 +1,4 @@
-<!-- synced-with: README.md@e9235837 -->
+<!-- synced-with: README.md@db599ce8 -->
 <div align="center">
   <a href="https://zsvirt.io">
     <img
@@ -90,6 +90,12 @@
 ZSvirt bringer [ZStack](https://www.zstack-cloud.com/) sin ZSphere-virtualiseringsmotor, utprøvd i bedrifter, til miljøet for åpen kildekode. Med støtte fra den etablerte infrastrukturleverandøren [ZStack](https://www.zstack-cloud.com/) er ZSvirt en lett og skalerbar plattform for å kjøre og administrere virtuelle maskiner uten leverandørlåsing.
 
 Installer en administrasjonsnode, koble til KVM-verter og administrer VM-er, klynger, lagring og nettverk via et webgrensesnitt, et RESTful API (med Terraform og Go/Python/Java-SDK-er) eller en CLI. Verktøy for VMware-migrering er innebygd: online-migrering, OVF-import og VMDK-opplasting.
+
+## 🗣️ Uttale
+
+Vi har hørt «ZSvirt» uttalt på flere forskjellige måter i fellesskapet, og ingen av dem er feil. Vårt forslag: Smelt **Z** og **S** sammen til én lyd, slik at navnet blir **"Z-s Virt"** — nær "zeese Virt" (omtrent «sis Vørt»; «Z-s» som én stavelse, som starten på «zebra»).
+
+Det er også der navnets lekne ånd bor: lest som én lyd sier det **"This is Virtualization"**, som er kjerneideen bak prosjektet. Hvis du foretrekker å lese det bokstav for bokstav som **"Z-S-virt,"**, fungerer det like godt. Si det slik som faller deg mest naturlig.
 
 ## Produktomvisning
 

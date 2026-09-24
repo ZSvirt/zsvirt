@@ -21,7 +21,7 @@ public class ClusterManagementNodeRecoverExtension implements ManagementNodeReco
     @Override
     public Map<String, List<NonBackupInfo>> getNonBackupInfos() {
         List<String> clusterUuids = Q.New(ClusterVO.class).select(ClusterVO_.uuid).listValues();
-        List<SystemTagInventory> tags = MevocoSystemTags.CLUSTER_MIGRATE_NETWORK_CIDR.getTagInventories(clusterUuids);
+        List<SystemTagInventory> tags = (List) MevocoSystemTags.CLUSTER_MIGRATE_NETWORK_CIDR.getTagInventories(clusterUuids);
         List<NonBackupInfo> infos = tags.stream().map(it -> {
             SystemTagNonBackupInfo info = new SystemTagNonBackupInfo();
             info.setTokenName(MevocoSystemTags.CLUSTER_MIGRATE_NETWORK_CIDR_TOKEN);
@@ -31,7 +31,7 @@ public class ClusterManagementNodeRecoverExtension implements ManagementNodeReco
             info.setResourceDescription(String.format("migrate cidr of cluster[uuid:%s]", it.getResourceUuid()));
             return info;
         }).collect(Collectors.toList());
-        infos.addAll(MevocoSystemTags.CLUSTER_CBT_BACKUP_NETWORK_CIDR.getTagInventories(clusterUuids).stream().map(it -> {
+        infos.addAll((List) MevocoSystemTags.CLUSTER_CBT_BACKUP_NETWORK_CIDR.getTagInventories(clusterUuids).stream().map(it -> {
             SystemTagNonBackupInfo info = new SystemTagNonBackupInfo();
             info.setTokenName(MevocoSystemTags.CLUSTER_CBT_BACKUP_NETWORK_CIDR_TOKEN);
             info.setTagFormat(MevocoSystemTags.CLUSTER_CBT_BACKUP_NETWORK_CIDR.getTagFormat());

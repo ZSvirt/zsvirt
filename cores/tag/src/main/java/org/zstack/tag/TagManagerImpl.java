@@ -107,17 +107,12 @@ public class TagManagerImpl extends AbstractService implements TagManager,
                 }
 
                 boolean ephemeral = stag.isEphemeral();
+                boolean hasPattern = stag.hasPattern();
 
                 // re-create system tag to autowired components by spring framework
-                if (stag instanceof PatternedSystemTag) {
-                    PatternedSystemTag ptag = new PatternedSystemTag(stag.getTagFormat(), stag.getResourceClass());
-                    ptag.setValidators(stag.getValidators());
-                    stag = ptag;
-                } else {
-                    SystemTag sstag = new SystemTag(stag.getTagFormat(), stag.getResourceClass());
-                    sstag.setValidators(stag.getValidators());
-                    stag = sstag;
-                }
+                SystemTagRuntime runtime = new SystemTagRuntime(stag.getTagFormat(), stag.getResourceClass(), hasPattern);
+                runtime.setValidators(stag.getValidators());
+                stag = runtime;
 
                 String head = findHeadForSystemTag(stag.getTagFormat());
                 List<SystemTag> list = systemTagsMap.computeIfAbsent(head, k -> new ArrayList<>());
@@ -136,12 +131,12 @@ public class TagManagerImpl extends AbstractService implements TagManager,
                     stag.disableClone();
                 }
 
-                if (f.isAnnotationPresent(SensitiveTag.class) && stag instanceof PatternedSystemTag) {
+                if (f.isAnnotationPresent(SensitiveTag.class) && hasPattern) {
                     stag.markAsSensitive();
-                    ((PatternedSystemTag) stag).annotation = f.getAnnotation(SensitiveTag.class);
+                    runtime.annotation = f.getAnnotation(SensitiveTag.class);
                 }
 
-                stag.setTagMgr(this);
+                runtime.setTagMgr(this);
                 List<SystemTag> lst = resourceTypeSystemTagMap.computeIfAbsent(
                         stag.getResourceClass().getSimpleName(), k -> new ArrayList<>());
                 lst.add(stag);
@@ -193,7 +188,7 @@ public class TagManagerImpl extends AbstractService implements TagManager,
 
     private String hideSensitiveInfoInTag(String tag) {
         final SystemTag systemTag = findMatchingSystemTag(tag);
-        if (systemTag instanceof PatternedSystemTag && systemTag.isSensitive()) {
+        if (systemTag != null && systemTag.hasPattern() && systemTag.isSensitive()) {
             return ((PatternedSystemTag) systemTag).hideSensitiveInfo(tag);
         }
 

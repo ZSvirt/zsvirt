@@ -2086,7 +2086,7 @@ public class LoadBalancerBase {
     }
 
     private <K, V> void updateLoadBalancerListenerSystemTag(PatternedSystemTag systemTag, String resourceUuid, K token, V value) {
-        SystemTagInventory systemTagInventory = systemTag.update(resourceUuid, systemTag.instantiateTag(map(e(token, value))));
+        SystemTagInventory systemTagInventory = (SystemTagInventory) systemTag.update(resourceUuid, systemTag.instantiateTag(map(e(token, value))));
 
         if (systemTagInventory == null) {
             SystemTagCreator creator = systemTag.newSystemTagCreator(resourceUuid);

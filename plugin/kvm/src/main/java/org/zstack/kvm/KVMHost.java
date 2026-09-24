@@ -3733,7 +3733,7 @@ public class KVMHost extends HostBase implements Host {
             creator.ignoreIfExisting = true;
             creator.inherent = true;
             creator.setTagByTokens(map(e(VmSystemTags.VM_SYSTEM_SERIAL_NUMBER_TOKEN, UUID.randomUUID().toString())));
-            SystemTagInventory inv = creator.create();
+            SystemTagInventory inv = (SystemTagInventory) creator.create();
             serialNumber = VmSystemTags.VM_SYSTEM_SERIAL_NUMBER.getTokenByTag(inv.getTag(), VmSystemTags.VM_SYSTEM_SERIAL_NUMBER_TOKEN);
         }
 

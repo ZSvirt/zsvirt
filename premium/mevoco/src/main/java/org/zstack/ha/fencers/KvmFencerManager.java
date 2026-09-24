@@ -28,7 +28,7 @@ public class KvmFencerManager implements VmInstanceStartExtensionPoint {
     private List<KvmFencer> fencers = new ArrayList<>();
 
     public String findVmFencedReasonByTag(String vmUuid) {
-        final SystemTagInventory tag = VM_FENCED_BY.getTagInventory(vmUuid);
+        final SystemTagInventory tag = (SystemTagInventory) VM_FENCED_BY.getTagInventory(vmUuid);
         if (tag == null) {
             return null;
         }

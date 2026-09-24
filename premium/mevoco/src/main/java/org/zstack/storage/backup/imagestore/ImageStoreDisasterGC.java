@@ -52,13 +52,13 @@ public class ImageStoreDisasterGC extends CycleBasedGarbageCollector {
         List<ImageStoreBackupStorageVO> bss = Q.New(ImageStoreBackupStorageVO.class).list();
 
         for(ImageStoreBackupStorageVO bs: bss) {
-            List<SystemTagInventory> tags = ImageStoreSystemTags.SYNC_TASK_STATUS.getTagInventories(bs.getUuid());
+            List<SystemTagInventory> tags = (List) ImageStoreSystemTags.SYNC_TASK_STATUS.getTagInventories(bs.getUuid());
             tags.forEach(tag -> findAndGcTags(tag));
         }
 
         // delete old version
         for(ImageStoreBackupStorageVO bs: bss) {
-            List<SystemTagInventory> tags = ImageStoreSystemTags.SYNC_TASK_STATUS_OLD.getTagInventories(bs.getUuid());
+            List<SystemTagInventory> tags = (List) ImageStoreSystemTags.SYNC_TASK_STATUS_OLD.getTagInventories(bs.getUuid());
             tags.forEach(tag -> dbf.removeByPrimaryKey(tag.getUuid(), SystemTagVO.class));
         }
 

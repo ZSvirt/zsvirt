@@ -14,7 +14,6 @@ import org.jsoup.select.Elements
 import org.markdown4j.Markdown4jProcessor
 import org.springframework.http.HttpMethod
 import org.zstack.core.Platform
-import org.zstack.core.config.BindResourceConfig
 import org.zstack.core.config.*
 import org.zstack.core.errorcode.ErrorFacadeImpl
 import org.zstack.header.core.NoDoc
@@ -263,7 +262,13 @@ class RestDocumentationGenerator implements DocumentGenerator {
                 } else {
                     c.setValue(StringTemplate.substitute(c.getValue(), propertiesMap))
                 }
-                GlobalConfig config = GlobalConfig.valueOf(c)
+                GlobalConfig config = new GlobalConfig(c.getCategory(), c.getName())
+                config.value = c.value
+                config.type = c.type
+                config.description = c.description
+                config.defaultValue = c.defaultValue
+                config.validatorRegularExpression = c.validatorRegularExpression
+
                 if (configs.containsKey(config.getIdentity())) {
                     throw new IllegalArgumentException(
                             String.format("duplicate GlobalConfig[category: %s, name: %s]",

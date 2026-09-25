@@ -211,7 +211,7 @@ public class ApiTimeoutManagerImpl implements ApiTimeoutManager, Component,
 
             vo.setValue(getTimeoutGlobalConfigValue(clz, vo));
 
-            results.add(GlobalConfig.valueOf(vo));
+            results.add(GlobalConfigRuntime.valueOf(vo));
         });
 
         return results;

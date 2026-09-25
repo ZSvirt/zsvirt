@@ -15,11 +15,6 @@
     <dependencies>
         <dependency>
             <groupId>org.zstack</groupId>
-            <artifactId>core</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.zstack</groupId>
             <artifactId>utils</artifactId>
             <version>${project.version}</version>
         </dependency>

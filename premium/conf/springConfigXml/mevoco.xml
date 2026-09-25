@@ -192,18 +192,6 @@
         </zstack:plugin>
     </bean>
 
-    <bean id="HostManagementNodeRecoverExtensionPoint" class="org.zstack.compute.host.HostManagementNodeRecoverExtension">
-        <zstack:plugin>
-            <zstack:extension interface="org.zstack.header.backup.ManagementNodeRecoverExtensionPoint" />
-        </zstack:plugin>
-    </bean>
-
-    <bean id="PrimaryStorageManagementNodeRecoverExtensionPoint" class="org.zstack.storage.primary.PrimaryStorageManagementNodeRecoverExtension">
-        <zstack:plugin>
-            <zstack:extension interface="org.zstack.header.backup.ManagementNodeRecoverExtensionPoint" />
-        </zstack:plugin>
-    </bean>
-
     <bean id="MevocoVolumeFactory" class="org.zstack.mevoco.MevocoVolumeFactoryImpl">
         <zstack:plugin>
             <zstack:extension interface="org.zstack.header.Component"/>

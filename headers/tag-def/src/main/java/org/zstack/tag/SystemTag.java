@@ -4,9 +4,13 @@ import org.zstack.header.tag.SystemTagInventoryDefinition;
 import org.zstack.header.tag.SystemTagLifeCycleListener;
 import org.zstack.header.tag.SystemTagOperationJudger;
 import org.zstack.header.tag.SystemTagValidator;
+import org.zstack.header.vo.ResourceVODefinition;
 import org.zstack.utils.Tags;
+import org.zstack.utils.Utils;
+import org.zstack.utils.logging.CLogger;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -17,41 +21,49 @@ import static org.zstack.utils.StringDSL.s;
  * Definition-layer system tag. Persistence / DB APIs are implemented by {@code SystemTagRuntime} in cores/tag.
  */
 public class SystemTag {
+    private static final CLogger logger = Utils.getLogger(SystemTag.class);
+
     public static final String EPHEMERAL_TAG_PREFIX = "ephemeral";
 
-    protected String tagFormat;
-    protected Class resourceClass;
-    protected boolean hasPattern;
+    public final String tagFormat;
+    public final Class<?> resourceClass;
+    public final boolean hasPattern;
     protected List<SystemTagValidator> validators = new ArrayList<>();
     protected List<SystemTagLifeCycleListener> lifeCycleListeners = new ArrayList<>();
     protected List<SystemTagOperationJudger> judgers = new ArrayList<>();
+
+    /**
+     * may use in SystemTag[hasPattern == true]
+     */
+    public SensitiveTag annotation;
 
     private boolean ephemeral = false;
     private boolean adminOnly = false;
     private boolean cloneable = true;
     private boolean sensitive = false;
 
-    public SystemTag(String tagFormat, Class resourceClass) {
-        this(tagFormat, resourceClass, false);
-    }
-
-    public SystemTag(String tagFormat, Class resourceClass, boolean hasPattern) {
+    /**
+     * TODO: resourceClass should be a class of ResourceVODefinition
+     * but there is invalid usage in BillingSystemTags
+     */
+    public SystemTag(String tagFormat, Class<?> resourceClass) {
         this.tagFormat = tagFormat;
         this.resourceClass = resourceClass;
-        this.hasPattern = hasPattern;
+        this.hasPattern = checkIfHasPattern(tagFormat);
+    }
+
+    private boolean checkIfHasPattern(String tagFormat) {
+        return Arrays.stream(Tags.split(tagFormat))
+                .anyMatch(fmtKey -> fmtKey.startsWith("{") && fmtKey.endsWith("}"));
+    }
+
+    public static Class<?> resourceTypeForEphemeralTag() {
+        return ResourceVODefinition.NopeResource.class;
     }
 
     public static SystemTag makeEphemeralTag(String tagScript) {
         String format = Tags.prefix(EPHEMERAL_TAG_PREFIX) + tagScript;
-        return new SystemTag(format, resolveSystemTagVoClass()).markAsEphemeral();
-    }
-
-    private static Class resolveSystemTagVoClass() {
-        try {
-            return Class.forName("org.zstack.header.tag.SystemTagVO");
-        } catch (ClassNotFoundException e) {
-            return Object.class;
-        }
+        return new SystemTag(format, resourceTypeForEphemeralTag()).markAsEphemeral();
     }
 
     public enum SystemTagOperation {
@@ -125,7 +137,7 @@ public class SystemTag {
         return tagFormat;
     }
 
-    public Class getResourceClass() {
+    public Class<?> getResourceClass() {
         return resourceClass;
     }
 
@@ -149,6 +161,21 @@ public class SystemTag {
             return null;
         }
         return tokens.get(tokenName);
+    }
+
+    public String hideSensitiveInfo(String tag) {
+        if (!hasPattern || annotation == null) {
+            return tag;
+        }
+        Class<? extends SensitiveTagOutputHandler> clz = annotation.customizeOutput();
+        String result = tag;
+        try {
+            SensitiveTagOutputHandler sensitiveOutputHandler = clz.newInstance();
+            result = sensitiveOutputHandler.desensitizeTag(this, tag);
+        } catch (InstantiationException | IllegalAccessException e) {
+            logger.warn("exception happened:", e);
+        }
+        return result;
     }
 
     public SystemTagCreator newSystemTagCreator(String resUuid) {

@@ -36,12 +36,6 @@
         </zstack:plugin>
     </bean>
 
-    <bean id="ImageStoreManagementNodeRecoverExtension" class="org.zstack.storage.backup.imagestore.ImageStoreManagementNodeRecoverExtension">
-        <zstack:plugin>
-            <zstack:extension interface="org.zstack.header.backup.ManagementNodeRecoverExtensionPoint" />
-        </zstack:plugin>
-    </bean>
-
     <bean id="ImageStoreBackupStorageApiInterceptor" class="org.zstack.storage.backup.imagestore.ImageStoreBackupStorageApiInterceptor">
 	    <zstack:plugin>
 		    <zstack:extension interface="org.zstack.header.apimediator.ApiMessageInterceptor" />

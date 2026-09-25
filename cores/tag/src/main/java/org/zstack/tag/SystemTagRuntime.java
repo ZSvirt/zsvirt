@@ -41,13 +41,8 @@ public class SystemTagRuntime extends PatternedSystemTag {
     // TagManager must be explicitly set. use @Autowired will cause circular dependency
     protected TagManagerImpl tagMgr;
 
-    public SystemTagRuntime(String tagFormat, Class resourceClass, boolean hasPattern) {
+    public SystemTagRuntime(String tagFormat, Class<?> resourceClass) {
         super(tagFormat, resourceClass);
-        this.hasPattern = hasPattern;
-    }
-
-    public SystemTagRuntime(String tagFormat, Class resourceClass) {
-        this(tagFormat, resourceClass, true);
     }
 
     @Override

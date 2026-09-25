@@ -2323,13 +2323,6 @@
     "fileName": "src/main/java/org/zstack/ha/fencers/KvmFencerManager.java"
   },
   {
-    "raw": "enter the new value here, empty means no change.",
-    "en_US": "enter the new value here, empty means no change.",
-    "zh_CN": "在此输入新值，空表示不变。",
-    "arguments": [],
-    "fileName": "src/main/java/org/zstack/header/backup/NonBackupInfo.java"
-  },
-  {
     "raw": "some error happened, skip management node power off",
     "en_US": "some error happened, skip management node power off",
     "zh_CN": "某些错误发生，跳过管理节点关机",

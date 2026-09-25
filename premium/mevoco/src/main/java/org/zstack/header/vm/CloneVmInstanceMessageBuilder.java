@@ -11,7 +11,7 @@ import org.zstack.compute.vm.VmSystemTags;
 import org.zstack.core.Platform;
 import org.zstack.core.db.Q;
 import org.zstack.core.db.SimpleQuery;
-import org.zstack.ha.HaSystemTags;
+import org.zstack.ha.header.HaSystemTags;
 import org.zstack.header.apimediator.ApiMessageInterceptionException;
 import org.zstack.header.configuration.ConfigAO;
 import org.zstack.header.image.ImagePlatform;

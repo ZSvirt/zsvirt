@@ -4,7 +4,7 @@ import org.zstack.ha.header.VmHaLevel;
 
 import java.util.Objects;
 
-public interface VmHAExecutor {
+public interface VmHaVOUpdater {
     default VmHAExecutorParameters setHALevelForVM(String vmUuid) {
         return new VmHAExecutorParameters(vmUuid, this);
     }
@@ -12,12 +12,12 @@ public interface VmHAExecutor {
 
     public class VmHAExecutorParameters {
         private final String vmUuid;
-        private final VmHAExecutor parent;
+        private final VmHaVOUpdater parent;
         private VmHaLevel HaLevelTo;
         private boolean inhibitHA;
         private String inhibitHAReason;
 
-        private VmHAExecutorParameters(String vmUuid, VmHAExecutor parent) {
+        private VmHAExecutorParameters(String vmUuid, VmHaVOUpdater parent) {
             this.vmUuid = Objects.requireNonNull(vmUuid);
             this.parent = Objects.requireNonNull(parent);
         }

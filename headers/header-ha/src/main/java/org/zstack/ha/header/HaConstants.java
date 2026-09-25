@@ -20,4 +20,8 @@ public interface HaConstants {
     String KVM_FENCER_SHARED_BLOCK = "shareblockFencer";
     String KVM_FENCER_FILE_SYSTEM = "fileSystemFencer";
     String KVM_FENCER_CEPH = "cephFencer";
+
+    // agent call path
+    String ADD_VM_FENCER_RULE_TO_HOST = "/add/vm/fencer/rule/to/host";
+    String REMOVE_VM_FENCER_RULE_FROM_HOST = "/remove/vm/fencer/rule/from/host";
 }

@@ -1,7 +1,7 @@
 package org.zstack.mevoco;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.zstack.ha.spi.VmHAExecutor;
+import org.zstack.ha.spi.VmHaVOUpdater;
 import org.zstack.header.core.workflow.Flow;
 import org.zstack.header.core.workflow.FlowTrigger;
 import org.zstack.header.core.workflow.NoRollbackFlow;
@@ -17,7 +17,7 @@ import java.util.Map;
  */
 public class VirtualRouterSetHaLevelExtension implements VirtualRouterPostCreateFlowExtensionPoint, VyosPostCreateFlowExtensionPoint {
     @Autowired
-    VmHAExecutor vmHAExecutor;
+    VmHaVOUpdater vmHAExecutor;
 
     private Flow getSetHaLevelFlow() {
         return new NoRollbackFlow() {

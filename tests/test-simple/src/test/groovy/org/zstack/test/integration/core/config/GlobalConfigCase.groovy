@@ -152,7 +152,7 @@ class GlobalConfigCase extends SubCase {
 
     void testFloatPointNumberTolerance() {
         // test if the global config can convert float to int
-        KVMGlobalConfig.VM_MIGRATION_QUANTITY.@value = 1.0
+        KVMGlobalConfig.VM_MIGRATION_QUANTITY.value = 1.0
         assert KVMGlobalConfig.VM_MIGRATION_QUANTITY.value(int.class) == 1
     }
 

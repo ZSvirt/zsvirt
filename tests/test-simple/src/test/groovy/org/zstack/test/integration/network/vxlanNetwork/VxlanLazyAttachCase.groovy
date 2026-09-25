@@ -141,7 +141,7 @@ class VxlanLazyAttachCase extends SubCase {
         def zone = env.inventoryByName("zone") as ZoneInventory
         def cluster = env.inventoryByName("cluster1") as ClusterInventory
 
-        VxlanNetworkGlobalConfig.CLUSTER_LAZY_ATTACH.@value = true;
+        VxlanNetworkGlobalConfig.CLUSTER_LAZY_ATTACH.value = true;
         assert VxlanNetworkGlobalConfig.CLUSTER_LAZY_ATTACH.value(boolean .class) == true
 
         L2VxlanNetworkPoolInventory poolinv = createL2VxlanNetworkPool {
@@ -250,8 +250,8 @@ class VxlanLazyAttachCase extends SubCase {
         def host1 = env.inventoryByName("kvm1") as KVMHostInventory
         def host2 = env.inventoryByName("kvm2") as KVMHostInventory
 
-        VxlanNetworkGlobalConfig.CLUSTER_LAZY_ATTACH.@value = false;
-        assert VxlanNetworkGlobalConfig.CLUSTER_LAZY_ATTACH.value(boolean .class) == false
+        VxlanNetworkGlobalConfig.CLUSTER_LAZY_ATTACH.value = false;
+        assert VxlanNetworkGlobalConfig.CLUSTER_LAZY_ATTACH.value(boolean.class) == false
 
 
         env.simulator(VxlanNetworkPoolConstant.VXLAN_KVM_REALIZE_L2VXLAN_NETWORK_PATH) { HttpEntity<String> entity, EnvSpec spec ->

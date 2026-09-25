@@ -89,7 +89,7 @@ public class GlobalConfigFacadeImpl extends AbstractService implements GlobalCon
         try {
             globalConfig.updateValue(msg.getValue());
 
-            GlobalConfigInventory inv = GlobalConfigInventory.valueOf(globalConfig.reload());
+            GlobalConfigInventory inv = GlobalConfigInventory.valueOf(((GlobalConfigRuntime) globalConfig).reload());
             pluginRgty.getExtensionList(AfterUpdateClobalConfigExtensionPoint.class).forEach(point -> point.saveSaveEncryptAfterUpdateClobalConfig(inv));
             evt.setInventory(inv);
         } catch (GlobalConfigException e) {
@@ -202,7 +202,7 @@ public class GlobalConfigFacadeImpl extends AbstractService implements GlobalCon
                         continue;
                     }
                     String defaultValue = StringTemplate.substitute(d.defaultValue, propertiesMap);
-                    GlobalConfig c = GlobalConfig.valueOf(d);
+                    GlobalConfig c = GlobalConfigRuntime.valueOf(d);
                     c.setDefaultValue(defaultValue);
                     c.setValue(defaultValue);
                     configsFromXml.put(c.getIdentity(), c);
@@ -211,7 +211,7 @@ public class GlobalConfigFacadeImpl extends AbstractService implements GlobalCon
 
             private void initAllConfig() {
                 for (GlobalConfig config : configsFromXml.values()) {
-                    config.init();
+                    ((GlobalConfigRuntime) config).init();
                 }
             }
 
@@ -277,7 +277,7 @@ public class GlobalConfigFacadeImpl extends AbstractService implements GlobalCon
                     }
 
                     logger.debug(String.format("Add a new global config to database: %s", config.toString()));
-                    toSave.add(config.toVO());
+                    toSave.add(((GlobalConfigRuntime) config).toVO());
                 }
 
                 for (GlobalConfig config : configsFromDatabase.values()) {
@@ -337,16 +337,19 @@ public class GlobalConfigFacadeImpl extends AbstractService implements GlobalCon
             private void loadConfigFromAutoGeneration() {
                 for (GlobalConfigInitExtensionPoint ext : pluginRgty.getExtensionList(GlobalConfigInitExtensionPoint.class)) {
                     List<GlobalConfig> tmp = ext.getGenerationGlobalConfig();
-                    Optional.ofNullable(tmp).ifPresent(configs -> configs.forEach(it ->
-                            configsFromXml.put(it.getIdentity(), it)
-                    ));
+                    Optional.ofNullable(tmp).ifPresent(configs -> configs.forEach(it -> {
+                        GlobalConfigRuntime rt = it instanceof GlobalConfigRuntime
+                                ? (GlobalConfigRuntime) it
+                                : GlobalConfigRuntime.valueOf(it);
+                        configsFromXml.put(rt.getIdentity(), rt);
+                    }));
                 }
             }
 
             private void loadConfigFromDatabase() {
                 List<GlobalConfigVO> vos = dbf.listAll(GlobalConfigVO.class);
                 for (GlobalConfigVO vo : vos) {
-                    GlobalConfig c = GlobalConfig.valueOf(vo);
+                    GlobalConfig c = GlobalConfigRuntime.valueOf(vo);
                     configsFromDatabase.put(c.getIdentity(), c);
                 }
             }
@@ -480,18 +483,18 @@ public class GlobalConfigFacadeImpl extends AbstractService implements GlobalCon
                 GlobalConfig xmlConfig = configsFromXml.get(old.getIdentity());
                 DebugUtils.Assert(xmlConfig != null, String.format("unable to find GlobalConfig[category:%s, name:%s] for linking to %s.%s",
                         old.getCategory(), old.getName(), field.getDeclaringClass().getName(), field.getName()));
-                final GlobalConfig config;
-                if (old.getEvtf() == null) {
-                    if (xmlConfig.getEvtf() != null) {
-                        config = xmlConfig;
+                final GlobalConfigRuntime config;
+                if (!old.isSpringReady()) {
+                    if (xmlConfig.isSpringReady()) {
+                        config = (GlobalConfigRuntime) xmlConfig;
                     } else {
-                        config = new GlobalConfig();
+                        config = new GlobalConfigRuntime();
                         config.copy(xmlConfig);
                     }
                     logger.debug(String.format("GlobalConfig[category: %s, name: %s] static field was initialized before Spring autowiring, relink to autowired instance",
                             config.getCategory(), config.getName()));
                 } else {
-                    config = old.copy(xmlConfig);
+                    config = (GlobalConfigRuntime) old.copy(xmlConfig);
                 }
                 field.set(null, config);
                 // all global config base on Field allConfig which is origin from configsFromXml, so update its value
@@ -673,7 +676,7 @@ public class GlobalConfigFacadeImpl extends AbstractService implements GlobalCon
     @Deprecated
     public GlobalConfig createGlobalConfig(GlobalConfigVO vo) {
         vo = dbf.persistAndRefresh(vo);
-        GlobalConfig c = GlobalConfig.valueOf(vo);
+        GlobalConfig c = GlobalConfigRuntime.valueOf(vo);
         allConfig.put(GlobalConfig.produceIdentity(vo.getCategory(), vo.getName()), c);
         return c;
     }

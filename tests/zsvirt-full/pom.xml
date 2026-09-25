@@ -56,11 +56,6 @@
         </dependency>
         <dependency>
             <groupId>org.zstack</groupId>
-            <artifactId>header-ha</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.zstack</groupId>
             <artifactId>identity</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -177,6 +172,43 @@
         <dependency>
             <groupId>org.zstack</groupId>
             <artifactId>sdk</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!-- headers modules -->
+        <dependency>
+            <groupId>org.zstack</groupId>
+            <artifactId>description</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.zstack</groupId>
+            <artifactId>global-config-def</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.zstack</groupId>
+            <artifactId>tag-def</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.zstack</groupId>
+            <artifactId>messages</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.zstack</groupId>
+            <artifactId>header-ha</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.zstack</groupId>
+            <artifactId>header-pci</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.zstack</groupId>
+            <artifactId>header-usb</artifactId>
             <version>${project.version}</version>
         </dependency>
 

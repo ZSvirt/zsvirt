@@ -19,6 +19,8 @@
         <module>global-config-def</module>
         <module>tag-def</module>
         <module>header-ha</module>
+        <module>header-pci</module>
+        <module>header-usb</module>
     </modules>
 
     <build>

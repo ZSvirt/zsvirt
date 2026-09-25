@@ -1,7 +1,7 @@
 package org.zstack.ha.fencers;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.zstack.ha.HaSystemTags;
+import org.zstack.ha.header.HaSystemTags;
 import org.zstack.ha.SelfFencerKvmBackend;
 import org.zstack.header.errorcode.ErrorCode;
 import org.zstack.header.tag.SystemTagInventory;
@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.zstack.core.Platform.i18n;
-import static org.zstack.ha.HaSystemTags.VM_FENCED_BY;
+import static org.zstack.ha.header.HaSystemTags.VM_FENCED_BY;
 import static org.zstack.ha.header.HaGlobalConfig.*;
 import static org.zstack.utils.CollectionDSL.e;
 import static org.zstack.utils.CollectionDSL.map;

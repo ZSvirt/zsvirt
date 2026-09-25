@@ -2,7 +2,7 @@ package org.zstack.pluginpremium.externalapiadapter.api.ecs.instance
 
 import org.apache.commons.lang.StringUtils
 import org.zstack.compute.vm.VmSystemTags
-import org.zstack.ha.HaSystemTags
+import org.zstack.ha.header.HaSystemTags
 import org.zstack.ha.header.VmHaLevel
 import org.zstack.header.affinitygroup.AffinityGroupSystemTags
 import org.zstack.pluginpremium.externalapiadapter.ExternalAPIAdapterUtils

@@ -12,6 +12,7 @@ import org.zstack.appliancevm.ApplianceVmStatus;
 import org.zstack.compute.vm.BeforeStopVmOnHypervisorExtensionPoint;
 import org.zstack.core.Platform;
 import org.zstack.core.timeout.TimeHelper;
+import org.zstack.ha.entity.HaCommands;
 import org.zstack.ha.entity.HaStrategyConditionInventory;
 import org.zstack.ha.entity.HaStrategyConditionVO;
 import org.zstack.ha.entity.HaStrategyConditionVO_;
@@ -128,7 +129,7 @@ public class HaManager extends AbstractService implements Component, HaCompletio
     @Autowired
     private ResourceConfigFacade rcf;
     @Autowired
-    private VmHAExecutor vmHAExecutor;
+    private VmHaVOUpdater vmHAExecutor;
     @Autowired
     private KvmFencerManager fencerManager;
     @Autowired
@@ -140,8 +141,6 @@ public class HaManager extends AbstractService implements Component, HaCompletio
     private final static Map<String, Boolean> haStatus = new HashMap<>();
     private List<String> updateHostStatusPrimaryStorages;
 
-    public static final String ADD_VM_FENCER_RULE_TO_HOST = "/add/vm/fencer/rule/to/host";
-    public static final String REMOVE_VM_FENCER_RULE_FROM_HOST = "/remove/vm/fencer/rule/from/host";
     private Cache<String, String> apiStopVmCache = CacheBuilder.newBuilder().
             maximumSize(1000).expireAfterAccess(10, TimeUnit.MINUTES).build();
 
@@ -340,27 +339,6 @@ public class HaManager extends AbstractService implements Component, HaCompletio
                 .inhibitHATemporarily("KVM reporting VM shutdown")
                 .update();
     }
-
-    public static class AddVmFencerRuleToHostCmd extends KVMAgentCommands.AgentCommand {
-        public String hostUuid;
-        private List<VmRuleAttachFencer> allowRules;
-        private List<VmRuleAttachFencer> blockRules;
-    }
-
-    public static class AddVmFencerRuleToHostRsp extends KVMAgentCommands.AgentResponse {
-
-    }
-
-    public static class RemoveVmFencerRuleFromHostCmd extends KVMAgentCommands.AgentCommand {
-        public String hostUuid;
-        private List<VmRuleAttachFencer> allowRules;
-        private List<VmRuleAttachFencer> blockRules;
-    }
-
-    public static class RemoveVmFencerRuleFromHostRsp extends KVMAgentCommands.AgentResponse {
-
-    }
-
 
     public List<String> getUpdateHostStatusPrimaryStorages() {
         return updateHostStatusPrimaryStorages;
@@ -1484,7 +1462,7 @@ public class HaManager extends AbstractService implements Component, HaCompletio
     }
 
     private void handle(RemoveVmFencerRuleFromHostMsg msg) {
-        RemoveVmFencerRuleFromHostCmd cmd = new RemoveVmFencerRuleFromHostCmd();
+        HaCommands.RemoveVmFencerRuleFromHostCmd cmd = new HaCommands.RemoveVmFencerRuleFromHostCmd();
         cmd.allowRules = msg.getAllowRules();
         cmd.blockRules = msg.getBlockRules();
         cmd.hostUuid = msg.getHostUuid();
@@ -1492,7 +1470,7 @@ public class HaManager extends AbstractService implements Component, HaCompletio
         KVMHostAsyncHttpCallMsg callMsg = new KVMHostAsyncHttpCallMsg();
         callMsg.setCommand(cmd);
         callMsg.setHostUuid(cmd.hostUuid);
-        callMsg.setPath(REMOVE_VM_FENCER_RULE_FROM_HOST);
+        callMsg.setPath(HaCommands.RemoveVmFencerRuleFromHostCmd.PATH);
         bus.makeTargetServiceIdByResourceUuid(callMsg, HostConstant.SERVICE_ID, msg.getHostUuid());
         bus.send(callMsg, new CloudBusCallBack(msg) {
             @Override
@@ -1513,7 +1491,7 @@ public class HaManager extends AbstractService implements Component, HaCompletio
     }
 
     private void handle(AddVmFencerRuleToHostMsg msg) {
-        AddVmFencerRuleToHostCmd cmd = new AddVmFencerRuleToHostCmd();
+        HaCommands.AddVmFencerRuleToHostCmd cmd = new HaCommands.AddVmFencerRuleToHostCmd();
         cmd.allowRules = msg.getAllowRules();
         cmd.blockRules = msg.getBlockRules();
         cmd.hostUuid = msg.getHostUuid();
@@ -1521,7 +1499,7 @@ public class HaManager extends AbstractService implements Component, HaCompletio
         KVMHostAsyncHttpCallMsg callMsg = new KVMHostAsyncHttpCallMsg();
         callMsg.setCommand(cmd);
         callMsg.setHostUuid(cmd.hostUuid);
-        callMsg.setPath(ADD_VM_FENCER_RULE_TO_HOST);
+        callMsg.setPath(HaCommands.AddVmFencerRuleToHostCmd.PATH);
         bus.makeTargetServiceIdByResourceUuid(callMsg, HostConstant.SERVICE_ID, msg.getHostUuid());
         bus.send(callMsg, new CloudBusCallBack(msg) {
             @Override

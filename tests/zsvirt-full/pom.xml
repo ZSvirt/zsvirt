@@ -176,12 +176,19 @@
         </dependency>
         <dependency>
             <groupId>org.zstack</groupId>
+            <artifactId>sdk</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!-- platforms modules -->
+        <dependency>
+            <groupId>org.zstack</groupId>
             <artifactId>telemetry</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.zstack</groupId>
-            <artifactId>sdk</artifactId>
+            <artifactId>ha</artifactId>
             <version>${project.version}</version>
         </dependency>
 

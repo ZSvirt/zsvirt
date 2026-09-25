@@ -15,8 +15,8 @@
         http://zstack.org/schema/zstack/plugin.xsd"
     default-init-method="init" default-destroy-method="destroy">
 
-    <bean id="VmHAExecutor" class="org.zstack.ha.VmHAExecutorImpl"/>
-    
+    <bean id="VmHaVOUpdater" class="org.zstack.ha.VmHaVOUpdaterImpl"/>
+
     <bean id="HaKvmFactory" class="org.zstack.ha.HaKvmFactory" >
         <zstack:plugin>
             <zstack:extension interface="org.zstack.ha.spi.HaHypervisorFactory" />

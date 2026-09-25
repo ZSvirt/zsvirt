@@ -8,8 +8,8 @@ import org.zstack.ha.entity.VmHaVO;
 import org.zstack.ha.entity.VmHaVO_;
 import org.zstack.ha.header.HaSystemTags;
 import org.zstack.ha.header.VmHaLevel;
+import org.zstack.ha.spi.VmHaVOUpdater;
 import org.zstack.ha.spi.VmInstanceHaLevelExtensionPoint;
-import org.zstack.ha.spi.VmHAExecutor;
 import org.zstack.tag.SystemTagCreator;
 import org.zstack.utils.CollectionUtils;
 import org.zstack.utils.Utils;
@@ -22,8 +22,8 @@ import static org.zstack.ha.header.VmHaLevel.*;
 import static org.zstack.utils.CollectionDSL.e;
 import static org.zstack.utils.CollectionDSL.map;
 
-public class VmHAExecutorImpl implements VmHAExecutor {
-    private static final CLogger logger = Utils.getLogger(VmHAExecutorImpl.class);
+public class VmHaVOUpdaterImpl implements VmHaVOUpdater {
+    private static final CLogger logger = Utils.getLogger(VmHaVOUpdaterImpl.class);
 
     @Autowired
     private PluginRegistry pluginRegistry;

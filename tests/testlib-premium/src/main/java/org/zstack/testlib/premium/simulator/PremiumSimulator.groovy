@@ -6,8 +6,8 @@ import org.zstack.compute.host.MevocoKVMAgentCommands
 import org.zstack.compute.host.MevocoKVMConstant
 import org.zstack.core.Platform
 import org.zstack.core.db.Q
-import org.zstack.ha.HaManager
 import org.zstack.ha.SelfFencerKvmBackend
+import org.zstack.ha.entity.HaCommands
 import org.zstack.header.agent.AgentResponse
 import org.zstack.header.storage.primary.PrimaryStorageVO
 import org.zstack.header.storage.primary.PrimaryStorageVO_
@@ -421,12 +421,12 @@ class PremiumSimulator implements Simulator {
             return new MevocoKVMAgentCommands.DelScsiControllerRsp()
         }
 
-        spec.simulator(HaManager.ADD_VM_FENCER_RULE_TO_HOST) {
-            return new HaManager.AddVmFencerRuleToHostRsp()
+        spec.simulator(HaCommands.AddVmFencerRuleToHostCmd.PATH) {
+            return new HaCommands.AddVmFencerRuleToHostRsp()
         }
 
-        spec.simulator(HaManager.REMOVE_VM_FENCER_RULE_FROM_HOST) {
-            return new HaManager.RemoveVmFencerRuleFromHostRsp()
+        spec.simulator(HaCommands.RemoveVmFencerRuleFromHostCmd.PATH) {
+            return new HaCommands.RemoveVmFencerRuleFromHostRsp()
         }
 
         spec.simulator(L2NetworkMacVlanConstant.KVM_CHECK_L2VLAN_NETWORK_MACVLAN_PATH) {

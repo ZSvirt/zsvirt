@@ -36,7 +36,7 @@
 
     <bean id="MttyDeviceKvmBackend" class="org.zstack.mttyDevice.KvmMttyDeviceBackend.MttyDeviceKvmBackend">
         <zstack:plugin>
-            <zstack:extension interface="org.zstack.mttyDevice.MttyDeviceBackend"/>
+            <zstack:extension interface="org.zstack.mttyDevice.spi.MttyDeviceBackend"/>
         </zstack:plugin>
     </bean>
 </beans>

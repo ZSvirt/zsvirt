@@ -1,6 +1,9 @@
-package org.zstack.mttyDevice;
+package org.zstack.mttyDevice.entity;
 
 import org.zstack.header.vo.ResourceVO_;
+import org.zstack.mttyDevice.header.MttyDeviceState;
+import org.zstack.mttyDevice.header.MttyDeviceType;
+import org.zstack.mttyDevice.header.MttyDeviceVirtStatus;
 
 import javax.persistence.metamodel.SingularAttribute;
 import javax.persistence.metamodel.StaticMetamodel;

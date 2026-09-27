@@ -4,10 +4,11 @@ import org.springframework.http.HttpMethod;
 import org.zstack.header.query.APIQueryMessage;
 import org.zstack.header.query.AutoQuery;
 import org.zstack.header.rest.RestRequest;
+import org.zstack.mttyDevice.entity.MttyDeviceInventory;
 
 import java.util.List;
-import static java.util.Arrays.asList;
 
+import static java.util.Arrays.asList;
 
 @AutoQuery(replyClass = APIQueryMttyDeviceReply.class, inventoryClass = MttyDeviceInventory.class)
 @RestRequest(

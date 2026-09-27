@@ -7,7 +7,7 @@ import org.zstack.header.query.ExpandedQueries;
 import org.zstack.header.query.ExpandedQuery;
 import org.zstack.header.search.Inventory;
 import org.zstack.header.vm.VmInstanceInventory;
-import org.zstack.mttyDevice.MttyDeviceInventory;
+import org.zstack.mttyDevice.entity.MttyDeviceInventory;
 import org.zstack.pciDevice.PciDeviceInventory;
 import org.zstack.pciDevice.specification.mdev.MdevDeviceSpecInventory;
 

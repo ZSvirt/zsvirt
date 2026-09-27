@@ -3,24 +3,24 @@ package org.zstack.mttyDevice;
 import org.springframework.http.HttpMethod;
 import org.zstack.header.message.APIMessage;
 import org.zstack.header.message.APIParam;
+import org.zstack.header.rest.APINoSee;
 import org.zstack.header.rest.RestRequest;
+import org.zstack.mttyDevice.entity.MttyDeviceVO;
 
-/**
- * @author yu.sun
- * @date 2022/11/22 14:12
- **/
+import java.util.List;
+
 @RestRequest(
         path = "/mtty-devices/{mttyDeviceUuid}/actions",
         method = HttpMethod.PUT,
-        responseClass = APIGenerateSeMdevDevicesEvent.class,
+        responseClass = APIUngenerateSeMdevDevicesEvent.class,
         isAction = true
 )
-public class APIGenerateSeMdevDevicesMsg extends APIMessage {
+public class APIUngenerateSeMdevDevicesMsg extends APIMessage {
     @APIParam(resourceType = MttyDeviceVO.class)
     private String mttyDeviceUuid;
 
-    @APIParam
-    private Integer virtPartNum;
+    @APINoSee
+    private List<String> mdevUuids;
 
     public String getMttyDeviceUuid() {
         return mttyDeviceUuid;
@@ -30,18 +30,17 @@ public class APIGenerateSeMdevDevicesMsg extends APIMessage {
         this.mttyDeviceUuid = mttyDeviceUuid;
     }
 
-    public Integer getVirtPartNum() {
-        return virtPartNum;
+    public List<String> getMdevUuids() {
+        return mdevUuids;
     }
 
-    public void setVirtPartNum(Integer virtPartNum) {
-        this.virtPartNum = virtPartNum;
+    public void setMdevUuids(List<String> mdevUuids) {
+        this.mdevUuids = mdevUuids;
     }
-
-    public static APIGenerateSeMdevDevicesMsg __example__() {
-        APIGenerateSeMdevDevicesMsg msg = new APIGenerateSeMdevDevicesMsg();
+    
+    public static APIUngenerateSeMdevDevicesMsg __example__() {
+        APIUngenerateSeMdevDevicesMsg msg = new APIUngenerateSeMdevDevicesMsg();
         msg.setMttyDeviceUuid(uuid());
-        msg.setVirtPartNum(4);
         return msg;
     }
 }

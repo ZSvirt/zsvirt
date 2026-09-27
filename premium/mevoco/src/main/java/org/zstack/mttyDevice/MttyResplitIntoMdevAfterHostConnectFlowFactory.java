@@ -12,6 +12,10 @@ import org.zstack.header.errorcode.ErrorCodeList;
 import org.zstack.header.host.HostInventory;
 import org.zstack.pciDevice.virtual.vfio_mdev.MdevDeviceVO;
 import org.zstack.pciDevice.virtual.vfio_mdev.MdevDeviceVO_;
+import org.zstack.mttyDevice.entity.MttyDeviceVO;
+import org.zstack.mttyDevice.entity.MttyDeviceVO_;
+import org.zstack.mttyDevice.header.MttyDeviceVirtStatus;
+import org.zstack.mttyDevice.spi.MttyDeviceBackend;
 import org.zstack.utils.Utils;
 import org.zstack.utils.logging.CLogger;
 

@@ -1,8 +1,8 @@
-package org.zstack.mttyDevice
+package org.zstack.mttyDevice.entity
 
-import org.zstack.mttyDevice.MttyDeviceType
-import org.zstack.mttyDevice.MttyDeviceState
-import org.zstack.mttyDevice.MttyDeviceVirtStatus
+import org.zstack.mttyDevice.header.MttyDeviceType
+import org.zstack.mttyDevice.header.MttyDeviceState
+import org.zstack.mttyDevice.header.MttyDeviceVirtStatus
 import java.sql.Timestamp
 import java.sql.Timestamp
 
@@ -36,7 +36,7 @@ doc {
 	}
 	ref {
 		name "type"
-		path "org.zstack.mttyDevice.MttyDeviceInventory.type"
+		path "org.zstack.mttyDevice.entity.MttyDeviceInventory.type"
 		desc "MTTY 设备类型"
 		type "MttyDeviceType"
 		since "zsv_3.15.11"
@@ -44,7 +44,7 @@ doc {
 	}
 	ref {
 		name "state"
-		path "org.zstack.mttyDevice.MttyDeviceInventory.state"
+		path "org.zstack.mttyDevice.entity.MttyDeviceInventory.state"
 		desc "MTTY 设备启用状态"
 		type "MttyDeviceState"
 		since "zsv_3.15.11"
@@ -52,7 +52,7 @@ doc {
 	}
 	ref {
 		name "virtStatus"
-		path "org.zstack.mttyDevice.MttyDeviceInventory.virtStatus"
+		path "org.zstack.mttyDevice.entity.MttyDeviceInventory.virtStatus"
 		desc "MTTY 设备虚拟类型"
 		type "MttyDeviceVirtStatus"
 		since "zsv_3.15.11"

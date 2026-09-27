@@ -1,6 +1,6 @@
 package org.zstack.mttyDevice
 
-import org.zstack.mttyDevice.MttyDeviceInventory
+import org.zstack.mttyDevice.entity.MttyDeviceInventory
 import org.zstack.header.errorcode.ErrorCode
 
 doc {

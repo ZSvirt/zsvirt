@@ -10,7 +10,7 @@ import org.zstack.header.vo.EntityGraph;
 import org.zstack.header.vo.ForeignKey;
 import org.zstack.header.vo.Index;
 import org.zstack.header.vo.*;
-import org.zstack.mttyDevice.MttyDeviceVO;
+import org.zstack.mttyDevice.entity.MttyDeviceVO;
 import org.zstack.pciDevice.PciDeviceVO;
 import org.zstack.pciDevice.specification.mdev.MdevDeviceSpecVO;
 

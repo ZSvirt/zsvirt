@@ -1,4 +1,4 @@
-package org.zstack.mttyDevice;
+package org.zstack.mttyDevice.message;
 
 import org.zstack.header.message.MessageReply;
 

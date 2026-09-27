@@ -1,6 +1,6 @@
 package org.zstack.pciDevice.virtual.vfio_mdev;
 
-import org.zstack.mttyDevice.MttyDeviceConstants;
+import org.zstack.mttyDevice.header.MttyDeviceConstants;
 import org.zstack.pciDevice.PciDeviceConstants;
 
 /**

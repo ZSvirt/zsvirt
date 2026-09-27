@@ -1,8 +1,6 @@
-package org.zstack.mttyDevice;
+package org.zstack.mttyDevice.message;
 
 import org.zstack.header.message.NeedReplyMessage;
-
-import java.util.List;
 
 public class SyncMttyDeviceMsg extends NeedReplyMessage {
     String hostUuid;

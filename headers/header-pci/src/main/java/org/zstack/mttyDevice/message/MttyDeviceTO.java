@@ -1,4 +1,6 @@
-package org.zstack.mttyDevice;
+package org.zstack.mttyDevice.message;
+
+import org.zstack.mttyDevice.entity.MttyDeviceVO;
 
 import java.io.Serializable;
 import java.util.ArrayList;

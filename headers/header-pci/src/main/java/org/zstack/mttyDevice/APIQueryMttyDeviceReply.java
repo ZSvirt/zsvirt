@@ -2,6 +2,7 @@ package org.zstack.mttyDevice;
 
 import org.zstack.header.query.APIQueryReply;
 import org.zstack.header.rest.RestResponse;
+import org.zstack.mttyDevice.entity.MttyDeviceInventory;
 
 import java.util.Collections;
 import java.util.List;

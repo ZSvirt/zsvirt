@@ -1,4 +1,4 @@
-package org.zstack.mttyDevice;
+package org.zstack.mttyDevice.entity;
 
 import org.zstack.header.host.HostEO;
 import org.zstack.header.host.HostVO;
@@ -6,6 +6,9 @@ import org.zstack.header.identity.OwnedByAccount;
 import org.zstack.header.vo.EntityGraph;
 import org.zstack.header.vo.ForeignKey;
 import org.zstack.header.vo.*;
+import org.zstack.mttyDevice.header.MttyDeviceState;
+import org.zstack.mttyDevice.header.MttyDeviceType;
+import org.zstack.mttyDevice.header.MttyDeviceVirtStatus;
 
 import javax.persistence.*;
 import java.sql.Timestamp;

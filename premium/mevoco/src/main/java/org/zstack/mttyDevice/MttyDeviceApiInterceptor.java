@@ -11,6 +11,8 @@ import org.zstack.header.host.HostStatus;
 import org.zstack.header.host.HostVO;
 import org.zstack.header.host.HostVO_;
 import org.zstack.header.message.APIMessage;
+import org.zstack.mttyDevice.entity.MttyDeviceVO;
+import org.zstack.mttyDevice.header.MttyDeviceVirtStatus;
 import org.zstack.pciDevice.virtual.vfio_mdev.MdevDeviceStatus;
 import org.zstack.pciDevice.virtual.vfio_mdev.MdevDeviceVO;
 import org.zstack.pciDevice.virtual.vfio_mdev.MdevDeviceVO_;

@@ -15,7 +15,10 @@ import org.zstack.ha.HaKvmHostSiblingChecker
 import org.zstack.ha.SelfFencerKvmBackend
 import org.zstack.header.Constants
 import org.zstack.header.agent.AgentResponse
-import org.zstack.header.host.*
+import org.zstack.header.host.HostNUMANode
+import org.zstack.header.host.HostVO
+import org.zstack.header.host.HostVO_
+import org.zstack.header.host.NetworkInterfaceType
 import org.zstack.header.network.l3.UsedIpTO
 import org.zstack.header.storage.snapshot.TakeSnapshotsOnKvmJobStruct
 import org.zstack.header.storage.snapshot.TakeSnapshotsOnKvmResultStruct
@@ -23,7 +26,6 @@ import org.zstack.header.vm.VmInstanceState
 import org.zstack.header.vm.VmInstanceVO
 import org.zstack.header.vm.VmInstanceVO_
 import org.zstack.header.vm.additions.VmHostFileContentFormat
-import org.zstack.header.vm.additions.VmHostFileType
 import org.zstack.header.vm.devices.DeviceAddress
 import org.zstack.header.vm.devices.VirtualDeviceInfo
 import org.zstack.header.volume.VolumeType
@@ -34,7 +36,7 @@ import org.zstack.kvm.KVMConstant
 import org.zstack.kvm.KVMGlobalProperty
 import org.zstack.kvm.VolumeTO
 import org.zstack.mttyDevice.KvmMttyDeviceBackend.MttyDeviceKvmBackend
-import org.zstack.mttyDevice.MttyDeviceTO
+import org.zstack.mttyDevice.message.MttyDeviceTO
 import org.zstack.network.hostNetworkInterface.HostKernelInterfaceTO
 import org.zstack.network.hostNetworkInterface.HostNetworkBondingInventory
 import org.zstack.network.hostNetworkInterface.HostNetworkInterfaceInventory
@@ -45,16 +47,10 @@ import org.zstack.network.l2.vxlan.vxlanNetworkPool.VxlanNetworkPoolConstant
 import org.zstack.pciDevice.KvmPciDeviceBackend.PciDeviceKvmBackend
 import org.zstack.pciDevice.PciDeviceTO
 import org.zstack.pciDevice.PciDeviceType
-import org.zstack.pciDevice.PciDeviceVO
-import org.zstack.pciDevice.PciDeviceVO_
 import org.zstack.pciDevice.virtual.vfio_mdev.MdevDeviceBase
 import org.zstack.simulator2.Simulator
 import org.zstack.simulator2.SimulatorGlobalProperty
-import org.zstack.simulator2.config.device.FcHbaDevice
-import org.zstack.simulator2.config.device.MdevDeviceSpec
-import org.zstack.simulator2.config.device.MttyDevice
-import org.zstack.simulator2.config.device.PciDevice
-import org.zstack.simulator2.config.device.UsbDevice
+import org.zstack.simulator2.config.device.*
 import org.zstack.simulator2.config.host.KvmHost
 import org.zstack.simulator2.config.primaryStorage.BlockDevice
 import org.zstack.sshkeypair.SshKeyPairBase

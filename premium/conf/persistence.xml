@@ -515,7 +515,7 @@
         <class>org.zstack.header.vmscheduling.VmSchedulingRuleVO</class>
         <class>org.zstack.directory.DirectoryVO</class>
         <class>org.zstack.directory.ResourceDirectoryRefVO</class>
-        <class>org.zstack.mttyDevice.MttyDeviceVO</class>
+        <class>org.zstack.mttyDevice.entity.MttyDeviceVO</class>
         <class>org.zstack.header.agent.versioncontrol.AgentVersionVO</class>
         <class>org.zstack.guesttools.GuestToolsStateVO</class>
         <class>org.zstack.guesttools.advanced.VmCustomSpecificationVO</class>

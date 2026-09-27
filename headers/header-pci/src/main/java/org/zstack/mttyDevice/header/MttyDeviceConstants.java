@@ -1,4 +1,4 @@
-package org.zstack.mttyDevice;
+package org.zstack.mttyDevice.header;
 
 import org.zstack.header.configuration.PythonClass;
 

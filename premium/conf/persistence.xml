@@ -325,7 +325,7 @@
         <class>org.zstack.pciDevice.entity.specification.pci.PciDeviceSpecVO</class>
         <class>org.zstack.header.aliyun.storage.snapshot.AliyunSnapshotVO</class>
         <class>org.zstack.header.aliyun.storage.disk.AliyunDiskVO</class>
-        <class>org.zstack.usbDevice.UsbDeviceVO</class>
+        <class>org.zstack.usbDevice.entity.UsbDeviceVO</class>
         <class>org.zstack.header.affinitygroup.AffinityGroupVO</class>
         <class>org.zstack.header.affinitygroup.AffinityGroupUsageVO</class>
         <class>org.zstack.header.longjob.LongJobVO</class>

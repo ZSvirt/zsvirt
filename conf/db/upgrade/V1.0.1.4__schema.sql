@@ -1,3 +1,18 @@
+UPDATE ResourceVO SET concreteResourceType = 'org.zstack.pciDevice.entity.PciDeviceVO'
+                  WHERE concreteResourceType = 'org.zstack.pciDevice.PciDeviceVO';
+UPDATE ResourceVO SET concreteResourceType = 'org.zstack.pciDevice.entity.PciDeviceOfferingVO'
+                  WHERE concreteResourceType = 'org.zstack.pciDevice.PciDeviceOfferingVO';
+UPDATE ResourceVO SET concreteResourceType = 'org.zstack.pciDevice.entity.gpu.GpuDeviceVO'
+                  WHERE concreteResourceType = 'org.zstack.pciDevice.gpu.GpuDeviceVO';
+UPDATE ResourceVO SET concreteResourceType = 'org.zstack.pciDevice.entity.specification.mdev.MdevDeviceSpecVO'
+                  WHERE concreteResourceType = 'org.zstack.pciDevice.specification.mdev.MdevDeviceSpecVO';
+UPDATE ResourceVO SET concreteResourceType = 'org.zstack.pciDevice.entity.specification.pci.PciDeviceSpecVO'
+                  WHERE concreteResourceType = 'org.zstack.pciDevice.specification.pci.PciDeviceSpecVO';
+UPDATE ResourceVO SET concreteResourceType = 'org.zstack.pciDevice.entity.virtual.vfio_mdev.MdevDeviceVO'
+                  WHERE concreteResourceType = 'org.zstack.pciDevice.virtual.vfio_mdev.MdevDeviceVO';
+UPDATE ResourceVO SET concreteResourceType = 'org.zstack.usbDevice.entity.UsbDeviceVO'
+                  WHERE concreteResourceType = 'org.zstack.usbDevice.UsbDeviceVO';
+
 -- Feature: Allocator Domain (scheduling domain) | ZSV-13008
 
 CREATE TABLE IF NOT EXISTS `zstack`.`AllocatorDomainVO` (

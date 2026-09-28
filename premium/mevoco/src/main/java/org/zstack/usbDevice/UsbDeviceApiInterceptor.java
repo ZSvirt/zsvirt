@@ -28,6 +28,10 @@ import org.zstack.header.vm.VmInstanceVO;
 import org.zstack.header.vo.ResourceVO;
 import org.zstack.header.vo.ResourceVO_;
 import org.zstack.identity.AccountManager;
+import org.zstack.usbDevice.entity.UsbDeviceVO;
+import org.zstack.usbDevice.entity.UsbDeviceVO_;
+import org.zstack.usbDevice.header.UsbDeviceConstants;
+import org.zstack.usbDevice.header.UsbDeviceState;
 import org.zstack.utils.CollectionDSL;
 
 import javax.persistence.Tuple;

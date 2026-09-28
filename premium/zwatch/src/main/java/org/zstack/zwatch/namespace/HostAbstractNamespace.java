@@ -28,7 +28,7 @@ public abstract class HostAbstractNamespace extends AbstractNamespace {
         CPUNum,
         DiskName,
         NicName,
-        Status,
+        CPUReadySupportStatus,
         DiskDeviceLetter,
         NetworkDeviceLetter,
         NetworkServiceType,
@@ -103,8 +103,8 @@ public abstract class HostAbstractNamespace extends AbstractNamespace {
     public static final Metric CPUReadinessPercent = new PercentMetric("CPUReadinessPercent", metrics,
             LabelNames.HostUuid
     );
-    public static final Metric CPUReadySupportStatus = new StateMetric("CPUReadySupportStatus", metrics,
-            LabelNames.HostUuid, LabelNames.Status
+    public static final Metric CPUReadyStatus = new StateMetric("CPUReadyStatus", metrics,
+            LabelNames.HostUuid, LabelNames.CPUReadySupportStatus
     );
     public static final Metric CPUReadyTimeMillisecondsByCPU = new TimeDurationMetric(
             "CPUReadyTimeMillisecondsByCPU", metrics, LabelNames.HostUuid, LabelNames.CPUNum

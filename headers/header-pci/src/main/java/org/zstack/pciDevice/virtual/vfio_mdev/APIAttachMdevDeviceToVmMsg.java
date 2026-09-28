@@ -5,6 +5,8 @@ import org.zstack.header.message.APIMessage;
 import org.zstack.header.message.APIParam;
 import org.zstack.header.rest.RestRequest;
 import org.zstack.header.vm.VmInstanceVO;
+import org.zstack.pciDevice.entity.virtual.vfio_mdev.MdevDeviceVO;
+import org.zstack.pciDevice.message.virtual.vfio_mdev.MdevDeviceMessage;
 
 /**
  * Created by GuoYi on 2019-04-20.

@@ -1,4 +1,4 @@
-package org.zstack.pciDevice.virtual.vfio_mdev;
+package org.zstack.pciDevice.entity.virtual.vfio_mdev;
 
 import org.zstack.header.host.HostEO;
 import org.zstack.header.host.HostVO;

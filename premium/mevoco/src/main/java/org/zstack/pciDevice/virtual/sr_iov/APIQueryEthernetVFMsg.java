@@ -12,6 +12,8 @@ import static java.util.Arrays.asList;
 
 /**
  * Created by shixin.ruan on 12/19/2023.
+ *
+ * Note: this api is in "sriov" permission
  */
 @AutoQuery(replyClass = APIQueryEthernetVFReply.class, inventoryClass = EthernetVfPciDeviceInventory.class)
 @RestRequest(

@@ -1,4 +1,4 @@
-package org.zstack.pciDevice.virtual.vfio_mdev;
+package org.zstack.pciDevice.message.virtual.vfio_mdev;
 
 import org.zstack.header.message.MessageReply;
 

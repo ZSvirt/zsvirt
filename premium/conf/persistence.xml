@@ -283,7 +283,7 @@
         <class>org.zstack.pciDevice.entity.PciDeviceOfferingInstanceOfferingRefVO</class>
         <class>org.zstack.pciDevice.entity.specification.pci.PciDeviceSpecVO</class>
         <class>org.zstack.pciDevice.entity.specification.pci.VmInstancePciDeviceSpecRefVO</class>
-        <class>org.zstack.pciDevice.virtual.vfio_mdev.MdevDeviceVO</class>
+        <class>org.zstack.pciDevice.entity.virtual.vfio_mdev.MdevDeviceVO</class>
         <class>org.zstack.pciDevice.entity.specification.mdev.MdevDeviceSpecVO</class>
         <class>org.zstack.pciDevice.entity.specification.mdev.PciDeviceMdevSpecRefVO</class>
         <class>org.zstack.pciDevice.entity.specification.mdev.VmInstanceMdevDeviceSpecRefVO</class>

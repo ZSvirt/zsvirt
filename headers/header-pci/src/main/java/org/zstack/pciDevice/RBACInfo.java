@@ -9,7 +9,6 @@ import org.zstack.pciDevice.specification.pci.APIQueryPciDeviceSpecMsg;
 import org.zstack.pciDevice.specification.pci.APIQueryVmInstancePciDeviceSpecRefMsg;
 import org.zstack.pciDevice.specification.pci.APIUpdatePciDeviceSpecMsg;
 import org.zstack.pciDevice.virtual.sr_iov.APIGenerateSriovPciDevicesMsg;
-import org.zstack.pciDevice.virtual.sr_iov.APIQueryEthernetVFMsg;
 import org.zstack.pciDevice.virtual.sr_iov.APIUngenerateSriovPciDevicesMsg;
 import org.zstack.pciDevice.virtual.vfio_mdev.APIGenerateMdevDevicesMsg;
 import org.zstack.pciDevice.virtual.vfio_mdev.APIGetMdevDeviceCandidatesMsg;
@@ -117,10 +116,6 @@ public class RBACInfo implements PackageDescription {
         apis()
                 .inPackage("org.zstack.pciDevice.virtual.sr_iov")
                 .toService("pciDevice")
-                .build();
-        apis()
-                .api(APIQueryEthernetVFMsg.class)
-                .toService(SearchConstant.QUERY_FACADE_SERVICE_ID)
                 .build();
         apis()
                 .inPackage("org.zstack.pciDevice.virtual.vfio_mdev")

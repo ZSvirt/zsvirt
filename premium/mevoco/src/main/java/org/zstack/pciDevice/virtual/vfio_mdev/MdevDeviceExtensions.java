@@ -3,8 +3,8 @@ package org.zstack.pciDevice.virtual.vfio_mdev;
 import org.jetbrains.annotations.NotNull;
 import org.zstack.core.db.Q;
 import org.zstack.header.vm.VmMigrateHostConstraintExtensionPoint;
-import org.zstack.pciDevice.virtual.vfio_mdev.MdevDeviceVO;
-import org.zstack.pciDevice.virtual.vfio_mdev.MdevDeviceVO_;
+import org.zstack.pciDevice.entity.virtual.vfio_mdev.MdevDeviceVO;
+import org.zstack.pciDevice.entity.virtual.vfio_mdev.MdevDeviceVO_;
 
 import java.util.List;
 

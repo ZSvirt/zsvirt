@@ -4,6 +4,8 @@ import org.springframework.http.HttpMethod;
 import org.zstack.header.message.APIDeleteMessage;
 import org.zstack.header.message.APIParam;
 import org.zstack.header.rest.RestRequest;
+import org.zstack.pciDevice.entity.virtual.vfio_mdev.MdevDeviceVO;
+import org.zstack.pciDevice.message.virtual.vfio_mdev.MdevDeviceMessage;
 
 @RestRequest(
         path = "/mdev-devices/{mdevDeviceUuid}",

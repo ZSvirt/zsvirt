@@ -3,7 +3,7 @@ package org.zstack.header.sriov;
 import org.zstack.header.vm.VmNicVO;
 import org.zstack.header.vo.ForeignKey;
 import org.zstack.header.vo.Index;
-import org.zstack.pciDevice.PciDeviceVO;
+import org.zstack.pciDevice.entity.PciDeviceVO;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;

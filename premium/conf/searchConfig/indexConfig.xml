@@ -125,7 +125,7 @@
     <index name="org.zstack.header.affinitygroup.AffinityGroupVO" baseClass="false">
         <prop name="name"/>
     </index>
-    <index name="org.zstack.pciDevice.PciDeviceOfferingVO" baseClass="false">
+    <index name="org.zstack.pciDevice.entity.PciDeviceOfferingVO" baseClass="false">
         <prop name="name"/>
     </index>
     <index name="org.zstack.vrouterRoute.VRouterRouteTableVO" baseClass="false">

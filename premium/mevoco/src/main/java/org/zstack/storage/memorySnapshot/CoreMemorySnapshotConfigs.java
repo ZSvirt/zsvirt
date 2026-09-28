@@ -14,13 +14,16 @@ import org.zstack.header.volume.VolumeVO;
 import org.zstack.kvm.KVMGlobalConfig;
 import org.zstack.kvm.KVMSystemTags;
 import org.zstack.mevoco.MevocoGlobalConfig;
-import org.zstack.pciDevice.PciDeviceGlobalConfig;
+import org.zstack.pciDevice.header.PciDeviceGlobalConfig;
 import org.zstack.storage.volume.VolumeSystemTags;
 import org.zstack.tag.PatternedSystemTag;
 import org.zstack.tag.SystemTag;
 import org.zstack.utils.BeanUtils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 

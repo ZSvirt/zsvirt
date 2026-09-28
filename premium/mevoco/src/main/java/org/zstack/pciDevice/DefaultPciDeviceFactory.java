@@ -3,9 +3,13 @@ package org.zstack.pciDevice;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.zstack.core.db.DatabaseFacade;
 import org.zstack.core.db.SQL;
-import org.zstack.pciDevice.specification.pci.PciDeviceSpecVO;
+import org.zstack.pciDevice.entity.PciDeviceVO;
+import org.zstack.pciDevice.entity.PciDeviceVO_;
 import org.zstack.pciDevice.virtual.vfio_mdev.MdevDeviceVO;
 import org.zstack.pciDevice.virtual.vfio_mdev.MdevDeviceVO_;
+import org.zstack.pciDevice.header.PciDeviceType;
+import org.zstack.pciDevice.message.PciDeviceTO;
+import org.zstack.pciDevice.spi.PciDeviceTypeFactory;
 import org.zstack.utils.Utils;
 import org.zstack.utils.logging.CLogger;
 

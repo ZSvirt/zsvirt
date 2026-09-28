@@ -24,7 +24,7 @@
             <zstack:extension interface="org.zstack.header.vm.PreVmInstantiateResourceExtensionPoint" />
             <zstack:extension interface="org.zstack.header.vm.ReleaseNetworkServiceOnDetachingNicExtensionPoint" order="-1"/>
             <zstack:extension interface="org.zstack.header.vm.FilterVmNicChangeableL3NetworkExtensionPoint" />
-            <zstack:extension interface="org.zstack.header.host.AfterSyncPciDeviceExtensionPoint" />
+            <zstack:extension interface="org.zstack.pciDevice.spi.AfterSyncPciDeviceExtensionPoint" />
             <zstack:extension interface="org.zstack.compute.vm.VmNicPrepareResourceExtensionPoint" />
             <zstack:extension interface="org.zstack.header.vm.VmFailToAttachL3NetworkExtensionPoint" />
             <zstack:extension interface="org.zstack.header.vm.VmInstanceMigrateExtensionPoint"/>

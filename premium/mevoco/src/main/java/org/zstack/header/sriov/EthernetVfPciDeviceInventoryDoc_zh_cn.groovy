@@ -1,15 +1,15 @@
 package org.zstack.header.sriov
 
 import org.zstack.header.sriov.EthernetVfStatus
-import org.zstack.pciDevice.PciDeviceType
-import org.zstack.pciDevice.PciDeviceState
-import org.zstack.pciDevice.PciDeviceStatus
-import org.zstack.pciDevice.virtual.PciDeviceVirtStatus
-import org.zstack.pciDevice.PciDeviceChooser
-import org.zstack.pciDevice.PciDeviceMetaData
+import org.zstack.pciDevice.header.PciDeviceType
+import org.zstack.pciDevice.header.PciDeviceState
+import org.zstack.pciDevice.header.PciDeviceStatus
+import org.zstack.pciDevice.header.virtual.PciDeviceVirtStatus
+import org.zstack.pciDevice.header.PciDeviceChooser
+import org.zstack.pciDevice.message.PciDeviceMetaData
 import java.sql.Timestamp
-import org.zstack.pciDevice.PciDevicePciDeviceOfferingRefInventory
-import org.zstack.pciDevice.specification.mdev.PciDeviceMdevSpecRefInventory
+import org.zstack.pciDevice.entity.specification.mdev.PciDeviceMdevSpecRefInventory
+import org.zstack.pciDevice.entity.PciDevicePciDeviceOfferingRefInventory
 
 doc {
 

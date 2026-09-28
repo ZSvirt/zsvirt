@@ -3,7 +3,13 @@ package org.zstack.zwatch.namespace;
 import org.zstack.header.core.StaticInit;
 import org.zstack.header.vm.VmInstanceVO;
 import org.zstack.zwatch.datatype.EventFamily;
-import org.zstack.zwatch.datatype.metric.*;
+import org.zstack.zwatch.datatype.metric.ByteRateMetric;
+import org.zstack.zwatch.datatype.metric.ByteSizeMetric;
+import org.zstack.zwatch.datatype.metric.CountMetric;
+import org.zstack.zwatch.datatype.metric.Metric;
+import org.zstack.zwatch.datatype.metric.PacketRateMetric;
+import org.zstack.zwatch.datatype.metric.PercentMetric;
+import org.zstack.zwatch.datatype.metric.TemperatureMetric;
 import org.zstack.zwatch.driver.DatabaseDriver;
 import org.zstack.zwatch.namespace.event.VmNamespaceEvent;
 

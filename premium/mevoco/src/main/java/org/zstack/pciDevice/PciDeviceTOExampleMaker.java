@@ -1,6 +1,8 @@
 package org.zstack.pciDevice;
 
-import org.zstack.pciDevice.virtual.PciDeviceVirtStatus;
+import org.zstack.pciDevice.header.virtual.PciDeviceVirtStatus;
+import org.zstack.pciDevice.header.PciDeviceType;
+import org.zstack.pciDevice.message.PciDeviceTO;
 
 import java.util.Arrays;
 import java.util.Collections;

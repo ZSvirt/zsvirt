@@ -1,10 +1,9 @@
 package org.zstack.pciDevice.virtual.vfio_mdev
 
-import org.zstack.pciDevice.virtual.vfio_mdev.MdevDeviceType
-import org.zstack.pciDevice.virtual.vfio_mdev.MdevDeviceState
-import org.zstack.pciDevice.virtual.vfio_mdev.MdevDeviceStatus
-import org.zstack.pciDevice.virtual.vfio_mdev.MdevDeviceChooser
-import java.sql.Timestamp
+import org.zstack.pciDevice.header.virtual.vfio_mdev.MdevDeviceType
+import org.zstack.pciDevice.header.virtual.vfio_mdev.MdevDeviceState
+import org.zstack.pciDevice.header.virtual.vfio_mdev.MdevDeviceStatus
+import org.zstack.pciDevice.header.virtual.vfio_mdev.MdevDeviceChooser
 import java.sql.Timestamp
 
 doc {

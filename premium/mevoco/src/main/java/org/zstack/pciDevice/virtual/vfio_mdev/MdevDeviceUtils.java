@@ -3,9 +3,15 @@ package org.zstack.pciDevice.virtual.vfio_mdev;
 import org.zstack.core.db.Q;
 import org.zstack.core.db.SQLBatch;
 import org.zstack.core.db.UpdateQuery;
-import org.zstack.pciDevice.PciDeviceSystemTags;
-import org.zstack.pciDevice.specification.mdev.VmInstanceMdevDeviceSpecRefVO;
-import org.zstack.pciDevice.specification.mdev.VmInstanceMdevDeviceSpecRefVO_;
+import org.zstack.pciDevice.entity.specification.mdev.VmInstanceMdevDeviceSpecRefVO;
+import org.zstack.pciDevice.entity.specification.mdev.VmInstanceMdevDeviceSpecRefVO_;
+import org.zstack.pciDevice.virtual.vfio_mdev.MdevDeviceVO;
+import org.zstack.pciDevice.virtual.vfio_mdev.MdevDeviceVO_;
+import org.zstack.pciDevice.header.PciDeviceSystemTags;
+import org.zstack.pciDevice.header.virtual.vfio_mdev.MdevDeviceChooser;
+import org.zstack.pciDevice.header.virtual.vfio_mdev.MdevDeviceState;
+import org.zstack.pciDevice.header.virtual.vfio_mdev.MdevDeviceStatus;
+import org.zstack.pciDevice.header.virtual.vfio_mdev.MdevDeviceSystemTags;
 
 import javax.persistence.Tuple;
 import java.util.Collection;

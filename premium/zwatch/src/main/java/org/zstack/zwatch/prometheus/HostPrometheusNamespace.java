@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 import static java.util.Arrays.asList;
+import org.zstack.pciDevice.message.PciDeviceAddress;
 
 public class HostPrometheusNamespace extends AbstractPrometheusNamespace {
     public static class HostCollector extends BasicMetricCollector {

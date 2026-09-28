@@ -8,13 +8,17 @@ import org.zstack.header.query.ExpandedQuery;
 import org.zstack.header.search.Inventory;
 import org.zstack.header.vm.VmInstanceInventory;
 import org.zstack.mttyDevice.entity.MttyDeviceInventory;
-import org.zstack.pciDevice.PciDeviceInventory;
-import org.zstack.pciDevice.specification.mdev.MdevDeviceSpecInventory;
+import org.zstack.pciDevice.entity.PciDeviceInventory;
+import org.zstack.pciDevice.entity.specification.mdev.MdevDeviceSpecInventory;
 
 import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.zstack.pciDevice.header.virtual.vfio_mdev.MdevDeviceChooser;
+import org.zstack.pciDevice.header.virtual.vfio_mdev.MdevDeviceState;
+import org.zstack.pciDevice.header.virtual.vfio_mdev.MdevDeviceStatus;
+import org.zstack.pciDevice.header.virtual.vfio_mdev.MdevDeviceType;
 
 /**
  * Created by GuoYi on 2019-04-17.

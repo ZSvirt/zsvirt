@@ -8,6 +8,7 @@ import org.zstack.core.db.DatabaseFacade;
 import org.zstack.core.thread.ThreadFacade;
 import org.zstack.header.message.Message;
 import org.zstack.identity.AccountManager;
+import org.zstack.pciDevice.spi.VirtualPciDevice;
 
 /**
  * Created by GuoYi on 2019-04-24.

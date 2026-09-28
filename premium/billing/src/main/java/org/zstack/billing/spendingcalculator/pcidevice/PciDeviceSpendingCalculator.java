@@ -5,6 +5,9 @@ import org.zstack.billing.*;
 import org.zstack.billing.spendingcalculator.SpendingCalculator;
 import org.zstack.core.db.Q;
 import org.zstack.pciDevice.*;
+import org.zstack.pciDevice.entity.PciDeviceOfferingVO;
+import org.zstack.pciDevice.entity.PciDeviceOfferingVO_;
+import org.zstack.pciDevice.header.PciDeviceStatus;
 import org.zstack.utils.Utils;
 import org.zstack.utils.logging.CLogger;
 

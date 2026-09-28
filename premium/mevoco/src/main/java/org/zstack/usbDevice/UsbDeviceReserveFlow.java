@@ -14,7 +14,11 @@ import org.zstack.header.allocator.HostAllocatorSpec;
 import org.zstack.header.core.workflow.FlowRollback;
 import org.zstack.header.core.workflow.FlowTrigger;
 import org.zstack.header.message.MessageReply;
-import org.zstack.header.vm.VmInstanceConstant;
+import org.zstack.usbDevice.entity.UsbDeviceVO;
+import org.zstack.usbDevice.entity.UsbDeviceVO_;
+import org.zstack.usbDevice.header.UsbDeviceConstants;
+import org.zstack.usbDevice.message.CheckAndReserveUsbDeviceMsg;
+import org.zstack.usbDevice.message.CheckAndReserveUsbDeviceReply;
 
 import java.util.List;
 import java.util.Map;

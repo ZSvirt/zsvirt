@@ -37,7 +37,7 @@
 
     <bean id="UsbDeviceXDragonBackend" class="org.zstack.xdragon.UsbDeviceXDragonBackend" >
         <zstack:plugin>
-            <zstack:extension interface="org.zstack.usbDevice.UsbDeviceBackend" />
+            <zstack:extension interface="org.zstack.usbDevice.spi.UsbDeviceBackend" />
             <zstack:extension interface="org.zstack.kvm.KVMHostConnectExtensionPoint" />
             <zstack:extension interface="org.zstack.header.host.HostConnectionReestablishExtensionPoint" />
         </zstack:plugin>

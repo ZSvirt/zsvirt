@@ -3,6 +3,9 @@ package org.zstack.usbDevice;
 import org.zstack.core.Platform;
 import org.zstack.core.db.Q;
 import org.zstack.header.errorcode.ErrorCode;
+import org.zstack.usbDevice.entity.UsbDeviceVO;
+import org.zstack.usbDevice.entity.UsbDeviceVO_;
+import org.zstack.usbDevice.header.UsbDeviceConstants;
 
 /**
  * @Author: DaoDao

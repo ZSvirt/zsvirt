@@ -71,7 +71,7 @@ import org.zstack.storage.primary.filesystem.AbstractFileSystemHostHeartbeatChec
 import org.zstack.storage.primary.shareblock.ShareBlockHostHeartbeatChecker
 import org.zstack.storage.primary.sharedblock.HaSanlockHostChecker
 import org.zstack.usbDevice.KvmUsbDeviceBackend.UsbDeviceKvmBackend
-import org.zstack.usbDevice.UsbDeviceTO
+import org.zstack.usbDevice.message.UsbDeviceTO
 import org.zstack.utils.data.SizeUnit
 import org.zstack.utils.gson.JSONObjectUtil
 import org.zstack.zwatch.prometheus.KvmHostScrape

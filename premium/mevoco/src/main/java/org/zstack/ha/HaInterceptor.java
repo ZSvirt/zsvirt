@@ -24,8 +24,8 @@ import org.zstack.pciDevice.entity.virtual.vfio_mdev.MdevDeviceVO;
 import org.zstack.pciDevice.entity.virtual.vfio_mdev.MdevDeviceVO_;
 import org.zstack.pciDevice.header.PciDeviceChooser;
 import org.zstack.pciDevice.header.virtual.vfio_mdev.MdevDeviceChooser;
-import org.zstack.usbDevice.UsbDeviceVO;
-import org.zstack.usbDevice.UsbDeviceVO_;
+import org.zstack.usbDevice.entity.UsbDeviceVO;
+import org.zstack.usbDevice.entity.UsbDeviceVO_;
 
 import java.util.List;
 

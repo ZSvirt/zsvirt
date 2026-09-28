@@ -24,7 +24,16 @@ import org.zstack.header.vm.VmInstanceInventory;
 import org.zstack.header.vm.VmInstanceState;
 import org.zstack.header.vm.VmInstanceVO;
 import org.zstack.kvm.*;
-import org.zstack.usbDevice.*;
+import org.zstack.usbDevice.entity.UsbDeviceInventory;
+import org.zstack.usbDevice.entity.UsbDeviceVO;
+import org.zstack.usbDevice.entity.UsbDeviceVO_;
+import org.zstack.usbDevice.header.UsbAttachType;
+import org.zstack.usbDevice.header.UsbDeviceConstants;
+import org.zstack.usbDevice.header.UsbDeviceState;
+import org.zstack.usbDevice.header.UsbSystemTags;
+import org.zstack.usbDevice.message.SyncUsbDeviceMsg;
+import org.zstack.usbDevice.message.UsbDeviceTO;
+import org.zstack.usbDevice.spi.UsbDeviceBackend;
 import org.zstack.utils.Utils;
 import org.zstack.utils.logging.CLogger;
 

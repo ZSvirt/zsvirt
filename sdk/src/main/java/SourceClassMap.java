@@ -524,8 +524,8 @@ public class SourceClassMap {
 			put("org.zstack.templateConfig.GlobalConfigTemplateInventory", "org.zstack.sdk.GlobalConfigTemplateInventory");
 			put("org.zstack.templateConfig.TemplateConfigInventory", "org.zstack.sdk.TemplateConfigInventory");
 			put("org.zstack.twoFactorAuthentication.TwoFactorAuthenticationSecretInventory", "org.zstack.sdk.TwoFactorAuthenticationSecretInventory");
-			put("org.zstack.usbDevice.UsbDeviceInventory", "org.zstack.sdk.UsbDeviceInventory");
-			put("org.zstack.usbDevice.UsbDeviceState", "org.zstack.sdk.UsbDeviceState");
+			put("org.zstack.usbDevice.entity.UsbDeviceInventory", "org.zstack.sdk.UsbDeviceInventory");
+			put("org.zstack.usbDevice.header.UsbDeviceState", "org.zstack.sdk.UsbDeviceState");
 			put("org.zstack.vrouterRoute.VRouterRouteEntryAO", "org.zstack.sdk.VRouterRouteEntryAO");
 			put("org.zstack.vrouterRoute.VRouterRouteEntryInventory", "org.zstack.sdk.VRouterRouteEntryInventory");
 			put("org.zstack.vrouterRoute.VRouterRouteEntryType", "org.zstack.sdk.VRouterRouteEntryType");
@@ -983,8 +983,8 @@ public class SourceClassMap {
 			put("org.zstack.sdk.UplinkGroupInventory", "org.zstack.network.l2.virtualSwitch.header.UplinkGroupInventory");
 			put("org.zstack.sdk.UplinkGroupType", "org.zstack.network.l2.virtualSwitch.header.UplinkGroupType");
 			put("org.zstack.sdk.UsageReport", "org.zstack.header.storage.primary.UsageReport");
-			put("org.zstack.sdk.UsbDeviceInventory", "org.zstack.usbDevice.UsbDeviceInventory");
-			put("org.zstack.sdk.UsbDeviceState", "org.zstack.usbDevice.UsbDeviceState");
+			put("org.zstack.sdk.UsbDeviceInventory", "org.zstack.usbDevice.entity.UsbDeviceInventory");
+			put("org.zstack.sdk.UsbDeviceState", "org.zstack.usbDevice.header.UsbDeviceState");
 			put("org.zstack.sdk.UsedIpInventory", "org.zstack.header.network.l3.UsedIpInventory");
 			put("org.zstack.sdk.UserTagInventory", "org.zstack.header.tag.UserTagInventory");
 			put("org.zstack.sdk.VHostAddOn", "org.zstack.kvm.KVMAgentCommands$VHostAddOn");

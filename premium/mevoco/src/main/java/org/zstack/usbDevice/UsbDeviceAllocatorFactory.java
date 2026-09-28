@@ -4,7 +4,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.zstack.compute.allocator.DesignatedHostAllocatorStrategyFactory;
 import org.zstack.core.db.Q;
 import org.zstack.core.errorcode.ErrorFacade;
-import org.zstack.header.allocator.*;
+import org.zstack.header.allocator.HostAllocatorFilterExtensionPoint;
+import org.zstack.header.allocator.HostAllocatorSpec;
+import org.zstack.header.allocator.HostAllocatorStrategyExtensionPoint;
+import org.zstack.header.allocator.HostAllocatorStrategyType;
+import org.zstack.header.allocator.HostCandidate;
+import org.zstack.usbDevice.entity.UsbDeviceVO;
+import org.zstack.usbDevice.entity.UsbDeviceVO_;
+import org.zstack.usbDevice.header.UsbAttachType;
+import org.zstack.usbDevice.header.UsbDeviceConstants;
 import org.zstack.utils.Utils;
 import org.zstack.utils.logging.CLogger;
 

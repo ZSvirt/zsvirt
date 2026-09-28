@@ -131,6 +131,10 @@ public class VmPrometheusNamespace extends AbstractPrometheusNamespace {
         } else if (metric == VmNamespace.CPUReadinessPercent) {
             rule.setExpression("avg by (vm_uuid) (zstack_vm_vcpu_readiness_percent)");
             rule.labelMapping("vm_uuid", VmNamespace.LabelNames.VMUuid.toString());
+        } else if (metric == VmNamespace.CPUReadyStatus) {
+            rule.setExpression("zstack_vm_cpu_ready_status");
+            rule.labelMapping("vm_uuid", VmNamespace.LabelNames.VMUuid.toString());
+            rule.labelMapping("cpu_ready_support_status", VmAbstractNamespace.LabelNames.CPUReadySupportStatus.toString());
         } else if (metric == VmNamespace.VCPUReadyTimeMilliseconds) {
             rule.setExpression("zstack_vm_vcpu_ready_time_milliseconds");
             rule.labelMapping("vm_uuid", VmNamespace.LabelNames.VMUuid.toString());

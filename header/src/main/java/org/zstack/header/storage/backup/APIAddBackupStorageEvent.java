@@ -1,5 +1,7 @@
 package org.zstack.header.storage.backup;
 
+import org.zstack.header.log.MaskSensitiveInfo;
+import org.zstack.header.log.NoLogging;
 import org.zstack.header.message.APIEvent;
 import org.zstack.header.rest.RestResponse;
 
@@ -32,10 +34,12 @@ import java.util.Collections;
  */
 
 @RestResponse(allTo = "inventory")
+@MaskSensitiveInfo
 public class APIAddBackupStorageEvent extends APIEvent {
     /**
      * @desc see :ref:`BackupStorageInventory`
      */
+    @NoLogging(behavior = NoLogging.Behavior.Auto)
     private BackupStorageInventory inventory;
 
     public APIAddBackupStorageEvent(String apiId) {

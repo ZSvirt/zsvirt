@@ -1,4 +1,4 @@
-package org.zstack.pciDevice.virtual.vfio_mdev
+package org.zstack.pciDevice.entity.virtual.vfio_mdev
 
 import org.zstack.pciDevice.header.virtual.vfio_mdev.MdevDeviceType
 import org.zstack.pciDevice.header.virtual.vfio_mdev.MdevDeviceState
@@ -54,7 +54,7 @@ doc {
 	}
 	ref {
 		name "type"
-		path "org.zstack.pciDevice.virtual.vfio_mdev.MdevDeviceInventory.type"
+		path "org.zstack.pciDevice.entity.virtual.vfio_mdev.MdevDeviceInventory.type"
 		desc "MDEV设备类型"
 		type "MdevDeviceType"
 		since "zsv_3.5.0"
@@ -62,7 +62,7 @@ doc {
 	}
 	ref {
 		name "state"
-		path "org.zstack.pciDevice.virtual.vfio_mdev.MdevDeviceInventory.state"
+		path "org.zstack.pciDevice.entity.virtual.vfio_mdev.MdevDeviceInventory.state"
 		desc "MDEV设备启用状态"
 		type "MdevDeviceState"
 		since "zsv_3.5.0"
@@ -70,7 +70,7 @@ doc {
 	}
 	ref {
 		name "status"
-		path "org.zstack.pciDevice.virtual.vfio_mdev.MdevDeviceInventory.status"
+		path "org.zstack.pciDevice.entity.virtual.vfio_mdev.MdevDeviceInventory.status"
 		desc "MDEV设备挂载状态"
 		type "MdevDeviceStatus"
 		since "zsv_3.5.0"
@@ -78,7 +78,7 @@ doc {
 	}
 	ref {
 		name "chooser"
-		path "org.zstack.pciDevice.virtual.vfio_mdev.MdevDeviceInventory.chooser"
+		path "org.zstack.pciDevice.entity.virtual.vfio_mdev.MdevDeviceInventory.chooser"
 		desc "MDEV设备选取者"
 		type "MdevDeviceChooser"
 		since "zsv_3.11.0"

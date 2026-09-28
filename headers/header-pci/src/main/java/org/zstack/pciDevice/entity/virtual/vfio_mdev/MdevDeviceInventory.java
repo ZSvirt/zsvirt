@@ -1,24 +1,27 @@
-package org.zstack.pciDevice.virtual.vfio_mdev;
+package org.zstack.pciDevice.entity.virtual.vfio_mdev;
 
-import org.zstack.core.Platform;
 import org.zstack.header.configuration.PythonClassInventory;
 import org.zstack.header.host.HostInventory;
+import org.zstack.header.host.HostVO;
+import org.zstack.header.message.DocUtils;
 import org.zstack.header.query.ExpandedQueries;
 import org.zstack.header.query.ExpandedQuery;
 import org.zstack.header.search.Inventory;
 import org.zstack.header.vm.VmInstanceInventory;
 import org.zstack.mttyDevice.entity.MttyDeviceInventory;
 import org.zstack.pciDevice.entity.PciDeviceInventory;
+import org.zstack.pciDevice.entity.PciDeviceVO;
 import org.zstack.pciDevice.entity.specification.mdev.MdevDeviceSpecInventory;
+import org.zstack.pciDevice.entity.specification.mdev.MdevDeviceSpecVO;
+import org.zstack.pciDevice.header.virtual.vfio_mdev.MdevDeviceChooser;
+import org.zstack.pciDevice.header.virtual.vfio_mdev.MdevDeviceState;
+import org.zstack.pciDevice.header.virtual.vfio_mdev.MdevDeviceStatus;
+import org.zstack.pciDevice.header.virtual.vfio_mdev.MdevDeviceType;
 
 import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.zstack.pciDevice.header.virtual.vfio_mdev.MdevDeviceChooser;
-import org.zstack.pciDevice.header.virtual.vfio_mdev.MdevDeviceState;
-import org.zstack.pciDevice.header.virtual.vfio_mdev.MdevDeviceStatus;
-import org.zstack.pciDevice.header.virtual.vfio_mdev.MdevDeviceType;
 
 /**
  * Created by GuoYi on 2019-04-17.
@@ -77,18 +80,18 @@ public class MdevDeviceInventory {
 
     public static MdevDeviceInventory __example__() {
         MdevDeviceInventory inv = new MdevDeviceInventory();
-        inv.setUuid(Platform.getUuid());
+        inv.setUuid(DocUtils.createFixedUuid(MdevDeviceVO.class));
         inv.setName("GRID M60-2A");
-        inv.setHostUuid(Platform.getUuid());
-        inv.setParentUuid(Platform.getUuid());
-        inv.setMdevSpecUuid(Platform.getUuid());
+        inv.setHostUuid(DocUtils.createFixedUuid(HostVO.class));
+        inv.setParentUuid(DocUtils.createFixedUuid(PciDeviceVO.class));
+        inv.setMdevSpecUuid(DocUtils.createFixedUuid(MdevDeviceSpecVO.class));
         inv.setType(MdevDeviceType.GPU_Video_Controller);
         inv.setState(MdevDeviceState.Enabled);
         inv.setStatus(MdevDeviceStatus.Active);
         inv.setChooser(MdevDeviceChooser.None);
         inv.setVendor("Intel");
-        inv.setCreateDate(new Timestamp(org.zstack.header.message.DocUtils.date));
-        inv.setLastOpDate(new Timestamp(org.zstack.header.message.DocUtils.date));
+        inv.setCreateDate(new Timestamp(DocUtils.date));
+        inv.setLastOpDate(new Timestamp(DocUtils.date));
         return inv;
     }
 
@@ -218,5 +221,9 @@ public class MdevDeviceInventory {
 
     public void setVendor(String vendor) {
         this.vendor = vendor;
+    }
+
+    private static String uuid() {
+        return java.util.UUID.randomUUID().toString().replace("-", "");
     }
 }

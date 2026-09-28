@@ -2,6 +2,7 @@ package org.zstack.pciDevice.virtual.vfio_mdev;
 
 import org.zstack.header.message.APIReply;
 import org.zstack.header.rest.RestResponse;
+import org.zstack.pciDevice.entity.virtual.vfio_mdev.MdevDeviceInventory;
 
 import java.util.Collections;
 import java.util.List;

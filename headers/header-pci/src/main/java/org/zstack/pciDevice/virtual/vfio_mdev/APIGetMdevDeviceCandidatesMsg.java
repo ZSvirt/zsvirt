@@ -6,10 +6,10 @@ import org.zstack.header.message.APIParam;
 import org.zstack.header.message.APISyncCallMessage;
 import org.zstack.header.rest.RestRequest;
 import org.zstack.header.vm.VmInstanceVO;
+import org.zstack.pciDevice.header.virtual.vfio_mdev.MdevDeviceType;
 
 import java.util.Collections;
 import java.util.List;
-import org.zstack.pciDevice.header.virtual.vfio_mdev.MdevDeviceType;
 
 /**
  * Created by GuoYi on 2019-05-05.

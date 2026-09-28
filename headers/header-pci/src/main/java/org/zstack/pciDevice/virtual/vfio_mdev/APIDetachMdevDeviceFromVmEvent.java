@@ -2,18 +2,19 @@ package org.zstack.pciDevice.virtual.vfio_mdev;
 
 import org.zstack.header.message.APIEvent;
 import org.zstack.header.rest.RestResponse;
+import org.zstack.pciDevice.entity.virtual.vfio_mdev.MdevDeviceInventory;
 
 /**
- * Created by GuoYi on 2019-04-20.
+ * Created by GuoYi on 2019-04-19.
  */
 @RestResponse(allTo = "inventory")
-public class APIAttachMdevDeviceToVmEvent extends APIEvent {
+public class APIDetachMdevDeviceFromVmEvent extends APIEvent {
     private MdevDeviceInventory inventory;
 
-    public APIAttachMdevDeviceToVmEvent() {
+    public APIDetachMdevDeviceFromVmEvent() {
     }
 
-    public APIAttachMdevDeviceToVmEvent(String apiId) {
+    public APIDetachMdevDeviceFromVmEvent(String apiId) {
         super(apiId);
     }
 
@@ -25,8 +26,8 @@ public class APIAttachMdevDeviceToVmEvent extends APIEvent {
         this.inventory = inventory;
     }
 
-    public static APIAttachMdevDeviceToVmEvent __example__() {
-        APIAttachMdevDeviceToVmEvent evt = new APIAttachMdevDeviceToVmEvent();
+    public static APIDetachMdevDeviceFromVmEvent __example__() {
+        APIDetachMdevDeviceFromVmEvent evt = new APIDetachMdevDeviceFromVmEvent();
         evt.setInventory(MdevDeviceInventory.__example__());
         return evt;
     }

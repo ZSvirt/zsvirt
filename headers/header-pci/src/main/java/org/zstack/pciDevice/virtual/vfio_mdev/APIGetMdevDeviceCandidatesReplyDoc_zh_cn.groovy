@@ -1,7 +1,7 @@
 package org.zstack.pciDevice.virtual.vfio_mdev
 
 import org.zstack.header.errorcode.ErrorCode
-import org.zstack.pciDevice.virtual.vfio_mdev.MdevDeviceInventory
+import org.zstack.pciDevice.entity.virtual.vfio_mdev.MdevDeviceInventory
 
 doc {
 

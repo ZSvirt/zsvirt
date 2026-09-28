@@ -21,15 +21,15 @@ import org.zstack.header.vm.VmInstanceVO_;
 import org.zstack.pciDevice.*;
 import org.zstack.pciDevice.entity.PciDeviceVO;
 import org.zstack.pciDevice.entity.PciDeviceVO_;
-import org.zstack.pciDevice.virtual.vfio_mdev.MdevDeviceVO;
-import org.zstack.pciDevice.virtual.vfio_mdev.MdevDeviceVO_;
+import org.zstack.pciDevice.entity.virtual.vfio_mdev.MdevDeviceVO;
+import org.zstack.pciDevice.entity.virtual.vfio_mdev.MdevDeviceVO_;
 import org.zstack.pciDevice.header.HostIommuStateType;
 import org.zstack.pciDevice.header.HostIommuStatusType;
 import org.zstack.pciDevice.header.virtual.vfio_mdev.MdevDeviceConstants;
 import org.zstack.pciDevice.header.virtual.vfio_mdev.MdevDeviceState;
 import org.zstack.pciDevice.header.virtual.vfio_mdev.MdevDeviceStatus;
 import org.zstack.pciDevice.header.virtual.vfio_mdev.MdevDeviceType;
-import org.zstack.pciDevice.virtual.vfio_mdev.MdevDeviceMessage;
+import org.zstack.pciDevice.message.virtual.vfio_mdev.MdevDeviceMessage;
 import org.zstack.utils.Utils;
 import org.zstack.utils.logging.CLogger;
 

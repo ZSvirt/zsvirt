@@ -1,6 +1,7 @@
-package org.zstack.pciDevice.virtual.vfio_mdev;
+package org.zstack.pciDevice.message.virtual.vfio_mdev;
 
 import org.zstack.header.message.MessageReply;
+import org.zstack.pciDevice.entity.virtual.vfio_mdev.MdevDeviceInventory;
 
 /**
  * Created by GuoYi on 2019-05-25.

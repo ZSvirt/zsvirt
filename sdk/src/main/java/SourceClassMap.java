@@ -421,6 +421,7 @@ public class SourceClassMap {
 			put("org.zstack.pciDevice.entity.specification.mdev.VmInstanceMdevDeviceSpecRefInventory", "org.zstack.sdk.VmInstanceMdevDeviceSpecRefInventory");
 			put("org.zstack.pciDevice.entity.specification.pci.PciDeviceSpecInventory", "org.zstack.sdk.PciDeviceSpecInventory");
 			put("org.zstack.pciDevice.entity.specification.pci.VmInstancePciDeviceSpecRefInventory", "org.zstack.sdk.VmInstancePciDeviceSpecRefInventory");
+			put("org.zstack.pciDevice.entity.virtual.vfio_mdev.MdevDeviceInventory", "org.zstack.sdk.MdevDeviceInventory");
 			put("org.zstack.pciDevice.header.HostIommuStateType", "org.zstack.sdk.HostIommuStateType");
 			put("org.zstack.pciDevice.header.HostIommuStatusType", "org.zstack.sdk.HostIommuStatusType");
 			put("org.zstack.pciDevice.header.PciDeviceChooser", "org.zstack.sdk.PciDeviceChooser");
@@ -439,7 +440,6 @@ public class SourceClassMap {
 			put("org.zstack.pciDevice.message.PciDeviceMetaData", "org.zstack.sdk.PciDeviceMetaData");
 			put("org.zstack.pciDevice.message.PciDeviceMetaDataEntry", "org.zstack.sdk.PciDeviceMetaDataEntry");
 			put("org.zstack.pciDevice.message.PciDeviceMetaDataEntry$PciDeviceMetaDataOperator", "org.zstack.sdk.PciDeviceMetaDataOperator");
-			put("org.zstack.pciDevice.virtual.vfio_mdev.MdevDeviceInventory", "org.zstack.sdk.MdevDeviceInventory");
 			put("org.zstack.resourceconfig.APIGetResourceBindableConfigReply$ResourceBindableConfigStruct", "org.zstack.sdk.ResourceBindableConfigStruct");
 			put("org.zstack.resourceconfig.ResourceConfigInventory", "org.zstack.sdk.ResourceConfigInventory");
 			put("org.zstack.resourceconfig.ResourceConfigStruct", "org.zstack.sdk.ResourceConfigStruct");
@@ -811,7 +811,7 @@ public class SourceClassMap {
 			put("org.zstack.sdk.LunInventory", "org.zstack.header.storageDevice.LunInventory");
 			put("org.zstack.sdk.ManagementNodeInventory", "org.zstack.header.managementnode.ManagementNodeInventory");
 			put("org.zstack.sdk.MdevDeviceChooser", "org.zstack.pciDevice.header.virtual.vfio_mdev.MdevDeviceChooser");
-			put("org.zstack.sdk.MdevDeviceInventory", "org.zstack.pciDevice.virtual.vfio_mdev.MdevDeviceInventory");
+			put("org.zstack.sdk.MdevDeviceInventory", "org.zstack.pciDevice.entity.virtual.vfio_mdev.MdevDeviceInventory");
 			put("org.zstack.sdk.MdevDeviceSpecInventory", "org.zstack.pciDevice.entity.specification.mdev.MdevDeviceSpecInventory");
 			put("org.zstack.sdk.MdevDeviceSpecState", "org.zstack.pciDevice.header.specification.mdev.MdevDeviceSpecState");
 			put("org.zstack.sdk.MdevDeviceState", "org.zstack.pciDevice.header.virtual.vfio_mdev.MdevDeviceState");

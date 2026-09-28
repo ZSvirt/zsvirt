@@ -4,6 +4,7 @@ import org.springframework.http.HttpMethod;
 import org.zstack.header.query.APIQueryMessage;
 import org.zstack.header.query.AutoQuery;
 import org.zstack.header.rest.RestRequest;
+import org.zstack.pciDevice.entity.virtual.vfio_mdev.MdevDeviceInventory;
 
 import java.util.List;
 

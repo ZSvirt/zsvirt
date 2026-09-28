@@ -18,12 +18,12 @@ import org.zstack.header.vm.VmInstanceVO;
 import org.zstack.header.vm.VmInstanceVO_;
 import org.zstack.header.volume.VolumeType;
 import org.zstack.kvm.KVMConstant;
-import org.zstack.pciDevice.PciDeviceChooser;
-import org.zstack.pciDevice.PciDeviceVO;
-import org.zstack.pciDevice.PciDeviceVO_;
-import org.zstack.pciDevice.virtual.vfio_mdev.MdevDeviceChooser;
+import org.zstack.pciDevice.entity.PciDeviceVO;
+import org.zstack.pciDevice.entity.PciDeviceVO_;
 import org.zstack.pciDevice.virtual.vfio_mdev.MdevDeviceVO;
 import org.zstack.pciDevice.virtual.vfio_mdev.MdevDeviceVO_;
+import org.zstack.pciDevice.header.PciDeviceChooser;
+import org.zstack.pciDevice.header.virtual.vfio_mdev.MdevDeviceChooser;
 import org.zstack.usbDevice.UsbDeviceVO;
 import org.zstack.usbDevice.UsbDeviceVO_;
 

@@ -11,11 +11,15 @@ import org.zstack.header.vo.ForeignKey;
 import org.zstack.header.vo.Index;
 import org.zstack.header.vo.*;
 import org.zstack.mttyDevice.entity.MttyDeviceVO;
-import org.zstack.pciDevice.PciDeviceVO;
-import org.zstack.pciDevice.specification.mdev.MdevDeviceSpecVO;
+import org.zstack.pciDevice.entity.PciDeviceVO;
+import org.zstack.pciDevice.entity.specification.mdev.MdevDeviceSpecVO;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
+import org.zstack.pciDevice.header.virtual.vfio_mdev.MdevDeviceChooser;
+import org.zstack.pciDevice.header.virtual.vfio_mdev.MdevDeviceState;
+import org.zstack.pciDevice.header.virtual.vfio_mdev.MdevDeviceStatus;
+import org.zstack.pciDevice.header.virtual.vfio_mdev.MdevDeviceType;
 
 /**
  * Created by GuoYi on 2019-04-17.

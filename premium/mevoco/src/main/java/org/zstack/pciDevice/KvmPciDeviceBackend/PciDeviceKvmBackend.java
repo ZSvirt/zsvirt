@@ -37,9 +37,48 @@ import org.zstack.kvm.*;
 import org.zstack.network.hostNetworkInterface.HostNetworkInterfaceVO;
 import org.zstack.network.hostNetworkInterface.HostNetworkInterfaceVO_;
 import org.zstack.pciDevice.*;
+import org.zstack.pciDevice.PciDeviceTOHelper;
+import org.zstack.pciDevice.entity.PciDeviceInventory;
+import org.zstack.pciDevice.entity.PciDeviceOfferingVO;
+import org.zstack.pciDevice.entity.PciDevicePciDeviceOfferingRefVO;
+import org.zstack.pciDevice.entity.PciDeviceVO;
+import org.zstack.pciDevice.entity.PciDeviceVO_;
+import org.zstack.pciDevice.entity.specification.mdev.MdevDeviceSpecInventory;
+import org.zstack.pciDevice.entity.specification.mdev.MdevDeviceSpecVO;
+import org.zstack.pciDevice.entity.specification.mdev.MdevDeviceSpecVO_;
+import org.zstack.pciDevice.entity.specification.mdev.PciDeviceMdevSpecRefVO;
+import org.zstack.pciDevice.entity.specification.mdev.PciDeviceMdevSpecRefVO_;
+import org.zstack.pciDevice.entity.specification.mdev.VmInstanceMdevDeviceSpecRefVO;
+import org.zstack.pciDevice.entity.specification.mdev.VmInstanceMdevDeviceSpecRefVO_;
+import org.zstack.pciDevice.entity.specification.pci.PciDeviceSpecInventory;
+import org.zstack.pciDevice.entity.specification.pci.PciDeviceSpecVO;
+import org.zstack.pciDevice.entity.specification.pci.PciDeviceSpecVO_;
+import org.zstack.pciDevice.entity.specification.pci.VmInstancePciDeviceSpecRefVO;
+import org.zstack.pciDevice.entity.specification.pci.VmInstancePciDeviceSpecRefVO_;
+import org.zstack.pciDevice.virtual.vfio_mdev.MdevDeviceVO;
+import org.zstack.pciDevice.virtual.vfio_mdev.MdevDeviceVO_;
+import org.zstack.pciDevice.header.HostIommuStateType;
+import org.zstack.pciDevice.header.HostIommuStatusType;
+import org.zstack.pciDevice.header.PciDeviceConstants;
+import org.zstack.pciDevice.header.PciDeviceGlobalConfig;
+import org.zstack.pciDevice.header.PciDeviceState;
+import org.zstack.pciDevice.header.PciDeviceStatus;
+import org.zstack.pciDevice.header.PciDeviceSystemTags;
+import org.zstack.pciDevice.header.PciDeviceType;
+import org.zstack.pciDevice.header.specification.mdev.MdevDeviceSpecState;
+import org.zstack.pciDevice.header.virtual.PciDeviceVirtStatus;
+import org.zstack.pciDevice.header.virtual.vfio_mdev.MdevDeviceChooser;
+import org.zstack.pciDevice.header.virtual.vfio_mdev.MdevDeviceState;
+import org.zstack.pciDevice.header.virtual.vfio_mdev.MdevDeviceStatus;
+import org.zstack.pciDevice.header.virtual.vfio_mdev.MdevDeviceType;
+import org.zstack.pciDevice.message.CustomPciDevices;
+import org.zstack.pciDevice.message.PciDeviceTO;
+import org.zstack.pciDevice.message.SyncPciDeviceMsg;
 import org.zstack.pciDevice.specification.mdev.*;
 import org.zstack.pciDevice.specification.pci.*;
-import org.zstack.pciDevice.virtual.PciDeviceVirtStatus;
+import org.zstack.pciDevice.spi.AfterSyncPciDeviceExtensionPoint;
+import org.zstack.pciDevice.spi.PciDeviceBackend;
+import org.zstack.pciDevice.spi.PciDeviceTypeFactory;
 import org.zstack.pciDevice.virtual.vfio_mdev.*;
 import org.zstack.tag.SystemTagCreator;
 import org.zstack.utils.Utils;
@@ -1234,7 +1273,7 @@ public class PciDeviceKvmBackend implements PciDeviceBackend,
             List<PciDeviceVO> newVOs = new ArrayList<>();
 
             for (PciDeviceTO to : parentNewTos) {
-                PciDeviceVO pciVo = PciDeviceTO.getPciDeviceVO(to, pciSpecs, offerings, refVOS);
+                PciDeviceVO pciVo = PciDeviceTOHelper.getPciDeviceVO(to, pciSpecs, offerings, refVOS);
 
                 pciAddressUuidMap.put(pciVo.getPciDeviceAddress(), pciVo.getUuid());
                 newVOs.add(pciVo);
@@ -1242,7 +1281,7 @@ public class PciDeviceKvmBackend implements PciDeviceBackend,
             }
 
             for (PciDeviceTO to : childNewTos) {
-                PciDeviceVO pciVo = PciDeviceTO.getPciDeviceVO(to, pciSpecs, offerings, refVOS);
+                PciDeviceVO pciVo = PciDeviceTOHelper.getPciDeviceVO(to, pciSpecs, offerings, refVOS);
 
                 String parentUuid = pciAddressUuidMap.get(to.getParentAddress());
                 if (parentUuid == null) {
@@ -1288,7 +1327,7 @@ public class PciDeviceKvmBackend implements PciDeviceBackend,
                     continue;
                 }
 
-                PciDeviceTO.updatePciDeviceVO(pci, to);
+                PciDeviceTOHelper.updatePciDeviceVO(pci, to);
                 pciSpecs.stream().filter(s -> s.matchPciDevice(to)).findFirst().ifPresent(spec -> pci.setPciSpecUuid(spec.getUuid()));
                 if (pci.getVmInstanceUuid() != null && !pci.getVmInstanceUuid().isEmpty()) {
                     pci.setStatus(PciDeviceStatus.Attached);
@@ -1409,13 +1448,13 @@ public class PciDeviceKvmBackend implements PciDeviceBackend,
                 Optional<PciDeviceSpecVO> op = pciSpecs.stream().filter(spec -> spec.matchPciDevice(to)).findFirst();
                 if (!op.isPresent()) {
                     // 1. create new pci device spec
-                    newSpecs.add(PciDeviceTO.createPciDeviceSpec(to));
+                    newSpecs.add(PciDeviceTOHelper.createPciDeviceSpec(to));
                     logger.debug(String.format("create new pci device spec[%s:%s:%s:%s]",
                             to.getVendorId(), to.getDeviceId(), to.getSubvendorId(), to.getSubdeviceId()));
                 } else {
                     // 2. update existing pci device spec
                     PciDeviceSpecVO spec = op.get();
-                    PciDeviceTO.updatePciDeviceSpec(spec, to);
+                    PciDeviceTOHelper.updatePciDeviceSpec(spec, to);
                     oldSpecs.add(spec);
                     logger.debug(String.format("updated existing pci device spec[%s:%s:%s:%s]",
                             to.getVendorId(), to.getDeviceId(), to.getSubvendorId(), to.getSubdeviceId()));

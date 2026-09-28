@@ -29,7 +29,7 @@
 
     <bean id="PciDeviceXDragonBackend" class="org.zstack.xdragon.PciDeviceXDragonBackend" >
         <zstack:plugin>
-            <zstack:extension interface="org.zstack.pciDevice.PciDeviceBackend" />
+            <zstack:extension interface="org.zstack.pciDevice.spi.PciDeviceBackend" />
             <zstack:extension interface="org.zstack.header.host.HostConnectionReestablishExtensionPoint" />
             <zstack:extension interface="org.zstack.header.tag.FormTagExtensionPoint"/>
         </zstack:plugin>

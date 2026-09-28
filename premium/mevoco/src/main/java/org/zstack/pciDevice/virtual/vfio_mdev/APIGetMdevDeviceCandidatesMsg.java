@@ -9,6 +9,7 @@ import org.zstack.header.vm.VmInstanceVO;
 
 import java.util.Collections;
 import java.util.List;
+import org.zstack.pciDevice.header.virtual.vfio_mdev.MdevDeviceType;
 
 /**
  * Created by GuoYi on 2019-05-05.

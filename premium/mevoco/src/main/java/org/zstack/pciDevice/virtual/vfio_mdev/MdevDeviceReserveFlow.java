@@ -20,6 +20,16 @@ import org.zstack.header.message.MessageReply;
 import org.zstack.header.vm.VmInstanceBeforeStartExtensionPoint;
 import org.zstack.header.vm.VmInstanceConstant.VmOperation;
 import org.zstack.header.vm.VmInstanceInventory;
+import org.zstack.pciDevice.virtual.vfio_mdev.MdevDeviceVO;
+import org.zstack.pciDevice.virtual.vfio_mdev.MdevDeviceVO_;
+import org.zstack.pciDevice.header.virtual.vfio_mdev.MdevDeviceChooser;
+import org.zstack.pciDevice.header.virtual.vfio_mdev.MdevDeviceConstants;
+import org.zstack.pciDevice.header.virtual.vfio_mdev.MdevDeviceState;
+import org.zstack.pciDevice.header.virtual.vfio_mdev.MdevDeviceStatus;
+import org.zstack.pciDevice.header.virtual.vfio_mdev.MdevDeviceSystemTags;
+import org.zstack.pciDevice.virtual.vfio_mdev.CheckAndReserveMdevDeviceBySpecMsg;
+import org.zstack.pciDevice.virtual.vfio_mdev.CheckAndReserveMdevDeviceBySpecReply;
+
 import org.zstack.utils.Utils;
 import org.zstack.utils.logging.CLogger;
 
@@ -28,7 +38,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.zstack.core.Platform.operr;
-
 @Configurable(preConstruction = true, autowire = Autowire.BY_TYPE)
 public class MdevDeviceReserveFlow implements
         VmInstanceBeforeStartExtensionPoint,

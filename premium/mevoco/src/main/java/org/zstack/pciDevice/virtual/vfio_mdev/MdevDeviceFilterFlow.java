@@ -13,17 +13,22 @@ import org.zstack.header.errorcode.OperationFailureException;
 import org.zstack.header.identity.AccountConstant;
 import org.zstack.identity.AccountManager;
 import org.zstack.pciDevice.HostIommuGetter;
-import org.zstack.pciDevice.HostIommuStateType;
-import org.zstack.pciDevice.HostIommuStatusType;
-import org.zstack.pciDevice.specification.mdev.MdevDeviceSpecVO;
-import org.zstack.pciDevice.specification.mdev.MdevDeviceSpecVO_;
+import org.zstack.pciDevice.entity.specification.mdev.MdevDeviceSpecVO;
+import org.zstack.pciDevice.entity.specification.mdev.MdevDeviceSpecVO_;
+import org.zstack.pciDevice.virtual.vfio_mdev.MdevDeviceVO;
+import org.zstack.pciDevice.virtual.vfio_mdev.MdevDeviceVO_;
+import org.zstack.pciDevice.header.HostIommuStateType;
+import org.zstack.pciDevice.header.HostIommuStatusType;
+import org.zstack.pciDevice.header.virtual.vfio_mdev.MdevDeviceChooser;
+import org.zstack.pciDevice.header.virtual.vfio_mdev.MdevDeviceState;
+import org.zstack.pciDevice.header.virtual.vfio_mdev.MdevDeviceStatus;
+import org.zstack.pciDevice.header.virtual.vfio_mdev.MdevDeviceType;
 import org.zstack.utils.Utils;
 import org.zstack.utils.logging.CLogger;
 
 import java.util.*;
 
 import static org.zstack.core.Platform.*;
-import static org.zstack.core.Platform.i18n;
 
 @Configurable(preConstruction = true, autowire = Autowire.BY_TYPE)
 public class MdevDeviceFilterFlow implements HostAllocatorFilterExtensionPoint {

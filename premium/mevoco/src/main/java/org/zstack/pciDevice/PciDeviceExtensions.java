@@ -8,6 +8,8 @@ import org.zstack.header.sriov.VmVfNicVO_;
 import org.zstack.header.vdpa.VmVdpaNicVO;
 import org.zstack.header.vdpa.VmVdpaNicVO_;
 import org.zstack.header.vm.VmMigrateHostConstraintExtensionPoint;
+import org.zstack.pciDevice.entity.PciDeviceVO;
+import org.zstack.pciDevice.entity.PciDeviceVO_;
 
 import javax.persistence.Tuple;
 import java.util.ArrayList;

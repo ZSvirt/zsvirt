@@ -4,8 +4,8 @@ import org.springframework.http.HttpMethod;
 import org.zstack.header.message.APIParam;
 import org.zstack.header.rest.APINoSee;
 import org.zstack.header.rest.RestRequest;
-import org.zstack.pciDevice.PciDeviceConstants;
-import org.zstack.pciDevice.PciDeviceVO;
+import org.zstack.pciDevice.header.PciDeviceConstants;
+import org.zstack.pciDevice.entity.PciDeviceVO;
 import org.zstack.pciDevice.virtual.APIUngenerateVirtualPciDevicesEvent;
 import org.zstack.pciDevice.virtual.APIUngenerateVirtualPciDevicesMsg;
 

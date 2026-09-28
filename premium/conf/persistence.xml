@@ -277,16 +277,16 @@
         <class>org.zstack.vrouterRoute.VRouterRouteTableVO</class>
         <class>org.zstack.vrouterRoute.VRouterRouteEntryVO</class>
         <class>org.zstack.vrouterRoute.VirtualRouterVRouterRouteTableRefVO</class>
-        <class>org.zstack.pciDevice.PciDeviceVO</class>
-        <class>org.zstack.pciDevice.PciDeviceOfferingVO</class>
-        <class>org.zstack.pciDevice.PciDevicePciDeviceOfferingRefVO</class>
-        <class>org.zstack.pciDevice.PciDeviceOfferingInstanceOfferingRefVO</class>
-        <class>org.zstack.pciDevice.specification.pci.PciDeviceSpecVO</class>
-        <class>org.zstack.pciDevice.specification.pci.VmInstancePciDeviceSpecRefVO</class>
+        <class>org.zstack.pciDevice.entity.PciDeviceVO</class>
+        <class>org.zstack.pciDevice.entity.PciDeviceOfferingVO</class>
+        <class>org.zstack.pciDevice.entity.PciDevicePciDeviceOfferingRefVO</class>
+        <class>org.zstack.pciDevice.entity.PciDeviceOfferingInstanceOfferingRefVO</class>
+        <class>org.zstack.pciDevice.entity.specification.pci.PciDeviceSpecVO</class>
+        <class>org.zstack.pciDevice.entity.specification.pci.VmInstancePciDeviceSpecRefVO</class>
         <class>org.zstack.pciDevice.virtual.vfio_mdev.MdevDeviceVO</class>
-        <class>org.zstack.pciDevice.specification.mdev.MdevDeviceSpecVO</class>
-        <class>org.zstack.pciDevice.specification.mdev.PciDeviceMdevSpecRefVO</class>
-        <class>org.zstack.pciDevice.specification.mdev.VmInstanceMdevDeviceSpecRefVO</class>
+        <class>org.zstack.pciDevice.entity.specification.mdev.MdevDeviceSpecVO</class>
+        <class>org.zstack.pciDevice.entity.specification.mdev.PciDeviceMdevSpecRefVO</class>
+        <class>org.zstack.pciDevice.entity.specification.mdev.VmInstanceMdevDeviceSpecRefVO</class>
         <class>org.zstack.header.aliyun.storage.snapshot.AliyunSnapshotVO</class>
         <class>org.zstack.header.aliyun.storage.disk.AliyunDiskVO</class>
         <class>org.zstack.sns.platform.email.SNSEmailEndpointVO</class>
@@ -318,11 +318,11 @@
         <class>org.zstack.header.storage.backup.VolumeBackupStorageRefVO</class>
         <class>org.zstack.header.storage.database.backup.DatabaseBackupVO</class>
         <class>org.zstack.header.storage.database.backup.DatabaseBackupStorageRefVO</class>
-        <class>org.zstack.pciDevice.PciDeviceVO</class>
-        <class>org.zstack.pciDevice.PciDeviceOfferingVO</class>
-        <class>org.zstack.pciDevice.PciDevicePciDeviceOfferingRefVO</class>
-        <class>org.zstack.pciDevice.PciDeviceOfferingInstanceOfferingRefVO</class>
-        <class>org.zstack.pciDevice.specification.pci.PciDeviceSpecVO</class>
+        <class>org.zstack.pciDevice.entity.PciDeviceVO</class>
+        <class>org.zstack.pciDevice.entity.PciDeviceOfferingVO</class>
+        <class>org.zstack.pciDevice.entity.PciDevicePciDeviceOfferingRefVO</class>
+        <class>org.zstack.pciDevice.entity.PciDeviceOfferingInstanceOfferingRefVO</class>
+        <class>org.zstack.pciDevice.entity.specification.pci.PciDeviceSpecVO</class>
         <class>org.zstack.header.aliyun.storage.snapshot.AliyunSnapshotVO</class>
         <class>org.zstack.header.aliyun.storage.disk.AliyunDiskVO</class>
         <class>org.zstack.usbDevice.UsbDeviceVO</class>
@@ -549,7 +549,7 @@
         <class>org.zstack.sns.platform.wecom.SNSWeComAtPersonVO</class>
         <class>org.zstack.sns.platform.feishu.SNSFeiShuEndpointVO</class>
         <class>org.zstack.sns.platform.feishu.SNSFeiShuAtPersonVO</class>
-        <class>org.zstack.pciDevice.gpu.GpuDeviceVO</class>
+        <class>org.zstack.pciDevice.entity.gpu.GpuDeviceVO</class>
         <class>org.zstack.header.host.HostHwMonitorStatusVO</class>
         <class>org.zstack.storage.device.hba.HbaDeviceVO</class>
         <class>org.zstack.storage.device.hba.FcHbaDeviceVO</class>

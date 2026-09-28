@@ -29,7 +29,7 @@
             <zstack:extension interface="org.zstack.header.vm.VmInstanceMigrateExtensionPoint"/>
             <zstack:extension interface="org.zstack.header.vm.VmAbnormalLifeCycleExtensionPoint"/>
             <zstack:extension interface="org.zstack.ha.spi.HaHostDeviceExtensionPoint"/>
-            <zstack:extension interface="org.zstack.pciDevice.PciDeviceManagerInterface"/>
+            <zstack:extension interface="org.zstack.pciDevice.spi.PciDeviceManagerInterface"/>
             <zstack:extension interface="org.zstack.header.vm.KvmReportVmShutdownEventExtensionPoint"/>
             <zstack:extension interface="org.zstack.network.hostNetworkInterface.HostNetworkCandidateFilterExtensionPoint" />
         </zstack:plugin>
@@ -43,20 +43,20 @@
 
     <bean id="SriovPciDeviceFactory" class="org.zstack.pciDevice.virtual.sr_iov.SriovPciDeviceFactory" >
         <zstack:plugin>
-            <zstack:extension interface="org.zstack.pciDevice.virtual.VirtualPciDeviceFactory" />
+            <zstack:extension interface="org.zstack.pciDevice.spi.VirtualPciDeviceFactory" />
             <zstack:extension interface="org.zstack.network.hostNetworkInterface.HostNetworkInterfaceUpdateExtensionPoint" />
         </zstack:plugin>
     </bean>
 
     <bean id="MdevDeviceFactory" class="org.zstack.pciDevice.virtual.vfio_mdev.MdevDeviceFactory" >
         <zstack:plugin>
-            <zstack:extension interface="org.zstack.pciDevice.virtual.VirtualPciDeviceFactory" />
+            <zstack:extension interface="org.zstack.pciDevice.spi.VirtualPciDeviceFactory" />
         </zstack:plugin>
     </bean>
 
     <bean id="PciDeviceKvmBackend" class="org.zstack.pciDevice.KvmPciDeviceBackend.PciDeviceKvmBackend" >
         <zstack:plugin>
-            <zstack:extension interface="org.zstack.pciDevice.PciDeviceBackend" />
+            <zstack:extension interface="org.zstack.pciDevice.spi.PciDeviceBackend" />
             <zstack:extension interface="org.zstack.header.host.HostConnectionReestablishExtensionPoint" />
             <zstack:extension interface="org.zstack.header.tag.FormTagExtensionPoint"/>
         </zstack:plugin>
@@ -65,19 +65,19 @@
     <bean id="GpuDeviceFactory" class="org.zstack.pciDevice.gpu.GpuDeviceFactory" >
         <zstack:plugin>
             <zstack:extension interface="org.zstack.header.Component"/>
-            <zstack:extension interface="org.zstack.pciDevice.PciDeviceTypeFactory" />
+            <zstack:extension interface="org.zstack.pciDevice.spi.PciDeviceTypeFactory" />
         </zstack:plugin>
     </bean>
 
     <bean id="DefaultPciDeviceFactory" class="org.zstack.pciDevice.DefaultPciDeviceFactory" >
         <zstack:plugin>
-            <zstack:extension interface="org.zstack.pciDevice.PciDeviceTypeFactory" />
+            <zstack:extension interface="org.zstack.pciDevice.spi.PciDeviceTypeFactory" />
         </zstack:plugin>
     </bean>
 
     <bean id="EthernetFactory" class="org.zstack.pciDevice.ethernet.EthernetFactory" >
         <zstack:plugin>
-            <zstack:extension interface="org.zstack.pciDevice.PciDeviceTypeFactory" />
+            <zstack:extension interface="org.zstack.pciDevice.spi.PciDeviceTypeFactory" />
         </zstack:plugin>
     </bean>
 

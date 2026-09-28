@@ -23,7 +23,12 @@ import org.zstack.header.vm.VmDeletionStruct;
 import org.zstack.header.vm.VmInstanceInventory;
 import org.zstack.header.vm.VmInstanceVO;
 import org.zstack.identity.AccountManager;
-import org.zstack.pciDevice.virtual.PciDeviceVirtStatus;
+import org.zstack.pciDevice.entity.PciDeviceInventory;
+import org.zstack.pciDevice.entity.PciDeviceVO;
+import org.zstack.pciDevice.entity.PciDeviceVO_;
+import org.zstack.pciDevice.header.PciDeviceCanonicalEvents;
+import org.zstack.pciDevice.header.PciDeviceType;
+import org.zstack.pciDevice.header.virtual.PciDeviceVirtStatus;
 import org.zstack.utils.Utils;
 import org.zstack.utils.logging.CLogger;
 

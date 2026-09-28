@@ -103,7 +103,7 @@ public abstract class HostAbstractNamespace extends AbstractNamespace {
     public static final Metric CPUReadinessPercent = new PercentMetric("CPUReadinessPercent", metrics,
             LabelNames.HostUuid
     );
-    public static final Metric CPUReadyStatus = new StateMetric("CPUReadyStatus", metrics,
+    public static final Metric CPUReadySupportStatus = new StateMetric("CPUReadySupportStatus", metrics,
             LabelNames.HostUuid, LabelNames.Status
     );
     public static final Metric CPUReadyTimeMillisecondsByCPU = new TimeDurationMetric(

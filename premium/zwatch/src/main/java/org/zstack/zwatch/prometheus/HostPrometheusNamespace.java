@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Map;
 
 import static java.util.Arrays.asList;
-import org.zstack.pciDevice.message.PciDeviceAddress;
 
 public class HostPrometheusNamespace extends AbstractPrometheusNamespace {
     public static class HostCollector extends BasicMetricCollector {
@@ -270,8 +269,8 @@ public class HostPrometheusNamespace extends AbstractPrometheusNamespace {
             rule.setExpression("zstack_host_cpu_ready_time_milliseconds");
         } else if (metric == HostNamespace.CPUReadinessPercent) {
             rule.setExpression("zstack_host_cpu_readiness_percent");
-        } else if (metric == HostNamespace.CPUReadyStatus) {
-            rule.setExpression("zstack_host_cpu_ready_status");
+        } else if (metric == HostNamespace.CPUReadySupportStatus) {
+            rule.setExpression("zstack_host_cpu_ready_support_status");
             rule.labelMapping("status", HostAbstractNamespace.LabelNames.Status.toString());
         } else if (metric == HostNamespace.CPUReadyTimeMillisecondsByCPU) {
             rule.setExpression("zstack_host_cpu_ready_time_milliseconds_by_cpu");

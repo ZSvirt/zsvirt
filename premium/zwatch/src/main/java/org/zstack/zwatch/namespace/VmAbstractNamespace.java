@@ -58,7 +58,7 @@ public abstract class VmAbstractNamespace extends AbstractNamespace {
     public static final Metric CPUReadinessPercent = new PercentMetric("CPUReadinessPercent", metrics, false,
             LabelNames.VMUuid
     );
-    public static final Metric CPUReadyStatus = new StateMetric("CPUReadyStatus", metrics, false,
+    public static final Metric CPUReadySupportStatus = new StateMetric("CPUReadySupportStatus", metrics, false,
             LabelNames.VMUuid, LabelNames.Status
     );
     public static final Metric VCPUReadyTimeMilliseconds = new TimeDurationMetric("VCPUReadyTimeMilliseconds", metrics,

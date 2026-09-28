@@ -9,6 +9,7 @@ import org.zstack.core.errorcode.ErrorFacade;
 import org.zstack.header.apimediator.ApiMessageInterceptionException;
 import org.zstack.header.apimediator.GlobalApiMessageInterceptor;
 import org.zstack.header.errorcode.ErrorCode;
+import org.zstack.header.errorcode.OperationFailureException;
 import org.zstack.header.image.APICreateDataVolumeTemplateFromVolumeMsg;
 import org.zstack.header.image.APICreateDataVolumeTemplateFromVolumeSnapshotMsg;
 import org.zstack.header.message.APIMessage;
@@ -53,6 +54,8 @@ public class SharedBlockApiInterceptor implements GlobalApiMessageInterceptor {
     public APIMessage intercept(APIMessage msg) throws ApiMessageInterceptionException {
         if (msg instanceof APIAddSharedBlockGroupPrimaryStorageMsg) {
             validate((APIAddSharedBlockGroupPrimaryStorageMsg) msg);
+        } else if (msg instanceof APIExtendSharedBlockVolumeMsg) {
+            validate((APIExtendSharedBlockVolumeMsg) msg);
         } else if (msg instanceof APIResizeDataVolumeMsg) {
             validate((APIResizeDataVolumeMsg) msg);
         } else if (msg instanceof APICreateVolumeSnapshotMsg) {
@@ -237,6 +240,16 @@ public class SharedBlockApiInterceptor implements GlobalApiMessageInterceptor {
 //        }
     }
 
+    private void validate(APIExtendSharedBlockVolumeMsg msg) {
+        try {
+            VolumeVO volumeVO = SharedBlockVolumeResizeValidator.validateExtend(
+                    msg.getVolumeUuid(), msg.getSize(), null);
+            msg.setPrimaryStorageUuid(volumeVO.getPrimaryStorageUuid());
+        } catch (OperationFailureException e) {
+            throw new ApiMessageInterceptionException(e.getErrorCode());
+        }
+    }
+
     private void validate(APICreateVolumeSnapshotMsg msg) {
         avoidLiveChangeMetaDataOnSharedVolume(msg.getVolumeUuid());
     }
@@ -357,6 +370,7 @@ public class SharedBlockApiInterceptor implements GlobalApiMessageInterceptor {
                 // former serviceConfig(storage.primary / sharedblock) bindings
                 APIAddSharedBlockGroupPrimaryStorageMsg.class,
                 APIAddSharedBlockToSharedBlockGroupMsg.class,
+                APIExtendSharedBlockVolumeMsg.class,
                 APIRefreshSharedblockDeviceCapacityMsg.class,
                 APIGetSharedBlockCandidateMsg.class,
                 APIGetSharedBlockVolumeSnapshotLanFreeLayoutMsg.class,

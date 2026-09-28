@@ -2185,6 +2185,8 @@ public class VolumeBase extends AbstractVolume implements Volume {
             handle((APIExpungeDataVolumeMsg) msg);
         } else if (msg instanceof APISyncVolumeSizeMsg) {
             handle((APISyncVolumeSizeMsg) msg);
+        } else if (msg instanceof APIShrinkVolumeMsg) {
+            handle((APIShrinkVolumeMsg) msg);
         } else if (msg instanceof APIGetVolumeCapabilitiesMsg) {
             handle((APIGetVolumeCapabilitiesMsg) msg);
         } else if (msg instanceof APIAttachDataVolumeToHostMsg) {
@@ -2210,6 +2212,62 @@ public class VolumeBase extends AbstractVolume implements Volume {
         }
         reply.setCapabilities(ret);
         bus.reply(msg, reply);
+    }
+
+    private void shrinkVolume(ReturnValueCompletion<ShrinkResult> completion) {
+        refreshVO();
+
+        ShrinkVolumeOnPrimaryStorageMsg smsg = new ShrinkVolumeOnPrimaryStorageMsg();
+        smsg.setPrimaryStorageUuid(self.getPrimaryStorageUuid());
+        smsg.setVolume(getSelfInventory());
+        bus.makeTargetServiceIdByResourceUuid(
+                smsg, PrimaryStorageConstant.SERVICE_ID, self.getPrimaryStorageUuid());
+        bus.send(smsg, new CloudBusCallBack(completion) {
+            @Override
+            public void run(MessageReply reply) {
+                if (!reply.isSuccess()) {
+                    completion.fail(reply.getError());
+                    return;
+                }
+
+                ShrinkVolumeOnPrimaryStorageReply sreply = reply.castReply();
+                completion.success(sreply.getShrinkResult());
+            }
+        });
+    }
+
+    private void handle(APIShrinkVolumeMsg msg) {
+        thdf.chainSubmit(new ChainTask(msg) {
+            @Override
+            public String getSyncSignature() {
+                return syncThreadId;
+            }
+
+            @Override
+            public void run(SyncTaskChain chain) {
+                APIShrinkVolumeEvent event = new APIShrinkVolumeEvent(msg.getId());
+                shrinkVolume(new ReturnValueCompletion<ShrinkResult>(chain) {
+                    @Override
+                    public void success(ShrinkResult result) {
+                        event.setShrinkResult(result);
+                        bus.publish(event);
+                        chain.next();
+                    }
+
+                    @Override
+                    public void fail(ErrorCode errorCode) {
+                        event.setError(errorCode);
+                        bus.publish(event);
+                        chain.next();
+                    }
+                });
+            }
+
+            @Override
+            public String getName() {
+                return String.format("shrink-volume-%s", self.getUuid());
+            }
+        });
     }
 
     private void getPrimaryStorageCapacities(Map<String, Object> ret) {

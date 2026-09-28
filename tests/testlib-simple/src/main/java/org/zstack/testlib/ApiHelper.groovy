@@ -1682,6 +1682,10 @@ abstract class ApiHelper {
         runAction(org.zstack.sdk.ExecuteDRSSchedulingAction, c)
     }
 
+    def extendSharedBlockVolume(@DelegatesTo(strategy = Closure.OWNER_FIRST, value = org.zstack.sdk.ExtendSharedBlockVolumeAction.class) Closure c) {
+        runAction(org.zstack.sdk.ExtendSharedBlockVolumeAction, c)
+    }
+
     def exportImageFromBackupStorage(@DelegatesTo(strategy = Closure.OWNER_FIRST, value = org.zstack.sdk.ExportImageFromBackupStorageAction.class) Closure c) {
         runAction(org.zstack.sdk.ExportImageFromBackupStorageAction, c)
     }
@@ -3780,6 +3784,10 @@ abstract class ApiHelper {
 
     def shrinkVolumeSnapshot(@DelegatesTo(strategy = Closure.OWNER_FIRST, value = org.zstack.sdk.ShrinkVolumeSnapshotAction.class) Closure c) {
         runAction(org.zstack.sdk.ShrinkVolumeSnapshotAction, c)
+    }
+
+    def shrinkVolume(@DelegatesTo(strategy = Closure.OWNER_FIRST, value = org.zstack.sdk.ShrinkVolumeAction.class) Closure c) {
+        runAction(org.zstack.sdk.ShrinkVolumeAction, c)
     }
 
     def shutdownHost(@DelegatesTo(strategy = Closure.OWNER_FIRST, value = org.zstack.sdk.ShutdownHostAction.class) Closure c) {

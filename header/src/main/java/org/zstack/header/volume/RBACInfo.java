@@ -60,6 +60,7 @@ public class RBACInfo implements PackageDescription {
                         APIGetVolumeCapabilitiesMsg.class,
                         APIGetVolumeFormatMsg.class,
                         APIRecoverDataVolumeMsg.class,
+                        APIShrinkVolumeMsg.class,
                         APISyncVolumeSizeMsg.class,
                         APIUndoSnapshotCreationMsg.class,
                         APIUpdateVolumeMsg.class

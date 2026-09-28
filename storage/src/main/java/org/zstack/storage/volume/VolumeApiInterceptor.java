@@ -63,11 +63,13 @@ import org.zstack.header.volume.APIDetachDataVolumeFromVmMsg;
 import org.zstack.header.volume.APIFlattenVolumeMsg;
 import org.zstack.header.volume.APIGetDataVolumeAttachableVmMsg;
 import org.zstack.header.volume.APIRecoverDataVolumeMsg;
+import org.zstack.header.volume.APIShrinkVolumeMsg;
 import org.zstack.header.volume.APIUndoSnapshotCreationMsg;
 import org.zstack.header.volume.VolumeConstant;
 import org.zstack.header.volume.VolumeFormat;
 import org.zstack.header.volume.VolumeHostRefVO;
 import org.zstack.header.volume.VolumeHostRefVO_;
+import org.zstack.header.volume.VolumeInventory;
 import org.zstack.header.volume.VolumeMessage;
 import org.zstack.header.volume.VolumeState;
 import org.zstack.header.volume.VolumeStatus;
@@ -139,6 +141,8 @@ public class VolumeApiInterceptor implements Component, GlobalApiMessageIntercep
             validate((APIAttachDataVolumeToHostMsg) msg);
         } else if (msg instanceof APIDetachDataVolumeFromHostMsg) {
             validate((APIDetachDataVolumeFromHostMsg) msg);
+        } else if (msg instanceof APIShrinkVolumeMsg) {
+            validate((APIShrinkVolumeMsg) msg);
         } else if (msg instanceof APIFlattenVolumeMsg) {
             validate((APIFlattenVolumeMsg) msg);
         } else if (msg instanceof APIChangeVolumeEncryptionMsg) {
@@ -577,6 +581,31 @@ public class VolumeApiInterceptor implements Component, GlobalApiMessageIntercep
         boolean isShareable = Q.New(VolumeVO.class).eq(VolumeVO_.uuid, msg.getVolumeUuid()).select(VolumeVO_.isShareable).findValue();
         if (isShareable) {
             throw new ApiMessageInterceptionException(argerr("cannot flatten a shareable volume[uuid:%s]", msg.getVolumeUuid()));
+        }
+    }
+
+    private void validate(APIShrinkVolumeMsg msg) {
+        VolumeVO volumeVO = dbf.findByUuid(msg.getVolumeUuid(), VolumeVO.class);
+        if (volumeVO.getStatus() != VolumeStatus.Ready) {
+            throw new ApiMessageInterceptionException(argerr(
+                    "volume[uuid:%s] is not ready, current status is %s",
+                    msg.getVolumeUuid(), volumeVO.getStatus()));
+        }
+
+        List<String> attachedVmUuids = VolumeInventory.valueOf(volumeVO).getAttachedVmUuids();
+        if (attachedVmUuids.isEmpty()) {
+            return;
+        }
+
+        List<String> notStoppedVmUuids = Q.New(VmInstanceVO.class)
+                .select(VmInstanceVO_.uuid)
+                .notEq(VmInstanceVO_.state, VmInstanceState.Stopped)
+                .in(VmInstanceVO_.uuid, attachedVmUuids)
+                .listValues();
+        if (!notStoppedVmUuids.isEmpty()) {
+            throw new ApiMessageInterceptionException(argerr(
+                    "cannot shrink volume[uuid:%s] while attached vm instances[uuids:%s] are not stopped",
+                    msg.getVolumeUuid(), notStoppedVmUuids));
         }
     }
 

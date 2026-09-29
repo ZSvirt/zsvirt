@@ -5,6 +5,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.zstack.core.cloudbus.CloudBus;
 import org.zstack.core.cloudbus.CloudBusListCallBack;
+import org.zstack.core.componentloader.PluginRegistry;
+import org.zstack.header.allocator.HostAllocatorL2NetworkExtensionPoint;
 import org.zstack.header.core.workflow.Flow;
 import org.zstack.header.core.workflow.FlowRollback;
 import org.zstack.header.core.workflow.FlowTrigger;
@@ -18,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.Collections;
 
 /**
  */
@@ -25,6 +28,8 @@ import java.util.stream.Collectors;
 public class VmMigrationCheckL2NetworkOnHostFlow implements Flow {
     @Autowired
     private CloudBus bus;
+    @Autowired
+    private PluginRegistry pluginRgty;
 
     @Override
     public void run(final FlowTrigger trigger, Map data) {
@@ -33,6 +38,12 @@ public class VmMigrationCheckL2NetworkOnHostFlow implements Flow {
 
         List<CheckL2NetworkOnHostMsg> cmsgs = new ArrayList<CheckL2NetworkOnHostMsg>();
         for (L3NetworkInventory l3 : VmNicSpec.getL3NetworkInventoryOfSpec(spec.getL3Networks())) {
+            boolean managed = pluginRgty.getExtensionList(HostAllocatorL2NetworkExtensionPoint.class).stream()
+                    .anyMatch(ext -> ext.getManagedL2NetworkUuids(Collections.singleton(l3.getL2NetworkUuid()))
+                            .contains(l3.getL2NetworkUuid()));
+            if (managed) {
+                continue;
+            }
             CheckL2NetworkOnHostMsg msg = new CheckL2NetworkOnHostMsg();
             msg.setL2NetworkUuid(l3.getL2NetworkUuid());
             msg.setHostUuid(spec.getDestHost().getUuid());

@@ -8,6 +8,7 @@ import org.zstack.core.componentloader.PluginRegistry;
 import org.zstack.core.db.DatabaseFacade;
 import org.zstack.core.db.Q;
 import org.zstack.header.allocator.HostAllocatorSpec;
+import org.zstack.header.allocator.HostAllocatorL2NetworkExtensionPoint;
 import org.zstack.header.host.HostVO;
 import org.zstack.header.host.HostVO_;
 import org.zstack.header.network.l2.L2NetworkClusterRefVO;
@@ -63,39 +64,70 @@ class AttachedL2NetworkHostMatcher {
             return new HashSet<>();
         }
 
-        List<L2NetworkClusterRefVO> refs = Q.New(L2NetworkClusterRefVO.class)
-                .in(L2NetworkClusterRefVO_.l2NetworkUuid, l2uuids)
-                .list();
-        if (refs.isEmpty()) {
-            return new HashSet<>();
-        }
-
-        Map<String, Set<String>> l2ClusterMap = new HashMap<>();
-        for (L2NetworkClusterRefVO ref : refs) {
-            Set<String> l2s = l2ClusterMap.computeIfAbsent(ref.getClusterUuid(), k -> new HashSet<>());
-            l2s.add(ref.getL2NetworkUuid());
-        }
-
-        Set<String> clusterUuids = new HashSet<>();
-        for (Map.Entry<String, Set<String>> e : l2ClusterMap.entrySet()) {
-            if (e.getValue().containsAll(l2uuids)) {
-                clusterUuids.add(e.getKey());
+        Set<String> managedL2Uuids = new HashSet<>();
+        List<String> managedCandidateHostUuids = null;
+        for (HostAllocatorL2NetworkExtensionPoint ext : pluginRgty.getExtensionList(HostAllocatorL2NetworkExtensionPoint.class)) {
+            Set<String> managed = ext.getManagedL2NetworkUuids(l2uuids);
+            managedL2Uuids.addAll(managed);
+            if (!managed.isEmpty()) {
+                List<String> candidates = ext.getCandidateHostUuids(managed);
+                if (managedCandidateHostUuids == null) {
+                    managedCandidateHostUuids = new ArrayList<>(candidates);
+                } else {
+                    managedCandidateHostUuids.retainAll(candidates);
+                }
             }
         }
-        if (clusterUuids.isEmpty()) {
+
+        List<String> localL2Uuids = new ArrayList<>(l2uuids);
+        localL2Uuids.removeAll(managedL2Uuids);
+        List<String> retHostUuids;
+        if (localL2Uuids.isEmpty()) {
+            retHostUuids = managedCandidateHostUuids == null ? new ArrayList<>() : managedCandidateHostUuids;
+        } else {
+            List<L2NetworkClusterRefVO> refs = Q.New(L2NetworkClusterRefVO.class)
+                    .in(L2NetworkClusterRefVO_.l2NetworkUuid, localL2Uuids)
+                    .list();
+            if (refs.isEmpty()) {
+                return new HashSet<>();
+            }
+
+            Map<String, Set<String>> l2ClusterMap = new HashMap<>();
+            for (L2NetworkClusterRefVO ref : refs) {
+                Set<String> l2s = l2ClusterMap.computeIfAbsent(ref.getClusterUuid(), k -> new HashSet<>());
+                l2s.add(ref.getL2NetworkUuid());
+            }
+
+            Set<String> clusterUuids = new HashSet<>();
+            for (Map.Entry<String, Set<String>> e : l2ClusterMap.entrySet()) {
+                if (e.getValue().containsAll(localL2Uuids)) {
+                    clusterUuids.add(e.getKey());
+                }
+            }
+            if (clusterUuids.isEmpty()) {
+                return new HashSet<>();
+            }
+
+            List<String> localCandidateHostUuids = Q.New(HostVO.class)
+                    .select(HostVO_.uuid)
+                    .in(HostVO_.clusterUuid, clusterUuids)
+                    .listValues();
+            if (localCandidateHostUuids == null || localCandidateHostUuids.isEmpty()) {
+                return new HashSet<>();
+            }
+            retHostUuids = new ArrayList<>(localCandidateHostUuids);
+            if (managedCandidateHostUuids != null) {
+                retHostUuids.retainAll(managedCandidateHostUuids);
+            }
+        }
+        if (retHostUuids.isEmpty()) {
             return new HashSet<>();
         }
 
-        List<String> retHostUuids = Q.New(HostVO.class)
-                .select(HostVO_.uuid)
-                .in(HostVO_.clusterUuid, clusterUuids)
-                .listValues();
-        if (retHostUuids == null || retHostUuids.isEmpty()) {
-            return new HashSet<>();
+        if (!localL2Uuids.isEmpty()) {
+            List<String> excludeHostUuids = L2NetworkHostUtils.getExcludeHostUuids(localL2Uuids, retHostUuids);
+            retHostUuids.removeAll(excludeHostUuids);
         }
-
-        List<String> excludeHostUuids = L2NetworkHostUtils.getExcludeHostUuids(l2uuids, retHostUuids);
-        retHostUuids.removeAll(excludeHostUuids);
         return new HashSet<>(retHostUuids);
     }
 }

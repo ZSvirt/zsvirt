@@ -10,5 +10,10 @@ import java.util.List;
 public interface FilterAttachableL3NetworkExtensionPoint {
     
     List<L3NetworkInventory> filterAttachableL3Network(VmInstanceInventory vm, List<L3NetworkInventory> l3s);
+
+    default List<L3NetworkInventory> filterAttachableL3Network(VmInstanceInventory vm,
+                                                                List<L3NetworkInventory> l3s, String accountUuid) {
+        return filterAttachableL3Network(vm, l3s);
+    }
     
 }

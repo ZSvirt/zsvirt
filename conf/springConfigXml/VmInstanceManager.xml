@@ -37,6 +37,7 @@
                 <value>org.zstack.compute.vm.VmAllocateVolumeFlow</value>
                 <value>org.zstack.compute.vm.VmAllocateNicFlow</value>
                 <value>org.zstack.compute.vm.VmAllocateNicIpFlow</value>
+                <value>org.zstack.compute.vm.VmAllocateExternalNetworkNicFlow</value>
                 <value>org.zstack.compute.vm.VmAllocateCdRomFlow</value>
                 <value>org.zstack.compute.vm.VmInstantiateResourcePreFlow</value>
                 <value>org.zstack.compute.vm.VmCreateOnHypervisorFlow</value>
@@ -58,6 +59,7 @@
                 <value>org.zstack.compute.vm.VmReleaseResourceFlow</value>
                 <value>org.zstack.compute.vm.VmImageSelectBackupStorageFlow</value>
                 <value>org.zstack.compute.vm.VmAllocateNicForStartingVmFlow</value>
+                <value>org.zstack.compute.vm.VmAllocateExternalNetworkNicFlow</value>
                 <value>org.zstack.compute.vm.VmInstantiateResourcePreFlow</value>
                 <value>org.zstack.compute.vm.VmStartOnHypervisorFlow</value>
                 <value>org.zstack.compute.vm.VmInstantiateResourcePostFlow</value>
@@ -68,6 +70,7 @@
                 <value>org.zstack.compute.vm.VmAllocateHostForStoppedVmFlow</value>
                 <value>org.zstack.compute.vm.VmImageSelectBackupStorageFlow</value>
                 <value>org.zstack.compute.vm.VmAllocateNicForStartingVmFlow</value>
+                <value>org.zstack.compute.vm.VmAllocateExternalNetworkNicFlow</value>
                 <value>org.zstack.compute.vm.VmInstantiateResourcePreFlow</value>
                 <value>org.zstack.compute.vm.VmStartOnHypervisorFlow</value>
                 <value>org.zstack.compute.vm.VmInstantiateResourcePostFlow</value>
@@ -115,6 +118,8 @@
         </property>
         <property name="expungeVmWorkFlowElements">
             <list>
+                <value>org.zstack.compute.vm.VmReturnReleaseNicFlow</value>
+                <value>org.zstack.compute.vm.VmPostReleaseNicFlow</value>
                 <value>org.zstack.compute.vm.VmExpungeRootVolumeFlow</value>
                 <value>org.zstack.compute.vm.VmExpungeMemoryVolumeFlow</value>
                 <value>org.zstack.compute.vm.VmExpungeCacheVolumeFlow</value>

@@ -8,6 +8,9 @@ import org.zstack.core.cloudbus.CloudBus;
 import org.zstack.core.cloudbus.CloudBusCallBack;
 import org.zstack.core.db.DatabaseFacade;
 import org.zstack.core.db.UpdateQuery;
+import org.zstack.core.componentloader.PluginRegistry;
+import org.zstack.header.core.Completion;
+import org.zstack.header.errorcode.ErrorCode;
 import org.zstack.header.core.WhileDoneCompletion;
 import org.zstack.header.core.workflow.FlowTrigger;
 import org.zstack.header.core.workflow.NoRollbackFlow;
@@ -19,6 +22,8 @@ import org.zstack.header.vm.*;
 import org.zstack.header.vm.devices.VmInstanceResourceMetadataManager;
 import org.zstack.utils.CollectionUtils;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -32,11 +37,59 @@ public class VmDetachNicFlow extends NoRollbackFlow {
     private CloudBus bus;
     @Autowired
     private VmInstanceResourceMetadataManager vidm;
+    @Autowired
+    private PluginRegistry pluginRgty;
 
     @Override
     public void run(FlowTrigger trigger, Map data) {
         final VmInstanceSpec spec = (VmInstanceSpec) data.get(VmInstanceConstant.Params.VmInstanceSpec.toString());
         final VmNicInventory nic = spec.getDestNics().get(0);
+        boolean releaseNic = (boolean) data.get(VmInstanceConstant.Params.ReleaseNicAfterDetachNic.toString());
+        if (!releaseNic) {
+            detachLocalNic(trigger, spec, nic, false);
+            return;
+        }
+        releaseNic(nic, new Completion(trigger) {
+            @Override
+            public void success() {
+                detachLocalNic(trigger, spec, nic, true);
+            }
+
+            @Override
+            public void fail(ErrorCode errorCode) {
+                trigger.fail(errorCode);
+            }
+        });
+    }
+
+    private void releaseNic(VmNicInventory nic, Completion completion) {
+        List<AfterAllocateExternalNetworkNicExtensionPoint> exts =
+                pluginRgty.getExtensionList(AfterAllocateExternalNetworkNicExtensionPoint.class);
+        new While<>(exts).each((ext, done) -> ext.releaseExternalNetworkNics(
+                Collections.singletonList(nic), new Completion(done) {
+                    @Override
+                    public void success() {
+                        done.done();
+                    }
+
+                    @Override
+                    public void fail(ErrorCode errorCode) {
+                        done.addError(errorCode);
+                        done.done();
+                    }
+                })).run(new WhileDoneCompletion(completion) {
+            @Override
+            public void done(ErrorCodeList errors) {
+                if (errors.hasError()) {
+                    completion.fail(errors.getCauses().get(0));
+                } else {
+                    completion.success();
+                }
+            }
+        });
+    }
+
+    private void detachLocalNic(FlowTrigger trigger, VmInstanceSpec spec, VmNicInventory nic, boolean releaseNic) {
         String defaultL3Uuid = dbf.findByUuid(spec.getVmInventory().getUuid(), VmInstanceVO.class).getDefaultL3NetworkUuid();
 
         if (defaultL3Uuid != null && VmNicHelper.getL3Uuids(nic).contains(defaultL3Uuid)) {
@@ -51,7 +104,6 @@ public class VmDetachNicFlow extends NoRollbackFlow {
 
         vidm.deleteVmResourceMetadata(nic.getUuid(), spec.getVmInventory().getUuid());
 
-        boolean releaseNic = (boolean) data.get(VmInstanceConstant.Params.ReleaseNicAfterDetachNic.toString());
         if (!releaseNic) {
             UpdateQuery.New(VmNicVO.class)
                     .eq(VmNicVO_.uuid, nic.getUuid())

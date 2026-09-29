@@ -1,12 +1,15 @@
 package org.zstack.allocator.domain.compute.flows;
 
 import org.springframework.beans.factory.annotation.Autowire;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.zstack.allocator.domain.compute.evaluator.AllocatorDomainRuleEvaluator;
 import org.zstack.header.allocator.domain.AllocatorHostRuleSet;
 import org.zstack.allocator.domain.header.AllocatorDomainConstant;
 import org.zstack.allocator.domain.header.AllocatorDomainErrors;
+import org.zstack.core.componentloader.PluginRegistry;
 import org.zstack.core.db.Q;
+import org.zstack.header.allocator.HostAllocatorL2NetworkExtensionPoint;
 import org.zstack.header.network.l2.L2NetworkClusterRefVO;
 import org.zstack.header.network.l2.L2NetworkClusterRefVO_;
 import org.zstack.header.network.l3.L3NetworkState;
@@ -25,6 +28,9 @@ import static org.zstack.core.Platform.i18m;
 
 @Configurable(preConstruction = true, autowire = Autowire.BY_TYPE)
 public class DomainL3NetworkHostAllocatorFlow extends AbstractDomainAllocatorFlow {
+    @Autowired
+    private PluginRegistry pluginRgty;
+
     @Override
     protected void allocate(AllocatorHostRuleSet domain) {
         List<String> zoneL3s = listZoneL3NetworkUuids(domain.zoneUuid);
@@ -48,8 +54,26 @@ public class DomainL3NetworkHostAllocatorFlow extends AbstractDomainAllocatorFlo
             }
         }
 
-        rejectHostsNotInClusters(clustersAttachedToAllL3Networks(specified),
-                i18m("cluster not attached to specified l3 of allocator domain[uuid:%s]", domain.domainUuid));
+        List<String> localL3Uuids = new ArrayList<>();
+        for (String l3Uuid : specified) {
+            String l2Uuid = Q.New(L3NetworkVO.class)
+                    .eq(L3NetworkVO_.uuid, l3Uuid)
+                    .select(L3NetworkVO_.l2NetworkUuid)
+                    .findValue();
+            boolean managed = l2Uuid != null && pluginRgty
+                    .getExtensionList(HostAllocatorL2NetworkExtensionPoint.class)
+                    .stream()
+                    .anyMatch(ext -> ext.getManagedL2NetworkUuids(
+                            Collections.singletonList(l2Uuid)).contains(l2Uuid));
+            if (!managed) {
+                localL3Uuids.add(l3Uuid);
+            }
+        }
+
+        if (!localL3Uuids.isEmpty()) {
+            rejectHostsNotInClusters(clustersAttachedToAllL3Networks(localL3Uuids),
+                    i18m("cluster not attached to specified l3 of allocator domain[uuid:%s]", domain.domainUuid));
+        }
     }
 
     private List<String> listZoneL3NetworkUuids(String zoneUuid) {

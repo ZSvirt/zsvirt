@@ -2278,6 +2278,7 @@ public class VmInstanceBase extends AbstractVmInstance {
 
         flowChain.then(new VmAllocateNicFlow());
         flowChain.then(new VmAllocateNicIpFlow());
+        flowChain.then(new VmAllocateExternalNetworkNicFlow());
         flowChain.then(new VmSetDefaultL3NetworkOnAttachingFlow());
         setAdditionalFlow(flowChain, spec);
         if (self.getState() == VmInstanceState.Running) {
@@ -5330,7 +5331,8 @@ public class VmInstanceBase extends AbstractVmInstance {
 
         List<L3NetworkInventory> ret = new ArrayList<>(l3Invs);
         for (FilterAttachableL3NetworkExtensionPoint ext : pluginRgty.getExtensionList(FilterAttachableL3NetworkExtensionPoint.class)) {
-            ret = ext.filterAttachableL3Network(VmInstanceInventory.valueOf(self), ret);
+            ret = ext.filterAttachableL3Network(VmInstanceInventory.valueOf(self), ret,
+                    msg.getSession().getAccountUuid());
         }
 
         reply.setInventories(ret);
@@ -5343,7 +5345,8 @@ public class VmInstanceBase extends AbstractVmInstance {
 
         List<L3NetworkInventory> ret = new ArrayList<>(l3Invs);
         for (FilterAttachableL3NetworkExtensionPoint ext : pluginRgty.getExtensionList(FilterAttachableL3NetworkExtensionPoint.class)) {
-            ret = ext.filterAttachableL3Network(VmInstanceInventory.valueOf(self), ret);
+            ret = ext.filterAttachableL3Network(VmInstanceInventory.valueOf(self), ret,
+                    msg.getSession().getAccountUuid());
         }
 
         VmNicVO nicVO = Q.New(VmNicVO.class).eq(VmNicVO_.uuid, msg.getVmNicUuid()).find();
@@ -8289,6 +8292,15 @@ public class VmInstanceBase extends AbstractVmInstance {
         // for L3Network that has been deleted
         List<String> nicUuidToDel = transformAndRemoveNull(inv.getVmNics(),
                 arg -> arg.getL3NetworkUuid() == null ? arg.getUuid() : null);
+
+        if ((operation == VmOperation.Destroy || operation == VmOperation.Expunge) && !nicUuidToDel.isEmpty()) {
+            for (AfterAllocateExternalNetworkNicExtensionPoint ext :
+                    pluginRgty.getExtensionList(AfterAllocateExternalNetworkNicExtensionPoint.class)) {
+                for (VmNicInventory nic : ext.getExternalNetworkNicsToRelease(inv.getVmNics())) {
+                    nicUuidToDel.remove(nic.getUuid());
+                }
+            }
+        }
 
         if (!nicUuidToDel.isEmpty()) {
             dbf.removeByPrimaryKeys(nicUuidToDel, VmNicVO.class);

@@ -2276,21 +2276,21 @@
     "en_US": "VM state is not running, try to start it",
     "zh_CN": "虚拟机状态为未运行，尝试启动虚拟机",
     "arguments": [],
-    "fileName": "src/main/java/org/zstack/ha/NeverStopVmGC.java"
+    "fileName": "src/main/java/org/zstack/ha/gc/NeverStopVmGC.java"
   },
   {
     "raw": "VM is started successfully",
     "en_US": "VM is started successfully",
     "zh_CN": "虚拟机已成功启动",
     "arguments": [],
-    "fileName": "src/main/java/org/zstack/ha/NeverStopVmGC.java"
+    "fileName": "src/main/java/org/zstack/ha/gc/NeverStopVmGC.java"
   },
   {
     "raw": "Failed to start the NeverStop VM",
     "en_US": "Failed to start the NeverStop VM",
     "zh_CN": "无法启动NeverStop虚拟机",
     "arguments": [],
-    "fileName": "src/main/java/org/zstack/ha/NeverStopVmGC.java"
+    "fileName": "src/main/java/org/zstack/ha/gc/NeverStopVmGC.java"
   },
   {
     "raw": "ceph storage is unavailable",

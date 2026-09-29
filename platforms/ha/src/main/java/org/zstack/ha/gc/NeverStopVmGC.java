@@ -1,4 +1,4 @@
-package org.zstack.ha;
+package org.zstack.ha.gc;
 
 import org.zstack.core.Platform;
 import org.zstack.core.db.Q;
@@ -12,23 +12,27 @@ import org.zstack.ha.spi.VmHaVOUpdater;
 import org.zstack.ha.header.HaGlobalConfig;
 import org.zstack.ha.header.SelfFencerStrategy;
 import org.zstack.ha.header.VmHaLevel;
+import org.zstack.ha.spi.VmHaVOUpdater;
 import org.zstack.ha.tracker.VmHaTaskTracker;
 import org.zstack.ha.vmboot.HaStartVmJudgers;
+import org.zstack.ha.vmboot.VmHaStartMessageSender;
 import org.zstack.header.core.Completion;
 import org.zstack.header.errorcode.ErrorCode;
 import org.zstack.header.host.HostStatus;
 import org.zstack.header.host.HostVO;
 import org.zstack.header.host.HostVO_;
+import org.zstack.header.storage.primary.PrimaryStorageConstants;
 import org.zstack.header.storage.primary.PrimaryStorageVO;
 import org.zstack.header.storage.primary.PrimaryStorageVO_;
-import org.zstack.header.vm.*;
+import org.zstack.header.vm.VmInstanceInventory;
+import org.zstack.header.vm.VmInstanceState;
+import org.zstack.header.vm.VmInstanceVO;
+import org.zstack.header.vm.VmInstanceVO_;
 import org.zstack.header.volume.VolumeInventory;
-import org.zstack.storage.primary.local.LocalStorageConstants;
 import org.zstack.utils.Utils;
 import org.zstack.utils.logging.CLogger;
 
 import java.util.List;
-
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -124,7 +128,7 @@ public class NeverStopVmGC extends TimeBasedGarbageCollector {
         if (!volumePSUuids.isEmpty()) {
             volumeInLocalPs = Q.New(PrimaryStorageVO.class)
                     .in(PrimaryStorageVO_.uuid, volumePSUuids)
-                    .eq(PrimaryStorageVO_.type, LocalStorageConstants.LOCAL_STORAGE_TYPE)
+                    .eq(PrimaryStorageVO_.type, PrimaryStorageConstants.LOCAL_STORAGE_TYPE)
                     .isExists();
         }
         

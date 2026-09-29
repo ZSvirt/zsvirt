@@ -1,4 +1,4 @@
-package org.zstack.ha;
+package org.zstack.ha.vmboot;
 
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -20,25 +20,19 @@ import org.zstack.ha.entity.VmHaVO;
 import org.zstack.ha.entity.VmHaVO_;
 import org.zstack.ha.fencers.HaStrategyHelper;
 import org.zstack.ha.spi.VmHaVOUpdater;
+import org.zstack.ha.gc.HaGcManager;
 import org.zstack.ha.header.*;
 import org.zstack.ha.message.*;
 import org.zstack.ha.spi.*;
-import org.zstack.ha.tracker.VmHaTaskTracker;
-import org.zstack.ha.vmboot.HaStartVmJudgers;
+import org.zstack.ha.vmboot.VmHaStartMessageSender;
 import org.zstack.header.core.*;
 import org.zstack.core.cloudbus.*;
 import org.zstack.core.componentloader.PluginRegistry;
-import org.zstack.core.config.GlobalConfig;
 import org.zstack.core.config.GlobalConfigException;
-import org.zstack.core.config.GlobalConfigUpdateExtensionPoint;
 import org.zstack.core.config.GlobalConfigValidatorExtensionPoint;
 import org.zstack.core.db.*;
 import org.zstack.core.db.SimpleQuery.Op;
-import org.zstack.core.gc.GCStatus;
-import org.zstack.core.gc.GarbageCollectorVO;
-import org.zstack.core.gc.GarbageCollectorVO_;
 import org.zstack.core.thread.ChainTask;
-import org.zstack.core.thread.PeriodicTask;
 import org.zstack.core.thread.SyncTaskChain;
 import org.zstack.core.thread.ThreadFacade;
 import org.zstack.header.AbstractService;
@@ -48,10 +42,8 @@ import org.zstack.header.cluster.ClusterVO;
 import org.zstack.header.cluster.ClusterVO_;
 import org.zstack.header.errorcode.ErrorCode;
 import org.zstack.header.errorcode.OperationFailureException;
-import org.zstack.header.errorcode.SysErrors;
 import org.zstack.header.exception.CloudRuntimeException;
 import org.zstack.header.host.*;
-import org.zstack.header.managementnode.ManagementNodeReadyExtensionPoint;
 import org.zstack.header.managementnode.PrepareDbInitialValueExtensionPoint;
 import org.zstack.header.message.APIMessage;
 import org.zstack.header.message.Message;
@@ -80,7 +72,6 @@ import java.sql.Timestamp;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -100,7 +91,7 @@ import static org.zstack.utils.CollectionUtils.toMap;
 public class HaManager extends AbstractService implements Component, HaCompletionCacher,
         HostAfterConnectedExtensionPoint, OrderVmBeforeMigrationDuringHostMaintenanceExtensionPoint,
         PrimaryStorageAttachExtensionPoint, PrimaryStorageDetachExtensionPoint, PrimaryStorageDeleteExtensionPoint,
-        ManagementNodeReadyExtensionPoint, VmHaExtensionPoint, HostScanExtensionPoint,
+        VmHaExtensionPoint, HostScanExtensionPoint,
         UpdatePrimaryStorageExtensionPoint, VmInstanceMigrateExtensionPoint, ClusterUpdateOSExtensionPoint,
         AfterAcquireVirtualRouterExtensionPoint, PrepareDbInitialValueExtensionPoint,
         VmInstanceStartNewCreatedVmExtensionPoint, VmInstanceStartExtensionPoint, VmInstanceStopExtensionPoint,
@@ -134,10 +125,11 @@ public class HaManager extends AbstractService implements Component, HaCompletio
     private VmHaVOUpdater vmHAExecutor;
     @Autowired
     private TimeHelper timeHelper;
+    @Autowired
+    private VmHaService vmHaService;
+    @Autowired
+    private HaGcManager haGcManager;
 
-    public static int vmHaBatchLimit = 1000;
-    public Future<Void> neverStopVmScanTracker = null;
-    private final ArrayList<VmInstanceState> needHaVmStates = new ArrayList<>();
     private final static Map<String, Boolean> haStatus = new HashMap<>();
     private List<String> updateHostStatusPrimaryStorages;
 
@@ -350,11 +342,6 @@ public class HaManager extends AbstractService implements Component, HaCompletio
         this.updateHostStatusPrimaryStorages = updateHostStatusPrimaryStorages;
     }
 
-    {
-        needHaVmStates.add(VmInstanceState.Unknown);
-        needHaVmStates.add(VmInstanceState.Stopped);
-    }
-
     private final Map<String, HaHypervisorFactory> hypervisorFactories = new ConcurrentHashMap<>();
     private List<VmFencerRuleExtensionPoint> vmFencerRuleList = new ArrayList<>();
 
@@ -537,13 +524,6 @@ public class HaManager extends AbstractService implements Component, HaCompletio
                 if (v < 0 || v > 1) {
                     throw new OperationFailureException(argerr("the value[%s] is lesser than 0 or greater than 1 ", newValue));
                 }
-            }
-        });
-
-        HaGlobalConfig.NEVER_STOP_VM_SCAN_INTERVAL.installUpdateExtension(new GlobalConfigUpdateExtensionPoint() {
-            @Override
-            public void updateGlobalConfig(GlobalConfig oldConfig, GlobalConfig newConfig) {
-                setHaScheduler();
             }
         });
 
@@ -731,156 +711,6 @@ public class HaManager extends AbstractService implements Component, HaCompletio
 
             return isFirst;
         }
-    }
-
-    private void setGCJobForNeverStopHaVm() {
-        new SQLBatch() {
-            @Override
-            protected void scripts() {
-                if (!isHaEnabled()) {
-                    return;
-                }
-
-                int offset = 0;
-                while (true) {
-                    List<VmInstanceVO> vos = sql("select vmVO" +
-                            " from VmInstanceVO vmVO" +
-                            " where vmVO.state in (:needHaVmStates)", VmInstanceVO.class)
-                            .param("needHaVmStates", needHaVmStates)
-                            .offset(offset)
-                            .limit(vmHaBatchLimit)
-                            .list();
-                    if (vos.isEmpty()) {
-                        break;
-                    }
-                    offset += vos.size();
-
-                    logger.debug(String.format("Batch:set HA GC job for %d VMs.", vos.size()));
-
-                    List<VmInstanceInventory> invs = VmInstanceInventory.valueOf(vos);
-                    for (VmInstanceInventory inv : invs) {
-                        if (!destinationMaker.isManagedByUs(inv.getUuid())) {
-                            continue;
-                        }
-
-                        final VmHaVO ha = Q.New(VmHaVO.class)
-                                .eq(VmHaVO_.uuid, inv.getUuid())
-                                .find();
-
-                        if (ha.getInhibitionReason() != null) {
-                            logger.debug(String.format("Skip VM [%s] GC job for HA: %s",
-                                    inv.getUuid(), ha.getInhibitionReason()));
-                            continue;
-                        }
-
-                        if (ha.getHaLevel() == NeverStop || ha.getHaLevel() == OnHostFailure) {
-                            // if vm's host connected means host is recovered from failure
-                            // use startVmWithStateSyncBefore which will check vm state before
-                            boolean hostRecovered = false;
-                            boolean isUnknownVm = VmInstanceState.Unknown.toString().equals(inv.getState());
-                            boolean isStoppedVm = VmInstanceState.Stopped.toString().equals(inv.getState());
-                            if (isUnknownVm) {
-                                hostRecovered = Q.New(HostVO.class)
-                                        .eq(HostVO_.status, HostStatus.Connected)
-                                        .eq(HostVO_.uuid, inv.getHostUuid())
-                                        .isExists();
-                            } else if (isStoppedVm) {
-                                hostRecovered = Q.New(HostVO.class)
-                                        .eq(HostVO_.status, HostStatus.Connected)
-                                        .eq(HostVO_.uuid, inv.getLastHostUuid())
-                                        .isExists();
-                            }
-
-                            if (hostRecovered) {
-                                startVmWithStateSyncBefore(inv);
-                            } else if (isStoppedVm) {
-                                submitNeverStopVmGCJob(inv);
-                            } else if (isUnknownVm) {
-                                haOnHostFailure(inv, true);
-                            }
-                        } else if (ha.getHaLevel() == FaultTolerance) {
-                            if (!inv.getType().equals(VmInstanceConstant.USER_VM_TYPE)) {
-                                continue;
-                            }
-
-                            if (VmInstanceState.Unknown.toString().equals(inv.getState())) {
-                                haOnHostFailure(inv, false);
-                            }
-                        } else {
-                            if (VmInstanceState.Unknown.toString().equals(inv.getState())) {
-                                haOnHostFailure(inv, false);
-                            }
-                        }
-                    }
-                }
-            }
-        }.execute();
-    }
-
-    private void submitNeverStopVmGCJob(VmInstanceInventory inv){
-        for (VmHaExtensionPoint ext : pluginRgty.getExtensionList(VmHaExtensionPoint.class)) {
-            ErrorCode errorCode = ext.preHaStartVm(inv.getUuid());
-            if (errorCode != null) {
-                logger.warn(String.format("can not ha for vm[%s]: %s", inv.getUuid(), errorCode.getReadableDetails()));
-                return;
-            }
-        }
-
-        setGCJobForOneVm(inv);
-    }
-
-    private void setGCJobForOneVm(VmInstanceInventory vmInv) {
-        String gcName = NeverStopVmGC.getGCName(vmInv.getUuid());
-        if (Q.New(GarbageCollectorVO.class)
-                .eq(GarbageCollectorVO_.name, gcName)
-                .notEq(GarbageCollectorVO_.status, GCStatus.Done)
-                .isExists()) {
-            logger.debug(String.format("There is already a NeverStopVmGC on Vm[uuid:%s], skip.", vmInv.getUuid()));
-            return;
-        }
-
-        NeverStopVmGC gc = new NeverStopVmGC();
-        gc.NAME = gcName;
-        gc.vm = vmInv;
-        gc.submit(HaGlobalConfig.NEVER_STOP_VM_FAILURE_RETRY_DELAY.value(Long.class), TimeUnit.SECONDS);
-        logger.debug(i18n("A GC job is submitted to HA the VM[retry delay: %s seconds]", HaGlobalConfig.NEVER_STOP_VM_FAILURE_RETRY_DELAY.value(Long.class)));
-    }
-
-    private synchronized void setHaScheduler() {
-        if (neverStopVmScanTracker != null) {
-            neverStopVmScanTracker.cancel(true);
-        }
-
-        final long interval = HaGlobalConfig.NEVER_STOP_VM_SCAN_INTERVAL.value(Long.class);
-        neverStopVmScanTracker = thdf.submitPeriodicTask(new PeriodicTask() {
-
-            @Override
-            @ExceptionSafe
-            public void run() {
-                setGCJobForNeverStopHaVm();
-            }
-
-            @Override
-            public TimeUnit getTimeUnit() {
-                return TimeUnit.SECONDS;
-            }
-
-            @Override
-            public long getInterval() {
-                return interval;
-            }
-
-            @Override
-            public String getName() {
-                return "NeverStopVmScanTracker";
-            }
-
-        });
-    }
-
-    @Override
-    public void managementNodeReady() {
-        setHaScheduler();
     }
 
     @Override
@@ -1152,7 +982,7 @@ public class HaManager extends AbstractService implements Component, HaCompletio
         VmHaLevel haLevel = ha.getHaLevel();
         if (haLevel.equals(VmHaLevel.FaultTolerance)) {
             if (VmInstanceState.Unknown.toString().equals(d.getNewState())) {
-                haOnHostFailure(d.getInventory(), false);
+                vmHaService.setupHaTrackerForOnHostFailureVm(d.getInventory(), false);
             }
 
             return;
@@ -1160,73 +990,19 @@ public class HaManager extends AbstractService implements Component, HaCompletio
 
         logger.info(String.format("starting HA for VM[uuid:%s]", d.getVmUuid()));
         if (haLevel == VmHaLevel.OnHostFailure && VmInstanceState.Unknown.toString().equals(d.getNewState())) {
-            haOnHostFailure(d.getInventory(), false);
+            vmHaService.setupHaTrackerForOnHostFailureVm(d.getInventory().getUuid(), false);
         } else if (haLevel == VmHaLevel.NeverStop) {
             if (VmInstanceState.Stopped.toString().equals(d.getNewState())) {
                 haOnStopVm(d.getInventory());
             } else if (VmInstanceState.Unknown.toString().equals(d.getNewState())) {
-                haOnHostFailure(d.getInventory(), true);
+                vmHaService.setupHaTrackerForOnHostFailureVm(d.getInventory().getUuid(), true);
             }
         } else {
             if (VmInstanceState.Unknown.toString().equals(d.getNewState())) {
-                haOnHostFailure(d.getInventory(), false);
+                vmHaService.setupHaTrackerForOnHostFailureVm(d.getInventory().getUuid(), false);
             }
         }
     }
-
-    private void doStartVm(final VmInstanceInventory vmInv, String reason) {
-        doStartVm(vmInv, reason, null);
-    }
-
-    private void doStartVm(final VmInstanceInventory vmInv, String reason, VmHaTaskTracker tracker) {
-        for (VmHaExtensionPoint ext : pluginRgty.getExtensionList(VmHaExtensionPoint.class)) {
-            ErrorCode errorCode = ext.preHaStartVm(vmInv.getUuid());
-            if (errorCode != null) {
-                logger.warn(String.format("can not start HA for vm[%s]: %s", vmInv.getUuid(), errorCode.getReadableDetails()));
-
-                if (tracker != null) {
-                    tracker.track(VmHaTaskTracker.Process.failure, errorCode.getDetails());
-                }
-                return;
-            }
-        }
-
-        String hostUuid = vmInv.getHostUuid() == null ? vmInv.getLastHostUuid() : vmInv.getHostUuid();
-        VmHaStartMessageSender sender = new VmHaStartMessageSender()
-                .withVmInstance(vmInv.getUuid())
-                .withAvoidHost(hostUuid)
-                .withReasonForHA(reason)
-                .withJudgerClass(HaStartVmJudgers.GeneralJudger.class.getName());
-
-        sender.send(new Completion(null) {
-            @Override
-            public void success() {
-                trackSuccess(tracker);
-            }
-
-            @Override
-            public void fail(ErrorCode errorCode) {
-                trackFailure(tracker, errorCode);
-                if (!errorCode.isError(SysErrors.INTERNAL)) {
-                    submitNeverStopVmGCJob(vmInv);
-                }
-            }
-
-            private void trackSuccess(VmHaTaskTracker tracker) {
-                if (tracker != null) {
-                    tracker.track(VmHaTaskTracker.Process.success, i18n("HA is successfully completed"));
-                }
-            }
-
-            private void trackFailure(VmHaTaskTracker tracker, ErrorCode errorCode) {
-                if (tracker != null) {
-                    tracker.error(errorCode);
-                    tracker.track(VmHaTaskTracker.Process.failure, i18n("Failed to HA the VM"));
-                }
-            }
-        });
-    }
-
 
     private void handleMigrationFailure(VmInstanceInventory vmInv, String hostUuid) {
         final String vmUuid = vmInv.getUuid();
@@ -1256,7 +1032,9 @@ public class HaManager extends AbstractService implements Component, HaCompletio
                     logger.warn(String.format("VM[%s] not found on migration destination host[%s]",
                             vmUuid, hostUuid));
 
-                    doStartVm(vmInv, "vm is not found on migration destination host after migrate failing");
+                    String reason = "vm is not found on migration destination host after migrate failing";
+                    String hostUuid = vmInv.getHostUuid() == null ? vmInv.getLastHostUuid() : vmInv.getHostUuid();
+                    vmHaService.haStartVmWithTracker(vmInv.getUuid(), hostUuid, reason, null);
                     return;
                 }
 
@@ -1295,152 +1073,19 @@ public class HaManager extends AbstractService implements Component, HaCompletio
         });
     }
 
-    // A NeverStop VM is reported as 'Stopped' or
-    // host is Connected but NEVER_STOP_VM_SCAN found
-    // vm unexpectedly changed to 'Stopped' or 'Unknown'
-    private void startVmWithStateSyncBefore(final VmInstanceInventory vmInv) {
-        final String vmUuid = vmInv.getUuid();
-        final String hostUuid = vmInv.getHostUuid() != null ? vmInv.getHostUuid() : vmInv.getLastHostUuid();
-
-        VmHaTaskTracker tracker = new VmHaTaskTracker(vmUuid);
-        tracker.track(VmHaTaskTracker.Process.checking, i18n("vm stopped unexpectedly, double check state"));
-        CheckVmStateOnHypervisorMsg msg = new CheckVmStateOnHypervisorMsg();
-        msg.setVmInstanceUuids(Collections.singletonList(vmUuid));
-        msg.setHostUuid(hostUuid);
-        bus.makeTargetServiceIdByResourceUuid(msg, HostConstant.SERVICE_ID, hostUuid);
-        bus.send(msg, new CloudBusCallBack(null) {
-            @Override
-            public void run(MessageReply reply) {
-                if (!reply.isSuccess()) {
-                    String info = i18n("cannot determine VM[%s] status on host[%s], try to start it", vmUuid, hostUuid);
-                    logger.warn(String.format("start HA tracker for VM[%s]: %s", vmInv.getUuid(), info));
-
-                    tracker.track(VmHaTaskTracker.Process.starting, info);
-                    doStartVm(vmInv, info, tracker);
-                    return;
-                }
-
-                CheckVmStateOnHypervisorReply r = reply.castReply();
-                String state = r.getStates().get(vmUuid);
-                if (state == null || VmInstanceState.Stopped.toString().equals(state)) {
-                    UpdateQuery.New(VmInstanceVO.class)
-                            .eq(VmInstanceVO_.uuid, vmUuid)
-                            .set(VmInstanceVO_.state, VmInstanceState.Stopped)
-                            .set(VmInstanceVO_.hostUuid, null)
-                            .set(VmInstanceVO_.lastHostUuid, hostUuid)
-                            .update();
-                    String info = vmHAExecutor.findVmFencedReason(vmUuid);
-                    info = info == null ? i18n("vm state is stopped, try to start it") : info;
-                    tracker.track(VmHaTaskTracker.Process.starting, info);
-                    logger.debug(String.format("start HA tracker for stopped VM[%s]: %s", vmInv.getUuid(), info));
-                    doStartVm(vmInv, info, tracker);
-                    return;
-                }
-
-                if (VmInstanceState.Running.toString().equals(state)) {
-                    String info = i18n("VM[%s] is running on host[%s]", vmUuid, hostUuid);
-                    logger.warn(info);
-                    tracker.track(VmHaTaskTracker.Process.noNeed, info);
-
-                    UpdateQuery.New(VmInstanceVO.class)
-                            .eq(VmInstanceVO_.uuid, vmUuid)
-                            .set(VmInstanceVO_.hostUuid, hostUuid)
-                            .set(VmInstanceVO_.state, VmInstanceState.Running)
-                            .update();
-                    return;
-                }
-
-                if (VmInstanceState.Paused.toString().equals(state)) {
-                    String info = i18n("VM[%s] is paused on host[%s]", vmUuid, hostUuid);
-                    logger.warn(info);
-                    tracker.track(VmHaTaskTracker.Process.noNeed, info);
-
-                    UpdateQuery.New(VmInstanceVO.class)
-                            .eq(VmInstanceVO_.uuid, vmUuid)
-                            .set(VmInstanceVO_.hostUuid, hostUuid)
-                            .set(VmInstanceVO_.state, VmInstanceState.Paused)
-                            .update();
-                }
-            }
-        });
-    }
-
     private void haOnStopVm(final VmInstanceInventory vmInv) {
         if (migrationFailedVMs.containsKey(vmInv.getUuid())) {
             handleMigrationFailure(vmInv, migrationFailedVMs.remove(vmInv.getUuid()));
             return;
         }
 
-        startVmWithStateSyncBefore(vmInv);
-    }
-
-    private void haOnHostFailure(VmInstanceInventory vm, final boolean retryOnFailure) {
-        VmHaTaskTracker tracker = new VmHaTaskTracker(vm.getUuid());
-
-        final HaHypervisorFactory f = hypervisorFactories.get(vm.getHypervisorType());
-        if (f == null) {
-            tracker.track(VmHaTaskTracker.Process.noNeed, i18n("the hypervisor[%s] does not support VM HA", vm.getHypervisorType()));
-            return;
-        }
-
-        thdf.chainSubmit(new ChainTask(null) {
-            @Override
-            public String getSyncSignature() {
-                return String.format("ha-vm-%s", vm.getUuid());
-            }
-
-            @Override
-            protected int getMaxPendingTasks() {
-                return 1;
-            }
-
-            @Override
-            protected String getDeduplicateString() {
-                return getSyncSignature();
-            }
-
-            @Override
-            public void run(final SyncTaskChain chain) {
-                HaHypervisorWorker worker = f.createHaWorker(vm);
-                worker.start(new HaCompletion(chain) {
-                    @Override
-                    public void noNeed(String details) {
-                        logger.debug(details);
-                        tracker.track(VmHaTaskTracker.Process.noNeed, details);
-                        chain.next();
-                    }
-
-                    @Override
-                    public void success() {
-                        tracker.track(VmHaTaskTracker.Process.success, i18n("HA is successfully completed"));
-                        chain.next();
-                    }
-
-                    @Override
-                    public void fail(ErrorCode errorCode) {
-                        logger.debug(String.format("failed to perform HA to the vm[name:%s, uuid:%s], %s", vm.getName(), vm.getUuid(), errorCode));
-                        tracker.error(errorCode);
-                        tracker.track(VmHaTaskTracker.Process.failure, i18n("Failed to HA the VM"));
-                        if (retryOnFailure) {
-                            submitNeverStopVmGCJob(vm);
-                        }
-                        chain.next();
-                    }
-                });
-            }
-
-            @Override
-            public String getName() {
-                return getSyncSignature();
-            }
-        });
+        final String vmUuid = vmInv.getUuid();
+        final String hostUuid = vmInv.getHostUuid() != null ? vmInv.getHostUuid() : vmInv.getLastHostUuid();
+        vmHaService.setupHaTrackerForNeverStopVm(vmUuid, hostUuid);
     }
 
     @Override
     public boolean stop() {
-        if (neverStopVmScanTracker != null) {
-            neverStopVmScanTracker.cancel(true);
-        }
         return true;
     }
 

@@ -9,13 +9,12 @@ import org.zstack.core.cloudbus.ResourceDestinationMaker;
 import org.zstack.core.db.Q;
 import org.zstack.core.db.SQL;
 import org.zstack.core.db.SQLBatchWithReturn;
-import org.zstack.header.core.NoErrorCompletion;
+import org.zstack.header.core.MevocoCoreGlobalConfig;
 import org.zstack.header.core.NopeCompletion;
 import org.zstack.header.core.WhileDoneCompletion;
 import org.zstack.header.errorcode.ErrorCodeList;
 import org.zstack.header.errorcode.OperationFailureException;
 import org.zstack.header.scheduler.*;
-import org.zstack.mevoco.MevocoGlobalConfig;
 import org.zstack.utils.Utils;
 import org.zstack.utils.gson.JSONObjectUtil;
 import org.zstack.utils.logging.CLogger;
@@ -47,7 +46,7 @@ public class SchedulerRunner implements Job {
 
     @Override
     public void execute(JobExecutionContext context) throws JobExecutionException {
-        if (MevocoGlobalConfig.PAUSE_THE_WORLD.value(Boolean.class)) {
+        if (MevocoCoreGlobalConfig.PAUSE_THE_WORLD.value(Boolean.class)) {
             logger.warn("world has been paused, skip scheduler job.");
             return;
         }

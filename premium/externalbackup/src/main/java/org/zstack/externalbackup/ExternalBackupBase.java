@@ -6,16 +6,12 @@ import org.springframework.beans.factory.annotation.Configurable;
 import org.zstack.core.cloudbus.CloudBus;
 import org.zstack.core.db.DatabaseFacade;
 import org.zstack.header.core.Completion;
+import org.zstack.header.core.MevocoCoreGlobalConfig;
 import org.zstack.header.errorcode.ErrorCode;
 import org.zstack.header.message.APIMessage;
 import org.zstack.header.message.Message;
-import org.zstack.mevoco.MevocoGlobalConfig;
 import org.zstack.utils.Utils;
-import org.zstack.utils.gson.JSONObjectUtil;
 import org.zstack.utils.logging.CLogger;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Created by MaJin on 2019/12/4.
@@ -71,7 +67,7 @@ public abstract class ExternalBackupBase implements ExternalBackup {
 
     private void handle(InitExternalBackupMsg msg) {
         InitExternalBackupReply reply = new InitExternalBackupReply();
-        MevocoGlobalConfig.PAUSE_THE_WORLD.updateValue(true);
+        MevocoCoreGlobalConfig.PAUSE_THE_WORLD.updateValue(true);
         initHook(new Completion(msg) {
             @Override
             public void success() {
@@ -91,7 +87,7 @@ public abstract class ExternalBackupBase implements ExternalBackup {
         completeHook(new Completion(msg) {
             @Override
             public void success() {
-                MevocoGlobalConfig.PAUSE_THE_WORLD.updateValue(false);
+                MevocoCoreGlobalConfig.PAUSE_THE_WORLD.updateValue(false);
                 bus.reply(msg, reply);
             }
 
@@ -106,7 +102,7 @@ public abstract class ExternalBackupBase implements ExternalBackup {
 
     private void handle(CancelExternalBackupMsg msg) {
         CancelExternalBackupReply reply = new CancelExternalBackupReply();
-        MevocoGlobalConfig.PAUSE_THE_WORLD.updateValue(false);
+        MevocoCoreGlobalConfig.PAUSE_THE_WORLD.updateValue(false);
         cancelHook(msg.getCancellationApiId(), new Completion(msg) {
             @Override
             public void success() {

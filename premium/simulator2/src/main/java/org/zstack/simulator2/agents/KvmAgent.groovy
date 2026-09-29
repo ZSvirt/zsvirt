@@ -12,7 +12,7 @@ import org.zstack.guesttools.GuestToolsAgentStatus
 import org.zstack.guesttools.GuestToolsConstant
 import org.zstack.guesttools.kvm.GuestToolsKvmCommands
 import org.zstack.ha.HaKvmHostSiblingChecker
-import org.zstack.ha.SelfFencerKvmBackend
+import org.zstack.ha.header.HaConstants
 import org.zstack.header.Constants
 import org.zstack.header.agent.AgentResponse
 import org.zstack.header.host.*
@@ -23,7 +23,6 @@ import org.zstack.header.vm.VmInstanceState
 import org.zstack.header.vm.VmInstanceVO
 import org.zstack.header.vm.VmInstanceVO_
 import org.zstack.header.vm.additions.VmHostFileContentFormat
-import org.zstack.header.vm.additions.VmHostFileType
 import org.zstack.header.vm.devices.DeviceAddress
 import org.zstack.header.vm.devices.VirtualDeviceInfo
 import org.zstack.header.volume.VolumeType
@@ -45,8 +44,6 @@ import org.zstack.network.l2.vxlan.vxlanNetworkPool.VxlanNetworkPoolConstant
 import org.zstack.pciDevice.KvmPciDeviceBackend.PciDeviceKvmBackend
 import org.zstack.pciDevice.message.PciDeviceTO
 import org.zstack.pciDevice.header.PciDeviceType
-import org.zstack.pciDevice.entity.PciDeviceVO
-import org.zstack.pciDevice.entity.PciDeviceVO_
 import org.zstack.pciDevice.virtual.vfio_mdev.MdevDeviceBase
 import org.zstack.simulator2.Simulator
 import org.zstack.simulator2.SimulatorGlobalProperty
@@ -401,9 +398,13 @@ class KvmAgent extends Agent {
             return rsp
         }
 
-        handle(SelfFencerKvmBackend.SETUP_SELF_FENCER_PATH) { HttpEntity<String> e ->
-            def rsp = new SelfFencerKvmBackend.AgentRsp()
-            rsp.success = true
+        handle(HaConstants.SETUP_SELF_FENCER_PATH) {
+            def rsp = new AgentResponse()
+            return rsp
+        }
+
+        handle(HaConstants.CANCEL_SELF_FENCER_PATH) {
+            def rsp = new AgentResponse()
             return rsp
         }
 

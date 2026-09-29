@@ -26,6 +26,7 @@ import org.zstack.ha.spi.HaHostStorageBasedChecker;
 import org.zstack.ha.spi.HaHostChecker;
 import org.zstack.ha.spi.HaHypervisorWorker;
 import org.zstack.ha.spi.HostScanExtensionPoint;
+import org.zstack.ha.vmboot.HaStartVmJudgers;
 import org.zstack.header.core.AsyncLatch;
 import org.zstack.header.core.Completion;
 import org.zstack.header.core.HaCheckerCompletion;
@@ -337,7 +338,8 @@ public class HaKvmWorker implements HaHypervisorWorker {
                 .withVmInstance(completion.getVmUuid())
                 .withAvoidHost(hostUuid)
                 .withReasonForHA(reason)
-                .withJudgerClass(UnknownVmHaJudger.class.getName());
+                .withJudgerClass(HaStartVmJudgers.UnknownVmJudger.class.getName());
+
         sender.send(new Completion(completion) {
             @Override
             public void success() {

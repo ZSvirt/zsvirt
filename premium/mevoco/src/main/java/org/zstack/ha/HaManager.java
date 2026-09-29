@@ -22,6 +22,8 @@ import org.zstack.ha.fencers.KvmFencerManager;
 import org.zstack.ha.header.*;
 import org.zstack.ha.message.*;
 import org.zstack.ha.spi.*;
+import org.zstack.ha.tracker.VmHaTaskTracker;
+import org.zstack.ha.vmboot.HaStartVmJudgers;
 import org.zstack.header.core.*;
 import org.zstack.core.cloudbus.*;
 import org.zstack.core.componentloader.PluginRegistry;
@@ -1189,7 +1191,7 @@ public class HaManager extends AbstractService implements Component, HaCompletio
                 .withVmInstance(vmInv.getUuid())
                 .withAvoidHost(hostUuid)
                 .withReasonForHA(reason)
-                .withJudgerClass(GeneralVmStateHaJudger.class.getName());
+                .withJudgerClass(HaStartVmJudgers.GeneralJudger.class.getName());
 
         sender.send(new Completion(null) {
             @Override

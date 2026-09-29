@@ -1,6 +1,7 @@
 package org.zstack.ha.fencers;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.zstack.core.timeout.TimeHelper;
 import org.zstack.ha.entity.HaCommands;
 import org.zstack.ha.header.HaSystemTags;
 import org.zstack.header.errorcode.ErrorCode;
@@ -25,6 +26,8 @@ public class KvmFencerManager implements VmInstanceStartExtensionPoint {
     private static final CLogger logger = Utils.getLogger(KvmFencerManager.class);
 
     @Autowired
+    private TimeHelper timeHelper;
+    @Autowired
     private List<KvmFencer> fencers = new ArrayList<>();
 
     public String findVmFencedReasonByTag(String vmUuid) {
@@ -39,7 +42,7 @@ public class KvmFencerManager implements VmInstanceStartExtensionPoint {
         long tagCreateTime = tag.getCreateDate().getTime();
         final long durationMillis = defaultFencedReasonMaxDurationMillis();
         if (fencer == null) {
-            if (System.currentTimeMillis() - tagCreateTime > durationMillis) {
+            if (timeHelper.getCurrentTimeMillis() - tagCreateTime > durationMillis) {
                 if (logger.isTraceEnabled()) {
                     logger.trace(String.format("fencerBy.tagCreateTime = %d, durationMillis = %d, delete expired tag",
                             tagCreateTime, durationMillis));
@@ -50,7 +53,7 @@ public class KvmFencerManager implements VmInstanceStartExtensionPoint {
             return i18n("VM fenced by %s", relatedFencer);
         }
 
-        if (System.currentTimeMillis() - tagCreateTime > durationMillis) {
+         if (timeHelper.getCurrentTimeMillis() - tagCreateTime > durationMillis) {
             if (logger.isTraceEnabled()) {
                 logger.trace(String.format("fencerBy.tagCreateTime = %d, durationMillis = %d, delete expired tag",
                         tagCreateTime, durationMillis));

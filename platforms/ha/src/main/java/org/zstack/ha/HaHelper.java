@@ -5,8 +5,10 @@ import org.zstack.core.db.Q;
 import org.zstack.ha.entity.HaStrategyConditionVO;
 import org.zstack.ha.entity.HaStrategyConditionVO_;
 import org.zstack.ha.header.HaConstants;
-import org.zstack.ha.header.HaGlobalConfig;import org.zstack.ha.header.HaStrategyState;
-import org.zstack.header.core.MevocoCoreGlobalConfig;import org.zstack.utils.Utils;
+import org.zstack.ha.header.HaGlobalConfig;
+import org.zstack.ha.header.HaStrategyState;
+import org.zstack.header.core.MevocoCoreGlobalConfig;
+import org.zstack.utils.Utils;
 import org.zstack.utils.logging.CLogger;
 
 import java.util.List;

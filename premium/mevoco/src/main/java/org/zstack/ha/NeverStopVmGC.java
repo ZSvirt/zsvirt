@@ -11,6 +11,8 @@ import org.zstack.ha.fencers.KvmFencerManager;
 import org.zstack.ha.header.HaGlobalConfig;
 import org.zstack.ha.header.SelfFencerStrategy;
 import org.zstack.ha.header.VmHaLevel;
+import org.zstack.ha.tracker.VmHaTaskTracker;
+import org.zstack.ha.vmboot.HaStartVmJudgers;
 import org.zstack.header.core.Completion;
 import org.zstack.header.errorcode.ErrorCode;
 import org.zstack.header.host.HostStatus;
@@ -129,7 +131,7 @@ public class NeverStopVmGC extends TimeBasedGarbageCollector {
 
         VmHaStartMessageSender sender = new VmHaStartMessageSender()
                 .withVmInstance(vm.getUuid())
-                .withJudgerClass(GCVmHaNeverStopJudger.class.getName())
+                .withJudgerClass(HaStartVmJudgers.NeverStopJudger.class.getName())
                 .withReasonForHA(reason);
         if (!(volumeInLocalPs || lastHostDeleted)) {
             sender.withAvoidHost(vm.getLastHostUuid());

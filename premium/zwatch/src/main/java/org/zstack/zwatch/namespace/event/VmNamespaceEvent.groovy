@@ -2,7 +2,7 @@ package org.zstack.zwatch.namespace.event
 
 import org.zstack.core.progress.TaskTracker
 import org.zstack.ha.header.VmHaCanonicalEvents
-import org.zstack.ha.VmHaTaskTracker
+import org.zstack.ha.tracker.VmHaTaskTracker
 import org.zstack.header.vm.VmAbnormalLifeCycleStruct
 import org.zstack.header.vm.VmCanonicalEvents
 import org.zstack.header.vm.VmInstanceState

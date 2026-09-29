@@ -1,4 +1,4 @@
-package org.zstack.ha;
+package org.zstack.ha.tracker;
 
 import org.zstack.compute.vm.VmSchedHistoryRecorder;
 import org.zstack.core.Platform;

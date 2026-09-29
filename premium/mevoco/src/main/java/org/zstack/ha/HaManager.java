@@ -818,12 +818,9 @@ public class HaManager extends AbstractService implements Component, HaCompletio
 
     private void submitNeverStopVmGCJob(VmInstanceInventory inv){
         for (VmHaExtensionPoint ext : pluginRgty.getExtensionList(VmHaExtensionPoint.class)) {
-            ext.preHaStartVm(inv.getUuid());
-        }
-
-        for (HaHostDeviceExtensionPoint ext : pluginRgty.getExtensionList(HaHostDeviceExtensionPoint.class)) {
-            if (!ext.canDoVmHa(inv.getUuid())) {
-                logger.warn(String.format("can not ha because device still attached to vm[%s]", inv.getUuid()));
+            ErrorCode errorCode = ext.preHaStartVm(inv.getUuid());
+            if (errorCode != null) {
+                logger.warn(String.format("can not ha for vm[%s]: %s", inv.getUuid(), errorCode.getReadableDetails()));
                 return;
             }
         }
@@ -1180,9 +1177,14 @@ public class HaManager extends AbstractService implements Component, HaCompletio
     }
 
     private void doStartVm(final VmInstanceInventory vmInv, String reason, VmHaTaskTracker tracker) {
-        for (HaHostDeviceExtensionPoint ext : pluginRgty.getExtensionList(HaHostDeviceExtensionPoint.class)) {
-            if (!ext.canDoVmHa(vmInv.getUuid())) {
-                logger.warn(String.format("can not ha because device still attached to vm[%s]", vmInv.getUuid()));
+        for (VmHaExtensionPoint ext : pluginRgty.getExtensionList(VmHaExtensionPoint.class)) {
+            ErrorCode errorCode = ext.preHaStartVm(vmInv.getUuid());
+            if (errorCode != null) {
+                logger.warn(String.format("can not start HA for vm[%s]: %s", vmInv.getUuid(), errorCode.getReadableDetails()));
+
+                if (tracker != null) {
+                    tracker.track(VmHaTaskTracker.Process.failure, errorCode.getDetails());
+                }
                 return;
             }
         }
@@ -1932,7 +1934,7 @@ public class HaManager extends AbstractService implements Component, HaCompletio
         syncHaVmListOnHost(host.getUuid());
     }
 
-    private void checkVmAllVolumePrimaryStorageState(String vmUuid) {
+    private ErrorCode checkVmAllVolumePrimaryStorageState(String vmUuid) {
         String sql = "select uuid from PrimaryStorageVO where uuid in (" +
                 " select distinct(primaryStorageUuid) from VolumeVO" +
                 " where vmInstanceUuid = :vmUuid and primaryStorageUuid is not null)" +
@@ -1942,8 +1944,10 @@ public class HaManager extends AbstractService implements Component, HaCompletio
                 .param("psState", PrimaryStorageState.Maintenance)
                 .list();
         if (result != null && !result.isEmpty()) {
-            throw new OperationFailureException(argerr("the VM[uuid:%s] volume stored location primary storage is in a state of maintenance", vmUuid));
+            return argerr("the VM[uuid:%s] volume stored location primary storage is in a state of maintenance", vmUuid);
         }
+
+        return null;
     }
 
     @Override
@@ -1970,8 +1974,8 @@ public class HaManager extends AbstractService implements Component, HaCompletio
     }
 
     @Override
-    public void preHaStartVm(String vmUuid) {
-        checkVmAllVolumePrimaryStorageState(vmUuid);
+    public ErrorCode preHaStartVm(String vmUuid) {
+        return checkVmAllVolumePrimaryStorageState(vmUuid);
     }
 
     @Override

@@ -22,7 +22,6 @@ import org.zstack.ha.message.CheckerStruct;
 import org.zstack.ha.message.HostScanResult;
 import org.zstack.ha.spi.HaCompletionCacher;
 import org.zstack.ha.spi.HaHostChecker;
-import org.zstack.ha.spi.HaHostDeviceExtensionPoint;
 import org.zstack.ha.spi.HaHostStorageBasedChecker;
 import org.zstack.ha.spi.HaHypervisorWorker;
 import org.zstack.ha.spi.HostScanExtensionPoint;
@@ -37,6 +36,7 @@ import org.zstack.header.core.ReturnValueCompletion;
 import org.zstack.header.errorcode.ErrorCode;
 import org.zstack.header.host.HostVO;
 import org.zstack.header.host.HostVO_;
+import org.zstack.header.vm.VmHaExtensionPoint;
 import org.zstack.header.vm.VmInstanceInventory;
 import org.zstack.header.vm.VmInstanceState;
 import org.zstack.header.vm.VmInstanceVO;
@@ -318,10 +318,11 @@ public class HaKvmWorker implements HaHypervisorWorker {
             return;
         }
 
-        for (HaHostDeviceExtensionPoint ext : pluginRgty.getExtensionList(HaHostDeviceExtensionPoint.class)) {
-            if (!ext.canDoVmHa(completion.getVmUuid())) {
-                logger.debug(String.format("host device still attached, skip HA for vm[uuid:%s]", completion.getVmUuid()));
-                completion.success();
+        for (VmHaExtensionPoint ext : pluginRgty.getExtensionList(VmHaExtensionPoint.class)) {
+            ErrorCode errorCode = ext.preHaStartVm(completion.getVmUuid());
+            if (errorCode != null) {
+                logger.warn(String.format("skip HA for vm[%s]: %s", completion.getVmUuid(), errorCode.getReadableDetails()));
+                completion.success(); // skip should not call `fail`
                 return;
             }
         }

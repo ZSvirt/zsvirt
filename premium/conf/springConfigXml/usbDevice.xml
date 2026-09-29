@@ -20,7 +20,7 @@
             <zstack:extension interface="org.zstack.header.apimediator.GlobalApiMessageInterceptor"/>
 			<zstack:extension interface="org.zstack.compute.vm.VmCapabilitiesExtensionPoint"/>
 			<zstack:extension interface="org.zstack.header.vm.VmInstanceMigrateExtensionPoint"/>
-			<zstack:extension interface="org.zstack.ha.spi.HaHostDeviceExtensionPoint" />
+			<zstack:extension interface="org.zstack.header.vm.VmHaExtensionPoint" />
 			<zstack:extension interface="org.zstack.header.vm.PreVmInstantiateResourceExtensionPoint" />
 		</zstack:plugin>
     </bean>

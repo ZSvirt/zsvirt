@@ -21,7 +21,6 @@ import org.zstack.core.thread.RunInQueue;
 import org.zstack.core.thread.SyncTaskChain;
 import org.zstack.core.thread.ThreadFacade;
 import org.zstack.core.workflow.FlowChainBuilder;
-import org.zstack.ha.spi.HaHostDeviceExtensionPoint;
 import org.zstack.header.AbstractService;
 import org.zstack.header.apimediator.ApiMessageInterceptionException;
 import org.zstack.header.apimediator.GlobalApiMessageInterceptor;
@@ -81,7 +80,7 @@ import static org.zstack.utils.CollectionDSL.map;
  * Created by GuoYi on 10/21/17.
  */
 public class UsbDeviceManager extends AbstractService implements KVMStartVmAddonExtensionPoint, GlobalApiMessageInterceptor,
-        VmCapabilitiesExtensionPoint, VmInstanceMigrateExtensionPoint, HaHostDeviceExtensionPoint, PreVmInstantiateResourceExtensionPoint {
+        VmCapabilitiesExtensionPoint, VmInstanceMigrateExtensionPoint, VmHaExtensionPoint, PreVmInstantiateResourceExtensionPoint {
     private static final CLogger logger = Utils.getLogger(UsbDeviceManager.class);
     private Map<HypervisorType, UsbDeviceBackend> backends = new HashMap<>();
 
@@ -895,8 +894,9 @@ public class UsbDeviceManager extends AbstractService implements KVMStartVmAddon
     }
 
     @Override
-    public boolean canDoVmHa(String vmUuid) {
-        return checkUsbRedirectHostState(vmUuid);
+    public ErrorCode preHaStartVm(String vmUuid) {
+        boolean ready = checkUsbRedirectHostState(vmUuid);
+        return ready ? null : operr("vm[%s] cannot start because usb redirect host is not connected", vmUuid);
     }
 
     @Override

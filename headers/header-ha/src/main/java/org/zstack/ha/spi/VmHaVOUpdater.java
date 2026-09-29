@@ -8,9 +8,18 @@ public interface VmHaVOUpdater {
     default VmHAExecutorParameters setHALevelForVM(String vmUuid) {
         return new VmHAExecutorParameters(vmUuid, this);
     }
+
     void update(VmHAExecutorParameters parameters);
 
-    public class VmHAExecutorParameters {
+    default VmHAFenceParameters fenceForVM(String vmUuid) {
+        return new VmHAFenceParameters(vmUuid, this);
+    }
+
+    void updateFence(VmHAFenceParameters parameters);
+
+    String findVmFencedReason(String vmUuid);
+
+    class VmHAExecutorParameters {
         private final String vmUuid;
         private final VmHaVOUpdater parent;
         private VmHaLevel HaLevelTo;
@@ -73,6 +82,53 @@ public interface VmHaVOUpdater {
 
         public void update() {
             parent.update(this);
+        }
+    }
+
+    class VmHAFenceParameters {
+        private final String vmUuid;
+        private final VmHaVOUpdater parent;
+        private boolean clear;
+        private String fencerName;
+        private String hostUuid;
+
+        private VmHAFenceParameters(String vmUuid, VmHaVOUpdater parent) {
+            this.vmUuid = Objects.requireNonNull(vmUuid);
+            this.parent = Objects.requireNonNull(parent);
+        }
+
+        public VmHAFenceParameters record(String fencerName, String hostUuid) {
+            this.clear = false;
+            this.fencerName = Objects.requireNonNull(fencerName);
+            this.hostUuid = hostUuid;
+            return this;
+        }
+
+        public VmHAFenceParameters clear() {
+            this.clear = true;
+            this.fencerName = null;
+            this.hostUuid = null;
+            return this;
+        }
+
+        public String getVmUuid() {
+            return vmUuid;
+        }
+
+        public boolean isClear() {
+            return clear;
+        }
+
+        public String getFencerName() {
+            return fencerName;
+        }
+
+        public String getHostUuid() {
+            return hostUuid;
+        }
+
+        public void update() {
+            parent.updateFence(this);
         }
     }
 }

@@ -2,10 +2,12 @@ package org.zstack.ha;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.zstack.core.componentloader.PluginRegistry;
+import org.zstack.core.db.Q;
 import org.zstack.core.db.SQL;
 import org.zstack.core.timeout.TimeHelper;
 import org.zstack.ha.entity.VmHaVO;
 import org.zstack.ha.entity.VmHaVO_;
+import org.zstack.ha.fencers.KvmFencer;
 import org.zstack.ha.header.HaSystemTags;
 import org.zstack.ha.header.VmHaLevel;
 import org.zstack.ha.spi.VmHaVOUpdater;
@@ -16,11 +18,18 @@ import org.zstack.utils.Utils;
 import org.zstack.utils.logging.CLogger;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 
+import static org.zstack.core.Platform.i18n;
+import static org.zstack.ha.header.HaGlobalConfig.HOST_CHECK_INTERVAL;
+import static org.zstack.ha.header.HaGlobalConfig.HOST_CHECK_MAX_ATTEMPTS;
+import static org.zstack.ha.header.HaGlobalConfig.STORAGE_CHECKER_TIMEOUT;
 import static org.zstack.ha.header.HaSystemTags.*;
 import static org.zstack.ha.header.VmHaLevel.*;
 import static org.zstack.utils.CollectionDSL.e;
 import static org.zstack.utils.CollectionDSL.map;
+import static org.zstack.utils.CollectionUtils.findOneOrNull;
 
 public class VmHaVOUpdaterImpl implements VmHaVOUpdater {
     private static final CLogger logger = Utils.getLogger(VmHaVOUpdaterImpl.class);
@@ -29,6 +38,8 @@ public class VmHaVOUpdaterImpl implements VmHaVOUpdater {
     private PluginRegistry pluginRegistry;
     @Autowired
     private TimeHelper timeHelper;
+    @Autowired
+    private List<KvmFencer> fencers = new ArrayList<>();
 
     @Override
     public void update(VmHAExecutorParameters parameters) {
@@ -48,6 +59,63 @@ public class VmHaVOUpdaterImpl implements VmHaVOUpdater {
         } else {
             disableVmHa(parameters);
         }
+    }
+
+    @Override
+    public void updateFence(VmHAFenceParameters parameters) {
+        if (parameters.isClear()) {
+            clearFence(parameters.getVmUuid());
+            return;
+        }
+
+        SQL.New(VmHaVO.class)
+                .eq(VmHaVO_.uuid, parameters.getVmUuid())
+                .set(VmHaVO_.lastFencerName, parameters.getFencerName())
+                .set(VmHaVO_.lastFenceHostUuid, parameters.getHostUuid())
+                .set(VmHaVO_.lastFenceTime, new Timestamp(timeHelper.getCurrentTimeMillis()))
+                .update();
+    }
+
+    @Override
+    public String findVmFencedReason(String vmUuid) {
+        VmHaVO vo = Q.New(VmHaVO.class).eq(VmHaVO_.uuid, vmUuid).find();
+        if (vo == null || vo.getLastFencerName() == null || vo.getLastFenceTime() == null) {
+            return null;
+        }
+
+        String relatedFencer = vo.getLastFencerName();
+        long fenceTime = vo.getLastFenceTime().getTime();
+        final long durationMillis = defaultFencedReasonMaxDurationMillis();
+        if (timeHelper.getCurrentTimeMillis() - fenceTime > durationMillis) {
+            if (logger.isTraceEnabled()) {
+                logger.trace(String.format("lastFenceTime = %d, durationMillis = %d, clear expired fence",
+                        fenceTime, durationMillis));
+            }
+            clearFence(vmUuid);
+            return null;
+        }
+
+        KvmFencer fencer = findOneOrNull(fencers, f -> f.getName().equals(relatedFencer));
+        if (fencer == null) {
+            return i18n("VM fenced by %s", relatedFencer);
+        }
+        return fencer.vmFencedReason(relatedFencer);
+    }
+
+    private long defaultFencedReasonMaxDurationMillis() {
+        int timeoutSeconds = STORAGE_CHECKER_TIMEOUT.value(Integer.class);
+        long intervalSeconds = HOST_CHECK_INTERVAL.value(Long.class);
+        int attempts = HOST_CHECK_MAX_ATTEMPTS.value(Integer.class);
+        return (timeoutSeconds + intervalSeconds) * 1000 * attempts * 2;
+    }
+
+    private void clearFence(String vmUuid) {
+        SQL.New(VmHaVO.class)
+                .eq(VmHaVO_.uuid, vmUuid)
+                .set(VmHaVO_.lastFencerName, null)
+                .set(VmHaVO_.lastFenceHostUuid, null)
+                .set(VmHaVO_.lastFenceTime, null)
+                .update();
     }
 
     @SuppressWarnings("unchecked")

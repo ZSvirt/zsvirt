@@ -25,8 +25,4 @@ public class HaSystemTags {
      */
     @Deprecated
     public static SystemTag INHIBIT_HA = new SystemTag(String.format("%s", INHIBIT_HA_TOKEN), VmInstanceVO.class);
-
-    public static String VM_FENCED_TOKEN = "fencer";
-    public static SystemTag VM_FENCED_BY =
-            new SystemTag(String.format("vmFencedBy::{%s}", VM_FENCED_TOKEN), VmInstanceVO.class);
 }

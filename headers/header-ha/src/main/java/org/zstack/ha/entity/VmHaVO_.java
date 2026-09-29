@@ -13,4 +13,7 @@ public class VmHaVO_ {
     public static volatile SingularAttribute<VmHaVO, Timestamp> haLevelUpdateTime;
     public static volatile SingularAttribute<VmHaVO, String> inhibitionReason;
     public static volatile SingularAttribute<VmHaVO, Timestamp> inhibitionTime;
+    public static volatile SingularAttribute<VmHaVO, String> lastFencerName;
+    public static volatile SingularAttribute<VmHaVO, String> lastFenceHostUuid;
+    public static volatile SingularAttribute<VmHaVO, Timestamp> lastFenceTime;
 }

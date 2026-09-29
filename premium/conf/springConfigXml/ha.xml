@@ -81,12 +81,6 @@
         </zstack:plugin>
     </bean>
 
-    <bean id="KvmFencerManager" class="org.zstack.ha.fencers.KvmFencerManager" >
-        <zstack:plugin>
-            <zstack:extension interface="org.zstack.header.vm.VmInstanceStartExtensionPoint" />
-        </zstack:plugin>
-    </bean>
-
     <bean id="HostBusinessNicKvmFencer" class="org.zstack.ha.fencers.HostBusinessNicKvmFencer" />
     <bean id="FileSystemKvmFencer" class="org.zstack.ha.fencers.FileSystemKvmFencer" />
     <bean id="CephKvmFencer" class="org.zstack.ha.fencers.CephKvmFencer" />

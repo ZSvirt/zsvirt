@@ -18,7 +18,7 @@ import org.zstack.ha.entity.HaStrategyConditionVO;
 import org.zstack.ha.entity.HaStrategyConditionVO_;
 import org.zstack.ha.entity.VmHaVO;
 import org.zstack.ha.entity.VmHaVO_;
-import org.zstack.ha.fencers.KvmFencerManager;
+import org.zstack.ha.spi.VmHaVOUpdater;
 import org.zstack.ha.header.*;
 import org.zstack.ha.message.*;
 import org.zstack.ha.spi.*;
@@ -132,8 +132,6 @@ public class HaManager extends AbstractService implements Component, HaCompletio
     @Autowired
     private VmHaVOUpdater vmHAExecutor;
     @Autowired
-    private KvmFencerManager fencerManager;
-    @Autowired
     private TimeHelper timeHelper;
 
     public static int vmHaBatchLimit = 1000;
@@ -154,6 +152,8 @@ public class HaManager extends AbstractService implements Component, HaCompletio
     public void afterStartVm(VmInstanceInventory inv) {
         syncHaVmListOnHost(inv.getHostUuid());
 
+        vmHAExecutor.fenceForVM(inv.getUuid()).clear().update();
+
         boolean haEnabled = Q.New(VmHaVO.class)
                 .eq(VmHaVO_.uuid, inv.getUuid())
                 .eq(VmHaVO_.haLevel, VmHaLevel.NeverStop)
@@ -170,7 +170,7 @@ public class HaManager extends AbstractService implements Component, HaCompletio
 
     @Override
     public void failedToStartVm(VmInstanceInventory inv, ErrorCode reason) {
-
+        vmHAExecutor.fenceForVM(inv.getUuid()).clear().update();
     }
 
     @Override
@@ -380,7 +380,8 @@ public class HaManager extends AbstractService implements Component, HaCompletio
 
             logger.info(String.format("host[uuid=%s] report VM%s has been fenced", cmd.hostUuid, vmUuids));
             for (String uuid : vmUuids) {
-                fencerManager.createFencedByTag(uuidFencerMap.get(uuid));
+                HaCommands.ReportVmSelfFencerTuple tuple = uuidFencerMap.get(uuid);
+                vmHAExecutor.fenceForVM(uuid).record(tuple.fencerName, cmd.hostUuid).update();
             }
 
             // TODO: start HA (send message or start HA GC job)
@@ -1324,7 +1325,7 @@ public class HaManager extends AbstractService implements Component, HaCompletio
                             .set(VmInstanceVO_.hostUuid, null)
                             .set(VmInstanceVO_.lastHostUuid, hostUuid)
                             .update();
-                    String info = fencerManager.findVmFencedReasonByTag(vmUuid);
+                    String info = vmHAExecutor.findVmFencedReason(vmUuid);
                     info = info == null ? i18n("vm state is stopped, try to start it") : info;
                     tracker.track(VmHaTaskTracker.Process.starting, info);
                     logger.debug(String.format("start HA tracker for stopped VM[%s]: %s", vmInv.getUuid(), info));

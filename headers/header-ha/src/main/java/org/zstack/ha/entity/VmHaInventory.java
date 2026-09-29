@@ -1,6 +1,8 @@
 package org.zstack.ha.entity;
 
 import org.zstack.header.configuration.PythonClassInventory;
+import org.zstack.header.host.HostVO;
+import org.zstack.header.message.DocUtils;
 import org.zstack.header.search.Inventory;
 import org.zstack.utils.CollectionUtils;
 
@@ -16,6 +18,9 @@ public class VmHaInventory {
     private Timestamp haLevelUpdateTime;
     private String inhibitionReason;
     private Timestamp inhibitionTime;
+    private String lastFencerName;
+    private String lastFenceHostUuid;
+    private Timestamp lastFenceTime;
 
     public static VmHaInventory valueOf(VmHaVO vo) {
         VmHaInventory inventory = new VmHaInventory();
@@ -24,6 +29,9 @@ public class VmHaInventory {
         inventory.setHaLevelUpdateTime(vo.getHaLevelUpdateTime());
         inventory.setInhibitionReason(vo.getInhibitionReason());
         inventory.setInhibitionTime(vo.getInhibitionTime());
+        inventory.setLastFencerName(vo.getLastFencerName());
+        inventory.setLastFenceHostUuid(vo.getLastFenceHostUuid());
+        inventory.setLastFenceTime(vo.getLastFenceTime());
         return inventory;
     }
 
@@ -71,6 +79,30 @@ public class VmHaInventory {
         this.inhibitionTime = inhibitionTime;
     }
 
+    public String getLastFencerName() {
+        return lastFencerName;
+    }
+
+    public void setLastFencerName(String lastFencerName) {
+        this.lastFencerName = lastFencerName;
+    }
+
+    public String getLastFenceHostUuid() {
+        return lastFenceHostUuid;
+    }
+
+    public void setLastFenceHostUuid(String lastFenceHostUuid) {
+        this.lastFenceHostUuid = lastFenceHostUuid;
+    }
+
+    public Timestamp getLastFenceTime() {
+        return lastFenceTime;
+    }
+
+    public void setLastFenceTime(Timestamp lastFenceTime) {
+        this.lastFenceTime = lastFenceTime;
+    }
+
     @Override
     public String toString() {
         return "VmHaInventory{" +
@@ -79,6 +111,9 @@ public class VmHaInventory {
         ", haLevelUpdateTime=" + haLevelUpdateTime +
         ", inhibitionReason='" + inhibitionReason + '\'' +
         ", inhibitionTime=" + inhibitionTime +
+        ", lastFencerName='" + lastFencerName + '\'' +
+        ", lastFenceHostUuid='" + lastFenceHostUuid + '\'' +
+        ", lastFenceTime=" + lastFenceTime +
         '}';
     }
 
@@ -89,6 +124,9 @@ public class VmHaInventory {
         inventory.setHaLevelUpdateTime(new Timestamp(1735192572615L));
         inventory.setInhibitionReason("APIStopVmInstanceMsg");
         inventory.setInhibitionTime(new Timestamp(1735192610654L));
+        inventory.setLastFencerName("hostFileSystemFencer");
+        inventory.setLastFenceHostUuid(DocUtils.createFixedUuid(HostVO.class));
+        inventory.setLastFenceTime(new Timestamp(1735192610654L));
         return inventory;
     }
 }

@@ -1,3 +1,5 @@
+-- Feature: PCI/MDEV/USB definition move to headers module
+
 UPDATE ResourceVO SET concreteResourceType = 'org.zstack.pciDevice.entity.PciDeviceVO'
                   WHERE concreteResourceType = 'org.zstack.pciDevice.PciDeviceVO';
 UPDATE ResourceVO SET concreteResourceType = 'org.zstack.pciDevice.entity.PciDeviceOfferingVO'
@@ -12,6 +14,20 @@ UPDATE ResourceVO SET concreteResourceType = 'org.zstack.pciDevice.entity.virtua
                   WHERE concreteResourceType = 'org.zstack.pciDevice.virtual.vfio_mdev.MdevDeviceVO';
 UPDATE ResourceVO SET concreteResourceType = 'org.zstack.usbDevice.entity.UsbDeviceVO'
                   WHERE concreteResourceType = 'org.zstack.usbDevice.UsbDeviceVO';
+
+-- Feature: VmHaVO replaces vmFencedBy system tag | ZSV-13383
+
+CALL INSERT_COLUMN('VmHaVO', 'lastFencerName', 'varchar(64)', 1, NULL, 'inhibitionTime');
+CALL INSERT_COLUMN('VmHaVO', 'lastFenceHostUuid', 'varchar(32)', 1, NULL, 'lastFencerName');
+CALL INSERT_COLUMN('VmHaVO', 'lastFenceTime', 'timestamp NULL', 1, NULL, 'lastFenceHostUuid');
+
+UPDATE `zstack`.`VmHaVO` v
+  INNER JOIN `zstack`.`SystemTagVO` t
+    ON t.resourceUuid = v.uuid AND t.tag LIKE 'vmFencedBy::%'
+SET v.lastFencerName = SUBSTRING(t.tag, LENGTH('vmFencedBy::') + 1),
+    v.lastFenceTime = t.createDate;
+
+DELETE FROM `zstack`.`SystemTagVO` WHERE `tag` LIKE 'vmFencedBy::%';
 
 -- Feature: Allocator Domain (scheduling domain) | ZSV-13008
 

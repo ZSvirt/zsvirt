@@ -1,5 +1,6 @@
 package org.zstack.ha;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
@@ -14,18 +15,18 @@ import org.zstack.core.errorcode.ErrorFacade;
 import org.zstack.core.thread.AsyncThread;
 import org.zstack.ha.entity.VmHaVO;
 import org.zstack.ha.entity.VmHaVO_;
-import org.zstack.ha.fencers.KvmFencerManager;
 import org.zstack.ha.header.HaGlobalConfig;
 import org.zstack.ha.header.SelfFencerStrategy;
 import org.zstack.ha.header.VmHaLevel;
 import org.zstack.ha.message.CheckerStruct;
 import org.zstack.ha.message.HostScanResult;
 import org.zstack.ha.spi.HaCompletionCacher;
+import org.zstack.ha.spi.HaHostChecker;
 import org.zstack.ha.spi.HaHostDeviceExtensionPoint;
 import org.zstack.ha.spi.HaHostStorageBasedChecker;
-import org.zstack.ha.spi.HaHostChecker;
 import org.zstack.ha.spi.HaHypervisorWorker;
 import org.zstack.ha.spi.HostScanExtensionPoint;
+import org.zstack.ha.spi.VmHaVOUpdater;
 import org.zstack.ha.vmboot.HaStartVmJudgers;
 import org.zstack.header.core.AsyncLatch;
 import org.zstack.header.core.Completion;
@@ -43,7 +44,6 @@ import org.zstack.resourceconfig.ResourceConfigFacade;
 import org.zstack.utils.Utils;
 import org.zstack.utils.logging.CLogger;
 
-import org.apache.commons.collections.CollectionUtils;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -71,7 +71,7 @@ public class HaKvmWorker implements HaHypervisorWorker {
     @Autowired
     private ResourceConfigFacade rcf;
     @Autowired
-    private KvmFencerManager fencerManager;
+    private VmHaVOUpdater vmHAExecutor;
 
     private VmInstanceVO self;
     private List<HostScanExtensionPoint> extensionPoints;
@@ -291,7 +291,7 @@ public class HaKvmWorker implements HaHypervisorWorker {
         }
 
         final HostScanResult result = ret.getCheckResult(hostUuid);
-        String reason = fencerManager.findVmFencedReasonByTag(completion.getVmUuid());
+        String reason = vmHAExecutor.findVmFencedReason(completion.getVmUuid());
         if (result.isDead()) {
             startHa(hostUuid, reason == null ? result.evidence : reason, completion);
             return;

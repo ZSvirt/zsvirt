@@ -39,6 +39,15 @@ public class VmHaVO {
     @Column
     private Timestamp inhibitionTime;
 
+    @Column
+    private String lastFencerName;
+
+    @Column
+    private String lastFenceHostUuid;
+
+    @Column
+    private Timestamp lastFenceTime;
+
     public String getUuid() {
         return uuid;
     }
@@ -77,5 +86,29 @@ public class VmHaVO {
 
     public void setInhibitionTime(Timestamp inhibitionTime) {
         this.inhibitionTime = inhibitionTime;
+    }
+
+    public String getLastFencerName() {
+        return lastFencerName;
+    }
+
+    public void setLastFencerName(String lastFencerName) {
+        this.lastFencerName = lastFencerName;
+    }
+
+    public String getLastFenceHostUuid() {
+        return lastFenceHostUuid;
+    }
+
+    public void setLastFenceHostUuid(String lastFenceHostUuid) {
+        this.lastFenceHostUuid = lastFenceHostUuid;
+    }
+
+    public Timestamp getLastFenceTime() {
+        return lastFenceTime;
+    }
+
+    public void setLastFenceTime(Timestamp lastFenceTime) {
+        this.lastFenceTime = lastFenceTime;
     }
 }

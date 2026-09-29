@@ -4,7 +4,7 @@ import org.zstack.core.asyncbatch.While;
 import org.zstack.core.progress.TaskTracker;
 import org.zstack.core.thread.GroupedConsumeQueue;
 import org.zstack.ha.HostCheckAliveTaskTracker;
-import org.zstack.ha.VmHaTaskTracker;
+import org.zstack.ha.tracker.VmHaTaskTracker;
 import org.zstack.ha.header.HaGlobalConfig;
 import org.zstack.header.Component;
 import org.zstack.header.core.NoErrorCompletion;

@@ -7,7 +7,7 @@ import org.zstack.core.gc.GCCompletion;
 import org.zstack.core.gc.TimeBasedGarbageCollector;
 import org.zstack.ha.entity.VmHaVO;
 import org.zstack.ha.entity.VmHaVO_;
-import org.zstack.ha.fencers.KvmFencerManager;
+import org.zstack.ha.spi.VmHaVOUpdater;
 import org.zstack.ha.header.HaGlobalConfig;
 import org.zstack.ha.header.SelfFencerStrategy;
 import org.zstack.ha.header.VmHaLevel;
@@ -109,8 +109,8 @@ public class NeverStopVmGC extends TimeBasedGarbageCollector {
         }
 
         VmHaTaskTracker tracker = new VmHaTaskTracker(vm.getUuid());
-        KvmFencerManager fencerManager = Platform.getComponentLoader().getComponent(KvmFencerManager.class);
-        String reason = fencerManager.findVmFencedReasonByTag(vm.getUuid());
+        VmHaVOUpdater vmHAExecutor = Platform.getComponentLoader().getComponent(VmHaVOUpdater.class);
+        String reason = vmHAExecutor.findVmFencedReason(vm.getUuid());
         reason = reason == null ? i18n("VM state is not running, try to start it") : reason;
         tracker.track(VmHaTaskTracker.Process.starting, reason);
         logger.debug(String.format("[GC] start HA tracker for VM[%s]: %s", vm.getUuid(), reason));

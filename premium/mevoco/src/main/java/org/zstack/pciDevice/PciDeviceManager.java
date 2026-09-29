@@ -20,7 +20,6 @@ import org.zstack.core.thread.SyncTaskChain;
 import org.zstack.core.thread.ThreadFacade;
 import org.zstack.core.workflow.FlowChainBuilder;
 import org.zstack.core.workflow.ShareFlow;
-import org.zstack.ha.spi.HaHostDeviceExtensionPoint;
 import org.zstack.header.AbstractService;
 import org.zstack.header.apimediator.ApiMessageInterceptionException;
 import org.zstack.header.apimediator.GlobalApiMessageInterceptor;
@@ -134,7 +133,7 @@ import static org.zstack.utils.CollectionDSL.map;
 public class PciDeviceManager extends AbstractService implements
         PciDeviceManagerInterface,
         ReportQuotaExtensionPoint,
-        HaHostDeviceExtensionPoint,
+        VmHaExtensionPoint,
         GlobalApiMessageInterceptor,
         VmCapabilitiesExtensionPoint,
         PostHostConnectExtensionPoint,
@@ -2433,7 +2432,7 @@ public class PciDeviceManager extends AbstractService implements
 
     @Override
     @Transactional
-    public boolean canDoVmHa(String vmUuid) {
+    public ErrorCode preHaStartVm(String vmUuid) {
         // release pci devices before check
         VmInstanceState state = Q.New(VmInstanceVO.class).eq(VmInstanceVO_.uuid, vmUuid).select(VmInstanceVO_.state).findValue();
         if (state == VmInstanceState.Stopped || state == VmInstanceState.Unknown) {
@@ -2452,15 +2451,19 @@ public class PciDeviceManager extends AbstractService implements
                 .limit(1)
                 .findValue();
         if (StringUtils.isEmpty(hostUuid)) {
-            return true;
+            return null;
         }
 
         // the vm can only start in the host where the pci device on
-        return Q.New(HostVO.class)
+        boolean oldHostReady = Q.New(HostVO.class)
                 .eq(HostVO_.uuid, hostUuid)
                 .eq(HostVO_.state, HostState.Enabled)
                 .eq(HostVO_.status, HostStatus.Connected)
                 .isExists();
+        if (oldHostReady) {
+            return null; // only can start on the old host
+        }
+        return operr("vm[%s] cannot start because pci redirect host is not connected", vmUuid);
     }
 
     @Override

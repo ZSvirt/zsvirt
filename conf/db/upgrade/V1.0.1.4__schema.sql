@@ -29,6 +29,9 @@ SET v.lastFencerName = SUBSTRING(t.tag, LENGTH('vmFencedBy::') + 1),
 
 DELETE FROM `zstack`.`SystemTagVO` WHERE `tag` LIKE 'vmFencedBy::%';
 
+UPDATE GarbageCollectorVO SET runnerClass = 'org.zstack.ha.gc.NeverStopVmGC'
+    WHERE runnerClass = 'org.zstack.ha.NeverStopVmGC';
+
 -- Feature: Allocator Domain (scheduling domain) | ZSV-13008
 
 CREATE TABLE IF NOT EXISTS `zstack`.`AllocatorDomainVO` (

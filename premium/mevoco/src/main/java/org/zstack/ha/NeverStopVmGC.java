@@ -7,6 +7,7 @@ import org.zstack.core.gc.GCCompletion;
 import org.zstack.core.gc.TimeBasedGarbageCollector;
 import org.zstack.ha.entity.VmHaVO;
 import org.zstack.ha.entity.VmHaVO_;
+import org.zstack.ha.fencers.HaStrategyHelper;
 import org.zstack.ha.spi.VmHaVOUpdater;
 import org.zstack.ha.header.HaGlobalConfig;
 import org.zstack.ha.header.SelfFencerStrategy;

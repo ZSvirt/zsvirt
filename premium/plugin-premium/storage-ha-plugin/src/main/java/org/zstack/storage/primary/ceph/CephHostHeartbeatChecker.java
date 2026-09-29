@@ -1,6 +1,7 @@
 package org.zstack.storage.primary.ceph;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.zstack.ha.fencers.HaStrategyHelper;
 import org.zstack.header.core.HaCheckerCompletion;
 import org.zstack.core.asyncbatch.While;
 import org.zstack.core.cloudbus.CloudBus;

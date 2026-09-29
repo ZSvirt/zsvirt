@@ -1,14 +1,10 @@
-package org.zstack.ha;
+package org.zstack.ha.fencers;
 
 import org.zstack.core.Platform;
-import org.zstack.core.db.Q;
 import org.zstack.core.db.SQL;
-import org.zstack.core.upgrade.UpgradeGlobalConfig;
 import org.zstack.ha.header.HaGlobalConfig;
 import org.zstack.ha.header.SelfFencerStrategy;
 import org.zstack.header.volume.VolumeType;
-import org.zstack.network.service.virtualrouter.VirtualRouterVmVO;
-import org.zstack.network.service.virtualrouter.VirtualRouterVmVO_;
 import org.zstack.resourceconfig.ResourceConfigFacade;
 import org.zstack.utils.Utils;
 import org.zstack.utils.logging.CLogger;
@@ -20,7 +16,7 @@ import java.util.Map;
 public class HaStrategyHelper {
     private static final CLogger logger = Utils.getLogger(HaStrategyHelper.class);
 
-    HaStrategyHelper(String primaryStorageType, Boolean storageConsistencySupported) {
+    public static void putConsistencyOffered(String primaryStorageType, Boolean storageConsistencySupported) {
         consistencyOffered.put(primaryStorageType, storageConsistencySupported);
     }
 
@@ -29,17 +25,18 @@ public class HaStrategyHelper {
     public static SelfFencerStrategy getVmHaFencerStrategy(String vmInstanceUuid) {
         ResourceConfigFacade rcf = Platform.getComponentLoader().getComponent(ResourceConfigFacade.class);
         if (SelfFencerStrategy.Force == SelfFencerStrategy.valueOf(rcf.getResourceConfigValue(HaGlobalConfig.VM_HA_STRATEGY, vmInstanceUuid, String.class))) {
-            // hardcode for ZSTAC-50843
-            String fencerStrategy = HaGlobalConfig.SELF_FENCER_STRATEGY.value();
-            boolean isVirtualRouterVm = Q.New(VirtualRouterVmVO.class)
-                    .eq(VirtualRouterVmVO_.uuid, vmInstanceUuid)
-                    .isExists();
-            boolean openGrayscaleUpgrade = UpgradeGlobalConfig.GRAYSCALE_UPGRADE.value(Boolean.class);
-            if (openGrayscaleUpgrade && isVirtualRouterVm
-                    && fencerStrategy.equals(SelfFencerStrategy.Permissive.name())) {
-                logger.debug(String.format("vm[%s] fencer strategy return permissive, hardcode for ZSTAC-50843", vmInstanceUuid));
-                return SelfFencerStrategy.Permissive;
-            }
+            // hardcode for ZSTAC-50843, but ZSphere do not have vpc.
+            // in Cloud, if UpgradeGlobalConfig.GRAYSCALE_UPGRADE and VM is a vpc, update SelfFencerStrategy to HaGlobalConfig.SELF_FENCER_STRATEGY
+//            String fencerStrategy = HaGlobalConfig.SELF_FENCER_STRATEGY.value();
+//            boolean isVirtualRouterVm = Q.New(VirtualRouterVmVO.class)
+//                    .eq(VirtualRouterVmVO_.uuid, vmInstanceUuid)
+//                    .isExists();
+//            boolean openGrayscaleUpgrade = UpgradeGlobalConfig.GRAYSCALE_UPGRADE.value(Boolean.class);
+//            if (openGrayscaleUpgrade && isVirtualRouterVm
+//                    && fencerStrategy.equals(SelfFencerStrategy.Permissive.name())) {
+//                logger.debug(String.format("vm[%s] fencer strategy return permissive, hardcode for ZSTAC-50843", vmInstanceUuid));
+//                return SelfFencerStrategy.Permissive;
+//            }
 
             return SelfFencerStrategy.Force;
         }

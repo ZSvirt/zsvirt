@@ -18,6 +18,7 @@ import org.zstack.ha.entity.HaStrategyConditionVO;
 import org.zstack.ha.entity.HaStrategyConditionVO_;
 import org.zstack.ha.entity.VmHaVO;
 import org.zstack.ha.entity.VmHaVO_;
+import org.zstack.ha.fencers.HaStrategyHelper;
 import org.zstack.ha.spi.VmHaVOUpdater;
 import org.zstack.ha.header.*;
 import org.zstack.ha.message.*;
@@ -1102,7 +1103,8 @@ public class HaManager extends AbstractService implements Component, HaCompletio
 
         pluginRgty.saveExtensionAsMap(KvmSetupSelfFencerExtensionPoint.class, KvmSetupSelfFencerExtensionPoint::kvmSetupSelfFencerStorageType);
 
-        pluginRgty.getExtensionList(KvmSetupSelfFencerExtensionPoint.class).forEach(ext -> new HaStrategyHelper(ext.kvmSetupSelfFencerStorageType(), ext.storageConsistencySupported()));
+        pluginRgty.getExtensionList(KvmSetupSelfFencerExtensionPoint.class).forEach(ext ->
+                HaStrategyHelper.putConsistencyOffered(ext.kvmSetupSelfFencerStorageType(), ext.storageConsistencySupported()));
         vmFencerRuleList = pluginRgty.getExtensionList(VmFencerRuleExtensionPoint.class);
     }
 

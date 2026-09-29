@@ -91,9 +91,6 @@ public class MevocoGlobalConfig {
     @GlobalConfigValidation
     public static GlobalConfig ENABLE_SECURITY_LEVEL = new GlobalConfig(CATEGORY,"enable.security.level");
 
-    @GlobalConfigValidation(validValues = {"true", "false"})
-    public static GlobalConfig PAUSE_THE_WORLD = new GlobalConfig(CATEGORY, "pause.world");
-
     @GlobalConfigValidation(inNumberRange = {720, 1440})
     @GlobalConfigDef(defaultValue = "1440", type = Long.class, description = "Accumulated hours for UKey to stay inserted")
     public static GlobalConfig LICENSE_ACCUMULATIVE_HOURS = new GlobalConfig(CATEGORY, "license.accu.hours");

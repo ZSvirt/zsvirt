@@ -1,8 +1,8 @@
 package org.zstack.ha.fencers;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.zstack.ha.entity.HaCommands;
 import org.zstack.ha.header.HaSystemTags;
-import org.zstack.ha.SelfFencerKvmBackend;
 import org.zstack.header.errorcode.ErrorCode;
 import org.zstack.header.tag.SystemTagInventory;
 import org.zstack.header.vm.VmInstanceInventory;
@@ -70,7 +70,7 @@ public class KvmFencerManager implements VmInstanceStartExtensionPoint {
     }
 
     @SuppressWarnings("unchecked")
-    public void createFencedByTag(SelfFencerKvmBackend.ReportVmSelfFencerTuple tuple) {
+    public void createFencedByTag(HaCommands.ReportVmSelfFencerTuple tuple) {
         SystemTagCreator creator = VM_FENCED_BY.newSystemTagCreator(tuple.vmUuid);
         creator.setTagByTokens(map(e(HaSystemTags.VM_FENCED_TOKEN, tuple.fencerName)));
         creator.inherent = true;

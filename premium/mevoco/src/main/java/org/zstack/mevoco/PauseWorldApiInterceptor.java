@@ -2,6 +2,7 @@ package org.zstack.mevoco;
 
 import org.zstack.header.apimediator.ApiMessageInterceptionException;
 import org.zstack.header.apimediator.GlobalApiMessageInterceptor;
+import org.zstack.header.core.MevocoCoreGlobalConfig;
 import org.zstack.header.message.APIMessage;
 import org.zstack.header.message.APISyncCallMessage;
 
@@ -31,7 +32,7 @@ public class PauseWorldApiInterceptor implements GlobalApiMessageInterceptor {
 
     @Override
     public APIMessage intercept(APIMessage msg) throws ApiMessageInterceptionException {
-        if (!MevocoGlobalConfig.PAUSE_THE_WORLD.value(Boolean.class)) {
+        if (!MevocoCoreGlobalConfig.PAUSE_THE_WORLD.value(Boolean.class)) {
             return msg;
         }
 

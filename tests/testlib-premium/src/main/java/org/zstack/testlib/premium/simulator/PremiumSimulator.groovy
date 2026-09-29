@@ -6,8 +6,8 @@ import org.zstack.compute.host.MevocoKVMAgentCommands
 import org.zstack.compute.host.MevocoKVMConstant
 import org.zstack.core.Platform
 import org.zstack.core.db.Q
-import org.zstack.ha.SelfFencerKvmBackend
 import org.zstack.ha.entity.HaCommands
+import org.zstack.ha.header.HaConstants
 import org.zstack.header.agent.AgentResponse
 import org.zstack.header.storage.primary.PrimaryStorageVO
 import org.zstack.header.storage.primary.PrimaryStorageVO_
@@ -232,9 +232,12 @@ class PremiumSimulator implements Simulator {
             return new KVMAgentCommands.AgentResponse()
         }
 
-        spec.simulator(SelfFencerKvmBackend.CANCEL_SELF_FENCER_PATH) {
-            SelfFencerKvmBackend.AgentRsp rsp = new SelfFencerKvmBackend.AgentRsp()
-            return rsp
+        spec.simulator(HaConstants.SETUP_SELF_FENCER_PATH) {
+            return new AgentResponse()
+        }
+
+        spec.simulator(HaConstants.CANCEL_SELF_FENCER_PATH) {
+            return new AgentResponse()
         }
 
         spec.simulator(RouteProtocolOspfBackend.ROUTER_PROTOCOL_REFRESH_OSPF) {

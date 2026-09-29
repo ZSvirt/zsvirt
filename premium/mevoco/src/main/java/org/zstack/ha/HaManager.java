@@ -61,7 +61,6 @@ import org.zstack.header.tag.SystemTagOperationJudger;
 import org.zstack.header.vm.*;
 import org.zstack.header.vm.VmCanonicalEvents.VmStateChangedData;
 import org.zstack.kvm.*;
-import org.zstack.mevoco.MevocoGlobalConfig;
 import org.zstack.network.service.virtualrouter.AfterAcquireVirtualRouterExtensionPoint;
 import org.zstack.network.service.virtualrouter.VirtualRouterVmInventory;
 import org.zstack.network.service.virtualrouter.VirtualRouterVmVO;
@@ -362,8 +361,8 @@ public class HaManager extends AbstractService implements Component, HaCompletio
         setupCanonicalEvents();
         setupGlobalConfig();
 
-        restf.registerSyncHttpCallHandler(SelfFencerKvmBackend.KVM_REPORT_VM_FENCED_EVENT, SelfFencerKvmBackend.ReportVmSelfFencerCmd.class, cmd -> {
-            Map<String, SelfFencerKvmBackend.ReportVmSelfFencerTuple> uuidFencerMap =
+        restf.registerSyncHttpCallHandler(HaCommands.ReportVmSelfFencerCmd.PATH, HaCommands.ReportVmSelfFencerCmd.class, cmd -> {
+            Map<String, HaCommands.ReportVmSelfFencerTuple> uuidFencerMap =
                     toMap(cmd.values, it -> it.vmUuid, Function.identity());
             if (uuidFencerMap.isEmpty()) {
                 return null;
@@ -1896,8 +1895,7 @@ public class HaManager extends AbstractService implements Component, HaCompletio
     }
 
     private boolean isHaEnabled() {
-        return HaGlobalConfig.ALL.value(Boolean.class)
-                && !MevocoGlobalConfig.PAUSE_THE_WORLD.value(Boolean.class);
+        return HaHelper.isVmHaEnabled();
     }
 
     @Override

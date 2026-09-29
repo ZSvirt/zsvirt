@@ -18,6 +18,7 @@ import org.zstack.ha.entity.HostHaStateVO;
 import org.zstack.ha.entity.HostHaStateVO_;
 import org.zstack.ha.message.SelfFencerStruct;
 import org.zstack.ha.spi.SelfFencerHypervisorBackend;
+import org.zstack.header.agent.AgentResponse;
 import org.zstack.header.core.AsyncLatch;
 import org.zstack.header.core.Completion;
 import org.zstack.header.core.NoErrorCompletion;
@@ -39,6 +40,7 @@ import org.zstack.utils.logging.CLogger;
 import java.util.*;
 
 import static org.zstack.core.Platform.*;
+import static org.zstack.ha.entity.HaCommands.*;
 
 /**
  * Created by xing5 on 2016/3/30.
@@ -56,48 +58,6 @@ public class SelfFencerKvmBackend implements SelfFencerHypervisorBackend {
     private ErrorFacade errf;
     @Autowired
     private PluginRegistry pluginRgty;
-
-    public static class AgentCmd {
-    }
-
-    public static class AgentRsp {
-        public boolean success = true;
-        public String error = "";
-    }
-
-    public static class SetupSelfFencerCmd extends AgentCmd {
-        public String hostUuid;
-        public long interval;
-        public int maxAttempts;
-        public List<String> mountPaths = new ArrayList<>();
-        public List<String> uuids = new ArrayList<>();
-        public List<String> urls = new ArrayList<>();
-        public List<Boolean> mountedByZStack = new ArrayList<>();
-        public List<String> mountOptions = new ArrayList<>();
-        public int storageCheckerTimeout;
-        public String strategy;
-        public List<String> fencers;
-    }
-
-    public static class CancelSelfFencerCmd extends AgentCmd {
-        public String hostUuid;
-        public List<String> mountPoints = new ArrayList<>();
-        public List<String> psUuids = new ArrayList<>();
-    }
-
-    public static class ReportVmSelfFencerCmd {
-        public List<ReportVmSelfFencerTuple> values = new ArrayList<>();
-        public String hostUuid;
-    }
-
-    public static class ReportVmSelfFencerTuple {
-        public String vmUuid;
-        public String fencerName;
-    }
-
-    public static final String SETUP_SELF_FENCER_PATH = "/ha/selffencer/setup";
-    public static final String CANCEL_SELF_FENCER_PATH = "/ha/selffencer/cancel";
-    public static final String KVM_REPORT_VM_FENCED_EVENT = "/ha/events/vm-fenced";
 
     private List<PrimaryStorageInventory> fileSystemStorage;
     private Map<PrimaryStorageInventory, KvmSetupSelfFencerExtensionPoint> hasExtensions;
@@ -140,9 +100,9 @@ public class SelfFencerKvmBackend implements SelfFencerHypervisorBackend {
             cmd.psUuids.add(it.getUuid());
         });
 
-        new KvmCommandSender(host.getUuid()).send(cmd, CANCEL_SELF_FENCER_PATH, wrapper -> {
-            AgentRsp rsp = wrapper.getResponse(AgentRsp.class);
-            return rsp.success ? null : operr("operation error, because:%s", rsp.error);
+        new KvmCommandSender(host.getUuid()).send(cmd, CancelSelfFencerCmd.PATH, wrapper -> {
+            AgentResponse rsp = wrapper.getResponse(AgentResponse.class);
+            return rsp.isSuccess() ? null : operr("operation error, because:%s", rsp.getError());
         }, new ReturnValueCompletion<KvmResponseWrapper>(completion) {
             @Override
             public void success(KvmResponseWrapper w) {
@@ -177,7 +137,7 @@ public class SelfFencerKvmBackend implements SelfFencerHypervisorBackend {
         KVMHostAsyncHttpCallMsg msg = new KVMHostAsyncHttpCallMsg();
         msg.setCommand(cmd);
         msg.setHostUuid(host.getUuid());
-        msg.setPath(SETUP_SELF_FENCER_PATH);
+        msg.setPath(SetupSelfFencerCmd.PATH);
         msg.setNoStatusCheck(param.skipStatusCheck);
         bus.makeTargetServiceIdByResourceUuid(msg, HostConstant.SERVICE_ID, host.getUuid());
         bus.send(msg, new CloudBusCallBack(completion) {
@@ -189,9 +149,9 @@ public class SelfFencerKvmBackend implements SelfFencerHypervisorBackend {
                 }
 
                 KVMHostAsyncHttpCallReply kr = reply.castReply();
-                AgentRsp rsp = kr.toResponse(AgentRsp.class);
-                if (!rsp.success) {
-                    completion.fail(operr("operation error, because:%s", rsp.error));
+                AgentResponse rsp = kr.toResponse(AgentResponse.class);
+                if (!rsp.isSuccess()) {
+                    completion.fail(operr("operation error, because:%s", rsp.getError()));
                     return;
                 }
 

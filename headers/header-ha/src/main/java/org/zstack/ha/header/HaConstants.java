@@ -24,4 +24,7 @@ public interface HaConstants {
     // agent call path
     String ADD_VM_FENCER_RULE_TO_HOST = "/add/vm/fencer/rule/to/host";
     String REMOVE_VM_FENCER_RULE_FROM_HOST = "/remove/vm/fencer/rule/from/host";
+    String SETUP_SELF_FENCER_PATH = "/ha/selffencer/setup";
+    String CANCEL_SELF_FENCER_PATH = "/ha/selffencer/cancel";
+    String KVM_REPORT_VM_FENCED_EVENT = "/ha/events/vm-fenced";
 }

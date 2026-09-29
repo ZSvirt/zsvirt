@@ -1,7 +1,5 @@
 package org.zstack.externalbackup;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.zstack.core.Platform;
 import org.zstack.core.cloudbus.CloudBus;
@@ -15,6 +13,7 @@ import org.zstack.core.thread.SyncTaskChain;
 import org.zstack.core.thread.ThreadFacade;
 import org.zstack.header.AbstractService;
 import org.zstack.header.core.Completion;
+import org.zstack.header.core.MevocoCoreGlobalConfig;
 import org.zstack.header.core.workflow.FlowChain;
 import org.zstack.header.core.workflow.FlowDoneHandler;
 import org.zstack.header.core.workflow.FlowErrorHandler;
@@ -26,9 +25,7 @@ import org.zstack.header.message.APIMessage;
 import org.zstack.header.message.Message;
 import org.zstack.header.message.MessageReply;
 import org.zstack.longjob.LongJobUtils;
-import org.zstack.mevoco.MevocoGlobalConfig;
 import org.zstack.utils.Utils;
-import org.zstack.utils.function.Function;
 import org.zstack.utils.logging.CLogger;
 import org.zstack.utils.path.PathUtil;
 
@@ -38,7 +35,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -257,14 +253,14 @@ public class ExternalBackupManagerImpl extends AbstractService implements Extern
         ExternalBackupRecoverTracker tracker = new ExternalBackupRecoverTracker(backupUuid);
         trackProgress();
         tracker.start();
-        MevocoGlobalConfig.PAUSE_THE_WORLD.updateValue(true);
+        MevocoCoreGlobalConfig.PAUSE_THE_WORLD.updateValue(true);
         extBackup.recoverHook(new Completion(null) {
             @Override
             public void success() {
                 SQL.New(ExternalBackupVO.class).eq(ExternalBackupVO_.uuid, backupUuid)
                         .set(ExternalBackupVO_.state, ExternalBackupState.Ready)
                         .update();
-                MevocoGlobalConfig.PAUSE_THE_WORLD.updateValue(false);
+                MevocoCoreGlobalConfig.PAUSE_THE_WORLD.updateValue(false);
                 ExternalBackupHelper.deleteBackupLabel();
                 tracker.success();
             }

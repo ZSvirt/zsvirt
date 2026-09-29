@@ -6,6 +6,7 @@ import org.zstack.compute.bonding.HostNetworkBondingConstant;
 import org.zstack.compute.bonding.HostNetworkBondingUtils;
 import org.zstack.compute.vm.StaticIpOperator;
 import org.zstack.core.cloudbus.CloudBus;
+import org.zstack.core.componentloader.PluginRegistry;
 import org.zstack.core.db.DatabaseFacade;
 import org.zstack.core.db.Q;
 import org.zstack.core.db.SQL;
@@ -45,6 +46,7 @@ import java.util.stream.Collectors;
 
 import static org.zstack.core.Platform.argerr;
 import static org.zstack.core.Platform.operr;
+import static org.zstack.network.l2.virtualSwitch.KVMRealizeL2PortGroupLinuxBridgeBackend.findBackend;
 
 /**
  * Created by shixin.ruan 2023.09.06
@@ -57,6 +59,8 @@ public class VirtualSwitchApiInterceptor implements GlobalApiMessageInterceptor 
     protected DatabaseFacade dbf;
     @Autowired
     CloudBus bus;
+    @Autowired
+    PluginRegistry pluginRgty;
 
     private void setServiceId(APIMessage msg) {
         if (msg instanceof L2NetworkMessage) {
@@ -178,6 +182,12 @@ public class VirtualSwitchApiInterceptor implements GlobalApiMessageInterceptor 
         L2NetworkVO l2vo = Q.New(L2NetworkVO.class).eq(L2NetworkVO_.uuid, msg.getUuid()).find();
         if (l2vo == null) {
             return;
+        }
+
+        PortGroupBackend backend = findBackend(pluginRgty, l2vo.getUuid());
+        if (backend != null && !backend.requiresLocalClusterBinding()) {
+            throw new ApiMessageInterceptionException(operr("backend-managed virtual switch[uuid:%s] cannot be deleted locally",
+                    l2vo.getUuid()));
         }
 
         if (l2vo.getType().equals(VirtualSwitchConstant.VIRTUAL_SWITCH_NETWORK_TYPE)) {
@@ -450,6 +460,11 @@ public class VirtualSwitchApiInterceptor implements GlobalApiMessageInterceptor 
 
     private void validate(APIAttachL2NetworkToClusterMsg msg) {
         L2NetworkVO vo = dbf.findByUuid(msg.getL2NetworkUuid(), L2NetworkVO.class);
+        PortGroupBackend backend = findBackend(pluginRgty, vo.getUuid());
+        if (backend != null && !backend.requiresLocalClusterBinding()) {
+            throw new ApiMessageInterceptionException(operr("L2VirtualSwitchNetwork[uuid:%s] is managed by backend and cannot be attached to cluster",
+                    vo.getUuid()));
+        }
         if (VirtualSwitchConstant.PORT_GROUP_NETWORK_TYPE.equals(vo.getType())) {
             throw new ApiMessageInterceptionException(operr("could not attach L2PortGroupNetwork[uuid:%s] to cluster[uuid:%s], " +
                     "which L2VirtualSwitchNetwork should be used", vo.getUuid(), msg.getClusterUuid()));
@@ -491,6 +506,11 @@ public class VirtualSwitchApiInterceptor implements GlobalApiMessageInterceptor 
 
     private void validate(APIAttachL2NetworkToHostMsg msg) {
         L2NetworkVO vo = dbf.findByUuid(msg.getL2NetworkUuid(), L2NetworkVO.class);
+        PortGroupBackend backend = findBackend(pluginRgty, vo.getUuid());
+        if (backend != null && !backend.requiresLocalClusterBinding()) {
+            throw new ApiMessageInterceptionException(operr("L2VirtualSwitchNetwork[uuid:%s] is managed by backend and cannot be attached to host",
+                    vo.getUuid()));
+        }
         if (VirtualSwitchConstant.PORT_GROUP_NETWORK_TYPE.equals(vo.getType())) {
             throw new ApiMessageInterceptionException(operr("could not attach L2PortGroupNetwork[uuid:%s] to host[uuid:%s], " +
                     "which L2VirtualSwitchNetwork should be used", vo.getUuid(), msg.getHostUuid()));
@@ -554,6 +574,16 @@ public class VirtualSwitchApiInterceptor implements GlobalApiMessageInterceptor 
     }
 
     private void validate(APICreatePortGroupMsg msg) {
+        PortGroupBackend backend = findBackend(pluginRgty, msg.getvSwitchUuid());
+        if (msg.getTenantRouterUuid() != null && backend == null) {
+            throw new ApiMessageInterceptionException(argerr("tenantRouterUuid requires a ZNS port group"));
+        }
+        if (backend != null) {
+            backend.validateCreate(msg);
+        } else if (!NetworkUtils.isValidVlan(msg.getVlan())) {
+            throw new ApiMessageInterceptionException(argerr("vlan[%s] for port group is invalid", msg.getVlan()));
+        }
+
         if (msg.getL2NetworkUuid() != null) {
             boolean l2BelongsToVSwitch = Q.New(L2PortGroupNetworkVO.class)
                     .eq(L2PortGroupNetworkVO_.uuid, msg.getL2NetworkUuid())
@@ -582,7 +612,8 @@ public class VirtualSwitchApiInterceptor implements GlobalApiMessageInterceptor 
             return;
         }
 
-        if (!NetworkUtils.isValidVlan(msg.getVirtualNetworkId())) {
+        PortGroupBackend backend = findBackend(pluginRgty, vo.getvSwitchUuid());
+        if (backend == null && !NetworkUtils.isValidVlan(msg.getVirtualNetworkId())) {
             throw new ApiMessageInterceptionException(argerr("vlan[%s] for port group is invalid", msg.getVirtualNetworkId()));
         }
 

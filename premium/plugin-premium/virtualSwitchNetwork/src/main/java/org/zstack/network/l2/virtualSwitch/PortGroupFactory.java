@@ -26,6 +26,7 @@ import org.zstack.utils.logging.CLogger;
 import java.util.List;
 import java.util.Map;
 
+import static org.zstack.core.Platform.argerr;
 import static org.zstack.core.Platform.err;
 
 public class PortGroupFactory extends L3BasicNetworkFactory {
@@ -130,6 +131,10 @@ public class PortGroupFactory extends L3BasicNetworkFactory {
             @Override
             public void run(FlowTrigger trigger, Map data) {
                 if (pg.getL2NetworkUuid() != null) {
+                    if (msg.getTenantRouterUuid() != null) {
+                        trigger.fail(argerr("tenantRouterUuid cannot be set when reusing an existing L2 port group"));
+                        return;
+                    }
                     trigger.next();
                     return;
                 }
@@ -140,6 +145,7 @@ public class PortGroupFactory extends L3BasicNetworkFactory {
                 l2Msg.setVlan(msg.getVlan());
                 l2Msg.setVlanMode(msg.getVlanMode());
                 l2Msg.setVlanRanges(msg.getVlanRanges());
+                l2Msg.setTenantRouterUuid(msg.getTenantRouterUuid());
 
                 List<L2NetworkCreateExtensionPoint> createExtensions = pluginRgty.getExtensionList(L2NetworkCreateExtensionPoint.class);
                 for (L2NetworkCreateExtensionPoint extp : createExtensions) {

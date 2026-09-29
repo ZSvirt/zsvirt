@@ -30,13 +30,24 @@ public class APICreatePortGroupMsg extends APICreateL3NetworkMsg {
 
     /* for normal case, this is vlanID,
      *  for trunk port, this is the native vlan */
-    @APIParam(numberRange = {0, 4094})
+    @APIParam(numberRange = {0, 16777215})
     private Integer vlan;
 
     /* it's used when mode is trunk, vlan ranges can be: [100-200, 300, 400-500],
      * max vlan range number is 10 */
     @APIParam(required = false)
     private String vlanRanges;
+
+    @APIParam(required = false, maxLength = 32)
+    private String tenantRouterUuid;
+
+    public String getTenantRouterUuid() {
+        return tenantRouterUuid;
+    }
+
+    public void setTenantRouterUuid(String tenantRouterUuid) {
+        this.tenantRouterUuid = tenantRouterUuid;
+    }
 
     @Override
     public String getType() {

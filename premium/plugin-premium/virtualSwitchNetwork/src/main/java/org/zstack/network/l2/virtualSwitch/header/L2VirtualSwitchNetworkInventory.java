@@ -3,6 +3,7 @@ package org.zstack.network.l2.virtualSwitch.header;
 import org.zstack.header.configuration.PythonClassInventory;
 import org.zstack.header.network.l2.L2NetworkInventory;
 import org.zstack.header.query.Queryable;
+import org.zstack.header.query.Unqueryable;
 import org.zstack.header.search.Inventory;
 import org.zstack.header.search.Parent;
 
@@ -23,6 +24,17 @@ public class L2VirtualSwitchNetworkInventory extends L2NetworkInventory {
     private Boolean isDistributed;
 
     private Integer vSwitchIndex;
+
+    @Unqueryable
+    private String transportType;
+
+    public String getTransportType() {
+        return transportType;
+    }
+
+    public void setTransportType(String transportType) {
+        this.transportType = transportType;
+    }
 
     @Queryable(mappingClass = PortGroupInventory.class,
             joinColumn = @JoinColumn(name = "vSwitchUuid"))

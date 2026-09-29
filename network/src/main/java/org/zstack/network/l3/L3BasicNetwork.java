@@ -869,7 +869,7 @@ public class L3BasicNetwork implements L3Network {
         bus.reply(msg, reply);
     }
 
-    private void handle(APIUpdateL3NetworkMsg msg) {
+    protected void handle(APIUpdateL3NetworkMsg msg) {
         boolean update = false;
         if (msg.getName() != null) {
             self.setName(msg.getName());
@@ -1182,12 +1182,14 @@ public class L3BasicNetwork implements L3Network {
                     detachNetworkServiceFromL3NetworkMsg(l3VO, refVOS, new Completion(msg) {
                         @Override
                         public void success() {
+                            dbf.removeCollection(refVOS, NetworkServiceL3NetworkRefVO.class);
                             reply.setError(errorCodeList.getCauses().get(0));
                             bus.reply(msg, reply);
                         }
 
                         @Override
                         public void fail(ErrorCode errorCode) {
+                            dbf.removeCollection(refVOS, NetworkServiceL3NetworkRefVO.class);
                             reply.setError(errorCodeList.getCauses().get(0));
                             bus.reply(msg, reply);
                         }

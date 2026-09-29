@@ -176,7 +176,6 @@ CREATE TABLE IF NOT EXISTS ZnsTransportZoneHostRefVO (
     uuid char(32) NOT NULL,
     znsInfoUuid char(32) NOT NULL,
     hostUuid char(32) NOT NULL,
-    vSwitchUuid char(32) NOT NULL,
     znsTransportZoneUuid char(32) NOT NULL,
     datapathType varchar(32),
     available bit NOT NULL DEFAULT 0,

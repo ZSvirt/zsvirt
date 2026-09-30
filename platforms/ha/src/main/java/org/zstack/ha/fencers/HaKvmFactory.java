@@ -1,4 +1,4 @@
-package org.zstack.ha;
+package org.zstack.ha.fencers;
 
 import org.zstack.ha.message.SelfFencerStruct;
 import org.zstack.ha.spi.HaHypervisorFactory;

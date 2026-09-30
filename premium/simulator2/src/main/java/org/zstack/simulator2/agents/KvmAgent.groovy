@@ -11,7 +11,7 @@ import org.zstack.core.db.SQL
 import org.zstack.guesttools.GuestToolsAgentStatus
 import org.zstack.guesttools.GuestToolsConstant
 import org.zstack.guesttools.kvm.GuestToolsKvmCommands
-import org.zstack.ha.HaKvmHostSiblingChecker
+import org.zstack.ha.fencers.HaKvmHostSiblingChecker
 import org.zstack.ha.header.HaConstants
 import org.zstack.header.Constants
 import org.zstack.header.agent.AgentResponse
@@ -75,6 +75,7 @@ import org.zstack.zwatch.prometheus.KvmHostScrape
 
 import javax.persistence.Tuple
 
+import static org.zstack.ha.entity.HaCommands.*
 import static org.zstack.kvm.KVMAgentCommands.*
 
 /**
@@ -408,14 +409,14 @@ class KvmAgent extends Agent {
             return rsp
         }
 
-        handle(HaKvmHostSiblingChecker.SCAN_HOST_PATH) { HttpEntity<String> e ->
-            def rsp = new HaKvmHostSiblingChecker.ScanRsp()
-            rsp.result = HaKvmHostSiblingChecker.RET_SUCCESS
+        handle(HaConstants.SCAN_HOST_PATH) { HttpEntity<String> e ->
+            def rsp = new ScanRsp()
+            rsp.result = ScanRsp.RET_SUCCESS
             return rsp
         }
 
-        handle(HaKvmHostSiblingChecker.SYNC_HA_VM_LIST_PATH) {
-            return new HaKvmHostSiblingChecker.AgentRsp()
+        handle(HaConstants.SYNC_HA_VM_LIST_PATH) {
+            return new AgentResponse()
         }
 
         handle(HaSanlockHostChecker.SANLOCK_SCAN_HOST_PATH) { HttpEntity<String> e ->

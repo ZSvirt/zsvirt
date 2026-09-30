@@ -1,4 +1,4 @@
-package org.zstack.ha;
+package org.zstack.ha.fencers;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.zstack.compute.host.HostSystemTags;
@@ -6,7 +6,6 @@ import org.zstack.header.core.HaCheckerCompletion;
 import org.zstack.core.cloudbus.CloudBus;
 import org.zstack.core.cloudbus.CloudBusListCallBack;
 import org.zstack.core.db.Q;
-import org.zstack.core.timeout.ApiTimeoutManager;
 import org.zstack.ha.header.HaGlobalConfig;
 import org.zstack.ha.message.CheckerStruct;
 import org.zstack.ha.spi.HaHostChecker;
@@ -29,7 +28,6 @@ import org.zstack.kvm.KVMHostAsyncHttpCallMsg;
 import org.zstack.kvm.KVMHostAsyncHttpCallReply;
 import org.zstack.storage.primary.PrimaryStorageSystemTags;
 import org.zstack.utils.Utils;
-import org.zstack.utils.gson.JSONObjectUtil;
 import org.zstack.utils.logging.CLogger;
 import org.zstack.utils.network.NetworkUtils;
 import org.zstack.utils.zsha2.ZSha2Helper;
@@ -43,6 +41,7 @@ import java.util.stream.Collectors;
 
 import static org.zstack.core.Platform.multiErr;
 import static org.zstack.core.Platform.operr;
+import static org.zstack.ha.entity.HaCommands.*;
 import static org.zstack.utils.CollectionUtils.isEmpty;
 import static org.zstack.utils.CollectionUtils.transform;
 
@@ -53,53 +52,7 @@ public class HaKvmHostSiblingChecker implements HaHostChecker {
     private static final CLogger logger = Utils.getLogger(HaKvmHostSiblingChecker.class);
 
     @Autowired
-    private ApiTimeoutManager timeoutManager;
-    @Autowired
     private CloudBus bus;
-
-    public static final String RET_SUCCESS = "success";
-    public static final String RET_FAILURE = "failure";
-    public static final String RET_NOT_STABLE = "unstable";
-
-    public static class AgentCmd {
-        @Override
-        public String toString() {
-            return JSONObjectUtil.toJsonString(this);
-        }
-    }
-
-    public static class AgentRsp {
-        public boolean success = true;
-        public String error = "";
-    }
-
-    public static class ScanCmd extends AgentCmd {
-        public String hostUuid;
-        // not used, only for test
-        public String slibingHostUuid;
-        public String ip;
-        public int startPort;
-        public int endPort;
-        public long interval;
-        public int times;
-        public long successInterval;
-        public int successTimes;
-    }
-
-    public static class ScanRsp extends AgentRsp {
-        public String result;
-    }
-
-    public static class SyncHaVmListCmd extends AgentCmd {
-        public String hostUuid;
-        public List<String> vmUuids;
-    }
-
-    public static final String SCAN_HOST_PATH = "/ha/scanhost";
-    /**
-     * To tell the host which VMs have enabled HA
-     */
-    public static final String SYNC_HA_VM_LIST_PATH = "/ha/sync/vm/list";
 
     private List<String> findSilblingFromSameCluster(String hostUuid, String clusterUuid) {
         Q query = Q.New(HostVO.class)
@@ -241,7 +194,7 @@ public class HaKvmHostSiblingChecker implements HaHostChecker {
 
             KVMHostAsyncHttpCallMsg msg = new KVMHostAsyncHttpCallMsg();
             msg.setHostUuid(huuid);
-            msg.setPath(SCAN_HOST_PATH);
+            msg.setPath(ScanCmd.PATH);
             msg.setCommand(cmd);
             bus.makeTargetServiceIdByResourceUuid(msg, HostConstant.SERVICE_ID, huuid);
 
@@ -264,16 +217,16 @@ public class HaKvmHostSiblingChecker implements HaHostChecker {
                     } else {
                         KVMHostAsyncHttpCallReply kr = reply.castReply();
                         ScanRsp rsp = kr.toResponse(ScanRsp.class);
-                        if (!rsp.success) {
-                            errors.add(operr("%s", rsp.error));
+                        if (!rsp.isSuccess()) {
+                            errors.add(operr("%s", rsp.getError()));
                             noway ++;
                         } else {
-                            if (RET_SUCCESS.equals(rsp.result)) {
+                            if (ScanRsp.RET_SUCCESS.equals(rsp.result)) {
                                 success ++;
-                            } else if (RET_FAILURE.equals(rsp.result)) {
+                            } else if (ScanRsp.RET_FAILURE.equals(rsp.result)) {
                                 failure ++;
-                                errors.add(operr("%s", rsp.error));
-                            } else if (RET_NOT_STABLE.equals(rsp.result)) {
+                                errors.add(operr("%s", rsp.getError()));
+                            } else if (ScanRsp.RET_NOT_STABLE.equals(rsp.result)) {
                                 notStable ++;
                             }
                         }

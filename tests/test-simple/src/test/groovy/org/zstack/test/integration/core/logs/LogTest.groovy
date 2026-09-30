@@ -1,12 +1,14 @@
 package org.zstack.test.integration.core.logs
 
-import org.zstack.test.integration.SimpleTest
 import org.zstack.testlib.Test
 
 class LogTest extends Test {
     @Override
     void setup() {
-        useSpring(SimpleTest.springSpec)
+        def spec = makeSpring()
+        spec.include("LogConfiguration.xml")
+        spec.include("Log4j2Configuration.xml")
+        useSpring(spec)
     }
 
     @Override

@@ -1,6 +1,7 @@
 package org.zstack.ha;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.NonNull;
 import org.zstack.core.cloudbus.CloudBus;
 import org.zstack.core.cloudbus.CloudBusCallBack;
 import org.zstack.core.componentloader.PluginRegistry;
@@ -10,7 +11,11 @@ import org.zstack.core.thread.ChainTask;
 import org.zstack.core.thread.SyncTaskChain;
 import org.zstack.core.thread.ThreadFacade;
 import org.zstack.core.workflow.SimpleFlowChain;
+import org.zstack.ha.entity.HaCommands;
+import org.zstack.ha.entity.VmHaVO;
+import org.zstack.ha.entity.VmHaVO_;
 import org.zstack.ha.gc.HaGcManager;
+import org.zstack.ha.header.VmHaLevel;
 import org.zstack.ha.spi.HaHypervisorFactory;
 import org.zstack.ha.spi.HaHypervisorWorker;
 import org.zstack.ha.spi.VmHaVOUpdater;
@@ -32,10 +37,12 @@ import org.zstack.header.vm.VmInstanceInventory;
 import org.zstack.header.vm.VmInstanceState;
 import org.zstack.header.vm.VmInstanceVO;
 import org.zstack.header.vm.VmInstanceVO_;
+import org.zstack.kvm.KVMHostAsyncHttpCallMsg;
 import org.zstack.utils.Utils;
 import org.zstack.utils.logging.CLogger;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 
 import static org.zstack.core.Platform.i18n;
@@ -280,6 +287,84 @@ public class VmHaService {
                 if (tracker != null) {
                     tracker.error(errorCode);
                     tracker.track(VmHaTaskTracker.Process.failure, i18n("Failed to HA the VM"));
+                }
+            }
+        });
+    }
+
+    // ------------------------------------- VM HA Configuration Syncing ------------------------------------
+
+    /**
+     * MN -> host:
+     *   What VM should be added to HA fenced list, even if the haVmList is empty
+     */
+    public void syncHaVmListOnHost(@NonNull String hostUuid, Completion completion) {
+        threadFacade.chainSubmit(new ChainTask(completion) {
+            @Override
+            public void run(SyncTaskChain chain) {
+                List<String> haVmList;
+                if (HaHelper.isVmHaEnabled()) {
+                    haVmList = Q.New(VmInstanceVO.class, VmHaVO.class)
+                        .table0()
+                            .select(VmInstanceVO_.uuid)
+                            .eq(VmInstanceVO_.hostUuid, hostUuid)
+                            .eq(VmInstanceVO_.uuid).table1(VmHaVO_.uuid)
+                        .table1()
+                            .eq(VmHaVO_.haLevel, VmHaLevel.NeverStop)
+                        .list();
+                    logger.debug(String.format("The following VMs on Host[%s] has HA enabled:\n\t%s", hostUuid, haVmList));
+                } else {
+                    haVmList = Collections.emptyList();
+                    logger.debug(String.format("No VMs on Host[%s] has HA enabled: HA is disabled now", hostUuid));
+                }
+
+                syncHaVmListOnHostChain(hostUuid, haVmList, new Completion(completion, chain) {
+                    @Override
+                    public void success() {
+                        logger.debug(String.format("sync ha vm list on host[%s] successfully", hostUuid));
+                        completion.success();
+                        chain.next();
+                    }
+
+                    @Override
+                    public void fail(ErrorCode errorCode) {
+                        logger.warn(String.format(
+                                "Failed to sync ha vm list on host[%s]: %s", hostUuid, errorCode.getReadableDetails()));
+                        completion.fail(errorCode);
+                        chain.next();
+                    }
+                });
+            }
+
+            @Override
+            public String getSyncSignature() {
+                return getName();
+            }
+
+            @Override
+            public String getName() {
+                return String.format("sync-ha-vm-list-on-host-%s", hostUuid);
+            }
+        });
+    }
+
+    private void syncHaVmListOnHostChain(String hostUuid, List<String> vmUuidList, Completion completion) {
+        HaCommands.SyncHaVmListCmd cmd = new HaCommands.SyncHaVmListCmd();
+        cmd.hostUuid = hostUuid;
+        cmd.vmUuids = vmUuidList;
+
+        KVMHostAsyncHttpCallMsg msg = new KVMHostAsyncHttpCallMsg();
+        msg.setPath(HaCommands.SyncHaVmListCmd.PATH);
+        msg.setHostUuid(hostUuid);
+        msg.setCommand(cmd);
+        bus.makeTargetServiceIdByResourceUuid(msg, HostConstant.SERVICE_ID, hostUuid);
+        bus.send(msg, new CloudBusCallBack(completion) {
+            @Override
+            public void run(MessageReply reply) {
+                if (reply.isSuccess()) {
+                    completion.success();
+                } else {
+                    completion.fail(reply.getError());
                 }
             }
         });

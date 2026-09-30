@@ -7,7 +7,15 @@ import org.zstack.ha.entity.VmHaVO;
  */
 public enum VmHaLevel {
     NeverStop,
+    /**
+     * ZSphere only use {@code NeverStop} now. (zsvirt_1.0.1, zsv_5.2.0)
+     */
     OnHostFailure,
+    /**
+     * ZSphere only use {@code NeverStop} now. (zsvirt_1.0.1, zsv_5.2.0)
+     * FaultTolerance is not used in ZSphere
+     */
+    @Deprecated
     FaultTolerance,
     None,
     /**

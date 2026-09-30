@@ -56,15 +56,20 @@
             <zstack:extension interface="org.zstack.header.cluster.ClusterUpdateOSExtensionPoint" />
             <zstack:extension interface="org.zstack.network.service.virtualrouter.AfterAcquireVirtualRouterExtensionPoint" />
             <zstack:extension interface="org.zstack.header.managementnode.PrepareDbInitialValueExtensionPoint" />
-            <zstack:extension interface="org.zstack.header.vm.VmInstanceStartNewCreatedVmExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.vm.VmInstanceCreateExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.vm.ApplianceVmInstanceCreateExtensionPoint"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="HaExtensions" class="org.zstack.ha.HaExtensions" >
+        <zstack:plugin>
             <zstack:extension interface="org.zstack.header.vm.VmInstanceStartExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.vm.VmInstanceStartNewCreatedVmExtensionPoint" />
             <zstack:extension interface="org.zstack.header.vm.VmInstanceStopExtensionPoint" />
             <zstack:extension interface="org.zstack.kvm.KVMDestroyVmExtensionPoint" />
             <zstack:extension interface="org.zstack.header.vm.BeforeStartNewCreatedVmExtensionPoint" />
             <zstack:extension interface="org.zstack.compute.vm.BeforeStopVmOnHypervisorExtensionPoint" />
             <zstack:extension interface="org.zstack.header.vm.KvmReportVmShutdownEventExtensionPoint"/>
-            <zstack:extension interface="org.zstack.header.vm.VmInstanceCreateExtensionPoint"/>
-            <zstack:extension interface="org.zstack.header.vm.ApplianceVmInstanceCreateExtensionPoint"/>
         </zstack:plugin>
     </bean>
 

@@ -792,6 +792,31 @@ public class MevocoVmManagerImpl implements VmInstanceExtensionManager, BeforeVm
                         });
                     }
                 });
+                flow(new NoRollbackFlow() {
+                    String __name__ = "refresh-registered-vm-metadata";
+                    @Override
+                    public void run(FlowTrigger trigger, Map data) {
+                        if (!VmGlobalConfig.VM_METADATA_ENABLED.value(Boolean.class)) {
+                            trigger.next();
+                            return;
+                        }
+                        UpdateVmInstanceMetadataMsg umsg = new UpdateVmInstanceMetadataMsg();
+                        umsg.setVmInstanceUuid(vmUuid);
+                        umsg.setStorageStructureChange(true);
+                        bus.makeLocalServiceId(umsg, VmInstanceConstant.SERVICE_ID);
+                        bus.send(umsg, new CloudBusCallBack(trigger) {
+                            @Override
+                            public void run(MessageReply reply) {
+                                if (!reply.isSuccess()) {
+                                    logger.warn(String.format("[MetadataRegistration] failed to refresh metadata " +
+                                            "for registered vm[uuid:%s], continue registration: %s",
+                                            vmUuid, reply.getError()));
+                                }
+                                trigger.next();
+                            }
+                        });
+                    }
+                });
 
                 done(new FlowDoneHandler(msg) {
                     @Override

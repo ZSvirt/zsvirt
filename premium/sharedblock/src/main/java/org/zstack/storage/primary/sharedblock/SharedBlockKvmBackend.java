@@ -145,6 +145,13 @@ public class SharedBlockKvmBackend extends SharedBlockHypervisorBackend implemen
 
             @Override
             public void run(final SyncTaskChain chain) {
+                if (SharedBlockSystemTags.SHARED_BLOCK_TAKEOVER.hasTag(primaryStorageUuid)) {
+                    completion.fail(operr("primary storage[uuid:%s] registration takeover has not completed; " +
+                            "retry attaching the primary storage before reconnecting", primaryStorageUuid));
+                    chain.next();
+                    return;
+                }
+
                 boolean vgCreated = !SharedBlockSystemTags.SHARED_BLOCK_NOT_INITIALIZED.hasTag(primaryStorageUuid);
 
                 if (!SharedBlockSystemTags.SHARED_BLOCK_FORCE_WIPE.hasTag(primaryStorageUuid) && vgCreated) {

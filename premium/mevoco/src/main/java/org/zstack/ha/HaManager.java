@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.transaction.annotation.Transactional;
-import org.zstack.appliancevm.ApplianceVmConstant;
 import org.zstack.appliancevm.ApplianceVmStatus;
 import org.zstack.core.Platform;
 import org.zstack.core.timeout.TimeHelper;
@@ -85,7 +84,7 @@ import static org.zstack.utils.CollectionUtils.toMap;
 public class HaManager extends AbstractService implements Component, HaCompletionCacher,
         HostAfterConnectedExtensionPoint, OrderVmBeforeMigrationDuringHostMaintenanceExtensionPoint,
         PrimaryStorageAttachExtensionPoint, PrimaryStorageDetachExtensionPoint, PrimaryStorageDeleteExtensionPoint,
-        VmHaExtensionPoint, HostScanExtensionPoint,
+        VmHaExtensionPoint,
         UpdatePrimaryStorageExtensionPoint, VmInstanceMigrateExtensionPoint, ClusterUpdateOSExtensionPoint,
         AfterAcquireVirtualRouterExtensionPoint, PrepareDbInitialValueExtensionPoint,
         VmInstanceCreateExtensionPoint, ApplianceVmInstanceCreateExtensionPoint {
@@ -388,46 +387,6 @@ public class HaManager extends AbstractService implements Component, HaCompletio
                 .param("htypes", hypervisorFactories.keySet())
                 .limit(10)
                 .list();
-    }
-
-    private ChangeVmStateMsg prepareMsg( String vmUuid) {
-        ChangeVmStateMsg msg = new ChangeVmStateMsg();
-        msg.setVmInstanceUuid(vmUuid);
-        msg.setStateEvent(VmInstanceStateEvent.stopped.toString());
-        bus.makeTargetServiceIdByResourceUuid(msg, VmInstanceConstant.SERVICE_ID, vmUuid);
-        return msg;
-    }
-
-    @Override
-    public void onScanResult(String hostUuid, HostScanResult stage) {
-        if (stage.alive) {
-            return;
-        }
-
-        List<String> unknownVmUuids = Q.New(VmInstanceVO.class)
-                .select(VmInstanceVO_.uuid)
-                .eq(VmInstanceVO_.hostUuid, hostUuid)
-                .in(VmInstanceVO_.type, Arrays.asList(VmInstanceConstant.USER_VM_TYPE, ApplianceVmConstant.APPLIANCE_VM_TYPE))
-                .eq(VmInstanceVO_.state, VmInstanceState.Unknown)
-                .listValues();
-
-        logger.info(String.format("Host[uuid: %s] is dead, has %d unknown VMs", hostUuid, unknownVmUuids.size()));
-
-        List<ChangeVmStateMsg> cmsgs = unknownVmUuids.stream()
-                .filter(uuid -> {
-                    VmHaLevel level = Q.New(VmHaVO.class)
-                            .eq(VmHaVO_.uuid, uuid)
-                            .select(VmHaVO_.haLevel)
-                            .findValue();
-                    return level.isDisabled();
-                })
-                .filter(uuid -> HaStrategyHelper.getVmHaFencerStrategy(uuid) == SelfFencerStrategy.Force)
-                .map(this::prepareMsg)
-                .collect(Collectors.toList());
-
-        logger.debug(String.format("remaining vm %s", cmsgs.stream().map(ChangeVmStateMsg::getVmInstanceUuid).collect(Collectors.toList())));
-
-        bus.send(cmsgs);
     }
 
     private void stopSelfFencerForPrimaryStorage(PrimaryStorageInventory inv) {

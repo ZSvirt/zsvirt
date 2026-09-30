@@ -9,6 +9,7 @@ public interface VmInstanceConstant {
     String ACTION_CATEGORY = "instance";
     @PythonClass
     String USER_VM_TYPE = "UserVm";
+    String APPLIANCE_VM_TYPE = "ApplianceVm";
     Integer VM_MONITOR_NUMBER = 1;
 
     // System limit

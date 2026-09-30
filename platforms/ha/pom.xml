@@ -20,6 +20,16 @@
         </dependency>
         <dependency>
             <groupId>org.zstack</groupId>
+            <artifactId>header-pci</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.zstack</groupId>
+            <artifactId>header-usb</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.zstack</groupId>
             <artifactId>header-storage</artifactId>
             <version>${project.version}</version>
         </dependency>

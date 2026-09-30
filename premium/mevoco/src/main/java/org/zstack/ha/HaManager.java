@@ -1,15 +1,11 @@
 package org.zstack.ha;
 
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
-import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.transaction.annotation.Transactional;
 import org.zstack.appliancevm.ApplianceVmConstant;
 import org.zstack.appliancevm.ApplianceVmStatus;
-import org.zstack.compute.vm.BeforeStopVmOnHypervisorExtensionPoint;
 import org.zstack.core.Platform;
 import org.zstack.core.timeout.TimeHelper;
 import org.zstack.ha.entity.HaCommands;
@@ -20,7 +16,6 @@ import org.zstack.ha.entity.VmHaVO;
 import org.zstack.ha.entity.VmHaVO_;
 import org.zstack.ha.fencers.HaStrategyHelper;
 import org.zstack.ha.spi.VmHaVOUpdater;
-import org.zstack.ha.gc.HaGcManager;
 import org.zstack.ha.header.*;
 import org.zstack.ha.message.*;
 import org.zstack.ha.spi.*;
@@ -61,7 +56,6 @@ import org.zstack.network.service.virtualrouter.AfterAcquireVirtualRouterExtensi
 import org.zstack.network.service.virtualrouter.VirtualRouterVmInventory;
 import org.zstack.network.service.virtualrouter.VirtualRouterVmVO;
 import org.zstack.portal.managementnode.ManagementNodeGlobalConfig;
-import org.zstack.resourceconfig.ResourceConfigFacade;
 import org.zstack.utils.CollectionUtils;
 import org.zstack.utils.DebugUtils;
 import org.zstack.utils.Utils;
@@ -80,7 +74,6 @@ import java.util.stream.Stream;
 
 import static org.zstack.core.Platform.*;
 import static org.zstack.ha.header.HaSystemTags.*;
-import static org.zstack.ha.header.HaGlobalConfig.*;
 import static org.zstack.ha.header.VmHaLevel.*;
 import static org.zstack.utils.CollectionDSL.*;
 import static org.zstack.utils.CollectionUtils.toMap;
@@ -95,9 +88,7 @@ public class HaManager extends AbstractService implements Component, HaCompletio
         VmHaExtensionPoint, HostScanExtensionPoint,
         UpdatePrimaryStorageExtensionPoint, VmInstanceMigrateExtensionPoint, ClusterUpdateOSExtensionPoint,
         AfterAcquireVirtualRouterExtensionPoint, PrepareDbInitialValueExtensionPoint,
-        VmInstanceStartNewCreatedVmExtensionPoint, VmInstanceStartExtensionPoint, VmInstanceStopExtensionPoint,
-        KVMDestroyVmExtensionPoint, BeforeStartNewCreatedVmExtensionPoint, BeforeStopVmOnHypervisorExtensionPoint,
-        KvmReportVmShutdownEventExtensionPoint, VmInstanceCreateExtensionPoint, ApplianceVmInstanceCreateExtensionPoint {
+        VmInstanceCreateExtensionPoint, ApplianceVmInstanceCreateExtensionPoint {
     private static final CLogger logger = Utils.getLogger(HaManager.class);
 
     // A list of checker jobs of the same key (the key is usually 'hostUuid')
@@ -121,151 +112,14 @@ public class HaManager extends AbstractService implements Component, HaCompletio
     @Autowired
     private RESTFacade restf;
     @Autowired
-    private ResourceConfigFacade rcf;
-    @Autowired
     private VmHaVOUpdater vmHAExecutor;
     @Autowired
     private TimeHelper timeHelper;
     @Autowired
     private VmHaService vmHaService;
-    @Autowired
-    private HaGcManager haGcManager;
 
     private final static Map<String, Boolean> haStatus = new HashMap<>();
     private List<String> updateHostStatusPrimaryStorages;
-
-    private Cache<String, String> apiStopVmCache = CacheBuilder.newBuilder().
-            maximumSize(1000).expireAfterAccess(10, TimeUnit.MINUTES).build();
-
-    @Override
-    public void beforeStartVm(VmInstanceInventory inv) {
-
-    }
-
-    @Override
-    public void afterStartVm(VmInstanceInventory inv) {
-        syncHaVmListOnHost(inv.getHostUuid());
-
-        vmHAExecutor.fenceForVM(inv.getUuid()).clear().update();
-
-        boolean haEnabled = Q.New(VmHaVO.class)
-                .eq(VmHaVO_.uuid, inv.getUuid())
-                .eq(VmHaVO_.haLevel, VmHaLevel.NeverStop)
-                .isExists();
-        if (!haEnabled) {
-            return;
-        }
-
-        addVmFencerRuleToHost(inv, inv.getHostUuid());
-        vmHAExecutor.setHALevelForVM(inv.getUuid())
-                .clearInhibitHABlocking("After starting VM")
-                .update();
-    }
-
-    @Override
-    public void failedToStartVm(VmInstanceInventory inv, ErrorCode reason) {
-        vmHAExecutor.fenceForVM(inv.getUuid()).clear().update();
-    }
-
-    @Override
-    public String preStartNewCreatedVm(VmInstanceInventory inv) {
-        return null;
-    }
-
-    @Override
-    public void beforeStartNewCreatedVm(VmInstanceInventory inv) {
-
-    }
-
-    @Override
-    public void afterStartNewCreatedVm(VmInstanceInventory inv) {
-        syncHaVmListOnHost(inv.getHostUuid());
-        updateHaSystemTagByClusterConfig(inv);
-        addVmFencerRuleToHost(inv, inv.getHostUuid());
-    }
-
-    private void updateHaSystemTagByClusterConfig(VmInstanceInventory inventory) {
-        boolean haUndefined = Q.New(VmHaVO.class)
-                .eq(VmHaVO_.uuid, inventory.getUuid())
-                .eq(VmHaVO_.haLevel, Undefined)
-                .isExists();
-        if (!haUndefined) {
-            return;
-        }
-
-        String clusterHAConfig = rcf.getResourceConfigValue(VM_HA_LEVEL, inventory.getClusterUuid(), String.class);
-        boolean haEnabled = !None.toString().equals(clusterHAConfig);
-
-        if (haEnabled) {
-            vmHAExecutor.setHALevelForVM(inventory.getUuid())
-                    .toNeverStop()
-                    .update();
-        } else {
-            vmHAExecutor.setHALevelForVM(inventory.getUuid())
-                    .toDisabled()
-                    .update();
-        }
-    }
-
-    @Override
-    public void failedToStartNewCreatedVm(VmInstanceInventory inv, ErrorCode reason) {
-
-    }
-
-    @Override
-    public String preStopVm(VmInstanceInventory inv) {
-        return null;
-    }
-
-    @Override
-    public void beforeStopVm(VmInstanceInventory inv) {
-        removeVmFencerRuleFromHost(inv, inv.getHostUuid());
-    }
-
-    @Override
-    public void afterStopVm(VmInstanceInventory inv) {
-        syncHaVmListOnHost(inv.getLastHostUuid());
-    }
-
-    @Override
-    public void failedToStopVm(VmInstanceInventory inv, ErrorCode reason) {
-        addVmFencerRuleToHost(inv, inv.getHostUuid());
-
-        boolean vmRunning = VmInstanceState.Running.toString().equals(inv.getState());
-        if (!vmRunning) {
-            return;
-        }
-
-        boolean errorMatched = !HostErrors.OPERATION_FAILURE_GC_ELIGIBLE.isEqual(reason.getCode());
-        if (errorMatched) {
-            vmHAExecutor.setHALevelForVM(inv.getUuid())
-                    .clearInhibitHABlocking("Failed to stop VM")
-                    .update();
-        }
-    }
-
-    @Override
-    public void beforeDestroyVmOnKvm(KVMHostInventory host, VmInstanceInventory vm, KVMAgentCommands.DestroyVmCmd cmd) throws KVMException {
-        removeVmFencerRuleFromHost(vm, vm.getHostUuid());
-        vmHAExecutor.setHALevelForVM(vm.getUuid())
-                .inhibitHATemporarily("Before destroying VM")
-                .update();
-    }
-
-    @Override
-    public void beforeDirectlyDestroyVmOnKvm(KVMAgentCommands.DestroyVmCmd cmd) {
-
-    }
-
-    @Override
-    public void destroyVmOnKvmSuccess(KVMHostInventory host, VmInstanceInventory vm) {
-
-    }
-
-    @Override
-    public void destroyVmOnKvmFailed(KVMHostInventory host, VmInstanceInventory vm, ErrorCode err) {
-        addVmFencerRuleToHost(vm, host.getUuid());
-    }
 
     private void addVmFencerRuleToHost(VmInstanceInventory inv, String hostUuid) {
         vmFencerRuleList.forEach(ext ->
@@ -280,59 +134,6 @@ public class HaManager extends AbstractService implements Component, HaCompletio
 
     private void removeVmFencerRuleFromHost(VmInstanceInventory inv, String hostUuid) {
         vmFencerRuleList.forEach(ext -> ext.removeVmFencerRuleFromHost(inv, hostUuid));
-    }
-
-    @Override
-    public void beforeStartNewCreatedVm(VmInstanceSpec spec) {
-        final String vmUuid = spec.getVmInventory().getUuid();
-        final boolean createdStopped = spec.getStrategy() == VmCreationStrategy.CreateStopped;
-
-        if (createdStopped) {
-            vmHAExecutor.setHALevelForVM(vmUuid)
-                    .inhibitHATemporarily("Create VM with CreateStopped strategy")
-                    .update();
-        }
-    }
-
-    @Override
-    public void beforeStopVmOnHypervisor(VmInstanceSpec spec, StopVmOnHypervisorMsg msg) {
-        final Message parentMsg = spec.getMessage();
-        // Reboot's guest shutdown is queued behind the VM reboot task; keep the
-        // uuid cached so the delayed event does not create a leftover inhibitHA tag.
-        if (parentMsg instanceof APIStopVmInstanceMsg
-                || parentMsg instanceof RebootVmInstanceMsg
-                || parentMsg instanceof APIRebootVmInstanceMsg) {
-            apiStopVmCache.put(spec.getVmInventory().getUuid(), spec.getVmInventory().getUuid());
-        }
-
-        boolean stopHa = false;
-        if (parentMsg instanceof StopVmInstanceMsg) {
-            stopHa = ((StopVmInstanceMsg) parentMsg).isStopHA();
-        } else if (parentMsg instanceof APIStopVmInstanceMsg) {
-            stopHa = Objects.equals(((APIStopVmInstanceMsg) parentMsg).getStopHA(), Boolean.TRUE.toString());
-        }
-
-        if (stopHa) {
-            vmHAExecutor.setHALevelForVM(msg.getVmInventory().getUuid())
-                    .inhibitHATemporarily("Before VM stopping on hypervisor")
-                    .update();
-        }
-    }
-
-    @Override
-    public void kvmReportVmShutdownEvent(ShutdownDetail detail) {
-        if (!detail.triggerByGuest) {
-            return;
-        }
-
-        if (!StringUtils.isEmpty(apiStopVmCache.getIfPresent(detail.vmUuid))) {
-            apiStopVmCache.invalidate(detail.vmUuid);
-            return;
-        }
-
-        vmHAExecutor.setHALevelForVM(detail.vmUuid)
-                .inhibitHATemporarily("KVM reporting VM shutdown")
-                .update();
     }
 
     public List<String> getUpdateHostStatusPrimaryStorages() {
@@ -1656,77 +1457,6 @@ public class HaManager extends AbstractService implements Component, HaCompletio
     }
 
     public void syncHaVmListOnHost(String hostUuid) {
-        thdf.chainSubmit(new ChainTask(null) {
-            @Override
-            public void run(SyncTaskChain chain) {
-                List<String> haVmList = isHaEnabled() ? findAllHaVmListOnHost(hostUuid) : Collections.emptyList();
-
-                // Even if the haVmList is empty, sync still needs to be executed
-                syncHaVmListOnHost(hostUuid, haVmList, new Completion(chain) {
-                    @Override
-                    public void success() {
-                        logger.debug(String.format("sync ha vm list on host[%s] successfully", hostUuid));
-                        chain.next();
-                    }
-
-                    @Override
-                    public void fail(ErrorCode errorCode) {
-                        logger.warn(String.format(
-                                "Failed to sync ha vm list on host[%s]: %s", hostUuid, errorCode.getDetails()));
-                        chain.next();
-                    }
-                });
-            }
-
-            @Override
-            public String getSyncSignature() {
-                return getName();
-            }
-
-            @Override
-            public String getName() {
-                return String.format("sync-ha-vm-list-on-host-%s", hostUuid);
-            }
-
-            public List<String> findAllHaVmListOnHost(String hostUuid) {
-                List<String> allVmsInThisHost = Q.New(VmInstanceVO.class)
-                        .select(VmInstanceVO_.uuid)
-                        .eq(VmInstanceVO_.hostUuid, hostUuid)
-                        .listValues();
-                if (allVmsInThisHost.isEmpty()) {
-                    return Collections.emptyList();
-                }
-
-                return Q.New(VmHaVO.class)
-                        .select(VmHaVO_.uuid)
-                        .in(VmHaVO_.uuid, allVmsInThisHost)
-                        .eq(VmHaVO_.haLevel, NeverStop)
-                        .listValues();
-            }
-        });
-    }
-
-    private void syncHaVmListOnHost(String hostUuid, List<String> vmUuidList, Completion completion) {
-        logger.debug(String.format("The following VMs on Host[%s] has HA enabled: %s", hostUuid, vmUuidList));
-
-        HaCommands.SyncHaVmListCmd cmd = new HaCommands.SyncHaVmListCmd();
-        cmd.hostUuid = hostUuid;
-        cmd.vmUuids = vmUuidList;
-
-        KVMHostAsyncHttpCallMsg msg = new KVMHostAsyncHttpCallMsg();
-        msg.setPath(HaCommands.SyncHaVmListCmd.PATH);
-        msg.setHostUuid(hostUuid);
-        msg.setCommand(cmd);
-        bus.makeTargetServiceIdByResourceUuid(msg, HostConstant.SERVICE_ID, hostUuid);
-        bus.send(msg, new CloudBusCallBack(null) {
-            @Override
-            public void run(MessageReply reply) {
-                if (reply.isSuccess()) {
-                    completion.success();
-                } else {
-                    completion.fail(reply.getError());
-                }
-            }
-        });
+        vmHaService.syncHaVmListOnHost(hostUuid, new NopeCompletion());
     }
 }

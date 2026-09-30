@@ -2,6 +2,7 @@ package org.zstack.kvm;
 
 import org.zstack.header.configuration.PythonClass;
 import org.zstack.header.exception.CloudRuntimeException;
+import org.zstack.header.vm.VmInstanceConstant;
 import org.zstack.header.vm.VmInstanceState;
 import org.zstack.header.vm.additions.VmHostFileType;
 
@@ -10,7 +11,7 @@ public interface KVMConstant {
     String SERVICE_ID = "kvm";
 
     @PythonClass
-    String KVM_HYPERVISOR_TYPE = "KVM";
+    String KVM_HYPERVISOR_TYPE = VmInstanceConstant.KVM_HYPERVISOR_TYPE;
 
     String KVM_CONNECT_PATH = "/host/connect";
     String KVM_PING_PATH = "/host/ping";

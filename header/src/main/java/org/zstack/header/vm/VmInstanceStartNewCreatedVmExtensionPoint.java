@@ -3,6 +3,7 @@ package org.zstack.header.vm;
 import org.zstack.header.errorcode.ErrorCode;
 
 public interface VmInstanceStartNewCreatedVmExtensionPoint {
+    // TODO it is better to return ErrorCode
     String preStartNewCreatedVm(VmInstanceInventory inv);
 
     void beforeStartNewCreatedVm(VmInstanceInventory inv);

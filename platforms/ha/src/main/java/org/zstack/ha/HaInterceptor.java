@@ -3,7 +3,6 @@ package org.zstack.ha;
 import org.zstack.core.Platform;
 import org.zstack.core.config.GlobalConfigException;
 import org.zstack.core.db.Q;
-import org.zstack.core.db.SQL;
 import org.zstack.ha.entity.VmHaVO;
 import org.zstack.ha.entity.VmHaVO_;
 import org.zstack.ha.header.VmHaLevel;
@@ -12,12 +11,14 @@ import org.zstack.header.apimediator.ApiMessageInterceptor;
 import org.zstack.header.apimediator.InterceptorForService;
 import org.zstack.header.errorcode.OperationFailureException;
 import org.zstack.header.host.HostStatus;
+import org.zstack.header.host.HostVO;
+import org.zstack.header.host.HostVO_;
 import org.zstack.header.message.APIMessage;
+import org.zstack.header.vm.VmInstanceConstant;
 import org.zstack.header.vm.VmInstanceState;
 import org.zstack.header.vm.VmInstanceVO;
 import org.zstack.header.vm.VmInstanceVO_;
 import org.zstack.header.volume.VolumeType;
-import org.zstack.kvm.KVMConstant;
 import org.zstack.pciDevice.entity.PciDeviceVO;
 import org.zstack.pciDevice.entity.PciDeviceVO_;
 import org.zstack.pciDevice.entity.virtual.vfio_mdev.MdevDeviceVO;
@@ -47,13 +48,16 @@ public class HaInterceptor implements ApiMessageInterceptor {
     }
 
     private void validate(APIUpdateHaStrategyConditionMsg msg) {
-        List<String> hostUuids = SQL.New("select distinct host.uuid from VmInstanceVO vm, HostVO host where vm.hostUuid = host.uuid " +
-                "and host.status != :hstatus and host.hypervisorType = :hypervisorType and vm.state = :vstate", String.class)
-                .param("hstatus", HostStatus.Connected)
-                .param("vstate", VmInstanceState.Unknown)
-                .param("hypervisorType", KVMConstant.KVM_HYPERVISOR_TYPE)
-                .limit(10)
-                .list();
+        List<String> hostUuids = Q.New(VmInstanceVO.class, HostVO.class)
+            .table0()
+                .eq(VmInstanceVO_.hostUuid).table1(HostVO_.uuid)
+                .eq(VmInstanceVO_.state, VmInstanceState.Unknown)
+            .table1()
+                .select(HostVO_.uuid)
+                .notEq(HostVO_.status, HostStatus.Connected)
+                .eq(HostVO_.hypervisorType, VmInstanceConstant.KVM_HYPERVISOR_TYPE)
+            .limit(10)
+            .list();
         if (!hostUuids.isEmpty()) {
             throw new GlobalConfigException(String.format("host[uuid:%s] is not %s, but still have vm on it," +
                     " please resolve hosts' problems before update fencer strategy", hostUuids, HostStatus.Connected));

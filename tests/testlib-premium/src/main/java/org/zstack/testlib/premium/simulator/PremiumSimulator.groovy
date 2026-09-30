@@ -35,6 +35,9 @@ import org.zstack.usbDevice.KvmUsbDeviceBackend.UsbDeviceKvmBackend
 import org.zstack.utils.gson.JSONObjectUtil
 import org.zstack.vpc.ha.vyos.VpcHaRouterCommands
 import org.zstack.zwatch.prometheus.KvmHostScrape
+
+import static org.zstack.ha.entity.HaCommands.*
+
 /**
  * Created by weiwang on 08/11/2017
  */
@@ -430,6 +433,16 @@ class PremiumSimulator implements Simulator {
 
         spec.simulator(HaCommands.RemoveVmFencerRuleFromHostCmd.PATH) {
             return new HaCommands.RemoveVmFencerRuleFromHostRsp()
+        }
+
+        spec.simulator(HaConstants.SCAN_HOST_PATH) { HttpEntity<String> e ->
+            def rsp = new ScanRsp()
+            rsp.result = ScanRsp.RET_SUCCESS
+            return rsp
+        }
+
+        spec.simulator(HaConstants.SYNC_HA_VM_LIST_PATH) {
+            return new AgentResponse()
         }
 
         spec.simulator(L2NetworkMacVlanConstant.KVM_CHECK_L2VLAN_NETWORK_MACVLAN_PATH) {

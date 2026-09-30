@@ -17,7 +17,7 @@
 
     <bean id="VmHaVOUpdater" class="org.zstack.ha.VmHaVOUpdaterImpl"/>
 
-    <bean id="HaKvmFactory" class="org.zstack.ha.HaKvmFactory" >
+    <bean id="HaKvmFactory" class="org.zstack.ha.fencers.HaKvmFactory" >
         <zstack:plugin>
             <zstack:extension interface="org.zstack.ha.spi.HaHypervisorFactory" />
         </zstack:plugin>
@@ -68,7 +68,7 @@
         </zstack:plugin>
     </bean>
 
-    <bean id="HaKvmHostSiblingChecker" class="org.zstack.ha.HaKvmHostSiblingChecker" >
+    <bean id="HaKvmHostSiblingChecker" class="org.zstack.ha.fencers.HaKvmHostSiblingChecker" >
         <zstack:plugin>
             <zstack:extension interface="org.zstack.ha.spi.HaHostChecker" />
         </zstack:plugin>

@@ -24,6 +24,7 @@ import org.zstack.ha.gc.HaGcManager;
 import org.zstack.ha.header.*;
 import org.zstack.ha.message.*;
 import org.zstack.ha.spi.*;
+import org.zstack.ha.vmboot.HaStartVmJudgers;
 import org.zstack.ha.vmboot.VmHaStartMessageSender;
 import org.zstack.header.core.*;
 import org.zstack.core.cloudbus.*;
@@ -763,7 +764,7 @@ public class HaManager extends AbstractService implements Component, HaCompletio
 
         VmHaStartMessageSender sender = new VmHaStartMessageSender()
                 .withVmInstance(vr.getUuid())
-                .withJudgerClass(HaStartVirtualRouterVmJudger.class.getName())
+                .withJudgerClass(HaStartVmJudgers.GeneralJudger.class.getName())
                 .withReasonForHA(i18n("VirtualRouterVm is not running"));
         sender.send(new Completion(completion) {
             @Override
@@ -1708,12 +1709,12 @@ public class HaManager extends AbstractService implements Component, HaCompletio
     private void syncHaVmListOnHost(String hostUuid, List<String> vmUuidList, Completion completion) {
         logger.debug(String.format("The following VMs on Host[%s] has HA enabled: %s", hostUuid, vmUuidList));
 
-        HaKvmHostSiblingChecker.SyncHaVmListCmd cmd = new HaKvmHostSiblingChecker.SyncHaVmListCmd();
+        HaCommands.SyncHaVmListCmd cmd = new HaCommands.SyncHaVmListCmd();
         cmd.hostUuid = hostUuid;
         cmd.vmUuids = vmUuidList;
 
         KVMHostAsyncHttpCallMsg msg = new KVMHostAsyncHttpCallMsg();
-        msg.setPath(HaKvmHostSiblingChecker.SYNC_HA_VM_LIST_PATH);
+        msg.setPath(HaCommands.SyncHaVmListCmd.PATH);
         msg.setHostUuid(hostUuid);
         msg.setCommand(cmd);
         bus.makeTargetServiceIdByResourceUuid(msg, HostConstant.SERVICE_ID, hostUuid);

@@ -21,6 +21,7 @@
         <module>header-ha</module>
         <module>header-pci</module>
         <module>header-usb</module>
+        <module>header-storage</module>
     </modules>
 
     <build>

@@ -1,4 +1,4 @@
-package org.zstack.ha;
+package org.zstack.ha.fencers;
 
 import org.zstack.core.Platform;
 import org.zstack.core.progress.TaskTracker;

@@ -1,4 +1,4 @@
-package org.zstack.ha;
+package org.zstack.ha.fencers;
 
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowire;
@@ -10,9 +10,7 @@ import org.zstack.core.componentloader.PluginRegistry;
 import org.zstack.core.db.Q;
 import org.zstack.core.db.UpdateQuery;
 import org.zstack.core.errorcode.ErrorFacade;
-import org.zstack.core.timeout.ApiTimeoutManager;
 import org.zstack.externalStorage.primary.ExternalStorageFencerType;
-import org.zstack.ha.fencers.HaStrategyHelper;
 import org.zstack.ha.header.HaGlobalConfig;
 import org.zstack.ha.header.HostHaState;
 import org.zstack.ha.entity.HostHaStateVO;
@@ -53,8 +51,6 @@ public class SelfFencerKvmBackend implements SelfFencerHypervisorBackend {
 
     @Autowired
     private CloudBus bus;
-    @Autowired
-    private ApiTimeoutManager timeoutManager;
     @Autowired
     private ErrorFacade errf;
     @Autowired

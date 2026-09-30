@@ -1,4 +1,4 @@
-package org.zstack.ha;
+package org.zstack.ha.fencers;
 
 import org.apache.commons.lang.StringUtils;
 import org.zstack.ha.header.HaGlobalConfig;

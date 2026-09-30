@@ -9,7 +9,7 @@ import java.util.Map;
  * @date 2024/8/21 10:38
  */
 public class ExternalStorageFencerType {
-    private static Map<String, String> types = Collections.synchronizedMap(new HashMap<String, String>());
+    private static Map<String, String> types = Collections.synchronizedMap(new HashMap<>());
 
     private final String identity;
     private final String protocol;

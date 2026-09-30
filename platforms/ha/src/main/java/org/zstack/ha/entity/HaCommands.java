@@ -61,4 +61,36 @@ public class HaCommands {
         public String vmUuid;
         public String fencerName;
     }
+
+    // ------------------------------------- For HaKvmHostSiblingChecker ------------------------------------
+
+    public static class ScanCmd extends AgentCommand {
+        public static final String PATH = HaConstants.SCAN_HOST_PATH;
+        public String hostUuid;
+        // not used, only for test
+        public String slibingHostUuid;
+        public String ip;
+        public int startPort;
+        public int endPort;
+        public long interval;
+        public int times;
+        public long successInterval;
+        public int successTimes;
+    }
+
+    public static class ScanRsp extends AgentResponse {
+        public static final String RET_SUCCESS = "success";
+        public static final String RET_FAILURE = "failure";
+        public static final String RET_NOT_STABLE = "unstable";
+        public String result;
+    }
+
+    /**
+     * To tell the host which VMs have enabled HA
+     */
+    public static class SyncHaVmListCmd extends AgentCommand {
+        public static final String PATH = HaConstants.SYNC_HA_VM_LIST_PATH;
+        public String hostUuid;
+        public List<String> vmUuids;
+    }
 }

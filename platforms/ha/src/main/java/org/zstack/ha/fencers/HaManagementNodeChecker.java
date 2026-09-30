@@ -1,9 +1,8 @@
-package org.zstack.ha;
+package org.zstack.ha.fencers;
 
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.zstack.core.CoreGlobalProperty;
-import org.zstack.core.errorcode.ErrorFacade;
 import org.zstack.core.thread.SyncTask;
 import org.zstack.core.thread.ThreadFacade;
 import org.zstack.ha.spi.HaHostChecker;
@@ -20,8 +19,6 @@ import static org.zstack.core.Platform.operr;
  * Created by xing5 on 2016/3/29.
  */
 public class HaManagementNodeChecker implements HaHostChecker {
-    @Autowired
-    private ErrorFacade errf;
     @Autowired
     private ThreadFacade thdf;
 

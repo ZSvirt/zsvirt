@@ -2,7 +2,7 @@ package org.zstack.zwatch.namespace.event
 
 import org.zstack.core.db.Q
 import org.zstack.core.progress.TaskTracker
-import org.zstack.ha.HostCheckAliveTaskTracker
+import org.zstack.ha.fencers.HostCheckAliveTaskTracker
 import org.zstack.ha.header.VmHaCanonicalEvents
 import org.zstack.header.host.HostCanonicalEvents
 import org.zstack.header.host.HostStatus

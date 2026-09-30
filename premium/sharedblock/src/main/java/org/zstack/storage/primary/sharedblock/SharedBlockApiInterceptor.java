@@ -155,6 +155,12 @@ public class SharedBlockApiInterceptor implements GlobalApiMessageInterceptor {
     }
 
     private void validate(APIAddSharedBlockGroupPrimaryStorageMsg msg) {
+        if (msg.getSystemTags() != null
+                && msg.getSystemTags().contains(SharedBlockSystemTags.SHARED_BLOCK_TAKEOVER.getTagFormat())
+                && msg.getSystemTags().contains(SharedBlockSystemTags.SHARED_BLOCK_FORCE_WIPE.getTagFormat())) {
+            throw new ApiMessageInterceptionException(argerr("takeover cannot be combined with forceWipe"));
+        }
+
         // NOTE(weiw): no need to validate or format uuid since we actually support wwn
         if (msg.getDiskUuids() == null || msg.getDiskUuids().isEmpty()) {
             throw new ApiMessageInterceptionException(argerr(

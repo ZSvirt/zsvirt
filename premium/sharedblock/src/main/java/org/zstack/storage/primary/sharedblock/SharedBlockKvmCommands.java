@@ -780,7 +780,7 @@ public class SharedBlockKvmCommands {
     }
 
     public static class GetVgsInfoRsp extends AgentRsp {
-        public Map<String, SharedBlockGroupDiskInfo> groupDiskInfos = new HashMap<>();
+        public List<SharedBlockVgDiskInfo> vgDiskInfos = new ArrayList<>();
     }
 
     public static class GetManagedVgsInfoCmd extends AgentCmd {
@@ -792,6 +792,12 @@ public class SharedBlockKvmCommands {
 
     public static class SharedBlockGroupDiskInfo {
         public List<SharedBlockCandidateStruct> disks;
+        public Long diskCount;
+    }
+
+    public static class SharedBlockVgDiskInfo {
+        public String vgUuid;
+        public SharedBlockCandidateStruct disk;
         public Long diskCount;
     }
 

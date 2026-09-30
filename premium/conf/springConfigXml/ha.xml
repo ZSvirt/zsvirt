@@ -50,7 +50,6 @@
             <zstack:extension interface="org.zstack.header.storage.primary.PrimaryStorageDetachExtensionPoint" />
             <zstack:extension interface="org.zstack.header.storage.primary.PrimaryStorageDeleteExtensionPoint" />
             <zstack:extension interface="org.zstack.header.vm.VmHaExtensionPoint" />
-            <zstack:extension interface="org.zstack.ha.spi.HostScanExtensionPoint" />
             <zstack:extension interface="org.zstack.header.storage.primary.UpdatePrimaryStorageExtensionPoint" />
             <zstack:extension interface="org.zstack.header.vm.VmInstanceMigrateExtensionPoint" />
             <zstack:extension interface="org.zstack.header.cluster.ClusterUpdateOSExtensionPoint" />

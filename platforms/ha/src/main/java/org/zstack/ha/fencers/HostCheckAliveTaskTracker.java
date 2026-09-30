@@ -2,7 +2,7 @@ package org.zstack.ha.fencers;
 
 import org.zstack.core.Platform;
 import org.zstack.core.progress.TaskTracker;
-import org.zstack.ha.message.HostScanResult;
+import org.zstack.ha.spi.HaHypervisorWorker;
 import org.zstack.header.host.HostVO;
 
 public class HostCheckAliveTaskTracker extends TaskTracker {
@@ -18,8 +18,9 @@ public class HostCheckAliveTaskTracker extends TaskTracker {
         judgeAlive,
         checking;
 
-        static Process mapFrom(HostScanResult stage){
-            return stage.alive ? judgeAlive : judgeDead;
+        static Process mapFrom(HaHypervisorWorker.Report report){
+            return (report.alive == HaHypervisorWorker.AliveLevel.Alive || report.alive == HaHypervisorWorker.AliveLevel.MustAlive) ?
+                    judgeAlive : judgeDead;
         }
     }
 

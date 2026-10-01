@@ -45,12 +45,7 @@
             <zstack:extension interface="org.zstack.header.Service" />
             <zstack:extension interface="org.zstack.ha.spi.HaCompletionCacher" />
             <zstack:extension interface="org.zstack.header.host.HostAfterConnectedExtensionPoint" />
-            <zstack:extension interface="org.zstack.header.storage.primary.PrimaryStorageAttachExtensionPoint" />
-            <zstack:extension interface="org.zstack.header.storage.primary.PrimaryStorageDetachExtensionPoint" />
-            <zstack:extension interface="org.zstack.header.storage.primary.PrimaryStorageDeleteExtensionPoint" />
-            <zstack:extension interface="org.zstack.header.storage.primary.UpdatePrimaryStorageExtensionPoint" />
             <zstack:extension interface="org.zstack.header.vm.VmInstanceMigrateExtensionPoint" />
-            <zstack:extension interface="org.zstack.network.service.virtualrouter.AfterAcquireVirtualRouterExtensionPoint" />
             <zstack:extension interface="org.zstack.header.managementnode.PrepareDbInitialValueExtensionPoint" />
         </zstack:plugin>
     </bean>
@@ -70,6 +65,10 @@
             <zstack:extension interface="org.zstack.header.vm.VmHaExtensionPoint"/>
             <zstack:extension interface="org.zstack.header.host.OrderVmBeforeMigrationDuringHostMaintenanceExtensionPoint"/>
             <zstack:extension interface="org.zstack.header.cluster.ClusterUpdateOSExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.storage.primary.PrimaryStorageDeleteExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.storage.primary.PrimaryStorageDetachExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.storage.primary.PrimaryStorageAttachExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.storage.primary.UpdatePrimaryStorageExtensionPoint" />
         </zstack:plugin>
     </bean>
 

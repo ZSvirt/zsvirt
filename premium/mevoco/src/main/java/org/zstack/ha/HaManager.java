@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.transaction.annotation.Transactional;
-import org.zstack.appliancevm.ApplianceVmStatus;
 import org.zstack.core.Platform;
 import org.zstack.core.timeout.TimeHelper;
 import org.zstack.ha.entity.HaCommands;
@@ -18,22 +17,17 @@ import org.zstack.ha.spi.VmHaVOUpdater;
 import org.zstack.ha.header.*;
 import org.zstack.ha.message.*;
 import org.zstack.ha.spi.*;
-import org.zstack.ha.vmboot.HaStartVmJudgers;
-import org.zstack.ha.vmboot.VmHaStartMessageSender;
 import org.zstack.header.core.*;
 import org.zstack.core.cloudbus.*;
 import org.zstack.core.componentloader.PluginRegistry;
 import org.zstack.core.config.GlobalConfigException;
 import org.zstack.core.config.GlobalConfigValidatorExtensionPoint;
 import org.zstack.core.db.*;
-import org.zstack.core.db.SimpleQuery.Op;
 import org.zstack.core.thread.ChainTask;
 import org.zstack.core.thread.SyncTaskChain;
 import org.zstack.core.thread.ThreadFacade;
 import org.zstack.header.AbstractService;
 import org.zstack.header.Component;
-import org.zstack.header.cluster.ClusterVO;
-import org.zstack.header.cluster.ClusterVO_;
 import org.zstack.header.errorcode.ErrorCode;
 import org.zstack.header.errorcode.OperationFailureException;
 import org.zstack.header.exception.CloudRuntimeException;
@@ -50,12 +44,8 @@ import org.zstack.header.tag.SystemTagOperationJudger;
 import org.zstack.header.vm.*;
 import org.zstack.header.vm.VmCanonicalEvents.VmStateChangedData;
 import org.zstack.kvm.*;
-import org.zstack.network.service.virtualrouter.AfterAcquireVirtualRouterExtensionPoint;
-import org.zstack.network.service.virtualrouter.VirtualRouterVmInventory;
-import org.zstack.network.service.virtualrouter.VirtualRouterVmVO;
 import org.zstack.portal.managementnode.ManagementNodeGlobalConfig;
 import org.zstack.utils.CollectionUtils;
-import org.zstack.utils.DebugUtils;
 import org.zstack.utils.Utils;
 import org.zstack.utils.logging.CLogger;
 
@@ -63,16 +53,14 @@ import javax.persistence.Tuple;
 import javax.persistence.TypedQuery;
 import java.sql.Timestamp;
 import java.util.*;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import static org.zstack.core.Platform.*;
+import static org.zstack.ha.fencers.SelfFencers.*;
 import static org.zstack.ha.header.HaSystemTags.*;
 import static org.zstack.ha.header.VmHaLevel.*;
-import static org.zstack.utils.CollectionDSL.*;
 import static org.zstack.utils.CollectionUtils.toMap;
 
 /**
@@ -81,9 +69,8 @@ import static org.zstack.utils.CollectionUtils.toMap;
 @Configurable(preConstruction = true, autowire = Autowire.BY_TYPE)
 public class HaManager extends AbstractService implements Component, HaCompletionCacher,
         HostAfterConnectedExtensionPoint,
-        PrimaryStorageAttachExtensionPoint, PrimaryStorageDetachExtensionPoint, PrimaryStorageDeleteExtensionPoint,
-        UpdatePrimaryStorageExtensionPoint, VmInstanceMigrateExtensionPoint,
-        AfterAcquireVirtualRouterExtensionPoint, PrepareDbInitialValueExtensionPoint {
+        VmInstanceMigrateExtensionPoint,
+        PrepareDbInitialValueExtensionPoint {
     private static final CLogger logger = Utils.getLogger(HaManager.class);
 
     // A list of checker jobs of the same key (the key is usually 'hostUuid')
@@ -374,70 +361,6 @@ public class HaManager extends AbstractService implements Component, HaCompletio
                 .list();
     }
 
-    private void stopSelfFencerForPrimaryStorage(PrimaryStorageInventory inv) {
-        if (!isHaEnabled()) {
-            return;
-        }
-
-        List<String> clusterUuids = Q.New(PrimaryStorageClusterRefVO.class)
-                .select(PrimaryStorageClusterRefVO_.clusterUuid).eq(PrimaryStorageClusterRefVO_.primaryStorageUuid, inv.getUuid())
-                .listValues();
-
-        if (clusterUuids.isEmpty()) {
-            return;
-        }
-
-        SelfFencerParamGenerator generator = new SelfFencerParamGenerator();
-        generator.clusterUuids = clusterUuids;
-        generator.operator = param -> {
-            CancelStorageHeartbeatFileAndGatewayPing cancel = new CancelStorageHeartbeatFileAndGatewayPing(param);
-            cancel.cancel();
-        };
-        generator.run();
-    }
-
-    @Override
-    public void preDeletePrimaryStorage(PrimaryStorageInventory inv) {
-
-    }
-
-    @Override
-    public void beforeDeletePrimaryStorage(PrimaryStorageInventory inv) {
-
-    }
-
-    @Override
-    public void afterDeletePrimaryStorage(PrimaryStorageInventory inv) {
-        stopSelfFencerForPrimaryStorage(inv);
-    }
-
-    @Override
-    public void preDetachPrimaryStorage(PrimaryStorageInventory inventory, String clusterUuid) {
-
-    }
-
-    @Override
-    public void beforeDetachPrimaryStorage(PrimaryStorageInventory inventory, String clusterUuid) {
-
-    }
-
-    @Override
-    public void failToDetachPrimaryStorage(PrimaryStorageInventory inventory, String clusterUuid) {
-
-    }
-
-    @Override
-    public void afterDetachPrimaryStorage(PrimaryStorageInventory inventory, String clusterUuid) {
-        List<HostVO> hosts = Q.New(HostVO.class).eq(HostVO_.clusterUuid, clusterUuid).list();
-        for (HostVO h : hosts) {
-            SelfFencerStruct param = new SelfFencerStruct();
-            param.host = HostInventory.valueOf(h);
-            param.primaryStorage = list(inventory);
-            CancelStorageHeartbeatFileAndGatewayPing cancel = new CancelStorageHeartbeatFileAndGatewayPing(param);
-            cancel.cancel();
-        }
-    }
-
     public Collection<HaCompletion> dequeCompletions(String key) {
         synchronized (haCompletions) {
             return haCompletions.remove(key);
@@ -457,44 +380,6 @@ public class HaManager extends AbstractService implements Component, HaCompletio
 
             return isFirst;
         }
-    }
-
-    @Override
-    public void afterAcquireVirtualRouter(VirtualRouterVmInventory vr, Completion completion) {
-        VirtualRouterVmVO vo = dbf.findByUuid(vr.getUuid(), VirtualRouterVmVO.class);
-
-        if (vo.getState().equals(VmInstanceState.Running)) {
-            completion.success();
-            return;
-        }
-
-        if (ApplianceVmStatus.Connected.equals(vo.getStatus())) {
-            logger.debug(String.format("virtual router[uuid: %s] is in status[%s], skip HA", vr.getUuid(), vo.getStatus()));
-            completion.success();
-            return;
-        }
-
-        if (HaStrategyHelper.getVmHaFencerStrategy(vr.getUuid()) == SelfFencerStrategy.Permissive && vo.getState().equals(VmInstanceState.Unknown)) {
-            logger.debug(String.format("Self fencer strategy if Permissive, skip HA for virtual router[uuid:%s, state:%s]", vr.getUuid(), VmInstanceState.Unknown.toString()));
-            completion.success();
-            return;
-        }
-
-        VmHaStartMessageSender sender = new VmHaStartMessageSender()
-                .withVmInstance(vr.getUuid())
-                .withJudgerClass(HaStartVmJudgers.GeneralJudger.class.getName())
-                .withReasonForHA(i18n("VirtualRouterVm is not running"));
-        sender.send(new Completion(completion) {
-            @Override
-            public void success() {
-                completion.success();
-            }
-
-            @Override
-            public void fail(ErrorCode errorCode) {
-                completion.fail(errorCode);
-            }
-        });
     }
 
     @Override
@@ -530,96 +415,6 @@ public class HaManager extends AbstractService implements Component, HaCompletio
                 }
             }
         }.execute();
-    }
-
-    private interface SelfFencerOperator {
-        void operate(SelfFencerStruct param);
-    }
-
-    private class SelfFencerParamGenerator {
-        SelfFencerOperator operator;
-        List<String> clusterUuids;
-
-        void run() {
-            DebugUtils.Assert(operator != null, "SelfFencerOperator must be set");
-
-            if (clusterUuids == null) {
-                SimpleQuery<ClusterVO> cq = dbf.createQuery(ClusterVO.class);
-                cq.select(ClusterVO_.uuid);
-                clusterUuids = cq.listValue();
-            }
-
-            if (clusterUuids.isEmpty()) {
-                return;
-            }
-
-            for (String clusterUuid : clusterUuids) {
-                List<PrimaryStorageInventory> ps = new Callable<List<PrimaryStorageInventory>>() {
-                    @Override
-                    @Transactional(readOnly = true)
-                    public List<PrimaryStorageInventory> call() {
-                        String sql = "select ps from PrimaryStorageClusterRefVO ref, PrimaryStorageVO ps where" +
-                                " ps.uuid = ref.primaryStorageUuid and ref.clusterUuid = :cuuid";
-                        TypedQuery<PrimaryStorageVO> q = dbf.getEntityManager().createQuery(sql, PrimaryStorageVO.class);
-                        q.setParameter("cuuid", clusterUuid);
-                        List<PrimaryStorageVO> vos = q.getResultList();
-                        return PrimaryStorageInventory.valueOf(vos);
-                    }
-                }.call();
-
-                if (ps.isEmpty()) {
-                    continue;
-                }
-
-                Iterator<List<HostInventory>> hostIterator = new Iterator<List<HostInventory>>() {
-                    final int STEP = 1000;
-
-                    int offset = 0;
-
-                    @Override
-                    public boolean hasNext() {
-                        // not used
-                        return true;
-                    }
-
-                    @Override
-                    public List<HostInventory> next() {
-                        SimpleQuery<HostVO> q = dbf.createQuery(HostVO.class);
-                        q.add(HostVO_.clusterUuid, Op.EQ, clusterUuid);
-                        q.add(HostVO_.status, Op.EQ, HostStatus.Connected);
-                        q.setStart(offset);
-                        q.setLimit(STEP);
-                        List<HostVO> vos = q.list();
-
-                        offset += STEP;
-
-                        return vos.isEmpty() ? null : HostInventory.valueOf(vos);
-                    }
-                };
-
-                List<HostInventory> hosts;
-                do {
-                    hosts = hostIterator.next();
-                    if (hosts != null) {
-                        for (HostInventory host : hosts) {
-                            new Runnable() {
-                                @Override
-                                @ExceptionSafe
-                                public void run() {
-                                    SelfFencerStruct param = new SelfFencerStruct();
-                                    param.host = host;
-                                    param.primaryStorage = ps;
-                                    param.strategy = HaGlobalConfig.SELF_FENCER_STRATEGY.value();
-                                    param.fencers = HaHelper.findExecuteFencers();
-                                    operator.operate(param);
-                                }
-                            }.run();
-                        }
-                    }
-
-                } while (hosts != null);
-            }
-        }
     }
 
     private void cancelSelfFencerOnAllHosts() {
@@ -1066,141 +861,6 @@ public class HaManager extends AbstractService implements Component, HaCompletio
     @Override
     public String getId() {
         return bus.makeLocalServiceId(HaConstants.SERVICE_ID);
-    }
-
-    @Override
-    public void preAttachPrimaryStorage(PrimaryStorageInventory inventory, String clusterUuid) {
-
-    }
-
-    @Override
-    public void beforeAttachPrimaryStorage(PrimaryStorageInventory inventory, String clusterUuid) {
-
-    }
-
-    @Override
-    public void failToAttachPrimaryStorage(PrimaryStorageInventory inventory, String clusterUuid) {
-
-    }
-
-    @Override
-    public void afterAttachPrimaryStorage(PrimaryStorageInventory inventory, String clusterUuid) {
-        SimpleQuery<HostVO> q = dbf.createQuery(HostVO.class);
-        q.add(HostVO_.clusterUuid, Op.EQ, clusterUuid);
-        List<HostVO> hosts = q.list();
-        if (hosts.isEmpty()) {
-            return;
-        }
-
-        List<HostInventory> hostInvs = hosts.stream().map(HostInventory::valueOf).collect(Collectors.toList());
-        setupStorageHeartbeatFileFencerOnHosts(list(inventory), hostInvs);
-    }
-
-    @Override
-    public void beforeUpdatePrimaryStorage(PrimaryStorageInventory ps) {
-
-    }
-
-    @Override
-    public void afterUpdatePrimaryStorage(PrimaryStorageInventory ps) {
-        List<HostVO> hosts = SQL.New("select host" +
-                " from HostVO host, PrimaryStorageClusterRefVO ref" +
-                " where ref.primaryStorageUuid = :psUuid" +
-                " and host.clusterUuid = ref.clusterUuid", HostVO.class)
-                .param("psUuid", ps.getUuid()).list();
-        if (hosts.isEmpty()) {
-            return;
-        }
-        List<HostInventory> hostInvs = hosts.stream().map(HostInventory::valueOf).collect(Collectors.toList());
-        setupStorageHeartbeatFileFencerOnHosts(list(ps), hostInvs);
-
-    }
-
-    private void setupStorageHeartbeatFileFencerOnHosts(List<PrimaryStorageInventory> ps, List<HostInventory> hosts){
-        ps = ps.stream().filter(it -> PrimaryStorageType.valueOf(it.getType()).isSupportHeartbeatFile())
-                .collect(Collectors.toList());
-        if (ps.isEmpty() || hosts.isEmpty()){
-            return;
-        }
-
-        for (HostInventory h : hosts) {
-            SelfFencerStruct param = new SelfFencerStruct();
-            param.host = h;
-            param.primaryStorage = ps;
-            param.fencers = HaHelper.findExecuteFencers();
-            new SetupStorageHeartbeatFileFencer(param).setup();
-        }
-    }
-
-    class CancelStorageHeartbeatFileAndGatewayPing {
-        SelfFencerStruct param;
-
-        public CancelStorageHeartbeatFileAndGatewayPing(SelfFencerStruct param) {
-            this.param = param;
-        }
-
-        void cancel() {
-            final HostInventory host = param.host;
-            final HaHypervisorFactory f = hypervisorFactories.get(host.getHypervisorType());
-            if (f == null) {
-                logger.warn(String.format("cannot find HaHypervisorFactory for the hypervisor type[%s], no need to cancel its self-fencer",
-                        host.getHypervisorType()));
-                return;
-            }
-
-            SelfFencerHypervisorBackend bkd = f.createSelfFencerBackend(param);
-            bkd.cancel(new Completion(null) {
-                @Override
-                public void success() {
-                    logger.debug(String.format("successfully cancelled the self-fencer on the host[uuid:%s, name:%s]", host.getUuid(), host.getName()));
-                }
-
-                @Override
-                public void fail(ErrorCode errorCode) {
-                    logger.warn(String.format("unable to cancel the self-fencer on the host[uuid:%s, name:%s], %s",
-                            host.getUuid(), host.getName(), errorCode));
-                }
-            });
-        }
-    }
-
-    class SetupStorageHeartbeatFileFencer {
-        SelfFencerStruct param;
-
-        SetupStorageHeartbeatFileFencer(SelfFencerStruct param) {
-            this.param = param;
-        }
-
-        void setup() {
-            if (!isHaEnabled()) {
-                logger.debug(String.format("the global config[%s] is set to false, skip setting up self-fencer on the hosts",
-                        HaGlobalConfig.ALL.getCanonicalName()));
-                return;
-            }
-
-            final HostInventory host = param.host;
-            final HaHypervisorFactory f = hypervisorFactories.get(host.getHypervisorType());
-            if (f == null) {
-                logger.warn(String.format("cannot find HaHypervisorFactory for the hypervisor type[%s], no way to setup self-fencer",
-                        host.getHypervisorType()));
-                return;
-            }
-
-            SelfFencerHypervisorBackend bkd = f.createSelfFencerBackend(param);
-            bkd.setup(new Completion(null) {
-                @Override
-                public void success() {
-                    logger.debug(String.format("successfully setup the self-fencer on the host[uuid:%s, name:%s]", host.getUuid(),
-                            host.getName()));
-                }
-
-                @Override
-                public void fail(ErrorCode errorCode) {
-                    logger.warn(String.format("failed to setup the self-fencer on the host[uuid:%s, name:%s], %s", host.getUuid(),
-                            host.getName(), errorCode));
-                }
-            });
-        }
     }
 
     @Transactional(readOnly = true)

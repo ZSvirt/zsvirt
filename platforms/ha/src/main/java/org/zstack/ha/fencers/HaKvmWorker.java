@@ -390,14 +390,6 @@ public class HaKvmWorker implements HaHypervisorWorker {
             }
         }
 
-        VmHaLevel level = Q.New(VmHaVO.class)
-                .eq(VmHaVO_.uuid, completion.getVmUuid())
-                .select(VmHaVO_.haLevel)
-                .findValue();
-        if (VmHaLevel.FaultTolerance.equals(level)) {
-            return;
-        }
-
         VmHaStartMessageSender sender = new VmHaStartMessageSender()
                 .withVmInstance(completion.getVmUuid())
                 .withAvoidHost(hostUuid)

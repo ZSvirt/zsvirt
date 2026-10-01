@@ -28,7 +28,7 @@ public class SetVmInstanceHaLevelAction extends AbstractAction {
     @Param(required = true, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
     public java.lang.String uuid;
 
-    @Param(required = true, validValues = {"NeverStop","OnHostFailure","FaultTolerance"}, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
+    @Param(required = true, validValues = {"NeverStop","OnHostFailure"}, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
     public java.lang.String level;
 
     @Param(required = false)

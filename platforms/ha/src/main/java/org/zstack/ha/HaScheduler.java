@@ -136,7 +136,6 @@ public class HaScheduler implements Component, ManagementNodeReadyExtensionPoint
         final Set<VmHaLevel> needHaVmHaLevels = new HashSet<>();
         needHaVmHaLevels.add(NeverStop);
         needHaVmHaLevels.add(OnHostFailure);
-        needHaVmHaLevels.add(FaultTolerance);
 
         List<Tuple> tupleList = Q.New(VmInstanceVO.class, VmHaVO.class)
             .table0()
@@ -191,26 +190,16 @@ public class HaScheduler implements Component, ManagementNodeReadyExtensionPoint
                 hostStatus = tuple0 == null ? null : tuple0.get(1, HostStatus.class);
             }
 
-            if (level == NeverStop || level == OnHostFailure) {
-                // if vm's host connected means host is recovered from failure
-                // use startVmWithStateSyncBefore which will check vm state before
+            // if vm's host connected means host is recovered from failure
+            // use startVmWithStateSyncBefore which will check vm state before
 
-                if (hostStatus == HostStatus.Connected) {
-                    logger.debug(String.format("ready to HA scheduler for VM[%s], level=%s: setup VmHaTaskTracker", vmUuid, level));
-                    vmHaService.setupHaTrackerForNeverStopVm(vmUuid, hostUuid);
-                } else if (vmState == VmInstanceState.Unknown) {
-                    vmHaService.setupHaTrackerForOnHostFailureVm(vmUuid, true);
-                } else {
-                    haGcManager.submitNeverStopVmGCJob(vmUuid);
-                }
-            } else { // FaultTolerance
-                if (!VmInstanceConstant.USER_VM_TYPE.equals(vmType)) {
-                    return;
-                }
-
-                if (vmState == VmInstanceState.Unknown) {
-                    vmHaService.setupHaTrackerForOnHostFailureVm(vmUuid, false);
-                }
+            if (hostStatus == HostStatus.Connected) {
+                logger.debug(String.format("ready to HA scheduler for VM[%s], level=%s: setup VmHaTaskTracker", vmUuid, level));
+                vmHaService.setupHaTrackerForNeverStopVm(vmUuid, hostUuid);
+            } else if (vmState == VmInstanceState.Unknown) {
+                vmHaService.setupHaTrackerForOnHostFailureVm(vmUuid, true);
+            } else {
+                haGcManager.submitNeverStopVmGCJob(vmUuid);
             }
         });
     }

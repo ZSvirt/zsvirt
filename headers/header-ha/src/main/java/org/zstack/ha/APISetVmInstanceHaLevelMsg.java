@@ -15,7 +15,7 @@ public class APISetVmInstanceHaLevelMsg extends APIMessage {
     @APIParam(resourceType = VmInstanceVO.class)
     private String uuid;
 
-    @APIParam(validValues = { "NeverStop", "OnHostFailure", "FaultTolerance" })
+    @APIParam(validValues = { "NeverStop", "OnHostFailure" })
     private String level;
 
     public String getUuid() {

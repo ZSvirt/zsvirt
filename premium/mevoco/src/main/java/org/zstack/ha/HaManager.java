@@ -32,7 +32,6 @@ import org.zstack.core.thread.SyncTaskChain;
 import org.zstack.core.thread.ThreadFacade;
 import org.zstack.header.AbstractService;
 import org.zstack.header.Component;
-import org.zstack.header.cluster.ClusterUpdateOSExtensionPoint;
 import org.zstack.header.cluster.ClusterVO;
 import org.zstack.header.cluster.ClusterVO_;
 import org.zstack.header.errorcode.ErrorCode;
@@ -69,7 +68,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static org.zstack.core.Platform.*;
 import static org.zstack.ha.header.HaSystemTags.*;
@@ -82,12 +80,10 @@ import static org.zstack.utils.CollectionUtils.toMap;
  */
 @Configurable(preConstruction = true, autowire = Autowire.BY_TYPE)
 public class HaManager extends AbstractService implements Component, HaCompletionCacher,
-        HostAfterConnectedExtensionPoint, OrderVmBeforeMigrationDuringHostMaintenanceExtensionPoint,
+        HostAfterConnectedExtensionPoint,
         PrimaryStorageAttachExtensionPoint, PrimaryStorageDetachExtensionPoint, PrimaryStorageDeleteExtensionPoint,
-        VmHaExtensionPoint,
-        UpdatePrimaryStorageExtensionPoint, VmInstanceMigrateExtensionPoint, ClusterUpdateOSExtensionPoint,
-        AfterAcquireVirtualRouterExtensionPoint, PrepareDbInitialValueExtensionPoint,
-        VmInstanceCreateExtensionPoint, ApplianceVmInstanceCreateExtensionPoint {
+        UpdatePrimaryStorageExtensionPoint, VmInstanceMigrateExtensionPoint,
+        AfterAcquireVirtualRouterExtensionPoint, PrepareDbInitialValueExtensionPoint {
     private static final CLogger logger = Utils.getLogger(HaManager.class);
 
     // A list of checker jobs of the same key (the key is usually 'hostUuid')
@@ -117,22 +113,11 @@ public class HaManager extends AbstractService implements Component, HaCompletio
     @Autowired
     private VmHaService vmHaService;
 
-    private final static Map<String, Boolean> haStatus = new HashMap<>();
     private List<String> updateHostStatusPrimaryStorages;
-
-    private void addVmFencerRuleToHost(VmInstanceInventory inv, String hostUuid) {
-        vmFencerRuleList.forEach(ext ->
-                ext.addVmFencerRuleToHost(Stream.of(inv.getUuid()).collect(Collectors.toList()),
-                        hostUuid));
-    }
 
     private void addVmFencerRuleToHost(List<String> vmUuids, String hostUuid) {
         vmFencerRuleList.forEach(ext ->
                 ext.addVmFencerRuleToHost(vmUuids, hostUuid));
-    }
-
-    private void removeVmFencerRuleFromHost(VmInstanceInventory inv, String hostUuid) {
-        vmFencerRuleList.forEach(ext -> ext.removeVmFencerRuleFromHost(inv, hostUuid));
     }
 
     public List<String> getUpdateHostStatusPrimaryStorages() {
@@ -471,33 +456,6 @@ public class HaManager extends AbstractService implements Component, HaCompletio
             }
 
             return isFirst;
-        }
-    }
-
-    @Override
-    public String preUpdateClusterOS(ClusterVO cls) {
-        return null;
-    }
-
-    @Override
-    public void beforeUpdateClusterOS(ClusterVO cls) {
-        // if global ha is enabled, then record and disable it
-        if (isHaEnabled()) {
-            haStatus.put(cls.getUuid(), true);
-            HaGlobalConfig.ALL.updateValue(false);
-        } else {
-            haStatus.put(cls.getUuid(), false);
-        }
-    }
-
-    @Override
-    public void afterUpdateClusterOS(ClusterVO cls) {
-        // if global ha was enabled, then re-enable it
-        if (haStatus.containsKey(cls.getUuid())) {
-            Boolean isHaEnabled = haStatus.get(cls.getUuid());
-            if (isHaEnabled) {
-                HaGlobalConfig.ALL.updateValue(true);
-            }
         }
     }
 
@@ -1174,39 +1132,6 @@ public class HaManager extends AbstractService implements Component, HaCompletio
         }
     }
 
-    @Override
-    public List<String> orderVmBeforeMigrationDuringHostMaintenance(HostInventory host, List<String> vmUuids) {
-        List<VmHaVO> haList = Q.New(VmHaVO.class)
-                .in(VmHaVO_.uuid, vmUuids)
-                .in(VmHaVO_.haLevel, list(NeverStop, OnHostFailure))
-                .list();
-        if (haList.isEmpty()) {
-            return vmUuids;
-        }
-
-        List<String> neverStopped = new ArrayList<>();
-        List<String> onHostFailure = new ArrayList<>();
-        List<String> haVmFirst = new ArrayList<>();
-
-        for (VmHaVO ha : haList) {
-            if (ha.getHaLevel() == NeverStop) {
-                neverStopped.add(ha.getUuid());
-            } else if (ha.getHaLevel() == OnHostFailure) {
-                onHostFailure.add(ha.getUuid());
-            }
-        }
-
-        haVmFirst.addAll(neverStopped);
-        haVmFirst.addAll(onHostFailure);
-        for (String uuid : vmUuids) {
-            if (!haVmFirst.contains(uuid)) {
-                haVmFirst.add(uuid);
-            }
-        }
-
-        return haVmFirst;
-    }
-
     class CancelStorageHeartbeatFileAndGatewayPing {
         SelfFencerStruct param;
 
@@ -1335,62 +1260,6 @@ public class HaManager extends AbstractService implements Component, HaCompletio
         syncHaVmListOnHost(host.getUuid());
     }
 
-    private ErrorCode checkVmAllVolumePrimaryStorageState(String vmUuid) {
-        String sql = "select uuid from PrimaryStorageVO where uuid in (" +
-                " select distinct(primaryStorageUuid) from VolumeVO" +
-                " where vmInstanceUuid = :vmUuid and primaryStorageUuid is not null)" +
-                " and state = :psState";
-        List<String> result = SQL.New(sql, String.class)
-                .param("vmUuid", vmUuid)
-                .param("psState", PrimaryStorageState.Maintenance)
-                .list();
-        if (result != null && !result.isEmpty()) {
-            return argerr("the VM[uuid:%s] volume stored location primary storage is in a state of maintenance", vmUuid);
-        }
-
-        return null;
-    }
-
-    @Override
-    public void preCreateVmInstance(CreateVmInstanceMsg msg) {
-        // do nothing
-    }
-
-    @Override
-    public void afterPersistVmInstanceVO(VmInstanceVO vo, CreateVmInstanceMsg msg) {
-        VmHaVO ha = new VmHaVO();
-        ha.setUuid(vo.getUuid());
-        ha.setHaLevel(Undefined);
-        ha.setHaLevelUpdateTime(vo.getCreateDate());
-        dbf.persist(ha);
-    }
-
-    @Override
-    public void afterPersistApplianceVmInstanceVO(VmInstanceVO vo) {
-        VmHaVO ha = new VmHaVO();
-        ha.setUuid(vo.getUuid());
-        ha.setHaLevel(Undefined);
-        ha.setHaLevelUpdateTime(vo.getCreateDate());
-        dbf.persist(ha);
-    }
-
-    @Override
-    public ErrorCode preHaStartVm(String vmUuid) {
-        return checkVmAllVolumePrimaryStorageState(vmUuid);
-    }
-
-    @Override
-    public void beforeMigrateVm(VmInstanceInventory inv, String destHostUuid) {
-        removeVmFencerRuleFromHost(inv, inv.getHostUuid());
-    }
-
-    @Override
-    public void afterMigrateVm(VmInstanceInventory inv, String srcHostUuid) {
-        addVmFencerRuleToHost(inv, inv.getHostUuid());
-        syncHaVmListOnHost(inv.getHostUuid());
-        syncHaVmListOnHost(srcHostUuid);
-    }
-
     @Override
     public void failedToMigrateVm(VmInstanceInventory inv, String destHostUuid, ErrorCode reason) {
         if (destHostUuid == null) {
@@ -1404,8 +1273,6 @@ public class HaManager extends AbstractService implements Component, HaCompletio
         if (neverStop) {
             migrationFailedVMs.putIfAbsent(inv.getUuid(), destHostUuid);
         }
-
-        addVmFencerRuleToHost(inv, inv.getHostUuid());
     }
 
     public void syncHaVmListOnHost(String hostUuid) {

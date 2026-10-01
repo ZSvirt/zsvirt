@@ -55,7 +55,7 @@ public class HaGlobalConfig {
     @BindResourceConfig(VmInstanceVO.class)
     public static GlobalConfig VM_HA_STRATEGY = new GlobalConfig(CATEGORY, "vm.ha.strategy");
 
-    @GlobalConfigValidation(validValues = {"NeverStop", "OnHostFailure", "FaultTolerance", "None"})
+    @GlobalConfigValidation(validValues = {"NeverStop", "OnHostFailure", "None"})
     @BindResourceConfig(ClusterVO.class)
     public static GlobalConfig VM_HA_LEVEL = new GlobalConfig(CATEGORY, "vm.ha.level");
 

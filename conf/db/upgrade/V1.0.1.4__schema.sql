@@ -32,6 +32,9 @@ DELETE FROM `zstack`.`SystemTagVO` WHERE `tag` LIKE 'vmFencedBy::%';
 UPDATE GarbageCollectorVO SET runnerClass = 'org.zstack.ha.gc.NeverStopVmGC'
     WHERE runnerClass = 'org.zstack.ha.NeverStopVmGC';
 
+DROP TABLE IF EXISTS `zstack`.`FaultToleranceVmInstanceGroupHostPortRefVO`;
+DROP TABLE IF EXISTS `zstack`.`FaultToleranceVmGroupVO`;
+
 -- Feature: Allocator Domain (scheduling domain) | ZSV-13008
 
 CREATE TABLE IF NOT EXISTS `zstack`.`AllocatorDomainVO` (

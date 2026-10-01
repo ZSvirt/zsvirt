@@ -11,12 +11,6 @@ public enum VmHaLevel {
      * ZSphere only use {@code NeverStop} now. (zsvirt_1.0.1, zsv_5.2.0)
      */
     OnHostFailure,
-    /**
-     * ZSphere only use {@code NeverStop} now. (zsvirt_1.0.1, zsv_5.2.0)
-     * FaultTolerance is not used in ZSphere
-     */
-    @Deprecated
-    FaultTolerance,
     None,
     /**
      * <p>This is a special value, only used when the VM is first created.

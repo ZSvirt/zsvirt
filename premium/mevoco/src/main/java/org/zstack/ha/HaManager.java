@@ -741,13 +741,6 @@ public class HaManager extends AbstractService implements Component, HaCompletio
         }
 
         VmHaLevel haLevel = ha.getHaLevel();
-        if (haLevel.equals(VmHaLevel.FaultTolerance)) {
-            if (VmInstanceState.Unknown.toString().equals(d.getNewState())) {
-                vmHaService.setupHaTrackerForOnHostFailureVm(d.getInventory(), false);
-            }
-
-            return;
-        }
 
         logger.info(String.format("starting HA for VM[uuid:%s]", d.getVmUuid()));
         if (haLevel == VmHaLevel.OnHostFailure && VmInstanceState.Unknown.toString().equals(d.getNewState())) {

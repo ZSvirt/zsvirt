@@ -3,7 +3,6 @@ package org.zstack.ha;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
-import org.springframework.transaction.annotation.Transactional;
 import org.zstack.core.Platform;
 import org.zstack.core.timeout.TimeHelper;
 import org.zstack.ha.entity.HaCommands;
@@ -42,19 +41,14 @@ import org.zstack.header.storage.primary.*;
 import org.zstack.header.tag.SystemTagInventoryDefinition;
 import org.zstack.header.tag.SystemTagOperationJudger;
 import org.zstack.header.vm.*;
-import org.zstack.header.vm.VmCanonicalEvents.VmStateChangedData;
 import org.zstack.kvm.*;
-import org.zstack.portal.managementnode.ManagementNodeGlobalConfig;
-import org.zstack.utils.CollectionUtils;
 import org.zstack.utils.Utils;
 import org.zstack.utils.logging.CLogger;
 
 import javax.persistence.Tuple;
-import javax.persistence.TypedQuery;
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 import static org.zstack.core.Platform.*;
@@ -68,8 +62,6 @@ import static org.zstack.utils.CollectionUtils.toMap;
  */
 @Configurable(preConstruction = true, autowire = Autowire.BY_TYPE)
 public class HaManager extends AbstractService implements Component, HaCompletionCacher,
-        HostAfterConnectedExtensionPoint,
-        VmInstanceMigrateExtensionPoint,
         PrepareDbInitialValueExtensionPoint {
     private static final CLogger logger = Utils.getLogger(HaManager.class);
 
@@ -87,8 +79,6 @@ public class HaManager extends AbstractService implements Component, HaCompletio
     private ThreadFacade thdf;
     @Autowired
     private CloudBus bus;
-    @Autowired
-    private ResourceDestinationMaker destinationMaker;
     @Autowired
     private DatabaseFacade dbf;
     @Autowired
@@ -121,7 +111,6 @@ public class HaManager extends AbstractService implements Component, HaCompletio
     @Override
     public boolean start() {
         populateExtensions();
-        setupCanonicalEvents();
         setupGlobalConfig();
 
         restf.registerSyncHttpCallHandler(HaCommands.ReportVmSelfFencerCmd.PATH, HaCommands.ReportVmSelfFencerCmd.class, cmd -> {
@@ -452,145 +441,6 @@ public class HaManager extends AbstractService implements Component, HaCompletio
         vmFencerRuleList = pluginRgty.getExtensionList(VmFencerRuleExtensionPoint.class);
     }
 
-    private void setupCanonicalEvents() {
-        evtf.on(VmCanonicalEvents.VM_FULL_STATE_CHANGED_PATH, new EventCallback() {
-            @Override
-            public void run(Map tokens, Object data) {
-                VmStateChangedData d = (VmStateChangedData) data;
-                if (!destinationMaker.isManagedByUs(d.getVmUuid())) {
-
-                    if (destinationMaker.getManagementNodeCount() > 1) {
-                        // we wait two ManagementNodeGlobalConfig.NODE_HEARTBEAT_INTERVAL in case the VM is
-                        // managed by a node which is dying
-                        try {
-                            TimeUnit.SECONDS.sleep(2L * ManagementNodeGlobalConfig.NODE_HEARTBEAT_INTERVAL.value(Integer.class));
-                        } catch (InterruptedException e) {
-                            logger.warn(e.getMessage(), e);
-                            Thread.currentThread().interrupt();
-                        }
-                    }
-
-                    if (!destinationMaker.isManagedByUs(d.getVmUuid())) {
-                        // OK, it's really not managed by us
-                        return;
-                    }
-                }
-
-                startHaIfNeeded(d);
-            }
-        });
-    }
-
-    private void startHaIfNeeded(VmStateChangedData d) {
-        if (!isHaEnabled()) {
-            return;
-        }
-
-        VmHaVO ha = Q.New(VmHaVO.class)
-                .eq(VmHaVO_.uuid, d.getVmUuid())
-                .find();
-        if (ha.getHaLevel().isDisabled() || null != ha.getInhibitionReason()) {
-            return;
-        }
-
-        VmHaLevel haLevel = ha.getHaLevel();
-
-        logger.info(String.format("starting HA for VM[uuid:%s]", d.getVmUuid()));
-        if (haLevel == VmHaLevel.OnHostFailure && VmInstanceState.Unknown.toString().equals(d.getNewState())) {
-            vmHaService.setupHaTrackerForOnHostFailureVm(d.getInventory().getUuid(), false);
-        } else if (haLevel == VmHaLevel.NeverStop) {
-            if (VmInstanceState.Stopped.toString().equals(d.getNewState())) {
-                haOnStopVm(d.getInventory());
-            } else if (VmInstanceState.Unknown.toString().equals(d.getNewState())) {
-                vmHaService.setupHaTrackerForOnHostFailureVm(d.getInventory().getUuid(), true);
-            }
-        } else {
-            if (VmInstanceState.Unknown.toString().equals(d.getNewState())) {
-                vmHaService.setupHaTrackerForOnHostFailureVm(d.getInventory().getUuid(), false);
-            }
-        }
-    }
-
-    private void handleMigrationFailure(VmInstanceInventory vmInv, String hostUuid) {
-        final String vmUuid = vmInv.getUuid();
-        CheckVmStateOnHypervisorMsg msg = new CheckVmStateOnHypervisorMsg();
-        msg.setVmInstanceUuids(Collections.singletonList(vmUuid));
-        msg.setHostUuid(hostUuid);
-        bus.makeTargetServiceIdByResourceUuid(msg, HostConstant.SERVICE_ID, hostUuid);
-        bus.send(msg, new CloudBusCallBack(null) {
-            @Override
-            public void run(MessageReply reply) {
-                if (!reply.isSuccess()) {
-                    logger.warn(String.format("cannot determine the VM[%s] status on host[%s]",
-                            vmUuid, hostUuid));
-
-                    // Set the host to migration destination, and HA manager will try to bring it up.
-                    UpdateQuery.New(VmInstanceVO.class)
-                            .eq(VmInstanceVO_.uuid, vmUuid)
-                            .set(VmInstanceVO_.hostUuid, hostUuid)
-                            .set(VmInstanceVO_.state, VmInstanceState.Unknown)
-                            .update();
-                    return;
-                }
-
-                CheckVmStateOnHypervisorReply r = reply.castReply();
-                String state = r.getStates().get(vmUuid);
-                if (state == null) {
-                    logger.warn(String.format("VM[%s] not found on migration destination host[%s]",
-                            vmUuid, hostUuid));
-
-                    String reason = "vm is not found on migration destination host after migrate failing";
-                    String hostUuid = vmInv.getHostUuid() == null ? vmInv.getLastHostUuid() : vmInv.getHostUuid();
-                    vmHaService.haStartVmWithTracker(vmInv.getUuid(), hostUuid, reason, null);
-                    return;
-                }
-
-                if (VmInstanceState.Running.toString().equals(state)) {
-                    logger.warn(String.format("Migrated VM[%s] is running on host[%s]", vmUuid, hostUuid));
-
-                    UpdateQuery.New(VmInstanceVO.class)
-                            .eq(VmInstanceVO_.uuid, vmUuid)
-                            .set(VmInstanceVO_.hostUuid, hostUuid)
-                            .set(VmInstanceVO_.state, VmInstanceState.Running)
-                            .update();
-                    return;
-                }
-
-                if (VmInstanceState.Paused.toString().equals(state)) {
-                    logger.warn(String.format("Migrated VM[%s] is paused on host[%s]", vmUuid, hostUuid));
-
-                    UpdateQuery.New(VmInstanceVO.class)
-                            .eq(VmInstanceVO_.uuid, vmUuid)
-                            .set(VmInstanceVO_.hostUuid, hostUuid)
-                            .set(VmInstanceVO_.state, VmInstanceState.Paused)
-                            .update();
-                    return;
-                }
-
-                if (VmInstanceState.Stopped.toString().equals(state)) {
-                    logger.warn(String.format("Migrated VM[%s] is stopped on host[%s]", vmUuid, hostUuid));
-
-                    // A stopped VM will be brought up by HA manager.
-                    UpdateQuery.New(VmInstanceVO.class)
-                            .eq(VmInstanceVO_.uuid, vmUuid)
-                            .set(VmInstanceVO_.state, VmInstanceState.Stopped)
-                            .update();
-                }
-            }
-        });
-    }
-
-    private void haOnStopVm(final VmInstanceInventory vmInv) {
-        if (migrationFailedVMs.containsKey(vmInv.getUuid())) {
-            handleMigrationFailure(vmInv, migrationFailedVMs.remove(vmInv.getUuid()));
-            return;
-        }
-
-        final String vmUuid = vmInv.getUuid();
-        final String hostUuid = vmInv.getHostUuid() != null ? vmInv.getHostUuid() : vmInv.getLastHostUuid();
-        vmHaService.setupHaTrackerForNeverStopVm(vmUuid, hostUuid);
-    }
-
     @Override
     public boolean stop() {
         return true;
@@ -861,78 +711,6 @@ public class HaManager extends AbstractService implements Component, HaCompletio
     @Override
     public String getId() {
         return bus.makeLocalServiceId(HaConstants.SERVICE_ID);
-    }
-
-    @Transactional(readOnly = true)
-    private List<PrimaryStorageInventory> getSelfFencerSupportedPrimaryStorage(HostInventory host) {
-        String sql = "select pri from PrimaryStorageVO pri, PrimaryStorageClusterRefVO ref where" +
-                " pri.uuid = ref.primaryStorageUuid and ref.clusterUuid = :cuuid";
-        TypedQuery<PrimaryStorageVO> q = dbf.getEntityManager().createQuery(sql, PrimaryStorageVO.class);
-        q.setParameter("cuuid", host.getClusterUuid());
-        List<PrimaryStorageVO> ps = q.getResultList();
-        if (ps.isEmpty()) {
-            return new ArrayList<PrimaryStorageInventory>();
-        }
-
-        List<PrimaryStorageInventory> invs = new ArrayList<PrimaryStorageInventory>();
-        for (PrimaryStorageVO vo : ps) {
-            PrimaryStorageType type = PrimaryStorageType.valueOf(vo.getType());
-            if (type.isSupportHeartbeatFile()) {
-                invs.add(PrimaryStorageInventory.valueOf(vo));
-            }
-        }
-
-        return invs;
-    }
-
-    private boolean isHaEnabled() {
-        return HaHelper.isVmHaEnabled();
-    }
-
-    @Override
-    public void afterHostConnected(HostInventory host) {
-        if (!isHaEnabled()) {
-            return;
-        }
-
-        List<PrimaryStorageInventory> ps = getSelfFencerSupportedPrimaryStorage(host);
-        if (ps.isEmpty()) {
-            return;
-        }
-
-        SelfFencerStruct param = new SelfFencerStruct();
-        param.primaryStorage = ps;
-        param.host = host;
-        param.fencers = HaHelper.findExecuteFencers();
-        new SetupStorageHeartbeatFileFencer(param).setup();
-
-        List<String> vmUuids = Q.New(VmInstanceVO.class)
-                .eq(VmInstanceVO_.hostUuid, host.getUuid())
-                .in(VmInstanceVO_.state, Arrays.asList(VmInstanceState.Running, VmInstanceState.Unknown, VmInstanceState.Paused))
-                .select(VmInstanceVO_.uuid)
-                .listValues();
-
-        if (CollectionUtils.isEmpty(vmUuids)) {
-            return;
-        }
-
-        addVmFencerRuleToHost(vmUuids, host.getUuid());
-        syncHaVmListOnHost(host.getUuid());
-    }
-
-    @Override
-    public void failedToMigrateVm(VmInstanceInventory inv, String destHostUuid, ErrorCode reason) {
-        if (destHostUuid == null) {
-            return;
-        }
-
-        boolean neverStop = Q.New(VmHaVO.class)
-                .eq(VmHaVO_.uuid, inv.getUuid())
-                .eq(VmHaVO_.haLevel, NeverStop)
-                .isExists();
-        if (neverStop) {
-            migrationFailedVMs.putIfAbsent(inv.getUuid(), destHostUuid);
-        }
     }
 
     public void syncHaVmListOnHost(String hostUuid) {

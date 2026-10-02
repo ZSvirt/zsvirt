@@ -9,8 +9,10 @@ import org.zstack.core.db.SQL;
 import org.zstack.core.timeout.TimeHelper;
 import org.zstack.ha.entity.VmHaVO;
 import org.zstack.ha.entity.VmHaVO_;
+import org.zstack.ha.fencers.SelfFencers;
 import org.zstack.ha.header.HaGlobalConfig;
 import org.zstack.ha.header.VmHaLevel;
+import org.zstack.ha.message.SelfFencerStruct;
 import org.zstack.ha.spi.VmFencerRuleExtensionPoint;
 import org.zstack.ha.spi.VmHaVOUpdater;
 import org.zstack.header.cluster.ClusterUpdateOSExtensionPoint;
@@ -19,9 +21,19 @@ import org.zstack.header.core.NopeCompletion;
 import org.zstack.header.errorcode.ErrorCode;
 import org.zstack.header.host.HostErrors;
 import org.zstack.header.host.HostInventory;
+import org.zstack.header.host.HostVO;
+import org.zstack.header.host.HostVO_;
 import org.zstack.header.host.OrderVmBeforeMigrationDuringHostMaintenanceExtensionPoint;
 import org.zstack.header.message.Message;
+import org.zstack.header.storage.primary.PrimaryStorageAttachExtensionPoint;
+import org.zstack.header.storage.primary.PrimaryStorageClusterRefVO;
+import org.zstack.header.storage.primary.PrimaryStorageClusterRefVO_;
+import org.zstack.header.storage.primary.PrimaryStorageDeleteExtensionPoint;
+import org.zstack.header.storage.primary.PrimaryStorageDetachExtensionPoint;
+import org.zstack.header.storage.primary.PrimaryStorageInventory;
 import org.zstack.header.storage.primary.PrimaryStorageState;
+import org.zstack.header.storage.primary.PrimaryStorageType;
+import org.zstack.header.storage.primary.UpdatePrimaryStorageExtensionPoint;
 import org.zstack.header.vm.APIRebootVmInstanceMsg;
 import org.zstack.header.vm.APIStopVmInstanceMsg;
 import org.zstack.header.vm.ApplianceVmInstanceCreateExtensionPoint;
@@ -60,6 +72,8 @@ import java.util.concurrent.TimeUnit;
 
 import static org.zstack.core.Platform.argerr;
 import static org.zstack.ha.header.HaGlobalConfig.VM_HA_LEVEL;
+import static org.zstack.utils.CollectionDSL.list;
+import static org.zstack.utils.CollectionUtils.filter;
 
 public class HaExtensions implements
         VmInstanceStartExtensionPoint
@@ -75,6 +89,10 @@ public class HaExtensions implements
         , VmHaExtensionPoint
         , OrderVmBeforeMigrationDuringHostMaintenanceExtensionPoint
         , ClusterUpdateOSExtensionPoint
+        , PrimaryStorageDeleteExtensionPoint
+        , PrimaryStorageDetachExtensionPoint
+        , PrimaryStorageAttachExtensionPoint
+        , UpdatePrimaryStorageExtensionPoint
 {
 
     @Autowired
@@ -440,5 +458,122 @@ public class HaExtensions implements
                 HaGlobalConfig.ALL.updateValue(true);
             }
         }
+    }
+
+    // ------------------------------------- PrimaryStorageDeleteExtensionPoint ------------------------------------
+
+    @Override
+    public void preDeletePrimaryStorage(PrimaryStorageInventory inv) {}
+
+    @Override
+    public void beforeDeletePrimaryStorage(PrimaryStorageInventory inv) {}
+
+    @Override
+    public void afterDeletePrimaryStorage(PrimaryStorageInventory inv) {
+        stopSelfFencerForPrimaryStorage(inv);
+    }
+
+    private void stopSelfFencerForPrimaryStorage(PrimaryStorageInventory inv) {
+        if (!HaHelper.isVmHaEnabled()) {
+            return;
+        }
+
+        List<String> clusterUuids = Q.New(PrimaryStorageClusterRefVO.class)
+                .select(PrimaryStorageClusterRefVO_.clusterUuid)
+                .eq(PrimaryStorageClusterRefVO_.primaryStorageUuid, inv.getUuid())
+                .listValues();
+
+        if (clusterUuids.isEmpty()) {
+            return;
+        }
+
+        SelfFencers.SelfFencerParamGenerator generator = new SelfFencers.SelfFencerParamGenerator();
+        generator.clusterUuids = clusterUuids;
+        generator.operator = param -> {
+            SelfFencers.CancelStorageHeartbeatFileAndGatewayPing cancel = new SelfFencers.CancelStorageHeartbeatFileAndGatewayPing(param);
+            cancel.cancel();
+        };
+        generator.run();
+    }
+
+    // ------------------------------------- PrimaryStorageDetachExtensionPoint ------------------------------------
+
+    @Override
+    public void preDetachPrimaryStorage(PrimaryStorageInventory inventory, String clusterUuid) {}
+
+    @Override
+    public void beforeDetachPrimaryStorage(PrimaryStorageInventory inventory, String clusterUuid) {}
+
+    @Override
+    public void failToDetachPrimaryStorage(PrimaryStorageInventory inventory, String clusterUuid) {}
+
+    @Override
+    public void afterDetachPrimaryStorage(PrimaryStorageInventory inventory, String clusterUuid) {
+        List<HostVO> hosts = Q.New(HostVO.class).eq(HostVO_.clusterUuid, clusterUuid).list();
+        for (HostVO h : hosts) {
+            SelfFencerStruct param = new SelfFencerStruct();
+            param.host = HostInventory.valueOf(h);
+            param.primaryStorage = list(inventory);
+            SelfFencers.CancelStorageHeartbeatFileAndGatewayPing cancel = new SelfFencers.CancelStorageHeartbeatFileAndGatewayPing(param);
+            cancel.cancel();
+        }
+    }
+
+    // ------------------------------------- PrimaryStorageAttachExtensionPoint ------------------------------------
+
+    @Override
+    public void preAttachPrimaryStorage(PrimaryStorageInventory inventory, String clusterUuid) {}
+
+    @Override
+    public void beforeAttachPrimaryStorage(PrimaryStorageInventory inventory, String clusterUuid) {}
+
+    @Override
+    public void failToAttachPrimaryStorage(PrimaryStorageInventory inventory, String clusterUuid) {}
+
+    @Override
+    public void afterAttachPrimaryStorage(PrimaryStorageInventory inventory, String clusterUuid) {
+        List<HostVO> hosts = Q.New(HostVO.class).eq(HostVO_.clusterUuid, clusterUuid).list();
+        if (hosts.isEmpty()) {
+            return;
+        }
+
+        List<HostInventory> hostInvs = HostInventory.valueOf(hosts);
+        setupStorageHeartbeatFileFencerOnHosts(list(inventory), hostInvs);
+    }
+
+    private void setupStorageHeartbeatFileFencerOnHosts(List<PrimaryStorageInventory> ps, List<HostInventory> hosts){
+        ps = filter(ps, it -> PrimaryStorageType.valueOf(it.getType()).isSupportHeartbeatFile());
+        if (ps.isEmpty() || hosts.isEmpty()){
+            return;
+        }
+
+        for (HostInventory h : hosts) {
+            SelfFencerStruct param = new SelfFencerStruct();
+            param.host = h;
+            param.primaryStorage = ps;
+            param.fencers = HaHelper.findExecuteFencers();
+            new SelfFencers.SetupStorageHeartbeatFileFencer(param).setup();
+        }
+    }
+
+    // ------------------------------------- UpdatePrimaryStorageExtensionPoint ------------------------------------
+
+    @Override
+    public void beforeUpdatePrimaryStorage(PrimaryStorageInventory ps) {}
+
+    @Override
+    public void afterUpdatePrimaryStorage(PrimaryStorageInventory ps) {
+        List<HostVO> hosts = Q.New(HostVO.class, PrimaryStorageClusterRefVO.class)
+            .table0()
+                .eq(HostVO_.clusterUuid).table1(PrimaryStorageClusterRefVO_.clusterUuid)
+                .selectThisTable()
+            .table1()
+                .eq(PrimaryStorageClusterRefVO_.primaryStorageUuid, ps.getUuid())
+            .list();
+        if (hosts.isEmpty()) {
+            return;
+        }
+        List<HostInventory> hostInvs = HostInventory.valueOf(hosts);
+        setupStorageHeartbeatFileFencerOnHosts(list(ps), hostInvs);
     }
 }

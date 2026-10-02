@@ -23,7 +23,7 @@ public interface TagManager {
 
     void createTagsFromAPICreateMessage(APICreateMessage msg, String resourceUuid, String resourceType);
 
-    void createTagsFromAPICreateMessage(APICreateMessage msg, String resourceUuid, String resourceType, boolean forceMatch);
+    void createTagsAndSkipValidation(APICreateMessage msg, String resourceUuid, String resourceType);
 
     TagInventory createSysTag(String resourceUuid, String tag, String resourceType);
 

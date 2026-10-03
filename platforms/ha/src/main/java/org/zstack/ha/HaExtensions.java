@@ -1,6 +1,7 @@
 package org.zstack.ha;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.zstack.compute.vm.BeforeStopVmOnHypervisorExtensionPoint;
 import org.zstack.core.componentloader.PluginRegistry;
 import org.zstack.core.db.DatabaseFacade;
@@ -19,6 +20,7 @@ import org.zstack.header.cluster.ClusterUpdateOSExtensionPoint;
 import org.zstack.header.cluster.ClusterVO;
 import org.zstack.header.core.NopeCompletion;
 import org.zstack.header.errorcode.ErrorCode;
+import org.zstack.header.host.HostAfterConnectedExtensionPoint;
 import org.zstack.header.host.HostErrors;
 import org.zstack.header.host.HostInventory;
 import org.zstack.header.host.HostVO;
@@ -33,27 +35,10 @@ import org.zstack.header.storage.primary.PrimaryStorageDetachExtensionPoint;
 import org.zstack.header.storage.primary.PrimaryStorageInventory;
 import org.zstack.header.storage.primary.PrimaryStorageState;
 import org.zstack.header.storage.primary.PrimaryStorageType;
+import org.zstack.header.storage.primary.PrimaryStorageVO;
+import org.zstack.header.storage.primary.PrimaryStorageVO_;
 import org.zstack.header.storage.primary.UpdatePrimaryStorageExtensionPoint;
-import org.zstack.header.vm.APIRebootVmInstanceMsg;
-import org.zstack.header.vm.APIStopVmInstanceMsg;
-import org.zstack.header.vm.ApplianceVmInstanceCreateExtensionPoint;
-import org.zstack.header.vm.BeforeStartNewCreatedVmExtensionPoint;
-import org.zstack.header.vm.CreateVmInstanceMsg;
-import org.zstack.header.vm.KvmReportVmShutdownEventExtensionPoint;
-import org.zstack.header.vm.RebootVmInstanceMsg;
-import org.zstack.header.vm.StopVmInstanceMsg;
-import org.zstack.header.vm.StopVmOnHypervisorMsg;
-import org.zstack.header.vm.VmCreationStrategy;
-import org.zstack.header.vm.VmHaExtensionPoint;
-import org.zstack.header.vm.VmInstanceCreateExtensionPoint;
-import org.zstack.header.vm.VmInstanceInventory;
-import org.zstack.header.vm.VmInstanceMigrateExtensionPoint;
-import org.zstack.header.vm.VmInstanceSpec;
-import org.zstack.header.vm.VmInstanceVO;
-import org.zstack.header.vm.VmInstanceStartExtensionPoint;
-import org.zstack.header.vm.VmInstanceStartNewCreatedVmExtensionPoint;
-import org.zstack.header.vm.VmInstanceState;
-import org.zstack.header.vm.VmInstanceStopExtensionPoint;
+import org.zstack.header.vm.*;
 import org.zstack.kvm.KVMAgentCommands;
 import org.zstack.kvm.KVMDestroyVmExtensionPoint;
 import org.zstack.kvm.KVMException;
@@ -68,6 +53,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 import static org.zstack.core.Platform.argerr;
@@ -93,6 +79,7 @@ public class HaExtensions implements
         , PrimaryStorageDetachExtensionPoint
         , PrimaryStorageAttachExtensionPoint
         , UpdatePrimaryStorageExtensionPoint
+        , HostAfterConnectedExtensionPoint
 {
 
     @Autowired
@@ -103,6 +90,8 @@ public class HaExtensions implements
     private VmHaVOUpdater vmHAExecutor;
     @Autowired
     private VmHaService vmHaService;
+    @Autowired
+    private VmStateHaListener vmStateHaListener;
     @Autowired
     private TimeHelper timeHelper;
     @Autowired
@@ -358,6 +347,9 @@ public class HaExtensions implements
 
     // ------------------------------------- VmInstanceMigrateExtensionPoint ------------------------------------
 
+    // A dictionary (vmUuid -> targetHostUuid) of migration failed HA VMs
+    final private Map<String, String> migrationFailedVMs = new ConcurrentHashMap<>();
+
     @Override
     public void beforeMigrateVm(VmInstanceInventory inv, String destHostUuid) {
         CollectionUtils.safeForEach(pluginRegistry.getExtensionList(VmFencerRuleExtensionPoint.class),
@@ -377,8 +369,17 @@ public class HaExtensions implements
         if (destHostUuid == null) {
             return;
         }
+
         CollectionUtils.safeForEach(pluginRegistry.getExtensionList(VmFencerRuleExtensionPoint.class),
                 extension -> extension.addVmFencerRuleToHost(Collections.singletonList(inv.getUuid()), inv.getHostUuid()));
+
+        boolean neverStop = Q.New(VmHaVO.class)
+                .eq(VmHaVO_.uuid, inv.getUuid())
+                .eq(VmHaVO_.haLevel, VmHaLevel.NeverStop)
+                .isExists();
+        if (neverStop) {
+            vmStateHaListener.putMigrationFailedVm(inv.getUuid(), destHostUuid);
+        }
     }
 
     // ------------------------------------- VmHaExtensionPoint ------------------------------------
@@ -575,5 +576,63 @@ public class HaExtensions implements
         }
         List<HostInventory> hostInvs = HostInventory.valueOf(hosts);
         setupStorageHeartbeatFileFencerOnHosts(list(ps), hostInvs);
+    }
+
+    // ------------------------------------- HostAfterConnectedExtensionPoint ------------------------------------
+
+    @Override
+    public void afterHostConnected(HostInventory host) {
+        if (!HaHelper.isVmHaEnabled()) {
+            return;
+        }
+
+        List<PrimaryStorageInventory> ps = getSelfFencerSupportedPrimaryStorage(host);
+        if (ps.isEmpty()) {
+            return;
+        }
+
+        SelfFencerStruct param = new SelfFencerStruct();
+        param.primaryStorage = ps;
+        param.host = host;
+        param.fencers = HaHelper.findExecuteFencers();
+        new SelfFencers.SetupStorageHeartbeatFileFencer(param).setup();
+
+        List<String> vmUuids = Q.New(VmInstanceVO.class)
+                .eq(VmInstanceVO_.hostUuid, host.getUuid())
+                .in(VmInstanceVO_.state, Arrays.asList(VmInstanceState.Running, VmInstanceState.Unknown, VmInstanceState.Paused))
+                .select(VmInstanceVO_.uuid)
+                .listValues();
+
+        if (CollectionUtils.isEmpty(vmUuids)) {
+            return;
+        }
+
+        CollectionUtils.safeForEach(pluginRegistry.getExtensionList(VmFencerRuleExtensionPoint.class),
+                extension -> extension.addVmFencerRuleToHost(vmUuids, host.getUuid()));
+        vmHaService.syncHaVmListOnHost(host.getUuid(), new NopeCompletion());
+    }
+
+    @Transactional(readOnly = true)
+    private List<PrimaryStorageInventory> getSelfFencerSupportedPrimaryStorage(HostInventory host) {
+        List<PrimaryStorageVO> ps = Q.New(PrimaryStorageVO.class, PrimaryStorageClusterRefVO.class)
+            .table0()
+                .eq(PrimaryStorageVO_.uuid).table1(PrimaryStorageClusterRefVO_.primaryStorageUuid)
+                .selectThisTable()
+            .table1()
+                .eq(PrimaryStorageClusterRefVO_.clusterUuid, host.getClusterUuid())
+            .list();
+        if (ps.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        List<PrimaryStorageInventory> invs = new ArrayList<>();
+        for (PrimaryStorageVO vo : ps) {
+            PrimaryStorageType type = PrimaryStorageType.valueOf(vo.getType());
+            if (type.isSupportHeartbeatFile()) {
+                invs.add(PrimaryStorageInventory.valueOf(vo));
+            }
+        }
+
+        return invs;
     }
 }

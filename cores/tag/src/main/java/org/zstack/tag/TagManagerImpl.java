@@ -418,21 +418,19 @@ public class TagManagerImpl extends AbstractService implements TagManager,
     @Override
     @Transactional
     public void createTagsFromAPICreateMessage(APICreateMessage msg, String resourceUuid, String resourceType) {
-        createTagsFromAPICreateMessage(msg, resourceUuid, resourceType, true);
+        // User tags first, then system tags
+        createTags(msg.getSystemTags(), msg.getUserTags(), resourceUuid, resourceType);
+        createResourceConfigsFromMessage(msg, resourceUuid);
+        createTagExtensions.forEach(it -> it.afterCreateTagFromMsg(msg, resourceUuid));
     }
 
     @Override
-    public void createTagsFromAPICreateMessage(APICreateMessage msg, String resourceUuid, String resourceType, boolean forceMatch) {
-        if (forceMatch) {
-            createTags(msg.getSystemTags(), msg.getUserTags(), resourceUuid, resourceType);
-        } else {
-            // User tags first, then system tags
-            createTags(Collections.emptyList(), msg.getUserTags(), resourceUuid, resourceType);
-            if (msg.getSystemTags() != null) {
-                for (String tag: msg.getSystemTags()) {
-                    if (isValidSystemTag(resourceUuid, resourceType, tag)) {
-                        createTags(Collections.singletonList(tag), Collections.emptyList(), resourceUuid, resourceType);
-                    }
+    public void createTagsAndSkipValidation(APICreateMessage msg, String resourceUuid, String resourceType) {
+        createTags(Collections.emptyList(), msg.getUserTags(), resourceUuid, resourceType);
+        if (msg.getSystemTags() != null) {
+            for (String tag: msg.getSystemTags()) {
+                if (isValidSystemTag(resourceUuid, resourceType, tag)) {
+                    createTags(Collections.singletonList(tag), Collections.emptyList(), resourceUuid, resourceType);
                 }
             }
         }

@@ -44,8 +44,6 @@
             <zstack:extension interface="org.zstack.header.Component" />
             <zstack:extension interface="org.zstack.header.Service" />
             <zstack:extension interface="org.zstack.ha.spi.HaCompletionCacher" />
-            <zstack:extension interface="org.zstack.header.host.HostAfterConnectedExtensionPoint" />
-            <zstack:extension interface="org.zstack.header.vm.VmInstanceMigrateExtensionPoint" />
             <zstack:extension interface="org.zstack.header.managementnode.PrepareDbInitialValueExtensionPoint" />
         </zstack:plugin>
     </bean>
@@ -69,6 +67,13 @@
             <zstack:extension interface="org.zstack.header.storage.primary.PrimaryStorageDetachExtensionPoint" />
             <zstack:extension interface="org.zstack.header.storage.primary.PrimaryStorageAttachExtensionPoint" />
             <zstack:extension interface="org.zstack.header.storage.primary.UpdatePrimaryStorageExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.host.HostAfterConnectedExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="VmStateHaListener" class="org.zstack.ha.VmStateHaListener" >
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.Component" />
         </zstack:plugin>
     </bean>
 

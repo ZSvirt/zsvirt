@@ -9,4 +9,6 @@ public interface SelfFencerHypervisorBackend {
     void setup(Completion completion);
 
     void cancel(Completion completion);
+
+    void sync(Completion completion);
 }

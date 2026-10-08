@@ -12,7 +12,9 @@ import java.sql.Timestamp;
  */
 @StaticMetamodel(HostHaStateVO.class)
 public class HostHaStateVO_ {
-    public static volatile SingularAttribute<HostHaStateVO, String> uuid;
+    public static volatile SingularAttribute<HostHaStateVO, Long> id;
+    public static volatile SingularAttribute<HostHaStateVO, String> hostUuid;
+    public static volatile SingularAttribute<HostHaStateVO, String> primaryStorageUuid;
     public static volatile SingularAttribute<HostHaStateVO, HostHaState> state;
     public static volatile SingularAttribute<HostHaStateVO, Timestamp> createDate;
     public static volatile SingularAttribute<HostHaStateVO, Timestamp> lastOpDate;

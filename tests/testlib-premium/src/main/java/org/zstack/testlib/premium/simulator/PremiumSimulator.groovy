@@ -243,6 +243,10 @@ class PremiumSimulator implements Simulator {
             return new AgentResponse()
         }
 
+        spec.simulator(HaConstants.SYNC_SELF_FENCER_STATE_PATH) {
+            return new GetFencerStateFromHostRsp()
+        }
+
         spec.simulator(RouteProtocolOspfBackend.ROUTER_PROTOCOL_REFRESH_OSPF) {
             return new RouteProtocolOspfBackend.SetOspfRsp()
         }

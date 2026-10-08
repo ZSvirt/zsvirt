@@ -29,6 +29,7 @@ import org.zstack.utils.Utils;
 import org.zstack.utils.logging.CLogger;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -85,12 +86,15 @@ public class SelfFencers {
                             .list();
 
                     for (HostInventory host : HostInventory.valueOf(vos)) {
-                        SelfFencerStruct param = new SelfFencerStruct();
-                        param.host = host;
-                        param.primaryStorage = psInvs;
-                        param.strategy = HaGlobalConfig.SELF_FENCER_STRATEGY.value();
-                        param.fencers = HaHelper.findExecuteFencers();
-                        structList.add(param);
+                        List<String> fencers = HaHelper.findExecuteFencers();
+                        for (PrimaryStorageInventory psInv : psInvs) {
+                            SelfFencerStruct param = new SelfFencerStruct();
+                            param.host = host;
+                            param.primaryStorage = Collections.singletonList(psInv);
+                            param.strategy = HaStrategyHelper.getPrimaryStorageSelfFencerStrategy(psInv.getUuid(), psInv.getType()).toString();
+                            param.fencers = fencers;
+                            structList.add(param);
+                        }
                     }
 
                     if (vos.size() < STEP) {
@@ -183,6 +187,45 @@ public class SelfFencers {
                 public void fail(ErrorCode errorCode) {
                     logger.warn(String.format("failed to setup the self-fencer on the host[uuid:%s, name:%s], %s", host.getUuid(),
                             host.getName(), errorCode));
+                }
+            });
+        }
+    }
+
+    public static class SyncStorageFencerState {
+        private final SelfFencerStruct param;
+
+        public SyncStorageFencerState(SelfFencerStruct param) {
+            this.param = param;
+        }
+
+        public void sync() {
+            if (!HaHelper.isVmHaEnabled()) {
+                logger.debug(String.format("the global config[%s] is set to false, skip sync self-fencer from host",
+                        HaGlobalConfig.ALL.getCanonicalName()));
+                return;
+            }
+
+            final HostInventory host = param.host;
+            final HaHypervisorFactory f = findHaHypervisorFactory(host.getHypervisorType());
+            if (f == null) {
+                logger.warn(String.format("cannot find HaHypervisorFactory for the hypervisor type[%s], no way to sync self-fencer state",
+                        host.getHypervisorType()));
+                return;
+            }
+
+            SelfFencerHypervisorBackend bkd = f.createSelfFencerBackend(param);
+            bkd.sync(new Completion(null) {
+                @Override
+                public void success() {
+                    logger.debug(String.format("successfully sync the self-fencer state from the host[uuid:%s, name:%s]",
+                            host.getUuid(), host.getName()));
+                }
+
+                @Override
+                public void fail(ErrorCode errorCode) {
+                    logger.warn(String.format("failed to sync the self-fencer state from the host[uuid:%s, name:%s], %s",
+                            host.getUuid(), host.getName(), errorCode));
                 }
             });
         }

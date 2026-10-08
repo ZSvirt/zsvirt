@@ -17,7 +17,6 @@ import org.zstack.header.host.HostStatus;
 import org.zstack.header.host.HostVO;
 import org.zstack.header.host.HostVO_;
 import org.zstack.header.managementnode.ManagementNodeReadyExtensionPoint;
-import org.zstack.header.vm.VmInstanceConstant;
 import org.zstack.header.vm.VmInstanceState;
 import org.zstack.header.vm.VmInstanceVO;
 import org.zstack.header.vm.VmInstanceVO_;
@@ -43,6 +42,7 @@ public class HaScheduler implements Component, ManagementNodeReadyExtensionPoint
 
     public final Object lock = new Object();
     public Future<Void> neverStopVmScanTracker = null;
+    private Future<Void> syncSelfFencerTracker;
 
     @Autowired
     private ThreadFacade threadFacade;
@@ -56,17 +56,22 @@ public class HaScheduler implements Component, ManagementNodeReadyExtensionPoint
     @Override
     public boolean start() {
         HaGlobalConfig.NEVER_STOP_VM_SCAN_INTERVAL.installUpdateExtension((oldConfig, newConfig) -> setupHaScheduler());
+        HaGlobalConfig.HA_SYNC_SELF_FENCER_INTERVAL.installUpdateExtension((oldConfig, newConfig) -> startSyncSelfFencer());
         return true;
     }
 
     @Override
     public void managementNodeReady() {
         setupHaScheduler();
+        startSyncSelfFencer();
     }
 
     @Override
     public boolean stop() {
-        clearScheduler();
+        synchronized (lock) {
+            clearScheduler();
+            clearSyncSelfFencer();
+        }
         return false;
     }
 
@@ -125,6 +130,23 @@ public class HaScheduler implements Component, ManagementNodeReadyExtensionPoint
                 neverStopVmScanTracker.cancel(true);
                 neverStopVmScanTracker = null;
             }
+        }
+    }
+
+    private void startSyncSelfFencer() {
+        synchronized (lock) {
+            clearSyncSelfFencer();
+            logger.debug(String.format("start ha-sync-state-retry-setup-cancel-self-fencer-task at interval %s",
+                    HaGlobalConfig.HA_SYNC_SELF_FENCER_INTERVAL.value()));
+            int interval = HaGlobalConfig.HA_SYNC_SELF_FENCER_INTERVAL.value(Integer.class);
+            syncSelfFencerTracker = threadFacade.submitPeriodicTask(new HaSyncSelfFencerTask(interval));
+        }
+    }
+
+    private void clearSyncSelfFencer() {
+        if (syncSelfFencerTracker != null) {
+            syncSelfFencerTracker.cancel(true);
+            syncSelfFencerTracker = null;
         }
     }
 

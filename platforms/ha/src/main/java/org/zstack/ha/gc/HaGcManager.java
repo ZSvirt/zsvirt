@@ -6,6 +6,7 @@ import org.zstack.core.db.Q;
 import org.zstack.core.gc.GCStatus;
 import org.zstack.core.gc.GarbageCollectorVO;
 import org.zstack.core.gc.GarbageCollectorVO_;
+import org.zstack.ha.HaHelper;
 import org.zstack.ha.header.HaGlobalConfig;
 import org.zstack.header.errorcode.ErrorCode;
 import org.zstack.header.vm.VmHaExtensionPoint;
@@ -26,6 +27,13 @@ public class HaGcManager {
     private PluginRegistry pluginRegistry;
 
     public void submitNeverStopVmGCJob(String vmUuid){
+        String hostUuid = Q.New(VmInstanceVO.class)
+                .eq(VmInstanceVO_.uuid, vmUuid)
+                .select(VmInstanceVO_.hostUuid)
+                .findValue();
+        if (!HaHelper.isSelfFencerDone(vmUuid, hostUuid)) {
+            return;
+        }
         for (VmHaExtensionPoint ext : pluginRegistry.getExtensionList(VmHaExtensionPoint.class)) {
             ErrorCode errorCode = ext.preHaStartVm(vmUuid);
             if (errorCode != null) {

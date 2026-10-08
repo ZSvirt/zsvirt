@@ -320,6 +320,7 @@ public class ZMigrateManager extends AbstractService implements
         String platformUuidOnZMigrate;
         String mnIpToAddZMigrate;
         String vmUuid; // gateway VM UUID
+        String managementIp;
         String accessKeyID;
         String accessKeySecret;
     }
@@ -362,6 +363,7 @@ public class ZMigrateManager extends AbstractService implements
                 systemTags.removeIf(tag -> Objects.equals(tag, ZMIGRATE_MANAGEMENT.getTagFormat()) || Objects.equals(tag, ZMIGRATE_GATEWAY.getTagFormat()));
                 systemTags.add(ZMIGRATE_MANAGEMENT.getTagFormat());
                 cvmsg.setSystemTags(systemTags);
+                context.managementIp = ZMigrateGatewayHelper.getManagementIpFromCreateMessage(cvmsg);
                 cvmsg.setImageUuid(context.gatewayImageUuid);
                 bus.makeLocalServiceId(cvmsg, VmInstanceConstant.SERVICE_ID);
                 bus.send(cvmsg, new CloudBusCallBack(trigger) {
@@ -430,7 +432,7 @@ public class ZMigrateManager extends AbstractService implements
             .build())
         .then(Flow.of("check-zmigrate-management-vm-is-ready")
             .skipIf(data -> CoreGlobalProperty.UNIT_TEST_ON)
-            .handle(trigger -> createSshClient().checkZMigrateManagementIsReady(context.mnIps, trigger.toCompletion()))
+            .handle(trigger -> createSshClient(context.managementIp).checkZMigrateManagementIsReady(context.mnIps, trigger.toCompletion()))
             .build())
         .then(Flow.of("configure-systemd-timesyncd")
             .skipIf(data -> CoreGlobalProperty.UNIT_TEST_ON)
@@ -470,7 +472,7 @@ public class ZMigrateManager extends AbstractService implements
                             return;
                         }
 
-                        ErrorableValue<Boolean> result = createSshClient().configureTimesyncd(ntpServers);
+                        ErrorableValue<Boolean> result = createSshClient(context.managementIp).configureTimesyncd(ntpServers);
                         if (!result.isSuccess()) {
                             trigger.fail(err(GENERIC_ERROR, "configure systemd-timesyncd failed")
                                     .withCause(result.error));
@@ -485,7 +487,7 @@ public class ZMigrateManager extends AbstractService implements
         .then(Flow.of("overwrite-zmigrate-management-auth-addr")
             .skipIf(data -> CoreGlobalProperty.UNIT_TEST_ON)
             .handle(trigger -> {
-                final ErrorableValue<Boolean> rsp = createSshClient().overwriteZMigrateManagementAuthAddr();
+                final ErrorableValue<Boolean> rsp = createSshClient(context.managementIp).overwriteZMigrateManagementAuthAddr();
                 if (!rsp.isSuccess()) {
                     trigger.fail(err(GENERIC_ERROR, "overwrite zmigrate management auth_addr failed")
                             .withCause(rsp.error));
@@ -498,7 +500,7 @@ public class ZMigrateManager extends AbstractService implements
             .skipIf(data -> CoreGlobalProperty.UNIT_TEST_ON)
             .handle(trigger -> {
                 ErrorableValue<ZMigrateHttpClient.GetZMigrateInfoResponse> rsp =
-                        createHttpClient().getZMigrateManagementServerInfo(5, 30);
+                        createHttpClient(context.managementIp).getZMigrateManagementServerInfo(5, 30);
                 if (!rsp.isSuccess()) {
                     trigger.fail(err(GENERIC_ERROR, "check zmigrate management server failed")
                             .withCause(rsp.error));
@@ -510,7 +512,7 @@ public class ZMigrateManager extends AbstractService implements
         .then(Flow.of("create-zmigrate-user")
             .skipIf(data -> CoreGlobalProperty.UNIT_TEST_ON)
             .handle(trigger -> {
-                ErrorableValue<Boolean> rsp = createHttpClient().createAccount();
+                ErrorableValue<Boolean> rsp = createHttpClient(context.managementIp).createAccount();
                 if (!rsp.isSuccess()) {
                     trigger.fail(err(GENERIC_ERROR, "create zmigrate user failed").withCause(rsp.error));
                     return;
@@ -560,7 +562,7 @@ public class ZMigrateManager extends AbstractService implements
         /*.then(Flow.of("verify-zmigrate-platform-connection")
                 .skipIf(data -> CoreGlobalProperty.UNIT_TEST_ON)
                 .handle(trigger -> {
-                    ErrorableValue<Boolean> rsp = createHttpClient().verifyPlatformConnection(
+                    ErrorableValue<Boolean> rsp = createHttpClient(context.managementIp).verifyPlatformConnection(
                             context.mnIpToAddZMigrate, context.accessKeyID, context.accessKeySecret);
                     if (!rsp.isSuccess()) {
                         trigger.fail(err(GENERIC_ERROR, "verify zmigrate platform connection failed")
@@ -573,7 +575,7 @@ public class ZMigrateManager extends AbstractService implements
         .then(Flow.of("register-zsv-to-zmigrate")
             .skipIf(data -> CoreGlobalProperty.UNIT_TEST_ON)
             .handle(trigger -> {
-                ErrorableValue<RegisterZsvToZMigratePlatformResponse> rsp = createHttpClient()
+                ErrorableValue<RegisterZsvToZMigratePlatformResponse> rsp = createHttpClient(context.managementIp)
                         .registerZsvToZMigrate(context.mnIpToAddZMigrate, context.accessKeyID, context.accessKeySecret);
                 if (!rsp.isSuccess()) {
                     trigger.fail(err(GENERIC_ERROR, "register zsv to zmigrate platform failed")
@@ -586,7 +588,7 @@ public class ZMigrateManager extends AbstractService implements
         .then(Flow.of("get-zsv-platform-uuid-on-zmigrate-platform")
             .skipIf(data -> CoreGlobalProperty.UNIT_TEST_ON)
             .handle(trigger -> {
-                ErrorableValue<String> platformInfos = createHttpClient().getPlatformInfos();
+                ErrorableValue<String> platformInfos = createHttpClient(context.managementIp).getPlatformInfos();
                 if (!platformInfos.isSuccess()) {
                     trigger.fail(err(GENERIC_ERROR, "get platform infos failed")
                             .withCause(platformInfos.error));
@@ -618,7 +620,7 @@ public class ZMigrateManager extends AbstractService implements
         .then(Flow.of("verify-zmigrate-gateway-connection")
             .skipIf(data -> CoreGlobalProperty.UNIT_TEST_ON)
             .handle(trigger -> {
-                ErrorableValue<Boolean> rsp = createHttpClient().verifyGatewayConnection();
+                ErrorableValue<Boolean> rsp = createHttpClient(context.managementIp).verifyGatewayConnection();
                 if (!rsp.isSuccess()) {
                     trigger.fail(err(GENERIC_ERROR, "verify zmigrate gateway connection failed")
                             .withCause(rsp.error));
@@ -630,7 +632,7 @@ public class ZMigrateManager extends AbstractService implements
         .then(Flow.of("register-zmigrate-gateway")
             .skipIf(data -> CoreGlobalProperty.UNIT_TEST_ON)
             .handle(trigger -> {
-                ErrorableValue<Boolean> rsp = createHttpClient().registerGatewayToZMigrate(context.platformUuidOnZMigrate);
+                ErrorableValue<Boolean> rsp = createHttpClient(context.managementIp).registerGatewayToZMigrate(context.platformUuidOnZMigrate);
                 if (!rsp.isSuccess()) {
                     trigger.fail(err(GENERIC_ERROR, "register zmigrate gateway to platform failed").withCause(rsp.error));
                     return;
@@ -641,7 +643,7 @@ public class ZMigrateManager extends AbstractService implements
         .then(Flow.of("get-zmigrate-license-key")
             .skipIf(data -> CoreGlobalProperty.UNIT_TEST_ON)
             .handle(trigger -> {
-                ErrorableValue<String> rsp = createHttpClient().exportActivationInfos();
+                ErrorableValue<String> rsp = createHttpClient(context.managementIp).exportActivationInfos();
                 if (!rsp.isSuccess()) {
                     trigger.fail(err(GENERIC_ERROR, "failed to get zmigrate license key").withCause(rsp.error));
                     return;
@@ -1921,10 +1923,21 @@ public class ZMigrateManager extends AbstractService implements
     // ------------------------------------- Utility Handers ------------------------------------
 
     private ZMigrateHttpClient createHttpClient() {
-        return Platform.New(ZMigrateHttpClient::new);
+        return createHttpClient(null);
+    }
+
+    private ZMigrateHttpClient createHttpClient(String managementIp) {
+        return Platform.New(() -> new ZMigrateHttpClient(managementIp));
     }
 
     private ZMigrateSshClient createSshClient() {
         return sshClientFactory.get();
+    }
+
+    private ZMigrateSshClient createSshClient(String managementIp) {
+        if (managementIp == null) {
+            return createSshClient();
+        }
+        return Platform.New(() -> new ZMigrateSshClient(managementIp));
     }
 }

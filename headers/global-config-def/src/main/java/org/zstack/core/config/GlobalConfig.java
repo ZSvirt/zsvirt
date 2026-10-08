@@ -301,6 +301,28 @@ public class GlobalConfig implements ConfigDefinition {
         ));
     }
 
+    // ---- Resource Config SPI ----
+
+    public String valueForResource(String resourceUuid) {
+        return valueForResource(resourceUuid, String.class);
+    }
+
+    public int intValueForResource(String resourceUuid) {
+        return valueForResource(resourceUuid, int.class);
+    }
+
+    public Integer integerValueForResource(String resourceUuid) {
+        return valueForResource(resourceUuid, Integer.class);
+    }
+
+    public boolean booleanValueForResource(String resourceUuid) {
+        return valueForResource(resourceUuid, boolean.class);
+    }
+
+    public Boolean boolValueForResource(String resourceUuid) {
+        return valueForResource(resourceUuid, Boolean.class);
+    }
+
     // ---- runtime stubs (implemented by GlobalConfigRuntime) ----
 
     public void updateValue(Object val) {
@@ -318,5 +340,9 @@ public class GlobalConfig implements ConfigDefinition {
     protected static IllegalStateException notRuntime(String method) {
         return new IllegalStateException(String.format(
                 "GlobalConfig.%s requires GlobalConfigFacade init (GlobalConfigRuntime)", method));
+    }
+
+    public <T> T valueForResource(String resourceUuid, Class<T> type) {
+        throw notRuntime("valueForResource");
     }
 }

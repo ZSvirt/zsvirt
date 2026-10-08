@@ -244,4 +244,12 @@ public class GlobalConfigRuntime extends PremiumGlobalConfig {
         newValue = StringTemplate.substitute(newValue, propertiesMap);
         executeUpdate(newValue, true);
     }
+
+    // ---- Resource Config SPI ----
+
+    @Override
+    public <T> T valueForResource(String resourceUuid, Class<T> type) {
+        ResourceConfigGetter getter = Platform.getComponentLoader().getComponent(ResourceConfigGetter.class);
+        return getter.getResourceConfigValue(this, resourceUuid, type);
+    }
 }

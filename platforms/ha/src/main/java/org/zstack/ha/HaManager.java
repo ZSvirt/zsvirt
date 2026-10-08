@@ -1,8 +1,6 @@
 package org.zstack.ha;
 
-import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Configurable;
 import org.zstack.core.Platform;
 import org.zstack.core.timeout.TimeHelper;
 import org.zstack.ha.entity.HaCommands;
@@ -60,7 +58,6 @@ import static org.zstack.utils.CollectionUtils.toMap;
 /**
  * Created by xing5 on 2016/3/28.
  */
-@Configurable(preConstruction = true, autowire = Autowire.BY_TYPE)
 public class HaManager extends AbstractService implements Component, HaCompletionCacher,
         PrepareDbInitialValueExtensionPoint {
     private static final CLogger logger = Utils.getLogger(HaManager.class);

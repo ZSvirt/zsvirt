@@ -93,7 +93,7 @@ public class LogConfigurationManagerImpl extends AbstractService implements LogC
             return;
         }
 
-        LogServerBase base = new LogServerBase(vo, bus, dbf, thdf, casf);
+        LogServerBase base = new LogServerBase(vo, bus, dbf, thdf, casf, this);
         base.handleMessage((Message) msg);
     }
 
@@ -306,8 +306,16 @@ public class LogConfigurationManagerImpl extends AbstractService implements LogC
                     DeleteLogServerConfigurationMsg dmsg = new DeleteLogServerConfigurationMsg();
                     dmsg.setUuid(inv.getUuid());
                     bus.makeServiceIdByManagementNodeId(dmsg, LogConfigurationConstant.SERVICE_ID, result.getManagementNodeUuid());
-                    bus.send(dmsg);
-                    whileCompletion.done();
+                    bus.send(dmsg, new CloudBusCallBack(whileCompletion) {
+                        @Override
+                        public void run(MessageReply reply) {
+                            if (!reply.isSuccess()) {
+                                logger.warn(String.format("failed to roll back log server[uuid:%s] configuration on node[uuid:%s]: %s",
+                                        inv.getUuid(), result.getManagementNodeUuid(), reply.getError()));
+                            }
+                            whileCompletion.done();
+                        }
+                    });
                 }).run(new WhileDoneCompletion(trigger) {
                     @Override
                     public void done(ErrorCodeList errorCodeList) {

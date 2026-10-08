@@ -34,6 +34,23 @@
             <artifactId>testlib-simple</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.zstack</groupId>
+            <artifactId>log4j2</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+            <!-- Inherited premium plugins require the full premium RBAC environment. -->
+            <exclusions>
+                <exclusion>
+                    <groupId>org.zstack</groupId>
+                    <artifactId>mevoco</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.zstack</groupId>
+                    <artifactId>vpc</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
     </dependencies>
 
 
@@ -174,6 +191,13 @@
                             <resources>
                                 <resource>
                                     <directory>../../conf</directory>
+                                </resource>
+                                <resource>
+                                    <directory>../../premium/conf</directory>
+                                    <includes>
+                                        <include>springConfigXml/LogConfiguration.xml</include>
+                                        <include>springConfigXml/Log4j2Configuration.xml</include>
+                                    </includes>
                                 </resource>
                             </resources>
                         </configuration>

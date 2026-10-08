@@ -289,7 +289,6 @@ public class CreateVmBackupJob extends AbstractSchedulerJob<VmBackupLongJobParam
         params.setAlternativeBackupStorageUuids(backupStorageUuids);
         params.setBackupQosStruct(backupQosStruct);
         params.setMode(getBackupMode());
-        params.setRemoteBackupStorageUuid(remoteBackupStorageUuid);
         return params;
     }
 
@@ -468,7 +467,7 @@ public class CreateVmBackupJob extends AbstractSchedulerJob<VmBackupLongJobParam
         VolumeBackupInventory root = backupInventories.stream()
                 .filter(it -> VolumeType.Root.toString().equals(it.getType())).findFirst().orElse(null);
         if (root == null) {
-            ErrorCode error = operr(
+            ErrorCode error = err(VolumeBackupErrors.ROOT_BACKUP_NOT_FOUND,
                     "failed to sync VM backups to remoteImageStoreBackupStorage[%s], root backup not found",
                     remoteBackupStorageUuid);
             logger.error(error.getReadableDetails());

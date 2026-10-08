@@ -39,6 +39,17 @@
             <artifactId>log4j2</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
+            <!-- Inherited premium plugins require the full premium RBAC environment. -->
+            <exclusions>
+                <exclusion>
+                    <groupId>org.zstack</groupId>
+                    <artifactId>mevoco</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.zstack</groupId>
+                    <artifactId>vpc</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
     </dependencies>
 

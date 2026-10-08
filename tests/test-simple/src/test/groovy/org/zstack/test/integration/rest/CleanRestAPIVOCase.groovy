@@ -54,11 +54,80 @@ class CleanRestAPIVOCase extends SubCase{
             mgr = entityManagerFactory.createEntityManager()
             tran = mgr.getTransaction()
 
+            testLargeRestAPIResultIsPersisted()
+            testMultibyteRestAPIResultReturnsError()
             testOversizedRestAPIResultReturnsError()
             testCleanRestAPIVO()
             testNotCleanRestAPIVO()
             deleteRestAPIVO()
         }
+    }
+
+    void testLargeRestAPIResultIsPersisted() {
+        String description = "x" * 70_000
+
+        env.message(APICreateZoneMsg.class) { APICreateZoneMsg request, CloudBus bus ->
+            APICreateZoneEvent event = new APICreateZoneEvent(request.id)
+            ZoneInventory inventory = new ZoneInventory()
+            inventory.name = request.name
+            inventory.description = description
+            event.inventory = inventory
+            bus.publish(event)
+        }
+
+        APICreateZoneMsg request = new APICreateZoneMsg()
+        request.name = "large-rest-result"
+        def sent = restApiImpl.send(request)
+
+        def response
+        retryInSecs {
+            response = restApiImpl.getResult(sent.uuid)
+            assert response.state == RestAPIState.Done.toString()
+        }
+
+        APICreateZoneEvent storedEvent = RESTApiDecoder.loads(response.result) as APICreateZoneEvent
+        assert storedEvent.success
+        assert storedEvent.inventory.description == description
+
+        tran.begin()
+        mgr.remove(mgr.find(RestAPIVO.class, sent.uuid))
+        tran.commit()
+    }
+
+    void testMultibyteRestAPIResultReturnsError() {
+        String description = "中" * 5_600_000
+
+        env.message(APICreateZoneMsg.class) { APICreateZoneMsg request, CloudBus bus ->
+            APICreateZoneEvent event = new APICreateZoneEvent(request.id)
+            ZoneInventory inventory = new ZoneInventory()
+            inventory.name = request.name
+            inventory.description = description
+            event.inventory = inventory
+            String serialized = RESTApiDecoder.dump(event)
+            assert serialized.length() < CoreGlobalProperty.REST_API_RESULT_MAX_LENGTH
+            assert serialized.getBytes("UTF-8").length > 16 * 1024 * 1024 - 1
+            bus.publish(event)
+        }
+
+        APICreateZoneMsg request = new APICreateZoneMsg()
+        request.name = "multibyte-rest-result"
+        def sent = restApiImpl.send(request)
+
+        def response
+        retryInSecs {
+            response = restApiImpl.getResult(sent.uuid)
+            assert response.state == RestAPIState.Done.toString()
+        }
+
+        APICreateZoneEvent failedEvent = RESTApiDecoder.loads(response.result) as APICreateZoneEvent
+        assert !failedEvent.success
+        assert failedEvent.inventory == null
+        assert failedEvent.error.code == "SYS.1020"
+        assert failedEvent.error.details.contains("bytes")
+
+        tran.begin()
+        mgr.remove(mgr.find(RestAPIVO.class, sent.uuid))
+        tran.commit()
     }
 
     void testOversizedRestAPIResultReturnsError() {

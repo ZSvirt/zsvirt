@@ -61,6 +61,7 @@ ${flyway} -outOfOrder=true -user=${user} -password=${password} -url=${url} migra
 eval "rm -f ${flyway_sql}/*"
 
 cp ${base}/../conf/db/V0.6__schema_buildin_httpserver.sql ${flyway_sql}
+cp ${base}/../conf/db/zstack_rest/upgrade/* ${flyway_sql}
 
 if [[ ! -n $host ]] || [[ ! -n $port ]];then
   url="jdbc:mysql://localhost:3306/zstack_rest"

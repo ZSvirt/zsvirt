@@ -11,8 +11,10 @@ import org.zstack.core.Platform;
 import org.zstack.core.asyncbatch.While;
 import org.zstack.core.cascade.CascadeConstant;
 import org.zstack.core.cascade.CascadeFacade;
+import org.zstack.core.cloudbus.AutoOffEventCallback;
 import org.zstack.core.cloudbus.CloudBus;
 import org.zstack.core.cloudbus.CloudBusCallBack;
+import org.zstack.core.cloudbus.EventFacade;
 import org.zstack.core.cloudbus.MessageSafe;
 import org.zstack.core.cloudbus.ResourceDestinationMaker;
 import org.zstack.core.componentloader.PluginRegistry;
@@ -85,6 +87,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -122,6 +125,8 @@ public class VolumeBackupManagerImpl extends AbstractService implements
     @Autowired
     private VmInstanceResourceMetadataManager vidm;
     @Autowired
+    private EventFacade evtf;
+    @Autowired
     private BackupOperationConflictManager conflictManager;
     @Autowired
     private ResourceDestinationMaker destinationMaker;
@@ -138,6 +143,47 @@ public class VolumeBackupManagerImpl extends AbstractService implements
         List<String> remoteBackupStorageUuids = ImageStoreBackupStorageSelector.getRemoteBsUuids().stream().distinct()
                 .filter(destinationMaker::isManagedByUs)
                 .collect(Collectors.toList());
+        if (remoteBackupStorageUuids.isEmpty()) {
+            return;
+        }
+
+        remoteBackupStorageUuids.forEach(this::cleanOrphanRemoteDataBackupsWhenConnected);
+    }
+
+    private void cleanOrphanRemoteDataBackupsWhenConnected(String backupStorageUuid) {
+        AtomicBoolean triggered = new AtomicBoolean(false);
+        AutoOffEventCallback<BackupStorageCanonicalEvents.BackupStorageStatusChangedData> callback =
+                new AutoOffEventCallback<BackupStorageCanonicalEvents.BackupStorageStatusChangedData>() {
+            {
+                uniqueIdentity = String.format("clean-orphan-volume-backups-after-bs-connected-%s", backupStorageUuid);
+            }
+
+            @Override
+            protected boolean run(Map<String, String> tokens,
+                                  BackupStorageCanonicalEvents.BackupStorageStatusChangedData data) {
+                if (!backupStorageUuid.equals(data.getBackupStorageUuid()) ||
+                        !BackupStorageStatus.Connected.toString().equals(data.getNewStatus())) {
+                    return false;
+                }
+
+                if (triggered.compareAndSet(false, true)) {
+                    cleanOrphanRemoteDataBackups(Collections.singletonList(backupStorageUuid));
+                }
+                return true;
+            }
+        };
+        evtf.onLocal(BackupStorageCanonicalEvents.BACKUP_STORAGE_STATUS_CHANGED, callback);
+
+        if (Q.New(BackupStorageVO.class)
+                .eq(BackupStorageVO_.uuid, backupStorageUuid)
+                .eq(BackupStorageVO_.status, BackupStorageStatus.Connected)
+                .isExists() && triggered.compareAndSet(false, true)) {
+            evtf.off(callback);
+            cleanOrphanRemoteDataBackups(Collections.singletonList(backupStorageUuid));
+        }
+    }
+
+    private void cleanOrphanRemoteDataBackups(List<String> remoteBackupStorageUuids) {
         if (remoteBackupStorageUuids.isEmpty()) {
             return;
         }

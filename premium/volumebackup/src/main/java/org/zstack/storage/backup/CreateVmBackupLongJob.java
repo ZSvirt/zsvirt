@@ -18,6 +18,7 @@ import org.zstack.header.message.APIEvent;
 import org.zstack.header.message.MessageReply;
 import org.zstack.header.storage.backup.*;
 import org.zstack.header.storage.volume.backup.*;
+import org.zstack.header.volume.VolumeType;
 import org.zstack.utils.Utils;
 import org.zstack.utils.gson.JSONObjectUtil;
 import org.zstack.utils.logging.CLogger;
@@ -95,26 +96,57 @@ public class CreateVmBackupLongJob implements LongJob {
         String backupStorageUuid = params.getBackupStorageUuid();
         String remoteBackupStorageUuid = params.getRemoteBackupStorageUuid();
 
-        List<SyncBackupFromImageStoreBackupStorageMsg> msgs = new ArrayList<>();
-        for (VolumeBackupInventory inv : evt.getInventories()) {
-            SyncBackupFromImageStoreBackupStorageMsg msg = new SyncBackupFromImageStoreBackupStorageMsg();
-            msg.setUuid(inv.getUuid());
-            msg.setSrcBackupStorageUuid(backupStorageUuid);
-            msg.setDstBackupStorageUuid(remoteBackupStorageUuid);
-            bus.makeTargetServiceIdByResourceUuid(msg, VolumeBackupConstant.SERVICE_ID, msg.getBackupStorageUuid());
-            msgs.add(msg);
+        VolumeBackupInventory root = evt.getInventories().stream()
+                .filter(it -> VolumeType.Root.toString().equals(it.getType())).findFirst().orElse(null);
+        if (root == null) {
+            logger.error(String.format("failed to sync VM backups to remoteImageStoreBackupStorage[%s], root backup not found",
+                    remoteBackupStorageUuid));
+            completion.success(evt);
+            return;
         }
 
-        new While<>(msgs).all((msg, com) -> bus.send(msg, new CloudBusCallBack(com) {
+        SyncBackupFromImageStoreBackupStorageMsg rootMsg = buildSyncMsg(root, backupStorageUuid, remoteBackupStorageUuid);
+        bus.send(rootMsg, new CloudBusCallBack(completion) {
             @Override
             public void run(MessageReply reply) {
                 if (!reply.isSuccess()) {
-                    logger.warn(String.format("failed to sync backup from imageStoreBackupStorage[%s] to " +
-                            "remoteImageStoreBackupStorage[%s], %s", backupStorageUuid, remoteBackupStorageUuid, reply.getError()));
+                    logger.warn(String.format("failed to sync VM root backup[uuid:%s] from imageStoreBackupStorage[%s] to " +
+                            "remoteImageStoreBackupStorage[%s], %s", rootMsg.getUuid(), backupStorageUuid,
+                            remoteBackupStorageUuid, reply.getError()));
+                    completion.success(evt);
+                    return;
+                }
+
+                syncDataBackups(evt, backupStorageUuid, remoteBackupStorageUuid, completion);
+            }
+        });
+    }
+
+    private SyncBackupFromImageStoreBackupStorageMsg buildSyncMsg(VolumeBackupInventory backup, String backupStorageUuid,
+                                                                   String remoteBackupStorageUuid) {
+        SyncBackupFromImageStoreBackupStorageMsg msg = new SyncBackupFromImageStoreBackupStorageMsg();
+        msg.setUuid(backup.getUuid());
+        msg.setSrcBackupStorageUuid(backupStorageUuid);
+        msg.setDstBackupStorageUuid(remoteBackupStorageUuid);
+        bus.makeTargetServiceIdByResourceUuid(msg, VolumeBackupConstant.SERVICE_ID, msg.getBackupStorageUuid());
+        return msg;
+    }
+
+    private void syncDataBackups(APICreateVmBackupEvent evt, String backupStorageUuid, String remoteBackupStorageUuid,
+                                 ReturnValueCompletion<APIEvent> completion) {
+        List<SyncBackupFromImageStoreBackupStorageMsg> msgs = evt.getInventories().stream()
+                .filter(it -> VolumeType.Data.toString().equals(it.getType()))
+                .map(it -> buildSyncMsg(it, backupStorageUuid, remoteBackupStorageUuid)).collect(Collectors.toList());
+        new While<>(msgs).step((msg, com) -> bus.send(msg, new CloudBusCallBack(com) {
+            @Override
+            public void run(MessageReply reply) {
+                if (!reply.isSuccess()) {
+                    logger.warn(String.format("failed to sync VM backup[uuid:%s] from imageStoreBackupStorage[%s] to " +
+                            "remoteImageStoreBackupStorage[%s], %s", msg.getUuid(), backupStorageUuid, remoteBackupStorageUuid, reply.getError()));
                 }
                 com.done();
             }
-        })).run(new WhileDoneCompletion(null) {
+        }), 10).run(new WhileDoneCompletion(null) {
             @Override
             public void done(ErrorCodeList errorCodeList) {
                 List<String> voUuids = evt.getInventories().stream().map(VolumeBackupInventory::getUuid).collect(Collectors.toList());

@@ -460,36 +460,68 @@ public class CreateVmBackupJob extends AbstractSchedulerJob<VmBackupLongJobParam
     }
 
     @ExceptionSafe
-    private void doSyncToRemote(final String bsUuid, final List<VolumeBackupInventory> backups, Completion completion) {
+    private void doSyncToRemote(final String bsUuid, final List<VolumeBackupInventory> backupInventories, Completion completion) {
         if (StringUtils.isEmpty(remoteBackupStorageUuid) || !dbf.isExist(remoteBackupStorageUuid, BackupStorageVO.class)) {
             return;
         }
 
-        List<SyncBackupFromImageStoreBackupStorageMsg> msgs = new ArrayList<>();
-        for (VolumeBackupInventory inv: backups) {
-            SyncBackupFromImageStoreBackupStorageMsg msg = new SyncBackupFromImageStoreBackupStorageMsg();
-            msg.setUuid(inv.getUuid());
-            msg.setSrcBackupStorageUuid(bsUuid);
-            msg.setDstBackupStorageUuid(remoteBackupStorageUuid);
-            bus.makeTargetServiceIdByResourceUuid(msg, VolumeBackupConstant.SERVICE_ID, msg.getBackupStorageUuid());
-            msgs.add(msg);
+        VolumeBackupInventory root = backupInventories.stream()
+                .filter(it -> VolumeType.Root.toString().equals(it.getType())).findFirst().orElse(null);
+        if (root == null) {
+            ErrorCode error = operr(
+                    "failed to sync VM backups to remoteImageStoreBackupStorage[%s], root backup not found",
+                    remoteBackupStorageUuid);
+            logger.error(error.getReadableDetails());
+            completion.fail(error);
+            return;
         }
 
-        List<ErrorCode> errorCodes = new ArrayList<>();
-        new While<>(msgs).all((msg, com) -> bus.send(msg, new CloudBusCallBack(com) {
+        SyncBackupFromImageStoreBackupStorageMsg rootMsg = buildSyncMsg(root, bsUuid);
+        bus.send(rootMsg, new CloudBusCallBack(completion) {
             @Override
             public void run(MessageReply reply) {
                 if (!reply.isSuccess()) {
-                    logger.warn(String.format("failed to sync backup from imageStoreBackupStorage[%s], %s", bsUuid, reply.getError()));
-                    errorCodes.add(reply.getError());
+                    logger.warn(String.format("failed to sync VM root backup[uuid:%s] from imageStoreBackupStorage[%s] to " +
+                            "remoteImageStoreBackupStorage[%s], %s", rootMsg.getUuid(), bsUuid, remoteBackupStorageUuid, reply.getError()));
+                    completion.fail(reply.getError());
+                    return;
+                }
+
+                List<VolumeBackupInventory> dataBackups = backupInventories.stream()
+                        .filter(it -> VolumeType.Data.toString().equals(it.getType()))
+                        .collect(Collectors.toList());
+                syncDataBackups(bsUuid, dataBackups, completion);
+            }
+        });
+    }
+
+    private SyncBackupFromImageStoreBackupStorageMsg buildSyncMsg(VolumeBackupInventory backup, String bsUuid) {
+        SyncBackupFromImageStoreBackupStorageMsg msg = new SyncBackupFromImageStoreBackupStorageMsg();
+        msg.setUuid(backup.getUuid());
+        msg.setSrcBackupStorageUuid(bsUuid);
+        msg.setDstBackupStorageUuid(remoteBackupStorageUuid);
+        bus.makeTargetServiceIdByResourceUuid(msg, VolumeBackupConstant.SERVICE_ID, msg.getBackupStorageUuid());
+        return msg;
+    }
+
+    private void syncDataBackups(String bsUuid, List<VolumeBackupInventory> backups, Completion completion) {
+        List<SyncBackupFromImageStoreBackupStorageMsg> msgs = backups.stream()
+                .map(it -> buildSyncMsg(it, bsUuid)).collect(Collectors.toList());
+        new While<>(msgs).step((msg, com) -> bus.send(msg, new CloudBusCallBack(com) {
+            @Override
+            public void run(MessageReply reply) {
+                if (!reply.isSuccess()) {
+                    logger.warn(String.format("failed to sync VM backup[uuid:%s] from imageStoreBackupStorage[%s] to " +
+                            "remoteImageStoreBackupStorage[%s], %s", msg.getUuid(), bsUuid, remoteBackupStorageUuid, reply.getError()));
+                    com.addError(reply.getError());
                 }
                 com.done();
             }
-        })).run(new WhileDoneCompletion(null) {
+        }), 10).run(new WhileDoneCompletion(null) {
             @Override
             public void done(ErrorCodeList errorCodeList) {
-                if (!errorCodes.isEmpty()) {
-                    completion.fail(errorCodes.get(0));
+                if (!errorCodeList.getCauses().isEmpty()) {
+                    completion.fail(errorCodeList.getCauses().get(0));
                     return;
                 }
                 completion.success();

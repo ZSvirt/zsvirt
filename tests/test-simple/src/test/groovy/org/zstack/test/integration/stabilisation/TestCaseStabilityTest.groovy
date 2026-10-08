@@ -14,6 +14,12 @@ import org.zstack.testlib.Test
 class TestCaseStabilityTest extends AbstractTestCaseStabilityTest {
     static SpringSpec springSpec = Test.makeSpring()
 
+    static {
+        // The suite builds Spring before running the stability subcases.
+        springSpec.include("LogConfiguration.xml")
+        springSpec.include("Log4j2Configuration.xml")
+    }
+
     @Override
     SpringSpec getSpringSpec() {
         return springSpec

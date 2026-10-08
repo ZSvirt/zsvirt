@@ -7,7 +7,8 @@ package org.zstack.ha.header;
 public enum HostHaState {
     Done,
     Setuping,
-    Fail,
+    SetupFail,
     None,
-    Cancelling
+    Cancelling,
+    CancelFail,
 }

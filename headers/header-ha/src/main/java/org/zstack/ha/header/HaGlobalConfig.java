@@ -62,4 +62,7 @@ public class HaGlobalConfig {
     @GlobalConfigValidation(inNumberRange = {-1, 5})
     public static GlobalConfig HA_NOTIFICATION_TIMELINESS = new GlobalConfig(CATEGORY, "notification.timeliness");
 
+    @GlobalConfigValidation(min = 1)
+    public static GlobalConfig HA_SYNC_SELF_FENCER_INTERVAL = new GlobalConfig(CATEGORY, "selfFencer.sync.interval");
+
 }

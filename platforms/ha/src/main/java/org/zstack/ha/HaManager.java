@@ -7,6 +7,8 @@ import org.zstack.ha.entity.HaCommands;
 import org.zstack.ha.entity.HaStrategyConditionInventory;
 import org.zstack.ha.entity.HaStrategyConditionVO;
 import org.zstack.ha.entity.HaStrategyConditionVO_;
+import org.zstack.ha.entity.HostHaStateVO;
+import org.zstack.ha.entity.HostHaStateVO_;
 import org.zstack.ha.entity.VmHaVO;
 import org.zstack.ha.entity.VmHaVO_;
 import org.zstack.ha.fencers.HaStrategyHelper;
@@ -28,6 +30,7 @@ import org.zstack.header.Component;
 import org.zstack.header.errorcode.ErrorCode;
 import org.zstack.header.errorcode.OperationFailureException;
 import org.zstack.header.exception.CloudRuntimeException;
+import org.zstack.header.exception.CloudStateMachineException;
 import org.zstack.header.host.*;
 import org.zstack.header.managementnode.PrepareDbInitialValueExtensionPoint;
 import org.zstack.header.message.APIMessage;
@@ -48,6 +51,7 @@ import java.sql.Timestamp;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static org.zstack.core.Platform.*;
 import static org.zstack.ha.fencers.SelfFencers.*;
@@ -461,6 +465,12 @@ public class HaManager extends AbstractService implements Component, HaCompletio
             handle((AddVmFencerRuleToHostMsg) msg);
         } else if (msg instanceof RemoveVmFencerRuleFromHostMsg) {
             handle((RemoveVmFencerRuleFromHostMsg) msg);
+        } else if (msg instanceof RetrySetupSelfFencerOnHostMsg) {
+            handle((RetrySetupSelfFencerOnHostMsg) msg);
+        } else if (msg instanceof RetryCancelSelfFencerOnHostMsg) {
+            handle((RetryCancelSelfFencerOnHostMsg) msg);
+        } else if (msg instanceof GetFencerStateFromHostMsg) {
+            handle((GetFencerStateFromHostMsg) msg);
         } else {
             bus.dealWithUnknownMessage(msg);
         }
@@ -543,6 +553,65 @@ public class HaManager extends AbstractService implements Component, HaCompletio
         fencer.setup();
         SetupStorageHeartbeatFileAndGatewayPingOnHostReply reply = new SetupStorageHeartbeatFileAndGatewayPingOnHostReply();
         bus.reply(msg, reply);
+    }
+
+    private void handle(RetrySetupSelfFencerOnHostMsg msg) {
+        List<PrimaryStorageInventory> ps = HaHelper.getSelfFencerSupportedPrimaryStorage(msg.getHostInventory())
+                .stream().filter(p -> msg.getPrimaryStorageUuids().contains(p.getUuid())).collect(Collectors.toList());
+        if (!ps.isEmpty()) {
+            SelfFencerStruct param = new SelfFencerStruct();
+            param.host = msg.getHostInventory();
+            param.primaryStorage = ps;
+            param.fencers = HaHelper.findExecuteFencers();
+            new SetupStorageHeartbeatFileFencer(param).setup();
+        }
+        bus.reply(msg, new RetrySetupSelfFencerOnHostReply());
+    }
+
+    private void handle(RetryCancelSelfFencerOnHostMsg msg) {
+        List<String> uuids = msg.getPrimaryStorageUuids() == null ? Collections.emptyList() : msg.getPrimaryStorageUuids();
+        List<PrimaryStorageVO> vos = uuids.isEmpty() ? Collections.emptyList() : Q.New(PrimaryStorageVO.class)
+                .in(PrimaryStorageVO_.uuid, uuids)
+                .list();
+        Set<String> found = vos.stream().map(PrimaryStorageVO::getUuid).collect(Collectors.toSet());
+        String hostUuid = msg.getHostInventory().getUuid();
+        for (String psUuid : uuids) {
+            if (!found.contains(psUuid)) {
+                completeCancelWithoutPrimaryStorage(hostUuid, psUuid);
+            }
+        }
+        if (!vos.isEmpty()) {
+            SelfFencerStruct param = new SelfFencerStruct();
+            param.host = msg.getHostInventory();
+            param.primaryStorage = PrimaryStorageInventory.valueOf(vos);
+            new CancelStorageHeartbeatFileAndGatewayPing(param).cancel();
+        }
+        bus.reply(msg, new RetryCancelSelfFencerOnHostReply());
+    }
+
+    private void completeCancelWithoutPrimaryStorage(String hostUuid, String psUuid) {
+        HostHaStateVO vo = Q.New(HostHaStateVO.class)
+                .eq(HostHaStateVO_.hostUuid, hostUuid)
+                .eq(HostHaStateVO_.primaryStorageUuid, psUuid)
+                .find();
+        if (vo == null) {
+            return;
+        }
+        try {
+            vo.setState(HostHaStateMachine.getState(vo.getState(), HostHaStateEvent.cancelDone));
+            dbf.update(vo);
+        } catch (CloudStateMachineException e) {
+            logger.warn(String.format("unable to finish cancel for missing primary storage[uuid:%s] on host[uuid:%s], current state[%s], %s",
+                    psUuid, hostUuid, vo.getState(), e.getMessage()));
+        }
+    }
+
+    private void handle(GetFencerStateFromHostMsg msg) {
+        SelfFencerStruct param = new SelfFencerStruct();
+        param.host = msg.getHostInventory();
+        param.primaryStorage = new ArrayList<>();
+        new SyncStorageFencerState(param).sync();
+        bus.reply(msg, new GetFencerStateFromHostReply());
     }
 
     private void handleApiMessage(APIMessage msg) {

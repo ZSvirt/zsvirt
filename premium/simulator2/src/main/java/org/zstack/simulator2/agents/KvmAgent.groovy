@@ -409,6 +409,10 @@ class KvmAgent extends Agent {
             return rsp
         }
 
+        handle(HaConstants.SYNC_SELF_FENCER_STATE_PATH) {
+            return new GetFencerStateFromHostRsp()
+        }
+
         handle(HaConstants.SCAN_HOST_PATH) { HttpEntity<String> e ->
             def rsp = new ScanRsp()
             rsp.result = ScanRsp.RET_SUCCESS

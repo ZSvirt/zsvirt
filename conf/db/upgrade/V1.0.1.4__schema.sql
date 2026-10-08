@@ -35,6 +35,19 @@ UPDATE GarbageCollectorVO SET runnerClass = 'org.zstack.ha.gc.NeverStopVmGC'
 DROP TABLE IF EXISTS `zstack`.`FaultToleranceVmInstanceGroupHostPortRefVO`;
 DROP TABLE IF EXISTS `zstack`.`FaultToleranceVmGroupVO`;
 
+DROP TABLE IF EXISTS `zstack`.`HostHaStateVO`;
+CREATE TABLE `zstack`.`HostHaStateVO` (
+    `id` BIGINT UNSIGNED NOT NULL UNIQUE AUTO_INCREMENT,
+    `hostUuid` char(32) NOT NULL,
+    `primaryStorageUuid` char(32) NOT NULL,
+    `state` varchar(32),
+    `lastOpDate` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `createDate` timestamp NOT NULL DEFAULT '1999-12-31 23:59:59',
+    PRIMARY KEY (`id`),
+    CONSTRAINT `fkHostHaStateVOHostEO` FOREIGN KEY (`hostUuid`) REFERENCES `HostEO` (`uuid`) ON DELETE CASCADE,
+    CONSTRAINT `fkHostHaStateVOPrimaryStorageEO` FOREIGN KEY (`primaryStorageUuid`) REFERENCES `PrimaryStorageEO` (`uuid`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 -- Feature: Allocator Domain (scheduling domain) | ZSV-13008
 
 CREATE TABLE IF NOT EXISTS `zstack`.`AllocatorDomainVO` (

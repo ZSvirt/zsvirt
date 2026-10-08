@@ -1,7 +1,6 @@
 package org.zstack.ha;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
 import org.zstack.compute.vm.BeforeStopVmOnHypervisorExtensionPoint;
 import org.zstack.core.componentloader.PluginRegistry;
 import org.zstack.core.db.DatabaseFacade;
@@ -35,8 +34,6 @@ import org.zstack.header.storage.primary.PrimaryStorageDetachExtensionPoint;
 import org.zstack.header.storage.primary.PrimaryStorageInventory;
 import org.zstack.header.storage.primary.PrimaryStorageState;
 import org.zstack.header.storage.primary.PrimaryStorageType;
-import org.zstack.header.storage.primary.PrimaryStorageVO;
-import org.zstack.header.storage.primary.PrimaryStorageVO_;
 import org.zstack.header.storage.primary.UpdatePrimaryStorageExtensionPoint;
 import org.zstack.header.vm.*;
 import org.zstack.kvm.KVMAgentCommands;
@@ -586,7 +583,7 @@ public class HaExtensions implements
             return;
         }
 
-        List<PrimaryStorageInventory> ps = getSelfFencerSupportedPrimaryStorage(host);
+        List<PrimaryStorageInventory> ps = HaHelper.getSelfFencerSupportedPrimaryStorage(host);
         if (ps.isEmpty()) {
             return;
         }
@@ -610,29 +607,5 @@ public class HaExtensions implements
         CollectionUtils.safeForEach(pluginRegistry.getExtensionList(VmFencerRuleExtensionPoint.class),
                 extension -> extension.addVmFencerRuleToHost(vmUuids, host.getUuid()));
         vmHaService.syncHaVmListOnHost(host.getUuid(), new NopeCompletion());
-    }
-
-    @Transactional(readOnly = true)
-    private List<PrimaryStorageInventory> getSelfFencerSupportedPrimaryStorage(HostInventory host) {
-        List<PrimaryStorageVO> ps = Q.New(PrimaryStorageVO.class, PrimaryStorageClusterRefVO.class)
-            .table0()
-                .eq(PrimaryStorageVO_.uuid).table1(PrimaryStorageClusterRefVO_.primaryStorageUuid)
-                .selectThisTable()
-            .table1()
-                .eq(PrimaryStorageClusterRefVO_.clusterUuid, host.getClusterUuid())
-            .list();
-        if (ps.isEmpty()) {
-            return new ArrayList<>();
-        }
-
-        List<PrimaryStorageInventory> invs = new ArrayList<>();
-        for (PrimaryStorageVO vo : ps) {
-            PrimaryStorageType type = PrimaryStorageType.valueOf(vo.getType());
-            if (type.isSupportHeartbeatFile()) {
-                invs.add(PrimaryStorageInventory.valueOf(vo));
-            }
-        }
-
-        return invs;
     }
 }

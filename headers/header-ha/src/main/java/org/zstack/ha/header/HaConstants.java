@@ -26,6 +26,7 @@ public interface HaConstants {
     String REMOVE_VM_FENCER_RULE_FROM_HOST = "/remove/vm/fencer/rule/from/host";
     String SETUP_SELF_FENCER_PATH = "/ha/selffencer/setup";
     String CANCEL_SELF_FENCER_PATH = "/ha/selffencer/cancel";
+    String SYNC_SELF_FENCER_STATE_PATH = "/ha/selffencer/state";
     String KVM_REPORT_VM_FENCED_EVENT = "/ha/events/vm-fenced";
     String SCAN_HOST_PATH = "/ha/scanhost";
     String SYNC_HA_VM_LIST_PATH = "/ha/sync/vm/list";

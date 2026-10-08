@@ -44,6 +44,14 @@ public class HaCommands {
         public List<String> fencers;
     }
 
+    public static class GetFencerStateFromHostCmd extends AgentCommand {
+        public static final String PATH = HaConstants.SYNC_SELF_FENCER_STATE_PATH;
+    }
+
+    public static class GetFencerStateFromHostRsp extends AgentResponse {
+        public List<String> psUuids;
+    }
+
     public static class CancelSelfFencerCmd extends AgentCommand {
         public static final String PATH = HaConstants.CANCEL_SELF_FENCER_PATH;
         public String hostUuid;

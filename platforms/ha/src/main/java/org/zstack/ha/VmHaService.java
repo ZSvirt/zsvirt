@@ -245,6 +245,9 @@ public class VmHaService {
      * doStartVm
      */
     public void haStartVmWithTracker(String vmUuid, String hostUuid, String reason, VmHaTaskTracker tracker) {
+        if (!HaHelper.isSelfFencerDone(vmUuid, hostUuid)) {
+            return;
+        }
         for (VmHaExtensionPoint ext : pluginRegistry.getExtensionList(VmHaExtensionPoint.class)) {
             ErrorCode errorCode = ext.preHaStartVm(vmUuid);
             if (errorCode != null) {

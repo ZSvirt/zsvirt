@@ -13,14 +13,16 @@ import java.util.List;
  */
 @Inventory(mappingVOClass = HostHaStateVO.class)
 public class HostHaStateInventory {
-    private String uuid;
+    private String hostUuid;
+    private String primaryStorageUuid;
     private String state;
     private Timestamp createDate;
     private Timestamp lastOpDate;
 
     public static HostHaStateInventory valueOf(HostHaStateVO vo) {
         HostHaStateInventory inv = new HostHaStateInventory();
-        inv.setUuid(vo.getUuid());
+        inv.setHostUuid(vo.getHostUuid());
+        inv.setPrimaryStorageUuid(vo.getPrimaryStorageUuid());
         inv.setState(vo.getState().toString());
         inv.setCreateDate(vo.getCreateDate());
         inv.setLastOpDate(vo.getLastOpDate());
@@ -35,13 +37,20 @@ public class HostHaStateInventory {
         return invs;
     }
 
-
-    public String getUuid() {
-        return uuid;
+    public String getHostUuid() {
+        return hostUuid;
     }
 
-    public void setUuid(String uuid) {
-        this.uuid = uuid;
+    public void setHostUuid(String hostUuid) {
+        this.hostUuid = hostUuid;
+    }
+
+    public String getPrimaryStorageUuid() {
+        return primaryStorageUuid;
+    }
+
+    public void setPrimaryStorageUuid(String primaryStorageUuid) {
+        this.primaryStorageUuid = primaryStorageUuid;
     }
 
     public String getState() {

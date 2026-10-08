@@ -146,4 +146,12 @@
         <type>java.lang.Integer</type>
         <defaultValue>1</defaultValue>
     </config>
+
+    <config>
+        <category>ha</category>
+        <name>selfFencer.sync.interval</name>
+        <description>Interval time to sync fencer state, also an interval time to setup/cancel self fencer on failed host</description>
+        <type>java.lang.Integer</type>
+        <defaultValue>60</defaultValue>
+    </config>
 </globalConfig>

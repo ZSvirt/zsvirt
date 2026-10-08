@@ -12,6 +12,7 @@ import org.zstack.core.errorcode.ErrorFacade;
 import org.zstack.core.thread.AsyncThread;
 import org.zstack.ha.entity.VmHaVO;
 import org.zstack.ha.entity.VmHaVO_;
+import org.zstack.ha.HaHelper;
 import org.zstack.ha.header.HaGlobalConfig;
 import org.zstack.ha.header.SelfFencerStrategy;
 import org.zstack.ha.header.VmHaLevel;
@@ -377,6 +378,11 @@ public class HaKvmWorker implements HaHypervisorWorker {
 
         if (strategy == SelfFencerStrategy.Permissive) {
             logger.debug(String.format("Self fencer strategy if Permissive, skip HA for vm[uuid:%s]", completion.getVmUuid()));
+            completion.success();
+            return;
+        }
+
+        if (!HaHelper.isSelfFencerDone(completion.getVmUuid(), hostUuid)) {
             completion.success();
             return;
         }

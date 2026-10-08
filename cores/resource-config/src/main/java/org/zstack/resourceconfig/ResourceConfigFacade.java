@@ -1,16 +1,15 @@
 package org.zstack.resourceconfig;
 
 import org.zstack.core.config.GlobalConfig;
+import org.zstack.core.config.ResourceConfigGetter;
 
 import java.util.List;
 import java.util.Map;
 
-public interface ResourceConfigFacade {
+public interface ResourceConfigFacade extends ResourceConfigGetter {
     String SERVICE_ID = ResourceConfigConstant.SERVICE_ID;
 
     ResourceConfig getResourceConfig(String identity);
-
-    <T> T getResourceConfigValue(GlobalConfig gc, String resourceUuid, Class<T> clz);
 
     /**
      * <p>This method will get the resource configuration from the specified type.

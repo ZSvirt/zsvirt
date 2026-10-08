@@ -11,15 +11,19 @@ import org.zstack.core.Platform;
 import org.zstack.core.asyncbatch.While;
 import org.zstack.core.cascade.CascadeConstant;
 import org.zstack.core.cascade.CascadeFacade;
+import org.zstack.core.cloudbus.AutoOffEventCallback;
 import org.zstack.core.cloudbus.CloudBus;
 import org.zstack.core.cloudbus.CloudBusCallBack;
+import org.zstack.core.cloudbus.EventFacade;
 import org.zstack.core.cloudbus.MessageSafe;
+import org.zstack.core.cloudbus.ResourceDestinationMaker;
 import org.zstack.core.componentloader.PluginRegistry;
 import org.zstack.core.db.DatabaseFacade;
 import org.zstack.core.db.Q;
 import org.zstack.core.db.SQL;
 import org.zstack.core.db.SQLBatch;
 import org.zstack.core.jsonlabel.JsonLabel;
+import org.zstack.core.thread.AsyncThread;
 import org.zstack.core.thread.CancelablePeriodicTask;
 import org.zstack.core.thread.ChainTask;
 import org.zstack.core.thread.SyncTaskChain;
@@ -44,6 +48,7 @@ import org.zstack.header.identity.quota.QuotaMessageHandler;
 import org.zstack.header.image.*;
 import org.zstack.header.imagestore.*;
 import org.zstack.header.message.*;
+import org.zstack.header.managementnode.ManagementNodeReadyExtensionPoint;
 import org.zstack.header.network.l3.L3NetworkInventory;
 import org.zstack.header.network.l3.L3NetworkVO;
 import org.zstack.header.storage.backup.*;
@@ -82,6 +87,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -98,7 +104,8 @@ public class VolumeBackupManagerImpl extends AbstractService implements
         VmBeforeStartOnHypervisorExtensionPoint,
         ImageStoreReclaimSpaceExtensionPoint,
         ReportQuotaExtensionPoint,
-        BackupOperationConflictChecker {
+        BackupOperationConflictChecker,
+        ManagementNodeReadyExtensionPoint {
     private static final CLogger logger = Utils.getLogger(VolumeBackupManagerImpl.class);
 
     @Autowired
@@ -118,9 +125,129 @@ public class VolumeBackupManagerImpl extends AbstractService implements
     @Autowired
     private VmInstanceResourceMetadataManager vidm;
     @Autowired
+    private EventFacade evtf;
+    @Autowired
     private BackupOperationConflictManager conflictManager;
+    @Autowired
+    private ResourceDestinationMaker destinationMaker;
 
     final private Map<String, VolumeBackupFactory> bkFactories = Collections.synchronizedMap(new HashMap<>());
+
+    @Override
+    public void managementNodeReady() {
+        cleanOrphanRemoteDataBackups();
+    }
+
+    @AsyncThread
+    private void cleanOrphanRemoteDataBackups() {
+        List<String> remoteBackupStorageUuids = ImageStoreBackupStorageSelector.getRemoteBsUuids().stream().distinct()
+                .filter(destinationMaker::isManagedByUs)
+                .collect(Collectors.toList());
+        if (remoteBackupStorageUuids.isEmpty()) {
+            return;
+        }
+
+        remoteBackupStorageUuids.forEach(this::cleanOrphanRemoteDataBackupsWhenConnected);
+    }
+
+    private void cleanOrphanRemoteDataBackupsWhenConnected(String backupStorageUuid) {
+        AtomicBoolean triggered = new AtomicBoolean(false);
+        AutoOffEventCallback<BackupStorageCanonicalEvents.BackupStorageStatusChangedData> callback =
+                new AutoOffEventCallback<BackupStorageCanonicalEvents.BackupStorageStatusChangedData>() {
+            {
+                uniqueIdentity = String.format("clean-orphan-volume-backups-after-bs-connected-%s", backupStorageUuid);
+            }
+
+            @Override
+            protected boolean run(Map<String, String> tokens,
+                                  BackupStorageCanonicalEvents.BackupStorageStatusChangedData data) {
+                if (!backupStorageUuid.equals(data.getBackupStorageUuid()) ||
+                        !BackupStorageStatus.Connected.toString().equals(data.getNewStatus())) {
+                    return false;
+                }
+
+                if (triggered.compareAndSet(false, true)) {
+                    cleanOrphanRemoteDataBackups(Collections.singletonList(backupStorageUuid));
+                }
+                return true;
+            }
+        };
+        evtf.onLocal(BackupStorageCanonicalEvents.BACKUP_STORAGE_STATUS_CHANGED, callback);
+
+        if (Q.New(BackupStorageVO.class)
+                .eq(BackupStorageVO_.uuid, backupStorageUuid)
+                .eq(BackupStorageVO_.status, BackupStorageStatus.Connected)
+                .isExists() && triggered.compareAndSet(false, true)) {
+            evtf.off(callback);
+            cleanOrphanRemoteDataBackups(Collections.singletonList(backupStorageUuid));
+        }
+    }
+
+    private void cleanOrphanRemoteDataBackups(List<String> remoteBackupStorageUuids) {
+        if (remoteBackupStorageUuids.isEmpty()) {
+            return;
+        }
+
+        String sql = "select dataRef.backupStorageUuid, data.volumeUuid, data.uuid" +
+                " from VolumeBackupVO data, VolumeBackupStorageRefVO dataRef" +
+                " where data.uuid = dataRef.volumeBackupUuid" +
+                " and dataRef.backupStorageUuid in (:backupStorageUuids)" +
+                " and dataRef.status = :ready" +
+                " and data.status = :ready" +
+                " and data.type = :dataType" +
+                " and data.groupUuid is not null" +
+                " and not exists (" +
+                " select rootRef.id from VolumeBackupVO root, VolumeBackupStorageRefVO rootRef" +
+                " where root.uuid = rootRef.volumeBackupUuid" +
+                " and root.groupUuid = data.groupUuid" +
+                " and root.type = :rootType" +
+                " and rootRef.backupStorageUuid = dataRef.backupStorageUuid" +
+                " and rootRef.status != :deleted" +
+                " )";
+        List<Tuple> refs = SQL.New(sql, Tuple.class)
+                .param("backupStorageUuids", remoteBackupStorageUuids)
+                .param("ready", VolumeBackupStatus.Ready)
+                .param("deleted", VolumeBackupStatus.Deleted)
+                .param("dataType", VolumeType.Data)
+                .param("rootType", VolumeType.Root)
+                .list();
+        Set<String> manualBackups = new HashSet<>(VolumeBackupSystemTag.MANUAL_CREATE_RESOURCE.filterResourceHasTag(
+                refs.stream().map(it -> it.get(2, String.class)).collect(Collectors.toList())));
+        refs.removeIf(it -> manualBackups.contains(it.get(2, String.class)));
+        if (refs.isEmpty()) {
+            return;
+        }
+
+        new While<>(refs).step((ref, completion) -> {
+            String backupStorageUuid = ref.get(0, String.class);
+            String backupUuid = ref.get(2, String.class);
+            VolumeBackupDeletionMsg deleteMsg = new VolumeBackupDeletionMsg();
+            deleteMsg.setUuid(backupUuid);
+            deleteMsg.setBackupStorageUuids(Collections.singletonList(backupStorageUuid));
+            bus.makeTargetServiceIdByResourceUuid(deleteMsg, VolumeBackupConstant.SERVICE_ID,
+                    ref.get(1, String.class));
+            bus.send(deleteMsg, new CloudBusCallBack(completion) {
+                @Override
+                public void run(MessageReply reply) {
+                    if (!reply.isSuccess()) {
+                        completion.addError(reply.getError());
+                    }
+                    completion.done();
+                }
+            });
+        }, 10).run(new WhileDoneCompletion(null) {
+            @Override
+            public void done(ErrorCodeList errorCodeList) {
+                if (errorCodeList.getCauses().isEmpty()) {
+                    logger.info(String.format("cleaned %s orphan VM data backups from remoteImageStoreBackupStorages[uuids:%s]",
+                            refs.size(), remoteBackupStorageUuids));
+                } else {
+                    logger.error(String.format("failed to clean %s of %s orphan VM data backups from remoteImageStoreBackupStorages[uuids:%s], %s",
+                            errorCodeList.getCauses().size(), refs.size(), remoteBackupStorageUuids, errorCodeList));
+                }
+            }
+        });
+    }
 
     @Override
     @MessageSafe

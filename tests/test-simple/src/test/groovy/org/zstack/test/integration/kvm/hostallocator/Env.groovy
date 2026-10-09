@@ -85,7 +85,7 @@ This environment is modeled with the issue reported in #829.
 
                 nfsPrimaryStorage {
                     name = "nfs"
-                    url = "/nfs_root"
+                    url = "127.0.0.1:/nfs_root"
                 }
 
                 l2NoVlanNetwork {

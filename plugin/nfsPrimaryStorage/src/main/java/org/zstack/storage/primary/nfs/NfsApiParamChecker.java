@@ -38,21 +38,72 @@ public class NfsApiParamChecker {
 
     public void checkUrl(String zoneUuid, List<String> systemTags, String url) {
         DebugUtils.Assert(url != null, "URL cannot be null !!!");
+        url = normalizeUrl(url);
+
         SimpleQuery<PrimaryStorageVO> q = dbf.createQuery(PrimaryStorageVO.class);
+        q.select(PrimaryStorageVO_.url);
         q.add(PrimaryStorageVO_.type, Op.EQ, NfsPrimaryStorageConstant.NFS_PRIMARY_STORAGE_TYPE);
-        q.add(PrimaryStorageVO_.url, Op.EQ, url);
         q.add(PrimaryStorageVO_.zoneUuid, Op.EQ, zoneUuid);
-        if (q.isExists()) {
-            throw new ApiMessageInterceptionException(argerr("there has been a nfs primary storage having url as %s in zone[uuid:%s]", url, zoneUuid));
+        for (String existingUrl : q.<String>listValue()) {
+            if (isSameNfsUrl(existingUrl, url)) {
+                throw new ApiMessageInterceptionException(argerr("there has been a nfs primary storage having url as %s in zone[uuid:%s]", url, zoneUuid));
+            }
         }
 
-        String[] results = url.split(":");
-        if (results.length == 2 && (
-                results[1].startsWith("/dev") || results[1].startsWith("/proc") || results[1].startsWith("/sys"))) {
+        int separatorIndex = getSeparatorIndex(url);
+        String host = url.substring(0, separatorIndex);
+        String path = url.substring(separatorIndex + 1);
+        if (isRestrictedPath(path)) {
             throw new ApiMessageInterceptionException(argerr(" the url contains an invalid folder[/dev or /proc or /sys]"));
         }
 
-        validateUrl(systemTags, results[0]);
+        validateUrl(systemTags, host);
+    }
+
+    public static String normalizeUrl(String url) {
+        if (url == null) {
+            throw new ApiMessageInterceptionException(argerr("NFS primary storage URL cannot be null"));
+        }
+
+        String value = url.trim();
+        int separatorIndex = getSeparatorIndex(value);
+        String host = value.substring(0, separatorIndex);
+        String path = value.substring(separatorIndex + 1);
+        if (host.isEmpty() || !path.startsWith("/")) {
+            throw new ApiMessageInterceptionException(argerr(
+                    "invalid NFS primary storage URL[%s], expected format is host:/absolute/path", url));
+        }
+
+        path = path.replaceAll("/{2,}", "/");
+        if (path.length() > 1 && path.endsWith("/")) {
+            path = path.substring(0, path.length() - 1);
+        }
+        return String.format("%s:%s", host, path);
+    }
+
+    private static int getSeparatorIndex(String url) {
+        int separatorIndex = url.indexOf(':');
+        if (separatorIndex <= 0 || separatorIndex != url.lastIndexOf(':') || separatorIndex >= url.length() - 1) {
+            throw new ApiMessageInterceptionException(argerr(
+                    "invalid NFS primary storage URL[%s], expected format is host:/absolute/path", url));
+        }
+        return separatorIndex;
+    }
+
+    private static boolean isSameNfsUrl(String first, String second) {
+        try {
+            return normalizeUrl(first).equals(normalizeUrl(second));
+        } catch (ApiMessageInterceptionException ignored) {
+            return first != null && first.equals(second);
+        }
+    }
+
+    private static boolean isRestrictedPath(String path) {
+        return isPathOrChild(path, "/dev") || isPathOrChild(path, "/proc") || isPathOrChild(path, "/sys");
+    }
+
+    private static boolean isPathOrChild(String path, String restrictedPath) {
+        return path.equals(restrictedPath) || path.startsWith(restrictedPath + "/");
     }
 
 

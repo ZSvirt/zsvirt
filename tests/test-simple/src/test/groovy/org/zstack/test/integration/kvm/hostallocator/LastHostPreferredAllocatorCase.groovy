@@ -87,7 +87,7 @@ class LastHostPreferredAllocatorCase extends SubCase {
 
                 nfsPrimaryStorage {
                     name = "nfs"
-                    url = "/nfs_root"
+                    url = "127.0.0.1:/nfs_root"
                 }
 
                 l2NoVlanNetwork {

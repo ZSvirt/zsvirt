@@ -5660,6 +5660,64 @@ public class SharedBlockKvmBackend extends SharedBlockHypervisorBackend implemen
     }
 
     @Override
+    void handle(GetSharedBlockVolumeSnapshotLanFreeLayoutMsg msg,
+                ReturnValueCompletion<GetSharedBlockVolumeSnapshotLanFreeLayoutReply> completion) {
+        SharedBlockKvmCommands.GetVolumeSnapshotLanFreeLayoutsCmd cmd =
+                new SharedBlockKvmCommands.GetVolumeSnapshotLanFreeLayoutsCmd();
+        cmd.vgUuid = msg.getPrimaryStorageUuid();
+        cmd.targets = msg.getTargets();
+
+        new KvmAgentCommandDispatcher(msg.getPrimaryStorageUuid()).go(
+                SharedBlockKvmCommands.GET_VOLUME_SNAPSHOT_LAN_FREE_LAYOUTS_PATH,
+                cmd,
+                SharedBlockKvmCommands.GetVolumeSnapshotLanFreeLayoutsRsp.class,
+                new ReturnValueCompletion<SharedBlockKvmCommands.GetVolumeSnapshotLanFreeLayoutsRsp>(completion) {
+                    @Override
+                    public void success(SharedBlockKvmCommands.GetVolumeSnapshotLanFreeLayoutsRsp rsp) {
+                        GetSharedBlockVolumeSnapshotLanFreeLayoutReply reply =
+                                new GetSharedBlockVolumeSnapshotLanFreeLayoutReply();
+                        reply.setLuns(rsp.luns);
+                        reply.setLayouts(rsp.layouts);
+                        completion.success(reply);
+                    }
+
+                    @Override
+                    public void fail(ErrorCode errorCode) {
+                        completion.fail(errorCode);
+                    }
+                });
+    }
+
+    @Override
+    void handle(GetSharedBlockVolumeLanFreeLayoutMsg msg,
+                ReturnValueCompletion<GetSharedBlockVolumeLanFreeLayoutReply> completion) {
+        SharedBlockKvmCommands.GetVolumeLanFreeLayoutsCmd cmd =
+                new SharedBlockKvmCommands.GetVolumeLanFreeLayoutsCmd();
+        cmd.vgUuid = msg.getPrimaryStorageUuid();
+        cmd.targets = msg.getTargets();
+
+        new KvmAgentCommandDispatcher(msg.getPrimaryStorageUuid()).go(
+                SharedBlockKvmCommands.GET_VOLUME_LAN_FREE_LAYOUTS_PATH,
+                cmd,
+                SharedBlockKvmCommands.GetVolumeLanFreeLayoutsRsp.class,
+                new ReturnValueCompletion<SharedBlockKvmCommands.GetVolumeLanFreeLayoutsRsp>(completion) {
+                    @Override
+                    public void success(SharedBlockKvmCommands.GetVolumeLanFreeLayoutsRsp rsp) {
+                        GetSharedBlockVolumeLanFreeLayoutReply reply =
+                                new GetSharedBlockVolumeLanFreeLayoutReply();
+                        reply.setLuns(rsp.luns);
+                        reply.setLayouts(rsp.layouts);
+                        completion.success(reply);
+                    }
+
+                    @Override
+                    public void fail(ErrorCode errorCode) {
+                        completion.fail(errorCode);
+                    }
+                });
+    }
+
+    @Override
     void handle(ConfigureFilterMsg msg, Completion completion) {
         doConfigFilter(Collections.singletonList(msg.getClusterUuid()), msg.getPrimaryStorageUuid(), new ArrayList<>(), completion);
     }

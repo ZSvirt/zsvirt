@@ -2230,6 +2230,14 @@ abstract class ApiHelper {
         runAction(org.zstack.sdk.GetSharedBlockCandidateAction, c)
     }
 
+    def getSharedBlockVolumeSnapshotLanFreeLayout(@DelegatesTo(strategy = Closure.OWNER_FIRST, value = org.zstack.sdk.GetSharedBlockVolumeSnapshotLanFreeLayoutAction.class) Closure c) {
+        runAction(org.zstack.sdk.GetSharedBlockVolumeSnapshotLanFreeLayoutAction, c)
+    }
+
+    def getSharedBlockVolumeLanFreeLayout(@DelegatesTo(strategy = Closure.OWNER_FIRST, value = org.zstack.sdk.GetSharedBlockVolumeLanFreeLayoutAction.class) Closure c) {
+        runAction(org.zstack.sdk.GetSharedBlockVolumeLanFreeLayoutAction, c)
+    }
+
     def getSpiceCertificates(@DelegatesTo(strategy = Closure.OWNER_FIRST, value = org.zstack.sdk.GetSpiceCertificatesAction.class) Closure c) {
         runAction(org.zstack.sdk.GetSpiceCertificatesAction, c)
     }

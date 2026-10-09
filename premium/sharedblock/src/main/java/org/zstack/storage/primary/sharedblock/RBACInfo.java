@@ -37,7 +37,9 @@ public class RBACInfo implements PackageDescription {
 
         apis()
                 .api(
-                        APIGetSharedBlockCandidateMsg.class
+                        APIGetSharedBlockCandidateMsg.class,
+                        APIGetSharedBlockVolumeSnapshotLanFreeLayoutMsg.class,
+                        APIGetSharedBlockVolumeLanFreeLayoutMsg.class
                 )
                 .toService("sharedblock")
                 .build();

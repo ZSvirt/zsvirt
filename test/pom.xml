@@ -489,6 +489,10 @@
                     <classpathDependencyExcludes>
                         <classpathDependencyExcludes>c3p0:c3p0:jar:0.9.1.1</classpathDependencyExcludes>
                     </classpathDependencyExcludes>
+                    <systemPropertyVariables>
+                        <webXmlPath>${project.basedir}/../tests/test-simple/src/test/resources/webapp/WEB-INF/web.xml</webXmlPath>
+                        <webServletContextFilePath>${project.basedir}/../tests/test-simple/src/test/resources/webapp/WEB-INF/zstack-servlet-context-groovy.xml</webServletContextFilePath>
+                    </systemPropertyVariables>
                 </configuration>
             </plugin>
 
@@ -583,6 +587,22 @@
                             <resources>
                                 <resource>
                                     <directory>../conf</directory>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>copy-test-simple-resources</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>target/test-classes</outputDirectory>
+                            <includeEmptyDirs>true</includeEmptyDirs>
+                            <resources>
+                                <resource>
+                                    <directory>../tests/test-simple/src/test/resources</directory>
                                 </resource>
                             </resources>
                         </configuration>

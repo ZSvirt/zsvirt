@@ -120,7 +120,13 @@
                             <includeEmptyDirs>true</includeEmptyDirs>
                             <resources>
                                 <resource>
+                                    <directory>../test-simple/src/test/resources/</directory>
+                                </resource>
+                                <resource>
                                     <directory>../../test/src/test/resources/</directory>
+                                    <includes>
+                                        <include>UTCapabilities/**</include>
+                                    </includes>
                                 </resource>
                             </resources>
                         </configuration>

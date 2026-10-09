@@ -21,11 +21,15 @@ class PremiumEnv {
             portForwarding()
             smp()
             console()
+            telemetry()
+
+            // premium
             agents()
 
             include("authentications/accountImport.xml")
             include("authentications/accountImportTest.xml")
             include("authentications/ldap.xml")
+            include("authentications/accountIam1Plugin.xml")
             include("captcha.xml")
             include("CloudBusAopProxy.xml")
             include("ZoneManager.xml")
@@ -38,8 +42,12 @@ class PremiumEnv {
             include("log.xml")
             include("HostAllocateExtension.xml")
             include("HostNetworkManager.xml")
-            include("telemetry.xml")
             include("allocatorDomain.xml")
+            include("prometheus.xml")
+            include("SchedulerFacade.xml")
+            include("sns.xml")
+            include("affinityGroup.xml")
+            include("vmSchedulingRule.xml")
         }
     }
 

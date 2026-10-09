@@ -2,6 +2,7 @@ package org.zstack.test.integration.other.mysqlschema
 
 import org.zstack.testlib.SpringSpec
 import org.zstack.testlib.Test
+import org.zstack.testlib.premium.PremiumEnv
 
 /**
  * Created by lining on 2017/2/27.
@@ -12,12 +13,9 @@ import org.zstack.testlib.Test
  * 如果执行成功，就意味着db schema兼容mysql 5.7
  */
 class Mysql57Test extends Test {
-    static SpringSpec springSpec = makeSpring {
-    }
-
     @Override
     void setup() {
-        useSpring(springSpec)
+        useSpring(PremiumEnv.makeSpring())
     }
 
     @Override

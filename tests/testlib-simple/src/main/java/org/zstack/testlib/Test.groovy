@@ -24,6 +24,7 @@ import org.zstack.sdk.ZSClient
 import org.zstack.sdk.identity.role.RoleInventory
 import org.zstack.testlib.collectstrategy.SubCaseCollectionStrategy
 import org.zstack.testlib.collectstrategy.SubCaseCollectionStrategyFactory
+import org.zstack.testlib.core.ThreadFacadeForTest
 import org.zstack.testlib.util.Retry
 import org.zstack.utils.ShellUtils
 import org.zstack.utils.Utils
@@ -528,6 +529,14 @@ abstract class Test extends ApiHelper implements Retry {
     protected <T> T bean(Class<T> clz) {
         assert componentLoader != null : "componentLoader is null!!!"
         return componentLoader.getComponent(clz)
+    }
+
+    protected ThreadFacadeForTest threadFacadeForTest() {
+        return bean(ThreadFacadeForTest.class)
+    }
+
+    {
+        onCleanExecute { threadFacadeForTest().reset() }
     }
 
     protected <T> T dbFindById(Long id, Class<T> voClz) {

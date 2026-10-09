@@ -4,11 +4,11 @@ import org.zstack.core.CoreGlobalProperty
 import org.zstack.core.Platform
 import org.zstack.core.thread.ChainTask
 import org.zstack.core.thread.SyncTaskChain
-import org.zstack.core.thread.ThreadFacadeImpl
 import org.zstack.testlib.SubCase
+import org.zstack.testlib.core.ThreadFacadeForTest
 
 class ChainTaskPendingQueueCase extends SubCase {
-    ThreadFacadeImpl thdf
+    ThreadFacadeForTest thdf
 
     @Override
     void clean() {
@@ -20,7 +20,7 @@ class ChainTaskPendingQueueCase extends SubCase {
 
     @Override
     void environment() {
-        thdf = bean(ThreadFacadeImpl.class)
+        thdf = threadFacadeForTest()
     }
 
     void testChainTaskPending() {
@@ -54,7 +54,7 @@ class ChainTaskPendingQueueCase extends SubCase {
         threads.each { it.join() }
 
         assert thdf.getChainTaskInfo(signature).getPendingTask().size() == pendingTaskSize
-        assert thdf.dpq.chainTasks.get(signature).getCurrentPendingQueueThreshold() == CoreGlobalProperty.PENDING_QUEUE_MINIMUM_THRESHOLD * 5
+        assert thdf.getDispatchQueue().chainTasks.get(signature).getCurrentPendingQueueThreshold() == CoreGlobalProperty.PENDING_QUEUE_MINIMUM_THRESHOLD * 5
 
         // confirm all task finished
         hangFirstTask = false
@@ -78,7 +78,7 @@ class ChainTaskPendingQueueCase extends SubCase {
         }
 
         // check pending queue threshold is reset
-        assert thdf.dpq.chainTasks.get(signature).getCurrentPendingQueueThreshold() == CoreGlobalProperty.PENDING_QUEUE_MINIMUM_THRESHOLD
+        assert thdf.getDispatchQueue().chainTasks.get(signature).getCurrentPendingQueueThreshold() == CoreGlobalProperty.PENDING_QUEUE_MINIMUM_THRESHOLD
 
         // confirm all task finished
         hangFirstTask = false

@@ -187,17 +187,20 @@ public class ThreadFacadeImpl implements ThreadFacade, ThreadFactory, RejectedEx
         _logger.warn("Task " + arg0.getClass().getSimpleName() + " got rejected by ThreadPool, the pool looks full");
     }
 
-    private Map<PeriodicTask, ScheduledFuture<?>> getPeriodicTasks() {
+    protected Map<PeriodicTask, ScheduledFuture<?>> getPeriodicTasks() {
         return _periodicTasks;
     }
 
-    @Override
-    public Future<Void> submitPeriodicTask(final PeriodicTask task, long delay) {
-        assert task.getInterval() != 0;
-        assert task.getTimeUnit() != null;
+    protected ScheduledThreadPoolExecutorExt getNormalThreadPool() {
+        return _pool;
+    }
 
-        @SuppressWarnings("unchecked")
-        ScheduledFuture<Void> ret = (ScheduledFuture<Void>) _pool.scheduleAtFixedRate(new Runnable() {
+    protected DispatchQueue getDispatchQueue() {
+        return dpq;
+    }
+
+    protected Runnable createPeriodicTaskRunner(final PeriodicTask task) {
+        return new Runnable() {
             public void run() {
                 try {
                     task.run();
@@ -214,7 +217,17 @@ public class ThreadFacadeImpl implements ThreadFacade, ThreadFactory, RejectedEx
                     }
                 }
             }
-        }, delay, task.getInterval(), task.getTimeUnit());
+        };
+    }
+
+    @Override
+    public Future<Void> submitPeriodicTask(final PeriodicTask task, long delay) {
+        assert task.getInterval() != 0;
+        assert task.getTimeUnit() != null;
+
+        @SuppressWarnings("unchecked")
+        ScheduledFuture<Void> ret = (ScheduledFuture<Void>) getNormalThreadPool().scheduleAtFixedRate(
+                createPeriodicTaskRunner(task), delay, task.getInterval(), task.getTimeUnit());
         _periodicTasks.put(task, ret);
         return ret;
     }

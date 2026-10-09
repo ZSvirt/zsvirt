@@ -20,6 +20,10 @@ cd ../../../     # under zvirt
 
 CASELIST=""
 for module in `ls test/src/test/resources/UTCapabilities`; do
+    case "$module" in
+        module-*) ;;
+        *) continue ;;
+    esac
     module_name="${module#module-}"
 
     # find ${module}/pom.xml

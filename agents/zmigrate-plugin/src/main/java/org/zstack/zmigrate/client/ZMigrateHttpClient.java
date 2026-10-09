@@ -57,6 +57,15 @@ public class ZMigrateHttpClient {
     @Autowired
     protected CloudBus bus;
 
+    private String cachedManagementIp;
+
+    public ZMigrateHttpClient() {
+        this(null);
+    }
+
+    public ZMigrateHttpClient(String managementIp) {
+        cachedManagementIp = managementIp;
+    }
 
     protected <T> RestHttp<T> http(Class<T> returnClass) {
         RestHttp<T> http = restFacade.http(returnClass);
@@ -73,7 +82,7 @@ public class ZMigrateHttpClient {
     }
 
     private ZMigrateSshClient createSshClient() {
-        return Platform.New(ZMigrateSshClient::new);
+        return Platform.New(() -> new ZMigrateSshClient(cachedManagementIp));
     }
 
     private ErrorableValue<String> getEncryptKey() {
@@ -84,15 +93,13 @@ public class ZMigrateHttpClient {
         return res;
     }
 
-    private String cachedManagementIp;
-
-    private ErrorableValue<String> resolveManagementIp(ErrorCode errorTemplate) {
+    ErrorableValue<String> resolveManagementIp() {
         if (cachedManagementIp != null) {
             return ErrorableValue.of(cachedManagementIp);
         }
         ErrorableValue<String> ip = ZMigrateGatewayHelper.getGatewayManagementIp();
         if (!ip.isSuccess()) {
-            return errorTemplate.withCause(ip.error).toErrorableValue();
+            return ip;
         }
         cachedManagementIp = ip.result;
         return ErrorableValue.of(cachedManagementIp);
@@ -126,9 +133,9 @@ public class ZMigrateHttpClient {
             int retryTimes, int retryIntervalSeconds,
             String methodName, ErrorCode failureError,
             BiFunction<String, String, ErrorableValue<T>> action) {
-        ErrorableValue<String> ip = resolveManagementIp(failureError);
+        ErrorableValue<String> ip = resolveManagementIp();
         if (!ip.isSuccess()) {
-            return ip.error.toErrorableValue();
+            return failureError.withCause(ip.error).toErrorableValue();
         }
         String managementIp = ip.result;
         ErrorCode lastError = null;
@@ -255,13 +262,21 @@ public class ZMigrateHttpClient {
     }
 
     public ErrorableValue<Boolean> registerGatewayToZMigrate(String platformUuidOnZMigrate) {
+        ErrorableValue<String> managementIpResult = resolveManagementIp();
+        if (!managementIpResult.isSuccess()) {
+            return err(ZMIGRATE_REGISTER_GATEWAY_TO_ZMIGRATE_ERROR, "failed to register gateway to ZMigrate, gateway not configured")
+                    .withCause(managementIpResult.error)
+                    .toErrorableValue();
+        }
+        String managementIp = managementIpResult.result;
+
         ErrorableValue<String> encryptKey = getEncryptKey();
         if (!encryptKey.isSuccess()) {
             return err(ZMIGRATE_REGISTER_GATEWAY_TO_ZMIGRATE_ERROR, "failed to register gateway to ZMigrate").toErrorableValue();
         }
 
         ErrorableValue<ZMigrateGatewayHelper.GatewayInfo> gatewayInfo = ZMigrateGatewayHelper.getGatewayInfo();
-        // NOTE: this method uses getGatewayInfo() (not resolveManagementIp) because it needs vmUuid and zoneUuid
+        // GatewayInfo is still needed for vmUuid and zoneUuid; the connection address was resolved above.
         if (!gatewayInfo.isSuccess()) {
             return err(ZMIGRATE_REGISTER_GATEWAY_TO_ZMIGRATE_ERROR, "failed to register gateway to ZMigrate, gateway not configured")
                     .withCause(gatewayInfo.error)
@@ -276,11 +291,11 @@ public class ZMigrateHttpClient {
         cloudServ.zone = info.zoneUuid;
         cmd.cloudServ = JSONObjectUtil.toJsonString(cloudServ);
         cmd.cloudUUID = platformUuidOnZMigrate;
-        cmd.mgmtADDR = info.managementIp;
-        cmd.servADDR = info.managementIp;
+        cmd.mgmtADDR = managementIp;
+        cmd.servADDR = managementIp;
         cmd.servName = cmd.servADDR;
         ErrorableValue<String> response = http(String.class)
-                .withPath(String.format("https://%s:%d%s", info.managementIp, GATEWAY_RESTFUL_API_PORT, ZMIGRATE_SERVICE_MANAGEMENT_PATH))
+                .withPath(String.format("https://%s:%d%s", managementIp, GATEWAY_RESTFUL_API_PORT, ZMIGRATE_SERVICE_MANAGEMENT_PATH))
                 .withBodyJson(cmd)
                 .withTimeoutInMillis(timeoutInMillisForGetter)
                 .withoutRetry()

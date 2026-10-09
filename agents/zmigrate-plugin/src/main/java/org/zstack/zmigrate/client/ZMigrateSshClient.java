@@ -33,6 +33,22 @@ import static org.zstack.zmigrate.ZMigratePluginErrors.*;
 @Configurable(preConstruction = true, autowire = Autowire.BY_TYPE)
 public class ZMigrateSshClient {
     private static final CLogger logger = Utils.getLogger(ZMigrateSshClient.class);
+    private final String fixedManagementIp;
+
+    public ZMigrateSshClient() {
+        this(null);
+    }
+
+    public ZMigrateSshClient(String fixedManagementIp) {
+        this.fixedManagementIp = fixedManagementIp;
+    }
+
+    ErrorableValue<String> resolveManagementIp() {
+        if (fixedManagementIp != null) {
+            return ErrorableValue.of(fixedManagementIp);
+        }
+        return ZMigrateGatewayHelper.getGatewayManagementIp();
+    }
 
     private static String shellQuote(String s) {
         return "'" + s.replace("'", "'\\''") + "'";
@@ -412,7 +428,7 @@ public class ZMigrateSshClient {
     }
 
     public ErrorableValue<Boolean> overwriteZMigrateManagementAuthAddr() {
-        ErrorableValue<String> managementIpResult = ZMigrateGatewayHelper.getGatewayManagementIp();
+        ErrorableValue<String> managementIpResult = resolveManagementIp();
         if (!managementIpResult.isSuccess()) {
             return managementIpResult.error.toErrorableValue();
         }
@@ -453,7 +469,7 @@ public class ZMigrateSshClient {
             return err(INVALID_CONFIG, "ntpServers list is empty").toErrorableValue();
         }
 
-        ErrorableValue<String> managementIpResult = ZMigrateGatewayHelper.getGatewayManagementIp();
+        ErrorableValue<String> managementIpResult = resolveManagementIp();
         if (!managementIpResult.isSuccess()) {
             return managementIpResult.error.toErrorableValue();
         }
@@ -502,7 +518,7 @@ public class ZMigrateSshClient {
     }
 
     public void checkZMigrateManagementIsReady(String mnIps, Completion completion) {
-        ErrorableValue<String> managementIpResult = ZMigrateGatewayHelper.getGatewayManagementIp();
+        ErrorableValue<String> managementIpResult = resolveManagementIp();
         if (!managementIpResult.isSuccess()) {
             completion.fail(managementIpResult.error);
             return;
@@ -548,7 +564,7 @@ public class ZMigrateSshClient {
     }
 
     public ErrorableValue<String> buildEncryptKey() {
-        ErrorableValue<String> managementIpResult = ZMigrateGatewayHelper.getGatewayManagementIp();
+        ErrorableValue<String> managementIpResult = resolveManagementIp();
         if (!managementIpResult.isSuccess()) {
             return managementIpResult.error.toErrorableValue();
         }

@@ -18,8 +18,10 @@ import org.zstack.header.message.APIMessage;
 import org.zstack.header.storage.addon.primary.PrimaryStorageOutputProtocolRefVO;
 import org.zstack.header.storage.addon.primary.PrimaryStorageOutputProtocolRefVO_;
 import org.zstack.header.storage.primary.*;
+import org.zstack.header.storage.snapshot.ConsistentType;
 import org.zstack.header.volume.APICreateVolumeSnapshotGroupMsg;
 import org.zstack.header.volume.VolumeInventory;
+import org.zstack.header.volume.VolumeType;
 import org.zstack.header.zone.ZoneVO;
 import org.zstack.header.zone.ZoneVO_;
 
@@ -225,6 +227,8 @@ public class PrimaryStorageApiInterceptor implements GlobalApiMessageInterceptor
 
     private void validate(final APICreateVolumeSnapshotGroupMsg msg) {
         Set<String> psUuids = msg.getVmInstance().getAllVolumes().stream()
+                .filter(it -> it.isDisk() || msg.getConsistentType() == ConsistentType.Application
+                        && it.getType().equals(VolumeType.Memory.toString()))
                 .map(VolumeInventory::getPrimaryStorageUuid)
                 .collect(Collectors.toSet());
 

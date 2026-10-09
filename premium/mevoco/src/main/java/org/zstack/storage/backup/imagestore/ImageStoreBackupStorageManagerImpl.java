@@ -276,11 +276,9 @@ public class ImageStoreBackupStorageManagerImpl extends AbstractService
 
     @Override
     public void beforeCommitVolume(KVMHostInventory host, CommitVolumeSnapshotOnHypervisorMsg msg, KVMAgentCommands.BlockCommitCmd cmd, Completion completion) {
-        completion.success();
-    }
-
-    @Override
-    public void afterCommitVolume(KVMHostInventory host, CommitVolumeSnapshotOnHypervisorMsg msg, KVMAgentCommands.BlockCommitCmd cmd, CommitVolumeSnapshotOnHypervisorReply reply, Completion completion) {
+        // Invalidate the destination metadata before block commit changes its contents.
+        // A cleanup failure must stop before the irreversible commit/pivot, not prevent
+        // the database update after the hypervisor has already switched the active layer.
         CleanImageMetaOnPrimaryStorageMsg cmsg = new CleanImageMetaOnPrimaryStorageMsg();
         cmsg.setVolumeUuid(msg.getVolume().getUuid());
         cmsg.setPrimaryStorageInstallPath(cmd.getBase());
@@ -290,14 +288,17 @@ public class ImageStoreBackupStorageManagerImpl extends AbstractService
             @Override
             public void run(MessageReply reply) {
                 if (!reply.isSuccess()) {
-                    completion.fail(operr(String.format("failed to clean image meta on primary storage %s, error: %s",
-                            msg.getVolume().getPrimaryStorageUuid(), reply.getError())));
-                    // TODO add gc
+                    completion.fail(reply.getError());
                     return;
                 }
                 completion.success();
             }
         });
+    }
+
+    @Override
+    public void afterCommitVolume(KVMHostInventory host, CommitVolumeSnapshotOnHypervisorMsg msg, KVMAgentCommands.BlockCommitCmd cmd, CommitVolumeSnapshotOnHypervisorReply reply, Completion completion) {
+        completion.success();
     }
 
     @Override

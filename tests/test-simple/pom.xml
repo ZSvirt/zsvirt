@@ -88,8 +88,8 @@
                         <classpathDependencyExcludes>c3p0:c3p0:jar:0.9.1.1</classpathDependencyExcludes>
                     </classpathDependencyExcludes>
                     <systemPropertyVariables>
-                        <webXmlPath>${project.basedir}/../../test/src/test/resources/webapp/WEB-INF/web.xml</webXmlPath>
-                        <webServletContextFilePath>${project.basedir}/../../test/src/test/resources/webapp/WEB-INF/zstack-servlet-context-groovy.xml</webServletContextFilePath>
+                        <webXmlPath>${project.basedir}/src/test/resources/webapp/WEB-INF/web.xml</webXmlPath>
+                        <webServletContextFilePath>${project.basedir}/src/test/resources/webapp/WEB-INF/zstack-servlet-context-groovy.xml</webServletContextFilePath>
                     </systemPropertyVariables>
                 </configuration>
             </plugin>
@@ -214,6 +214,9 @@
                             <resources>
                                 <resource>
                                     <directory>../../test/src/test/resources/</directory>
+                                    <includes>
+                                        <include>UTCapabilities/**</include>
+                                    </includes>
                                 </resource>
                             </resources>
                         </configuration>

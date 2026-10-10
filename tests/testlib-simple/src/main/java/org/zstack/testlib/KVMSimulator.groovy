@@ -21,6 +21,7 @@ import org.zstack.header.volume.VolumeVO
 import org.zstack.header.volume.VolumeVO_
 import org.zstack.kvm.KVMAgentCommands
 import org.zstack.kvm.KVMConstant
+import org.zstack.kvm.KVMSecurityGroupBackend
 import org.zstack.kvm.VolumeTO
 import org.zstack.testlib.vfs.Qcow2
 import org.zstack.testlib.vfs.VFS
@@ -773,6 +774,10 @@ class KVMSimulator implements Simulator {
 
         spec.simulator(KVMConstant.BACKUP_VM_HOST_FILE_PATH) { HttpEntity<String> e ->
             return new BackupVmHostFileResponse()
+        }
+
+        spec.simulator(KVMSecurityGroupBackend.SECURITY_GROUP_CLEANUP_UNUSED_RULE_ON_HOST_PATH) { HttpEntity<String> e ->
+            return new CleanupUnusedRulesOnHostResponse()
         }
     }
 

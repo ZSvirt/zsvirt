@@ -112,6 +112,11 @@ public class ThreadFacadeForTest extends ThreadFacadeImpl {
         return null;
     }
 
+    public void triggerBlockedPeriodicTaskNoThrow(String taskName) {
+        ErrorCode error = triggerBlockedPeriodicTask(taskName);
+        assert error == null;
+    }
+
     @Override
     public boolean start() {
         boolean started = super.start();

@@ -1295,7 +1295,8 @@ public class VolumeBase extends AbstractVolume implements Volume {
                 }
 
 
-                if (self.getPrimaryStorageUuid() != null && deletionPolicy == VolumeDeletionPolicy.Direct) {
+                if (self.getPrimaryStorageUuid() != null && deletionPolicy == VolumeDeletionPolicy.Direct &&
+                        (self.getStatus() != VolumeStatus.NotInstantiated || self.getInstallPath() == null)) {
                     flow(new NoRollbackFlow() {
                         String __name__ = "return-primary-storage-capacity";
 

@@ -63,3 +63,9 @@ threadFacade.submitPeriodicTask(new PeriodicTask() {
 ErrorCode errorCode = threadFacadeForTest().triggerBlockedPeriodicTask("test-p-task")
 assert errorCode == null
 ```
+
+或者
+
+```groovy
+threadFacadeForTest().triggerBlockedPeriodicTaskNoThrow("test-p-task")
+```

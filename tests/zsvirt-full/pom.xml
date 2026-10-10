@@ -21,17 +21,7 @@
         </dependency>
         <dependency>
             <groupId>org.zstack</groupId>
-            <artifactId>core</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.zstack</groupId>
             <artifactId>header</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.zstack</groupId>
-            <artifactId>compute</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -47,11 +37,6 @@
         <dependency>
             <groupId>org.zstack</groupId>
             <artifactId>network</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.zstack</groupId>
-            <artifactId>offering</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -217,6 +202,23 @@
             <version>${project.version}</version>
         </dependency>
 
+        <!-- computes modules -->
+        <dependency>
+            <groupId>org.zstack</groupId>
+            <artifactId>compute</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.zstack</groupId>
+            <artifactId>allocator</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.zstack</groupId>
+            <artifactId>offering</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
         <!-- platforms modules -->
         <dependency>
             <groupId>org.zstack</groupId>
@@ -243,6 +245,23 @@
         <dependency>
             <groupId>org.zstack</groupId>
             <artifactId>accessKey</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!-- cores modules -->
+        <dependency>
+            <groupId>org.zstack</groupId>
+            <artifactId>core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.zstack</groupId>
+            <artifactId>resource-config</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.zstack</groupId>
+            <artifactId>tag</artifactId>
             <version>${project.version}</version>
         </dependency>
 

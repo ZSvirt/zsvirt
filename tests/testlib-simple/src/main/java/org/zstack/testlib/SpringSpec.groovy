@@ -121,6 +121,13 @@ class SpringSpec {
         include("ConsoleManager.xml")
     }
 
+    void telemetry() {
+        include("telemetry.xml")
+    }
+
+    // ------------------------------------- Premium includes ------------------------------------
+    //   DO NOT USE IT IN test-simple module
+
     void agents() {
         include("agents/softwarePackagePlugin.xml")
         include("agents/zmigratePlugin.xml")

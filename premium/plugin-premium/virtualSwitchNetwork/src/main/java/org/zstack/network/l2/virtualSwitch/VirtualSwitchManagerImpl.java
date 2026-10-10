@@ -1520,11 +1520,11 @@ public class VirtualSwitchManagerImpl extends AbstractService implements Virtual
                         }
                     }
                 }).then(new NoRollbackFlow() {
-                    String __name__ = "create-default-host-kernel-interface";
+                    String __name__ = "create-or-update-default-host-kernel-interface";
 
                     @Override
                     public boolean skip(Map<String, Object> data) {
-                        return ctx.attachFailed || VirtualSwitchUtils.getDefaultKernelInterface(ctx.pvo.getL2NetworkUuid(), host.getUuid()) != null;
+                        return ctx.attachFailed;
                     }
 
                     @Override
@@ -1547,6 +1547,19 @@ public class VirtualSwitchManagerImpl extends AbstractService implements Virtual
                                 ip.setGateway(ipTo.getGateway());
                             }
                         });
+
+                        HostKernelInterfaceVO vo = VirtualSwitchUtils.getDefaultKernelInterface(ctx.pvo.getL2NetworkUuid(), host.getUuid());
+                        if (vo != null) {
+                            for (HostKernelInterfaceUsedIpVO usedIp : vo.getUsedIps()) {
+                                if (Objects.equals(usedIp.getIp(), ip.getIp()) && !StringUtils.isEmpty(ip.getNetmask())
+                                        && !Objects.equals(usedIp.getNetmask(), ip.getNetmask())) {
+                                    usedIp.setNetmask(ip.getNetmask());
+                                    dbf.update(usedIp);
+                                }
+                            }
+                            innerTrigger.next();
+                            return;
+                        }
 
                         CreateHostKernelInterfaceMsg cmsg = new CreateHostKernelInterfaceMsg();
                         cmsg.setHostUuid(host.getUuid());

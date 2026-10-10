@@ -26,14 +26,13 @@ class SpringSpec {
     ]
 
     Set<String> xmls = []
-    boolean all
 
     void include(String xml) {
         xmls.add(xml)
     }
 
-    void includeAll() {
-        all = true
+    void include(SpringSpec spec) {
+        xmls.addAll(spec.xmls)
     }
 
     void includeCoreServices() {

@@ -444,13 +444,9 @@ abstract class Test extends ApiHelper implements Retry {
 
     void buildBeanConstructor() {
         beanConstructor = BeanConstructorFactory.getBeanConstructor(this.getCaseMode())
-        if (_springSpec.all) {
-            beanConstructor.loadAll = true
-        } else {
-            _springSpec.xmls.each {it ->
-                logger.debug("add xml to bean constructor ${it}")
-                beanConstructor.addXml(it)
-            }
+        _springSpec.xmls.each {it ->
+            logger.debug("add xml to bean constructor ${it}")
+            beanConstructor.addXml(it)
         }
 
         componentLoader = beanConstructor.build()

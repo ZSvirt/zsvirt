@@ -1,6 +1,6 @@
 package org.zstack.softwarePackage.header
 
-
+import org.zstack.softwarePackage.header.APIQuerySoftwarePackageReply
 import org.zstack.header.query.APIQueryMessage
 
 doc {

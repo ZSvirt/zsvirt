@@ -833,6 +833,10 @@ mysqldump -u root zstack > ${failureLogDir.absolutePath}/dbdump.sql
         return JSONObjectUtil.toObject(str, type)
     }
 
+    protected static String jsonString(Object o) {
+        return JSONObjectUtil.toJsonString(o)
+    }
+
     SessionInventory loginAsAdmin() {
         return logInByAccount {
             accountName = AccountConstant.INITIAL_SYSTEM_ADMIN_NAME

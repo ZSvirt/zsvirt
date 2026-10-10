@@ -40,6 +40,9 @@ import static org.zstack.ha.header.VmHaLevel.*;
 public class HaScheduler implements Component, ManagementNodeReadyExtensionPoint {
     private static final CLogger logger = Utils.getLogger(HaScheduler.class);
 
+    public static final String TASK_NAME_STOPPED_VM_SCANNER = "NeverStopVmScanTracker";
+    public static final String TASK_NAME_REFRESH_FENCERS = "ha-sync-state-retry-setup-cancel-self-fencer-task";
+
     public final Object lock = new Object();
     public Future<Void> neverStopVmScanTracker = null;
     private Future<Void> syncSelfFencerTracker;
@@ -79,10 +82,6 @@ public class HaScheduler implements Component, ManagementNodeReadyExtensionPoint
         synchronized (lock) {
             clearScheduler();
 
-            if (CoreGlobalProperty.UNIT_TEST_ON) {
-                return;
-            }
-
             final long interval = HaGlobalConfig.NEVER_STOP_VM_SCAN_INTERVAL.value(Long.class);
             neverStopVmScanTracker = threadFacade.submitPeriodicTask(new PeriodicTask() {
                 @Override
@@ -103,7 +102,7 @@ public class HaScheduler implements Component, ManagementNodeReadyExtensionPoint
 
                 @Override
                 public String getName() {
-                    return "NeverStopVmScanTracker";
+                    return TASK_NAME_STOPPED_VM_SCANNER;
                 }
             });
         }

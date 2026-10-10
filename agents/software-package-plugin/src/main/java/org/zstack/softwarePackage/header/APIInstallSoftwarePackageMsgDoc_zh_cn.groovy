@@ -1,5 +1,7 @@
 package org.zstack.softwarePackage.header
 
+import org.zstack.softwarePackage.header.APIInstallSoftwarePackageEvent
+
 doc {
 	title "InstallSoftwarePackage"
 

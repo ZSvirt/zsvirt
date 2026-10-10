@@ -1,5 +1,7 @@
 package org.zstack.softwarePackage.header
 
+import org.zstack.softwarePackage.header.APIUploadAndExecuteSoftwareUpgradePackageEvent
+
 doc {
 	title "UploadAndExecuteSoftwareUpgradePackage"
 

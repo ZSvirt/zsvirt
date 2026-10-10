@@ -1,5 +1,7 @@
 package org.zstack.softwarePackage.header
 
+import org.zstack.softwarePackage.header.APICleanUpgradeSoftwarePackageEvent
+
 doc {
 	title "CleanSoftwarePackage"
 

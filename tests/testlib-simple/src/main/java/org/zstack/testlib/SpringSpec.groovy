@@ -132,4 +132,8 @@ class SpringSpec {
         include("agents/softwarePackagePlugin.xml")
         include("agents/zmigratePlugin.xml")
     }
+
+    void platformsPremium() {
+        include("ha.xml")
+    }
 }

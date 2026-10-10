@@ -25,6 +25,7 @@ class PremiumEnv {
 
             // premium
             agents()
+            platformsPremium()
 
             include("authentications/accountImport.xml")
             include("authentications/accountImportTest.xml")

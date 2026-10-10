@@ -77,7 +77,7 @@ public class HaSyncSelfFencerTask implements PeriodicTask {
 
     @Override
     public String getName() {
-        return "ha-sync-state-retry-setup-cancel-self-fencer-task";
+        return HaScheduler.TASK_NAME_REFRESH_FENCERS;
     }
 
     @Override

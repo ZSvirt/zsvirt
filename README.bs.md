@@ -1,4 +1,4 @@
-<!-- synced-with: README.md@e9235837 -->
+<!-- synced-with: README.md@db599ce8 -->
 <div align="center">
   <a href="https://zsvirt.io">
     <img
@@ -90,6 +90,12 @@
 ZSvirt donosi ZSphere virtualizacijski pogon kompanije [ZStack](https://www.zstack-cloud.com/), dokazan u poslovnim okruženjima, u svijet otvorenog koda. Uz podršku iskusnog infrastrukturnog dobavljača [ZStack](https://www.zstack-cloud.com/), ZSvirt nudi laganu, skalabilnu platformu za pokretanje i upravljanje virtualnim mašinama bez vezivanja za dobavljača.
 
 Instalirajte upravljački čvor, povežite KVM hostove i upravljajte VM-ovima, klasterima, pohranom i mrežama putem web-interfejsa, RESTful API-ja (uz Terraform i Go/Python/Java SDK-ove) ili CLI-ja. Ugrađeni alati za VMware migraciju podržavaju online migraciju, OVF uvoz i VMDK otpremanje.
+
+## 🗣️ Izgovor
+
+Čuli smo da se „ZSvirt" u zajednici izgovara na nekoliko različitih načina i nijedan nije pogrešan. Naš predlog: spojite **Z** i **S** u jedan glas, tako da ime zvuči kao **"Z-s Virt"** — blizu "zeese Virt" (otprilike „ziis virt").
+
+Tu živi i razigrani duh imena: pročitano kao jedan glas, ono kaže **"This is Virtualization"** — što je suštinska ideja projekta. Ako vam je draže čitati ga slovo po slovo kao **"Z-S-virt,"** — i to je sasvim u redu. Izgovarajte ga onako kako vam je najprirodnije.
 
 ## Pregled proizvoda
 

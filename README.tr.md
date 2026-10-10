@@ -1,4 +1,4 @@
-<!-- synced-with: README.md@e9235837 -->
+<!-- synced-with: README.md@db599ce8 -->
 <div align="center">
   <a href="https://zsvirt.io">
     <img
@@ -90,6 +90,12 @@
 ZSvirt, [ZStack](https://www.zstack-cloud.com/)’in kurumsal ortamlarda kanıtlanmış ZSphere sanallaştırma motorunu açık kaynak dünyasına taşır. Köklü altyapı sağlayıcısı [ZStack](https://www.zstack-cloud.com/) tarafından desteklenen ZSvirt, sanal makineleri sağlayıcıya bağımlı olmadan çalıştırmak ve yönetmek için hafif, ölçeklenebilir bir platformdur.
 
 Bir yönetim düğümü kurun, KVM tabanlı sunucuları bağlayın ve VM’leri, kümeleri, depolamayı ve ağları web arayüzü, RESTful API (Terraform ve Go/Python/Java SDK’larıyla) veya CLI üzerinden yönetin. VMware geçiş araçları yerleşiktir: çevrimiçi geçiş, OVF içe aktarma ve VMDK yükleme.
+
+## 🗣️ Telaffuz
+
+ZSvirt'in toplulukta birkaç farklı şekilde söylendiğini duyduk ve hiçbiri yanlış değil. Önerimiz: **Z** ile **S**'yi tek bir sese kaynaştırın; böylece ad **"Z-s Virt"** gibi, yani "zeese Virt" (yaklaşık „ziis virt") ifadesine yakın çıkar.
+
+Adın oyuncu ruhu da tam burada yaşar: tek bir ses olarak okunduğunda **"This is Virtualization"** der — bu da projenin öz fikridir. Harf harf **"Z-S-virt,"** diye okumayı tercih ederseniz o da aynı derecede geçerlidir. En doğal gelen şekilde söyleyin.
 
 ## Ürün turu
 

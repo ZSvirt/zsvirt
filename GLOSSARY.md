@@ -67,6 +67,20 @@ These appear in every README and stay in their original form in every language.
 | `Demo Login` | Button label in the live demo. Keep exactly as written. |
 | `DASHBOARD` / `INVENTORY` / `MIGRATION MANAGEMENT` | UI navigation section names inside the Product Tour. Keep the English label; you may translate the descriptive subtitle that follows the dash. The screenshots themselves are in English. |
 
+### Pronunciation examples
+
+The `Pronunciation Guide` section explains the name with an English pun: read as
+one sound, `Z-s Virt` comes out close to "This is Virt", which gives **"This is
+Virtualization"**. The pun does not survive translation, and neither does the
+spelling of the examples.
+
+Keep `"Z-s Virt"`, `"zeese Virt"`, and `"Z-S-virt"` as written — they are Latin
+script in every language, and the quotes around them stay straight quotes, not
+local quotation marks. Translate the prose around them, and add one approximation
+in your own script so a reader can actually say the name out loud. Where your
+language has its own word for *virtualization*, use it for the pun's payoff
+rather than leaving the English phrase untranslated.
+
 ### Repository files
 
 Filenames and link targets must point at the same file in every language.
@@ -187,19 +201,20 @@ translated; the order and the link targets may not change.
 | 2 | Tagline and badges | `<h1>` tagline, then the badge row. |
 | 3 | "Try it now" blockquote | The qcow2/OVA nested-virtualization paragraph. |
 | 4 | What is ZSvirt | |
-| 5 | Product Tour | Three collapsible sections. The first is open by default. |
-| 6 | Live Demo | |
-| 7 | Architecture | Includes `./assets/zsvirt-architecture.svg`. |
-| 8 | VMware Migration Guide | |
-| 9 | Quick Start | |
-| 10 | Best Practices | |
-| 11 | Virtualization Platform Comparison | |
-| 12 | Roadmap | |
-| 13 | Governance | |
-| 14 | Contributing | |
-| 15 | Security | |
-| 16 | License | |
-| 17 | Resources | The two-column table of community links. |
+| 5 | Pronunciation Guide | Heading keeps the 🗣️ emoji. See [Pronunciation examples](#pronunciation-examples) — the pun is English-only. |
+| 6 | Product Tour | Three collapsible sections. The first is open by default. |
+| 7 | Live Demo | |
+| 8 | Architecture | Includes `./assets/zsvirt-architecture.svg`. |
+| 9 | VMware Migration Guide | |
+| 10 | Quick Start | |
+| 11 | Best Practices | |
+| 12 | Virtualization Platform Comparison | |
+| 13 | Roadmap | |
+| 14 | Governance | |
+| 15 | Contributing | |
+| 16 | Security | |
+| 17 | License | |
+| 18 | Resources | The two-column table of community links. |
 
 ---
 

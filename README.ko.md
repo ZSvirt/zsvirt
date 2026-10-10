@@ -1,4 +1,4 @@
-<!-- synced-with: README.md@e9235837 -->
+<!-- synced-with: README.md@db599ce8 -->
 <div align="center">
   <a href="https://zsvirt.io">
     <img
@@ -90,6 +90,12 @@
 ZSvirt는 [ZStack](https://www.zstack-cloud.com/)이 엔터프라이즈 환경에서 검증한 ZSphere 가상화 엔진을 오픈 소스 세계에 제공합니다. 성숙한 인프라 선도 기업인 [ZStack](https://www.zstack-cloud.com/)의 지원을 받는 ZSvirt는 공급업체 종속 없이 가상 머신을 실행하고 관리할 수 있는 가볍고 확장 가능한 플랫폼입니다.
 
 관리 노드를 설치하고 KVM 기반 호스트를 연결하면 웹 UI, RESTful API(Terraform 및 Go/Python/Java SDK 지원) 또는 CLI를 통해 VM, 클러스터, 스토리지, 네트워크 등 전체 환경을 관리할 수 있습니다. 온라인 마이그레이션, OVF 가져오기, VMDK 업로드와 같은 VMware 마이그레이션 도구도 기본으로 제공됩니다.
+
+## 🗣️ 발음 가이드
+
+커뮤니티에서는 "ZSvirt"를 여러 가지 방식으로 읽어 왔고, 어느 것도 틀리지 않았습니다. 저희의 제안은 **Z**와 **S**를 하나의 소리로 이어 붙여 **"Z-s Virt"**로 읽는 것입니다. 이는 "zeese Virt"(지즈 버트)에 가깝습니다.
+
+이름의 재미있는 정신도 바로 여기에 있습니다. 하나의 소리로 읽으면 **"This is Virtualization"**(이것이 가상화다)처럼 들리는데, 이것이 바로 이 프로젝트의 핵심 아이디어입니다. 문자 하나하나 **"Z-S-virt,"**로 읽는 편이 좋다면 그 또한 괜찮습니다. 가장 자연스럽게 나오는 대로 읽어 주세요.
 
 ## 제품 둘러보기
 

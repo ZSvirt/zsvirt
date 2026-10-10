@@ -1,4 +1,4 @@
-<!-- synced-with: README.md@e9235837 -->
+<!-- synced-with: README.md@db599ce8 -->
 <div align="center">
   <a href="https://zsvirt.io">
     <img
@@ -93,6 +93,12 @@
 ZSvirt 將 [ZStack](https://www.zstack.io/) 經企業級實務驗證的 ZSphere 虛擬化引擎帶入開源世界。ZSvirt 由成熟的基礎架構領導廠商 [ZStack](https://www.zstack.io/) 支援，是一個輕量、可擴充的平台，讓使用者能夠執行及管理虛擬機，並避免供應商鎖定。
 
 安裝管理節點並連接採用 KVM 的主機後，即可透過 Web 介面、RESTful API（搭配 Terraform 與 Go/Python/Java SDK）或 CLI，管理整個環境中的虛擬機、叢集、儲存和網路。平台內建 VMware 遷移工具，支援線上遷移、OVF 匯入及 VMDK 上傳。
+
+## 🗣️ 發音指南
+
+我們在社群裡聽過 "ZSvirt" 的幾種不同讀法，沒有哪一種算錯。我們的建議是：把 **Z** 和 **S** 連成一個音，讀作 **"Z-s Virt"** — 接近 "zeese Virt"（茲斯維特）。
+
+名字裡的巧思也正藏在這裡：連起來讀，它聽起來就像 **"This is Virtualization"**（這就是虛擬化），而這正是專案背後的核心概念。如果你更習慣逐字母讀成 **"Z-S-virt,"**，那也完全沒問題。怎麼順口就怎麼讀。
 
 ## 產品導覽
 

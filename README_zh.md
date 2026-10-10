@@ -1,4 +1,4 @@
-<!-- synced-with: README.md@e9235837 -->
+<!-- synced-with: README.md@db599ce8 -->
 <div align="center">
   <a href="https://zsvirt.io">
     <img
@@ -93,6 +93,12 @@
 ZSvirt 将 [ZStack](https://www.zstack.io/) 经企业级实践验证的 ZSphere 虚拟化引擎带入开源世界。
 
 依托成熟的基础设施厂商 [ZStack](https://www.zstack.io/)，ZSvirt 提供轻量、可扩展的虚拟化平台。从高性能家庭实验室到超大规模基础设施，ZSvirt 致力于为用户提供不受厂商锁定限制的自由选择。
+
+## 🗣️ 发音指南
+
+我们在社区里听到过 "ZSvirt" 的几种不同读法，没有哪一种算错。我们的建议是：把 **Z** 和 **S** 连成一个音，读作 **"Z-s Virt"** — 接近 "zeese Virt"（兹斯维特）。
+
+名字里的巧思也正藏在这里：连起来读，它听起来就像 **"This is Virtualization"**（这就是虚拟化），而这正是项目背后的核心理念。如果你更习惯逐字母读成 **"Z-S-virt,"**，那也完全没问题。怎么顺口就怎么读。
 
 ## 产品导览
 

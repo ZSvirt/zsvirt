@@ -537,6 +537,7 @@
         <class>org.zstack.storage.ceph.primary.CephOsdGroupHistoricalUsageVO</class>
         <class>org.zstack.storage.primary.local.LocalStorageHostHistoricalUsageVO</class>
         <class>org.zstack.network.l2.virtualSwitch.header.L2VirtualSwitchNetworkVO</class>
+        <class>org.zstack.network.zns.entity.ZnsTransportZoneRefVO</class>
         <class>org.zstack.network.l2.virtualSwitch.header.L2PortGroupNetworkVO</class>
         <class>org.zstack.network.hostNetworkInterface.lldp.entity.HostNetworkInterfaceLldpVO </class>
         <class>org.zstack.network.hostNetworkInterface.lldp.entity.HostNetworkInterfaceLldpRefVO</class>

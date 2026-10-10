@@ -47,6 +47,9 @@ public class L2VirtualSwitchNetworkInventory extends L2NetworkInventory {
         super(vo);
         this.isDistributed = vo.getDistributed();
         this.vSwitchIndex = vo.getVSwitchIndex();
+        if (vo.getZnsTransportZoneRef() != null) {
+            this.transportType = vo.getZnsTransportZoneRef().getTransportType();
+        }
         this.setPortGroups(PortGroupInventory.valueOf1(vo.getPortGroups()));
     }
 

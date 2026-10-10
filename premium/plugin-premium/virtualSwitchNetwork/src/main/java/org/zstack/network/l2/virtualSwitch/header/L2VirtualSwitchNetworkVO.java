@@ -4,6 +4,7 @@ import org.zstack.header.network.l2.L2NetworkEO;
 import org.zstack.header.network.l2.L2NetworkVO;
 import org.zstack.header.tag.AutoDeleteTag;
 import org.zstack.header.vo.*;
+import org.zstack.network.zns.entity.ZnsTransportZoneRefVO;
 
 import javax.persistence.*;
 import java.util.HashSet;
@@ -20,6 +21,11 @@ public class L2VirtualSwitchNetworkVO extends L2NetworkVO {
 
     @Column
     private Integer vSwitchIndex;
+
+    @OneToOne(fetch = FetchType.EAGER, optional = true)
+    @JoinColumn(name = "uuid", referencedColumnName = "vSwitchUuid", insertable = false, updatable = false)
+    @NoView
+    private ZnsTransportZoneRefVO znsTransportZoneRef;
 
     @OneToMany(fetch = FetchType.EAGER)
     @JoinColumn(name = "vSwitchUuid", insertable = false, updatable = false)
@@ -47,6 +53,10 @@ public class L2VirtualSwitchNetworkVO extends L2NetworkVO {
 
     public void setVSwitchIndex(Integer index) {
         this.vSwitchIndex = index;
+    }
+
+    public ZnsTransportZoneRefVO getZnsTransportZoneRef() {
+        return znsTransportZoneRef;
     }
 
     public Set<PortGroupVO> getPortGroups() {

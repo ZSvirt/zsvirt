@@ -1,4 +1,15 @@
-请按照 HA 的测试阶段，自觉把 case 分到对应的子目录里面。
+请按照 HA 的测试阶段，把 case 放到对应子目录。套件是同目录的 `HaTest`，spring 用 `ZStackTest.springSpec`。
+
+当前只有 `config/HaNeverStopCase`：Stopped VM 设置 NeverStop 后，`inhibitionReason` 会挡住拉起；清掉 inhibition 再触发扫描才会复活。`dead`、`reboot`、`full` 还没有用例。
+
+单测里下面两个周期任务在 `UTCapabilities/thread-facade-configs/blocked-periodic-task.list` 中，不会按生产间隔执行。需要时在当前线程触发：
+
+```groovy
+threadFacadeForTest().triggerBlockedPeriodicTask(HaScheduler.TASK_NAME_STOPPED_VM_SCANNER)
+threadFacadeForTest().triggerBlockedPeriodicTask(HaScheduler.TASK_NAME_REFRESH_FENCERS)
+```
+
+`TASK_NAME_STOPPED_VM_SCANNER` 的 `run()` 会同步执行 `HaScheduler.scanHaVmNow()`。`TASK_NAME_REFRESH_FENCERS` 的 `run()` 只提交 chain，触发返回时同步流程可能还没结束。
 
 # HA 总览（判死 vs 复活）
 
@@ -11,13 +22,12 @@ VM HA
 └── [阶段B · 复活] HaStartVmInstanceMsg → Judger → VmSchedHistoryVO → startVm
 ```
 
-| 阶段             | 子目录                    |
-|----------------|------------------------|
-| 参数设置           | `.platforms.ha.config` |
-| Self-Fencer 部署 | `.platforms.ha.config` |
-| 阶段A · 判死       | `.platforms.ha.dead`   |
-| 阶段B · 复活       | `.platforms.ha.reboot` |
-| 综合             | `.platforms.ha.full`   |
+| 阶段 | 包 |
+|------|----|
+| 参数设置、Self-Fencer 部署与状态同步 | `org.zstack.test.integration.platforms.ha.config` |
+| 阶段A · 判死 | `org.zstack.test.integration.platforms.ha.dead` |
+| 阶段B · 复活 | `org.zstack.test.integration.platforms.ha.reboot` |
+| 综合 | `org.zstack.test.integration.platforms.ha.full` |
 
 
 ## 配置：Self-Fencer 部署（判死能力上线）
@@ -29,12 +39,39 @@ Host Connected / PS Attach / Strategy 变更 / MN Ready
     ├── SelfFencerStruct(fencers, host, PS)
     └── SetupStorageHeartbeatFileFencer
         └── SelfFencerKvmBackend.setup
-            ├── HostHaStateVO → Setuping → Done|Fail
+            ├── HostHaStateVO（每个 host + primaryStorage 一行）
+            │   └── None → Setuping → Done | SetupFail
+            │       Cancel：Cancelling → None | CancelFail
             ├── /ha/selffencer/setup → KVM Agent
             │   ├── hostStorageState（存储心跳）
             │   ├── hostBusinessNic（业务网）
             │   ├── cephFencer / fileSystemFencer / shareblockFencer …
             └── 按 PS 调 KvmSetupSelfFencerExtensionPoint
+```
+
+`HostHaState` 不是只在 setup 时写一次。MN Ready 后 `HaScheduler.startSyncSelfFencer()` 按 `ha.selfFencer.sync.interval`（默认 60 秒）跑 `HaSyncSelfFencerTask`：
+
+```
+HaSyncSelfFencerTask
+├── 向已有 HostHaStateVO 的 host 发 GetFencerStateFromHostMsg（/ha/selffencer/state）
+│   ├── 宿主上报存在 → syncExist（None/SetupFail → Done；Cancelling/CancelFail + 仍存在 → CancelFail）
+│   └── 宿主上报不存在 → syncNotExist（Done → SetupFail；Cancelling/CancelFail → None）
+├── SetupFail → 先改成 Setuping，再发 RetrySetupSelfFencerOnHostMsg
+│   └── 仍按当前挂载的主存储过滤；已卸载的主存储不会被重试 setup
+└── CancelFail → 先改成 Cancelling，再发 RetryCancelSelfFencerOnHostMsg
+    └── 按消息里的主存储 UUID 加载，不看集群挂载
+        ├── VO 还在 → 对该主存储发 cancel
+        └── VO 已删、HostHaStateVO 还在 → cancelDone（Cancelling → None）
+```
+
+策略按主存储读取：`HaStrategyHelper.getPrimaryStorageSelfFencerStrategy`。支持存储一致性的类型（如 Shared Block）固定为 Force。文件系统主存储读该主存储的 `ha.self.fencer.strategy`，没有单独配置时用全局 Force。`Permissive` 才会跳过杀 VM / 卸载，以及管理侧复活。
+
+复活前会看根盘所在主存储在该 host 上的 `HostHaState`。没有行、没有 host 或没有根盘主存储时，`HaHelper.isSelfFencerDone` 视为已完成。已有行且不是 `Done` 时直接跳过，不发 `HaStartVmInstanceMsg`：
+
+```
+HaKvmWorker.startHa
+VmHaService.haStartVmWithTracker
+HaGcManager.submitNeverStopVmGCJob
 ```
 
 ## 阶段 A · 判死（Fencer / Checker）
@@ -88,6 +125,7 @@ Agent → MN 回调对照：
 tryHaWith / startHa
 ├── onlyCheckAlive（haLevel=None）→ noNeed
 ├── Strategy=Permissive           → skip
+├── HostHaState 不是 Done         → skip（见上面的 isSelfFencerDone）
 ├── HaHostDeviceExtensionPoint    → 外设仍挂载则 skip
 ├── FaultTolerance                → 特殊处理（部分路径直接 return）
 └── 通过 → 进入阶段 B（Judger=UnknownVmHaJudger）
@@ -119,7 +157,8 @@ Host disconnect
 | NeverStop 异常 Stopped | `haOnStopVm` → 状态复核 → `doStartVm` |
 | Guest ACPI 关机 | `kvmReportVmShutdownEvent` → **inhibit HA**（防误拉起） |
 | API/Hypervisor Stop | `inhibitHATemporarily`（意图停机不触发 HA） |
-| NeverStop 周期扫描 / GC | `NeverStopVmScanTracker` / `NeverStopVmGC` |
+| NeverStop 周期扫描 / GC | `HaScheduler.TASK_NAME_STOPPED_VM_SCANNER`（`NeverStopVmScanTracker`）/ `NeverStopVmGC` |
+| Self-Fencer 状态同步与失败重试 | `HaScheduler.TASK_NAME_REFRESH_FENCERS` |
 | 迁移失败（NeverStop） | `failedToMigrateVm` → `handleMigrationFailure` |
 | VR Unknown | `afterAcquireVirtualRouter` 可能 HA 拉起 |
 | 全局开关 | `HaGlobalConfig.ALL`；另受 `PAUSE_THE_WORLD` 影响 |
@@ -219,5 +258,5 @@ VM.state → Stopped（非用户意图）
 Agent Self-Fencer 判死并杀 VM
 └── /ha/events/vm-fenced → vmFencedBy tag          【判死·标记】
     └── （之后）VM 被标 Unknown / NeverStop 扫描
-        └── 再走 7.1 / 周期扫描 → HaStart，reason 用 Fencer 文案
+        └── 再走 Unknown 路径或 NeverStop 周期扫描 → HaStart，reason 用 Fencer 文案
 ```

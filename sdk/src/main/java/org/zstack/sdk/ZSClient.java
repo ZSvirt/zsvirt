@@ -749,6 +749,8 @@ public class ZSClient {
 
             if (response.code() == 200) {
                 res.setResultString(response.body().string());
+            } else if (response.code() == 204) {
+                // 204 No Content: success with no response body
             } else if (response.code() == 503) {
                 res = gson.fromJson(response.body().string(), ApiResult.class);
             } else {

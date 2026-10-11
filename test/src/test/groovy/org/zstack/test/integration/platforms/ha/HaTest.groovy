@@ -47,6 +47,8 @@ class HaTest extends Test {
                         managementIp = "127.0.0.1"
                         username = "root"
                         password = "password"
+                        totalMem = gb(256)
+                        totalCpu = 256
                     }
 
                     kvm {
@@ -54,6 +56,8 @@ class HaTest extends Test {
                         managementIp = "127.0.0.2"
                         username = "root"
                         password = "password"
+                        totalMem = gb(256)
+                        totalCpu = 256
                     }
 
                     attachPrimaryStorage("nfs")

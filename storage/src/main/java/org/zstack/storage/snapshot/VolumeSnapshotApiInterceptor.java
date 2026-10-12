@@ -83,11 +83,25 @@ public class VolumeSnapshotApiInterceptor implements ApiMessageInterceptor {
             validateSnapshotGroupAccess(msg, (VolumeSnapshotGroupMessage) msg);
         } else if (msg instanceof APIGetVolumeSnapshotGroupTreeMsg) {
             validate((APIGetVolumeSnapshotGroupTreeMsg) msg);
+        } else if (msg instanceof APIGetVolumeSnapshotSizeMsg) {
+            validate((APIGetVolumeSnapshotSizeMsg) msg);
         }
 
         setServiceId(msg);
 
         return msg;
+    }
+
+    private void validate(APIGetVolumeSnapshotSizeMsg msg) {
+        if (Account.isAdminPermission(msg.getSession())) {
+            return;
+        }
+
+        if (!VolumeSnapshotQueryAccess.isSnapshotReadableByAccount(msg.getUuid(), msg.getSession().getAccountUuid())) {
+            throw new ApiMessageInterceptionException(errf.instantiateErrorCode(RESOURCE_NOT_ACCESSIBLE,
+                    "account[uuid:%s] has no access to volume snapshot[uuid:%s]",
+                    msg.getSession().getAccountUuid(), msg.getUuid()));
+        }
     }
 
     private void validateSnapshotGroupAccess(APIMessage msg, VolumeSnapshotGroupMessage groupMsg) {

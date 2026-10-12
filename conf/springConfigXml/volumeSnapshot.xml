@@ -29,6 +29,13 @@
         </zstack:plugin>
     </bean>
 
+    <bean id="VolumeSnapshotZQLExtension" class="org.zstack.storage.snapshot.VolumeSnapshotZQLExtension">
+        <zstack:plugin>
+            <!-- Handle the account restriction before IdentityZQLExtension; reuse its single account marker. -->
+            <zstack:extension interface="org.zstack.header.zql.RestrictByExprExtensionPoint" order="100"/>
+        </zstack:plugin>
+    </bean>
+
     <bean id="VolumeSnapshotApiInterceptor" class="org.zstack.storage.snapshot.VolumeSnapshotApiInterceptor">
         <zstack:plugin>
             <zstack:extension interface="org.zstack.header.apimediator.ApiMessageInterceptor"/>

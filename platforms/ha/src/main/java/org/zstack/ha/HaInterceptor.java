@@ -1,6 +1,5 @@
 package org.zstack.ha;
 
-import org.zstack.core.config.GlobalConfigException;
 import org.zstack.core.db.Q;
 import org.zstack.header.apimediator.ApiMessageInterceptionException;
 import org.zstack.header.apimediator.ApiMessageInterceptor;
@@ -15,6 +14,8 @@ import org.zstack.header.vm.VmInstanceVO;
 import org.zstack.header.vm.VmInstanceVO_;
 
 import java.util.List;
+
+import static org.zstack.core.Platform.argerr;
 
 @InterceptorForService("ha")
 public class HaInterceptor implements ApiMessageInterceptor {
@@ -39,7 +40,7 @@ public class HaInterceptor implements ApiMessageInterceptor {
             .limit(10)
             .list();
         if (!hostUuids.isEmpty()) {
-            throw new GlobalConfigException(String.format("host[uuid:%s] is not %s, but still have vm on it," +
+            throw new ApiMessageInterceptionException(argerr("host[uuid:%s] is not %s, but still have vm on it," +
                     " please resolve hosts' problems before update fencer strategy", hostUuids, HostStatus.Connected));
         }
     }

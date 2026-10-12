@@ -170,6 +170,10 @@ class PremiumSimulator implements Simulator {
             return rsp
         }
 
+        spec.simulator(MevocoKVMConstant.KVM_VM_CHECK_VOLUME_PATH) {
+            return new KVMAgentCommands.AgentResponse()
+        }
+
         spec.simulator(UsbDeviceKvmBackend.GET_USB_DEVICES_PATH) {
             UsbDeviceKvmBackend.GetUsbDevicesRsp rsp = new UsbDeviceKvmBackend.GetUsbDevicesRsp()
             rsp.usbDevicesInfo = []

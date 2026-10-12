@@ -159,8 +159,6 @@ class HaTest extends Test {
 
                 cephPrimaryStorage {
                     name = "ceph-pri"
-                    totalCapacity = gb(300)
-                    availableCapacity = gb(300)
                     url = "ceph://pri-1"
                     fsid = "7ff218d9-f525-435f-8a40-3618d1772a64"
                     monUrls = ["root:password@127.0.0.11/?monPort=7777"]
@@ -203,6 +201,88 @@ class HaTest extends Test {
                 useImage("image1")
                 useL3Networks("l3")
                 usePrimaryStorage("nfs")
+            }
+        }
+    }
+
+    static EnvSpec cephOneCluster() {
+        return makeEnv {
+            cephBackupStorage {
+                name="ceph-bs"
+                url = "/bk"
+                fsid ="7ff218d9-f525-435f-8a40-3618d1772a64"
+                monUrls = ["root:password@127.0.0.11/?monPort=7777"]
+
+                image {
+                    name = "image1"
+                    url = "http://zstack.org/download/test.qcow2"
+                }
+            }
+
+            zone {
+                name = "zone"
+                description = "test"
+
+                cluster {
+                    name = "cluster"
+                    hypervisorType = "KVM"
+
+                    kvm {
+                        name = "kvm1"
+                        managementIp = "127.0.0.1"
+                        username = "root"
+                        password = "password"
+                        totalMem = gb(256)
+                        totalCpu = 256
+                    }
+
+                    kvm {
+                        name = "kvm2"
+                        managementIp = "127.0.0.2"
+                        username = "root"
+                        password = "password"
+                        totalMem = gb(256)
+                        totalCpu = 256
+                    }
+
+                    attachPrimaryStorage("ceph-pri")
+                    attachL2Network("l2")
+                }
+
+                cephPrimaryStorage {
+                    name = "ceph-pri"
+                    url = "ceph://pri-1"
+                    fsid = "7ff218d9-f525-435f-8a40-3618d1772a64"
+                    monUrls = ["root:password@127.0.0.11/?monPort=7777"]
+                }
+
+                l2NoVlanNetwork {
+                    name = "l2"
+                    physicalInterface = "eth0"
+
+                    l3Network {
+                        name = "l3"
+
+                        ip {
+                            startIp = "192.168.100.10"
+                            endIp = "192.168.100.100"
+                            netmask = "255.255.255.0"
+                            gateway = "192.168.100.1"
+                        }
+                    }
+                }
+
+                attachBackupStorage("ceph-bs")
+            }
+
+            vm {
+                name = "vm"
+                cpu = 4
+                memoryGB(8)
+                useHost("kvm1")
+                useImage("image1")
+                useL3Networks("l3")
+                usePrimaryStorage("ceph-pri")
             }
         }
     }

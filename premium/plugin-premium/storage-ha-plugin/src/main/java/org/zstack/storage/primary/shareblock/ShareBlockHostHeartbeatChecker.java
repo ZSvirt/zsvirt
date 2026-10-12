@@ -4,16 +4,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.zstack.core.cloudbus.CloudBus;
 import org.zstack.core.cloudbus.CloudBusCallBack;
 import org.zstack.core.db.Q;
-import org.zstack.core.db.SQL;
 import org.zstack.ha.message.CheckerStruct;
 import org.zstack.ha.spi.HaHostStorageBasedChecker;
 import org.zstack.header.core.HaCheckerCompletion;
-import org.zstack.header.host.*;
+import org.zstack.header.host.HostConstant;
 import org.zstack.header.message.MessageReply;
-import org.zstack.header.storage.primary.*;
+import org.zstack.header.storage.primary.PrimaryStorageType;
 import org.zstack.kvm.KVMAgentCommands;
 import org.zstack.kvm.KVMHostAsyncHttpCallMsg;
 import org.zstack.kvm.KVMHostAsyncHttpCallReply;
+import org.zstack.storage.primary.HaStoreFindHostUtils;
 import org.zstack.storage.primary.sharedblock.SharedBlockConstants;
 import org.zstack.storage.primary.sharedblock.SharedBlockGroupPrimaryStorageHostRefVO;
 import org.zstack.storage.primary.sharedblock.SharedBlockGroupPrimaryStorageHostRefVO_;
@@ -21,7 +21,6 @@ import org.zstack.utils.Utils;
 import org.zstack.utils.logging.CLogger;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -52,55 +51,40 @@ public class ShareBlockHostHeartbeatChecker implements HaHostStorageBasedChecker
         public List<String> vmUuids;
     }
 
-    private List<String> findSiblingsFromSameCluster(String hostUuid, String clusterUuid) {
-        return Q.New(HostVO.class)
-                .select(HostVO_.uuid)
-                .notEq(HostVO_.uuid, hostUuid)
-                .eq(HostVO_.status, HostStatus.Connected)
-                .eq(HostVO_.state, HostState.Enabled)
-                .eq(HostVO_.clusterUuid, clusterUuid)
-                .limit(3)
-                .listValues();
-    }
-
-    private boolean isShareBlockPs(String rootVolumePsUuid) {
-        long count =  SQL.New("select count(1) from PrimaryStorageVO ps " +
-                "where ps.uuid = :uuid and ps.type= :type", Long.class)
-                .param("uuid", rootVolumePsUuid)
-                .param("type", SharedBlockConstants.SHARED_BLOCK_PRIMARY_STORAGE_TYPE)
-                .find();
-
-        return count > 0;
-    }
-
     @Override
     public void check(CheckerStruct struct, HaCheckerCompletion completion) {
-        if (!isShareBlockPs(struct.vmInstance.getRootVolume().getPrimaryStorageUuid())) {
+        List<String> currentVmUsedPrimaryStorageUuids = HaStoreFindHostUtils.findCurrentVmUsedPrimaryStorageUuids(
+                struct, getPrimaryStorageType().toString());
+        if (currentVmUsedPrimaryStorageUuids.isEmpty()) {
             completion.noWay();
             return;
         }
 
-        final String clusterUuid = struct.vmInstance.getClusterUuid();
-        final List<String> siblings = findSiblingsFromSameCluster(struct.hostUuid, clusterUuid);
-        if (siblings.isEmpty()) {
+        HaStoreFindHostUtils.HeartbeatTarget target = HaStoreFindHostUtils.findHeartbeatTarget(struct, currentVmUsedPrimaryStorageUuids);
+        if (target == null) {
             completion.noWay();
             return;
         }
 
-        Collections.shuffle(siblings);
         ShareBlockCheckHostHeartbeatCmd cmd = new ShareBlockCheckHostHeartbeatCmd();
         cmd.storageCheckerTimeout = struct.successTimes;
         cmd.interval = struct.interval;
         cmd.times = struct.maxTimes;
-        cmd.psUuid = struct.vmInstance.getRootVolume().getPrimaryStorageUuid();
+        cmd.psUuid = target.primaryStorageUuid;
         cmd.hostUuid = struct.hostUuid;
-        cmd.hostId = Q.New(SharedBlockGroupPrimaryStorageHostRefVO.class)
+        Integer hostId = Q.New(SharedBlockGroupPrimaryStorageHostRefVO.class)
                 .select(SharedBlockGroupPrimaryStorageHostRefVO_.hostId)
                 .eq(SharedBlockGroupPrimaryStorageHostRefVO_.hostUuid, cmd.hostUuid)
                 .eq(SharedBlockGroupPrimaryStorageHostRefVO_.primaryStorageUuid, cmd.psUuid)
                 .findValue();
+        if (hostId == null) {
+            logger.warn(String.format("no sanlock hostId for host[uuid: %s] on primary storage[uuid: %s]", cmd.hostUuid, cmd.psUuid));
+            completion.noWay();
+            return;
+        }
+        cmd.hostId = hostId;
 
-        doCheckWithSanlock(siblings.get(0), cmd, completion);
+        doCheckWithSanlock(target.hostUuid, cmd, completion);
     }
 
     private void doCheckWithSanlock(String sentinelHostUuid, ShareBlockCheckHostHeartbeatCmd cmd, HaCheckerCompletion<List<String>> completion) {

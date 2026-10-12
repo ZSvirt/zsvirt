@@ -1073,4 +1073,8 @@ mysqldump -u root zstack > ${failureLogDir.absolutePath}/dbdump.sql
     static long gb(double gb) {
         return SizeUnit.GIGABYTE.toByte(gb)
     }
+
+    static long tb(double tb) {
+        return SizeUnit.TERABYTE.toByte(tb)
+    }
 }

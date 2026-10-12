@@ -346,6 +346,8 @@ class EnvSpec extends ApiHelper implements Node  {
         return spec
     }
 
+    // sftpBackupStorage is not used in ZSphere.
+    // Note: sftpBackupStorage do not support VM clone (and any feature with volume snapshot)
     BackupStorageSpec sftpBackupStorage(@DelegatesTo(strategy = Closure.DELEGATE_FIRST, value = SftpBackupStorageSpec.class) Closure c) {
         def spec = new SftpBackupStorageSpec(this)
         c.resolveStrategy = Closure.DELEGATE_FIRST

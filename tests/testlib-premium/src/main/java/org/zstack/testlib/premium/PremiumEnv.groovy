@@ -27,6 +27,9 @@ class PremiumEnv {
             agents()
             platformsPremium()
 
+            include("mevoco.xml")
+            include("imagestore.xml")
+            include("sriov.xml")
             include("authentications/accountImport.xml")
             include("authentications/accountImportTest.xml")
             include("authentications/ldap.xml")

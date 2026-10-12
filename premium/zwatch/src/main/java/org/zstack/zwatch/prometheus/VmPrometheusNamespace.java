@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static java.util.Arrays.asList;
-import static org.zstack.zwatch.ZWatchConstants.*;
+import static org.zstack.zwatch.header.ZWatchConstants.*;
 
 public class VmPrometheusNamespace extends AbstractPrometheusNamespace {
     public VmPrometheusNamespace(Namespace namespace) {

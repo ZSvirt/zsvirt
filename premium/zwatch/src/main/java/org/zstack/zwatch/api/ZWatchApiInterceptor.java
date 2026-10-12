@@ -18,7 +18,6 @@ import org.zstack.identity.rbac.AccessibleResourceChecker;
 import org.zstack.utils.CollectionUtils;
 import org.zstack.utils.TimeUtils;
 import org.zstack.utils.gson.JSONObjectUtil;
-import org.zstack.zwatch.ZWatchConstants;
 import org.zstack.zwatch.alarm.*;
 import org.zstack.zwatch.alarm.activealarm.api.APIChangeActiveAlarmStateMsg;
 import org.zstack.zwatch.alarm.activealarm.entity.ActiveAlarmVO;
@@ -26,6 +25,7 @@ import org.zstack.zwatch.alarm.activealarm.entity.ActiveAlarmVO_;
 import org.zstack.zwatch.datatype.*;
 import org.zstack.zwatch.datatype.metric.Metric;
 import org.zstack.zwatch.function.MetricFunction;
+import org.zstack.zwatch.header.ZWatchConstants;
 import org.zstack.zwatch.migratedb.AlarmRecordsVO;
 import org.zstack.zwatch.migratedb.EventRecordsVO;
 import org.zstack.zwatch.namespace.CustomNamespace;
@@ -48,8 +48,8 @@ import java.util.function.Supplier;
 import static org.zstack.core.Platform.argerr;
 import static org.zstack.utils.CollectionDSL.list;
 import static org.zstack.utils.CollectionUtils.findOneOrNull;
-import static org.zstack.zwatch.ZWatchConstants.UPDATE_DATA_MODE_INRANGE;
-import static org.zstack.zwatch.ZWatchConstants.UPDATE_DATA_MODE_ONLYONE;
+import static org.zstack.zwatch.header.ZWatchConstants.UPDATE_DATA_MODE_INRANGE;
+import static org.zstack.zwatch.header.ZWatchConstants.UPDATE_DATA_MODE_ONLYONE;
 
 @InterceptorForService("zwatch")
 public class ZWatchApiInterceptor implements GlobalApiMessageInterceptor {

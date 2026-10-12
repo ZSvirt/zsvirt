@@ -3,11 +3,8 @@ package org.zstack.zwatch.alarm;
 import org.zstack.header.configuration.PythonClassInventory;
 import org.zstack.header.search.Inventory;
 import org.zstack.header.search.Parent;
-import org.zstack.zwatch.ZWatchConstants;
-import org.zstack.zwatch.ZWatchGlobalConfig;
+import org.zstack.zwatch.header.ZWatchConstants;
 
-import java.io.Serializable;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;

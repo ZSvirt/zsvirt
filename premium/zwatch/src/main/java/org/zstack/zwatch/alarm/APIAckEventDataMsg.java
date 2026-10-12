@@ -3,7 +3,7 @@ package org.zstack.zwatch.alarm;
 import org.springframework.http.HttpMethod;
 import org.zstack.header.message.APIParam;
 import org.zstack.header.rest.RestRequest;
-import org.zstack.zwatch.ZWatchConstants;
+import org.zstack.zwatch.header.ZWatchConstants;
 
 /**
  * Create by yaoning at 2020/10/20

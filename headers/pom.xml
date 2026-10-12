@@ -22,6 +22,7 @@
         <module>header-pci</module>
         <module>header-usb</module>
         <module>header-storage</module>
+        <module>header-zwatch</module>
     </modules>
 
     <build>

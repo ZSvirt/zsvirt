@@ -7,7 +7,7 @@ import org.zstack.header.message.APISyncCallMessage;
 import org.zstack.header.message.DocUtils;
 import org.zstack.header.rest.RestRequest;
 import org.zstack.header.vm.VmInstanceVO;
-import org.zstack.zwatch.ZWatchConstants;
+import org.zstack.zwatch.header.ZWatchConstants;
 import org.zstack.zwatch.namespace.VmNamespace;
 
 import java.util.List;

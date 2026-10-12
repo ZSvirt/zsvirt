@@ -1,7 +1,7 @@
 package org.zstack.zwatch.namespace.event
 
 import org.zstack.header.managementnode.ManagementNodeCanonicalEvent
-import org.zstack.zwatch.ZWatchConstants
+import org.zstack.zwatch.header.ZWatchConstants
 import org.zstack.zwatch.datatype.EventFamily
 import org.zstack.zwatch.namespace.ManagementNodeNamespace
 

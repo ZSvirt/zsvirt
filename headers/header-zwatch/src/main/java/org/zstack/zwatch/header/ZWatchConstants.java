@@ -1,4 +1,4 @@
-package org.zstack.zwatch;
+package org.zstack.zwatch.header;
 
 public interface ZWatchConstants {
     String SERVICE_ID = "zwatch";
@@ -51,4 +51,11 @@ public interface ZWatchConstants {
     String WINDOWS_HARDDISK_PREFIX = "Harddisk.*";
 
     String IGNORED_FS_TYPE = "proc|tmpfs|rootfs|ramfs|iso9660|rpc_pipefs|fuse.lxcfs|nsfs";
+
+    // PeriodicTaskName
+    String TASK_NAME_METRIC_PUSHER = "push-metric-data-to-receiver";
+    String TASK_NAME_METRIC_PUSHER_THIRD_PARTY = "push-metric-data-to-receiver-third-party";
+    String TASK_NAME_EVENT_AUDIT_RETENTION = "zwatch-alarm-event-audit-retention";
+    String TASK_NAME_MONITOR_GROUP_CLEANUP = "cleanup-monitorGroup-nonexistent-instance-task";
+    String TASK_NAME_EVALUATION = "zwatch-evaluation-task";
 }

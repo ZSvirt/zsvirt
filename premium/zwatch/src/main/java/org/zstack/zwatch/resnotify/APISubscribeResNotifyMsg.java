@@ -9,7 +9,7 @@ import org.zstack.header.message.APIMessage;
 import org.zstack.header.message.APIParam;
 import org.zstack.header.other.APIAuditor;
 import org.zstack.header.rest.RestRequest;
-import org.zstack.zwatch.ZWatchConstants;
+import org.zstack.zwatch.header.ZWatchConstants;
 
 import java.util.Arrays;
 import java.util.List;

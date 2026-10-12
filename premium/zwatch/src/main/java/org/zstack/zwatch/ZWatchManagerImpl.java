@@ -59,10 +59,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import static org.zstack.core.Platform.operr;
-import static org.zstack.zwatch.ZWatchConstants.*;
 import static org.zstack.zwatch.alarm.sns.AbstractTextTemplate.defaultSupportedAlarmParams;
 import static org.zstack.zwatch.alarm.sns.AbstractTextTemplate.defaultSupportedEventParams;
+import static org.zstack.zwatch.header.ZWatchConstants.*;
 
 public class ZWatchManagerImpl extends AbstractService implements ZWatchManager, HostAfterConnectedExtensionPoint,
         VmInstanceAttachNicExtensionPoint {
@@ -310,16 +309,16 @@ public class ZWatchManagerImpl extends AbstractService implements ZWatchManager,
         }
 
         boolean flag = msg.getLabelList().stream().anyMatch( label ->
-                ZWatchConstants.DATA_READ_STATUS.equals(label.getKey()) && ZWatchConstants.DATA_READ_STATUS_READ.equalsIgnoreCase(label.getValue())
+                DATA_READ_STATUS.equals(label.getKey()) && org.zstack.zwatch.header.ZWatchConstants.DATA_READ_STATUS_READ.equalsIgnoreCase(label.getValue())
         );
         if (!flag) {
             return Collections.emptyList();
         }
 
         List<Label> labels = msg.getLabelList().stream()
-                .filter(label -> !ZWatchConstants.DATA_READ_STATUS.equals(label.getKey()))
+                .filter(label -> !DATA_READ_STATUS.equals(label.getKey()))
                 .collect(Collectors.toList());
-        labels.add(new Label(ZWatchConstants.DATA_READ_STATUS, ""));
+        labels.add(new Label(DATA_READ_STATUS, ""));
 
         AlarmQueryObject qo = AlarmQueryObject.New()
                 .startTime(msg.getStartTime())
@@ -406,20 +405,20 @@ public class ZWatchManagerImpl extends AbstractService implements ZWatchManager,
 
 
                 if (endTime != null && startTime != null) {
-                    conditions.add(String.format(ZWatchConstants.alarmMysqlAllString, alarmVO.getUuid(), startTime, endTime));
+                    conditions.add(String.format(org.zstack.zwatch.header.ZWatchConstants.alarmMysqlAllString, alarmVO.getUuid(), startTime, endTime));
                     continue;
                 }
 
                 if (endTime != null) {
-                    conditions.add(String.format(ZWatchConstants.alarmMysqlEndTimeString, alarmVO.getUuid(), endTime));
+                    conditions.add(String.format(org.zstack.zwatch.header.ZWatchConstants.alarmMysqlEndTimeString, alarmVO.getUuid(), endTime));
                     continue;
                 }
 
                 if (startTime != null) {
-                    conditions.add(String.format(ZWatchConstants.alarmMysqlStartTimeString, alarmVO.getUuid(), startTime));
+                    conditions.add(String.format(org.zstack.zwatch.header.ZWatchConstants.alarmMysqlStartTimeString, alarmVO.getUuid(), startTime));
                     continue;
                 }
-                conditions.add(String.format(ZWatchConstants.alarmMysqlNotTimeString, alarmVO.getUuid()));
+                conditions.add(String.format(org.zstack.zwatch.header.ZWatchConstants.alarmMysqlNotTimeString, alarmVO.getUuid()));
             }
 
             StringBuffer buffer = new StringBuffer();
@@ -613,16 +612,16 @@ public class ZWatchManagerImpl extends AbstractService implements ZWatchManager,
         }
 
         boolean flag = msg.getLabelList().stream().anyMatch( label ->
-            ZWatchConstants.DATA_READ_STATUS.equals(label.getKey()) && ZWatchConstants.DATA_READ_STATUS_READ.equalsIgnoreCase(label.getValue())
+            org.zstack.zwatch.header.ZWatchConstants.DATA_READ_STATUS.equals(label.getKey()) && org.zstack.zwatch.header.ZWatchConstants.DATA_READ_STATUS_READ.equalsIgnoreCase(label.getValue())
         );
         if (!flag) {
             return Collections.emptyList();
         }
 
         List<Label> labels = msg.getLabelList().stream()
-                .filter(label -> !ZWatchConstants.DATA_READ_STATUS.equals(label.getKey()))
+                .filter(label -> !org.zstack.zwatch.header.ZWatchConstants.DATA_READ_STATUS.equals(label.getKey()))
                 .collect(Collectors.toList());
-        labels.add(new Label(ZWatchConstants.DATA_READ_STATUS, ""));
+        labels.add(new Label(org.zstack.zwatch.header.ZWatchConstants.DATA_READ_STATUS, ""));
 
         EventQueryObject qo = EventQueryObject.New()
                 .startTime(msg.getStartTime())
@@ -717,21 +716,21 @@ public class ZWatchManagerImpl extends AbstractService implements ZWatchManager,
                 }
 
                 if (startTime != null && endTime != null) {
-                    conditions.add(String.format(ZWatchConstants.subscriptionMysqlAllString, subscriptionVO.getUuid(), startTime, endTime));
+                    conditions.add(String.format(org.zstack.zwatch.header.ZWatchConstants.subscriptionMysqlAllString, subscriptionVO.getUuid(), startTime, endTime));
                     continue;
                 }
 
                 if (startTime != null) {
-                    conditions.add(String.format(ZWatchConstants.subscriptionMysqlStartString, subscriptionVO.getUuid(), startTime));
+                    conditions.add(String.format(org.zstack.zwatch.header.ZWatchConstants.subscriptionMysqlStartString, subscriptionVO.getUuid(), startTime));
                     continue;
                 }
 
                 if (endTime != null) {
-                    conditions.add(String.format(ZWatchConstants.subscriptionMysqlEndTimeString, subscriptionVO.getUuid(), endTime));
+                    conditions.add(String.format(org.zstack.zwatch.header.ZWatchConstants.subscriptionMysqlEndTimeString, subscriptionVO.getUuid(), endTime));
                     continue;
                 }
 
-                conditions.add(String.format(ZWatchConstants.subscriptionMysqlNotTimeString, subscriptionVO.getUuid()));
+                conditions.add(String.format(org.zstack.zwatch.header.ZWatchConstants.subscriptionMysqlNotTimeString, subscriptionVO.getUuid()));
             }
 
             StringBuffer buffer = new StringBuffer();
@@ -759,8 +758,8 @@ public class ZWatchManagerImpl extends AbstractService implements ZWatchManager,
             // hardcode for ZSTAC-18142 & ZSV-8407
             if (!Account.supportToQueryEventsFromAllAccounts(msg.getSession()) && msg.getLabelList() != null) {
                 for (Label label : msg.getLabelList()) {
-                    if (ZWatchConstants.DATA_READ_STATUS.equals(label.getKey())) {
-                        qo.getLabels().add(new Label(ZWatchConstants.DATA_ACCOUNT_UUID, msg.getSession().getAccountUuid()));
+                    if (org.zstack.zwatch.header.ZWatchConstants.DATA_READ_STATUS.equals(label.getKey())) {
+                        qo.getLabels().add(new Label(org.zstack.zwatch.header.ZWatchConstants.DATA_ACCOUNT_UUID, msg.getSession().getAccountUuid()));
                         break;
                     }
                 }
@@ -776,7 +775,7 @@ public class ZWatchManagerImpl extends AbstractService implements ZWatchManager,
         }
 
         if (!Account.supportToQueryEventsFromAllAccounts(msg.getSession())) {
-            qo.getLabels().add(new Label(ZWatchConstants.DATA_ACCOUNT_UUID, msg.getSession().getAccountUuid()));
+            qo.getLabels().add(new Label(org.zstack.zwatch.header.ZWatchConstants.DATA_ACCOUNT_UUID, msg.getSession().getAccountUuid()));
         }
         Long count = eventDBDriver.getQueryCount(qo);
 //        Long count = mysqlDriver.getQueryCount(qo);
@@ -854,14 +853,14 @@ public class ZWatchManagerImpl extends AbstractService implements ZWatchManager,
         }
 
         if (msg.getReadStatus() != null && DATA_READ_STATUS_READ.equalsIgnoreCase(msg.getReadStatus())) {
-            msg.getLabelList().add(new Label(ZWatchConstants.DATA_READ_STATUS, DATA_READ_STATUS_UNREAD));
+            msg.getLabelList().add(new Label(org.zstack.zwatch.header.ZWatchConstants.DATA_READ_STATUS, DATA_READ_STATUS_UNREAD));
         }
 
         EventQueryObject qo = null;
 
         String updateMode = msg.getUpdateMode();
         if (UPDATE_DATA_MODE_ONLYONE.equals(updateMode)) {
-            msg.getLabelList().add(new Label(ZWatchConstants.DATA_UUID, msg.getDataUuid()));
+            msg.getLabelList().add(new Label(org.zstack.zwatch.header.ZWatchConstants.DATA_UUID, msg.getDataUuid()));
             qo = EventQueryObject.New()
                     .labels(msg.getLabelList())
                     .limit(1)
@@ -927,14 +926,14 @@ public class ZWatchManagerImpl extends AbstractService implements ZWatchManager,
         }
 
         if (msg.getReadStatus() != null) {
-            msg.getLabelList().add(new Label(ZWatchConstants.DATA_READ_STATUS, DATA_READ_STATUS_UNREAD));
+            msg.getLabelList().add(new Label(org.zstack.zwatch.header.ZWatchConstants.DATA_READ_STATUS, DATA_READ_STATUS_UNREAD));
         }
 
         AlarmQueryObject qo = null;
 
         String updateMode = msg.getUpdateMode();
         if (UPDATE_DATA_MODE_ONLYONE.equals(updateMode)) {
-            msg.getLabelList().add(new Label(ZWatchConstants.DATA_UUID, msg.getDataUuid()));
+            msg.getLabelList().add(new Label(org.zstack.zwatch.header.ZWatchConstants.DATA_UUID, msg.getDataUuid()));
             qo = AlarmQueryObject.New()
                     .labels(msg.getLabelList())
                     .limit(1)
@@ -972,7 +971,7 @@ public class ZWatchManagerImpl extends AbstractService implements ZWatchManager,
         String resourceUuid = !StringUtils.isEmpty(msg.getResourceUuid()) ? msg.getResourceUuid() : msg.getAlarmUuid();
         vo.setAlertDataUuid(msg.getAlertDataUuid());
         vo.setResumeAlert(false);
-        vo.setAlertType(ZWatchConstants.ALARM_DATA_TYPE);
+        vo.setAlertType(org.zstack.zwatch.header.ZWatchConstants.ALARM_DATA_TYPE);
         vo.setResourceUuid(resourceUuid);
         vo.setAlarmUuid(msg.getAlarmUuid());
         vo.setAckDate(new Timestamp(System.currentTimeMillis()));
@@ -1002,7 +1001,7 @@ public class ZWatchManagerImpl extends AbstractService implements ZWatchManager,
         String resourceUuid = msg.getResourceUuid() != null ? msg.getResourceUuid() : msg.getEventSubscriptionUuid();
         vo.setEventSubscriptionUuid(msg.getEventSubscriptionUuid());
         vo.setAlertDataUuid(msg.getAlertDataUuid());
-        vo.setAlertType(ZWatchConstants.EVENT_DATA_TYPE);
+        vo.setAlertType(org.zstack.zwatch.header.ZWatchConstants.EVENT_DATA_TYPE);
         vo.setResumeAlert(false);
         vo.setResourceUuid(resourceUuid);
         vo.setAckDate(new Timestamp(System.currentTimeMillis()));
@@ -1261,7 +1260,7 @@ public class ZWatchManagerImpl extends AbstractService implements ZWatchManager,
 
     @Override
     public String getId() {
-        return bus.makeLocalServiceId(ZWatchConstants.SERVICE_ID);
+        return bus.makeLocalServiceId(org.zstack.zwatch.header.ZWatchConstants.SERVICE_ID);
     }
 
     @Override

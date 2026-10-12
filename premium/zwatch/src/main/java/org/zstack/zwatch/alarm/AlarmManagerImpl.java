@@ -2,7 +2,6 @@ package org.zstack.zwatch.alarm;
 
 import com.google.common.base.Joiner;
 import org.apache.commons.lang.StringUtils;
-import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.zstack.core.CoreGlobalProperty;
 import org.zstack.core.Platform;
@@ -12,8 +11,6 @@ import org.zstack.core.componentloader.PluginRegistry;
 import org.zstack.core.db.*;
 import org.zstack.core.thread.ThreadFacade;
 import org.zstack.header.AbstractService;
-import org.zstack.header.apimediator.ApiMessageInterceptionException;
-import org.zstack.header.apimediator.GlobalApiMessageInterceptor;
 import org.zstack.header.core.NoErrorCompletion;
 import org.zstack.header.core.NopeWhileDoneCompletion;
 import org.zstack.header.errorcode.OperationFailureException;
@@ -33,11 +30,11 @@ import org.zstack.identity.AccountManager;
 import org.zstack.utils.Utils;
 import org.zstack.utils.gson.JSONObjectUtil;
 import org.zstack.utils.logging.CLogger;
-import org.zstack.zwatch.ZWatchConstants;
 import org.zstack.zwatch.ZWatchGlobalConfig;
 import org.zstack.zwatch.ZWatchQuotaConstant;
 import org.zstack.zwatch.datatype.*;
 import org.zstack.zwatch.driver.EventDatabaseDriver;
+import org.zstack.zwatch.header.ZWatchConstants;
 import org.zstack.zwatch.migratedb.MysqlAuditAction;
 import org.zstack.zwatch.namespace.NamespaceEventManager;
 import org.zstack.zwatch.namespace.ThirdpartyAlertNamespace;
@@ -54,10 +51,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import static org.zstack.core.Platform.operr;
-import static org.zstack.utils.CollectionDSL.*;
+import static org.zstack.utils.CollectionDSL.list;
 import static org.zstack.zwatch.alarm.system.AlarmSystemTagUtils.*;
-import static org.zstack.zwatch.alarm.system.AlarmSystemTagUtils.EVENT_SUBSCRIPTION_NAME_MAP;
-import static org.zstack.zwatch.alarm.system.AlarmSystemTagUtils.EVENT_SUBSCRIPTION_CN_SYSTEM_TAG_MAP;
 import static org.zstack.zwatch.utils.ParserUtils.getResourceUuid;
 
 public class AlarmManagerImpl extends AbstractService implements AlarmManager, ManagementNodeReadyExtensionPoint, ReportQuotaExtensionPoint,

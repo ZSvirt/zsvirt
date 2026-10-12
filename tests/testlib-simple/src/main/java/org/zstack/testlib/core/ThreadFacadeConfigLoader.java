@@ -24,9 +24,12 @@ public class ThreadFacadeConfigLoader {
             String line;
             while ((line = reader.readLine()) != null) {
                 String name = line.trim();
-                if (!name.isEmpty()) {
-                    names.add(name);
+
+                if (name.isEmpty() || name.startsWith("#")) {
+                    continue;
                 }
+
+                names.add(name);
             }
         } catch (IOException e) {
             throw new RuntimeException("failed to read " + BLOCKED_PERIODIC_TASK_LIST, e);

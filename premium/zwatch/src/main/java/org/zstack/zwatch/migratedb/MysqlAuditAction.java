@@ -9,7 +9,6 @@ import org.zstack.identity.AccountManager;
 import org.zstack.utils.Utils;
 import org.zstack.utils.gson.JSONObjectUtil;
 import org.zstack.utils.logging.CLogger;
-import org.zstack.zwatch.ZWatchConstants;
 import org.zstack.zwatch.alarm.AlarmAction;
 import org.zstack.zwatch.alarm.AlarmInventory;
 import org.zstack.zwatch.alarm.AlarmLabelInventory;
@@ -18,6 +17,7 @@ import org.zstack.zwatch.datatype.AlarmDataV2;
 import org.zstack.zwatch.datatype.EventData;
 import org.zstack.zwatch.datatype.Label;
 import org.zstack.zwatch.datatype.Namespace;
+import org.zstack.zwatch.header.ZWatchConstants;
 import org.zstack.zwatch.utils.ParserUtils;
 
 import java.util.Arrays;

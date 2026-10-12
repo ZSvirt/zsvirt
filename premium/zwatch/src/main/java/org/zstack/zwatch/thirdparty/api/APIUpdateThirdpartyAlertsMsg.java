@@ -4,7 +4,7 @@ import org.springframework.http.HttpMethod;
 import org.zstack.header.message.APIMessage;
 import org.zstack.header.message.APIParam;
 import org.zstack.header.rest.RestRequest;
-import org.zstack.zwatch.ZWatchConstants;
+import org.zstack.zwatch.header.ZWatchConstants;
 import org.zstack.zwatch.thirdparty.entity.ThirdpartyOriginalAlertVO;
 
 @RestRequest(

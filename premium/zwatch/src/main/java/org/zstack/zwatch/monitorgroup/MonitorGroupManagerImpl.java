@@ -47,6 +47,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import static org.zstack.core.Platform.argerr;
+import static org.zstack.zwatch.header.ZWatchConstants.TASK_NAME_MONITOR_GROUP_CLEANUP;
 
 public class MonitorGroupManagerImpl extends AbstractService implements ManagementNodeReadyExtensionPoint {
     protected static final CLogger logger = Utils.getLogger(MonitorGroupManagerImpl.class);
@@ -173,7 +174,7 @@ public class MonitorGroupManagerImpl extends AbstractService implements Manageme
 
             @Override
             public String getName() {
-                return "cleanup-monitorGroup-nonexistent-instance-task";
+                return TASK_NAME_MONITOR_GROUP_CLEANUP;
             }
 
             @Override

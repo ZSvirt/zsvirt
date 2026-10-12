@@ -75,11 +75,11 @@ import org.zstack.utils.ObjectUtils;
 import org.zstack.utils.Utils;
 import org.zstack.utils.gson.JSONObjectUtil;
 import org.zstack.utils.logging.CLogger;
-import org.zstack.zwatch.ZWatchConstants;
 import org.zstack.zwatch.api.GetMetricDataMsg;
 import org.zstack.zwatch.api.GetMetricDataReply;
 import org.zstack.zwatch.datatype.Datapoint;
 import org.zstack.zwatch.datatype.Label;
+import org.zstack.zwatch.header.ZWatchConstants;
 import org.zstack.zwatch.namespace.VmNamespace;
 
 import java.sql.Timestamp;

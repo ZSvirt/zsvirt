@@ -8,7 +8,7 @@ import org.zstack.header.volume.VolumeQosMode;
 import org.zstack.header.volume.VolumeQosType;
 import org.zstack.header.volume.VolumeVO;
 import org.zstack.storage.volume.MevocoVolumeSystemTags;
-import org.zstack.tag.PatternedSystemTag;
+import org.zstack.tag.SystemTag;
 import org.zstack.tag.SystemTagCreator;
 
 import java.util.HashMap;
@@ -314,11 +314,11 @@ public class VolumeQosHelper {
     }
 
     private static void doGetVolumeQosStr(String resourceUuid, Class resourceClass, StringBuilder sb, VolumeQosType type) {
-        Map<String, PatternedSystemTag> tagMap;
+        Map<String, SystemTag> tagMap;
         String totalToken, readToken, writeToken;
         String totalKey, readKey, writeKey;
         if (type == IOPS) {
-            tagMap = MevocoVolumeSystemTags.iopsSystemTagMap;
+            tagMap = MevocoVolumeSystemTags.generateIopsSystemTagMap();
             totalToken = MevocoVolumeSystemTags.VOLUME_TOTAL_IOPS_TOKEN;
             readToken = MevocoVolumeSystemTags.VOLUME_READ_IOPS_TOKEN;
             writeToken = MevocoVolumeSystemTags.VOLUME_WRITE_IOPS_TOKEN;
@@ -326,7 +326,7 @@ public class VolumeQosHelper {
             readKey = IOPS_READ;
             writeKey = IOPS_WRITE;
         } else if (type == BANDWIDTH) {
-            tagMap = MevocoVolumeSystemTags.volumeSystemTagMap;
+            tagMap = MevocoVolumeSystemTags.generateVolumeSystemTagMap();
             totalToken = MevocoVolumeSystemTags.VOLUME_TOTAL_BANDWIDTH_TOKEN;
             readToken = MevocoVolumeSystemTags.VOLUME_READ_BANDWIDTH_TOKEN;
             writeToken = MevocoVolumeSystemTags.VOLUME_WRITE_BANDWIDTH_TOKEN;
@@ -337,8 +337,8 @@ public class VolumeQosHelper {
             return;
         }
 
-        for (Map.Entry<String, PatternedSystemTag> entry : tagMap.entrySet()) {
-            PatternedSystemTag qosTag = entry.getValue();
+        for (Map.Entry<String, SystemTag> entry : tagMap.entrySet()) {
+            SystemTag qosTag = entry.getValue();
             if (qosTag.hasTag(resourceUuid, resourceClass)) {
                 if (qosTag.getTagFormat().contains(totalToken)) {
                     String qos = qosTag.getTokenByResourceUuid(resourceUuid, resourceClass, totalToken);
@@ -420,7 +420,7 @@ public class VolumeQosHelper {
 
     public static void copyQosFromOffering(String offeringUuid, Class offeringClass, String volumeUuid) {
         Map<String, String> volumeQos = getVolumeQosSystemTagMap(offeringUuid, offeringClass,
-                MevocoVolumeSystemTags.volumeSystemTagMap);
+                MevocoVolumeSystemTags.generateVolumeSystemTagMap());
         if (!volumeQos.isEmpty()) {
             SystemTagCreator creator = MevocoVolumeSystemTags.NORMAL_ACCOUNT_VOLUME_BANDWIDTH_UP_THRESHOLD.newSystemTagCreator(volumeUuid);
             creator.recreate = true;
@@ -434,7 +434,7 @@ public class VolumeQosHelper {
 
     public static void copyIopsQosFromOffering(String offeringUuid, Class offeringClass, String volumeUuid) {
         Map<String, String> iopsQos = getVolumeQosSystemTagMap(offeringUuid, offeringClass,
-                MevocoVolumeSystemTags.iopsSystemTagMap);
+                MevocoVolumeSystemTags.generateIopsSystemTagMap());
         if (iopsQos.isEmpty()) {
             MevocoVolumeSystemTags.NORMAL_ACCOUNT_VOLUME_IOPS_UP_THRESHOLD.delete(volumeUuid, VolumeVO.class);
             return;
@@ -448,10 +448,10 @@ public class VolumeQosHelper {
     }
 
     public static Map<String, String> getVolumeQosSystemTagMap(String offeringUuid, Class resourceClass,
-            Map<String, PatternedSystemTag> tagMaps) {
+            Map<String, SystemTag> tagMaps) {
         Map<String, String> tags = new HashMap<>();
-        for (Map.Entry<String, PatternedSystemTag> entry : tagMaps.entrySet()) {
-            PatternedSystemTag qosTag = entry.getValue();
+        for (Map.Entry<String, SystemTag> entry : tagMaps.entrySet()) {
+            SystemTag qosTag = entry.getValue();
             if (qosTag.hasTag(offeringUuid, resourceClass)) {
                 tags.put(entry.getKey(), qosTag.getTokenByResourceUuid(offeringUuid, resourceClass, entry.getKey()));
             }
@@ -460,8 +460,8 @@ public class VolumeQosHelper {
     }
 
     public static void removeVolumeQosInOldVersion(String resourceUuid, Class resourceClass) {
-        for (Map.Entry<String, PatternedSystemTag> entry : MevocoVolumeSystemTags.volumeSystemTagMap.entrySet()) {
-            PatternedSystemTag qosTag = entry.getValue();
+        for (Map.Entry<String, SystemTag> entry : MevocoVolumeSystemTags.generateVolumeSystemTagMap().entrySet()) {
+            SystemTag qosTag = entry.getValue();
             if (qosTag.hasTag(resourceUuid, resourceClass)) {
                 qosTag.delete(resourceUuid, resourceClass);
             }

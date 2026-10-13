@@ -130,6 +130,7 @@ import org.zstack.storage.volume.VolumeSystemTags;
 import org.zstack.storage.volume.block.BlockVolumeFactory;
 import org.zstack.storage.volume.block.BlockVolumeMessage;
 import org.zstack.tag.PatternedSystemTag;
+import org.zstack.tag.SystemTag;
 import org.zstack.tag.SystemTagCreator;
 import org.zstack.tag.TagManager;
 import org.zstack.utils.*;
@@ -460,9 +461,9 @@ public class MevocoManagerImpl extends AbstractService implements MevocoManager,
             }
         });
 
-        for (Map.Entry<String, PatternedSystemTag> entry : MevocoSystemTags._volumeSystemTagMap.entrySet()) {
+        for (Map.Entry<String, SystemTag> entry : MevocoSystemTags.generateVolumeSystemTagMap().entrySet()) {
             String patternedSystemTagToken = entry.getKey();
-            PatternedSystemTag patternedSystemTag = entry.getValue();
+            SystemTag patternedSystemTag = entry.getValue();
             patternedSystemTag.installValidator(new SystemTagValidator() {
                 @Override
                 public void validateSystemTag(String resourceUuid, Class resourceType, String systemTag) {
@@ -481,9 +482,9 @@ public class MevocoManagerImpl extends AbstractService implements MevocoManager,
             });
         }
 
-        for (Map.Entry<String, PatternedSystemTag> entry : MevocoVolumeSystemTags.volumeSystemTagMap.entrySet()) {
+        for (Map.Entry<String, SystemTag> entry : MevocoVolumeSystemTags.generateVolumeSystemTagMap().entrySet()) {
             String patternedSystemTagToken = entry.getKey();
-            PatternedSystemTag patternedSystemTag = entry.getValue();
+            SystemTag patternedSystemTag = entry.getValue();
             patternedSystemTag.installValidator(new SystemTagValidator() {
                 @Override
                 public void validateSystemTag(String resourceUuid, Class resourceType, String systemTag) {
@@ -502,9 +503,9 @@ public class MevocoManagerImpl extends AbstractService implements MevocoManager,
             });
         }
 
-        for (Map.Entry<String, PatternedSystemTag> entry : MevocoSystemTags._iopsSystemTagMap.entrySet()) {
+        for (Map.Entry<String, SystemTag> entry : MevocoSystemTags.generateIopsSystemTagMap().entrySet()) {
             String token = entry.getKey();
-            PatternedSystemTag tag = entry.getValue();
+            SystemTag tag = entry.getValue();
             tag.installValidator(((resourceUuid, resourceType, systemTag) -> {
                 String iops = tag.getTokenByTag(systemTag, token);
                 try {
@@ -520,9 +521,9 @@ public class MevocoManagerImpl extends AbstractService implements MevocoManager,
             }));
         }
 
-        for (Map.Entry<String, PatternedSystemTag> entry : MevocoVolumeSystemTags.iopsSystemTagMap.entrySet()) {
+        for (Map.Entry<String, SystemTag> entry : MevocoVolumeSystemTags.generateIopsSystemTagMap().entrySet()) {
             String token = entry.getKey();
-            PatternedSystemTag tag = entry.getValue();
+            SystemTag tag = entry.getValue();
             tag.installValidator((resourceUuid, resourceType, systemTag) -> {
                 String iops = tag.getTokenByTag(systemTag, token);
                 try {

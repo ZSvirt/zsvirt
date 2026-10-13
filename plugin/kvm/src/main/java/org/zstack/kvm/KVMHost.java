@@ -4650,67 +4650,110 @@ public class KVMHost extends HostBase implements Host {
 
         addons(spec, cmd);
         KVMHostInventory khinv = KVMHostInventory.valueOf(getSelf());
-        extEmitter.beforeStartVmOnKvm(khinv, spec, cmd);
 
-        extEmitter.addOn(khinv, spec, cmd);
-        //Set account uuid for kvm agent call vrouter agent api
-        cmd.setAccountUuid(accountMgr.getOwnerAccountUuidOfResource(cmd.getVmInstanceUuid()));
+        SimpleFlowChain chain = SimpleFlowChain.of("start-vm-on-kvm");
+        chain.putData(KVMStartVmExtensionPoint.Param.HOST, khinv)
+            .putData(KVMStartVmExtensionPoint.Param.SPEC, spec)
+            .putData(KVMStartVmExtensionPoint.Param.CMD, cmd);
 
-        new Http<>(startVmPath, cmd, StartVmResponse.class).call(new ReturnValueCompletion<StartVmResponse>(msg, completion) {
-            @Override
-            public void success(StartVmResponse ret) {
-                StartVmOnHypervisorReply reply = new StartVmOnHypervisorReply();
-                if (ret.isSuccess()) {
-                    extEmitter.afterReceiveSyncVmDeviceInfoResponse(null, ret, spec);
+        chain.then(Flow.nope("call-before-start-vm-extension-begin"));
+        extEmitter.beforeStartVmOnKvm(chain);
+        chain.then(Flow.nope("call-before-start-vm-extension-end"));
 
-                    String info = String.format("successfully start vm[uuid:%s name:%s] on kvm host[uuid:%s, ip:%s]",
-                            spec.getVmInventory().getUuid(), spec.getVmInventory().getName(),
-                            self.getUuid(), self.getManagementIp());
-                    logger.debug(info);
-                    extEmitter.startVmOnKvmSuccess(KVMHostInventory.valueOf(getSelf()), spec);
-                } else {
-                    reply.setError(err(HostErrors.FAILED_TO_START_VM_ON_HYPERVISOR,
-                            "failed to start vm[uuid:%s, name:%s] on kvm host[uuid:%s, ip:%s]",
-                            spec.getVmInventory().getUuid(), spec.getVmInventory().getName(),
-                            self.getUuid(), self.getManagementIp())
-                            .withOpaque("response.error", ret.getError()));
-                    logger.warn(reply.getError().getReadableDetails());
-                    extEmitter.startVmOnKvmFailed(KVMHostInventory.valueOf(getSelf()), spec, reply.getError());
-                }
-
-                if (ret.getNicInfos() != null && !ret.getNicInfos().isEmpty()) {
-                    Map<String, VmNicInventory> macNicMap = new HashMap<>();
-                    for (VmNicInventory nic : spec.getDestNics()) {
-                        macNicMap.put(nic.getMac(), nic);
-                    }
-
-                    for (VmNicInfo vmNicInfo : ret.getNicInfos()) {
-                        VmNicInventory nic = macNicMap.get(vmNicInfo.getMacAddress());
-                        if (nic == null) {
-                            continue;
+        chain.then(Flow.of("complete-add-on-for-start-vm-cmd")
+            .handle(trigger -> {
+                extEmitter.addOn(khinv, spec, cmd);
+                trigger.next();
+            })
+            .build())
+        .then(Flow.of("complete-account-info-for-start-vm-cmd")
+            .handle(trigger -> {
+                // Set account uuid for kvm agent call vrouter agent api
+                cmd.setAccountUuid(accountMgr.getOwnerAccountUuidOfResource(cmd.getVmInstanceUuid()));
+                trigger.next();
+            })
+            .build())
+        .then(Flow.of("send-start-vm-cmd")
+            .handle((trigger, data) -> {
+                new Http<>(startVmPath, cmd, StartVmResponse.class).call(new ReturnValueCompletion<StartVmResponse>(trigger) {
+                    @Override
+                    public void success(StartVmResponse response) {
+                        data.put(KVMStartVmExtensionPoint.Param.RESPONSE, response);
+                        if (response.isSuccess()) {
+                            logger.debug(String.format("successfully start vm[uuid:%s name:%s] on kvm host[uuid:%s, ip:%s]",
+                                    spec.getVmInventory().getUuid(), spec.getVmInventory().getName(),
+                                    self.getUuid(), self.getManagementIp()));
+                            trigger.next();
+                            return;
                         }
 
-                        SystemTagCreator creator = KVMSystemTags.VMNIC_PCI_ADDRESS.newSystemTagCreator(nic.getUuid());
-                        creator.inherent = true;
-                        creator.recreate = true;
-                        creator.setTagByTokens(map(e(KVMSystemTags.VMNIC_PCI_ADDRESS_TOKEN, vmNicInfo.getDeviceAddress().toString())));
-                        creator.create();
+                        trigger.fail(err(HostErrors.FAILED_TO_START_VM_ON_HYPERVISOR,
+                                "failed to start vm[uuid:%s, name:%s] on kvm host[uuid:%s, ip:%s]",
+                                spec.getVmInventory().getUuid(), spec.getVmInventory().getName(),
+                                self.getUuid(), self.getManagementIp())
+                                .withOpaque("response.error", response.getError()));
                     }
-                }
-                bus.reply(msg, reply);
-                completion.done();
-            }
 
-            @Override
-            public void fail(ErrorCode err) {
-                StartVmOnHypervisorReply reply = new StartVmOnHypervisorReply();
-                reply.setError(err);
-                reply.setSuccess(false);
-                extEmitter.startVmOnKvmFailed(KVMHostInventory.valueOf(getSelf()), spec, err);
-                bus.reply(msg, reply);
-                completion.done();
-            }
-        });
+                    @Override
+                    public void fail(ErrorCode errorCode) {
+                        trigger.fail(errorCode);
+                    }
+                });
+            })
+            .build())
+
+        // TODO: Subsequent flow errors should not affect the earlier flows
+        .then(Flow.of("sync-vm-device-info-from-response")
+            .handle((trigger, data) -> {
+                StartVmResponse response = (StartVmResponse) data.get(KVMStartVmExtensionPoint.Param.RESPONSE);
+                extEmitter.afterReceiveSyncVmDeviceInfoResponse(null, response, spec);
+                trigger.next();
+            })
+            .build())
+        .then(Flow.of("call-after-start-vm-extension")
+            .handle((trigger, data) -> {
+                KVMHostInventory kvmHostInventory = KVMHostInventory.valueOf(getSelf());
+                extEmitter.startVmOnKvmSuccess(kvmHostInventory, spec);
+                trigger.next();
+            })
+            .build())
+        .then(Flow.of("rebuild-vm-nic-tags")
+            .skipIf(data ->
+                    CollectionUtils.isEmpty(((StartVmResponse) data.get(KVMStartVmExtensionPoint.Param.RESPONSE)).getNicInfos()))
+            .handle((trigger, data) -> {
+                Map<String, VmNicInventory> macNicMap = new HashMap<>();
+                for (VmNicInventory nic : spec.getDestNics()) {
+                    macNicMap.put(nic.getMac(), nic);
+                }
+
+                List<VmNicInfo> nicInfos = ((StartVmResponse) data.get(KVMStartVmExtensionPoint.Param.RESPONSE)).getNicInfos();
+                CollectionUtils.safeForEach(nicInfos, vmNicInfo -> {
+                    VmNicInventory nic = macNicMap.get(vmNicInfo.getMacAddress());
+                    if (nic == null) {
+                        return;
+                    }
+
+                    SystemTagCreator creator = KVMSystemTags.VMNIC_PCI_ADDRESS.newSystemTagCreator(nic.getUuid());
+                    creator.inherent = true;
+                    creator.recreate = true;
+                    creator.setTagByTokens(map(e(KVMSystemTags.VMNIC_PCI_ADDRESS_TOKEN, vmNicInfo.getDeviceAddress().toString())));
+                    creator.create();
+                });
+                trigger.next();
+            })
+            .build())
+        .propagateExceptionTo(completion, msg)
+        .done(() -> {
+            bus.reply(msg, new StartVmOnHypervisorReply());
+            completion.done();
+        })
+        .error(error -> {
+            StartVmOnHypervisorReply reply = new StartVmOnHypervisorReply();
+            reply.setError(error);
+            bus.reply(msg, reply);
+            completion.done();
+        })
+        .start();
     }
 
     private void addons(final VmInstanceSpec spec, StartVmCmd cmd) {

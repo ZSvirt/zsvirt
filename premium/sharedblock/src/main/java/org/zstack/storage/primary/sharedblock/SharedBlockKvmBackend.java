@@ -438,7 +438,7 @@ public class SharedBlockKvmBackend extends SharedBlockHypervisorBackend implemen
         disconnectByClusterUuid(clusterUuid, new Completion(completion) {
             @Override
             public void success() {
-                completion.success();
+                doConfigFilter(Collections.singletonList(clusterUuid), self.getUuid(), new ArrayList<>(), completion);
             }
 
             @Override
@@ -5750,6 +5750,8 @@ public class SharedBlockKvmBackend extends SharedBlockHypervisorBackend implemen
 
                 @Override
                 public void fail(ErrorCode errorCode) {
+                    logger.warn(String.format("failed to configure LVM filter on host[uuid:%s] for primary storage[uuid:%s]: %s",
+                            hostUuid, psUuid, errorCode));
                     whileCompletion.done();
                 }
             });

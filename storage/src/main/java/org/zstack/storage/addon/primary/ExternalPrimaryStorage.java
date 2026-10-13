@@ -207,7 +207,7 @@ public class ExternalPrimaryStorage extends PrimaryStorageBase {
                         evt.setError(reply.getError());
                     } else {
                         self = dbf.reload(self);
-                        evt.setInventory(externalVO.toInventory());
+                        evt.setInventory(controller.maskUpdateEventInventory(externalVO.toInventory()));
                     }
 
                     bus.publish(evt);
@@ -216,7 +216,7 @@ public class ExternalPrimaryStorage extends PrimaryStorageBase {
             return;
         }
 
-        evt.setInventory(externalVO.toInventory());
+        evt.setInventory(controller.maskUpdateEventInventory(externalVO.toInventory()));
         bus.publish(evt);
     }
 

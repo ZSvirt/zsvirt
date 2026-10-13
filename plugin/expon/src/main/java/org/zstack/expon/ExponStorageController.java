@@ -842,6 +842,11 @@ public class ExponStorageController implements PrimaryStorageControllerSvc, Prim
     }
 
     @Override
+    public ExternalPrimaryStorageInventory maskUpdateEventInventory(ExternalPrimaryStorageInventory inventory) {
+        return inventory;
+    }
+
+    @Override
     public void connect(String config, String url, ReturnValueCompletion<LinkedHashMap> comp) {
         apiHelper.accountInfo = getAccountInfo(URI.create(url));
         apiHelper.login();

@@ -2,9 +2,9 @@ package org.zstack.test.integration.platforms.ha.config
 
 import org.springframework.http.HttpEntity
 import org.zstack.compute.host.HostGlobalConfig
+import org.zstack.ha.header.HaErrors
 import org.zstack.ha.header.HaGlobalConfig
 import org.zstack.ha.header.HaStrategyState
-import org.zstack.header.errorcode.SysErrors
 import org.zstack.header.host.HostStatus
 import org.zstack.header.host.HostVO
 import org.zstack.header.vm.VmInstanceState
@@ -83,7 +83,7 @@ class HaStrategyConditionNegativeCase extends SubCase {
                 delegate.state = HaStrategyState.Enable.toString()
             }
         }) {
-            assert delegate.code == SysErrors.INVALID_ARGUMENT_ERROR.toString()
+            assert delegate.code == HaErrors.DISCONNECTED_HOST_HAS_UNKNOWN_VM.toString()
             assert delegate.details.contains(vm.hostUuid)
         }
 

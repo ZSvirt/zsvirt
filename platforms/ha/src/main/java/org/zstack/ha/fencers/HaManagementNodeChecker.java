@@ -5,15 +5,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.zstack.core.CoreGlobalProperty;
 import org.zstack.core.thread.SyncTask;
 import org.zstack.core.thread.ThreadFacade;
-import org.zstack.ha.spi.HaHostChecker;
+import org.zstack.ha.header.HaErrors;
 import org.zstack.ha.message.CheckerStruct;
+import org.zstack.ha.spi.HaHostChecker;
 import org.zstack.header.core.HaCheckerCompletion;
 import org.zstack.utils.ShellResult;
 import org.zstack.utils.ShellUtils;
 
 import java.util.concurrent.TimeUnit;
 
-import static org.zstack.core.Platform.operr;
+import static org.zstack.core.Platform.err;
 
 /**
  * Created by xing5 on 2016/3/29.
@@ -97,7 +98,7 @@ public class HaManagementNodeChecker implements HaHostChecker {
         if (success >= struct.successTimes) {
             completion.success(null);
         } else if (success == 0) {
-            completion.fail(operr("the management node fails to scan the host"));
+            completion.fail(err(HaErrors.MANAGEMENT_NODE_SCAN_FAILED, "the management node fails to scan the host"));
         } else {
             completion.notStable();
         }

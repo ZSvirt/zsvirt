@@ -13,6 +13,7 @@ import org.zstack.core.thread.AsyncThread;
 import org.zstack.ha.entity.VmHaVO;
 import org.zstack.ha.entity.VmHaVO_;
 import org.zstack.ha.HaHelper;
+import org.zstack.ha.header.HaErrors;
 import org.zstack.ha.header.HaGlobalConfig;
 import org.zstack.ha.header.SelfFencerStrategy;
 import org.zstack.ha.header.VmHaLevel;
@@ -96,7 +97,7 @@ public class HaKvmWorker implements HaHypervisorWorker {
     private void checkHost(List<HaHostChecker> checkers, final CheckerStruct s, Completion completion) {
         synchronized (context.lock) {
             if (context.started) {
-                completion.fail(operr("HaKvmWorker already started"));
+                completion.fail(err(HaErrors.HA_WORKER_ALREADY_STARTED, "HaKvmWorker already started"));
                 return;
             }
             context.started = true;
@@ -290,14 +291,15 @@ public class HaKvmWorker implements HaHypervisorWorker {
         }
 
         if (self.getHostUuid() == null) {
-            completion.fail(operr("cannot find the host of the vm[name:%s, uuid:%s], hostUuid is null",
+            completion.fail(err(HaErrors.VM_HOST_NOT_FOUND,
+                    "cannot find the host of the vm[name:%s, uuid:%s], hostUuid is null",
                     self.getName(), self.getUuid()));
             return;
         }
 
         List<HaHostChecker> checkers = pluginRgty.getExtensionList(HaHostChecker.class);
         if (checkers.isEmpty()) {
-            completion.fail(operr("no HaHostChecker found, cannot do HA"));
+            completion.fail(err(HaErrors.NO_HA_HOST_CHECKER, "no HaHostChecker found, cannot do HA"));
             return;
         }
 

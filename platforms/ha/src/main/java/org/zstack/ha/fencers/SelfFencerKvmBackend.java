@@ -10,7 +10,6 @@ import org.zstack.core.cloudbus.CloudBusCallBack;
 import org.zstack.core.componentloader.PluginRegistry;
 import org.zstack.core.db.DatabaseFacade;
 import org.zstack.core.db.Q;
-import org.zstack.core.errorcode.ErrorFacade;
 import org.zstack.core.thread.ChainTask;
 import org.zstack.core.thread.SyncTaskChain;
 import org.zstack.core.thread.ThreadFacade;
@@ -20,6 +19,7 @@ import org.zstack.ha.entity.HaCommands.GetFencerStateFromHostCmd;
 import org.zstack.ha.entity.HaCommands.GetFencerStateFromHostRsp;
 import org.zstack.ha.entity.HostHaStateVO;
 import org.zstack.ha.entity.HostHaStateVO_;
+import org.zstack.ha.header.HaErrors;
 import org.zstack.ha.header.HaGlobalConfig;
 import org.zstack.ha.header.HostHaState;
 import org.zstack.ha.header.HostHaStateEvent;
@@ -59,8 +59,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
-import static org.zstack.core.Platform.inerr;
-import static org.zstack.core.Platform.operr;
+import static org.zstack.core.Platform.err;
 import static org.zstack.ha.entity.HaCommands.CancelSelfFencerCmd;
 import static org.zstack.ha.entity.HaCommands.SetupSelfFencerCmd;
 import static org.zstack.ha.fencers.HaStrategyHelper.getPrimaryStorageSelfFencerStrategy;
@@ -79,8 +78,6 @@ public class SelfFencerKvmBackend implements SelfFencerHypervisorBackend {
     private ThreadFacade thdf;
     @Autowired
     private DatabaseFacade dbf;
-    @Autowired
-    private ErrorFacade errf;
     @Autowired
     private PluginRegistry pluginRgty;
     @Autowired
@@ -127,7 +124,7 @@ public class SelfFencerKvmBackend implements SelfFencerHypervisorBackend {
 
         new KvmCommandSender(host.getUuid()).send(cmd, CancelSelfFencerCmd.PATH, wrapper -> {
             AgentResponse rsp = wrapper.getResponse(AgentResponse.class);
-            return rsp.isSuccess() ? null : operr("operation error, because:%s", rsp.getError());
+            return rsp.isSuccess() ? null : err(HaErrors.CANCEL_SELF_FENCER_FAILED, "operation error, because:%s", rsp.getError());
         }, new ReturnValueCompletion<KvmResponseWrapper>(completion) {
             @Override
             public void success(KvmResponseWrapper w) {
@@ -175,7 +172,7 @@ public class SelfFencerKvmBackend implements SelfFencerHypervisorBackend {
                 KVMHostAsyncHttpCallReply kr = reply.castReply();
                 AgentResponse rsp = kr.toResponse(AgentResponse.class);
                 if (!rsp.isSuccess()) {
-                    completion.fail(operr("operation error, because:%s", rsp.getError()));
+                    completion.fail(err(HaErrors.SETUP_SELF_FENCER_FAILED, "operation error, because:%s", rsp.getError()));
                     return;
                 }
 
@@ -247,8 +244,9 @@ public class SelfFencerKvmBackend implements SelfFencerHypervisorBackend {
                         completion.success();
                     } else {
                         updateHostHaState(psUuid, HostHaStateEvent.setupFail);
-                        completion.fail(errf.stringToOperationError(String.format("unable to setup storage[uuid:%s] self-fencer on the KVM host[uuid:%s, name: %s]",
-                                psUuid, param.host.getUuid(), param.host.getName()), result.error));
+                        completion.fail(err(HaErrors.SETUP_SELF_FENCER_FAILED,
+                                "unable to setup storage[uuid:%s] self-fencer on the KVM host[uuid:%s, name: %s]",
+                                psUuid, param.host.getUuid(), param.host.getName()).withCause(result.error));
                     }
                 }
             }
@@ -329,8 +327,9 @@ public class SelfFencerKvmBackend implements SelfFencerHypervisorBackend {
                         completion.success();
                     } else {
                         updateHostHaState(psUuid, HostHaStateEvent.cancelFail);
-                        completion.fail(errf.stringToOperationError(String.format("unable to cancel storage[uuid:%s] self-fencer on the KVM host[uuid:%s, name: %s]",
-                                psUuid, param.host.getUuid(), param.host.getName()), result.error));
+                        completion.fail(err(HaErrors.CANCEL_SELF_FENCER_FAILED,
+                                "unable to cancel storage[uuid:%s] self-fencer on the KVM host[uuid:%s, name: %s]",
+                                psUuid, param.host.getUuid(), param.host.getName()).withCause(result.error));
                     }
                 }
             }
@@ -404,7 +403,8 @@ public class SelfFencerKvmBackend implements SelfFencerHypervisorBackend {
                         KVMHostAsyncHttpCallReply kr = reply.castReply();
                         GetFencerStateFromHostRsp rsp = kr.toResponse(GetFencerStateFromHostRsp.class);
                         if (!rsp.isSuccess()) {
-                            completion.fail(operr("exception occurred when sync the self-fencer state from the host[uuid: %s], %s",
+                            completion.fail(err(HaErrors.SYNC_SELF_FENCER_STATE_FAILED,
+                                    "exception occurred when sync the self-fencer state from the host[uuid: %s], %s",
                                     param.host.getUuid(), rsp.getError()));
                             return;
                         }
@@ -439,7 +439,7 @@ public class SelfFencerKvmBackend implements SelfFencerHypervisorBackend {
 
             @Override
             protected void exceedMaxPendingCallback() {
-                completion.fail(inerr(
+                completion.fail(err(HaErrors.FENCER_SYNC_TASK_CONFLICT,
                         "in task %s: an other fencer state sync task in running, cancel the new task", getName()));
             }
         });

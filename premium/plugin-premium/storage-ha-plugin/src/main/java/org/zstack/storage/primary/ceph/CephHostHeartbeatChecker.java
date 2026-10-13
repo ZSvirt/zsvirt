@@ -12,6 +12,7 @@ import org.zstack.core.thread.SyncTaskChain;
 import org.zstack.core.thread.ThreadFacade;
 import org.zstack.core.workflow.FlowChainBuilder;
 import org.zstack.ha.*;
+import org.zstack.ha.header.HaErrors;
 import org.zstack.ha.header.HaGlobalConfig;
 import org.zstack.ha.message.CheckerStruct;
 import org.zstack.ha.spi.HaHostStorageBasedChecker;
@@ -37,7 +38,7 @@ import org.zstack.utils.logging.CLogger;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static org.zstack.core.Platform.operr;
+import static org.zstack.core.Platform.err;
 
 public class CephHostHeartbeatChecker implements HaHostStorageBasedChecker, CephPrimaryStorageMonAfterModifiedExtensionPoint {
     private static final CLogger logger = Utils.getLogger(CephHostHeartbeatChecker.class);
@@ -151,7 +152,7 @@ public class CephHostHeartbeatChecker implements HaHostStorageBasedChecker, Ceph
                 if (res.contains(Boolean.TRUE)) {
                     completion.success(rsp.vmUuids);
                 } else {
-                    completion.fail(operr("host %s's heartbeat is not updated", targetHostUuid));
+                    completion.fail(err(HaErrors.HEARTBEAT_NOT_UPDATED, "host %s's heartbeat is not updated", targetHostUuid));
                 }
             }
         });

@@ -118,9 +118,9 @@ public class AccountBase implements Account {
 
         boolean passwordUpdated = false;
         String oldPassword = null;
-        if (msg.getPassword() != null && !msg.getPassword().equals(account.getPassword())) {
+        if (msg.getPassword() != null && !AccountPassword.matches(msg.getPassword(), account.getPassword())) {
             oldPassword = account.getPassword();
-            account.setPassword(msg.getPassword());
+            account.setPassword(AccountPassword.encodeForStorage(msg.getPassword()));
             passwordUpdated = true;
 
         }

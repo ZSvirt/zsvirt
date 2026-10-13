@@ -43,6 +43,7 @@ import org.zstack.header.identity.role.RoleVO;
 import org.zstack.header.identity.role.RoleVO_;
 import org.zstack.header.identity.role.api.APIGetRolePolicyActionsMsg;
 import org.zstack.header.identity.role.api.APIGetRolePolicyActionsReply;
+import org.zstack.header.managementnode.ManagementNodeVO;
 import org.zstack.header.managementnode.PrepareDbInitialValueExtensionPoint;
 import org.zstack.header.message.*;
 import org.zstack.header.rest.RestAuthenticationBackend;
@@ -101,6 +102,13 @@ public class AccountManagerImpl extends AbstractService implements AccountManage
 
     @Override
     public void prepareDbInitialValue() {
+        // Only the fresh installer opts in. Existing databases/nodes keep their storage mode.
+        if (IdentityGlobalProperty.SALTED_PASSWORD_ON_FRESH_INSTALL
+                && !Q.New(AccountVO.class).isExists()
+                && !Q.New(ManagementNodeVO.class).isExists()) {
+            IdentityGlobalConfig.ENABLE_SALTED_PASSWORD.updateValue(true);
+        }
+
         new SQLBatch() {
             @Override
             protected void scripts() {
@@ -110,7 +118,7 @@ public class AccountManagerImpl extends AbstractService implements AccountManage
                     AccountVO vo = new AccountVO();
                     vo.setUuid(AccountConstant.INITIAL_SYSTEM_ADMIN_UUID);
                     vo.setName(AccountConstant.INITIAL_SYSTEM_ADMIN_NAME);
-                    vo.setPassword(AccountConstant.INITIAL_SYSTEM_ADMIN_PASSWORD);
+                    vo.setPassword(AccountPassword.encodeForStorage(AccountConstant.INITIAL_SYSTEM_ADMIN_PASSWORD));
                     vo.setType(AccountType.SystemAdmin);
                     vo.setSource(AccountSource.Local);
                     vo.setState(AccountState.Enabled);
@@ -552,7 +560,7 @@ public class AccountManagerImpl extends AbstractService implements AccountManage
                 }
                 vo.setName(msg.getName());
                 vo.setDescription(msg.getDescription());
-                vo.setPassword(msg.getPassword());
+                vo.setPassword(AccountPassword.encodeForStorage(msg.getPassword()));
                 AccountType accountType = msg.getType() != null ? AccountType.valueOf(msg.getType()) : AccountType.Normal;
                 if (accountType == AccountType.ThirdParty) {
                     throw operr("account type[ThirdParty] is deprecated; use Normal with account source instead")
@@ -1119,7 +1127,7 @@ public class AccountManagerImpl extends AbstractService implements AccountManage
 
 
 
-        if (msg.getOldPassword() != null && !msg.getOldPassword().equals(account.getPassword())) {
+        if (msg.getOldPassword() != null && !AccountPassword.matches(msg.getOldPassword(), account.getPassword())) {
             throw new OperationFailureException(operr("old password is not equal to the original password, cannot update the password of account[uuid: %s]", msg.getUuid()));
         }
 

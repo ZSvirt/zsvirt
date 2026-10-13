@@ -115,11 +115,12 @@ public class GLock {
             try {
                 conn = dataSource.getConnection();
                 conn.setAutoCommit(true);
-                pstmt = conn.prepareStatement(String.format("select get_lock('%s', %s)", name, timeout),ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_READ_ONLY);
-                //pstmt = conn.prepareStatement(String.format("select get_lock('%s', %s)", name, timeout));
+                pstmt = conn.prepareStatement("select get_lock(?, ?)", ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
                 if (waitTimeout > 0) {
                     pstmt.execute(String.format("set wait_timeout=%d", waitTimeout));
                 }
+                pstmt.setString(1, name);
+                pstmt.setLong(2, timeout);
                 ResultSet rs = pstmt.executeQuery();
                 if (rs == null) {
                     String err = "Unable to get DB lock: " + name + ", internal database error happened";
@@ -198,7 +199,8 @@ public class GLock {
 
             PreparedStatement pstmt = null;
             try {
-                pstmt = conn.prepareStatement(String.format("select release_lock('%s')", name), ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_READ_ONLY);
+                pstmt = conn.prepareStatement("select release_lock(?)", ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+                pstmt.setString(1, name);
                 try (ResultSet rs = pstmt.executeQuery()) {
                     if (!rs.next()) {
                         throw new CloudRuntimeException("Mysql cannot find lock: " + name);

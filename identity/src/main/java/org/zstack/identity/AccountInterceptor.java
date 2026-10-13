@@ -46,11 +46,11 @@ public class AccountInterceptor implements GlobalApiMessageInterceptor {
         }
 
         String accountUuid = session.getAccountUuid();
-        boolean correct = Q.New(AccountVO.class)
+        String stored = Q.New(AccountVO.class)
                 .eq(AccountVO_.uuid, accountUuid)
-                .eq(AccountVO_.password, msg.getPassword())
-                .isExists();
-        if (!correct) {
+                .select(AccountVO_.password)
+                .findValue();
+        if (!AccountPassword.matchesAccount(msg.getPassword(), accountUuid, stored)) {
             throw new ApiMessageInterceptionException(argerr("wrong password"));
         }
     }

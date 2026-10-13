@@ -6802,10 +6802,12 @@ public class KVMHost extends HostBase implements Host {
                         continue;
                     }
 
-                    hardwareChangedErrors.add(operr("host[uuid:%s]'s %s changed, old:%s, new:%s",
-                            self.getUuid(),
-                            systemTag.getTagFormat(),
-                            oldValue, newValue));
+                    if (!CPU_GHZ.getTagFormat().equals(systemTag.getTagFormat())) {
+                        hardwareChangedErrors.add(operr("host[uuid:%s]'s %s changed, old:%s, new:%s",
+                                self.getUuid(),
+                                systemTag.getTagFormat(),
+                                oldValue, newValue));
+                    }
                 }
 
                 recreateTag(systemTag, tokenMap, true);

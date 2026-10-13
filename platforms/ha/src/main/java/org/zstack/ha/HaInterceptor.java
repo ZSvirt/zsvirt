@@ -1,6 +1,7 @@
 package org.zstack.ha;
 
 import org.zstack.core.db.Q;
+import org.zstack.ha.header.HaErrors;
 import org.zstack.header.apimediator.ApiMessageInterceptionException;
 import org.zstack.header.apimediator.ApiMessageInterceptor;
 import org.zstack.header.apimediator.InterceptorForService;
@@ -15,7 +16,7 @@ import org.zstack.header.vm.VmInstanceVO_;
 
 import java.util.List;
 
-import static org.zstack.core.Platform.argerr;
+import static org.zstack.core.Platform.err;
 
 @InterceptorForService("ha")
 public class HaInterceptor implements ApiMessageInterceptor {
@@ -40,7 +41,8 @@ public class HaInterceptor implements ApiMessageInterceptor {
             .limit(10)
             .list();
         if (!hostUuids.isEmpty()) {
-            throw new ApiMessageInterceptionException(argerr("host[uuid:%s] is not %s, but still have vm on it," +
+            throw new ApiMessageInterceptionException(err(HaErrors.DISCONNECTED_HOST_HAS_UNKNOWN_VM,
+                    "host[uuid:%s] is not %s, but still have vm on it," +
                     " please resolve hosts' problems before update fencer strategy", hostUuids, HostStatus.Connected));
         }
     }

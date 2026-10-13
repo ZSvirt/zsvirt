@@ -1,7 +1,5 @@
 package org.zstack.ha.header;
 
-import org.zstack.header.errorcode.ErrorCode;
-
 /**
  * Created by xing5 on 2016/3/28.
  */
@@ -9,8 +7,6 @@ public interface HaConstants {
     String ACTION_CATEGORY = "ha";
 
     String SERVICE_ID = "ha";
-
-    ErrorCode PRIMARY_STORAGE_HOST_DISCONNECTED_ERROR = new ErrorCode(HaErrors.PRIMARY_STORAGE_ERROR.toString(), "Primary storage error");
 
     String HOST_STORAGE_STATE = "hostStorageState";
     String HOST_BUSINESS_NIC = "hostBusinessNic";

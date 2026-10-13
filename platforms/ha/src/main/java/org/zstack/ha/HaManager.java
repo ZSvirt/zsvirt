@@ -28,7 +28,6 @@ import org.zstack.core.thread.ThreadFacade;
 import org.zstack.header.AbstractService;
 import org.zstack.header.Component;
 import org.zstack.header.errorcode.ErrorCode;
-import org.zstack.header.errorcode.OperationFailureException;
 import org.zstack.header.exception.CloudRuntimeException;
 import org.zstack.header.exception.CloudStateMachineException;
 import org.zstack.header.host.*;
@@ -209,10 +208,9 @@ public class HaManager extends AbstractService implements Component, HaCompletio
                         msg.setStatus(PrimaryStorageHostStatus.valueOf(cmd.psStatus));
 
                         if (msg.getStatus().equals(PrimaryStorageHostStatus.Disconnected)) {
-                            ErrorCode reason = HaConstants.PRIMARY_STORAGE_HOST_DISCONNECTED_ERROR;
-                            reason.setDetails(String.format("primary storage %s disconnect on host %s, details: %s",
+                            msg.setReason(err(HaErrors.PRIMARY_STORAGE_HOST_DISCONNECTED,
+                                    "primary storage %s disconnect on host %s, details: %s",
                                     cmd.psUuids, cmd.hostUuid, cmd.reason));
-                            msg.setReason(reason);
                         }
 
                         bus.makeTargetServiceIdByResourceUuid(msg, PrimaryStorageConstant.SERVICE_ID, msg.getPrimaryStorageUuid());
@@ -270,7 +268,7 @@ public class HaManager extends AbstractService implements Component, HaCompletio
                 final String haToken = HA.getTokenByTag(tag.getTag(), HA_TOKEN);
                 final VmHaLevel level = VmHaLevel.valueOfOrNull(haToken);
                 if (level == null) {
-                    throw new OperationFailureException(operr("invalid HA level: %s", haToken));
+                    throw err(HaErrors.INVALID_HA_LEVEL, "invalid HA level: %s", haToken).toException();
                 }
                 return level;
             }
@@ -285,7 +283,8 @@ public class HaManager extends AbstractService implements Component, HaCompletio
             public void validateGlobalConfig(String category, String name, String oldValue, String newValue) throws GlobalConfigException {
                 float v = Float.parseFloat(newValue);
                 if (v < 0 || v > 1) {
-                    throw new OperationFailureException(argerr("the value[%s] is lesser than 0 or greater than 1 ", newValue));
+                    throw err(HaErrors.INVALID_CHECK_SUCCESS_RATIO,
+                            "the value[%s] is lesser than 0 or greater than 1 ", newValue).toException();
                 }
             }
         });
@@ -293,16 +292,18 @@ public class HaManager extends AbstractService implements Component, HaCompletio
         HaGlobalConfig.ALL.installValidateExtension((category, name, oldValue, newValue) -> {
             List<String> hostUuids = getDisconnectedHostsWithVm();
             if (Boolean.parseBoolean(newValue) && !hostUuids.isEmpty()) {
-                throw new GlobalConfigException(String.format("host[uuid:%s] is not %s, but still have vm on it," +
-                        " please resolve hosts' problems before enable ha", hostUuids, HostStatus.Connected));
+                throw err(HaErrors.DISCONNECTED_HOST_HAS_UNKNOWN_VM,
+                        "host[uuid:%s] is not %s, but still have vm on it," +
+                        " please resolve hosts' problems before enable ha", hostUuids, HostStatus.Connected).toException();
             }
         });
 
         HaGlobalConfig.SELF_FENCER_STRATEGY.installValidateExtension((category, name, oldValue, newValue) -> {
             List<String> hostUuids = getDisconnectedHostsWithVm();
             if (!hostUuids.isEmpty()) {
-                throw new GlobalConfigException(String.format("host[uuid:%s] is not %s, but still have vm on it," +
-                        " please resolve hosts' problems before update fencer strategy", hostUuids, HostStatus.Connected));
+                throw err(HaErrors.DISCONNECTED_HOST_HAS_UNKNOWN_VM,
+                        "host[uuid:%s] is not %s, but still have vm on it," +
+                        " please resolve hosts' problems before update fencer strategy", hostUuids, HostStatus.Connected).toException();
             }
         });
 

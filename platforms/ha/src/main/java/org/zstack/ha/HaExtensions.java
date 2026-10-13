@@ -10,6 +10,7 @@ import org.zstack.core.timeout.TimeHelper;
 import org.zstack.ha.entity.VmHaVO;
 import org.zstack.ha.entity.VmHaVO_;
 import org.zstack.ha.fencers.SelfFencers;
+import org.zstack.ha.header.HaErrors;
 import org.zstack.ha.header.HaGlobalConfig;
 import org.zstack.ha.header.VmHaLevel;
 import org.zstack.ha.message.SelfFencerStruct;
@@ -53,7 +54,7 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
-import static org.zstack.core.Platform.argerr;
+import static org.zstack.core.Platform.err;
 import static org.zstack.ha.header.HaGlobalConfig.VM_HA_LEVEL;
 import static org.zstack.utils.CollectionDSL.list;
 import static org.zstack.utils.CollectionUtils.filter;
@@ -392,7 +393,8 @@ public class HaExtensions implements
                 .param("psState", PrimaryStorageState.Maintenance)
                 .list();
         if (result != null && !result.isEmpty()) {
-            return argerr("the VM[uuid:%s] volume stored location primary storage is in a state of maintenance", vmUuid);
+            return err(HaErrors.PRIMARY_STORAGE_IN_MAINTENANCE,
+                    "the VM[uuid:%s] volume stored location primary storage is in a state of maintenance", vmUuid);
         }
         return null;
     }

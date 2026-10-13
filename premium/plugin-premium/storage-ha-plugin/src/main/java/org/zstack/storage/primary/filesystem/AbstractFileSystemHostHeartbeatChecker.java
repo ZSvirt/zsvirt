@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.zstack.core.cloudbus.CloudBus;
 import org.zstack.core.cloudbus.CloudBusCallBack;
 import org.zstack.core.db.Q;
+import org.zstack.ha.header.HaErrors;
 import org.zstack.ha.message.CheckerStruct;
 import org.zstack.ha.spi.HaHostStorageBasedChecker;
 import org.zstack.header.core.HaCheckerCompletion;
@@ -24,7 +25,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
-import static org.zstack.core.Platform.operr;
+import static org.zstack.core.Platform.err;
 
 /**
  * @Author: DaoDao
@@ -117,7 +118,7 @@ public abstract class AbstractFileSystemHostHeartbeatChecker implements HaHostSt
                     completion.success(rsp.vmUuids);
                     return;
                 }
-                completion.fail(operr("host[uuid:%s]'s heartbeat is not updated", cmd.targetHostUuid));
+                completion.fail(err(HaErrors.HEARTBEAT_NOT_UPDATED, "host[uuid:%s]'s heartbeat is not updated", cmd.targetHostUuid));
             }
         });
     }

@@ -26,7 +26,7 @@ import org.zstack.core.thread.ThreadFacade;
 import org.zstack.core.timeout.ApiTimeoutManager;
 import org.zstack.core.workflow.FlowChainBuilder;
 import org.zstack.core.workflow.ShareFlow;
-import org.zstack.ha.header.HaConstants;
+import org.zstack.ha.header.HaErrors;
 import org.zstack.header.Component;
 import org.zstack.header.cluster.ClusterConnectionStatus;
 import org.zstack.header.core.*;
@@ -2830,10 +2830,9 @@ public class SharedBlockKvmBackend extends SharedBlockHypervisorBackend implemen
                         umsg.setStatus(PrimaryStorageHostStatus.Disconnected);
                         umsg.setPrimaryStorageUuid(entry.getKey());
 
-                        ErrorCode reason = HaConstants.PRIMARY_STORAGE_HOST_DISCONNECTED_ERROR;
-                        reason.setDetails(String.format("primary storage %s disconnect on host %s, details: %s",
+                        umsg.setReason(Platform.err(HaErrors.PRIMARY_STORAGE_HOST_DISCONNECTED,
+                                "primary storage %s disconnect on host %s, details: %s",
                                 entry.getKey(), msg.getHostUuid(), entry.getValue()));
-                        umsg.setReason(reason);
                         umsg.setHostUuid(msg.getHostUuid());
                         bus.makeTargetServiceIdByResourceUuid(umsg, PrimaryStorageConstant.SERVICE_ID, entry.getKey());
                         bus.send(umsg);

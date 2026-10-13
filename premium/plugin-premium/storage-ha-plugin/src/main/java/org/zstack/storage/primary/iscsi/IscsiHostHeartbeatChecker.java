@@ -5,6 +5,7 @@ import org.zstack.core.cloudbus.CloudBus;
 import org.zstack.core.cloudbus.CloudBusCallBack;
 import org.zstack.core.db.DatabaseFacade;
 import org.zstack.core.thread.ThreadFacade;
+import org.zstack.ha.header.HaErrors;
 import org.zstack.ha.header.HaGlobalConfig;
 import org.zstack.ha.message.CheckerStruct;
 import org.zstack.ha.spi.HaHostStorageBasedChecker;
@@ -27,7 +28,7 @@ import org.zstack.utils.logging.CLogger;
 
 import java.util.*;
 
-import static org.zstack.core.Platform.operr;
+import static org.zstack.core.Platform.err;
 
 public class IscsiHostHeartbeatChecker implements HaHostStorageBasedChecker {
     private static final CLogger logger = Utils.getLogger(IscsiHostHeartbeatChecker.class);
@@ -145,7 +146,7 @@ public class IscsiHostHeartbeatChecker implements HaHostStorageBasedChecker {
                 if (res.contains(Boolean.TRUE)) {
                     completion.success(rsp.vmUuids);
                 } else {
-                    completion.fail(operr("host %s's heartbeat is not updated", targetHostUuid));
+                    completion.fail(err(HaErrors.HEARTBEAT_NOT_UPDATED, "host %s's heartbeat is not updated", targetHostUuid));
                 }
             }
         });

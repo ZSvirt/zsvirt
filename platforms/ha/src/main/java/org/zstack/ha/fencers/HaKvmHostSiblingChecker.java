@@ -6,6 +6,7 @@ import org.zstack.header.core.HaCheckerCompletion;
 import org.zstack.core.cloudbus.CloudBus;
 import org.zstack.core.cloudbus.CloudBusListCallBack;
 import org.zstack.core.db.Q;
+import org.zstack.ha.header.HaErrors;
 import org.zstack.ha.header.HaGlobalConfig;
 import org.zstack.ha.message.CheckerStruct;
 import org.zstack.ha.spi.HaHostChecker;
@@ -39,8 +40,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static org.zstack.core.Platform.err;
 import static org.zstack.core.Platform.multiErr;
-import static org.zstack.core.Platform.operr;
 import static org.zstack.ha.entity.HaCommands.*;
 import static org.zstack.utils.CollectionUtils.isEmpty;
 import static org.zstack.utils.CollectionUtils.transform;
@@ -218,14 +219,14 @@ public class HaKvmHostSiblingChecker implements HaHostChecker {
                         KVMHostAsyncHttpCallReply kr = reply.castReply();
                         ScanRsp rsp = kr.toResponse(ScanRsp.class);
                         if (!rsp.isSuccess()) {
-                            errors.add(operr("%s", rsp.getError()));
+                            errors.add(err(HaErrors.HOST_SCAN_FAILED, "%s", rsp.getError()));
                             noway ++;
                         } else {
                             if (ScanRsp.RET_SUCCESS.equals(rsp.result)) {
                                 success ++;
                             } else if (ScanRsp.RET_FAILURE.equals(rsp.result)) {
                                 failure ++;
-                                errors.add(operr("%s", rsp.getError()));
+                                errors.add(err(HaErrors.HOST_SCAN_FAILED, "%s", rsp.getError()));
                             } else if (ScanRsp.RET_NOT_STABLE.equals(rsp.result)) {
                                 notStable ++;
                             }

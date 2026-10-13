@@ -2,9 +2,9 @@ package org.zstack.test.integration.platforms.ha.config
 
 import org.springframework.http.HttpEntity
 import org.zstack.compute.host.HostGlobalConfig
+import org.zstack.ha.header.HaErrors
 import org.zstack.ha.header.HaGlobalConfig
 import org.zstack.ha.header.SelfFencerStrategy
-import org.zstack.header.errorcode.SysErrors
 import org.zstack.header.host.HostStatus
 import org.zstack.header.host.HostVO
 import org.zstack.header.vm.VmInstanceState
@@ -53,7 +53,7 @@ class HaGlobalConfigNegativeCase extends SubCase {
     }
 
     void testInvalidCheckSuccessRatio() {
-        logger.info("Test 001: ha check success ratio outside 0..1, expect invalid argument")
+        logger.info("Test 001: ha check success ratio outside 0..1, expect HA.2002")
         expectApiFailure({
             updateGlobalConfig {
                 delegate.category = HaGlobalConfig.CATEGORY
@@ -61,10 +61,10 @@ class HaGlobalConfigNegativeCase extends SubCase {
                 delegate.value = "-1"
             }
         }) {
-            assert delegate.code == SysErrors.INVALID_ARGUMENT_ERROR.toString()
+            assert delegate.code == HaErrors.INVALID_CHECK_SUCCESS_RATIO.toString()
         }
 
-        logger.info("Test 002: ha check success ratio 2, expect invalid argument")
+        logger.info("Test 002: ha check success ratio 2, expect HA.2002")
         expectApiFailure({
             updateGlobalConfig {
                 delegate.category = HaGlobalConfig.CATEGORY
@@ -72,7 +72,7 @@ class HaGlobalConfigNegativeCase extends SubCase {
                 delegate.value = "2"
             }
         }) {
-            assert delegate.code == SysErrors.INVALID_ARGUMENT_ERROR.toString()
+            assert delegate.code == HaErrors.INVALID_CHECK_SUCCESS_RATIO.toString()
         }
 
         assert queryGlobalConfig {
@@ -121,7 +121,7 @@ class HaGlobalConfigNegativeCase extends SubCase {
                 delegate.value = "true"
             }
         }) {
-            assert delegate.code == SysErrors.INVALID_ARGUMENT_ERROR.toString()
+            assert delegate.code == HaErrors.DISCONNECTED_HOST_HAS_UNKNOWN_VM.toString()
             assert delegate.details.contains(vm.hostUuid)
             assert delegate.details.count(vm.hostUuid) == 1
         }
@@ -134,7 +134,7 @@ class HaGlobalConfigNegativeCase extends SubCase {
                 delegate.value = SelfFencerStrategy.Permissive.toString()
             }
         }) {
-            assert delegate.code == SysErrors.INVALID_ARGUMENT_ERROR.toString()
+            assert delegate.code == HaErrors.DISCONNECTED_HOST_HAS_UNKNOWN_VM.toString()
             assert delegate.details.contains(vm.hostUuid)
         }
 

@@ -7,6 +7,7 @@ import org.zstack.core.cloudbus.CloudBusCallBack;
 import org.zstack.core.db.DatabaseFacade;
 import org.zstack.core.db.Q;
 import org.zstack.core.thread.ThreadFacade;
+import org.zstack.ha.header.HaErrors;
 import org.zstack.ha.header.HaGlobalConfig;
 import org.zstack.ha.message.CheckerStruct;
 import org.zstack.ha.spi.HaHostStorageBasedChecker;
@@ -28,7 +29,7 @@ import org.zstack.utils.logging.CLogger;
 
 import java.util.*;
 
-import static org.zstack.core.Platform.operr;
+import static org.zstack.core.Platform.err;
 
 public class CbdHostHeartbeatChecker implements HaHostStorageBasedChecker {
     private static final CLogger logger = Utils.getLogger(CbdHostHeartbeatChecker.class);
@@ -104,7 +105,8 @@ public class CbdHostHeartbeatChecker implements HaHostStorageBasedChecker {
                 .findValue();
 
         if (hostId == null) {
-            completion.fail(operr("not found hostId for hostUuid[%s] and primaryStorageUuid[%s]", targetHostUuid, primaryStorageUuid));
+            completion.fail(err(HaErrors.HOST_ID_NOT_FOUND,
+                    "not found hostId for hostUuid[%s] and primaryStorageUuid[%s]", targetHostUuid, primaryStorageUuid));
             return;
         }
 
@@ -154,7 +156,7 @@ public class CbdHostHeartbeatChecker implements HaHostStorageBasedChecker {
                 if (res.contains(Boolean.TRUE)) {
                     completion.success(rsp.vmUuids);
                 } else {
-                    completion.fail(operr("host %s's heartbeat is not updated", targetHostUuid));
+                    completion.fail(err(HaErrors.HEARTBEAT_NOT_UPDATED, "host %s's heartbeat is not updated", targetHostUuid));
                 }
             }
         });

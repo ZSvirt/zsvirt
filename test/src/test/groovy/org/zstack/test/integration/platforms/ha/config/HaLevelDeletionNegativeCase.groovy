@@ -1,6 +1,6 @@
 package org.zstack.test.integration.platforms.ha.config
 
-import org.zstack.header.errorcode.SysErrors
+import org.zstack.ha.header.HaErrors
 import org.zstack.sdk.L3NetworkInventory
 import org.zstack.test.integration.ZStackTest
 import org.zstack.test.integration.platforms.ha.HaTest
@@ -30,7 +30,7 @@ class HaLevelDeletionNegativeCase extends SubCase {
     }
 
     void testInvalidHaTagOnCreateVm() {
-        logger.info("Test 001: create a VM with ha::test, expect operation error")
+        logger.info("Test 001: create a VM with ha::test, expect HA.2001")
         expectApiFailure({
             createVmInstance {
                 delegate.name = "invalid-ha-tag"
@@ -52,7 +52,7 @@ class HaLevelDeletionNegativeCase extends SubCase {
                 delegate.systemTags = ["ha::test"]
             }
         }) {
-            assert delegate.code == SysErrors.OPERATION_ERROR.toString()
+            assert delegate.code == HaErrors.INVALID_HA_LEVEL.toString()
             assert delegate.details.contains("test")
         }
     }

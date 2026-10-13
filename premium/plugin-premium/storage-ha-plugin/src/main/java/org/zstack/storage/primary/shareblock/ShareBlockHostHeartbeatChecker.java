@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.zstack.core.cloudbus.CloudBus;
 import org.zstack.core.cloudbus.CloudBusCallBack;
 import org.zstack.core.db.Q;
+import org.zstack.ha.header.HaErrors;
 import org.zstack.ha.message.CheckerStruct;
 import org.zstack.ha.spi.HaHostStorageBasedChecker;
 import org.zstack.header.core.HaCheckerCompletion;
@@ -24,7 +25,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 
-import static org.zstack.core.Platform.operr;
+import static org.zstack.core.Platform.err;
 
 /**
  * @Author: DaoDao
@@ -120,7 +121,8 @@ public class ShareBlockHostHeartbeatChecker implements HaHostStorageBasedChecker
                 if (res.contains(Boolean.TRUE)) {
                     completion.success(rsp.vmUuids);
                 } else {
-                    completion.fail(operr("shareblock says host %s is offline on %s", cmd.hostUuid, sentinelHostUuid));
+                    completion.fail(err(HaErrors.HEARTBEAT_NOT_UPDATED,
+                            "shareblock says host %s is offline on %s", cmd.hostUuid, sentinelHostUuid));
                 }
             }
         });

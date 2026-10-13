@@ -6,6 +6,7 @@ import org.zstack.core.componentloader.PluginRegistry;
 import org.zstack.header.Component;
 import org.zstack.header.core.Completion;
 import org.zstack.header.core.WhileDoneCompletion;
+import org.zstack.header.core.workflow.FlowChain;
 import org.zstack.header.errorcode.ErrorCode;
 import org.zstack.header.errorcode.ErrorCodeList;
 import org.zstack.header.host.*;
@@ -66,19 +67,14 @@ public class KVMExtensionEmitter implements Component {
         CollectionUtils.safeForEach(syncVmDeviceInfoExts, arg -> arg.afterReceiveVmDeviceInfoResponse(vm, rsp, spec));
     }
 
-    public void beforeStartVmOnKvm(final KVMHostInventory host, final VmInstanceSpec spec, final StartVmCmd cmd) {
+    public void beforeStartVmOnKvm(FlowChain chain) {
         for (KVMStartVmExtensionPoint extp : startVmExts) {
-            extp.beforeStartVmOnKvm(host, spec, cmd);
+            chain.then(extp.beforeStartVmOnKvmFlow());
         }
     }
 
-
     public void startVmOnKvmSuccess(final KVMHostInventory host, final VmInstanceSpec spec) {
         CollectionUtils.safeForEach(startVmExts, arg -> arg.startVmOnKvmSuccess(host, spec));
-    }
-
-    public void startVmOnKvmFailed(final KVMHostInventory host, final VmInstanceSpec spec, final ErrorCode err) {
-        CollectionUtils.safeForEach(startVmExts, arg -> arg.startVmOnKvmFailed(host, spec, err));
     }
 
     public void beforeDestroyVmOnKvm(KVMHostInventory host, VmInstanceInventory vm, KVMAgentCommands.DestroyVmCmd cmd) throws KVMException {

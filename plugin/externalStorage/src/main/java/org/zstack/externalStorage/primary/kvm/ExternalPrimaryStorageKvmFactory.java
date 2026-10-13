@@ -1,7 +1,6 @@
 package org.zstack.externalStorage.primary.kvm;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.transaction.annotation.Transactional;
 import org.zstack.core.asyncbatch.While;
 import org.zstack.core.cloudbus.CloudBus;
@@ -15,7 +14,6 @@ import org.zstack.header.core.*;
 import org.zstack.header.core.workflow.*;
 import org.zstack.header.errorcode.ErrorCode;
 import org.zstack.header.errorcode.ErrorCodeList;
-import org.zstack.header.errorcode.OperationFailureException;
 import org.zstack.header.host.HostInventory;
 import org.zstack.header.host.HostVO;
 import org.zstack.header.host.HostVO_;
@@ -31,7 +29,6 @@ import org.zstack.header.volume.VolumeVO;
 import org.zstack.header.volume.VolumeVO_;
 import org.zstack.kvm.*;
 import org.zstack.storage.addon.primary.ExternalPrimaryStorageFactory;
-import org.zstack.utils.CollectionUtils;
 import org.zstack.utils.Utils;
 import org.zstack.utils.logging.CLogger;
 
@@ -40,6 +37,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static org.zstack.core.Platform.multiErr;
 import static org.zstack.core.Platform.operr;
 
 public class ExternalPrimaryStorageKvmFactory implements KVMHostConnectExtensionPoint, KVMPingAgentNoFailureExtensionPoint,
@@ -326,8 +324,30 @@ public class ExternalPrimaryStorageKvmFactory implements KVMHostConnectExtension
     }
 
     @Override
-    public void beforeStartVmOnKvm(KVMHostInventory host, VmInstanceSpec spec, KVMAgentCommands.StartVmCmd cmd) {
+    public Flow beforeStartVmOnKvmFlow() {
+        return Flow.of("external-ps-before-start-vm-on-kvm")
+        .handle(((trigger, data) -> {
+            KVMHostInventory host = (KVMHostInventory) data.get(Param.HOST);
+            VmInstanceSpec spec = (VmInstanceSpec) data.get(Param.SPEC);
+            beforeStartVmOnKvm(host, spec, trigger.toCompletion());
+        }))
+        .build();
+    }
+
+    static class ActiveVolumeStruct {
+        VolumeInventory vol;
+        HostInventory host;
+        PrimaryStorageNodeSvc nodeSvc;
+        public ActiveVolumeStruct(VolumeInventory vol, HostInventory host, PrimaryStorageNodeSvc nodeSvc) {
+            this.vol = vol;
+            this.host = host;
+            this.nodeSvc = nodeSvc;
+        }
+    }
+
+    public void beforeStartVmOnKvm(KVMHostInventory host, VmInstanceSpec spec, Completion completion) {
         List<VolumeInventory> vols = getManagerExclusiveVolume(spec);
+        ArrayList<ActiveVolumeStruct> structs = new ArrayList<>();
 
         for (VolumeInventory vol : vols) {
             PrimaryStorageNodeSvc nodeSvc = extPsFactory.getNodeSvc(vol.getPrimaryStorageUuid());
@@ -336,49 +356,75 @@ public class ExternalPrimaryStorageKvmFactory implements KVMHostConnectExtension
             }
 
             List<ActiveVolumeClient> clients = nodeSvc.getActiveClients(vol.getInstallPath(), vol.getProtocol());
-            clients.forEach(client -> {
-                if (!client.getManagerIp().equals(host.getManagementIp()) && !client.isInBlacklist()) {
-                    // hard code for zbs, zbs not support deactive and blacklist yet
-                    if (vol.getProtocol().equals(ExternalStorageConstant.CBD_PROTOCOL)) {
-                        throw new OperationFailureException(operr("find active clients for volume[uuid:%s, installPath %s, client:%s]",
-                                vol.getUuid(), vol.getInstallPath(), client.getManagerIp()));
-                    }
-                    // TODO use async call
-                    HostVO clientHost = Q.New(HostVO.class).eq(HostVO_.managementIp, client.getManagerIp()).find();
-                    if (clientHost != null) {
-                        logger.debug(String.format("because volume[uuid:%s, installPath:%s] is in use by other KVM " +
-                                        "host[uuid:%s, ip:%s], but to start on host[uuid:%s, ip:%s], " +
-                                        "add it to blacklist if deactivate failed",
-                                vol.getUuid(), vol.getInstallPath(),
-                                clientHost.getUuid(), clientHost.getManagementIp(),
-                                host.getUuid(), host.getManagementIp()));
+            for (ActiveVolumeClient client : clients) {
+                if (client.getManagerIp().equals(host.getManagementIp()) || client.isInBlacklist()) {
+                    continue;
+                }
 
-                        nodeSvc.deactivate(vol.getInstallPath(), vol.getProtocol(), HostInventory.valueOf(clientHost), new Completion(null) {
-                            @Override
-                            public void success() {
-                                logger.info(String.format("successfully deactivate volume[uuid:%s, installPath:%s] on host[uuid:%s, ip:%s]",
-                                        vol.getUuid(), vol.getInstallPath(), clientHost.getUuid(), clientHost.getManagementIp()));
-                            }
+                // hard code for zbs, zbs not support deactive and blacklist yet
+                if (vol.getProtocol().equals(ExternalStorageConstant.CBD_PROTOCOL)) {
+                    completion.fail(operr("find active clients for volume[uuid:%s, installPath %s, client:%s]",
+                            vol.getUuid(), vol.getInstallPath(), client.getManagerIp()));
+                    return;
+                }
+                HostVO clientHost = Q.New(HostVO.class).eq(HostVO_.managementIp, client.getManagerIp()).find();
+                if (clientHost == null) {
+                    continue;
+                }
 
-                            @Override
-                            public void fail(ErrorCode errorCode) {
-                                logger.warn(String.format("failed to deactivate volume[uuid:%s, installPath:%s] on host[uuid:%s, ip:%s], add it to blacklist",
-                                        vol.getUuid(), vol.getInstallPath(), clientHost.getUuid(), clientHost.getManagementIp()));
-                                nodeSvc.blacklist(vol.getInstallPath(), vol.getProtocol(), HostInventory.valueOf(clientHost), new NopeCompletion());
-                            }
-                        });
-                    }
+                logger.debug(String.format("because volume[uuid:%s, installPath:%s] is in use by other KVM " +
+                                "host[uuid:%s, ip:%s], but to start on host[uuid:%s, ip:%s], " +
+                                "add it to blacklist if deactivate failed",
+                        vol.getUuid(), vol.getInstallPath(),
+                        clientHost.getUuid(), clientHost.getManagementIp(),
+                        host.getUuid(), host.getManagementIp()));
+                structs.add(new ActiveVolumeStruct(vol, HostInventory.valueOf(clientHost), nodeSvc));
+            }
+        }
+
+        new While<>(structs).each((struct, whileCompletion) -> {
+            VolumeInventory vol = struct.vol;
+
+            struct.nodeSvc.deactivate(vol.getInstallPath(), vol.getProtocol(), struct.host, new Completion(whileCompletion) {
+                @Override
+                public void success() {
+                    logger.info(String.format("successfully deactivate volume[uuid:%s, installPath:%s] on host[uuid:%s, ip:%s]",
+                            vol.getUuid(), vol.getInstallPath(), struct.host.getUuid(), struct.host.getManagementIp()));
+                    whileCompletion.done();
+                }
+
+                @Override
+                public void fail(ErrorCode errorCode) {
+                    logger.warn(String.format("failed to deactivate volume[uuid:%s, installPath:%s] on host[uuid:%s, ip:%s] and add it to blacklist:\n %s",
+                            vol.getUuid(), vol.getInstallPath(), struct.host.getUuid(), struct.host.getManagementIp(), errorCode.getReadableDetails()));
+                    struct.nodeSvc.blacklist(vol.getInstallPath(), vol.getProtocol(), struct.host, new Completion(whileCompletion) {
+                        @Override
+                        public void success() {
+                            whileCompletion.done();
+                        }
+
+                        @Override
+                        public void fail(ErrorCode errorCode) {
+                            whileCompletion.addError(errorCode);
+                            whileCompletion.allDone();
+                        }
+                    });
                 }
             });
-        }
+        }).run(new WhileDoneCompletion(completion) {
+            @Override
+            public void done(ErrorCodeList errorCodeList) {
+                if (errorCodeList.hasError()) {
+                    completion.fail(multiErr(errorCodeList));
+                    return;
+                }
+                completion.success();
+            }
+        });
     }
 
     @Override
     public void startVmOnKvmSuccess(KVMHostInventory host, VmInstanceSpec spec) {
-    }
-
-    @Override
-    public void startVmOnKvmFailed(KVMHostInventory host, VmInstanceSpec spec, ErrorCode err) {
     }
 
     private PrimaryStorageNodeSvc getNodeService(VolumeInventory volumeInventory) {

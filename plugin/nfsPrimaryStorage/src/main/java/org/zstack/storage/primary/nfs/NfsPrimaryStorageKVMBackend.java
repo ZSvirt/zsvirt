@@ -200,7 +200,6 @@ public class NfsPrimaryStorageKVMBackend implements NfsPrimaryStorageBackend,
             return;
         }
 
-        List<ErrorCode> errs = new ArrayList<>();
         new While<>(hostUuids).all((hostUuid, compl) -> {
             mount(inv, hostUuid, new Completion(compl){
 
@@ -211,7 +210,7 @@ public class NfsPrimaryStorageKVMBackend implements NfsPrimaryStorageBackend,
 
                 @Override
                 public void fail(ErrorCode errorCode) {
-                    errs.add(errorCode);
+                    compl.addError(errorCode);
                     compl.done();
                 }
             });
@@ -219,9 +218,9 @@ public class NfsPrimaryStorageKVMBackend implements NfsPrimaryStorageBackend,
         }).run(new WhileDoneCompletion(completion) {
             @Override
             public void done(ErrorCodeList errorCodeList) {
-                if(!errs.isEmpty()){
-                    completion.fail(errs.get(0));
-                }else {
+                if (errorCodeList.hasError()){
+                    completion.fail(errorCodeList.getCauses().get(0));
+                } else {
                     completion.success(true);
                 }
             }

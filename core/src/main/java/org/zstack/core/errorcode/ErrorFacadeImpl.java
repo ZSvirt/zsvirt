@@ -41,7 +41,7 @@ public class ErrorFacadeImpl implements ErrorFacade {
 
     @Override
     public ErrorCode instantiateErrorCode(Enum code, ErrorCode cause) {
-        return instantiateErrorCode(code.toString(), cause);
+        return instantiateErrorCode(code, cause.getDetails(), cause);
     }
 
     @Override
@@ -51,7 +51,11 @@ public class ErrorFacadeImpl implements ErrorFacade {
 
     @Override
     public ErrorCode instantiateErrorCode(Enum code, String details, ErrorCode cause) {
-        return instantiateErrorCode(code.toString(), details, cause);
+        ErrorCode err = doInstantiateErrorCode(code.toString(), descriptionFromEnum(code), details, null);
+        if (cause != null) {
+            err.setCause(cause);
+        }
+        return err;
     }
 
     @Override
@@ -63,16 +67,31 @@ public class ErrorFacadeImpl implements ErrorFacade {
         return err;
     }
 
+    private static String descriptionFromEnum(Enum<?> code) {
+        return code.name().replace('_', ' ');
+    }
+
     private ErrorCode doInstantiateErrorCode(String code, String details, List<ErrorCode> causes) {
+        return doInstantiateErrorCode(code, null, details, causes);
+    }
+
+    private ErrorCode doInstantiateErrorCode(String code, String fallbackDescription, String details, List<ErrorCode> causes) {
         ErrorCodeInfo info = codes.get(code);
+        ErrorCode err;
         if (info == null) {
-            throw new CloudRuntimeException(String.format("cannot find error code[%s]", code));
+            if (fallbackDescription == null) {
+                throw new CloudRuntimeException(String.format("cannot find error code[%s]", code));
+            }
+            err = new ErrorCode();
+            err.setCode(code);
+            err.setDescription(fallbackDescription);
+        } else {
+            err = info.code.copy();
         }
 
         if (details != null && details.length() > 4096) {
             details = details.substring(0, 4093) + "...";
         }
-        ErrorCode err = info.code.copy();
         err.setDetails(details);
         err.setCauses(causes);
 
@@ -86,32 +105,20 @@ public class ErrorFacadeImpl implements ErrorFacade {
 
     @Override
     public ErrorCode instantiateErrorCode(Enum<?> code, String fmt, Object... args) {
-        return instantiateErrorCode(code.toString(), fmt, args);
+        String details = formatDetails(fmt, args);
+        ErrorCode errorCode = doInstantiateErrorCode(code.toString(), descriptionFromEnum(code), details, null)
+                .withOpaque(OPAQUE_KEY_TEMPLATE, fmt);
+        if (args != null) {
+            for (int i = 0; i < args.length; i++) {
+                errorCode.withOpaque(opaqueKeyForArg(i), args[i]);
+            }
+        }
+        return errorCode;
     }
 
     @Override
     public ErrorCode instantiateErrorCode(String code, String fmt, Object... args) {
-        String details;
-        if (fmt == null) {
-            details = "";
-        } else if (args == null || args.length == 0) {
-            details = fmt;
-        } else {
-            Object[] formatArgs = args.clone();
-            for (int i = 0; i < args.length; i++) {
-                if (args[i] instanceof I18nMessage) {
-                    formatArgs[i] = ((I18nMessage) args[i]).getDetails();
-                }
-            }
-
-            try {
-                details = String.format(fmt, formatArgs);
-            } catch (Exception e) {
-                logger.warn("exception happened when format error message");
-                logger.warn(e.getMessage());
-                details = fmt;
-            }
-        }
+        String details = formatDetails(fmt, args);
         ErrorCode errorCode = doInstantiateErrorCode(code, details, null)
                 .withOpaque(OPAQUE_KEY_TEMPLATE, fmt);
         if (args != null) {
@@ -154,7 +161,7 @@ public class ErrorFacadeImpl implements ErrorFacade {
 
     @Override
     public ErrorCode instantiateErrorCode(Enum code, List<ErrorCode> causes) {
-        return instantiateErrorCode(code.toString(), causes);
+        return doInstantiateErrorCode(code.toString(), descriptionFromEnum(code), null, causes);
     }
 
     @Override
@@ -164,7 +171,7 @@ public class ErrorFacadeImpl implements ErrorFacade {
 
     @Override
     public ErrorCode instantiateErrorCode(Enum code, String details, List<ErrorCode> causes) {
-        return instantiateErrorCode(code.toString(), details, causes);
+        return doInstantiateErrorCode(code.toString(), descriptionFromEnum(code), details, causes);
     }
 
     @Override
@@ -190,6 +197,29 @@ public class ErrorFacadeImpl implements ErrorFacade {
     @Override
     public ErrorCode throwableToInvalidArgumentError(Throwable t) {
         return throwableToError(t, SysErrors.INVALID_ARGUMENT_ERROR);
+    }
+
+    private String formatDetails(String fmt, Object... args) {
+        if (fmt == null) {
+            return "";
+        }
+        if (args == null || args.length == 0) {
+            return fmt;
+        }
+        Object[] formatArgs = args.clone();
+        for (int i = 0; i < args.length; i++) {
+            if (args[i] instanceof I18nMessage) {
+                formatArgs[i] = ((I18nMessage) args[i]).getDetails();
+            }
+        }
+
+        try {
+            return String.format(fmt, formatArgs);
+        } catch (Exception e) {
+            logger.warn("exception happened when format error message");
+            logger.warn(e.getMessage());
+            return fmt;
+        }
     }
 
     private ErrorCode throwableToError(Throwable t, Enum<?> errCode) {

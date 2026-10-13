@@ -113,9 +113,6 @@ public class MevocoSystemTags {
 
     public static SystemTag CONFIRM_CALL_API = SystemTag.makeEphemeralTag("IReallyWantToCallThisApi");
 
-    public static final Map<String, PatternedSystemTag> _volumeSystemTagMap = new HashMap<>();
-    public static final Map<String, PatternedSystemTag> _iopsSystemTagMap = new HashMap<>();
-
     /**
      * guestToolsHasAttached system tag will replace by {@link VmCdRomVO#getOccupant()} soon.
      */
@@ -131,13 +128,19 @@ public class MevocoSystemTags {
     public static final String KVM_HOST_CGROUP_DEVICE_ACL_STATUS_TOKEN = "status";
     public static PatternedSystemTag KVM_HOST_CGROUP_DEVICE_ACL_STATUS = new PatternedSystemTag(String.format("kvmHostCgroupDeviceAclStatus::{%s}", KVM_HOST_CGROUP_DEVICE_ACL_STATUS_TOKEN), HostVO.class);
 
-    static {
-        _volumeSystemTagMap.put(VOLUME_TOTAL_BANDWIDTH_TOKEN, _VOLUME_TOTAL_BANDWIDTH);
-        _volumeSystemTagMap.put(VOLUME_READ_BANDWIDTH_TOKEN, _VOLUME_READ_BANDWIDTH);
-        _volumeSystemTagMap.put(VOLUME_WRITE_BANDWIDTH_TOKEN, _VOLUME_WRITE_BANDWIDTH);
+    public static Map<String, SystemTag> generateIopsSystemTagMap() {
+        Map<String, SystemTag> map = new HashMap<>();
+        map.put(VOLUME_TOTAL_IOPS_TOKEN, _VOLUME_TOTAL_IOPS);
+        map.put(VOLUME_WRITE_IOPS_TOKEN, _VOLUME_WRITE_IOPS);
+        map.put(VOLUME_READ_IOPS_TOKEN, _VOLUME_READ_IOPS);
+        return map;
+    }
 
-        _iopsSystemTagMap.put(VOLUME_TOTAL_IOPS_TOKEN, _VOLUME_TOTAL_IOPS);
-        _iopsSystemTagMap.put(VOLUME_WRITE_IOPS_TOKEN, _VOLUME_WRITE_IOPS);
-        _iopsSystemTagMap.put(VOLUME_READ_IOPS_TOKEN, _VOLUME_READ_IOPS);
+    public static Map<String, SystemTag> generateVolumeSystemTagMap() {
+        Map<String, SystemTag> map = new HashMap<>();
+        map.put(VOLUME_TOTAL_BANDWIDTH_TOKEN, _VOLUME_TOTAL_BANDWIDTH);
+        map.put(VOLUME_READ_BANDWIDTH_TOKEN, _VOLUME_READ_BANDWIDTH);
+        map.put(VOLUME_WRITE_BANDWIDTH_TOKEN, _VOLUME_WRITE_BANDWIDTH);
+        return map;
     }
 }

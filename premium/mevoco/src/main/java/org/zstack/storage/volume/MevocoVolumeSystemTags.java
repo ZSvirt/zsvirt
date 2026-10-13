@@ -4,6 +4,7 @@ import org.zstack.header.configuration.DiskOfferingVO;
 import org.zstack.header.tag.TagDefinition;
 import org.zstack.header.volume.VolumeVO;
 import org.zstack.tag.PatternedSystemTag;
+import org.zstack.tag.SystemTag;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -49,21 +50,25 @@ public class MevocoVolumeSystemTags {
                     VOLUME_WRITE_IOPS_TOKEN, VOLUME_READ_IOPS_TOKEN
             ), VolumeVO.class);
 
-    public static final Map<String, PatternedSystemTag> iopsSystemTagMap = new HashMap<>();
-    public static final Map<String, PatternedSystemTag> volumeSystemTagMap = new HashMap<>();
-    static {
-        iopsSystemTagMap.put(VOLUME_TOTAL_IOPS_TOKEN, VOLUME_TOTAL_IOPS);
-        iopsSystemTagMap.put(VOLUME_READ_IOPS_TOKEN, VOLUME_READ_IOPS);
-        iopsSystemTagMap.put(VOLUME_WRITE_IOPS_TOKEN, VOLUME_WRITE_IOPS);
-
-        volumeSystemTagMap.put(VOLUME_TOTAL_BANDWIDTH_TOKEN, VOLUME_TOTAL_BANDWIDTH);
-        volumeSystemTagMap.put(VOLUME_READ_BANDWIDTH_TOKEN, VOLUME_READ_BANDWIDTH);
-        volumeSystemTagMap.put(VOLUME_WRITE_BANDWIDTH_TOKEN, VOLUME_WRITE_BANDWIDTH);
-    }
-
     public static final String IO_THREAD_PIN_TOKEN = "ioThreadPin";
     public static PatternedSystemTag IO_THREAD_PIN = new PatternedSystemTag(
             String.format("ioThreadPin::{%s}", IO_THREAD_PIN_TOKEN),
             VolumeVO.class
     );
+
+    public static Map<String, SystemTag> generateIopsSystemTagMap() {
+        Map<String, SystemTag> map = new HashMap<>();
+        map.put(VOLUME_TOTAL_IOPS_TOKEN, VOLUME_TOTAL_IOPS);
+        map.put(VOLUME_READ_IOPS_TOKEN, VOLUME_READ_IOPS);
+        map.put(VOLUME_WRITE_IOPS_TOKEN, VOLUME_WRITE_IOPS);
+        return map;
+    }
+
+    public static Map<String, SystemTag> generateVolumeSystemTagMap() {
+        Map<String, SystemTag> map = new HashMap<>();
+        map.put(VOLUME_TOTAL_BANDWIDTH_TOKEN, VOLUME_TOTAL_BANDWIDTH);
+        map.put(VOLUME_READ_BANDWIDTH_TOKEN, VOLUME_READ_BANDWIDTH);
+        map.put(VOLUME_WRITE_BANDWIDTH_TOKEN, VOLUME_WRITE_BANDWIDTH);
+        return map;
+    }
 }

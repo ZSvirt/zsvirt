@@ -74,6 +74,26 @@ apply 同时要求数据库开关为 true，并要求操作者确认升级和备
 
 每条更新独立提交；中途失败可能留下新旧混合数据，新代码可读取这种状态。排除故障后重复执行；已转换的记录不重复哈希。需要检查 changed-concurrently 计数，并在业务静止后重试。
 
+== 迁移工具回归测试
+
+tests/AccountPasswordMigrationTest.java 从仓库 conf/db/V0.5.1__schema.sql 读取 AccountVO、HistoricalPasswordVO 和 GlobalConfigVO 的真实 DDL，仅将建表改为当前连接的临时表。测试先确认历史时间字段确实会自动更新，再调用实际迁移入口，检查 dry-run、开关阻断、账号及历史时间保持、凭据有效性、已编码/null 记录跳过及重复执行。
+
+在专用临时 MariaDB 数据库中运行，通过 ZSTACK_MIGRATION_TEST_USER 和 ZSTACK_MIGRATION_TEST_PASSWORD 环境变量传入测试账号；密码不放入命令行。下例使用包含本补丁的新安装依赖目录，需包含对应 JDBC 驱动；REPO 指向源码根目录。
+
+[source,bash]
+----
+REPO=/path/to/zsvirt
+LIB=/usr/local/zstack/apache-tomcat/webapps/zstack/WEB-INF/lib
+WORK=$(mktemp -d)
+javac -cp "$LIB/*" -d "$WORK" \
+    "$REPO/docs/security/AccountPasswordMigration.java" \
+    "$REPO/docs/security/tests/AccountPasswordMigrationTest.java"
+export ZSTACK_MIGRATION_TEST_URL='jdbc:mysql://127.0.0.1:43317/password_migration_test?useSSL=false'
+java -cp "$WORK:$LIB/*" AccountPasswordMigrationTest "$REPO/conf/db/V0.5.1__schema.sql"
+----
+
+2026-10-14 在隔离 MariaDB 10.11.13、Java 8 和实际密码编码器上运行上述测试，52 项断言通过；修复前代码在历史 createDate 保持断言处失败。测试不覆盖整个平台的 Spring/AspectJ、安装包和多管理节点行为。
+
 == 回退边界
 
 新版本读取旧格式属于前向升级兼容，不代表旧二进制能读取新格式。一旦启用新写入或转换出新记录，关闭开关只停止新写入，不还原已经生成的哈希。

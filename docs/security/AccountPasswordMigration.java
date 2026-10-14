@@ -49,8 +49,9 @@ public class AccountPasswordMigration {
     private static int migrateTable(Connection conn, String table, String key, boolean apply) throws SQLException {
         int legacy = 0, updated = 0, concurrent = 0;
         // Table/key come only from the two fixed calls above, never user input.
+        // Preserve both tables' ON UPDATE timestamps when re-encoding credentials.
         String sql = "update " + table + " set password = ?"
-                + ("AccountVO".equals(table) ? ", lastOpDate = lastOpDate" : "")
+                + ("AccountVO".equals(table) ? ", lastOpDate = lastOpDate" : ", createDate = createDate")
                 + " where " + key + " = ? and binary password = binary ?";
         try (PreparedStatement select = conn.prepareStatement("select " + key + ", password from " + table);
              PreparedStatement update = conn.prepareStatement(sql);

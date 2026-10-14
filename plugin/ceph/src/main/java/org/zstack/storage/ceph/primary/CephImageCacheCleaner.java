@@ -7,6 +7,7 @@ import org.zstack.header.storage.primary.ImageCacheShadowVO;
 import org.zstack.header.storage.primary.ImageCacheVO;
 import org.zstack.storage.ceph.CephConstants;
 import org.zstack.storage.ceph.CephGlobalConfig;
+import org.zstack.storage.primary.ImageCacheCleanParam;
 import org.zstack.storage.primary.ImageCacheCleaner;
 import org.zstack.utils.Utils;
 import org.zstack.utils.logging.CLogger;
@@ -32,8 +33,8 @@ public class CephImageCacheCleaner extends ImageCacheCleaner implements Manageme
 
     @Transactional
     @Override
-    protected List<ImageCacheShadowVO> createShadowImageCacheVOsForNewDeletedAndOld(String psUuid) {
-        List<Long> staleImageCacheIds = getStaleImageCacheIds(psUuid);
+    protected List<ImageCacheShadowVO> createShadowImageCacheVOsForNewDeletedAndOld(String psUuid, ImageCacheCleanParam param) {
+        List<Long> staleImageCacheIds = getStaleImageCacheIds(psUuid, false);
         if (staleImageCacheIds == null || staleImageCacheIds.isEmpty()) {
             return null;
         }

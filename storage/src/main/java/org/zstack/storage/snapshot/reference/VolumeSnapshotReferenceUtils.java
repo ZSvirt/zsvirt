@@ -363,6 +363,7 @@ public class VolumeSnapshotReferenceUtils {
         });
     }
 
+    // FIXME: consider path and psUuid
     public static List<Long> filterStaleImageCache(List<Long> ids) {
         if (CollectionUtils.isEmpty(ids)) {
             return Collections.emptyList();

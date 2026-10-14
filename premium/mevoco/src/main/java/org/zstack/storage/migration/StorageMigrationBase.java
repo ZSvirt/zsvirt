@@ -396,7 +396,6 @@ public class StorageMigrationBase implements Component {
 
             @Override
             public void run(FlowTrigger trigger, Map data) {
-                List<ErrorCode> errors = Collections.synchronizedList(new ArrayList<>());
                 new While<>(vmInstanceVO.getAllDiskVolumes()).all((volumeVO, whileCompletion) -> {
                     SyncVolumeSizeMsg syncVolumeSizeMsg = new SyncVolumeSizeMsg();
                     syncVolumeSizeMsg.setVolumeUuid(volumeVO.getUuid());
@@ -405,7 +404,7 @@ public class StorageMigrationBase implements Component {
                         @Override
                         public void run(MessageReply reply) {
                             if (!reply.isSuccess()) {
-                                errors.add(reply.getError());
+                                whileCompletion.addError(reply.getError());
                                 whileCompletion.done();
                                 return;
                             }
@@ -415,11 +414,7 @@ public class StorageMigrationBase implements Component {
                 }).run(new WhileDoneCompletion(trigger) {
                     @Override
                     public void done(ErrorCodeList errorCodeList) {
-                        if (!errors.isEmpty()) {
-                            trigger.fail(errors.get(0));
-                            return;
-                        }
-                        trigger.next();
+                        trigger.next(errorCodeList.wrapOrNull());
                     }
                 });
             }
@@ -432,7 +427,6 @@ public class StorageMigrationBase implements Component {
                     trigger.next();
                     return;
                 }
-                List<ErrorCode> errors = Collections.synchronizedList(new ArrayList<>());
                 new While<>(dstPsSet).all((dstPs, wc) -> {
                     SyncPrimaryStorageCapacityMsg smsg = new SyncPrimaryStorageCapacityMsg();
                     smsg.setPrimaryStorageUuid(dstPs);
@@ -441,11 +435,11 @@ public class StorageMigrationBase implements Component {
                         @Override
                         public void run(MessageReply reply) {
                             if (!reply.isSuccess()) {
-                                errors.add(reply.getError());
+                                wc.addError(reply.getError());
                             } else {
                                 SyncPrimaryStorageCapacityReply r = reply.castReply();
                                 if (!r.isSuccess()) {
-                                    errors.add(r.getError());
+                                    wc.addError(r.getError());
                                 }
                             }
                             wc.done();
@@ -454,11 +448,7 @@ public class StorageMigrationBase implements Component {
                 }).run(new WhileDoneCompletion(trigger) {
                     @Override
                     public void done(ErrorCodeList errorCodeList) {
-                        if (!errors.isEmpty()) {
-                            trigger.fail(errors.get(0));
-                            return;
-                        }
-                        trigger.next();
+                        trigger.next(errorCodeList.wrapOrNull());
                     }
                 });
             }

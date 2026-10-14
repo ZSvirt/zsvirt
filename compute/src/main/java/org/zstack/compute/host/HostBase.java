@@ -564,7 +564,6 @@ public abstract class HostBase extends AbstractHost {
                     }
 
                     private void stopFailedToMigrateVms(List<String> vmUuids, final FlowTrigger trigger) {
-                        List<ErrorCode> errors = Collections.synchronizedList(new ArrayList<>());
                         List<String> vmFailedToStop = Collections.synchronizedList(new ArrayList<>());
                         new While<>(vmUuids).step((vmUuid, coml) -> {
                             StopVmInstanceMsg msg = new StopVmInstanceMsg();
@@ -579,7 +578,7 @@ public abstract class HostBase extends AbstractHost {
                                 public void run(MessageReply reply) {
                                     logger.debug(String.format("stop vm[uuid:%s] after migration failure", vmUuid));
                                     if (!reply.isSuccess() && dbf.isExist(vmUuid, VmInstanceVO.class)) {
-                                        errors.add(reply.getError());
+                                        coml.addError(reply.getError());
                                         vmFailedToStop.add(vmUuid);
                                     }
                                     coml.done();
@@ -588,13 +587,12 @@ public abstract class HostBase extends AbstractHost {
                         }, quantity).run(new WhileDoneCompletion(trigger) {
                             @Override
                             public void done(ErrorCodeList errorCodeList) {
-                                if (errors.isEmpty() || HostGlobalConfig.IGNORE_ERROR_ON_MAINTENANCE_MODE.value(Boolean.class)) {
+                                if (errorCodeList.isEmpty() || HostGlobalConfig.IGNORE_ERROR_ON_MAINTENANCE_MODE.value(Boolean.class)) {
                                     trigger.next();
                                 } else {
-                                    trigger.fail(errf.instantiateErrorCode(SysErrors.OPERATION_ERROR,
-                                            String.format("failed to stop vm[uuids:%s] on host[uuid:%s, name:%s, ip:%s]",
-                                                    vmFailedToStop, self.getUuid(), self.getName(), self.getManagementIp()),
-                                            errors));
+                                    trigger.fail(operr("failed to stop vm[uuids:%s] on host[uuid:%s, name:%s, ip:%s]",
+                                                    vmFailedToStop, self.getUuid(), self.getName(), self.getManagementIp())
+                                            .withCause(errorCodeList));
                                 }
                             }
                         });

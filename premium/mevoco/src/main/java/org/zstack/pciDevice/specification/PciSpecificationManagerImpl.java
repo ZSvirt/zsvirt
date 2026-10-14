@@ -344,7 +344,6 @@ public class PciSpecificationManagerImpl extends AbstractService implements
     private void handle(APIGetPciDeviceSpecCandidatesMsg msg) {
         APIGetPciDeviceSpecCandidatesReply reply = new APIGetPciDeviceSpecCandidatesReply();
         if (CollectionUtils.isNotEmpty(msg.getVmInstanceUuids())) {
-            List<ErrorCode> errors = new ArrayList<>();
             List<List<String>> candidateSpecs = new ArrayList<>();
             new While<>(msg.getVmInstanceUuids()).all((vmUuid, completion) -> {
                 GetPciDeviceSpecCandidatesMsg gmsg = new GetPciDeviceSpecCandidatesMsg();
@@ -356,7 +355,7 @@ public class PciSpecificationManagerImpl extends AbstractService implements
                     @Override
                     public void run(MessageReply rly) {
                         if (!rly.isSuccess()) {
-                            errors.add(rly.getError());
+                            completion.addError(rly.getError());
                             completion.allDone();
                             return;
                         } else {
@@ -370,8 +369,8 @@ public class PciSpecificationManagerImpl extends AbstractService implements
             }).run(new WhileDoneCompletion(msg) {
                 @Override
                 public void done(ErrorCodeList errorCodeList) {
-                    if (!errors.isEmpty()) {
-                        reply.setError(errors.get(0));
+                    if (errorCodeList.hasError()) {
+                        reply.setError(errorCodeList.wrapOrNull());
                         bus.reply(msg, reply);
                         return;
                     }
@@ -527,7 +526,6 @@ public class PciSpecificationManagerImpl extends AbstractService implements
     private void handle(APIGetMdevDeviceSpecCandidatesMsg msg) {
         APIGetMdevDeviceSpecCandidatesReply reply = new APIGetMdevDeviceSpecCandidatesReply();
         if (CollectionUtils.isNotEmpty(msg.getVmInstanceUuids())) {
-            List<ErrorCode> errors = new ArrayList<>();
             List<List<String>> candidateSpecs = new ArrayList<>();
             new While<>(msg.getVmInstanceUuids()).all((vmUuid, completion) -> {
                 GetMdevDeviceSpecCandidatesMsg gmsg = new GetMdevDeviceSpecCandidatesMsg();
@@ -539,7 +537,7 @@ public class PciSpecificationManagerImpl extends AbstractService implements
                     @Override
                     public void run(MessageReply rly) {
                         if (!rly.isSuccess()) {
-                            errors.add(rly.getError());
+                            completion.addError(rly.getError());
                             completion.allDone();
                             return;
                         } else {
@@ -553,8 +551,8 @@ public class PciSpecificationManagerImpl extends AbstractService implements
             }).run(new WhileDoneCompletion(msg) {
                 @Override
                 public void done(ErrorCodeList errorCodeList) {
-                    if (!errors.isEmpty()) {
-                        reply.setError(errors.get(0));
+                    if (errorCodeList.hasError()) {
+                        reply.setError(errorCodeList.wrapOrNull());
                         bus.reply(msg, reply);
                         return;
                     }

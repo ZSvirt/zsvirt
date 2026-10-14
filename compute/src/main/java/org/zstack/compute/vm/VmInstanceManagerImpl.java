@@ -947,7 +947,6 @@ public class VmInstanceManagerImpl extends AbstractService implements
 
             @Override
             public void run(FlowTrigger trigger, Map data) {
-                List<ErrorCode> errors = new ArrayList<>();
                 L3NetworkVO l3NetworkVO = dbf.findByUuid(msg.getL3NetworkUuid(), L3NetworkVO.class);
                 new While<>(l3NetworkVO.getIpVersions()).each((version, wcomp) -> {
                     AllocateIpMsg allocateIpMsg = new AllocateIpMsg();
@@ -964,7 +963,7 @@ public class VmInstanceManagerImpl extends AbstractService implements
                         @Override
                         public void run(MessageReply reply) {
                             if (!reply.isSuccess()) {
-                                errors.add(reply.getError());
+                                wcomp.addError(reply.getError());
                                 wcomp.allDone();
                                 return;
                             }
@@ -989,11 +988,7 @@ public class VmInstanceManagerImpl extends AbstractService implements
                 }).run(new WhileDoneCompletion(trigger) {
                     @Override
                     public void done(ErrorCodeList errorCodeList) {
-                        if (errors.size() > 0) {
-                            trigger.fail(errors.get(0));
-                        } else {
-                            trigger.next();
-                        }
+                        trigger.next(errorCodeList.wrapOrNull());
                     }
                 });
 

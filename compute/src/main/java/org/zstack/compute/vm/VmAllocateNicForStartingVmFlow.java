@@ -15,7 +15,6 @@ import org.zstack.header.core.WhileDoneCompletion;
 import org.zstack.header.core.workflow.Flow;
 import org.zstack.header.core.workflow.FlowRollback;
 import org.zstack.header.core.workflow.FlowTrigger;
-import org.zstack.header.errorcode.ErrorCode;
 import org.zstack.header.errorcode.ErrorCodeList;
 import org.zstack.header.message.MessageReply;
 import org.zstack.header.network.l3.*;
@@ -120,13 +119,12 @@ public class VmAllocateNicForStartingVmFlow implements Flow {
         final List<UsedIpInventory> allocatedIPs = new ArrayList<UsedIpInventory>();
         data.put(VmAllocateNicForStartingVmFlow.class, allocatedIPs);
 
-        List<ErrorCode> errs = new ArrayList<>();
         new While<>(amsgs).each((msg, wcompl) -> {
             bus.send(msg, new CloudBusCallBack(wcompl) {
                 @Override
                 public void run(MessageReply reply) {
                     if (!reply.isSuccess()) {
-                        errs.add(reply.getError());
+                        wcompl.addError(reply.getError());
                         wcompl.allDone();
                     }
 
@@ -148,8 +146,8 @@ public class VmAllocateNicForStartingVmFlow implements Flow {
         }).run(new WhileDoneCompletion(trigger) {
             @Override
             public void done(ErrorCodeList errorCodeList) {
-                if (errs.size() > 0) {
-                    trigger.fail(errs.get(0));
+                if (errorCodeList.hasError()) {
+                    trigger.fail(errorCodeList.wrapOrNull());
                 } else {
                     VmInstanceVO vmvo = dbf.findByUuid(vm.getUuid(), VmInstanceVO.class);
                     spec.setVmInventory(VmInstanceInventory.valueOf(vmvo));

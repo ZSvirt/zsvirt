@@ -123,7 +123,6 @@ public class LoadBalancerCascadeExtension extends AbstractAsyncCascadeExtension 
                     return msg;
                 });
 
-                List<ErrorCode> erros = new ArrayList<>();
                 new While<>(msgs).all((msg, whileCompletion) -> {
                     bus.send(msg, new CloudBusCallBack(whileCompletion) {
                         @Override
@@ -131,7 +130,7 @@ public class LoadBalancerCascadeExtension extends AbstractAsyncCascadeExtension 
                             if (!reply.isSuccess()) {
                                 logger.warn(String.format("failed to delete loadBalancer[uuid:%s], %s",
                                         msg.getUuid(), reply.getError()));
-                                erros.add(reply.getError());
+                                whileCompletion.addError(reply.getError());
                             }
 
                             whileCompletion.done();
@@ -140,8 +139,8 @@ public class LoadBalancerCascadeExtension extends AbstractAsyncCascadeExtension 
                 }).run(new WhileDoneCompletion(completion) {
                     @Override
                     public void done(ErrorCodeList errorCodeList) {
-                        if (!erros.isEmpty()) {
-                            completion.fail(erros.get(0));
+                        if (errorCodeList.hasError()) {
+                            completion.fail(errorCodeList.wrapOrNull());
                         }
 
                         trigger.next();

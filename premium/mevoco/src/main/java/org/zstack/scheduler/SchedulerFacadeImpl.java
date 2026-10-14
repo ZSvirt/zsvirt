@@ -2486,7 +2486,6 @@ public class SchedulerFacadeImpl extends AbstractService implements SchedulerFac
             return;
         }
 
-        List<ErrorCode> errs = new ArrayList<>();
         new While<>(jobUuids).each((jobUuid, compl) -> {
             deleteSchedulerJob(jobUuid, new Completion(compl) {
                 @Override
@@ -2496,18 +2495,14 @@ public class SchedulerFacadeImpl extends AbstractService implements SchedulerFac
 
                 @Override
                 public void fail(ErrorCode errorCode) {
-                    errs.add(errorCode);
+                    compl.addError(errorCode);
                     compl.done();
                 }
             });
         }).run(new WhileDoneCompletion(completion) {
             @Override
             public void done(ErrorCodeList errorCodeList) {
-                if (errs.isEmpty()) {
-                    completion.success();
-                } else {
-                    completion.fail(errs.get(0));
-                }
+                completion.next(errorCodeList);
             }
         });
     }

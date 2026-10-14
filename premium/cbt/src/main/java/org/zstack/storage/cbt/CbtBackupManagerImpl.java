@@ -31,7 +31,6 @@ import org.zstack.header.message.MessageReply;
 import org.zstack.header.storage.backup.BackupOperationConflictChecker;
 import org.zstack.header.storage.primary.PrimaryStorageVO;
 import org.zstack.header.storage.primary.PrimaryStorageVO_;
-import org.zstack.header.vm.VmInstanceConstant;
 import org.zstack.header.vm.VmInstanceState;
 import org.zstack.header.vm.VmInstanceVO;
 import org.zstack.header.vm.VmInstanceVO_;
@@ -45,7 +44,6 @@ import org.zstack.storage.primary.local.LocalStorageConstants;
 import org.zstack.storage.primary.local.LocalStorageSystemTags;
 import org.zstack.storage.backup.BackupOperationConflictManager;
 import org.zstack.storage.volume.VolumeSystemTags;
-import org.zstack.tag.SystemTagCreator;
 import org.zstack.utils.CollectionUtils;
 import org.zstack.utils.Utils;
 import org.zstack.utils.logging.CLogger;
@@ -59,8 +57,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import static java.util.Arrays.asList;
 import static org.zstack.core.Platform.operr;
 import static org.zstack.storage.backup.BackupOperationConflictManager.sendBackupInVmQueue;
-import static org.zstack.utils.CollectionDSL.e;
-import static org.zstack.utils.CollectionDSL.map;
 
 public class CbtBackupManagerImpl extends AbstractService implements Component, CbtBackupManager, BackupOperationConflictChecker {
     private static final CLogger logger = Utils.getLogger(CbtBackupManagerImpl.class);
@@ -1092,7 +1088,6 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
         KVMHostInventory inv = KVMHostInventory.valueOf(dbf.findByUuid(hostUuid, KVMHostVO.class));
         String nbdServer = CbtBackupNetworkUtils.getBackupAddress(inv);
 
-        List<ErrorCode> errs = new ArrayList<>();
         new While<>(volumeUuids).step((uuid, wcompl) -> {
             VolumeVO vo = getVolumeByUuid(uuid);
             PrimaryStorageVO ps = Q.New(PrimaryStorageVO.class).eq(PrimaryStorageVO_.uuid, vo.getPrimaryStorageUuid()).find();
@@ -1116,7 +1111,7 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
                 @Override
                 public void run(MessageReply reply) {
                     if (!reply.isSuccess()) {
-                        errs.add(operr("create cbt volumes failed. details is: %s", reply.getError().getDetails()));
+                        wcompl.addError(operr("create cbt volumes failed. details is: %s", reply.getError().getDetails()));
                         wcompl.done();
                         return;
                     }
@@ -1134,10 +1129,10 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
         }, 5).run(new WhileDoneCompletion(completion) {
             @Override
             public void done(ErrorCodeList errorCodeList) {
-                if (errs.isEmpty()) {
+                if (errorCodeList.isEmpty()) {
                     completion.success(infos);
                 } else {
-                    completion.fail(errs.get(0));
+                    completion.fail(errorCodeList.wrapOrNull());
                 }
             }
         });
@@ -1150,7 +1145,6 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
             return;
         }
 
-        List<ErrorCode> errs = new ArrayList<>();
         new While<>(uuids).step((uuid, wcompl) -> {
             DeleteVolumeMsg msg = new DeleteVolumeMsg();
             msg.setDeletionPolicy(VolumeDeletionPolicyManager.VolumeDeletionPolicy.Direct.toString());
@@ -1161,7 +1155,7 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
                 public void run(MessageReply reply) {
                     if (!reply.isSuccess()) {
                         logger.warn(String.format("failed to expunge the volume[uuid:%s], %s", uuid, reply.getError()));
-                        errs.add(reply.getError());
+                        wcompl.addError(reply.getError());
                     } else {
                         deleteResourceUuidsForCbtTask(uuid, taskUuid);
                         logger.debug(String.format("successfully expunged the volume [uuid:%s]", uuid));
@@ -1172,11 +1166,7 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
         }, 5).run(new WhileDoneCompletion(completion) {
             @Override
             public void done(ErrorCodeList errorCodeList) {
-                if (errs.isEmpty()) {
-                    completion.success();
-                } else {
-                    completion.fail(errs.get(0));
-                }
+                completion.next(errorCodeList.wrapOrNull());
             }
         });
     }

@@ -4229,7 +4229,6 @@ public class CephPrimaryStorageBase extends PrimaryStorageBase {
 
                         DebugUtils.Assert(!mons.isEmpty(), "how can be no connected MON !!!???");
 
-                        List<ErrorCode> errors = new ArrayList<>();
                         new While<>(mons).each((mon, compl) -> {
                             GetFactsCmd cmd = new GetFactsCmd();
                             cmd.uuid = self.getUuid();
@@ -4253,15 +4252,15 @@ public class CephPrimaryStorageBase extends PrimaryStorageBase {
                                 @Override
                                 public void fail(ErrorCode errorCode) {
                                     // one mon cannot get the facts, directly error out
-                                    errors.add(errorCode);
+                                    compl.addError(errorCode);
                                     compl.allDone();
                                 }
                             });
                         }).run(new WhileDoneCompletion(trigger) {
                             @Override
                             public void done(ErrorCodeList errorCodeList) {
-                                if (!errors.isEmpty()) {
-                                    trigger.fail(errors.get(0));
+                                if (errorCodeList.hasError()) {
+                                    trigger.fail(errorCodeList.wrapOrNull());
                                     return;
                                 }
 

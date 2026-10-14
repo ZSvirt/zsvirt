@@ -375,6 +375,7 @@ public class SharedBlockGroupPrimaryStorageFactory implements PrimaryStorageFact
         DisconnectSharedBlockGroupPrimaryStorageOnHostMsg msg = new DisconnectSharedBlockGroupPrimaryStorageOnHostMsg();
         msg.setHostUuid(inventory.getUuid());
         msg.setHypervisorType(inventory.getHypervisorType());
+        msg.setRemoveRefVO(true);
 
         FutureCompletion completion = new FutureCompletion(null);
         ErrorCodeList errList = new ErrorCodeList();

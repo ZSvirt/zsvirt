@@ -28,6 +28,7 @@ import org.zstack.utils.Utils;
 import org.zstack.utils.logging.CLogger;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
@@ -99,6 +100,11 @@ public class KvmAgentCommandDispatcher {
                     "primary storage[uuid: %s]", psUuid));
         }
         hinvs.forEach(it -> hostUuids.add(it.getUuid()));
+    }
+
+    public KvmAgentCommandDispatcher(String psUuid, Comparator<String> hostUuidComparator) {
+        this(psUuid);
+        hostUuids.sort(hostUuidComparator);
     }
 
     public KvmAgentCommandDispatcher(String psUuid) {

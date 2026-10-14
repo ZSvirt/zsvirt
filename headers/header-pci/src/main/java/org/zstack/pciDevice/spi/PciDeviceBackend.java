@@ -10,6 +10,9 @@ import java.util.List;
 
 /**
  * Created by weiwang on 10/07/2017.
+ *
+ * To ZSTAC-83192:
+ * * PciDeviceBackend is a backend to KVM HOST! not a place to set method like 'syncPciDeviceInDb';
  */
 public interface PciDeviceBackend {
     void attachPciDeviceToVm(PciDeviceInventory pciDevice, String vmUuid, Completion completion);

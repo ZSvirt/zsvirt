@@ -87,20 +87,7 @@ import org.zstack.pciDevice.header.PciDeviceStatus;
 import org.zstack.pciDevice.header.PciDeviceSystemTags;
 import org.zstack.pciDevice.header.PciDeviceType;
 import org.zstack.pciDevice.header.virtual.PciDeviceVirtStatus;
-import org.zstack.pciDevice.message.AttachPciDeviceToHostMsg;
-import org.zstack.pciDevice.message.AttachPciDeviceToHostReply;
-import org.zstack.pciDevice.message.AttachPciDeviceToVmMsg;
-import org.zstack.pciDevice.message.AttachPciDeviceToVmReply;
-import org.zstack.pciDevice.message.CheckAndReservePciDeviceBySpecMsg;
-import org.zstack.pciDevice.message.CheckAndReservePciDeviceBySpecReply;
-import org.zstack.pciDevice.message.CheckAndReservePciDeviceMsg;
-import org.zstack.pciDevice.message.CheckAndReservePciDeviceReply;
-import org.zstack.pciDevice.message.DetachPciDeviceFromHostMsg;
-import org.zstack.pciDevice.message.DetachPciDeviceFromHostReply;
-import org.zstack.pciDevice.message.DetachPciDeviceFromVmMsg;
-import org.zstack.pciDevice.message.DetachPciDeviceFromVmReply;
-import org.zstack.pciDevice.message.SyncPciDeviceMsg;
-import org.zstack.pciDevice.message.SyncPciDeviceReply;
+import org.zstack.pciDevice.message.*;
 import org.zstack.pciDevice.specification.mdev.APIAddMdevDeviceSpecToVmInstanceMsg;
 import org.zstack.pciDevice.specification.pci.*;
 import org.zstack.pciDevice.spi.PciDeviceBackend;
@@ -109,6 +96,7 @@ import org.zstack.pciDevice.spi.PciDeviceTypeFactory;
 import org.zstack.pciDevice.spi.VirtualPciDeviceFactory;
 import org.zstack.pciDevice.quota.GPUNumQuotaDefinition;
 import org.zstack.pciDevice.quota.GenericPCIDeviceNumQuotaDefinition;
+import org.zstack.pciDevice.sync.PciDeviceDbSyncer;
 import org.zstack.pciDevice.virtual.*;
 import org.zstack.pciDevice.virtual.vfio_mdev.APIAttachMdevDeviceToVmMsg;
 import org.zstack.storage.migration.primary.APIPrimaryStorageMigrateVmMsg;
@@ -247,6 +235,7 @@ public class PciDeviceManager extends AbstractService implements
     @Override
     public PciDeviceBackend getPciDeviceBackendByHostUuid(String hostUuid) {
         HostVO hvo = Q.New(HostVO.class).eq(HostVO_.uuid, hostUuid).find();
+        Objects.requireNonNull(hvo, "failed to find host[uuid=" + hostUuid + "]");
         return backends.get(HypervisorType.valueOf(hvo.getHypervisorType()));
     }
 
@@ -280,6 +269,8 @@ public class PciDeviceManager extends AbstractService implements
     private void handleLocalMessage(Message msg) {
         if (msg instanceof SyncPciDeviceMsg) {
             handle((SyncPciDeviceMsg) msg);
+        } else if (msg instanceof SyncPciDeviceInDbMsg) {
+            handle((SyncPciDeviceInDbMsg) msg);
         } else if (msg instanceof AttachPciDeviceToVmMsg) {
             handle((AttachPciDeviceToVmMsg) msg);
         } else if (msg instanceof DetachPciDeviceFromVmMsg) {
@@ -645,7 +636,8 @@ public class PciDeviceManager extends AbstractService implements
         thdf.chainSubmit(new ChainTask(msg) {
             @Override
             public String getSyncSignature() {
-                return PciDeviceConstants.SYNC_PCI_DEVICE_SIGNATURE;
+                return String.format("%s-%s",
+                        PciDeviceConstants.SYNC_PCI_DEVICE_SIGNATURE, msg.getHostUuid());
             }
 
             @Override
@@ -685,6 +677,40 @@ public class PciDeviceManager extends AbstractService implements
             }
         });
 
+    }
+
+    private void handle(SyncPciDeviceInDbMsg msg) {
+        thdf.chainSubmit(new ChainTask(msg) {
+            @Override
+            public String getSyncSignature() {
+                return PciDeviceConstants.SYNC_PCI_DEVICE_IN_DB_SIGNATURE;
+            }
+
+            @Override
+            public void run(SyncTaskChain chain) {
+                PciDeviceDbSyncer syncer = new PciDeviceDbSyncer(msg.getHostUuid(), msg.getPciDevices());
+
+                switch (msg.getSyncMode()) {
+                    case Full:
+                        syncer.doSyncPciWithDb();
+                        break;
+                    case Ethernet:
+                        syncer.doSyncEthPciWithDb();
+                        break;
+                    default:
+                        throw new IllegalArgumentException(String.format(
+                                "unknown pci device database sync mode[%s]", msg.getSyncMode()));
+                }
+
+                bus.reply(msg, new SyncPciDeviceInDbReply());
+                chain.next();
+            }
+
+            @Override
+            public String getName() {
+                return String.format("%s-%s", getSyncSignature(), msg.getHostUuid());
+            }
+        });
     }
 
     private void handle(DetachPciDeviceFromVmMsg msg) {

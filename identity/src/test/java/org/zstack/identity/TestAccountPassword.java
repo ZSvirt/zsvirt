@@ -34,6 +34,9 @@ public class TestAccountPassword {
         // All 128 input characters must matter; no bcrypt-style 72-byte truncation.
         assertFalse(AccountPassword.matches(LEGACY.substring(0, 127) + "0", first));
         assertFalse(AccountPassword.matches(first, first));
+        assertTrue(AccountPassword.matchesAccount(LEGACY, "account", first));
+        assertFalse(AccountPassword.matchesAccount(first, "account", first));
+        assertFalse(AccountPassword.matchesAccount("wrong", "account", first));
     }
 
     @Test
@@ -42,11 +45,12 @@ public class TestAccountPassword {
         String truncated = stored.substring(0, stored.length() - 1);
         assertFalse(AccountPassword.matches(LEGACY, truncated));
         assertFalse(AccountPassword.matches(truncated, truncated));
+        assertFalse(AccountPassword.matchesAccount(truncated, "account", truncated));
         assertFalse(AccountPassword.matches(LEGACY, stored.substring(0, stored.indexOf('}') + 1) + "not-hex"));
     }
 
     @Test
-    public void historyCanCompareBothFormatsWithoutDoubleHashing() {
+    public void historyCanCompareBothFormats() {
         String stored = AccountPassword.encode(LEGACY);
         assertTrue(AccountPassword.matches(LEGACY, stored));
         assertTrue(AccountPassword.matches(LEGACY, LEGACY));

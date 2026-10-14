@@ -59,7 +59,19 @@ class AccountSaltedPasswordCase extends SubCase {
             // Model an account stored by the previous version; new API writes are always salted.
             SQL.New(AccountVO.class).eq(AccountVO_.uuid, legacy.uuid)
                     .set(AccountVO_.password, oldInput).update()
+            def legacyBeforeLogin = dbFindByUuid(legacy.uuid, AccountVO.class)
+            assert legacyBeforeLogin.password == oldInput
+            def legacyLastOpDate = legacyBeforeLogin.lastOpDate
+            String historicalInput = DigestUtils.sha512Hex("pre-upgrade-history")
+            HistoricalPasswordVO legacyHistory = bean(DatabaseFacade.class).persist(
+                    new HistoricalPasswordVO(uuid: legacy.uuid, password: historicalInput,
+                            createDate: new java.sql.Timestamp(946684800000L)))
+            def historyDate = dbFindById(legacyHistory.id, HistoricalPasswordVO.class).createDate
+
+            // Reinitialization and login must leave pre-upgrade credentials untouched.
+            bean(AccountManagerImpl.class).prepareDbInitialValue()
             assert dbFindByUuid(legacy.uuid, AccountVO.class).password == oldInput
+            assert dbFindByUuid(legacy.uuid, AccountVO.class).lastOpDate == legacyLastOpDate
 
             // Legacy login keeps the database's existing comparison semantics.
             boolean oldDatabaseMatch = Q.New(AccountVO.class).eq(AccountVO_.uuid, legacy.uuid)
@@ -72,16 +84,27 @@ class AccountSaltedPasswordCase extends SubCase {
             } as SessionInventory
             assert session.accountUuid == legacy.uuid
             assert dbFindByUuid(legacy.uuid, AccountVO.class).password == oldInput
+            assert dbFindByUuid(legacy.uuid, AccountVO.class).lastOpDate == legacyLastOpDate
+            assert dbFindById(legacyHistory.id, HistoricalPasswordVO.class).password == historicalInput
+            assert dbFindById(legacyHistory.id, HistoricalPasswordVO.class).createDate == historyDate
 
             updateAccount {
                 uuid = legacy.uuid
                 oldPassword = oldInput
                 password = newInput
-                sessionId = admin.uuid
+                sessionId = session.uuid
             }
             String changedLegacy = dbFindByUuid(legacy.uuid, AccountVO.class).password
             assert AccountPassword.isEncoded(changedLegacy)
             assert AccountPassword.matches(newInput, changedLegacy)
+            retryInSecs {
+                List<String> history = Q.New(HistoricalPasswordVO.class)
+                        .eq(HistoricalPasswordVO_.uuid, legacy.uuid)
+                        .select(HistoricalPasswordVO_.password).listValues()
+                assert history.any { AccountPassword.isEncoded(it) && AccountPassword.matches(oldInput, it) }
+            }
+            assert dbFindById(legacyHistory.id, HistoricalPasswordVO.class).password == historicalInput
+            assert dbFindById(legacyHistory.id, HistoricalPasswordVO.class).createDate == historyDate
             assert (logInByAccount {
                 accountName = legacy.name
                 password = newInput

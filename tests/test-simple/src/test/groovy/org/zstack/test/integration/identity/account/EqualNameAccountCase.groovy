@@ -5,6 +5,7 @@ import org.zstack.header.errorcode.SysErrors
 import org.zstack.header.identity.AccountSource
 import org.zstack.header.identity.AccountVO
 import org.zstack.header.identity.AccountVO_
+import org.zstack.identity.AccountPassword
 import org.zstack.identity.imports.entity.AccountThirdPartyAccountSourceRefVO
 import org.zstack.identity.imports.entity.AccountThirdPartyAccountSourceRefVO_
 import org.zstack.sdk.AccountInventory
@@ -230,7 +231,9 @@ class EqualNameAccountCase extends SubCase {
             delegate.password = "localpassword2"
         }
 
-        assert dbFindByUuid(localZhangsan.uuid, AccountVO.class).password == "localpassword2"
+        String localStored = dbFindByUuid(localZhangsan.uuid, AccountVO.class).password
+        assert AccountPassword.isEncoded(localStored)
+        assert AccountPassword.matches("localpassword2", localStored)
         logInByAccount {
             delegate.accountName = "zhangsan"
             delegate.password = "localpassword2"
@@ -271,7 +274,9 @@ class EqualNameAccountCase extends SubCase {
             delegate.password = "lisipassword"
         }
 
-        assert dbFindByUuid(ldapLisi.uuid, AccountVO.class).password == "lisipassword"
+        String lisiStored = dbFindByUuid(ldapLisi.uuid, AccountVO.class).password
+        assert AccountPassword.isEncoded(lisiStored)
+        assert AccountPassword.matches("lisipassword", lisiStored)
         def accounts301 = queryAccount {
             delegate.conditions = [
                 "uuid=" + ldapLisi.uuid
@@ -329,7 +334,7 @@ class EqualNameAccountCase extends SubCase {
             assert code == SysErrors.OPERATION_ERROR.toString()
         }
 
-        assert dbFindByUuid(ldapLisi.uuid, AccountVO.class).password == "lisipassword"
+        assert dbFindByUuid(ldapLisi.uuid, AccountVO.class).password == lisiStored
 
         logger.info("Test 399: clean accounts named lisi")
         cleanupAccountsNamed("lisi")

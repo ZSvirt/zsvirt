@@ -12,6 +12,7 @@ import org.zstack.header.identity.QuotaVO
 import org.zstack.header.identity.QuotaVO_
 import org.zstack.header.identity.SessionVO
 import org.zstack.header.identity.SessionVO_
+import org.zstack.identity.AccountPassword
 import org.zstack.identity.QuotaGlobalConfig
 import org.zstack.kvm.KVMConstant
 import org.zstack.sdk.AccountInventory
@@ -158,7 +159,8 @@ class AccountCase extends SubCase {
         } as SessionInventory
 
         AccountVO accountVO = dbFindByUuid(AccountConstant.INITIAL_SYSTEM_ADMIN_UUID, AccountVO.class)
-        assert accountVO.password  == "new"
+        assert AccountPassword.isEncoded(accountVO.password)
+        assert AccountPassword.matches("new", accountVO.password)
 
         //changeWithRightOldPassword
         updateAccount {
@@ -175,7 +177,8 @@ class AccountCase extends SubCase {
         } as SessionInventory
 
         accountVO = dbFindByUuid(AccountConstant.INITIAL_SYSTEM_ADMIN_UUID, AccountVO.class)
-        assert accountVO.password  == "new2"
+        assert AccountPassword.isEncoded(accountVO.password)
+        assert AccountPassword.matches("new2", accountVO.password)
 
         //changeWithWrongOldPassword
         UpdateAccountAction updateAccountAction = new UpdateAccountAction()
@@ -194,7 +197,8 @@ class AccountCase extends SubCase {
         }
 
         AccountVO accountVO1 = dbFindByUuid(AccountConstant.INITIAL_SYSTEM_ADMIN_UUID, AccountVO.class)
-        assert accountVO1.password == AccountConstant.INITIAL_SYSTEM_ADMIN_PASSWORD
+        assert AccountPassword.isEncoded(accountVO1.password)
+        assert AccountPassword.matches(AccountConstant.INITIAL_SYSTEM_ADMIN_PASSWORD, accountVO1.password)
     }
 
     void testLoginAsNormalAccountAndChangeSelfPassword() {
@@ -210,7 +214,8 @@ class AccountCase extends SubCase {
         }
 
         AccountVO accountVO = dbFindByUuid(accountInventory.uuid, AccountVO.class)
-        assert accountVO.password == "new"
+        assert AccountPassword.isEncoded(accountVO.password)
+        assert AccountPassword.matches("new", accountVO.password)
 
         logOut {
             sessionUuid = sessionInventory.uuid

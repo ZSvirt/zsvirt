@@ -8,7 +8,6 @@ import org.zstack.core.cloudbus.CloudBus;
 import org.zstack.core.cloudbus.CloudBusCallBack;
 import org.zstack.header.core.WhileDoneCompletion;
 import org.zstack.header.core.ReturnValueCompletion;
-import org.zstack.header.errorcode.ErrorCode;
 import org.zstack.header.errorcode.ErrorCodeList;
 import org.zstack.header.longjob.LongJob;
 import org.zstack.header.longjob.LongJobFor;
@@ -17,12 +16,6 @@ import org.zstack.header.message.APIEvent;
 import org.zstack.header.message.MessageReply;
 import org.zstack.header.storage.database.backup.*;
 import org.zstack.utils.gson.JSONObjectUtil;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.zstack.core.Platform.err;
-import static org.zstack.core.Platform.operr;
 
 /**
  * Created by MaJin on 2019/3/8.
@@ -36,7 +29,6 @@ public class CreateDatabaseBackupLongJob implements LongJob {
 
     @Override
     public void start(LongJobVO job, ReturnValueCompletion<APIEvent> completion) {
-        List<ErrorCode> errors = new ArrayList<>();
         APICreateDatabaseBackupEvent evt = new APICreateDatabaseBackupEvent(job.getApiId());
         DatabaseBackupLongJobParams params = JSONObjectUtil.toObject(job.getJobData(), DatabaseBackupLongJobParams.class);
         new While<>(params.getAlternativeBackupStorageUuids()).each((bsUuid, compl) -> {
@@ -51,7 +43,7 @@ public class CreateDatabaseBackupLongJob implements LongJob {
                         evt.setInventory(r.getInventory());
                         compl.allDone();
                     } else {
-                        errors.add(reply.getError());
+                        compl.addError(reply.getError());
                         compl.done();
                     }
                 }
@@ -59,8 +51,8 @@ public class CreateDatabaseBackupLongJob implements LongJob {
         }).run(new WhileDoneCompletion(completion) {
             @Override
             public void done(ErrorCodeList errorCodeList) {
-                if (evt.getInventory() == null && !errors.isEmpty()) {
-                    completion.fail(errors.get(0));
+                if (evt.getInventory() == null && errorCodeList.hasError()) {
+                    completion.fail(errorCodeList.wrapOrNull());
                 } else {
                     completion.success(evt);
                 }

@@ -33,7 +33,6 @@ import org.zstack.utils.CollectionUtils;
 import org.zstack.utils.Utils;
 import org.zstack.utils.logging.CLogger;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -130,7 +129,6 @@ public class DownloadIsoForVmExtension implements PreVmInstantiateResourceExtens
                 }
         );
 
-        List<ErrorCode> errorCodes = new ArrayList<>();
         new While<>(msgs).step((msg, whileCompletion) -> {
             bus.send(msg, new CloudBusCallBack(completion) {
                 @Override
@@ -153,7 +151,7 @@ public class DownloadIsoForVmExtension implements PreVmInstantiateResourceExtens
                                     .update();
                         }
                     } else {
-                        errorCodes.add(reply.getError());
+                        whileCompletion.addError(reply.getError());
                     }
                     whileCompletion.done();
                 }
@@ -161,12 +159,12 @@ public class DownloadIsoForVmExtension implements PreVmInstantiateResourceExtens
         }, 3).run(new WhileDoneCompletion(completion) {
             @Override
             public void done(ErrorCodeList errorCodeList) {
-                if (errorCodes.isEmpty()) {
+                if (errorCodeList.isEmpty()) {
                     completion.success();
                     return;
                 }
 
-                ErrorCode ec = multiErr(errorCodes, "unable to download iso to primary storage");
+                ErrorCode ec = multiErr(errorCodeList, "unable to download iso to primary storage");
                 completion.fail(ec);
             }
         });

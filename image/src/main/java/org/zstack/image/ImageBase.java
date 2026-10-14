@@ -415,13 +415,12 @@ public class ImageBase implements Image {
                     detachIsoFromVmInstanceMsgs.add(detachIsoFromVmInstanceMsg);
                 }
 
-                List<ErrorCode> errors = Collections.synchronizedList(new LinkedList<ErrorCode>());
                 new While<>(detachIsoFromVmInstanceMsgs).all((detachIsoFromVmInstanceMsg, completion) -> {
                     bus.send(detachIsoFromVmInstanceMsg, new CloudBusCallBack(completion) {
                         @Override
                         public void run(MessageReply rly) {
                             if (!rly.isSuccess()) {
-                                errors.add(rly.getError());
+                                completion.addError(rly.getError());
                             }
 
                             completion.done();
@@ -430,9 +429,9 @@ public class ImageBase implements Image {
                 }).run(new WhileDoneCompletion(trigger) {
                     @Override
                     public void done(ErrorCodeList errorCodeList) {
-                        if (errors.size() != 0) {
+                        if (errorCodeList.hasError()) {
                             trigger.fail(operr("detach iso[uuid=%s] from vm failed, errors are %s"
-                                    ,msg.getImageUuid(), JSONObjectUtil.toJsonString(errors)));
+                                    ,msg.getImageUuid(), JSONObjectUtil.toJsonString(errorCodeList.getCauses())));
                             return;
                         }
                         trigger.next();

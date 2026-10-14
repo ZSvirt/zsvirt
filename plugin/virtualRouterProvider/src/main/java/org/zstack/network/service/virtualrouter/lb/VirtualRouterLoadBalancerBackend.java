@@ -906,7 +906,6 @@ public class VirtualRouterLoadBalancerBackend extends AbstractVirtualRouterBacke
     private void refreshCertificate(VirtualRouterVmInventory vr, boolean checkVrState, List<LoadBalancerStruct> struct, final Completion completion){
         List<String> certificateUuids = getCertificates(struct);
 
-        List<ErrorCode> errors = new ArrayList<>();
         new While<>(certificateUuids).each((uuid, wcmpl) -> {
             VirtualRouterAsyncHttpCallMsg msg = new VirtualRouterAsyncHttpCallMsg();
             msg.setVmInstanceUuid(vr.getUuid());
@@ -928,25 +927,16 @@ public class VirtualRouterLoadBalancerBackend extends AbstractVirtualRouterBacke
                         if (rsp.isSuccess()) {
                             wcmpl.done();
                         } else {
-                            errors.add(operr("operation error, because:%s", rsp.getError()));
+                            wcmpl.addError(operr("operation error, because:%s", rsp.getError()));
                             wcmpl.allDone();
                         }
                     } else {
-                        errors.add(reply.getError());
+                        wcmpl.addError(reply.getError());
                         wcmpl.allDone();
                     }
                 }
             });
-        }).run(new WhileDoneCompletion(completion) {
-            @Override
-            public void done(ErrorCodeList errorCodeList) {
-                if (errors.isEmpty()) {
-                    completion.success();
-                } else {
-                    completion.fail(errors.get(0));
-                }
-            }
-        });
+        }).runAndSendErrorTo(completion);
     }
 
     private void rollbackCertificate(VirtualRouterVmInventory vr, boolean checkVrState, List<LoadBalancerStruct> struct, final NoErrorCompletion completion){

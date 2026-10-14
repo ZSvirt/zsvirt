@@ -38,12 +38,9 @@ import org.zstack.header.volume.*;
 import org.zstack.identity.AccountManager;
 import org.zstack.kvm.KvmSetupSelfFencerExtensionPoint;
 import org.zstack.storage.backup.imagestore.CommitVolumeAsImageFlowChain;
-import org.zstack.storage.primary.EstimateVolumeTemplateSizeOnPrimaryStorageMsg;
-import org.zstack.storage.primary.EstimateVolumeTemplateSizeOnPrimaryStorageReply;
+import org.zstack.storage.primary.*;
 import org.zstack.storage.backup.imagestore.GetImageChainInfoMsg;
 import org.zstack.storage.backup.imagestore.GetImageChainInfoReply;
-import org.zstack.storage.primary.PrimaryStorageBase;
-import org.zstack.storage.primary.PrimaryStorageCapacityUpdater;
 import org.zstack.storage.primary.block.message.*;
 import org.zstack.utils.Utils;
 import org.zstack.utils.gson.JSONObjectUtil;
@@ -89,7 +86,7 @@ public class BlockPrimaryStorageBase extends PrimaryStorageBase {
     @Override
     protected void handle(APICleanUpImageCacheOnPrimaryStorageMsg msg) {
         APICleanUpImageCacheOnPrimaryStorageEvent evt = new APICleanUpImageCacheOnPrimaryStorageEvent(msg.getId());
-        imageCacheCleaner.cleanup(msg.getUuid(), false);
+        imageCacheCleaner.cleanup(msg.getUuid(), new ImageCacheCleanParam(true, msg.isForce()));
         bus.publish(evt);
     }
 

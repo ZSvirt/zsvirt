@@ -39,6 +39,7 @@ import org.zstack.header.volume.*;
 import org.zstack.kvm.*;
 import org.zstack.storage.primary.EstimateVolumeTemplateSizeOnPrimaryStorageMsg;
 import org.zstack.storage.primary.EstimateVolumeTemplateSizeOnPrimaryStorageReply;
+import org.zstack.storage.primary.ImageCacheCleanParam;
 import org.zstack.storage.primary.PrimaryStorageBase;
 import org.zstack.storage.volume.VolumeErrors;
 import org.zstack.tag.TagManager;
@@ -322,7 +323,7 @@ public class SharedBlockGroupPrimaryStorageBase extends PrimaryStorageBase imple
     @Override
     protected void handle(APICleanUpImageCacheOnPrimaryStorageMsg msg) {
         APICleanUpImageCacheOnPrimaryStorageEvent evt = new APICleanUpImageCacheOnPrimaryStorageEvent(msg.getId());
-        imageCacheCleaner.cleanup(msg.getUuid(), false);
+        imageCacheCleaner.cleanup(msg.getUuid(), new ImageCacheCleanParam(true, msg.isForce()));
         bus.publish(evt);
     }
 

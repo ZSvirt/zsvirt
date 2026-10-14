@@ -136,14 +136,6 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
             @Override
             public void run(SyncTaskChain chain) {
                 final APIExportNbdVolumesEvent evt = new APIExportNbdVolumesEvent(msg.getId());
-                ErrorCode err = validateVmStateForOperation(msg.getVmInstanceUuid(), VmInstanceState.Stopped, "export NBD volumes");
-                if (err != null) {
-                    evt.setError(err);
-                    bus.publish(evt);
-                    chain.next();
-                    return;
-                }
-
                 String hostUuid = getVmHostUuid(msg.getVmInstanceUuid());
                 if (hostUuid == null) {
                     evt.setError(operr("host not found for VM: %s", msg.getVmInstanceUuid()));
@@ -193,14 +185,6 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
             @Override
             public void run(SyncTaskChain chain) {
                 final APIUnexportNbdVolumesEvent evt = new APIUnexportNbdVolumesEvent(msg.getId());
-                ErrorCode err = validateVmStateForOperation(msg.getVmInstanceUuid(), VmInstanceState.Stopped, "unexport NBD volumes");
-                if (err != null) {
-                    evt.setError(err);
-                    bus.publish(evt);
-                    chain.next();
-                    return;
-                }
-
                 UnexportNbdVolumesMsg umsg = new UnexportNbdVolumesMsg();
                 umsg.setVmInstanceUuid(msg.getVmInstanceUuid());
                 umsg.setVolumeUuids(msg.getVolumeUuids());
@@ -430,14 +414,6 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
                     chain.next();
                     return;
                 }
-                if (taskVO.getStatus() == CbtTaskStatus.Failed && hasPendingCbtCleanupRecords(msg.getUuid())) {
-                    reply.setError(operr("Cbt task[uuid: %s] has pending cleanup records, please disable it before enabling again.",
-                            msg.getUuid()));
-                    bus.reply(msg, reply);
-                    chain.next();
-                    return;
-                }
-
                 CbtBackupHypervisorBackend backend = getCbtBackend(vmUuid);
                 runStartVmInstanceCbtFlow(backend, vmUuid, taskVO, msg.getAccountUuid(), msg.getBitmapName(), new ReturnValueCompletion<List<VolumeCbtBackupInfo>>(msg, chain) {
                     @Override
@@ -589,9 +565,12 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
                                       List<String> volumeUuids,
                                       final ReturnValueCompletion<List<VolumeCbtBackupInfo>> completion) {
         final List<VolumeCbtBackupInfo>[] volumeInfos = new List[]{new ArrayList<VolumeCbtBackupInfo>()};
-        ErrorCode err = validateVmStateForOperation(vmUuid, VmInstanceState.Stopped, "export NBD volumes");
-        if (err != null) {
-            completion.fail(err);
+        boolean running = Q.New(VmInstanceVO.class)
+                .eq(VmInstanceVO_.uuid, vmUuid)
+                .eq(VmInstanceVO_.state, VmInstanceState.Running)
+                .isExists();
+        if (running) {
+            completion.fail(operr("vm[uuid: %s] is running, please stop it and try again.", vmUuid));
             return;
         }
 
@@ -699,6 +678,33 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
         String hostUuid = getVmHostUuid(vmUuid);
         FlowChain chain = FlowChainBuilder.newSimpleFlowChain();
         chain.setName(String.format("start-cbt-task-for-vm-%s", vmUuid));
+        chain.then(new NoRollbackFlow() {
+            final String __name__ = "cleanup-failed-cbt-task-before-retry";
+
+            @Override
+            public boolean skip(Map data) {
+                return taskVO.getStatus() != CbtTaskStatus.Failed;
+            }
+
+            @Override
+            public void run(FlowTrigger trigger, Map data) {
+                // Keep Enable retryable without a separate public Disable call.
+                // Retry scratch deletion too when rollback records are already gone.
+                DisableCbtTaskMsg dmsg = new DisableCbtTaskMsg();
+                dmsg.setUuid(taskVO.getUuid());
+                doDisableCbtTask(dmsg, new Completion(trigger) {
+                    @Override
+                    public void success() {
+                        trigger.next();
+                    }
+
+                    @Override
+                    public void fail(ErrorCode errorCode) {
+                        trigger.fail(errorCode);
+                    }
+                });
+            }
+        });
         chain.then(new NoRollbackFlow() {
             final String __name__ = "sync-volumes-size";
 
@@ -951,13 +957,6 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
         }
 
         final String vmUuid = refVO.getResourceUuid();
-        if (!msg.isForce() && !vmNotRunning(vmUuid)) {
-            ErrorCode err = validateVmStateForOperation(vmUuid, VmInstanceState.Running, "disable cbt task");
-            if (err != null) {
-                completion.fail(err);
-                return;
-            }
-        }
         FlowChain chain = FlowChainBuilder.newSimpleFlowChain();
         chain.setName(String.format("start-cbt-task-for-vm-%s", vmUuid));
         chain.then(new NoRollbackFlow() {
@@ -1322,13 +1321,6 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
     private boolean hasCbtCleanupRecords(String taskUuid) {
         return Q.New(VolumeCbtBackupRecordVO.class)
                 .eq(VolumeCbtBackupRecordVO_.taskUuid, taskUuid)
-                .isExists();
-    }
-
-    private boolean hasPendingCbtCleanupRecords(String taskUuid) {
-        return Q.New(VolumeCbtBackupRecordVO.class)
-                .eq(VolumeCbtBackupRecordVO_.taskUuid, taskUuid)
-                .notNull(VolumeCbtBackupRecordVO_.cleanupAttemptUuid)
                 .isExists();
     }
 

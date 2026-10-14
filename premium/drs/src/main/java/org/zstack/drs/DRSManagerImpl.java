@@ -503,7 +503,7 @@ public class DRSManagerImpl extends AbstractService implements DRSManager, Manag
                 hostLoadMap.put(vmUuid, hostLoad);
             }
 
-            hostLoad.setUsedHostCPUPercent(cpuUsedMap.get(vmUuid).floatValue() / 100f);
+            hostLoad.setUsedHostPhysicalCpuNum(cpuUsedMap.get(vmUuid).floatValue() / 100f);
         }
 
         for(String vmUuid : memoryUsedMap.keySet()){

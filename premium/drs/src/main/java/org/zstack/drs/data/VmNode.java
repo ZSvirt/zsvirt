@@ -8,15 +8,17 @@ import java.io.Serializable;
 public class VmNode implements Serializable {
     public String uuid;
 
-    private float usedCPUPercent; // Percentage of CPU used on the physical machine
-    private float usedMemoryPercent; // Percentage of memory used on the physical machine
+    private float usedCPUPercent; // [0, 100] Percentage of CPU used on the physical machine
+    private float usedMemoryPercent; // [0, 100] Percentage of memory used on the physical machine
     private long usedPhysicalMemoryBit; // Occupies the memory capacity of the physical machine
+    private float usedPhysicalCpuNum; // Occupies the CPU cores of the physical machine from top command
 
     private int cpuNum;
     private long memorySize;
 
-    public VmNode(String vmUuid, float usedCPUPercent, long usedPhysicalMemoryBit, float usedMemoryPercent, int cpuNum, long memorySize) {
+    public VmNode(String vmUuid, float usedPhysicalCpuNum, float usedCPUPercent, long usedPhysicalMemoryBit, float usedMemoryPercent, int cpuNum, long memorySize) {
         this.uuid = vmUuid;
+        this.usedPhysicalCpuNum = usedPhysicalCpuNum;
         this.usedCPUPercent = usedCPUPercent;
         this.usedPhysicalMemoryBit = usedPhysicalMemoryBit;
         this.usedMemoryPercent = usedMemoryPercent;
@@ -47,6 +49,14 @@ public class VmNode implements Serializable {
 
     public void setMemorySize(long memorySize) {
         this.memorySize = memorySize;
+    }
+
+    public float getUsedPhysicalCpuNum() {
+        return usedPhysicalCpuNum;
+    }
+
+    public void setUsedPhysicalCpuNum(float usedPhysicalCpuNum) {
+        this.usedPhysicalCpuNum = usedPhysicalCpuNum;
     }
 
     public float getUsedCPUPercent() {

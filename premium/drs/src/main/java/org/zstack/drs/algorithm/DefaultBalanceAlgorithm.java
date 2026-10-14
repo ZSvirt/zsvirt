@@ -29,6 +29,10 @@ public class DefaultBalanceAlgorithm implements BalanceAlgorithm {
 
     private List<MigrateTask> tasks = new ArrayList<>();
 
+
+    private static final float HYSTERESIS = 2.0f; // in percentage points
+
+
     @Override
     public List<MigrateTask> makeTasks(List<HostNode> hostNodeList, Float cpuUsedPercentThreshold, Float memUsedPercentThreshold) {
         hostNodeList = deepCopy(hostNodeList);
@@ -175,6 +179,8 @@ public class DefaultBalanceAlgorithm implements BalanceAlgorithm {
     }
 
     private void generateMigrateTasks() {
+        scheduleFireFighting();
+
         boolean flag = true;
         while (flag) {
             int taskSize = tasks.size();
@@ -202,9 +208,7 @@ public class DefaultBalanceAlgorithm implements BalanceAlgorithm {
     }
 
     private void generateMigrateTasks(HostNode sourceHost, HostNode targetHost) {
-        for(final Iterator<VmNode> vmNodeIterator = sourceHost.getVmList().iterator(); vmNodeIterator.hasNext();) {
-            final VmNode vmNode = vmNodeIterator.next();
-
+        for (VmNode vmNode : new ArrayList<>(sourceHost.getVmList())) {
             if (cpuUsedPercentThreshold != null) {
                 if (vmNode.getUsedCPUPercent() > sourceHost.getMaxSize2MoveCPUPercent()) {
                     continue;
@@ -227,35 +231,41 @@ public class DefaultBalanceAlgorithm implements BalanceAlgorithm {
                 continue;
             }
 
-            MigrateTask task = new MigrateTask();
-            task.sourceHostUuid = sourceHost.getUuid();
-            task.targetHostUuid = targetHost.getUuid();
-            task.vmUuid = vmNode.uuid;
-            tasks.add(task);
-
-            targetHost.setHostCapacityAvailableCpuNum(targetHost.getHostCapacityAvailableCpuNum() - vmNode.getCpuNum());
-            targetHost.setHostCapacityAvailableMemoryBit(targetHost.getHostCapacityAvailableMemoryBit() - vmNode.getMemorySize());
-            targetHost.setFreePhysicalMemoryBit(targetHost.getFreePhysicalMemoryBit() - vmNode.getUsedPhysicalMemoryBit());
-            targetHost.setUsedCPUPercent(targetHost.getUsedCPUPercent() + vmNode.getUsedCPUPercent());
-
-            sourceHost.setHostCapacityAvailableCpuNum(sourceHost.getHostCapacityAvailableCpuNum() - vmNode.getCpuNum());
-            sourceHost.setHostCapacityAvailableMemoryBit(sourceHost.getHostCapacityAvailableMemoryBit() - vmNode.getMemorySize());
-            sourceHost.setFreePhysicalMemoryBit(sourceHost.getFreePhysicalMemoryBit() + vmNode.getUsedPhysicalMemoryBit());
-            sourceHost.setUsedCPUPercent(targetHost.getUsedCPUPercent() - vmNode.getUsedCPUPercent());
-
-            if (cpuUsedPercentThreshold != null) {
-                targetHost.setMaxSize2MoveCPUPercent(targetHost.getMaxSize2MoveCPUPercent() - vmNode.getUsedCPUPercent());
-                sourceHost.setMaxSize2MoveCPUPercent(sourceHost.getMaxSize2MoveCPUPercent() - vmNode.getUsedCPUPercent());
-            }
-
-            if (memUsedPercentThreshold != null) {
-                targetHost.setMaxSize2MoveMemoryBit(targetHost.getMaxSize2MoveMemoryBit() - vmNode.getUsedPhysicalMemoryBit());
-                sourceHost.setMaxSize2MoveMemoryBit(sourceHost.getMaxSize2MoveMemoryBit() - vmNode.getUsedPhysicalMemoryBit());
-            }
-
-            vmNodeIterator.remove();
-            targetHost.getVmList().add(vmNode);
+            generateMigrateTask(sourceHost, targetHost, vmNode);
         }
+
+        // check if source host is still high load
+    }
+
+    private void generateMigrateTask(HostNode sourceHost, HostNode targetHost, VmNode vmNode) {
+        MigrateTask task = new MigrateTask();
+        task.sourceHostUuid = sourceHost.getUuid();
+        task.targetHostUuid = targetHost.getUuid();
+        task.vmUuid = vmNode.uuid;
+        tasks.add(task);
+
+        targetHost.setHostCapacityAvailableCpuNum(targetHost.getHostCapacityAvailableCpuNum() - vmNode.getCpuNum());
+        targetHost.setHostCapacityAvailableMemoryBit(targetHost.getHostCapacityAvailableMemoryBit() - vmNode.getMemorySize());
+        targetHost.setFreePhysicalMemoryBit(targetHost.getFreePhysicalMemoryBit() - vmNode.getUsedPhysicalMemoryBit());
+        targetHost.setUsedCPUPercent(targetHost.getUsedCPUPercent() + vmCpuPctOn(targetHost, vmNode));
+
+        sourceHost.setHostCapacityAvailableCpuNum(sourceHost.getHostCapacityAvailableCpuNum() + vmNode.getCpuNum());
+        sourceHost.setHostCapacityAvailableMemoryBit(sourceHost.getHostCapacityAvailableMemoryBit() + vmNode.getMemorySize());
+        sourceHost.setFreePhysicalMemoryBit(sourceHost.getFreePhysicalMemoryBit() + vmNode.getUsedPhysicalMemoryBit());
+        sourceHost.setUsedCPUPercent(sourceHost.getUsedCPUPercent() - vmCpuPctOn(sourceHost, vmNode));
+
+        if (cpuUsedPercentThreshold != null) {
+            targetHost.setMaxSize2MoveCPUPercent(targetHost.getMaxSize2MoveCPUPercent() - vmCpuPctOn(targetHost, vmNode));
+            sourceHost.setMaxSize2MoveCPUPercent(sourceHost.getMaxSize2MoveCPUPercent() - vmCpuPctOn(sourceHost, vmNode));
+        }
+
+        if (memUsedPercentThreshold != null) {
+            targetHost.setMaxSize2MoveMemoryBit(targetHost.getMaxSize2MoveMemoryBit() - vmNode.getUsedPhysicalMemoryBit());
+            sourceHost.setMaxSize2MoveMemoryBit(sourceHost.getMaxSize2MoveMemoryBit() - vmNode.getUsedPhysicalMemoryBit());
+        }
+
+        targetHost.getVmList().add(vmNode);
+        sourceHost.getVmList().remove(vmNode);
     }
 
     private <T> List<T> deepCopy(List<T> src) {
@@ -342,5 +352,94 @@ public class DefaultBalanceAlgorithm implements BalanceAlgorithm {
                 )));
             }
         }
+    }
+
+    private static float vmCpuPctOn(HostNode host, VmNode v) {
+        return 100f * v.getUsedPhysicalCpuNum() / (float) host.getTotalCpu();
+    }
+
+    private static float vmMemPctOn(HostNode host, VmNode v) {
+        return 100f * v.getUsedPhysicalMemoryBit() / (float) host.getTotalMemoryBit();
+    }
+
+    private static boolean withinThresholdAfter(HostNode target, VmNode v, Float thCpu, Float thMem, float h) {
+        float uCpuAfter = target.getUsedCPUPercent() + vmCpuPctOn(target, v);
+        float uMemAfter = target.getUsedMemoryPercent() + vmMemPctOn(target, v);
+        boolean cpuOk = thCpu == null || uCpuAfter <= (thCpu - h);
+        boolean memOk = thMem == null || uMemAfter <= (thMem - h);
+        boolean capacityOk = target.getHostCapacityAvailableCpuNum() >= v.getCpuNum()
+                && target.getHostCapacityAvailableMemoryBit() >= v.getMemorySize();
+        return cpuOk && memOk && capacityOk;
+    }
+
+    /*** fire fighting
+     * rule： As long as the target machine is not pushed beyond the threshold (leaving a lag h),
+     * it is acceptable; Do not force Δ V<0, as firefighting is given priority
+     */
+    private void scheduleFireFighting() {
+        for (HostNode src : new ArrayList<>(highLoadHost)) {
+            // filter: single fix VM that can be moved
+            List<VmNode> singleFix = src.getVmList().stream().filter(v -> {
+                boolean cpuOk = cpuUsedPercentThreshold == null
+                        || (src.getUsedCPUPercent() - vmCpuPctOn(src, v) <= cpuUsedPercentThreshold);
+                boolean memOk = memUsedPercentThreshold == null
+                        || (src.getUsedMemoryPercent() - vmMemPctOn(src, v) <= memUsedPercentThreshold);
+                return cpuOk && memOk;
+            }).collect(Collectors.toList());
+
+            // sort：sort by benefit/cost
+            singleFix.sort((a, b) -> {
+                int c = Long.compare(a.getUsedPhysicalMemoryBit(), b.getUsedPhysicalMemoryBit());
+                if (c != 0) {
+                    return c;
+                }
+                return -Double.compare(fireScore(src, a), fireScore(src, b));
+            });
+
+            boolean moved = false;
+            for (VmNode v : singleFix) {
+                HostNode tgt = firstAcceptableTarget(lowLoadHost, v);
+                if (tgt != null) {
+                    generateMigrateTask(src, tgt, v);
+                    sortHosts();
+                    moved = true;
+                    break;
+                }
+            }
+            if (!moved) {
+                // undertake: choose the VM with the highest benefit/cost ratio that has an acceptable target
+                Optional<VmNode> best = src.getVmList().stream()
+                        .filter(v -> firstAcceptableTarget(lowLoadHost, v) != null)
+                        .max((x, y) -> Double.compare(fireScore(src, x), fireScore(src, y)));
+                if (best.isPresent()) {
+                    HostNode tgt = firstAcceptableTarget(lowLoadHost, best.get());
+                    if (tgt != null) {
+                        generateMigrateTask(src, tgt, best.get());
+                        sortHosts();
+                    }
+                }
+            }
+        }
+    }
+
+    private double fireScore(HostNode src, VmNode v) {
+        double needCpu = (cpuUsedPercentThreshold == null) ? 0.0
+                : Math.max(0.0, src.getUsedCPUPercent() - cpuUsedPercentThreshold);
+        double needMem = (memUsedPercentThreshold == null) ? 0.0
+                : Math.max(0.0, src.getUsedMemoryPercent() - memUsedPercentThreshold);
+        double vCpu = vmCpuPctOn(src, v);
+        double vMem = vmMemPctOn(src, v);
+        double benefit = Math.min(vCpu, needCpu) + Math.min(vMem, needMem);
+        double cost = Math.max(1.0, v.getUsedCPUPercent() + v.getUsedMemoryPercent());
+        return benefit / cost;
+    }
+
+    private HostNode firstAcceptableTarget(List<HostNode> targets, VmNode v) {
+        for (HostNode t : targets) {
+            if (withinThresholdAfter(t, v, cpuUsedPercentThreshold, memUsedPercentThreshold, HYSTERESIS)) {
+                return t;
+            }
+        }
+        return null;
     }
 }

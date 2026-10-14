@@ -25,6 +25,7 @@ class PremiumEnv {
 
             // premium
             agents()
+            computesPremium()
             platformsPremium()
 
             include("mevoco.xml")

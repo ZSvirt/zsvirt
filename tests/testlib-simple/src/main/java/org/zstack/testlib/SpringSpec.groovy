@@ -132,6 +132,12 @@ class SpringSpec {
         include("agents/zmigratePlugin.xml")
     }
 
+    void computesPremium() {
+        include("pciDevice.xml")
+        include("mttyDevice.xml")
+        include("usbDevice.xml")
+    }
+
     void platformsPremium() {
         include("ha.xml")
     }

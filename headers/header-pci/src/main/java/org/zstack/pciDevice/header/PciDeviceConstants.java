@@ -12,6 +12,7 @@ public class PciDeviceConstants {
     public static final String PCI_DEVICE_ALLOCATOR_STRATEGY = "PciDeviceStrategy";
 
     public static final String SYNC_PCI_DEVICE_SIGNATURE = "sync-pci-device-in-host";
+    public static final String SYNC_PCI_DEVICE_IN_DB_SIGNATURE = "sync-pci-device-in-db";
 
     // pci quota
     public static final String GENERIC_PCI_DEVICE_NUMBER = "pci.num";

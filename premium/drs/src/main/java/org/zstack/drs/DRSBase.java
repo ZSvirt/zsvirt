@@ -534,6 +534,12 @@ public class DRSBase {
                     logger.debug("skip executeDRSScheduling, migrateTasks is empty");
                     trigger.next();
                     return;
+                } else {
+                    logger.debug(String.format("DRS[%s] found %d migrate tasks", self.getUuid(), migrateTasks.size()));
+                    for (MigrateTask migrateTask : migrateTasks) {
+                        logger.debug(String.format("DRS[%s] migrate task, vm[uuid:%s] from host[uuid:%s] to host[uuid:%s]",
+                                self.getUuid(), migrateTask.getVmUuid(), migrateTask.getSourceHostUuid(), migrateTask.getTargetHostUuid()));
+                    }
                 }
 
                 if (DRSAutomationLevel.Automatic == self.getAutomationLevel()) {
@@ -565,7 +571,7 @@ public class DRSBase {
         if (cpuUsedPercentThreshold != null && memUsedPercentThreshold == null) {
             for (HostLoad hostLoad : hostLoads) {
                 List<HostLoadOccupiedByVm> vmList = hostLoad.getVmList().stream()
-                        .filter(vm -> vm.getUsedHostCPUPercent() != null)
+                        .filter(vm -> vm.getUsedHostPhysicalCpuNum() != null)
                         .collect(Collectors.toList());
                 hostLoad.setVmList(vmList);
             }
@@ -579,7 +585,7 @@ public class DRSBase {
         } else if (cpuUsedPercentThreshold != null) {
             for (HostLoad hostLoad : hostLoads) {
                 List<HostLoadOccupiedByVm> vmList = hostLoad.getVmList().stream()
-                        .filter(vm -> vm.getUsedHostCPUPercent() != null && vm.getUsedHostPhysicalMemoryBit() != null)
+                        .filter(vm -> vm.getUsedHostPhysicalCpuNum() != null && vm.getUsedHostPhysicalMemoryBit() != null)
                         .collect(Collectors.toList());
                 hostLoad.setVmList(vmList);
             }
@@ -709,15 +715,17 @@ public class DRSBase {
                     hostLoad.getUsedPhysicalMemoryBit(),
                     hostCapacityVO.getAvailableCpu(),
                     hostCapacityVO.getAvailablePhysicalMemory(),
+                    hostCapacityVO.getCpuNum(),
                     hostCapacityVO.getTotalMemory()
             );
 
             for (HostLoadOccupiedByVm vmLoad : hostLoad.getVmList()) {
                 VmInstanceVO vmInstanceVO = dbf.findByUuid(vmLoad.getVmUuid(), VmInstanceVO.class);
                 float usedMemoryPercent = vmLoad.getUsedHostPhysicalMemoryBit() == null ? 0.0f : (1.0f * vmLoad.getUsedHostPhysicalMemoryBit() / hostNode.getTotalMemoryBit()) * 100;
-                float usedHostCPUPercent = vmLoad.getUsedHostCPUPercent() == null ? 0.0f : (vmLoad.getUsedHostCPUPercent() / hostCapacityVO.getCpuNum()) * 100;
+                float usedHostCPUPercent = vmLoad.getUsedHostPhysicalCpuNum() == null ? 0.0f : (vmLoad.getUsedHostPhysicalCpuNum() / hostCapacityVO.getCpuNum()) * 100;
                 VmNode vmNode = new VmNode(
                         vmLoad.getVmUuid(),
+                        vmLoad.getUsedHostPhysicalCpuNum() == null ? 0.0f : vmLoad.getUsedHostPhysicalCpuNum(),
                         usedHostCPUPercent,
                         vmLoad.getUsedHostPhysicalMemoryBit() == null ? 0L : vmLoad.getUsedHostPhysicalMemoryBit(),
                         usedMemoryPercent,

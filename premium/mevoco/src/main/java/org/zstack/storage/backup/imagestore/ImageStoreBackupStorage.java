@@ -73,6 +73,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 import static org.zstack.core.Platform.err;
@@ -975,105 +976,70 @@ public class ImageStoreBackupStorage extends BackupStorageBase {
         bus.reply(msg, r);
     }
 
-    private void doReclaimSpaceLocally(final RunGarbageCollectorCmd cmd, ReturnValueCompletion<Long> completion) {
-        restf.asyncJsonPost(buildUrl(ImageStoreBackupStorageConstant.RUNGC_IMAGE_PATH), cmd, new JsonAsyncRESTCallback<RunGarbageCollectorResponse>(completion) {
+    private void handle(final ReclaimSpaceFromImageStoreMsg msg) {
+        ReclaimSpaceFromImageStoreReply reply = new ReclaimSpaceFromImageStoreReply();
+
+        thdf.singleFlightSubmit(new SingleFlightTask(msg) {
             @Override
-            public void fail(ErrorCode err) {
-                completion.fail(err);
+            public String getSyncSignature() {
+                return getName();
             }
 
             @Override
-            public void success(RunGarbageCollectorResponse ret) {
-                if (!ret.isSuccess()) {
-                    completion.fail(Platform.experr("operation error, because: %1$s", ret.getError()));
-                    return;
+            public String getName() {
+                return String.format("reclaim-space-from-image-store-%s", msg.getBackupStorageUuid());
+            }
+        }.run(completion -> {
+            final List<String> installPaths = getAvailableImages(msg.getBackupStorageUuid());
+            RunGarbageCollectorCmd cmd = new RunGarbageCollectorCmd();
+            cmd.setImagesToKeep(installPaths);
+
+            setImageStoreGCTaskStatus(true);
+            if (ImageStoreBackupStorageSelector.isRemote(msg.getBackupStorageUuid())) {
+                RunGarbageCollectorResponse ret = restf.syncJsonPost(buildUrl(ImageStoreBackupStorageConstant.SYNC_RUNGC_IMAGE_PATH), cmd, RunGarbageCollectorResponse.class, TimeUnit.MINUTES, 10);
+                handleGcResult(ret, completion);
+                setImageStoreGCTaskStatus(false);
+                return;
+            }
+            restf.asyncJsonPost(buildUrl(ImageStoreBackupStorageConstant.RUNGC_IMAGE_PATH), cmd, new JsonAsyncRESTCallback<RunGarbageCollectorResponse>(completion) {
+                @Override
+                public void fail(ErrorCode err) {
+                    setImageStoreGCTaskStatus(false);
+                    completion.fail(err);
                 }
 
-                if (ret.getFreed() > 0) {
-                    updateCapacity(self.getTotalCapacity(), self.getAvailableCapacity() + ret.getFreed());
+                @Override
+                public void success(RunGarbageCollectorResponse ret) {
+                    setImageStoreGCTaskStatus(false);
+                    handleGcResult(ret, completion);
                 }
-                completion.success(ret.getFreed());
-            }
 
-            @Override
-            public Class<RunGarbageCollectorResponse> getReturnClass() {
-                return RunGarbageCollectorResponse.class;
+                @Override
+                public Class<RunGarbageCollectorResponse> getReturnClass() {
+                    return RunGarbageCollectorResponse.class;
+                }
+            });
+        }).done(result -> {
+            if (!result.isSuccess()) {
+                reply.setError(result.getErrorCode());
+            } else {
+                reply.setFreedSpaceInBytes(((AtomicLong) result.getResult()).getAndSet(0));
             }
-        });
+            bus.reply(msg, reply);
+        }));
     }
 
-    private void handle(final ReclaimSpaceFromImageStoreMsg msg) {
-        final List<String> installPaths = getAvailableImages(msg.getBackupStorageUuid());
-        RunGarbageCollectorCmd cmd = new RunGarbageCollectorCmd();
-        cmd.setImagesToKeep(installPaths);
-        ReclaimSpaceFromImageStoreReply reply = new ReclaimSpaceFromImageStoreReply();
-        if (ImageStoreBackupStorageSelector.isRemote(msg.getBackupStorageUuid())) {
-            thdf.syncSubmit(new SyncTask<Object>() {
-                @Override
-                public String getSyncSignature() {
-                    return String.format("reclaim-imagestore-thdf-for-bs-%s", self.getUuid());
-                }
-
-                @Override
-                public int getSyncLevel() {
-                    return 10;
-                }
-
-                @Override
-                public String getName() {
-                    return getSyncSignature();
-                }
-
-                @Override
-                public Object call() {
-                    RunGarbageCollectorResponse ret = restf.syncJsonPost(buildUrl(ImageStoreBackupStorageConstant.SYNC_RUNGC_IMAGE_PATH), cmd, RunGarbageCollectorResponse.class, TimeUnit.MINUTES, 10);
-                    if (!ret.isSuccess()) {
-                        reply.setError(operr("reclaim imagestore error, because:%s", ret.getError()));
-                    } else {
-                        reply.setFreedSpaceInBytes(ret.getFreed());
-                        if (ret.getFreed() > 0) {
-                            updateCapacity(self.getTotalCapacity(), self.getAvailableCapacity() + ret.getFreed());
-                        }
-                    }
-                    bus.reply(msg, reply);
-                    return null;
-                }
-            });
-        } else {
-            thdf.chainSubmit(new ChainTask(msg) {
-                @Override
-                public String getSyncSignature() {
-                    return getName();
-                }
-
-                @Override
-                public void run(SyncTaskChain chain) {
-                    setImageStoreGCTaskStatus(true);
-                    doReclaimSpaceLocally(cmd, new ReturnValueCompletion<Long>(chain) {
-                        @Override
-                        public void success(Long freed) {
-                            setImageStoreGCTaskStatus(false);
-                            reply.setFreedSpaceInBytes(freed);
-                            bus.reply(msg, reply);
-                            chain.next();
-                        }
-
-                        @Override
-                        public void fail(ErrorCode errorCode) {
-                            setImageStoreGCTaskStatus(false);
-                            reply.setError(errorCode);
-                            bus.reply(msg, reply);
-                            chain.next();
-                        }
-                    });
-                }
-
-                @Override
-                public String getName() {
-                    return String.format("reclaim-space-from-image-store-%s", msg.getBackupStorageUuid());
-                }
-            });
+    private void handleGcResult(RunGarbageCollectorResponse ret, ReturnValueCompletion<Object> completion) {
+        if (!ret.isSuccess()) {
+            completion.fail(operr("operation error, because:%s", ret.getError()));
+            return;
         }
+
+        if (ret.getFreed() > 0) {
+            updateCapacity(self.getTotalCapacity(), self.getAvailableCapacity() + ret.getFreed());
+        }
+
+        completion.success(new AtomicLong(ret.getFreed()));
     }
 
     private void handle(final SetImageStoreQuotaMsg msg) {

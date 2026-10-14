@@ -809,6 +809,7 @@ public class ImageStoreBackupStorageCommands {
 
     public static class RunGarbageCollectorResponse extends ImageStoreResponse {
         private long freed;
+        private List<String> collectedImagesToKeep;
 
         public long getFreed() {
             return freed;
@@ -816,6 +817,14 @@ public class ImageStoreBackupStorageCommands {
 
         public void setFreed(long freed) {
             this.freed = freed;
+        }
+
+        public List<String> getCollectedImagesToKeep() {
+            return collectedImagesToKeep;
+        }
+
+        public void setCollectedImagesToKeep(List<String> collectedImagesToKeep) {
+            this.collectedImagesToKeep = collectedImagesToKeep;
         }
     }
 

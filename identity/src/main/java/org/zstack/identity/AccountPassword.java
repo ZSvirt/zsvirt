@@ -26,9 +26,8 @@ public final class AccountPassword {
     }
 
     public static String encodeForStorage(String credential) {
-        // Keep old writers compatible until every management node supports this format.
-        return credential != null && Boolean.TRUE.equals(IdentityGlobalConfig.ENABLE_SALTED_PASSWORD.value(Boolean.class))
-                ? encode(credential) : credential;
+        // New credentials always use salted storage; legacy records are read as-is.
+        return credential == null ? null : encode(credential);
     }
 
     public static boolean matches(String credential, String stored) {

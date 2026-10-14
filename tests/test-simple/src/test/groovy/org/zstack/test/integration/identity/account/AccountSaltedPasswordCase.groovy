@@ -1,14 +1,13 @@
 package org.zstack.test.integration.identity.account
 
 import org.zstack.core.db.Q
+import org.zstack.core.db.SQL
 import org.zstack.core.db.DatabaseFacade
 import org.zstack.header.identity.AccountVO
 import org.zstack.header.identity.AccountVO_
 import org.zstack.identity.AccountLoginBackend
 import org.zstack.identity.AccountManagerImpl
-import org.zstack.identity.IdentityGlobalProperty
 import org.zstack.identity.AccountPassword
-import org.zstack.identity.IdentityGlobalConfig
 import org.zstack.loginControl.PasswordStrategyGlobalConfig
 import org.zstack.loginControl.entity.HistoricalPasswordVO
 import org.zstack.loginControl.entity.HistoricalPasswordVO_
@@ -23,7 +22,6 @@ import org.apache.commons.codec.digest.DigestUtils
 
 class AccountSaltedPasswordCase extends SubCase {
     EnvSpec env
-    String originalConfig
     String originalHistoryConfig
 
     @Override
@@ -40,42 +38,27 @@ class AccountSaltedPasswordCase extends SubCase {
         env = makeEnv {}
     }
 
-    void setStorage(boolean enabled) {
-        updateGlobalConfig {
-            category = IdentityGlobalConfig.CATEGORY
-            name = IdentityGlobalConfig.ENABLE_SALTED_PASSWORD.name
-            value = enabled.toString()
-        }
-    }
-
     @Override
     void test() {
-        originalConfig = IdentityGlobalConfig.ENABLE_SALTED_PASSWORD.value()
         originalHistoryConfig = PasswordStrategyGlobalConfig.ENABLE_HISTORICAL_PASSWORD_COMPARE.value()
         env.create {
             SessionInventory admin = loginAsAdmin()
-            setStorage(false)
             def existingAdmin = dbFindByUuid(admin.accountUuid, AccountVO.class)
             String existingAdminPassword = existingAdmin.password
             def existingAdminLastOpDate = existingAdmin.lastOpDate
-            boolean originalBootstrap = IdentityGlobalProperty.SALTED_PASSWORD_ON_FRESH_INSTALL
-            try {
-                // Installing another node against an old database must not enable salted writes.
-                IdentityGlobalProperty.SALTED_PASSWORD_ON_FRESH_INSTALL = true
-                bean(AccountManagerImpl.class).prepareDbInitialValue()
-                assert !IdentityGlobalConfig.ENABLE_SALTED_PASSWORD.value(Boolean.class)
-                def unchangedAdmin = dbFindByUuid(admin.accountUuid, AccountVO.class)
-                assert unchangedAdmin.password == existingAdminPassword
-                assert unchangedAdmin.lastOpDate == existingAdminLastOpDate
-            } finally {
-                IdentityGlobalProperty.SALTED_PASSWORD_ON_FRESH_INSTALL = originalBootstrap
-            }
+            bean(AccountManagerImpl.class).prepareDbInitialValue()
+            def unchangedAdmin = dbFindByUuid(admin.accountUuid, AccountVO.class)
+            assert unchangedAdmin.password == existingAdminPassword
+            assert unchangedAdmin.lastOpDate == existingAdminLastOpDate
             String oldInput = DigestUtils.sha512Hex("legacy-password")
             String newInput = DigestUtils.sha512Hex("new-password")
             AccountInventory legacy = createAccount {
                 name = "legacy-storage"
                 password = oldInput
             } as AccountInventory
+            // Model an account stored by the previous version; new API writes are always salted.
+            SQL.New(AccountVO.class).eq(AccountVO_.uuid, legacy.uuid)
+                    .set(AccountVO_.password, oldInput).update()
             assert dbFindByUuid(legacy.uuid, AccountVO.class).password == oldInput
 
             // Legacy login keeps the database's existing comparison semantics.
@@ -83,13 +66,32 @@ class AccountSaltedPasswordCase extends SubCase {
                     .eq(AccountVO_.password, oldInput.toUpperCase()).isExists()
             assert bean(AccountLoginBackend.class).authenticate(legacy.name, oldInput.toUpperCase()) == oldDatabaseMatch
 
-            setStorage(true)
             SessionInventory session = logInByAccount {
                 accountName = legacy.name
                 password = oldInput
             } as SessionInventory
             assert session.accountUuid == legacy.uuid
             assert dbFindByUuid(legacy.uuid, AccountVO.class).password == oldInput
+
+            updateAccount {
+                uuid = legacy.uuid
+                oldPassword = oldInput
+                password = newInput
+                sessionId = admin.uuid
+            }
+            String changedLegacy = dbFindByUuid(legacy.uuid, AccountVO.class).password
+            assert AccountPassword.isEncoded(changedLegacy)
+            assert AccountPassword.matches(newInput, changedLegacy)
+            assert (logInByAccount {
+                accountName = legacy.name
+                password = newInput
+            } as SessionInventory).accountUuid == legacy.uuid
+            expectApiFailure({
+                logInByAccount {
+                    accountName = legacy.name
+                    password = oldInput
+                }
+            }) { assert code != null }
 
             AccountInventory salted = createAccount {
                 name = "salted-storage"
@@ -162,7 +164,6 @@ class AccountSaltedPasswordCase extends SubCase {
                 }) { assert code != null }
             }
 
-            setStorage(false)
             session = logInByAccount {
                 accountName = salted.name
                 password = newInput
@@ -174,13 +175,6 @@ class AccountSaltedPasswordCase extends SubCase {
     @Override
     void clean() {
         try {
-            if (originalConfig != null) {
-                updateGlobalConfig {
-                    category = IdentityGlobalConfig.CATEGORY
-                    name = IdentityGlobalConfig.ENABLE_SALTED_PASSWORD.name
-                    value = originalConfig
-                }
-            }
             if (originalHistoryConfig != null) {
                 updateGlobalConfig {
                     category = PasswordStrategyGlobalConfig.CATEGORY

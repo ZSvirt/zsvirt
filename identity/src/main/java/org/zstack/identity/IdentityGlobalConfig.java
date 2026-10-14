@@ -9,10 +9,6 @@ import org.zstack.header.core.encrypt.GlobalConfigEncrypt;
 public class IdentityGlobalConfig {
     public static final String CATEGORY = "identity";
 
-    @GlobalConfigValidation(validValues = {"true", "false"})
-    @GlobalConfigDef(type = Boolean.class, defaultValue = "false", description = "Enable salted account password storage only after all management nodes support it; old binaries cannot read the new format")
-    public static GlobalConfig ENABLE_SALTED_PASSWORD = new GlobalConfig(CATEGORY, "enableSaltedPassword");
-
     @GlobalConfigValidation(min = 0)
     public static GlobalConfig MAX_CONCURRENT_SESSION = new GlobalConfig(CATEGORY, "session.maxConcurrent");
 

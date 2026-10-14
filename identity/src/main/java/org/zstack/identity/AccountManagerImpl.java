@@ -43,7 +43,6 @@ import org.zstack.header.identity.role.RoleVO;
 import org.zstack.header.identity.role.RoleVO_;
 import org.zstack.header.identity.role.api.APIGetRolePolicyActionsMsg;
 import org.zstack.header.identity.role.api.APIGetRolePolicyActionsReply;
-import org.zstack.header.managementnode.ManagementNodeVO;
 import org.zstack.header.managementnode.PrepareDbInitialValueExtensionPoint;
 import org.zstack.header.message.*;
 import org.zstack.header.rest.RestAuthenticationBackend;
@@ -102,13 +101,6 @@ public class AccountManagerImpl extends AbstractService implements AccountManage
 
     @Override
     public void prepareDbInitialValue() {
-        // Only the fresh installer opts in. Existing databases/nodes keep their storage mode.
-        if (IdentityGlobalProperty.SALTED_PASSWORD_ON_FRESH_INSTALL
-                && !Q.New(AccountVO.class).isExists()
-                && !Q.New(ManagementNodeVO.class).isExists()) {
-            IdentityGlobalConfig.ENABLE_SALTED_PASSWORD.updateValue(true);
-        }
-
         new SQLBatch() {
             @Override
             protected void scripts() {

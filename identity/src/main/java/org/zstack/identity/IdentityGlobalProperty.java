@@ -5,9 +5,6 @@ import org.zstack.core.GlobalPropertyDefinition;
 
 @GlobalPropertyDefinition
 public class IdentityGlobalProperty {
-    @GlobalProperty(name = "identity.saltedPasswordOnFreshInstall", defaultValue = "false")
-    public static boolean SALTED_PASSWORD_ON_FRESH_INSTALL;
-
     @GlobalProperty(name = "identity.authorizationBackend.session.cache.size", defaultValue = "500")
     public static int AUTHORIZATION_SESSION_CACHE_SIZE;
 }

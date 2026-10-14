@@ -1,25 +1,12 @@
 package org.zstack.identity;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
 
 public class TestAccountPassword {
-    private String oldConfig;
     private static final String LEGACY = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
             + "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
-
-    @Before
-    public void saveConfig() {
-        oldConfig = IdentityGlobalConfig.ENABLE_SALTED_PASSWORD.value();
-    }
-
-    @After
-    public void restoreConfig() {
-        IdentityGlobalConfig.ENABLE_SALTED_PASSWORD.setValue(oldConfig);
-    }
 
     @Test
     public void legacyCredentialsStillAuthenticate() {
@@ -32,15 +19,12 @@ public class TestAccountPassword {
     }
 
     @Test
-    public void defaultCompatibilityModeDoesNotRewritePasswords() {
-        IdentityGlobalConfig.ENABLE_SALTED_PASSWORD.setValue("false");
-        assertEquals(LEGACY, AccountPassword.encodeForStorage(LEGACY));
+    public void nullCredentialRemainsNull() {
         assertNull(AccountPassword.encodeForStorage(null));
     }
 
     @Test
     public void saltedStorageAcceptsTheUnchangedClientCredential() {
-        IdentityGlobalConfig.ENABLE_SALTED_PASSWORD.setValue("true");
         String first = AccountPassword.encodeForStorage(LEGACY);
         String second = AccountPassword.encodeForStorage(LEGACY);
         assertTrue(AccountPassword.isEncoded(first));
@@ -50,14 +34,6 @@ public class TestAccountPassword {
         // All 128 input characters must matter; no bcrypt-style 72-byte truncation.
         assertFalse(AccountPassword.matches(LEGACY.substring(0, 127) + "0", first));
         assertFalse(AccountPassword.matches(first, first));
-    }
-
-    @Test
-    public void disablingNewWritesDoesNotBreakExistingSaltedRecords() {
-        String stored = AccountPassword.encode(LEGACY);
-        IdentityGlobalConfig.ENABLE_SALTED_PASSWORD.setValue("false");
-        assertTrue(AccountPassword.matches(LEGACY, stored));
-        assertEquals(LEGACY, AccountPassword.encodeForStorage(LEGACY));
     }
 
     @Test

@@ -10,6 +10,15 @@ public class HostLoadOccupiedByVm {
 
     private Long usedHostPhysicalMemoryBit;
 
+    public HostLoadOccupiedByVm() {}
+
+    public HostLoadOccupiedByVm(String vmUuid, Float usedHostPhysicalCpuNum, Long usedHostPhysicalMemoryBit) {
+        this.vmUuid = vmUuid;
+        this.usedHostPhysicalCpuNum = usedHostPhysicalCpuNum;
+        this.usedHostPhysicalMemoryBit = usedHostPhysicalMemoryBit;
+    }
+
+
     public String getVmUuid() {
         return vmUuid;
     }

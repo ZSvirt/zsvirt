@@ -1,5 +1,6 @@
 package org.zstack.drs.algorithm;
 
+import org.zstack.drs.DRSGlobalConfig;
 import org.zstack.drs.data.HostNode;
 import org.zstack.drs.data.MigrateTask;
 import org.zstack.drs.data.VmNode;
@@ -32,6 +33,14 @@ public class DefaultBalanceAlgorithm implements BalanceAlgorithm {
 
     private static final float HYSTERESIS = 2.0f; // in percentage points
 
+    private final boolean trace = logger.isTraceEnabled() || DRSGlobalConfig.LOG_TRACE_DRS.value(Boolean.class);
+
+    private void logTrace(String msg) {
+        if (trace) {
+            logger.debug(msg);
+        }
+    }
+
 
     @Override
     public List<MigrateTask> makeTasks(List<HostNode> hostNodeList, Float cpuUsedPercentThreshold, Float memUsedPercentThreshold) {
@@ -43,7 +52,7 @@ public class DefaultBalanceAlgorithm implements BalanceAlgorithm {
         this.averageCpuLoadPercent = (float) (hostNodeList.stream().mapToDouble(HostNode::getUsedCPUPercent).sum() / hostNodeList.size());
         this.averageMemoryLoadPercent = (float) (hostNodeList.stream().mapToDouble(HostNode::getUsedMemoryPercent).sum() / hostNodeList.size());
 
-        logger.trace(String.format("Before scheduling\n" +
+        logTrace(String.format("Before scheduling\n" +
                         "average CPU usage: %s\n" +
                         "average memory usage: %s\n" +
                         "the cluster host load: %s",
@@ -60,7 +69,7 @@ public class DefaultBalanceAlgorithm implements BalanceAlgorithm {
 
         this.generateMigrateTasks();
 
-        logger.trace(String.format("After scheduling\n" +
+        logTrace(String.format("After scheduling\n" +
                         "the cluster host load: %s\n" +
                         "migrate tasks: %s",
                 JSONObjectUtil.toJsonString(hostNodeList),
@@ -181,6 +190,13 @@ public class DefaultBalanceAlgorithm implements BalanceAlgorithm {
     private void generateMigrateTasks() {
         scheduleFireFighting();
 
+        logTrace(String.format("After fire fighting, the cluster host load: %s\n" +
+                        "migrate tasks size: %d",
+                JSONObjectUtil.toJsonString(highLoadHost),
+                tasks.size())
+        );
+        logTrace("start balance scheduling");
+
         boolean flag = true;
         while (flag) {
             int taskSize = tasks.size();
@@ -238,6 +254,9 @@ public class DefaultBalanceAlgorithm implements BalanceAlgorithm {
     }
 
     private void generateMigrateTask(HostNode sourceHost, HostNode targetHost, VmNode vmNode) {
+        logTrace(String.format("Generate migrate task, source host[uuid: %s], target host[uuid: %s], VM[uuid: %s]",
+                sourceHost.getUuid(), targetHost.getUuid(), vmNode.uuid));
+
         MigrateTask task = new MigrateTask();
         task.sourceHostUuid = sourceHost.getUuid();
         task.targetHostUuid = targetHost.getUuid();
@@ -396,6 +415,9 @@ public class DefaultBalanceAlgorithm implements BalanceAlgorithm {
                 return -Double.compare(fireScore(src, a), fireScore(src, b));
             });
 
+            logTrace(String.format("Fire fighting, source host[uuid: %s], candidate single fix VMs[uuids: %s]",
+                    src.getUuid(), singleFix.stream().map(it -> it.uuid).collect(Collectors.toList())));
+
             boolean moved = false;
             for (VmNode v : singleFix) {
                 HostNode tgt = firstAcceptableTarget(lowLoadHost, v);
@@ -411,12 +433,23 @@ public class DefaultBalanceAlgorithm implements BalanceAlgorithm {
                 Optional<VmNode> best = src.getVmList().stream()
                         .filter(v -> firstAcceptableTarget(lowLoadHost, v) != null)
                         .max((x, y) -> Double.compare(fireScore(src, x), fireScore(src, y)));
+
+
                 if (best.isPresent()) {
                     HostNode tgt = firstAcceptableTarget(lowLoadHost, best.get());
                     if (tgt != null) {
+                        logTrace(String.format("Fire fighting, source host[uuid: %s]. No single fixed VM can be migrated. " +
+                                        "The best remaining VM[uuid: %s] is selected to take over.",
+                                src.getUuid(),
+                                best.get().uuid));
+
                         generateMigrateTask(src, tgt, best.get());
                         sortHosts();
                     }
+                } else {
+                    logTrace(String.format("Fire fighting, source host[uuid: %s]. No single fixed VM can be migrated. " +
+                                    "No suitable VM is found to undertake.",
+                            src.getUuid()));
                 }
             }
         }

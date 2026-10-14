@@ -1,6 +1,7 @@
 package org.zstack.drs;
 
 import org.zstack.core.config.BindResourceConfig;
+import org.zstack.core.config.GlobalConfigDef;
 import org.zstack.core.config.GlobalConfigDefinition;
 import org.zstack.core.config.GlobalConfigValidation;
 import org.zstack.header.cluster.ClusterVO;
@@ -24,5 +25,8 @@ public class DRSGlobalConfig {
     // seconds
     @GlobalConfigValidation(min = 0, max = 6 * 3600)
     public static PremiumGlobalConfig DRS_COLLECT_HOST_METRIC_DATA_DURATION = new PremiumGlobalConfig(CATEGORY, "drs.collectHostMetricDataDuration");
+
+    @GlobalConfigDef(type = Boolean.class, defaultValue = "false", description = "drs log trace")
+    public static PremiumGlobalConfig LOG_TRACE_DRS = new PremiumGlobalConfig(CATEGORY, "drs.trace");
 }
 

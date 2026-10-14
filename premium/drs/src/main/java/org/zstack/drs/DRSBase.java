@@ -534,6 +534,12 @@ public class DRSBase {
                     logger.debug("skip executeDRSScheduling, migrateTasks is empty");
                     trigger.next();
                     return;
+                } else {
+                    logger.debug(String.format("DRS[%s] found %d migrate tasks", self.getUuid(), migrateTasks.size()));
+                    for (MigrateTask migrateTask : migrateTasks) {
+                        logger.debug(String.format("DRS[%s] migrate task, vm[uuid:%s] from host[uuid:%s] to host[uuid:%s]",
+                                self.getUuid(), migrateTask.getVmUuid(), migrateTask.getSourceHostUuid(), migrateTask.getTargetHostUuid()));
+                    }
                 }
 
                 if (DRSAutomationLevel.Automatic == self.getAutomationLevel()) {

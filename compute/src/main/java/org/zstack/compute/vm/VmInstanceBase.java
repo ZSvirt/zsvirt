@@ -1098,7 +1098,6 @@ public class VmInstanceBase extends AbstractVmInstance {
 
                     @Override
                     public void run(final FlowTrigger trigger, Map data) {
-                        List<ErrorCode> errs = new ArrayList<>();
                         new While<>(staticIpMap.entrySet()).each((entry, wcomp) -> {
                             AllocateIpMsg amsg = new AllocateIpMsg();
                             amsg.setL3NetworkUuid(l3Uuid);
@@ -1109,7 +1108,7 @@ public class VmInstanceBase extends AbstractVmInstance {
                                 @Override
                                 public void run(MessageReply reply) {
                                     if (!reply.isSuccess()) {
-                                        errs.add(reply.getError());
+                                        wcomp.addError(reply.getError());
                                         wcomp.allDone();
                                     } else {
                                         AllocateIpReply r = reply.castReply();
@@ -1121,11 +1120,7 @@ public class VmInstanceBase extends AbstractVmInstance {
                         }).run(new WhileDoneCompletion(trigger) {
                             @Override
                             public void done(ErrorCodeList errorCodeList) {
-                                if (errs.size() > 0) {
-                                    trigger.fail(errs.get(0));
-                                } else {
-                                    trigger.next();
-                                }
+                                trigger.next(errorCodeList.wrapOrNull());
                             }
                         });
                     }
@@ -7152,7 +7147,6 @@ public class VmInstanceBase extends AbstractVmInstance {
 
         List<AllocateIpMsg> msgs = new ArrayList<>();
         List<UsedIpInventory> ips = new ArrayList<>();
-        List<ErrorCode> errs = new ArrayList<>();
 
         //data.put(VmInstanceConstant.Params.VmAllocateNicFlow_ips.toString(), ips);
 
@@ -7172,7 +7166,6 @@ public class VmInstanceBase extends AbstractVmInstance {
             msgs.add(msg);
         }
 
-        List<ErrorCode> ipErrs = new ArrayList<>();
         new While<>(msgs).each((amsg, wcompl) -> {
             bus.send(amsg, new CloudBusCallBack(wcompl) {
                 @Override
@@ -7182,7 +7175,7 @@ public class VmInstanceBase extends AbstractVmInstance {
                         ips.add(areply.getIpInventory());
                         wcompl.done();
                     } else {
-                        ipErrs.add(reply.getError());
+                        wcompl.addError(reply.getError());
                         wcompl.allDone();
                     }
                 }
@@ -7190,9 +7183,9 @@ public class VmInstanceBase extends AbstractVmInstance {
         }).run(new WhileDoneCompletion(completion) {
             @Override
             public void done(ErrorCodeList errorCodeList) {
-                if (ipErrs.size() > 0) {
+                if (errorCodeList.hasError()) {
                     if (ips.isEmpty()) {
-                        completion.fail(ipErrs.get(0));
+                        completion.fail(errorCodeList.wrapOrNull());
                         return;
                     }
                     List<ReturnIpMsg> msgs = new ArrayList<ReturnIpMsg>();
@@ -7207,7 +7200,7 @@ public class VmInstanceBase extends AbstractVmInstance {
                     bus.send(msgs, 1, new CloudBusListCallBack(completion) {
                         @Override
                         public void run(List<MessageReply> replies) {
-                            completion.fail(ipErrs.get(0));
+                            completion.fail(errorCodeList.wrapOrNull());
                         }
                     });
                 }

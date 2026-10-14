@@ -566,8 +566,6 @@ public class AutoScalingGroupBase implements AutoScalingGroup {
             @Override
             public void setup() {
                 List<VmInstanceInventory> newVmInventories = Collections.synchronizedList(new LinkedList<VmInstanceInventory>());
-                List<ErrorCode> addVmNicToLoadBalancerErrorCodes = Collections.synchronizedList(new LinkedList<ErrorCode>());
-                List<ErrorCode> addVmNicToSecurityGroupErrorCodes = Collections.synchronizedList(new LinkedList<ErrorCode>());
                 Set<String> needRollbackVms = Collections.synchronizedSet(new HashSet<>());
                 int parallelism = 10;
 
@@ -670,7 +668,7 @@ public class AutoScalingGroupBase implements AutoScalingGroup {
                                         return;
                                     }
 
-                                    addVmNicToLoadBalancerErrorCodes.add(rly.getError());
+                                    completion.addError(rly.getError());
                                     for (VmInstanceInventory vm : newVmInventories) {
                                         if (vm.getVmNics().stream().map(VmNicInventory::getUuid).collect(Collectors.toList()).containsAll(addVmNicToLoadBalancerMsg.getVmNicUuids())) {
                                             needRollbackVms.add(vm.getUuid());
@@ -685,7 +683,7 @@ public class AutoScalingGroupBase implements AutoScalingGroup {
                             public void done(ErrorCodeList errorCodeList) {
                                 if (newVmInventories.size() == needRollbackVms.size()) {
                                     trigger.fail(operr("autoScalingGroup[%s] add newly created vm to loadBalancer failed completely, errors are %s"
-                                            ,msg.getAutoScalingGroupUuid(), JSONObjectUtil.toJsonString(addVmNicToLoadBalancerErrorCodes)));
+                                            ,msg.getAutoScalingGroupUuid(), JSONObjectUtil.toJsonString(errorCodeList.getCauses())));
                                     return;
                                 }
                                 trigger.next();
@@ -741,7 +739,7 @@ public class AutoScalingGroupBase implements AutoScalingGroup {
                                         return;
                                     }
 
-                                    addVmNicToSecurityGroupErrorCodes.add(rly.getError());
+                                    completion.addError(rly.getError());
                                     for (VmInstanceInventory vm : newVmInventories) {
                                         if (vm.getVmNics().stream().map(VmNicInventory::getUuid).collect(Collectors.toList()).containsAll(addVmNicToSecurityGroupMsg.getVmNicUuids())) {
                                             needRollbackVms.add(vm.getUuid());
@@ -756,7 +754,7 @@ public class AutoScalingGroupBase implements AutoScalingGroup {
                             public void done(ErrorCodeList errorCodeList) {
                                 if (newVmInventories.size() == needRollbackVms.size()) {
                                     trigger.fail(operr("autoScalingGroup[%s] add newly created vm to securityGroup failed completely, errors are %s"
-                                            ,msg.getAutoScalingGroupUuid(), JSONObjectUtil.toJsonString(addVmNicToSecurityGroupErrorCodes)));
+                                            ,msg.getAutoScalingGroupUuid(), JSONObjectUtil.toJsonString(errorCodeList.getCauses())));
                                     return;
                                 }
                                 trigger.next();
@@ -1090,7 +1088,7 @@ public class AutoScalingGroupBase implements AutoScalingGroup {
         chain.then(new ShareFlow() {
             @Override
             public void setup() {
-                List<ErrorCode> errors = Collections.synchronizedList(new LinkedList<ErrorCode>());
+                ErrorCodeList errors = new ErrorCodeList();
 
                 flow(new NoRollbackFlow() {
                     String __name__ = "destroy-vms";
@@ -1106,7 +1104,6 @@ public class AutoScalingGroupBase implements AutoScalingGroup {
                             destroyVmInstanceMsgs.add(destroyVmInstanceMsg);
                         }
 
-                        List<ErrorCode> errors = Collections.synchronizedList(new LinkedList<ErrorCode>());
                         new While<>(destroyVmInstanceMsgs).step((destroyVmInstanceMsg, whileCompletion) -> {
                             bus.send(destroyVmInstanceMsg, new CloudBusCallBack(whileCompletion) {
                                 @Override
@@ -1128,7 +1125,7 @@ public class AutoScalingGroupBase implements AutoScalingGroup {
                                         }
 
                                     } else {
-                                        errors.add(rly.getError());
+                                        whileCompletion.addError(rly.getError());
                                     }
 
                                     whileCompletion.done();
@@ -1137,9 +1134,11 @@ public class AutoScalingGroupBase implements AutoScalingGroup {
                         }, 10).run(new WhileDoneCompletion(trigger) {
                             @Override
                             public void done(ErrorCodeList errorCodeList) {
-                                if (errors.size() == vmInstanceUuids.size()) {
+                                errors.getCauses().addAll(errorCodeList.getCauses());
+
+                                if (errorCodeList.getCauses().size() == vmInstanceUuids.size()) {
                                     trigger.fail(operr("autoScalingGroup[%s] destroy vms[%s] failed completely, errors are %s"
-                                            ,self.getUuid(), vmInstanceUuids, JSONObjectUtil.toJsonString(errors)));
+                                            ,self.getUuid(), vmInstanceUuids, JSONObjectUtil.toJsonString(errorCodeList.getCauses())));
                                     return;
                                 }
 
@@ -1206,7 +1205,7 @@ public class AutoScalingGroupBase implements AutoScalingGroup {
                     public void handle(Map data) {
                         RemoveInstancesResult result = new RemoveInstancesResult();
                         result.setInstanceUuids(deleteSuccessfulInstanceUuids);
-                        result.setErrorCodes(errors);
+                        result.setErrorCodes(errors.getCauses());
                         completion.success(result);
                     }
                 });
@@ -1811,8 +1810,6 @@ public class AutoScalingGroupBase implements AutoScalingGroup {
             @Override
             public void setup() {
 
-                List<ErrorCode> errors = Collections.synchronizedList(new LinkedList<ErrorCode>());
-
                 flow(new NoRollbackFlow() {
                     String __name__ = "delete-auto-scaling-rule-triggers";
 
@@ -1840,7 +1837,7 @@ public class AutoScalingGroupBase implements AutoScalingGroup {
                                 @Override
                                 public void run(MessageReply rly) {
                                     if (!rly.isSuccess()) {
-                                        errors.add(rly.getError());
+                                        whileCompletion.addError(rly.getError());
                                     }
                                     whileCompletion.done();
                                 }
@@ -1848,9 +1845,9 @@ public class AutoScalingGroupBase implements AutoScalingGroup {
                         }, 10).run(new WhileDoneCompletion(trigger) {
                             @Override
                             public void done(ErrorCodeList errorCodeList) {
-                                if (errors.size() != 0) {
+                                if (errorCodeList.hasError()) {
                                     trigger.fail(operr("delete autoScalingRule[%s] triggers failed, errors are %s"
-                                            ,ruleUuid, JSONObjectUtil.toJsonString(errors)));
+                                            ,ruleUuid, JSONObjectUtil.toJsonString(errorCodeList.getCauses())));
                                     return;
                                 }
                                 trigger.next();

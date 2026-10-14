@@ -2138,7 +2138,6 @@ public class PciDeviceManager extends AbstractService implements
 
             @Override
             public void run(FlowTrigger trigger, Map data) {
-                List<ErrorCode> errs = new ArrayList<>();
                 new While<>(pciUuids).each((pciUuid, compl) -> {
                     AttachPciDeviceToVmMsg amsg = new AttachPciDeviceToVmMsg();
                     amsg.setPciDeviceUuid(pciUuid);
@@ -2151,7 +2150,7 @@ public class PciDeviceManager extends AbstractService implements
                                 logger.debug(String.format("attached pci device[uuid:%s] to vm[uuid:%s]", pciUuid, vmUuid));
                                 compl.done();
                             } else {
-                                errs.add(reply.getError());
+                                compl.addError(reply.getError());
                                 compl.allDone();
                                 logger.error(String.format("failed to attach pci device[uuid:%s] to vm[uuid:%s], %s", pciUuid, vmUuid, reply.getError()));
                             }
@@ -2160,11 +2159,7 @@ public class PciDeviceManager extends AbstractService implements
                 }).run(new WhileDoneCompletion(trigger) {
                     @Override
                     public void done(ErrorCodeList errorCodeList) {
-                        if (!errs.isEmpty()) {
-                            trigger.fail(errs.get(0));
-                        } else {
-                            trigger.next();
-                        }
+                        trigger.next(errorCodeList.wrapOrNull());
                     }
                 });
             }
@@ -2210,7 +2205,6 @@ public class PciDeviceManager extends AbstractService implements
 
             @Override
             public void run(FlowTrigger trigger, Map data) {
-                List<ErrorCode> errs = new ArrayList<>();
                 new While<>(invs).each((inv, compl) -> {
                     DetachPciDeviceFromVmMsg dmsg = new DetachPciDeviceFromVmMsg();
                     dmsg.setPciDeviceUuid(inv.getUuid());
@@ -2223,7 +2217,7 @@ public class PciDeviceManager extends AbstractService implements
                                 logger.error(String.format(
                                         "failed to detach pci device[uuid:%s] from vm[uuid:%s]: %s",
                                         inv.getUuid(), dmsg.getVmInstanceUuid(), reply.getError().toString()));
-                                errs.add(reply.getError());
+                                compl.addError(reply.getError());
                                 compl.allDone();
                             } else {
                                 logger.debug(String.format("successfully detached pci device[uuid:%s] from vm[uuid:%s]",
@@ -2235,11 +2229,7 @@ public class PciDeviceManager extends AbstractService implements
                 }).run(new WhileDoneCompletion(trigger) {
                     @Override
                     public void done(ErrorCodeList errorCodeList) {
-                        if (errs.isEmpty()) {
-                            trigger.next();
-                        } else {
-                            trigger.fail(errs.get(0));
-                        }
+                        trigger.next(errorCodeList.wrapOrNull());
                     }
                 });
             }

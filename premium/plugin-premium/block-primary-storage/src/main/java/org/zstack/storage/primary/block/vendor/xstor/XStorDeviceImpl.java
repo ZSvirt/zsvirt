@@ -579,7 +579,6 @@ public class XStorDeviceImpl implements BlockPrimaryStorageDeviceBackend {
         VolumeProvisioningStrategy imageCacheLunProvisioning = VolumeProvisioningStrategy.ThinProvisioning;
 
         List<Lun> imageLunList = new ArrayList<>();
-        List<ErrorCode> errorCodes = new ArrayList<>();
         new While<>(imageNameCandidate).each((Integer imageNameIndex, WhileCompletion whileCompletion) -> {
             String candidateImageName = name + '_' + String.valueOf(imageNameIndex);
             if ( imageNameIndex == 0) {
@@ -587,7 +586,7 @@ public class XStorDeviceImpl implements BlockPrimaryStorageDeviceBackend {
             }
             Lun imageLun = xStorDevice.queryLun(candidateImageName);
             if (imageLun == null && imageNameIndex == 0) {
-                errorCodes.add(operr(String.format("can not find lun: %s", name)));
+                whileCompletion.addError(operr(String.format("can not find lun: %s", name)));
                 whileCompletion.allDone();
             }
 
@@ -605,7 +604,7 @@ public class XStorDeviceImpl implements BlockPrimaryStorageDeviceBackend {
             }
 
             if (imageLun == null || !imageLun.isReady()) {
-                errorCodes.add(operr(String.format("new image cache is not ready please wait for a second, and retry again")));
+                whileCompletion.addError(operr("new image cache is not ready please wait for a second, and retry again"));
                 whileCompletion.allDone();
             }
 
@@ -638,15 +637,15 @@ public class XStorDeviceImpl implements BlockPrimaryStorageDeviceBackend {
 
                 @Override
                 public void fail(ErrorCode errorCode) {
-                    errorCodes.add(errorCode);
+                    whileCompletion.addError(errorCode);
                     whileCompletion.allDone();
                 }
             });
         }).run(new WhileDoneCompletion(completion) {
             @Override
             public void done(ErrorCodeList errorCodeList) {
-                if (!errorCodes.isEmpty()) {
-                    completion.fail(errorCodes.get(0));
+                if (errorCodeList.hasError()) {
+                    completion.fail(errorCodeList.wrapOrNull());
                     return;
                 }
 

@@ -103,13 +103,12 @@ public class AutoScalingRuleCascadeExtension extends AbstractAsyncCascadeExtensi
                     String __name__ = "delete-autoscaling-rule";
                     @Override
                     public void run(FlowTrigger trigger, Map data) {
-                        List<ErrorCode> errorCodes = Collections.synchronizedList(new LinkedList<ErrorCode>());
                         new While<>(msgs).step((deleteMsg, whileCompletion) -> {
                             bus.send(deleteMsg, new CloudBusCallBack(whileCompletion) {
                                 @Override
                                 public void run(MessageReply reply) {
                                     if (!reply.isSuccess()) {
-                                        errorCodes.add(reply.getError());
+                                        whileCompletion.addError(reply.getError());
                                     }
                                     whileCompletion.done();
                                 }
@@ -117,11 +116,7 @@ public class AutoScalingRuleCascadeExtension extends AbstractAsyncCascadeExtensi
                         }, 10).run(new WhileDoneCompletion(completion) {
                             @Override
                             public void done(ErrorCodeList errorCodeList) {
-                                if (errorCodes.isEmpty()) {
-                                    completion.success();
-                                    return;
-                                }
-                                completion.fail(errorCodes.get(0));
+                                completion.next(errorCodeList);
                             }
                         });
                     }

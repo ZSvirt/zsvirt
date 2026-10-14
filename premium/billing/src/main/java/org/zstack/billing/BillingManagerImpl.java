@@ -84,7 +84,6 @@ import org.zstack.header.cluster.ClusterVO_;
 import org.zstack.header.configuration.userconfig.DiskOfferingUserConfigValidator;
 import org.zstack.header.configuration.userconfig.InstanceOfferingUserConfigValidator;
 import org.zstack.header.core.WhileDoneCompletion;
-import org.zstack.header.errorcode.ErrorCode;
 import org.zstack.header.errorcode.ErrorCodeList;
 import org.zstack.header.errorcode.OperationFailureException;
 import org.zstack.header.identity.*;
@@ -540,13 +539,12 @@ public class BillingManagerImpl extends AbstractService implements BillingManage
             return;
         }
 
-        List<ErrorCode> erros = new ArrayList<>();
         new While<>(msgs).all((generateAccountBillingMsg, whileCompletion) -> {
             bus.send(generateAccountBillingMsg, new CloudBusCallBack(whileCompletion) {
                 @Override
                 public void run(MessageReply reply) {
                     if (!reply.isSuccess()) {
-                        erros.add(reply.getError());
+                        whileCompletion.addError(reply.getError());
                     }
 
                     whileCompletion.done();
@@ -556,8 +554,8 @@ public class BillingManagerImpl extends AbstractService implements BillingManage
             @Override
             public void done(ErrorCodeList errorCodeList) {
                 DeleteResourcePriceReply reply = new DeleteResourcePriceReply();
-                if (!erros.isEmpty()) {
-                    reply.setError(erros.get(0));
+                if (errorCodeList.hasError()) {
+                    reply.setError(errorCodeList.wrapOrNull());
                     bus.reply(msg, reply);
                     return;
                 }

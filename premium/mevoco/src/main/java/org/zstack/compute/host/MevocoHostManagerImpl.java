@@ -506,7 +506,6 @@ public class MevocoHostManagerImpl implements HostExtensionManager, PostHostConn
             }
         }
 
-        List<ErrorCode> errors = Collections.synchronizedList(new LinkedList<ErrorCode>());
         List<HostNetworkBondingServiceRefInventory> inventories = new ArrayList<>();
         new While<>(msgs).step((smsg, whileCompletion) ->
                 bus.send(smsg, new CloudBusCallBack(whileCompletion) {
@@ -517,15 +516,15 @@ public class MevocoHostManagerImpl implements HostExtensionManager, PostHostConn
                             inventories.addAll(aReply.getInventory());
                             whileCompletion.done();
                         } else {
-                            errors.add(reply.getError());
+                            whileCompletion.addError(reply.getError());
                             whileCompletion.allDone();
                         }
                     }
                 }), 10).run(new WhileDoneCompletion(msg) {
             @Override
             public void done(ErrorCodeList errorCodeList) {
-                if (errors.size() > 0) {
-                    event.setError(errors.get(0));
+                if (errorCodeList.hasError()) {
+                    event.setError(errorCodeList.wrapOrNull());
                     bus.publish(event);
                     return;
                 }
@@ -714,7 +713,6 @@ public class MevocoHostManagerImpl implements HostExtensionManager, PostHostConn
             }
         }
 
-        List<ErrorCode> errors = Collections.synchronizedList(new LinkedList<ErrorCode>());
         List<HostNetworkInterfaceServiceRefInventory> inventories = new ArrayList<>();
         new While<>(msgs).step((smsg, whileCompletion) ->
                 bus.send(smsg, new CloudBusCallBack(whileCompletion) {
@@ -725,15 +723,15 @@ public class MevocoHostManagerImpl implements HostExtensionManager, PostHostConn
                             inventories.addAll(aReply.getInventory());
                             whileCompletion.done();
                         } else {
-                            errors.add(reply.getError());
+                            whileCompletion.addError(reply.getError());
                             whileCompletion.allDone();
                         }
                     }
                 }), 10).run(new WhileDoneCompletion(msg) {
             @Override
             public void done(ErrorCodeList errorCodeList) {
-                if (errors.size() > 0) {
-                    event.setError(errors.get(0));
+                if (errorCodeList.hasError()) {
+                    event.setError(errorCodeList.wrapOrNull());
                     bus.publish(event);
                     return;
                 }
@@ -1837,7 +1835,6 @@ public class MevocoHostManagerImpl implements HostExtensionManager, PostHostConn
             return;
         }
 
-        List<ErrorCode> errors = Collections.synchronizedList(new LinkedList<>());
         new While<>(hostInterfaceMap.entrySet()).step((entry, whileCompletion) -> {
             getCandidateInterfaceVlanIds(entry.getKey(), entry.getValue(), new ReturnValueCompletion<List<Integer>>(msg) {
                 @Override
@@ -1848,7 +1845,7 @@ public class MevocoHostManagerImpl implements HostExtensionManager, PostHostConn
 
                 @Override
                 public void fail(ErrorCode errorCode) {
-                    errors.add(errorCode);
+                    whileCompletion.addError(errorCode);
                     whileCompletion.done();
                 }
             });
@@ -1857,8 +1854,8 @@ public class MevocoHostManagerImpl implements HostExtensionManager, PostHostConn
             public void done(ErrorCodeList errorCodeList) {
                 List<Integer> vlanIds = new ArrayList<>();
                 APIGetCandidateInterfaceVlanIdsReply reply = new APIGetCandidateInterfaceVlanIdsReply();
-                if (!errors.isEmpty()) {
-                    reply.setError(errors.get(0));
+                if (errorCodeList.hasError()) {
+                    reply.setError(errorCodeList.wrapOrNull());
                     bus.reply(msg, reply);
                     return;
                 }

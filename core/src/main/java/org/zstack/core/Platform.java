@@ -974,6 +974,10 @@ public class Platform {
                 .withCause(errorCodeList);
     }
 
+    static {
+        ErrorCodeList.putMultiErrorGenerator(Platform::multiErr);
+    }
+
     public static String missingVariables(Object...args) {
         if (args.length == 1) {
             return String.format("[%s] is required", args[0]);

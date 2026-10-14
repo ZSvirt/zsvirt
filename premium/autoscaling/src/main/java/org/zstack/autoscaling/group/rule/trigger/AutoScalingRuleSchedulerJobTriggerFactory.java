@@ -9,7 +9,6 @@ import org.zstack.core.db.Q;
 import org.zstack.core.workflow.FlowChainBuilder;
 import org.zstack.core.workflow.ShareFlow;
 import org.zstack.header.core.Completion;
-import org.zstack.header.core.NoErrorCompletion;
 import org.zstack.header.core.WhileDoneCompletion;
 import org.zstack.header.core.workflow.FlowChain;
 import org.zstack.header.core.workflow.FlowDoneHandler;
@@ -97,13 +96,12 @@ public class AutoScalingRuleSchedulerJobTriggerFactory implements AutoScalingRul
                     String __name__ = "delete-schedulerJob-group";
                     @Override
                     public void run(FlowTrigger trigger, Map data) {
-                        List<ErrorCode> errorCodes = Collections.synchronizedList(new LinkedList<ErrorCode>());
                         new While<>(deleteSchedulerJobGroupMsgs).step((deleteSchedulerJobGroupMsg, whileCompletion) -> {
                             bus.send(deleteSchedulerJobGroupMsg, new CloudBusCallBack(whileCompletion) {
                                 @Override
                                 public void run(MessageReply reply) {
                                     if (!reply.isSuccess()) {
-                                        errorCodes.add(reply.getError());
+                                        whileCompletion.addError(reply.getError());
                                     }
                                     whileCompletion.done();
                                 }
@@ -111,11 +109,7 @@ public class AutoScalingRuleSchedulerJobTriggerFactory implements AutoScalingRul
                         }, 10).run(new WhileDoneCompletion(trigger) {
                             @Override
                             public void done(ErrorCodeList errorCodeList) {
-                                if (errorCodes.isEmpty()) {
-                                    trigger.next();
-                                    return;
-                                }
-                                trigger.fail(errorCodes.get(0));
+                                trigger.next(errorCodeList.wrapOrNull());
                             }
                         });
                     }
@@ -143,13 +137,12 @@ public class AutoScalingRuleSchedulerJobTriggerFactory implements AutoScalingRul
                     String __name__ = "delete-scheduler-trigger";
                     @Override
                     public void run(FlowTrigger trigger, Map data) {
-                        List<ErrorCode> errorCodes = Collections.synchronizedList(new LinkedList<ErrorCode>());
                         new While<>(deleteSchedulerTriggerMsgs).step((deleteSchedulerTriggerMsg, whileCompletion) -> {
                             bus.send(deleteSchedulerTriggerMsg, new CloudBusCallBack(whileCompletion) {
                                 @Override
                                 public void run(MessageReply reply) {
                                     if (!reply.isSuccess()) {
-                                        errorCodes.add(reply.getError());
+                                        whileCompletion.addError(reply.getError());
                                     }
                                     whileCompletion.done();
                                 }
@@ -157,11 +150,7 @@ public class AutoScalingRuleSchedulerJobTriggerFactory implements AutoScalingRul
                         }, 10).run(new WhileDoneCompletion(completion) {
                             @Override
                             public void done(ErrorCodeList errorCodeList) {
-                                if (errorCodes.isEmpty()) {
-                                    completion.success();
-                                    return;
-                                }
-                                completion.fail(errorCodes.get(0));
+                                completion.next(errorCodeList);
                             }
                         });
                     }

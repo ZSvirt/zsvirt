@@ -250,9 +250,8 @@ public class HostNetworkBondingManagerImpl extends AbstractService implements Ho
             msgs.add(createBondingMsg);
         }
 
-        List<ErrorCode> errors = Collections.synchronizedList(new LinkedList<ErrorCode>());
         List<HostNetworkBondingInventory> inventories = Collections.synchronizedList(new ArrayList<>());
-        new While<CreateBondingMsg>(msgs).step((cmsg, whileCompletion) ->
+        new While<>(msgs).step((cmsg, whileCompletion) ->
             bus.send(cmsg, new CloudBusCallBack(whileCompletion) {
                 @Override
                 public void run(MessageReply reply) {
@@ -261,15 +260,15 @@ public class HostNetworkBondingManagerImpl extends AbstractService implements Ho
                         inventories.add(cReply.getInventory());
                         whileCompletion.done();
                     } else {
-                        errors.add(reply.getError());
+                        whileCompletion.addError(reply.getError());
                         whileCompletion.allDone();
                     }
                 }
             }), 10).run(new WhileDoneCompletion(msg) {
         @Override
         public void done(ErrorCodeList errorCodeList) {
-            if (errors.size() > 0) {
-                event.setError(errors.get(0));
+            if (errorCodeList.hasError()) {
+                event.setError(errorCodeList.wrapOrNull());
                 bus.publish(event);
                 return;
             }

@@ -151,7 +151,6 @@ public class VmAllocateNicIpFlow implements Flow {
                 bus.makeTargetServiceIdByResourceUuid(msg, L3NetworkConstant.SERVICE_ID, nw.getUuid());
                 msgs.add(msg);
             }
-            List<ErrorCode> ipErrs = new ArrayList<>();
             List<UsedIpInventory> nicIps = new ArrayList<>();
             new While<>(msgs).each((msg, wcompl) -> {
                 bus.send(msg, new CloudBusCallBack(wcompl) {
@@ -163,7 +162,7 @@ public class VmAllocateNicIpFlow implements Flow {
                             nicIps.add(areply.getIpInventory());
                             wcompl.done();
                         } else {
-                            ipErrs.add(reply.getError());
+                            wcompl.addError(reply.getError());
                             wcompl.allDone();
                         }
                     }
@@ -171,8 +170,8 @@ public class VmAllocateNicIpFlow implements Flow {
             }).run(new WhileDoneCompletion(wcomp) {
                 @Override
                 public void done(ErrorCodeList errorCodeList) {
-                    if (ipErrs.size() > 0) {
-                        errs.add(ipErrs.get(0));
+                    if (errorCodeList.hasError()) {
+                        errs.addAll(errorCodeList.getCauses());
                         wcomp.allDone();
                     } else {
                         List<UsedIpInventory> sortedNicsIps = nicIps.stream()

@@ -116,18 +116,11 @@ public class CbtBackupCascadeExtension extends AbstractCascadeExtension {
                     public void run(MessageReply reply) {
                         if (!reply.isSuccess()) {
                             logger.warn(String.format("failed to unexport volumes of vm[uuid:%s], %s", msg.getVmInstanceUuid(), reply.getError()));
-                            if (force) {
-                                try {
-                                    if (!submitUnexportNbdVolumesGC(msg)) {
-                                        com.addError(reply.getError());
-                                    }
-                                } catch (Throwable t) {
-                                    logger.warn(String.format("failed to submit unexport NBD GC for vm[uuid:%s]",
-                                            msg.getVmInstanceUuid()), t);
-                                    com.addError(reply.getError());
-                                }
-                            } else {
-                                com.addError(reply.getError());
+                            try {
+                                submitUnexportNbdVolumesGC(msg);
+                            } catch (Throwable t) {
+                                logger.warn(String.format("failed to submit unexport NBD GC for vm[uuid:%s]",
+                                        msg.getVmInstanceUuid()), t);
                             }
                         }
                         com.done();
@@ -135,11 +128,7 @@ public class CbtBackupCascadeExtension extends AbstractCascadeExtension {
                 }), 10).run(new WhileDoneCompletion(completion) {
                     @Override
                     public void done(ErrorCodeList errorCodeList) {
-                        if (!errorCodeList.getCauses().isEmpty()) {
-                            trigger.fail(errorCodeList.getCauses().get(0));
-                        } else {
-                            trigger.next();
-                        }
+                        trigger.next();
                     }
                 });
             }

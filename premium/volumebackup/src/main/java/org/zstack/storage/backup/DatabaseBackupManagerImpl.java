@@ -39,7 +39,6 @@ import org.zstack.header.message.Message;
 import org.zstack.header.message.MessageReply;
 import org.zstack.header.storage.backup.*;
 import org.zstack.header.storage.database.backup.*;
-import org.zstack.header.tag.SystemTagInventory;
 import org.zstack.header.tag.SystemTagInventoryDefinition;
 import org.zstack.header.tag.SystemTagLifeCycleListener;
 import org.zstack.mevoco.MevocoGlobalProperty;
@@ -533,7 +532,6 @@ public class DatabaseBackupManagerImpl extends AbstractService implements Databa
                             checkVersion(metadata.version);
                             checkType(metadata.type);
 
-                            List<ErrorCode> errs = Collections.synchronizedList(new ArrayList<>());
                             new While<>(vo.getBackupStorageRefs()).each((ref, compl) -> {
                                 PullImageToLocalMsg pmsg = new PullImageToLocalMsg();
                                 pmsg.setInstallPath(ref.getInstallPath());
@@ -549,15 +547,15 @@ public class DatabaseBackupManagerImpl extends AbstractService implements Databa
                                             return;
                                         }
 
-                                        errs.add(reply.getError());
+                                        compl.addError(reply.getError());
                                         compl.done();
                                     }
                                 });
                             }).run(new WhileDoneCompletion(trigger) {
                                 @Override
                                 public void done(ErrorCodeList errorCodeList) {
-                                    if (errs.size() == vo.getBackupStorageRefs().size()) {
-                                        trigger.fail(errs.get(0));
+                                    if (errorCodeList.size() == vo.getBackupStorageRefs().size()) {
+                                        trigger.fail(errorCodeList.wrapOrNull());
                                         return;
                                     }
                                     trigger.next();

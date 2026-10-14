@@ -18,10 +18,8 @@ import org.zstack.header.apimediator.ApiMessageInterceptionException;
 import org.zstack.header.apimediator.GlobalApiMessageInterceptor;
 import org.zstack.header.core.Completion;
 import org.zstack.header.core.NoErrorCompletion;
-import org.zstack.header.core.WhileDoneCompletion;
 import org.zstack.header.core.workflow.*;
 import org.zstack.header.errorcode.ErrorCode;
-import org.zstack.header.errorcode.ErrorCodeList;
 import org.zstack.header.errorcode.OperationFailureException;
 import org.zstack.header.exception.CloudRuntimeException;
 import org.zstack.header.message.APIMessage;
@@ -552,7 +550,6 @@ public class IPsecManagerImpl extends AbstractService implements IPsecManager, V
             return;
         }
 
-        List<ErrorCode> errs = new ArrayList<>();
         new While<>(vos).each((vo, cmpl) -> {
             dbf.remove(vo);
             IPsecConnectionInventory inv = IPsecConnectionInventory.valueOf(dbf.findByUuid(vo.getConnectionUuid(), IPsecConnectionVO.class));
@@ -572,21 +569,12 @@ public class IPsecManagerImpl extends AbstractService implements IPsecManager, V
                 @Override
                 public void run(MessageReply reply) {
                     if (!reply.isSuccess()) {
-                        errs.add(reply.getError());
+                        cmpl.addError(reply.getError());
                     }
                     cmpl.done();
                 }
             });
-        }).run(new WhileDoneCompletion(completion){
-            @Override
-            public void done(ErrorCodeList errorCodeList) {
-                if (errs.isEmpty()){
-                    completion.success();
-                } else {
-                    completion.fail(errs.get(0));
-                }
-            }
-        });
+        }).runAndSendErrorTo(completion);
     }
 
     @Override

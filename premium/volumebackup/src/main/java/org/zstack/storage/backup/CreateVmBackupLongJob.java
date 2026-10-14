@@ -11,7 +11,6 @@ import org.zstack.core.db.DatabaseFacade;
 import org.zstack.core.db.Q;
 import org.zstack.header.core.WhileDoneCompletion;
 import org.zstack.header.core.ReturnValueCompletion;
-import org.zstack.header.errorcode.ErrorCode;
 import org.zstack.header.errorcode.ErrorCodeList;
 import org.zstack.header.longjob.*;
 import org.zstack.header.message.APIEvent;
@@ -23,7 +22,6 @@ import org.zstack.utils.Utils;
 import org.zstack.utils.gson.JSONObjectUtil;
 import org.zstack.utils.logging.CLogger;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -43,7 +41,6 @@ public class CreateVmBackupLongJob implements LongJob {
 
     @Override
     public void start(LongJobVO job, ReturnValueCompletion<APIEvent> completion) {
-        List<ErrorCode> errors = new ArrayList<>();
         APICreateVmBackupEvent evt = new APICreateVmBackupEvent(job.getApiId());
         VmBackupLongJobParams params = JSONObjectUtil.toObject(job.getJobData(), VmBackupLongJobParams.class);
         params.makeCompatibleParams();
@@ -65,7 +62,7 @@ public class CreateVmBackupLongJob implements LongJob {
                         evt.setActualExecuteTime(r.getActualExecuteTime());
                         compl.allDone();
                     } else {
-                        errors.add(reply.getError());
+                        compl.addError(reply.getError());
                         compl.done();
                     }
                 }
@@ -73,8 +70,8 @@ public class CreateVmBackupLongJob implements LongJob {
         }).run(new WhileDoneCompletion(completion) {
             @Override
             public void done(ErrorCodeList errorCodeList) {
-                if (evt.getInventories() == null && !errors.isEmpty()) {
-                    completion.fail(errors.get(0));
+                if (evt.getInventories() == null && errorCodeList.hasError()) {
+                    completion.fail(errorCodeList.wrapOrNull());
                     return;
                 }
                 if (params.getRemoteBackupStorageUuid() != null) {

@@ -249,7 +249,6 @@ private void deleteL2Bridge(List<String> clusterUuids, Completion completion) {
     List<HostVO> hosts = Q.New(HostVO.class)
             .in(HostVO_.clusterUuid, clusterUuids)
             .list();
-    List<ErrorCode> errs = new ArrayList<>();
     new While<>(hosts).step((host,compl) -> {
         HostInventory hostInv = HostInventory.valueOf(host);
             L2NetworkInventory l2Inv = getSelfInventory();
@@ -263,7 +262,7 @@ private void deleteL2Bridge(List<String> clusterUuids, Completion completion) {
 
             @Override
             public void fail(ErrorCode errorCode) {
-                errs.add(errorCode);
+                compl.addError(errorCode);
                 compl.done();
             }
 
@@ -271,8 +270,8 @@ private void deleteL2Bridge(List<String> clusterUuids, Completion completion) {
     },10).run((new WhileDoneCompletion(completion) {
         @Override
         public void done(ErrorCodeList errorCodeList) {
-            if (errs.size() > 0) {
-                logger.debug(String.format("delete bridge fail [error is %s ], but ignore", errs.get(0).toString()));
+            if (errorCodeList.hasError() {
+                logger.debug(String.format("delete bridge fail [error is %s ], but ignore", errorCodeList.wrapOrNull().toString()));
             }
             completion.success();
 

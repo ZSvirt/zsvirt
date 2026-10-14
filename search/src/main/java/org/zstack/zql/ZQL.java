@@ -500,7 +500,6 @@ public class ZQL {
 
         FutureCompletion future = new FutureCompletion(null);
         Map ret = new ConcurrentHashMap();
-        List<ErrorCode> errs = new ArrayList<>();
         new While<>(astResult.returnWith).all((r, coml) -> {
             Optional<ReturnWithExtensionPoint> opt = pluginRgty.getExtensionList(ReturnWithExtensionPoint.class)
                     .stream().filter(ext->r.name.equals(ext.getReturnWithName())).findAny();
@@ -528,17 +527,17 @@ public class ZQL {
 
                 @Override
                 public void fail(ErrorCode errorCode) {
-                    errs.add(errorCode);
+                    coml.addError(errorCode);
                     coml.allDone();
                 }
             });
         }).run(new WhileDoneCompletion(future) {
             @Override
             public void done(ErrorCodeList errorCodeList) {
-                if (errs.isEmpty()) {
+                if (errorCodeList.isEmpty()) {
                     future.success();
                 } else {
-                    future.fail(errs.get(0));
+                    future.fail(errorCodeList.wrapOrNull());
                 }
             }
         });

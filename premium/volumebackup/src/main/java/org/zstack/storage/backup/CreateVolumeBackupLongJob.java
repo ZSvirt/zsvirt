@@ -10,7 +10,6 @@ import org.zstack.core.db.DatabaseFacade;
 import org.zstack.core.db.Q;
 import org.zstack.header.core.WhileDoneCompletion;
 import org.zstack.header.core.ReturnValueCompletion;
-import org.zstack.header.errorcode.ErrorCode;
 import org.zstack.header.errorcode.ErrorCodeList;
 import org.zstack.header.longjob.LongJob;
 import org.zstack.header.longjob.LongJobFor;
@@ -45,7 +44,6 @@ public class CreateVolumeBackupLongJob implements LongJob {
 
     @Override
     public void start(LongJobVO job, ReturnValueCompletion<APIEvent> completion) {
-        List<ErrorCode> errors = new ArrayList<>();
         APICreateVolumeBackupEvent evt = new APICreateVolumeBackupEvent(job.getApiId());
         VolumeBackupLongJobParams params = JSONObjectUtil.toObject(job.getJobData(), VolumeBackupLongJobParams.class);
         params.makeCompatibleParams();
@@ -63,7 +61,7 @@ public class CreateVolumeBackupLongJob implements LongJob {
                         evt.setActualExecuteTime(r.getActualExecuteTime());
                         compl.allDone();
                     } else {
-                        errors.add(reply.getError());
+                        compl.addError(reply.getError());
                         compl.done();
                     }
                 }
@@ -71,8 +69,8 @@ public class CreateVolumeBackupLongJob implements LongJob {
         }).run(new WhileDoneCompletion(completion) {
             @Override
             public void done(ErrorCodeList errorCodeList) {
-                if (evt.getInventory() == null && !errors.isEmpty()) {
-                    completion.fail(errors.get(0));
+                if (evt.getInventory() == null && errorCodeList.hasError()) {
+                    completion.fail(errorCodeList.wrapOrNull());
                     return;
                 }
                 if (params.getRemoteBackupStorageUuid() != null) {

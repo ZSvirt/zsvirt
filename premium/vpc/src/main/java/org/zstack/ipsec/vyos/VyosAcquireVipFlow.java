@@ -41,7 +41,6 @@ public class VyosAcquireVipFlow implements Flow {
         String provideType = (String) data.get(Param.SERVICE_PROVIDER_TYPE);
         IPsecConnectionInventory inv = (IPsecConnectionInventory) data.get(Param.IPSEC_STRUCT);
 
-        List<ErrorCode> errs = new ArrayList<>();
         new While<>(l3Invs).each((l3Inv, whileComplection) -> {
             ModifyVipAttributesStruct vipStruct = new ModifyVipAttributesStruct();
             vipStruct.setUseFor(IPsecConstants.IPSEC_NETWORK_SERVICE_TYPE.toString());
@@ -58,15 +57,15 @@ public class VyosAcquireVipFlow implements Flow {
 
                 @Override
                 public void fail(ErrorCode errorCode) {
-                    errs.add(errorCode);
+                    whileComplection.addError(errorCode);
                     whileComplection.done();
                 }
             });
         }).run(new WhileDoneCompletion(trigger) {
             @Override
             public void done(ErrorCodeList errorCodeList) {
-                if (errs.size() > 0) {
-                    trigger.fail(errs.get(0));
+                if (errorCodeList.hasError()) {
+                    trigger.fail(errorCodeList.wrapOrNull());
                 } else {
                     data.put(SUCCESS, true);
                     trigger.next();

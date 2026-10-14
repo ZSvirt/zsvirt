@@ -13,16 +13,12 @@ import org.zstack.core.db.Q;
 import org.zstack.core.db.SQL;
 import org.zstack.core.db.SimpleQuery;
 import org.zstack.core.thread.ThreadFacade;
-import org.zstack.core.workflow.FlowChainBuilder;
 import org.zstack.header.apimediator.ApiMessageInterceptionException;
 import org.zstack.header.core.FutureCompletion;
 import org.zstack.header.core.WhileCompletion;
-import org.zstack.header.core.WhileDoneCompletion;
 import org.zstack.header.core.workflow.*;
 import org.zstack.header.errorcode.ErrorCode;
-import org.zstack.header.errorcode.ErrorCodeList;
 import org.zstack.header.errorcode.OperationFailureException;
-import org.zstack.header.exception.CloudRuntimeException;
 import org.zstack.header.message.MessageReply;
 import org.zstack.header.network.l2.L2NetworkConstant;
 import org.zstack.header.network.l2.L2NetworkInventory;
@@ -40,7 +36,6 @@ import org.zstack.network.service.virtualrouter.vyos.VyosGlobalConfig;
 import org.zstack.network.service.virtualrouter.vyos.VyosVmBaseFactory;
 import org.zstack.resourceconfig.ResourceConfigFacade;
 import org.zstack.utils.Utils;
-import org.zstack.utils.gson.JSONObjectUtil;
 import org.zstack.utils.logging.CLogger;
 import org.zstack.utils.network.IPv6Constants;
 import org.zstack.vpc.ha.VpcHaGroupGlobalConfig;
@@ -118,7 +113,6 @@ public class VpcVRouterFactory extends VyosVmBaseFactory implements ApplianceVmP
     }
 
     private void deleteVpcNicForVmCascade(String vpcUuid, List<VmNicVO> deleletedNics) {
-        List<ErrorCode> errs = new ArrayList<>();
         FutureCompletion completion = new FutureCompletion(null);
 
         new While<>(deleletedNics).each((VmNicVO nic, WhileCompletion completion1) -> {
@@ -139,7 +133,7 @@ public class VpcVRouterFactory extends VyosVmBaseFactory implements ApplianceVmP
                         if (!dbf.isExist(nic.getUuid(), VmNicVO.class)) {
                             logger.info(String.format("nic[uuid:%s] not exists, mark it as success", nic.getUuid()));
                         } else {
-                            errs.add(reply.getError());
+                            completion1.addError(reply.getError());
                             logger.error(String.format("detach nic[uuid: %s] for " +
                                     "delete l3[uuid: %s] failed", nic.getUuid(), nic.getL3NetworkUuid()));
                         }
@@ -150,16 +144,7 @@ public class VpcVRouterFactory extends VyosVmBaseFactory implements ApplianceVmP
                     completion1.done();
                 }
             });
-        }).run(new WhileDoneCompletion(completion) {
-            @Override
-            public void done(ErrorCodeList errorCodeList) {
-                if (!errs.isEmpty()) {
-                    completion.fail(errs.get(0));
-                } else {
-                    completion.success();
-                }
-            }
-        });
+        }).runAndSendErrorTo(completion);
 
         completion.await(TimeUnit.MINUTES.toMillis(30));
         if (!completion.isSuccess()) {

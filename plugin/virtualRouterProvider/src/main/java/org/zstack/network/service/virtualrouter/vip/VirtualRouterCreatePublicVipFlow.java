@@ -153,7 +153,6 @@ public class VirtualRouterCreatePublicVipFlow implements Flow {
             msgs.add(cmsg);
         }
 
-        List<ErrorCode> errs = new ArrayList<>();
         List<VipInventory> vips = new ArrayList<>();
         /* use for rollback */
         data.put(VirtualRouterConstant.Param.PUB_VIP_UUID.toString(), vips);
@@ -162,7 +161,7 @@ public class VirtualRouterCreatePublicVipFlow implements Flow {
                 @Override
                 public void run(MessageReply reply) {
                     if (!reply.isSuccess()) {
-                        errs.add(reply.getError());
+                        wcoml.addError(reply.getError());
                         wcoml.allDone();
                         return;
                     }

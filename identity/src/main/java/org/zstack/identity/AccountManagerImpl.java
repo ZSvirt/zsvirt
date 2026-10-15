@@ -110,7 +110,7 @@ public class AccountManagerImpl extends AbstractService implements AccountManage
                     AccountVO vo = new AccountVO();
                     vo.setUuid(AccountConstant.INITIAL_SYSTEM_ADMIN_UUID);
                     vo.setName(AccountConstant.INITIAL_SYSTEM_ADMIN_NAME);
-                    vo.setPassword(AccountConstant.INITIAL_SYSTEM_ADMIN_PASSWORD);
+                    vo.setPassword(AccountPassword.encodeForStorage(AccountConstant.INITIAL_SYSTEM_ADMIN_PASSWORD));
                     vo.setType(AccountType.SystemAdmin);
                     vo.setSource(AccountSource.Local);
                     vo.setState(AccountState.Enabled);
@@ -552,7 +552,7 @@ public class AccountManagerImpl extends AbstractService implements AccountManage
                 }
                 vo.setName(msg.getName());
                 vo.setDescription(msg.getDescription());
-                vo.setPassword(msg.getPassword());
+                vo.setPassword(AccountPassword.encodeForStorage(msg.getPassword()));
                 AccountType accountType = msg.getType() != null ? AccountType.valueOf(msg.getType()) : AccountType.Normal;
                 if (accountType == AccountType.ThirdParty) {
                     throw operr("account type[ThirdParty] is deprecated; use Normal with account source instead")
@@ -1119,7 +1119,7 @@ public class AccountManagerImpl extends AbstractService implements AccountManage
 
 
 
-        if (msg.getOldPassword() != null && !msg.getOldPassword().equals(account.getPassword())) {
+        if (msg.getOldPassword() != null && !AccountPassword.matches(msg.getOldPassword(), account.getPassword())) {
             throw new OperationFailureException(operr("old password is not equal to the original password, cannot update the password of account[uuid: %s]", msg.getUuid()));
         }
 

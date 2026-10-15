@@ -36,6 +36,18 @@
         </dependency>
         <dependency>
             <groupId>org.zstack</groupId>
+            <artifactId>login-control</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.zstack</groupId>
+            <artifactId>two-factor</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.zstack</groupId>
             <artifactId>log4j2</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
@@ -197,6 +209,9 @@
                                     <includes>
                                         <include>springConfigXml/LogConfiguration.xml</include>
                                         <include>springConfigXml/Log4j2Configuration.xml</include>
+                                        <include>springConfigXml/LoginControl.xml</include>
+                                        <include>springConfigXml/TwoFactorAuthentication.xml</include>
+                                        <include>globalConfig/twoFactorAuthentication.xml</include>
                                     </includes>
                                 </resource>
                             </resources>
@@ -219,6 +234,35 @@
                                     </includes>
                                 </resource>
                             </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>3.1.0</version>
+                <executions>
+                    <execution>
+                        <id>register-authentication-test-entities</id>
+                        <phase>process-test-resources</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                <!-- Extend only the test descriptor; keep production configuration unchanged. -->
+                                <copy file="${project.basedir}/../../conf/persistence.xml"
+                                      tofile="${project.build.testOutputDirectory}/persistence.xml" overwrite="true"/>
+                                <replace file="${project.build.testOutputDirectory}/persistence.xml">
+                                    <replacetoken><![CDATA[    </persistence-unit>]]></replacetoken>
+                                    <replacevalue><![CDATA[        <class>org.zstack.loginControl.entity.LoginAttemptsVO</class>
+        <class>org.zstack.loginControl.entity.HistoricalPasswordVO</class>
+        <class>org.zstack.loginControl.entity.AccessControlRuleVO</class>
+        <class>org.zstack.twoFactorAuthentication.TwoFactorAuthenticationSecretVO</class>
+    </persistence-unit>]]></replacevalue>
+                                </replace>
+                            </target>
                         </configuration>
                     </execution>
                 </executions>

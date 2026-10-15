@@ -211,6 +211,7 @@
                                         <include>springConfigXml/Log4j2Configuration.xml</include>
                                         <include>springConfigXml/LoginControl.xml</include>
                                         <include>springConfigXml/TwoFactorAuthentication.xml</include>
+                                        <include>globalConfig/twoFactorAuthentication.xml</include>
                                     </includes>
                                 </resource>
                             </resources>

@@ -354,8 +354,12 @@ public class ZMigrateHttpClient {
     }
 
     public ErrorableValue<String> getGatewayServerInfos() {
+        return getGatewayServerInfos(DEFAULT_RETRY_TIMES);
+    }
+
+    public ErrorableValue<String> getGatewayServerInfos(int retryTimes) {
         return retryWithFreshContext(
-                DEFAULT_RETRY_TIMES, DEFAULT_RETRY_INTERVAL_SECONDS,
+                retryTimes, DEFAULT_RETRY_INTERVAL_SECONDS,
                 "getGatewayServerInfos",
                 err(ZMIGRATE_GET_GATEWAY_SERVER_INFOS_ERROR, "failed to get gateway server infos from ZMigrate"),
                 (managementIp, encryptKey) -> {
@@ -373,6 +377,33 @@ public class ZMigrateHttpClient {
                         return ErrorableValue.of(EMPTY_JSON_ARRAY);
                     }
                     return ErrorableValue.of(response.result);
+                });
+    }
+
+    public ErrorableValue<UploadVddkResponse> uploadVddk(String servUuid, String vddkFile) {
+        return retryWithFreshContext(
+                0, 0,
+                "uploadVddk",
+                err(ZMIGRATE_GATEWAY_ERROR, "failed to upload VDDK to ZMigrate gateway"),
+                (managementIp, encryptKey) -> {
+                    UploadVddkCmd cmd = new UploadVddkCmd(encryptKey, servUuid, vddkFile);
+                    cmd.mgmtAddr = managementIp;
+                    ErrorableValue<UploadVddkResponse> response = http(UploadVddkResponse.class)
+                            .withPath(String.format("https://%s:%d%s", managementIp,
+                                    GATEWAY_RESTFUL_API_PORT, ZMIGRATE_VMWARE_WEB_SERVICES_PATH))
+                            .withBodyJson(cmd)
+                            .withTimeoutInMillis(timeoutInMillisForGetter)
+                            .withoutRetry()
+                            .postWithErrorCode();
+                    if (!response.isSuccess() || response.result == null) {
+                        ErrorCode error = err(ZMIGRATE_GATEWAY_ERROR,
+                                "failed to upload VDDK to ZMigrate gateway");
+                        if (!response.isSuccess()) {
+                            error = error.withCause(response.error);
+                        }
+                        return ErrorableValue.ofErrorCode(error);
+                    }
+                    return response;
                 });
     }
 
@@ -642,6 +673,29 @@ public class ZMigrateHttpClient {
         public GetGatewayServerInfosCmd(String encryptKey) {
             this.encryptKey = encryptKey;
         }
+    }
+
+    public static class UploadVddkCmd extends AgentCmd {
+        @SerializedName("Action")
+        public String action = ZMIGRATE_UPLOAD_VDDK_ACTION;
+        @SerializedName("ServUUID")
+        public String servUuid;
+        @SerializedName("VddkFile")
+        public String vddkFile;
+        @SerializedName("MgmtAddr")
+        public String mgmtAddr;
+
+        public UploadVddkCmd(String encryptKey, String servUuid, String vddkFile) {
+            this.encryptKey = encryptKey;
+            this.servUuid = servUuid;
+            this.vddkFile = vddkFile;
+        }
+    }
+
+    public static class UploadVddkResponse {
+        public String status;
+        public String version;
+        public String msg;
     }
 
     public static class GetMigrationJobsCmd extends AgentCmd {

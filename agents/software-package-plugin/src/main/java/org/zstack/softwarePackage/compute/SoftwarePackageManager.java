@@ -17,7 +17,6 @@ import org.zstack.core.thread.ThreadFacade;
 import org.zstack.core.workflow.SimpleFlowChain;
 import org.zstack.header.AbstractService;
 import org.zstack.header.core.Completion;
-import org.zstack.header.core.NoErrorCompletion;
 import org.zstack.header.core.ReturnValueCompletion;
 import org.zstack.header.core.WhileDoneCompletion;
 import org.zstack.header.core.workflow.Flow;
@@ -64,7 +63,6 @@ import org.zstack.utils.logging.CLogger;
 import org.zstack.utils.path.PathUtil;
 
 import javax.persistence.Tuple;
-import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -1521,27 +1519,14 @@ public class SoftwarePackageManager extends AbstractService {
         SimpleFlowChain.of("upload-software-package-to-vm")
         .then(Flow.of("prepare-software-package-upload-to-vm")
             .handle(trigger -> {
-                try {
-                    context.hostUuid = msg.getHostUuid();
-                    context.targetIp = msg.getTargetIp();
-
-                    URI uri = URI.create(msg.getUrl());
-                    String path = uri.getPath();
-                    String fileName = path != null && !path.isEmpty() && !path.endsWith("/")
-                            ? path.substring(path.lastIndexOf('/') + 1) : uri.getAuthority();
-                    context.hostPath = String.format(
-                            "/var/lib/zstack/software-package/vm-upload/%s/%s",
-                            uploadTaskUuid, fileName);
-                    context.backend = getUploadSoftwarePackageToVmBackend(msg.getType());
-                    context.spec = context.backend.getUploadSpec(uploadTaskUuid);
-                    trigger.next();
-                } catch (OperationFailureException e) {
-                    trigger.fail(e.getErrorCode());
-                } catch (RuntimeException e) {
-                    trigger.fail(err(GENERAL_ERROR,
-                            "failed to prepare software package upload to VM[uuid:%s]: %s",
-                            msg.getVmInstanceUuid(), e.getMessage()));
-                }
+                context.hostUuid = msg.getHostUuid();
+                context.targetIp = msg.getTargetIp();
+                context.hostPath = SoftwarePackageUploadPath.buildHostPath(
+                        msg.getUrl(), uploadTaskUuid);
+                context.backend = getUploadSoftwarePackageToVmBackend(msg.getType());
+                context.spec = context.backend.getUploadSpec(
+                        uploadTaskUuid, msg.getUploadTimestamp());
+                trigger.next();
             })
             .build())
         .then(Flow.of("upload-software-package-to-host")
@@ -1602,6 +1587,14 @@ public class SoftwarePackageManager extends AbstractService {
                 }
                 context.targetIp = msg.getTargetIp();
 
+                ErrorCode prepareError = context.backend.prepareUpload(
+                        msg.getVmInstanceUuid(), context.targetIp, uploadTaskUuid,
+                        msg.getUploadTimestamp());
+                if (prepareError != null) {
+                    trigger.fail(prepareError);
+                    return;
+                }
+
                 UploadFileToVmMsg vmMsg = new UploadFileToVmMsg();
                 vmMsg.setHostUuid(context.hostUuid);
                 vmMsg.setTaskUuid(uploadTaskUuid);
@@ -1611,6 +1604,7 @@ public class SoftwarePackageManager extends AbstractService {
                 vmMsg.setUsername(context.spec.getUsername());
                 vmMsg.setSshPort(context.spec.getSshPort());
                 vmMsg.setPassword(context.spec.getPassword());
+                vmMsg.setTimeout(msg.getTimeout());
                 bus.makeTargetServiceIdByResourceUuid(vmMsg, HostConstant.SERVICE_ID, context.hostUuid);
                 bus.send(vmMsg, new CloudBusCallBack(trigger) {
                     @Override
@@ -1635,7 +1629,8 @@ public class SoftwarePackageManager extends AbstractService {
                 }
 
                 try {
-                    context.backend.install(msg.getVmInstanceUuid(), context.targetIp, uploadTaskUuid, canceled,
+                    context.backend.install(msg.getVmInstanceUuid(), context.targetIp, uploadTaskUuid,
+                            msg.getUploadTimestamp(), canceled,
                             new Completion(trigger) {
                                 @Override
                                 public void success() {
@@ -1655,30 +1650,12 @@ public class SoftwarePackageManager extends AbstractService {
             })
             .build())
         .propagateExceptionTo(completion)
-        .done(() -> {
-            if (msg.needTrack() || msg.isDeferCleanupToLongJob()) {
-                completion.success(context.uploadUrl);
-                return;
-            }
-            new UploadSoftwarePackageToVmCleanup().cleanup(
-                    context.hostUuid, uploadTaskUuid, new NoErrorCompletion(completion) {
-                        @Override
-                        public void done() {
-                            completion.success(context.uploadUrl);
-                        }
-                    });
-        })
+        .done(() -> completion.success(context.uploadUrl))
         .error(errorCode -> {
             logger.warn(String.format(
                     "failed to upload software package task[uuid:%s] to VM[uuid:%s]: %s",
                     uploadTaskUuid, msg.getVmInstanceUuid(), errorCode.getReadableDetails()));
-            new UploadSoftwarePackageToVmCleanup().cleanup(
-                    context.hostUuid, uploadTaskUuid, new NoErrorCompletion(completion) {
-                        @Override
-                        public void done() {
-                            completion.fail(errorCode);
-                        }
-                    });
+            completion.fail(errorCode);
         })
         .start();
     }

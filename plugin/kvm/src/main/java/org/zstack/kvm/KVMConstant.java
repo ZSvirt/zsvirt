@@ -163,7 +163,6 @@ public interface KVMConstant {
     String KVM_HOST_FILE_UPLOAD_PATH = "/host/file/upload";
     String KVM_HOST_FILE_DOWNLOAD_PROGRESS_PATH = "/host/file/progress";
     String KVM_UPLOAD_FILE_TO_VM_PATH = "/host/file/uploadtovm";
-    String KVM_CLEANUP_UPLOAD_FILE_TO_VM_PATH = "/host/file/uploadtovm/cleanup";
 
     String SET_HOST_PHYSICAL_MEMORY_MONITOR = "/host/physical/memory/monitor/start";
 

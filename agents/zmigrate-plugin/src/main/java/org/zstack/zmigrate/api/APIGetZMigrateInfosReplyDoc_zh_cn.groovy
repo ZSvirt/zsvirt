@@ -46,7 +46,7 @@ doc {
 		name "vddkUploaded"
 		desc "ZMigrate管理虚拟机是否已成功安装VDDK"
 		type "boolean"
-		since "1.0.0, zsv_5.1.0"
+		since "1.0.0, zsv_5.2.0"
 	}
 	field {
 		name "success"

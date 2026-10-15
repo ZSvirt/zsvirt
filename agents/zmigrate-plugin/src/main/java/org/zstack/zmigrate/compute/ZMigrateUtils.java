@@ -68,6 +68,27 @@ public class ZMigrateUtils {
         );
     }
 
+    public static List<String> getZMigrateImageUuids() {
+        return Stream.concat(getZMigrateImages().values().stream(), getZMigrateUpgradeImages().values().stream())
+                .map(ImageInventory::getUuid)
+                .filter(Objects::nonNull)
+                .distinct()
+                .collect(Collectors.toList());
+    }
+
+    public static boolean isZMigrateImage(String imageUuid) {
+        return imageUuid != null && getZMigrateImageUuids().contains(imageUuid);
+    }
+
+    public static boolean isZMigrateGatewayImage(String imageUuid) {
+        if (imageUuid == null) {
+            return false;
+        }
+        String softwarePackageUuid = getSoftwarePackageUuid();
+        return imageUuid.equals(getTokenFromTag(ZMIGRATE_GATEWAY_IMAGE,
+                ZMIGRATE_GATEWAY_IMAGE_TOKEN, softwarePackageUuid));
+    }
+
     private static Map<String, ImageInventory> getImagesByTags(PatternedSystemTag[] tags, String[] tokenNames) {
         String softwarePackageUuid = getSoftwarePackageUuid();
         String[] imageUuidsByToken = new String[tags.length];

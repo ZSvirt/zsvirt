@@ -136,6 +136,71 @@ public class SharedBlockKvmBackend extends SharedBlockHypervisorBackend implemen
         super(self);
     }
 
+    @Override
+    void handle(ExtendSharedBlockVolumeOnPrimaryStorageMsg msg, VolumeInventory volume, Completion completion) {
+        List<HostInventory> hosts = primaryStorageFactory.getConnectedHostsForOperation(getSelfInventory(), volume);
+        if (hosts.isEmpty()) {
+            completion.fail(operr("cannot find any connected host to extend logical volume[uuid:%s] on shared block group primary storage[uuid:%s]",
+                    volume.getUuid(), msg.getPrimaryStorageUuid()));
+            return;
+        }
+
+        ExtendLogicalVolumeCmd cmd = new ExtendLogicalVolumeCmd();
+        cmd.destPath = convertInstallPathToAbsolute(volume.getInstallPath());
+        cmd.volumeUuid = volume.getUuid();
+        cmd.requiredSize = msg.getSize();
+        cmd.vgUuid = msg.getPrimaryStorageUuid();
+
+        new Do(hosts.get(0).getUuid(), msg.getPrimaryStorageUuid()).go(
+                EXTEND_LOGICAL_VOLUME_PATH, cmd, ExtendLogicalVolumeRsp.class,
+                new ReturnValueCompletion<ExtendLogicalVolumeRsp>(completion) {
+                    @Override
+                    public void success(ExtendLogicalVolumeRsp rsp) {
+                        completion.success();
+                    }
+
+                    @Override
+                    public void fail(ErrorCode errorCode) {
+                        completion.fail(errorCode);
+                    }
+                });
+    }
+
+    @Override
+    void handle(ShrinkVolumeOnPrimaryStorageMsg msg, ReturnValueCompletion<ShrinkVolumeOnPrimaryStorageReply> completion) {
+        VolumeInventory volume = msg.getVolume();
+        List<HostInventory> hosts = primaryStorageFactory.getConnectedHostsForOperation(getSelfInventory(), volume);
+        if (hosts.isEmpty()) {
+            completion.fail(operr("cannot find any connected host to shrink logical volume[uuid:%s] on shared block group primary storage[uuid:%s]",
+                    volume.getUuid(), msg.getPrimaryStorageUuid()));
+            return;
+        }
+
+        ShrinkSnapshotCmd cmd = new ShrinkSnapshotCmd();
+        cmd.installPath = volume.getInstallPath();
+        cmd.vgUuid = msg.getPrimaryStorageUuid();
+
+        new Do(hosts.get(0).getUuid(), msg.getPrimaryStorageUuid()).go(
+                SHRINK_SNAPSHOT_PATH, cmd, ShrinkSnapshotRsp.class,
+                new ReturnValueCompletion<ShrinkSnapshotRsp>(completion) {
+                    @Override
+                    public void success(ShrinkSnapshotRsp rsp) {
+                        ShrinkResult result = new ShrinkResult();
+                        result.setOldSize(rsp.oldSize);
+                        result.setSize(rsp.size);
+                        result.setDeltaSize(rsp.oldSize - rsp.size);
+                        ShrinkVolumeOnPrimaryStorageReply reply = new ShrinkVolumeOnPrimaryStorageReply();
+                        reply.setShrinkResult(result);
+                        completion.success(reply);
+                    }
+
+                    @Override
+                    public void fail(ErrorCode errorCode) {
+                        completion.fail(errorCode);
+                    }
+                });
+    }
+
     private void connect(String hostUuid, String primaryStorageUuid, final ReturnValueCompletion<SharedBlockKvmCommands.ConnectRsp> completion) {
         thdf.chainSubmit(new ChainTask(completion) {
             @Override

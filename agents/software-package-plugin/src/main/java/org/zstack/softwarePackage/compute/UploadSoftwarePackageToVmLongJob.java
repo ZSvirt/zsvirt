@@ -11,9 +11,11 @@ import org.zstack.core.cloudbus.EventFacade;
 import org.zstack.core.db.DatabaseFacade;
 import org.zstack.core.db.GLock;
 import org.zstack.core.db.Q;
+import org.zstack.header.core.Completion;
 import org.zstack.header.core.NoErrorCompletion;
 import org.zstack.header.core.ReturnValueCompletion;
 import org.zstack.header.errorcode.ErrorCode;
+import org.zstack.header.errorcode.OperationFailureException;
 import org.zstack.header.errorcode.SysErrors;
 import org.zstack.header.exception.CloudRuntimeException;
 import org.zstack.header.host.CancelHostTaskMsg;
@@ -26,9 +28,10 @@ import org.zstack.header.longjob.LongJobState;
 import org.zstack.header.longjob.LongJobVO;
 import org.zstack.header.longjob.LongJobVO_;
 import org.zstack.header.message.APIEvent;
-import org.zstack.header.message.CancelTaskResult;
 import org.zstack.header.message.MessageReply;
 import org.zstack.header.vm.VmInstanceVO;
+import org.zstack.kvm.KvmRunShellMsg;
+import org.zstack.kvm.KvmRunShellReply;
 import org.zstack.softwarePackage.SoftwarePackageConstant;
 import org.zstack.softwarePackage.header.APIUploadSoftwarePackageToVmEvent;
 import org.zstack.softwarePackage.header.APIUploadSoftwarePackageToVmMsg;
@@ -38,12 +41,12 @@ import org.zstack.utils.Utils;
 import org.zstack.utils.gson.JSONObjectUtil;
 import org.zstack.utils.logging.CLogger;
 
-import java.net.URI;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.UUID;
+import java.util.function.Supplier;
 
 import static org.zstack.core.Platform.err;
 import static org.zstack.core.Platform.operr;
@@ -60,7 +63,7 @@ import static org.zstack.softwarePackage.SoftwarePackagePluginErrors.UPLOAD_SOFT
 public class UploadSoftwarePackageToVmLongJob implements LongJob {
     private static final CLogger logger = Utils.getLogger(UploadSoftwarePackageToVmLongJob.class);
     private static final String OWNER_LOCK = "upload-software-package-to-vm-longjob";
-    private static final String OWNER_SESSION_UUID = Platform.getUuid();
+    private static final String OWNER_SESSION_UUID = UUID.randomUUID().toString().replace("-", "");
 
     @Autowired
     private DatabaseFacade dbf;
@@ -73,82 +76,110 @@ public class UploadSoftwarePackageToVmLongJob implements LongJob {
 
     private String auditResourceUuid;
 
+    private UploadSoftwarePackageToVmBackend getUploadSoftwarePackageToVmBackend(String type) {
+        if (softwarePackageManager == null) {
+            softwarePackageManager = Platform.getComponentLoader().getComponent(SoftwarePackageManager.class);
+        }
+        return softwarePackageManager.getUploadSoftwarePackageToVmBackend(type);
+    }
+
+    static class CompletionGuard {
+        private boolean done;
+
+        synchronized boolean complete(Runnable terminalWrite) {
+            if (done) {
+                return false;
+            }
+
+            done = true;
+            terminalWrite.run();
+            return true;
+        }
+
+        synchronized void track(Runnable progressWrite) {
+            if (!done) {
+                progressWrite.run();
+            }
+        }
+    }
+
+    static boolean completeTerminal(CompletionGuard guard, Runnable terminalWrite,
+                                    Runnable markUploadSettled) {
+        return guard.complete(() -> {
+            try {
+                terminalWrite.run();
+            } finally {
+                markUploadSettled.run();
+            }
+        });
+    }
+
+    static String ownerSessionUuid() {
+        return OWNER_SESSION_UUID;
+    }
+
+    static boolean isOwnedByCurrentProcess(String ownerSessionUuid) {
+        return Objects.equals(OWNER_SESSION_UUID, ownerSessionUuid);
+    }
+
     class UploadSoftwarePackageToVmCompletion
             extends ReturnValueCompletion<APIUploadSoftwarePackageToVmEvent> {
         private final APIUploadSoftwarePackageToVmEvent event;
         private final LongJobVO job;
-        private final UploadSoftwarePackageToVmMsg msg;
         private final ReturnValueCompletion<APIEvent> completion;
-        private final AtomicBoolean done = new AtomicBoolean(false);
+        private final UploadSoftwarePackageToVmBackend backend;
+        private final String uploadTaskUuid;
+        private final CompletionGuard guard = new CompletionGuard();
 
         UploadSoftwarePackageToVmCompletion(APIUploadSoftwarePackageToVmEvent event,
                                             LongJobVO job,
-                                            UploadSoftwarePackageToVmMsg msg,
-                                            ReturnValueCompletion<APIEvent> completion) {
+                                            ReturnValueCompletion<APIEvent> completion,
+                                            UploadSoftwarePackageToVmBackend backend,
+                                            String uploadTaskUuid) {
             super(completion);
             this.event = event;
             this.job = job;
-            this.msg = msg;
             this.completion = completion;
+            this.backend = backend;
+            this.uploadTaskUuid = uploadTaskUuid;
         }
 
         @Override
         public void success(APIUploadSoftwarePackageToVmEvent result) {
-            if (!done.compareAndSet(false, true)) {
-                return;
-            }
-
-            if (jobCanceled(job.getUuid())) {
-                ErrorCode error = cancelErr(job.getUuid());
-                setJobError(job.getUuid(), error);
-                cleanupStagedFile(msg, new NoErrorCompletion(completion) {
-                    @Override
-                    public void done() {
-                        completion.fail(error);
-                    }
-                });
-                return;
-            }
-
-            setJobResult(job.getUuid(), result);
-            cleanupStagedFile(msg, new NoErrorCompletion(completion) {
-                @Override
-                public void done() {
-                    completion.success(result);
-                }
-            });
+            completeTerminal(guard, () -> {
+                setJobResult(job.getUuid(), result);
+                completion.success(result);
+            }, this::markUploadSettled);
         }
 
         @Override
         public void fail(ErrorCode error) {
-            if (!done.compareAndSet(false, true)) {
-                return;
-            }
-
-            boolean canceled = jobCanceled(job.getUuid());
-            ErrorCode terminalError = canceled ? cancelErr(job.getUuid(), error) : error;
-            if (!canceled && terminalError.isError(LongJobErrors.INTERRUPTED)) {
-                event.setError(terminalError);
-                setJobResult(job.getUuid(), event);
-                completion.fail(terminalError);
-                return;
-            }
-
-            setJobError(job.getUuid(), terminalError);
-            cleanupStagedFile(msg, new NoErrorCompletion(completion) {
-                @Override
-                public void done() {
+            completeTerminal(guard, () -> {
+                boolean canceled = jobCanceled(job.getUuid());
+                ErrorCode terminalError = canceled ? cancelErr(job.getUuid(), error) : error;
+                if (!canceled && terminalError.isError(LongJobErrors.INTERRUPTED)) {
+                    event.setError(terminalError);
+                    setJobResult(job.getUuid(), event);
                     completion.fail(terminalError);
+                    return;
                 }
-            });
+
+                setJobError(job.getUuid(), terminalError);
+                completion.fail(terminalError);
+            }, this::markUploadSettled);
         }
 
-        public synchronized void track(String uploadUrl) {
-            if (done.get()) {
-                return;
+        private void markUploadSettled() {
+            if (backend != null) {
+                backend.markUploadSettled(uploadTaskUuid);
             }
-            event.setUploadUrl(uploadUrl);
-            setJobResult(job.getUuid(), event);
+        }
+
+        public void track(String uploadUrl) {
+            guard.track(() -> {
+                event.setUploadUrl(uploadUrl);
+                setJobResult(job.getUuid(), event);
+            });
         }
 
         AutoOffEventCallback startTrack() {
@@ -183,13 +214,21 @@ public class UploadSoftwarePackageToVmLongJob implements LongJob {
         APIUploadSoftwarePackageToVmMsg apiMsg = JSONObjectUtil.toObject(
                 job.getJobData(), APIUploadSoftwarePackageToVmMsg.class);
         UploadSoftwarePackageToVmMsg msg = UploadSoftwarePackageToVmMsg.fromApiMessage(apiMsg, job.getUuid());
-        msg.setOwnerSessionUuid(OWNER_SESSION_UUID);
+        msg.setOwnerSessionUuid(ownerSessionUuid());
         msg.setCancellationApiId(job.getApiId());
-        msg.setDeferCleanupToLongJob(true);
         auditResourceUuid = msg.getVmInstanceUuid();
         job.setTargetResourceUuid(msg.getVmInstanceUuid());
 
-        ErrorCode targetError = UploadSoftwarePackageToVmTargetChecker.refreshForUpload(msg);
+        UploadSoftwarePackageToVmBackend backend;
+        ErrorCode targetError;
+        try {
+            backend = getUploadSoftwarePackageToVmBackend(msg.getType());
+            targetError = UploadSoftwarePackageToVmTargetChecker.refreshForUpload(msg, backend);
+        } catch (OperationFailureException e) {
+            setJobError(job.getUuid(), e.getErrorCode());
+            completion.fail(e.getErrorCode());
+            return;
+        }
         if (targetError != null) {
             setJobError(job.getUuid(), targetError);
             completion.fail(targetError);
@@ -208,7 +247,8 @@ public class UploadSoftwarePackageToVmLongJob implements LongJob {
         }
 
         UploadSoftwarePackageToVmCompletion uploadCompletion =
-                new UploadSoftwarePackageToVmCompletion(event, job, msg, completion);
+                new UploadSoftwarePackageToVmCompletion(
+                        event, job, completion, backend, msg.getUploadTaskUuid());
         AutoOffEventCallback trackCallback = msg.needTrack()
                 ? uploadCompletion.startTrack() : null;
         bus.makeLocalServiceId(msg, SoftwarePackageConstant.SERVICE_ID);
@@ -227,15 +267,12 @@ public class UploadSoftwarePackageToVmLongJob implements LongJob {
             }
 
             private void handleSuccess(MessageReply reply) {
-                if (jobCanceled(job.getUuid())) {
-                    if (trackCallback != null) {
-                        evtf.off(trackCallback);
-                    }
-                    uploadCompletion.fail(cancelErr(job.getUuid()));
-                    return;
-                }
-
                 if (msg.needTrack()) {
+                    if (jobCanceled(job.getUuid())) {
+                        evtf.off(trackCallback);
+                        uploadCompletion.fail(cancelErr(job.getUuid()));
+                        return;
+                    }
                     UploadSoftwarePackageToVmReply uploadReply = reply.castReply();
                     uploadCompletion.track(uploadReply.getUploadUrl());
                     return;
@@ -277,44 +314,70 @@ public class UploadSoftwarePackageToVmLongJob implements LongJob {
 
     @Override
     public void resume(LongJobVO job, ReturnValueCompletion<APIEvent> completion) {
+        resumeInternal(job, () -> completion);
+    }
+
+    void resumeInternal(LongJobVO job, Supplier<ReturnValueCompletion<APIEvent>> completionSupplier) {
+        ReturnValueCompletion<APIEvent> completion = completionSupplier.get();
         UploadSoftwarePackageToVmMsg msg = JSONObjectUtil.toObject(
                 job.getJobData(), UploadSoftwarePackageToVmMsg.class);
         if (msg.getCancellationApiId() == null) {
             msg.setCancellationApiId(job.getApiId());
         }
-        msg.setDeferCleanupToLongJob(true);
         auditResourceUuid = msg.getVmInstanceUuid();
         APIUploadSoftwarePackageToVmEvent event = buildEvent(job, msg.getUploadTaskUuid());
-        UploadSoftwarePackageToVmCompletion uploadCompletion =
-                new UploadSoftwarePackageToVmCompletion(event, job, msg, completion);
-        AutoOffEventCallback trackCallback = null;
+        if (!isOwnedByCurrentProcess(msg.getOwnerSessionUuid())) {
+            UploadSoftwarePackageToVmCompletion uploadCompletion =
+                    new UploadSoftwarePackageToVmCompletion(
+                            event, job, completion, null, msg.getUploadTaskUuid());
+            ErrorCode restartError = buildRestartError(job);
+            cleanupTemporaryFiles(msg, new Completion(uploadCompletion) {
+                @Override
+                public void success() {
+                    failUpload(uploadCompletion, restartError);
+                }
 
-        if (!Objects.equals(OWNER_SESSION_UUID, msg.getOwnerSessionUuid())) {
-            uploadCompletion.fail(err(SysErrors.NOT_SUPPORTED,
-                    "cannot resume UploadSoftwarePackageToVm long job[uuid:%s] after management node restart",
-                    job.getUuid()));
+                @Override
+                public void fail(ErrorCode cleanupError) {
+                    logger.warn(String.format(
+                            "failed to clean interrupted UploadSoftwarePackageToVm long job[uuid:%s]: %s",
+                            job.getUuid(), cleanupError.getReadableDetails()));
+                    failUpload(uploadCompletion, restartError);
+                }
+            });
             return;
         }
+
+        UploadSoftwarePackageToVmBackend backend;
+        try {
+            backend = getUploadSoftwarePackageToVmBackend(msg.getType());
+        } catch (OperationFailureException e) {
+            setJobError(job.getUuid(), e.getErrorCode());
+            completion.fail(e.getErrorCode());
+            return;
+        }
+        UploadSoftwarePackageToVmCompletion uploadCompletion =
+                new UploadSoftwarePackageToVmCompletion(
+                        event, job, completion, backend, msg.getUploadTaskUuid());
+        AutoOffEventCallback trackCallback = null;
 
         job.setJobData(JSONObjectUtil.toJsonString(msg));
         dbf.updateAndRefresh(job);
 
         try {
-            UploadSoftwarePackageToVmBackend backend =
-                    softwarePackageManager.getUploadSoftwarePackageToVmBackend(msg.getType());
-            ErrorCode targetError = UploadSoftwarePackageToVmTargetChecker.refreshBeforeCopy(msg, backend);
+            ErrorCode targetError = refreshBeforeCopyForResume(msg, backend);
             if (targetError != null) {
                 uploadCompletion.fail(targetError);
                 return;
             }
 
-            UploadSoftwarePackageToVmSpec spec = backend.getUploadSpec(msg.getUploadTaskUuid());
-            String hostPath = buildHostPath(msg);
+            UploadSoftwarePackageToVmSpec spec = backend.getUploadSpec(
+                    msg.getUploadTaskUuid(), msg.getUploadTimestamp());
+            String hostPath = SoftwarePackageUploadPath.buildHostPath(
+                    msg.getUrl(), msg.getUploadTaskUuid());
 
-            setJobResult(job.getUuid(), event);
-            trackCallback = uploadCompletion.startTrack();
-            new UploadSoftwarePackageToVmTracker().runTrackTask(
-                    msg, hostPath, spec, backend, () -> jobCanceled(job.getUuid()));
+            trackCallback = startResumeTracking(
+                    job, event, msg, hostPath, spec, backend, uploadCompletion);
         } catch (RuntimeException e) {
             if (trackCallback != null) {
                 evtf.off(trackCallback);
@@ -323,6 +386,35 @@ public class UploadSoftwarePackageToVmLongJob implements LongJob {
                     "failed to resume UploadSoftwarePackageToVm long job[uuid:%s]: %s",
                     job.getUuid(), e.getMessage()));
         }
+    }
+
+    protected ErrorCode refreshBeforeCopyForResume(UploadSoftwarePackageToVmMsg msg,
+                                                    UploadSoftwarePackageToVmBackend backend) {
+        return UploadSoftwarePackageToVmTargetChecker.refreshBeforeCopy(msg, backend);
+    }
+
+    protected AutoOffEventCallback startResumeTracking(LongJobVO job,
+                                                        APIUploadSoftwarePackageToVmEvent event,
+                                                        UploadSoftwarePackageToVmMsg msg,
+                                                        String hostPath,
+                                                        UploadSoftwarePackageToVmSpec spec,
+                                                        UploadSoftwarePackageToVmBackend backend,
+                                                        UploadSoftwarePackageToVmCompletion completion) {
+        setJobResult(job.getUuid(), event);
+        AutoOffEventCallback trackCallback = completion.startTrack();
+        new UploadSoftwarePackageToVmTracker().runTrackTask(
+                msg, hostPath, spec, backend, () -> jobCanceled(job.getUuid()));
+        return trackCallback;
+    }
+
+    protected void failUpload(UploadSoftwarePackageToVmCompletion completion, ErrorCode error) {
+        completion.fail(error);
+    }
+
+    protected ErrorCode buildRestartError(LongJobVO job) {
+        return err(SysErrors.NOT_SUPPORTED,
+                "cannot resume UploadSoftwarePackageToVm long job[uuid:%s] after management node restart",
+                job.getUuid());
     }
 
     static APIUploadSoftwarePackageToVmEvent buildEvent(LongJobVO job, String uploadTaskUuid) {
@@ -336,20 +428,22 @@ public class UploadSoftwarePackageToVmLongJob implements LongJob {
         return event;
     }
 
-    private String buildHostPath(UploadSoftwarePackageToVmMsg msg) {
-        URI uri = URI.create(msg.getUrl());
-        String path = uri.getPath();
-        String fileName = path != null && !path.isEmpty() && !path.endsWith("/")
-                ? path.substring(path.lastIndexOf('/') + 1) : uri.getAuthority();
-        return String.format("/var/lib/zstack/software-package/vm-upload/%s/%s",
-                msg.getUploadTaskUuid(), fileName);
-    }
-
     @Override
     public void cancel(LongJobVO job, ReturnValueCompletion<Boolean> completion) {
         UploadSoftwarePackageToVmMsg uploadMsg = JSONObjectUtil.toObject(
                 job.getJobData(), UploadSoftwarePackageToVmMsg.class);
         String hostUuid = uploadMsg.getHostUuid();
+        UploadSoftwarePackageToVmBackend backend;
+        try {
+            backend = getUploadSoftwarePackageToVmBackend(uploadMsg.getType());
+        } catch (OperationFailureException e) {
+            completion.fail(e.getErrorCode());
+            return;
+        }
+        if (!backend.isUploadCancelable(uploadMsg.getUploadTaskUuid())) {
+            completion.success(false);
+            return;
+        }
 
         CancelHostTaskMsg msg = new CancelHostTaskMsg();
         msg.setHostUuid(hostUuid);
@@ -360,16 +454,22 @@ public class UploadSoftwarePackageToVmLongJob implements LongJob {
             @Override
             public void run(MessageReply reply) {
                 if (!reply.isSuccess()) {
+                    if (reply.getError().isError(SysErrors.RESOURCE_NOT_FOUND)) {
+                        completeCancellationCleanup(uploadMsg, completion);
+                        return;
+                    }
                     completion.fail(reply.getError());
                     return;
                 }
 
                 CancelHostTaskReply cancelReply = reply.castReply();
-                if (cancelReply.getCancelResult() == CancelTaskResult.TASK_NOT_FOUND) {
+                boolean uploadCancelable = backend.isUploadCancelable(uploadMsg.getUploadTaskUuid());
+                if (!UploadSoftwarePackageToVmCancellationPolicy.isCompleted(
+                        cancelReply.getCancelResult(), uploadCancelable)) {
                     completion.success(false);
                     return;
                 }
-                completion.success(false);
+                completeCancellationCleanup(uploadMsg, completion);
             }
         });
     }
@@ -378,24 +478,114 @@ public class UploadSoftwarePackageToVmLongJob implements LongJob {
     public void clean(LongJobVO job, NoErrorCompletion completion) {
         UploadSoftwarePackageToVmMsg msg = JSONObjectUtil.toObject(
                 job.getJobData(), UploadSoftwarePackageToVmMsg.class);
-        cancel(job, new ReturnValueCompletion<Boolean>(completion) {
+        UploadSoftwarePackageToVmBackend backend;
+        try {
+            backend = getUploadSoftwarePackageToVmBackend(msg.getType());
+        } catch (OperationFailureException e) {
+            logger.warn(String.format("failed to prepare cleanup for UploadSoftwarePackageToVm long job[uuid:%s]: %s",
+                    job.getUuid(), e.getErrorCode().getReadableDetails()));
+            completion.done();
+            return;
+        }
+
+        backend.runAfterUploadFinished(msg.getUploadTaskUuid(), () -> cleanupTemporaryFiles(msg,
+                new Completion(completion) {
+                    @Override
+                    public void success() {
+                        completion.done();
+                    }
+
+                    @Override
+                    public void fail(ErrorCode errorCode) {
+                        logger.warn(String.format(
+                                "failed to clean UploadSoftwarePackageToVm long job[uuid:%s]: %s",
+                                job.getUuid(), errorCode.getReadableDetails()));
+                        completion.done();
+                    }
+                }));
+    }
+
+    private void completeCancellationCleanup(UploadSoftwarePackageToVmMsg msg,
+                                             ReturnValueCompletion<Boolean> completion) {
+        cleanupTemporaryFiles(msg, new Completion(completion) {
             @Override
-            public void success(Boolean ignored) {
-                cleanupStagedFile(msg, completion);
+            public void success() {
+                completion.success(true);
             }
 
             @Override
             public void fail(ErrorCode errorCode) {
-                logger.warn(String.format("failed to clean UploadSoftwarePackageToVm long job[uuid:%s]: %s",
-                        job.getUuid(), errorCode.getReadableDetails()));
-                cleanupStagedFile(msg, completion);
+                completion.fail(errorCode);
             }
         });
     }
 
-    private void cleanupStagedFile(UploadSoftwarePackageToVmMsg msg, NoErrorCompletion completion) {
-        new UploadSoftwarePackageToVmCleanup().cleanup(
-                msg.getHostUuid(), msg.getUploadTaskUuid(), completion);
+    protected void cleanupTemporaryFiles(UploadSoftwarePackageToVmMsg msg, Completion completion) {
+        ErrorCode vmCleanupError = cleanupVmTemporaryFiles(msg);
+        if (msg.getHostUuid() == null || msg.getHostUuid().trim().isEmpty()) {
+            completion.fail(vmCleanupError == null
+                    ? operr("cannot clean software package upload task[uuid:%s]: host UUID is missing",
+                    msg.getUploadTaskUuid()) : vmCleanupError);
+            return;
+        }
+
+        KvmRunShellMsg cleanupMsg = new KvmRunShellMsg();
+        cleanupMsg.setHostUuid(msg.getHostUuid());
+        try {
+            cleanupMsg.setScript(SoftwarePackageUploadPath.buildHostCleanupCommand(
+                    msg.getUploadTaskUuid()));
+        } catch (IllegalArgumentException e) {
+            completion.fail(operr("cannot clean software package upload task[uuid:%s]: %s",
+                    msg.getUploadTaskUuid(), e.getMessage()));
+            return;
+        }
+        bus.makeTargetServiceIdByResourceUuid(
+                cleanupMsg, HostConstant.SERVICE_ID, msg.getHostUuid());
+        bus.send(cleanupMsg, new CloudBusCallBack(completion) {
+            @Override
+            public void run(MessageReply reply) {
+                if (!reply.isSuccess()) {
+                    if (reply.getError().isError(SysErrors.RESOURCE_NOT_FOUND) && vmCleanupError == null) {
+                        completion.success();
+                    } else {
+                        completion.fail(reply.getError());
+                    }
+                    return;
+                }
+
+                KvmRunShellReply cleanupReply = reply.castReply();
+                if (cleanupReply.getReturnCode() != 0) {
+                    completion.fail(operr(
+                            "failed to clean software package upload task[uuid:%s] on host[uuid:%s], return code: %s, error: %s",
+                            msg.getUploadTaskUuid(), msg.getHostUuid(), cleanupReply.getReturnCode(),
+                            cleanupReply.getStderr()));
+                    return;
+                }
+                if (vmCleanupError != null) {
+                    completion.fail(vmCleanupError);
+                    return;
+                }
+                completion.success();
+            }
+        });
+    }
+
+    private ErrorCode cleanupVmTemporaryFiles(UploadSoftwarePackageToVmMsg msg) {
+        if (msg.getTargetIp() == null || msg.getTargetIp().trim().isEmpty()
+                || msg.getUploadTimestamp() <= 0) {
+            return operr("cannot clean software package upload task[uuid:%s] on VM: target is incomplete",
+                    msg.getUploadTaskUuid());
+        }
+        try {
+            UploadSoftwarePackageToVmBackend backend =
+                    getUploadSoftwarePackageToVmBackend(msg.getType());
+            return backend.cleanupUpload(msg.getTargetIp(), msg.getUploadTimestamp());
+        } catch (OperationFailureException e) {
+            return e.getErrorCode();
+        } catch (RuntimeException e) {
+            return operr("failed to clean software package upload task[uuid:%s] on VM: %s",
+                    msg.getUploadTaskUuid(), e.getMessage());
+        }
     }
 
     @Override

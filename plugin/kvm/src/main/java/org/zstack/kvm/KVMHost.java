@@ -241,7 +241,6 @@ public class KVMHost extends HostBase implements Host {
     private String fileUploadPath;
     private String fileDownloadProgressPath;
     private String uploadFileToVmPath;
-    private String cleanupUploadFileToVmPath;
     private String readVmHostFilePath;
     private String writeVmHostFilePath;
 
@@ -498,10 +497,6 @@ public class KVMHost extends HostBase implements Host {
         ub = UriComponentsBuilder.fromHttpUrl(baseUrl);
         ub.path(KVMConstant.KVM_UPLOAD_FILE_TO_VM_PATH);
         uploadFileToVmPath = ub.build().toString();
-
-        ub = UriComponentsBuilder.fromHttpUrl(baseUrl);
-        ub.path(KVMConstant.KVM_CLEANUP_UPLOAD_FILE_TO_VM_PATH);
-        cleanupUploadFileToVmPath = ub.build().toString();
 
         ub = UriComponentsBuilder.fromHttpUrl(baseUrl);
         ub.path(KVMConstant.READ_VM_HOST_FILE_PATH);
@@ -766,8 +761,6 @@ public class KVMHost extends HostBase implements Host {
             handle((UploadFileToHostMsg) msg);
         } else if (msg instanceof UploadFileToVmMsg) {
             handle((UploadFileToVmMsg) msg);
-        } else if (msg instanceof CleanupUploadFileToVmMsg) {
-            handle((CleanupUploadFileToVmMsg) msg);
         } else if (msg instanceof GetFileDownloadProgressMsg) {
             handle((GetFileDownloadProgressMsg) msg);
         } else if (msg instanceof RestartKvmAgentMsg) {
@@ -7898,7 +7891,7 @@ public class KVMHost extends HostBase implements Host {
         cmd.targetPath = msg.getTargetPath();
         cmd.username = msg.getUsername();
         cmd.sshPort = msg.getSshPort();
-        cmd.timeout = TimeUnit.MILLISECONDS.toSeconds(msg.getTimeout());
+        cmd.timeout = timeoutManager.getTimeoutSeconds();
         cmd.password = msg.getPassword();
 
         new Http<>(uploadFileToVmPath, cmd, UploadFileToVmResponse.class).call(
@@ -7919,27 +7912,4 @@ public class KVMHost extends HostBase implements Host {
                 });
     }
 
-    private void handle(CleanupUploadFileToVmMsg msg) {
-        CleanupUploadFileToVmReply reply = new CleanupUploadFileToVmReply();
-        CleanupUploadFileToVmCmd cmd = new CleanupUploadFileToVmCmd();
-        cmd.taskUuid = msg.getTaskUuid();
-
-        new Http<>(cleanupUploadFileToVmPath, cmd, CleanupUploadFileToVmResponse.class).call(
-                new ReturnValueCompletion<CleanupUploadFileToVmResponse>(msg) {
-                    @Override
-                    public void success(CleanupUploadFileToVmResponse rsp) {
-                        if (!rsp.isSuccess()) {
-                            reply.setError(operr("failed to clean staged VM upload files, because: %s",
-                                    rsp.getError()));
-                        }
-                        bus.reply(msg, reply);
-                    }
-
-                    @Override
-                    public void fail(ErrorCode errorCode) {
-                        reply.setError(errorCode);
-                        bus.reply(msg, reply);
-                    }
-                });
-    }
 }

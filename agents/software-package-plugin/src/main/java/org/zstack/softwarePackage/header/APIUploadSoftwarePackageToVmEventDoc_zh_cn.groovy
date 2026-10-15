@@ -3,32 +3,32 @@ package org.zstack.softwarePackage.header
 import org.zstack.header.errorcode.ErrorCode
 
 doc {
-    title "ÉÏ´«Èí¼ş°üµ½ĞéÄâ»ú·µ»Ø"
+    title "ä¸Šä¼ è½¯ä»¶åŒ…åˆ°è™šæ‹Ÿæœºè¿”å›"
 
     field {
         name "uploadTaskUuid"
-        desc "ÉÏ´«ÈÎÎñUUID"
+        desc "ä¸Šä¼ ä»»åŠ¡UUID"
         type "String"
-        since "1.0.0, zsv_5.1.0"
+        since "5.2.0"
     }
     field {
         name "uploadUrl"
-        desc "uploadĞ­ÒéµÄÖ±´«µØÖ·£¬HTTPºÍHTTPSÉÏ´«Ê±Îª¿Õ"
+        desc "uploadåè®®çš„ç›´ä¼ åœ°å€ï¼ŒHTTPå’ŒHTTPSä¸Šä¼ æ—¶ä¸ºç©º"
         type "String"
-        since "1.0.0, zsv_5.1.0"
+        since "5.2.0"
     }
     field {
         name "success"
-        desc "²Ù×÷³É¹¦Ê±Îªtrue£¬·ñÔòÎªfalse"
+        desc "æ“ä½œæˆåŠŸæ—¶ä¸ºtrueï¼Œå¦åˆ™ä¸ºfalse"
         type "boolean"
-        since "1.0.0, zsv_5.1.0"
+        since "5.2.0"
     }
     ref {
         name "error"
         path "org.zstack.softwarePackage.header.APIUploadSoftwarePackageToVmEvent.error"
-        desc "´íÎóÂë£¬Èô²»Îªnull£¬Ôò±íÊ¾²Ù×÷Ê§°Ü"
+        desc "é”™è¯¯ç ï¼Œè‹¥ä¸ä¸ºnullï¼Œåˆ™è¡¨ç¤ºæ“ä½œå¤±è´¥"
         type "ErrorCode"
-        since "1.0.0, zsv_5.1.0"
+        since "5.2.0"
         clz ErrorCode.class
     }
 }

@@ -52,12 +52,21 @@ public class ShellCommandUtils {
         return true;
     }
 
-    private static void checkPathOrThrowException(String path) {
-        if (path == null || path.isEmpty()) {
-            throw err(INVALID_INSTALL_PATH, "path cannot be null or empty").toException();
+    public static boolean areValidPaths(String... paths) {
+        if (paths == null || paths.length == 0) {
+            return false;
         }
-        if (!isValidPath(path)) {
-            throw err(INVALID_INSTALL_PATH, "invalid path: %s", path).toException();
+        for (String path : paths) {
+            if (!isValidPath(path)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static void requireValidPaths(String... paths) {
+        if (!areValidPaths(paths)) {
+            throw err(INVALID_INSTALL_PATH, "invalid path: %s", String.join(", ", paths)).toException();
         }
     }
 
@@ -72,7 +81,7 @@ public class ShellCommandUtils {
     }
 
     public static boolean pathExists(String path) {
-        checkPathOrThrowException(path);
+        requireValidPaths(path);
         String cmd = String.format("timeout 10 ls '%s'", path);
         ShellResult res = ShellUtils.runAndReturn(cmd, true);
         return res.getRetCode() == 0;
@@ -94,34 +103,35 @@ public class ShellCommandUtils {
     }
 
     public static void createDirectory(String path) {
-        checkPathOrThrowException(path);
+        requireValidPaths(path);
         executeCommand(String.format("mkdir -p '%s'", path));
     }
 
     public static void createPackageInstallDirectory(String path) {
-        checkPathOrThrowException(path);
+        requireValidPaths(path);
         executeCommand(String.format("install -d -m %s '%s'", PACKAGE_INSTALL_DIRECTORY_MODE, path));
     }
 
     public static void deleteRecursive(String path) {
-        checkPathOrThrowException(path);
+        if (path == null || path.isEmpty()) {
+            throw err(INVALID_INSTALL_PATH, "path cannot be null or empty").toException();
+        }
+        requireValidPaths(path);
         executeCommand(String.format("rm -rf '%s'", path));
     }
 
     public static void unzipPackage(String path, String unzipPath) {
-        checkPathOrThrowException(path);
-        checkPathOrThrowException(unzipPath);
+        requireValidPaths(path, unzipPath);
         executeCommand(String.format("tar -xzf %s -C %s ", path, unzipPath));
     }
 
     public static void unzipPackageForInstall(String path, String unzipPath) {
-        checkPathOrThrowException(path);
-        checkPathOrThrowException(unzipPath);
+        requireValidPaths(path, unzipPath);
         executeCommand(String.format("sh -c 'umask %s && tar --no-same-permissions -xzf %s -C %s'", PACKAGE_INSTALL_UMASK, path, unzipPath));
     }
 
     public static DirectoryUsage getDirectoryUsage(String path) {
-        checkPathOrThrowException(path);
+        requireValidPaths(path);
 
         String cmd = String.format("timeout 30 df -B1 '%s' | awk 'END{print $2,$4}'", path);
         ShellResult res = ShellUtils.runAndReturn(cmd, true);

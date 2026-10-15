@@ -148,7 +148,8 @@ class AccountCase extends SubCase {
         // Legacy login keeps the database's existing comparison semantics.
         boolean oldDatabaseMatch = Q.New(AccountVO.class).eq(AccountVO_.uuid, legacy.uuid)
                 .eq(AccountVO_.password, oldInput.toUpperCase()).isExists()
-        assert bean(AccountLoginBackend.class).authenticate(legacy.name, oldInput.toUpperCase()) == oldDatabaseMatch
+        AccountLoginBackend backend = componentLoader.getComponentByBeanName("AccountLoginBackend")
+        assert backend.authenticate(legacy.name, oldInput.toUpperCase()) == oldDatabaseMatch
 
         SessionInventory session = logInByAccount {
             accountName = legacy.name

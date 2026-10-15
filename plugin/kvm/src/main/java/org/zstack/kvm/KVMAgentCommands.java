@@ -5077,13 +5077,6 @@ public class KVMAgentCommands {
     public static class UploadFileToVmResponse extends AgentResponse {
     }
 
-    public static class CleanupUploadFileToVmCmd extends AgentCommand {
-        public String taskUuid;
-    }
-
-    public static class CleanupUploadFileToVmResponse extends AgentResponse {
-    }
-
     public static class TakeVmConsoleScreenshotCmd extends AgentCommand {
         private String vmUuid;
 

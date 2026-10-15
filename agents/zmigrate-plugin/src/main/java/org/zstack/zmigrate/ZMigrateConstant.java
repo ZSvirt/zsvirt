@@ -2,13 +2,12 @@ package org.zstack.zmigrate;
 
 import org.zstack.header.configuration.PythonClass;
 
-import java.util.regex.Pattern;
-
 @PythonClass
 public class ZMigrateConstant {
     public static final String SERVICE_ID = "ZMigratePlugin";
 
     public static final String ZMIGRATE_SOFTWARE_PACKAGE_TYPE = "ZMigrate";
+    // Keep this UUID fixed because it serves as the authorization identifier.
     public static final String ZMIGRATE_MANAGEMENT_VM_UUID = "f176628e5c2c4e31aa16ccac41e7b18e";
 
     public static final int ZMIGRATE_SOFTWARE_IMAGE_COUNT = 3;
@@ -16,34 +15,22 @@ public class ZMigrateConstant {
     public static final String GATEWAY_SSH_USERNAME = "zmuser";
     public static final int GATEWAY_SSH_PORT = 50022;
     public static final int GATEWAY_RESTFUL_API_PORT = 443;
-    public static final String VDDK_VM_PATH = "/root/vddk.tar.gz";
-    public static final String VDDK_CONTAINER_PATH = "/tmp/vddk.tar.gz";
-    public static final String VDDK_GENERATION_MARKER_PATH = "/root/.zstack-zmigrate-vddk-generation";
-    public static final String VDDK_INSTALL_LOCK_PATH = "/root/.zstack-zmigrate-vddk-install.lock";
     public static final long VDDK_INSTALL_TIMEOUT_SECONDS = 600;
-    public static final long VDDK_DISTRIBUTION_TIMEOUT_SECONDS = 7200;
+    public static final String VDDK_BUNDLE_FILE_NAME = "zmigrate-vddk.tar.gz";
+    public static final String VDDK_PACKAGE_DIRECTORY = "/mnt/mgmt/htdocs/integration/debug/files/packages";
 
-    private static final Pattern UUID_PATTERN = Pattern.compile("^[0-9a-f]{32}$");
-
-    public static String vddkUploadPath(String uploadTaskUuid) {
-        validateUploadTaskUuid(uploadTaskUuid);
-        return String.format("/tmp/vddk-%s.tar.gz", uploadTaskUuid);
+    public static String vddkUploadDirectory(long uploadTimestamp) {
+        validateUploadTimestamp(uploadTimestamp);
+        return String.format("/tmp/vddk-%d", uploadTimestamp);
     }
 
-    public static String vddkGenerationPath(String uploadTaskUuid) {
-        validateUploadTaskUuid(uploadTaskUuid);
-        return String.format("/root/vddk-%s.tar.gz", uploadTaskUuid);
+    public static String vddkUploadPath(long uploadTimestamp) {
+        return String.format("%s/%s", vddkUploadDirectory(uploadTimestamp), VDDK_BUNDLE_FILE_NAME);
     }
 
-    public static String vddkDistributionUploadPath(String uploadTaskUuid, String distributionUuid) {
-        validateUploadTaskUuid(uploadTaskUuid);
-        validateUploadTaskUuid(distributionUuid);
-        return String.format("/tmp/vddk-%s-%s.tar.gz", uploadTaskUuid, distributionUuid);
-    }
-
-    private static void validateUploadTaskUuid(String uploadTaskUuid) {
-        if (uploadTaskUuid == null || !UUID_PATTERN.matcher(uploadTaskUuid).matches()) {
-            throw new IllegalArgumentException("invalid ZMigrate VDDK upload task UUID");
+    private static void validateUploadTimestamp(long uploadTimestamp) {
+        if (uploadTimestamp <= 0) {
+            throw new IllegalArgumentException("invalid ZMigrate VDDK upload timestamp");
         }
     }
 
@@ -70,6 +57,7 @@ public class ZMigrateConstant {
     public static final String ZMIGRATE_ZSPHERE_EXTRA_SUPPORT = "ZSphere";
 
     public static final String ZMIGRATE_SERVICE_MANAGEMENT_PATH = "/restful/ServiceManagement";
+    public static final String ZMIGRATE_VMWARE_WEB_SERVICES_PATH = "/restful/VMwareWebServices";
     // add gateway
     public static final String ZMIGRATE_INITIALIZE_NEW_SERVER_ACTION = "InitializeNewServer";
     // test gateway connection
@@ -86,6 +74,8 @@ public class ZMigrateConstant {
     public static final String ZMIGRATE_LIST_CLOUD_ACTION = "ListCloud";
     // get all platform info
     public static final String ZMIGRATE_QUERY_AVAILABLE_SERVER_ACTION = "QueryAvailableServer";
+    // distribute VDDK to a gateway
+    public static final String ZMIGRATE_UPLOAD_VDDK_ACTION = "UploadVDDK";
 
     public static final String ZMIGRATE_ZSPHERE_WEB_SERVICES_PATH = "/restful/ZSphereWebServices";
     // verify platform connection

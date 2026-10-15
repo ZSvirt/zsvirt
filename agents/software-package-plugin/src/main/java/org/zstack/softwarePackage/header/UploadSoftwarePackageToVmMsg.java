@@ -3,6 +3,8 @@ package org.zstack.softwarePackage.header;
 import org.zstack.header.log.NoLogging;
 import org.zstack.header.message.NeedReplyMessage;
 
+import java.util.concurrent.TimeUnit;
+
 public class UploadSoftwarePackageToVmMsg extends NeedReplyMessage {
     private String type;
     @NoLogging(type = NoLogging.Type.Uri)
@@ -11,9 +13,9 @@ public class UploadSoftwarePackageToVmMsg extends NeedReplyMessage {
     private String hostUuid;
     private String targetIp;
     private String uploadTaskUuid;
+    private long uploadTimestamp;
     private String ownerSessionUuid;
     private String cancellationApiId;
-    private boolean deferCleanupToLongJob;
 
     public boolean needTrack() {
         return url != null && url.regionMatches(true, 0, "upload://", 0, "upload://".length());
@@ -67,6 +69,14 @@ public class UploadSoftwarePackageToVmMsg extends NeedReplyMessage {
         this.uploadTaskUuid = uploadTaskUuid;
     }
 
+    public long getUploadTimestamp() {
+        return uploadTimestamp;
+    }
+
+    public void setUploadTimestamp(long uploadTimestamp) {
+        this.uploadTimestamp = uploadTimestamp;
+    }
+
     public String getOwnerSessionUuid() {
         return ownerSessionUuid;
     }
@@ -83,14 +93,6 @@ public class UploadSoftwarePackageToVmMsg extends NeedReplyMessage {
         this.cancellationApiId = cancellationApiId;
     }
 
-    public boolean isDeferCleanupToLongJob() {
-        return deferCleanupToLongJob;
-    }
-
-    public void setDeferCleanupToLongJob(boolean deferCleanupToLongJob) {
-        this.deferCleanupToLongJob = deferCleanupToLongJob;
-    }
-
     public static UploadSoftwarePackageToVmMsg fromApiMessage(
             APIUploadSoftwarePackageToVmMsg apiMessage, String uploadTaskUuid) {
         if (apiMessage == null) {
@@ -104,6 +106,10 @@ public class UploadSoftwarePackageToVmMsg extends NeedReplyMessage {
         msg.setHostUuid(apiMessage.getHostUuid());
         msg.setTargetIp(apiMessage.getTargetIp());
         msg.setUploadTaskUuid(uploadTaskUuid);
+        msg.setUploadTimestamp(System.currentTimeMillis());
+        msg.setTimeout(apiMessage.getTimeout() > 0
+                ? apiMessage.getTimeout()
+                : TimeUnit.HOURS.toMillis(6));
         return msg;
     }
 }

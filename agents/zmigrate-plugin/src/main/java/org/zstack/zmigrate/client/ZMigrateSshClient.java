@@ -16,13 +16,13 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.PosixFilePermissions;
 import java.util.Arrays;
 import java.util.Base64;
-import java.util.UUID;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -231,104 +231,8 @@ public class ZMigrateSshClient {
         }
     }
 
-    public ShellResult distributeVddk(String managementIp, String targetIp, String uploadTaskUuid,
-                                      long timeoutSeconds) {
-        if (!NetworkUtils.isValidIPAddress(targetIp) && !NetworkUtils.isHostname(targetIp)) {
-            return shellError("invalid VDDK target host");
-        }
-        String uploadPath;
-        String generationPath;
-        try {
-            String distributionUuid = UUID.randomUUID().toString().replace("-", "");
-            uploadPath = vddkDistributionUploadPath(uploadTaskUuid, distributionUuid);
-            generationPath = vddkGenerationPath(uploadTaskUuid);
-        } catch (IllegalArgumentException e) {
-            return shellError(e.getMessage());
-        }
-        if (managementIp.equals(targetIp)) {
-            return runWithSudoPassword(
-                    targetIp, buildVddkInstallCommand(generationPath, uploadTaskUuid),
-                    VDDK_INSTALL_TIMEOUT_SECONDS);
-        }
-
-        byte[] password = Base64.getDecoder().decode(ZMigrateGlobalConfig.GATEWAY_SSH_PASSWORD.value());
-        try {
-            String command = buildVddkDistributionCommand(
-                    targetIp, generationPath, uploadPath, uploadTaskUuid);
-            return redactPassword(runWithStdin(managementIp, command, password, timeoutSeconds), password);
-        } finally {
-            Arrays.fill(password, (byte) 0);
-        }
-    }
-
-    private static String buildVddkInstallCommand(String sourcePath, String uploadTaskUuid) {
-        return String.format("sudo -S -p '' sh -c %s",
-                shellQuote(buildVddkLockedInstallScript(sourcePath, uploadTaskUuid)));
-    }
-
-    static String buildVddkLockedInstallScript(String sourcePath, String uploadTaskUuid) {
-        return String.format("flock -n %s sh -c %s",
-                shellQuote(VDDK_INSTALL_LOCK_PATH),
-                shellQuote(buildVddkInstallScript(sourcePath, uploadTaskUuid)));
-    }
-
-    static String buildVddkInstallScript(String sourcePath, String uploadTaskUuid) {
-        vddkGenerationPath(uploadTaskUuid);
-        return String.format(
-                "marker=%s; " +
-                        "if test -f \"$marker\" && test ! -L \"$marker\" && grep -qx %s \"$marker\"; " +
-                        "then :; else " +
-                        "test -f %s && test ! -L %s && " +
-                        "docker cp %s %s && docker restart treker >/dev/null && " +
-                        "sleep 90 && docker restart treker >/dev/null && " +
-                        "docker inspect -f '{{.State.Running}}' treker | grep -qx true && " +
-                        "marker_tmp=$(mktemp \"${marker}.XXXXXX\") && " +
-                        "printf '%%s\\n' %s > \"$marker_tmp\" && chmod 600 \"$marker_tmp\" && " +
-                        "mv -T -- \"$marker_tmp\" \"$marker\"; fi",
-                shellQuote(VDDK_GENERATION_MARKER_PATH), shellQuote(uploadTaskUuid),
-                shellQuote(sourcePath), shellQuote(sourcePath), shellQuote(sourcePath),
-                shellQuote("treker:" + VDDK_CONTAINER_PATH), shellQuote(uploadTaskUuid));
-    }
-
-    private static String buildVddkDistributionCommand(String targetIp, String generationPath,
-                                                        String uploadPath, String uploadTaskUuid) {
-        String targetInstallCommand = String.format(
-                "sudo -S -p '' sh -c %s",
-                shellQuote(String.format("rc=0; %s || rc=$?; rm -f -- %s; exit $rc",
-                        buildVddkLockedInstallScript(uploadPath, uploadTaskUuid),
-                        shellQuote(uploadPath))));
-        return String.format(
-                "set -eu\n" +
-                        "umask 077\n" +
-                        "password_file=$(mktemp /dev/shm/zmigrate-vddk-password.XXXXXX)\n" +
-                        "askpass_file=$(mktemp /dev/shm/zmigrate-vddk-askpass.XXXXXX)\n" +
-                        "source_stage=$(mktemp /tmp/zmigrate-vddk.XXXXXX)\n" +
-                        "cleanup() { rm -f \"$password_file\" \"$askpass_file\" \"$source_stage\"; }\n" +
-                        "trap cleanup EXIT\n" +
-                        "trap 'exit 1' HUP INT TERM\n" +
-                        "cat > \"$password_file\"\n" +
-                        "chmod 600 \"$password_file\"\n" +
-                        "printf '#!/bin/sh\\ncat %%s\\n' \"$password_file\" > \"$askpass_file\"\n" +
-                        "chmod 700 \"$askpass_file\"\n" +
-                        "source_uid=$(id -u)\n" +
-                        "source_gid=$(id -g)\n" +
-                        "cat \"$password_file\" | sudo -S -p '' cp %s \"$source_stage\"\n" +
-                        "cat \"$password_file\" | sudo -S -p '' chown \"$source_uid:$source_gid\" \"$source_stage\"\n" +
-                        "chmod 600 \"$source_stage\"\n" +
-                        "timeout %d env DISPLAY=:0 SSH_ASKPASS_REQUIRE=force SSH_ASKPASS=\"$askpass_file\" " +
-                        "setsid -w scp -P %d -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null " +
-                        "\"$source_stage\" %s@%s:%s\n" +
-                        "cat \"$password_file\" | timeout %d env DISPLAY=:0 SSH_ASKPASS_REQUIRE=force " +
-                        "SSH_ASKPASS=\"$askpass_file\" setsid -w ssh -p %d " +
-                        "-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null %s@%s %s",
-                shellQuote(generationPath), VDDK_DISTRIBUTION_TIMEOUT_SECONDS,
-                GATEWAY_SSH_PORT, GATEWAY_SSH_USERNAME, targetIp, uploadPath,
-                VDDK_INSTALL_TIMEOUT_SECONDS, GATEWAY_SSH_PORT,
-                GATEWAY_SSH_USERNAME, targetIp, shellQuote(targetInstallCommand));
-    }
-
     private ShellResult redactPassword(ShellResult result, byte[] password) {
-        String secret = new String(password, java.nio.charset.StandardCharsets.UTF_8);
+        String secret = new String(password, StandardCharsets.UTF_8);
         if (!secret.isEmpty()) {
             result.setStdout(redact(result.getStdout(), secret));
             result.setStderr(redact(result.getStderr(), secret));

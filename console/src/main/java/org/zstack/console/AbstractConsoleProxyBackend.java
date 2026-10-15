@@ -327,6 +327,11 @@ public abstract class AbstractConsoleProxyBackend implements ConsoleBackend, Com
     public void deactivateConsoleProxy(final VmInstanceInventory vm, final Completion completion) {
         final ConsoleProxyVO vo = Q.New(ConsoleProxyVO.class).eq(ConsoleProxyVO_.vmInstanceUuid, vm.getUuid())
                 .eq(ConsoleProxyVO_.status, ConsoleProxyStatus.Active).find();
+        if (vo == null) {
+            completion.success();
+            return;
+        }
+
         ConsoleProxy proxy = getConsoleProxy(vm, vo);
         proxy.deleteProxy(vm, new Completion(completion) {
             @Override

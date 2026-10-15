@@ -19,6 +19,7 @@ import org.zstack.header.errorcode.OperationFailureException;
 import org.zstack.header.image.ImageConstant.ImageMediaType;
 import org.zstack.header.image.*;
 import org.zstack.header.message.APIMessage;
+import org.zstack.header.message.APIResourceScope;
 import org.zstack.header.network.l2.*;
 import org.zstack.header.network.l3.*;
 import org.zstack.header.cluster.ClusterVO;
@@ -42,6 +43,8 @@ import org.zstack.header.vm.devices.VmInstanceResourceMetadataGroupVO;
 import org.zstack.header.vm.devices.VmInstanceResourceMetadataGroupVO_;
 import org.zstack.header.vm.metadata.VmMetadataPathBuildExtensionPoint;
 import org.zstack.header.volume.*;
+import org.zstack.identity.Account;
+import org.zstack.identity.rbac.AccessibleResourceChecker;
 import org.zstack.network.l2.L2NetworkHostUtils;
 import org.zstack.resourceconfig.ResourceConfigFacade;
 import org.zstack.tag.SystemTagUtils;
@@ -60,7 +63,9 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.zstack.core.Platform.argerr;
+import static org.zstack.core.Platform.err;
 import static org.zstack.core.Platform.operr;
+import static org.zstack.header.errorcode.SysErrors.RESOURCE_NOT_ACCESSIBLE;
 import static org.zstack.utils.CollectionDSL.*;
 import static org.zstack.utils.CollectionUtils.findOneOrNull;
 import static org.zstack.utils.CollectionUtils.isEmpty;
@@ -1276,8 +1281,22 @@ public class VmInstanceApiInterceptor implements ApiMessageInterceptor {
     }
 
     private void validate(APICreateVmInstanceFromVolumeSnapshotGroupMsg msg) {
-        String vmInstanceUuid = Q.New(VolumeSnapshotGroupVO.class).select(VolumeSnapshotGroupVO_.vmInstanceUuid)
-                .eq(VolumeSnapshotGroupVO_.uuid, msg.getVolumeSnapshotGroupUuid()).findValue();
+        VolumeSnapshotGroupVO group = Q.New(VolumeSnapshotGroupVO.class)
+                .eq(VolumeSnapshotGroupVO_.uuid, msg.getVolumeSnapshotGroupUuid()).find();
+        String vmInstanceUuid = group == null ? null : group.getVmInstanceUuid();
+        String accountUuid = msg.getSession().getAccountUuid();
+        if (!Account.isAdminPermission(msg.getSession())
+                && !AccessibleResourceChecker.forAccount(accountUuid)
+                        .withResourceType(VolumeSnapshotGroupVO.class)
+                        .isAccessible(msg.getVolumeSnapshotGroupUuid())
+                && (!isCompleteOrdinarySnapshotGroup(group) || !AccessibleResourceChecker.forAccount(accountUuid)
+                        .withResourceType(VmInstanceVO.class)
+                        .withScope(APIResourceScope.MustOwner)
+                        .isAccessible(vmInstanceUuid))) {
+            throw new ApiMessageInterceptionException(err(RESOURCE_NOT_ACCESSIBLE,
+                    "account[uuid:%s] cannot create a VM from volume snapshot group[uuid:%s] of VM[uuid:%s]",
+                    accountUuid, msg.getVolumeSnapshotGroupUuid(), vmInstanceUuid));
+        }
         if (vmInstanceUuid == null) {
             return;
         }
@@ -1286,6 +1305,19 @@ public class VmInstanceApiInterceptor implements ApiMessageInterceptor {
                 .eq(VmInstanceVO_.uuid, vmInstanceUuid).findValue();
 
         msg.setPlatform(platform);
+    }
+    private boolean isCompleteOrdinarySnapshotGroup(VolumeSnapshotGroupVO group) {
+        if (group == null || group.getSnapshotCount() == null || group.getVolumeSnapshotRefs().isEmpty()
+                || group.getVolumeSnapshotRefs().size() != group.getSnapshotCount()
+                || group.getVolumeSnapshotRefs().stream().noneMatch(ref -> VolumeType.Root.toString().equals(ref.getVolumeType()))
+                || group.getVolumeSnapshotRefs().stream().anyMatch(ref -> ref.isSnapshotDeleted()
+                        || !(VolumeType.Root.toString().equals(ref.getVolumeType())
+                        || VolumeType.Data.toString().equals(ref.getVolumeType())))) {
+            return false;
+        }
+        List<String> snapshotUuids = new ArrayList<>();
+        group.getVolumeSnapshotRefs().forEach(ref -> snapshotUuids.add(ref.getVolumeSnapshotUuid()));
+        return Q.New(VolumeSnapshotVO.class).in(VolumeSnapshotVO_.uuid, snapshotUuids).count() == group.getSnapshotCount().longValue();
     }
 
     private void validate(APIDestroyVmInstanceMsg msg) {

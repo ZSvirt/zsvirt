@@ -76,7 +76,8 @@ public class APICreateVmInstanceFromVolumeSnapshotGroupMsg extends APICreateMess
      * @desc root volume. Optional when vm is created from RootVolumeTemplate,
      * mandatory when vm is created from ISO. See 'mediaType' of :ref:`ImageInventory`
      */
-    @APIParam(resourceType = VolumeSnapshotGroupVO.class)
+    // VmInstanceApiInterceptor validates direct group access or VM ownership for a complete ordinary group.
+    @APIParam(resourceType = VolumeSnapshotGroupVO.class, scope = APIParam.SCOPE_ALLOWED_ALL)
     private String volumeSnapshotGroupUuid;
 
     @APIParam(required = false, resourceType = ZoneVO.class)

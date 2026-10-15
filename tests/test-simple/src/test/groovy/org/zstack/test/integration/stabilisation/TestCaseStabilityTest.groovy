@@ -1,5 +1,6 @@
 package org.zstack.test.integration.stabilisation
 
+import org.zstack.test.integration.identity.IdentityTest
 import org.zstack.testlib.AbstractTestCaseStabilityTest
 import org.zstack.testlib.SpringSpec
 import org.zstack.testlib.Test
@@ -18,6 +19,12 @@ class TestCaseStabilityTest extends AbstractTestCaseStabilityTest {
         // The suite builds Spring before running the stability subcases.
         springSpec.include("LogConfiguration.xml")
         springSpec.include("Log4j2Configuration.xml")
+        // AccountCase needs its authentication extensions before the shared context starts.
+        if (System.getProperty("cases", "").split(",").any {
+            it.trim() == "org.zstack.test.integration.identity.account.AccountCase"
+        }) {
+            springSpec.xmls.addAll(IdentityTest.springSpec.xmls)
+        }
     }
 
     @Override

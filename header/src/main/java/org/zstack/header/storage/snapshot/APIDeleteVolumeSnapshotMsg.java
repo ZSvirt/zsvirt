@@ -44,7 +44,7 @@ import static org.zstack.utils.CollectionDSL.list;
         method = HttpMethod.DELETE,
         responseClass = APIDeleteVolumeSnapshotEvent.class
 )
-@DefaultTimeout(timeunit = TimeUnit.HOURS, value = 6)
+@DefaultTimeout(timeunit = TimeUnit.HOURS, value = 12)
 @MetadataImpact(value = MetadataImpact.Impact.STORAGE, resolver = "SnapshotUuidToVmUuidResolver", field = "uuid", updateOnFailure = true)
 public class APIDeleteVolumeSnapshotMsg extends APIDeleteMessage implements DeleteVolumeSnapshotMessage {
     /**

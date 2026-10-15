@@ -19,7 +19,7 @@ import java.util.concurrent.TimeUnit;
         method = HttpMethod.DELETE,
         responseClass = APIDeleteVolumeSnapshotGroupEvent.class
 )
-@DefaultTimeout(timeunit = TimeUnit.HOURS, value = 3)
+@DefaultTimeout(timeunit = TimeUnit.HOURS, value = 12)
 @MetadataImpact(value = MetadataImpact.Impact.STORAGE, resolver = "SnapshotGroupUuidToVmUuidResolver", field = "uuid", updateOnFailure = true)
 public class APIDeleteVolumeSnapshotGroupMsg extends APIDeleteMessage implements VolumeSnapshotGroupMessage {
     @APIParam(resourceType = VolumeSnapshotGroupVO.class, successIfResourceNotExisting = true,

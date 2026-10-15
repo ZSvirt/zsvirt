@@ -41,12 +41,6 @@ public class CbtBackupApiInterceptor implements ApiMessageInterceptor, GlobalApi
     public APIMessage intercept(APIMessage msg) throws ApiMessageInterceptionException {
         if (msg instanceof APIEnableCbtTaskMsg) {
             validate((APIEnableCbtTaskMsg) msg);
-        } else if (msg instanceof APIDisableCbtTaskMsg) {
-            validate((APIDisableCbtTaskMsg) msg);
-        } else if (msg instanceof APIExportNbdVolumesMsg) {
-            validate((APIExportNbdVolumesMsg) msg);
-        } else if (msg instanceof APIUnexportNbdVolumesMsg) {
-            validate((APIUnexportNbdVolumesMsg) msg);
         }
 
         setServiceId(msg);
@@ -65,24 +59,6 @@ public class CbtBackupApiInterceptor implements ApiMessageInterceptor, GlobalApi
         final String vmUuid = getVmUuidByCbtTaskUuid(msg.getUuid());
         validateVmState(vmUuid, VmInstanceState.Running, "enable cbt task");
 
-    }
-
-    private void validate(APIDisableCbtTaskMsg msg) {
-        CbtTaskVO taskVO = dbf.findByUuid(msg.getUuid(), CbtTaskVO.class);
-        if (taskVO == null) {
-            throw new ApiMessageInterceptionException(operr("Cbt task not found[uuid: %s]", msg.getUuid()));
-        }
-
-        String vmUuid = getVmUuidByCbtTaskUuid(msg.getUuid());
-        validateVmState(vmUuid, VmInstanceState.Running, "disable cbt task");
-    }
-
-    private void validate(APIExportNbdVolumesMsg msg) {
-        validateVmState(msg.getVmInstanceUuid(), VmInstanceState.Stopped, "export NBD volumes");
-    }
-
-    private void validate(APIUnexportNbdVolumesMsg msg) {
-        validateVmState(msg.getVmInstanceUuid(), VmInstanceState.Stopped, "unexport NBD volumes");
     }
 
     private String getVmUuidByCbtTaskUuid(String taskUuid) {

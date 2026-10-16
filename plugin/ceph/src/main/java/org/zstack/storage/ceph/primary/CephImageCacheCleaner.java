@@ -34,7 +34,7 @@ public class CephImageCacheCleaner extends ImageCacheCleaner implements Manageme
     @Transactional
     @Override
     protected List<ImageCacheShadowVO> createShadowImageCacheVOsForNewDeletedAndOld(String psUuid, ImageCacheCleanParam param) {
-        List<Long> staleImageCacheIds = getStaleImageCacheIds(psUuid, false);
+        List<Long> staleImageCacheIds = getStaleImageCacheIds(psUuid, param.includeReadyImage);
         if (staleImageCacheIds == null || staleImageCacheIds.isEmpty()) {
             return null;
         }

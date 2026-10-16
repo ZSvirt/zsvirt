@@ -25,8 +25,11 @@ public class RegisterVmInstanceFromMetadataAction extends AbstractAction {
         }
     }
 
-    @Param(required = true, maxLength = 2048, nonempty = true, nullElements = false, emptyString = true, noTrim = false)
+    @Param(required = false, maxLength = 2048, nonempty = true, nullElements = false, emptyString = true, noTrim = false)
     public java.lang.String metadataPath;
+
+    @Param(required = false, nonempty = true, nullElements = false, emptyString = true, noTrim = false)
+    public java.lang.String metadata;
 
     @Param(required = true, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
     public java.lang.String primaryStorageUuid;

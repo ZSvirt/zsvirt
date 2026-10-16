@@ -437,6 +437,11 @@ public class MevocoVmManagerImpl implements VmInstanceExtensionManager, BeforeVm
 
                     @Override
                     public void run(FlowTrigger trigger, Map data) {
+                        if (msg.isInlineMetadata()) {
+                            metadataJson = msg.getMetadata();
+                            trigger.next();
+                            return;
+                        }
                         GetVmInstanceMetadataFromPrimaryStorageMsg gmsg = new GetVmInstanceMetadataFromPrimaryStorageMsg();
                         gmsg.setPrimaryStorageUuid(primaryStorageUuid);
                         gmsg.setHostUuid(msg.getHostUuid());
@@ -558,6 +563,14 @@ public class MevocoVmManagerImpl implements VmInstanceExtensionManager, BeforeVm
                         psType = Q.New(PrimaryStorageVO.class).select(PrimaryStorageVO_.type)
                                 .eq(PrimaryStorageVO_.uuid, primaryStorageUuid).findValue();
 
+                        metadataToCurrentPathMap = Collections.emptyMap();
+                        replacement = null;
+                        if (msg.isInlineMetadata()) {
+                            // Inline metadata describes existing bits at their final paths.
+                            trigger.next();
+                            return;
+                        }
+
                         List<String> allOldPaths = new ArrayList<>();
                         if (dto.getVolumes() != null) {
                             for (VolumeResourceMetadata volMeta : dto.getVolumes()) {
@@ -594,8 +607,6 @@ public class MevocoVmManagerImpl implements VmInstanceExtensionManager, BeforeVm
                             }
                         }
 
-                        metadataToCurrentPathMap = Collections.emptyMap();
-                        replacement = null;
                         VmMetadataPathReplacementExtensionPoint ext = pluginRgty.getExtensionFromMap(psType, VmMetadataPathReplacementExtensionPoint.class);
                         if (ext != null) {
                             replacement = ext.calculatePathReplacements(primaryStorageUuid, allOldPaths);
@@ -757,7 +768,7 @@ public class MevocoVmManagerImpl implements VmInstanceExtensionManager, BeforeVm
 
                     @Override
                     public void run(FlowTrigger trigger, Map data) {
-                        if (!regeneratedVmUuid) {
+                        if (msg.isInlineMetadata() || !regeneratedVmUuid) {
                             trigger.next();
                             return;
                         }
@@ -796,7 +807,7 @@ public class MevocoVmManagerImpl implements VmInstanceExtensionManager, BeforeVm
                     String __name__ = "refresh-registered-vm-metadata";
                     @Override
                     public void run(FlowTrigger trigger, Map data) {
-                        if (!VmGlobalConfig.VM_METADATA_ENABLED.value(Boolean.class)) {
+                        if (msg.isInlineMetadata() || !VmGlobalConfig.VM_METADATA_ENABLED.value(Boolean.class)) {
                             trigger.next();
                             return;
                         }

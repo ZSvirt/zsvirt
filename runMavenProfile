@@ -133,9 +133,11 @@ docpremium() {
 }
 
 check() {
-  cd tests/checker
+  cd tests/checker || return 1
   $MVNTest -Dtest=BasicCheckTestSuite
+  local ret=$?
   cd ../../
+  return $ret
 }
 
 md() {

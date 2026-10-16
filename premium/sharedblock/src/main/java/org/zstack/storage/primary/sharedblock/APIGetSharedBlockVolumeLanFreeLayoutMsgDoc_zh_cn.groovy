@@ -28,7 +28,7 @@ doc {
 					location "body"
 					type "List"
 					optional false
-					since "5.2.0"
+					since "1.0.1, zsv_5.2.0"
 				}
 				column {
 					name "systemTags"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "5.2.0"
+					since "1.0.1, zsv_5.2.0"
 				}
 				column {
 					name "userTags"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "5.2.0"
+					since "1.0.1, zsv_5.2.0"
 				}
 			}
 		}

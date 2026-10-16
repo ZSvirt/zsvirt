@@ -84,7 +84,7 @@ doc {
 		path "org.zstack.sns.platform.feishu.SNSFeiShuEndpointInventory.platform"
 		desc "null"
 		type "SNSApplicationPlatformInventory"
-		since "zsv_4.2.0s"
+		since "zsv_4.2.0"
 		clz SNSApplicationPlatformInventory.class
 	}
 }

@@ -22,6 +22,6 @@ doc {
 		name "endpointUuid"
 		desc "企业微信Endpoint UUID"
 		type "String"
-		since "zsv_4.2.0s"
+		since "zsv_4.2.0"
 	}
 }

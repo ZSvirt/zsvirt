@@ -9,14 +9,14 @@ doc {
         name "success"
         desc ""
         type "boolean"
-        since "0.6"
+        since "zsv_0.6"
     }
     ref {
         name "error"
         path "org.zstack.storage.primary.sharedblock.APIGetSharedBlockVolumeLanFreeLayoutReply.error"
         desc "错误码；成功时为空"
         type "ErrorCode"
-        since "5.2.0"
+        since "1.0.1, zsv_5.2.0"
         clz ErrorCode.class
     }
     ref {
@@ -24,7 +24,7 @@ doc {
         path "org.zstack.storage.primary.sharedblock.APIGetSharedBlockVolumeLanFreeLayoutReply.luns"
         desc "各 Volume range 引用的完整裸 LUN，按 WWID 去重"
         type "List"
-        since "5.2.0"
+        since "1.0.1, zsv_5.2.0"
         clz SharedBlockLunDescriptor.class
     }
     ref {
@@ -32,7 +32,7 @@ doc {
         path "org.zstack.storage.primary.sharedblock.APIGetSharedBlockVolumeLanFreeLayoutReply.layouts"
         desc "按 volumeUuids 请求顺序返回；每项表示单个普通 Volume LV，不包含快照链"
         type "List"
-        since "5.2.0"
+        since "1.0.1, zsv_5.2.0"
         clz SharedBlockVolumeLanFreeLayout.class
     }
 }

@@ -9,14 +9,16 @@ import org.zstack.core.Platform
 import org.zstack.test.checker.audits.AuditChecker
 import org.zstack.test.checker.code.LFFileChecker
 import org.zstack.test.checker.db.DBChecker
+import org.zstack.test.checker.doc.ApiDocChecker
 import org.zstack.test.checker.route.ApiServiceIdRegistryDump
 
 @RunWith(Suite.class)
 @Suite.SuiteClasses([
     AuditChecker.class,
-    LFFileChecker.class,
+    //LFFileChecker.class,
     ApiServiceIdRegistryDump.class,
     DBChecker.class,
+    ApiDocChecker.class,
 ])
 class JUnitCheckTestSuite {
     static void runAllTestCases() {

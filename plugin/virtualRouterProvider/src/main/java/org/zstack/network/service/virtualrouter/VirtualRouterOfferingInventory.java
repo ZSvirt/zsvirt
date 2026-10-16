@@ -26,7 +26,7 @@ import java.util.List;
         @ExpandedQuery(expandedField = "image", inventoryClass = ImageInventory.class,
                 foreignKey = "imageUuid", expandedInventoryKey = "uuid"),
 		@ExpandedQuery(target = ApplianceVmInventory.class, expandedField = "virtualRouterOffering", inventoryClass = VirtualRouterOfferingInventory.class,
-				foreignKey = "uuid", expandedInventoryKey = "instanceOfferingUuid")
+				foreignKey = "instanceOfferingUuid", expandedInventoryKey = "uuid")
 })
 public class VirtualRouterOfferingInventory extends InstanceOfferingInventory {
     private String managementNetworkUuid;

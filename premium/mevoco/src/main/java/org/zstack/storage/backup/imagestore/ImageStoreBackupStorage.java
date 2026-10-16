@@ -2752,7 +2752,9 @@ public class ImageStoreBackupStorage extends BackupStorageBase {
     }
 
     private void uploadToRemote(UploadImageToRemoteTargetCmd cmd, Completion completion) {
-        restf.asyncJsonPost(buildUrl(ImageStoreBackupStorageConstant.UPLOAD_IMAGE_TO_REMOTE_PATH), cmd, new JsonAsyncRESTCallback<UploadImageToRemoteTargetRsp>(completion) {
+        restf.asyncJsonPost(buildUrl(ImageStoreBackupStorageConstant.UPLOAD_IMAGE_TO_REMOTE_PATH), cmd,
+                Collections.singletonMap(ImageStoreBackupStorageConstant.IMAGE_STORE_UUID_HEADER, self.getUuid()),
+                new JsonAsyncRESTCallback<UploadImageToRemoteTargetRsp>(completion) {
             @Override
             public void fail(ErrorCode err) {
                 completion.fail(err);

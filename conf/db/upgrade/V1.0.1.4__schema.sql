@@ -113,12 +113,42 @@ CREATE TABLE IF NOT EXISTS ZnsInfoVO (
     vendorVersion varchar(255),
     accessKeyId varchar(64),
     accessKeySecret text,
+    connectionGeneration bigint NOT NULL DEFAULT 1,
     status varchar(32),
     lastSyncDate timestamp NULL,
     createDate timestamp NULL,
     lastOpDate timestamp NULL,
     PRIMARY KEY (uuid),
     UNIQUE KEY `ukZnsInfoVOComputerManagerUuid` (computerManagerUuid)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS ZnsCapabilitySnapshotVO (
+    znsUuid char(32) NOT NULL,
+    valid bit NOT NULL DEFAULT 0,
+    productVersion varchar(64) DEFAULT NULL,
+    connectionGeneration bigint NOT NULL DEFAULT 0,
+    probeEpoch bigint NOT NULL DEFAULT 0,
+    capabilitiesJson text DEFAULT NULL,
+    lastAttemptDate timestamp NULL DEFAULT NULL,
+    lastSuccessDate timestamp NULL DEFAULT NULL,
+    lastErrorCode varchar(64) DEFAULT NULL,
+    PRIMARY KEY (znsUuid),
+    CONSTRAINT fkZnsCapabilitySnapshotVOZnsInfoVO FOREIGN KEY (znsUuid) REFERENCES ZnsInfoVO (uuid) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE IF NOT EXISTS ZnsWizardSyncVO (
+    uuid char(32) NOT NULL,
+    znsUuid char(32) NOT NULL,
+    reason varchar(64) NOT NULL,
+    status varchar(32) NOT NULL,
+    leaseOwner char(32) DEFAULT NULL,
+    leaseUntil timestamp NULL DEFAULT NULL,
+    acceptedDate timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    completedDate timestamp NULL DEFAULT NULL,
+    lastErrorCode varchar(64) DEFAULT NULL,
+    PRIMARY KEY (uuid),
+    UNIQUE KEY `ukZnsWizardSyncVOZnsReason` (znsUuid, reason),
+    CONSTRAINT fkZnsWizardSyncVOZnsInfoVO FOREIGN KEY (znsUuid) REFERENCES ZnsInfoVO (uuid) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS ZnsTransportZoneRefVO (

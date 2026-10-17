@@ -264,10 +264,12 @@ public class RESTFacadeImpl extends AbstractRESTFacade {
             }
 
             String ret = handler.handle(entity);
-            if (ret == null) {
-                rsp.setStatus(HttpStatus.SC_OK);
-            } else {
-                rsp.setStatus(HttpStatus.SC_OK, ret);
+            if (!rsp.isCommitted()) {
+                if (ret == null) {
+                    rsp.setStatus(HttpStatus.SC_OK);
+                } else {
+                    rsp.setStatus(HttpStatus.SC_OK, ret);
+                }
             }
         } catch (IOException e) {
             logger.warn(e.getMessage(), e);

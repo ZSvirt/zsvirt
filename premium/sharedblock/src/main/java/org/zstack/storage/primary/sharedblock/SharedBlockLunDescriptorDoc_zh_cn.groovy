@@ -9,12 +9,12 @@ doc {
         name "wwid"
         desc "底层LUN的WWID"
         type "String"
-        since "5.2.0"
+        since "1.0.1, zsv_5.2.0"
     }
     field {
         name "capacityBytes"
         desc "从LBA 0起计算的完整原始LUN字节容量"
         type "Long"
-        since "5.2.0"
+        since "1.0.1, zsv_5.2.0"
     }
 }

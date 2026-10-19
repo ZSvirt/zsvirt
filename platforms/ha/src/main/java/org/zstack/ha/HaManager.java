@@ -234,6 +234,20 @@ public class HaManager extends AbstractService implements Component, HaCompletio
             }
         });
 
+        restf.registerSyncHttpCallHandler(KVMConstant.KVM_REPORT_SELF_FENCER_STATE_CHANGED, KVMAgentCommands.ReportSelfFencerCmd.class, cmd -> {
+            HostVO host = dbf.findByUuid(cmd.hostUuid, HostVO.class);
+            if (host == null) {
+                return null;
+            }
+            // sync fencer state from host.
+            HostInventory inv = HostInventory.valueOf(host);
+            GetFencerStateFromHostMsg msg = new GetFencerStateFromHostMsg();
+            msg.setHostInventory(inv);
+            bus.makeTargetServiceIdByResourceUuid(msg, HaConstants.SERVICE_ID, inv.getUuid());
+            bus.send(msg);
+            return null;
+        });
+
         HaSystemTags.HA.installJudger(new SystemTagOperationJudger() {
             @Override
             public void tagPreCreated(SystemTagInventoryDefinition tag) {

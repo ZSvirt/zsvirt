@@ -108,6 +108,7 @@ public interface KVMConstant {
     String KVM_RECONNECT_ME = "/kvm/reconnectme";
     String KVM_REPORT_PS_STATUS = "/kvm/reportstoragestatus";
     String KVM_REPORT_SELF_FENCER = "/kvm/reportselffencer";
+    String KVM_REPORT_SELF_FENCER_STATE_CHANGED = "/kvm/reportselffencerstatechanged";
     String KVM_REQUEST_MAINTAIN_HOST = "/kvm/requestmaintainhost";
     String KVM_ANSIBLE_LOG_PATH_FROMAT = "/kvm/ansiblelog/{uuid}";
     String KVM_REPORT_VM_SHUTDOWN_EVENT = "/kvm/reportvmshutdown";

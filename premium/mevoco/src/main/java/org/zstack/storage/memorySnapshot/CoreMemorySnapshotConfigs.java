@@ -16,7 +16,6 @@ import org.zstack.kvm.KVMSystemTags;
 import org.zstack.mevoco.MevocoGlobalConfig;
 import org.zstack.pciDevice.header.PciDeviceGlobalConfig;
 import org.zstack.storage.volume.VolumeSystemTags;
-import org.zstack.tag.PatternedSystemTag;
 import org.zstack.tag.SystemTag;
 import org.zstack.utils.BeanUtils;
 
@@ -28,7 +27,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class CoreMemorySnapshotConfigs implements ManagementNodeReadyExtensionPoint {
-    public static final List<PatternedSystemTag> restoreCandidatePatternedSystemTags = Stream.of(
+    public static final List<SystemTag> restoreCandidatePatternedSystemTags = Stream.of(
             // vm
             VmSystemTags.USERDATA, VmSystemTags.USB_REDIRECT, VmSystemTags.SSHKEY, VmSystemTags.BOOT_MODE, VmSystemTags.CLEAN_TRAFFIC,
             VmSystemTags.HOSTNAME, MevocoVmSystemTags.VM_CPU_PINNING, MevocoVmSystemTags.VM_NUMA_ENABLE, VmHardwareSystemTags.CPU_CORES,
@@ -113,7 +112,7 @@ public class CoreMemorySnapshotConfigs implements ManagementNodeReadyExtensionPo
     }
 
     public static boolean systemTagIsRegistered(String configName) {
-        for (PatternedSystemTag tag : restoreCandidatePatternedSystemTags) {
+        for (SystemTag tag : restoreCandidatePatternedSystemTags) {
             if (Objects.equals(tag.getTagFormat(), configName)) {
                 return true;
             }

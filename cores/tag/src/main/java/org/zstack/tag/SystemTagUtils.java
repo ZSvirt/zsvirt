@@ -4,27 +4,20 @@ import org.zstack.core.db.Q;
 import org.zstack.header.identity.AccessLevel;
 import org.zstack.header.identity.AccountResourceRefVO;
 import org.zstack.header.identity.AccountResourceRefVO_;
-import org.zstack.header.tag.SystemTagInventory;
-import org.zstack.header.tag.SystemTagInventoryDefinition;
 import org.zstack.header.tag.SystemTagVO;
 import org.zstack.header.tag.TagAO_;
 import org.zstack.header.tag.UserTagVO;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
-import static org.zstack.utils.CollectionDSL.e;
-import static org.zstack.utils.CollectionDSL.map;
 
 /**
  * Created by lining on 2017/6/22.
  */
 public class SystemTagUtils {
 
-    public static String findTagValue(List<String> systemTags, PatternedSystemTag tag, String tagToken){
+    public static String findTagValue(List<String> systemTags, SystemTag tag, String tagToken){
         if(systemTags == null || tag == null || tagToken == null ){
             throw new IllegalArgumentException("illegal argument");
         }
@@ -33,12 +26,11 @@ public class SystemTagUtils {
             return null;
         }
 
-        Optional<String> opt = systemTags.stream().filter(s -> tag.isMatch(s)).findAny();
-        String result = opt.isPresent() ? tag.getTokenByTag(opt.get(), tagToken) : null;
-        return result;
+        Optional<String> opt = systemTags.stream().filter(tag::isMatch).findAny();
+        return opt.map(s -> tag.getTokenByTag(s, tagToken)).orElse(null);
     }
 
-    public static String findTagValue(List<String> systemTags, PatternedSystemTag tag){
+    public static String findTagValue(List<String> systemTags, SystemTag tag){
         if(systemTags == null || tag == null){
             throw new IllegalArgumentException("illegal argument");
         }
@@ -47,12 +39,11 @@ public class SystemTagUtils {
             return null;
         }
 
-        Optional<String> opt = systemTags.stream().filter(s -> tag.isMatch(s)).findAny();
-        String result = opt.isPresent() ? opt.get() : null;
-        return result;
+        Optional<String> opt = systemTags.stream().filter(tag::isMatch).findAny();
+        return opt.orElse(null);
     }
 
-    public static List<String> findTagValues(List<String> systemTags, PatternedSystemTag tag, String tagToken) {
+    public static List<String> findTagValues(List<String> systemTags, SystemTag tag, String tagToken) {
         if(systemTags == null || tag == null || tagToken == null ){
             throw new IllegalArgumentException("illegal argument");
         }
@@ -64,7 +55,7 @@ public class SystemTagUtils {
         return systemTags.stream().filter(tag::isMatch).map(t -> tag.getTokenByTag(t, tagToken)).collect(Collectors.toList());
     }
 
-    public static List<String> findTagValues(List<String> systemTags, PatternedSystemTag tag) {
+    public static List<String> findTagValues(List<String> systemTags, SystemTag tag) {
         if(systemTags == null || tag == null){
             throw new IllegalArgumentException("illegal argument");
         }
@@ -74,49 +65,6 @@ public class SystemTagUtils {
         }
 
         return systemTags.stream().filter(tag::isMatch).collect(Collectors.toList());
-    }
-
-    public static void cloneTag(PatternedSystemTag tag, String tagToken, String srcUuid, String destUuid){
-        if (tagToken == null || !tag.isCloneable()) {
-            return;
-        }
-        List<? extends SystemTagInventoryDefinition> srcTags = tag.getTagInventories(srcUuid);
-
-        if (srcTags == null || srcTags.isEmpty()) {
-            return;
-        }
-
-        for(SystemTagInventoryDefinition srcTag: srcTags) {
-            SystemTagCreator creator = tag.newSystemTagCreator(destUuid);
-            creator.setTagByTokens(map(e(tagToken, tag.getTokenByResourceUuid(srcUuid, tagToken))));
-            creator.inherent = srcTag.isInherent();
-            creator.ignoreIfExisting = true;
-            creator.create();
-        }
-    }
-
-    public static void cloneTag(PatternedSystemTag tag, String srcUuid, String destUuid, List<String> tokens){
-        if (!tag.isCloneable()) {
-            return;
-        }
-        List<? extends SystemTagInventoryDefinition> srcTags = tag.getTagInventories(srcUuid);
-
-        if (srcTags == null || srcTags.isEmpty()) {
-            return;
-        }
-
-        Map<String, String> tokenMap = new HashMap<>();
-        for (String token : tokens) {
-            tokenMap.put(token, tag.getTokenByResourceUuid(srcUuid, token));
-        }
-
-        for(SystemTagInventoryDefinition srcTag: srcTags) {
-            SystemTagCreator creator = tag.newSystemTagCreator(destUuid);
-            creator.setTagByTokens(tokenMap);
-            creator.inherent = srcTag.isInherent();
-            creator.ignoreIfExisting = true;
-            creator.create();
-        }
     }
 
     public static String findSystemTagOwner(String tagUuid) {

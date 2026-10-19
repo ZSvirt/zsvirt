@@ -9,7 +9,7 @@ import org.zstack.header.tag.SystemTagVO;
 import org.zstack.header.tag.SystemTagVO_;
 import org.zstack.header.vm.VmCanonicalEvents;
 import org.zstack.header.vm.VmInstanceVO;
-import org.zstack.tag.PatternedSystemTag;
+import org.zstack.tag.SystemTag;
 import org.zstack.tag.SystemTagCreator;
 import org.zstack.utils.Tags;
 import org.zstack.utils.Utils;
@@ -41,11 +41,11 @@ public class VmSensitiveTagEncryptor {
     private EventFacade evtf;
 
     private static final class SensitiveTagContext {
-        private final PatternedSystemTag patternedTag;
+        private final SystemTag patternedTag;
         private final String tagHead;
         private final Map<String, String> tokens;
 
-        private SensitiveTagContext(PatternedSystemTag patternedTag, String tagHead, Map<String, String> tokens) {
+        private SensitiveTagContext(SystemTag patternedTag, String tagHead, Map<String, String> tokens) {
             this.patternedTag = patternedTag;
             this.tagHead = tagHead;
             this.tokens = new HashMap<>(tokens);
@@ -219,7 +219,7 @@ public class VmSensitiveTagEncryptor {
             return;
         }
 
-        for (PatternedSystemTag tag : sensitivePatternedTags()) {
+        for (SystemTag tag : sensitivePatternedTags()) {
             List<String> tags = tag.getTags(vmUuid, VmInstanceVO.class);
             if (tags == null || tags.isEmpty()) {
                 continue;
@@ -235,7 +235,7 @@ public class VmSensitiveTagEncryptor {
     }
 
     private void decryptExistingTagsForVm(String vmUuid) {
-        for (PatternedSystemTag tag : sensitivePatternedTags()) {
+        for (SystemTag tag : sensitivePatternedTags()) {
             List<String> tags = tag.getTags(vmUuid, VmInstanceVO.class);
             if (tags == null || tags.isEmpty()) {
                 continue;
@@ -310,7 +310,7 @@ public class VmSensitiveTagEncryptor {
     }
 
     private SensitiveTagContext parseSensitiveTag(String tag) {
-        PatternedSystemTag patternedTag = findSensitivePatternedTag(tag);
+        SystemTag patternedTag = findSensitivePatternedTag(tag);
         if (patternedTag == null) {
             return null;
         }
@@ -324,19 +324,19 @@ public class VmSensitiveTagEncryptor {
         return new SensitiveTagContext(patternedTag, tagHead, tokens);
     }
 
-    private PatternedSystemTag findSensitivePatternedTag(String tag) {
+    private SystemTag findSensitivePatternedTag(String tag) {
         String tagHead = Tags.first(tag);
         if (Objects.equals(tagHead, tag)) {
             return null;
         }
-        PatternedSystemTag patternedTag = VmSystemTags.getSensitivePatternedTagByHead(tagHead);
+        SystemTag patternedTag = VmSystemTags.getSensitivePatternedTagByHead(tagHead);
         if (patternedTag != null && patternedTag.isMatch(tag)) {
             return patternedTag;
         }
         return null;
     }
 
-    private List<PatternedSystemTag> sensitivePatternedTags() {
+    private List<SystemTag> sensitivePatternedTags() {
         return VmSystemTags.sensitivePatternedTags();
     }
 }

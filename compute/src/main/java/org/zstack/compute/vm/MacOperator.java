@@ -8,7 +8,7 @@ import org.zstack.core.db.Q;
 import org.zstack.header.errorcode.OperationFailureException;
 import org.zstack.header.network.l3.*;
 import org.zstack.header.vm.*;
-import org.zstack.tag.PatternedSystemTag;
+import org.zstack.tag.SystemTag;
 import org.zstack.utils.Utils;
 import org.zstack.utils.logging.CLogger;
 
@@ -42,7 +42,7 @@ public class MacOperator {
     @Autowired
     private DatabaseFacade dbf;
 
-    private PatternedSystemTag that = VmSystemTags.CUSTOM_MAC;
+    private SystemTag that = VmSystemTags.CUSTOM_MAC;
 
     public List<VmMacStruct> getMacInfobyVmUuid(String vmUuid) {
         List<VmMacStruct> structs = Lists.newArrayList();

@@ -37,14 +37,24 @@
 
     <bean id="DefaultPrimaryStorageAllocatorFactory"
           class="org.zstack.storage.primary.DefaultPrimaryStorageAllocatorFactory">
+        <property name="producerNames">
+            <list>
+                <value>org.zstack.storage.primary.allocate.PrimaryStorageCandidateProducerFlow</value>
+            </list>
+        </property>
         <property name="allocatorFlowNames">
             <list>
-                <value>org.zstack.storage.primary.PrimaryStorageMainAllocatorFlow</value>
+                <value>org.zstack.storage.primary.allocate.PrimaryStorageStateAllocatorFlow</value>
+                <value>org.zstack.storage.primary.allocate.PrimaryStorageScopeAllocatorFlow</value>
+                <value>org.zstack.storage.primary.allocate.PrimaryStorageTypeAllocatorFlow</value>
+                <value>org.zstack.storage.primary.allocate.PrimaryStorageCapacityAllocatorFlow</value>
+                <value>org.zstack.storage.primary.allocate.PrimaryStorageBackupStorageAllocatorFlow</value>
                 <value>org.zstack.storage.primary.PrimaryStorageAvoidAllocatorFlow</value>
                 <value>org.zstack.storage.primary.PrimaryStorageFeatureAllocatorFlow</value>
-                <value>org.zstack.allocator.domain.compute.flows.DomainFilterPrimaryStorageFlow</value>
+                <value>org.zstack.allocator.domain.compute.flows.DomainPrimaryStorageAllocatorFlow</value>
                 <value>org.zstack.storage.primary.PrimaryStorageTagAllocatorFlow</value>
                 <value>org.zstack.storage.primary.PrimaryStorageReservedCapacityAllocatorFlow</value>
+                <value>org.zstack.storage.primary.allocate.PrimaryStorageFilterFlow</value>
             </list>
         </property>
         <property name="sortFlowNames">
@@ -63,14 +73,24 @@
 
     <bean id="LeastVolumePrimaryStorageAllocatorFactory"
           class="org.zstack.storage.primary.LeastVolumePrimaryStorageAllocatorFactory">
+        <property name="producerNames">
+            <list>
+                <value>org.zstack.storage.primary.allocate.PrimaryStorageCandidateProducerFlow</value>
+            </list>
+        </property>
         <property name="allocatorFlowNames">
             <list>
-                <value>org.zstack.storage.primary.PrimaryStorageMainAllocatorFlow</value>
+                <value>org.zstack.storage.primary.allocate.PrimaryStorageStateAllocatorFlow</value>
+                <value>org.zstack.storage.primary.allocate.PrimaryStorageScopeAllocatorFlow</value>
+                <value>org.zstack.storage.primary.allocate.PrimaryStorageTypeAllocatorFlow</value>
+                <value>org.zstack.storage.primary.allocate.PrimaryStorageCapacityAllocatorFlow</value>
+                <value>org.zstack.storage.primary.allocate.PrimaryStorageBackupStorageAllocatorFlow</value>
                 <value>org.zstack.storage.primary.PrimaryStorageAvoidAllocatorFlow</value>
                 <value>org.zstack.storage.primary.PrimaryStorageFeatureAllocatorFlow</value>
-                <value>org.zstack.allocator.domain.compute.flows.DomainFilterPrimaryStorageFlow</value>
+                <value>org.zstack.allocator.domain.compute.flows.DomainPrimaryStorageAllocatorFlow</value>
                 <value>org.zstack.storage.primary.PrimaryStorageTagAllocatorFlow</value>
                 <value>org.zstack.storage.primary.PrimaryStorageReservedCapacityAllocatorFlow</value>
+                <value>org.zstack.storage.primary.allocate.PrimaryStorageFilterFlow</value>
             </list>
         </property>
         <property name="sortFlowNames">
@@ -89,14 +109,24 @@
 
     <bean id="MaximumAvailableCapacityAllocatorFactory"
           class="org.zstack.storage.primary.MaximumAvailableCapacityAllocatorFactory">
+        <property name="producerNames">
+            <list>
+                <value>org.zstack.storage.primary.allocate.PrimaryStorageCandidateProducerFlow</value>
+            </list>
+        </property>
         <property name="allocatorFlowNames">
             <list>
-                <value>org.zstack.storage.primary.PrimaryStorageMainAllocatorFlow</value>
+                <value>org.zstack.storage.primary.allocate.PrimaryStorageStateAllocatorFlow</value>
+                <value>org.zstack.storage.primary.allocate.PrimaryStorageScopeAllocatorFlow</value>
+                <value>org.zstack.storage.primary.allocate.PrimaryStorageTypeAllocatorFlow</value>
+                <value>org.zstack.storage.primary.allocate.PrimaryStorageCapacityAllocatorFlow</value>
+                <value>org.zstack.storage.primary.allocate.PrimaryStorageBackupStorageAllocatorFlow</value>
                 <value>org.zstack.storage.primary.PrimaryStorageAvoidAllocatorFlow</value>
                 <value>org.zstack.storage.primary.PrimaryStorageFeatureAllocatorFlow</value>
-                <value>org.zstack.allocator.domain.compute.flows.DomainFilterPrimaryStorageFlow</value>
+                <value>org.zstack.allocator.domain.compute.flows.DomainPrimaryStorageAllocatorFlow</value>
                 <value>org.zstack.storage.primary.PrimaryStorageTagAllocatorFlow</value>
                 <value>org.zstack.storage.primary.PrimaryStorageReservedCapacityAllocatorFlow</value>
+                <value>org.zstack.storage.primary.allocate.PrimaryStorageFilterFlow</value>
             </list>
         </property>
         <property name="sortFlowNames">
@@ -115,14 +145,24 @@
 
     <bean id="CustomOrderPrimaryStorageAllocatorFactory"
           class="org.zstack.storage.primary.CustomOrderPrimaryStorageAllocatorFactory">
+        <property name="producerNames">
+            <list>
+                <value>org.zstack.storage.primary.allocate.PrimaryStorageCandidateProducerFlow</value>
+            </list>
+        </property>
         <property name="allocatorFlowNames">
             <list>
-                <value>org.zstack.storage.primary.PrimaryStorageMainAllocatorFlow</value>
+                <value>org.zstack.storage.primary.allocate.PrimaryStorageStateAllocatorFlow</value>
+                <value>org.zstack.storage.primary.allocate.PrimaryStorageScopeAllocatorFlow</value>
+                <value>org.zstack.storage.primary.allocate.PrimaryStorageTypeAllocatorFlow</value>
+                <value>org.zstack.storage.primary.allocate.PrimaryStorageCapacityAllocatorFlow</value>
+                <value>org.zstack.storage.primary.allocate.PrimaryStorageBackupStorageAllocatorFlow</value>
                 <value>org.zstack.storage.primary.PrimaryStorageAvoidAllocatorFlow</value>
                 <value>org.zstack.storage.primary.PrimaryStorageFeatureAllocatorFlow</value>
-                <value>org.zstack.allocator.domain.compute.flows.DomainFilterPrimaryStorageFlow</value>
+                <value>org.zstack.allocator.domain.compute.flows.DomainPrimaryStorageAllocatorFlow</value>
                 <value>org.zstack.storage.primary.PrimaryStorageTagAllocatorFlow</value>
                 <value>org.zstack.storage.primary.PrimaryStorageReservedCapacityAllocatorFlow</value>
+                <value>org.zstack.storage.primary.allocate.PrimaryStorageFilterFlow</value>
             </list>
         </property>
         <property name="sortFlowNames">

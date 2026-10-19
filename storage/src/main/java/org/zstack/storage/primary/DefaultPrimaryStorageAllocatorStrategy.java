@@ -1,13 +1,10 @@
 package org.zstack.storage.primary;
 
 import org.zstack.core.workflow.FlowChainBuilder;
+import org.zstack.storage.primary.allocate.PrimaryStorageAllocatorChainBuilder;
 
 class DefaultPrimaryStorageAllocatorStrategy extends AbstractPrimaryStorageAllocatorStrategy {
-    DefaultPrimaryStorageAllocatorStrategy(FlowChainBuilder allocateBuilder) {
-        super(allocateBuilder);
-    }
-
-    DefaultPrimaryStorageAllocatorStrategy(FlowChainBuilder allocateBuilder, FlowChainBuilder sortBuilder) {
+    DefaultPrimaryStorageAllocatorStrategy(PrimaryStorageAllocatorChainBuilder allocateBuilder, FlowChainBuilder sortBuilder) {
         super(allocateBuilder, sortBuilder);
     }
 }

@@ -15,7 +15,7 @@ import org.zstack.test.checker.route.ApiServiceIdRegistryDump
 @RunWith(Suite.class)
 @Suite.SuiteClasses([
     AuditChecker.class,
-    //LFFileChecker.class,
+    LFFileChecker.class,
     ApiServiceIdRegistryDump.class,
     DBChecker.class,
     ApiDocChecker.class,

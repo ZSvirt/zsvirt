@@ -20,7 +20,7 @@ class LFFileChecker {
 
     private static final Set<String> SKIP_DIR_NAMES = [
             ".git", ".idea", ".vscode", ".gradle", "target", "node_modules",
-            "out", "build", ".settings", ".classpath", ".project"
+            "out", "build", ".settings", ".classpath", ".project", "m2"
     ] as Set
 
     private static final Set<String> TEXT_EXTENSIONS = [

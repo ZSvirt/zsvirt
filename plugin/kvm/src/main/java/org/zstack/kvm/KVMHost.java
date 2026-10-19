@@ -87,7 +87,6 @@ import org.zstack.kvm.hypervisor.KvmHypervisorInfoManager;
 import org.zstack.network.l3.NetworkGlobalProperty;
 import org.zstack.resourceconfig.ResourceConfig;
 import org.zstack.resourceconfig.ResourceConfigFacade;
-import org.zstack.tag.PatternedSystemTag;
 import org.zstack.tag.SystemTag;
 import org.zstack.tag.SystemTagCreator;
 import org.zstack.tag.TagManager;
@@ -6809,7 +6808,7 @@ public class KVMHost extends HostBase implements Host {
                         });
             }
 
-            private void recordHardwareChangesAndCreateTag(PatternedSystemTag systemTag, Map<String, String> tokenMap) {
+            private void recordHardwareChangesAndCreateTag(SystemTag systemTag, Map<String, String> tokenMap) {
                 if (tokenMap.isEmpty()) {
                     return;
                 }

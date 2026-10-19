@@ -2859,7 +2859,7 @@ public class VmInstanceManagerImpl extends AbstractService implements
 
     @Override
     public ErrorCode handleSystemTag(String vmUuid, List<String> tags) {
-        PatternedSystemTag tag = VmSystemTags.DIRECTORY_UUID;
+        SystemTag tag = VmSystemTags.DIRECTORY_UUID;
         String token = VmSystemTags.DIRECTORY_UUID_TOKEN;
 
         String directoryUuid = SystemTagUtils.findTagValue(tags, tag, token);

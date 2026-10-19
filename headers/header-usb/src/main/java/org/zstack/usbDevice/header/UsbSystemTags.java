@@ -1,7 +1,7 @@
 package org.zstack.usbDevice.header;
 
 import org.zstack.header.tag.TagDefinition;
-import org.zstack.tag.PatternedSystemTag;
+import org.zstack.tag.SystemTag;
 import org.zstack.usbDevice.entity.UsbDeviceVO;
 
 /**
@@ -13,6 +13,6 @@ public class UsbSystemTags {
 
     public static String USB_REDIRECT_PORT_TOKEN = "port";
 
-    public static PatternedSystemTag USB_REDIRECT_PORT =
-            new PatternedSystemTag(String.format("usbRedirectPort::{%s}", USB_REDIRECT_PORT_TOKEN), UsbDeviceVO.class);
+    public static SystemTag USB_REDIRECT_PORT =
+            new SystemTag(String.format("usbRedirectPort::{%s}", USB_REDIRECT_PORT_TOKEN), UsbDeviceVO.class);
 }

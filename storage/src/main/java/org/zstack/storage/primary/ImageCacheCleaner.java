@@ -387,8 +387,8 @@ public abstract class ImageCacheCleaner {
 
     @Transactional
     protected List<ImageCacheShadowVO> createShadowImageCacheVOsForNewDeletedAndOld(String psUuid, ImageCacheCleanParam param) {
-        // 1. image has been deleted
-        List<Long> staleImageCacheIds = getStaleImageCacheIds(psUuid, false);
+        // 1. image has been deleted or force cleanup includes images still in ready state with no VMs using them
+        List<Long> staleImageCacheIds = getStaleImageCacheIds(psUuid, param.includeReadyImage);
         if (staleImageCacheIds == null || staleImageCacheIds.isEmpty()) {
             return null;
         }

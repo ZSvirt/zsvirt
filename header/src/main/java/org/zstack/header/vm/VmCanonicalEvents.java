@@ -22,6 +22,8 @@ public class VmCanonicalEvents {
     public static final String VM_NIC_INFO_IPRANGE_CONFLICT_PATH = "/vm/nicinfo/iprangeConflict";
     public static final String VM_HOST_FILE_CHANGED_PATH = "/vm/hostfile/changed";
     public static final String VM_USERDATA_ENCRYPTION_DEGRADED_PATH = "/vm/userdata/encryption/degraded";
+    public static final String VM_MIGRATION_HOST_CAPACITY_PATH = "/vm/migration/host/capacity";
+    public static final String VM_MIGRATION_HOST_CAPACITY_RELEASED_PATH = "/vm/migration/host/capacity/released";
 
     @NeedJsonSchema
     public static class VmCrashReportData {
@@ -416,6 +418,58 @@ public class VmCanonicalEvents {
 
         public void setDate(Date date) {
             this.date = date;
+        }
+    }
+
+    @NeedJsonSchema
+    public static class MigrationHostCapacityData {
+        public static final String RESERVE_PATH = VM_MIGRATION_HOST_CAPACITY_PATH;
+        public static final String RELEASE_PATH = VM_MIGRATION_HOST_CAPACITY_RELEASED_PATH;
+
+        private String vmUuid;
+        private String hostUuid;
+        private long memorySize;
+        private int cpuNum;
+        private String taskId;
+
+        public String getVmUuid() {
+            return vmUuid;
+        }
+
+        public void setVmUuid(String vmUuid) {
+            this.vmUuid = vmUuid;
+        }
+
+        public String getHostUuid() {
+            return hostUuid;
+        }
+
+        public void setHostUuid(String hostUuid) {
+            this.hostUuid = hostUuid;
+        }
+
+        public long getMemorySize() {
+            return memorySize;
+        }
+
+        public void setMemorySize(long memorySize) {
+            this.memorySize = memorySize;
+        }
+
+        public int getCpuNum() {
+            return cpuNum;
+        }
+
+        public void setCpuNum(int cpuNum) {
+            this.cpuNum = cpuNum;
+        }
+
+        public String getTaskId() {
+            return taskId;
+        }
+
+        public void setTaskId(String taskId) {
+            this.taskId = taskId;
         }
     }
 }

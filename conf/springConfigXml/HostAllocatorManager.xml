@@ -77,6 +77,12 @@
         </zstack:plugin>
     </bean>
 
+    <bean id="HostAllocatorExtensions" class="org.zstack.compute.allocator.HostAllocatorExtensions">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.vm.VmInstanceMigrateExtensionPoint" order="10000"/>
+        </zstack:plugin>
+    </bean>
+
     <bean id="ResourceBindingClusterCollector" class="org.zstack.compute.allocator.ResourceBindingClusterCollector">
         <zstack:plugin>
             <zstack:extension interface="org.zstack.header.allocator.ResourceBindingCollector"/>

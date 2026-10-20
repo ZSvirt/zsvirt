@@ -25,7 +25,7 @@ import static org.zstack.core.Platform.err;
 
 /**
  * PS membership for a volume type, applied on the primary-storage allocator candidate list.
- * Root is wired from {@code DomainFilterPrimaryStorageFlow} in allocatorFlowNames.
+ * Root is wired from {@code DomainPrimaryStorageAllocatorFlow} in allocatorFlowNames.
  */
 public class AllocatorDomainPrimaryStorageGate {
     private final AllocatorDomainRuleEvaluator evaluator = new AllocatorDomainRuleEvaluator();

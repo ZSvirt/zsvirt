@@ -28,7 +28,6 @@ import org.zstack.header.managementnode.APIQueryManagementNodeMsg;
 import org.zstack.header.message.APIMessage;
 import org.zstack.header.message.Message;
 import org.zstack.identity.PasswordUpdateExtensionPoint;
-import org.zstack.identity.AccountPassword;
 import org.zstack.loginControl.api.*;
 import org.zstack.loginControl.entity.*;
 import org.zstack.rest.RestConstants;
@@ -468,8 +467,7 @@ public class LoginControlManagerImpl extends AbstractService implements LoginCon
                 .orderBy(HistoricalPasswordVO_.id, SimpleQuery.Od.DESC)
                 .limit(limit)
                 .listValues();
-        if (AccountPassword.matches(newPassword, currentPassword)
-                || latestPasswords.stream().anyMatch(stored -> AccountPassword.matches(newPassword, stored))) {
+        if (currentPassword.equals(newPassword) || latestPasswords.contains(newPassword)) {
             throw new OperationFailureException(err(LoginControlErrors.HISTORICAL_PASSWORD_REPEATED_ERROR, "Password repeated, please use another one"));
         }
     }
@@ -492,7 +490,7 @@ public class LoginControlManagerImpl extends AbstractService implements LoginCon
 
                 HistoricalPasswordVO passwordVO = new HistoricalPasswordVO();
                 passwordVO.setUuid(accountUuid);
-                passwordVO.setPassword(AccountPassword.isEncoded(password) ? password : AccountPassword.encodeForStorage(password));
+                passwordVO.setPassword(password);
                 persist(passwordVO);
             }
         }.execute();

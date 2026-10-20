@@ -12,8 +12,6 @@ class IdentityTest extends Test {
         spec.include("authentications/accountImport.xml")
         spec.include("authentications/accountImportTest.xml")
         spec.include("authentications/ldap.xml")
-        spec.include("LoginControl.xml")
-        spec.include("TwoFactorAuthentication.xml")
 
         return spec
     }()

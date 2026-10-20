@@ -26,6 +26,7 @@ public class ImageStoreBackupStorageConstant {
     public static final String IMPORT_BACKUP_PATH = "/imagestore/import-backup/";
     public static final String INSTALL_PATH_ALLOCATE = "/imagestore/installpath/allocate";
     public static final String UPLOAD_IMAGE_TO_REMOTE_PATH = "/imagestore/remote/upload/";
+    public static final String IMAGE_STORE_UUID_HEADER = "X-ZStack-ImageStore-UUID";
     public static final String DELETE_IMAGE_PATH = "/imagestore/delete/";
     public static final String GET_IMAGE_INFO = "/imagestore/imginfo/";
     public static final String DEFAULT_ARCH = "amd64";

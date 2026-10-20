@@ -1009,15 +1009,15 @@ public class AutoScalingGroupBase implements AutoScalingGroup {
                 final String[] uuidList = vmTemplateVO.getDataDiskOfferingUuids()
                         .split(AutoScalingConstants.AutoScalingTemplate.VmInstance.SEPARATOR);
 
-                List<DiskAO> deprecatedDiskSpecs = new ArrayList<>();
+                List<DiskAO> diskSpecs = new ArrayList<>();
                 for (String uuid : uuidList) {
                     DiskAO disk = DiskAO.nonRootDisk();
                     disk.setDiskOfferingUuid(uuid);
                     disk.setSystemTags(Arrays.asList(VolumeSystemTags.AUTO_SCALING_GROUP_UUID.instantiateTag(
                                 map(e(VolumeSystemTags.AUTO_SCALING_GROUP_UUID_TOKEN, self.getUuid())))));
-                    deprecatedDiskSpecs.add(disk);
+                    diskSpecs.add(disk);
                 }
-                msg.setDeprecatedDataVolumeSpecs(deprecatedDiskSpecs);
+                msg.setDataDisks(diskSpecs);
             }
             msg.setStrategy(VmCreationStrategy.InstantStart.toString());
             msg.setClusterUuid(vmTemplateVO.getVmInstanceClusterUuid());

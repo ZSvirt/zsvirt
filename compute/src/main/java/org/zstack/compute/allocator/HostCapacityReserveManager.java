@@ -2,11 +2,10 @@ package org.zstack.compute.allocator;
 
 import org.zstack.header.allocator.ReservedHostCapacity;
 import org.zstack.header.host.HostVO;
+import org.zstack.header.vm.VmCanonicalEvents;
 
 import java.util.List;
 
-/**
- */
 public interface HostCapacityReserveManager {
     List<HostVO> filterOutHostsByReservedCapacity(List<HostVO> candidates, long requiredCpu, long requiredMemory);
 
@@ -17,4 +16,6 @@ public interface HostCapacityReserveManager {
     ReservedHostCapacity getReservedHostCapacityByHosts(List<String> hostUuids);
 
     void reserveCapacity(String hostUuid, long requiredCpu, long requiredMemory, boolean skipCheck);
+
+    List<VmCanonicalEvents.MigrationHostCapacityData> reservedByVmMigration(String hostUuid);
 }

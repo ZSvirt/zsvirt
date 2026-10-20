@@ -1,6 +1,10 @@
 package org.zstack.compute.allocator;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.zstack.core.cloudbus.EventCallback;
+import org.zstack.core.cloudbus.EventFacade;
 import org.zstack.core.componentloader.PluginRegistry;
 import org.zstack.core.db.DatabaseFacade;
 import org.zstack.core.db.SimpleQuery;
@@ -12,12 +16,16 @@ import org.zstack.header.host.HostState;
 import org.zstack.header.host.HostStatus;
 import org.zstack.header.host.HostVO;
 import org.zstack.header.host.HostVO_;
+import org.zstack.header.vm.VmCanonicalEvents;
 import org.zstack.utils.Utils;
 import org.zstack.utils.logging.CLogger;
 
 import javax.persistence.Tuple;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+
+import static org.zstack.utils.CollectionUtils.filter;
 
 /**
  */
@@ -30,6 +38,8 @@ public class HostCapacityReserveManagerImpl implements HostCapacityReserveManage
     private PluginRegistry pluginRgty;
     @Autowired
     private HostCapacityOverProvisioningManager ratioMgr;
+    @Autowired
+    private EventFacade eventFacade;
 
     private Map<String, HostReservedCapacityExtensionPoint> exts = new HashMap<>();
 
@@ -48,6 +58,7 @@ public class HostCapacityReserveManagerImpl implements HostCapacityReserveManage
     @Override
     public boolean start() {
         populateExtensions();
+        registerEventsOnCapacityReservedCache();
         return true;
     }
 
@@ -272,5 +283,34 @@ public class HostCapacityReserveManagerImpl implements HostCapacityReserveManage
             cap.setAvailableMemory(availMemory);
             return cap;
         });
+    }
+
+    // ------------------------------------- Capacity Reserved Cache by VM Migration ------------------------------------
+
+    private final Cache<String, VmCanonicalEvents.MigrationHostCapacityData> migrationHostCapacities =
+            CacheBuilder.newBuilder().expireAfterWrite(3, TimeUnit.DAYS).build();
+
+    private static String capacityReservedCacheKey(String vmUuid, String taskId) {
+        return vmUuid + ":" + taskId;
+    }
+
+    private void registerEventsOnCapacityReservedCache() {
+        eventFacade.on(VmCanonicalEvents.VM_MIGRATION_HOST_CAPACITY_PATH, new EventCallback<VmCanonicalEvents.MigrationHostCapacityData>() {
+            @Override
+            protected void run(Map<String, String> tokens, VmCanonicalEvents.MigrationHostCapacityData data) {
+                migrationHostCapacities.asMap().putIfAbsent(capacityReservedCacheKey(data.getVmUuid(), data.getTaskId()), data);
+            }
+        });
+        eventFacade.on(VmCanonicalEvents.VM_MIGRATION_HOST_CAPACITY_RELEASED_PATH, new EventCallback<VmCanonicalEvents.MigrationHostCapacityData>() {
+            @Override
+            protected void run(Map<String, String> tokens, VmCanonicalEvents.MigrationHostCapacityData data) {
+                migrationHostCapacities.invalidate(capacityReservedCacheKey(data.getVmUuid(), data.getTaskId()));
+            }
+        });
+    }
+
+    @Override
+    public List<VmCanonicalEvents.MigrationHostCapacityData> reservedByVmMigration(String hostUuid) {
+        return filter(migrationHostCapacities.asMap().values(), data -> Objects.equals(data.getHostUuid(), hostUuid));
     }
 }

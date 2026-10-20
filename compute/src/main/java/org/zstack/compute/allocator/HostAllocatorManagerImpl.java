@@ -40,6 +40,7 @@ import org.zstack.header.storage.primary.PrimaryStorageVO_;
 import org.zstack.header.vm.VmAbnormalLifeCycleExtensionPoint;
 import org.zstack.header.vm.VmAbnormalLifeCycleStruct;
 import org.zstack.header.vm.VmAbnormalLifeCycleStruct.VmAbnormalLifeCycleOperation;
+import org.zstack.header.vm.VmCanonicalEvents;
 import org.zstack.header.vm.VmInstanceState;
 import org.zstack.header.volume.VolumeFormat;
 import org.zstack.header.zone.ZoneVO;
@@ -269,8 +270,18 @@ public class HostAllocatorManagerImpl extends AbstractService implements HostAll
 
         for (final HostUsedCpuMem s : hostUsedCpuMemList) {
             new HostCapacityUpdater(s.hostUuid).run(cap -> {
+                long reservedMemory = 0;
+                long reservedCpu = 0;
+                for (VmCanonicalEvents.MigrationHostCapacityData reservation : reserveMgr.reservedByVmMigration(s.hostUuid)) {
+                    if (s.hostUuid.equals(reservation.getHostUuid())) {
+                        reservedMemory += ratioMgr.calculateMemoryByRatio(s.hostUuid, reservation.getMemorySize());
+                        reservedCpu += reservation.getCpuNum();
+                    }
+                }
+
                 long before = cap.getAvailableMemory();
                 long avail = s.usedMemory == null ? cap.getTotalMemory() : cap.getTotalMemory() - s.usedMemory;
+                avail -= reservedMemory;
                 cap.setAvailableMemory(avail);
 
                 long totalCpu = cpuRatioMgr.calculateHostCpuByRatio(s.hostUuid, cap.getCpuNum());
@@ -279,6 +290,7 @@ public class HostAllocatorManagerImpl extends AbstractService implements HostAll
 
                 long beforeCpu = cap.getAvailableCpu();
                 long availCpu = s.usedCpu == null ? cap.getTotalCpu() : cap.getTotalCpu() - s.usedCpu;
+                availCpu -= reservedCpu;
                 cap.setAvailableCpu(availCpu);
 
                 logger.debug(String.format("re-calculated available capacity on the host[uuid:%s]:" +
@@ -292,6 +304,8 @@ public class HostAllocatorManagerImpl extends AbstractService implements HostAll
                 return cap;
             });
         }
+
+        bus.reply(msg, new RecalculateHostCapacityReply());
     }
 
     private void handle(ReturnHostCapacityMsg msg) {

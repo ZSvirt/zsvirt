@@ -6,7 +6,6 @@ import org.zstack.core.db.Q;
 import org.zstack.header.identity.AccountConstant;
 import org.zstack.header.identity.AccountVO;
 import org.zstack.header.identity.AccountVO_;
-import org.zstack.identity.AccountPassword;
 
 import java.util.List;
 
@@ -23,18 +22,18 @@ public class TwoFactorAuthenticationAccountFactory implements TwoFactorAuthentic
 
     @Override
     public TwoFactorAuthenticationStruct createAuthentication(TwoFactorAuthenticationParamStruct param) {
-        List<AccountVO> accounts = Q.New(AccountVO.class)
+        List<String> accountUuidList = Q.New(AccountVO.class)
                 .eq(AccountVO_.name, param.getName())
-                .list();
-        accounts.removeIf(account -> !AccountPassword.matchesAccount(param.getPassword(),
-                account.getUuid(), account.getPassword()));
+                .eq(AccountVO_.password, param.getPassword())
+                .select(AccountVO_.uuid)
+                .listValues();
 
-        if (accounts.isEmpty()) {
+        if (accountUuidList.isEmpty()) {
             return null;
         }
 
         TwoFactorAuthenticationStruct twoFactorAuthenticationStruct = new TwoFactorAuthenticationStruct();
-        twoFactorAuthenticationStruct.setAccountUuid(accounts.get(0).getUuid());
+        twoFactorAuthenticationStruct.setAccountUuid(accountUuidList.get(0));
         return twoFactorAuthenticationStruct;
     }
 

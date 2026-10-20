@@ -40,15 +40,14 @@ public class AccountLoginBackend implements LoginBackend {
         // When a same-name Local account exists, it shadows any non-Local same-name accounts, so the
         // local login resolves to the Local account only. source is never declared on the login path.
         Q query = Q.New(AccountVO.class)
-                .eq(AccountVO_.name, loginContext.getUsername());
+                .eq(AccountVO_.name, loginContext.getUsername())
+                .eq(AccountVO_.password, loginContext.getPassword());
         if (hasLocalAccountNamed(loginContext.getUsername())) {
             query.eq(AccountVO_.source, AccountSource.Local);
         }
         List<Tuple> accountTuples = query
-                .select(AccountVO_.uuid, AccountVO_.state, AccountVO_.password)
+                .select(AccountVO_.uuid, AccountVO_.state)
                 .listTuple();
-        accountTuples.removeIf(tuple -> !AccountPassword.matchesAccount(loginContext.getPassword(),
-                tuple.get(0, String.class), tuple.get(2, String.class)));
 
         String accountType = loginContext.getProperties().get(AccountConstant.ACCOUNT_TYPE);
         LoginSessionInfo info = new LoginSessionInfo();
@@ -140,13 +139,12 @@ public class AccountLoginBackend implements LoginBackend {
         // exists it shadows non-Local ones on the local login channel, so a non-Local account's
         // password must not authenticate here.
         Q query = Q.New(AccountVO.class)
-                .eq(AccountVO_.name, name);
+                .eq(AccountVO_.name, name)
+                .eq(AccountVO_.password, password);
         if (hasLocalAccountNamed(name)) {
             query.eq(AccountVO_.source, AccountSource.Local);
         }
-        List<Tuple> accounts = query.select(AccountVO_.uuid, AccountVO_.password).listTuple();
-        return accounts.stream().anyMatch(tuple -> AccountPassword.matchesAccount(password,
-                tuple.get(0, String.class), tuple.get(1, String.class)));
+        return query.isExists();
     }
 
     @Override

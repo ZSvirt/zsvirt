@@ -53,10 +53,22 @@
             <zstack:extension interface="org.zstack.header.storage.primary.PSCapacityExtensionPoint"/>
         </zstack:plugin>
 
+        <property name="producerNames">
+            <list>
+                <value>org.zstack.storage.primary.allocate.PrimaryStorageCandidateProducerFlow</value>
+            </list>
+        </property>
         <property name="allocatorFlowNames">
             <list>
-                <value>org.zstack.storage.primary.local.LocalStorageMainAllocatorFlow</value>
-                <value>org.zstack.allocator.domain.compute.flows.DomainFilterPrimaryStorageFlow</value>
+                <value>org.zstack.storage.primary.allocate.PrimaryStorageStateAllocatorFlow</value>
+                <value>org.zstack.storage.primary.local.LocalStorageTypeAllocatorFlow</value>
+                <value>org.zstack.storage.primary.local.LocalStorageHostRefAllocatorFlow</value>
+                <value>org.zstack.storage.primary.local.LocalStorageCapacityAllocatorFlow</value>
+                <value>org.zstack.storage.primary.local.LocalStoragePhysicalCapacityAllocatorFlow</value>
+                <value>org.zstack.storage.primary.local.LocalStorageImageCacheAllocatorFlow</value>
+                <value>org.zstack.storage.primary.allocate.PrimaryStorageTypeAllocatorFlow</value>
+                <value>org.zstack.allocator.domain.compute.flows.DomainPrimaryStorageAllocatorFlow</value>
+                <value>org.zstack.storage.primary.allocate.PrimaryStorageFilterFlow</value>
             </list>
         </property>
     </bean>

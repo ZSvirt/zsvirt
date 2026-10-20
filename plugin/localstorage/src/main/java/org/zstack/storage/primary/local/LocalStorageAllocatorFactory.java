@@ -8,7 +8,6 @@ import org.zstack.core.db.Q;
 import org.zstack.core.db.SimpleQuery;
 import org.zstack.core.db.SimpleQuery.Op;
 import org.zstack.core.errorcode.ErrorFacade;
-import org.zstack.core.workflow.FlowChainBuilder;
 import org.zstack.header.Component;
 import org.zstack.header.allocator.HostAllocatorFilterExtensionPoint;
 import org.zstack.header.allocator.HostAllocatorSpec;
@@ -28,6 +27,7 @@ import org.zstack.header.volume.VolumeVO;
 import org.zstack.header.volume.VolumeVO_;
 import org.zstack.storage.primary.PrimaryStorageCapacityChecker;
 import org.zstack.storage.primary.PrimaryStoragePhysicalCapacityManager;
+import org.zstack.storage.primary.allocate.PrimaryStorageAllocatorChainBuilder;
 import org.zstack.storage.snapshot.SnapshotDeletionExtensionPoint;
 import org.zstack.tag.PatternedSystemTag;
 import org.zstack.utils.Utils;
@@ -63,8 +63,9 @@ public class LocalStorageAllocatorFactory implements PrimaryStorageAllocatorStra
 
     public static PrimaryStorageAllocatorStrategyType type = new PrimaryStorageAllocatorStrategyType(LocalStorageConstants.LOCAL_STORAGE_ALLOCATOR_STRATEGY);
 
+    private List<String> producerNames;
     private List<String> allocatorFlowNames;
-    private FlowChainBuilder builder = new FlowChainBuilder();
+    private PrimaryStorageAllocatorChainBuilder allocateBuilder;
     private LocalStorageAllocatorStrategy strategy;
     private static HashMap<String, AbstractUriParser> uriParsers = new HashMap<>();
 
@@ -76,6 +77,14 @@ public class LocalStorageAllocatorFactory implements PrimaryStorageAllocatorStra
     @Override
     public PrimaryStorageAllocatorStrategy getPrimaryStorageAllocatorStrategy() {
         return strategy;
+    }
+
+    public List<String> getProducerNames() {
+        return producerNames;
+    }
+
+    public void setProducerNames(List<String> producerNames) {
+        this.producerNames = producerNames;
     }
 
     public List<String> getAllocatorFlowNames() {
@@ -92,8 +101,11 @@ public class LocalStorageAllocatorFactory implements PrimaryStorageAllocatorStra
 
     @Override
     public boolean start() {
-        builder.setFlowClassNames(allocatorFlowNames).construct();
-        strategy = new LocalStorageAllocatorStrategy(builder);
+        allocateBuilder = PrimaryStorageAllocatorChainBuilder.newBuilder()
+                .setProducerClassNames(producerNames)
+                .setFlowClassNames(allocatorFlowNames)
+                .construct();
+        strategy = new LocalStorageAllocatorStrategy(allocateBuilder);
         return true;
     }
 

@@ -10,7 +10,6 @@ import org.zstack.test.integration.storage.StorageTest
 import org.zstack.testlib.BackupStorageSpec
 import org.zstack.testlib.EnvSpec
 import org.zstack.testlib.SubCase
-import org.zstack.utils.data.SizeUnit
 import org.zstack.utils.gson.JSONObjectUtil
 
 /**
@@ -166,7 +165,12 @@ class ResumePrimaryStorageCapacityAfterCreateVmFailCase extends SubCase {
                     ]
                 }
             }) {
-                assert delegate.code == "SYS.1006"
+                assert delegate.code == "PS.1000"
+                assert delegate.opaque
+                assert delegate.opaque["rejectedCandidates"] instanceof List
+                assert (delegate.opaque["rejectedCandidates"] as List).size() == 1
+                assert delegate.opaque["rejectedCandidates"][0] instanceof Map
+                assert delegate.opaque["rejectedCandidates"][0]["primaryStorageName"] == "local"
             }
 
             retryInSecs(3){

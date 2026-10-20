@@ -8,6 +8,7 @@ import org.zstack.header.storage.primary.PrimaryStorageVO;
 import org.zstack.header.storage.primary.allocate.AbstractPrimaryStorageAllocatorFlow;
 import org.zstack.header.storage.primary.allocate.PrimaryStorageAllocatorTrigger;
 import org.zstack.header.storage.primary.allocate.PrimaryStorageCandidate;
+import org.zstack.storage.primary.DiskCapacityTracer;
 import org.zstack.utils.Utils;
 import org.zstack.utils.logging.CLogger;
 
@@ -100,6 +101,7 @@ public class PrimaryStorageAllocatorChain implements PrimaryStorageAllocatorTrig
 
         logger.debug(String.format("[Primary Storage Allocation]: flow[%s] left %s candidates",
                 lastFlow.getClass().getName(), result.size()));
+        DiskCapacityTracer.traceAllocation(allocationSpec, transform(result, candidate -> candidate.primaryStorage));
 
         if (it.hasNext()) {
             runFlow(it.next());

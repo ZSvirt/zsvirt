@@ -136,21 +136,6 @@ CREATE TABLE IF NOT EXISTS ZnsCapabilitySnapshotVO (
     CONSTRAINT fkZnsCapabilitySnapshotVOZnsInfoVO FOREIGN KEY (znsUuid) REFERENCES ZnsInfoVO (uuid) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-CREATE TABLE IF NOT EXISTS ZnsWizardSyncVO (
-    uuid char(32) NOT NULL,
-    znsUuid char(32) NOT NULL,
-    reason varchar(64) NOT NULL,
-    status varchar(32) NOT NULL,
-    leaseOwner char(32) DEFAULT NULL,
-    leaseUntil timestamp NULL DEFAULT NULL,
-    acceptedDate timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    completedDate timestamp NULL DEFAULT NULL,
-    lastErrorCode varchar(64) DEFAULT NULL,
-    PRIMARY KEY (uuid),
-    UNIQUE KEY `ukZnsWizardSyncVOZnsReason` (znsUuid, reason),
-    CONSTRAINT fkZnsWizardSyncVOZnsInfoVO FOREIGN KEY (znsUuid) REFERENCES ZnsInfoVO (uuid) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
 CREATE TABLE IF NOT EXISTS ZnsTransportZoneRefVO (
     vSwitchUuid char(32) NOT NULL,
     znsInfoUuid char(32) NOT NULL,

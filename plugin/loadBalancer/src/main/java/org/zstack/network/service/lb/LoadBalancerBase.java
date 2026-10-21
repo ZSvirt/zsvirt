@@ -39,7 +39,7 @@ import org.zstack.network.l3.L3NetworkManager;
 import org.zstack.network.service.vip.ModifyVipAttributesStruct;
 import org.zstack.network.service.vip.Vip;
 import org.zstack.network.service.vip.VipVO;
-import org.zstack.tag.PatternedSystemTag;
+import org.zstack.tag.SystemTag;
 import org.zstack.tag.SystemTagCreator;
 import org.zstack.tag.TagManager;
 import org.zstack.utils.DebugUtils;
@@ -2085,7 +2085,7 @@ public class LoadBalancerBase {
         });
     }
 
-    private <K, V> void updateLoadBalancerListenerSystemTag(PatternedSystemTag systemTag, String resourceUuid, K token, V value) {
+    private <K, V> void updateLoadBalancerListenerSystemTag(SystemTag systemTag, String resourceUuid, K token, V value) {
         SystemTagInventory systemTagInventory = (SystemTagInventory) systemTag.update(resourceUuid, systemTag.instantiateTag(map(e(token, value))));
 
         if (systemTagInventory == null) {

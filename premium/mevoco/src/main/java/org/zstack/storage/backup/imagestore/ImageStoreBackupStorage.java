@@ -53,7 +53,7 @@ import org.zstack.storage.backup.BackupStorageBase;
 import org.zstack.storage.backup.BackupStorageGlobalConfig;
 import org.zstack.storage.backup.BackupStorageSystemTags;
 import org.zstack.storage.backup.imagestore.ImageStoreBackupStorageCommands.*;
-import org.zstack.tag.PatternedSystemTag;
+import org.zstack.tag.SystemTag;
 import org.zstack.tag.SystemTagCreator;
 import org.zstack.utils.*;
 import org.zstack.utils.gson.JSONObjectUtil;
@@ -66,7 +66,6 @@ import org.zstack.utils.ssh.SshException;
 
 import javax.persistence.Query;
 import java.io.File;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
@@ -2302,7 +2301,7 @@ public class ImageStoreBackupStorage extends BackupStorageBase {
         return ThreadContext.get(THREAD_CONTEXT_TASK_NAME).contains(VOLUME_BACKUP_PACKAGE_NAME);
     }
 
-    public static String getNetworkAddress(String bsUuid, PatternedSystemTag systemTag, String token) {
+    public static String getNetworkAddress(String bsUuid, SystemTag systemTag, String token) {
         final String cidr = systemTag.getTokenByResourceUuid(bsUuid, token);
         if (cidr == null) {
             logger.warn(String.format("BS[uuid:%s] has no %s config", bsUuid, token));

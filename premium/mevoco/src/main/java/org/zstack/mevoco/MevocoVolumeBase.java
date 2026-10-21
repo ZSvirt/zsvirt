@@ -73,7 +73,7 @@ import org.zstack.storage.snapshot.VolumeSnapshotManagerImpl;
 import org.zstack.storage.snapshot.VolumeSnapshotSystemTags;
 import org.zstack.storage.snapshot.reference.VolumeSnapshotReferenceUtils;
 import org.zstack.storage.volume.*;
-import org.zstack.tag.PatternedSystemTag;
+import org.zstack.tag.SystemTag;
 import org.zstack.tag.SystemTagCreator;
 import org.zstack.utils.CollectionUtils;
 import org.zstack.utils.DebugUtils;
@@ -2780,7 +2780,7 @@ public class MevocoVolumeBase extends VolumeBase {
     }
 
     private ErrorCode doCheckNonAdminQosLimit(VolumeQosType limitType,  Long total, Long read, Long write) {
-        PatternedSystemTag upThresholdTag;
+        SystemTag upThresholdTag;
         String readToken, writeToken, totalToken;
         if (IOPS == limitType) {
             upThresholdTag = MevocoVolumeSystemTags.NORMAL_ACCOUNT_VOLUME_IOPS_UP_THRESHOLD;

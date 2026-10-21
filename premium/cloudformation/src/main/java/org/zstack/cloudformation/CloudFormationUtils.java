@@ -7,7 +7,7 @@ import org.zstack.cloudformation.template.struct.CfnResults;
 import org.zstack.cloudformation.template.struct.ResultStruct;
 import org.zstack.header.errorcode.OperationFailureException;
 import org.zstack.sdk.CreateSystemTagAction;
-import org.zstack.tag.PatternedSystemTag;
+import org.zstack.tag.SystemTag;
 import org.zstack.tag.SystemTagCreator;
 import org.zstack.utils.Utils;
 import org.zstack.utils.logging.CLogger;
@@ -67,7 +67,7 @@ public class CloudFormationUtils {
         }
     }
 
-    public static void attachSystemTagToResources(Object action, Object result, PatternedSystemTag tag) {
+    public static void attachSystemTagToResources(Object action, Object result, SystemTag tag) {
         if (!action.getClass().getSimpleName().startsWith("Create") || action instanceof CreateSystemTagAction) {
             return;
         }

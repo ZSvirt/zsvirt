@@ -2,7 +2,7 @@ package org.zstack.test.integration.network.l3network
 
 import org.zstack.network.l3.L3NetworkSystemTags
 import org.zstack.network.l3.L3NetworkGlobalConfig
-import org.zstack.tag.PatternedSystemTag
+import org.zstack.tag.SystemTag
 import org.zstack.test.integration.network.NetworkTest
 import org.zstack.testlib.EnvSpec
 import org.zstack.sdk.*
@@ -690,7 +690,7 @@ class AscDelayRecycleIpAllocatorStrategyCase extends SubCase {
             l3NetworkUuid = l3.uuid
         } as VipInventory
 
-        def pst = L3NetworkSystemTags.NETWORK_ASC_DELAY_NORMAL_NEXT_IP as PatternedSystemTag;
+        def pst = L3NetworkSystemTags.NETWORK_ASC_DELAY_NORMAL_NEXT_IP as SystemTag
         assert pst.getTagInventory(l3.uuid) == null
 
         def vip_3 = createVip {
@@ -769,7 +769,7 @@ class AscDelayRecycleIpAllocatorStrategyCase extends SubCase {
             ipRangeUuid = range_2.uuid
         } as VipInventory
 
-        pst = L3NetworkSystemTags.NETWORK_ASC_DELAY_ADDRESS_POOL_NEXT_IP as PatternedSystemTag;
+        pst = L3NetworkSystemTags.NETWORK_ASC_DELAY_ADDRESS_POOL_NEXT_IP as SystemTag
         assert pst.getTagInventory(l3.uuid) == null
 
         def vip_9 = createVip {

@@ -75,7 +75,7 @@ import org.zstack.softwarePackage.compute.UploadSoftwarePackageToBackupStorageEx
 import org.zstack.softwarePackage.entity.SoftwarePackageVO;
 import org.zstack.softwarePackage.entity.UpgradeType;
 import org.zstack.softwarePackage.entity.UploadSoftwarePackageToBackupStorageLongJobData;
-import org.zstack.tag.PatternedSystemTag;
+import org.zstack.tag.SystemTag;
 import org.zstack.tag.SystemTagCreator;
 import org.zstack.utils.TagUtils;
 import org.zstack.utils.ShellResult;
@@ -969,7 +969,7 @@ public class ZMigrateManager extends AbstractService implements
                     amsg.setArchitecture(ImageArchitecture.x86_64.toString());
                     amsg.setDescription(imageName.startsWith(GATEWAY_IMAGE_PREFIX) ? GATEWAY_IMAGE_DESCRIPTION : BOOT_IMAGE_DESCRIPTION);
 
-                    final PatternedSystemTag upgradeImageSystemTag;
+                    final SystemTag upgradeImageSystemTag;
                     final String upgradeImageTokenName;
                     if (imageName.startsWith(GATEWAY_IMAGE_PREFIX)) {
                         upgradeImageSystemTag = ZMIGRATE_GATEWAY_UPGRADE_IMAGE;
@@ -1128,7 +1128,7 @@ public class ZMigrateManager extends AbstractService implements
                         doDeleteImageSystemTag(ZMIGRATE_WINDOWS_BOOT_IMAGE);
                     }
 
-                    private void doDeleteImageSystemTag(PatternedSystemTag systemtag) {
+                    private void doDeleteImageSystemTag(SystemTag systemtag) {
                         sql(SystemTagVO.class)
                                 .like(SystemTagVO_.tag, TagUtils.tagPatternToSqlPattern(systemtag.getTagFormat()))
                                 .eq(SystemTagVO_.resourceType, SoftwarePackageVO.class.getSimpleName())
@@ -1270,7 +1270,7 @@ public class ZMigrateManager extends AbstractService implements
                     amsg.setUrl(String.format("file://%s", imagePath));
                     amsg.setArchitecture(ImageArchitecture.x86_64.toString());
                     amsg.setDescription(imageName.startsWith(GATEWAY_IMAGE_PREFIX) ? GATEWAY_IMAGE_DESCRIPTION : BOOT_IMAGE_DESCRIPTION);
-                    final PatternedSystemTag imageSystemTag;
+                    final SystemTag imageSystemTag;
                     final String imageTokenName;
                     if (imageName.startsWith(GATEWAY_IMAGE_PREFIX)) {
                         imageSystemTag = ZMIGRATE_GATEWAY_IMAGE;
@@ -1482,7 +1482,7 @@ public class ZMigrateManager extends AbstractService implements
         .start();
     }
 
-    private void createImageSystemTag(PatternedSystemTag systemTag, String tokenName, String tokenValue, String softwarePackageUuid) {
+    private void createImageSystemTag(SystemTag systemTag, String tokenName, String tokenValue, String softwarePackageUuid) {
         if (tokenValue == null) {
             return;
         }

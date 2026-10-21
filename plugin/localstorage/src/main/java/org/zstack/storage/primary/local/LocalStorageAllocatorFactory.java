@@ -29,7 +29,7 @@ import org.zstack.storage.primary.PrimaryStorageCapacityChecker;
 import org.zstack.storage.primary.PrimaryStoragePhysicalCapacityManager;
 import org.zstack.storage.primary.allocate.PrimaryStorageAllocatorChainBuilder;
 import org.zstack.storage.snapshot.SnapshotDeletionExtensionPoint;
-import org.zstack.tag.PatternedSystemTag;
+import org.zstack.tag.SystemTag;
 import org.zstack.utils.Utils;
 import org.zstack.utils.logging.CLogger;
 
@@ -337,7 +337,7 @@ public class LocalStorageAllocatorFactory implements PrimaryStorageAllocatorStra
         } else if (msg.getRequiredHostUuid() != null) {
             hostUuid = msg.getRequiredHostUuid();
         } else if (msg.getSystemTags() != null) {
-            PatternedSystemTag lsTag = LocalStorageSystemTags.DEST_HOST_FOR_CREATING_DATA_VOLUME;
+            SystemTag lsTag = LocalStorageSystemTags.DEST_HOST_FOR_CREATING_DATA_VOLUME;
             hostUuid = msg.getSystemTags().stream().filter(lsTag::isMatch)
                     .map(it -> lsTag.getTokenByTag(it, LocalStorageSystemTags.DEST_HOST_FOR_CREATING_DATA_VOLUME_TOKEN))
                     .findAny().orElse(null);

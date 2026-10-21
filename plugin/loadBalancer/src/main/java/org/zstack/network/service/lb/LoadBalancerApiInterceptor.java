@@ -38,7 +38,7 @@ import org.zstack.network.service.vip.VipNetworkServicesRefVO;
 import org.zstack.network.service.vip.VipNetworkServicesRefVO_;
 import org.zstack.network.service.vip.VipVO;
 import org.zstack.network.service.vip.VipVO_;
-import org.zstack.tag.PatternedSystemTag;
+import org.zstack.tag.SystemTag;
 import org.zstack.tag.TagManager;
 import org.zstack.utils.*;
 import org.zstack.utils.logging.CLogger;
@@ -610,7 +610,7 @@ public class LoadBalancerApiInterceptor implements ApiMessageInterceptor, Global
         msg.setLoadBalancerUuid(q.getSingleResult());
     }
 
-    private boolean hasTag(APIMessage msg, PatternedSystemTag tag) {
+    private boolean hasTag(APIMessage msg, SystemTag tag) {
         if (msg.getSystemTags() == null) {
             return false;
         }
@@ -623,7 +623,7 @@ public class LoadBalancerApiInterceptor implements ApiMessageInterceptor, Global
         return false;
     }
 
-    private void insertTagIfNotExisting(APICreateMessage msg, PatternedSystemTag tag, String value) {
+    private void insertTagIfNotExisting(APICreateMessage msg, SystemTag tag, String value) {
         if (!hasTag(msg, tag)) {
             msg.addSystemTag(value);
         }

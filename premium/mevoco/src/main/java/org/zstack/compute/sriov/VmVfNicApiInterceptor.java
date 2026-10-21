@@ -37,7 +37,7 @@ import org.zstack.header.volume.VolumeVO;
 import org.zstack.header.volume.VolumeVO_;
 import org.zstack.storage.migration.primary.APIPrimaryStorageMigrateVmMsg;
 import org.zstack.storage.primary.local.APILocalStorageMigrateVolumeMsg;
-import org.zstack.tag.PatternedSystemTag;
+import org.zstack.tag.SystemTag;
 import org.zstack.tag.SystemTagUtils;
 import org.zstack.utils.Utils;
 import org.zstack.utils.gson.JSONObjectUtil;
@@ -214,7 +214,7 @@ public class VmVfNicApiInterceptor implements GlobalApiMessageInterceptor {
             return;
         }
 
-        PatternedSystemTag tag = SriovSystemTags.L2_ENABLE_SRIOV;
+        SystemTag tag = SriovSystemTags.L2_ENABLE_SRIOV;
         String tagValue = SystemTagUtils.findTagValue(msg.getSystemTags(), tag);
         if (StringUtils.isEmpty(tagValue)) {
             return;

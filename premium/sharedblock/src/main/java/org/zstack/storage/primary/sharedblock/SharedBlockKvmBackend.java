@@ -384,10 +384,10 @@ public class SharedBlockKvmBackend extends SharedBlockHypervisorBackend implemen
     }
 
     private void disconnect(String hostUuid, final Completion completion) {
-        disconnect(hostUuid, self.getUuid(), false, completion);
+        disconnect(hostUuid, self.getUuid(), false, true, completion);
     }
 
-    private void disconnect(String hostUuid, String primaryStorageUuid, boolean stopServices, final Completion completion) {
+    private void disconnect(String hostUuid, String primaryStorageUuid, boolean stopServices, boolean isRemoveRefVO, final Completion completion) {
         SharedBlockKvmCommands.DisonnectCmd cmd = new SharedBlockKvmCommands.DisonnectCmd();
         cmd.vgUuid = primaryStorageUuid;
         cmd.hostUuid = hostUuid;
@@ -396,12 +396,23 @@ public class SharedBlockKvmBackend extends SharedBlockHypervisorBackend implemen
         httpCall(SharedBlockKvmCommands.DISCONNECT_PATH, hostUuid, cmd, true, SharedBlockKvmCommands.AgentRsp.class, new ReturnValueCompletion<SharedBlockKvmCommands.AgentRsp>(completion) {
             @Override
             public void success(SharedBlockKvmCommands.AgentRsp rsp) {
-                SharedBlockGroupPrimaryStorageHostRefVO vo = Q.New(SharedBlockGroupPrimaryStorageHostRefVO.class)
-                        .eq(SharedBlockGroupPrimaryStorageHostRefVO_.hostUuid, hostUuid)
-                        .eq(SharedBlockGroupPrimaryStorageHostRefVO_.primaryStorageUuid, self.getUuid())
-                        .find();
-                if (vo != null) {
-                    dbf.remove(vo);
+                if (isRemoveRefVO) {
+                    SharedBlockGroupPrimaryStorageHostRefVO vo = Q.New(SharedBlockGroupPrimaryStorageHostRefVO.class)
+                            .eq(SharedBlockGroupPrimaryStorageHostRefVO_.hostUuid, hostUuid)
+                            .eq(SharedBlockGroupPrimaryStorageHostRefVO_.primaryStorageUuid, self.getUuid())
+                            .find();
+                    if (vo != null) {
+                        dbf.remove(vo);
+                    }
+                } else {
+                    UpdatePrimaryStorageHostStatusMsg umsg = new UpdatePrimaryStorageHostStatusMsg();
+                    umsg.setStatus(PrimaryStorageHostStatus.Disconnected);
+                    umsg.setPrimaryStorageUuid(primaryStorageUuid);
+                    umsg.setReason(Platform.err(HaErrors.PRIMARY_STORAGE_HOST_DISCONNECTED,
+                            "primary storage %s disconnect on host %s", primaryStorageUuid, hostUuid));
+                    umsg.setHostUuid(hostUuid);
+                    bus.makeTargetServiceIdByResourceUuid(umsg, PrimaryStorageConstant.SERVICE_ID, primaryStorageUuid);
+                    bus.send(umsg);
                 }
 
                 completion.success();
@@ -2906,7 +2917,7 @@ public class SharedBlockKvmBackend extends SharedBlockHypervisorBackend implemen
     }
     private void handle(final DisconnectSharedBlockGroupPrimaryStorageOnHostMsg msg) {
         final DisconnectSharedBlockGroupPrimaryStorageOnHostReply reply = new DisconnectSharedBlockGroupPrimaryStorageOnHostReply();
-        disconnect(msg.getHostUuid(), msg.getPrimaryStorageUuid(), msg.getStopService(), new Completion(msg) {
+        disconnect(msg.getHostUuid(), msg.getPrimaryStorageUuid(), msg.getStopService(), msg.isRemoveRefVO(), new Completion(msg) {
             @Override
             public void success() {
                 bus.reply(msg, reply);
@@ -6056,7 +6067,7 @@ public class SharedBlockKvmBackend extends SharedBlockHypervisorBackend implemen
     void ping(String psUuid, Completion completion) {
         AgentCmd cmd = new AgentCmd();
         cmd.vgUuid = psUuid;
-        new KvmAgentCommandDispatcher(psUuid).go(PING_PATH, cmd, SharedBlockKvmCommands.AgentRsp.class, new ReturnValueCompletion<AgentRsp>(completion) {
+        new KvmAgentCommandDispatcher(psUuid, Comparator.naturalOrder()).go(PING_PATH, cmd, SharedBlockKvmCommands.AgentRsp.class, new ReturnValueCompletion<AgentRsp>(completion) {
             @Override
             public void success(AgentRsp returnValue) {
                 completion.success();

@@ -448,7 +448,7 @@ public class CloudBusImpl3 implements CloudBus, CloudBusIN {
             }
 
             if (logger.isTraceEnabled()) {
-                logger.trace(String.format("%s in message%s is set, drop reply%s", NO_NEED_REPLY_MSG,
+                logger.trace(String.format("%s in message %s is set, drop reply%s", NO_NEED_REPLY_MSG,
                         dumpMessage(request), dumpMessage(reply)));
             }
 

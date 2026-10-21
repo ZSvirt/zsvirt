@@ -7873,8 +7873,8 @@ public class VmInstanceBase extends AbstractVmInstance {
             }
         }
 
-        if (struct.getRootDiskOfferingUuid() != null) {
-            DiskOfferingVO rootDisk = dbf.findByUuid(struct.getRootDiskOfferingUuid(), DiskOfferingVO.class);
+        if (struct.getRootDisk().getDiskOfferingUuid() != null) {
+            DiskOfferingVO rootDisk = dbf.findByUuid(struct.getRootDisk().getDiskOfferingUuid(), DiskOfferingVO.class);
             spec.setRootDiskOffering(DiskOfferingInventory.valueOf(rootDisk));
         }
 

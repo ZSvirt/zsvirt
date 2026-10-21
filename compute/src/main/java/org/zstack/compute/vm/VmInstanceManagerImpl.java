@@ -1324,28 +1324,6 @@ public class VmInstanceManagerImpl extends AbstractService implements
                         smsg.setDataVolumeFromTemplateSystemTags(msg.getDataVolumeFromTemplateSystemTags());
                         smsg.setL3NetworkUuids(msg.getL3NetworkSpecs());
                         smsg.setVmNicSecurityPolicyByDeviceId(msg.getVmNicSecurityPolicyByDeviceId());
-
-                        final DiskAO rootDisk = msg.getRootDisk();
-                        DiskOfferingVO dvo = null;
-                        if (rootDisk != null) {
-                            if (rootDisk.getDiskOfferingUuid() != null) {
-                                smsg.setRootDiskOfferingUuid(rootDisk.getDiskOfferingUuid());
-                            } else if (rootDisk.getSize() > 0) {
-                                dvo = new DiskOfferingVO();
-                                dvo.setUuid(getUuid());
-                                dvo.setAccountUuid(msg.getAccountUuid());
-                                dvo.setDiskSize(rootDisk.getSize());
-                                dvo.setName("for-create-vm-" + finalVo.getUuid());
-                                dvo.setType("TemporaryDiskOfferingType");
-                                dvo.setState(DiskOfferingState.Enabled);
-                                dvo.setAllocatorStrategy(PrimaryStorageConstant.DEFAULT_PRIMARY_STORAGE_ALLOCATION_STRATEGY_TYPE);
-                                dbf.persist(dvo);
-                                smsg.setRootDiskOfferingUuid(dvo.getUuid());
-                            }
-                        }
-
-                        String newCreateDiskOfferingUuid = dvo == null ? null : dvo.getUuid();
-
                         smsg.setVmInstanceInventory(VmInstanceInventory.valueOf(finalVo));
                         smsg.setCandidatePrimaryStorageUuidsForDataVolume(msg.getCandidatePrimaryStorageUuidsForDataVolume());
                         smsg.setCandidatePrimaryStorageUuidsForRootVolume(msg.getCandidatePrimaryStorageUuidsForRootVolume());
@@ -1374,10 +1352,6 @@ public class VmInstanceManagerImpl extends AbstractService implements
                         bus.send(smsg, new CloudBusCallBack(smsg) {
                             @Override
                             public void run(MessageReply reply) {
-                                if (newCreateDiskOfferingUuid != null) {
-                                    dbf.removeByPrimaryKey(newCreateDiskOfferingUuid, DiskOfferingVO.class);
-                                }
-
                                 if (reply.isSuccess()) {
                                     InstantiateNewCreatedVmInstanceReply r = (InstantiateNewCreatedVmInstanceReply) reply;
                                     instantiateVm = r.getVmInventory();

@@ -10,7 +10,7 @@ import java.util.List;
  */
 public class SelfFencerStruct {
     public HostInventory host;
-    public List<PrimaryStorageInventory> primaryStorage;
+    public List<PrimaryStorageInventory> primaryStorages;
     public String strategy;
     public List<String> fencers;
     public boolean skipStatusCheck; // "noStatusCheck" in cloud

@@ -12,6 +12,7 @@ import org.zstack.ha.spi.SelfFencerHypervisorBackend;
 import org.zstack.header.cluster.ClusterVO;
 import org.zstack.header.cluster.ClusterVO_;
 import org.zstack.header.core.Completion;
+import org.zstack.header.core.NopeCompletion;
 import org.zstack.header.core.WhileDoneCompletion;
 import org.zstack.header.errorcode.ErrorCode;
 import org.zstack.header.errorcode.ErrorCodeList;
@@ -90,7 +91,7 @@ public class SelfFencers {
                         for (PrimaryStorageInventory psInv : psInvs) {
                             SelfFencerStruct param = new SelfFencerStruct();
                             param.host = host;
-                            param.primaryStorage = Collections.singletonList(psInv);
+                            param.primaryStorages = Collections.singletonList(psInv);
                             param.strategy = HaStrategyHelper.getPrimaryStorageSelfFencerStrategy(psInv.getUuid(), psInv.getType()).toString();
                             param.fencers = fencers;
                             structList.add(param);
@@ -155,38 +156,49 @@ public class SelfFencers {
 
     public static class SetupStorageHeartbeatFileFencer {
         private final SelfFencerStruct param;
+        public boolean setupSkipped;
 
         public SetupStorageHeartbeatFileFencer(SelfFencerStruct param) {
             this.param = param;
         }
 
         public void setup() {
+            setup(new NopeCompletion());
+        }
+
+        public void setup(Completion completion) {
             if (!HaHelper.isVmHaEnabled()) {
+                setupSkipped = true;
                 logger.debug(String.format("the global config[%s] is set to false, skip setting up self-fencer on the hosts",
                         HaGlobalConfig.ALL.getCanonicalName()));
+                completion.success();
                 return;
             }
 
             final HostInventory host = param.host;
             final HaHypervisorFactory f = findHaHypervisorFactory(host.getHypervisorType());
             if (f == null) {
+                setupSkipped = true;
                 logger.warn(String.format("cannot find HaHypervisorFactory for the hypervisor type[%s], no way to setup self-fencer",
                         host.getHypervisorType()));
+                completion.success();
                 return;
             }
 
             SelfFencerHypervisorBackend bkd = f.createSelfFencerBackend(param);
-            bkd.setup(new Completion(null) {
+            bkd.setup(new Completion(completion) {
                 @Override
                 public void success() {
                     logger.debug(String.format("successfully setup the self-fencer on the host[uuid:%s, name:%s]", host.getUuid(),
                             host.getName()));
+                    completion.success();
                 }
 
                 @Override
                 public void fail(ErrorCode errorCode) {
                     logger.warn(String.format("failed to setup the self-fencer on the host[uuid:%s, name:%s], %s", host.getUuid(),
-                            host.getName(), errorCode));
+                            host.getName(), errorCode.getReadableDetails()));
+                    completion.fail(errorCode);
                 }
             });
         }

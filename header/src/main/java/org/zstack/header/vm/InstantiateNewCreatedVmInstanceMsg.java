@@ -128,14 +128,6 @@ public class InstantiateNewCreatedVmInstanceMsg extends NeedReplyMessage impleme
         this.dataVolumeTemplateUuids = dataVolumeTemplateUuids;
     }
 
-    public String getRootDiskOfferingUuid() {
-        return rootDiskOfferingUuid;
-    }
-
-    public void setRootDiskOfferingUuid(String rootDiskOfferingUuid) {
-        this.rootDiskOfferingUuid = rootDiskOfferingUuid;
-    }
-
     @Override
     public String getVmInstanceUuid() {
         return getVmInstanceInventory().getUuid();

@@ -21,6 +21,7 @@ public interface GuestToolsHypervisorBackend {
     void attachGuestToolsIsoToVm(VmInstanceInventory vm, Completion completion);
     void detachGuestToolsIsoFromVm(VmInstanceInventory vm, Completion completion);
     void getVmGuestToolsInfo(VmInstanceInventory vm, boolean readMetricOnly, ReturnValueCompletion<GuestToolsKvmCommands.GetVmGuestToolsInfoRsp> completion);
+    void getVmZWatchStatus(VmInstanceInventory vm, ReturnValueCompletion<GuestToolsKvmCommands.GetVmZWatchStatusRsp> completion);
     void getVmMetricsRoutingStatus(VmInstanceInventory vm, Set<String> checkItems, ReturnValueCompletion<Map<String, String>> completion);
     void updateHostGuestToolsTag(String hostUuid, String version);
     String getHostGuestToolsTag(String hostUuid);

@@ -5,7 +5,7 @@ import org.zstack.header.errorcode.ErrorCode;
 import org.zstack.header.network.l3.*;
 import org.zstack.header.tag.SystemTagVO;
 import org.zstack.header.tag.SystemTagVO_;
-import org.zstack.tag.PatternedSystemTag;
+import org.zstack.tag.SystemTag;
 import org.zstack.tag.SystemTagCreator;
 import org.zstack.utils.TagUtils;
 import org.zstack.utils.Utils;
@@ -58,7 +58,7 @@ public class AscDelayRecycleIpAllocatorStrategy extends AbstractIpAllocatorStrat
     private IpCursorStruct getIpCursorStruct(String l3NetworkUuid, String reqRangeType) {
         IpCursorStruct ipCursorStruct = new IpCursorStruct();
 
-        PatternedSystemTag pst;
+        SystemTag pst;
         String rangeUuidToken;
         String nextIpToken;
 
@@ -89,7 +89,7 @@ public class AscDelayRecycleIpAllocatorStrategy extends AbstractIpAllocatorStrat
     }
 
     private void updateIpCursorStruct(String l3NetworkUuid, String ipRangeType, String ipRangeUuid, String ip) {
-        PatternedSystemTag pst;
+        SystemTag pst;
         String rangeUuidToken;
         String nextIpToken;
 

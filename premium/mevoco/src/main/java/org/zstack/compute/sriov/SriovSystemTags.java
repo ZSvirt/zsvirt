@@ -3,7 +3,7 @@ package org.zstack.compute.sriov;
 import org.zstack.header.network.l2.L2NetworkVO;
 import org.zstack.header.tag.AdminOnlyTag;
 import org.zstack.header.tag.TagDefinition;
-import org.zstack.tag.PatternedSystemTag;
+import org.zstack.tag.SystemTag;
 
 /**
  * Created by GuoYi on 12/9/19.
@@ -11,5 +11,5 @@ import org.zstack.tag.PatternedSystemTag;
 @TagDefinition
 public class SriovSystemTags {
     @AdminOnlyTag
-    public static PatternedSystemTag L2_ENABLE_SRIOV = new PatternedSystemTag("enableSRIOV", L2NetworkVO.class);
+    public static SystemTag L2_ENABLE_SRIOV = new SystemTag("enableSRIOV", L2NetworkVO.class);
 }

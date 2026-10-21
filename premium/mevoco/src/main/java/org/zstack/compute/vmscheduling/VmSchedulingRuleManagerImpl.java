@@ -23,7 +23,7 @@ import org.zstack.header.vm.VmInstanceBeforeStartExtensionPoint;
 import org.zstack.header.vm.VmInstanceState;
 import org.zstack.header.vmscheduling.*;
 import org.zstack.identity.AccountManager;
-import org.zstack.tag.PatternedSystemTag;
+import org.zstack.tag.SystemTag;
 import org.zstack.tag.SystemTagCreator;
 import org.zstack.tag.SystemTagUtils;
 import org.zstack.tag.TagManager;
@@ -515,7 +515,7 @@ public class VmSchedulingRuleManagerImpl extends AbstractService implements Dele
     }
 
     private void createAffinityGroupSystemTags(String vmUuid, List<String> tags) {
-        PatternedSystemTag tag =  AffinityGroupSystemTags.AFFINITY_GROUP_UUID;
+        SystemTag tag = AffinityGroupSystemTags.AFFINITY_GROUP_UUID;
         String token = AffinityGroupSystemTags.AFFINITY_GROUP_UUID_TOKEN;
 
         String agUuid = SystemTagUtils.findTagValue(tags, tag, token);
@@ -532,8 +532,8 @@ public class VmSchedulingRuleManagerImpl extends AbstractService implements Dele
     @Override
     public ErrorCode handleSystemTag(String vmUuid, List<String> tags) {
         createAffinityGroupSystemTags(vmUuid, tags);
-        
-        PatternedSystemTag tag = VmSchedulingRuleSystemTags.VM_SCHEDULING_RULE_GROUP_UUID;
+
+        SystemTag tag = VmSchedulingRuleSystemTags.VM_SCHEDULING_RULE_GROUP_UUID;
         String token = VmSchedulingRuleSystemTags.VM_SCHEDULING_RULE_GROUP_UUID_TOKEN;
 
         String vmGroupUuid = SystemTagUtils.findTagValue(tags, tag, token);
@@ -561,7 +561,7 @@ public class VmSchedulingRuleManagerImpl extends AbstractService implements Dele
 
 
     private void createVmSystemTagForVmSchedulingRuleGroup(String vmGroupUuid, String vmUuid) {
-        PatternedSystemTag tag = VmSchedulingRuleSystemTags.VM_SCHEDULING_RULE_GROUP_UUID;
+        SystemTag tag = VmSchedulingRuleSystemTags.VM_SCHEDULING_RULE_GROUP_UUID;
 
         /* remove vm old nonherent systemTag  */
         if (tag.getTokenByResourceUuid(vmUuid, VmSchedulingRuleSystemTags.VM_SCHEDULING_RULE_GROUP_UUID_TOKEN) != null) {

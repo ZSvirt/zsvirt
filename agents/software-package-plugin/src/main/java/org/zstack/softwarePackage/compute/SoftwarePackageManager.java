@@ -56,6 +56,7 @@ import org.zstack.softwarePackage.entity.UploadSoftwarePackageLongJobData;
 import org.zstack.softwarePackage.entity.UploadSoftwarePackageToBackupStorageLongJobData;
 import org.zstack.softwarePackage.header.*;
 import org.zstack.softwarePackage.message.*;
+import org.zstack.tag.SystemTag;
 import org.zstack.tag.SystemTagCreator;
 import org.zstack.utils.Utils;
 import org.zstack.utils.gson.JSONObjectUtil;
@@ -1689,7 +1690,7 @@ public class SoftwarePackageManager extends AbstractService {
     }
 
     @SuppressWarnings("unchecked")
-    private void restoreBackupStorageTag(org.zstack.tag.PatternedSystemTag tag, String softwarePackageUuid,
+    private void restoreBackupStorageTag(SystemTag tag, String softwarePackageUuid,
                                          String value, String tokenName) {
         tag.delete(softwarePackageUuid);
         if (value == null) {

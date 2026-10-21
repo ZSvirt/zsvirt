@@ -34,7 +34,7 @@ import org.zstack.network.service.NetworkServiceSystemTag;
 import org.zstack.resourceconfig.ResourceConfig;
 import org.zstack.resourceconfig.ResourceConfigFacade;
 import org.zstack.resourceconfig.ResourceConfigUpdateExtensionPoint;
-import org.zstack.tag.PatternedSystemTag;
+import org.zstack.tag.SystemTag;
 import org.zstack.tag.SystemTagCreator;
 import org.zstack.tag.TagManager;
 import org.zstack.utils.ExceptionDSL;
@@ -554,7 +554,7 @@ public class L3NetworkManagerImpl extends AbstractService implements L3NetworkMa
     private void cleanUpIpCursorOfAcsStrategy(String resourceUuid, String oldValue, String newValue) {
         if (oldValue.equals(L3NetworkConstant.ASC_DELAY_RECYCLE_IP_ALLOCATOR_STRATEGY) &&
         !newValue.equals(L3NetworkConstant.ASC_DELAY_RECYCLE_IP_ALLOCATOR_STRATEGY)) {
-            PatternedSystemTag pst = L3NetworkSystemTags.NETWORK_ASC_DELAY_NORMAL_NEXT_IP;
+            SystemTag pst = L3NetworkSystemTags.NETWORK_ASC_DELAY_NORMAL_NEXT_IP;
             pst.delete(resourceUuid);
             pst = L3NetworkSystemTags.NETWORK_ASC_DELAY_ADDRESS_POOL_NEXT_IP;
             pst.delete(resourceUuid);

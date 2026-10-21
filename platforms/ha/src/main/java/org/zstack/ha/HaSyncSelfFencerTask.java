@@ -9,6 +9,7 @@ import org.zstack.core.cloudbus.CloudBusCallBack;
 import org.zstack.core.cloudbus.ResourceDestinationMaker;
 import org.zstack.core.db.DatabaseFacade;
 import org.zstack.core.db.Q;
+import org.zstack.core.db.SQL;
 import org.zstack.core.thread.ChainTask;
 import org.zstack.core.thread.PeriodicTask;
 import org.zstack.core.thread.SyncTaskChain;
@@ -42,6 +43,7 @@ import org.zstack.header.message.MessageReply;
 import org.zstack.utils.Utils;
 import org.zstack.utils.logging.CLogger;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -169,15 +171,26 @@ public class HaSyncSelfFencerTask implements PeriodicTask {
                             completion.done();
                             return;
                         }
+                        List<String> claimedPsUuids = new ArrayList<>();
                         for (HostHaStateVO hostHaStateVO : hostHaStateVOs) {
-                            hostHaStateVO.setState(HostHaStateMachine.getState(hostHaStateVO.getState(), HostHaStateEvent.setup));
-                            dbf.update(hostHaStateVO);
+                            int updated = SQL.New(HostHaStateVO.class)
+                                    .eq(HostHaStateVO_.id, hostHaStateVO.getId())
+                                    .eq(HostHaStateVO_.state, HostHaState.SetupFail)
+                                    .set(HostHaStateVO_.state, HostHaStateMachine.getState(hostHaStateVO.getState(), HostHaStateEvent.setup))
+                                    .update();
+                            if (updated > 0) {
+                                claimedPsUuids.add(hostHaStateVO.getPrimaryStorageUuid());
+                            }
+                        }
+                        if (claimedPsUuids.isEmpty()) {
+                            completion.done();
+                            return;
                         }
 
                         HostInventory inv = HostInventory.valueOf(hostVo);
                         RetrySetupSelfFencerOnHostMsg msg = new RetrySetupSelfFencerOnHostMsg();
                         msg.setHostInventory(inv);
-                        msg.setPrimaryStorageUuids(hostHaStateVOs.stream().map(HostHaStateVO::getPrimaryStorageUuid).collect(Collectors.toList()));
+                        msg.setPrimaryStorageUuids(claimedPsUuids);
 
                         bus.makeTargetServiceIdByResourceUuid(msg, HaConstants.SERVICE_ID, inv.getUuid());
                         bus.send(msg, new CloudBusCallBack(completion) {

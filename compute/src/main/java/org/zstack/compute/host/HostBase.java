@@ -1429,7 +1429,7 @@ public abstract class HostBase extends AbstractHost {
                 changeConnectionState(HostStatusEvent.connected);
                 tracker.trackHost(self.getUuid());
                 CollectionUtils.safeForEach(pluginRgty.getExtensionList(HostAfterConnectedExtensionPoint.class),
-                        ext -> ext.afterHostConnected(getSelfInventory()));
+                        ext -> ext.afterHostConnected(getSelfInventory(), hostInfo));
                 completion.success();
             })
             .error(error -> {

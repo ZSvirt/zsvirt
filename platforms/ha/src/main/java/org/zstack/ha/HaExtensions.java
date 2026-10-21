@@ -1,25 +1,34 @@
 package org.zstack.ha;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.zstack.compute.host.PreHostConnectExtensionPoint;
 import org.zstack.compute.vm.BeforeStopVmOnHypervisorExtensionPoint;
 import org.zstack.core.componentloader.PluginRegistry;
 import org.zstack.core.db.DatabaseFacade;
 import org.zstack.core.db.Q;
 import org.zstack.core.db.SQL;
+import org.zstack.core.db.SQLBatchWithReturn;
 import org.zstack.core.timeout.TimeHelper;
+import org.zstack.ha.entity.HostHaStateVO;
+import org.zstack.ha.entity.HostHaStateVO_;
 import org.zstack.ha.entity.VmHaVO;
 import org.zstack.ha.entity.VmHaVO_;
 import org.zstack.ha.fencers.SelfFencers;
 import org.zstack.ha.header.HaErrors;
 import org.zstack.ha.header.HaGlobalConfig;
+import org.zstack.ha.header.HostHaState;
 import org.zstack.ha.header.VmHaLevel;
 import org.zstack.ha.message.SelfFencerStruct;
 import org.zstack.ha.spi.VmFencerRuleExtensionPoint;
 import org.zstack.ha.spi.VmHaVOUpdater;
 import org.zstack.header.cluster.ClusterUpdateOSExtensionPoint;
 import org.zstack.header.cluster.ClusterVO;
+import org.zstack.header.core.Completion;
+import org.zstack.header.core.NoErrorCompletion;
 import org.zstack.header.core.NopeCompletion;
+import org.zstack.header.core.workflow.Flow;
 import org.zstack.header.errorcode.ErrorCode;
+import org.zstack.header.host.ConnectHostInfo;
 import org.zstack.header.host.HostAfterConnectedExtensionPoint;
 import org.zstack.header.host.HostErrors;
 import org.zstack.header.host.HostInventory;
@@ -32,6 +41,9 @@ import org.zstack.header.storage.primary.PrimaryStorageClusterRefVO;
 import org.zstack.header.storage.primary.PrimaryStorageClusterRefVO_;
 import org.zstack.header.storage.primary.PrimaryStorageDeleteExtensionPoint;
 import org.zstack.header.storage.primary.PrimaryStorageDetachExtensionPoint;
+import org.zstack.header.storage.primary.PrimaryStorageHostRefVO;
+import org.zstack.header.storage.primary.PrimaryStorageHostRefVO_;
+import org.zstack.header.storage.primary.PrimaryStorageHostStatus;
 import org.zstack.header.storage.primary.PrimaryStorageInventory;
 import org.zstack.header.storage.primary.PrimaryStorageState;
 import org.zstack.header.storage.primary.PrimaryStorageType;
@@ -43,11 +55,15 @@ import org.zstack.kvm.KVMException;
 import org.zstack.kvm.KVMHostInventory;
 import org.zstack.resourceconfig.ResourceConfigFacade;
 import org.zstack.utils.CollectionUtils;
+import org.zstack.utils.RunOnce;
+import org.zstack.utils.Utils;
+import org.zstack.utils.logging.CLogger;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -55,9 +71,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 import static org.zstack.core.Platform.err;
+import static org.zstack.ha.HaHelper.getSelfFencerSupportedPrimaryStorage;
 import static org.zstack.ha.header.HaGlobalConfig.VM_HA_LEVEL;
 import static org.zstack.utils.CollectionDSL.list;
 import static org.zstack.utils.CollectionUtils.filter;
+import static org.zstack.utils.CollectionUtils.transform;
 
 public class HaExtensions implements
         VmInstanceStartExtensionPoint
@@ -77,8 +95,10 @@ public class HaExtensions implements
         , PrimaryStorageDetachExtensionPoint
         , PrimaryStorageAttachExtensionPoint
         , UpdatePrimaryStorageExtensionPoint
+        , PreHostConnectExtensionPoint
         , HostAfterConnectedExtensionPoint
 {
+    private static final CLogger logger = Utils.getLogger(HaExtensions.class);
 
     @Autowired
     private PluginRegistry pluginRegistry;
@@ -513,7 +533,7 @@ public class HaExtensions implements
         for (HostVO h : hosts) {
             SelfFencerStruct param = new SelfFencerStruct();
             param.host = HostInventory.valueOf(h);
-            param.primaryStorage = list(inventory);
+            param.primaryStorages = list(inventory);
             SelfFencers.CancelStorageHeartbeatFileAndGatewayPing cancel = new SelfFencers.CancelStorageHeartbeatFileAndGatewayPing(param);
             cancel.cancel();
         }
@@ -550,7 +570,7 @@ public class HaExtensions implements
         for (HostInventory h : hosts) {
             SelfFencerStruct param = new SelfFencerStruct();
             param.host = h;
-            param.primaryStorage = ps;
+            param.primaryStorages = ps;
             param.fencers = HaHelper.findExecuteFencers();
             new SelfFencers.SetupStorageHeartbeatFileFencer(param).setup();
         }
@@ -577,24 +597,191 @@ public class HaExtensions implements
         setupStorageHeartbeatFileFencerOnHosts(list(ps), hostInvs);
     }
 
-    // ------------------------------------- HostAfterConnectedExtensionPoint ------------------------------------
+    // ------------------------------------- PreHostConnectExtensionPoint ------------------------------------
 
     @Override
-    public void afterHostConnected(HostInventory host) {
+    public Flow createPreHostConnectFlow() {
+        return Flow.of("setup-ha-self-fencer-pre-connect")
+            .handle((trigger, data) -> {
+                HostInventory hostInventory = findInventoryFromFlowData(data);
+                setupSelfFencerPreConnect(hostInventory, new NoErrorCompletion(trigger) {
+                    @Override
+                    public void done() {
+                        trigger.next();
+                    }
+                });
+            })
+            .build();
+    }
+
+    void setupSelfFencerPreConnect(HostInventory host, NoErrorCompletion completion) {
         if (!HaHelper.isVmHaEnabled()) {
+            completeReconnectSelfFencerSetup(completion);
             return;
         }
 
-        List<PrimaryStorageInventory> ps = HaHelper.getSelfFencerSupportedPrimaryStorage(host);
+        List<PrimaryStorageInventory> ps = claimPrimaryStorageNeedReconnectSelfFencerSetup(
+                host, getSelfFencerSupportedPrimaryStorage(host));
         if (ps.isEmpty()) {
+            completeReconnectSelfFencerSetup(completion);
             return;
         }
 
         SelfFencerStruct param = new SelfFencerStruct();
-        param.primaryStorage = ps;
         param.host = host;
+        param.primaryStorages = ps;
         param.fencers = HaHelper.findExecuteFencers();
-        new SelfFencers.SetupStorageHeartbeatFileFencer(param).setup();
+        param.skipStatusCheck = true;
+        RunOnce completionOnce = new RunOnce();
+        SelfFencers.SetupStorageHeartbeatFileFencer fencer = new SelfFencers.SetupStorageHeartbeatFileFencer(param);
+        fencer.setup(new Completion(completion) {
+            @Override
+            public void success() {
+                if (fencer.setupSkipped) {
+                    releaseReconnectSelfFencerSetupClaimsAndComplete(host, ps, completion, completionOnce);
+                    return;
+                }
+                completeReconnectSelfFencerSetup(completion, completionOnce);
+            }
+
+            @Override
+            public void fail(ErrorCode errorCode) {
+                releaseReconnectSelfFencerSetupClaimsAndComplete(host, ps, completion, completionOnce);
+            }
+        });
+    }
+
+    private void releaseReconnectSelfFencerSetupClaims(HostInventory host, List<PrimaryStorageInventory> ps) {
+        SQL.New(HostHaStateVO.class)
+                .eq(HostHaStateVO_.hostUuid, host.getUuid())
+                .in(HostHaStateVO_.primaryStorageUuid, transform(ps, PrimaryStorageInventory::getUuid))
+                .eq(HostHaStateVO_.state, HostHaState.Setuping)
+                .set(HostHaStateVO_.state, HostHaState.SetupFail)
+                .update();
+    }
+
+    private void releaseReconnectSelfFencerSetupClaimsAndComplete(
+            HostInventory host, List<PrimaryStorageInventory> ps, NoErrorCompletion completion, RunOnce completionOnce) {
+        completionOnce.run(() -> {
+            releaseReconnectSelfFencerSetupClaims(host, ps);
+            completeReconnectSelfFencerSetup(completion);
+        });
+    }
+
+    private void completeReconnectSelfFencerSetup(NoErrorCompletion completion, RunOnce completionOnce) {
+        completionOnce.run(() -> completeReconnectSelfFencerSetup(completion));
+    }
+
+    private void completeReconnectSelfFencerSetup(NoErrorCompletion completion) {
+        if (completion != null) {
+            completion.done();
+        }
+    }
+
+    List<PrimaryStorageInventory> claimPrimaryStorageNeedConnectedSelfFencerSetup(HostInventory host, List<PrimaryStorageInventory> candidates) {
+        return claimPrimaryStorageNeedSelfFencerSetup(host, candidates,
+                Arrays.asList(HostHaState.Done, HostHaState.Setuping, HostHaState.Cancelling));
+    }
+
+    List<PrimaryStorageInventory> claimPrimaryStorageNeedReconnectSelfFencerSetup(HostInventory host, List<PrimaryStorageInventory> candidates) {
+        return claimPrimaryStorageNeedSelfFencerSetup(host, candidates,
+                Collections.singletonList(HostHaState.Cancelling));
+    }
+
+    private List<PrimaryStorageInventory> claimPrimaryStorageNeedSelfFencerSetup(HostInventory host,
+                                                                                 List<PrimaryStorageInventory> candidates,
+                                                                                 List<HostHaState> skipStates) {
+        return new SQLBatchWithReturn<List<PrimaryStorageInventory>>() {
+            @Override
+            protected List<PrimaryStorageInventory> scripts() {
+                List<PrimaryStorageInventory> ps = filterPrimaryStorageNeedSelfFencerSetup(host, candidates, skipStates);
+                if (ps.isEmpty()) {
+                    return ps;
+                }
+
+                List<String> psUuids = transform(ps, PrimaryStorageInventory::getUuid);
+                HashSet<String> existingStatePsUuids = new HashSet<>(q(HostHaStateVO.class)
+                        .select(HostHaStateVO_.primaryStorageUuid)
+                        .eq(HostHaStateVO_.hostUuid, host.getUuid())
+                        .in(HostHaStateVO_.primaryStorageUuid, psUuids)
+                        .listValues());
+
+                List<PrimaryStorageInventory> ret = new ArrayList<>();
+                for (PrimaryStorageInventory inv : ps) {
+                    if (!existingStatePsUuids.contains(inv.getUuid())) {
+                        HostHaStateVO vo = new HostHaStateVO();
+                        vo.setHostUuid(host.getUuid());
+                        vo.setPrimaryStorageUuid(inv.getUuid());
+                        vo.setState(HostHaState.Setuping);
+                        persist(vo);
+                        ret.add(inv);
+                        continue;
+                    }
+
+                    int updated = sql(HostHaStateVO.class)
+                            .eq(HostHaStateVO_.hostUuid, host.getUuid())
+                            .eq(HostHaStateVO_.primaryStorageUuid, inv.getUuid())
+                            .notIn(HostHaStateVO_.state, skipStates)
+                            .set(HostHaStateVO_.state, HostHaState.Setuping)
+                            .update();
+                    if (updated > 0) {
+                        ret.add(inv);
+                    }
+                }
+                return ret;
+            }
+        }.execute();
+    }
+
+    private List<PrimaryStorageInventory> filterPrimaryStorageNeedSelfFencerSetup(HostInventory host, List<PrimaryStorageInventory> candidates, List<HostHaState> skipStates) {
+        if (candidates.isEmpty()) {
+            return candidates;
+        }
+
+        List<String> candidateUuids = transform(candidates, PrimaryStorageInventory::getUuid);
+        List<String> connectedPsUuids = Q.New(PrimaryStorageHostRefVO.class)
+                .select(PrimaryStorageHostRefVO_.primaryStorageUuid)
+                .eq(PrimaryStorageHostRefVO_.hostUuid, host.getUuid())
+                .eq(PrimaryStorageHostRefVO_.status, PrimaryStorageHostStatus.Connected)
+                .in(PrimaryStorageHostRefVO_.primaryStorageUuid, candidateUuids)
+                .listValues();
+        if (connectedPsUuids.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        HashSet<String> connectedPsUuidSet = new HashSet<>(connectedPsUuids);
+        HashSet<String> skipPsUuids = new HashSet<>(Q.New(HostHaStateVO.class)
+                .select(HostHaStateVO_.primaryStorageUuid)
+                .eq(HostHaStateVO_.hostUuid, host.getUuid())
+                .in(HostHaStateVO_.primaryStorageUuid, connectedPsUuids)
+                .in(HostHaStateVO_.state, skipStates)
+                .listValues());
+
+        return filter(candidates, ps -> connectedPsUuidSet.contains(ps.getUuid()) && !skipPsUuids.contains(ps.getUuid()));
+    }
+
+    // ------------------------------------- HostAfterConnectedExtensionPoint ------------------------------------
+
+    @Override
+    public void afterHostConnected(HostInventory host, ConnectHostInfo hostInfo) {
+        if (!HaHelper.isVmHaEnabled()) {
+            return;
+        }
+
+        List<PrimaryStorageInventory> ps = getSelfFencerSupportedPrimaryStorage(host);
+        ps = claimPrimaryStorageNeedConnectedSelfFencerSetup(host, ps);
+
+        if (!ps.isEmpty()) {
+            SelfFencerStruct param = new SelfFencerStruct();
+            param.primaryStorages = ps;
+            param.host = host;
+            param.fencers = HaHelper.findExecuteFencers();
+            new SelfFencers.SetupStorageHeartbeatFileFencer(param).setup();
+        } else {
+            logger.debug(String.format(
+                    "host[uuid:%s] has no primary storage needing self-fencer setup, skip setup self-fencer",
+                    host.getUuid()));
+        }
 
         List<String> vmUuids = Q.New(VmInstanceVO.class)
                 .eq(VmInstanceVO_.hostUuid, host.getUuid())

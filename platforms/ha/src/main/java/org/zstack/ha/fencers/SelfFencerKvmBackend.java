@@ -10,6 +10,7 @@ import org.zstack.core.cloudbus.CloudBusCallBack;
 import org.zstack.core.componentloader.PluginRegistry;
 import org.zstack.core.db.DatabaseFacade;
 import org.zstack.core.db.Q;
+import org.zstack.core.errorcode.ErrorFacade;
 import org.zstack.core.thread.ChainTask;
 import org.zstack.core.thread.SyncTaskChain;
 import org.zstack.core.thread.ThreadFacade;
@@ -32,6 +33,8 @@ import org.zstack.header.core.ExceptionSafe;
 import org.zstack.header.core.NoErrorCompletion;
 import org.zstack.header.core.ReturnValueCompletion;
 import org.zstack.header.errorcode.ErrorCode;
+import org.zstack.header.errorcode.ErrorCodeList;
+import org.zstack.header.errorcode.OperationFailureException;
 import org.zstack.header.exception.CloudStateMachineException;
 import org.zstack.header.host.HostConstant;
 import org.zstack.header.host.HostInventory;
@@ -58,6 +61,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static org.zstack.core.Platform.err;
 import static org.zstack.ha.entity.HaCommands.CancelSelfFencerCmd;
@@ -75,6 +79,8 @@ public class SelfFencerKvmBackend implements SelfFencerHypervisorBackend {
     @Autowired
     private CloudBus bus;
     @Autowired
+    private ErrorFacade errorFacade;
+    @Autowired
     private ThreadFacade thdf;
     @Autowired
     private DatabaseFacade dbf;
@@ -91,7 +97,7 @@ public class SelfFencerKvmBackend implements SelfFencerHypervisorBackend {
 
         fileSystemStorage = new ArrayList<>();
         hasExtensions = new HashMap<>();
-        for (PrimaryStorageInventory ps : param.primaryStorage) {
+        for (PrimaryStorageInventory ps : param.primaryStorages) {
             KvmSetupSelfFencerExtensionPoint ext = pluginRgty.getExtensionFromMap(ps.getType(), KvmSetupSelfFencerExtensionPoint.class);
             if (ext != null) {
                 hasExtensions.put(ps, ext);
@@ -229,26 +235,40 @@ public class SelfFencerKvmBackend implements SelfFencerHypervisorBackend {
             }
         }
 
-        final Map<String, StorageResult> ret = new HashMap<>();
+        final Map<String, StorageResult> ret = new ConcurrentHashMap<>();
         logger.debug(String.format("start setup self-fencer on the KVM host[uuid:%s, name: %s]",
                 param.host.getUuid(), param.host.getName()));
         final AsyncLatch latch = new AsyncLatch(fileSystemStorage.size() + hasExtensions.size(), new NoErrorCompletion(completion) {
             @Override
             public void done() {
+                ErrorCodeList errorList = new ErrorCodeList();
                 for (String psUuid : ret.keySet()) {
                     StorageResult result = ret.get(psUuid);
-                    if (result.success) {
-                        updateHostHaState(psUuid, HostHaStateEvent.setupDone);
-                        logger.debug(String.format("setup storage[uuid:%s] self-fencer on the KVM host[uuid:%s, name: %s] success",
-                                psUuid, param.host.getUuid(), param.host.getName()));
-                        completion.success();
-                    } else {
-                        updateHostHaState(psUuid, HostHaStateEvent.setupFail);
-                        completion.fail(err(HaErrors.SETUP_SELF_FENCER_FAILED,
-                                "unable to setup storage[uuid:%s] self-fencer on the KVM host[uuid:%s, name: %s]",
-                                psUuid, param.host.getUuid(), param.host.getName()).withCause(result.error));
+
+                    try {
+                        if (result.success) {
+                            updateHostHaState(psUuid, HostHaStateEvent.setupDone);
+                            logger.debug(String.format("setup storage[uuid:%s] self-fencer on the KVM host[uuid:%s, name: %s] success",
+                                    psUuid, param.host.getUuid(), param.host.getName()));
+                        } else {
+                            updateHostHaState(psUuid, HostHaStateEvent.setupFail);
+                        }
+                    } catch (OperationFailureException e) {
+                        errorList.add(e.getErrorCode());
+                        continue;
+                    } catch (Exception e) {
+                        errorList.add(errorFacade.throwableToOperationError(e));
+                        continue;
+                    }
+
+                    if (!result.success) {
+                        errorList.add(err(HaErrors.SETUP_SELF_FENCER_FAILED, "unable to setup storage[uuid:%s] self-fencer on the KVM host[uuid:%s, name: %s]",
+                                psUuid, param.host.getUuid(), param.host.getName())
+                                .withCause(result.error));
                     }
                 }
+
+                completion.next(errorList);
             }
         });
 

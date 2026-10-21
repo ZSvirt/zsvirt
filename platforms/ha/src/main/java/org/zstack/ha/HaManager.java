@@ -552,7 +552,7 @@ public class HaManager extends AbstractService implements Component, HaCompletio
     private void handle(CancelStorageHeartbeatFileAndGatewayPingOnHostMsg msg) {
         SelfFencerStruct param = new SelfFencerStruct();
         param.host = msg.getHostInventory();
-        param.primaryStorage = Collections.singletonList(msg.getPrimaryStorageInventory());
+        param.primaryStorages = Collections.singletonList(msg.getPrimaryStorageInventory());
         CancelStorageHeartbeatFileAndGatewayPing cancel = new CancelStorageHeartbeatFileAndGatewayPing(param);
         cancel.cancel();
         CancelStorageHeartbeatFileAndGatewayPingOnHostReply reply = new CancelStorageHeartbeatFileAndGatewayPingOnHostReply();
@@ -562,7 +562,7 @@ public class HaManager extends AbstractService implements Component, HaCompletio
     private void handle(SetupStorageHeartbeatFileAndGatewayPingOnHostMsg msg) {
         SelfFencerStruct param = new SelfFencerStruct();
         param.host = msg.getHostInventory();
-        param.primaryStorage = Collections.singletonList(msg.getPrimaryStorageInventory());
+        param.primaryStorages = Collections.singletonList(msg.getPrimaryStorageInventory());
         param.fencers = HaHelper.findExecuteFencers();
         SetupStorageHeartbeatFileFencer fencer = new SetupStorageHeartbeatFileFencer(param);
         fencer.setup();
@@ -576,7 +576,7 @@ public class HaManager extends AbstractService implements Component, HaCompletio
         if (!ps.isEmpty()) {
             SelfFencerStruct param = new SelfFencerStruct();
             param.host = msg.getHostInventory();
-            param.primaryStorage = ps;
+            param.primaryStorages = ps;
             param.fencers = HaHelper.findExecuteFencers();
             new SetupStorageHeartbeatFileFencer(param).setup();
         }
@@ -598,7 +598,7 @@ public class HaManager extends AbstractService implements Component, HaCompletio
         if (!vos.isEmpty()) {
             SelfFencerStruct param = new SelfFencerStruct();
             param.host = msg.getHostInventory();
-            param.primaryStorage = PrimaryStorageInventory.valueOf(vos);
+            param.primaryStorages = PrimaryStorageInventory.valueOf(vos);
             new CancelStorageHeartbeatFileAndGatewayPing(param).cancel();
         }
         bus.reply(msg, new RetryCancelSelfFencerOnHostReply());
@@ -624,7 +624,7 @@ public class HaManager extends AbstractService implements Component, HaCompletio
     private void handle(GetFencerStateFromHostMsg msg) {
         SelfFencerStruct param = new SelfFencerStruct();
         param.host = msg.getHostInventory();
-        param.primaryStorage = new ArrayList<>();
+        param.primaryStorages = new ArrayList<>();
         new SyncStorageFencerState(param).sync();
         bus.reply(msg, new GetFencerStateFromHostReply());
     }

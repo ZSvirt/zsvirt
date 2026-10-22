@@ -137,6 +137,7 @@ import org.zstack.utils.*;
 import org.zstack.utils.data.NumberUtils;
 import org.zstack.utils.gson.JSONObjectUtil;
 import org.zstack.utils.logging.CLogger;
+import org.zstack.utils.network.IPv6Constants;
 import org.zstack.utils.network.NetworkUtils;
 import org.zstack.utils.path.PathUtil;
 import org.zstack.vrouterRoute.*;
@@ -587,6 +588,14 @@ public class MevocoManagerImpl extends AbstractService implements MevocoManager,
                         ApiMessageInterceptionException apiMesException = new ApiMessageInterceptionException(argerr("[%s] is not a standard cidr", cidr));
                         apiMesException.initCause(e);
                         throw apiMesException;
+            }
+        });
+
+        MevocoSystemTags.CLUSTER_CBT_BACKUP_NETWORK_CIDR.installValidator((resourceUuid, resourceType, systemTag) -> {
+            String cidr = MevocoSystemTags.CLUSTER_CBT_BACKUP_NETWORK_CIDR.getTokenByTag(systemTag,
+                    MevocoSystemTags.CLUSTER_CBT_BACKUP_NETWORK_CIDR_TOKEN);
+            if (cidr == null || !NetworkUtils.isCidr(cidr, IPv6Constants.IPv4)) {
+                throw new OperationFailureException(argerr("invalid CBT backup network CIDR[%s]", cidr));
             }
         });
     }

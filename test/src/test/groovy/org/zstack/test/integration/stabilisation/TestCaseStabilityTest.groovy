@@ -15,7 +15,12 @@ import org.zstack.testlib.SpringSpec
  */
 class TestCaseStabilityTest extends AbstractTestCaseStabilityTest {
 
-    static SpringSpec springSpec = ZStackTest.springSpec
+    static SpringSpec springSpec = makeSpring {
+        include(ZStackTest.springSpec)
+        include("guesttools.xml")
+        include("zwatch.xml")
+        include("zwatchDB.xml")
+    }
 
     @Override
     SpringSpec getSpringSpec() {

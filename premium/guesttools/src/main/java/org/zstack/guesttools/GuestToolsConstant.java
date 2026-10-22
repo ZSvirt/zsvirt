@@ -17,6 +17,7 @@ public interface GuestToolsConstant {
     String ATTACH_GUEST_TOOLS_ISO_TO_VM_PATH = "/vm/guesttools/attachiso";
     String DETACH_GUEST_TOOLS_ISO_FROM_VM_PATH = "/vm/guesttools/detachiso";
     String GET_VM_GUEST_TOOLS_INFO_PATH = "/vm/guesttools/getinfo";
+    String GET_VM_ZWATCH_STATUS_PATH = "/vm/zwatch/getstatus";
     String GET_VM_METRICS_ROUTING_STATUS_PATH = "/vm/guesttools/getroutingstatus";
 
     // to download guesttools iso to host

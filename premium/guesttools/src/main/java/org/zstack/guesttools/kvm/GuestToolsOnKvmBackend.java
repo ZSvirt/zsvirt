@@ -14,11 +14,15 @@ import org.zstack.core.db.DatabaseFacade;
 import org.zstack.core.db.Q;
 import org.zstack.core.db.SQL;
 import org.zstack.core.db.SimpleQuery;
+import org.zstack.core.workflow.SimpleFlowChain;
 import org.zstack.guesttools.*;
 import org.zstack.header.core.Completion;
 import org.zstack.header.core.NoErrorCompletion;
 import org.zstack.header.core.ReturnValueCompletion;
 import org.zstack.header.core.workflow.FlowTrigger;
+import org.zstack.header.core.workflow.FlowChain;
+import org.zstack.header.core.workflow.FlowDoneHandler;
+import org.zstack.header.core.workflow.FlowErrorHandler;
 import org.zstack.header.core.workflow.NoRollbackFlow;
 import org.zstack.header.errorcode.ErrorCode;
 import org.zstack.header.exception.CloudRuntimeException;
@@ -168,6 +172,115 @@ public abstract class GuestToolsOnKvmBackend implements GuestToolsHypervisorBack
                 }
 
                 logger.info(String.format("successfully get guest tools info from vm[uuid:%s]", vmUuid));
+                completion.success(rsp);
+            }
+        });
+    }
+
+    @Override
+    @SuppressWarnings("rawtypes")
+    public void getVmZWatchStatus(VmInstanceInventory vm, ReturnValueCompletion<GetVmZWatchStatusRsp> completion) {
+        boolean windowsGuest = getGuestToolsAgentType() == GuestToolsAgentType.WindowsOnKvm;
+        if (!windowsGuest) {
+            String versionTag = VmSystemTags.VM_GUEST_TOOLS.getTokenByResourceUuid(vm.getUuid(),
+                    VmSystemTags.VM_GUEST_TOOLS_VERSION_TOKEN);
+            if (ZWATCH_INSTALL_FAILED.equals(versionTag)) {
+                GetVmZWatchStatusRsp rsp = new GetVmZWatchStatusRsp();
+                rsp.setVersion(versionTag);
+                rsp.setStatus(GuestToolsAgentStatus.NOT_RUNNING.toString());
+                completion.success(rsp);
+                return;
+            }
+        }
+
+        QueryGuestToolsInfoContext context = createContext(vm.getUuid());
+        CheckGuestToolsStatusFlowBuilder statusFlow = new CheckGuestToolsStatusFlowBuilder()
+                .name("check-zwatch-last-response-timestamp")
+                .context(context)
+                .prometheusMetric(VmNamespace.AgentLastResponseTimestampDelta.getName())
+                .skipIfMetricIsEmpty()
+                .checkStatusByLastMetricValue(value -> value > 0 ? GuestToolsAgentStatus.RUNNING : GuestToolsAgentStatus.NOT_RUNNING);
+        if (windowsGuest) {
+            statusFlow.skipWhenQueryFail();
+        }
+
+        FlowChain chain = new SimpleFlowChain();
+        chain.disableDebugLog();
+        chain.setName(String.format("get-vm-%s-zwatch-status", vm.getUuid()));
+        chain.then(statusFlow.create()).then(new CheckGuestToolsStatusFlowBuilder()
+                .name("check-zwatch-version")
+                .context(context)
+                .prometheusMetric(VmNamespace.ZWatchAgentVersion.getName())
+                .skipIfMetricIsEmpty()
+                .skipWhenQueryFail()
+                .version(value -> new GuestToolsVersion(value.intValue()))
+                .create()
+        ).then(new NoRollbackFlow() {
+            String __name__ = "get-zwatch-status-from-host";
+
+            @Override
+            public boolean skip(Map data) {
+                return !windowsGuest || context.getStatus() != null || context.getVersion() != null;
+            }
+
+            @Override
+            public void run(FlowTrigger trigger, Map data) {
+                getVmZWatchStatusFromHost(vm.getUuid(), vm.getHostUuid(), new ReturnValueCompletion<GetVmZWatchStatusRsp>(trigger) {
+                    @Override
+                    public void success(GetVmZWatchStatusRsp rsp) {
+                        context.setStatus(GuestToolsAgentStatus.of(rsp.getStatus()));
+                        trigger.next();
+                    }
+
+                    @Override
+                    public void fail(ErrorCode errorCode) {
+                        trigger.fail(errorCode);
+                    }
+                });
+            }
+        }).done(new FlowDoneHandler(completion) {
+            @Override
+            public void handle(Map data) {
+                GetVmZWatchStatusRsp rsp = new GetVmZWatchStatusRsp();
+                if (context.getStatus() != null) {
+                    rsp.setStatus(context.getStatus().toString());
+                }
+                rsp.setVersion(context.getVersionString());
+                completion.success(rsp);
+            }
+        }).error(new FlowErrorHandler(completion) {
+            @Override
+            public void handle(ErrorCode errorCode, Map data) {
+                completion.fail(errorCode);
+            }
+        }).start();
+    }
+
+    protected void getVmZWatchStatusFromHost(String vmUuid, String hostUuid, ReturnValueCompletion<GetVmZWatchStatusRsp> completion) {
+        GetVmZWatchStatusCmd cmd = new GetVmZWatchStatusCmd();
+        cmd.setVmInstanceUuid(vmUuid);
+
+        KVMHostAsyncHttpCallMsg msg = new KVMHostAsyncHttpCallMsg();
+        msg.setHostUuid(hostUuid);
+        msg.setCommand(cmd);
+        msg.setPath(GET_VM_ZWATCH_STATUS_PATH);
+        bus.makeTargetServiceIdByResourceUuid(msg, HostConstant.SERVICE_ID, hostUuid);
+        bus.send(msg, new CloudBusCallBack(completion) {
+            @Override
+            public void run(MessageReply reply) {
+                if (!reply.isSuccess()) {
+                    completion.fail(reply.getError());
+                    return;
+                }
+
+                KVMHostAsyncHttpCallReply rly = reply.castReply();
+                GetVmZWatchStatusRsp rsp = rly.toResponse(GetVmZWatchStatusRsp.class);
+                if (!rsp.isSuccess()) {
+                    completion.fail(err(FAILED_TO_GET_STATUS, "failed to get ZWatch status from vm[uuid:%s], because:%s",
+                            vmUuid, rsp.getError()));
+                    return;
+                }
+
                 completion.success(rsp);
             }
         });

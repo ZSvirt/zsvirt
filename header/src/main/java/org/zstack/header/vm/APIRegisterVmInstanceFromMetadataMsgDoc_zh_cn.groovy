@@ -7,7 +7,10 @@ doc {
 
 	category "云主机"
 
-	desc """根据主存储上的元数据文件注册（恢复）一台云主机"""
+	desc """根据主存储上的元数据文件或传入的元数据字符串注册（恢复）一台云主机。
+metadata 与 metadataPath 必须二选一。metadata 仅登记云主机和已有卷的控制面记录，
+适用于不支持元数据文件的存储；不创建、转换或检查物理卷，也不读写存储元数据文件。
+调用者须确保元数据中的卷已存在且路径正确。"""
 
 	rest {
 		request {
@@ -24,11 +27,20 @@ doc {
 				column {
 					name "metadataPath"
 					enclosedIn "params"
-					desc "元数据文件在主存储上的路径"
+					desc "元数据文件在主存储上的路径，与 metadata 二选一"
 					location "body"
 					type "String"
-					optional false
+					optional true
 					since "zsv_5.0.0"
+				}
+				column {
+					name "metadata"
+					enclosedIn "params"
+					desc "完整的虚拟机元数据 JSON 字符串，与 metadataPath 二选一；卷路径指向已存在的实体"
+					location "body"
+					type "String"
+					optional true
+					since "zsv_5.2.0"
 				}
 				column {
 					name "primaryStorageUuid"

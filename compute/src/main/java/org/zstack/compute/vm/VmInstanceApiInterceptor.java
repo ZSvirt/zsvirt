@@ -1372,11 +1372,13 @@ public class VmInstanceApiInterceptor implements ApiMessageInterceptor {
 
     private void validate(APIRegisterVmInstanceFromMetadataMsg msg) {
         String path = msg.getMetadataPath();
-        if (StringUtils.isEmpty(path)) {
-            throw new ApiMessageInterceptionException(argerr("metadataPath cannot be empty or null"));
+        try {
+            VmMetadataRegistrationInputValidator.validate(path, msg.getMetadata(),
+                    VmGlobalConfig.VM_METADATA_PAYLOAD_REJECT_THRESHOLD.value(Long.class));
+        } catch (IllegalArgumentException e) {
+            throw new ApiMessageInterceptionException(argerr("%s", e.getMessage()));
         }
 
-        // Delegate path validation to the storage-type-specific extension
         String psUuid = msg.getPrimaryStorageUuid();
         String psType = Q.New(PrimaryStorageVO.class).select(PrimaryStorageVO_.type).eq(PrimaryStorageVO_.uuid, psUuid).findValue();
         if (psType == null) {
@@ -1384,15 +1386,16 @@ public class VmInstanceApiInterceptor implements ApiMessageInterceptor {
                     "primary storage[uuid:%s] not found", psUuid));
         }
 
-        VmMetadataPathBuildExtensionPoint ext = pluginRgty.getExtensionFromMap(psType, VmMetadataPathBuildExtensionPoint.class);
-        if (ext == null) {
-            throw new ApiMessageInterceptionException(argerr(
-                    "primary storage[uuid:%s, type:%s] does not support vm metadata", psUuid, psType));
-        }
-
-        String error = ext.validateMetadataPath(psUuid, path);
-        if (error != null) {
-            throw new ApiMessageInterceptionException(argerr("%s", error));
+        if (!msg.isInlineMetadata()) {
+            VmMetadataPathBuildExtensionPoint ext = pluginRgty.getExtensionFromMap(psType, VmMetadataPathBuildExtensionPoint.class);
+            if (ext == null) {
+                throw new ApiMessageInterceptionException(argerr(
+                        "primary storage[uuid:%s, type:%s] does not support vm metadata", psUuid, psType));
+            }
+            String error = ext.validateMetadataPath(psUuid, path);
+            if (error != null) {
+                throw new ApiMessageInterceptionException(argerr("%s", error));
+            }
         }
 
         // Validate cluster belongs to the specified zone

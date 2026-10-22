@@ -502,11 +502,10 @@ public class MetadataRegistrationPersistHelper {
             vmVO.setName(ctx.vmName);
         }
 
-        long originalInternalId = vmVO.getInternalId();
         long newInternalId = dbf.generateSequenceNumber(VmInstanceSequenceNumberVO.class);
         vmVO.setInternalId(newInternalId);
-        logger.info(String.format("[MetadataRegistration] persistVmInstance: reassigned internalId for vm[uuid:%s]: %d -> %d",
-                ctx.vmUuid, originalInternalId, newInternalId));
+        logger.info(String.format("[MetadataRegistration] persistVmInstance: assigned internalId for vm[uuid:%s]: %d",
+                ctx.vmUuid, newInternalId));
 
         logger.info(String.format("[MetadataRegistration] persisting VmInstanceVO[uuid:%s, name:%s, zoneUuid:%s, clusterUuid:%s, state:Registering]",
                 vmVO.getUuid(), vmVO.getName(), vmVO.getZoneUuid(), vmVO.getClusterUuid()));

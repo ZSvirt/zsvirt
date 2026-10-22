@@ -10,6 +10,8 @@ import org.zstack.header.zone.ZoneVO;
 import org.zstack.header.cluster.ClusterVO;
 import org.zstack.header.host.HostVO;
 import org.zstack.header.tag.TagResourceType;
+import org.zstack.header.vm.metadata.VmInstanceMetadataDTO;
+import org.zstack.utils.gson.JSONObjectUtil;
 
 import java.util.concurrent.TimeUnit;
 
@@ -22,8 +24,11 @@ import java.util.concurrent.TimeUnit;
 )
 @DefaultTimeout(timeunit = TimeUnit.HOURS, value = 1)
 public class APIRegisterVmInstanceFromMetadataMsg extends APIMessage {
-    @APIParam(nonempty = true, maxLength = 2048)
+    @APIParam(required = false, nonempty = true, maxLength = 2048)
     private String metadataPath;
+
+    @APIParam(required = false, nonempty = true)
+    private String metadata;
 
     @APIParam(resourceType = PrimaryStorageVO.class)
     private String primaryStorageUuid;
@@ -51,7 +56,24 @@ public class APIRegisterVmInstanceFromMetadataMsg extends APIMessage {
         this.metadataPath = metadataPath;
     }
 
+    public String getMetadata() {
+        return metadata;
+    }
+
+    public void setMetadata(String metadata) {
+        this.metadata = metadata;
+    }
+
+    public boolean isInlineMetadata() {
+        return metadata != null;
+    }
+
     public String getMetadataName() {
+        if (isInlineMetadata()) {
+            // Input is validated before routing. Share the path-mode queue for this VM.
+            VmInstanceMetadataDTO dto = JSONObjectUtil.toObject(metadata, VmInstanceMetadataDTO.class);
+            return dto.getVm().getResourceUuid() + ".vmmeta";
+        }
         int separatorIndex = metadataPath.lastIndexOf('/');
         return metadataPath.substring(separatorIndex + 1);
     }

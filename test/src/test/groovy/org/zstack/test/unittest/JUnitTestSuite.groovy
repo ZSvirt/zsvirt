@@ -7,6 +7,8 @@ import org.junit.runner.notification.Failure
 import org.junit.runners.Suite
 import org.zstack.configuration.OfferingUserConfigUtils
 import org.zstack.test.unittest.compute.VmSensitiveTagEncryptorTest
+import org.zstack.test.unittest.drs.DRSMemoryCapacityTest
+import org.zstack.test.unittest.drs.DRSHostCapacityInputTest
 import org.zstack.test.unittest.utils.NetworkUtilsCase
 import org.zstack.test.unittest.utils.OfferingUserConfigUtilsCase
 import org.zstack.test.unittest.utils.ShellEscapeCase
@@ -21,6 +23,8 @@ import java.util.stream.Collectors
 @RunWith(Suite.class)
 @Suite.SuiteClasses([
         VmSensitiveTagEncryptorTest.class,
+        DRSMemoryCapacityTest.class,
+        DRSHostCapacityInputTest.class,
         NetworkUtilsCase.class,
         OfferingUserConfigUtilsCase.class,
         ShellEscapeCase.class,

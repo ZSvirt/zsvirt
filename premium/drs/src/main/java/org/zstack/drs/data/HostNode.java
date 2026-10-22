@@ -21,7 +21,11 @@ public class HostNode implements Serializable {
     private Long maxSize2MoveMemoryBit;
 
     private long hostCapacityAvailableCpuNum;
+    // Allocation ledger, separate from the physical memory load above.
     private long hostCapacityAvailableMemoryBit;
+    private double memoryRatio = 1;
+    private long reservedMemoryBit;
+    private Long maxVmMemoryBit;
 
     public HostNode(String hostUuid, float usedCPUPercent, long usedPhysicalMemoryBit,
                     long hostCapacityAvailableCpuNum, long hostCapacityAvailableMemoryBit,
@@ -39,6 +43,28 @@ public class HostNode implements Serializable {
 
     private void updateMemoryPercent() {
         this.usedMemoryPercent = 100 - (int) ((1f * freePhysicalMemoryBit / totalMemoryBit) * 100);
+    }
+
+    public void setMemoryCapacityPolicy(double memoryRatio, long reservedMemoryBit, Long maxVmMemoryBit) {
+        this.memoryRatio = memoryRatio;
+        this.reservedMemoryBit = reservedMemoryBit;
+        this.maxVmMemoryBit = maxVmMemoryBit;
+    }
+
+    public boolean hasMemoryCapacity(long memorySize) {
+        // Match HostCapacityAllocatorFlow and HostCapacityReserveManagerImpl,
+        // including their per-request rounding and optional physical-size limit.
+        return (maxVmMemoryBit == null || memorySize < maxVmMemoryBit)
+                && Math.round(hostCapacityAvailableMemoryBit * memoryRatio) >= memorySize
+                && hostCapacityAvailableMemoryBit - reservedMemoryBit >= Math.round(memorySize / memoryRatio);
+    }
+
+    public void reserveMemoryCapacity(long memorySize) {
+        hostCapacityAvailableMemoryBit -= Math.round(memorySize / memoryRatio);
+    }
+
+    public void releaseMemoryCapacity(long memorySize) {
+        hostCapacityAvailableMemoryBit += Math.round(memorySize / memoryRatio);
     }
 
     public float getUsedCPUPercent() {

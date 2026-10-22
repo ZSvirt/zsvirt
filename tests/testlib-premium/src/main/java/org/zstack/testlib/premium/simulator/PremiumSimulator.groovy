@@ -21,6 +21,7 @@ import org.zstack.header.volume.VolumeInventory
 import org.zstack.header.volume.VolumeVO
 import org.zstack.header.volume.VolumeVO_
 import org.zstack.kvm.KVMAgentCommands
+import org.zstack.kvm.KVMConstant
 import org.zstack.macvlan.KvmAgentL2NetworkMacVlanCommands
 import org.zstack.macvlan.L2NetworkMacVlanConstant
 import org.zstack.mttyDevice.KvmMttyDeviceBackend.MttyDeviceKvmBackend
@@ -53,6 +54,8 @@ import static org.zstack.ha.entity.HaCommands.*
 class PremiumSimulator implements Simulator {
     @Override
     void registerSimulators(EnvSpec spec) {
+        Map<String, Map<String, Set<List<String>>>> kernelInterfaceAddresses = [:]
+
         spec.simulator(PciDeviceKvmBackend.GET_PCI_DEVICES) {
             PciDeviceKvmBackend.GetPciDevicesRsp rsp = new PciDeviceKvmBackend.GetPciDevicesRsp()
             rsp.hostIommuStatus = true
@@ -441,8 +444,51 @@ class PremiumSimulator implements Simulator {
             return new MevocoKVMAgentCommands.GetHostKernelInterfaceRsp(interfaces: [to])
         }
 
-        spec.simulator(MevocoKVMConstant.SET_KERNEL_INTERFACE_PATH) {
+        spec.simulator(MevocoKVMConstant.SET_KERNEL_INTERFACE_PATH) { HttpEntity<String> entity, EnvSpec env ->
+            def hostUuid = entity.headers.getFirst(Constants.AGENT_HTTP_HEADER_RESOURCE_UUID)
+            def cmd = JSONObjectUtil.toObject(entity.body, MevocoKVMAgentCommands.SetHostKernelInterfaceCmd.class)
+            synchronized (kernelInterfaceAddresses) {
+                def interfaces = kernelInterfaceAddresses.computeIfAbsent(hostUuid) { [:] }
+                cmd.interfaces.each { to ->
+                    String interfaceKey = "${to.interfaceName}.${to.vlanId}".toString()
+                    def addresses = interfaces.computeIfAbsent(interfaceKey) { new LinkedHashSet<List<String>>() }
+                    to.ips.each { ip ->
+                        List<String> address = [ip.ip, ip.netmask]
+                        if (ip.actionCode == UsedIpTO.ACTION_CODE_ADD) {
+                            addresses.add(address)
+                        } else if (ip.actionCode == UsedIpTO.ACTION_CODE_REMOVE) {
+                            addresses.remove(address)
+                        }
+                    }
+                    if (addresses.isEmpty()) {
+                        interfaces.remove(interfaceKey)
+                    }
+                }
+                if (interfaces.isEmpty()) {
+                    kernelInterfaceAddresses.remove(hostUuid)
+                }
+            }
             return new MevocoKVMAgentCommands.SetHostKernelInterfaceRsp()
+        }
+
+        spec.afterSimulator(KVMConstant.KVM_HOST_FACT_PATH) {
+            KVMAgentCommands.HostFactResponse rsp, HttpEntity<String> entity ->
+            def hostUuid = entity.headers.getFirst(Constants.AGENT_HTTP_HEADER_RESOURCE_UUID)
+            def managementIp = Q.New(HostVO.class)
+                    .eq(HostVO_.uuid, hostUuid)
+                    .select(HostVO_.managementIp)
+                    .findValue() as String
+            Set<String> ips = new LinkedHashSet<>()
+            if (managementIp != null) {
+                ips.add(managementIp)
+            }
+            synchronized (kernelInterfaceAddresses) {
+                kernelInterfaceAddresses.get(hostUuid)?.values()?.each { addresses ->
+                    addresses.each { ips.add(it[0]) }
+                }
+            }
+            rsp.ipAddresses = new ArrayList<String>(ips)
+            return rsp
         }
 
         spec.simulator(MevocoKVMConstant.KVM_UPDATE_HOST_ISCSI_INITIATOR_NAME_PATH) {

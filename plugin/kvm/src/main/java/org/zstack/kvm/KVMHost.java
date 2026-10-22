@@ -624,7 +624,9 @@ public class KVMHost extends HostBase implements Host {
 
     @Override
     protected void handleLocalMessage(Message msg) {
-        if (msg instanceof CheckNetworkPhysicalInterfaceMsg) {
+        if (msg instanceof RefreshHostExtraIpsMsg) {
+            handle((RefreshHostExtraIpsMsg) msg);
+        } else if (msg instanceof CheckNetworkPhysicalInterfaceMsg) {
             handle((CheckNetworkPhysicalInterfaceMsg) msg);
         } else if (msg instanceof BatchCheckNetworkPhysicalInterfaceMsg) {
             handle((BatchCheckNetworkPhysicalInterfaceMsg) msg);
@@ -6770,6 +6772,68 @@ public class KVMHost extends HostBase implements Host {
         }).start();
     }
 
+    /**
+     * save host extra ips to host tag
+     * host management network ip address and management node vip should be excluded
+     * @param response
+     */
+    private void saveHostExtraIps(HostFactResponse response) {
+        List<String> ips = response.getIpAddresses();
+        if (ips == null) {
+            return;
+        }
+
+        ips.remove(self.getManagementIp());
+        if (CoreGlobalProperty.MN_VIP != null) {
+            ips.remove(CoreGlobalProperty.MN_VIP);
+        }
+
+        if (ips.isEmpty()) {
+            HostSystemTags.EXTRA_IPS.delete(self.getUuid());
+            return;
+        }
+
+        recreateNonInherentTag(HostSystemTags.EXTRA_IPS, HostSystemTags.EXTRA_IPS_TOKEN, StringUtils.join(ips, ","));
+    }
+
+    private void handle(RefreshHostExtraIpsMsg msg) {
+        HostFactCmd cmd = new HostFactCmd();
+        KvmCommandFailureChecker checker = wrapper -> {
+            HostFactResponse rsp = wrapper.getResponse(HostFactResponse.class);
+            if (!rsp.isSuccess()) {
+                return operr("failed to refresh IP addresses on host[uuid:%s], %s",
+                        self.getUuid(), rsp.getError());
+            }
+            if (rsp.getIpAddresses() == null) {
+                return operr("host[uuid:%s] returned no IP address facts", self.getUuid());
+            }
+            return null;
+        };
+
+        String signature = String.format("refresh-host-extra-ips-%s", self.getUuid());
+        new RunInQueue(signature, thdf, 1).name(signature).asyncBackup(msg).run(chain -> {
+            MessageReply reply = new MessageReply();
+            ReturnValueCompletion<KvmResponseWrapper> callback = new ReturnValueCompletion<KvmResponseWrapper>(msg, chain) {
+                @Override
+                public void success(KvmResponseWrapper wrapper) {
+                    saveHostExtraIps(wrapper.getResponse(HostFactResponse.class));
+                    bus.reply(msg, reply);
+                    chain.next();
+                }
+
+                @Override
+                public void fail(ErrorCode errorCode) {
+                    reply.setError(errorCode);
+                    bus.reply(msg, reply);
+                    chain.next();
+                }
+            };
+
+            new KvmCommandSender(self.getUuid()).disableHostStatusCheck()
+                    .send(cmd, KVMConstant.KVM_HOST_FACT_PATH, checker, callback);
+        });
+    }
+
     private NoRollbackFlow createCollectHostFactsFlow(final ConnectHostInfo info) {
         return new NoRollbackFlow() {
             String __name__ = "collect-kvm-host-facts";
@@ -6906,30 +6970,6 @@ public class KVMHost extends HostBase implements Host {
                 }
 
                 new HostHardwareChangedCanonicalEvent(self.getUuid(), multiErr(hardwareChangedErrors)).fire();
-            }
-
-            /**
-             * save host extra ips to host tag
-             * host management network ip address and management node vip should be excluded
-             * @param response
-             */
-            private void saveHostExtraIps(HostFactResponse response) {
-                List<String> ips = response.getIpAddresses();
-                if (ips == null) {
-                    return;
-                }
-
-                ips.remove(self.getManagementIp());
-                if (CoreGlobalProperty.MN_VIP != null) {
-                    ips.remove(CoreGlobalProperty.MN_VIP);
-                }
-
-                if (ips.isEmpty()) {
-                    HostSystemTags.EXTRA_IPS.delete(self.getUuid());
-                    return;
-                }
-
-                recreateNonInherentTag(HostSystemTags.EXTRA_IPS, HostSystemTags.EXTRA_IPS_TOKEN, StringUtils.join(ips, ","));
             }
 
             private boolean checkVirtualizationEnabled(HostFactResponse response) {

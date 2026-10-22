@@ -41,7 +41,7 @@ class AllocatorDomainNegativeBindCase extends SubCase {
 
                     kvm {
                         name = "kvm"
-                        managementIp = "localhost"
+                        managementIp = "127.0.0.1"
                         username = "root"
                         password = "password"
                     }

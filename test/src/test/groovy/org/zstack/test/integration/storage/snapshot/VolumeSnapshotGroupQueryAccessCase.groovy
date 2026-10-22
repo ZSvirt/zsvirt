@@ -70,7 +70,7 @@ class VolumeSnapshotGroupQueryAccessCase extends SubCase {
                     hypervisorType = "KVM"
                     kvm {
                         name = "kvm"
-                        managementIp = "localhost"
+                        managementIp = "127.0.0.1"
                         username = "root"
                         password = "password"
                     }

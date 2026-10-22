@@ -1,6 +1,7 @@
 package org.zstack.testlib.premium.simulator
 
 import org.springframework.http.HttpEntity
+import org.zstack.compute.bonding.HostNetworkBondingConstant
 import org.zstack.compute.host.HostXfsFragReader
 import org.zstack.compute.host.MevocoKVMAgentCommands
 import org.zstack.compute.host.MevocoKVMConstant
@@ -8,7 +9,12 @@ import org.zstack.core.Platform
 import org.zstack.core.db.Q
 import org.zstack.ha.entity.HaCommands
 import org.zstack.ha.header.HaConstants
+import org.zstack.header.Constants
 import org.zstack.header.agent.AgentResponse
+import org.zstack.header.host.HostVO
+import org.zstack.header.host.HostVO_
+import org.zstack.header.host.NetworkInterfaceType
+import org.zstack.header.network.l3.UsedIpTO
 import org.zstack.header.storage.primary.PrimaryStorageVO
 import org.zstack.header.storage.primary.PrimaryStorageVO_
 import org.zstack.header.volume.VolumeInventory
@@ -18,11 +24,14 @@ import org.zstack.kvm.KVMAgentCommands
 import org.zstack.macvlan.KvmAgentL2NetworkMacVlanCommands
 import org.zstack.macvlan.L2NetworkMacVlanConstant
 import org.zstack.mttyDevice.KvmMttyDeviceBackend.MttyDeviceKvmBackend
+import org.zstack.network.hostNetworkInterface.HostKernelInterfaceTO
 import org.zstack.network.service.virtualrouter.VirtualRouterCommands
 import org.zstack.network.service.virtualrouter.VirtualRouterConstant
 import org.zstack.pciDevice.KvmPciDeviceBackend.PciDeviceKvmBackend
 import org.zstack.pciDevice.virtual.vfio_mdev.MdevDeviceBase
 import org.zstack.routeProtocol.RouteProtocolOspfBackend
+import org.zstack.sdk.HostNetworkBondingInventory
+import org.zstack.sdk.HostNetworkInterfaceInventory
 import org.zstack.sshkeypair.SshKeyPairBase
 import org.zstack.sshkeypair.SshKeyPairConstant
 import org.zstack.storage.device.StorageDeviceKvmCommands
@@ -143,11 +152,58 @@ class PremiumSimulator implements Simulator {
             return rsp
         }
 
-        spec.simulator(MevocoKVMConstant.GET_HOST_NETWORK_FACTS) {
-            def rsp = new MevocoKVMAgentCommands.GetHostNetworkBondingResponse()
-            rsp.nics = []
-            rsp.setSuccess(true)
-            return rsp
+        spec.simulator(MevocoKVMConstant.GET_HOST_NETWORK_FACTS) { HttpEntity<String> entity, EnvSpec env ->
+            def reply = new MevocoKVMAgentCommands.GetHostNetworkBondingResponse()
+
+            def inv1 = new HostNetworkInterfaceInventory()
+            inv1.interfaceName = "enp101s0f0"
+            inv1.speed = 10000L
+            inv1.carrierActive = true
+            inv1.mac = "ac:1f:6b:93:6c:8c"
+            inv1.pciDeviceAddress = "0e:00.0"
+            inv1.interfaceType = NetworkInterfaceType.bondingSlave.toString()
+
+            def inv2 = new HostNetworkInterfaceInventory()
+            inv2.interfaceName = "enp101s0f1"
+            inv2.speed = 10000L
+            inv2.carrierActive = true
+            inv2.mac = "ac:1f:6b:93:6c:8d"
+            inv2.pciDeviceAddress = "0e:00.1"
+            inv2.interfaceType = NetworkInterfaceType.bondingSlave.toString()
+
+            def inv3 = new HostNetworkInterfaceInventory()
+            inv3.interfaceName = "vmnic0"
+            inv3.speed = 10000L
+            inv3.carrierActive = true
+            inv3.mac = "ac:1f:6b:93:6c:66"
+            inv3.pciDeviceAddress = "10:00.0"
+            inv3.interfaceType = NetworkInterfaceType.bondingSlave.toString()
+
+            def inv4 = new HostNetworkInterfaceInventory()
+            inv4.interfaceName = "vmnic1"
+            inv4.speed = 10000L
+            inv4.carrierActive = true
+            inv4.mac = "ac:1f:6b:93:6c:67"
+            inv4.pciDeviceAddress = "10:00.1"
+            inv4.interfaceType = NetworkInterfaceType.noMaster.toString()
+
+            reply.nics = [inv1, inv2, inv3, inv4] as List<HostNetworkInterfaceInventory>
+
+            def bond0 = new HostNetworkBondingInventory()
+            bond0.bondingName = "bond0"
+            bond0.type = HostNetworkBondingConstant.LINUX_BONDING_TYPE.toString()
+            bond0.mode = "active-backup 1"
+            bond0.slaves = [inv1, inv2] as List<HostNetworkInterfaceInventory>
+
+            def bondDefault = new HostNetworkBondingInventory()
+            bondDefault.bondingName = "vmbond0"
+            bondDefault.type = HostNetworkBondingConstant.LINUX_BONDING_TYPE.toString()
+            bondDefault.mode = "active-backup 1"
+            bondDefault.xmitHashPolicy = "layer 3+4"
+            bondDefault.slaves = [inv3] as List<HostNetworkInterfaceInventory>
+
+            reply.bondings = [bond0, bondDefault] as List<HostNetworkBondingInventory>
+            return reply
         }
 
         spec.simulator(MevocoKVMConstant.GET_HOST_PHYSICAL_CPU_FACTS) {
@@ -371,8 +427,18 @@ class PremiumSimulator implements Simulator {
             return new MevocoKVMAgentCommands.SetHostPhysicalNicMonitorRsp()
         }
 
-        spec.simulator(MevocoKVMConstant.GET_KERNEL_INTERFACE_PATH) {
-            return new MevocoKVMAgentCommands.GetHostKernelInterfaceRsp()
+        spec.simulator(MevocoKVMConstant.GET_KERNEL_INTERFACE_PATH) { HttpEntity<String> entity, EnvSpec env ->
+            def hostUuid = entity.headers.getFirst(Constants.AGENT_HTTP_HEADER_RESOURCE_UUID)
+            def ip = Q.New(HostVO.class)
+                    .eq(HostVO_.uuid, hostUuid)
+                    .select(HostVO_.managementIp)
+                    .findValue() as String
+
+            def to = new HostKernelInterfaceTO()
+            to.interfaceName = "vmbond0"
+            to.vlanId = 0
+            to.ips = [new UsedIpTO(ip: ip, netmask: "255.255.255.0")]
+            return new MevocoKVMAgentCommands.GetHostKernelInterfaceRsp(interfaces: [to])
         }
 
         spec.simulator(MevocoKVMConstant.SET_KERNEL_INTERFACE_PATH) {

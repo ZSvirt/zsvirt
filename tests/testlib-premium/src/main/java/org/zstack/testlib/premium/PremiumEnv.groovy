@@ -42,6 +42,7 @@ class PremiumEnv {
             include("Progress.xml")
             include("vip.xml")
             include("vxlan.xml")
+            include("virtualSwitch.xml")
             include("mediateApiValidator.xml")
             include("LongJobManager.xml")
             include("log.xml")

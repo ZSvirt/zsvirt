@@ -29,7 +29,7 @@ class Env {
 
                     kvm {
                         name = "host"
-                        managementIp = "localhost"
+                        managementIp = "127.0.0.2"
                         username = "root"
                         password = "password"
                     }

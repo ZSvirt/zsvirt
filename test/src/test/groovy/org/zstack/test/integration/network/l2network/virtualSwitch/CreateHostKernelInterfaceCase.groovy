@@ -1,19 +1,32 @@
 package org.zstack.test.integration.network.l2network.virtualSwitch
 
 import org.springframework.http.HttpEntity
+import org.zstack.compute.host.HostSystemTags
 import org.zstack.compute.host.MevocoKVMAgentCommands
 import org.zstack.compute.host.MevocoKVMConstant
+import org.zstack.core.cloudbus.CloudBus
+import org.zstack.core.cloudbus.CloudBusCallBack
 import org.zstack.core.db.Q
+import org.zstack.core.thread.ThreadFacade
+import org.zstack.header.Constants
 import org.zstack.header.errorcode.SysErrors
+import org.zstack.header.identity.AccountConstant
 import org.zstack.header.message.DocUtils
+import org.zstack.header.message.MessageReply
 import org.zstack.header.network.l3.L3NetworkCategory
 import org.zstack.header.network.l3.UsedIpTO
 import org.zstack.header.network.l3.UsedIpVO
 import org.zstack.header.network.l3.UsedIpVO_
 import org.zstack.header.network.service.NetworkServiceType
+import org.zstack.kvm.KVMAgentCommands
+import org.zstack.kvm.KVMConstant
+import org.zstack.kvm.RefreshHostExtraIpsMsg
 import org.zstack.network.hostNetworkInterface.HostKernelInterfaceTO
+import org.zstack.network.l2.virtualSwitch.header.CreateHostKernelInterfaceMsg
+import org.zstack.network.l2.virtualSwitch.header.CreateHostKernelInterfaceReply
 import org.zstack.network.l2.virtualSwitch.header.HostKernelInterfaceStruct
 import org.zstack.network.l2.virtualSwitch.header.HostKernelInterfaceTrafficType
+import org.zstack.network.l2.virtualSwitch.header.VirtualSwitchConstant
 import org.zstack.network.l2.virtualSwitch.header.VirtualSwitchSystemTags
 import org.zstack.network.service.userdata.UserdataConstant
 import org.zstack.sdk.*
@@ -22,6 +35,10 @@ import org.zstack.testlib.SubCase
 import org.zstack.testlib.premium.network.NetworkController
 import org.zstack.utils.gson.JSONObjectUtil
 import org.zstack.utils.network.IPv6Constants
+
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicInteger
 
 import static org.zstack.utils.CollectionDSL.e
 import static org.zstack.utils.CollectionDSL.map
@@ -127,6 +144,7 @@ class CreateHostKernelInterfaceCase extends SubCase {
         } as HostKernelInterfaceInventory
 
         assert zskernel_1.name == "zskernel-1-on-host1"
+        assertExtraIps(host, ["1.1.1.1"])
         assert zskernel_1.description == "zskernel-1-description"
         assert zskernel_1.hostUuid == host.uuid
         assert zskernel_1.l3NetworkUuid == pg1.uuid
@@ -160,6 +178,7 @@ class CreateHostKernelInterfaceCase extends SubCase {
         } as HostKernelInterfaceInventory
 
         assert zqlQuery("query usedIp where ip='2.2.2.2' and l3NetworkUuid='${pg1.uuid}'").size() == 1
+        assertExtraIps(host, ["1.1.1.1", "2.2.2.2"])
         assert zqlQuery("query hostKernelInterfaceUsedIp where hostKernelInterfaceUuid='${zskernel_2.uuid}'").size() == 1
 
         retryInSecs {
@@ -181,6 +200,7 @@ class CreateHostKernelInterfaceCase extends SubCase {
         } as HostKernelInterfaceInventory
 
         assert zskernel_1.name == "zskernel-1-rename"
+        assertExtraIps(host, ["1.1.1.1", "2.2.2.2"])
         assert zskernel_1.description == "zskernel-1-description"
         assert zqlQuery("query usedIp where ip='1.1.1.1' and l3NetworkUuid='${pg1.uuid}'").size() == 1
         assert zqlQuery("query hostKernelInterfaceUsedIp where hostKernelInterfaceUuid='${zskernel_1.uuid}'").size() == 1
@@ -194,6 +214,7 @@ class CreateHostKernelInterfaceCase extends SubCase {
         } as HostKernelInterfaceInventory
 
         assert zskernel_1.name == "zskernel-1-remove-traffic-type"
+        assertExtraIps(host, ["1.1.1.1", "2.2.2.2"])
         assert zskernel_1.description == "zskernel-1-description"
         assert zskernel_1.trafficTypes.isEmpty()
         assert zqlQuery("query usedIp where ip='1.1.1.1' and l3NetworkUuid='${pg1.uuid}'").size() == 1
@@ -212,6 +233,7 @@ class CreateHostKernelInterfaceCase extends SubCase {
         assert zqlQuery("query hostKernelInterfaceUsedIp where hostKernelInterfaceUuid='${zskernel_1.uuid}'").size() == 1
         assert zqlQuery("query hostKernelInterfaceTrafficType where hostKernelInterfaceUuid='${zskernel_1.uuid}'").isEmpty()
         assert cmd == null
+        assertExtraIps(host, ["1.1.1.1", "2.2.2.2"])
 
         cmd = null as MevocoKVMAgentCommands.SetHostKernelInterfaceCmd
         zskernel_1 = updateHostKernelInterface {
@@ -223,6 +245,7 @@ class CreateHostKernelInterfaceCase extends SubCase {
             trafficTypes = [MANAGEMENT_TRAFFIC_TYPE]
         } as HostKernelInterfaceInventory
         assert zskernel_1.name == "zskernel-1-reconfigure-ip"
+        assertExtraIps(host, ["1.1.1.3", "2.2.2.2"])
         assert zskernel_1.description == "zskernel-1-description"
         assert zqlQuery("query usedIp where ip='1.1.1.3' and l3NetworkUuid='${pg1.uuid}'").size() == 1
         assert zqlQuery("query hostKernelInterfaceUsedIp where hostKernelInterfaceUuid='${zskernel_1.uuid}'").size() == 1
@@ -251,6 +274,7 @@ class CreateHostKernelInterfaceCase extends SubCase {
             trafficTypes = [MANAGEMENT_TRAFFIC_TYPE]
         } as HostKernelInterfaceInventory
         assert zskernel_1.name == "zskernel-1-reconfigure-netmask"
+        assertExtraIps(host, ["1.1.1.3", "2.2.2.2"])
         assert zskernel_1.description == "zskernel-1-description"
         assert zqlQuery("query usedIp where ip='1.1.1.3' and netmask='255.255.0.0' and l3NetworkUuid='${pg1.uuid}'").size() == 1
         assert zqlQuery("query hostKernelInterfaceUsedIp where hostKernelInterfaceUuid='${zskernel_1.uuid}'").size() == 1
@@ -287,6 +311,7 @@ class CreateHostKernelInterfaceCase extends SubCase {
         }
 
         assert (queryHostKernelInterface {conditions=["uuid=${zskernel_1.uuid}"]} as List<HostKernelInterfaceInventory>).isEmpty()
+        assertExtraIps(host, ["2.2.2.2"])
 
         retryInSecs {
             assert cmd != null
@@ -303,6 +328,129 @@ class CreateHostKernelInterfaceCase extends SubCase {
 
         deleteHostKernelInterface {
             uuid = zskernel_2.uuid
+        }
+        assertExtraIps(host, [])
+    }
+
+    void testConcurrentHostExtraIpsRefreshOnDifferentL2Networks() {
+        def pgs = [112, 113].collect { vlanId ->
+            createPortGroup {
+                name = "concurrent-pg-${vlanId}"
+                vSwitchUuid = vswitch.uuid
+                vlan = vlanId
+                category = L3NetworkCategory.Private
+                enableIPAM = false
+            } as PortGroupInventory
+        }
+        assert pgs[0].l2NetworkUuid != pgs[1].l2NetworkUuid
+        def ips = ["11.11.11.11", "12.12.12.12"]
+        def firstEntered = new CountDownLatch(1)
+        def secondEntered = new CountDownLatch(1)
+        def secondIpApplied = new CountDownLatch(1)
+        def secondRefreshRequested = new CountDownLatch(1)
+        def releaseFirst = new CountDownLatch(1)
+        def completed = [new CountDownLatch(1), new CountDownLatch(1)]
+        def calls = new AtomicInteger()
+        def refreshes = new AtomicInteger()
+        def snapshots = Collections.synchronizedList([])
+        def replies = Collections.synchronizedMap([:]) as Map<Integer, MessageReply>
+        def previousSetHandler = env.getPostSimulator(MevocoKVMConstant.SET_KERNEL_INTERFACE_PATH) ?: { rsp -> rsp }
+        def cleaner = notifyWhenReceivedMessage(RefreshHostExtraIpsMsg) { RefreshHostExtraIpsMsg msg ->
+            if (msg.hostUuid == host.uuid && refreshes.incrementAndGet() == 2) {
+                secondRefreshRequested.countDown()
+            }
+        }
+        env.afterSimulator(MevocoKVMConstant.SET_KERNEL_INTERFACE_PATH) { rsp, HttpEntity<String> entity ->
+            def cmd = JSONObjectUtil.toObject(entity.body, MevocoKVMAgentCommands.SetHostKernelInterfaceCmd.class)
+            if (entity.headers.getFirst(Constants.AGENT_HTTP_HEADER_RESOURCE_UUID) == host.uuid &&
+                    cmd.interfaces.any { it.ips.any { it.ip == ips[1] } }) {
+                secondIpApplied.countDown()
+            }
+            return rsp
+        }
+        env.hijackSimulator(KVMConstant.KVM_HOST_FACT_PATH) {
+            KVMAgentCommands.HostFactResponse rsp, HttpEntity<String> entity ->
+            if (entity.headers.getFirst(Constants.AGENT_HTTP_HEADER_RESOURCE_UUID) == host.uuid) {
+                snapshots.add(new ArrayList<String>(rsp.ipAddresses))
+                if (calls.incrementAndGet() == 1) {
+                    firstEntered.countDown()
+                    assert releaseFirst.await(60, TimeUnit.SECONDS)
+                } else {
+                    secondEntered.countDown()
+                }
+            }
+            return rsp
+        }
+
+        def bus = bean(CloudBus)
+        int submitted = 0
+        try {
+            pgs.eachWithIndex { pg, index ->
+                def msg = new CreateHostKernelInterfaceMsg()
+                msg.name = "concurrent-kernel-${index}"
+                msg.hostUuid = host.uuid
+                msg.l2NetworkUuid = pg.l2NetworkUuid
+                msg.l3NetworkUuid = pg.uuid
+                msg.requiredIp = ips[index]
+                msg.netmask = "255.255.255.0"
+                msg.accountUuid = AccountConstant.INITIAL_SYSTEM_ADMIN_UUID
+                bus.makeTargetServiceIdByResourceUuid(msg, VirtualSwitchConstant.VIRTUAL_SWITCH_SERVICE_ID, msg.l2NetworkUuid)
+                bus.send(msg, new CloudBusCallBack(null) {
+                    @Override
+                    void run(MessageReply reply) {
+                        replies[index] = reply
+                        completed[index].countDown()
+                    }
+                })
+                submitted++
+                if (index == 0) {
+                    assert firstEntered.await(10, TimeUnit.SECONDS)
+                }
+            }
+            assert secondIpApplied.await(10, TimeUnit.SECONDS)
+            assert secondRefreshRequested.await(10, TimeUnit.SECONDS)
+            boolean overlappingSnapshots = false
+            retryInSecs {
+                if (secondEntered.count == 0) {
+                    overlappingSnapshots = true
+                } else {
+                    def queue = bean(ThreadFacade).getChainTaskInfo("refresh-host-extra-ips-${host.uuid}".toString())
+                    assert queue?.maxThreadNum == 1
+                    assert queue?.runningTask?.size() == 1
+                    assert queue?.pendingTask?.size() == 1
+                }
+            }
+            if (overlappingSnapshots) {
+                assert completed[1].await(30, TimeUnit.SECONDS)
+                assert replies[1].success : replies[1].error
+                assertExtraIps(host, ips)
+            }
+            releaseFirst.countDown()
+            assert completed.every { it.await(30, TimeUnit.SECONDS) }
+            assert replies.size() == 2
+            assert replies.values().every { it.success } : replies.values()*.error
+            pgs.eachWithIndex { pg, index ->
+                def kernel = (replies[index] as CreateHostKernelInterfaceReply).inventory
+                assert kernel.hostUuid == host.uuid
+                assert kernel.l3NetworkUuid == pg.uuid
+                assert kernel.usedIps*.ip == [ips[index]]
+                assert zqlQuery("query hostKernelInterface where uuid='${kernel.uuid}'").size() == 1
+                assert Q.New(UsedIpVO.class).eq(UsedIpVO_.ip, ips[index]).eq(UsedIpVO_.l3NetworkUuid, pg.uuid).isExists()
+            }
+            assert snapshots[0].toSet() == [host.managementIp, ips[0]].toSet()
+            assert snapshots[1].toSet() == ([host.managementIp] + ips).toSet()
+            assertExtraIps(host, ips)
+        } finally {
+            releaseFirst.countDown()
+            try {
+                assert (0..<submitted).collect { completed[it].await(30, TimeUnit.SECONDS) }.every { it }
+            } finally {
+                env.hijackSimulator(KVMConstant.KVM_HOST_FACT_PATH) { rsp -> rsp }
+                env.afterSimulator(MevocoKVMConstant.SET_KERNEL_INTERFACE_PATH, previousSetHandler)
+                cleaner.call()
+            }
+            pgs.each { pg -> deletePortGroup { uuid = pg.uuid } }
+            assertExtraIps(host, [])
         }
     }
 
@@ -344,6 +492,7 @@ class CreateHostKernelInterfaceCase extends SubCase {
         } as HostKernelInterfaceInventory
 
         assert (queryHostKernelInterface {conditions=["uuid=${zskernel1_pg2.uuid}"]} as List<HostKernelInterfaceInventory>).size() == 1
+        assertExtraIps(host, ["192.168.100.150"])
         assert zqlQuery("query usedIp where ip='192.168.100.150' and l3NetworkUuid='${pg2.uuid}'").size() == 1
         assert zqlQuery("query hostKernelInterfaceUsedIp where hostKernelInterfaceUuid='${zskernel1_pg2.uuid}'").size() == 1
         assert zqlQuery("query hostKernelInterfaceTrafficType where hostKernelInterfaceUuid='${zskernel1_pg2.uuid}'" +
@@ -373,6 +522,7 @@ class CreateHostKernelInterfaceCase extends SubCase {
         assert zqlQuery("query hostKernelInterfaceUsedIp where hostKernelInterfaceUuid='${zskernel2_pg2.uuid}'").size() == 1
         def usedIpInv = zskernel2_pg2.usedIps.get(0) as HostKernelInterfaceUsedIpInventory
         assert usedIpInv != null
+        assertExtraIps(host2, [usedIpInv.ip])
 
         retryInSecs {
             assert cmd != null
@@ -390,10 +540,12 @@ class CreateHostKernelInterfaceCase extends SubCase {
         deleteHostKernelInterface {
             uuid = zskernel1_pg2.uuid
         }
+        assertExtraIps(host, [])
 
         deleteHostKernelInterface {
             uuid = zskernel2_pg2.uuid
         }
+        assertExtraIps(host2, [])
 
         assert (queryHostKernelInterface {conditions=["uuid=${zskernel1_pg2.uuid}"]} as List<HostKernelInterfaceInventory>).isEmpty()
         assert (queryHostKernelInterface {conditions=["uuid=${zskernel2_pg2.uuid}"]} as List<HostKernelInterfaceInventory>).isEmpty()
@@ -425,33 +577,34 @@ class CreateHostKernelInterfaceCase extends SubCase {
             networkServices = netServices
         }
 
+        def defaultSetHandler = env.getSimulator(MevocoKVMConstant.SET_KERNEL_INTERFACE_PATH)
         env.simulator(MevocoKVMConstant.SET_KERNEL_INTERFACE_PATH) { HttpEntity<String> entity, EnvSpec spec ->
             def rsp = new MevocoKVMAgentCommands.SetHostKernelInterfaceRsp()
             rsp.setError("on purpose")
             return rsp
         }
 
-        expectApiFailure({
-            createHostKernelInterface {
-                name = "kernel-failed-on-purpose"
-                hostUuid = host.uuid
-                l3NetworkUuid = pg3.uuid
-                requiredIp = "192.168.200.11"
-                netmask = "255.255.255.0"
-                trafficTypes = [MANAGEMENT_TRAFFIC_TYPE]
+        try {
+            expectApiFailure({
+                createHostKernelInterface {
+                    name = "kernel-failed-on-purpose"
+                    hostUuid = host.uuid
+                    l3NetworkUuid = pg3.uuid
+                    requiredIp = "192.168.200.11"
+                    netmask = "255.255.255.0"
+                    trafficTypes = [MANAGEMENT_TRAFFIC_TYPE]
+                }
+            }) {
+                assert code == OPERATION_ERROR_CODE
+                assert details == String.format("failed to create hostKernelInterface[name:%s] on the host[uuid:%s], %s",
+                        "kernel-failed-on-purpose", host.uuid, "on purpose")
             }
-        }) {
-            assert code == OPERATION_ERROR_CODE
-            assert details == String.format("failed to create hostKernelInterface[name:%s] on the host[uuid:%s], %s",
-                    "kernel-failed-on-purpose", host.uuid, "on purpose")
+        } finally {
+            env.simulator(MevocoKVMConstant.SET_KERNEL_INTERFACE_PATH, defaultSetHandler)
         }
 
         assert !Q.New(UsedIpVO.class).eq(UsedIpVO_.ip, "192.168.200.11").isExists()
-
-        env.simulator(MevocoKVMConstant.SET_KERNEL_INTERFACE_PATH) { HttpEntity<String> entity, EnvSpec spec ->
-            def rsp = new MevocoKVMAgentCommands.SetHostKernelInterfaceRsp()
-            return rsp
-        }
+        assertExtraIps(host, [])
 
         expect(ApiException.class){
             createHostKernelInterface {
@@ -463,6 +616,7 @@ class CreateHostKernelInterfaceCase extends SubCase {
                 trafficTypes = ["Tenant"]
             }
         }
+        assertExtraIps(host, [])
     }
 
     void testCheckIpAvailability() {
@@ -488,10 +642,12 @@ class CreateHostKernelInterfaceCase extends SubCase {
             ip = "44.44.44.44"
         } as CheckIpAvailabilityResult
         assert res.available
+        assertExtraIps(host, ["44.44.44.44"])
 
         deleteHostKernelInterface {
             uuid = zskernel_pg4.uuid
         }
+        assertExtraIps(host, [])
     }
 
     void testBatchCreateHostKernelInterfaceError() {
@@ -588,20 +744,27 @@ class CreateHostKernelInterfaceCase extends SubCase {
         }
 
         struct2.ip = "55.55.55.56"
+        def defaultSetHandler = env.getSimulator(MevocoKVMConstant.SET_KERNEL_INTERFACE_PATH)
         env.simulator(MevocoKVMConstant.SET_KERNEL_INTERFACE_PATH) { HttpEntity<String> entity, EnvSpec spec ->
             def cmd = JSONObjectUtil.toObject(entity.body, MevocoKVMAgentCommands.SetHostKernelInterfaceCmd.class)
-            def rsp = new MevocoKVMAgentCommands.SetHostKernelInterfaceRsp()
             if (cmd.interfaces.ips.ip.flatten().contains(struct.ip)) {
+                def rsp = new MevocoKVMAgentCommands.SetHostKernelInterfaceRsp()
                 rsp.setError("on purpose")
+                return rsp
             }
-            return rsp
+            return defaultSetHandler(entity, spec)
         }
 
-        def batchResult = batchCreateHostKernelInterface {
+        BatchCreateHostKernelInterfaceResult batchResult
+        try {
+            batchResult = batchCreateHostKernelInterface {
                 structs = [struct, struct2]
                 l3NetworkUuid = simpleL3.uuid
                 trafficTypes = [STORAGE_TRAFFIC_TYPE]
-        } as BatchCreateHostKernelInterfaceResult
+            } as BatchCreateHostKernelInterfaceResult
+        } finally {
+            env.simulator(MevocoKVMConstant.SET_KERNEL_INTERFACE_PATH, defaultSetHandler)
+        }
 
         def results = batchResult.results as List<HostKernelInterfaceResult>
         assert results.size() == 2
@@ -610,15 +773,13 @@ class CreateHostKernelInterfaceCase extends SubCase {
         assert results.error.find {it != null}.code == OPERATION_ERROR_CODE
         assert results.error.find {it != null}.details == String.format("failed to create hostKernelInterface[name:%s] on the host[uuid:%s], %s",
                 struct.name, host.uuid, "on purpose")
-
-        env.simulator(MevocoKVMConstant.SET_KERNEL_INTERFACE_PATH) { HttpEntity<String> entity, EnvSpec spec ->
-            def rsp = new MevocoKVMAgentCommands.SetHostKernelInterfaceRsp()
-            return rsp
-        }
+        assertExtraIps(host, [])
+        assertExtraIps(host2, ["55.55.55.56"])
 
         deleteHostKernelInterface {
             uuid = results.inventory.find { it != null }.uuid
         }
+        assertExtraIps(host2, [])
     }
 
     void testBatchCreateHostKernelInterfaceWithSimpleL3() {
@@ -643,6 +804,8 @@ class CreateHostKernelInterfaceCase extends SubCase {
         assert inv2.description == struct2.description
         assert inv2.trafficTypes == [STORAGE_TRAFFIC_TYPE]
         assert (inv2.usedIps as List<HostKernelInterfaceUsedIpInventory>).get(0).ip == struct2.ip
+        assertExtraIps(host, ["55.55.55.55"])
+        assertExtraIps(host2, ["55.55.55.56"])
     }
 
     void testBatchCreateHostKernelInterfaceWithNormalL3() {
@@ -716,6 +879,13 @@ class CreateHostKernelInterfaceCase extends SubCase {
             assert inv.description == "normal-kernel-on-host" + host.name.replaceAll("kvm", "") + "-description"
             assert [MANAGEMENT_TRAFFIC_TYPE, STORAGE_TRAFFIC_TYPE].containsAll(inv.trafficTypes)
             assert inv.usedIps.size() == 1
+            List<String> expectedIps = [inv.usedIps.get(0).ip]
+            if (host.uuid == this.host.uuid) {
+                expectedIps.add("55.55.55.55")
+            } else if (host.uuid == host2.uuid) {
+                expectedIps.add("55.55.55.56")
+            }
+            assertExtraIps(host, expectedIps)
 
             if (![this.host.uuid, host2.uuid].contains(host.uuid)) {
                 deleteHost {
@@ -760,6 +930,8 @@ class CreateHostKernelInterfaceCase extends SubCase {
         } as HostKernelInterfaceInventory
 
         def hostUuidList = [host.uuid, host2.uuid, host3.uuid, host4.uuid]
+        assertExtraIps(host3, ["55.55.55.57"])
+        assertExtraIps(host4, ["55.55.55.58"])
         expectApiFailure({
             getCandidateHostKernelInterfaces {
                 hostUuids = hostUuidList
@@ -857,6 +1029,14 @@ class CreateHostKernelInterfaceCase extends SubCase {
         assert !zqlQuery("query hostKernelInterface where portGroup.uuid='${simpleL3.uuid}'").isEmpty()
     }
 
+    void assertExtraIps(HostInventory host, List<String> expectedIps) {
+        String value = HostSystemTags.EXTRA_IPS.getTokenByResourceUuid(host.uuid, HostSystemTags.EXTRA_IPS_TOKEN)
+        assert (value == null ? [] : value.tokenize(",")).toSet() == expectedIps.toSet()
+        if (expectedIps.isEmpty()) {
+            assert !HostSystemTags.EXTRA_IPS.hasTag(host.uuid)
+        }
+    }
+
     @Override
     void test() {
         env.create {
@@ -865,6 +1045,8 @@ class CreateHostKernelInterfaceCase extends SubCase {
             host = env.inventoryByName("kvm1") as KVMHostInventory
             host2 = env.inventoryByName("kvm2") as KVMHostInventory
             bond0 = controller.getHostNetworkBonding(host.uuid, "bond0")
+            assertExtraIps(host, [])
+            assertExtraIps(host2, [])
 
             def nsProviders = queryNetworkServiceProvider {
                 delegate.conditions = ["type=Flat"]
@@ -875,6 +1057,7 @@ class CreateHostKernelInterfaceCase extends SubCase {
                      UserdataConstant.USERDATA_TYPE.toString()])
 
             testCreateHostKernelInterfaceWithSimpleL3()
+            testConcurrentHostExtraIpsRefreshOnDifferentL2Networks()
             testCreateHostKernelInterfaceWithNormalL3()
             testCreateHostKernelInterfaceError()
             testCheckIpAvailability()

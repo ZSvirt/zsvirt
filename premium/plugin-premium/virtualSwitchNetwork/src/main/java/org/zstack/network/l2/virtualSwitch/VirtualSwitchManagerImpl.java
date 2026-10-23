@@ -46,6 +46,7 @@ import org.zstack.kvm.KVMConstant;
 import org.zstack.kvm.KVMHostAsyncHttpCallMsg;
 import org.zstack.kvm.KVMHostAsyncHttpCallReply;
 import org.zstack.kvm.KVMSystemTags;
+import org.zstack.kvm.RefreshHostExtraIpsMsg;
 import org.zstack.network.hostNetworkInterface.*;
 import org.zstack.network.l2.L2NetworkHostHelper;
 import org.zstack.network.l2.L2NetworkHostUtils;
@@ -246,6 +247,7 @@ public class VirtualSwitchManagerImpl extends AbstractService implements Virtual
     private void doCreateHostKernelInterface(final CreateHostKernelInterfaceMsg msg, ReturnValueCompletion<HostKernelInterfaceVO> completion) {
         class Context {
             HostKernelInterfaceVO vo;
+            boolean ipApplied;
             final List<UsedIpInventory> usedIps = new ArrayList<>();
         }
         final Context ctx = new Context();
@@ -392,8 +394,33 @@ public class VirtualSwitchManagerImpl extends AbstractService implements Virtual
                             trigger.fail(operr("failed to create hostKernelInterface[name:%s] on the host[uuid:%s], %s",
                                     msg.getName(), msg.getHostUuid(), rsp.getError()));
                         } else {
+                            ctx.ipApplied = true;
                             trigger.next();
                         }
+                    }
+                });
+            }
+        }).then(new NoRollbackFlow() {
+            String __name__ = "refresh-host-extra-ips";
+
+            @Override
+            public boolean skip(Map<String, Object> data) {
+                return !ctx.ipApplied;
+            }
+
+            @Override
+            public void run(FlowTrigger trigger, Map<String, Object> data) {
+                RefreshHostExtraIpsMsg rmsg = new RefreshHostExtraIpsMsg();
+                rmsg.setHostUuid(msg.getHostUuid());
+                bus.makeTargetServiceIdByResourceUuid(rmsg, HostConstant.SERVICE_ID, rmsg.getHostUuid());
+                bus.send(rmsg, new CloudBusCallBack(trigger) {
+                    @Override
+                    public void run(MessageReply reply) {
+                        if (!reply.isSuccess()) {
+                            logger.warn(String.format("failed to refresh extra IPs after updating kernel interfaces on host[uuid:%s]: %s",
+                                    rmsg.getHostUuid(), reply.getError().getReadableDetails()));
+                        }
+                        trigger.next();
                     }
                 });
             }
@@ -533,6 +560,7 @@ public class VirtualSwitchManagerImpl extends AbstractService implements Virtual
         class Context {
             HostKernelInterfaceVO vo;
             UsedIpInventory usedIpInv;
+            boolean ipApplied;
             final List<HostKernelInterfaceUsedIpVO> ips = new ArrayList<>();
         }
         final Context ctx = new Context();
@@ -713,12 +741,37 @@ public class VirtualSwitchManagerImpl extends AbstractService implements Virtual
                         if (!reply.isSuccess()) {
                             trigger.fail(reply.getError());
                         } else {
+                            ctx.ipApplied = true;
                             trigger.next();
                         }
                     }
                 });
             }
 
+        }).then(new NoRollbackFlow() {
+            String __name__ = "refresh-host-extra-ips";
+
+            @Override
+            public boolean skip(Map<String, Object> data) {
+                return !ctx.ipApplied;
+            }
+
+            @Override
+            public void run(FlowTrigger trigger, Map<String, Object> data) {
+                RefreshHostExtraIpsMsg rmsg = new RefreshHostExtraIpsMsg();
+                rmsg.setHostUuid(ctx.vo.getHostUuid());
+                bus.makeTargetServiceIdByResourceUuid(rmsg, HostConstant.SERVICE_ID, rmsg.getHostUuid());
+                bus.send(rmsg, new CloudBusCallBack(trigger) {
+                    @Override
+                    public void run(MessageReply reply) {
+                        if (!reply.isSuccess()) {
+                            logger.warn(String.format("failed to refresh extra IPs after updating kernel interfaces on host[uuid:%s]: %s",
+                                    rmsg.getHostUuid(), reply.getError().getReadableDetails()));
+                        }
+                        trigger.next();
+                    }
+                });
+            }
         }).done(new FlowDoneHandler(completion) {
             @Override
             public void handle(Map data) {
@@ -771,6 +824,7 @@ public class VirtualSwitchManagerImpl extends AbstractService implements Virtual
 
     private void doDeleteHostKernelInterface(APIDeleteHostKernelInterfaceMsg msg, boolean dbOnly, Completion completion) {
         class Context {
+            boolean ipApplied;
             final List<UsedIpInventory> ips = new ArrayList<>();
         }
         final Context ctx = new Context();
@@ -854,12 +908,37 @@ public class VirtualSwitchManagerImpl extends AbstractService implements Virtual
                             trigger.fail(operr("failed to delete hostKernelInterface[uuid:%s] on the host[uuid:%s], %s",
                                     msg.getUuid(), hostUuid, rsp.getError()));
                         } else {
+                            ctx.ipApplied = true;
                             trigger.next();
                         }
                     }
                 });
             }
 
+        }).then(new NoRollbackFlow() {
+            String __name__ = "refresh-host-extra-ips";
+
+            @Override
+            public boolean skip(Map<String, Object> data) {
+                return !ctx.ipApplied;
+            }
+
+            @Override
+            public void run(FlowTrigger trigger, Map<String, Object> data) {
+                RefreshHostExtraIpsMsg rmsg = new RefreshHostExtraIpsMsg();
+                rmsg.setHostUuid(hostUuid);
+                bus.makeTargetServiceIdByResourceUuid(rmsg, HostConstant.SERVICE_ID, rmsg.getHostUuid());
+                bus.send(rmsg, new CloudBusCallBack(trigger) {
+                    @Override
+                    public void run(MessageReply reply) {
+                        if (!reply.isSuccess()) {
+                            logger.warn(String.format("failed to refresh extra IPs after updating kernel interfaces on host[uuid:%s]: %s",
+                                    rmsg.getHostUuid(), reply.getError().getReadableDetails()));
+                        }
+                        trigger.next();
+                    }
+                });
+            }
         }).done(new FlowDoneHandler(completion) {
             @Override
             public void handle(Map data) {
@@ -1024,7 +1103,19 @@ public class VirtualSwitchManagerImpl extends AbstractService implements Virtual
                 }
 
                 logger.debug(String.format("successfully refresh host kernel interface on host[uuid:%s]", msg.getHostUuid()));
-                bus.reply(msg, reply);
+                RefreshHostExtraIpsMsg rmsg = new RefreshHostExtraIpsMsg();
+                rmsg.setHostUuid(msg.getHostUuid());
+                bus.makeTargetServiceIdByResourceUuid(rmsg, HostConstant.SERVICE_ID, rmsg.getHostUuid());
+                bus.send(rmsg, new CloudBusCallBack(msg) {
+                    @Override
+                    public void run(MessageReply refreshReply) {
+                        if (!refreshReply.isSuccess()) {
+                            logger.warn(String.format("failed to refresh extra IPs after updating kernel interfaces on host[uuid:%s]: %s",
+                                    rmsg.getHostUuid(), refreshReply.getError().getReadableDetails()));
+                        }
+                        bus.reply(msg, reply);
+                    }
+                });
             }
         });
     }

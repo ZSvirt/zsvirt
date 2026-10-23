@@ -84,6 +84,7 @@ import static org.zstack.kvm.KVMAgentCommands.*
 class KvmAgent extends Agent {
     private String version
     private String sendCommandUrl
+    private final Map<String, Map<String, Set<List<String>>>> kernelInterfaceAddresses = [:]
 
     KvmAgent(Simulator simulator) {
         super(simulator)
@@ -889,6 +890,21 @@ class KvmAgent extends Agent {
             rsp.virtualizerInfo = new VirtualizerInfoTO()
             rsp.virtualizerInfo.version = "4.2.0-627.g36ee592.el7"
             rsp.virtualizerInfo.virtualizer = "qemu-kvm"
+            def hostUuid = e.headers.getFirst(Constants.AGENT_HTTP_HEADER_RESOURCE_UUID)
+            def managementIp = Q.New(HostVO.class)
+                    .eq(HostVO_.uuid, hostUuid)
+                    .select(HostVO_.managementIp)
+                    .findValue() as String
+            Set<String> ips = new LinkedHashSet<>()
+            if (managementIp != null) {
+                ips.add(managementIp)
+            }
+            synchronized (kernelInterfaceAddresses) {
+                kernelInterfaceAddresses.get(hostUuid)?.values()?.each { addresses ->
+                    addresses.each { ips.add(it[0]) }
+                }
+            }
+            rsp.ipAddresses = new ArrayList<String>(ips)
             return rsp
         }
 
@@ -1239,7 +1255,30 @@ class KvmAgent extends Agent {
             return reply
         }
 
-        handle(MevocoKVMConstant.SET_KERNEL_INTERFACE_PATH) {
+        handle(MevocoKVMConstant.SET_KERNEL_INTERFACE_PATH) { HttpEntity<String> e ->
+            def hostUuid = e.headers.getFirst(Constants.AGENT_HTTP_HEADER_RESOURCE_UUID)
+            def cmd = json(e, MevocoKVMAgentCommands.SetHostKernelInterfaceCmd.class)
+            synchronized (kernelInterfaceAddresses) {
+                def interfaces = kernelInterfaceAddresses.computeIfAbsent(hostUuid) { [:] }
+                cmd.interfaces.each { to ->
+                    String interfaceKey = "${to.interfaceName}.${to.vlanId}".toString()
+                    def addresses = interfaces.computeIfAbsent(interfaceKey) { new LinkedHashSet<List<String>>() }
+                    to.ips.each { ip ->
+                        List<String> address = [ip.ip, ip.netmask]
+                        if (ip.actionCode == UsedIpTO.ACTION_CODE_ADD) {
+                            addresses.add(address)
+                        } else if (ip.actionCode == UsedIpTO.ACTION_CODE_REMOVE) {
+                            addresses.remove(address)
+                        }
+                    }
+                    if (addresses.isEmpty()) {
+                        interfaces.remove(interfaceKey)
+                    }
+                }
+                if (interfaces.isEmpty()) {
+                    kernelInterfaceAddresses.remove(hostUuid)
+                }
+            }
             return new MevocoKVMAgentCommands.SetHostKernelInterfaceRsp()
         }
 

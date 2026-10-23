@@ -1,6 +1,9 @@
 package org.zstack.storage.migration;
 
+import org.zstack.core.Platform;
+import org.zstack.core.componentloader.PluginRegistry;
 import org.zstack.core.db.Q;
+import org.zstack.header.allocator.HostAllocatorL2NetworkExtensionPoint;
 import org.zstack.header.cluster.ClusterVO;
 import org.zstack.header.cluster.ClusterVO_;
 import org.zstack.header.host.HostState;
@@ -31,6 +34,7 @@ import org.zstack.storage.primary.local.LocalStorageResourceRefVO_;
 import org.zstack.storage.primary.local.LocalStorageSystemTags;
 import org.zstack.tag.SystemTag;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -99,12 +103,14 @@ final class StorageMigrationLayoutChecker {
             localPrimaryStorageUuidsByHost = getLocalPrimaryStorageUuidsByHost(localPrimaryStorageUuids);
 
             List<HostVO> compatibleHosts = vmCompatibleClusterUuids.isEmpty()
-                    ? Collections.emptyList()
+                    ? new ArrayList<>()
                     : Q.New(HostVO.class)
                     .in(HostVO_.clusterUuid, vmCompatibleClusterUuids)
                     .eq(HostVO_.state, HostState.Enabled)
                     .eq(HostVO_.status, HostStatus.Connected)
                     .list();
+            Set<String> networkHostUuids = getVmNetworkHostUuids(vm, vmCompatibleClusterUuids);
+            compatibleHosts.removeIf(host -> !networkHostUuids.contains(host.getUuid()));
             clusterUuidByHostUuid = compatibleHosts.stream().collect(Collectors.toMap(
                     HostVO::getUuid,
                     HostVO::getClusterUuid,
@@ -285,6 +291,7 @@ final class StorageMigrationLayoutChecker {
         if (runnableClusterUuids.isEmpty()) {
             return "no cluster satisfies primary storage, architecture and L2 requirements after migration";
         }
+        Set<String> networkHostUuids = getVmNetworkHostUuids(vm, runnableClusterUuids);
 
         if (!finalLocalHostUuids.isEmpty()) {
             String finalLocalHostUuid = finalLocalHostUuids.iterator().next();
@@ -306,6 +313,9 @@ final class StorageMigrationLayoutChecker {
                 return String.format("host[uuid:%s] is not in a cluster that satisfies primary storage, architecture and L2 requirements after migration",
                         finalLocalHostUuid);
             }
+            if (!networkHostUuids.contains(finalLocalHostUuid)) {
+                return String.format("host[uuid:%s] cannot access the VM's L2 networks after migration", finalLocalHostUuid);
+            }
             if (!hostCanAccessAllSharedPrimaryStorages(finalLocalHostUuid, finalSharedPrimaryStorageUuids)) {
                 return String.format("host[uuid:%s] cannot access all shared primary storages%s after migration",
                         finalLocalHostUuid, finalSharedPrimaryStorageUuids);
@@ -320,6 +330,9 @@ final class StorageMigrationLayoutChecker {
                 return String.format("host[uuid:%s] is not in a cluster that satisfies primary storage, architecture and L2 requirements after migration",
                         resolvedDstHostUuid);
             }
+            if (!networkHostUuids.contains(resolvedDstHostUuid)) {
+                return String.format("host[uuid:%s] cannot access the VM's L2 networks after migration", resolvedDstHostUuid);
+            }
             if (!hostCanAccessAllSharedPrimaryStorages(resolvedDstHostUuid, finalSharedPrimaryStorageUuids)) {
                 return String.format("host[uuid:%s] cannot access all shared primary storages%s after migration",
                         resolvedDstHostUuid, finalSharedPrimaryStorageUuids);
@@ -328,6 +341,7 @@ final class StorageMigrationLayoutChecker {
         }
 
         Set<String> runnableHostUuids = getRunnableHostUuids(runnableClusterUuids, finalSharedPrimaryStorageUuids);
+        runnableHostUuids.retainAll(networkHostUuids);
         if (excludeCurrentHostForLiveWithoutDstHost && isRunningOrPaused(vm)) {
             runnableHostUuids.remove(vm.getHostUuid());
         }
@@ -386,28 +400,73 @@ final class StorageMigrationLayoutChecker {
             return clusterUuids;
         }
 
+        Set<String> networkHostUuids = getVmNetworkHostUuids(vm, clusterUuids);
+        if (networkHostUuids.isEmpty()) {
+            return Collections.emptySet();
+        }
+        List<String> networkClusterUuids = Q.New(HostVO.class)
+                .in(HostVO_.uuid, networkHostUuids)
+                .select(HostVO_.clusterUuid)
+                .listValues();
+        clusterUuids.retainAll(networkClusterUuids);
+        return clusterUuids;
+    }
+
+    private static Set<String> getVmNetworkHostUuids(VmInstanceVO vm, Collection<String> clusterUuids) {
+        if (clusterUuids.isEmpty()) {
+            return Collections.emptySet();
+        }
+        Set<String> hostUuids = new LinkedHashSet<>(Q.New(HostVO.class)
+                .in(HostVO_.clusterUuid, clusterUuids)
+                .select(HostVO_.uuid)
+                .listValues());
+        if (hostUuids.isEmpty()) {
+            return hostUuids;
+        }
         List<String> l3NetworkUuids = Q.New(VmNicVO.class)
                 .eq(VmNicVO_.vmInstanceUuid, vm.getUuid())
                 .select(VmNicVO_.l3NetworkUuid)
                 .listValues();
         if (l3NetworkUuids.isEmpty()) {
-            return clusterUuids;
+            return hostUuids;
         }
         List<String> l2Networks = Q.New(L3NetworkVO.class)
                 .in(L3NetworkVO_.uuid, l3NetworkUuids)
                 .select(L3NetworkVO_.l2NetworkUuid)
                 .listValues();
+        Set<String> managedL2Networks = new LinkedHashSet<>();
+        PluginRegistry pluginRegistry = Platform.getComponentLoader().getComponent(PluginRegistry.class);
+        for (HostAllocatorL2NetworkExtensionPoint ext : pluginRegistry.getExtensionList(HostAllocatorL2NetworkExtensionPoint.class)) {
+            Set<String> managed = ext.getManagedL2NetworkUuids(l2Networks);
+            managedL2Networks.addAll(managed);
+            if (!managed.isEmpty()) {
+                hostUuids.retainAll(ext.getCandidateHostUuids(managed));
+                if (hostUuids.isEmpty()) {
+                    return hostUuids;
+                }
+            }
+        }
         for (String l2NetworkUuid : new LinkedHashSet<>(l2Networks)) {
+            if (managedL2Networks.contains(l2NetworkUuid)) {
+                continue;
+            }
             List<String> l2Clusters = Q.New(L2NetworkClusterRefVO.class)
                     .eq(L2NetworkClusterRefVO_.l2NetworkUuid, l2NetworkUuid)
                     .select(L2NetworkClusterRefVO_.clusterUuid)
                     .listValues();
-            clusterUuids.retainAll(l2Clusters);
-            if (clusterUuids.isEmpty()) {
-                return clusterUuids;
+            if (l2Clusters.isEmpty()) {
+                return Collections.emptySet();
+            }
+            hostUuids.retainAll(Q.New(HostVO.class)
+                    .in(HostVO_.uuid, hostUuids)
+                    .in(HostVO_.clusterUuid, l2Clusters)
+                    .select(HostVO_.uuid)
+                    .listValues());
+            if (hostUuids.isEmpty()) {
+                return hostUuids;
             }
         }
-        return clusterUuids;
+        return hostUuids;
     }
 
     private static Map<String, Set<String>> getPrimaryStorageUuidsByCluster(Collection<String> primaryStorageUuids) {

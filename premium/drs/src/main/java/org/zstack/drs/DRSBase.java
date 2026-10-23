@@ -3,6 +3,8 @@ package org.zstack.drs;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
+import org.zstack.compute.allocator.HostAllocatorGlobalConfig;
+import org.zstack.compute.allocator.HostCapacityReserveManager;
 import org.zstack.core.Platform;
 import org.zstack.core.asyncbatch.While;
 import org.zstack.core.cascade.CascadeFacade;
@@ -29,6 +31,8 @@ import org.zstack.drs.message.*;
 import org.zstack.drs.util.DRSActivityConcurrencyControl;
 import org.zstack.drs.util.DRSUtils;
 import org.zstack.header.allocator.HostCapacityVO;
+import org.zstack.header.allocator.HostCapacityOverProvisioningManager;
+import org.zstack.header.allocator.ReservedHostCapacity;
 import org.zstack.header.allocator.AllocatorDomainScene;
 import org.zstack.header.core.Completion;
 import org.zstack.header.core.WhileDoneCompletion;
@@ -62,6 +66,7 @@ import org.zstack.zwatch.ruleengine.RuleEvaluationResult;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -99,6 +104,10 @@ public class DRSBase {
     protected CascadeFacade casf;
     @Autowired
     private ResourceConfigFacade rcf;
+    @Autowired
+    private HostCapacityOverProvisioningManager memoryRatioMgr;
+    @Autowired
+    private HostCapacityReserveManager capacityReserveMgr;
 
     protected ClusterDRSVO self;
     protected ClusterDRSVO originalCopy;
@@ -706,6 +715,7 @@ public class DRSBase {
 
     private List<HostNode> buildHostNodes(List<HostLoad> hostLoads) {
         List<HostNode> hostNodes = new ArrayList<>();
+        boolean checkMaxMemory = HostAllocatorGlobalConfig.HOST_ALLOCATOR_MAX_MEMORY.value(Boolean.class);
 
         for (HostLoad hostLoad : hostLoads) {
             HostCapacityVO hostCapacityVO = dbf.findByUuid(hostLoad.getHostUuid(), HostCapacityVO.class);
@@ -714,10 +724,16 @@ public class DRSBase {
                     hostLoad.getUsedCPUPercent(),
                     hostLoad.getUsedPhysicalMemoryBit(),
                     hostCapacityVO.getAvailableCpu(),
-                    hostCapacityVO.getAvailablePhysicalMemory(),
+                    hostCapacityVO.getAvailableMemory(),
                     hostCapacityVO.getCpuNum(),
                     hostCapacityVO.getTotalMemory()
             );
+
+            ReservedHostCapacity reserved = capacityReserveMgr.getReservedHostCapacityByHosts(
+                    Collections.singletonList(hostLoad.getHostUuid()));
+            hostNode.setMemoryCapacityPolicy(memoryRatioMgr.getMemoryRatio(hostLoad.getHostUuid()),
+                    reserved.getReservedMemoryCapacity(),
+                    checkMaxMemory ? hostCapacityVO.getTotalPhysicalMemory() : null);
 
             for (HostLoadOccupiedByVm vmLoad : hostLoad.getVmList()) {
                 VmInstanceVO vmInstanceVO = dbf.findByUuid(vmLoad.getVmUuid(), VmInstanceVO.class);

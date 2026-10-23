@@ -243,7 +243,7 @@ public class DefaultBalanceAlgorithm implements BalanceAlgorithm {
                 }
             }
 
-            if (targetHost.getHostCapacityAvailableCpuNum() < vmNode.getCpuNum() || targetHost.getHostCapacityAvailableMemoryBit() < vmNode.getMemorySize()) {
+            if (targetHost.getHostCapacityAvailableCpuNum() < vmNode.getCpuNum() || !targetHost.hasMemoryCapacity(vmNode.getMemorySize())) {
                 continue;
             }
 
@@ -264,12 +264,12 @@ public class DefaultBalanceAlgorithm implements BalanceAlgorithm {
         tasks.add(task);
 
         targetHost.setHostCapacityAvailableCpuNum(targetHost.getHostCapacityAvailableCpuNum() - vmNode.getCpuNum());
-        targetHost.setHostCapacityAvailableMemoryBit(targetHost.getHostCapacityAvailableMemoryBit() - vmNode.getMemorySize());
+        targetHost.reserveMemoryCapacity(vmNode.getMemorySize());
         targetHost.setFreePhysicalMemoryBit(targetHost.getFreePhysicalMemoryBit() - vmNode.getUsedPhysicalMemoryBit());
         targetHost.setUsedCPUPercent(targetHost.getUsedCPUPercent() + vmCpuPctOn(targetHost, vmNode));
 
         sourceHost.setHostCapacityAvailableCpuNum(sourceHost.getHostCapacityAvailableCpuNum() + vmNode.getCpuNum());
-        sourceHost.setHostCapacityAvailableMemoryBit(sourceHost.getHostCapacityAvailableMemoryBit() + vmNode.getMemorySize());
+        sourceHost.releaseMemoryCapacity(vmNode.getMemorySize());
         sourceHost.setFreePhysicalMemoryBit(sourceHost.getFreePhysicalMemoryBit() + vmNode.getUsedPhysicalMemoryBit());
         sourceHost.setUsedCPUPercent(sourceHost.getUsedCPUPercent() - vmCpuPctOn(sourceHost, vmNode));
 
@@ -387,7 +387,7 @@ public class DefaultBalanceAlgorithm implements BalanceAlgorithm {
         boolean cpuOk = thCpu == null || uCpuAfter <= (thCpu - h);
         boolean memOk = thMem == null || uMemAfter <= (thMem - h);
         boolean capacityOk = target.getHostCapacityAvailableCpuNum() >= v.getCpuNum()
-                && target.getHostCapacityAvailableMemoryBit() >= v.getMemorySize();
+                && target.hasMemoryCapacity(v.getMemorySize());
         return cpuOk && memOk && capacityOk;
     }
 

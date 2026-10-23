@@ -49,7 +49,7 @@ class AllocatorDomainNegativeMigrateAllocateCase extends SubCase {
 
                     kvm {
                         name = "kvm1"
-                        managementIp = "localhost"
+                        managementIp = "127.0.0.1"
                         username = "root"
                         password = "password"
                     }

@@ -2590,8 +2590,12 @@ public class SchedulerFacadeImpl extends AbstractService implements SchedulerFac
                 .param("jobsInGroup", new HashSet<>(jobsInGroup)).find();
         }
 
-        SQL.New("select vo from SchedulerJobVO vo where vo.uuid not in (:jobsInGroup)", SchedulerJobVO.class)
-                .param("jobsInGroup", new HashSet<>(jobsInGroup)).limit(1000).paginate(count, (List<SchedulerJobVO> jobs) -> {
+        SQL schedulerJobSql = jobsInGroup.isEmpty() ?
+                SQL.New("select vo from SchedulerJobVO vo", SchedulerJobVO.class) :
+                SQL.New("select vo from SchedulerJobVO vo where vo.uuid not in (:jobsInGroup)", SchedulerJobVO.class)
+                        .param("jobsInGroup", new HashSet<>(jobsInGroup));
+
+        schedulerJobSql.limit(1000).paginate(count, (List<SchedulerJobVO> jobs) -> {
             HashMap<String, List<SchedulerJobVO>> ours = new HashMap<>();
             for (SchedulerJobVO job : jobs) {
                 if (skipManaged && getManagementServerId().equals(job.getManagementNodeUuid())) {

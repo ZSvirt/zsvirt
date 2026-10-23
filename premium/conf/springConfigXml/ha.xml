@@ -67,6 +67,7 @@
             <zstack:extension interface="org.zstack.header.storage.primary.PrimaryStorageDetachExtensionPoint" />
             <zstack:extension interface="org.zstack.header.storage.primary.PrimaryStorageAttachExtensionPoint" />
             <zstack:extension interface="org.zstack.header.storage.primary.UpdatePrimaryStorageExtensionPoint" />
+            <zstack:extension interface="org.zstack.compute.host.PreHostConnectExtensionPoint" />
             <zstack:extension interface="org.zstack.header.host.HostAfterConnectedExtensionPoint" />
         </zstack:plugin>
     </bean>

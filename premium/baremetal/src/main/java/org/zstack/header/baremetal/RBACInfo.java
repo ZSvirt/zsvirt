@@ -35,7 +35,6 @@ public class RBACInfo implements PackageDescription {
                         APIQueryBaremetalInstanceMsg.class,
                         APIQueryBaremetalBondingMsg.class,
                         APIGetBaremetalChassisPowerStatusMsg.class)
-                .productName("baremetal")
                 .build();
 
         roleBuilder()

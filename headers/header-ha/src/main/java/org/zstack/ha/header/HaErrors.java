@@ -36,9 +36,10 @@ public enum HaErrors {
     VM_HA_START_ERROR(5000),
     HA_WORKER_ALREADY_STARTED(5001),
 
-    // 51XX: HA start refused
+    // 51XX: HA start refused (code is equals to VmErrors)
     VM_HA_START_BLOCKED(5100),
     PRIMARY_STORAGE_IN_MAINTENANCE(5101),
+    LV_LOCKED_BY_OTHER_HOST(5102), // LV locked by other host
     ;
 
     public final String code;

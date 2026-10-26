@@ -6,12 +6,16 @@ import org.springframework.beans.factory.annotation.Configurable;
 import org.zstack.core.db.DatabaseFacade;
 import org.zstack.core.db.SQL;
 import org.zstack.core.db.SQLBatchWithReturn;
+import org.zstack.header.errorcode.ErrorCode;
 import org.zstack.header.vm.*;
 import org.zstack.identity.AccountManager;
 import org.zstack.utils.DebugUtils;
 import org.zstack.utils.data.Pair;
 
 import javax.persistence.Tuple;
+
+import static org.zstack.core.Platform.err;
+import static org.zstack.header.vm.VmErrors.LV_LOCKED_BY_OTHER_HOST;
 
 @Configurable(preConstruction = true, autowire = Autowire.BY_TYPE)
 public class VmSchedHistoryRecorder {
@@ -90,6 +94,10 @@ public class VmSchedHistoryRecorder {
         return this;
     }
 
+    public VmSchedHistoryRecorder withFailError(ErrorCode error) {
+        return withFailReason(simplifyError(error).getReadableDetails());
+    }
+
     public VmSchedHistoryRecorder withFailReason(String failReason) {
         this.failReason = (failReason.length() > REASON_MAX_LENGTH) ?
                 failReason.substring(0, REASON_MAX_LENGTH - 3) + "..." : failReason;
@@ -106,5 +114,16 @@ public class VmSchedHistoryRecorder {
                 .set(VmSchedHistoryVO_.success, currentHostUuid != null)
                 .set(VmSchedHistoryVO_.failReason, failReason)
                 .update();
+    }
+
+    // ------------------------------------- VmSchedHistoryVO.failReason ------------------------------------
+    // This is a work-around for ZSV-13599: simplify failReason
+    private ErrorCode simplifyError(ErrorCode rawError) {
+        String detail = rawError.getDetails();
+        if (detail.contains("LV locked by other host")) {
+            return err(LV_LOCKED_BY_OTHER_HOST, "waiting for LV locked release");
+        }
+
+        return rawError;
     }
 }

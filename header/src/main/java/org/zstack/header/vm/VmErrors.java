@@ -26,6 +26,12 @@ public enum VmErrors {
     VM_ALLOCATION_ERROR(1200),
     WRONG_SPECIFIC_HOST_ERROR(1201),
     WRONG_SPECIFIC_PS_ERROR(1202),
+
+    // 51XX: VM start refused (code is equals to HaErrors)
+    VM_START_BLOCKED(5100),
+    PRIMARY_STORAGE_IN_MAINTENANCE(5101),
+    LV_LOCKED_BY_OTHER_HOST(5102),
+
     ;
 
     private String code;

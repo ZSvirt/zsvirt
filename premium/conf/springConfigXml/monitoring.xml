@@ -16,7 +16,7 @@
     	<zstack:plugin>
 		<zstack:extension interface="org.zstack.header.Component" />
 		<zstack:extension interface="org.zstack.header.Service" />
-		<zstack:extension interface="org.zstack.compute.host.PostHostConnectExtensionPoint"/>
+		<zstack:extension interface="org.zstack.header.host.spi.HostPostConnectedExtensionPoint"/>
 		<zstack:extension interface="org.zstack.header.host.HostDeleteExtensionPoint"/>
 		<zstack:extension interface="org.zstack.header.vm.VmJustBeforeDeleteFromDbExtensionPoint"/>
 		<zstack:extension interface="org.zstack.header.managementnode.ManagementNodeReadyExtensionPoint"/>

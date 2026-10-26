@@ -5,7 +5,7 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.zstack.appliancevm.ApplianceVmConstant;
-import org.zstack.compute.host.PostHostConnectExtensionPoint;
+import org.zstack.header.host.spi.HostPostConnectedExtensionPoint;
 import org.zstack.compute.vm.VmCapabilitiesExtensionPoint;
 import org.zstack.core.Platform;
 import org.zstack.core.asyncbatch.While;
@@ -124,7 +124,7 @@ public class PciDeviceManager extends AbstractService implements
         VmHaExtensionPoint,
         GlobalApiMessageInterceptor,
         VmCapabilitiesExtensionPoint,
-        PostHostConnectExtensionPoint,
+        HostPostConnectedExtensionPoint,
         KVMStartVmAddonExtensionPoint,
         VmInstanceMigrateExtensionPoint,
         VmReleaseResourceExtensionPoint,

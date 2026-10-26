@@ -33,6 +33,7 @@ import org.zstack.header.exception.CloudRuntimeException;
 import org.zstack.header.host.*;
 import org.zstack.header.host.ServiceTypeStatisticConstants.InterfaceType;
 import org.zstack.header.host.ServiceTypeStatisticConstants.SortBy;
+import org.zstack.header.host.spi.HostPostConnectedExtensionPoint;
 import org.zstack.header.message.APIMessage;
 import org.zstack.header.message.Message;
 import org.zstack.header.message.MessageReply;
@@ -68,7 +69,7 @@ import static org.zstack.core.Platform.operr;
 import static org.zstack.longjob.LongJobUtils.buildErrIfCanceled;
 import static org.zstack.longjob.LongJobUtils.jobCanceled;
 
-public class MevocoHostManagerImpl implements HostExtensionManager, PostHostConnectExtensionPoint, HostAfterConnectedExtensionPoint, Component, ServiceTypeExtensionPoint {
+public class MevocoHostManagerImpl implements HostExtensionManager, HostPostConnectedExtensionPoint, HostAfterConnectedExtensionPoint, Component, ServiceTypeExtensionPoint {
     private static final CLogger logger = Utils.getLogger(MevocoHostManagerImpl.class);
     @Autowired
     private CloudBus bus;

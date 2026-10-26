@@ -14,6 +14,7 @@ import org.zstack.header.host.HostInventory;
 import org.zstack.header.host.HostNUMANode;
 import org.zstack.header.host.HostNumaNodeVO;
 import org.zstack.header.host.HostNumaNodeVO_;
+import org.zstack.header.host.spi.HostPostConnectedExtensionPoint;
 import org.zstack.header.message.MessageReply;
 import org.zstack.utils.Utils;
 import org.zstack.utils.gson.JSONObjectUtil;
@@ -25,7 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-public class PostHostExtensionPointForNuma implements PostHostConnectExtensionPoint {
+public class PostHostExtensionPointForNuma implements HostPostConnectedExtensionPoint {
     @Autowired
     private DatabaseFacade dbf;
     @Autowired

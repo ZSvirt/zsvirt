@@ -1,7 +1,7 @@
 package org.zstack.mttyDevice;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.zstack.compute.host.PostHostConnectExtensionPoint;
+import org.zstack.header.host.spi.HostPostConnectedExtensionPoint;
 import org.zstack.core.asyncbatch.While;
 import org.zstack.core.db.Q;
 import org.zstack.header.core.Completion;
@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
  *
  * see: ZSTAC-51096
  */
-public class MttyResplitIntoMdevAfterHostConnectFlowFactory implements PostHostConnectExtensionPoint {
+public class MttyResplitIntoMdevAfterHostConnectFlowFactory implements HostPostConnectedExtensionPoint {
     private static final CLogger logger = Utils.getLogger(MttyResplitIntoMdevAfterHostConnectFlowFactory.class);
 
     @Autowired

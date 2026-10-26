@@ -16,7 +16,7 @@
         <zstack:plugin>
             <zstack:extension interface="org.zstack.header.Component"/>
             <zstack:extension interface="org.zstack.header.Service"/>
-            <zstack:extension interface="org.zstack.compute.host.PostHostConnectExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.host.spi.HostPostConnectedExtensionPoint"/>
             <zstack:extension interface="org.zstack.header.vm.PreVmInstantiateResourceExtensionPoint"/>
             <zstack:extension interface="org.zstack.header.vm.PostVmInstantiateResourceExtensionPoint"/>
         </zstack:plugin>
@@ -24,7 +24,7 @@
 
     <bean id="MttyResplitIntoMdevAfterHostConnectFlowFactory" class="org.zstack.mttyDevice.MttyResplitIntoMdevAfterHostConnectFlowFactory">
         <zstack:plugin>
-            <zstack:extension interface="org.zstack.compute.host.PostHostConnectExtensionPoint" order="10"/>
+            <zstack:extension interface="org.zstack.header.host.spi.HostPostConnectedExtensionPoint" order="10"/>
         </zstack:plugin>
     </bean>
 

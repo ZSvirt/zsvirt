@@ -1,6 +1,6 @@
-# ZVirt Governance
+# ZSvirt Governance
 
-This document describes how the ZVirt project is governed, maintained, and developed.
+This document describes how the ZSvirt project is governed, maintained, and developed.
 
 ## Goals
 
@@ -14,7 +14,7 @@ The governance model is designed to:
 
 ## Project Scope
 
-ZVirt is an open infrastructure project for private cloud, server virtualization, and enterprise cloud management.
+ZSvirt is an open infrastructure project for private cloud, server virtualization, and enterprise cloud management.
 
 The project may include the following repositories:
 
@@ -65,7 +65,7 @@ Contributors are expected to follow:
 
 ## Decision Making
 
-ZVirt uses a maintainer-led decision-making model during the open-source preview stage.
+ZSvirt uses a maintainer-led decision-making model during the open-source preview stage.
 
 Routine decisions may be made by maintainers through issues, pull requests, and discussions.
 

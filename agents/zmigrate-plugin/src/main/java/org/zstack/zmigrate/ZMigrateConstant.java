@@ -76,6 +76,7 @@ public class ZMigrateConstant {
     public static final String ZMIGRATE_QUERY_AVAILABLE_SERVER_ACTION = "QueryAvailableServer";
     // distribute VDDK to a gateway
     public static final String ZMIGRATE_UPLOAD_VDDK_ACTION = "UploadVDDK";
+    public static final String ZMIGRATE_QUERY_VDDK_VERSION_ACTION = "VersionVDDK";
 
     public static final String ZMIGRATE_ZSPHERE_WEB_SERVICES_PATH = "/restful/ZSphereWebServices";
     // verify platform connection

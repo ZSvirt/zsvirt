@@ -101,10 +101,12 @@ import java.util.Base64;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -1623,10 +1625,9 @@ public class ZMigrateManager extends AbstractService implements
 
     private void activateUploadedVddk(String vmInstanceUuid, String targetIp, String uploadTaskUuid,
                                       long uploadTimestamp, Completion completion) {
-        String activateUploadCommand = ZMigrateVddkBundle.buildActivationCommand(
-                uploadTimestamp,
-                ZMigrateVddkBundle.parseVersionMd5Config(
-                        ZMigrateGlobalConfig.VDDK_VERSION_MD5.value()));
+        Map<String, String> required = ZMigrateVddkBundle.parseVersionMd5Config(
+                ZMigrateGlobalConfig.VDDK_VERSION_MD5.value());
+        String activateUploadCommand = ZMigrateVddkBundle.buildActivationCommand(uploadTimestamp, required);
         ShellResult activateUploadResult = createSshClient().runWithSudoPassword(
                 targetIp, activateUploadCommand, VDDK_INSTALL_TIMEOUT_SECONDS);
         if (activateUploadResult.getRetCode() != 0) {
@@ -1634,15 +1635,15 @@ public class ZMigrateManager extends AbstractService implements
             return;
         }
         createVddkUploadedTag(vmInstanceUuid, uploadTaskUuid);
-        distributeVddkToDefaultGateway(vmInstanceUuid, activateUploadResult.getStdout(), completion);
+        distributeVddkToDefaultGateway(vmInstanceUuid, activateUploadResult.getStdout(), required, completion);
     }
 
     private void distributeVddkToDefaultGateway(String vmUuid, String activationOutput,
-                                                Completion completion) {
+                                                Map<String, String> required, Completion completion) {
         SimpleFlowChain.of(String.format("distribute-VDDK-to-ZMigrate-gateway-%s", vmUuid))
         .then(Flow.of("distribute-VDDK-to-default-ZMigrate-gateway")
             .handle(trigger -> {
-                List<String> vddkFiles = parsePublishedVddkFiles(activationOutput);
+                Map<String, String> vddkFiles = parsePublishedVddkFiles(activationOutput, required);
                 ZMigrateHttpClient httpClient = createHttpClient();
                 String servUuid = getGatewayServUuid(httpClient, vmUuid);
                 distributeVddks(httpClient, servUuid, vddkFiles);
@@ -1660,14 +1661,19 @@ public class ZMigrateManager extends AbstractService implements
         .start();
     }
 
-    private List<String> parsePublishedVddkFiles(String activationOutput) {
+    private Map<String, String> parsePublishedVddkFiles(String activationOutput, Map<String, String> required) {
         List<String> vddkFiles = ZMigrateVddkBundle.parsePublishedFileNames(activationOutput);
         int distinctFileCount = new HashSet<>(vddkFiles).size();
         if (vddkFiles.size() != 2 || distinctFileCount != 2) {
             throw new OperationFailureException(operr(
                     "activation returned %d distinct VDDK package files", distinctFileCount));
         }
-        return vddkFiles;
+        List<String> versions = ZMigrateVddkBundle.getDistributionVersions(required);
+        Map<String, String> filesByVersion = new LinkedHashMap<>();
+        for (int i = 0; i < versions.size(); i++) {
+            filesByVersion.put(versions.get(i), vddkFiles.get(i));
+        }
+        return filesByVersion;
     }
 
     private String getGatewayServUuid(ZMigrateHttpClient httpClient, String vmUuid) {
@@ -1698,10 +1704,24 @@ public class ZMigrateManager extends AbstractService implements
         return (String) servUuid;
     }
 
-    private void distributeVddks(ZMigrateHttpClient httpClient, String servUuid, List<String> vddkFiles) {
-        for (String vddkFile : vddkFiles) {
-            distributeVddk(httpClient, servUuid, vddkFile);
-        }
+    private void distributeVddks(ZMigrateHttpClient httpClient, String servUuid, Map<String, String> vddkFiles) {
+        new ZMigrateVddkDistribution(new ZMigrateVddkDistribution.Gateway() {
+            @Override
+            public Set<String> queryVersions(long timeoutInMillis) {
+                ErrorableValue<Set<String>> response = httpClient.getVddkVersions(servUuid, timeoutInMillis);
+                if (!response.isSuccess()) {
+                    throw new OperationFailureException(operr(
+                            "failed to query VDDK versions on ZMigrate gateway[servUuid:%s]", servUuid)
+                            .withCause(response.error));
+                }
+                return response.result;
+            }
+
+            @Override
+            public void upload(String file) {
+                distributeVddk(httpClient, servUuid, file);
+            }
+        }).distribute(vddkFiles);
     }
 
     private void distributeVddk(ZMigrateHttpClient httpClient, String servUuid, String vddkFile) {

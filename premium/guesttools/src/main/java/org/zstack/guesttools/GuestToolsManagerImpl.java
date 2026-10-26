@@ -1273,6 +1273,28 @@ public class GuestToolsManagerImpl extends AbstractService implements GuestTools
             public void run(SyncTaskChain chain) {
                 VmInstanceVO vm = dbf.findByUuid(vmUuid, VmInstanceVO.class);
                 List<VmConfigSyncStruct.VmPortConfig> ports = getVmPortsConfig(msg.getVmInstanceUuid(), msg.getVmNicUuids(), msg.getHaState());
+                // A transient Guest snapshot may remove UsedIp while VmNic still
+                // records the static address. Never turn that inconsistency into
+                // an apparently successful request that clears Windows IPv4.
+                if (ImagePlatform.Windows.toString().equals(vm.getPlatform())) {
+                    for (VmConfigSyncStruct.VmPortConfig port : ports) {
+                        VmNicVO nic = vm.getVmNics().stream()
+                                .filter(n -> Objects.equals(n.getMac(), port.getMac())).findFirst().orElse(null);
+                        if (nic == null) {
+                            continue;
+                        }
+                        for (VmConfigSyncStruct.VmIpConfig ip : port.getVmIps()) {
+                            if (ip.getVersion() == IPv6Constants.IPv4 &&
+                                    WindowsNetworkConfigValidator.isMissingStaticIpv4(nic.getIp(), ip.getProto(), ip.getIp(), ip.getNetmask())) {
+                                reply.setError(operr("cannot sync Windows vm[uuid:%s] nic[uuid:%s]: static IPv4 configuration is missing, recorded IP is %s",
+                                        vmUuid, nic.getUuid(), nic.getIp()));
+                                bus.reply(msg, reply);
+                                chain.next();
+                                return;
+                            }
+                        }
+                    }
+                }
                 logger.debug(String.format("get vm[uuid:%s] ports config: %s", vmUuid, ports));
                 VmPortsConfigSyncOnHypervisorMsg syncMsg = new VmPortsConfigSyncOnHypervisorMsg();
                 syncMsg.setPorts(ports);

@@ -81,7 +81,8 @@ public final class ZMigrateVddkBundle {
         if (required == null || required.size() != 2) {
             throw new IllegalArgumentException("exactly two VDDK version/checksum entries are required");
         }
-        String[] checksums = required.values().toArray(new String[0]);
+        String[] checksums = getDistributionVersions(required).stream()
+                .map(required::get).toArray(String[]::new);
         for (String checksum : checksums) {
             if (!MD5_PATTERN.matcher(checksum).matches()) {
                 throw new IllegalArgumentException("invalid VDDK MD5 value");
@@ -190,6 +191,16 @@ public final class ZMigrateVddkBundle {
             }
         }
         return fileNames;
+    }
+
+    public static List<String> getDistributionVersions(Map<String, ?> packages) {
+        List<String> versions = new ArrayList<>(packages.keySet());
+        // Management requires 8.0.3 before accepting dependent VDDK packages.
+        // Keep version identity tied to the configured checksum, not the filename.
+        if (versions.remove("8.0.3")) {
+            versions.add(0, "8.0.3");
+        }
+        return versions;
     }
 
     public static String buildCleanupCommand(long uploadTimestamp) {

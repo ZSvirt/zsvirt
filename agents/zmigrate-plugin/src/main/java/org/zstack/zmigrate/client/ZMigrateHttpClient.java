@@ -407,6 +407,44 @@ public class ZMigrateHttpClient {
                 });
     }
 
+    public ErrorableValue<Set<String>> getVddkVersions(String servUuid, long timeoutInMillis) {
+        long started = System.nanoTime();
+        return retryWithFreshContext(
+                0, 0,
+                "getVddkVersions",
+                err(ZMIGRATE_GATEWAY_ERROR, "failed to query VDDK versions on ZMigrate gateway"),
+                (managementIp, encryptKey) -> {
+                    long remaining = timeoutInMillis - TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - started);
+                    if (remaining <= 0) {
+                        return err(ZMIGRATE_GATEWAY_ERROR,
+                                "VDDK version query timed out for gateway[servUuid:%s]", servUuid).toErrorableValue();
+                    }
+                    GetVddkVersionsCmd cmd = new GetVddkVersionsCmd(encryptKey, servUuid);
+                    ErrorableValue<VddkVersionsResponse> response = http(VddkVersionsResponse.class)
+                            .withPath(String.format("https://%s:%d%s", managementIp,
+                                    GATEWAY_RESTFUL_API_PORT, ZMIGRATE_VMWARE_WEB_SERVICES_PATH))
+                            .withBodyJson(cmd)
+                            .withTimeoutInMillis(Math.min(timeoutInMillisForGetter, remaining))
+                            .withoutRetry()
+                            .postWithErrorCode();
+                    if (!response.isSuccess()) {
+                        return response.cast();
+                    }
+                    VddkVersionsResponse result = response.result;
+                    if (result == null) {
+                        return err(ZMIGRATE_GATEWAY_ERROR,
+                                "empty VDDK version response from gateway[servUuid:%s]", servUuid).toErrorableValue();
+                    }
+                    try {
+                        return ErrorableValue.of(result.getInstalledVersions());
+                    } catch (IllegalArgumentException invalid) {
+                        return err(ZMIGRATE_GATEWAY_ERROR,
+                                "failed to query VDDK versions on gateway[servUuid:%s]: %s",
+                                servUuid, invalid.getMessage()).toErrorableValue();
+                    }
+                });
+    }
+
     public ErrorableValue<String> getMigrateJobs() {
         return retryWithFreshContext(
                 DEFAULT_RETRY_TIMES, DEFAULT_RETRY_INTERVAL_SECONDS,
@@ -694,8 +732,43 @@ public class ZMigrateHttpClient {
 
     public static class UploadVddkResponse {
         public String status;
-        public String version;
+        // Acknowledgements may contain a nested object; readiness comes from VersionVDDK.
+        public Object version;
         public String msg;
+    }
+
+    public static class GetVddkVersionsCmd extends AgentCmd {
+        @SerializedName("Action")
+        public String action = ZMIGRATE_QUERY_VDDK_VERSION_ACTION;
+        @SerializedName("ServUUID")
+        public String servUuid;
+
+        public GetVddkVersionsCmd(String encryptKey, String servUuid) {
+            this.encryptKey = encryptKey;
+            this.servUuid = servUuid;
+        }
+    }
+
+    public static class VddkVersionsResponse {
+        public String status;
+        public Map<String, Boolean> version;
+        public String msg;
+
+        public Set<String> getInstalledVersions() {
+            if ("false".equals(status) && (version == null || version.isEmpty())) {
+                return new HashSet<>();
+            }
+            if (!Boolean.parseBoolean(status) || version == null) {
+                throw new IllegalArgumentException("VersionVDDK did not return a successful version map: " + msg);
+            }
+            Set<String> installed = new HashSet<>();
+            version.forEach((name, ready) -> {
+                if (Boolean.TRUE.equals(ready)) {
+                    installed.add(name);
+                }
+            });
+            return installed;
+        }
     }
 
     public static class GetMigrationJobsCmd extends AgentCmd {

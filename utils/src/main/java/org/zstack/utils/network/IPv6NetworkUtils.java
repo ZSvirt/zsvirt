@@ -199,8 +199,21 @@ public class IPv6NetworkUtils {
         }
     }
 
+    public static boolean isValidIpv6Range(String startIp, String endIp) {
+        try {
+            IPv6Address start = IPv6Address.fromString(startIp);
+            IPv6Address end = IPv6Address.fromString(endIp);
+            return end.compareTo(start) >= 0;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
     public static boolean isIpv6RangeOverlap(String startIp1, String endIp1, String startIp2, String endIp2) {
         try {
+            if (!isValidIpv6Range(startIp1, endIp1) || !isValidIpv6Range(startIp2, endIp2)) {
+                return false;
+            }
             IPv6Address s1 = IPv6Address.fromString(startIp1);
             IPv6Address e1 = IPv6Address.fromString(endIp1);
             IPv6Address s2 = IPv6Address.fromString(startIp2);
@@ -210,7 +223,7 @@ public class IPv6NetworkUtils {
             IPv6AddressRange range2 = IPv6AddressRange.fromFirstAndLast(s2, e2);
             return range1.overlaps(range2);
         } catch (Exception e) {
-            return true;
+            return false;
         }
     }
 

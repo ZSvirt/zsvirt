@@ -1054,6 +1054,12 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
                                  ReturnValueCompletion<CbtTaskInventory> completion) {
         final String uuid = msg.getUuid();
         final String vmUuid = msg.getVmInstanceUuid();
+        List<String> existingTaskUuids = CbtTaskConflictChecker.getTaskUuids(vmUuid);
+        if (!existingTaskUuids.isEmpty()) {
+            completion.fail(operr("VM[uuid: %s] already has a CBT task[uuid: %s], cannot create another task.",
+                    vmUuid, existingTaskUuids.get(0)));
+            return;
+        }
         CbtTaskVO taskVO = new SQLBatchWithReturn<CbtTaskVO>() {
             @Override
             protected CbtTaskVO scripts() {
@@ -1335,20 +1341,7 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
 
     @Override
     public ErrorCode check(String vmUuid, String currentResourceUuid) {
-        List<String> taskUuids = Q.New(CbtTaskResourceRefVO.class)
-                .eq(CbtTaskResourceRefVO_.resourceType, VmInstanceVO.class.getSimpleName())
-                .eq(CbtTaskResourceRefVO_.resourceUuid, vmUuid)
-                .select(CbtTaskResourceRefVO_.taskUuid)
-                .listValues();
-        if (currentResourceUuid != null) {
-            taskUuids.removeIf(currentResourceUuid::equals);
-        }
-        if (taskUuids.isEmpty()) {
-            return null;
-        }
-
-        return operr("VM[uuid: %s] has already created a CBT task[uuid: %s], cannot perform another backup operation at the same time.",
-                vmUuid, taskUuids.get(0));
+        return CbtTaskConflictChecker.checkTaskConflict(vmUuid, currentResourceUuid);
     }
 
     @Override

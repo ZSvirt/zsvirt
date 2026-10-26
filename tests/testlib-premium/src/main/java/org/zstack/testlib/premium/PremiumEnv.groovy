@@ -30,6 +30,8 @@ class PremiumEnv {
 
             include("mevoco.xml")
             include("imagestore.xml")
+            include("CbtBackupStorage.xml")
+            include("volumeBackup.xml")
             include("sriov.xml")
             include("authentications/accountImport.xml")
             include("authentications/accountImportTest.xml")

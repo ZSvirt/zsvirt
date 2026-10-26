@@ -63,7 +63,6 @@ import org.zstack.sdk.zwatch.monitorgroup.api.DeleteMonitorGroupAction
 import org.zstack.sdk.zwatch.monitorgroup.api.DeleteMonitorTemplateAction
 import org.zstack.storage.volume.VolumeGlobalConfig
 import org.zstack.testlib.identity.AccountSpec
-import org.zstack.testlib.identity.IdentitySpec
 import org.zstack.testlib.identity.ldap.LdapServerSpec
 import org.zstack.testlib.identity.ldap.LdapVirtualEndpointSpec
 import org.zstack.testlib.vfs.VFS
@@ -307,14 +306,6 @@ class EnvSpec extends ApiHelper implements Node  {
 
     void cleanStorageObjectMocks() {
         storageObjectSizeMocks.clear()
-    }
-
-    void identities(@DelegatesTo(strategy = Closure.DELEGATE_FIRST, value = IdentitySpec.class) Closure c) {
-        def ispec = new IdentitySpec(this)
-        c.delegate = ispec
-        c.resolveStrategy = Closure.DELEGATE_FIRST
-        c()
-        addChild(ispec)
     }
 
     ZoneSpec zone(@DelegatesTo(strategy = Closure.DELEGATE_FIRST, value = ZoneSpec.class) Closure c)  {

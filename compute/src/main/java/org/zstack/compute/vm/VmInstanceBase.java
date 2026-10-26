@@ -3948,6 +3948,9 @@ public class VmInstanceBase extends AbstractVmInstance {
         final VmInstanceSpec spec = buildSpecFromInventory(getSelfInventory(), VmOperation.ChangeNicIp);
         final VmNicVO nicVO = self.getVmNics().stream().filter(
                 nic -> nic.getL3NetworkUuid().equals(msg.getL3NetworkUuid())).findFirst().orElse(new VmNicVO());
+        final Map<Integer, UsedIpInventory> oldIpMap = nicVO.getUsedIps().stream()
+                .collect(Collectors.toMap(UsedIpVO::getIpVersion, UsedIpInventory::valueOf,
+                        (first, second) -> first));
         spec.setL3Networks(list(new VmNicSpec(
                 L3NetworkInventory.valueOf(dbf.findByUuid(msg.getL3NetworkUuid(), L3NetworkVO.class)))));
         chain.getData().put(VmInstanceConstant.Params.VmInstanceSpec.toString(), spec);
@@ -4058,6 +4061,21 @@ public class VmInstanceBase extends AbstractVmInstance {
                                     IPv6NetworkUtils.ipv6AddessToTagValue(ipVO.getIp()));
                         }
                         dbf.removeCollection(voRemoveSet, UsedIpVO.class);
+                        List<UsedIpVO> newUsedIps = Q.New(UsedIpVO.class)
+                                .eq(UsedIpVO_.vmNicUuid, nicVO.getUuid()).list();
+                        Map<Integer, UsedIpInventory> newIpMap = newUsedIps.stream()
+                                .collect(Collectors.toMap(UsedIpVO::getIpVersion, UsedIpInventory::valueOf,
+                                        (first, second) -> first));
+                        oldIpMap.entrySet().removeIf(entry -> !newIpMap.containsKey(entry.getKey())
+                                || Objects.equals(entry.getValue().getIp(), newIpMap.get(entry.getKey()).getIp()));
+                        VmInstanceInventory vm = getSelfInventory();
+                        VmNicInventory nic = VmNicInventory.valueOf(nicVO);
+                        CollectionUtils.safeForEach(pluginRgty.getExtensionList(VmIpChangedExtensionPoint.class),
+                                ext -> {
+                                    if (ext.supportsNoIpAllocationChange()) {
+                                        ext.vmIpChanged(vm, nic, oldIpMap, newIpMap);
+                                    }
+                                });
                         if (self.getState() != VmInstanceState.Running) {
                             vmConfigSyncHelper.setVmSyncPorts(msg.getVmInstanceUuid());
                         }

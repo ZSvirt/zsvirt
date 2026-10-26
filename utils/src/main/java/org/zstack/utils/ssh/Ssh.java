@@ -86,7 +86,7 @@ public class Ssh {
         @Override
         public SshResult run() {
             if (logger.isTraceEnabled()) {
-                logger.trace(String.format("run script remotely[ip: %s, port: %s]:\n%s\n", hostname, port, rawScript));
+                logger.trace(String.format("run script remotely[ip: %s, port: %s]:\n%s\n", hostname, port, removeSensitiveInfoFromCmd(rawScript)));
             }
             return scriptCommand.run();
         }

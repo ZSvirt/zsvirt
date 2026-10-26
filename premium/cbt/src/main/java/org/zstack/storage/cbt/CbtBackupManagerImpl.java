@@ -1151,21 +1151,36 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
         }
 
         new While<>(uuids).step((uuid, wcompl) -> {
-            DeleteVolumeMsg msg = new DeleteVolumeMsg();
-            msg.setDeletionPolicy(VolumeDeletionPolicyManager.VolumeDeletionPolicy.Direct.toString());
-            msg.setUuid(uuid);
-            bus.makeTargetServiceIdByResourceUuid(msg, VolumeConstant.SERVICE_ID, uuid);
-            bus.send(msg, new CloudBusCallBack(wcompl) {
+            DeleteVolumeMsg delete = new DeleteVolumeMsg();
+            delete.setUuid(uuid);
+            delete.setDeletionPolicy(VolumeDeletionPolicyManager.VolumeDeletionPolicy.Delay.toString());
+            bus.makeTargetServiceIdByResourceUuid(delete, VolumeConstant.SERVICE_ID, uuid);
+            bus.send(delete, new CloudBusCallBack(wcompl) {
                 @Override
-                public void run(MessageReply reply) {
-                    if (!reply.isSuccess()) {
-                        logger.warn(String.format("failed to expunge the volume[uuid:%s], %s", uuid, reply.getError()));
-                        wcompl.addError(reply.getError());
-                    } else {
-                        deleteResourceUuidsForCbtTask(uuid, taskUuid);
-                        logger.debug(String.format("successfully expunged the volume [uuid:%s]", uuid));
+                public void run(MessageReply deleteReply) {
+                    if (!deleteReply.isSuccess()) {
+                        logger.warn(String.format("failed to delete the volume[uuid:%s], %s", uuid, deleteReply.getError()));
+                        wcompl.addError(deleteReply.getError());
+                        wcompl.done();
+                        return;
                     }
-                    wcompl.done();
+
+                    ExpungeVolumeMsg expunge = new ExpungeVolumeMsg();
+                    expunge.setVolumeUuid(uuid);
+                    bus.makeTargetServiceIdByResourceUuid(expunge, VolumeConstant.SERVICE_ID, uuid);
+                    bus.send(expunge, new CloudBusCallBack(wcompl) {
+                        @Override
+                        public void run(MessageReply expungeReply) {
+                            if (expungeReply.isSuccess()) {
+                                deleteResourceUuidsForCbtTask(uuid, taskUuid);
+                                logger.debug(String.format("successfully expunged the volume [uuid:%s]", uuid));
+                            } else {
+                                logger.warn(String.format("failed to expunge the volume[uuid:%s], %s", uuid, expungeReply.getError()));
+                                wcompl.addError(expungeReply.getError());
+                            }
+                            wcompl.done();
+                        }
+                    });
                 }
             });
         }, 5).run(new WhileDoneCompletion(completion) {

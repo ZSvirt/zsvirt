@@ -1,4 +1,4 @@
-package org.zstack.compute.host;
+package org.zstack.header.host.spi;
 
 import org.zstack.header.core.workflow.Flow;
 import org.zstack.header.host.ConnectHostInfo;
@@ -7,9 +7,11 @@ import org.zstack.header.host.HostInventory;
 import java.util.Map;
 
 /**
- * Created by GuoYi on 2019-06-03.
+ * Named PreHostConnectExtensionPoint in version < 5.2.0
+ *
+ * @version zsv_5.2.0: update name to HostPreConnectedExtensionPoint, move to header module
  */
-public interface PreHostConnectExtensionPoint {
+public interface HostPreConnectedExtensionPoint {
     String KEY_INVENTORY = "HOST_INVENTORY";
     String KEY_CONNECT_HOST_INFO = "CONNECT_HOST_INFO";
 

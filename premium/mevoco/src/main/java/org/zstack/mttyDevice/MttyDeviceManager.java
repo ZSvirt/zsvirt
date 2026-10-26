@@ -1,7 +1,7 @@
 package org.zstack.mttyDevice;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.zstack.compute.host.PostHostConnectExtensionPoint;
+import org.zstack.header.host.spi.HostPostConnectedExtensionPoint;
 import org.zstack.compute.vm.VmSystemTags;
 import org.zstack.core.Platform;
 import org.zstack.core.cloudbus.CloudBus;
@@ -34,7 +34,6 @@ import org.zstack.pciDevice.entity.virtual.vfio_mdev.MdevDeviceVO;
 import org.zstack.pciDevice.entity.virtual.vfio_mdev.MdevDeviceVO_;
 import org.zstack.pciDevice.header.virtual.vfio_mdev.MdevDeviceStatus;
 import org.zstack.pciDevice.header.virtual.vfio_mdev.MdevDeviceType;
-import org.zstack.pciDevice.virtual.vfio_mdev.*;
 import org.zstack.utils.Utils;
 import org.zstack.utils.logging.CLogger;
 
@@ -45,7 +44,7 @@ import java.util.*;
  * @date 2022/11/17 13:19
  **/
 public class MttyDeviceManager extends AbstractService implements
-        PostHostConnectExtensionPoint,
+HostPostConnectedExtensionPoint,
         PreVmInstantiateResourceExtensionPoint,
         PostVmInstantiateResourceExtensionPoint {
     private static final CLogger logger = Utils.getLogger(MttyDeviceManager.class);

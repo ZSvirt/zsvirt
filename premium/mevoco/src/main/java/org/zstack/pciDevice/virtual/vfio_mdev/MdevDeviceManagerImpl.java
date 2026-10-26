@@ -5,7 +5,7 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.zstack.appliancevm.ApplianceVmConstant;
-import org.zstack.compute.host.PostHostConnectExtensionPoint;
+import org.zstack.header.host.spi.HostPostConnectedExtensionPoint;
 import org.zstack.compute.vm.VmCapabilitiesExtensionPoint;
 import org.zstack.core.Platform;
 import org.zstack.core.asyncbatch.While;
@@ -67,7 +67,6 @@ import org.zstack.pciDevice.message.virtual.vfio_mdev.CheckAndReserveMdevDeviceB
 import org.zstack.pciDevice.message.virtual.vfio_mdev.CheckAndReserveMdevDeviceBySpecReply;
 import org.zstack.pciDevice.message.virtual.vfio_mdev.DetachMdevDeviceMsg;
 import org.zstack.pciDevice.message.virtual.vfio_mdev.MdevDeviceMessage;
-import org.zstack.pciDevice.specification.mdev.*;
 import org.zstack.pciDevice.spi.MdevDeviceManager;
 import org.zstack.pciDevice.spi.PciDeviceBackend;
 import org.zstack.pciDevice.spi.PciDeviceManagerInterface;
@@ -90,7 +89,7 @@ public class MdevDeviceManagerImpl extends AbstractService implements
         MdevDeviceManager,
         VmHaExtensionPoint,
         GlobalApiMessageInterceptor,
-        PostHostConnectExtensionPoint,
+        HostPostConnectedExtensionPoint,
         VmCapabilitiesExtensionPoint,
         KVMStartVmAddonExtensionPoint,
         VmInstanceMigrateExtensionPoint,

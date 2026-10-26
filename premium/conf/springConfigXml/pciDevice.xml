@@ -20,7 +20,7 @@
             <zstack:extension interface="org.zstack.header.identity.ReportQuotaExtensionPoint" />
             <zstack:extension interface="org.zstack.compute.vm.VmCapabilitiesExtensionPoint"/>
             <zstack:extension interface="org.zstack.kvm.KVMHostConnectExtensionPoint" order="2"/>
-            <zstack:extension interface="org.zstack.compute.host.PostHostConnectExtensionPoint" order="-2"/>
+            <zstack:extension interface="org.zstack.header.host.spi.HostPostConnectedExtensionPoint" order="-2"/>
             <zstack:extension interface="org.zstack.header.vm.VmReleaseResourceExtensionPoint"/>
             <zstack:extension interface="org.zstack.header.vm.PreVmInstantiateResourceExtensionPoint"/>
             <zstack:extension interface="org.zstack.header.vm.PostVmInstantiateResourceExtensionPoint"/>
@@ -134,7 +134,7 @@
             <zstack:extension interface="org.zstack.header.Component" />
             <zstack:extension interface="org.zstack.header.Service" />
             <zstack:extension interface="org.zstack.compute.vm.VmCapabilitiesExtensionPoint"/>
-            <zstack:extension interface="org.zstack.compute.host.PostHostConnectExtensionPoint" order="10" />
+            <zstack:extension interface="org.zstack.header.host.spi.HostPostConnectedExtensionPoint" order="10" />
             <zstack:extension interface="org.zstack.kvm.KVMStartVmAddonExtensionPoint"/>
             <zstack:extension interface="org.zstack.header.vm.VmReleaseResourceExtensionPoint"/>
             <zstack:extension interface="org.zstack.header.vm.PreVmInstantiateResourceExtensionPoint"/>

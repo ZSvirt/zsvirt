@@ -5,7 +5,7 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.zstack.compute.host.MevocoKVMAgentCommands;
 import org.zstack.compute.host.MevocoKVMConstant;
-import org.zstack.compute.host.PostHostConnectExtensionPoint;
+import org.zstack.header.host.spi.HostPostConnectedExtensionPoint;
 import org.zstack.core.Platform;
 import org.zstack.core.asyncbatch.While;
 import org.zstack.core.cloudbus.CloudBus;
@@ -66,7 +66,7 @@ import java.util.stream.Collectors;
 import static org.zstack.core.Platform.*;
 
 public class VirtualSwitchManagerImpl extends AbstractService implements VirtualSwitchManager,
-        PostHostConnectExtensionPoint, L3NetworkGetIpStatisticExtensionPoint, HostAfterUpdatedExtensionPoint,
+HostPostConnectedExtensionPoint, L3NetworkGetIpStatisticExtensionPoint, HostAfterUpdatedExtensionPoint,
         HostNetworkCandidateFilterExtensionPoint, FilterAttachableL3NetworkExtensionPoint, L2NetworkCandidateFilterExtensionPoint {
 
     private static CLogger logger = Utils.getLogger(VirtualSwitchManagerImpl.class);

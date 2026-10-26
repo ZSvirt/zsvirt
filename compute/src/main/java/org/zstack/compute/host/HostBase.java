@@ -40,6 +40,8 @@ import org.zstack.header.host.HostCanonicalEvents.HostDeletedData;
 import org.zstack.header.host.HostCanonicalEvents.HostStatusChangedData;
 import org.zstack.header.host.HostErrors.Opaque;
 import org.zstack.header.host.HostMaintenancePolicyExtensionPoint.HostMaintenancePolicy;
+import org.zstack.header.host.spi.HostPostConnectedExtensionPoint;
+import org.zstack.header.host.spi.HostPreConnectedExtensionPoint;
 import org.zstack.header.message.APIDeleteMessage;
 import org.zstack.header.message.APIMessage;
 import org.zstack.header.message.Message;
@@ -1373,15 +1375,15 @@ public abstract class HostBase extends AbstractHost {
 
         SimpleFlowChain chain = SimpleFlowChain.of("connect-host-" + self.getUuid());
         chain.allowWatch();
-        chain.putData(PreHostConnectExtensionPoint.KEY_INVENTORY, getSelfInventory());
-        chain.putData(PreHostConnectExtensionPoint.KEY_CONNECT_HOST_INFO, hostInfo);
+        chain.putData(HostPreConnectedExtensionPoint.KEY_INVENTORY, getSelfInventory());
+        chain.putData(HostPreConnectedExtensionPoint.KEY_CONNECT_HOST_INFO, hostInfo);
 
         chain.then(Flow.of("check-conditions-of-connection")
             .handle(trigger -> checkConnectConditions(hostInfo, trigger.toCompletion()))
             .build());
 
         chain.then(Flow.nope("call-pre-connect-extensions-start"));
-        for (PreHostConnectExtensionPoint p : pluginRgty.getExtensionList(PreHostConnectExtensionPoint.class)) {
+        for (HostPreConnectedExtensionPoint p : pluginRgty.getExtensionList(HostPreConnectedExtensionPoint.class)) {
             Flow flow = p.createPreHostConnectFlow();
             if (flow != null) {
                 chain.then(flow);
@@ -1402,12 +1404,12 @@ public abstract class HostBase extends AbstractHost {
         chain.then(Flow.of("call-post-connect-extensions-start")
             .handle((trigger, data) -> {
                 self = dbf.reload(self);
-                data.put(PostHostConnectExtensionPoint.KEY_INVENTORY, getSelfInventory()); // overwrite
+                data.put(HostPostConnectedExtensionPoint.KEY_INVENTORY, getSelfInventory()); // overwrite
                 trigger.next();
             })
             .build());
 
-        for (PostHostConnectExtensionPoint p : pluginRgty.getExtensionList(PostHostConnectExtensionPoint.class)) {
+        for (HostPostConnectedExtensionPoint p : pluginRgty.getExtensionList(HostPostConnectedExtensionPoint.class)) {
             Flow flow = p.createPostHostConnectFlow();
             if (flow != null) {
                 chain.then(flow);

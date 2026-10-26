@@ -3,7 +3,7 @@ package org.zstack.compute.sriov;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.zstack.compute.host.MevocoKVMAgentCommands;
 import org.zstack.compute.host.MevocoKVMConstant;
-import org.zstack.compute.host.PostHostConnectExtensionPoint;
+import org.zstack.header.host.spi.HostPostConnectedExtensionPoint;
 import org.zstack.core.asyncbatch.While;
 import org.zstack.core.cloudbus.CloudBus;
 import org.zstack.core.cloudbus.CloudBusCallBack;
@@ -55,7 +55,7 @@ import java.util.stream.Collectors;
  */
 public class VmVfNicKvmBackend implements VmVfNicHypervisorBackend, VmInstanceStartNewCreatedVmExtensionPoint,
         VmInstanceStartExtensionPoint, VmInstanceStopExtensionPoint, VmInstanceMigrateExtensionPoint,
-        VmInstanceAttachNicExtensionPoint, VmDetachNicExtensionPoint, PostHostConnectExtensionPoint {
+        VmInstanceAttachNicExtensionPoint, VmDetachNicExtensionPoint, HostPostConnectedExtensionPoint {
     private static final CLogger logger = Utils.getLogger(VmVfNicKvmBackend.class);
     private static final VfPciDeviceUtils vfPciDeviceUtils = new VfPciDeviceUtils();
 

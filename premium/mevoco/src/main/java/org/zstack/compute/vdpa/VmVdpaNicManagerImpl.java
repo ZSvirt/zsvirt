@@ -7,7 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.zstack.compute.cluster.MevocoClusterGlobalConfig;
 import org.zstack.compute.host.MevocoKVMAgentCommands;
 import org.zstack.compute.host.MevocoKVMConstant;
-import org.zstack.compute.host.PostHostConnectExtensionPoint;
+import org.zstack.header.host.spi.HostPostConnectedExtensionPoint;
 import org.zstack.compute.host.ReserveEthernetVfMsg;
 import org.zstack.compute.host.ReserveHostPciDeviceReply;
 import org.zstack.compute.ovs.OvsGlobalConfig;
@@ -116,7 +116,7 @@ public class VmVdpaNicManagerImpl extends AbstractService implements VmVdpaNicMa
         KVMStartVmExtensionPoint,
         VmInstanceMigrateExtensionPoint,
         KVMHostConnectExtensionPoint,
-        PostHostConnectExtensionPoint,
+HostPostConnectedExtensionPoint,
         KvmHostAgentDeploymentExtensionPoint{
 
     private static final CLogger logger = Utils.getLogger(VmVdpaNicManagerImpl.class);

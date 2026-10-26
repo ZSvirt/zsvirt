@@ -69,7 +69,7 @@
             <zstack:extension interface="org.zstack.header.vm.VmInstanceMigrateExtensionPoint" />
             <zstack:extension interface="org.zstack.header.vm.VmInstanceAttachNicExtensionPoint" />
             <zstack:extension interface="org.zstack.header.vm.VmDetachNicExtensionPoint" />
-            <zstack:extension interface="org.zstack.compute.host.PostHostConnectExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.host.spi.HostPostConnectedExtensionPoint" />
         </zstack:plugin>
     </bean>
 </beans>

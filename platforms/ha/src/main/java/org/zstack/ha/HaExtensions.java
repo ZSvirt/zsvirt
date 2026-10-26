@@ -1,7 +1,7 @@
 package org.zstack.ha;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.zstack.compute.host.PreHostConnectExtensionPoint;
+import org.zstack.header.host.spi.HostPreConnectedExtensionPoint;
 import org.zstack.compute.vm.BeforeStopVmOnHypervisorExtensionPoint;
 import org.zstack.core.componentloader.PluginRegistry;
 import org.zstack.core.db.DatabaseFacade;
@@ -95,7 +95,7 @@ public class HaExtensions implements
         , PrimaryStorageDetachExtensionPoint
         , PrimaryStorageAttachExtensionPoint
         , UpdatePrimaryStorageExtensionPoint
-        , PreHostConnectExtensionPoint
+        , HostPreConnectedExtensionPoint
         , HostAfterConnectedExtensionPoint
 {
     private static final CLogger logger = Utils.getLogger(HaExtensions.class);

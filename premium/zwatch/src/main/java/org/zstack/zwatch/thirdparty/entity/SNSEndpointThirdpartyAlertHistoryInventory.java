@@ -1,8 +1,9 @@
 package org.zstack.zwatch.thirdparty.entity;
 
-import org.zstack.core.Platform;
 import org.zstack.header.configuration.PythonClassInventory;
+import org.zstack.header.message.DocUtils;
 import org.zstack.header.search.Inventory;
+import org.zstack.monitoring.AlertVO;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
@@ -42,9 +43,9 @@ public class SNSEndpointThirdpartyAlertHistoryInventory implements Serializable 
 
     public static SNSEndpointThirdpartyAlertHistoryInventory __example__() {
         SNSEndpointThirdpartyAlertHistoryInventory inventory = new SNSEndpointThirdpartyAlertHistoryInventory();
-        inventory.setEndpointUuid(Platform.getUuid());
-        inventory.setAlertUuid(Platform.getUuid());
-        inventory.createDate = new Timestamp(System.currentTimeMillis());
+        inventory.setEndpointUuid(DocUtils.createFixedUuid(SNSEndpointThirdpartyAlertHistoryVO.class));
+        inventory.setAlertUuid(DocUtils.createFixedUuid(AlertVO.class));
+        inventory.createDate = DocUtils.timestamp();
         return inventory;
     }
 

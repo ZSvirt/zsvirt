@@ -2,6 +2,7 @@ package org.zstack.zwatch.metricpusher;
 
 import org.zstack.core.Platform;
 import org.zstack.header.configuration.PythonClassInventory;
+import org.zstack.header.message.DocUtils;
 import org.zstack.header.search.Inventory;
 
 import java.io.Serializable;
@@ -49,12 +50,12 @@ public class MetricDataHttpReceiverInventory implements Serializable {
 
     public static MetricDataHttpReceiverInventory __example__() {
         MetricDataHttpReceiverInventory ret = new MetricDataHttpReceiverInventory();
-        ret.uuid = Platform.getUuid();
+        ret.uuid = DocUtils.createFixedUuid(MetricDataHttpReceiverVO.class);
         ret.name = "CloudMonitor";
         ret.url = "http://127.0.0.1/xxx";
         ret.state = ReceiverState.Enabled;
-        ret.createDate = new Timestamp(org.zstack.header.message.DocUtils.date);
-        ret.lastOpDate = new Timestamp(org.zstack.header.message.DocUtils.date);
+        ret.createDate = DocUtils.timestamp();
+        ret.lastOpDate = DocUtils.timestamp();
         return ret;
     }
 

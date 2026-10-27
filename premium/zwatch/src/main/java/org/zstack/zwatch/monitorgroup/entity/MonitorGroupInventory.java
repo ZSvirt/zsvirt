@@ -1,7 +1,7 @@
 package org.zstack.zwatch.monitorgroup.entity;
 
-import org.zstack.core.Platform;
 import org.zstack.header.configuration.PythonClassInventory;
+import org.zstack.header.message.DocUtils;
 import org.zstack.header.search.Inventory;
 
 import java.io.Serializable;
@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import static java.util.Arrays.asList;
+import static org.zstack.utils.CollectionDSL.list;
 
 @PythonClassInventory
 @Inventory(mappingVOClass = MonitorGroupVO.class, collectionValueOfMethod = "valueOf1")
@@ -56,10 +56,10 @@ public class MonitorGroupInventory implements Serializable {
         MonitorGroupInventory inventory = new MonitorGroupInventory();
         inventory.setName("group-vm");
         inventory.setDescription("desc");
-        inventory.setCreateDate(new Timestamp(System.currentTimeMillis()));
-        inventory.setLastOpDate(new Timestamp(System.currentTimeMillis()));
-        inventory.setUuid(Platform.getUuid());
-        inventory.setMonitorGroupTemplateRefs(asList(new MonitorGroupTemplateRefVO()));
+        inventory.setCreateDate(DocUtils.timestamp());
+        inventory.setLastOpDate(DocUtils.timestamp());
+        inventory.setUuid(DocUtils.createFixedUuid(MonitorGroupVO.class));
+        inventory.setMonitorGroupTemplateRefs(list(new MonitorGroupTemplateRefVO()));
         return inventory;
     }
 

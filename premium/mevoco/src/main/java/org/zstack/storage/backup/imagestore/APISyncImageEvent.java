@@ -1,6 +1,5 @@
 package org.zstack.storage.backup.imagestore;
 
-import org.zstack.core.Platform;
 import org.zstack.header.message.APIEvent;
 import org.zstack.header.rest.RestResponse;
 
@@ -15,7 +14,6 @@ public class APISyncImageEvent extends APIEvent {
     }
 
     public static APISyncImageEvent __example__() {
-        APISyncImageEvent event = new APISyncImageEvent(Platform.getUuid());
-        return event;
+        return new APISyncImageEvent();
     }
 }

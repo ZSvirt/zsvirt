@@ -2,6 +2,8 @@ package org.zstack.test.checker.doc
 
 import org.junit.Test
 import org.zstack.header.exception.CloudRuntimeException
+import org.zstack.utils.Utils
+import org.zstack.utils.logging.CLogger
 
 import java.nio.charset.StandardCharsets
 import java.nio.file.FileVisitResult
@@ -13,7 +15,9 @@ import java.nio.file.attribute.BasicFileAttributes
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 
-class ApiDocChecker {
+class ApiDocSinceChecker {
+    private static final CLogger logger = Utils.getLogger(ApiDocSinceChecker.class)
+
     private static final Set<String> SKIP_DIR_NAMES = [
             ".git", ".idea", ".vscode", ".gradle", "target", "node_modules",
             "out", "build", ".settings"
@@ -25,7 +29,7 @@ class ApiDocChecker {
     void checkSinceField() {
         Set<String> supported = loadSupportedSince()
         Path root = findProjectRoot()
-        Set<String> errors = new TreeSet<>()
+        Set<String> invalidFiles = new TreeSet<>()
 
         Files.walkFileTree(root, new SimpleFileVisitor<Path>() {
             @Override
@@ -52,19 +56,19 @@ class ApiDocChecker {
                 while (matcher.find()) {
                     String since = matcher.group(1)
                     if (!supported.contains(since)) {
-                        errors.add("${relativePath}: found unsupported since \"${since}\"")
+                        logger.info("${relativePath}: found unsupported since \"${since}\"")
+                        invalidFiles.add(relativePath)
                     }
                 }
                 return FileVisitResult.CONTINUE
             }
         })
 
-        errors.each { println it }
-        assert errors.isEmpty()
+        assert invalidFiles.isEmpty() : "Invalid doc files:\n" + String.join("\n", invalidFiles)
     }
 
     private static Set<String> loadSupportedSince() {
-        InputStream input = ApiDocChecker.class.getResourceAsStream("supports-since.txt")
+        InputStream input = ApiDocSinceChecker.class.getResourceAsStream("supports-since.txt")
         if (input == null) {
             throw new CloudRuntimeException("cannot find supports-since.txt")
         }

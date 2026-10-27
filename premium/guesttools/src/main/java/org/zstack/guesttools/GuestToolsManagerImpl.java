@@ -279,6 +279,11 @@ public class GuestToolsManagerImpl extends AbstractService implements GuestTools
         }
 
         if (qevent == GuestToolsQgaStateEvent.noOperation && zevent == GuestToolsZWatchStateEvent.noOperation) {
+            String version = StringUtils.isNotEmpty(qversion) ? qversion : zversion;
+            if (StringUtils.isNotEmpty(version) && !version.equals(stateVO.getVersion())) {
+                stateVO.setVersion(version);
+                stateVO = dbf.updateAndRefresh(stateVO);
+            }
             return stateVO;
         }
 

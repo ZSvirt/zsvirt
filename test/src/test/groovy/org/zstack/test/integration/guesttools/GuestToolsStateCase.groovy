@@ -13,7 +13,12 @@ import org.zstack.guesttools.GetVmZWatchStatusMsg
 import org.zstack.guesttools.GuestToolsAgentStatus
 import org.zstack.guesttools.GuestToolsConstant
 import org.zstack.guesttools.GuestToolsManagerImpl
+import org.zstack.guesttools.GuestToolsQgaState
+import org.zstack.guesttools.GuestToolsServiceType
 import org.zstack.guesttools.GuestToolsStateVO
+import org.zstack.guesttools.GuestToolsZWatchState
+import org.zstack.guesttools.UpdateGuestToolsStateMsg
+import org.zstack.guesttools.UpdateGuestToolsStateReply
 import org.zstack.guesttools.kvm.GuestToolsKvmCommands
 import org.zstack.header.vm.DiskAO
 import org.zstack.header.vm.VmInstanceVO
@@ -34,6 +39,8 @@ class GuestToolsStateCase extends SubCase {
     volatile boolean qgaRunning
     volatile boolean zsToolsFound
     volatile String qgaPlatform = "Linux"
+    volatile String guestToolsVersion = "1.6.0"
+    volatile boolean guestToolsQueryFails
     volatile GuestToolsAgentStatus zwatchStatus = GuestToolsAgentStatus.NOT_RUNNING
     Map<String, Double> metrics = [:]
     List<String> requests = Collections.synchronizedList([])
@@ -115,7 +122,11 @@ class GuestToolsStateCase extends SubCase {
             }
             env.simulator(GuestToolsConstant.GET_VM_ZWATCH_STATUS_PATH) {
                 requests.add(GuestToolsConstant.GET_VM_ZWATCH_STATUS_PATH)
-                return new GuestToolsKvmCommands.GetVmZWatchStatusRsp(status: zwatchStatus.toString())
+                if (guestToolsQueryFails) {
+                    return new GuestToolsKvmCommands.GetVmZWatchStatusRsp(
+                            success: false, error: GuestToolsConstant.GUEST_TOOLS_NOT_CONNNETED)
+                }
+                return new GuestToolsKvmCommands.GetVmZWatchStatusRsp(status: zwatchStatus.toString(), version: guestToolsVersion)
             }
             env.simulator(MevocoKVMConstant.KVM_VM_GUESTTOOLS_STATE_PATH) { HttpEntity<String> entity ->
                 def cmd = JSONObjectUtil.toObject(entity.body, MevocoKVMAgentCommands.GetGuestToolsStateCmd.class)
@@ -134,6 +145,7 @@ class GuestToolsStateCase extends SubCase {
             testQgaState()
             testQgaStateAutoUpdated()
             testMissingGuestToolsStateCanBeRecovered()
+            testWindowsVersionRefresh()
         }
     }
 
@@ -301,6 +313,43 @@ class GuestToolsStateCase extends SubCase {
         def state = assertState(vm, "Running", "NotUpgraded")
         assert state.version == "5.0.0" : "Recovered tools state must retain ZWatch version: actual=${state.version}"
         assert requests.isEmpty() : "Available metrics must avoid host fallback: actual=${requests}"
+    }
+
+    void testWindowsVersionRefresh() {
+        def vm = createVm("windows-version-refresh")
+        def bus = bean(CloudBus.class)
+        def dbf = bean(DatabaseFacade.class)
+        String statusMetric = VmNamespace.AgentLastResponseTimestampDelta.name
+        String versionMetric = VmNamespace.ZWatchAgentVersion.name
+        Double versionCode = ((1 << 24) | (6 << 16) | (1 << 8)) as double
+        guestToolsVersion = "1.5.8"
+        zwatchStatus = GuestToolsAgentStatus.NOT_RUNNING
+        [
+                [metrics: [:], zwatch: "NotInstalled", version: "1.5.8"],
+                [metrics: [(statusMetric): 1d], zwatch: "Running", version: "1.5.8"],
+                [metrics: [(versionMetric): versionCode], zwatch: "NotInstalled", version: "1.6.1"],
+                [metrics: [(versionMetric): versionCode], failed: true,
+                 zwatch: "Running", qga: "NotInstalled", version: "1.6.1"]
+        ].each { scenario ->
+            def stateVO = dbf.findByUuid(vm.uuid, GuestToolsStateVO.class)
+            stateVO.qgaState = GuestToolsQgaState.valueOf(scenario.qga ?: "Running")
+            stateVO.zwatchState = scenario.failed ? GuestToolsZWatchState.Running : GuestToolsZWatchState.NotInstalled
+            stateVO.osType = "mswindows 2022"
+            stateVO.version = null
+            dbf.updateAndRefresh(stateVO)
+            metrics.clear()
+            metrics.putAll(scenario.metrics)
+            guestToolsQueryFails = scenario.failed == true
+            requests.clear()
+            qgaRequests.clear()
+            def msg = new UpdateGuestToolsStateMsg(vmInstanceUuid: vm.uuid, hostUuid: vm.hostUuid)
+            msg.serviceTypeList.remove(GuestToolsServiceType.QGA)
+            bus.makeTargetServiceIdByResourceUuid(msg, GuestToolsConstant.SERVICE_ID, vm.uuid)
+            assert (bus.call(msg) as UpdateGuestToolsStateReply).success
+            assert assertState(vm, scenario.zwatch, scenario.qga ?: "Running").version == scenario.version
+            assert requests == [GuestToolsConstant.GET_VM_ZWATCH_STATUS_PATH]
+            assert qgaRequests.isEmpty()
+        }
     }
 
     private VmInstanceInventory createVm(String vmName, String imageName = "image1") {

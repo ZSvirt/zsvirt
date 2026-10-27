@@ -220,7 +220,7 @@ public abstract class GuestToolsOnKvmBackend implements GuestToolsHypervisorBack
 
             @Override
             public boolean skip(Map data) {
-                return !windowsGuest || context.getStatus() != null || context.getVersion() != null;
+                return !windowsGuest || (context.getStatus() != null && context.getVersion() != null);
             }
 
             @Override
@@ -228,12 +228,21 @@ public abstract class GuestToolsOnKvmBackend implements GuestToolsHypervisorBack
                 getVmZWatchStatusFromHost(vm.getUuid(), vm.getHostUuid(), new ReturnValueCompletion<GetVmZWatchStatusRsp>(trigger) {
                     @Override
                     public void success(GetVmZWatchStatusRsp rsp) {
-                        context.setStatus(GuestToolsAgentStatus.of(rsp.getStatus()));
+                        if (context.getStatus() == null) {
+                            context.setStatus(GuestToolsAgentStatus.of(rsp.getStatus()));
+                        }
+                        if (context.getVersion() == null) {
+                            context.setVersion(rsp.getVersion());
+                        }
                         trigger.next();
                     }
 
                     @Override
                     public void fail(ErrorCode errorCode) {
+                        if (context.getStatus() != null || context.getVersion() != null) {
+                            trigger.next();
+                            return;
+                        }
                         trigger.fail(errorCode);
                     }
                 });

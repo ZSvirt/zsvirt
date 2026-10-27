@@ -6,6 +6,7 @@ import org.zstack.header.message.APIEvent;
 import org.zstack.header.message.APIMessage;
 import org.zstack.header.message.APIParam;
 import org.zstack.header.other.APIAuditor;
+import org.zstack.header.storage.AddBackupStorageReply;
 
 public abstract class APIAddBackupStorageMsg extends APICreateMessage implements APIAuditor {
     /**
@@ -81,10 +82,10 @@ public abstract class APIAddBackupStorageMsg extends APICreateMessage implements
     }
 
     public Result audit(APIMessage msg, APIEvent rsp) {
-	    String resUuid = "";
-	    if (rsp.isSuccess()) {
-            APIAddBackupStorageEvent evt = (APIAddBackupStorageEvent) rsp;
-            resUuid = evt.getInventory().getUuid();
+        String resUuid = "";
+        if (rsp.isSuccess()) {
+            AddBackupStorageReply evt = (AddBackupStorageReply) rsp;
+            resUuid = evt.backupStorageInventory().getUuid();
         }
 
         return new Result(resUuid, BackupStorageVO.class);

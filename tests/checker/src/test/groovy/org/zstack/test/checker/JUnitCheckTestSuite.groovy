@@ -9,7 +9,8 @@ import org.zstack.core.Platform
 import org.zstack.test.checker.audits.AuditChecker
 import org.zstack.test.checker.code.LFFileChecker
 import org.zstack.test.checker.db.DBChecker
-import org.zstack.test.checker.doc.ApiDocChecker
+import org.zstack.test.checker.doc.ApiDocExampleChecker
+import org.zstack.test.checker.doc.ApiDocSinceChecker
 import org.zstack.test.checker.route.ApiServiceIdRegistryDump
 
 @RunWith(Suite.class)
@@ -18,7 +19,8 @@ import org.zstack.test.checker.route.ApiServiceIdRegistryDump
     LFFileChecker.class,
     ApiServiceIdRegistryDump.class,
     DBChecker.class,
-    ApiDocChecker.class,
+    ApiDocSinceChecker.class,
+    ApiDocExampleChecker.class,
 ])
 class JUnitCheckTestSuite {
     static void runAllTestCases() {

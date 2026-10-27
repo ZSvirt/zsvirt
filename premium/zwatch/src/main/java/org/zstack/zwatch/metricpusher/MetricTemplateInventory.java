@@ -1,9 +1,7 @@
 package org.zstack.zwatch.metricpusher;
 
-import org.zstack.core.Platform;
 import org.zstack.header.configuration.PythonClassInventory;
-import org.zstack.header.query.ExpandedQueries;
-import org.zstack.header.query.ExpandedQuery;
+import org.zstack.header.message.DocUtils;
 import org.zstack.header.search.Inventory;
 
 import java.io.Serializable;
@@ -54,8 +52,8 @@ public class MetricTemplateInventory implements Serializable {
 
     public static MetricTemplateInventory __example__() {
         MetricTemplateInventory ret = new MetricTemplateInventory();
-        ret.setUuid(Platform.getUuid());
-        ret.setReceiverUuid(Platform.getUuid());
+        ret.setUuid(DocUtils.createFixedUuid(MetricTemplateVO.class));
+        ret.setReceiverUuid(DocUtils.createFixedUuid(MetricDataHttpReceiverVO.class));
         ret.template = "{" +
                 "  \"metricName\":\"${METRIC_NAME}\",\n" +
                 "  \"regionId\":\"cn-shanghai\",\n" +
@@ -71,8 +69,8 @@ public class MetricTemplateInventory implements Serializable {
         ret.setLabelsJsonStr("['VMUuid=95e5885772de4f2bb3e05eba98a43cd0']");
         ret.setMetricName("DiskReadOps");
         ret.setNamespace("ZStack/VM");
-        ret.createDate = new Timestamp(org.zstack.header.message.DocUtils.date);
-        ret.lastOpDate = new Timestamp(org.zstack.header.message.DocUtils.date);
+        ret.createDate = DocUtils.timestamp();
+        ret.lastOpDate = DocUtils.timestamp();
         return ret;
     }
 

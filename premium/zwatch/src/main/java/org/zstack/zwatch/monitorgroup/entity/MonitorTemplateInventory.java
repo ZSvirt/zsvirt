@@ -1,8 +1,7 @@
 package org.zstack.zwatch.monitorgroup.entity;
 
 import org.zstack.header.configuration.PythonClassInventory;
-import org.zstack.header.query.ExpandedQueries;
-import org.zstack.header.query.ExpandedQuery;
+import org.zstack.header.message.DocUtils;
 import org.zstack.header.search.Inventory;
 
 import java.io.Serializable;
@@ -93,5 +92,15 @@ public class MonitorTemplateInventory implements Serializable {
 
     public void setMonitorGroupTemplateRefs(List<MonitorGroupTemplateRefVO> monitorGroupTemplateRefs) {
         this.monitorGroupTemplateRefs = monitorGroupTemplateRefs;
+    }
+
+    public static MonitorTemplateInventory __example__() {
+        MonitorTemplateInventory inventory = new MonitorTemplateInventory();
+        inventory.setUuid(DocUtils.createFixedUuid(MonitorTemplateVO.class));
+        inventory.setName("vm-template");
+        inventory.setDescription("desc");
+        inventory.setLastOpDate(DocUtils.timestamp());
+        inventory.setCreateDate(DocUtils.timestamp());
+        return inventory;
     }
 }

@@ -50,7 +50,7 @@ public class APIUpdateMetricRuleTemplateMsg extends APIMessage {
 
     public static APIUpdateMetricRuleTemplateMsg __example__() {
         APIUpdateMetricRuleTemplateMsg msg = new APIUpdateMetricRuleTemplateMsg();
-        msg.setUuid(uuid());
+        msg.setUuid(uuid(MetricRuleTemplateVO.class));
         msg.setComparisonOperator(ComparisonOperator.GreaterThanOrEqualTo.name());
         msg.setPeriod(10);
         msg.setThreshold(90d);

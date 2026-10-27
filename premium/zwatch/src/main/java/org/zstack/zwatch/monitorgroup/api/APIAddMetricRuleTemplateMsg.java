@@ -69,7 +69,7 @@ public class APIAddMetricRuleTemplateMsg extends APICreateMessage implements API
         msg.setThreshold(80d);
         msg.setEnableRecovery(true);
         msg.setMetricName(VmNamespace.CPUUsedUtilization.getName());
-        msg.setMonitorTemplateUuid(uuid());
+        msg.setMonitorTemplateUuid(uuid(MonitorTemplateVO.class));
         msg.setComparisonOperator( ComparisonOperator.GreaterThan.toString());
         msg.setEmergencyLevel(EmergencyLevel.Normal.name());
         return msg;

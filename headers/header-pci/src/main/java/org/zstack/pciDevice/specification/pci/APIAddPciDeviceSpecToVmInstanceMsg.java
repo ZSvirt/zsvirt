@@ -53,8 +53,8 @@ public class APIAddPciDeviceSpecToVmInstanceMsg extends APIMessage {
 
     public static APIAddPciDeviceSpecToVmInstanceMsg __example__() {
         APIAddPciDeviceSpecToVmInstanceMsg msg = new APIAddPciDeviceSpecToVmInstanceMsg();
-        msg.setPciSpecUuid(uuid());
-        msg.setVmInstanceUuid(uuid());
+        msg.setPciSpecUuid(uuid(PciDeviceSpecVO.class));
+        msg.setVmInstanceUuid(uuid(VmInstanceVO.class));
         return msg;
     }
 }

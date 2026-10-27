@@ -48,8 +48,8 @@ public class APIGenerateMdevDevicesMsg extends APIGenerateVirtualPciDevicesMsg {
 
     public static APIGenerateMdevDevicesMsg __example__() {
         APIGenerateMdevDevicesMsg msg = new APIGenerateMdevDevicesMsg();
-        msg.setPciDeviceUuid(uuid());
-        msg.setMdevSpecUuid(uuid());
+        msg.setPciDeviceUuid(uuid(PciDeviceVO.class));
+        msg.setMdevSpecUuid(uuid(MdevDeviceSpecVO.class));
         return msg;
     }
 }

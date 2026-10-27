@@ -40,8 +40,8 @@ public class APIRemoveMdevDeviceSpecFromVmInstanceMsg extends APIMessage {
 
     public static APIRemoveMdevDeviceSpecFromVmInstanceMsg __example__() {
         APIRemoveMdevDeviceSpecFromVmInstanceMsg msg = new APIRemoveMdevDeviceSpecFromVmInstanceMsg();
-        msg.setMdevSpecUuid(uuid());
-        msg.setVmInstanceUuid(uuid());
+        msg.setMdevSpecUuid(uuid(MdevDeviceSpecVO.class));
+        msg.setVmInstanceUuid(uuid(VmInstanceVO.class));
         return msg;
     }
 }

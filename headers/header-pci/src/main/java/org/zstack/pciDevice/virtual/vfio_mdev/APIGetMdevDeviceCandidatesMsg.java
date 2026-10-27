@@ -66,7 +66,7 @@ public class APIGetMdevDeviceCandidatesMsg extends APISyncCallMessage {
 
     public static APIGetMdevDeviceCandidatesMsg __example__() {
         APIGetMdevDeviceCandidatesMsg msg = new APIGetMdevDeviceCandidatesMsg();
-        msg.setVmInstanceUuid(uuid());
+        msg.setVmInstanceUuid(uuid(VmInstanceVO.class));
         msg.setTypes(Collections.singletonList(MdevDeviceType.GPU_Video_Controller.toString()));
         return msg;
     }

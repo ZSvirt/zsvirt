@@ -2,9 +2,12 @@ package org.zstack.pciDevice.entity;
 
 import org.zstack.header.configuration.PythonClassInventory;
 import org.zstack.header.host.HostInventory;
+import org.zstack.header.host.HostVO;
+import org.zstack.header.message.DocUtils;
 import org.zstack.header.query.*;
 import org.zstack.header.search.Inventory;
 import org.zstack.header.vm.VmInstanceInventory;
+import org.zstack.header.vm.VmInstanceVO;
 import org.zstack.pciDevice.entity.specification.mdev.PciDeviceMdevSpecRefInventory;
 import org.zstack.pciDevice.entity.specification.pci.PciDeviceSpecInventory;
 import org.zstack.pciDevice.header.PciDeviceChooser;
@@ -13,6 +16,7 @@ import org.zstack.pciDevice.header.PciDeviceState;
 import org.zstack.pciDevice.header.PciDeviceStatus;
 import org.zstack.pciDevice.header.PciDeviceType;
 import org.zstack.pciDevice.header.virtual.PciDeviceVirtStatus;
+import org.zstack.pciDevice.message.PciDeviceAddress;
 import org.zstack.pciDevice.message.PciDeviceMetaData;
 
 import javax.persistence.JoinColumn;
@@ -349,5 +353,20 @@ public class PciDeviceInventory implements Serializable {
 
     public void setDevice(String device) {
         this.device = device;
+    }
+
+    public static PciDeviceInventory __example__() {
+        PciDeviceInventory inv = new PciDeviceInventory();
+        inv.setUuid(DocUtils.createFixedUuid(PciDeviceVO.class));
+        inv.setHostUuid(DocUtils.createFixedUuid(HostVO.class));
+        inv.setVmInstanceUuid(DocUtils.createFixedUuid(VmInstanceVO.class));
+        inv.setStatus(PciDeviceStatus.Attached);
+        inv.setType(PciDeviceType.GPU_Video_Controller);
+        inv.setVendorId("10de");
+        inv.setDeviceId("0e0f");
+        inv.setSubdeviceId("118b");
+        inv.setSubvendorId("10de");
+        inv.setPciDeviceAddress(new PciDeviceAddress("06:00.1").toString());
+        return inv;
     }
 }

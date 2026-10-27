@@ -30,11 +30,7 @@ public class APIUpdateHaStrategyConditionEvent extends APIEvent {
 
     public static APIUpdateHaStrategyConditionEvent __example__() {
         APIUpdateHaStrategyConditionEvent event = new APIUpdateHaStrategyConditionEvent();
-        HaStrategyConditionInventory inventory = new HaStrategyConditionInventory();
-        inventory.setUuid(uuid());
-        inventory.setName("test");
-        inventory.setFencerName("hostStorageState");
-        event.setInventory(inventory);
+        event.setInventory(HaStrategyConditionInventory.__example__());
         return event;
     }
 }

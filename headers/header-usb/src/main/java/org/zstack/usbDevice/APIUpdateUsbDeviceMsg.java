@@ -32,7 +32,7 @@ public class APIUpdateUsbDeviceMsg extends APIMessage {
 
     public static APIUpdateUsbDeviceMsg __example__() {
         APIUpdateUsbDeviceMsg msg = new APIUpdateUsbDeviceMsg();
-        msg.setUuid(uuid());
+        msg.setUuid(uuid(UsbDeviceVO.class));
         msg.setName("usb");
         msg.setDescription("this is a usb device");
         msg.setState(UsbDeviceState.Enabled.toString());

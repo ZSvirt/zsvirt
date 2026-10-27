@@ -3,7 +3,6 @@ package org.zstack.usbDevice;
 import org.zstack.header.message.APIEvent;
 import org.zstack.header.rest.RestResponse;
 import org.zstack.usbDevice.entity.UsbDeviceInventory;
-import org.zstack.usbDevice.header.UsbDeviceState;
 
 /**
  * Created by GuoYi on 10/21/17.
@@ -21,21 +20,7 @@ public class APIDetachUsbDeviceFromVmEvent extends APIEvent {
 
     public static APIDetachUsbDeviceFromVmEvent __example__() {
         APIDetachUsbDeviceFromVmEvent evt = new APIDetachUsbDeviceFromVmEvent();
-        UsbDeviceInventory inv = new UsbDeviceInventory();
-        inv.setUuid(uuid());
-        inv.setName("usb");
-        inv.setHostUuid(uuid());
-        inv.setVmInstanceUuid(uuid());
-        inv.setState(UsbDeviceState.Enabled);
-        inv.setBusNum("001");
-        inv.setDevNum("001");
-        inv.setIdVendor("0781");
-        inv.setIdProduct("5591");
-        inv.setiManufacturer("SanDisk");
-        inv.setiProduct("Ultra USB 3.0");
-        inv.setiSerial("000000000001");
-        inv.setUsbVersion("3.0");
-        evt.setInventory(inv);
+        evt.setInventory(UsbDeviceInventory.__example__());
         return evt;
     }
 

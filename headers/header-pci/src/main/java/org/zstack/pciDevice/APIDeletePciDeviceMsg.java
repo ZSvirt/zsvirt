@@ -21,7 +21,7 @@ public class APIDeletePciDeviceMsg extends APIDeleteMessage {
 
     public static APIDeletePciDeviceMsg __example__() {
         APIDeletePciDeviceMsg msg = new APIDeletePciDeviceMsg();
-        msg.setUuid(uuid());
+        msg.setUuid(uuid(PciDeviceVO.class));
         return msg;
     }
 

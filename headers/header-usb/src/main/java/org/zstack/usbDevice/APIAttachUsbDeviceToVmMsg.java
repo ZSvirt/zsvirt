@@ -29,8 +29,8 @@ public class APIAttachUsbDeviceToVmMsg extends APIMessage {
 
     public static APIAttachUsbDeviceToVmMsg __example__() {
         APIAttachUsbDeviceToVmMsg msg = new APIAttachUsbDeviceToVmMsg();
-        msg.setUsbDeviceUuid(uuid());
-        msg.setVmInstanceUuid(uuid());
+        msg.setUsbDeviceUuid(uuid(UsbDeviceVO.class));
+        msg.setVmInstanceUuid(uuid(VmInstanceVO.class));
         msg.setAttachType(UsbAttachType.PassThrough.toString());
         return msg;
     }

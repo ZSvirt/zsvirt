@@ -68,7 +68,7 @@ public class APIUpdateMdevDeviceMsg extends APIMessage implements MdevDeviceMess
 
     public static APIUpdateMdevDeviceMsg __example__() {
         APIUpdateMdevDeviceMsg msg = new APIUpdateMdevDeviceMsg();
-        msg.setUuid(uuid());
+        msg.setUuid(uuid(MdevDeviceVO.class));
         msg.setName("NVIDIA_M60-2A");
         msg.setDescription("NVIDIA_M60-2A_2048MB_1920*1080_4Ins_60FPS");
         msg.setState("Enabled");

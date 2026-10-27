@@ -38,7 +38,7 @@ public class APIUpdatePciDeviceMsg extends APIMessage {
 
     public static APIUpdatePciDeviceMsg __example__() {
         APIUpdatePciDeviceMsg msg = new APIUpdatePciDeviceMsg();
-        msg.setUuid(uuid());
+        msg.setUuid(uuid(PciDeviceVO.class));
         msg.setState(PciDeviceState.Disabled.toString());
         msg.setPassThroughState(PciDevicePassThroughState.Enabled.toString());
         msg.setMetaData("key1:value1;key2:value2");

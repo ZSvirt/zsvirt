@@ -47,7 +47,7 @@ public class APIGenerateSriovPciDevicesMsg extends APIGenerateVirtualPciDevicesM
 
     public static APIGenerateSriovPciDevicesMsg __example__() {
         APIGenerateSriovPciDevicesMsg msg = new APIGenerateSriovPciDevicesMsg();
-        msg.setPciDeviceUuid(uuid());
+        msg.setPciDeviceUuid(uuid(PciDeviceVO.class));
         msg.setVirtPartNum(4);
         return msg;
     }

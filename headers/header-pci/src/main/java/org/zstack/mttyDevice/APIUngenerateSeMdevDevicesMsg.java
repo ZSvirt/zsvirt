@@ -40,7 +40,7 @@ public class APIUngenerateSeMdevDevicesMsg extends APIMessage {
     
     public static APIUngenerateSeMdevDevicesMsg __example__() {
         APIUngenerateSeMdevDevicesMsg msg = new APIUngenerateSeMdevDevicesMsg();
-        msg.setMttyDeviceUuid(uuid());
+        msg.setMttyDeviceUuid(uuid(MttyDeviceVO.class));
         return msg;
     }
 }

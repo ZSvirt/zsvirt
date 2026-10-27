@@ -36,7 +36,7 @@ public class APIUngenerateSriovPciDevicesMsg extends APIUngenerateVirtualPciDevi
 
     public static APIUngenerateSriovPciDevicesMsg __example__() {
         APIUngenerateSriovPciDevicesMsg msg = new APIUngenerateSriovPciDevicesMsg();
-        msg.setPciDeviceUuid(uuid());
+        msg.setPciDeviceUuid(uuid(PciDeviceVO.class));
         return msg;
     }
 }

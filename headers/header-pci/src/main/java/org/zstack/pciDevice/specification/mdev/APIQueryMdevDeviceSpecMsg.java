@@ -5,6 +5,7 @@ import org.zstack.header.query.APIQueryMessage;
 import org.zstack.header.query.AutoQuery;
 import org.zstack.header.rest.RestRequest;
 import org.zstack.pciDevice.entity.specification.mdev.MdevDeviceSpecInventory;
+import org.zstack.pciDevice.entity.specification.mdev.MdevDeviceSpecVO;
 
 import java.util.Collections;
 import java.util.List;
@@ -21,6 +22,6 @@ import java.util.List;
 )
 public class APIQueryMdevDeviceSpecMsg extends APIQueryMessage {
     public static List<String> __example__() {
-        return Collections.singletonList("uuid=" + uuid());
+        return Collections.singletonList("uuid=" + uuid(MdevDeviceSpecVO.class));
     }
 }

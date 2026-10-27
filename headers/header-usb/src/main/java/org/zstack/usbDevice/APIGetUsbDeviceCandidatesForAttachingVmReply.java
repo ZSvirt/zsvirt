@@ -3,10 +3,10 @@ package org.zstack.usbDevice;
 import org.zstack.header.message.APIReply;
 import org.zstack.header.rest.RestResponse;
 import org.zstack.usbDevice.entity.UsbDeviceInventory;
-import org.zstack.usbDevice.header.UsbDeviceState;
 
-import java.util.Arrays;
 import java.util.List;
+
+import static org.zstack.utils.CollectionDSL.list;
 
 /**
  * Created by GuoYi on 10/21/17.
@@ -17,21 +17,7 @@ public class APIGetUsbDeviceCandidatesForAttachingVmReply extends APIReply {
 
     public static APIGetUsbDeviceCandidatesForAttachingVmReply __example__() {
         APIGetUsbDeviceCandidatesForAttachingVmReply reply = new APIGetUsbDeviceCandidatesForAttachingVmReply();
-        UsbDeviceInventory inv = new UsbDeviceInventory();
-        inv.setUuid(uuid());
-        inv.setName("usb");
-        inv.setHostUuid(uuid());
-        inv.setVmInstanceUuid(uuid());
-        inv.setState(UsbDeviceState.Enabled);
-        inv.setBusNum("001");
-        inv.setDevNum("001");
-        inv.setIdVendor("0781");
-        inv.setIdProduct("5591");
-        inv.setiManufacturer("SanDisk");
-        inv.setiProduct("Ultra USB 3.0");
-        inv.setiSerial("000000000001");
-        inv.setUsbVersion("3.0");
-        reply.setInventories(Arrays.asList(inv));
+        reply.setInventories(list(UsbDeviceInventory.__example__()));
         return reply;
     }
 

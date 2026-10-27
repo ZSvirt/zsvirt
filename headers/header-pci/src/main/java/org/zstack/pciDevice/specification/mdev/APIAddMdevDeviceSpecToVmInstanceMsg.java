@@ -53,8 +53,8 @@ public class APIAddMdevDeviceSpecToVmInstanceMsg extends APIMessage {
 
     public static APIAddMdevDeviceSpecToVmInstanceMsg __example__() {
         APIAddMdevDeviceSpecToVmInstanceMsg msg = new APIAddMdevDeviceSpecToVmInstanceMsg();
-        msg.setMdevSpecUuid(uuid());
-        msg.setVmInstanceUuid(uuid());
+        msg.setMdevSpecUuid(uuid(MdevDeviceSpecVO.class));
+        msg.setVmInstanceUuid(uuid(VmInstanceVO.class));
         return msg;
     }
 }

@@ -50,7 +50,7 @@ public class APIUngenerateMdevDevicesMsg extends APIUngenerateVirtualPciDevicesM
 
     public static APIUngenerateMdevDevicesMsg __example__() {
         APIUngenerateMdevDevicesMsg msg = new APIUngenerateMdevDevicesMsg();
-        msg.setPciDeviceUuid(uuid());
+        msg.setPciDeviceUuid(uuid(PciDeviceVO.class));
         return msg;
     }
 }

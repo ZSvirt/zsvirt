@@ -23,7 +23,7 @@ public class APIGetUsbDeviceCandidatesForAttachingVmMsg extends APISyncCallMessa
 
     public static APIGetUsbDeviceCandidatesForAttachingVmMsg __example__() {
         APIGetUsbDeviceCandidatesForAttachingVmMsg msg = new APIGetUsbDeviceCandidatesForAttachingVmMsg();
-        msg.setVmInstanceUuid(uuid());
+        msg.setVmInstanceUuid(uuid(VmInstanceVO.class));
         msg.attachType = "PassThrough";
         return msg;
     }

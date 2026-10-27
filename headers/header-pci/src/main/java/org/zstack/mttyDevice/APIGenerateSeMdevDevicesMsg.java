@@ -41,7 +41,7 @@ public class APIGenerateSeMdevDevicesMsg extends APIMessage {
 
     public static APIGenerateSeMdevDevicesMsg __example__() {
         APIGenerateSeMdevDevicesMsg msg = new APIGenerateSeMdevDevicesMsg();
-        msg.setMttyDeviceUuid(uuid());
+        msg.setMttyDeviceUuid(uuid(MttyDeviceVO.class));
         msg.setVirtPartNum(4);
         return msg;
     }

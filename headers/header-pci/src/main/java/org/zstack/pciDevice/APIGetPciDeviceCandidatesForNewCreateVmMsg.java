@@ -28,7 +28,7 @@ public class APIGetPciDeviceCandidatesForNewCreateVmMsg extends APISyncCallMessa
 
     public static APIGetPciDeviceCandidatesForNewCreateVmMsg __example__() {
         APIGetPciDeviceCandidatesForNewCreateVmMsg msg = new APIGetPciDeviceCandidatesForNewCreateVmMsg();
-        msg.setHostUuid(uuid());
+        msg.setHostUuid(uuid(HostVO.class));
         return msg;
     }
 

@@ -1,6 +1,7 @@
 package org.zstack.ha.entity;
 
 import org.zstack.header.configuration.PythonClassInventory;
+import org.zstack.header.message.DocUtils;
 import org.zstack.header.search.Inventory;
 
 import java.io.Serializable;
@@ -93,5 +94,13 @@ public class HaStrategyConditionInventory implements Serializable {
 
     public void setLastOpDate(Timestamp lastOpDate) {
         this.lastOpDate = lastOpDate;
+    }
+
+    public static HaStrategyConditionInventory __example__() {
+        HaStrategyConditionInventory inventory = new HaStrategyConditionInventory();
+        inventory.setUuid(DocUtils.createFixedUuid(HaStrategyConditionVO.class));
+        inventory.setName("test");
+        inventory.setFencerName("hostStorageState");
+        return inventory;
     }
 }

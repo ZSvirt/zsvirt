@@ -3,13 +3,10 @@ package org.zstack.pciDevice;
 import org.zstack.header.message.APIReply;
 import org.zstack.header.rest.RestResponse;
 import org.zstack.pciDevice.entity.PciDeviceInventory;
-import org.zstack.pciDevice.header.PciDeviceStatus;
-import org.zstack.pciDevice.header.PciDeviceType;
-import org.zstack.pciDevice.message.PciDeviceAddress;
 
 import java.util.List;
 
-import static java.util.Arrays.asList;
+import static org.zstack.utils.CollectionDSL.list;
 
 /**
  * Created by weiwang on 02/09/2017
@@ -28,19 +25,7 @@ public class APIGetPciDeviceCandidatesForNewCreateVmReply extends APIReply {
 
     public static APIGetPciDeviceCandidatesForNewCreateVmReply __example__() {
         APIGetPciDeviceCandidatesForNewCreateVmReply reply = new APIGetPciDeviceCandidatesForNewCreateVmReply();
-        PciDeviceInventory inv = new PciDeviceInventory();
-        inv.setUuid(uuid());
-        inv.setHostUuid(uuid());
-        inv.setStatus(PciDeviceStatus.Attached);
-        inv.setType(PciDeviceType.GPU_Video_Controller);
-        inv.setVendorId("10de");
-        inv.setDeviceId("0e0f");
-        inv.setSubdeviceId("118b");
-        inv.setSubvendorId("10de");
-        inv.setPciDeviceAddress(new PciDeviceAddress("06:00.1").toString());
-
-        reply.setInventories(asList(inv));
-        reply.setSuccess(true);
+        reply.setInventories(list(PciDeviceInventory.__example__()));
         return reply;
     }
 }

@@ -25,8 +25,8 @@ public class APIDetachPciDeviceFromVmMsg extends APIMessage {
 
     public static APIDetachPciDeviceFromVmMsg __example__() {
         APIDetachPciDeviceFromVmMsg msg = new APIDetachPciDeviceFromVmMsg();
-        msg.setPciDeviceUuid(uuid());
-        msg.setVmInstanceUuid(uuid());
+        msg.setPciDeviceUuid(uuid(PciDeviceVO.class));
+        msg.setVmInstanceUuid(uuid(VmInstanceVO.class));
 
         return msg;
     }

@@ -43,8 +43,8 @@ public class APIAttachMdevDeviceToVmMsg extends APIMessage implements MdevDevice
 
     public static APIAttachMdevDeviceToVmMsg __example__() {
         APIAttachMdevDeviceToVmMsg msg = new APIAttachMdevDeviceToVmMsg();
-        msg.setMdevDeviceUuid(uuid());
-        msg.setVmInstanceUuid(uuid());
+        msg.setMdevDeviceUuid(uuid(MdevDeviceVO.class));
+        msg.setVmInstanceUuid(uuid(VmInstanceVO.class));
         return msg;
     }
 }

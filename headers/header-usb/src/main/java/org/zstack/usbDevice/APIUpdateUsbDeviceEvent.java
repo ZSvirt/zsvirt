@@ -3,7 +3,6 @@ package org.zstack.usbDevice;
 import org.zstack.header.message.APIEvent;
 import org.zstack.header.rest.RestResponse;
 import org.zstack.usbDevice.entity.UsbDeviceInventory;
-import org.zstack.usbDevice.header.UsbDeviceState;
 
 /**
  * Created by GuoYi on 10/24/2017.
@@ -21,21 +20,7 @@ public class APIUpdateUsbDeviceEvent extends APIEvent {
 
     public static APIUpdateUsbDeviceEvent __example__() {
         APIUpdateUsbDeviceEvent event = new APIUpdateUsbDeviceEvent();
-
-        UsbDeviceInventory inv = new UsbDeviceInventory();
-        inv.setUuid(uuid());
-        inv.setHostUuid(uuid());
-        inv.setVmInstanceUuid(uuid());
-        inv.setIdVendor("10de");
-        inv.setIdProduct("0e0f");
-        inv.setiManufacturer("SanDisk");
-        inv.setiProduct("USB Storage");
-        inv.setiSerial("000000000001");
-        inv.setUsbVersion("3.0");
-        inv.setState(UsbDeviceState.Disabled);
-        inv.setDescription("test usb");
-
-        event.setInventory(inv);
+        event.setInventory(UsbDeviceInventory.__example__());
         return event;
     }
 

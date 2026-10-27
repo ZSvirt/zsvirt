@@ -40,8 +40,8 @@ public class APIRemovePciDeviceSpecFromVmInstanceMsg extends APIMessage {
 
     public static APIRemovePciDeviceSpecFromVmInstanceMsg __example__() {
         APIRemovePciDeviceSpecFromVmInstanceMsg msg = new APIRemovePciDeviceSpecFromVmInstanceMsg();
-        msg.setPciSpecUuid(uuid());
-        msg.setVmInstanceUuid(uuid());
+        msg.setPciSpecUuid(uuid(PciDeviceSpecVO.class));
+        msg.setVmInstanceUuid(uuid(VmInstanceVO.class));
         return msg;
     }
 }

@@ -1,6 +1,8 @@
 package org.zstack.pciDevice.specification.pci;
 
 import org.springframework.http.HttpMethod;
+import org.zstack.header.cluster.ClusterInventory;
+import org.zstack.header.cluster.ClusterVO;
 import org.zstack.header.host.HostVO;
 import org.zstack.header.message.APIParam;
 import org.zstack.header.message.APISyncCallMessage;
@@ -79,9 +81,9 @@ public class APIGetPciDeviceSpecCandidatesMsg extends APISyncCallMessage {
 
     public static APIGetPciDeviceSpecCandidatesMsg __example__() {
         APIGetPciDeviceSpecCandidatesMsg msg = new APIGetPciDeviceSpecCandidatesMsg();
-        msg.setClusterUuids(Arrays.asList(uuid(), uuid()));
-        msg.setHostUuid(uuid());
-        msg.setVmInstanceUuid(uuid());
+        msg.setClusterUuids(Arrays.asList(uuid(ClusterVO.class), uuid(ClusterInventory.class)));
+        msg.setHostUuid(uuid(HostVO.class));
+        msg.setVmInstanceUuid(uuid(VmInstanceVO.class));
         msg.setTypes(Arrays.asList(
                 PciDeviceType.GPU_Video_Controller.toString(),
                 PciDeviceType.GPU_Audio_Controller.toString()

@@ -4,6 +4,7 @@ import org.springframework.http.HttpMethod;
 import org.zstack.header.query.APIQueryMessage;
 import org.zstack.header.query.AutoQuery;
 import org.zstack.header.rest.RestRequest;
+import org.zstack.header.vm.VmInstanceVO;
 import org.zstack.pciDevice.entity.specification.mdev.VmInstanceMdevDeviceSpecRefInventory;
 
 import java.util.Collections;
@@ -21,6 +22,6 @@ import java.util.List;
 )
 public class APIQueryVmInstanceMdevDeviceSpecRefMsg extends APIQueryMessage {
     public static List<String> __example__() {
-        return Collections.singletonList("vmInstanceUuid=" + uuid());
+        return Collections.singletonList("vmInstanceUuid=" + uuid(VmInstanceVO.class));
     }
 }

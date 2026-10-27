@@ -20,12 +20,12 @@ public class APIUpdateHostIommuStateMsg extends APIMessage {
     @APIParam(resourceType = HostVO.class)
     private String uuid;
 
-    @APIParam(validValues = {"Enabled", "Disabled"})
+    @APIParam(validEnums = HostIommuStateType.class)
     private String state;
 
     public static APIUpdateHostIommuStateMsg __example__() {
         APIUpdateHostIommuStateMsg msg = new APIUpdateHostIommuStateMsg();
-        msg.setUuid(uuid());
+        msg.setUuid(uuid(HostVO.class));
         msg.setState(HostIommuStateType.Enabled.toString());
 
         return msg;

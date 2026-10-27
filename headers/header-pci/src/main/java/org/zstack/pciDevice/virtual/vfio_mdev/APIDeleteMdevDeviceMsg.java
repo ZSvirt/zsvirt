@@ -27,7 +27,7 @@ public class APIDeleteMdevDeviceMsg extends APIDeleteMessage implements MdevDevi
 
     public static APIDeleteMdevDeviceMsg __example__() {
         APIDeleteMdevDeviceMsg msg = new APIDeleteMdevDeviceMsg();
-        msg.setMdevDeviceUuid(uuid());
+        msg.setMdevDeviceUuid(uuid(MdevDeviceVO.class));
         return msg;
     }
 }

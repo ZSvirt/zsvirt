@@ -2,10 +2,13 @@ package org.zstack.usbDevice.entity;
 
 import org.zstack.header.configuration.PythonClassInventory;
 import org.zstack.header.host.HostInventory;
+import org.zstack.header.host.HostVO;
+import org.zstack.header.message.DocUtils;
 import org.zstack.header.query.ExpandedQueries;
 import org.zstack.header.query.ExpandedQuery;
 import org.zstack.header.search.Inventory;
 import org.zstack.header.vm.VmInstanceInventory;
+import org.zstack.header.vm.VmInstanceVO;
 import org.zstack.usbDevice.header.UsbDeviceState;
 
 import java.io.Serializable;
@@ -213,5 +216,23 @@ public class UsbDeviceInventory implements Serializable {
 
     public void setLastOpDate(Timestamp lastOpDate) {
         this.lastOpDate = lastOpDate;
+    }
+
+    public static UsbDeviceInventory __example__() {
+        UsbDeviceInventory inv = new UsbDeviceInventory();
+        inv.setUuid(DocUtils.createFixedUuid(UsbDeviceVO.class));
+        inv.setName("usb");
+        inv.setHostUuid(DocUtils.createFixedUuid(HostVO.class));
+        inv.setVmInstanceUuid(DocUtils.createFixedUuid(VmInstanceVO.class));
+        inv.setState(UsbDeviceState.Enabled);
+        inv.setBusNum("001");
+        inv.setDevNum("001");
+        inv.setIdVendor("0781");
+        inv.setIdProduct("5591");
+        inv.setiManufacturer("SanDisk");
+        inv.setiProduct("Ultra USB 3.0");
+        inv.setiSerial("000000000001");
+        inv.setUsbVersion("3.0");
+        return inv;
     }
 }

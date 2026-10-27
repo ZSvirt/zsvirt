@@ -25,7 +25,7 @@ public class APIGetHostIommuStateMsg extends APISyncCallMessage {
 
     public static APIGetHostIommuStateMsg __example__() {
         APIGetHostIommuStateMsg msg = new APIGetHostIommuStateMsg();
-        msg.setUuid(uuid());
+        msg.setUuid(uuid(HostVO.class));
 
         return msg;
     }

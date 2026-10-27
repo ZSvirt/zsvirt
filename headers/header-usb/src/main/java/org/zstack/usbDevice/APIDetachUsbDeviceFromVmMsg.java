@@ -21,7 +21,7 @@ public class APIDetachUsbDeviceFromVmMsg extends APIMessage {
 
     public static APIDetachUsbDeviceFromVmMsg __example__() {
         APIDetachUsbDeviceFromVmMsg msg = new APIDetachUsbDeviceFromVmMsg();
-        msg.setUsbDeviceUuid(uuid());
+        msg.setUsbDeviceUuid(uuid(UsbDeviceVO.class));
         return msg;
     }
 

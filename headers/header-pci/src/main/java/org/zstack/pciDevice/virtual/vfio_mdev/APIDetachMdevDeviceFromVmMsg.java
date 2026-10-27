@@ -42,8 +42,8 @@ public class APIDetachMdevDeviceFromVmMsg extends APIMessage implements MdevDevi
 
     public static APIDetachMdevDeviceFromVmMsg __example__() {
         APIDetachMdevDeviceFromVmMsg msg = new APIDetachMdevDeviceFromVmMsg();
-        msg.setMdevDeviceUuid(uuid());
-        msg.setVmInstanceUuid(uuid());
+        msg.setMdevDeviceUuid(uuid(MdevDeviceVO.class));
+        msg.setVmInstanceUuid(uuid(VmInstanceVO.class));
         return msg;
     }
 }

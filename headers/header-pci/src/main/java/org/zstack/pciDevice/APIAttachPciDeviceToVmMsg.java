@@ -25,8 +25,8 @@ public class APIAttachPciDeviceToVmMsg extends APIMessage {
 
     public static APIAttachPciDeviceToVmMsg __example__() {
         APIAttachPciDeviceToVmMsg msg = new APIAttachPciDeviceToVmMsg();
-        msg.setPciDeviceUuid(uuid());
-        msg.setVmInstanceUuid(uuid());
+        msg.setPciDeviceUuid(uuid(PciDeviceVO.class));
+        msg.setVmInstanceUuid(uuid(VmInstanceVO.class));
 
         return msg;
     }

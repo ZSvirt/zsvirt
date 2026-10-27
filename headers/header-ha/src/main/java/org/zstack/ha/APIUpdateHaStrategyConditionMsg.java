@@ -51,7 +51,7 @@ public class APIUpdateHaStrategyConditionMsg extends APIMessage {
 
     public static APIUpdateHaStrategyConditionMsg __example__() {
         APIUpdateHaStrategyConditionMsg msg = new APIUpdateHaStrategyConditionMsg();
-        msg.uuid = uuid();
+        msg.uuid = uuid(HaStrategyConditionVO.class);
         msg.name = "new ha strategycondition name";
         msg.setState("Enable");
         return msg;

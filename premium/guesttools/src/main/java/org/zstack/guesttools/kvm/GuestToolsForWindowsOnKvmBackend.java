@@ -220,6 +220,12 @@ public class GuestToolsForWindowsOnKvmBackend extends GuestToolsOnKvmBackend {
     }
 
     private void createVirtIOSystemTag(VmInstanceInventory vm) {
+        // The existing tag already selects Virtio at startup. Recreating it fires
+        // tag lifecycle callbacks that discard disk/NIC addresses without a bus change.
+        // Keep the outer stop callback running so that QGA and ISO state are updated.
+        if (VmSystemTags.VIRTIO.hasTag(vm.getUuid())) {
+            return;
+        }
         // if vm platform is 'Windows', change to 'Windows' with VirtIO
         // WindowsVirtio is split into Windows and virtio, not change platform, only change virtio
         for (VmPlatformChangedExtensionPoint ext : pluginRgty.getExtensionList(VmPlatformChangedExtensionPoint.class)) {

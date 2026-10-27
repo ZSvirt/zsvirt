@@ -66,7 +66,8 @@ public class VmStopOnHypervisorFlow extends NoRollbackFlow {
                     return;
                 }
 
-                if (spec.isGcOnStopFailure() && reply.getError().isError(HostErrors.OPERATION_FAILURE_GC_ELIGIBLE)) {
+                if (!StopVmType.grace.toString().equals(msg.getType()) && spec.isGcOnStopFailure()
+                            && reply.getError().isError(HostErrors.OPERATION_FAILURE_GC_ELIGIBLE)) {
 
                     StopVmGC gc = new StopVmGC();
                     gc.inventory = spec.getVmInventory();

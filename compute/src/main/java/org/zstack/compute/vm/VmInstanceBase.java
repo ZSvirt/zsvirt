@@ -8567,6 +8567,11 @@ public class VmInstanceBase extends AbstractVmInstance {
 
     protected void stopVm(final Message msg, final Completion completion) {
         refreshVO();
+        if (self.getState() == VmInstanceState.Paused && msg instanceof StopVmMessage
+                && StopVmType.grace.toString().equals(((StopVmMessage) msg).getType())) {
+            completion.fail(operr("cannot gracefully stop paused vm[uuid:%s]; resume it first", self.getUuid()));
+            return;
+        }
         ErrorCode allowed = validateOperationByState(msg, self.getState(), null);
         if (allowed != null) {
             completion.fail(allowed);

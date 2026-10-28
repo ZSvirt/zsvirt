@@ -5,7 +5,7 @@ import org.zstack.header.rest.RestResponse;
 
 /**
  * @Author: ya.wang
- * @Date: 1/15/26 1:53 AM
+ * @Date: 1/15/26 1:53 AM
  */
 @RestResponse(allTo = "inventory")
 public class APIUpdateExternalServiceConfigurationEvent extends APIEvent {
@@ -21,10 +21,7 @@ public class APIUpdateExternalServiceConfigurationEvent extends APIEvent {
 
     public static APIUpdateExternalServiceConfigurationEvent __example__() {
         APIUpdateExternalServiceConfigurationEvent event = new APIUpdateExternalServiceConfigurationEvent();
-        ExternalServiceConfigurationInventory inv = new ExternalServiceConfigurationInventory();
-
-        inv.setUuid(uuid());
-        event.setInventory(inv);
+        event.setInventory(ExternalServiceConfigurationInventory.__example__());
         return event;
     }
 }

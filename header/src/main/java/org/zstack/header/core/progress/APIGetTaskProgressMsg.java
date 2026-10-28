@@ -36,7 +36,7 @@ public class APIGetTaskProgressMsg extends APISyncCallMessage {
 
     public static APIGetTaskProgressMsg __example__() {
         APIGetTaskProgressMsg msg = new APIGetTaskProgressMsg();
-        msg.setApiId(uuid());
+        msg.setApiId(uuid(TaskProgressVO.class));
         return msg;
     }
 }

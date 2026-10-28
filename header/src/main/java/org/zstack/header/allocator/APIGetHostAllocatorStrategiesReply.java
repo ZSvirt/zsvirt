@@ -27,7 +27,7 @@ public class APIGetHostAllocatorStrategiesReply extends APIReply {
  
     public static APIGetHostAllocatorStrategiesReply __example__() {
         APIGetHostAllocatorStrategiesReply reply = new APIGetHostAllocatorStrategiesReply();
-        reply.setHostAllocatorStrategies(list(uuid(),uuid()));
+        reply.setHostAllocatorStrategies(list("DesignatedHostAllocatorStrategy","DefaultHostAllocatorStrategy"));
 
         return reply;
     }

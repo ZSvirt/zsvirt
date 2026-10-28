@@ -1,5 +1,6 @@
 package org.zstack.header.configuration;
 
+import org.zstack.header.message.DocUtils;
 import org.zstack.header.query.ExpandedQueries;
 import org.zstack.header.query.ExpandedQuery;
 import org.zstack.header.search.Inventory;
@@ -186,5 +187,19 @@ public class InstanceOfferingInventory implements Serializable {
 
     public void setReservedMemorySize(long reservedMemorySize) {
         this.reservedMemorySize = reservedMemorySize;
+    }
+
+    public static InstanceOfferingInventory __example__() {
+        InstanceOfferingInventory inventory = new InstanceOfferingInventory();
+        inventory.setCpuSpeed(1);
+        inventory.setCpuNum(2);
+        inventory.setName("instanceOffering1");
+        inventory.setUuid(DocUtils.createFixedUuid(InstanceOfferingVO.class));
+        inventory.setAllocatorStrategy("Mevoco");
+        inventory.setType("UserVm");
+        inventory.setState(InstanceOfferingState.Enabled.toString());
+        inventory.setCreateDate(DocUtils.timestamp());
+        inventory.setLastOpDate(DocUtils.timestamp());
+        return inventory;
     }
 }

@@ -32,8 +32,7 @@ public class APIReconnectConsoleProxyAgentMsg extends APIMessage implements Cons
  
     public static APIReconnectConsoleProxyAgentMsg __example__() {
         APIReconnectConsoleProxyAgentMsg msg = new APIReconnectConsoleProxyAgentMsg();
-        msg.setAgentUuids(list(uuid(), uuid(), uuid()));
-
+        msg.setAgentUuids(list(uuid(ConsoleProxyAgentVO.class), uuid(ConsoleProxyAgentInventory.class)));
         return msg;
     }
 }

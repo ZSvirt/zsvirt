@@ -6,9 +6,10 @@ import org.zstack.header.message.APIParam;
 import org.zstack.header.message.DefaultTimeout;
 import org.zstack.header.rest.RestRequest;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+
+import static org.zstack.utils.CollectionDSL.list;
 
 /**
  * Created by GuoYi on 3/12/18
@@ -68,9 +69,9 @@ public class APIUpdateClusterOSMsg extends APICreateMessage implements ClusterMe
 
     public static APIUpdateClusterOSMsg __example__() {
         APIUpdateClusterOSMsg msg = new APIUpdateClusterOSMsg();
-        msg.setUuid(uuid());
-        msg.setExcludePackages(Arrays.asList("kernel", "systemd*"));
-        msg.setUpdatePackages(Arrays.asList("zstack-release"));
+        msg.setUuid(uuid(ClusterVO.class));
+        msg.setExcludePackages(list("kernel", "systemd*"));
+        msg.setUpdatePackages(list("zstack-release"));
         msg.setReleaseVersion("c74");
         return msg;
     }

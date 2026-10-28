@@ -7,7 +7,7 @@ import org.zstack.header.rest.RestRequest;
 
 import java.util.List;
 
-import static java.util.Arrays.asList;
+import static org.zstack.utils.CollectionDSL.list;
 
 @AutoQuery(replyClass = APIQueryInstanceOfferingReply.class, inventoryClass = InstanceOfferingInventory.class)
 @RestRequest(
@@ -18,9 +18,7 @@ import static java.util.Arrays.asList;
 )
 public class APIQueryInstanceOfferingMsg extends APIQueryMessage {
 
-
     public static List<String> __example__() {
-        return asList("uuid=" + uuid());
+        return list("uuid=" + uuid(InstanceOfferingVO.class));
     }
-
 }

@@ -53,9 +53,8 @@ public class APIUpdateDiskOfferingMsg extends APIMessage implements DiskOffering
  
     public static APIUpdateDiskOfferingMsg __example__() {
         APIUpdateDiskOfferingMsg msg = new APIUpdateDiskOfferingMsg();
-        msg.setUuid(uuid());
+        msg.setUuid(uuid(DiskOfferingVO.class));
         msg.setName("new name");
-
         return msg;
     }
 }

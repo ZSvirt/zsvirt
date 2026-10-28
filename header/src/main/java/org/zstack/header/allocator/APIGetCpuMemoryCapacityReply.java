@@ -1,6 +1,7 @@
 package org.zstack.header.allocator;
 
 import org.zstack.header.allocator.datatypes.CpuMemoryCapacityData;
+import org.zstack.header.host.HostVO;
 import org.zstack.header.message.APIReply;
 import org.zstack.header.rest.RestResponse;
 
@@ -85,7 +86,7 @@ public class APIGetCpuMemoryCapacityReply extends APIReply {
         reply.setCapacityData(dataList);
         CpuMemoryCapacityData data = new CpuMemoryCapacityData();
         dataList.add(data);
-        data.setResourceUuid(uuid());
+        data.setResourceUuid(uuid(HostVO.class));
         data.setAvailableCpu(2);
         data.setAvailableMemory(4);
         data.setTotalCpu(4);

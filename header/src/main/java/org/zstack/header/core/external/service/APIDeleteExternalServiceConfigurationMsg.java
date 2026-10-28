@@ -10,7 +10,7 @@ import org.zstack.header.rest.RestRequest;
 
 /**
  * @Author: ya.wang
- * @Date: 1/15/26 1:44 AM
+ * @Date: 1/15/26 1:44 AM
  */
 @RestRequest(
         path = "/external/service/configurations/{uuid}",
@@ -36,7 +36,7 @@ public class APIDeleteExternalServiceConfigurationMsg extends APIDeleteMessage i
 
     public static APIDeleteExternalServiceConfigurationMsg __example__() {
         APIDeleteExternalServiceConfigurationMsg msg = new APIDeleteExternalServiceConfigurationMsg();
-        msg.setUuid(uuid());
+        msg.setUuid(uuid(ExternalServiceConfigurationVO.class));
         return msg;
     }
 }

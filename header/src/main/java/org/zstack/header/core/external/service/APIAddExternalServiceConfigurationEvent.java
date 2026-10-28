@@ -5,7 +5,7 @@ import org.zstack.header.rest.RestResponse;
 
 /**
  * @Author: ya.wang
- * @Date: 1/15/26 12:48 AM
+ * @Date: 1/15/26 12:48 AM
  */
 @RestResponse(allTo = "inventory")
 public class APIAddExternalServiceConfigurationEvent extends APIEvent {
@@ -22,13 +22,7 @@ public class APIAddExternalServiceConfigurationEvent extends APIEvent {
 
     public static APIAddExternalServiceConfigurationEvent __example__() {
         APIAddExternalServiceConfigurationEvent event = new APIAddExternalServiceConfigurationEvent();
-        ExternalServiceConfigurationInventory inv = new ExternalServiceConfigurationInventory();
-
-        inv.setUuid(uuid());
-        inv.setServiceType("Prometheus2");
-        inv.setConfiguration("{}");
-        event.setInventory(inv);
-
+        event.setInventory(ExternalServiceConfigurationInventory.__example__());
         return event;
     }
 }

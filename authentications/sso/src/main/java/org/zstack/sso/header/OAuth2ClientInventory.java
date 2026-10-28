@@ -2,6 +2,7 @@ package org.zstack.sso.header;
 
 import org.zstack.header.configuration.PythonClassInventory;
 import org.zstack.header.log.NoLogging;
+import org.zstack.header.message.DocUtils;
 import org.zstack.header.search.Inventory;
 import org.zstack.identity.imports.entity.ThirdPartyAccountSourceInventory;
 import org.zstack.utils.CollectionUtils;
@@ -137,7 +138,13 @@ public class OAuth2ClientInventory extends ThirdPartyAccountSourceInventory {
 
     public static OAuth2ClientInventory __example__() {
         OAuth2ClientInventory inventory = new OAuth2ClientInventory();
-        inventory.setUuid("27fa448b03fd5a379882c831bddcf796");
+        inventory.setUuid(DocUtils.createFixedUuid(OAuth2ClientVO.class));
+        inventory.setClientId("mock-client-id");
+        inventory.setAuthorizationUrl("http://zstack.com/code");
+        inventory.setTokenUrl("http://zstack.com/token");
+        inventory.setLoginMNUrl("http://127.0.0.1:8080/zstack/sso/oauth2/");
+        inventory.setUserinfoUrl("http://zstack.com/userinfoUrl");
+        inventory.setRedirectUrl("http://zstack.com/redirectUrl");
         return inventory;
     }
 }

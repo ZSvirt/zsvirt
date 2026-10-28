@@ -4,9 +4,9 @@ import org.zstack.header.message.APIEvent;
 import org.zstack.header.rest.RestResponse;
 import org.zstack.header.tag.UserTagInventory;
 
-import java.sql.Timestamp;
-import java.util.Collections;
 import java.util.List;
+
+import static org.zstack.utils.CollectionDSL.list;
 
 @RestResponse(fieldsTo = {"all"})
 public class APIAttachTagToResourcesEvent extends APIEvent {
@@ -30,16 +30,7 @@ public class APIAttachTagToResourcesEvent extends APIEvent {
 
     public static APIAttachTagToResourcesEvent __example__() {
         APIAttachTagToResourcesEvent evt = new APIAttachTagToResourcesEvent();
-        UserTagInventory tag = new UserTagInventory();
-        tag.setType("User");
-        tag.setResourceType(uuid());
-        tag.setResourceType("DiskOfferingVO");
-        tag.setTag("for-large-DB");
-        tag.setUuid(uuid());
-        tag.setTagPatternUuid(uuid());
-        tag.setCreateDate(new Timestamp(org.zstack.header.message.DocUtils.date));
-        tag.setLastOpDate(new Timestamp(org.zstack.header.message.DocUtils.date));
-        evt.setResults(Collections.singletonList(new AttachTagResult(tag)));
+        evt.setResults(list(new AttachTagResult(UserTagInventory.__example__())));
         return evt;
     }
 }

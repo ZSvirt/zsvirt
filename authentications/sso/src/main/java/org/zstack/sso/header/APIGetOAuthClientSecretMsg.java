@@ -24,7 +24,7 @@ public class APIGetOAuthClientSecretMsg extends APISyncCallMessage {
 
     public static APIGetOAuthClientSecretMsg __example__() {
         APIGetOAuthClientSecretMsg msg = new APIGetOAuthClientSecretMsg();
-        msg.setUuid(uuid());
+        msg.setUuid(uuid(OAuth2ClientVO.class));
         return msg;
     }
 }

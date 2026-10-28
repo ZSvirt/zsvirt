@@ -1,5 +1,6 @@
 package org.zstack.sso.header;
 
+import org.zstack.header.message.DocUtils;
 import org.zstack.header.query.ExpandedQueries;
 import org.zstack.header.query.ExpandedQuery;
 import org.zstack.header.search.Inventory;
@@ -98,5 +99,15 @@ public class SSORedirectTemplateInventory {
 
     public void setLastOpDate(Timestamp lastOpDate) {
         this.lastOpDate = lastOpDate;
+    }
+
+    public static SSORedirectTemplateInventory __example__() {
+        SSORedirectTemplateInventory inv = new SSORedirectTemplateInventory();
+        inv.setUuid(DocUtils.createFixedUuid(SSORedirectTemplateVO.class));
+        inv.setName("test");
+        inv.setDescription("desv");
+        inv.setClientUuid(DocUtils.createFixedUuid(CasClientVO.class));
+        inv.setRedirectTemplate("http://zstack.com/mock-url");
+        return inv;
     }
 }

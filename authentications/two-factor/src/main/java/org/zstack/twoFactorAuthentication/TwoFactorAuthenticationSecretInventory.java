@@ -1,5 +1,7 @@
 package org.zstack.twoFactorAuthentication;
 
+import org.zstack.header.identity.AccountVO;
+import org.zstack.header.message.DocUtils;
 import org.zstack.header.message.GsonTransient;
 import org.zstack.header.search.Inventory;
 import org.zstack.utils.CollectionUtils;
@@ -82,5 +84,14 @@ public class TwoFactorAuthenticationSecretInventory {
 
     public void setAccountUuid(String accountUuid) {
         this.accountUuid = accountUuid;
+    }
+
+    public static TwoFactorAuthenticationSecretInventory __example__() {
+        TwoFactorAuthenticationSecretInventory inventory = new TwoFactorAuthenticationSecretInventory();
+        inventory.setUuid(DocUtils.createFixedUuid(TwoFactorAuthenticationSecretVO.class));
+        inventory.setSecret("ABCDEFGH12345678");
+        inventory.setStatus(TwoFactorAuthenticationSecretStatus.NewCreated.toString());
+        inventory.setAccountUuid(DocUtils.createFixedUuid(AccountVO.class));
+        return inventory;
     }
 }

@@ -1,20 +1,15 @@
 package org.zstack.header.tag;
 
-import org.zstack.header.network.l2.L2NetworkInventory;
-import org.zstack.header.network.l3.UsedIpInventory;
-import org.zstack.header.network.service.NetworkServiceL3NetworkRefInventory;
+import org.zstack.header.message.DocUtils;
 import org.zstack.header.query.ExpandedQueries;
 import org.zstack.header.query.ExpandedQuery;
 import org.zstack.header.search.Inventory;
-import org.zstack.header.vm.VmNicInventory;
-import org.zstack.header.zone.ZoneInventory;
+import org.zstack.header.vo.ResourceVO;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-/**
- */
 @Inventory(mappingVOClass = UserTagVO.class)
 @ExpandedQueries({
         @ExpandedQuery(expandedField = "tagPattern", inventoryClass = TagPatternInventory.class,
@@ -63,5 +58,18 @@ public class UserTagInventory extends TagInventory {
 
     public void setTagPattern(TagPatternInventory tagPattern) {
         this.tagPattern = tagPattern;
+    }
+
+    public static UserTagInventory __example__() {
+        UserTagInventory tag = new UserTagInventory();
+        tag.setType("User");
+        tag.setResourceUuid(DocUtils.createFixedUuid(ResourceVO.class));
+        tag.setResourceType("DiskOfferingVO");
+        tag.setTag("for-large-DB");
+        tag.setUuid(DocUtils.createFixedUuid(UserTagVO.class));
+        tag.setTagPatternUuid(DocUtils.createFixedUuid(TagPatternVO.class));
+        tag.setCreateDate(DocUtils.timestamp());
+        tag.setLastOpDate(DocUtils.timestamp());
+        return tag;
     }
 }

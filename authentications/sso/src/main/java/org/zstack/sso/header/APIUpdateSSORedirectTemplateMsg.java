@@ -58,7 +58,7 @@ public class APIUpdateSSORedirectTemplateMsg extends APIMessage implements Accou
 
     public static APIUpdateSSORedirectTemplateMsg __example__() {
         APIUpdateSSORedirectTemplateMsg msg = new APIUpdateSSORedirectTemplateMsg();
-        msg.setUuid(uuid());
+        msg.setUuid(uuid(SSORedirectTemplateVO.class));
         msg.setRedirectTemplate("http://zstack.com/userinfoUrl");
         return msg;
     }

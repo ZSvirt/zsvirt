@@ -95,7 +95,7 @@ public class APIUpdateCasClientMsg extends APIMessage implements AccountSourceMe
 
     public static APIUpdateCasClientMsg __example__() {
         APIUpdateCasClientMsg msg = new APIUpdateCasClientMsg();
-        msg.setUuid(uuid());
+        msg.setUuid(uuid(CasClientVO.class));
         msg.setCasServerLoginUrl("http://zstack.com/login");
         msg.setCasServerUrlPrefix("http://zstack.com");
         msg.setServerName("http://127.0.0.1:8080");

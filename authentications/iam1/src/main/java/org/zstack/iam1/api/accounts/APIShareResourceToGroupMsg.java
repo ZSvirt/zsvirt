@@ -46,8 +46,8 @@ public class APIShareResourceToGroupMsg extends APIMessage implements AccountGro
 
     public static APIShareResourceToGroupMsg __example__() {
         APIShareResourceToGroupMsg msg = new APIShareResourceToGroupMsg();
-        msg.setResourceUuids(list(uuid()));
-        msg.setGroupUuid(uuid());
+        msg.setResourceUuids(list(uuid(ResourceVO.class)));
+        msg.setGroupUuid(uuid(AccountGroupVO.class));
         return msg;
     }
 }

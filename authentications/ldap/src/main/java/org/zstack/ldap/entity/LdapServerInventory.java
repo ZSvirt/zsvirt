@@ -1,6 +1,7 @@
 package org.zstack.ldap.entity;
 
 import org.zstack.header.configuration.PythonClassInventory;
+import org.zstack.header.message.DocUtils;
 import org.zstack.header.search.Inventory;
 import org.zstack.identity.imports.entity.ThirdPartyAccountSourceInventory;
 import org.zstack.utils.CollectionUtils;
@@ -97,5 +98,17 @@ public class LdapServerInventory extends ThirdPartyAccountSourceInventory {
 
     public void setUsernameProperty(String usernameProperty) {
         this.usernameProperty = usernameProperty;
+    }
+
+    public static LdapServerInventory __example__() {
+        LdapServerInventory inventory = new LdapServerInventory();
+        inventory.setUuid(DocUtils.createFixedUuid(LdapServerVO.class));
+        inventory.setName("miao");
+        inventory.setDescription("miao desc");
+        inventory.setUrl("ldap://localhost:1888");
+        inventory.setBase("dc=example,dc=com");
+        inventory.setUsername("");
+        inventory.setEncryption("None");
+        return inventory;
     }
 }

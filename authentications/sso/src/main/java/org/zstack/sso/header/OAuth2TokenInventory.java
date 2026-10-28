@@ -1,6 +1,8 @@
 package org.zstack.sso.header;
 
 import org.zstack.header.configuration.PythonClassInventory;
+import org.zstack.header.identity.AccountVO;
+import org.zstack.header.message.DocUtils;
 import org.zstack.header.search.Inventory;
 
 import java.util.ArrayList;
@@ -62,5 +64,16 @@ public class OAuth2TokenInventory extends SSOTokenInventory {
 
     public void setRefreshToken(String refreshToken) {
         this.refreshToken = refreshToken;
+    }
+
+    public static OAuth2TokenInventory __example__() {
+        OAuth2TokenInventory inventory = new OAuth2TokenInventory();
+        inventory.setUuid(DocUtils.createFixedUuid(OAuth2TokenVO.class));
+        inventory.setClientUuid(DocUtils.createFixedUuid(OAuth2ClientVO.class));
+        inventory.setUserUuid(DocUtils.createFixedUuid(AccountVO.class));
+        inventory.setIdToken("eyJhbGci******e9SM88Kg");
+        inventory.setAccessToken("mock-access-token");
+        inventory.setRefreshToken("mock-refresh-token");
+        return inventory;
     }
 }

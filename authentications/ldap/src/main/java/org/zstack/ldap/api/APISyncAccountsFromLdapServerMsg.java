@@ -51,8 +51,7 @@ public class APISyncAccountsFromLdapServerMsg extends APIMessage {
 
     public static APISyncAccountsFromLdapServerMsg __example__() {
         APISyncAccountsFromLdapServerMsg msg = new APISyncAccountsFromLdapServerMsg();
-        msg.setUuid(uuid());
-
+        msg.setUuid(uuid(LdapServerVO.class));
         return msg;
     }
 }

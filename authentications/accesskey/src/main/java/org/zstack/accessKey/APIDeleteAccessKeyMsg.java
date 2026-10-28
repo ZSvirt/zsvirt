@@ -14,7 +14,7 @@ public class APIDeleteAccessKeyMsg extends APIDeleteMessage  {
 
     public static APIDeleteAccessKeyMsg __example__() {
         APIDeleteAccessKeyMsg ret = new APIDeleteAccessKeyMsg();
-        ret.uuid = uuid();
+        ret.uuid = uuid(AccessKeyVO.class);
         return ret;
     }
 

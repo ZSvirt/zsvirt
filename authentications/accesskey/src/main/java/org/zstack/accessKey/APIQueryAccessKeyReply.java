@@ -27,16 +27,7 @@ public class APIQueryAccessKeyReply extends APIQueryReply {
  
     public static APIQueryAccessKeyReply __example__() {
         APIQueryAccessKeyReply reply = new APIQueryAccessKeyReply();
-
-        AccessKeyInventory inventory = new AccessKeyInventory();
-        inventory.setUuid(uuid());
-        inventory.setAccountUuid(uuid());
-        inventory.setUserUuid(inventory.getAccountUuid());
-        inventory.setState(AccessKeyState.Enabled);
-        inventory.setAccessKeyID("1234567890abcdedfhij");
-        inventory.setAccessKeySecret("1234567890abcdedfhij1234567890abcdedfhij");
-
-        reply.setInventories(list(inventory));
+        reply.setInventories(list(AccessKeyInventory.__example__()));
         return reply;
     }
 

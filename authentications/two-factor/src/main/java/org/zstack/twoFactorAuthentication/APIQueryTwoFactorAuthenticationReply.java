@@ -22,15 +22,7 @@ public class APIQueryTwoFactorAuthenticationReply extends APIQueryReply {
  
     public static APIQueryTwoFactorAuthenticationReply __example__() {
         APIQueryTwoFactorAuthenticationReply reply = new APIQueryTwoFactorAuthenticationReply();
-
-        TwoFactorAuthenticationSecretInventory inventory = new TwoFactorAuthenticationSecretInventory();
-        inventory.setUuid(uuid());
-        inventory.setSecret("ABCDEFGH12345678");
-        inventory.setAccountUuid(uuid());
-        inventory.setStatus(TwoFactorAuthenticationSecretStatus.NewCreated.toString());
-
-        reply.setInventories(list(inventory));
+        reply.setInventories(list(TwoFactorAuthenticationSecretInventory.__example__()));
         return reply;
     }
-
 }

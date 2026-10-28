@@ -60,7 +60,7 @@ public class APIGetAccountGroupTreeMsg extends APISyncCallMessage implements Acc
 
     public static APIGetAccountGroupTreeMsg __example__() {
         APIGetAccountGroupTreeMsg msg = new APIGetAccountGroupTreeMsg();
-        msg.setGroupUuid(uuid());
+        msg.setGroupUuid(uuid(AccountGroupVO.class));
         return msg;
     }
 }

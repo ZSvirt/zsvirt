@@ -39,7 +39,7 @@ public class APIDeleteAccountGroupMsg extends APIDeleteMessage implements Accoun
 
     public static APIDeleteAccountGroupMsg __example__() {
         APIDeleteAccountGroupMsg msg = new APIDeleteAccountGroupMsg();
-        msg.setUuid(uuid());
+        msg.setUuid(uuid(AccountGroupVO.class));
         return msg;
     }
 }

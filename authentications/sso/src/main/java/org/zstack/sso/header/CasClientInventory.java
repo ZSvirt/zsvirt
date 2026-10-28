@@ -1,6 +1,7 @@
 package org.zstack.sso.header;
 
 import org.zstack.header.configuration.PythonClassInventory;
+import org.zstack.header.message.DocUtils;
 import org.zstack.header.search.Inventory;
 import org.zstack.identity.imports.entity.ThirdPartyAccountSourceInventory;
 import org.zstack.utils.CollectionUtils;
@@ -104,8 +105,15 @@ public class CasClientInventory extends ThirdPartyAccountSourceInventory {
     }
 
     public static CasClientInventory __example__() {
-        CasClientInventory inventory = new CasClientInventory();
-        inventory.setUuid("dc6cd27ea6c25cafba684d19a01107f9");
-        return inventory;
+        CasClientInventory inv = new CasClientInventory();
+        inv.setUuid(DocUtils.createFixedUuid(CasClientVO.class));
+        inv.setName("test");
+        inv.setState(CasState.Enabled.toString());
+        inv.setServerName("http://127.0.0.1");
+        inv.setCasServerUrlPrefix("http://zstack.com");
+        inv.setCasServerLoginUrl("/login");
+        inv.setServerName("http://127.0.0.1:8080/");
+        inv.setLoginMNUrl("http://127.0.0.1:8080/zstack/sso/cas/");
+        return inv;
     }
 }

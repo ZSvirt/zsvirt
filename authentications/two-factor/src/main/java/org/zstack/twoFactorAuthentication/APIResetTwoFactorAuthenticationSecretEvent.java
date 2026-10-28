@@ -26,14 +26,7 @@ public class APIResetTwoFactorAuthenticationSecretEvent extends APIEvent {
 
     public static APIResetTwoFactorAuthenticationSecretEvent __example__() {
         APIResetTwoFactorAuthenticationSecretEvent event = new APIResetTwoFactorAuthenticationSecretEvent();
-        TwoFactorAuthenticationSecretInventory inventory= new TwoFactorAuthenticationSecretInventory();
-        inventory.setUuid(uuid());
-        inventory.setSecret("ABCDEFGH12345678");
-        inventory.setStatus(TwoFactorAuthenticationSecretStatus.NewCreated.toString());
-        inventory.setAccountUuid(uuid());
-        event.setInventory(inventory);
-
+        event.setInventory(TwoFactorAuthenticationSecretInventory.__example__());
         return event;
     }
-
 }

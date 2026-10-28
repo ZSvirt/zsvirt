@@ -55,7 +55,7 @@ public class APIUpdateAccountGroupMsg extends APIMessage implements AccountGroup
 
     public static APIUpdateAccountGroupMsg __example__() {
         APIUpdateAccountGroupMsg msg = new APIUpdateAccountGroupMsg();
-        msg.setUuid(uuid());
+        msg.setUuid(uuid(AccountGroupVO.class));
         msg.setName("my-group");
         return msg;
     }

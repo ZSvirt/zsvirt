@@ -46,8 +46,8 @@ public class APIRevokeResourceSharingToGroupMsg extends APIMessage implements Ac
 
     public static APIRevokeResourceSharingToGroupMsg __example__() {
         APIRevokeResourceSharingToGroupMsg msg = new APIRevokeResourceSharingToGroupMsg();
-        msg.setResourceUuids(list(uuid()));
-        msg.setGroupUuid(uuid());
+        msg.setResourceUuids(list(uuid(ResourceVO.class)));
+        msg.setGroupUuid(uuid(AccountGroupVO.class));
         return msg;
     }
 }

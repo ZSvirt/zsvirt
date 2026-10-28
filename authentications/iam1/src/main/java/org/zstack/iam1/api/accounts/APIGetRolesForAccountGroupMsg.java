@@ -40,7 +40,7 @@ public class APIGetRolesForAccountGroupMsg extends APISyncCallMessage implements
 
     public static APIGetRolesForAccountGroupMsg __example__() {
         APIGetRolesForAccountGroupMsg msg = new APIGetRolesForAccountGroupMsg();
-        msg.setGroupUuid(uuid());
+        msg.setGroupUuid(uuid(AccountGroupVO.class));
         return msg;
     }
 }

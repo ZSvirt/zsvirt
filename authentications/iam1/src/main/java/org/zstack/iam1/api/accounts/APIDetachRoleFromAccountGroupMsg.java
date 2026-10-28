@@ -45,8 +45,8 @@ public class APIDetachRoleFromAccountGroupMsg extends APIMessage implements Acco
 
     public static APIDetachRoleFromAccountGroupMsg __example__() {
         APIDetachRoleFromAccountGroupMsg msg = new APIDetachRoleFromAccountGroupMsg();
-        msg.setGroupUuid(uuid());
-        msg.setRoleUuids(list(uuid()));
+        msg.setGroupUuid(uuid(AccountGroupVO.class));
+        msg.setRoleUuids(list(uuid(RoleVO.class)));
         return msg;
     }
 }

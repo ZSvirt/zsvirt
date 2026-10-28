@@ -5,6 +5,7 @@ import org.zstack.header.message.APICreateMessage;
 import org.zstack.header.message.APIEvent;
 import org.zstack.header.message.APIMessage;
 import org.zstack.header.message.APIParam;
+import org.zstack.header.message.DocUtils;
 import org.zstack.header.other.APIAuditor;
 import org.zstack.header.rest.RestRequest;
 import org.zstack.identity.imports.entity.ThirdPartyAccountSourceVO;
@@ -76,7 +77,7 @@ public class APICreateSSORedirectTemplateMsg extends APICreateMessage implements
         APICreateSSORedirectTemplateMsg msg = new APICreateSSORedirectTemplateMsg();
         msg.setName("test");
         msg.setDescription("desc");
-        msg.setClientUuid(uuid());
+        msg.setClientUuid(DocUtils.createFixedUuid(CasClientVO.class));
         msg.setRedirectTemplate("http://172.24.194.28:5000/oauth1/verify/?username=${username}&sessionId=${sessionId}&userUuid=${userUuid}&accountUuid=${accountUuid}&loginType=${loginType}&userType=${userType}'");
         return msg;
     }

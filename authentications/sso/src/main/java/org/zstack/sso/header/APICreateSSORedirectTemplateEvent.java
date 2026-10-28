@@ -25,14 +25,10 @@ public class APICreateSSORedirectTemplateEvent extends APIEvent {
     public void setInventory(SSORedirectTemplateInventory inventory) {
         this.inventory = inventory;
     }
+
     public static APICreateSSORedirectTemplateEvent __example__() {
         APICreateSSORedirectTemplateEvent evt = new APICreateSSORedirectTemplateEvent();
-        SSORedirectTemplateInventory inv = new SSORedirectTemplateInventory();
-        inv.setUuid(uuid());
-        inv.setName("test");
-        inv.setDescription("desv");
-        inv.setClientUuid(uuid());
-        evt.setInventory(inv);
+        evt.setInventory(SSORedirectTemplateInventory.__example__());
         return evt;
     }
 }

@@ -30,7 +30,7 @@ public class APIDeleteSSOClientMsg extends APIDeleteMessage {
 
     public static APIDeleteSSOClientMsg __example__() {
         APIDeleteSSOClientMsg msg = new APIDeleteSSOClientMsg();
-        msg.setUuid(uuid());
+        msg.setUuid(uuid(ThirdPartyAccountSourceVO.class));
         return msg;
     }
 }

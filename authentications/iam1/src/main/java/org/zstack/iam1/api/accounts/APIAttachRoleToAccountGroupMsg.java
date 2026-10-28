@@ -46,8 +46,8 @@ public class APIAttachRoleToAccountGroupMsg extends APIMessage implements Accoun
 
     public static APIAttachRoleToAccountGroupMsg __example__() {
         APIAttachRoleToAccountGroupMsg msg = new APIAttachRoleToAccountGroupMsg();
-        msg.setGroupUuid(uuid());
-        msg.setRoleUuids(list(uuid()));
+        msg.setGroupUuid(uuid(AccountGroupVO.class));
+        msg.setRoleUuids(list(uuid(RoleVO.class)));
         return msg;
     }
 }

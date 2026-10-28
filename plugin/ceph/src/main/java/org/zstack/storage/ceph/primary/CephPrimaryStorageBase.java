@@ -2889,6 +2889,7 @@ public class CephPrimaryStorageBase extends PrimaryStorageBase {
                             return;
                         }
 
+                        msg.getVolume().setInstallPath(volumePath);
                         ResizeVolumeOnPrimaryStorageMsg rmsg = new ResizeVolumeOnPrimaryStorageMsg();
                         rmsg.setVolume(msg.getVolume());
                         rmsg.setSize(msg.getVolume().getSize());

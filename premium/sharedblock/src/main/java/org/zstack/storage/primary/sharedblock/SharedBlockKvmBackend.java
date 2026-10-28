@@ -149,6 +149,8 @@ public class SharedBlockKvmBackend extends SharedBlockHypervisorBackend implemen
         cmd.destPath = convertInstallPathToAbsolute(volume.getInstallPath());
         cmd.volumeUuid = volume.getUuid();
         cmd.requiredSize = msg.getSize();
+        // Honor the target size without adding thin-provisioning initialization headroom.
+        cmd.getAddons().put(THIN_PROVISIONING_INITIALIZE_SIZE_TAG_TOKEN, 0L);
         cmd.vgUuid = msg.getPrimaryStorageUuid();
 
         new Do(hosts.get(0).getUuid(), msg.getPrimaryStorageUuid()).go(

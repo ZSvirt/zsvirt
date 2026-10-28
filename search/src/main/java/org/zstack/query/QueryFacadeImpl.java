@@ -27,6 +27,7 @@ import org.zstack.header.rest.APINoSee;
 import org.zstack.header.search.Inventory;
 import org.zstack.header.search.Parent;
 import org.zstack.header.search.SearchConstant;
+import org.zstack.header.search.SearchErrors;
 import org.zstack.utils.*;
 import org.zstack.utils.gson.JSONObjectUtil;
 import org.zstack.utils.logging.CLogger;
@@ -35,15 +36,19 @@ import org.zstack.zql.ZQLContext;
 import org.zstack.zql.ZQLQueryReturn;
 import org.zstack.zql.ast.ZQLMetadata;
 
+import javax.persistence.metamodel.SingularAttribute;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.function.IntConsumer;
 import java.util.stream.Collectors;
 
 import static org.zstack.core.Platform.argerr;
+import static org.zstack.core.Platform.err;
 import static org.zstack.core.Platform.inerr;
 
 public class QueryFacadeImpl extends AbstractService implements QueryFacade, GlobalApiMessageInterceptor, MarshalReplyMessageExtensionPoint {
@@ -328,6 +333,7 @@ public class QueryFacadeImpl extends AbstractService implements QueryFacade, Glo
 
     private Map<Class, Method> replySetter = new HashMap<>();
     private Map<Class, AutoQuery> autoQueryMap = new HashMap<>();
+    private final Map<Class, Set<String>> voSingularAttributeNames = new ConcurrentHashMap<>();
 
     private Method getReplySetter(AutoQuery at) {
         Class replyClass = at.replyClass();
@@ -665,6 +671,52 @@ public class QueryFacadeImpl extends AbstractService implements QueryFacade, Glo
             if (!QueryOp.NOT_NULL.equals(cond.getOp()) && !QueryOp.IS_NULL.equals(cond.getOp()) && cond.getValue() == null) {
                 throw new ApiMessageInterceptionException(argerr("'value' of query condition %s cannot be null",
                                 JSONObjectUtil.toJsonString(cond)));
+            }
+        }
+
+        // @APINoSee fields and resourceName are allowed through this check for now.
+        // Complex ZQL and query parameters such as sortBy are not checked in this version.
+        // Columns present on VO_ but absent from the inventory are allowed; they are out of scope here.
+        if (qmsg.getFields() != null && !qmsg.getFields().isEmpty()) {
+            AutoQuery at = autoQueryMap.get(qmsg.getClass());
+            if (at == null) {
+                at = qmsg.getClass().getAnnotation(AutoQuery.class);
+                if (at != null) {
+                    autoQueryMap.put(qmsg.getClass(), at);
+                }
+            }
+            if (at != null) {
+                Class inventoryClass = getQueryTargetInventoryClass(qmsg, at.inventoryClass());
+                Class voClass = ((Inventory) inventoryClass.getAnnotation(Inventory.class)).mappingVOClass();
+                Set<String> columnNames = voSingularAttributeNames.get(voClass);
+                if (columnNames == null) {
+                    Class metaClass;
+                    try {
+                        metaClass = Class.forName(voClass.getName() + "_");
+                    } catch (ClassNotFoundException e) {
+                        throw new CloudRuntimeException(e);
+                    }
+                    columnNames = new HashSet<>();
+                    for (Class c = metaClass; c != null && c != Object.class; c = c.getSuperclass()) {
+                        for (Field f : c.getDeclaredFields()) {
+                            if (Modifier.isStatic(f.getModifiers()) && SingularAttribute.class.isAssignableFrom(f.getType())) {
+                                columnNames.add(f.getName());
+                            }
+                        }
+                    }
+                    voSingularAttributeNames.put(voClass, columnNames);
+                }
+                List<String> invalid = new ArrayList<>();
+                for (String field : qmsg.getFields()) {
+                    if (!columnNames.contains(field)) {
+                        invalid.add(field);
+                    }
+                }
+                if (!invalid.isEmpty()) {
+                    throw new ApiMessageInterceptionException(err(SearchErrors.INVALID_ZQL_FIELDS,
+                            "invalid query fields%s", invalid)
+                            .withOpaque("fields", invalid));
+                }
             }
         }
 

@@ -28,11 +28,7 @@ public class APIUpdateSSORedirectTemplateEvent extends APIEvent {
 
     public static APIUpdateSSORedirectTemplateEvent __example__() {
         APIUpdateSSORedirectTemplateEvent evt = new APIUpdateSSORedirectTemplateEvent();
-        SSORedirectTemplateInventory inv = new SSORedirectTemplateInventory();
-        inv.setUuid(uuid());
-        inv.setClientUuid(uuid());
-        inv.setRedirectTemplate("http://zstack.com/code");
-        evt.setInventory(inv);
+        evt.setInventory(SSORedirectTemplateInventory.__example__());
         return evt;
     }
 }

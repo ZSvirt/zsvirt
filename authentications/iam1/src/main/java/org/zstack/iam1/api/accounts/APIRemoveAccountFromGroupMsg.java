@@ -45,8 +45,8 @@ public class APIRemoveAccountFromGroupMsg extends APIMessage implements AccountG
 
     public static APIRemoveAccountFromGroupMsg __example__() {
         APIRemoveAccountFromGroupMsg msg = new APIRemoveAccountFromGroupMsg();
-        msg.setGroupUuid(uuid());
-        msg.setAccountUuids(list(uuid()));
+        msg.setGroupUuid(uuid(AccountGroupVO.class));
+        msg.setAccountUuids(list(uuid(AccountVO.class)));
         return msg;
     }
 }

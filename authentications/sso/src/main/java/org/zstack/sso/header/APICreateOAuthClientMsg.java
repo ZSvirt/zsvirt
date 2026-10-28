@@ -151,8 +151,8 @@ public class APICreateOAuthClientMsg extends APICreateMessage implements APIAudi
 
     public static APICreateOAuthClientMsg __example__() {
         APICreateOAuthClientMsg msg = new APICreateOAuthClientMsg();
-        msg.setClientId(uuid());
-        msg.setClientSecret(uuid());
+        msg.setClientId("mock-client-id");
+        msg.setClientSecret("******");
         msg.setAuthorizationUrl("http://zstack.com/code");
         msg.setTokenUrl("http://zstack.com/token");
         msg.setDescription("test");

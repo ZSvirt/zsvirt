@@ -1,5 +1,6 @@
 package org.zstack.core.gc;
 
+import org.zstack.header.message.DocUtils;
 import org.zstack.header.search.Inventory;
 
 import java.sql.Timestamp;
@@ -116,5 +117,15 @@ public class GarbageCollectorInventory {
 
     public void setLastOpDate(Timestamp lastOpDate) {
         this.lastOpDate = lastOpDate;
+    }
+
+    public static GarbageCollectorInventory __example__() {
+        GarbageCollectorInventory gc = new GarbageCollectorInventory();
+        gc.setName("TestGC");
+        gc.setUuid(DocUtils.createFixedUuid(GarbageCollectorVO.class));
+        gc.setType("TimeBased");
+        gc.setCreateDate(DocUtils.timestamp());
+        gc.setLastOpDate(DocUtils.timestamp());
+        return gc;
     }
 }

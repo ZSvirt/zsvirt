@@ -7,7 +7,7 @@ import org.zstack.header.rest.RestRequest;
 
 import java.util.List;
 
-import static java.util.Arrays.asList;
+import static org.zstack.utils.CollectionDSL.list;
 
 
 @AutoQuery(replyClass = APIQueryTwoFactorAuthenticationReply.class, inventoryClass = TwoFactorAuthenticationSecretInventory.class)
@@ -20,7 +20,6 @@ import static java.util.Arrays.asList;
 public class APIQueryTwoFactorAuthenticationMsg extends APIQueryMessage {
 
     public static List<String> __example__() {
-        return asList("uuid=" + uuid());
+        return list("uuid=" + uuid(TwoFactorAuthenticationSecretVO.class));
     }
-
 }

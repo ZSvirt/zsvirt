@@ -2,6 +2,7 @@ package org.zstack.iam1.api.ensemble;
 
 import org.zstack.header.message.APIReply;
 import org.zstack.header.rest.RestResponse;
+import org.zstack.header.vo.ResourceVO;
 import org.zstack.iam1.entity.ensemble.AccountGroupSharingView;
 import org.zstack.iam1.entity.ensemble.AccountSharingView;
 
@@ -71,7 +72,7 @@ public class APIGetResourceSharingReply extends APIReply {
 
     public static APIGetResourceSharingReply __example__() {
         APIGetResourceSharingReply reply = new APIGetResourceSharingReply();
-        reply.setUuid(uuid());
+        reply.setUuid(uuid(ResourceVO.class));
         reply.setToPublic(false);
         reply.setAccounts(list(AccountSharingView.__example__()));
         reply.setAccountGroups(list(AccountGroupSharingView.__example__()));

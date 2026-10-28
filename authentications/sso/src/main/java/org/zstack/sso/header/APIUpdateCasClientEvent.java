@@ -28,15 +28,7 @@ public class APIUpdateCasClientEvent extends APIEvent {
 
     public static APIUpdateCasClientEvent __example__() {
         APIUpdateCasClientEvent evt = new APIUpdateCasClientEvent();
-        CasClientInventory inv = new CasClientInventory();
-        inv.setUuid(uuid());
-        inv.setName("test");
-        inv.setDescription("test");
-        inv.setCasServerLoginUrl("http://zstack.com/login");
-        inv.setCasServerUrlPrefix("http://zstack.com");
-        inv.setServerName("http://127.0.0.1:8080/");
-        inv.setLoginMNUrl("http://127.0.0.1:8080/zstack/sso/cas/");
-        evt.setInventory(inv);
+        evt.setInventory(CasClientInventory.__example__());
         return evt;
     }
 }

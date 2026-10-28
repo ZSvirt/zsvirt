@@ -37,9 +37,7 @@ public class APIDeleteLdapBindingMsg extends APIMessage {
 
     public static APIDeleteLdapBindingMsg __example__() {
         APIDeleteLdapBindingMsg msg = new APIDeleteLdapBindingMsg();
-        msg.setAccountUuid(uuid());
-
+        msg.setAccountUuid(uuid(AccountVO.class));
         return msg;
     }
-
 }

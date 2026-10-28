@@ -35,7 +35,7 @@ public class APIUploadSoftwarePackageToVmEvent extends APIEvent {
 
     public static APIUploadSoftwarePackageToVmEvent __example__() {
         APIUploadSoftwarePackageToVmEvent event = new APIUploadSoftwarePackageToVmEvent();
-        event.setUploadTaskUuid(uuid());
+        event.setUploadTaskUuid(uuid(Object.class)); // not related to any VO
         event.setUploadUrl("http://192.168.0.10:7070/host/file/direct/upload");
         return event;
     }

@@ -28,15 +28,7 @@ public class APICreateCasClientEvent extends APIEvent {
 
     public static APICreateCasClientEvent __example__() {
         APICreateCasClientEvent evt = new APICreateCasClientEvent();
-        CasClientInventory inv = new CasClientInventory();
-        inv.setUuid(uuid());
-        inv.setState(CasState.Enabled.toString());
-        inv.setServerName("http://127.0.0.1");
-        inv.setCasServerUrlPrefix("http://zstack.com/login");
-        inv.setCasServerUrlPrefix("http://zstack.com");
-        inv.setLoginMNUrl("http://127.0.0.1:8080/zstack/sso/cas/");
-        evt.setInventory(inv);
+        evt.setInventory(CasClientInventory.__example__());
         return evt;
     }
-
 }

@@ -49,10 +49,8 @@ public class APICreateLdapBindingMsg extends APIMessage {
 
     public static APICreateLdapBindingMsg __example__() {
         APICreateLdapBindingMsg msg = new APICreateLdapBindingMsg();
-        msg.setAccountUuid(uuid());
+        msg.setAccountUuid(uuid(AccountVO.class));
         msg.setLdapUid("ou=Employee,uid=test");
-
         return msg;
     }
-
 }

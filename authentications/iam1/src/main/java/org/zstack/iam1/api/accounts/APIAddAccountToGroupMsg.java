@@ -46,8 +46,8 @@ public class APIAddAccountToGroupMsg extends APIMessage implements AccountGroupM
 
     public static APIAddAccountToGroupMsg __example__() {
         APIAddAccountToGroupMsg msg = new APIAddAccountToGroupMsg();
-        msg.setGroupUuid(uuid());
-        msg.setAccountUuids(list(uuid()));
+        msg.setGroupUuid(uuid(AccountGroupVO.class));
+        msg.setAccountUuids(list(uuid(AccountVO.class)));
         return msg;
     }
 }

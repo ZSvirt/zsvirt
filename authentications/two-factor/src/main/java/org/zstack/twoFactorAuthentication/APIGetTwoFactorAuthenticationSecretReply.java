@@ -17,13 +17,7 @@ public class APIGetTwoFactorAuthenticationSecretReply extends APIReply {
  
     public static APIGetTwoFactorAuthenticationSecretReply __example__() {
         APIGetTwoFactorAuthenticationSecretReply reply = new APIGetTwoFactorAuthenticationSecretReply();
-        TwoFactorAuthenticationSecretInventory inventory= new TwoFactorAuthenticationSecretInventory();
-        inventory.setUuid(uuid());
-        inventory.setSecret("ABCDEFGH12345678");
-        inventory.setStatus(TwoFactorAuthenticationSecretStatus.NewCreated.toString());
-        inventory.setAccountUuid(uuid());
-        reply.setInventory(inventory);
+        reply.setInventory(TwoFactorAuthenticationSecretInventory.__example__());
         return reply;
     }
-
 }

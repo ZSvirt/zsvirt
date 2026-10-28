@@ -47,7 +47,7 @@ public class APIDeleteSSORedirectTemplateMsg extends APIDeleteMessage implements
 
     public static APIDeleteSSORedirectTemplateMsg __example__() {
         APIDeleteSSORedirectTemplateMsg msg = new APIDeleteSSORedirectTemplateMsg();
-        msg.setUuid(uuid());
+        msg.setUuid(uuid(SSORedirectTemplateVO.class));
         return msg;
     }
 }

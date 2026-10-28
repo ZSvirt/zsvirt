@@ -7,7 +7,7 @@ import org.zstack.header.rest.RestRequest;
 
 import java.util.List;
 
-import static java.util.Arrays.asList;
+import static org.zstack.utils.CollectionDSL.list;
 
 /**
  * Created with IntelliJ IDEA.
@@ -25,7 +25,6 @@ import static java.util.Arrays.asList;
 public class APIQueryAccessKeyMsg extends APIQueryMessage {
 
     public static List<String> __example__() {
-        return asList("uuid=" + uuid());
+        return list("uuid=" + uuid(AccessKeyVO.class));
     }
-
 }

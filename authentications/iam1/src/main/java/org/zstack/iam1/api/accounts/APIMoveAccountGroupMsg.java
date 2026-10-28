@@ -5,6 +5,7 @@ import org.zstack.header.message.APIMessage;
 import org.zstack.header.message.APIParam;
 import org.zstack.header.rest.RestRequest;
 import org.zstack.iam1.entity.accounts.AccountGroupVO;
+import org.zstack.utils.StringDSL;
 
 @RestRequest(
         path = "/account-groups/{uuid}/actions",
@@ -41,8 +42,8 @@ public class APIMoveAccountGroupMsg extends APIMessage implements AccountGroupMe
 
     public static APIMoveAccountGroupMsg __example__() {
         APIMoveAccountGroupMsg msg = new APIMoveAccountGroupMsg();
-        msg.setUuid(uuid());
-        msg.setParentUuid(uuid());
+        msg.setUuid(uuid(AccountGroupVO.class));
+        msg.setParentUuid(StringDSL.createFixedUuid("parent-account-group"));
         return msg;
     }
 }

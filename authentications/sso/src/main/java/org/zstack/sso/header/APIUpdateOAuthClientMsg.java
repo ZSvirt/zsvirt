@@ -135,8 +135,9 @@ public class APIUpdateOAuthClientMsg extends APIMessage implements AccountSource
 
     public static APIUpdateOAuthClientMsg __example__() {
         APIUpdateOAuthClientMsg msg = new APIUpdateOAuthClientMsg();
-        msg.setClientId(uuid());
-        msg.setClientSecret(uuid());
+        msg.setUuid(uuid(OAuth2ClientVO.class));
+        msg.setClientId("mock-client-id");
+        msg.setClientSecret("******");
         msg.setAuthorizationUrl("http://zstack.com/code");
         msg.setTokenUrl("http://zstack.com/token");
         msg.setDescription("test");

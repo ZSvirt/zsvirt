@@ -33,7 +33,7 @@ public class APIDeleteGCJobMsg extends APIMessage implements GarbageCollectorMes
 
     public static APIDeleteGCJobMsg __example__() {
         APIDeleteGCJobMsg msg = new APIDeleteGCJobMsg();
-        msg.setUuid(uuid());
+        msg.setUuid(uuid(GarbageCollectorVO.class));
         return msg;
     }
 }

@@ -8,8 +8,9 @@ import org.zstack.header.message.APIParam;
 import org.zstack.header.rest.RestRequest;
 import org.zstack.header.vo.ResourceVO;
 
-import java.util.Arrays;
 import java.util.List;
+
+import static org.zstack.utils.CollectionDSL.list;
 
 @RestRequest(
         path = "/resource-configurations/{resourceUuid}/resource-configs/actions",
@@ -50,12 +51,8 @@ public class APIUpdateResourceConfigsMsg extends APIMessage {
 
     public static APIUpdateResourceConfigsMsg __example__() {
         APIUpdateResourceConfigsMsg msg = new APIUpdateResourceConfigsMsg();
-        msg.setResourceUuid(uuid());
-        ConfigAO resourceConfigAO = new ConfigAO();
-        resourceConfigAO.setName("cleanTraffic");
-        resourceConfigAO.setCategory("vm");
-        resourceConfigAO.setValue("true");
-        msg.setResourceConfigs(Arrays.asList(resourceConfigAO));
+        msg.setResourceUuid(uuid(ResourceVO.class));
+        msg.setResourceConfigs(list(ConfigAO.__example__()));
         return msg;
     }
 }

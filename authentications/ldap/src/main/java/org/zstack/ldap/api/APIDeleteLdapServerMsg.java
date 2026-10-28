@@ -35,9 +35,7 @@ public class APIDeleteLdapServerMsg extends APIDeleteMessage {
 
     public static APIDeleteLdapServerMsg __example__() {
         APIDeleteLdapServerMsg msg = new APIDeleteLdapServerMsg();
-        msg.setUuid(uuid());
-
+        msg.setUuid(uuid(LdapServerVO.class));
         return msg;
     }
-
 }

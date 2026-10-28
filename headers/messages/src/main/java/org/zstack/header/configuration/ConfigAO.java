@@ -81,4 +81,12 @@ public class ConfigAO {
         config.setValue(value);
         return config;
     }
+
+    public static ConfigAO __example__() {
+        ConfigAO resourceConfigAO = new ConfigAO();
+        resourceConfigAO.setName("cleanTraffic");
+        resourceConfigAO.setCategory("vm");
+        resourceConfigAO.setValue("true");
+        return resourceConfigAO;
+    }
 }

@@ -5,10 +5,11 @@ import org.zstack.header.query.APIQueryMessage;
 import org.zstack.header.query.AutoQuery;
 import org.zstack.header.rest.RestRequest;
 import org.zstack.loginControl.entity.AccessControlRuleInventory;
+import org.zstack.loginControl.entity.AccessControlRuleVO;
 
 import java.util.List;
 
-import static java.util.Arrays.asList;
+import static org.zstack.utils.CollectionDSL.list;
 
 @AutoQuery(replyClass = APIQueryAccessControlRuleReply.class, inventoryClass = AccessControlRuleInventory.class)
 @RestRequest(
@@ -18,6 +19,6 @@ import static java.util.Arrays.asList;
 )
 public class APIQueryAccessControlRuleMsg extends APIQueryMessage {
     public static List<String> __example__() {
-        return asList(String.format("uuid=" + uuid()));
+        return list(String.format("uuid=" + uuid(AccessControlRuleVO.class)));
     }
 }

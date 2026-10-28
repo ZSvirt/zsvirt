@@ -22,17 +22,7 @@ public class APIQueryLdapServerReply extends APIQueryReply {
  
     public static APIQueryLdapServerReply __example__() {
         APIQueryLdapServerReply reply = new APIQueryLdapServerReply();
-        LdapServerInventory inventory = new LdapServerInventory();
-        inventory.setUuid(uuid());
-        inventory.setName("miao");
-        inventory.setDescription("miao desc");
-        inventory.setUrl("ldap://localhost:1888");
-        inventory.setBase("dc=example,dc=com");
-        inventory.setUsername("");
-        inventory.setEncryption("None");
-
-        reply.setInventories(list(inventory));
+        reply.setInventories(list(LdapServerInventory.__example__()));
         return reply;
     }
-
 }

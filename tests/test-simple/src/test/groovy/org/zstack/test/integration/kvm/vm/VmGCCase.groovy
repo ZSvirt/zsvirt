@@ -232,6 +232,7 @@ class VmGCCase extends SubCase {
     private void stopVmWithGCOpen(String vmUuid) {
         StopVmInstanceMsg msg = new StopVmInstanceMsg()
         msg.gcOnFailure = true
+        msg.type = org.zstack.header.vm.StopVmType.cold.toString()
         msg.vmInstanceUuid = vmUuid
         bus.makeTargetServiceIdByResourceUuid(msg, VmInstanceConstant.SERVICE_ID, vmUuid)
         MessageReply reply = bus.call(msg)

@@ -504,6 +504,8 @@ public class VmCascadeExtension extends AbstractAsyncCascadeExtension {
                 }
                 StopVmInstanceMsg msg = new StopVmInstanceMsg();
                 msg.setVmInstanceUuid(inv.getInventory().getUuid());
+                // Host deletion explicitly requires releasing the VM resources.
+                msg.setType(StopVmType.cold.toString());
                 msg.setGcOnFailure(true);
                 msg.setIgnoreResourceReleaseFailure(ignoreResourceReleaseFailure);
                 bus.makeTargetServiceIdByResourceUuid(msg, VmInstanceConstant.SERVICE_ID, inv.getInventory().getUuid());

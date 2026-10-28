@@ -571,6 +571,8 @@ public abstract class HostBase extends AbstractHost {
                             StopVmInstanceMsg msg = new StopVmInstanceMsg();
                             msg.setVmInstanceUuid(vmUuid);
                             if (changeHostStateMsg.isForceChange()) {
+                                // Forced maintenance explicitly authorizes a hard stop.
+                                msg.setType(StopVmType.cold.toString());
                                 msg.setGcOnFailure(true);
                                 msg.setIgnoreResourceReleaseFailure(true);
                             }

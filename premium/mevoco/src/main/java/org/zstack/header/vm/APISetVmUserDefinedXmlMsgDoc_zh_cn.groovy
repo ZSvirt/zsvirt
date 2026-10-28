@@ -24,7 +24,7 @@ doc {
 				column {
 					name "vmInstanceUuid"
 					enclosedIn "setVmUserDefinedXml"
-					desc "云主机UUID"
+					desc "虚拟机UUID"
 					location "url"
 					type "String"
 					optional false

@@ -5,17 +5,17 @@ import java.sql.Timestamp
 
 doc {
 
-	title "云主机DNS清单"
+	title "虚拟机DNS清单"
 
 	field {
 		name "vmInstanceUuid"
-		desc "云主机UUID"
+		desc "虚拟机UUID"
 		type "String"
 		since "zsv_4.10.10"
 	}
 	field {
 		name "vmNicUuid"
-		desc "云主机网卡UUID"
+		desc "虚拟机网卡UUID"
 		type "String"
 		since "zsv_4.10.10"
 	}

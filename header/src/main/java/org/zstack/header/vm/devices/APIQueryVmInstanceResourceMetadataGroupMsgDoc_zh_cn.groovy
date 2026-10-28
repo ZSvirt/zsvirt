@@ -8,7 +8,7 @@ doc {
 
 	category "snapshot.volume"
 
-	desc """查询云主机设备地址组"""
+	desc """查询虚拟机设备地址组"""
 
 	rest {
 		request {

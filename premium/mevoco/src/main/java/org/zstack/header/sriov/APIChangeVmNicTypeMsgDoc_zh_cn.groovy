@@ -7,7 +7,7 @@ doc {
 
 	category "sriov"
 
-	desc """修改云主机网卡类型"""
+	desc """修改虚拟机网卡类型"""
 
 	rest {
 		request {
@@ -17,14 +17,14 @@ doc {
 
 			clz APIChangeVmNicTypeMsg.class
 
-			desc """修改云主机网卡类型"""
+			desc """修改虚拟机网卡类型"""
 
 			params {
 
 				column {
 					name "vmNicUuid"
 					enclosedIn "changeVmNicType"
-					desc "云主机网卡UUID"
+					desc "虚拟机网卡UUID"
 					location "url"
 					type "String"
 					optional false
@@ -33,7 +33,7 @@ doc {
 				column {
 					name "vmNicType"
 					enclosedIn "changeVmNicType"
-					desc "云主机网卡类型"
+					desc "虚拟机网卡类型"
 					location "body"
 					type "String"
 					optional false

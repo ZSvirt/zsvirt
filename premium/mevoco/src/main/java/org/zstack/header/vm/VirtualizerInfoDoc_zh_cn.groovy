@@ -14,7 +14,7 @@ doc {
 	}
 	field {
 		name "currentVersion"
-		desc "云主机当前使用的虚拟化软件版本 / 物理机当前安装的虚拟化软件版本"
+		desc "虚拟机当前使用的虚拟化软件版本 / 物理机当前安装的虚拟化软件版本"
 		type "String"
 		since "zsv_3.16.21"
 	}

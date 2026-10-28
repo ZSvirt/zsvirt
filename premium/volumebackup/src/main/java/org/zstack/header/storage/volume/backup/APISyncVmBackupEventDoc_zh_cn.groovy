@@ -5,7 +5,7 @@ import org.zstack.header.storage.backup.SyncBackupResult
 
 doc {
 
-	title "扫描云主机备份结果"
+	title "扫描虚拟机备份结果"
 
 	field {
 		name "success"

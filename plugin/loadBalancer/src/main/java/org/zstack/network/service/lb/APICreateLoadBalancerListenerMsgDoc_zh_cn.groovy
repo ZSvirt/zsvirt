@@ -51,7 +51,7 @@ doc {
 				column {
 					name "instancePort"
 					enclosedIn "params"
-					desc "云主机端口"
+					desc "虚拟机端口"
 					location "body"
 					type "Integer"
 					optional true

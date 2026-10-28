@@ -7,7 +7,7 @@ doc {
 
 	category "ha"
 
-	desc """获取云主机高可用级别"""
+	desc """获取虚拟机高可用级别"""
 
 	rest {
 		request {
@@ -24,7 +24,7 @@ doc {
 				column {
 					name "uuid"
 					enclosedIn ""
-					desc "云主机资源Uuid"
+					desc "虚拟机资源Uuid"
 					location "url"
 					type "String"
 					optional false

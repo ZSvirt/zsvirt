@@ -3,11 +3,11 @@ package org.zstack.header.vm
 import org.zstack.header.vm.APIGetCandidateIsoForAttachingVmReply
 
 doc {
-	title "获取云主机可加载ISO列表(GetCandidateIsoForAttachingVm)"
+	title "获取虚拟机可加载ISO列表(GetCandidateIsoForAttachingVm)"
 
 	category "vmInstance"
 
-	desc """获取一个云主机以加载的ISO列表"""
+	desc """获取一个虚拟机以加载的ISO列表"""
 
 	rest {
 		request {
@@ -24,7 +24,7 @@ doc {
 				column {
 					name "vmInstanceUuid"
 					enclosedIn ""
-					desc "云主机UUID"
+					desc "虚拟机UUID"
 					location "url"
 					type "String"
 					optional false

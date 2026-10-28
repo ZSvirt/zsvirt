@@ -7,7 +7,7 @@ doc {
 
 	category "vmInstance"
 
-	desc """获取云主机usb重定向开关状态"""
+	desc """获取虚拟机usb重定向开关状态"""
 
 	rest {
 		request {

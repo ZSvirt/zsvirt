@@ -4,7 +4,7 @@ import org.zstack.header.errorcode.ErrorCode
 
 doc {
 
-	title "云主机hostname"
+	title "虚拟机hostname"
 
 	ref {
 		name "error"
@@ -22,7 +22,7 @@ doc {
 	}
 	field {
 		name "hostname"
-		desc "云主机hostname"
+		desc "虚拟机hostname"
 		type "String"
 		since "zsv_0.6"
 	}

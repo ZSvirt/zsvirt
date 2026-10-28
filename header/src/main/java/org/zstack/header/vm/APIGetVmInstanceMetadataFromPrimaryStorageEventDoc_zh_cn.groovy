@@ -4,11 +4,11 @@ import org.zstack.header.errorcode.ErrorCode
 
 doc {
 
-	title "获取云主机元数据返回"
+	title "获取虚拟机元数据返回"
 
 	field {
 		name "metadata"
-		desc "云主机元数据内容"
+		desc "虚拟机元数据内容"
 		type "String"
 		since "zsv_5.0.0"
 	}

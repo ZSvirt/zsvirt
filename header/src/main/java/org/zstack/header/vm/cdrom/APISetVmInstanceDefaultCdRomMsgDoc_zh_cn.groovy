@@ -7,7 +7,7 @@ doc {
 
 	category "vmInstance"
 
-	desc """设置云主机默认CDROM"""
+	desc """设置虚拟机默认CDROM"""
 
 	rest {
 		request {
@@ -33,7 +33,7 @@ doc {
 				column {
 					name "vmInstanceUuid"
 					enclosedIn "setVmInstanceDefaultCdRom"
-					desc "云主机UUID"
+					desc "虚拟机UUID"
 					location "url"
 					type "String"
 					optional false

@@ -3,11 +3,11 @@ package org.zstack.ha
 import org.zstack.ha.APISetVmInstanceHaLevelEvent
 
 doc {
-	title "设置云主机高可用(SetVmInstanceHaLevel)"
+	title "设置虚拟机高可用(SetVmInstanceHaLevel)"
 
 	category "ha"
 
-	desc """设置云主机高可用级别"""
+	desc """设置虚拟机高可用级别"""
 
 	rest {
 		request {
@@ -24,7 +24,7 @@ doc {
 				column {
 					name "uuid"
 					enclosedIn "params"
-					desc "云主机的资源Uuid"
+					desc "虚拟机的资源Uuid"
 					location "url"
 					type "String"
 					optional false
@@ -33,7 +33,7 @@ doc {
 				column {
 					name "level"
 					enclosedIn "params"
-					desc "云主机高可用级别，这里为NeverStop或OnHostFailure"
+					desc "虚拟机高可用级别，这里为NeverStop或OnHostFailure"
 					location "body"
 					type "String"
 					optional false

@@ -7,7 +7,7 @@ doc {
 
 	category "vmInstance"
 
-	desc """获取云主机内部与云平台资源对应的设备地址"""
+	desc """获取虚拟机内部与云平台资源对应的设备地址"""
 
 	rest {
 		request {
@@ -24,7 +24,7 @@ doc {
 				column {
 					name "uuid"
 					enclosedIn ""
-					desc "云主机UUID"
+					desc "虚拟机UUID"
 					location "query"
 					type "String"
 					optional false

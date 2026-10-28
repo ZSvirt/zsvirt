@@ -7,7 +7,7 @@ doc {
 
 	category "vmInstance"
 
-	desc """创建云主机网卡"""
+	desc """创建虚拟机网卡"""
 
 	rest {
 		request {

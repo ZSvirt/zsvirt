@@ -7,7 +7,7 @@ doc {
 
 	category "vmInstance"
 
-	desc """设置云主机DNS"""
+	desc """设置虚拟机DNS"""
 
 	rest {
 		request {
@@ -24,7 +24,7 @@ doc {
 				column {
 					name "vmInstanceUuid"
 					enclosedIn "setVmDns"
-					desc "云主机UUID"
+					desc "虚拟机UUID"
 					location "url"
 					type "String"
 					optional false
@@ -33,7 +33,7 @@ doc {
 				column {
 					name "vmNicUuid"
 					enclosedIn "setVmDns"
-					desc "云主机网卡UUID"
+					desc "虚拟机网卡UUID"
 					location "body"
 					type "String"
 					optional true

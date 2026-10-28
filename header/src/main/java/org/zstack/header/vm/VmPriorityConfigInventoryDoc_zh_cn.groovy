@@ -6,7 +6,7 @@ import java.sql.Timestamp
 
 doc {
 
-	title "云主机优先级配置"
+	title "虚拟机优先级配置"
 
 	field {
 		name "uuid"

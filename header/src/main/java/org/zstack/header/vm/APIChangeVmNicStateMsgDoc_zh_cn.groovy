@@ -7,7 +7,7 @@ doc {
 
 	category "vmInstance"
 
-	desc """修改云主机网卡状态"""
+	desc """修改虚拟机网卡状态"""
 
 	rest {
 		request {
@@ -24,7 +24,7 @@ doc {
 				column {
 					name "vmNicUuid"
 					enclosedIn "changeVmNicState"
-					desc "云主机网卡UUID"
+					desc "虚拟机网卡UUID"
 					location "url"
 					type "String"
 					optional false
@@ -33,7 +33,7 @@ doc {
 				column {
 					name "state"
 					enclosedIn "changeVmNicState"
-					desc "云主机网卡状态"
+					desc "虚拟机网卡状态"
 					location "body"
 					type "String"
 					optional false

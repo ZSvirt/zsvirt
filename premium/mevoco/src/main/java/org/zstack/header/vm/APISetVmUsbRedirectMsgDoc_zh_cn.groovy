@@ -7,7 +7,7 @@ doc {
 
 	category "vmInstance"
 
-	desc """设置云主机usb重定向开关"""
+	desc """设置虚拟机usb重定向开关"""
 
 	rest {
 		request {

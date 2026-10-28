@@ -7,7 +7,7 @@ doc {
 
 	category "configuration"
 
-	desc """删除云主机规格"""
+	desc """删除虚拟机规格"""
 
 	rest {
 		request {
@@ -17,7 +17,7 @@ doc {
 
 			clz APIDeleteInstanceOfferingMsg.class
 
-			desc """删除云主机规格"""
+			desc """删除虚拟机规格"""
 
 			params {
 

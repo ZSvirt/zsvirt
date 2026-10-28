@@ -22,7 +22,7 @@ doc {
 	}
 	field {
 		name "spiceTlsPort"
-		desc "spice开启Tls加密，会存在spiceTlsPort和spicePort两个端口号，通过spice客户端连接云主机需要使用spiceTlsPort端口号"
+		desc "spice开启Tls加密，会存在spiceTlsPort和spicePort两个端口号，通过spice客户端连接虚拟机需要使用spiceTlsPort端口号"
 		type "Integer"
 		since "zsv_3.7"
 	}

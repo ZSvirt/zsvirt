@@ -2,11 +2,11 @@ package org.zstack.pciDevice.entity.specification.pci
 
 doc {
 
-	title "云主机与PCI规格及设备的关联关系"
+	title "虚拟机与PCI规格及设备的关联关系"
 
 	field {
 		name "vmInstanceUuid"
-		desc "云主机UUID"
+		desc "虚拟机UUID"
 		type "String"
 		since "zsv_3.5.0"
 	}

@@ -4,7 +4,7 @@ import org.zstack.header.errorcode.ErrorCode
 
 doc {
 
-	title "云主机控制台地址"
+	title "虚拟机控制台地址"
 
 	ref {
 		name "error"
@@ -16,19 +16,19 @@ doc {
 	}
 	field {
 		name "hostIp"
-		desc "云主机运行物理机IP"
+		desc "虚拟机运行物理机IP"
 		type "String"
 		since "zsv_0.6"
 	}
 	field {
 		name "port"
-		desc "云主机控制台端口"
+		desc "虚拟机控制台端口"
 		type "int"
 		since "zsv_0.6"
 	}
 	field {
 		name "protocol"
-		desc "云主机控制台协议，vnc或spice或vncAndSpice"
+		desc "虚拟机控制台协议，vnc或spice或vncAndSpice"
 		type "String"
 		since "zsv_0.6"
 	}

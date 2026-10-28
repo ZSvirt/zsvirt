@@ -3,11 +3,11 @@ package org.zstack.header.vm
 import org.zstack.header.vm.APIDestroyVmInstanceEvent
 
 doc {
-	title "删除云主机(DestroyVmInstance)"
+	title "删除虚拟机(DestroyVmInstance)"
 
 	category "vmInstance"
 
-	desc """删除一个云主机"""
+	desc """删除一个虚拟机"""
 
 	rest {
 		request {
@@ -24,7 +24,7 @@ doc {
 				column {
 					name "uuid"
 					enclosedIn ""
-					desc "云主机UUID"
+					desc "虚拟机UUID"
 					location "url"
 					type "String"
 					optional false

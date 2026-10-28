@@ -70,7 +70,7 @@ doc {
 				column {
 					name "system"
 					enclosedIn "params"
-					desc "是否用于系统云主机"
+					desc "是否用于系统虚拟机"
 					location "body"
 					type "boolean"
 					optional true

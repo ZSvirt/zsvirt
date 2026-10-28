@@ -8,7 +8,7 @@ doc {
 
 	category "pciDevice"
 
-	desc """查询云主机与MDEV设备规格的关联关系"""
+	desc """查询虚拟机与MDEV设备规格的关联关系"""
 
 	rest {
 		request {
@@ -19,7 +19,7 @@ doc {
 
 			clz APIQueryVmInstanceMdevDeviceSpecRefMsg.class
 
-			desc """查询云主机与MDEV设备规格的关联关系"""
+			desc """查询虚拟机与MDEV设备规格的关联关系"""
 
 			params APIQueryMessage.class
 		}

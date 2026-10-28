@@ -6,7 +6,7 @@ import java.sql.Timestamp
 
 doc {
 
-	title "云主机VF网卡资源清单"
+	title "虚拟机VF网卡资源清单"
 
 	field {
 		name "pciDeviceUuid"
@@ -28,7 +28,7 @@ doc {
 	}
 	field {
 		name "vmInstanceUuid"
-		desc "云主机UUID"
+		desc "虚拟机UUID"
 		type "String"
 		since "zsv_4.10.0"
 	}

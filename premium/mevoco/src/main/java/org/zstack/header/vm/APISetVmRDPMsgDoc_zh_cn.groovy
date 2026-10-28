@@ -7,7 +7,7 @@ doc {
 
 	category "mevoco"
 
-	desc """设置云主机是否开启了RDP功能,如果开启，桌面云会使用RDP连接该云主机"""
+	desc """设置虚拟机是否开启了RDP功能,如果开启，桌面云会使用RDP连接该虚拟机"""
 
 	rest {
 		request {
@@ -33,7 +33,7 @@ doc {
 				column {
 					name "enable"
 					enclosedIn "setVmRDP"
-					desc "云主机是否被标识为RDP可访问"
+					desc "虚拟机是否被标识为RDP可访问"
 					location "body"
 					type "boolean"
 					optional false

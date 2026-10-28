@@ -7,7 +7,7 @@ doc {
 
 	category "cloudformation"
 
-	desc """添加资源栈中云主机的端口监控"""
+	desc """添加资源栈中虚拟机的端口监控"""
 
 	rest {
 		request {
@@ -33,7 +33,7 @@ doc {
 				column {
 					name "vmInstanceUuid"
 					enclosedIn "params"
-					desc "云主机UUID"
+					desc "虚拟机UUID"
 					location "body"
 					type "String"
 					optional false

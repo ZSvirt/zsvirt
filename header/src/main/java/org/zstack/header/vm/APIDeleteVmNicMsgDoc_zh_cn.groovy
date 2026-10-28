@@ -7,7 +7,7 @@ doc {
 
 	category "vmInstance"
 
-	desc """删除云主机网卡"""
+	desc """删除虚拟机网卡"""
 
 	rest {
 		request {

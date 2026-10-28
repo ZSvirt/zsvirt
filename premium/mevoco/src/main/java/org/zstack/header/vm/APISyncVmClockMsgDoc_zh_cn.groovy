@@ -7,7 +7,7 @@ doc {
 
 	category "mevoco"
 
-	desc """立即同步云主机时钟"""
+	desc """立即同步虚拟机时钟"""
 
 	rest {
 		request {
@@ -17,7 +17,7 @@ doc {
 
 			clz APISyncVmClockMsg.class
 
-			desc """立即将指定云主机和所在物理机的时钟进行同步，仅对已经安装了 QEMU Guest Agent 的云主机有效"""
+			desc """立即将指定虚拟机和所在物理机的时钟进行同步，仅对已经安装了 QEMU Guest Agent 的虚拟机有效"""
 
 			params {
 

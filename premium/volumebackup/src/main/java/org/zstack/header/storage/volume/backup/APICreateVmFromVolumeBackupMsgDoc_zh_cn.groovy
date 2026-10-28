@@ -7,7 +7,7 @@ doc {
 
 	category "backup.volume"
 
-	desc """从备份创建云主机"""
+	desc """从备份创建虚拟机"""
 
 	rest {
 		request {
@@ -24,7 +24,7 @@ doc {
 				column {
 					name "name"
 					enclosedIn "params"
-					desc "云主机名字"
+					desc "虚拟机名字"
 					location "body"
 					type "String"
 					optional false
@@ -96,7 +96,7 @@ doc {
 				column {
 					name "type"
 					enclosedIn "params"
-					desc "云主机类型"
+					desc "虚拟机类型"
 					location "body"
 					type "String"
 					optional true
@@ -196,7 +196,7 @@ doc {
 				column {
 					name "strategy"
 					enclosedIn "params"
-					desc "云主机创建策略"
+					desc "虚拟机创建策略"
 					location "body"
 					type "String"
 					optional true

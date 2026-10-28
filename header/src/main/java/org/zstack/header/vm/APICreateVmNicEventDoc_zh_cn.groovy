@@ -5,7 +5,7 @@ import org.zstack.header.vm.VmNicInventory
 
 doc {
 
-	title "云主机网卡清单"
+	title "虚拟机网卡清单"
 
 	field {
 		name "success"

@@ -4,7 +4,7 @@ import org.zstack.header.errorcode.ErrorCode
 
 doc {
 
-  title """从云主机卸载PCI设备切分后产生的MDEV设备的结果"""
+  title """从虚拟机卸载PCI设备切分后产生的MDEV设备的结果"""
 
 	field {
 		name "success"

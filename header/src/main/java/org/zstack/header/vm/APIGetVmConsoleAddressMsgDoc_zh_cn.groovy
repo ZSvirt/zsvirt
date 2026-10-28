@@ -3,11 +3,11 @@ package org.zstack.header.vm
 import org.zstack.header.vm.APIGetVmConsoleAddressReply
 
 doc {
-	title "获取云主机控制台地址(GetVmConsoleAddress)"
+	title "获取虚拟机控制台地址(GetVmConsoleAddress)"
 
 	category "vmInstance"
 
-	desc """获取云主机控制台地址和访问协议
+	desc """获取虚拟机控制台地址和访问协议
 
 >该API应该仅仅用于调试目的
 """
@@ -27,7 +27,7 @@ doc {
 				column {
 					name "uuid"
 					enclosedIn ""
-					desc "云主机UUID"
+					desc "虚拟机UUID"
 					location "url"
 					type "String"
 					optional false

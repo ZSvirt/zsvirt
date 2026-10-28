@@ -5,7 +5,7 @@ import org.zstack.header.errorcode.ErrorCode
 
 doc {
 
-	title "修改云主机VF网卡高可用状态返回结果"
+	title "修改虚拟机VF网卡高可用状态返回结果"
 
 	ref {
 		name "inventory"

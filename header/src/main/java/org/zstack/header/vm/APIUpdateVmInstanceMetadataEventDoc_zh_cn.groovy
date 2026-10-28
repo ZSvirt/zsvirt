@@ -4,7 +4,7 @@ import org.zstack.header.errorcode.ErrorCode
 
 doc {
 
-	title "更新云主机元数据返回"
+	title "更新虚拟机元数据返回"
 
 	field {
 		name "success"

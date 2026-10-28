@@ -7,7 +7,7 @@ doc {
 
 	category "guest.tools"
 
-	desc """同步云主机网络配置应答"""
+	desc """同步虚拟机网络配置应答"""
 
 	rest {
 		request {
@@ -24,7 +24,7 @@ doc {
 				column {
 					name "vmInstanceUuid"
 					enclosedIn "updateVmNetworkConfig"
-					desc "云主机UUID"
+					desc "虚拟机UUID"
 					location "url"
 					type "String"
 					optional false

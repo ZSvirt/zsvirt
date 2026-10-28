@@ -7,7 +7,7 @@ doc {
 
 	category "affinityGroup"
 
-	desc """获取可绑定亲和组的云主机"""
+	desc """获取可绑定亲和组的虚拟机"""
 
 	rest {
 		request {

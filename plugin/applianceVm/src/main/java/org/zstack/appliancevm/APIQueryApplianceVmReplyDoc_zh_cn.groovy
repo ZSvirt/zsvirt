@@ -5,7 +5,7 @@ import org.zstack.appliancevm.ApplianceVmInventory
 
 doc {
 
-	title "系统云主机清单"
+	title "系统虚拟机清单"
 
 	field {
 		name "success"

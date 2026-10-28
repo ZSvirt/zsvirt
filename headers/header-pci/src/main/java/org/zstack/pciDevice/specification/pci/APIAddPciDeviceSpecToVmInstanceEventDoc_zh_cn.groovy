@@ -4,7 +4,7 @@ import org.zstack.header.errorcode.ErrorCode
 
 doc {
 
-	title "为云主机添加PCI设备规格的返回结果"
+	title "为虚拟机添加PCI设备规格的返回结果"
 
 	field {
 		name "success"
@@ -23,7 +23,7 @@ doc {
 	ref {
 		name "inventory"
 		path "org.zstack.pciDevice.specification.pci.APIAddPciDeviceSpecToVmInstanceEvent.inventory"
-		desc "新添加的云主机与PCI设备规格的关联关系"
+		desc "新添加的虚拟机与PCI设备规格的关联关系"
 		type "VmInstancePciDeviceSpecRefInventory"
 		since "zsv_3.5.0"
 		clz VmInstancePciDeviceSpecRefInventory.class

@@ -4,7 +4,7 @@ import org.zstack.header.errorcode.ErrorCode
 
 doc {
 
-  title"""绑定PCI设备切分出的MDEV设备到云主机的结果"""
+  title"""绑定PCI设备切分出的MDEV设备到虚拟机的结果"""
 
 	field {
 		name "success"

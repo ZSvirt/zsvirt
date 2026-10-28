@@ -4,7 +4,7 @@ package org.zstack.guesttools
 
 doc {
 
-	title "云主机GuestTools zwatch状态"
+	title "虚拟机GuestTools zwatch状态"
 
 	field {
 		name "NotInstalled"

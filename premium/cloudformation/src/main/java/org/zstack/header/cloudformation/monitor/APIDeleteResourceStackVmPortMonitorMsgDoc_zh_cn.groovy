@@ -7,7 +7,7 @@ doc {
 
 	category "cloudformation"
 
-	desc """删除资源栈中云主机端口监控"""
+	desc """删除资源栈中虚拟机端口监控"""
 
 	rest {
 		request {
@@ -33,7 +33,7 @@ doc {
 				column {
 					name "vmInstanceUuid"
 					enclosedIn ""
-					desc "云主机UUID"
+					desc "虚拟机UUID"
 					location "query"
 					type "String"
 					optional false

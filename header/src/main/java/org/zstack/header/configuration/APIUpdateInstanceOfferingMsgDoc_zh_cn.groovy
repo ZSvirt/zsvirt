@@ -7,7 +7,7 @@ doc {
 
 	category "configuration"
 
-	desc """更新云主机规格"""
+	desc """更新虚拟机规格"""
 
 	rest {
 		request {
@@ -17,7 +17,7 @@ doc {
 
 			clz APIUpdateInstanceOfferingMsg.class
 
-			desc """更新云主机规格"""
+			desc """更新虚拟机规格"""
 
 			params {
 

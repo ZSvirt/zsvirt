@@ -5,7 +5,7 @@ import org.zstack.autoscaling.group.AutoScalingGroupInventory
 
 doc {
 
-	title "挂载伸缩组云主机模板返回值"
+	title "挂载伸缩组虚拟机模板返回值"
 
 	field {
 		name "success"

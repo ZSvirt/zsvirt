@@ -5,7 +5,7 @@ import org.zstack.header.vm.VmInstanceInventory
 
 doc {
 
-	title "云主机清单"
+	title "虚拟机清单"
 
 	field {
 		name "success"
@@ -24,7 +24,7 @@ doc {
 	ref {
 		name "inventory"
 		path "org.zstack.header.vm.APIReimageVmInstanceEvent.inventory"
-		desc "云主机清单"
+		desc "虚拟机清单"
 		type "VmInstanceInventory"
 		since "zsv_0.6"
 		clz VmInstanceInventory.class

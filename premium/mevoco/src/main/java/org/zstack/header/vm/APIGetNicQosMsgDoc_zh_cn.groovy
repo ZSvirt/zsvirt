@@ -7,7 +7,7 @@ doc {
 
 	category "mevoco"
 
-	desc """获取云主机网卡限速"""
+	desc """获取虚拟机网卡限速"""
 
 	rest {
 		request {
@@ -17,14 +17,14 @@ doc {
 
 			clz APIGetNicQosMsg.class
 
-			desc """获取云主机网卡限速"""
+			desc """获取虚拟机网卡限速"""
 
 			params {
 
 				column {
 					name "uuid"
 					enclosedIn ""
-					desc "云主机网卡的UUID"
+					desc "虚拟机网卡的UUID"
 					location "url"
 					type "String"
 					optional false

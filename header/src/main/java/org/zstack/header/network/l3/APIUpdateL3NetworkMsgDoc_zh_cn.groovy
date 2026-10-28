@@ -51,7 +51,7 @@ doc {
 				column {
 					name "system"
 					enclosedIn "updateL3Network"
-					desc "是否用于系统云主机"
+					desc "是否用于系统虚拟机"
 					location "body"
 					type "Boolean"
 					optional true

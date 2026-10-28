@@ -7,7 +7,7 @@ doc {
 
 	category "pciDevice"
 
-	desc """从云主机卸载PCI设备切分后产生的MDEV设备"""
+	desc """从虚拟机卸载PCI设备切分后产生的MDEV设备"""
 
 	rest {
 		request {
@@ -17,7 +17,7 @@ doc {
 
 			clz APIDetachMdevDeviceFromVmMsg.class
 
-			desc """从云主机卸载PCI设备切分后产生的MDEV设备"""
+			desc """从虚拟机卸载PCI设备切分后产生的MDEV设备"""
 
 			params {
 
@@ -33,7 +33,7 @@ doc {
 				column {
 					name "vmInstanceUuid"
 					enclosedIn ""
-					desc "云主机UUID"
+					desc "虚拟机UUID"
 					location "url"
 					type "String"
 					optional false

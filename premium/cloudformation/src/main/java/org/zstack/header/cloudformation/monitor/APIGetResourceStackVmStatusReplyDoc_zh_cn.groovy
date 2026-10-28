@@ -4,7 +4,7 @@ import org.zstack.header.errorcode.ErrorCode
 
 doc {
 
-	title "获取资源栈内云主机的监控状态结果"
+	title "获取资源栈内虚拟机的监控状态结果"
 
 	ref {
 		name "error"

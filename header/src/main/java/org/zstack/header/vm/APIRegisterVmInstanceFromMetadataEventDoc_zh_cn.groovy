@@ -5,12 +5,12 @@ import org.zstack.header.errorcode.ErrorCode
 
 doc {
 
-	title "从元数据注册云主机返回"
+	title "从元数据注册虚拟机返回"
 
 	ref {
 		name "inventory"
 		path "org.zstack.header.vm.APIRegisterVmInstanceFromMetadataEvent.inventory"
-		desc "云主机详情"
+		desc "虚拟机详情"
 		type "VmInstanceInventory"
 		since "zsv_5.0.0"
 		clz VmInstanceInventory.class

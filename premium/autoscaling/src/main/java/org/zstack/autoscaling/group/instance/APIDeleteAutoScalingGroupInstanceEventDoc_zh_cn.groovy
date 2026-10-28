@@ -4,7 +4,7 @@ import org.zstack.header.errorcode.ErrorCode
 
 doc {
 
-	title "手动删除伸缩组内云主机返回值"
+	title "手动删除伸缩组内虚拟机返回值"
 
 	field {
 		name "success"

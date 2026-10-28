@@ -7,7 +7,7 @@ doc {
 
 	category "mevoco"
 
-	desc """更新云主机mac地址"""
+	desc """更新虚拟机mac地址"""
 
 	rest {
 		request {
@@ -17,14 +17,14 @@ doc {
 
 			clz APIUpdateVmNicMacMsg.class
 
-			desc """更新云主机mac地址"""
+			desc """更新虚拟机mac地址"""
 
 			params {
 
 				column {
 					name "vmNicUuid"
 					enclosedIn "updateVmNicMac"
-					desc "云主机网卡UUID"
+					desc "虚拟机网卡UUID"
 					location "url"
 					type "String"
 					optional false

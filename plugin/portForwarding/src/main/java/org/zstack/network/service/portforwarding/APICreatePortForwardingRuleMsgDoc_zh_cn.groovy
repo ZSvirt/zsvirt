@@ -79,7 +79,7 @@ doc {
 				column {
 					name "vmNicUuid"
 					enclosedIn "params"
-					desc "云主机网卡UUID"
+					desc "虚拟机网卡UUID"
 					location "body"
 					type "String"
 					optional true

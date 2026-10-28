@@ -7,7 +7,7 @@ doc {
 
 	category "volume"
 
-	desc """从云主机上卸载云盘"""
+	desc """从虚拟机上卸载云盘"""
 
 	rest {
 		request {
@@ -33,7 +33,7 @@ doc {
 				column {
 					name "vmUuid"
 					enclosedIn ""
-					desc "云主机的UUID"
+					desc "虚拟机的UUID"
 					location "query"
 					type "String"
 					optional true

@@ -5,7 +5,7 @@ import org.zstack.header.vm.VmNicInventory
 
 doc {
 
-	title "更新云主机mac地址结果返回"
+	title "更新虚拟机mac地址结果返回"
 
 	field {
 		name "success"

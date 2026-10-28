@@ -3,7 +3,7 @@ package org.zstack.header.vm
 import org.zstack.header.vm.APIGetVmvNUMATopologyReply
 
 doc {
-	title "获取云主机的vNUMA拓扑"
+	title "获取虚拟机的vNUMA拓扑"
 
 	category "vm"
 
@@ -24,7 +24,7 @@ doc {
 				column {
 					name "uuid"
 					enclosedIn ""
-					desc "云主机UUID"
+					desc "虚拟机UUID"
 					location "url"
 					type "String"
 					optional false

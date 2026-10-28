@@ -7,7 +7,7 @@ doc {
 
 	category "pciDevice"
 
-	desc """为云主机添加PCI设备规格"""
+	desc """为虚拟机添加PCI设备规格"""
 
 	rest {
 		request {
@@ -17,7 +17,7 @@ doc {
 
 			clz APIAddPciDeviceSpecToVmInstanceMsg.class
 
-			desc """为云主机添加PCI设备规格"""
+			desc """为虚拟机添加PCI设备规格"""
 
 			params {
 
@@ -33,7 +33,7 @@ doc {
 				column {
 					name "vmInstanceUuid"
 					enclosedIn "params"
-					desc "云主机UUID"
+					desc "虚拟机UUID"
 					location "url"
 					type "String"
 					optional false

@@ -6,7 +6,7 @@ import org.zstack.header.errorcode.ErrorCode
 
 doc {
 
-	title "克隆云主机到指定物理机的回复"
+	title "克隆虚拟机到指定物理机的回复"
 
 	ref {
 		name "error"

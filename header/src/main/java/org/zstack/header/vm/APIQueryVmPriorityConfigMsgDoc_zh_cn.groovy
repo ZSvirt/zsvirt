@@ -8,7 +8,7 @@ doc {
 
 	category "vmInstance"
 
-	desc """查询云主机优先级配置"""
+	desc """查询虚拟机优先级配置"""
 
 	rest {
 		request {

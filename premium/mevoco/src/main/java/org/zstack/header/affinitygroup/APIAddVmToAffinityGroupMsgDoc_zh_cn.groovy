@@ -7,7 +7,7 @@ doc {
 
 	category "affinityGroup"
 
-	desc """添加云主机到亲和组"""
+	desc """添加虚拟机到亲和组"""
 
 	rest {
 		request {

@@ -3,11 +3,11 @@ package org.zstack.header.storage.primary
 import org.zstack.header.storage.primary.APIScanVmInstanceMetadataFromPrimaryStorageReply
 
 doc {
-	title "扫描主存储上的云主机元数据"
+	title "扫描主存储上的虚拟机元数据"
 
 	category "主存储"
 
-	desc """扫描指定主存储上所有云主机元数据文件，返回元数据摘要列表"""
+	desc """扫描指定主存储上所有虚拟机元数据文件，返回元数据摘要列表"""
 
 	rest {
 		request {

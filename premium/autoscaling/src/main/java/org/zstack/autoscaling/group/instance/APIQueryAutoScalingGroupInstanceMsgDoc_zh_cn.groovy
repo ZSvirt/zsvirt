@@ -8,7 +8,7 @@ doc {
 
 	category "autoscaling"
 
-	desc """查询伸缩组组内云主机列表"""
+	desc """查询伸缩组组内虚拟机列表"""
 
 	rest {
 		request {

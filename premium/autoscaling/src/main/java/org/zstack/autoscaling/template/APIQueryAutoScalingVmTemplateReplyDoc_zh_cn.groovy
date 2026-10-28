@@ -5,7 +5,7 @@ import org.zstack.autoscaling.template.AutoScalingVmTemplateInventory
 
 doc {
 
-	title "查询伸缩组云主机模板返回值"
+	title "查询伸缩组虚拟机模板返回值"
 
 	field {
 		name "success"

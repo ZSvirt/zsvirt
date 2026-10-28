@@ -4,7 +4,7 @@ import org.zstack.header.errorcode.ErrorCode
 
 doc {
 
-	title "云主机网卡清单"
+	title "虚拟机网卡清单"
 
 	field {
 		name "success"

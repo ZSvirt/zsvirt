@@ -3,11 +3,11 @@ package org.zstack.header.vm
 import org.zstack.header.vm.APIGetVmCapabilitiesReply
 
 doc {
-	title "获取云主机能力(GetVmCapabilities)"
+	title "获取虚拟机能力(GetVmCapabilities)"
 
 	category "vmInstance"
 
-	desc """获取一个云主机的能力，用于判断云主机是否能做某些特定操作。目前已定义能力包括:
+	desc """获取一个虚拟机的能力，用于判断虚拟机是否能做某些特定操作。目前已定义能力包括:
 	
 |名称|描述|类型|
 |---|---|---|
@@ -30,7 +30,7 @@ doc {
 				column {
 					name "uuid"
 					enclosedIn ""
-					desc "云主机UUID"
+					desc "虚拟机UUID"
 					location "url"
 					type "String"
 					optional false

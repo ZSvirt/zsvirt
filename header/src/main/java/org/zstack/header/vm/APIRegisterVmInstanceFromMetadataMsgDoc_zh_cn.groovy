@@ -3,12 +3,12 @@ package org.zstack.header.vm
 import org.zstack.header.vm.APIRegisterVmInstanceFromMetadataEvent
 
 doc {
-	title "从元数据注册云主机(RegisterVmInstanceFromMetadata)"
+	title "从元数据注册虚拟机(RegisterVmInstanceFromMetadata)"
 
-	category "云主机"
+	category "虚拟机"
 
-	desc """根据主存储上的元数据文件或传入的元数据字符串注册（恢复）一台云主机。
-metadata 与 metadataPath 必须二选一。metadata 仅登记云主机和已有卷的控制面记录，
+	desc """根据主存储上的元数据文件或传入的元数据字符串注册（恢复）一台虚拟机。
+metadata 与 metadataPath 必须二选一。metadata 仅登记虚拟机和已有卷的控制面记录，
 适用于不支持元数据文件的存储；不创建、转换或检查物理卷，也不读写存储元数据文件。
 调用者须确保元数据中的卷已存在且路径正确。"""
 
@@ -81,7 +81,7 @@ metadata 与 metadataPath 必须二选一。metadata 仅登记云主机和已有
 				column {
 					name "name"
 					enclosedIn "params"
-					desc "云主机名称"
+					desc "虚拟机名称"
 					location "body"
 					type "String"
 					optional true

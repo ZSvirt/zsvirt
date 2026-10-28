@@ -3,11 +3,11 @@ package org.zstack.header.vm
 import org.zstack.header.vm.APISetVmHostnameEvent
 
 doc {
-	title "设置云主机Hostname(SetVmHostname)"
+	title "设置虚拟机Hostname(SetVmHostname)"
 
 	category "vmInstance"
 
-	desc """设置云主机Hostname。注意，ZStack通过DHCP服务器配置云主机hostname，如果云主机本身采用静态hostname方式，该API配置的hostname不生效。"""
+	desc """设置虚拟机Hostname。注意，ZStack通过DHCP服务器配置虚拟机hostname，如果虚拟机本身采用静态hostname方式，该API配置的hostname不生效。"""
 
 	rest {
 		request {
@@ -24,7 +24,7 @@ doc {
 				column {
 					name "uuid"
 					enclosedIn "setVmHostname"
-					desc "云主机UUID"
+					desc "虚拟机UUID"
 					location "url"
 					type "String"
 					optional false

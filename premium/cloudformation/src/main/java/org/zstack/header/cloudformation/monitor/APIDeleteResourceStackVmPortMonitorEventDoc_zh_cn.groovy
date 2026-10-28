@@ -4,7 +4,7 @@ import org.zstack.header.errorcode.ErrorCode
 
 doc {
 
-	title "删除资源栈内云主机端口监控结果"
+	title "删除资源栈内虚拟机端口监控结果"
 
 	field {
 		name "success"

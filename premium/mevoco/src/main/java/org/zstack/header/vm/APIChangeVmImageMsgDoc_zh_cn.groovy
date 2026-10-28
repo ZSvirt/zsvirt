@@ -7,7 +7,7 @@ doc {
 
 	category "mevoco"
 
-	desc """修改云主机根云盘"""
+	desc """修改虚拟机根云盘"""
 
 	rest {
 		request {
@@ -17,14 +17,14 @@ doc {
 
 			clz APIChangeVmImageMsg.class
 
-			desc """修改云主机根云盘"""
+			desc """修改虚拟机根云盘"""
 
 			params {
 
 				column {
 					name "vmInstanceUuid"
 					enclosedIn "changeVmImage"
-					desc "云主机UUID"
+					desc "虚拟机UUID"
 					location "url"
 					type "String"
 					optional false

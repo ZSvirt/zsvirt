@@ -4,7 +4,7 @@ import org.zstack.header.errorcode.ErrorCode
 
 doc {
 
-	title "获取云主机内部增强工具信息的结果"
+	title "获取虚拟机内部增强工具信息的结果"
 
 	ref {
 		name "error"

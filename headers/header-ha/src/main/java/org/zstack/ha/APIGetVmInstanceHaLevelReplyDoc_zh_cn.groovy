@@ -4,7 +4,7 @@ import org.zstack.header.errorcode.ErrorCode
 
 doc {
 
-	title "云主机高可用级别"
+	title "虚拟机高可用级别"
 
 	ref {
 		name "error"
@@ -16,7 +16,7 @@ doc {
 	}
 	field {
 		name "level"
-		desc "云主机高可用级别，NeverStop或OnHostFailure"
+		desc "虚拟机高可用级别，NeverStop或OnHostFailure"
 		type "String"
 		since "zsv_0.6"
 	}

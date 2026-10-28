@@ -5,7 +5,7 @@ import org.zstack.header.vm.VmPriorityConfigInventory
 
 doc {
 
-	title "查询云主机优先级配置返回"
+	title "查询虚拟机优先级配置返回"
 
 	field {
 		name "success"

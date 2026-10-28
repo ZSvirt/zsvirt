@@ -5,7 +5,7 @@ import org.zstack.header.vm.VmInstanceInventory
 
 doc {
 
-	title "设置云主机控制台模式的结果"
+	title "设置虚拟机控制台模式的结果"
 
 	field {
 		name "success"

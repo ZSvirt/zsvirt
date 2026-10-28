@@ -5,7 +5,7 @@ import org.zstack.header.errorcode.ErrorCode
 
 doc {
 
-	title "清理云主机元数据返回"
+	title "清理虚拟机元数据返回"
 
 	field {
 		name "totalCleaned"
@@ -21,7 +21,7 @@ doc {
 	}
 	field {
 		name "failedVmUuids"
-		desc "清理失败的云主机UUID列表"
+		desc "清理失败的虚拟机UUID列表"
 		type "List"
 		since "zsv_5.0.0"
 	}

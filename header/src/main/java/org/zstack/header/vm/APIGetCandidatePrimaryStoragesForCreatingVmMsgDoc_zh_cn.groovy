@@ -3,11 +3,11 @@ package org.zstack.header.vm
 import org.zstack.header.vm.APIGetCandidatePrimaryStoragesForCreatingVmReply
 
 doc {
-	title "获取创建云主机时可选择的主存储(GetCandidatePrimaryStoragesForCreatingVm)"
+	title "获取创建虚拟机时可选择的主存储(GetCandidatePrimaryStoragesForCreatingVm)"
 
 	category "vmInstance"
 
-	desc """用户可通过指定云主机参数，来获取当前参数下可选择的主存储"""
+	desc """用户可通过指定虚拟机参数，来获取当前参数下可选择的主存储"""
 
 	rest {
 		request {

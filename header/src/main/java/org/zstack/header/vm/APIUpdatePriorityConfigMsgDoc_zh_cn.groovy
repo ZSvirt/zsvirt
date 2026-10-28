@@ -7,7 +7,7 @@ doc {
 
 	category "vmInstance"
 
-	desc """更改云主机优先级配置"""
+	desc """更改虚拟机优先级配置"""
 
 	rest {
 		request {

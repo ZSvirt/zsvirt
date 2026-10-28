@@ -7,7 +7,7 @@ doc {
 
 	category "host.allocator"
 
-	desc """获取用于创建云主机的候选镜像"""
+	desc """获取用于创建虚拟机的候选镜像"""
 
 	rest {
 		request {

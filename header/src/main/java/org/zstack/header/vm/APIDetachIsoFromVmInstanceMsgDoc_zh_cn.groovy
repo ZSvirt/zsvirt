@@ -3,11 +3,11 @@ package org.zstack.header.vm
 import org.zstack.header.vm.APIDetachIsoFromVmInstanceEvent
 
 doc {
-	title "卸载云主机上的ISO(DetachIsoFromVmInstance)"
+	title "卸载虚拟机上的ISO(DetachIsoFromVmInstance)"
 
 	category "vmInstance"
 
-	desc """如果云主机上挂载有ISO，卸载它"""
+	desc """如果虚拟机上挂载有ISO，卸载它"""
 
 	rest {
 		request {
@@ -24,7 +24,7 @@ doc {
 				column {
 					name "vmInstanceUuid"
 					enclosedIn ""
-					desc "云主机UUID"
+					desc "虚拟机UUID"
 					location "url"
 					type "String"
 					optional false

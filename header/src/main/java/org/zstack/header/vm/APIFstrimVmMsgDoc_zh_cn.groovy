@@ -7,7 +7,7 @@ doc {
 
 	category "vmInstance"
 
-	desc """回收云主机磁盘空间"""
+	desc """回收虚拟机磁盘空间"""
 
 	rest {
 		request {
@@ -17,14 +17,14 @@ doc {
 
 			clz APIFstrimVmMsg.class
 
-			desc """回收云主机磁盘空间"""
+			desc """回收虚拟机磁盘空间"""
 
 			params {
 
 				column {
 					name "uuid"
 					enclosedIn "params"
-					desc "云主机UUID"
+					desc "虚拟机UUID"
 					location "url"
 					type "String"
 					optional false

@@ -5,7 +5,7 @@ import java.sql.Timestamp
 
 doc {
 
-	title "伸缩组云主机详细信息"
+	title "伸缩组虚拟机详细信息"
 
 	field {
 		name "uuid"
@@ -15,7 +15,7 @@ doc {
 	}
 	field {
 		name "instanceUuid"
-		desc "云主机UUID"
+		desc "虚拟机UUID"
 		type "String"
 		since "zsv_3.1.0"
 	}
@@ -27,7 +27,7 @@ doc {
 	}
 	field {
 		name "templateUuid"
-		desc "伸缩组云主机模块UUID"
+		desc "伸缩组虚拟机模块UUID"
 		type "String"
 		since "zsv_3.1.0"
 	}
@@ -39,13 +39,13 @@ doc {
 	}
 	field {
 		name "status"
-		desc "云主机在伸缩组里的状态"
+		desc "虚拟机在伸缩组里的状态"
 		type "String"
 		since "zsv_3.1.0"
 	}
 	field {
 		name "healthStatus"
-		desc "云主机在伸缩组里的健康状态"
+		desc "虚拟机在伸缩组里的健康状态"
 		type "String"
 		since "zsv_3.1.0"
 	}

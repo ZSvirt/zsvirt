@@ -5,7 +5,7 @@ import org.zstack.header.errorcode.ErrorCode
 
 doc {
 
-	title "云主机DNS清单列表"
+	title "虚拟机DNS清单列表"
 
 	ref {
 		name "inventories"

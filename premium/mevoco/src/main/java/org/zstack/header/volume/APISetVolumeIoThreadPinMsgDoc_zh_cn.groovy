@@ -33,7 +33,7 @@ doc {
 				column {
 					name "vmUuid"
 					enclosedIn "setVolumeIoThreadPin"
-					desc "云盘加载目标云主机的UUID"
+					desc "云盘加载目标虚拟机的UUID"
 					location "body"
 					type "String"
 					optional false

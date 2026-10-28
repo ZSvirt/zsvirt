@@ -5,7 +5,7 @@ import org.zstack.header.vm.cdrom.VmCdRomInventory
 
 doc {
 
-	title "设置云主机默认CDROM返回"
+	title "设置虚拟机默认CDROM返回"
 
 	field {
 		name "success"

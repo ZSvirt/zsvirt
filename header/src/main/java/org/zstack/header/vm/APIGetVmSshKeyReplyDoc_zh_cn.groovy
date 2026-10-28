@@ -4,7 +4,7 @@ import org.zstack.header.errorcode.ErrorCode
 
 doc {
 
-	title "云主机SSH Key"
+	title "虚拟机SSH Key"
 
 	ref {
 		name "error"
@@ -22,7 +22,7 @@ doc {
 	}
 	field {
 		name "sshKey"
-		desc "云主机SSH Key"
+		desc "虚拟机SSH Key"
 		type "String"
 		since "zsv_0.6"
 	}

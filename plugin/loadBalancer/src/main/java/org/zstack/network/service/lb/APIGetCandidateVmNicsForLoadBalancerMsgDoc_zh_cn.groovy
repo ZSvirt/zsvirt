@@ -3,11 +3,11 @@ package org.zstack.network.service.lb
 import org.zstack.network.service.lb.APIGetCandidateVmNicsForLoadBalancerReply
 
 doc {
-	title "获取可供负载均衡器添加的云主机网卡(GetCandidateVmNicsForLoadBalancer)"
+	title "获取可供负载均衡器添加的虚拟机网卡(GetCandidateVmNicsForLoadBalancer)"
 
 	category "负载均衡"
 
-	desc """获取可供负载均衡器添加的云主机网卡"""
+	desc """获取可供负载均衡器添加的虚拟机网卡"""
 
 	rest {
 		request {

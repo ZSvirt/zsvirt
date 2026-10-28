@@ -24,7 +24,7 @@ doc {
 	}
 	field {
 		name "scalingResourceType"
-		desc "伸缩资源类型：云主机"
+		desc "伸缩资源类型：虚拟机"
 		type "String"
 		since "zsv_3.1.0"
 	}
@@ -48,19 +48,19 @@ doc {
 	}
 	field {
 		name "minResourceSize"
-		desc "伸缩组里最少云主机数量"
+		desc "伸缩组里最少虚拟机数量"
 		type "Integer"
 		since "zsv_3.1.0"
 	}
 	field {
 		name "maxResourceSize"
-		desc "伸缩组里最多云主机数量"
+		desc "伸缩组里最多虚拟机数量"
 		type "Integer"
 		since "zsv_3.1.0"
 	}
 	field {
 		name "removalPolicy"
-		desc "删除云主机默认策略"
+		desc "删除虚拟机默认策略"
 		type "String"
 		since "zsv_3.1.0"
 	}
@@ -78,7 +78,7 @@ doc {
 	}
 	field {
 		name "attachedTemplates"
-		desc "挂载的伸缩组云主机模板列表"
+		desc "挂载的伸缩组虚拟机模板列表"
 		type "List"
 		since "zsv_3.1.0"
 	}

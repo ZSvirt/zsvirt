@@ -5,7 +5,7 @@ import org.zstack.guesttools.GuestToolsInventory
 
 doc {
 
-	title "获取云主机可用最新增强工具的返回"
+	title "获取虚拟机可用最新增强工具的返回"
 
 	ref {
 		name "error"

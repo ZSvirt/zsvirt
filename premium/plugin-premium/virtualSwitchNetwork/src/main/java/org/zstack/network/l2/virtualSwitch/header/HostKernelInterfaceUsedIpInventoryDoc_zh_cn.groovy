@@ -70,7 +70,7 @@ doc {
 	}
 	field {
 		name "vmNicUuid"
-		desc "云主机网卡UUID"
+		desc "虚拟机网卡UUID"
 		type "String"
 		since "zsv_4.1.0"
 	}

@@ -7,7 +7,7 @@ doc {
 
 	category "autoscaling"
 
-	desc """创建伸缩组云主机扩容规则"""
+	desc """创建伸缩组虚拟机扩容规则"""
 
 	rest {
 		request {
@@ -24,7 +24,7 @@ doc {
 				column {
 					name "adjustmentType"
 					enclosedIn "params"
-					desc "扩容方式：增加指定数量云主机，按百分比增加云主机，增加云主机数量到指定值"
+					desc "扩容方式：增加指定数量虚拟机，按百分比增加虚拟机，增加虚拟机数量到指定值"
 					location "body"
 					type "String"
 					optional false

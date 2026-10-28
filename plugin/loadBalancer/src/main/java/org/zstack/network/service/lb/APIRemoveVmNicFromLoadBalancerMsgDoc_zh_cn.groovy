@@ -3,11 +3,11 @@ package org.zstack.network.service.lb
 import org.zstack.network.service.lb.APIRemoveVmNicFromLoadBalancerEvent
 
 doc {
-	title "从负载均衡移除云主机网卡(RemoveVmNicFromLoadBalancer)"
+	title "从负载均衡移除虚拟机网卡(RemoveVmNicFromLoadBalancer)"
 
 	category "负载均衡"
 
-	desc """从负载均衡移除云主机网卡"""
+	desc """从负载均衡移除虚拟机网卡"""
 
 	rest {
 		request {
@@ -24,7 +24,7 @@ doc {
 				column {
 					name "vmNicUuids"
 					enclosedIn ""
-					desc "云主机网卡UUID"
+					desc "虚拟机网卡UUID"
 					location "query"
 					type "List"
 					optional false

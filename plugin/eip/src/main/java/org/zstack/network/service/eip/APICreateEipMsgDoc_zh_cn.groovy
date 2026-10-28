@@ -51,7 +51,7 @@ doc {
 				column {
 					name "vmNicUuid"
 					enclosedIn "params"
-					desc "云主机网卡UUID"
+					desc "虚拟机网卡UUID"
 					location "body"
 					type "String"
 					optional true
@@ -69,7 +69,7 @@ doc {
 				column {
 					name "resourceUuid"
 					enclosedIn "params"
-					desc "资源UUID。若指定，云主机会使用该字段值作为UUID"
+					desc "资源UUID。若指定，虚拟机会使用该字段值作为UUID"
 					location "body"
 					type "String"
 					optional true

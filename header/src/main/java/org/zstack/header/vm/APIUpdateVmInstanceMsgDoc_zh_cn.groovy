@@ -3,11 +3,11 @@ package org.zstack.header.vm
 import org.zstack.header.vm.APIUpdateVmInstanceEvent
 
 doc {
-	title "更新云主机信息(UpdateVmInstance)"
+	title "更新虚拟机信息(UpdateVmInstance)"
 
 	category "vmInstance"
 
-	desc """更新一个云主机的信息"""
+	desc """更新一个虚拟机的信息"""
 
 	rest {
 		request {
@@ -24,7 +24,7 @@ doc {
 				column {
 					name "uuid"
 					enclosedIn "updateVmInstance"
-					desc "云主机UUID"
+					desc "虚拟机UUID"
 					location "url"
 					type "String"
 					optional false
@@ -33,7 +33,7 @@ doc {
 				column {
 					name "name"
 					enclosedIn "updateVmInstance"
-					desc "云主机名"
+					desc "虚拟机名"
 					location "body"
 					type "String"
 					optional true
@@ -42,7 +42,7 @@ doc {
 				column {
 					name "description"
 					enclosedIn "updateVmInstance"
-					desc "云主机详细描述"
+					desc "虚拟机详细描述"
 					location "body"
 					type "String"
 					optional true
@@ -51,7 +51,7 @@ doc {
 				column {
 					name "state"
 					enclosedIn "updateVmInstance"
-					desc "云主机状态。**注意**，通常是不应该直接更新云主机状态，否则会导致ZStack对云主机状态发生误判。该字段只应该用在云主机真实状态和ZStack记录状态发生了不一致，而ZStack的同步机制已经失效时（通常意味着bug），并管理员应该完全理解使用该字段的后果时。"
+					desc "虚拟机状态。**注意**，通常是不应该直接更新虚拟机状态，否则会导致ZStack对虚拟机状态发生误判。该字段只应该用在虚拟机真实状态和ZStack记录状态发生了不一致，而ZStack的同步机制已经失效时（通常意味着bug），并管理员应该完全理解使用该字段的后果时。"
 					location "body"
 					type "String"
 					optional true
@@ -70,7 +70,7 @@ doc {
 				column {
 					name "platform"
 					enclosedIn "updateVmInstance"
-					desc "云主机平台类型"
+					desc "虚拟机平台类型"
 					location "body"
 					type "String"
 					optional true
@@ -80,7 +80,7 @@ doc {
 				column {
 					name "cpuNum"
 					enclosedIn "updateVmInstance"
-					desc "云主机CPU数量。需停止/启动云主机后生效"
+					desc "虚拟机CPU数量。需停止/启动虚拟机后生效"
 					location "body"
 					type "Integer"
 					optional true
@@ -89,7 +89,7 @@ doc {
 				column {
 					name "memorySize"
 					enclosedIn "updateVmInstance"
-					desc "云主机内存大小。需停止/启动云主机后生效"
+					desc "虚拟机内存大小。需停止/启动虚拟机后生效"
 					location "body"
 					type "Long"
 					optional true

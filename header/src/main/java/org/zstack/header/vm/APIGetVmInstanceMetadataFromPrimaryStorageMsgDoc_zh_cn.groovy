@@ -3,11 +3,11 @@ package org.zstack.header.vm
 import org.zstack.header.vm.APIGetVmInstanceMetadataFromPrimaryStorageEvent
 
 doc {
-	title "获取云主机元数据"
+	title "获取虚拟机元数据"
 
 	category "主存储"
 
-	desc """从主存储获取指定云主机的元数据内容"""
+	desc """从主存储获取指定虚拟机的元数据内容"""
 
 	rest {
 		request {
@@ -24,7 +24,7 @@ doc {
 				column {
 					name "uuid"
 					enclosedIn ""
-					desc "云主机UUID"
+					desc "虚拟机UUID"
 					location "query"
 					type "String"
 					optional false

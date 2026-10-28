@@ -24,7 +24,7 @@ doc {
 				column {
 					name "uuid"
 					enclosedIn ""
-					desc "云主机资源Uuid"
+					desc "虚拟机资源Uuid"
 					location "url"
 					type "String"
 					optional false

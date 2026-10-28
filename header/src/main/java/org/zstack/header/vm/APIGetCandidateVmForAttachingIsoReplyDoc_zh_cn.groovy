@@ -4,7 +4,7 @@ import org.zstack.header.errorcode.ErrorCode
 
 doc {
 
-	title "云主机清单"
+	title "虚拟机清单"
 
 	field {
 		name "success"
@@ -23,7 +23,7 @@ doc {
 	ref {
 		name "inventories"
 		path "org.zstack.header.vm.APIGetCandidateVmForAttachingIsoReply.inventories"
-		desc "云主机清单"
+		desc "虚拟机清单"
 		type "List"
 		since "zsv_0.6"
 		clz VmInstanceInventory.class

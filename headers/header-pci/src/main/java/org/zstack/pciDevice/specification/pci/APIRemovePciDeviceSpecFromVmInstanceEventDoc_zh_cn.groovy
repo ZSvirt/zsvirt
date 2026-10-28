@@ -4,7 +4,7 @@ import org.zstack.header.errorcode.ErrorCode
 
 doc {
 
-	title "为云主机删除PCI设备规格的返回结果"
+	title "为虚拟机删除PCI设备规格的返回结果"
 
 	field {
 		name "success"

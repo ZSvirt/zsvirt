@@ -5,7 +5,7 @@ import org.zstack.mevoco.ShareableVolumeVmInstanceRefInventory
 
 doc {
 
-	title "获取到的云主机共享云盘清单"
+	title "获取到的虚拟机共享云盘清单"
 
 	field {
 		name "success"

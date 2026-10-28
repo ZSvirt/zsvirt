@@ -7,7 +7,7 @@ doc {
 
 	category "cloudformation"
 
-	desc """获取资源栈中云主机端口监控状态"""
+	desc """获取资源栈中虚拟机端口监控状态"""
 
 	rest {
 		request {

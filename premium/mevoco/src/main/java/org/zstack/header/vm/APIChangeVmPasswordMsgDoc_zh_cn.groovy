@@ -7,7 +7,7 @@ doc {
 
 	category "mevoco"
 
-	desc """变更云主机密码"""
+	desc """变更虚拟机密码"""
 
 	rest {
 		request {
@@ -17,7 +17,7 @@ doc {
 
 			clz APIChangeVmPasswordMsg.class
 
-			desc """变更云主机密码"""
+			desc """变更虚拟机密码"""
 
 			params {
 

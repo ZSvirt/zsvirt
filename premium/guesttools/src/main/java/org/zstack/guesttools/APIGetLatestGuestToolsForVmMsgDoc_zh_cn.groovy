@@ -7,7 +7,7 @@ doc {
 
 	category "guest.tools"
 
-	desc """获取云主机可用的最新增强工具"""
+	desc """获取虚拟机可用的最新增强工具"""
 
 	rest {
 		request {
@@ -17,7 +17,7 @@ doc {
 
 			clz APIGetLatestGuestToolsForVmMsg.class
 
-			desc """获取云主机可用的最新增强工具"""
+			desc """获取虚拟机可用的最新增强工具"""
 
 			params {
 

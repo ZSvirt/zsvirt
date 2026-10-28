@@ -4,7 +4,7 @@ import org.zstack.header.errorcode.ErrorCode
 
 doc {
 
-	title "设置云主机Hostname结果"
+	title "设置虚拟机Hostname结果"
 
 	field {
 		name "success"

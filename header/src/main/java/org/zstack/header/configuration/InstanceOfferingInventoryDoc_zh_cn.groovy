@@ -2,7 +2,7 @@ package org.zstack.header.configuration
 
 doc {
 
-	title "云主机规格清单"
+	title "虚拟机规格清单"
 
 	field {
 		name "uuid"

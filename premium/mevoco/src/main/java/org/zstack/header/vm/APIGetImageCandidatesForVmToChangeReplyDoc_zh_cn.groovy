@@ -5,7 +5,7 @@ import org.zstack.header.image.ImageInventory
 
 doc {
 
-	title "用于修改云主机根云盘的候选镜像列表"
+	title "用于修改虚拟机根云盘的候选镜像列表"
 
 	field {
 		name "success"
@@ -24,7 +24,7 @@ doc {
 	ref {
 		name "inventories"
 		path "org.zstack.header.vm.APIGetImageCandidatesForVmToChangeReply.inventories"
-		desc "用于修改云主机根云盘的候选镜像列表"
+		desc "用于修改虚拟机根云盘的候选镜像列表"
 		type "List"
 		since "zsv_2.2"
 		clz ImageInventory.class

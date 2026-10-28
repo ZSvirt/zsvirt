@@ -22,7 +22,7 @@ doc {
 	ref {
 		name "inventories"
 		path "org.zstack.header.storage.snapshot.group.APIGetVolumeSnapshotGroupTreeReply.inventories"
-		desc "指定云主机的快照组树清单"
+		desc "指定虚拟机的快照组树清单"
 		type "List"
 		since "1.0.1, zsv_5.2.0"
 		clz VolumeSnapshotGroupTreeInventory.class

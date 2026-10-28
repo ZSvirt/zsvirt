@@ -5,7 +5,7 @@ import java.sql.Timestamp
 
 doc {
 
-	title "云主机外部备份信息"
+	title "虚拟机外部备份信息"
 
 	field {
 		name "liveBackup"
@@ -29,7 +29,7 @@ doc {
 	}
 	field {
 		name "uuid"
-		desc "云主机的UUID，唯一标示该资源"
+		desc "虚拟机的UUID，唯一标示该资源"
 		type "String"
 		since "zsv_3.9.0"
 	}

@@ -3,11 +3,11 @@ package org.zstack.header.vm
 import org.zstack.header.vm.APIMigrateVmEvent
 
 doc {
-	title "热迁移云主机(MigrateVm)"
+	title "热迁移虚拟机(MigrateVm)"
 
 	category "vmInstance"
 
-	desc """将云主机热迁移至另一个物理机"""
+	desc """将虚拟机热迁移至另一个物理机"""
 
 	rest {
 		request {
@@ -24,7 +24,7 @@ doc {
 				column {
 					name "vmInstanceUuid"
 					enclosedIn "migrateVm"
-					desc "云主机UUID"
+					desc "虚拟机UUID"
 					location "url"
 					type "String"
 					optional false

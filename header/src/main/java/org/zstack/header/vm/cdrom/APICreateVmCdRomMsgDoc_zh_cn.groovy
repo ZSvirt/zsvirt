@@ -7,7 +7,7 @@ doc {
 
 	category "vmInstance"
 
-	desc """为云主机创建CDROM"""
+	desc """为虚拟机创建CDROM"""
 
 	rest {
 		request {
@@ -33,7 +33,7 @@ doc {
 				column {
 					name "vmInstanceUuid"
 					enclosedIn "params"
-					desc "云主机UUID"
+					desc "虚拟机UUID"
 					location "body"
 					type "String"
 					optional false

@@ -5,7 +5,7 @@ import org.zstack.header.errorcode.ErrorCode
 
 doc {
 
-	title "云主机清单"
+	title "虚拟机清单"
 
 	ref {
 		name "inventory"

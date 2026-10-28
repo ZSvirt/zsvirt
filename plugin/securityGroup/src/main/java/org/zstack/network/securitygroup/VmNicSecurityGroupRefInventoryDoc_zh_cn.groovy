@@ -15,7 +15,7 @@ doc {
 	}
 	field {
 		name "vmNicUuid"
-		desc "云主机网卡UUID"
+		desc "虚拟机网卡UUID"
 		type "String"
 		since "zsv_0.6"
 	}
@@ -27,7 +27,7 @@ doc {
 	}
 	field {
 		name "vmInstanceUuid"
-		desc "云主机UUID"
+		desc "虚拟机UUID"
 		type "String"
 		since "zsv_0.6"
 	}

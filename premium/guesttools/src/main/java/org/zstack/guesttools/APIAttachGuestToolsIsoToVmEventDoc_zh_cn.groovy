@@ -4,7 +4,7 @@ import org.zstack.header.errorcode.ErrorCode
 
 doc {
 
-	title "为云主机挂载增强工具镜像的返回"
+	title "为虚拟机挂载增强工具镜像的返回"
 
 	field {
 		name "success"

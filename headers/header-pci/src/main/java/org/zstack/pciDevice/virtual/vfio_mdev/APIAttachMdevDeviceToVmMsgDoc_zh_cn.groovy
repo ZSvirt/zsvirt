@@ -7,7 +7,7 @@ doc {
 
 	category "pciDevice"
 
-	desc """绑定PCI设备切分出的MDEV设备到云主机"""
+	desc """绑定PCI设备切分出的MDEV设备到虚拟机"""
 
 	rest {
 		request {
@@ -17,7 +17,7 @@ doc {
 
 			clz APIAttachMdevDeviceToVmMsg.class
 
-			desc """绑定PCI设备切分出的MDEV设备到云主机"""
+			desc """绑定PCI设备切分出的MDEV设备到虚拟机"""
 
 			params {
 
@@ -33,7 +33,7 @@ doc {
 				column {
 					name "vmInstanceUuid"
 					enclosedIn "params"
-					desc "云主机UUID"
+					desc "虚拟机UUID"
 					location "url"
 					type "String"
 					optional false

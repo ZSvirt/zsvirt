@@ -7,7 +7,7 @@ doc {
 
 	category "ovf"
 
-	desc """从OVF模板导入云主机"""
+	desc """从OVF模板导入虚拟机"""
 
 	rest {
 		request {
@@ -51,7 +51,7 @@ doc {
 				column {
 					name "jsonCreateVmParam"
 					enclosedIn "params"
-					desc "包含云主机创建参数的消息的JSON字符串"
+					desc "包含虚拟机创建参数的消息的JSON字符串"
 					location "body"
 					type "String"
 					optional false

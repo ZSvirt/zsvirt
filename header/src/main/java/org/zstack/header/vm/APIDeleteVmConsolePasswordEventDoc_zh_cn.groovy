@@ -4,7 +4,7 @@ import org.zstack.header.errorcode.ErrorCode
 
 doc {
 
-	title "删除云主机控制台密码结果"
+	title "删除虚拟机控制台密码结果"
 
 	field {
 		name "success"

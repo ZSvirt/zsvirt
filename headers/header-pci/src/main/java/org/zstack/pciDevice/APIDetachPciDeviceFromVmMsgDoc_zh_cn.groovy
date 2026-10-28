@@ -7,7 +7,7 @@ doc {
 
 	category "pciDevice"
 
-	desc """从云主机上上卸载PCI设备"""
+	desc """从虚拟机上上卸载PCI设备"""
 
 	rest {
 		request {
@@ -33,7 +33,7 @@ doc {
 				column {
 					name "vmInstanceUuid"
 					enclosedIn "params"
-					desc "云主机UUID"
+					desc "虚拟机UUID"
 					location "body"
 					type "String"
 					optional false

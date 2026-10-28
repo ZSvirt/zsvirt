@@ -24,7 +24,7 @@ doc {
 				column {
 					name "vmNicUuid"
 					enclosedIn ""
-					desc "云主机网卡UUID"
+					desc "虚拟机网卡UUID"
 					location "url"
 					type "String"
 					optional false

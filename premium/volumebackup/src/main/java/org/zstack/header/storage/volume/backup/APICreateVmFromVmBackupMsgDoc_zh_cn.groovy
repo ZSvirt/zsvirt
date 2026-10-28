@@ -7,7 +7,7 @@ doc {
 
 	category "backup.volume"
 
-	desc """从云主机备份创建虚拟机"""
+	desc """从虚拟机备份创建虚拟机"""
 
 	rest {
 		request {
@@ -33,7 +33,7 @@ doc {
 				column {
 					name "groupUuid"
 					enclosedIn "params"
-					desc "云主机备份组UUID"
+					desc "虚拟机备份组UUID"
 					location "url"
 					type "String"
 					optional false
@@ -78,7 +78,7 @@ doc {
 				column {
 					name "type"
 					enclosedIn "params"
-					desc "云主机类型"
+					desc "虚拟机类型"
 					location "body"
 					type "String"
 					optional true
@@ -214,7 +214,7 @@ doc {
 				column {
 					name "strategy"
 					enclosedIn "params"
-					desc "云主机创建策略"
+					desc "虚拟机创建策略"
 					location "body"
 					type "String"
 					optional true

@@ -7,7 +7,7 @@ doc {
 
 	category "vmInstance"
 
-	desc """从快照组创建云主机"""
+	desc """从快照组创建虚拟机"""
 
 	rest {
 		request {
@@ -78,7 +78,7 @@ doc {
 				column {
 					name "type"
 					enclosedIn "params"
-					desc "云主机类型"
+					desc "虚拟机类型"
 					location "body"
 					type "String"
 					optional true

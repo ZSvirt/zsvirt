@@ -33,7 +33,7 @@ doc {
 				column {
 					name "vmNicUuids"
 					enclosedIn "params"
-					desc "云主机网卡的uuid列表"
+					desc "虚拟机网卡的uuid列表"
 					location "body"
 					type "List"
 					optional false

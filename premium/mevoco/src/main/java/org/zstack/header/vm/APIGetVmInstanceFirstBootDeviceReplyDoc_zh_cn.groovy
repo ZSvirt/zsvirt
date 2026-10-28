@@ -4,7 +4,7 @@ import org.zstack.header.errorcode.ErrorCode
 
 doc {
 
-	title "获取云主机第一启动项的返回"
+	title "获取虚拟机第一启动项的返回"
 
 	ref {
 		name "error"
@@ -22,7 +22,7 @@ doc {
 	}
 	field {
 		name "firstBootDevice"
-		desc "云主机第一启动项"
+		desc "虚拟机第一启动项"
 		type "String"
 		since "zsv_3.7.0"
 	}

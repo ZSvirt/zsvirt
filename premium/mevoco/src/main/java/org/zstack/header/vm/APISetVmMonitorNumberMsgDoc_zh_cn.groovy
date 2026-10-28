@@ -7,7 +7,7 @@ doc {
 
 	category "mevoco"
 
-	desc """设置云主机支持的屏幕个数"""
+	desc """设置虚拟机支持的屏幕个数"""
 
 	rest {
 		request {
@@ -17,7 +17,7 @@ doc {
 
 			clz APISetVmMonitorNumberMsg.class
 
-			desc """设置云主机支持的屏幕个数"""
+			desc """设置虚拟机支持的屏幕个数"""
 
 			params {
 

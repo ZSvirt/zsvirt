@@ -4,7 +4,7 @@ package org.zstack.header.vm
 
 doc {
 
-	title "云主机优先级枚举"
+	title "虚拟机优先级枚举"
 
 	field {
 		name "Normal"

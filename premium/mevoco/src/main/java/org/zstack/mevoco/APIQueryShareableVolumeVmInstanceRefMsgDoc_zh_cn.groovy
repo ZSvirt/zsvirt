@@ -4,11 +4,11 @@ import org.zstack.mevoco.APIQueryShareableVolumeVmInstanceRefReply
 import org.zstack.header.query.APIQueryMessage
 
 doc {
-	title "查询共享磁盘所挂载的云主机"
+	title "查询共享磁盘所挂载的虚拟机"
 
 	category "mevoco"
 
-	desc """查询共享磁盘所挂载的云主机"""
+	desc """查询共享磁盘所挂载的虚拟机"""
 
 	rest {
 		request {

@@ -5,7 +5,7 @@ import org.zstack.header.errorcode.ErrorCode
 
 doc {
 
-	title "获取云主机设备地址结果"
+	title "获取虚拟机设备地址结果"
 
 	ref {
 		name "error"

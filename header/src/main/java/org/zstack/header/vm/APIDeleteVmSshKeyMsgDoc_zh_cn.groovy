@@ -3,11 +3,11 @@ package org.zstack.header.vm
 import org.zstack.header.vm.APIDeleteVmSshKeyEvent
 
 doc {
-	title "删除云主机SSH Key(DeleteVmSshKey)"
+	title "删除虚拟机SSH Key(DeleteVmSshKey)"
 
 	category "vmInstance"
 
-	desc """删除云主机SSH Key，该Key是之前通过SetVmSshKey设置的。"""
+	desc """删除虚拟机SSH Key，该Key是之前通过SetVmSshKey设置的。"""
 
 	rest {
 		request {
@@ -24,7 +24,7 @@ doc {
 				column {
 					name "uuid"
 					enclosedIn ""
-					desc "云主机UUID"
+					desc "虚拟机UUID"
 					location "url"
 					type "String"
 					optional true

@@ -7,7 +7,7 @@ doc {
 
 	category "autoscaling"
 
-	desc """创建伸缩规则触发器-基于云主机监控信息"""
+	desc """创建伸缩规则触发器-基于虚拟机监控信息"""
 
 	rest {
 		request {

@@ -60,7 +60,7 @@ doc {
 				column {
 					name "vmInstanceUuid"
 					enclosedIn "resizeRootVolume"
-					desc "云主机UUID"
+					desc "虚拟机UUID"
 					location "body"
 					type "String"
 					optional true

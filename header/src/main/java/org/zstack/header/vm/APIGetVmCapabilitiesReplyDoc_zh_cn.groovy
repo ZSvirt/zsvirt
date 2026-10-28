@@ -4,7 +4,7 @@ import org.zstack.header.errorcode.ErrorCode
 
 doc {
 
-	title "云主机能力结果"
+	title "虚拟机能力结果"
 
 	ref {
 		name "error"
@@ -22,7 +22,7 @@ doc {
 	}
 	field {
 		name "capabilities"
-		desc "云主机能力结果"
+		desc "虚拟机能力结果"
 		type "Map"
 		since "zsv_0.6"
 	}

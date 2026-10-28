@@ -4,7 +4,7 @@ import org.zstack.header.errorcode.ErrorCode
 
 doc {
 
-	title "云主机规格清单列表"
+	title "虚拟机规格清单列表"
 
 	field {
 		name "success"
@@ -23,7 +23,7 @@ doc {
 	ref {
 		name "inventories"
 		path "org.zstack.header.configuration.APIQueryInstanceOfferingReply.inventories"
-		desc "云主机规格清单列表"
+		desc "虚拟机规格清单列表"
 		type "List"
 		since "zsv_0.6"
 		clz InstanceOfferingInventory.class

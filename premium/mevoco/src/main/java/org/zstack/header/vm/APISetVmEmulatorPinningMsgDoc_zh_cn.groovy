@@ -7,7 +7,7 @@ doc {
 
 	category "mevoco"
 
-	desc """设置云主机EmulatorPinning的Host CPU"""
+	desc """设置虚拟机EmulatorPinning的Host CPU"""
 
 	rest {
 		request {

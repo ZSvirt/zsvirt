@@ -3,11 +3,11 @@ package org.zstack.header.vm
 import org.zstack.header.vm.APIDeleteVmStaticIpEvent
 
 doc {
-	title "删除云主机指定IP(DeleteVmStaticIp)"
+	title "删除虚拟机指定IP(DeleteVmStaticIp)"
 
 	category "vmInstance"
 
-	desc """删除云主机三层网络上指定的IP"""
+	desc """删除虚拟机三层网络上指定的IP"""
 
 	rest {
 		request {
@@ -24,7 +24,7 @@ doc {
 				column {
 					name "vmInstanceUuid"
 					enclosedIn ""
-					desc "云主机UUID"
+					desc "虚拟机UUID"
 					location "url"
 					type "String"
 					optional false

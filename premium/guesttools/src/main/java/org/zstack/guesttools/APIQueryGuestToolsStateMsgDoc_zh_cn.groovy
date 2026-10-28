@@ -8,7 +8,7 @@ doc {
 
 	category "guest.tools"
 
-	desc """获取云主机GuestTools状态"""
+	desc """获取虚拟机GuestTools状态"""
 
 	rest {
 		request {

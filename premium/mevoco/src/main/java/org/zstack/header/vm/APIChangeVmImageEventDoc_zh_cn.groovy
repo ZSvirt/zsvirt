@@ -5,7 +5,7 @@ import org.zstack.header.vm.VmInstanceInventory
 
 doc {
 
-	title "修改云主机根云盘结果"
+	title "修改虚拟机根云盘结果"
 
 	field {
 		name "success"
@@ -24,7 +24,7 @@ doc {
 	ref {
 		name "inventory"
 		path "org.zstack.header.vm.APIChangeVmImageEvent.inventory"
-		desc "修改根云盘后的云主机"
+		desc "修改根云盘后的虚拟机"
 		type "VmInstanceInventory"
 		since "zsv_2.2"
 		clz VmInstanceInventory.class

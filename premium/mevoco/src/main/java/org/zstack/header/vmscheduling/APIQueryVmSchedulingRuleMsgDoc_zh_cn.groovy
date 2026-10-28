@@ -8,7 +8,7 @@ doc {
 
 	category "vmSchedulingRule"
 
-	desc """查询云主机调度策略"""
+	desc """查询虚拟机调度策略"""
 
 	rest {
 		request {

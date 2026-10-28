@@ -5,7 +5,7 @@ import org.zstack.header.errorcode.ErrorCode
 
 doc {
 
-	title "云主机DNS信息"
+	title "虚拟机DNS信息"
 
 	ref {
 		name "vmDnsList"

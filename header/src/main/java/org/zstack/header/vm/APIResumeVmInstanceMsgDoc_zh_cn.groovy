@@ -3,11 +3,11 @@ package org.zstack.header.vm
 import org.zstack.header.vm.APIResumeVmInstanceEvent
 
 doc {
-	title "恢复暂停的云主机(ResumeVmInstance)"
+	title "恢复暂停的虚拟机(ResumeVmInstance)"
 
 	category "vmInstance"
 
-	desc """恢复一个被暂停的云主机，云主机从内存中恢复运行"""
+	desc """恢复一个被暂停的虚拟机，虚拟机从内存中恢复运行"""
 
 	rest {
 		request {
@@ -24,7 +24,7 @@ doc {
 				column {
 					name "uuid"
 					enclosedIn "resumeVmInstance"
-					desc "云主机UUID"
+					desc "虚拟机UUID"
 					location "url"
 					type "String"
 					optional false

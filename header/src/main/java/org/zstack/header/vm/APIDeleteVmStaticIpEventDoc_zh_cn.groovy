@@ -4,7 +4,7 @@ import org.zstack.header.errorcode.ErrorCode
 
 doc {
 
-	title "删除云主机指定IP结果"
+	title "删除虚拟机指定IP结果"
 
 	field {
 		name "success"

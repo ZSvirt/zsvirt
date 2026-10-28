@@ -5,7 +5,7 @@ import org.zstack.pciDevice.entity.specification.pci.VmInstancePciDeviceSpecRefI
 
 doc {
 
-	title "查询云主机与PCI设备规格关联关系的返回结果"
+	title "查询虚拟机与PCI设备规格关联关系的返回结果"
 
 	field {
 		name "success"
@@ -24,7 +24,7 @@ doc {
 	ref {
 		name "inventories"
 		path "org.zstack.pciDevice.specification.pci.APIQueryVmInstancePciDeviceSpecRefReply.inventories"
-		desc "云主机与PCI设备规格的关联关系"
+		desc "虚拟机与PCI设备规格的关联关系"
 		type "List"
 		since "zsv_3.5.0"
 		clz VmInstancePciDeviceSpecRefInventory.class

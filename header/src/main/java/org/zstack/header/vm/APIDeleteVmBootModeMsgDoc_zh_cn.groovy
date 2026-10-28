@@ -7,7 +7,7 @@ doc {
 
 	category "vmInstance"
 
-	desc """删除云主机启动模式"""
+	desc """删除虚拟机启动模式"""
 
 	rest {
 		request {

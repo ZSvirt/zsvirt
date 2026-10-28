@@ -4,7 +4,7 @@ import org.zstack.header.errorcode.ErrorCode
 
 doc {
 
-	title "取消云主机网卡限速结果"
+	title "取消虚拟机网卡限速结果"
 
 	field {
 		name "success"

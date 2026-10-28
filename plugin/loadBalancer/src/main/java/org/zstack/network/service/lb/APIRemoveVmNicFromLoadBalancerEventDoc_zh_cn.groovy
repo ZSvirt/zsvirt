@@ -5,7 +5,7 @@ import org.zstack.network.service.lb.LoadBalancerInventory
 
 doc {
 
-	title "从负载均衡移除云主机网卡返回值"
+	title "从负载均衡移除虚拟机网卡返回值"
 
 	field {
 		name "success"

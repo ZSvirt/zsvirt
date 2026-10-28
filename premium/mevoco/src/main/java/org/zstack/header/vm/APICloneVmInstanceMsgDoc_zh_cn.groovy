@@ -7,7 +7,7 @@ doc {
 
 	category "mevoco"
 
-	desc """克隆云主机到指定物理机上"""
+	desc """克隆虚拟机到指定物理机上"""
 
 	rest {
 		request {
@@ -17,14 +17,14 @@ doc {
 
 			clz APICloneVmInstanceMsg.class
 
-			desc """克隆云主机到指定物理机上"""
+			desc """克隆虚拟机到指定物理机上"""
 
 			params {
 
 				column {
 					name "vmInstanceUuid"
 					enclosedIn "cloneVmInstance"
-					desc "云主机UUID"
+					desc "虚拟机UUID"
 					location "url"
 					type "String"
 					optional false
@@ -43,7 +43,7 @@ doc {
 				column {
 					name "names"
 					enclosedIn "cloneVmInstance"
-					desc "云主机的名字清单"
+					desc "虚拟机的名字清单"
 					location "body"
 					type "List"
 					optional false

@@ -7,7 +7,7 @@ doc {
 
 	category "guest.tools"
 
-	desc """更新云主机GuestTools状态"""
+	desc """更新虚拟机GuestTools状态"""
 
 	rest {
 		request {
@@ -24,7 +24,7 @@ doc {
 				column {
 					name "vmInstanceUuid"
 					enclosedIn "updateGuestToolsState"
-					desc "云主机UUID"
+					desc "虚拟机UUID"
 					location "url"
 					type "String"
 					optional false

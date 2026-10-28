@@ -7,7 +7,7 @@ doc {
 
 	category "autoscaling"
 
-	desc """挂载云主机模块到伸缩组"""
+	desc """挂载虚拟机模块到伸缩组"""
 
 	rest {
 		request {

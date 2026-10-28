@@ -4,7 +4,7 @@ import org.zstack.header.errorcode.ErrorCode
 
 doc {
 
-	title "变更云主机密码消息回复"
+	title "变更虚拟机密码消息回复"
 
 	field {
 		name "success"

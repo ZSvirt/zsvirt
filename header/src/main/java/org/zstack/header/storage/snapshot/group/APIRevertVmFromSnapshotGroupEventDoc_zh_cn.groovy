@@ -5,7 +5,7 @@ import org.zstack.header.storage.snapshot.group.RevertSnapshotGroupResult
 
 doc {
 
-	title "从快照组恢复云主机结果"
+	title "从快照组恢复虚拟机结果"
 
 	field {
 		name "success"

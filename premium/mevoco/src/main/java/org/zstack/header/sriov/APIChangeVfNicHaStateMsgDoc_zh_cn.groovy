@@ -7,7 +7,7 @@ doc {
 
 	category "sriov"
 
-	desc """修改云主机VF网卡高可用状态"""
+	desc """修改虚拟机VF网卡高可用状态"""
 
 	rest {
 		request {
@@ -17,7 +17,7 @@ doc {
 
 			clz APIChangeVfNicHaStateMsg.class
 
-			desc """修改云主机VF网卡高可用状态"""
+			desc """修改虚拟机VF网卡高可用状态"""
 
 			params {
 

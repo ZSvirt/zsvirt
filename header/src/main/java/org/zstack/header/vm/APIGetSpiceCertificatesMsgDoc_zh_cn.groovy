@@ -7,7 +7,7 @@ doc {
 
 	category "vmInstance"
 
-	desc """开启Spice TLS加密后，spice客户端需要下载CA证书才能访问云主机控制台"""
+	desc """开启Spice TLS加密后，spice客户端需要下载CA证书才能访问虚拟机控制台"""
 
 	rest {
 		request {

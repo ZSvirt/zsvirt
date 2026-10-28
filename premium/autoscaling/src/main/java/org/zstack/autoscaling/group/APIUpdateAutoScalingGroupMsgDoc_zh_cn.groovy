@@ -51,7 +51,7 @@ doc {
 				column {
 					name "minResourceSize"
 					enclosedIn "updateAutoScalingGroup"
-					desc "伸缩组内最少云主机数量"
+					desc "伸缩组内最少虚拟机数量"
 					location "body"
 					type "Integer"
 					optional true
@@ -60,7 +60,7 @@ doc {
 				column {
 					name "maxResourceSize"
 					enclosedIn "updateAutoScalingGroup"
-					desc "伸缩组内最大云主机数量"
+					desc "伸缩组内最大虚拟机数量"
 					location "body"
 					type "Integer"
 					optional true
@@ -69,7 +69,7 @@ doc {
 				column {
 					name "removalPolicy"
 					enclosedIn "updateAutoScalingGroup"
-					desc "删除云主机策略：创建时间最久的主机优先，新创建的云主机优先"
+					desc "删除虚拟机策略：创建时间最久的主机优先，新创建的虚拟机优先"
 					location "body"
 					type "String"
 					optional true

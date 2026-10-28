@@ -3,11 +3,11 @@ package org.zstack.header.vm
 import org.zstack.header.vm.APIGetCandidateVmForAttachingIsoReply
 
 doc {
-	title "获取ISO可加载云主机列表(GetCandidateVmForAttachingIso)"
+	title "获取ISO可加载虚拟机列表(GetCandidateVmForAttachingIso)"
 
 	category "vmInstance"
 
-	desc """获取一个ISO可以加载到的云主机列表"""
+	desc """获取一个ISO可以加载到的虚拟机列表"""
 
 	rest {
 		request {

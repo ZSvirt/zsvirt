@@ -4,7 +4,7 @@ import org.zstack.header.errorcode.ErrorCode
 
 doc {
 
-	title "设置云主机显存返回结果"
+	title "设置虚拟机显存返回结果"
 
 	field {
 		name "success"

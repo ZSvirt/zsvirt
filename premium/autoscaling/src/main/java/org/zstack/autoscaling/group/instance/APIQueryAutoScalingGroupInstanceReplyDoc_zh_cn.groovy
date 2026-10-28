@@ -5,7 +5,7 @@ import org.zstack.autoscaling.group.instance.AutoScalingGroupInstanceInventory
 
 doc {
 
-	title "查询伸缩组组内云主机列表返回值"
+	title "查询伸缩组组内虚拟机列表返回值"
 
 	field {
 		name "success"

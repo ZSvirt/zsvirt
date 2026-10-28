@@ -7,7 +7,7 @@ doc {
 
 	category "vmInstance"
 
-	desc """设置云主机时钟同步"""
+	desc """设置虚拟机时钟同步"""
 
 	rest {
 		request {

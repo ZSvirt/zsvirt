@@ -169,7 +169,7 @@ public class VfPciDeviceUtils {
                     /* vm is running on another host, release old vf device */
                     releaseVfDevice(EthernetVfPciDeviceInventory.valueOf(oldVo));
                 } else {
-                    /* 在vm迁移时使用: 源云主机在选择了目的物理机之后，变成Paused
+                    /* 在vm迁移时使用: 源虚拟机在选择了目的物理机之后，变成Paused
                     *  迁移成功，释放他变成Available; 迁移失败，恢复使用变成Attached */
                     pauseVfPciDevice(EthernetVfPciDeviceInventory.valueOf(oldVo));
                 }

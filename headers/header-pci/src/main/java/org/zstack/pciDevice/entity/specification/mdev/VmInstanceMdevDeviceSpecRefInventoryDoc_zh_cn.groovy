@@ -6,11 +6,11 @@ import java.sql.Timestamp
 
 doc {
 
-	title "云主机与MDEV设备规格的关联关系"
+	title "虚拟机与MDEV设备规格的关联关系"
 
 	field {
 		name "vmInstanceUuid"
-		desc "云主机UUID"
+		desc "虚拟机UUID"
 		type "String"
 		since "zsv_3.5.0"
 	}
@@ -22,7 +22,7 @@ doc {
 	}
 	field {
 		name "mdevDeviceNumber"
-		desc "需要为云主机挂载的符合设备规格的设备个数，默认为1"
+		desc "需要为虚拟机挂载的符合设备规格的设备个数，默认为1"
 		type "Integer"
 		since "zsv_3.5.0"
 	}

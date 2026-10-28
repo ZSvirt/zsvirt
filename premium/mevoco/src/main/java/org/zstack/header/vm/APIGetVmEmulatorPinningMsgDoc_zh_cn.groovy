@@ -17,14 +17,14 @@ doc {
 
 			clz APIGetVmEmulatorPinningMsg.class
 
-			desc """获取云主机EmulatorPinning绑定的Host CPU"""
+			desc """获取虚拟机EmulatorPinning绑定的Host CPU"""
 
 			params {
 
 				column {
 					name "uuid"
 					enclosedIn ""
-					desc "云主机的UUID"
+					desc "虚拟机的UUID"
 					location "url"
 					type "String"
 					optional false

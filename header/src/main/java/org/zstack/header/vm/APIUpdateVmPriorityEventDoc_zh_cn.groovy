@@ -4,7 +4,7 @@ import org.zstack.header.errorcode.ErrorCode
 
 doc {
 
-	title "更改云主机优先级返回"
+	title "更改虚拟机优先级返回"
 
 	field {
 		name "success"

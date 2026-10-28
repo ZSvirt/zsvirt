@@ -7,7 +7,7 @@ doc {
 
 	category "snapshot.volume"
 
-	desc """查询指定云主机的快照组树"""
+	desc """查询指定虚拟机的快照组树"""
 
 	rest {
 		request {
@@ -24,7 +24,7 @@ doc {
 				column {
 					name "vmInstanceUuid"
 					enclosedIn ""
-					desc "云主机UUID"
+					desc "虚拟机UUID"
 					location "query"
 					type "String"
 					optional false

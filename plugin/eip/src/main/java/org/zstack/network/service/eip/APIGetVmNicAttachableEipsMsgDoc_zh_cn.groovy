@@ -7,7 +7,7 @@ doc {
 
 	category "eip"
 
-	desc """获取云主机网卡可挂载弹性IP"""
+	desc """获取虚拟机网卡可挂载弹性IP"""
 
 	rest {
 		request {
@@ -24,7 +24,7 @@ doc {
 				column {
 					name "vmNicUuid"
 					enclosedIn ""
-					desc "云主机网卡UUID"
+					desc "虚拟机网卡UUID"
 					location "url"
 					type "String"
 					optional false

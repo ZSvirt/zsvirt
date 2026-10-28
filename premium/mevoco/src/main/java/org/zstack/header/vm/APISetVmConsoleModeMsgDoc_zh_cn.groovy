@@ -7,7 +7,7 @@ doc {
 
 	category "mevoco"
 
-	desc """设置云主机控制台模式"""
+	desc """设置虚拟机控制台模式"""
 
 	rest {
 		request {

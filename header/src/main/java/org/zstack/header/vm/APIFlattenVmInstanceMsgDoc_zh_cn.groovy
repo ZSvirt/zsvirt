@@ -7,7 +7,7 @@ doc {
 
 	category "vmInstance"
 
-	desc """扁平合并云主机"""
+	desc """扁平合并虚拟机"""
 
 	rest {
 		request {
@@ -33,7 +33,7 @@ doc {
 				column {
 					name "full"
 					enclosedIn "flattenVmInstance"
-					desc "扁平合并云主机上所有云盘"
+					desc "扁平合并虚拟机上所有云盘"
 					location "body"
 					type "boolean"
 					optional true

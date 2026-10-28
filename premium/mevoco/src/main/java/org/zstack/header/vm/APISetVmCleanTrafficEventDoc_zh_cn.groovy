@@ -4,7 +4,7 @@ import org.zstack.header.errorcode.ErrorCode
 
 doc {
 
-	title "改变云主机防IP欺骗启用状态"
+	title "改变虚拟机防IP欺骗启用状态"
 
 	field {
 		name "success"

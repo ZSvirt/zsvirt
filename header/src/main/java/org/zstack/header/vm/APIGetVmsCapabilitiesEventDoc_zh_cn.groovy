@@ -5,7 +5,7 @@ import org.zstack.header.vm.VmCapabilities
 
 doc {
 
-	title "批量获取云主机能力返回"
+	title "批量获取虚拟机能力返回"
 
 	field {
 		name "success"

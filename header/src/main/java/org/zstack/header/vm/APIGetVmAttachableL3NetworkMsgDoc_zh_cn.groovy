@@ -3,11 +3,11 @@ package org.zstack.header.vm
 import org.zstack.header.vm.APIGetVmAttachableL3NetworkReply
 
 doc {
-	title "获取云主机可加载三层网络列表(GetVmAttachableL3Network)"
+	title "获取虚拟机可加载三层网络列表(GetVmAttachableL3Network)"
 
 	category "vmInstance"
 
-	desc """获取一个云主机可加载网络三层网络列表"""
+	desc """获取一个虚拟机可加载网络三层网络列表"""
 
 	rest {
 		request {
@@ -24,7 +24,7 @@ doc {
 				column {
 					name "vmInstanceUuid"
 					enclosedIn ""
-					desc "云主机UUID"
+					desc "虚拟机UUID"
 					location "url"
 					type "String"
 					optional false

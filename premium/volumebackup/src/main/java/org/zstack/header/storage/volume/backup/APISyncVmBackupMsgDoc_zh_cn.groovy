@@ -7,7 +7,7 @@ doc {
 
 	category "backup.volume"
 
-	desc """扫描云主机备份"""
+	desc """扫描虚拟机备份"""
 
 	rest {
 		request {

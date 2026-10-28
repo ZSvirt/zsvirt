@@ -24,7 +24,7 @@ doc {
 				column {
 					name "vmNicUuid"
 					enclosedIn "params"
-					desc "云主机网卡UUID"
+					desc "虚拟机网卡UUID"
 					location "url"
 					type "String"
 					optional false
@@ -42,7 +42,7 @@ doc {
 				column {
 					name "staticIp"
 					enclosedIn "params"
-					desc "指定分配给云主机的IP地址"
+					desc "指定分配给虚拟机的IP地址"
 					location "body"
 					type "String"
 					optional true

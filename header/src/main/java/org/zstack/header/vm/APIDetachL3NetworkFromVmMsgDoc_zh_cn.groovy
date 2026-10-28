@@ -3,11 +3,11 @@ package org.zstack.header.vm
 import org.zstack.header.vm.APIDetachL3NetworkFromVmEvent
 
 doc {
-	title "从云主机卸载网络(DetachL3NetworkFromVm)"
+	title "从虚拟机卸载网络(DetachL3NetworkFromVm)"
 
 	category "vmInstance"
 
-	desc """从Running或Stopped的云主机上卸载一个网络"""
+	desc """从Running或Stopped的虚拟机上卸载一个网络"""
 
 	rest {
 		request {
@@ -24,7 +24,7 @@ doc {
 				column {
 					name "vmNicUuid"
 					enclosedIn ""
-					desc "云主机网卡UUID，该网卡所在网络会从云主机卸载掉"
+					desc "虚拟机网卡UUID，该网卡所在网络会从虚拟机卸载掉"
 					location "url"
 					type "String"
 					optional false

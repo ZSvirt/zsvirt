@@ -7,7 +7,7 @@ doc {
 
 	category "mevoco"
 
-	desc """设置云主机网卡限速"""
+	desc """设置虚拟机网卡限速"""
 
 	rest {
 		request {
@@ -17,14 +17,14 @@ doc {
 
 			clz APISetNicQosMsg.class
 
-			desc """设置云主机网卡限速"""
+			desc """设置虚拟机网卡限速"""
 
 			params {
 
 				column {
 					name "uuid"
 					enclosedIn "setNicQos"
-					desc "云主机网卡UUID"
+					desc "虚拟机网卡UUID"
 					location "url"
 					type "String"
 					optional false

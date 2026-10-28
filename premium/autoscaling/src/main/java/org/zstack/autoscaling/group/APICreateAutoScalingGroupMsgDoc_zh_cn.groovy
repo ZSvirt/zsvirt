@@ -42,7 +42,7 @@ doc {
 				column {
 					name "scalingResourceType"
 					enclosedIn "params"
-					desc "伸缩组伸缩资源类型，目前只支持云主机"
+					desc "伸缩组伸缩资源类型，目前只支持虚拟机"
 					location "body"
 					type "String"
 					optional false
@@ -52,7 +52,7 @@ doc {
 				column {
 					name "minResourceSize"
 					enclosedIn "params"
-					desc "伸缩组内云主机最少数量"
+					desc "伸缩组内虚拟机最少数量"
 					location "body"
 					type "Integer"
 					optional false
@@ -61,7 +61,7 @@ doc {
 				column {
 					name "maxResourceSize"
 					enclosedIn "params"
-					desc "伸缩组内云主机最多数量"
+					desc "伸缩组内虚拟机最多数量"
 					location "body"
 					type "Integer"
 					optional false
@@ -79,7 +79,7 @@ doc {
 				column {
 					name "removalPolicy"
 					enclosedIn "params"
-					desc "删除云主机规则"
+					desc "删除虚拟机规则"
 					location "body"
 					type "String"
 					optional false

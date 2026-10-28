@@ -24,7 +24,7 @@ doc {
 	ref {
 		name "inventory"
 		path "org.zstack.header.vm.APICreateVmInstanceFromVolumeEvent.inventory"
-		desc "云主机实例"
+		desc "虚拟机实例"
 		type "VmInstanceInventory"
 		since "zsv_3.10.0"
 		clz VmInstanceInventory.class

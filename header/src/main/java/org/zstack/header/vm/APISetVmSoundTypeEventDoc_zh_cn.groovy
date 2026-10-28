@@ -4,7 +4,7 @@ import org.zstack.header.errorcode.ErrorCode
 
 doc {
 
-	title "设置云主机虚拟声卡类型返回结果"
+	title "设置虚拟机虚拟声卡类型返回结果"
 
 	field {
 		name "success"

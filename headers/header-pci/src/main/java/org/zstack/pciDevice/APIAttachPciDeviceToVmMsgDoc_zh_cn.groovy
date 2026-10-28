@@ -3,11 +3,11 @@ package org.zstack.pciDevice
 import org.zstack.pciDevice.APIAttachPciDeviceToVmEvent
 
 doc {
-	title "绑定PCI设备到云主机"
+	title "绑定PCI设备到虚拟机"
 
 	category "pciDevice"
 
-	desc """绑定PCI设备到云主机，管理员可以直接将状态为System、Active的PCI设备绑定到状态为Active、Stop的云主机"""
+	desc """绑定PCI设备到虚拟机，管理员可以直接将状态为System、Active的PCI设备绑定到状态为Active、Stop的虚拟机"""
 
 	rest {
 		request {
@@ -33,7 +33,7 @@ doc {
 				column {
 					name "vmInstanceUuid"
 					enclosedIn "params"
-					desc "云主机UUID"
+					desc "虚拟机UUID"
 					location "body"
 					type "String"
 					optional false

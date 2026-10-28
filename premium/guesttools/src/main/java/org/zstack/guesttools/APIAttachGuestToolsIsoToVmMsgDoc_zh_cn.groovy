@@ -7,7 +7,7 @@ doc {
 
 	category "guest.tools"
 
-	desc """为云主机挂载增强工具镜像"""
+	desc """为虚拟机挂载增强工具镜像"""
 
 	rest {
 		request {
@@ -17,7 +17,7 @@ doc {
 
 			clz APIAttachGuestToolsIsoToVmMsg.class
 
-			desc """为云主机挂载增强工具镜像"""
+			desc """为虚拟机挂载增强工具镜像"""
 
 			params {
 

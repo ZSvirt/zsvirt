@@ -7,7 +7,7 @@ doc {
 
 	category "guest.tools"
 
-	desc """获取云主机内部增强工具的信息"""
+	desc """获取虚拟机内部增强工具的信息"""
 
 	rest {
 		request {
@@ -17,7 +17,7 @@ doc {
 
 			clz APIGetVmGuestToolsInfoMsg.class
 
-			desc """获取云主机内部增强工具的信息"""
+			desc """获取虚拟机内部增强工具的信息"""
 
 			params {
 

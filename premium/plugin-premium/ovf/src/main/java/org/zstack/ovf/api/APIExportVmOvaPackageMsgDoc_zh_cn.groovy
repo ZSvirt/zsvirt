@@ -7,7 +7,7 @@ doc {
 
 	category "ovf"
 
-	desc """导出云主机的OVA包"""
+	desc """导出虚拟机的OVA包"""
 
 	rest {
 		request {
@@ -42,7 +42,7 @@ doc {
 				column {
 					name "vmUuid"
 					enclosedIn "params"
-					desc "源云主机UUID"
+					desc "源虚拟机UUID"
 					location "body"
 					type "String"
 					optional false

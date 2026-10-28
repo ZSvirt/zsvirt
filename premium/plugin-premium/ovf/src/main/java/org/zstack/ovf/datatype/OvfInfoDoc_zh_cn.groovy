@@ -48,7 +48,7 @@ doc {
 	}
 	field {
 		name "vmName"
-		desc "云主机名称"
+		desc "虚拟机名称"
 		type "String"
 		since "zsv_3.14.6"
 	}

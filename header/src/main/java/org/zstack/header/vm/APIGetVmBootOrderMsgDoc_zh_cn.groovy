@@ -3,11 +3,11 @@ package org.zstack.header.vm
 import org.zstack.header.vm.APIGetVmBootOrderReply
 
 doc {
-	title "获得云主机启动设备列表(GetVmBootOrder)"
+	title "获得虚拟机启动设备列表(GetVmBootOrder)"
 
 	category "vmInstance"
 
-	desc """获得一个云主机的启动设备列表"""
+	desc """获得一个虚拟机的启动设备列表"""
 
 	rest {
 		request {
@@ -24,7 +24,7 @@ doc {
 				column {
 					name "uuid"
 					enclosedIn ""
-					desc "云主机UUID"
+					desc "虚拟机UUID"
 					location "url"
 					type "String"
 					optional false

@@ -4,12 +4,12 @@ import org.zstack.header.errorcode.ErrorCode
 
 doc {
 
-	title "扫描主存储上的云主机元数据返回"
+	title "扫描主存储上的虚拟机元数据返回"
 
 	ref {
 		name "vmInstanceMetadata"
 		path "org.zstack.header.storage.primary.APIScanVmInstanceMetadataFromPrimaryStorageReply.vmInstanceMetadata"
-		desc "云主机元数据摘要列表"
+		desc "虚拟机元数据摘要列表"
 		type "List"
 		since "zsv_5.0.0"
 		clz VmMetadataScanEntry.class

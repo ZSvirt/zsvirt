@@ -7,7 +7,7 @@ doc {
 
 	category "mevoco"
 
-	desc """设置云主机是否开启了Vnuma功能,如果开启，云主机在重启后会自动生成numa结构"""
+	desc """设置虚拟机是否开启了Vnuma功能,如果开启，虚拟机在重启后会自动生成numa结构"""
 
 	rest {
 		request {
@@ -33,7 +33,7 @@ doc {
 				column {
 					name "enable"
 					enclosedIn "setVmNuma"
-					desc "云主机是否被标识为Vnuma可访问"
+					desc "虚拟机是否被标识为Vnuma可访问"
 					location "body"
 					type "boolean"
 					optional false

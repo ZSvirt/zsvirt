@@ -87,7 +87,7 @@ doc {
 				column {
 					name "type"
 					enclosedIn "params"
-					desc "云主机类型"
+					desc "虚拟机类型"
 					location "body"
 					type "String"
 					optional true
@@ -161,7 +161,7 @@ doc {
 				column {
 					name "strategy"
 					enclosedIn "params"
-					desc "云主机创建策略"
+					desc "虚拟机创建策略"
 					location "body"
 					type "String"
 					optional true

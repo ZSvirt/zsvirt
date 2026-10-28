@@ -7,7 +7,7 @@ doc {
 
 	category "autoscaling"
 
-	desc """手动删除伸缩组内云主机"""
+	desc """手动删除伸缩组内虚拟机"""
 
 	rest {
 		request {
@@ -24,7 +24,7 @@ doc {
 				column {
 					name "instanceUuid"
 					enclosedIn ""
-					desc "云主机UUID"
+					desc "虚拟机UUID"
 					location "url"
 					type "String"
 					optional false

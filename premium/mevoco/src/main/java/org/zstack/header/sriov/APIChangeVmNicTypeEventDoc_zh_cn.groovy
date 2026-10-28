@@ -5,7 +5,7 @@ import org.zstack.header.vm.VmNicInventory
 
 doc {
 
-	title "修改云主机网卡类型返回结果"
+	title "修改虚拟机网卡类型返回结果"
 
 	field {
 		name "success"
@@ -24,7 +24,7 @@ doc {
 	ref {
 		name "inventory"
 		path "org.zstack.header.sriov.APIChangeVmNicTypeEvent.inventory"
-		desc "云主机网卡清单"
+		desc "虚拟机网卡清单"
 		type "VmNicInventory"
 		since "zsv_3.9.0"
 		clz VmNicInventory.class

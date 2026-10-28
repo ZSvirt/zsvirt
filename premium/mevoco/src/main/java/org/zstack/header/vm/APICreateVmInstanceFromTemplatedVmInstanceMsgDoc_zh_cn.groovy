@@ -88,7 +88,7 @@ doc {
 				column {
 					name "l3NetworkUuids"
 					enclosedIn "params"
-					desc "三层网络UUID列表。可以指定一个或多个三层网络，云主机会在每个网络上创建一个网卡"
+					desc "三层网络UUID列表。可以指定一个或多个三层网络，虚拟机会在每个网络上创建一个网卡"
 					location "body"
 					type "List"
 					optional true

@@ -4,7 +4,7 @@ import org.zstack.header.errorcode.ErrorCode
 
 doc {
 
-	title "获取云主机虚拟化技术类型"
+	title "获取虚拟机虚拟化技术类型"
 
 	ref {
 		name "error"

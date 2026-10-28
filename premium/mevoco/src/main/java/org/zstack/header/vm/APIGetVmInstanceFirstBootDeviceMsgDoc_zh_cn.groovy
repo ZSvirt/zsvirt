@@ -7,7 +7,7 @@ doc {
 
 	category "mevoco"
 
-	desc """获取云主机第一启动项"""
+	desc """获取虚拟机第一启动项"""
 
 	rest {
 		request {
@@ -17,7 +17,7 @@ doc {
 
 			clz APIGetVmInstanceFirstBootDeviceMsg.class
 
-			desc """获取云主机第一启动项"""
+			desc """获取虚拟机第一启动项"""
 
 			params {
 

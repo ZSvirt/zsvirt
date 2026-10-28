@@ -7,7 +7,7 @@ doc {
 
 	category "vmInstance"
 
-	desc """批量获取云主机能力"""
+	desc """批量获取虚拟机能力"""
 
 	rest {
 		request {

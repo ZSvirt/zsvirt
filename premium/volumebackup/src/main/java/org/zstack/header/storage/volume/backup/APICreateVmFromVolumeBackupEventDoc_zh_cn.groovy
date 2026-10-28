@@ -5,12 +5,12 @@ import org.zstack.header.errorcode.ErrorCode
 
 doc {
 
-	title "从备份创建云主机返回"
+	title "从备份创建虚拟机返回"
 
 	ref {
 		name "inventory"
 		path "org.zstack.header.storage.volume.backup.APICreateVmFromVolumeBackupEvent.inventory"
-		desc "云主机实例"
+		desc "虚拟机实例"
 		type "VmInstanceInventory"
 		since "zsv_3.18.0"
 		clz VmInstanceInventory.class

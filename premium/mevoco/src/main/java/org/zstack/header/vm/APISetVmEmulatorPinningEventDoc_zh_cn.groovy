@@ -4,7 +4,7 @@ import org.zstack.header.errorcode.ErrorCode
 
 doc {
 
-	title "设置云主机EmulatorPinning的Host CPU"
+	title "设置虚拟机EmulatorPinning的Host CPU"
 
 	field {
 		name "success"

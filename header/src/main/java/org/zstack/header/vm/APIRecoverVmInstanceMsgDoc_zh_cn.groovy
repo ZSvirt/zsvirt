@@ -3,11 +3,11 @@ package org.zstack.header.vm
 import org.zstack.header.vm.APIRecoverVmInstanceEvent
 
 doc {
-	title "恢复已删除云主机(RecoverVmInstance)"
+	title "恢复已删除虚拟机(RecoverVmInstance)"
 
 	category "vmInstance"
 
-	desc """恢复一个处于Destroyed状态的云主机。恢复后云主机处于Stopped状态并且没有IP地址"""
+	desc """恢复一个处于Destroyed状态的虚拟机。恢复后虚拟机处于Stopped状态并且没有IP地址"""
 
 	rest {
 		request {
@@ -24,7 +24,7 @@ doc {
 				column {
 					name "uuid"
 					enclosedIn "recoverVmInstance"
-					desc "云主机UUID"
+					desc "虚拟机UUID"
 					location "url"
 					type "String"
 					optional false

@@ -7,7 +7,7 @@ doc {
 
 	category "mevoco"
 
-	desc """设置云主机防IP欺骗启用状态"""
+	desc """设置虚拟机防IP欺骗启用状态"""
 
 	rest {
 		request {
@@ -33,7 +33,7 @@ doc {
 				column {
 					name "enable"
 					enclosedIn "setVmCleanTraffic"
-					desc "是否启用云主机 clean-traffic"
+					desc "是否启用虚拟机 clean-traffic"
 					location "body"
 					type "boolean"
 					optional false

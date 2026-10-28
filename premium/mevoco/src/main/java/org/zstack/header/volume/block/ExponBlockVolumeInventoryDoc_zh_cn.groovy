@@ -53,7 +53,7 @@ doc {
 	}
 	field {
 		name "vmInstanceUuid"
-		desc "云主机UUID"
+		desc "虚拟机UUID"
 		type "String"
 		since "zsv_4.10.16"
 	}

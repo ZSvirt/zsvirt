@@ -7,7 +7,7 @@ doc {
 
 	category "vmInstance"
 
-	desc """改变Stopped的云主机的网卡的L3网络"""
+	desc """改变Stopped的虚拟机的网卡的L3网络"""
 
 	rest {
 		request {
@@ -24,7 +24,7 @@ doc {
 				column {
 					name "vmNicUuid"
 					enclosedIn "params"
-					desc "云主机网卡UUID"
+					desc "虚拟机网卡UUID"
 					location "url"
 					type "String"
 					optional false

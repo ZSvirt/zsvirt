@@ -7,7 +7,7 @@ doc {
 
 	category "sshKeyPair"
 
-	desc """云主机卸载密钥对"""
+	desc """虚拟机卸载密钥对"""
 
 	rest {
 		request {
@@ -24,7 +24,7 @@ doc {
 				column {
 					name "vmInstanceUuid"
 					enclosedIn ""
-					desc "云主机UUID"
+					desc "虚拟机UUID"
 					location "url"
 					type "String"
 					optional false

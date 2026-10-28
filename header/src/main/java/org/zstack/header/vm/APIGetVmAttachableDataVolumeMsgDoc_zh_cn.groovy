@@ -3,11 +3,11 @@ package org.zstack.header.vm
 import org.zstack.header.vm.APIGetVmAttachableDataVolumeReply
 
 doc {
-	title "获取云主机可加载云盘列表(GetVmAttachableDataVolume)"
+	title "获取虚拟机可加载云盘列表(GetVmAttachableDataVolume)"
 
 	category "vmInstance"
 
-	desc """获取一个云主机可以加载的云盘列表"""
+	desc """获取一个虚拟机可以加载的云盘列表"""
 
 	rest {
 		request {
@@ -24,7 +24,7 @@ doc {
 				column {
 					name "vmInstanceUuid"
 					enclosedIn ""
-					desc "云主机UUID"
+					desc "虚拟机UUID"
 					location "url"
 					type "String"
 					optional false

@@ -4,7 +4,7 @@ import org.zstack.header.errorcode.ErrorCode
 
 doc {
 
-	title "云主机控制台密码"
+	title "虚拟机控制台密码"
 
 	ref {
 		name "error"

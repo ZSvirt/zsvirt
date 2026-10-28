@@ -3,11 +3,11 @@ package org.zstack.header.vm
 import org.zstack.header.vm.APISetVmQxlMemoryEvent
 
 doc {
-	title "设置云主机的显存(SetVmQxlMemory)"
+	title "设置虚拟机的显存(SetVmQxlMemory)"
 
 	category "vmInstance"
 
-	desc """设置云主机的显存大小，当云主机的显卡类型为qxl时生效"""
+	desc """设置虚拟机的显存大小，当虚拟机的显卡类型为qxl时生效"""
 
 	rest {
 		request {
@@ -24,7 +24,7 @@ doc {
 				column {
 					name "uuid"
 					enclosedIn "setVmQxlMemory"
-					desc "云主机UUID"
+					desc "虚拟机UUID"
 					location "url"
 					type "String"
 					optional false

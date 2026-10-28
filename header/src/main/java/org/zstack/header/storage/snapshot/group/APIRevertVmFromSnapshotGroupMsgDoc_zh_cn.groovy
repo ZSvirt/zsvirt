@@ -7,7 +7,7 @@ doc {
 
 	category "snapshot.volume"
 
-	desc """从快照组恢复云主机"""
+	desc """从快照组恢复虚拟机"""
 
 	rest {
 		request {

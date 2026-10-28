@@ -29,7 +29,7 @@ doc {
 	}
 	field {
 		name "vmUuid"
-		desc "云主机Uuid"
+		desc "虚拟机Uuid"
 		type "String"
 		since "zsv_4.2.0"
 	}

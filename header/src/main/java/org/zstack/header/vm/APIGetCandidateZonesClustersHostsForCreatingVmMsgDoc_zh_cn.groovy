@@ -3,11 +3,11 @@ package org.zstack.header.vm
 import org.zstack.header.vm.APIGetCandidateZonesClustersHostsForCreatingVmReply
 
 doc {
-	title "获取可创建云主机的目的地列表(GetCandidateZonesClustersHostsForCreatingVm)"
+	title "获取可创建虚拟机的目的地列表(GetCandidateZonesClustersHostsForCreatingVm)"
 
 	category "vmInstance"
 
-	desc """获取可以创建指定云主机参数的目的区域、集群、物理机。用户可以使用该API，通过指定云主机参数获得可以创建满足参数云主机的目的地。"""
+	desc """获取可以创建指定虚拟机参数的目的区域、集群、物理机。用户可以使用该API，通过指定虚拟机参数获得可以创建满足参数虚拟机的目的地。"""
 
 	rest {
 		request {

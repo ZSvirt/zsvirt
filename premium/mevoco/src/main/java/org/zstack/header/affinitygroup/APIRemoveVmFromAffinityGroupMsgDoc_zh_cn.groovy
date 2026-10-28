@@ -7,7 +7,7 @@ doc {
 
 	category "affinityGroup"
 
-	desc """从亲和组中移除云主机"""
+	desc """从亲和组中移除虚拟机"""
 
 	rest {
 		request {

@@ -1,11 +1,14 @@
 package org.zstack.header.allocator;
 
 import org.springframework.http.HttpMethod;
+import org.zstack.header.cluster.ClusterInventory;
 import org.zstack.header.cluster.ClusterVO;
+import org.zstack.header.host.HostInventory;
 import org.zstack.header.host.HostVO;
 import org.zstack.header.message.APIParam;
 import org.zstack.header.message.APISyncCallMessage;
 import org.zstack.header.rest.RestRequest;
+import org.zstack.header.zone.ZoneInventory;
 import org.zstack.header.zone.ZoneVO;
 
 import java.util.List;
@@ -72,9 +75,9 @@ public class APIGetCpuMemoryCapacityMsg extends APISyncCallMessage {
     public static APIGetCpuMemoryCapacityMsg __example__() {
         APIGetCpuMemoryCapacityMsg msg = new APIGetCpuMemoryCapacityMsg();
         msg.setAll(true);
-        msg.setZoneUuids(list(uuid(),uuid()));
-        msg.setClusterUuids(list(uuid(),uuid()));
-        msg.setHostUuids(list(uuid(),uuid()));
+        msg.setZoneUuids(list(uuid(ZoneVO.class),uuid(ZoneInventory.class)));
+        msg.setClusterUuids(list(uuid(ClusterVO.class),uuid(ClusterInventory.class)));
+        msg.setHostUuids(list(uuid(HostVO.class),uuid(HostInventory.class)));
         msg.setHypervisorType("KVM");
         return msg;
     }

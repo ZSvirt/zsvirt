@@ -45,7 +45,7 @@ public class APIUpdateConsoleProxyAgentMsg extends APIMessage implements Console
 
     public static APIUpdateConsoleProxyAgentMsg __example__() {
         APIUpdateConsoleProxyAgentMsg msg = new APIUpdateConsoleProxyAgentMsg();
-        msg.setUuid(uuid());
+        msg.setUuid(uuid(ConsoleProxyAgentVO.class));
         msg.setConsoleProxyOverriddenIp("127.0.0.1");
         msg.setConsoleProxyPort(4789);
         return msg;

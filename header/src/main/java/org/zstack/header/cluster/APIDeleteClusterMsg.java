@@ -33,7 +33,7 @@ import static org.zstack.utils.CollectionDSL.list;
  * }
  * }
  * @result see :ref:`APIDeleteClusterEvent`
- * @since 0.1.0
+ * @since zsv_0.1.0
  */
 @RestRequest(
         path = "/clusters/{uuid}",
@@ -74,7 +74,7 @@ public class APIDeleteClusterMsg extends APIDeleteMessage implements ClusterMess
  
     public static APIDeleteClusterMsg __example__() {
         APIDeleteClusterMsg msg = new APIDeleteClusterMsg();
-        msg.setUuid(uuid());
+        msg.setUuid(uuid(ClusterVO.class));
         return msg;
     }
 }

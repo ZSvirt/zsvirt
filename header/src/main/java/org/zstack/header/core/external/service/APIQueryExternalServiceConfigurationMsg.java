@@ -5,12 +5,13 @@ import org.zstack.header.query.APIQueryMessage;
 import org.zstack.header.query.AutoQuery;
 import org.zstack.header.rest.RestRequest;
 
-import java.util.Collections;
 import java.util.List;
+
+import static org.zstack.utils.CollectionDSL.list;
 
 /**
  * @Author: ya.wang
- * @Date: 1/15/26 1:36 AM
+ * @Date: 1/15/26 1:36 AM
  */
 @AutoQuery(replyClass = APIQueryExternalServiceConfigurationReply.class, inventoryClass = ExternalServiceConfigurationInventory.class)
 @RestRequest(
@@ -20,5 +21,5 @@ import java.util.List;
         responseClass = APIQueryExternalServiceConfigurationReply.class
 )
 public class APIQueryExternalServiceConfigurationMsg extends APIQueryMessage {
-    public static List<String> __example__() {return Collections.singletonList("uuid=" + uuid());}
+    public static List<String> __example__() {return list("uuid=" + uuid(ExternalServiceConfigurationVO.class));}
 }

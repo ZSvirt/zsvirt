@@ -28,9 +28,7 @@ public class APIUpdateClusterOSEvent extends APIEvent {
 
     public static APIUpdateClusterOSEvent __example__() {
         APIUpdateClusterOSEvent event = new APIUpdateClusterOSEvent();
-        LongJobInventory inv = new LongJobInventory();
-        inv.setUuid(uuid());
-        event.setInventory(inv);
+        event.setInventory(LongJobInventory.__example__());
         return event;
     }
 }

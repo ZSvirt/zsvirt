@@ -81,7 +81,18 @@ public class ConsoleInventory {
     public Timestamp getExpiredDate() {
         return expiredDate;
     }
+
     public void setExpiredDate(Timestamp expiredDate) {
         this.expiredDate = expiredDate;
+    }
+
+    public static ConsoleInventory __example__() {
+        ConsoleInventory inventory = new ConsoleInventory();
+        inventory.setHostname("127.0.0.1");
+        inventory.setPort(4900);
+        inventory.setScheme("http");
+        inventory.setToken("token");
+        inventory.setVersion("1.0.0");
+        return inventory;
     }
 }

@@ -78,7 +78,7 @@ public class APIUpdateWebhookMsg extends APIMessage {
 
     public static APIUpdateWebhookMsg __example__() {
         APIUpdateWebhookMsg msg = new APIUpdateWebhookMsg();
-        msg.setUuid(uuid());
+        msg.setUuid(uuid(WebhookVO.class));
         msg.setName("test");
         return msg;
     }

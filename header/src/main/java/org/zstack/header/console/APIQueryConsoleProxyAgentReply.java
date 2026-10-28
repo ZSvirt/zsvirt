@@ -24,15 +24,7 @@ public class APIQueryConsoleProxyAgentReply extends APIQueryReply {
  
     public static APIQueryConsoleProxyAgentReply __example__() {
         APIQueryConsoleProxyAgentReply reply = new APIQueryConsoleProxyAgentReply();
-        ConsoleProxyAgentInventory inventory = new ConsoleProxyAgentInventory();
-        inventory.setManagementIp("127.0.0.1");
-        inventory.setState(ConsoleProxyAgentState.Enabled.toString());
-        inventory.setType("ManagementServerConsoleProxy");
-        inventory.setState(ConsoleProxyAgentStatus.Connected.toString());
-        inventory.setUuid(uuid());
-
-        reply.setInventories(list(inventory));
+        reply.setInventories(list(ConsoleProxyAgentInventory.__example__()));
         return reply;
     }
-
 }

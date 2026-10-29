@@ -1291,19 +1291,28 @@ public class CloudBusImpl3 implements CloudBus, CloudBusIN {
 
     @AsyncThread
     public void handleHttpRequest(HttpEntity<String> e, HttpServletResponse rsp) {
+        Message msg;
+        Map raw;
         try {
-            Message msg = CloudBusGson.fromJson(e.getBody());
-            Map raw = JSONObjectUtil.toObject(e.getBody(), LinkedHashMap.class);
-            try {
-                restoreFromSchema(msg, raw);
-            } catch (ClassNotFoundException e1) {
-                throw new CloudRuntimeException(e1);
-            }
+            msg = CloudBusGson.fromJson(e.getBody());
+            raw = JSONObjectUtil.toObject(e.getBody(), LinkedHashMap.class);
+        } catch (Exception exception) {
+            logger.warn("unable to parse message from HTTP", exception);
+            return;
+        }
 
+        try {
+            restoreFromSchema(msg, raw);
+        } catch (ClassNotFoundException e1) {
+            throw new CloudRuntimeException(e1);
+        }
+
+        try {
             new MessageSender(msg).localSend();
             rsp.setStatus(HttpStatus.OK.value());
         } catch (Throwable t) {
-            logger.warn(String.format("unable to deliver a message received from HTTP. HTTP body: %s", e.getBody()), t);
+            logger.warn(String.format("unable to deliver a message received from HTTP. HTTP body: %s",
+                    CloudBusGson.toLogSafeJson(msg)), t);
         }
     }
 

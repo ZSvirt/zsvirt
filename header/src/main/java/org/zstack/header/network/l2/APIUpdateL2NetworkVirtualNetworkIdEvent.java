@@ -28,16 +28,7 @@ public class APIUpdateL2NetworkVirtualNetworkIdEvent extends APIEvent {
 
     public static APIUpdateL2NetworkVirtualNetworkIdEvent __example__() {
         APIUpdateL2NetworkVirtualNetworkIdEvent event = new APIUpdateL2NetworkVirtualNetworkIdEvent();
-        L2VlanNetworkInventory net = new L2VlanNetworkInventory();
-
-        net.setName("Test-Net");
-        net.setVlan(10);
-        net.setDescription("Test");
-        net.setZoneUuid(uuid());
-        net.setPhysicalInterface("eth0");
-        net.setType("L2VlanNetwork");
-
-        event.setInventory(net);
+        event.setInventory(L2VlanNetworkInventory.__example__());
         return event;
     }
 }

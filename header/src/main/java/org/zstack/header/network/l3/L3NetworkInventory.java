@@ -1,7 +1,9 @@
 package org.zstack.header.network.l3;
 
 import org.zstack.header.configuration.PythonClassInventory;
+import org.zstack.header.message.DocUtils;
 import org.zstack.header.network.l2.L2NetworkInventory;
+import org.zstack.header.network.l2.L2NetworkVO;
 import org.zstack.header.network.service.NetworkServiceL3NetworkRefInventory;
 import org.zstack.header.network.service.NetworkServiceType;
 import org.zstack.header.query.*;
@@ -18,6 +20,8 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static org.zstack.utils.CollectionDSL.list;
 
 /**
  * @inventory inventory for l3Network
@@ -57,7 +61,7 @@ import java.util.stream.Collectors;
  * ]
  * }
  * }
- * @since 0.1.0
+ * @since zsv_0.1.0
  */
 @Inventory(mappingVOClass = L3NetworkVO.class)
 @PythonClassInventory
@@ -413,5 +417,15 @@ public class L3NetworkInventory implements Serializable {
         }
 
         return false;
+    }
+
+    public static L3NetworkInventory __example__() {
+        L3NetworkInventory l3 = new L3NetworkInventory();
+        l3.setName("Test-L3Network");
+        l3.setL2NetworkUuid(DocUtils.createFixedUuid(L2NetworkVO.class));
+        l3.setUuid(DocUtils.createFixedUuid(L3NetworkVO.class));
+        l3.setDns(list("8.8.8.8"));
+        l3.setHostRoute(list(L3NetworkHostRouteInventory.__example__()));
+        return l3;
     }
 }

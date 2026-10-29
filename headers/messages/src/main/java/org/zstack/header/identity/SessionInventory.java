@@ -3,6 +3,7 @@ package org.zstack.header.identity;
 import org.zstack.header.configuration.PythonClassInventory;
 import org.zstack.header.message.DocUtils;
 import org.zstack.header.rest.APINoSee;
+import org.zstack.utils.StringDSL;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
@@ -59,7 +60,7 @@ public class SessionInventory implements Serializable {
     public static SessionInventory __example__() {
         SessionInventory session = new SessionInventory();
         session.setUuid(DocUtils.createFixedUuid(SessionInventory.class));
-        session.setAccountUuid(DocUtils.uuidForAPIDoc());
+        session.setAccountUuid(StringDSL.createFixedUuid("AccountVO"));
         session.setCreateDate(DocUtils.timestamp());
         session.setExpiredDate(DocUtils.timestampAndAddDays(1));
         return session;

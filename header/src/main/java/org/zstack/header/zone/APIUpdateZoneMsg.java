@@ -1,7 +1,6 @@
 package org.zstack.header.zone;
 
 import org.springframework.http.HttpMethod;
-import org.zstack.header.message.APIEvent;
 import org.zstack.header.message.APIMessage;
 import org.zstack.header.message.APIParam;
 import org.zstack.header.rest.RestRequest;
@@ -66,7 +65,7 @@ public class APIUpdateZoneMsg extends APIMessage implements ZoneMessage {
         APIUpdateZoneMsg msg = new APIUpdateZoneMsg();
         msg.setName("TestZone2");
         msg.setDescription("test second zone");
-        msg.setUuid(uuid());
+        msg.setUuid(uuid(ZoneVO.class));
         msg.setDefault(true);
         return msg;
     }

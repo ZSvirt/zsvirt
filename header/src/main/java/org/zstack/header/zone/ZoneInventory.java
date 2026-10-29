@@ -3,6 +3,7 @@ package org.zstack.header.zone;
 import org.zstack.header.cluster.ClusterInventory;
 import org.zstack.header.configuration.PythonClassInventory;
 import org.zstack.header.host.HostInventory;
+import org.zstack.header.message.DocUtils;
 import org.zstack.header.network.l2.L2NetworkInventory;
 import org.zstack.header.network.l3.L3NetworkInventory;
 import org.zstack.header.query.ExpandedQueries;
@@ -182,5 +183,17 @@ public class ZoneInventory implements Serializable {
 
     public void setDefault(boolean aDefault) {
         isDefault = aDefault;
+    }
+
+    public static ZoneInventory __example__() {
+        ZoneInventory zone = new ZoneInventory();
+        zone.setName("TestZone");
+        zone.setUuid(DocUtils.createFixedUuid(ZoneVO.class));
+        zone.setDescription("Test");
+        zone.setState(ZoneState.Enabled.toString());
+        zone.setType("zstack");
+        zone.setCreateDate(DocUtils.timestamp());
+        zone.setLastOpDate(DocUtils.timestamp());
+        return zone;
     }
 }

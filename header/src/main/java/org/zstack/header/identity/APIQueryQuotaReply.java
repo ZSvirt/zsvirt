@@ -24,13 +24,7 @@ public class APIQueryQuotaReply extends APIQueryReply {
  
     public static APIQueryQuotaReply __example__() {
         APIQueryQuotaReply reply = new APIQueryQuotaReply();
-        QuotaInventory inventory = new QuotaInventory();
-        inventory.setName("quota");
-        inventory.setValue(20);
-        inventory.setIdentityUuid(uuid());
-        reply.setInventories(list(inventory));
-
+        reply.setInventories(list(QuotaInventory.__example__()));
         return reply;
     }
-
 }

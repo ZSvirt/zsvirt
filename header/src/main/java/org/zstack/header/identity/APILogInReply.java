@@ -3,8 +3,6 @@ package org.zstack.header.identity;
 import org.zstack.header.message.APIReply;
 import org.zstack.header.rest.RestResponse;
 
-import java.sql.Timestamp;
-
 /**
  * author:kaicai.hu
  * Date:2019/4/24
@@ -23,13 +21,7 @@ public class APILogInReply extends APIReply {
 
     public static APILogInReply __example__() {
         APILogInReply reply = new APILogInReply();
-
-        SessionInventory inventory = new SessionInventory();
-        inventory.setUuid(uuid());
-        inventory.setAccountUuid(uuid());
-        inventory.setExpiredDate(new Timestamp(org.zstack.header.message.DocUtils.date));
-
-        reply.setInventory(inventory);
+        reply.setInventory(SessionInventory.__example__());
         return reply;
     }
 }

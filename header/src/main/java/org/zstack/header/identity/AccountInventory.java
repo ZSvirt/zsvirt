@@ -120,8 +120,8 @@ public class AccountInventory {
         account.setType(AccountType.Normal.toString());
         account.setSource(AccountSource.Local.toString());
         account.setState(AccountState.Enabled.toString());
-        account.setCreateDate(new Timestamp(DocUtils.date));
-        account.setLastOpDate(new Timestamp(DocUtils.date));
+        account.setCreateDate(DocUtils.timestamp());
+        account.setLastOpDate(DocUtils.timestamp());
         return account;
     }
 }

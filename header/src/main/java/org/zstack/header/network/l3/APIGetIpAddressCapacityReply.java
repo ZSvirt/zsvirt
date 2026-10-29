@@ -7,9 +7,6 @@ import org.zstack.header.rest.RestResponse;
 import java.util.ArrayList;
 import java.util.List;
 
-
-/**
- */
 @RestResponse(fieldsTo = {"all"})
 public class APIGetIpAddressCapacityReply extends APIReply {
     private long totalCapacity;
@@ -125,8 +122,7 @@ public class APIGetIpAddressCapacityReply extends APIReply {
         data.setAvailableCapacity(15L);
         data.setTotalCapacity(20L);
         data.setUsedIpAddressNumber(5L);
-        data.setResourceUuid(uuid());
+        data.setResourceUuid(uuid(IpRangeVO.class));
         return reply;
     }
-
 }

@@ -1,6 +1,7 @@
 package org.zstack.header.network.l3;
 
 import org.zstack.header.configuration.PythonClassInventory;
+import org.zstack.header.message.DocUtils;
 import org.zstack.header.query.ExpandedQueries;
 import org.zstack.header.query.ExpandedQuery;
 import org.zstack.header.search.Inventory;
@@ -26,7 +27,7 @@ import java.util.List;
  * "lastOpDate": "May 4, 2014 4:30:23 PM"
  * }
  * }
- * @since 0.1.0
+ * @since zsv_0.1.0
  */
 @Inventory(mappingVOClass = AddressPoolVO.class, collectionValueOfMethod="valueOf1")
 @PythonClassInventory
@@ -63,5 +64,14 @@ public class AddressPoolInventory extends IpRangeInventory {
             invs.add(AddressPoolInventory.valueOf1(vo));
         }
         return invs;
+    }
+
+    public static AddressPoolInventory __example__() {
+        AddressPoolInventory ipRange = new AddressPoolInventory();
+        ipRange.setName("Test-IPRange");
+        ipRange.setL3NetworkUuid(DocUtils.createFixedUuid(L3NetworkVO.class));
+        ipRange.setNetworkCidr("192.168.10.0/24");
+        ipRange.setIpRangeType(IpRangeType.AddressPool);
+        return ipRange;
     }
 }

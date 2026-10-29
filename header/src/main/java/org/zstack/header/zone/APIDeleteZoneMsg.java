@@ -78,7 +78,7 @@ public class APIDeleteZoneMsg extends APIDeleteMessage implements ZoneMessage {
  
     public static APIDeleteZoneMsg __example__() {
         APIDeleteZoneMsg msg = new APIDeleteZoneMsg();
-        msg.setUuid(uuid());
+        msg.setUuid(uuid(ZoneVO.class));
         msg.setDeletionMode(DeletionMode.Permissive);
         return msg;
     }

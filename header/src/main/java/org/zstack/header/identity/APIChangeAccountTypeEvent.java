@@ -25,13 +25,8 @@ public class APIChangeAccountTypeEvent extends APIEvent {
 
     public static APIChangeAccountTypeEvent __example__() {
         APIChangeAccountTypeEvent event = new APIChangeAccountTypeEvent();
-
-        AccountInventory inventory = new AccountInventory();
-        inventory.setName("test");
-        inventory.setType(AccountType.SystemAdmin.toString());
-        inventory.setUuid(uuid());
-
-        event.setInventory(inventory);
+        event.setInventory(AccountInventory.__example__());
+        event.getInventory().setType(AccountType.SystemAdmin.toString());
         return event;
     }
 }

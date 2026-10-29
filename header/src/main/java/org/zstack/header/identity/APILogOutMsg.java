@@ -43,7 +43,7 @@ public class APILogOutMsg extends APISessionMessage implements APILoginAuditor {
     public static APILogOutMsg __example__() {
         APILogOutMsg msg = new APILogOutMsg();
 
-        msg.setSessionUuid(uuid());
+        msg.setSessionUuid(uuid(SessionVO.class));
         return msg;
     }
 

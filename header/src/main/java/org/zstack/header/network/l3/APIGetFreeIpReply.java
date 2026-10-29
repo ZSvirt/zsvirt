@@ -24,7 +24,7 @@ public class APIGetFreeIpReply extends APIReply {
     public static APIGetFreeIpReply __example__() {
         APIGetFreeIpReply reply = new APIGetFreeIpReply();
 
-        String iprUuid = uuid();
+        String iprUuid = uuid(FreeIpInventory.class);
 
         List<FreeIpInventory> invs = new ArrayList<>();
 

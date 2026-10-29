@@ -22,7 +22,7 @@ import org.zstack.header.rest.RestResponse;
  * "success": true
  * }
  * }
- * @since 0.1.0
+ * @since zsv_0.1.0
  */
 
 @RestResponse(allTo = "inventory")
@@ -51,16 +51,7 @@ public class APIDetachL2NetworkFromClusterEvent extends APIEvent {
  
     public static APIDetachL2NetworkFromClusterEvent __example__() {
         APIDetachL2NetworkFromClusterEvent event = new APIDetachL2NetworkFromClusterEvent();
-        L2VlanNetworkInventory net = new L2VlanNetworkInventory();
-
-        net.setName("Test-Net");
-        net.setVlan(10);
-        net.setDescription("Test");
-        net.setZoneUuid(uuid());
-        net.setPhysicalInterface("eth0");
-        net.setType("L2VlanNetwork");
-
-        event.setInventory(net);
+        event.setInventory(L2VlanNetworkInventory.__example__());
         return event;
     }
 

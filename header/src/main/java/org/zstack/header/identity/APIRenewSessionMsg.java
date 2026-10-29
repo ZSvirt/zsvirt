@@ -43,9 +43,8 @@ public class APIRenewSessionMsg extends APIMessage {
 
     public static APIRenewSessionMsg __example__() {
         APIRenewSessionMsg msg = new APIRenewSessionMsg();
-        msg.setSessionUuid(uuid());
+        msg.setSessionUuid(uuid(SessionVO.class));
         msg.setDuration(100L);
         return msg;
     }
-
 }

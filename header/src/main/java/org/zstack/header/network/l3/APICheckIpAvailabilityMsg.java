@@ -58,10 +58,8 @@ public class APICheckIpAvailabilityMsg extends APISyncCallMessage implements L3N
 
     public static APICheckIpAvailabilityMsg __example__() {
         APICheckIpAvailabilityMsg msg = new APICheckIpAvailabilityMsg();
-
-        msg.setL3NetworkUuid(uuid());
+        msg.setL3NetworkUuid(uuid(L3NetworkVO.class));
         msg.setIp("192.168.10.100");
-
         return msg;
     }
 

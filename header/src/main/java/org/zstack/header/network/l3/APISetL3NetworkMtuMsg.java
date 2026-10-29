@@ -40,9 +40,8 @@ public class APISetL3NetworkMtuMsg extends APIMessage implements L3NetworkMessag
 
     public static APISetL3NetworkMtuMsg __example__() {
         APISetL3NetworkMtuMsg msg = new APISetL3NetworkMtuMsg();
-        msg.setL3NetworkUuid(uuid());
+        msg.setL3NetworkUuid(uuid(L3NetworkVO.class));
         msg.setMtu(9216);
-
         return msg;
     }
 }

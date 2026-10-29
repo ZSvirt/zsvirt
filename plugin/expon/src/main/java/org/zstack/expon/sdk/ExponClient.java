@@ -335,6 +335,8 @@ public class ExponClient {
             }
 
             if (action instanceof LoginExponRequest) {
+                // TODO after zsv_5.2.0
+                reqBody = String.format("****** (for user name %s)", ((LoginExponRequest) action).getName());
                 return;
             }
             reqBuilder.addHeader(Constants.HEADER_AUTHORIZATION, String.format("%s %s", Constants.BEARER, action.sessionId));

@@ -33,7 +33,7 @@ doc {
 				column {
 					name "size"
 					enclosedIn "extendSharedBlockVolume"
-					desc "逻辑卷需要容纳的数据大小，单位为字节，不能超过卷的虚拟容量"
+					desc "扩展后的目标大小，单位为字节，不含逻辑卷元数据预留空间，不能超过卷的虚拟容量"
 					location "body"
 					type "long"
 					optional false

@@ -204,7 +204,6 @@ public class StorageDeviceManagerImpl extends AbstractService implements Storage
             HostCanonicalEvents.HostPhysicalHbaPortStateAbnormalData cdata = new HostCanonicalEvents.HostPhysicalHbaPortStateAbnormalData();
             FcHbaDeviceVO hba = Q.New(FcHbaDeviceVO.class)
                     .eq(FcHbaDeviceVO_.hostUuid, cmd.host)
-                    .eq(FcHbaDeviceVO_.name, cmd.name)
                     .eq(FcHbaDeviceVO_.portName, cmd.portName)
                     .find();
 
@@ -231,7 +230,6 @@ public class StorageDeviceManagerImpl extends AbstractService implements Storage
                 HostCanonicalEvents.HostPhysicalHbaPortStateAbnormalData cdata = (HostCanonicalEvents.HostPhysicalHbaPortStateAbnormalData) data;
                 FcHbaDeviceVO hba = Q.New(FcHbaDeviceVO.class)
                         .eq(FcHbaDeviceVO_.hostUuid, cdata.getHostUuid())
-                        .eq(FcHbaDeviceVO_.name, cdata.getName())
                         .eq(FcHbaDeviceVO_.portName, cdata.getPortName())
                         .find();
                 if (hba != null && !hba.getPortState().equals(cdata.getNewPortState())) {
@@ -401,39 +399,42 @@ public class StorageDeviceManagerImpl extends AbstractService implements Storage
     }
 
     private void handle(RefreshHbaDeviceMsg msg) {
-        RefreshHbaDeviceReply reply = new RefreshHbaDeviceReply();
-        HostVO hostVO = Q.New(HostVO.class)
-                .eq(HostVO_.uuid, msg.getHostUuid())
-                .find();
-
-        StorageDeviceBackend bkd = backends.get(hostVO.getHypervisorType());
-        bkd.scanHba(HostInventory.valueOf(hostVO), new ReturnValueCompletion<List<HbaDeviceStruct>>(msg) {
+        thdf.chainSubmit(new ChainTask(msg) {
+            @Override
+            public String getSyncSignature() {
+                return String.format("sync-hba-device-on-host-%s", msg.getHostUuid());
+            }
 
             @Override
-            public void success(List<HbaDeviceStruct> hbaDeviceStructs) {
-                syncHbaDevicesFromAgent(hbaDeviceStructs, msg.getHostUuid(), new Completion(msg) {
+            public void run(SyncTaskChain chain) {
+                RefreshHbaDeviceReply reply = new RefreshHbaDeviceReply();
+                HostVO hostVO = Q.New(HostVO.class)
+                        .eq(HostVO_.uuid, msg.getHostUuid())
+                        .find();
 
+                StorageDeviceBackend bkd = backends.get(hostVO.getHypervisorType());
+                bkd.scanHba(HostInventory.valueOf(hostVO), new ReturnValueCompletion<List<HbaDeviceStruct>>(msg, chain) {
                     @Override
-                    public void success() {
+                    public void success(List<HbaDeviceStruct> hbaDeviceStructs) {
+                        doSyncHbaDeviceDbFromAgent(hbaDeviceStructs, msg.getHostUuid());
                         bus.reply(msg, reply);
+                        chain.next();
                     }
 
                     @Override
                     public void fail(ErrorCode errorCode) {
                         reply.setError(errorCode);
                         bus.reply(msg, reply);
+                        chain.next();
                     }
                 });
-
             }
 
             @Override
-            public void fail(ErrorCode errorCode) {
-                reply.setError(errorCode);
-                bus.reply(msg, reply);
+            public String getName() {
+                return getSyncSignature();
             }
         });
-
     }
 
     private void handle(RefreshLocalRaidMsg msg) {
@@ -754,9 +755,10 @@ public class StorageDeviceManagerImpl extends AbstractService implements Storage
 
         if (!hba.getPortState().toString().equals(s.getPortState())) {
             hba.setPortState(s.getPortState());
-            hba.setSpeed(s.getSpeed());
-            dbf.update(hba);
         }
+        hba.setName(s.getName());
+        hba.setSpeed(s.getSpeed());
+        dbf.update(hba);
     }
 
     private void doSyncLocalRaidDbFromAgent(List<RaidPhysicalDriveStruct> structs, String hostUuid) {
@@ -832,27 +834,6 @@ public class StorageDeviceManagerImpl extends AbstractService implements Storage
         }
 
         doClearStaleRaidController(hostUuid);
-    }
-
-    private void syncHbaDevicesFromAgent(List<HbaDeviceStruct> structs, String hostUuid, Completion completion) {
-        thdf.chainSubmit(new ChainTask(completion) {
-            @Override
-            public String getSyncSignature() {
-                return String.format("sync-hba-device-on-host-%s", hostUuid);
-            }
-
-            @Override
-            public void run(SyncTaskChain chain) {
-                doSyncHbaDeviceDbFromAgent(structs, hostUuid);
-                completion.success();
-                chain.next();
-            }
-
-            @Override
-            public String getName() {
-                return getSyncSignature();
-            }
-        });
     }
 
     private void syncLocalRaidDbFromAgent(List<RaidPhysicalDriveStruct> struct, String hostUuid, Completion completion) {

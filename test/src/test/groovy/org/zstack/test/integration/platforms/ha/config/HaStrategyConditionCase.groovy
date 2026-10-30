@@ -57,6 +57,12 @@ class HaStrategyConditionCase extends SubCase {
         updateGlobalConfig {
             delegate.category = HaGlobalConfig.CATEGORY
             delegate.name = HaGlobalConfig.SELF_FENCER_STRATEGY.name
+            delegate.value = SelfFencerStrategy.Permissive.toString()
+        }
+
+        updateGlobalConfig {
+            delegate.category = HaGlobalConfig.CATEGORY
+            delegate.name = HaGlobalConfig.SELF_FENCER_STRATEGY.name
             delegate.value = SelfFencerStrategy.Force.toString()
         }
         def storage = zqlQuery("query HaStrategyCondition where fencerName = '${HaConstants.HOST_STORAGE_STATE}'")

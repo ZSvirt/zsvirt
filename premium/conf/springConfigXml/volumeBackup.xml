@@ -25,7 +25,6 @@
     <bean id="VolumeBackupApiInterceptor" class="org.zstack.storage.backup.VolumeBackupApiInterceptor">
         <zstack:plugin>
             <zstack:extension interface="org.zstack.header.apimediator.ApiMessageInterceptor"/>
-            <zstack:extension interface="org.zstack.header.apimediator.GlobalApiMessageInterceptor"/>
         </zstack:plugin>
     </bean>
 

@@ -269,11 +269,18 @@ public class VmCascadeExtension extends AbstractAsyncCascadeExtension {
             return;
         }
 
+        List<String> pausedVmUuids = Q.New(VmInstanceVO.class)
+                .select(VmInstanceVO_.uuid)
+                .in(VmInstanceVO_.uuid, vmUuids)
+                .eq(VmInstanceVO_.state, VmInstanceState.Paused)
+                .listValues();
         List<StopVmInstanceMsg> msgs = transformAndRemoveNull(vmUuids, arg -> {
             StopVmInstanceMsg msg = new StopVmInstanceMsg();
             msg.setVmInstanceUuid(arg);
-            // Storage detach must stop paused VMs before removing storage access.
-            msg.setType(StopVmType.cold.toString());
+            // Paused guests cannot process graceful shutdown before storage detach.
+            if (pausedVmUuids.contains(arg)) {
+                msg.setType(StopVmType.cold.toString());
+            }
             bus.makeTargetServiceIdByResourceUuid(msg, VmInstanceConstant.SERVICE_ID, arg);
             return msg;
         });

@@ -155,11 +155,25 @@ class LocalStorageDetachClusterCase extends SubCase {
         VmInstanceVO vmVo = dbFindByUuid(vm.uuid,VmInstanceVO.class)
         assert vmVo.state == VmInstanceState.Paused
 
+        VmInstanceInventory runningVm = createVmInstance {
+            name = "running-vm"
+            imageUuid = image.uuid
+            l3NetworkUuids = [l3.uuid]
+            cpuNum = 1
+            memorySize = gb(1)
+            hostUuid = host.uuid
+        }
+        assert dbFindByUuid(runningVm.uuid, VmInstanceVO.class).state == VmInstanceState.Running
+
         List<String> stopTypes = []
+        List<String> runningStopTypes = []
         env.afterSimulator(KVMConstant.KVM_STOP_VM_PATH) { rsp, HttpEntity<String> e ->
             KVMAgentCommands.StopVmCmd cmd = json(e.body, KVMAgentCommands.StopVmCmd.class)
             if (cmd.uuid == vm.uuid) {
                 stopTypes.add(cmd.type)
+            }
+            if (cmd.uuid == runningVm.uuid) {
+                runningStopTypes.add(cmd.type)
             }
             return rsp
         }
@@ -171,6 +185,8 @@ class LocalStorageDetachClusterCase extends SubCase {
         vmVo = dbFindByUuid(vm.uuid,VmInstanceVO.class)
         assert vmVo.state == VmInstanceState.Stopped
         assert stopTypes == [StopVmType.cold.toString()]
+        assert dbFindByUuid(runningVm.uuid, VmInstanceVO.class).state == VmInstanceState.Stopped
+        assert runningStopTypes == [StopVmType.grace.toString()]
     }
 
     @Override

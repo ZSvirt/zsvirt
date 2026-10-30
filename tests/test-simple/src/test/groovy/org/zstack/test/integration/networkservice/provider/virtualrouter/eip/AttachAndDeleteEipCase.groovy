@@ -291,6 +291,9 @@ class AttachAndDeleteEipCase extends SubCase{
     }
 
     void testAttachAndDeleteEipWhenVmStopped(){
+        resumeVmInstance {
+            uuid = vm.uuid
+        }
         stopVmInstance {
             uuid = vm.uuid
         }

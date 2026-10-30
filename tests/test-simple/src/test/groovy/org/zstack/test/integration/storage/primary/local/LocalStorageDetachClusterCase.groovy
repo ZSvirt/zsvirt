@@ -1,8 +1,12 @@
 package org.zstack.test.integration.storage.primary.local
 
+import org.springframework.http.HttpEntity
 import org.zstack.core.db.DatabaseFacade
+import org.zstack.header.vm.StopVmType
 import org.zstack.header.vm.VmInstanceState
 import org.zstack.header.vm.VmInstanceVO
+import org.zstack.kvm.KVMAgentCommands
+import org.zstack.kvm.KVMConstant
 import org.zstack.network.securitygroup.SecurityGroupConstant
 import org.zstack.sdk.ClusterInventory
 import org.zstack.sdk.ImageInventory
@@ -151,12 +155,38 @@ class LocalStorageDetachClusterCase extends SubCase {
         VmInstanceVO vmVo = dbFindByUuid(vm.uuid,VmInstanceVO.class)
         assert vmVo.state == VmInstanceState.Paused
 
+        VmInstanceInventory runningVm = createVmInstance {
+            name = "running-vm"
+            imageUuid = image.uuid
+            l3NetworkUuids = [l3.uuid]
+            cpuNum = 1
+            memorySize = gb(1)
+            hostUuid = host.uuid
+        }
+        assert dbFindByUuid(runningVm.uuid, VmInstanceVO.class).state == VmInstanceState.Running
+
+        List<String> stopTypes = []
+        List<String> runningStopTypes = []
+        env.afterSimulator(KVMConstant.KVM_STOP_VM_PATH) { rsp, HttpEntity<String> e ->
+            KVMAgentCommands.StopVmCmd cmd = json(e.body, KVMAgentCommands.StopVmCmd.class)
+            if (cmd.uuid == vm.uuid) {
+                stopTypes.add(cmd.type)
+            }
+            if (cmd.uuid == runningVm.uuid) {
+                runningStopTypes.add(cmd.type)
+            }
+            return rsp
+        }
+
         detachPrimaryStorageFromCluster{
             primaryStorageUuid = psInventory.uuid
             clusterUuid = cluster.uuid
         }
         vmVo = dbFindByUuid(vm.uuid,VmInstanceVO.class)
         assert vmVo.state == VmInstanceState.Stopped
+        assert stopTypes == [StopVmType.cold.toString()]
+        assert dbFindByUuid(runningVm.uuid, VmInstanceVO.class).state == VmInstanceState.Stopped
+        assert runningStopTypes == [StopVmType.grace.toString()]
     }
 
     @Override

@@ -29,6 +29,8 @@ public class StopVmGC extends EventBasedGarbageCollector {
     public String hostUuid;
     @GC
     public VmInstanceInventory inventory;
+    @GC
+    public String stopType;
 
     @Override
     protected void triggerNow(GCCompletion completion) {
@@ -51,6 +53,11 @@ public class StopVmGC extends EventBasedGarbageCollector {
             public void run(FlowTrigger trigger, Map data) {
                 StopVmOnHypervisorMsg msg = new StopVmOnHypervisorMsg();
                 msg.setVmInventory(inventory);
+                // Preserve the original cleanup request; old GC records retain
+                // their existing behavior when no stop type was persisted.
+                if (stopType != null) {
+                    msg.setType(stopType);
+                }
                 bus.makeTargetServiceIdByResourceUuid(msg, HostConstant.SERVICE_ID, hostUuid);
                 bus.send(msg, new CloudBusCallBack(trigger) {
                     @Override

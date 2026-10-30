@@ -272,6 +272,8 @@ public class VmCascadeExtension extends AbstractAsyncCascadeExtension {
         List<StopVmInstanceMsg> msgs = transformAndRemoveNull(vmUuids, arg -> {
             StopVmInstanceMsg msg = new StopVmInstanceMsg();
             msg.setVmInstanceUuid(arg);
+            // Storage detach must stop paused VMs before removing storage access.
+            msg.setType(StopVmType.cold.toString());
             bus.makeTargetServiceIdByResourceUuid(msg, VmInstanceConstant.SERVICE_ID, arg);
             return msg;
         });

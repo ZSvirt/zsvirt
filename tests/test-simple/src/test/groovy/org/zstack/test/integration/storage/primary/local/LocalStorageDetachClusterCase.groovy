@@ -1,8 +1,12 @@
 package org.zstack.test.integration.storage.primary.local
 
+import org.springframework.http.HttpEntity
 import org.zstack.core.db.DatabaseFacade
+import org.zstack.header.vm.StopVmType
 import org.zstack.header.vm.VmInstanceState
 import org.zstack.header.vm.VmInstanceVO
+import org.zstack.kvm.KVMAgentCommands
+import org.zstack.kvm.KVMConstant
 import org.zstack.network.securitygroup.SecurityGroupConstant
 import org.zstack.sdk.ClusterInventory
 import org.zstack.sdk.ImageInventory
@@ -151,12 +155,22 @@ class LocalStorageDetachClusterCase extends SubCase {
         VmInstanceVO vmVo = dbFindByUuid(vm.uuid,VmInstanceVO.class)
         assert vmVo.state == VmInstanceState.Paused
 
+        List<String> stopTypes = []
+        env.afterSimulator(KVMConstant.KVM_STOP_VM_PATH) { rsp, HttpEntity<String> e ->
+            KVMAgentCommands.StopVmCmd cmd = json(e.body, KVMAgentCommands.StopVmCmd.class)
+            if (cmd.uuid == vm.uuid) {
+                stopTypes.add(cmd.type)
+            }
+            return rsp
+        }
+
         detachPrimaryStorageFromCluster{
             primaryStorageUuid = psInventory.uuid
             clusterUuid = cluster.uuid
         }
         vmVo = dbFindByUuid(vm.uuid,VmInstanceVO.class)
         assert vmVo.state == VmInstanceState.Stopped
+        assert stopTypes == [StopVmType.cold.toString()]
     }
 
     @Override

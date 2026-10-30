@@ -2,6 +2,7 @@ package org.zstack.header.identity;
 
 import org.zstack.header.message.APIReply;
 import org.zstack.header.rest.RestResponse;
+import org.zstack.header.vo.ResourceVO;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -24,15 +25,8 @@ public class APIGetResourceAccountReply extends APIReply {
     public static APIGetResourceAccountReply __example__() {
         APIGetResourceAccountReply reply = new APIGetResourceAccountReply();
 
-        AccountInventory accountInventory = new AccountInventory();
-        accountInventory.setName("test");
-        accountInventory.setType(AccountType.Normal.toString());
-        accountInventory.setUuid(uuid());
-
         Map<String, AccountInventory> inventories = new HashMap<>();
-        inventories.put(uuid(), accountInventory);
-        inventories.put(uuid(), accountInventory);
-
+        inventories.put(uuid(ResourceVO.class), AccountInventory.__example__());
         reply.setInventories(inventories);
 
         return reply;

@@ -39,9 +39,8 @@ public class APIChangeResourceOwnerMsg extends APIMessage {
  
     public static APIChangeResourceOwnerMsg __example__() {
         APIChangeResourceOwnerMsg msg = new APIChangeResourceOwnerMsg();
-        msg.setAccountUuid(uuid());
-        msg.setResourceUuid(uuid());
-
+        msg.setAccountUuid(uuid(AccountVO.class));
+        msg.setResourceUuid(uuid(ResourceVO.class));
         return msg;
     }
 }

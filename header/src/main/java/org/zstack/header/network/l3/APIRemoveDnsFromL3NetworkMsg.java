@@ -31,7 +31,7 @@ import org.zstack.header.rest.RestRequest;
  * }
  * }
  * @result see :ref:`APIRemoveDnsFromL3NetworkEvent`
- * @since 0.1.0
+ * @since zsv_0.1.0
  */
 @RestRequest(
         path = "/l3-networks/{l3NetworkUuid}/dns/{dns}",
@@ -69,10 +69,8 @@ public class APIRemoveDnsFromL3NetworkMsg extends APIMessage implements L3Networ
  
     public static APIRemoveDnsFromL3NetworkMsg __example__() {
         APIRemoveDnsFromL3NetworkMsg msg = new APIRemoveDnsFromL3NetworkMsg();
-
-        msg.setL3NetworkUuid(uuid());
+        msg.setL3NetworkUuid(uuid(L3NetworkVO.class));
         msg.setDns("8.8.4.4");
-
         return msg;
     }
 }

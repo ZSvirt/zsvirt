@@ -3,6 +3,7 @@ package org.zstack.header.network.l3;
 import org.apache.commons.net.util.SubnetUtils;
 import org.apache.commons.net.util.SubnetUtils.SubnetInfo;
 import org.zstack.header.configuration.PythonClassInventory;
+import org.zstack.header.message.DocUtils;
 import org.zstack.header.query.ExpandedQueries;
 import org.zstack.header.query.ExpandedQuery;
 import org.zstack.header.search.Inventory;
@@ -375,5 +376,17 @@ public class IpRangeInventory implements Serializable {
 
     public SubnetUtils toSubnetUtils() {
         return new SubnetUtils(new SubnetUtils(gateway, netmask).getInfo().getNetworkAddress(), netmask);
+    }
+
+    public static IpRangeInventory __example__() {
+        IpRangeInventory ipRange = new IpRangeInventory();
+        ipRange.setName("Test-IP-Range");
+        ipRange.setL3NetworkUuid(DocUtils.createFixedUuid(L3NetworkVO.class));
+        ipRange.setStartIp("192.168.100.10");
+        ipRange.setEndIp("192.168.100.250");
+        ipRange.setNetmask("255.255.255.0");
+        ipRange.setGateway("192.168.100.1");
+        ipRange.setNetworkCidr("192.168.100.0/24");
+        return ipRange;
     }
 }

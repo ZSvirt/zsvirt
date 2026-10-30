@@ -3,8 +3,6 @@ package org.zstack.header.identity;
 import org.zstack.header.message.APIEvent;
 import org.zstack.header.rest.RestResponse;
 
-import java.sql.Timestamp;
-
 @RestResponse(allTo = "inventory")
 public class APIRenewSessionEvent extends APIEvent {
     private SessionInventory inventory;
@@ -27,14 +25,7 @@ public class APIRenewSessionEvent extends APIEvent {
 
     public static APIRenewSessionEvent __example__() {
         APIRenewSessionEvent event = new APIRenewSessionEvent();
-
-        SessionInventory inventory = new SessionInventory();
-        inventory.setUuid(uuid());
-        inventory.setAccountUuid(uuid());
-        inventory.setExpiredDate(new Timestamp(org.zstack.header.message.DocUtils.date));
-
-        event.setInventory(inventory);
+        event.setInventory(SessionInventory.__example__());
         return event;
     }
-
 }

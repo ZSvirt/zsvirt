@@ -92,7 +92,7 @@ public class APIDeleteIpRangeMsg extends APIDeleteMessage implements L3NetworkMe
  
     public static APIDeleteIpRangeMsg __example__() {
         APIDeleteIpRangeMsg msg = new APIDeleteIpRangeMsg();
-        msg.setUuid(uuid());
+        msg.setUuid(uuid(IpRangeVO.class));
         return msg;
     }
 }

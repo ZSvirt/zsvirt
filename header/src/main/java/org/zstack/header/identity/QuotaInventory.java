@@ -1,5 +1,6 @@
 package org.zstack.header.identity;
 
+import org.zstack.header.message.DocUtils;
 import org.zstack.header.query.ExpandedQueries;
 import org.zstack.header.query.ExpandedQuery;
 import org.zstack.header.search.Inventory;
@@ -100,5 +101,13 @@ public class QuotaInventory {
 
     public void setCreateDate(Timestamp createDate) {
         this.createDate = createDate;
+    }
+
+    public static QuotaInventory __example__() {
+        QuotaInventory inventory = new QuotaInventory();
+        inventory.setName("quota");
+        inventory.setValue(20);
+        inventory.setIdentityUuid(DocUtils.createFixedUuid(AccountVO.class));
+        return inventory;
     }
 }

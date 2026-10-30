@@ -24,12 +24,7 @@ public class APIQueryAccountReply extends APIQueryReply {
  
     public static APIQueryAccountReply __example__() {
         APIQueryAccountReply reply = new APIQueryAccountReply();
-        AccountInventory inventory = new AccountInventory();
-        inventory.setName("test");
-        inventory.setUuid(uuid());
-        inventory.setType(AccountType.Normal.toString());
-        reply.setInventories(list(inventory));
+        reply.setInventories(list(AccountInventory.__example__()));
         return reply;
     }
-
 }

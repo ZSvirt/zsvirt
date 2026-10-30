@@ -55,10 +55,9 @@ public class APIAddHostRouteToL3NetworkMsg extends APIMessage implements L3Netwo
 
     public static APIAddHostRouteToL3NetworkMsg __example__() {
         APIAddHostRouteToL3NetworkMsg msg = new APIAddHostRouteToL3NetworkMsg();
-        msg.setL3NetworkUuid(uuid());
+        msg.setL3NetworkUuid(uuid(L3NetworkVO.class));
         msg.setPrefix("169.254.169.254/32");
         msg.setNexthop("192.168.1.254");
-
         return msg;
     }
 }

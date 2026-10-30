@@ -42,9 +42,8 @@ public class APIDetachL2NetworkFromHostMsg extends APIMessage implements L2Netwo
 
     public static APIDetachL2NetworkFromHostMsg __example__() {
         APIDetachL2NetworkFromHostMsg msg = new APIDetachL2NetworkFromHostMsg();
-        msg.setL2NetworkUuid(uuid());
-        msg.setHostUuid(uuid());
-
+        msg.setL2NetworkUuid(uuid(L2NetworkVO.class));
+        msg.setHostUuid(uuid(HostVO.class));
         return msg;
     }
 }

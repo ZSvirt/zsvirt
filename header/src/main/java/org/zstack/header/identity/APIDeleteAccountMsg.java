@@ -41,8 +41,7 @@ public class APIDeleteAccountMsg extends APIDeleteMessage implements AccountMess
 
     public static APIDeleteAccountMsg __example__() {
         APIDeleteAccountMsg msg = new APIDeleteAccountMsg();
-        msg.setUuid(uuid());
-
+        msg.setUuid(uuid(AccountVO.class));
         return msg;
     }
 }

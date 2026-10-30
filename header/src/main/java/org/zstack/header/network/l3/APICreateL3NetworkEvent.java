@@ -26,7 +26,7 @@ import org.zstack.header.rest.RestResponse;
  * "success": true
  * }
  * }
- * @since 0.1.0
+ * @since zsv_0.1.0
  */
 @RestResponse(allTo = "inventory")
 public class APICreateL3NetworkEvent extends APIEvent {
@@ -53,13 +53,7 @@ public class APICreateL3NetworkEvent extends APIEvent {
  
     public static APICreateL3NetworkEvent __example__() {
         APICreateL3NetworkEvent event = new APICreateL3NetworkEvent();
-        L3NetworkInventory l3 = new L3NetworkInventory();
-
-        l3.setName("Test-L3Network");
-        l3.setL2NetworkUuid(uuid());
-        l3.setCategory(L3NetworkCategory.Private.toString());
-
-        event.setInventory(l3);
+        event.setInventory(L3NetworkInventory.__example__());
         return event;
     }
 

@@ -1,6 +1,7 @@
 package org.zstack.header.managementnode;
 
 import org.zstack.header.configuration.PythonClassInventory;
+import org.zstack.header.message.DocUtils;
 import org.zstack.header.search.Inventory;
 
 import java.sql.Timestamp;
@@ -65,5 +66,14 @@ public class ManagementNodeInventory {
 
     public Timestamp getHeartBeat() {
         return heartBeat;
+    }
+
+    public static ManagementNodeInventory __example__() {
+        ManagementNodeInventory inventory = new ManagementNodeInventory();
+        inventory.setUuid(DocUtils.createFixedUuid(ManagementNodeVO.class));
+        inventory.setHostName("127.0.0.1");
+        inventory.setJoinDate(DocUtils.timestamp());
+        inventory.setHeartBeat(DocUtils.timestamp());
+        return inventory;
     }
 }

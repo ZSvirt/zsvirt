@@ -7,8 +7,6 @@ import org.zstack.header.rest.RestRequest;
 import org.zstack.header.tag.TagResourceType;
 import org.zstack.utils.network.IPv6Constants;
 
-/**
- */
 @TagResourceType(L3NetworkVO.class)
 @RestRequest(
         path = "/l3-networks/{l3NetworkUuid}/ipv6-ranges/by-cidr",
@@ -86,7 +84,7 @@ public class APIAddIpv6RangeByNetworkCidrMsg extends APICreateMessage implements
         APIAddIpv6RangeByNetworkCidrMsg msg = new APIAddIpv6RangeByNetworkCidrMsg();
 
         msg.setName("Test-IPRange");
-        msg.setL3NetworkUuid(uuid());
+        msg.setL3NetworkUuid(uuid(L3NetworkVO.class));
         msg.setNetworkCidr("2002:2001::/64");
         msg.setAddressMode(IPv6Constants.SLAAC);
         msg.setIpRangeType(IpRangeType.Normal.toString());

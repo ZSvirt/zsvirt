@@ -22,7 +22,7 @@ public class APIGetZoneMsg extends APISyncCallMessage {
 
     public static APIGetZoneMsg __example__() {
         APIGetZoneMsg msg = new APIGetZoneMsg();
-        msg.setUuid(uuid());
+        msg.setUuid(uuid(ZoneVO.class));
         return msg;
     }
 

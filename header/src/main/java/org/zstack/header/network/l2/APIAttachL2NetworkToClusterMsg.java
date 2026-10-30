@@ -32,7 +32,7 @@ import org.zstack.header.rest.RestRequest;
  * }
  * }
  * @result see :ref:`APIAttachL2NetworkToClusterEvent`
- * @since 0.1.0
+ * @since zsv_0.1.0
  */
 @RestRequest(
         path = "/l2-networks/{l2NetworkUuid}/clusters/{clusterUuid}",
@@ -93,10 +93,8 @@ public class APIAttachL2NetworkToClusterMsg extends APIMessage implements L2Netw
 
     public static APIAttachL2NetworkToClusterMsg __example__() {
         APIAttachL2NetworkToClusterMsg msg = new APIAttachL2NetworkToClusterMsg();
-
-        msg.setL2NetworkUuid(uuid());
-        msg.setClusterUuid(uuid());
-
+        msg.setL2NetworkUuid(uuid(L2NetworkVO.class));
+        msg.setClusterUuid(uuid(ClusterVO.class));
         return msg;
     }
 }

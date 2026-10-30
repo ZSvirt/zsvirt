@@ -6,8 +6,9 @@ import org.zstack.header.message.APISyncCallMessage;
 import org.zstack.header.rest.RestRequest;
 import org.zstack.header.zone.ZoneVO;
 
-import java.util.Arrays;
 import java.util.List;
+
+import static org.zstack.utils.CollectionDSL.list;
 
 /**
  */
@@ -59,7 +60,7 @@ public class APIGetIpAddressCapacityMsg extends APISyncCallMessage {
  
     public static APIGetIpAddressCapacityMsg __example__() {
         APIGetIpAddressCapacityMsg msg = new APIGetIpAddressCapacityMsg();
-        msg.setIpRangeUuids(Arrays.asList(uuid()));
+        msg.setIpRangeUuids(list(uuid(IpRangeVO.class)));
         return msg;
     }
 

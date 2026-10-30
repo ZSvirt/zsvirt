@@ -53,10 +53,9 @@ public class APIUpdateL2NetworkMsg extends APIMessage implements L2NetworkMessag
  
     public static APIUpdateL2NetworkMsg __example__() {
         APIUpdateL2NetworkMsg msg = new APIUpdateL2NetworkMsg();
-        msg.setUuid(uuid());
+        msg.setUuid(uuid(L2NetworkVO.class));
         msg.setName("Test-Net");
         msg.setDescription("Test");
-
         return msg;
     }
 }

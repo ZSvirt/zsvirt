@@ -45,7 +45,7 @@ public class APIUpdateL2NetworkVirtualNetworkIdMsg extends APIMessage implements
 
     public static APIUpdateL2NetworkVirtualNetworkIdMsg __example__() {
         APIUpdateL2NetworkVirtualNetworkIdMsg msg = new APIUpdateL2NetworkVirtualNetworkIdMsg();
-        msg.setUuid(uuid());
+        msg.setUuid(uuid(L2NetworkVO.class));
         msg.setVirtualNetworkId(1);
         return msg;
     }

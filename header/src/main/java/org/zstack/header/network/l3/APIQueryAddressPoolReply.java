@@ -3,8 +3,9 @@ package org.zstack.header.network.l3;
 import org.zstack.header.query.APIQueryReply;
 import org.zstack.header.rest.RestResponse;
 
-import java.util.Arrays;
 import java.util.List;
+
+import static org.zstack.utils.CollectionDSL.list;
 
 @RestResponse(allTo = "inventories")
 public class APIQueryAddressPoolReply extends APIQueryReply {
@@ -20,15 +21,7 @@ public class APIQueryAddressPoolReply extends APIQueryReply {
  
     public static APIQueryAddressPoolReply __example__() {
         APIQueryAddressPoolReply reply = new APIQueryAddressPoolReply();
-        AddressPoolInventory ipRange = new AddressPoolInventory();
-
-        ipRange.setName("Test-IPRange");
-        ipRange.setL3NetworkUuid(uuid());
-        ipRange.setNetworkCidr("192.168.10.0/24");
-        ipRange.setIpRangeType(IpRangeType.AddressPool);
-
-        reply.setInventories(Arrays.asList(ipRange));
+        reply.setInventories(list(AddressPoolInventory.__example__()));
         return reply;
     }
-
 }

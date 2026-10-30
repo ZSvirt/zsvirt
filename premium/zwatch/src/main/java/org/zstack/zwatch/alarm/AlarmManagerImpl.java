@@ -624,9 +624,11 @@ public class AlarmManagerImpl extends AbstractService implements AlarmManager, M
         rule.setThreshold(vo.getThreshold());
         rule.setAccountUuid(acntMgr.getOwnerAccountUuidOfResource(vo.getUuid()));
 
-        // TODO: fix this hack set rule state problem if status is alarm
+        // Restore the persisted state so an empty first evaluation also updates existing OK alarms.
         if (vo.getStatus().equals(AlarmStatus.Alarm)) {
             rule.setState(RuleEvaluationResult.RuleEvaluationState.Problem);
+        } else if (vo.getStatus().equals(AlarmStatus.OK)) {
+            rule.setState(RuleEvaluationResult.RuleEvaluationState.OK);
         }
 
         rule.repeatInterval = vo.getRepeatInterval();
@@ -839,7 +841,7 @@ public class AlarmManagerImpl extends AbstractService implements AlarmManager, M
         vo.setMetricName(msg.getMetricName());
         vo.setNamespace(msg.getNamespace());
         vo.setPeriod(msg.getPeriod());
-        vo.setStatus(AlarmStatus.OK);
+        vo.setStatus(AlarmStatus.InsufficientData);
         vo.setThreshold(msg.getThreshold());
         vo.setState(AlarmState.Enabled);
         vo.setRepeatInterval(msg.getRepeatInterval() == null ? ZWatchGlobalConfig.ALARM_REPEAT_INTERVAL.value(Integer.class) : msg.getRepeatInterval());

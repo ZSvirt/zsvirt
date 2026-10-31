@@ -6,26 +6,19 @@ import org.springframework.beans.factory.annotation.Configurable;
 import org.zstack.core.cloudbus.CloudBus;
 import org.zstack.core.cloudbus.CloudBusCallBack;
 import org.zstack.core.db.DatabaseFacade;
-import org.zstack.header.core.ReturnValueCompletion;
 import org.zstack.header.core.workflow.FlowTrigger;
 import org.zstack.header.core.workflow.NoRollbackFlow;
-import org.zstack.header.errorcode.ErrorCode;
-import org.zstack.header.host.CheckVmStateOnHypervisorMsg;
-import org.zstack.header.host.CheckVmStateOnHypervisorReply;
 import org.zstack.header.host.HostConstant;
 import org.zstack.header.host.HostErrors;
+import org.zstack.header.host.HostVO;
 import org.zstack.header.message.MessageReply;
 import org.zstack.header.vm.DestroyVmOnHypervisorMsg;
 import org.zstack.header.vm.VmInstanceConstant;
 import org.zstack.header.vm.VmInstanceSpec;
-import org.zstack.header.vm.VmInstanceState;
 import org.zstack.utils.Utils;
 import org.zstack.utils.logging.CLogger;
 
-import java.util.Collections;
 import java.util.Map;
-
-import static org.zstack.core.Platform.operr;
 
 
 @Configurable(preConstruction = true, autowire = Autowire.BY_TYPE)
@@ -36,33 +29,6 @@ public class VmDestroyOnHypervisorFlow extends NoRollbackFlow {
     protected DatabaseFacade dbf;
     @Autowired
     protected CloudBus bus;
-
-    private void getVmStateOnHypervisor(final String hostUuid, String vmUuid, final ReturnValueCompletion<VmInstanceState> completion) {
-        CheckVmStateOnHypervisorMsg msg = new CheckVmStateOnHypervisorMsg();
-        msg.setVmInstanceUuids(Collections.singletonList(vmUuid));
-        msg.setHostUuid(hostUuid);
-        bus.makeTargetServiceIdByResourceUuid(msg, HostConstant.SERVICE_ID, hostUuid);
-        bus.send(msg, new CloudBusCallBack(completion) {
-            @Override
-            public void run(MessageReply reply) {
-                if (!reply.isSuccess()) {
-                    logger.warn(String.format("unable to check state of the vm[uuid:%s] on the host[uuid:%s], %s",
-                            vmUuid, hostUuid, reply.getError()));
-                    completion.fail(reply.getError());
-                    return;
-                }
-
-                CheckVmStateOnHypervisorReply r = reply.castReply();
-                String state = r.getStates().get(vmUuid);
-                if (state == null) {
-                    completion.fail(operr("null state of the vm[uuid:%s] on the host[uuid:%s]", vmUuid, hostUuid));
-                    return;
-                }
-
-                completion.success(VmInstanceState.valueOf(state));
-            }
-        });
-    }
 
     @Override
     public void run(final FlowTrigger chain, Map data) {
@@ -76,11 +42,14 @@ public class VmDestroyOnHypervisorFlow extends NoRollbackFlow {
             return;
         }
 
-        if (VmInstanceState.Stopped.toString().equals(spec.getVmInventory().getState())) {
+        if (!dbf.isExist(hostUuid, HostVO.class)) {
+            // An unregistered host cannot have resources managed by this flow.
             chain.next();
             return;
         }
 
+        // Stopped describes power state, not whether a persistent domain remains.
+        // Always request idempotent host cleanup before deleting VM resources.
         DestroyVmOnHypervisorMsg msg = new DestroyVmOnHypervisorMsg();
         msg.setVmInventory(spec.getVmInventory());
         bus.makeTargetServiceIdByResourceUuid(msg, HostConstant.SERVICE_ID, hostUuid);
@@ -93,22 +62,10 @@ public class VmDestroyOnHypervisorFlow extends NoRollbackFlow {
                     return;
                 }
 
-                if (!reply.getError().isError(HostErrors.OPERATION_FAILURE_GC_ELIGIBLE)) {
-                    /*continue to run the chain if the vm has been shutoff in hypervisor*/
-                    getVmStateOnHypervisor(hostUuid, spec.getVmInventory().getUuid(), new ReturnValueCompletion<VmInstanceState>(chain) {
-                        @Override
-                        public void success(VmInstanceState state) {
-                            if (VmInstanceState.Stopped.equals(state)) {
-                                chain.next();
-                            } else {
-                                chain.fail(reply.getError());
-                            }
-                        }
-                        @Override
-                        public void fail(ErrorCode errorCode) {
-                            chain.fail(errorCode.causedBy(reply.getError()));
-                        }
-                    });
+                if (!reply.getError().isError(HostErrors.OPERATION_FAILURE_GC_ELIGIBLE, HostErrors.HOST_IS_DISCONNECTED)) {
+                    // A powered-off domain can still retain its disk references.
+                    // Only successful cleanup (or a tracked GC) permits deletion.
+                    chain.fail(reply.getError());
                     return;
                 }
 

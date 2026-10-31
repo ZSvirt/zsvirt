@@ -15,6 +15,7 @@ import org.zstack.sdk.GetIpAddressCapacityResult
 import org.zstack.sdk.L3NetworkInventory
 import org.zstack.sdk.PrimaryStorageInventory
 import org.zstack.sdk.VmInstanceInventory
+import org.zstack.storage.primary.local.LocalStorageKvmBackend
 import org.zstack.sdk.VolumeInventory
 import org.zstack.test.integration.storage.StorageTest
 import org.zstack.testlib.EnvSpec
@@ -260,8 +261,21 @@ class PrimaryStorageDeleteCascadeCase extends SubCase {
 
         KVMAgentCommands.DestroyVmCmd destroyCmd = null
         env.afterSimulator(KVMConstant.KVM_DESTROY_VM_PATH) { KVMAgentCommands.DestroyVmResponse rsp, HttpEntity<String> e ->
-            destroyCmd = JSONObjectUtil.toObject(e.body, KVMAgentCommands.DestroyVmCmd.class)
+            def candidate = JSONObjectUtil.toObject(e.body, KVMAgentCommands.DestroyVmCmd.class)
+            if (candidate.uuid == vm.uuid) {
+                destroyCmd = candidate
+            }
             return rsp
+        }
+
+        List<String> physicalDeletes = []
+        [LocalStorageKvmBackend.DELETE_BITS_PATH, LocalStorageKvmBackend.DELETE_DIR_PATH].each { path ->
+            env.afterSimulator(path) { rsp, HttpEntity<String> e ->
+                if (e.body.contains(vm.rootVolumeUuid) || e.body.contains(volume.uuid)) {
+                    physicalDeletes.add(e.body)
+                }
+                return rsp
+            }
         }
 
         // delete primary storage cascade will destroy vm and data volume using Keep volume strategy
@@ -273,12 +287,11 @@ class PrimaryStorageDeleteCascadeCase extends SubCase {
             vo = dbFindByUuid(vm.getUuid(), VmInstanceVO.class)
             volVO = dbFindByUuid(volume.getUuid(), VolumeVO.class)
 
-            return {
-                assert vo == null
-                assert volVO == null
-            }
+            assert vo == null
+            assert volVO == null
         }
-        assert destroyCmd == null
+        assert destroyCmd != null && destroyCmd.uuid == vm.uuid
+        assert physicalDeletes.isEmpty()
     }
 
     void testPrimaryStorageDeleteCascadeWhenUseSMP() {
@@ -309,7 +322,10 @@ class PrimaryStorageDeleteCascadeCase extends SubCase {
 
         KVMAgentCommands.DestroyVmCmd destroyCmd = null
         env.afterSimulator(KVMConstant.KVM_DESTROY_VM_PATH) { KVMAgentCommands.DestroyVmResponse rsp, HttpEntity<String> e ->
-            destroyCmd = JSONObjectUtil.toObject(e.body, KVMAgentCommands.DestroyVmCmd.class)
+            def candidate = JSONObjectUtil.toObject(e.body, KVMAgentCommands.DestroyVmCmd.class)
+            if (candidate.uuid == vm.uuid) {
+                destroyCmd = candidate
+            }
             return rsp
         }
         // delete primary storage cascade will destroy vm and data volume using delay strategy
@@ -321,12 +337,10 @@ class PrimaryStorageDeleteCascadeCase extends SubCase {
             vo = dbFindByUuid(vm.getUuid(), VmInstanceVO.class)
             volVO = dbFindByUuid(volume.getUuid(), VolumeVO.class)
 
-            return {
-                assert vo == null
-                assert volVO == null
-            }
+            assert vo == null
+            assert volVO == null
         }
-        assert destroyCmd == null
+        assert destroyCmd != null && destroyCmd.uuid == vm.uuid
     }
 
     void testPrimaryStorageDeleteCascadeWhenUseNfs() {
@@ -357,7 +371,10 @@ class PrimaryStorageDeleteCascadeCase extends SubCase {
 
         KVMAgentCommands.DestroyVmCmd destroyCmd = null
         env.afterSimulator(KVMConstant.KVM_DESTROY_VM_PATH) { KVMAgentCommands.DestroyVmResponse rsp, HttpEntity<String> e ->
-            destroyCmd = JSONObjectUtil.toObject(e.body, KVMAgentCommands.DestroyVmCmd.class)
+            def candidate = JSONObjectUtil.toObject(e.body, KVMAgentCommands.DestroyVmCmd.class)
+            if (candidate.uuid == vm.uuid) {
+                destroyCmd = candidate
+            }
             return rsp
         }
         // delete primary storage cascade will destroy vm and data volume using delay strategy
@@ -371,6 +388,6 @@ class PrimaryStorageDeleteCascadeCase extends SubCase {
             assert vo == null
             assert volVO == null
         }
-        assert destroyCmd == null
+        assert destroyCmd != null && destroyCmd.uuid == vm.uuid
     }
 }

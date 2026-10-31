@@ -1,6 +1,8 @@
 package org.zstack.test.integration.kvm.vm
 
 import org.springframework.http.HttpEntity
+import org.zstack.compute.vm.DeleteVmGC
+import org.zstack.compute.vm.StopVmGC
 import org.zstack.core.cloudbus.CloudBus
 import org.zstack.core.cloudbus.EventFacade
 import org.zstack.core.db.DatabaseFacade
@@ -98,7 +100,7 @@ class VmGCCase extends SubCase {
 
         retryInSecs {
             inv = queryGCJob {
-                conditions=["context~=%${vm.uuid}%"]
+                conditions=["context~=%${vm.uuid}%", "runnerClass=${DeleteVmGC.name}"]
             }[0]
 
             assert cmd != null
@@ -122,7 +124,7 @@ class VmGCCase extends SubCase {
 
         retryInSecs {
             inv = queryGCJob {
-                conditions=["context~=%${vm.uuid}%"]
+                conditions=["context~=%${vm.uuid}%", "runnerClass=${DeleteVmGC.name}"]
             }[0]
 
             assert inv.status == GCStatus.Done.toString()
@@ -162,7 +164,7 @@ class VmGCCase extends SubCase {
 
         retryInSecs {
             inv = queryGCJob {
-                conditions=["context~=%${vm.uuid}%"]
+                conditions=["context~=%${vm.uuid}%", "runnerClass=${DeleteVmGC.name}"]
             }[0]
 
             // still destroy command sent even if the vm is recovered
@@ -197,7 +199,7 @@ class VmGCCase extends SubCase {
 
         retryInSecs {
             inv = queryGCJob {
-                conditions=["context~=%${vm.uuid}%"]
+                conditions=["context~=%${vm.uuid}%", "runnerClass=${DeleteVmGC.name}"]
             }[0]
 
             //destroy command still sent even if the vm is recovered because of some resource of vm released
@@ -277,7 +279,7 @@ class VmGCCase extends SubCase {
 
         retryInSecs {
             inv = queryGCJob {
-                conditions=["context~=%${vm.uuid}%"]
+                conditions=["context~=%${vm.uuid}%", "runnerClass=${StopVmGC.name}"]
             }[0]
 
             assert cmd == null
@@ -298,6 +300,9 @@ class VmGCCase extends SubCase {
             return rsp
         }
 
+        env.afterSimulator(KVMConstant.KVM_DESTROY_VM_PATH) {
+            throw new HttpError(403, "explicitly retain delete cleanup for retry")
+        }
         destroyVmInstance {
             uuid = vm.uuid
         }
@@ -307,7 +312,7 @@ class VmGCCase extends SubCase {
         retryInSecs {
             // the GC job is cancelled
             inv = queryGCJob {
-                conditions=["context~=%${vm.uuid}%"]
+                conditions=["context~=%${vm.uuid}%", "runnerClass=${StopVmGC.name}"]
             }[0]
 
             assert cmd == null
@@ -317,6 +322,24 @@ class VmGCCase extends SubCase {
         deleteGCJob {
             uuid = inv.uuid
         }
+
+        def deletion = queryGCJob {
+            conditions = ["context~=%${vm.uuid}%", "runnerClass=${DeleteVmGC.name}"]
+        }
+        assert deletion.size() == 1
+        assert deletion[0].status == GCStatus.Idle.toString()
+        KVMAgentCommands.DestroyVmCmd destroyCmd = null
+        env.afterSimulator(KVMConstant.KVM_DESTROY_VM_PATH) { rsp, HttpEntity<String> e ->
+            destroyCmd = json(e.body, KVMAgentCommands.DestroyVmCmd.class)
+            return rsp
+        }
+        triggerGCJob { uuid = deletion[0].uuid }
+        retryInSecs {
+            assert queryGCJob { conditions = ["uuid=${deletion[0].uuid}"] }[0].status == GCStatus.Done.toString()
+            assert destroyCmd != null && destroyCmd.uuid == vm.uuid
+            assert cmd == null
+        }
+        deleteGCJob { uuid = deletion[0].uuid }
     }
 
     void testStopVmWhenHostDisconnect() {
@@ -336,7 +359,7 @@ class VmGCCase extends SubCase {
         GarbageCollectorInventory inv = null
         retryInSecs {
             inv = queryGCJob {
-                conditions=["context~=%${vm.uuid}%"]
+                conditions=["context~=%${vm.uuid}%", "runnerClass=${StopVmGC.name}"]
             }[0]
 
             assert cmd != null

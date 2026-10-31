@@ -17,6 +17,7 @@ import org.zstack.kvm.KVMAgentCommands
 import org.zstack.kvm.KVMConstant
 import org.zstack.network.securitygroup.SecurityGroupConstant
 import org.zstack.network.service.virtualrouter.VirtualRouterConstant
+import org.zstack.sdk.ExpungeVmInstanceAction
 import org.zstack.sdk.DestroyVmInstanceAction
 import org.zstack.sdk.VmInstanceInventory
 import org.zstack.test.integration.kvm.KvmTest
@@ -163,9 +164,9 @@ class VmDestroyingCase extends SubCase {
             vm = env.inventoryByName("vm") as VmInstanceInventory
             errf = bean(ErrorFacade.class)
             simulatorEnv()
-            testDestroyingVmWillBeSetToDestroyedIfDestroyingFailButVmSyncMsgReturnStopped()
+            testFailedDestroyPreservesResourcesUntilSuccessfulRetry()
             testRecover()
-            testDestroyingVmWillBeSetToDestroyedIfDestroyingFailButVmSyncMsgReturnStopped()
+            testFailedDestroyPreservesResourcesUntilSuccessfulRetry()
             testExpunge()
         }
     }
@@ -188,33 +189,35 @@ class VmDestroyingCase extends SubCase {
         }
     }
 
-    void testDestroyingVmWillBeSetToDestroyedIfDestroyingFailButVmSyncMsgReturnStopped() {
-        String sessionId = adminSession()
+    void testFailedDestroyPreservesResourcesUntilSuccessfulRetry() {
+        simulatorEnv()
+        cmd = null
         boolean resourceReleased = false
-        env.afterSimulator(VirtualRouterConstant.VR_REMOVE_DHCP_PATH) { rsp, HttpEntity<String> e ->
+        def recordRelease = { rsp, HttpEntity<String> e ->
             resourceReleased = true
             return rsp
         }
+        env.afterSimulator(VirtualRouterConstant.VR_REMOVE_DHCP_PATH, recordRelease)
 
-        new Thread(new Runnable() {
-            @Override
-            void run() {
-                DestroyVmInstanceAction action = new DestroyVmInstanceAction()
-                action.uuid = vm.uuid
-                action.sessionId = sessionId
-                DestroyVmInstanceAction.Result result = action.call()
+        def result = new DestroyVmInstanceAction(uuid: vm.uuid, sessionId: adminSession()).call()
+        assert result.error != null
+        assert cmd != null && cmd.uuid == vm.uuid
+        assert dbFindByUuid(vm.uuid, VmInstanceVO.class).state == VmInstanceState.Stopped
+        assert !resourceReleased
+        assert dbFindByUuid(vm.rootVolumeUuid, VolumeVO.class).status == VolumeStatus.Ready
+        assert new ExpungeVmInstanceAction(uuid: vm.uuid, sessionId: adminSession()).call().error != null
 
-                assert result.error != null
-            }
-        }).start()
-
-        retryInSecs {
-            VmInstanceVO vo = Q.New(VmInstanceVO.class).eq(VmInstanceVO_.uuid, vm.uuid).find()
-
-            assert vo.state == VmInstanceState.Destroyed
-            assert cmd != null
-            assert resourceReleased
+        // A successful retry must perform cleanup before exposing Destroyed.
+        env.cleanSimulatorAndMessageHandlers()
+        env.afterSimulator(VirtualRouterConstant.VR_REMOVE_DHCP_PATH, recordRelease)
+        env.afterSimulator(KVMConstant.KVM_DESTROY_VM_PATH) { rsp, HttpEntity<String> e ->
+            cmd = JSONObjectUtil.toObject(e.body, KVMAgentCommands.DestroyVmCmd.class)
+            return rsp
         }
+        destroyVmInstance { uuid = vm.uuid }
+        assert dbFindByUuid(vm.uuid, VmInstanceVO.class).state == VmInstanceState.Destroyed
+        assert resourceReleased
+        assert dbFindByUuid(vm.rootVolumeUuid, VolumeVO.class).status == VolumeStatus.Deleted
     }
 
     void testRecover() {

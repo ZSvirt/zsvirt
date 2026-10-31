@@ -1536,7 +1536,8 @@ public class VmInstanceBase extends AbstractVmInstance {
             completion.done();
             return;
         } else if (operation == VmAbnormalLifeCycleOperation.VmPausedFromRunningStateHostNotChanged
-                || operation == VmAbnormalLifeCycleOperation.VmPausedFromMigratingStateHostNotChanged) {
+                || operation == VmAbnormalLifeCycleOperation.VmPausedFromMigratingStateHostNotChanged
+                || operation == VmAbnormalLifeCycleOperation.VmPausedFromStoppingStateHostNotChanged) {
             // just synchronize database
             changeVmStateInDb(VmInstanceStateEvent.paused, () -> self.setHostUuid(msg.getHostUuid()));
             fireEvent.run();

@@ -253,6 +253,9 @@ public class VmInstanceBase extends AbstractVmInstance {
         }).error(new FlowErrorHandler(completion) {
             @Override
             public void handle(final ErrorCode errCode, Map data) {
+                // Failed resource cleanup must not turn a power-off observation
+                // into Destroyed. Reconcile from Unknown so retry remains possible.
+                changeVmStateInDb(VmInstanceStateEvent.unknown);
                 if (originalCopy.getState() == VmInstanceState.Running) {
                     checkState(originalCopy.getHostUuid(), new NoErrorCompletion(completion) {
                         @Override
@@ -261,7 +264,6 @@ public class VmInstanceBase extends AbstractVmInstance {
                         }
                     });
                 } else {
-                    changeVmStateInDb(VmInstanceStateEvent.unknown);
                     completion.fail(errCode);
                 }
             }

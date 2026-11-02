@@ -3,6 +3,8 @@ package org.zstack.header.storage.primary;
 import org.zstack.header.errorcode.ErrorCode;
 import org.zstack.header.message.NeedJsonSchema;
 
+import java.io.Serializable;
+
 /**
  * Created by xing5 on 2016/3/23.
  */
@@ -13,7 +15,7 @@ public class PrimaryStorageCanonicalEvent {
     public static final String PRIMARY_STORAGE_HOST_STATUS_CHANGED_PATH = "/primaryStorage/host/status/change";
     public static final String PRIMARY_STORAGE_DISCONNECTED = "/primaryStorage/disconnected";
 
-    public static class DisconnectedData {
+    public static class DisconnectedData implements Serializable {
         private String primaryStorageUuid;
         private ErrorCode reason;
 
@@ -35,7 +37,7 @@ public class PrimaryStorageCanonicalEvent {
     }
 
     @NeedJsonSchema
-    public static class PrimaryStorageDeletedData {
+    public static class PrimaryStorageDeletedData implements Serializable {
         private String primaryStorageUuid;
         private PrimaryStorageInventory inventory;
 
@@ -57,7 +59,7 @@ public class PrimaryStorageCanonicalEvent {
     }
 
     @NeedJsonSchema
-    public static class PrimaryStorageStatusChangedData {
+    public static class PrimaryStorageStatusChangedData implements Serializable {
         private String primaryStorageUuid;
         private String oldStatus;
         private String newStatus;
@@ -97,7 +99,7 @@ public class PrimaryStorageCanonicalEvent {
     }
 
     @NeedJsonSchema
-    public static class PrimaryStorageStateChangedData{
+    public static class PrimaryStorageStateChangedData implements Serializable {
         private String primaryStorageUuid;
         private PrimaryStorageState oldState;
         private PrimaryStorageState newState;
@@ -137,7 +139,7 @@ public class PrimaryStorageCanonicalEvent {
     }
 
     @NeedJsonSchema
-    public static class PrimaryStorageHostStatusChangeData{
+    public static class PrimaryStorageHostStatusChangeData implements Serializable {
         private String primaryStorageUuid;
         private String hostUuid;
         private PrimaryStorageHostStatus oldStatus;

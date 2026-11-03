@@ -4,13 +4,22 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * Created by MaJin on 2019/9/22.
- * mask sensitive info in log, usually uses for password.
+ * Masks sensitive information in logs, usually passwords.
+ * <p>
+ * For {@link Behavior#Auto}, the runtime value of the annotated field must
+ * implement {@link java.io.Serializable} or {@link org.zstack.header.message.Message}.
+ * Log masking walks into the value only when one of those types is implemented;
+ * otherwise the value is written as-is and nested sensitive fields stay in the log.
  */
 @Target({java.lang.annotation.ElementType.FIELD})
 @Retention(java.lang.annotation.RetentionPolicy.RUNTIME)
 public @interface NoLogging {
     enum Behavior {
+        /**
+         * Walk into the field value and mask nested sensitive fields.
+         * The value must implement {@link java.io.Serializable} or
+         * {@link org.zstack.header.message.Message}.
+         */
         Auto,
         Mask;
 

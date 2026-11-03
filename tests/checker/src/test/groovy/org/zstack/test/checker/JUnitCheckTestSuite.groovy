@@ -11,6 +11,7 @@ import org.zstack.test.checker.code.LFFileChecker
 import org.zstack.test.checker.db.DBChecker
 import org.zstack.test.checker.doc.ApiDocExampleChecker
 import org.zstack.test.checker.doc.ApiDocSinceChecker
+import org.zstack.test.checker.log.NoLoggingSerializableChecker
 import org.zstack.test.checker.route.ApiServiceIdRegistryDump
 
 @RunWith(Suite.class)
@@ -21,6 +22,7 @@ import org.zstack.test.checker.route.ApiServiceIdRegistryDump
     DBChecker.class,
     ApiDocSinceChecker.class,
     ApiDocExampleChecker.class,
+    // NoLoggingSerializableChecker.class,
 ])
 class JUnitCheckTestSuite {
     static void runAllTestCases() {

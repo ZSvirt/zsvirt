@@ -10,6 +10,7 @@ import org.zstack.core.componentloader.PluginRegistry;
 import org.zstack.core.db.*;
 import org.zstack.core.errorcode.ErrorFacade;
 import org.zstack.header.AbstractService;
+import org.zstack.header.core.Completion;
 import org.zstack.header.core.ReturnValueCompletion;
 import org.zstack.header.errorcode.ErrorCode;
 import org.zstack.header.errorcode.SysErrors;
@@ -129,6 +130,33 @@ public class L3NetworkManagerImpl extends AbstractService implements L3NetworkMa
     private void handle(final APISetL3NetworkMtuMsg msg) {
         final APISetL3NetworkMtuEvent evt = new APISetL3NetworkMtuEvent(msg.getId());
 
+        for (L3NetworkMtuUpdateExtensionPoint ext : pluginRgty.getExtensionList(L3NetworkMtuUpdateExtensionPoint.class)) {
+            if (ext.supports(msg.getL3NetworkUuid())) {
+                ext.updateMtu(msg.getL3NetworkUuid(), msg.getMtu(), new Completion(msg) {
+                    @Override
+                    public void success() {
+                        try {
+                            saveL3NetworkMtu(msg, evt);
+                        } catch (RuntimeException e) {
+                            logger.warn(String.format("failed to save MTU for L3 network[uuid:%s]", msg.getL3NetworkUuid()), e);
+                            fail(Platform.operr("failed to save MTU for L3 network[uuid:%s]: %s",
+                                    msg.getL3NetworkUuid(), e.getMessage()));
+                        }
+                    }
+
+                    @Override
+                    public void fail(ErrorCode errorCode) {
+                        evt.setError(errorCode);
+                        bus.publish(evt);
+                    }
+                });
+                return;
+            }
+        }
+        saveL3NetworkMtu(msg, evt);
+    }
+
+    private void saveL3NetworkMtu(APISetL3NetworkMtuMsg msg, APISetL3NetworkMtuEvent evt) {
         NetworkServiceSystemTag.L3_MTU.delete(msg.getL3NetworkUuid());
         SystemTagCreator creator = NetworkServiceSystemTag.L3_MTU.newSystemTagCreator(msg.getL3NetworkUuid());
         creator.ignoreIfExisting = true;

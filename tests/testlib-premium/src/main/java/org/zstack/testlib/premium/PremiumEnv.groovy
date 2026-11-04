@@ -25,6 +25,7 @@ class PremiumEnv {
 
             // premium
             agents()
+            authenticationPremium()
             computesPremium()
             platformsPremium()
 
@@ -33,10 +34,6 @@ class PremiumEnv {
             include("CbtBackupStorage.xml")
             include("volumeBackup.xml")
             include("sriov.xml")
-            include("authentications/accountImport.xml")
-            include("authentications/accountImportTest.xml")
-            include("authentications/ldap.xml")
-            include("authentications/accountIam1Plugin.xml")
             include("captcha.xml")
             include("CloudBusAopProxy.xml")
             include("ZoneManager.xml")

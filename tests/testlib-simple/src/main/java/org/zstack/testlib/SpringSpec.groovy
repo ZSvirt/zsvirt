@@ -141,4 +141,12 @@ class SpringSpec {
     void platformsPremium() {
         include("ha.xml")
     }
+
+    void authenticationPremium() {
+        include("authentications/accountImport.xml")
+        include("authentications/accountImportTest.xml")
+        include("authentications/ldap.xml")
+        include("authentications/accountIam1Plugin.xml")
+        include("authentications/accessKey.xml")
+    }
 }

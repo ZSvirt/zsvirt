@@ -233,6 +233,10 @@ class PremiumSimulator implements Simulator {
             return new KVMAgentCommands.AgentResponse()
         }
 
+        spec.simulator(MevocoKVMConstant.SET_NIC_QOS) {
+            return new KVMAgentCommands.AgentResponse()
+        }
+
         spec.simulator(UsbDeviceKvmBackend.GET_USB_DEVICES_PATH) {
             UsbDeviceKvmBackend.GetUsbDevicesRsp rsp = new UsbDeviceKvmBackend.GetUsbDevicesRsp()
             rsp.usbDevicesInfo = []

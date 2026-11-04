@@ -32,11 +32,8 @@ import org.zstack.softwarePackage.entity.UpgradeType;
 import org.zstack.softwarePackage.header.*;
 
 import javax.persistence.Tuple;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
 
 import static org.zstack.core.Platform.*;
@@ -44,9 +41,6 @@ import static org.zstack.softwarePackage.SoftwarePackageConstant.STORAGE_SOFTWAR
 
 @InterceptorForService("softwarePackage")
 public class SoftwarePackageApiInterceptor implements ApiMessageInterceptor {
-    private static final List<String> VM_UPLOAD_URL_SCHEMES = Arrays.asList(
-            "upload", "http", "https");
-
     @Autowired
     private CloudBus bus;
     @Autowired
@@ -109,47 +103,30 @@ public class SoftwarePackageApiInterceptor implements ApiMessageInterceptor {
 
     private void validate(APIUploadSoftwarePackageToVmMsg msg) {
         try {
-            URI uri = new URI(msg.getUrl());
-            String scheme = uri.getScheme();
-            if (scheme == null || !VM_UPLOAD_URL_SCHEMES.contains(scheme.toLowerCase(Locale.ROOT))) {
-                throw new ApiMessageInterceptionException(argerr(
-                        "unsupported software package URL scheme, only upload, http and https are allowed"));
-            }
-
-            String path = uri.getPath();
-            String fileName = null;
-            if (path != null && !path.isEmpty() && !path.endsWith("/")) {
-                fileName = path.substring(path.lastIndexOf('/') + 1);
-            } else if ("upload".equalsIgnoreCase(scheme)) {
-                fileName = uri.getAuthority();
-            }
-            if (fileName == null || !fileName.matches("[A-Za-z0-9._-]+") ||
-                    ".".equals(fileName) || "..".equals(fileName)) {
-                throw new ApiMessageInterceptionException(argerr(
-                        "software package URL must contain a valid file name"));
-            }
-        } catch (URISyntaxException | NullPointerException e) {
-            throw new ApiMessageInterceptionException(argerr("invalid software package URL"));
+            SoftwarePackageUploadPath.resolveFileName(msg.getUrl());
+        } catch (IllegalArgumentException e) {
+            throw new ApiMessageInterceptionException(
+                    argerr("software package URL must contain a valid file name"));
         }
 
         VmInstanceVO vm = Q.New(VmInstanceVO.class)
                 .eq(VmInstanceVO_.uuid, msg.getVmInstanceUuid())
                 .find();
         if (vm == null) {
-            throw new ApiMessageInterceptionException(operr(
+            throw new ApiMessageInterceptionException(argerr(
                     "VM instance[uuid:%s] not found", msg.getVmInstanceUuid()));
         }
         if (!KVMConstant.KVM_HYPERVISOR_TYPE.equals(vm.getHypervisorType())) {
-            throw new ApiMessageInterceptionException(operr(
+            throw new ApiMessageInterceptionException(argerr(
                     "VM instance[uuid:%s] is not a KVM VM", msg.getVmInstanceUuid()));
         }
         if (vm.getState() != VmInstanceState.Running) {
-            throw new ApiMessageInterceptionException(operr(
+            throw new ApiMessageInterceptionException(argerr(
                     "VM instance[uuid:%s] must be Running to receive a software package, current state is %s",
                     msg.getVmInstanceUuid(), vm.getState()));
         }
         if (vm.getDefaultL3NetworkUuid() == null) {
-            throw new ApiMessageInterceptionException(operr(
+            throw new ApiMessageInterceptionException(argerr(
                     "VM instance[uuid:%s] has no default L3 network", msg.getVmInstanceUuid()));
         }
         String ip = Q.New(VmNicVO.class)
@@ -158,7 +135,7 @@ public class SoftwarePackageApiInterceptor implements ApiMessageInterceptor {
                 .select(VmNicVO_.ip)
                 .findValue();
         if (ip == null) {
-            throw new ApiMessageInterceptionException(operr(
+            throw new ApiMessageInterceptionException(argerr(
                     "VM instance[uuid:%s] has no IP on its default L3 network", msg.getVmInstanceUuid()));
         }
         msg.setHostUuid(vm.getHostUuid());
@@ -167,7 +144,7 @@ public class SoftwarePackageApiInterceptor implements ApiMessageInterceptor {
         UploadSoftwarePackageToVmBackend backend = plugins.getExtensionFromMap(
                 msg.getType(), UploadSoftwarePackageToVmBackend.class);
         if (backend == null) {
-            throw new ApiMessageInterceptionException(operr(
+            throw new ApiMessageInterceptionException(argerr(
                     "cannot find UploadSoftwarePackageToVmBackend for type[%s]", msg.getType()));
         }
 
@@ -176,11 +153,11 @@ public class SoftwarePackageApiInterceptor implements ApiMessageInterceptor {
             throw new ApiMessageInterceptionException(error);
         }
 
-        UploadSoftwarePackageToVmSpec spec = backend.getUploadSpec(Platform.getUuid());
-        if (spec == null || spec.getTargetPath() == null ||
-                !spec.getTargetPath().matches("^/(root|tmp)/(?!\\.{1,2}$)[A-Za-z0-9._-]+$")) {
+        UploadSoftwarePackageToVmSpec spec = backend.getUploadSpec(
+                Platform.getUuid(), System.currentTimeMillis());
+        if (spec == null || !SoftwarePackageUploadPath.isValidVmTargetPath(spec.getTargetPath())) {
             throw new ApiMessageInterceptionException(operr(
-                    "upload target path must be a file directly under /root or /tmp"));
+                    "upload target path must be a safe file path under /root or /tmp with at most one subdirectory"));
         }
         if (spec.getUsername() == null || spec.getUsername().isEmpty() ||
                 spec.getSshPort() < 1 || spec.getSshPort() > 65535 || spec.getPassword() == null) {

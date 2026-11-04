@@ -14,7 +14,6 @@ import org.zstack.core.thread.ThreadFacade;
 import org.zstack.core.workflow.FlowChainBuilder;
 import org.zstack.core.workflow.ShareFlow;
 import org.zstack.header.core.Completion;
-import org.zstack.header.core.NoErrorCompletion;
 import org.zstack.header.core.workflow.FlowChain;
 import org.zstack.header.core.workflow.FlowDoneHandler;
 import org.zstack.header.core.workflow.FlowErrorHandler;
@@ -195,6 +194,14 @@ public class UploadSoftwarePackageToVmTracker {
                             return;
                         }
 
+                        ErrorCode prepareError = backend.prepareUpload(
+                                msg.getVmInstanceUuid(), msg.getTargetIp(), uploadTaskUuid,
+                                msg.getUploadTimestamp());
+                        if (prepareError != null) {
+                            trigger.fail(prepareError);
+                            return;
+                        }
+
                         UploadFileToVmMsg vmMsg = new UploadFileToVmMsg();
                         vmMsg.setHostUuid(msg.getHostUuid());
                         vmMsg.setTaskUuid(uploadTaskUuid);
@@ -204,6 +211,7 @@ public class UploadSoftwarePackageToVmTracker {
                         vmMsg.setUsername(spec.getUsername());
                         vmMsg.setSshPort(spec.getSshPort());
                         vmMsg.setPassword(spec.getPassword());
+                        vmMsg.setTimeout(msg.getTimeout());
                         bus.makeTargetServiceIdByResourceUuid(
                                 vmMsg, HostConstant.SERVICE_ID, msg.getHostUuid());
                         bus.send(vmMsg, new CloudBusCallBack(trigger) {
@@ -231,7 +239,8 @@ public class UploadSoftwarePackageToVmTracker {
                         }
 
                         try {
-                            backend.install(msg.getVmInstanceUuid(), msg.getTargetIp(), uploadTaskUuid, canceled,
+                            backend.install(msg.getVmInstanceUuid(), msg.getTargetIp(), uploadTaskUuid,
+                                    msg.getUploadTimestamp(), canceled,
                                     new Completion(trigger) {
                                         @Override
                                         public void success() {
@@ -260,6 +269,19 @@ public class UploadSoftwarePackageToVmTracker {
                 error(new FlowErrorHandler(null) {
                     @Override
                     public void handle(ErrorCode errorCode, Map data) {
+                        try {
+                            ErrorCode cleanupError = backend.cleanupUpload(
+                                    msg.getTargetIp(), msg.getUploadTimestamp());
+                            if (cleanupError != null) {
+                                logger.warn(String.format(
+                                        "failed to clean software package upload task[uuid:%s] on VM: %s",
+                                        uploadTaskUuid, cleanupError.getReadableDetails()));
+                            }
+                        } catch (RuntimeException e) {
+                            logger.warn(String.format(
+                                    "failed to clean software package upload task[uuid:%s] on VM: %s",
+                                    uploadTaskUuid, e.getMessage()));
+                        }
                         logger.warn(String.format(
                                 "failed to complete software package upload task[uuid:%s] to VM[uuid:%s]: %s",
                                 uploadTaskUuid, msg.getVmInstanceUuid(), errorCode.getReadableDetails()));
@@ -280,19 +302,7 @@ public class UploadSoftwarePackageToVmTracker {
     }
 
     private void fireTerminalEvent(UploadSoftwarePackageToVmMsg msg, ErrorCode errorCode) {
-        if (msg.isDeferCleanupToLongJob() ||
-                errorCode != null && errorCode.isError(UPLOAD_SOFTWARE_PACKAGE_INTERRUPTED)) {
-            fireEvent(msg, errorCode);
-            return;
-        }
-
-        new UploadSoftwarePackageToVmCleanup().cleanup(
-                msg.getHostUuid(), msg.getUploadTaskUuid(), new NoErrorCompletion() {
-                    @Override
-                    public void done() {
-                        fireEvent(msg, errorCode);
-                    }
-                });
+        fireEvent(msg, errorCode);
     }
 
     private void reportProgress(String taskName, long progress) {

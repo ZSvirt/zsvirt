@@ -13,7 +13,7 @@ doc {
 		path "org.zstack.header.storageDevice.APIGetScsiLunCandidatesForAttachingVmReply.error"
 		desc "错误码，若不为null，则表示操作失败, 操作成功时该字段为null",false
 		type "ErrorCode"
-		since "3.1.0"
+		since "zsv_3.1.0"
 		clz ErrorCode.class
 	}
 	ref {
@@ -21,13 +21,13 @@ doc {
 		path "org.zstack.header.storageDevice.APIGetScsiLunCandidatesForAttachingVmReply.inventories"
 		desc "SCSI Lun清单"
 		type "List"
-		since "3.1.0"
+		since "zsv_3.1.0"
 		clz ScsiLunInventory.class
 	}
 	field {
 		name "success"
 		desc ""
 		type "boolean"
-		since "3.1.0"
+		since "zsv_3.1.0"
 	}
 }

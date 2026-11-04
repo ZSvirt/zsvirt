@@ -3,9 +3,6 @@ package org.zstack.header.zone;
 import org.zstack.header.message.APIEvent;
 import org.zstack.header.rest.RestResponse;
 
-import java.sql.Timestamp;
-
-
 /**
  * @apiResult api event for message :ref:`APICreateZoneMsg`
  * @example {
@@ -49,15 +46,7 @@ public class APICreateZoneEvent extends APIEvent {
  
     public static APICreateZoneEvent __example__() {
         APICreateZoneEvent event = new APICreateZoneEvent();
-        ZoneInventory zone = new ZoneInventory();
-        zone.setName("TestZone");
-        zone.setUuid(uuid());
-        zone.setDescription("Test");
-        zone.setState(ZoneState.Enabled.toString());
-        zone.setType("zstack");
-        zone.setCreateDate(new Timestamp(org.zstack.header.message.DocUtils.date));
-        zone.setLastOpDate(new Timestamp(org.zstack.header.message.DocUtils.date));
-        event.setInventory(zone);
+        event.setInventory(ZoneInventory.__example__());
         return event;
     }
 

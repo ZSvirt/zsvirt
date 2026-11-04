@@ -1,10 +1,12 @@
 package org.zstack.header.network.l3;
 
 import org.zstack.header.configuration.PythonClassInventory;
+import org.zstack.header.message.DocUtils;
 import org.zstack.header.query.ExpandedQueries;
 import org.zstack.header.query.ExpandedQuery;
 import org.zstack.header.search.Inventory;
 import org.zstack.utils.gson.JSONObjectUtil;
+import org.zstack.utils.network.IPv6Constants;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
@@ -155,4 +157,14 @@ public class ReservedIpRangeInventory implements Serializable {
         return JSONObjectUtil.toJsonString(this);
     }
 
+    public static ReservedIpRangeInventory __example__() {
+        ReservedIpRangeInventory ipRange = new ReservedIpRangeInventory();
+        ipRange.setUuid(DocUtils.createFixedUuid(ReservedIpRangeVO.class));
+        ipRange.setL3NetworkUuid(DocUtils.createFixedUuid(L3NetworkVO.class));
+        ipRange.setName("Test-IP-Range");
+        ipRange.setStartIp("192.168.100.10");
+        ipRange.setEndIp("192.168.100.250");
+        ipRange.setIpVersion(IPv6Constants.IPv4);
+        return ipRange;
+    }
 }

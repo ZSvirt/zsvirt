@@ -4,6 +4,8 @@ import org.springframework.http.HttpMethod;
 import org.zstack.header.message.APIParam;
 import org.zstack.header.message.APISyncCallMessage;
 import org.zstack.header.rest.RestRequest;
+import org.zstack.header.vm.VmInstanceVO;
+import org.zstack.header.vo.ResourceVO;
 
 import java.util.List;
 
@@ -32,9 +34,7 @@ public class APIGetResourceAccountMsg extends APISyncCallMessage {
  
     public static APIGetResourceAccountMsg __example__() {
         APIGetResourceAccountMsg msg = new APIGetResourceAccountMsg();
-        msg.setResourceUuids(list(uuid(), uuid()));
-
+        msg.setResourceUuids(list(uuid(ResourceVO.class), uuid(VmInstanceVO.class)));
         return msg;
     }
-
 }

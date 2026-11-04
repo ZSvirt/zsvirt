@@ -1,12 +1,13 @@
 package org.zstack.header.network.l3;
 
+import org.zstack.header.message.DocUtils;
 import org.zstack.header.query.ExpandedQueries;
 import org.zstack.header.query.ExpandedQuery;
 import org.zstack.header.rest.APINoSee;
 import org.zstack.header.search.Inventory;
-import org.zstack.header.vm.VmInstanceInventory;
 import org.zstack.header.vm.VmNicInventory;
 import org.zstack.header.vm.VmNicVO;
+import org.zstack.utils.network.IPv6Constants;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
@@ -184,5 +185,18 @@ public class UsedIpInventory implements Serializable {
 
     public void setVmNicUuid(String vmNicUuid) {
         this.vmNicUuid = vmNicUuid;
+    }
+
+    public static UsedIpInventory __example__() {
+        UsedIpInventory ip = new UsedIpInventory();
+        ip.setVmNicUuid(DocUtils.createFixedUuid(VmNicVO.class));
+        ip.setUuid(DocUtils.createFixedUuid(UsedIpVO.class));
+        ip.setL3NetworkUuid(DocUtils.createFixedUuid(L3NetworkVO.class));
+        ip.setGateway("192.168.1.1");
+        ip.setIpRangeUuid(DocUtils.createFixedUuid(IpRangeVO.class));
+        ip.setIpVersion(IPv6Constants.IPv4);
+        ip.setIp("192.168.1.100");
+        ip.setNetmask("255.255.255.0");
+        return ip;
     }
 }

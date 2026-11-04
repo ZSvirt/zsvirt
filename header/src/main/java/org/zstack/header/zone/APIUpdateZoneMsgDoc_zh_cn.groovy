@@ -28,7 +28,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "description"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "uuid"
@@ -46,7 +46,7 @@ doc {
 					location "url"
 					type "String"
 					optional false
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "systemTags"
@@ -55,7 +55,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "userTags"
@@ -64,7 +64,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "isDefault"
@@ -73,7 +73,7 @@ doc {
 					location "body"
 					type "Boolean"
 					optional true
-					since "zsv 3.16.31"
+					since "zsv_3.16.31"
 				}
 			}
 		}

@@ -1,7 +1,7 @@
 package org.zstack.log;
 
-import org.zstack.core.Platform;
 import org.zstack.core.jsonlabel.JsonLabelInventory;
+import org.zstack.core.jsonlabel.JsonLabelVO;
 import org.zstack.header.message.APIReply;
 import org.zstack.header.rest.RestResponse;
 
@@ -23,7 +23,7 @@ public class APIGetLogConfigurationReply extends APIReply {
     public static APIGetLogConfigurationReply __example__() {
         APIGetLogConfigurationReply evt = new APIGetLogConfigurationReply();
         JsonLabelInventory inv1 = new JsonLabelInventory();
-        inv1.setLabelKey("log4j2-" + Platform.getUuid());
+        inv1.setLabelKey("log4j2-" + uuid(JsonLabelVO.class));
         inv1.setLabelValue("{\n" +
                 "\"appenderType\": \"Syslog\",\n" +
                 "\"configuration\": {\n" +
@@ -35,7 +35,7 @@ public class APIGetLogConfigurationReply extends APIReply {
                 "}");
 
         JsonLabelInventory inv2 = new JsonLabelInventory();
-        inv2.setLabelKey("log4j2-" + Platform.getUuid());
+        inv2.setLabelKey("log4j2-" + uuid(JsonLabelInventory.class));
         inv2.setLabelValue("{\n" +
                 "\"appenderType\": \"Syslog\",\n" +
                 "\"configuration\": {\n" +

@@ -31,10 +31,4 @@
         </zstack:plugin>
     </bean>
 
-    <bean id="ZMigrateZQLExtension" class="org.zstack.zmigrate.compute.ZMigrateZQLExtension">
-        <zstack:plugin>
-            <zstack:extension interface="org.zstack.header.zql.MarshalZQLASTTreeExtensionPoint"/>
-            <zstack:extension interface="org.zstack.header.zql.RestrictByExprExtensionPoint"/>
-        </zstack:plugin>
-    </bean>
 </beans>

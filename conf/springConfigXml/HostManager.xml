@@ -59,7 +59,7 @@
 
     <bean id="PostHostExtensionPointForNuma" class="org.zstack.compute.host.PostHostExtensionPointForNuma">
         <zstack:plugin>
-            <zstack:extension interface="org.zstack.compute.host.PostHostConnectExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.host.spi.HostPostConnectedExtensionPoint" />
         </zstack:plugin>
     </bean>
 

@@ -28,7 +28,7 @@ doc {
 					location "query"
 					type "String"
 					optional false
-					since "2.3"
+					since "zsv_2.3"
 				}
 				column {
 					name "metricName"
@@ -37,7 +37,7 @@ doc {
 					location "query"
 					type "String"
 					optional false
-					since "2.3"
+					since "zsv_2.3"
 				}
 				column {
 					name "startTime"
@@ -46,7 +46,7 @@ doc {
 					location "query"
 					type "Long"
 					optional true
-					since "2.3"
+					since "zsv_2.3"
 				}
 				column {
 					name "endTime"
@@ -55,7 +55,7 @@ doc {
 					location "query"
 					type "Long"
 					optional true
-					since "2.3"
+					since "zsv_2.3"
 				}
 				column {
 					name "period"
@@ -64,7 +64,7 @@ doc {
 					location "query"
 					type "Integer"
 					optional true
-					since "2.3"
+					since "zsv_2.3"
 				}
 				column {
 					name "labels"
@@ -73,7 +73,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "2.3"
+					since "zsv_2.3"
 				}
 				column {
 					name "systemTags"
@@ -82,7 +82,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "2.3"
+					since "zsv_2.3"
 				}
 				column {
 					name "userTags"
@@ -91,7 +91,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "2.3"
+					since "zsv_2.3"
 				}
 				column {
 					name "functions"
@@ -100,7 +100,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "2.3"
+					since "zsv_2.3"
 				}
 				column {
 					name "offsetAheadOfCurrentTime"
@@ -109,7 +109,7 @@ doc {
 					location "query"
 					type "Long"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "valueConditions"
@@ -118,7 +118,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 			}
 		}

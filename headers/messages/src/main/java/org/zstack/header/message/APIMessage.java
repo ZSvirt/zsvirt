@@ -227,8 +227,7 @@ public abstract class APIMessage extends NeedReplyMessage implements Configurabl
         // TODO: will add RestRequest.readOnly()
         // Note: APIGenerateSshKeyPairMsg is not a read-only api, but it is a sync api
         if (apiClass.getSimpleName().equals("APIGenerateSshKeyPairMsg")
-                || apiClass.getSimpleName().equals("APIBatchSyncVolumeSizeMsg")
-                || apiClass.getSimpleName().equals("APICheckElaborationContentMsg")) {
+                || apiClass.getSimpleName().equals("APIBatchSyncVolumeSizeMsg")) {
             return false;
         }
         return APISyncCallMessage.class.isAssignableFrom(apiClass);

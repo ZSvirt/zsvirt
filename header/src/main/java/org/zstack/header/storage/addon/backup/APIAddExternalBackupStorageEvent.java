@@ -1,10 +1,15 @@
 package org.zstack.header.storage.addon.backup;
 
+import org.zstack.header.log.MaskSensitiveInfo;
+import org.zstack.header.log.NoLogging;
+import org.zstack.header.message.APIEvent;
 import org.zstack.header.rest.RestResponse;
-import org.zstack.header.storage.backup.APIAddBackupStorageEvent;
+import org.zstack.header.storage.AddBackupStorageReply;
+import org.zstack.header.storage.backup.BackupStorageInventory;
 
 @RestResponse(allTo = "inventory")
-public class APIAddExternalBackupStorageEvent extends APIAddBackupStorageEvent {
+@MaskSensitiveInfo
+public class APIAddExternalBackupStorageEvent extends APIEvent implements AddBackupStorageReply {
     public APIAddExternalBackupStorageEvent(String apiId) {
         super(apiId);
     }
@@ -13,6 +18,7 @@ public class APIAddExternalBackupStorageEvent extends APIAddBackupStorageEvent {
         super(null);
     }
 
+    @NoLogging(behavior = NoLogging.Behavior.Auto)
     private ExternalBackupStorageInventory inventory;
 
     public ExternalBackupStorageInventory getInventory() {
@@ -34,4 +40,8 @@ public class APIAddExternalBackupStorageEvent extends APIAddBackupStorageEvent {
         return event;
     }
 
+    @Override
+    public BackupStorageInventory backupStorageInventory() {
+        return getInventory();
+    }
 }

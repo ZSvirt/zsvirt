@@ -10,18 +10,18 @@ doc {
 		name "Running"
 		desc "正在执行"
 		type "RunningState"
-		since "3.6"
+		since "zsv_3.6"
 	}
 	field {
 		name "Success"
 		desc "执行成果"
 		type "RunningState"
-		since "3.6"
+		since "zsv_3.6"
 	}
 	field {
 		name "Failed"
 		desc "执行失败"
 		type "RunningState"
-		since "3.6"
+		since "zsv_3.6"
 	}
 }

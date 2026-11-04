@@ -79,7 +79,6 @@ import org.zstack.utils.CollectionUtils;
 import org.zstack.utils.ExceptionDSL;
 import org.zstack.utils.ObjectUtils;
 import org.zstack.utils.Utils;
-import org.zstack.utils.function.ForEachFunction;
 import org.zstack.utils.gson.JSONObjectUtil;
 import org.zstack.utils.logging.CLogger;
 import org.zstack.utils.network.NicIpAddressInfo;
@@ -254,6 +253,9 @@ public class VmInstanceBase extends AbstractVmInstance {
         }).error(new FlowErrorHandler(completion) {
             @Override
             public void handle(final ErrorCode errCode, Map data) {
+                // Failed resource cleanup must not turn a power-off observation
+                // into Destroyed. Reconcile from Unknown so retry remains possible.
+                changeVmStateInDb(VmInstanceStateEvent.unknown);
                 if (originalCopy.getState() == VmInstanceState.Running) {
                     checkState(originalCopy.getHostUuid(), new NoErrorCompletion(completion) {
                         @Override
@@ -262,7 +264,6 @@ public class VmInstanceBase extends AbstractVmInstance {
                         }
                     });
                 } else {
-                    changeVmStateInDb(VmInstanceStateEvent.unknown);
                     completion.fail(errCode);
                 }
             }
@@ -409,12 +410,7 @@ public class VmInstanceBase extends AbstractVmInstance {
 
             VmInstanceInventory inv = getSelfInventory();
             CollectionUtils.safeForEach(pluginRgty.getExtensionList(VmStateChangedExtensionPoint.class),
-                    new ForEachFunction<VmStateChangedExtensionPoint>() {
-                        @Override
-                        public void run(VmStateChangedExtensionPoint ext) {
-                            ext.vmStateChanged(inv, bs, self.getState());
-                        }
-                    });
+                    ext -> ext.vmStateChanged(inv, bs, self.getState()));
 
             //TODO: remove this
             notifyEmitter.notifyVmStateChange(VmInstanceInventory.valueOf(self), bs, state);
@@ -1007,7 +1003,7 @@ public class VmInstanceBase extends AbstractVmInstance {
                         if (!errList.getCauses().isEmpty()) {
                             reply.setError(errList.getCauses().get(0));
                             bus.reply(msg, reply);
-                            recorder.withFailReason(reply.getError().getDetails())
+                            recorder.withFailError(reply.getError())
                                     .end(null);
                             chain.next();
                             return;
@@ -1039,7 +1035,7 @@ public class VmInstanceBase extends AbstractVmInstance {
                             public void fail(ErrorCode errorCode) {
                                 reply.setError(errorCode);
                                 bus.reply(msg, reply);
-                                recorder.withFailReason(errorCode.getDetails())
+                                recorder.withFailError(errorCode)
                                         .end(null);
                                 chain.next();
                             }
@@ -1104,7 +1100,6 @@ public class VmInstanceBase extends AbstractVmInstance {
 
                     @Override
                     public void run(final FlowTrigger trigger, Map data) {
-                        List<ErrorCode> errs = new ArrayList<>();
                         new While<>(staticIpMap.entrySet()).each((entry, wcomp) -> {
                             AllocateIpMsg amsg = new AllocateIpMsg();
                             amsg.setL3NetworkUuid(l3Uuid);
@@ -1115,7 +1110,7 @@ public class VmInstanceBase extends AbstractVmInstance {
                                 @Override
                                 public void run(MessageReply reply) {
                                     if (!reply.isSuccess()) {
-                                        errs.add(reply.getError());
+                                        wcomp.addError(reply.getError());
                                         wcomp.allDone();
                                     } else {
                                         AllocateIpReply r = reply.castReply();
@@ -1127,11 +1122,7 @@ public class VmInstanceBase extends AbstractVmInstance {
                         }).run(new WhileDoneCompletion(trigger) {
                             @Override
                             public void done(ErrorCodeList errorCodeList) {
-                                if (errs.size() > 0) {
-                                    trigger.fail(errs.get(0));
-                                } else {
-                                    trigger.next();
-                                }
+                                trigger.next(errorCodeList.wrapOrNull());
                             }
                         });
                     }
@@ -1224,12 +1215,7 @@ public class VmInstanceBase extends AbstractVmInstance {
                         final VmInstanceInventory vm = getSelfInventory();
                         final VmNicInventory nic = VmNicInventory.valueOf(targetNic);
                         CollectionUtils.safeForEach(pluginRgty.getExtensionList(VmIpChangedExtensionPoint.class),
-                                new ForEachFunction<VmIpChangedExtensionPoint>() {
-                                    @Override
-                                    public void run(VmIpChangedExtensionPoint ext) {
-                                        ext.vmIpChanged(vm, nic, oldIpMap, newIpMap);
-                                    }
-                                });
+                                ext -> ext.vmIpChanged(vm, nic, oldIpMap, newIpMap));
                         trigger.next();
                     }
                 });
@@ -1552,7 +1538,8 @@ public class VmInstanceBase extends AbstractVmInstance {
             completion.done();
             return;
         } else if (operation == VmAbnormalLifeCycleOperation.VmPausedFromRunningStateHostNotChanged
-                || operation == VmAbnormalLifeCycleOperation.VmPausedFromMigratingStateHostNotChanged) {
+                || operation == VmAbnormalLifeCycleOperation.VmPausedFromMigratingStateHostNotChanged
+                || operation == VmAbnormalLifeCycleOperation.VmPausedFromStoppingStateHostNotChanged) {
             // just synchronize database
             changeVmStateInDb(VmInstanceStateEvent.paused, () -> self.setHostUuid(msg.getHostUuid()));
             fireEvent.run();
@@ -1968,6 +1955,7 @@ public class VmInstanceBase extends AbstractVmInstance {
         amsg.setServiceId(bus.makeLocalServiceId(HostAllocatorConstant.SERVICE_ID));
         amsg.setAllocatorStrategy(HostAllocatorConstant.MIGRATE_VM_ALLOCATOR_TYPE);
         amsg.setVmOperation(VmOperation.Migrate.toString());
+        amsg.setAllocationScene(AllocatorDomainScene.Migrate);
         amsg.setL3NetworkUuids(VmNicHelper.getL3Uuids(VmNicInventory.valueOf(self.getVmNics())));
         amsg.setVmNicParams(VmNicHelper.getVmNicParamsWithVfNic(self));
         amsg.setDryRun(true);
@@ -2384,17 +2372,12 @@ public class VmInstanceBase extends AbstractVmInstance {
 
 
                 CollectionUtils.safeForEach(pluginRgty.getExtensionList(VmBeforeAttachL3NetworkExtensionPoint.class),
-                        new ForEachFunction<VmBeforeAttachL3NetworkExtensionPoint>() {
-                            @Override
-                            public void run(VmBeforeAttachL3NetworkExtensionPoint arg) {
-                                arg.vmBeforeAttachL3Network(vm, l3);
-                            }
-                        });
+                        arg -> arg.vmBeforeAttachL3Network(vm, l3));
 
                 FlowChain flowChain = FlowChainBuilder.newSimpleFlowChain();
                 setFlowMarshaller(flowChain);
                 flowChain.setName(String.format("attachNic-vm-%s-nic-%s", self.getUuid(), vmNicVO.getUuid()));
-                flowChain.getData().put(VmInstanceConstant.Params.VmInstanceSpec.toString(), spec);
+                flowChain.getData().put(VmInstanceConstant.Params.VmInstanceSpec, spec);
 
                 flowChain.then(new Flow() {
                     String __name__ = "update-nic";
@@ -2449,12 +2432,7 @@ public class VmInstanceBase extends AbstractVmInstance {
                     @Override
                     public void handle(Map data) {
                         CollectionUtils.safeForEach(pluginRgty.getExtensionList(VmAfterAttachL3NetworkExtensionPoint.class),
-                                new ForEachFunction<VmAfterAttachL3NetworkExtensionPoint>() {
-                                    @Override
-                                    public void run(VmAfterAttachL3NetworkExtensionPoint arg) {
-                                        arg.vmAfterAttachL3Network(vm, l3);
-                                    }
-                                });
+                                arg -> arg.vmAfterAttachL3Network(vm, l3));
                         VmNicInventory nic = spec.getDestNics().get(0);
                         completion.success(nic);
                         chain.next();
@@ -2463,12 +2441,7 @@ public class VmInstanceBase extends AbstractVmInstance {
                     @Override
                     public void handle(final ErrorCode errCode, Map data) {
                         CollectionUtils.safeForEach(pluginRgty.getExtensionList(VmFailToAttachL3NetworkExtensionPoint.class),
-                                new ForEachFunction<VmFailToAttachL3NetworkExtensionPoint>() {
-                                    @Override
-                                    public void run(VmFailToAttachL3NetworkExtensionPoint arg) {
-                                        arg.vmFailToAttachL3Network(vm, l3, errCode);
-                                    }
-                                });
+                                arg -> arg.vmFailToAttachL3Network(vm, l3, errCode));
                         setDefaultL3Network.rollback();
                         completion.fail(errCode);
                         chain.next();
@@ -4878,12 +4851,7 @@ public class VmInstanceBase extends AbstractVmInstance {
             ext.preRecoverVm(vm);
         }
 
-        CollectionUtils.forEach(exts, new ForEachFunction<RecoverVmExtensionPoint>() {
-            @Override
-            public void run(RecoverVmExtensionPoint ext) {
-                ext.beforeRecoverVm(vm);
-            }
-        });
+        CollectionUtils.forEach(exts, ext -> ext.beforeRecoverVm(vm));
 
         FlowChain chain = FlowChainBuilder.newShareFlowChain();
         chain.setName(String.format("recover-vm-%s", self.getUuid()));
@@ -4963,12 +4931,7 @@ public class VmInstanceBase extends AbstractVmInstance {
                     @Override
                     public void run(FlowTrigger trigger, Map data) {
                         self = changeVmStateInDb(VmInstanceStateEvent.stopped);
-                        CollectionUtils.forEach(exts, new ForEachFunction<RecoverVmExtensionPoint>() {
-                            @Override
-                            public void run(RecoverVmExtensionPoint ext) {
-                                ext.afterRecoverVm(vm);
-                            }
-                        });
+                        CollectionUtils.forEach(exts, ext -> ext.afterRecoverVm(vm));
 
                         trigger.next();
                     }
@@ -7187,7 +7150,6 @@ public class VmInstanceBase extends AbstractVmInstance {
 
         List<AllocateIpMsg> msgs = new ArrayList<>();
         List<UsedIpInventory> ips = new ArrayList<>();
-        List<ErrorCode> errs = new ArrayList<>();
 
         //data.put(VmInstanceConstant.Params.VmAllocateNicFlow_ips.toString(), ips);
 
@@ -7207,7 +7169,6 @@ public class VmInstanceBase extends AbstractVmInstance {
             msgs.add(msg);
         }
 
-        List<ErrorCode> ipErrs = new ArrayList<>();
         new While<>(msgs).each((amsg, wcompl) -> {
             bus.send(amsg, new CloudBusCallBack(wcompl) {
                 @Override
@@ -7217,7 +7178,7 @@ public class VmInstanceBase extends AbstractVmInstance {
                         ips.add(areply.getIpInventory());
                         wcompl.done();
                     } else {
-                        ipErrs.add(reply.getError());
+                        wcompl.addError(reply.getError());
                         wcompl.allDone();
                     }
                 }
@@ -7225,9 +7186,9 @@ public class VmInstanceBase extends AbstractVmInstance {
         }).run(new WhileDoneCompletion(completion) {
             @Override
             public void done(ErrorCodeList errorCodeList) {
-                if (ipErrs.size() > 0) {
+                if (errorCodeList.hasError()) {
                     if (ips.isEmpty()) {
-                        completion.fail(ipErrs.get(0));
+                        completion.fail(errorCodeList.wrapOrNull());
                         return;
                     }
                     List<ReturnIpMsg> msgs = new ArrayList<ReturnIpMsg>();
@@ -7242,7 +7203,7 @@ public class VmInstanceBase extends AbstractVmInstance {
                     bus.send(msgs, 1, new CloudBusListCallBack(completion) {
                         @Override
                         public void run(List<MessageReply> replies) {
-                            completion.fail(ipErrs.get(0));
+                            completion.fail(errorCodeList.wrapOrNull());
                         }
                     });
                 }
@@ -7915,8 +7876,8 @@ public class VmInstanceBase extends AbstractVmInstance {
             }
         }
 
-        if (struct.getRootDiskOfferingUuid() != null) {
-            DiskOfferingVO rootDisk = dbf.findByUuid(struct.getRootDiskOfferingUuid(), DiskOfferingVO.class);
+        if (struct.getRootDisk().getDiskOfferingUuid() != null) {
+            DiskOfferingVO rootDisk = dbf.findByUuid(struct.getRootDisk().getDiskOfferingUuid(), DiskOfferingVO.class);
             spec.setRootDiskOffering(DiskOfferingInventory.valueOf(rootDisk));
         }
 
@@ -8030,25 +7991,20 @@ public class VmInstanceBase extends AbstractVmInstance {
         changeVmStateInDb(VmInstanceStateEvent.starting);
 
         CollectionUtils.safeForEach(pluginRgty.getExtensionList(BeforeStartNewCreatedVmExtensionPoint.class),
-                new ForEachFunction<BeforeStartNewCreatedVmExtensionPoint>() {
-                    @Override
-                    public void run(BeforeStartNewCreatedVmExtensionPoint ext) {
-                        ext.beforeStartNewCreatedVm(spec);
-                    }
-                });
+                ext -> ext.beforeStartNewCreatedVm(spec));
 
         extEmitter.beforeStartNewCreatedVm(VmInstanceInventory.valueOf(self));
         FlowChain chain = getCreateVmWorkFlowChain(getSelfInventory());
         setFlowMarshaller(chain);
 
         chain.setName(String.format("create-vm-%s", self.getUuid()));
-        chain.getData().put(VmInstanceConstant.Params.VmInstanceSpec.toString(), spec);
+        chain.getData().put(VmInstanceConstant.Params.VmInstanceSpec, spec);
         chain.then(new NoRollbackFlow() {
             String __name__ = "after-started-vm-" + self.getUuid();
 
             @Override
             public void run(FlowTrigger trigger, Map data) {
-                VmInstanceSpec spec = (VmInstanceSpec) data.get(VmInstanceConstant.Params.VmInstanceSpec.toString());
+                VmInstanceSpec spec = (VmInstanceSpec) data.get(VmInstanceConstant.Params.VmInstanceSpec);
                 changeVmStateInDb(struct.getStrategy() == VmCreationStrategy.InstantStart ?
                         VmInstanceStateEvent.running : VmInstanceStateEvent.paused, () -> {
                     self.setLastHostUuid(spec.getDestHost().getUuid());
@@ -8614,6 +8570,11 @@ public class VmInstanceBase extends AbstractVmInstance {
 
     protected void stopVm(final Message msg, final Completion completion) {
         refreshVO();
+        if (self.getState() == VmInstanceState.Paused && msg instanceof StopVmMessage
+                && StopVmType.grace.toString().equals(((StopVmMessage) msg).getType())) {
+            completion.fail(operr("cannot gracefully stop paused vm[uuid:%s]; resume it first", self.getUuid()));
+            return;
+        }
         ErrorCode allowed = validateOperationByState(msg, self.getState(), null);
         if (allowed != null) {
             completion.fail(allowed);

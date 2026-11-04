@@ -3,8 +3,6 @@ package org.zstack.storage.volume;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
-import org.zstack.configuration.DiskOfferingSystemTags;
-import org.zstack.configuration.OfferingUserConfigUtils;
 import org.zstack.core.cloudbus.CloudBus;
 import org.zstack.core.componentloader.PluginRegistry;
 import org.zstack.core.db.DatabaseFacade;
@@ -21,7 +19,6 @@ import org.zstack.header.cluster.ClusterVO;
 import org.zstack.header.cluster.ClusterVO_;
 import org.zstack.header.configuration.DiskOfferingVO;
 import org.zstack.header.configuration.DiskOfferingVO_;
-import org.zstack.header.configuration.userconfig.DiskOfferingUserConfig;
 import org.zstack.header.errorcode.ErrorCode;
 import org.zstack.header.host.HostStatus;
 import org.zstack.header.host.HostVO;
@@ -32,7 +29,6 @@ import org.zstack.header.image.ImageState;
 import org.zstack.header.image.ImageStatus;
 import org.zstack.header.image.ImageVO;
 import org.zstack.header.message.APIMessage;
-import org.zstack.header.storage.primary.PrimaryStorageAllocateConfig;
 import org.zstack.header.storage.primary.PrimaryStorageClusterRefVO;
 import org.zstack.header.storage.primary.PrimaryStorageClusterRefVO_;
 import org.zstack.header.storage.primary.PrimaryStorageHostRefVO;
@@ -67,12 +63,13 @@ import org.zstack.header.volume.APIDetachDataVolumeFromVmMsg;
 import org.zstack.header.volume.APIFlattenVolumeMsg;
 import org.zstack.header.volume.APIGetDataVolumeAttachableVmMsg;
 import org.zstack.header.volume.APIRecoverDataVolumeMsg;
+import org.zstack.header.volume.APIShrinkVolumeMsg;
 import org.zstack.header.volume.APIUndoSnapshotCreationMsg;
 import org.zstack.header.volume.VolumeConstant;
-import org.zstack.header.volume.VolumeCreateMessage;
 import org.zstack.header.volume.VolumeFormat;
 import org.zstack.header.volume.VolumeHostRefVO;
 import org.zstack.header.volume.VolumeHostRefVO_;
+import org.zstack.header.volume.VolumeInventory;
 import org.zstack.header.volume.VolumeMessage;
 import org.zstack.header.volume.VolumeState;
 import org.zstack.header.volume.VolumeStatus;
@@ -118,9 +115,6 @@ public class VolumeApiInterceptor implements Component, GlobalApiMessageIntercep
 
     @Override
     public APIMessage intercept(APIMessage msg) throws ApiMessageInterceptionException {
-        if (msg instanceof VolumeCreateMessage) {
-            validate((VolumeCreateMessage) msg);
-        }
         if (msg instanceof APIChangeVolumeStateMsg) {
             validate((APIChangeVolumeStateMsg) msg);
         } else if (msg instanceof APIDeleteDataVolumeMsg) {
@@ -147,6 +141,8 @@ public class VolumeApiInterceptor implements Component, GlobalApiMessageIntercep
             validate((APIAttachDataVolumeToHostMsg) msg);
         } else if (msg instanceof APIDetachDataVolumeFromHostMsg) {
             validate((APIDetachDataVolumeFromHostMsg) msg);
+        } else if (msg instanceof APIShrinkVolumeMsg) {
+            validate((APIShrinkVolumeMsg) msg);
         } else if (msg instanceof APIFlattenVolumeMsg) {
             validate((APIFlattenVolumeMsg) msg);
         } else if (msg instanceof APIChangeVolumeEncryptionMsg) {
@@ -159,27 +155,6 @@ public class VolumeApiInterceptor implements Component, GlobalApiMessageIntercep
 
         setServiceId(msg);
         return msg;
-    }
-
-    private void validate(VolumeCreateMessage msg) {
-        String diskOffering = msg.getDiskOfferingUuid();
-        if (diskOffering == null || !DiskOfferingSystemTags.DISK_OFFERING_USER_CONFIG.hasTag(diskOffering)) {
-            return;
-        }
-
-        DiskOfferingUserConfig config = OfferingUserConfigUtils.getDiskOfferingConfig(diskOffering, DiskOfferingUserConfig.class);
-        if (config.getAllocate() == null) {
-            return;
-        }
-
-        if (!config.getAllocate().getAllPrimaryStorages().isEmpty()) {
-            List<String> requiredPrimaryStorageUuids = config.getAllocate().getAllPrimaryStorages().stream()
-                    .map(PrimaryStorageAllocateConfig::getUuid).collect(Collectors.toList());
-            if (msg.getPrimaryStorageUuid() != null && !requiredPrimaryStorageUuids.contains(msg.getPrimaryStorageUuid())) {
-                throw new ApiMessageInterceptionException(operr("primary storage uuid conflict, the primary storage specified by the disk offering are %s, and the primary storage specified in the creation parameter is %s",
-                        requiredPrimaryStorageUuids, msg.getPrimaryStorageUuid()));
-            }
-        }
     }
 
     private void validate(APICreateVolumeSnapshotMsg msg) {
@@ -606,6 +581,31 @@ public class VolumeApiInterceptor implements Component, GlobalApiMessageIntercep
         boolean isShareable = Q.New(VolumeVO.class).eq(VolumeVO_.uuid, msg.getVolumeUuid()).select(VolumeVO_.isShareable).findValue();
         if (isShareable) {
             throw new ApiMessageInterceptionException(argerr("cannot flatten a shareable volume[uuid:%s]", msg.getVolumeUuid()));
+        }
+    }
+
+    private void validate(APIShrinkVolumeMsg msg) {
+        VolumeVO volumeVO = dbf.findByUuid(msg.getVolumeUuid(), VolumeVO.class);
+        if (volumeVO.getStatus() != VolumeStatus.Ready) {
+            throw new ApiMessageInterceptionException(argerr(
+                    "volume[uuid:%s] is not ready, current status is %s",
+                    msg.getVolumeUuid(), volumeVO.getStatus()));
+        }
+
+        List<String> attachedVmUuids = VolumeInventory.valueOf(volumeVO).getAttachedVmUuids();
+        if (attachedVmUuids.isEmpty()) {
+            return;
+        }
+
+        List<String> notStoppedVmUuids = Q.New(VmInstanceVO.class)
+                .select(VmInstanceVO_.uuid)
+                .notEq(VmInstanceVO_.state, VmInstanceState.Stopped)
+                .in(VmInstanceVO_.uuid, attachedVmUuids)
+                .listValues();
+        if (!notStoppedVmUuids.isEmpty()) {
+            throw new ApiMessageInterceptionException(argerr(
+                    "cannot shrink volume[uuid:%s] while attached vm instances[uuids:%s] are not stopped",
+                    msg.getVolumeUuid(), notStoppedVmUuids));
         }
     }
 

@@ -1,18 +1,11 @@
 package org.zstack.header.network.l3;
 
-import org.apache.commons.net.util.SubnetUtils;
-import org.apache.commons.net.util.SubnetUtils.SubnetInfo;
 import org.zstack.header.configuration.PythonClassInventory;
+import org.zstack.header.message.DocUtils;
 import org.zstack.header.query.ExpandedQueries;
 import org.zstack.header.query.ExpandedQuery;
 import org.zstack.header.search.Inventory;
-import org.zstack.utils.gson.JSONObjectUtil;
-import org.zstack.utils.network.IPv6Constants;
-import org.zstack.utils.network.IPv6NetworkUtils;
-import org.zstack.utils.network.NetworkUtils;
 
-import java.io.Serializable;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -34,7 +27,7 @@ import java.util.List;
  * "lastOpDate": "May 4, 2014 4:30:23 PM"
  * }
  * }
- * @since 0.1.0
+ * @since zsv_0.1.0
  */
 @Inventory(mappingVOClass = AddressPoolVO.class, collectionValueOfMethod="valueOf1")
 @PythonClassInventory
@@ -71,5 +64,14 @@ public class AddressPoolInventory extends IpRangeInventory {
             invs.add(AddressPoolInventory.valueOf1(vo));
         }
         return invs;
+    }
+
+    public static AddressPoolInventory __example__() {
+        AddressPoolInventory ipRange = new AddressPoolInventory();
+        ipRange.setName("Test-IPRange");
+        ipRange.setL3NetworkUuid(DocUtils.createFixedUuid(L3NetworkVO.class));
+        ipRange.setNetworkCidr("192.168.10.0/24");
+        ipRange.setIpRangeType(IpRangeType.AddressPool);
+        return ipRange;
     }
 }

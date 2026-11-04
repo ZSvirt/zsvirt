@@ -18,7 +18,7 @@ import org.zstack.header.network.service.NetworkServiceProviderType;
 import org.zstack.header.network.service.NetworkServiceType;
 import org.zstack.header.vm.*;
 import org.zstack.network.service.AbstractNetworkServiceExtension;
-import org.zstack.tag.PatternedSystemTag;
+import org.zstack.tag.SystemTag;
 import org.zstack.utils.Utils;
 import org.zstack.utils.logging.CLogger;
 
@@ -106,11 +106,11 @@ public class SecurityGroupNetworkServiceExtension extends AbstractNetworkService
         }
     }
 
-    private List<String> getExactTags(PatternedSystemTag systemTag, String vmUuid) {
+    private List<String> getExactTags(SystemTag systemTag, String vmUuid) {
         return systemTag.getTags(vmUuid).stream().filter(systemTag::isMatch).collect(Collectors.toList());
     }
 
-    private void deleteExactTags(PatternedSystemTag systemTag, String vmUuid, List<String> tags) {
+    private void deleteExactTags(SystemTag systemTag, String vmUuid, List<String> tags) {
         tags.forEach(tag -> systemTag.delete(vmUuid, tag));
     }
 

@@ -7,7 +7,7 @@ doc {
 
 	category "mevoco"
 
-	desc """设置云主机控制台模式"""
+	desc """设置虚拟机控制台模式"""
 
 	rest {
 		request {
@@ -28,7 +28,7 @@ doc {
 					location "url"
 					type "String"
 					optional false
-					since "3.7.0"
+					since "zsv_3.7.0"
 				}
 				column {
 					name "mode"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "3.7.0"
+					since "zsv_3.7.0"
 				}
 				column {
 					name "systemTags"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.7.0"
+					since "zsv_3.7.0"
 				}
 				column {
 					name "userTags"
@@ -55,7 +55,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.7.0"
+					since "zsv_3.7.0"
 				}
 			}
 		}

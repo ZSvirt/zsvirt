@@ -5,7 +5,7 @@ import org.zstack.core.config.GlobalConfigDef;
 import org.zstack.core.config.GlobalConfigDefinition;
 import org.zstack.core.config.GlobalConfigValidation;
 import org.zstack.header.vm.VmInstanceVO;
-import org.zstack.resourceconfig.BindResourceConfig;
+import org.zstack.core.config.BindResourceConfig;
 
 @GlobalConfigDefinition
 public class AllocatorDomainGlobalConfig {

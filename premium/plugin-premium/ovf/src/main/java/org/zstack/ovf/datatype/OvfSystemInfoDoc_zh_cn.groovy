@@ -10,12 +10,12 @@ doc {
 		name "virtualSystemType"
 		desc "硬件系统类型"
 		type "String"
-		since "3.14.6"
+		since "zsv_3.14.6"
 	}
 	field {
 		name "firmwareType"
 		desc "固件类型"
 		type "String"
-		since "3.14.6"
+		since "zsv_3.14.6"
 	}
 }

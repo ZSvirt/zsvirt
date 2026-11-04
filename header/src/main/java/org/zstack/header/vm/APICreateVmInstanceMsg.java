@@ -70,9 +70,7 @@ import static org.zstack.utils.CollectionDSL.list;
  * }
  * }
  * @result See :ref:`APICreateVmInstanceEvent`
- * @since 0.1.0
- *
- * @summary 创建云主机
+ * @since zsv_0.1.0
  */
 @TagResourceType(VmInstanceVO.class)
 @RestRequest(

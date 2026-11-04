@@ -3,11 +3,11 @@ package org.zstack.header.vm
 import org.zstack.header.vm.APIStartVmInstanceEvent
 
 doc {
-	title "启动云主机(StartVmInstance)"
+	title "启动虚拟机(StartVmInstance)"
 
 	category "vmInstance"
 
-	desc """启动一个云主机"""
+	desc """启动一个虚拟机"""
 
 	rest {
 		request {
@@ -24,29 +24,29 @@ doc {
 				column {
 					name "uuid"
 					enclosedIn "startVmInstance"
-					desc "云主机UUID"
+					desc "虚拟机UUID"
 					location "url"
 					type "String"
 					optional false
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "clusterUuid"
 					enclosedIn "startVmInstance"
-					desc "集群UUID。若指定，云主机将在该集群启动"
+					desc "集群UUID。若指定，虚拟机将在该集群启动"
 					location "body"
 					type "String"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "hostUuid"
 					enclosedIn "startVmInstance"
-					desc "物理机UUID。若指定，云主机将在该物理机启动。该字段覆盖`clusterUuid`字段"
+					desc "物理机UUID。若指定，虚拟机将在该物理机启动。该字段覆盖`clusterUuid`字段"
 					location "body"
 					type "String"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "systemTags"
@@ -55,7 +55,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "userTags"
@@ -64,7 +64,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 			}
 		}

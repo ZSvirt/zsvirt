@@ -69,7 +69,7 @@
             <zstack:extension interface="org.zstack.header.Component" />
             <zstack:extension interface="org.zstack.header.Service" />
             <zstack:extension interface="org.zstack.network.l2.virtualSwitch.VirtualSwitchManager" />
-            <zstack:extension interface="org.zstack.compute.host.PostHostConnectExtensionPoint" order="-1"/>
+            <zstack:extension interface="org.zstack.header.host.spi.HostPostConnectedExtensionPoint" order="-1"/>
             <zstack:extension interface="org.zstack.network.service.flat.L3NetworkGetIpStatisticExtensionPoint" />
             <zstack:extension interface="org.zstack.header.host.HostAfterUpdatedExtensionPoint"/>
             <zstack:extension interface="org.zstack.network.hostNetworkInterface.HostNetworkCandidateFilterExtensionPoint" />

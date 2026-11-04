@@ -12,6 +12,8 @@ import org.zstack.header.vm.VmInstanceVO;
 import org.zstack.header.vm.VmInstanceVO_;
 import org.zstack.header.volume.VolumeVO;
 import org.zstack.header.volume.VolumeVO_;
+import org.zstack.pciDevice.entity.PciDeviceVO;
+import org.zstack.pciDevice.entity.PciDeviceVO_;
 import org.zstack.storage.primary.local.LocalStorageConstants;
 
 import java.util.Collections;

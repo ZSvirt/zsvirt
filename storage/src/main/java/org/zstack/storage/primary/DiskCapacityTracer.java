@@ -33,9 +33,21 @@ public class DiskCapacityTracer implements Component {
     private static Logger logger = LogManager.getLogger("org.zstack.storage.primary.DiskCapacityTracer");
     private static Logger loggerd = LogManager.getLogger("org.zstack.storage.primary.DiskCapacityTracerDetails");
     private static CLogger clogger = Utils.getLogger(DiskCapacityTracer.class);
+    private static DiskCapacityTracer self;
 
     @Autowired
     private DatabaseFacade dbf;
+
+    /**
+     * Called by {@code PrimaryStorageAllocatorChain}, which is not a {@link FlowChain}
+     * and cannot use {@link #trackAllocatorChain}.
+     */
+    public static void traceAllocation(PrimaryStorageAllocationSpec spec, List<PrimaryStorageVO> candidates) {
+        if (self == null) {
+            return;
+        }
+        self.trace(spec, candidates);
+    }
 
     public void trackAllocatorChain(FlowChain chain) {
         if (!PrimaryStorageGlobalProperty.CAPACITY_TRACKER_ON) {
@@ -55,23 +67,7 @@ public class DiskCapacityTracer implements Component {
                         public void run(FlowTrigger trigger, Map data) {
                             PrimaryStorageAllocationSpec spec = (PrimaryStorageAllocationSpec) data.get(AllocatorParams.SPEC);
                             List<PrimaryStorageVO> candidates = (List<PrimaryStorageVO>) data.get(AllocatorParams.CANDIDATES);
-                            List<PrimaryStorageVO> all = dbf.listAll(PrimaryStorageVO.class);
-
-                            StringBuilder sb = new StringBuilder("\n=== Primary Storage Allocation Tracker ====\n");
-                            sb.append(String.format("REQUIRED SIZE: %s\n", spec.getSize()));
-                            sb.append("CANDIDATES:\n");
-                            for (PrimaryStorageVO p : candidates) {
-                                sb.append(String.format("[name]:%s [uuid]:%s [status]:%s [state]:%s [available]:%s [total]:%s",
-                                        p.getName(), p.getUuid(), p.getStatus(), p.getState(), p.getCapacity().getAvailableCapacity(), p.getCapacity().getTotalCapacity()));
-                            }
-                            sb.append("\n\n");
-                            sb.append("ALL:\n");
-                            for (PrimaryStorageVO p : all) {
-                                sb.append(String.format("[name]:%s [uuid]:%s [status]:%s [state]:%s [available]:%s [total]:%s",
-                                        p.getName(), p.getUuid(), p.getStatus(), p.getState(), p.getCapacity().getAvailableCapacity(), p.getCapacity().getTotalCapacity()));
-                            }
-                            sb.append("\n===========================================\n");
-                            clogger.debug(sb.toString());
+                            trace(spec, candidates);
                             trigger.next();
                         }
                     });
@@ -80,6 +76,30 @@ public class DiskCapacityTracer implements Component {
                 chain.setFlows(flows);
             }
         });
+    }
+
+    private void trace(PrimaryStorageAllocationSpec spec, List<PrimaryStorageVO> candidates) {
+        if (!PrimaryStorageGlobalProperty.CAPACITY_TRACKER_ON || spec == null || candidates == null) {
+            return;
+        }
+
+        List<PrimaryStorageVO> all = dbf.listAll(PrimaryStorageVO.class);
+
+        StringBuilder sb = new StringBuilder("\n=== Primary Storage Allocation Tracker ====\n");
+        sb.append(String.format("REQUIRED SIZE: %s\n", spec.getSize()));
+        sb.append("CANDIDATES:\n");
+        for (PrimaryStorageVO p : candidates) {
+            sb.append(String.format("[name]:%s [uuid]:%s [status]:%s [state]:%s [available]:%s [total]:%s",
+                    p.getName(), p.getUuid(), p.getStatus(), p.getState(), p.getCapacity().getAvailableCapacity(), p.getCapacity().getTotalCapacity()));
+        }
+        sb.append("\n\n");
+        sb.append("ALL:\n");
+        for (PrimaryStorageVO p : all) {
+            sb.append(String.format("[name]:%s [uuid]:%s [status]:%s [state]:%s [available]:%s [total]:%s",
+                    p.getName(), p.getUuid(), p.getStatus(), p.getState(), p.getCapacity().getAvailableCapacity(), p.getCapacity().getTotalCapacity()));
+        }
+        sb.append("\n===========================================\n");
+        clogger.debug(sb.toString());
     }
 
     private void printCallTrace() {
@@ -95,6 +115,7 @@ public class DiskCapacityTracer implements Component {
 
     @Override
     public boolean start() {
+        self = this;
         if (!PrimaryStorageGlobalProperty.CAPACITY_TRACKER_ON) {
             return true;
         }
@@ -215,6 +236,7 @@ public class DiskCapacityTracer implements Component {
 
     @Override
     public boolean stop() {
+        self = null;
         return true;
     }
 }

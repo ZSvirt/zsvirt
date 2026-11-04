@@ -2,8 +2,6 @@ package org.zstack.header.host;
 
 import com.google.gson.annotations.SerializedName;
 import com.google.gson.internal.LinkedTreeMap;
-import org.zstack.utils.CollectionDSL;
-import org.zstack.utils.CollectionUtils;
 import org.zstack.utils.gson.JSONObjectUtil;
 
 import java.util.*;

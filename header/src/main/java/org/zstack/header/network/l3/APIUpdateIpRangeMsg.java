@@ -65,9 +65,7 @@ public class APIUpdateIpRangeMsg extends APIMessage implements L3NetworkMessage,
  
     public static APIUpdateIpRangeMsg __example__() {
         APIUpdateIpRangeMsg msg = new APIUpdateIpRangeMsg();
-
-        msg.setUuid(uuid());
-
+        msg.setUuid(uuid(IpRangeVO.class));
         return msg;
     }
 }

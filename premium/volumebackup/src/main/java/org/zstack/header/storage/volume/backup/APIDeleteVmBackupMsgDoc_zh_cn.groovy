@@ -28,7 +28,7 @@ doc {
 					location "url"
 					type "String"
 					optional false
-					since "3.0.0"
+					since "zsv_3.0.0"
 				}
 				column {
 					name "backupStorageUuids"
@@ -37,7 +37,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "3.0.0"
+					since "zsv_3.0.0"
 				}
 				column {
 					name "deleteMode"
@@ -46,7 +46,7 @@ doc {
 					location "query"
 					type "String"
 					optional true
-					since "3.0.0"
+					since "zsv_3.0.0"
 				}
 				column {
 					name "systemTags"
@@ -55,7 +55,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "3.0.0"
+					since "zsv_3.0.0"
 				}
 				column {
 					name "userTags"
@@ -64,7 +64,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "3.0.0"
+					since "zsv_3.0.0"
 				}
 				column {
 					name "handleDependency"
@@ -73,7 +73,7 @@ doc {
 					location "query"
 					type "boolean"
 					optional true
-					since "3.17.11"
+					since "zsv_3.17.11"
 				}
 			}
 		}

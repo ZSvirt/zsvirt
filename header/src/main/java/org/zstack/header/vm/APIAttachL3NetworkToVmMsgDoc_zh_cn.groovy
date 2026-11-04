@@ -3,11 +3,11 @@ package org.zstack.header.vm
 import org.zstack.header.vm.APIAttachL3NetworkToVmEvent
 
 doc {
-	title "加载网络到云主机(AttachL3NetworkToVm)"
+	title "加载网络到虚拟机(AttachL3NetworkToVm)"
 
 	category "vmInstance"
 
-	desc """动态添加一个网络到Running或者Stopped的云主机"""
+	desc """动态添加一个网络到Running或者Stopped的虚拟机"""
 
 	rest {
 		request {
@@ -24,11 +24,11 @@ doc {
 				column {
 					name "vmInstanceUuid"
 					enclosedIn "params"
-					desc "云主机UUID"
+					desc "虚拟机UUID"
 					location "url"
 					type "String"
 					optional false
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "l3NetworkUuid"
@@ -37,16 +37,16 @@ doc {
 					location "url"
 					type "String"
 					optional false
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "staticIp"
 					enclosedIn "params"
-					desc "指定分配给云主机的IP地址"
+					desc "指定分配给虚拟机的IP地址"
 					location "body"
 					type "String"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "systemTags"
@@ -55,7 +55,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "userTags"
@@ -64,7 +64,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "driverType"
@@ -73,7 +73,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 3.10.0"
+					since "zsv_3.10.0"
 				}
 				column {
 					name "customMac"
@@ -82,7 +82,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 3.10.0"
+					since "zsv_3.10.0"
 				}
 				column {
 					name "vmNicParams"
@@ -91,7 +91,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 3.17.0"
+					since "zsv_3.17.0"
 				}
 			}
 		}

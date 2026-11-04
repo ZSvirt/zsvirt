@@ -14,6 +14,10 @@ class BackupStorageNamespaceEvent {
             return data.getBackupStorageUuid()
         }
 
+        BackupStorageNamespace.FaultMountPointOnBackupStorage.onCanonicalEvent(BackupStorageCanonicalEvents.BACKUP_STORAGE_CHECK_INITIALIZED_FAILED) { BackupStorageCanonicalEvents.BackupStorageMountData data ->
+            return new EventFamily.Event(data.backupStorageUuid, data.details)
+        }
+
         BackupStorageNamespace.BackupStorageConnected.onCanonicalEvent(BackupStorageCanonicalEvents.BACKUP_STORAGE_STATUS_CHANGED) { BackupStorageCanonicalEvents.BackupStorageStatusChangedData data ->
             if (data.newStatus == BackupStorageStatus.Connected.toString()) {
                 return new EventFamily.Event(data.backupStorageUuid, data.oldStatus, data.newStatus)

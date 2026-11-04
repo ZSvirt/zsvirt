@@ -7,7 +7,7 @@ doc {
 
 	category "autoscaling"
 
-	desc """更新伸缩组云主机模板"""
+	desc """更新伸缩组虚拟机模板"""
 
 	rest {
 		request {
@@ -24,11 +24,11 @@ doc {
 				column {
 					name "uuid"
 					enclosedIn "updateAutoScalingVmTemplate"
-					desc "云主机模板UUID"
+					desc "虚拟机模板UUID"
 					location "url"
 					type "String"
 					optional false
-					since "3.9.0"
+					since "zsv_3.9.0"
 				}
 				column {
 					name "name"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.9.0"
+					since "zsv_3.9.0"
 				}
 				column {
 					name "description"
@@ -46,43 +46,43 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.9.0"
+					since "zsv_3.9.0"
 				}
 				column {
 					name "vmInstanceName"
 					enclosedIn "updateAutoScalingVmTemplate"
-					desc "云主机名称"
+					desc "虚拟机名称"
 					location "body"
 					type "String"
 					optional true
-					since "3.9.0"
+					since "zsv_3.9.0"
 				}
 				column {
 					name "vmInstanceDescription"
 					enclosedIn "updateAutoScalingVmTemplate"
-					desc "云主机描述"
+					desc "虚拟机描述"
 					location "body"
 					type "String"
 					optional true
-					since "3.9.0"
+					since "zsv_3.9.0"
 				}
 				column {
 					name "vmInstanceOfferingUuid"
 					enclosedIn "updateAutoScalingVmTemplate"
-					desc "云主机实例规格UUID"
+					desc "虚拟机实例规格UUID"
 					location "body"
 					type "String"
 					optional true
-					since "3.9.0"
+					since "zsv_3.9.0"
 				}
 				column {
 					name "imageUuid"
 					enclosedIn "updateAutoScalingVmTemplate"
-					desc "云主机镜像UUID"
+					desc "虚拟机镜像UUID"
 					location "body"
 					type "String"
 					optional true
-					since "3.9.0"
+					since "zsv_3.9.0"
 				}
 				column {
 					name "systemTags"
@@ -91,7 +91,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.9.0"
+					since "zsv_3.9.0"
 				}
 				column {
 					name "userTags"
@@ -100,25 +100,25 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.9.0"
+					since "zsv_3.9.0"
 				}
 				column {
 					name "vmInstanceClusterUuid"
 					enclosedIn "updateAutoScalingVmTemplate"
-					desc "云主机所在集群UUID"
+					desc "虚拟机所在集群UUID"
 					location "body"
 					type "String"
 					optional true
-					since "3.10.0"
+					since "zsv_3.10.0"
 				}
 				column {
 					name "hostUuid"
 					enclosedIn "updateAutoScalingVmTemplate"
-					desc "云主机所在物理机UUID"
+					desc "虚拟机所在物理机UUID"
 					location "body"
 					type "String"
 					optional true
-					since "3.10.0"
+					since "zsv_3.10.0"
 				}
 			}
 		}

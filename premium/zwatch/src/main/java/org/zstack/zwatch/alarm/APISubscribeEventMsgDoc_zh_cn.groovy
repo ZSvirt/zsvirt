@@ -28,7 +28,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "2.3"
+					since "zsv_2.3"
 				}
 				column {
 					name "eventName"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "2.3"
+					since "zsv_2.3"
 				}
 				column {
 					name "actions"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "2.3"
+					since "zsv_2.3"
 				}
 				column {
 					name "labels"
@@ -55,7 +55,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "2.3"
+					since "zsv_2.3"
 				}
 				column {
 					name "resourceUuid"
@@ -64,7 +64,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "2.3"
+					since "zsv_2.3"
 				}
 				column {
 					name "systemTags"
@@ -73,7 +73,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "2.3"
+					since "zsv_2.3"
 				}
 				column {
 					name "userTags"
@@ -82,7 +82,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "2.3"
+					since "zsv_2.3"
 				}
 				column {
 					name "name"
@@ -91,7 +91,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.0.0"
+					since "zsv_3.0.0"
 				}
 				column {
 					name "emergencyLevel"
@@ -100,7 +100,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.8"
+					since "zsv_3.8"
 					values ("Emergent","Important","Normal")
 				}
 				column {
@@ -110,7 +110,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.8"
+					since "zsv_3.8"
 				}
 			}
 		}

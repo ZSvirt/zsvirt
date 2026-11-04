@@ -11,18 +11,15 @@ import org.zstack.core.db.Q;
 import org.zstack.core.db.SQL;
 import org.zstack.header.apimediator.ApiMessageInterceptionException;
 import org.zstack.header.apimediator.ApiMessageInterceptor;
-import org.zstack.header.apimediator.GlobalApiMessageInterceptor;
 import org.zstack.header.apimediator.InterceptorForService;
 import org.zstack.header.errorcode.ErrorCode;
 import org.zstack.header.message.APIMessage;
-import org.zstack.header.scheduler.*;
 import org.zstack.header.storage.backup.*;
 import org.zstack.header.storage.volume.backup.*;
 import org.zstack.header.vm.*;
 import org.zstack.header.volume.VolumeType;
 import org.zstack.header.volume.VolumeVO;
 import org.zstack.header.volume.VolumeVO_;
-import org.zstack.scheduler.*;
 import org.zstack.storage.backup.imagestore.ImageStoreBackupStorageConstant;
 import org.zstack.storage.backup.imagestore.ImageStoreBackupStorageSelector;
 import org.zstack.utils.message.OperationChecker;
@@ -35,19 +32,13 @@ import static org.zstack.core.Platform.operr;
 import static org.zstack.utils.CollectionDSL.list;
 
 @InterceptorForService("backup.volume")
-public class VolumeBackupApiInterceptor implements ApiMessageInterceptor, GlobalApiMessageInterceptor {
+public class VolumeBackupApiInterceptor implements ApiMessageInterceptor {
     @Autowired
     private CloudBus bus;
-    @Autowired
-    private SchedulerFacade schedulerFacade;
     @Autowired
     private VmNicManager nicManager;
 
     protected static OperationChecker allowedOperations = new OperationChecker(true);
-
-    private static Set<String> backupSchedulerType = new HashSet<>();
-
-    private static Set<String> backupSchedulerJobClassNames = new HashSet<>();
 
     static {
         allowedOperations.addState(BackupStorageState.Enabled,
@@ -62,17 +53,6 @@ public class VolumeBackupApiInterceptor implements ApiMessageInterceptor, Global
                 APIRevertVolumeFromVolumeBackupMsg.class.getName(),
                 APIRevertVmFromVmBackupMsg.class.getName()
         );
-
-        backupSchedulerType.add(SchedulerType.VM_BACKUP);
-        backupSchedulerType.add(SchedulerType.VOLUME_BACKUP);
-        backupSchedulerType.add(SchedulerType.ROOT_VOLUME_BACKUP);
-        backupSchedulerType.add(SchedulerType.DATABASE_BACKUP);
-
-        backupSchedulerJobClassNames.add(CreateVmBackupJob.class.getName());
-        backupSchedulerJobClassNames.add(CreateVolumeBackupJob.class.getName());
-        backupSchedulerJobClassNames.add(CreateRootVolumeBackupJob.class.getName());
-        backupSchedulerJobClassNames.add(CreateDatabaseBackupJob.class.getName());
-
     }
 
     private ErrorCode validateOperationOnBackupStorage(OperationChecker checker, String msgName, String bsUuid) {
@@ -527,12 +507,5 @@ public class VolumeBackupApiInterceptor implements ApiMessageInterceptor, Global
                         operr("the cluster of vm[%s] is not in the same cluster as the primaryStorage[%s]", msg.getVmInstanceUuid(), msg.getPrimaryStorageUuid()));
             }
         }
-    }
-
-    @Override
-    public List<Class> getMessageClassToIntercept() {
-        return Arrays.asList(APICreateSchedulerJobMsg.class,
-                APICreateSchedulerJobGroupMsg.class
-        );
     }
 }

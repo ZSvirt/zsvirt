@@ -10,7 +10,7 @@ import org.zstack.header.rest.RestRequest;
 
 /**
  * @Author: ya.wang
- * @Date: 1/15/26 1:49 AM
+ * @Date: 1/15/26 1:49 AM
  */
 @RestRequest(
         path = "/external/service/configurations/{uuid}",
@@ -60,7 +60,7 @@ public class APIUpdateExternalServiceConfigurationMsg extends APIMessage impleme
 
     public static APIUpdateExternalServiceConfigurationMsg __example__() {
         APIUpdateExternalServiceConfigurationMsg msg = new APIUpdateExternalServiceConfigurationMsg();
-        msg.setUuid(uuid());
+        msg.setUuid(uuid(ExternalServiceConfigurationVO.class));
         msg.setDescription("description");
         msg.setConfiguration("{}");
         return msg;

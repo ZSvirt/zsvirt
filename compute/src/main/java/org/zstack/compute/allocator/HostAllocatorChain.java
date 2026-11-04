@@ -112,7 +112,7 @@ public class HostAllocatorChain implements HostAllocatorTrigger, HostAllocatorSt
                                 "because of pagination, will start over allocation again; " +
                                 "current pagination info %s; failure details: %s",
                         JSONObjectUtil.toJsonString(paginationInfo), ofe.getErrorCode().getDetails()));
-                seriesErrorWhenPagination.add(ofe.getErrorCode().getCause());
+                seriesErrorWhenPagination.addAll(ofe.getErrorCode().getCauses());
                 startNextPage();
             } else {
                 fail(ofe.getErrorCode());
@@ -217,7 +217,7 @@ public class HostAllocatorChain implements HostAllocatorTrigger, HostAllocatorSt
                 upperError.setCode(HostAllocatorConstant.PAGINATION_INTERMEDIATE_ERROR.getCode());
                 upperError.setDetails("no host meet the requirements (in pagination, a middle flow fails)");
                 upperError.setDescription(HostAllocatorConstant.PAGINATION_INTERMEDIATE_ERROR.getDescription());
-                upperError.setCause(errorCode);
+                upperError.withCause(errorCode);
                 errorCode = upperError;
             }
             // else: no host found, stop allocating

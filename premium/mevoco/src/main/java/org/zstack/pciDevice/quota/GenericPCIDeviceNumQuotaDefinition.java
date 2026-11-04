@@ -1,7 +1,7 @@
 package org.zstack.pciDevice.quota;
 
 import org.zstack.header.identity.quota.QuotaDefinition;
-import org.zstack.pciDevice.PciDeviceConstants;
+import org.zstack.pciDevice.header.PciDeviceConstants;
 import org.zstack.pciDevice.PciDeviceQuotaGlobalConfig;
 import org.zstack.pciDevice.PciDeviceQuotaUtils;
 

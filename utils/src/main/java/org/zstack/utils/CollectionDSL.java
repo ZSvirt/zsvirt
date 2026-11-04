@@ -28,6 +28,7 @@ public class CollectionDSL {
         };
     }
 
+    @SafeVarargs
     public static <T> List<T> list(T...els) {
         ArrayList<T> lst = new ArrayList<>(els.length);
         Collections.addAll(lst, els);

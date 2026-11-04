@@ -27,14 +27,7 @@ public class APIUpdateIpRangeEvent extends APIEvent {
  
     public static APIUpdateIpRangeEvent __example__() {
         APIUpdateIpRangeEvent event = new APIUpdateIpRangeEvent();
-        IpRangeInventory ipRange = new IpRangeInventory();
-
-        ipRange.setName("Test-IPRange");
-        ipRange.setL3NetworkUuid(uuid());
-        ipRange.setNetworkCidr("192.168.10.0/24");
-
-        event.setInventory(ipRange);
+        event.setInventory(IpRangeInventory.__example__());
         return event;
     }
-
 }

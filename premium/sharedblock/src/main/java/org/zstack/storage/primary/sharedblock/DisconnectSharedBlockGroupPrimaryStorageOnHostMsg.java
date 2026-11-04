@@ -7,7 +7,16 @@ public class DisconnectSharedBlockGroupPrimaryStorageOnHostMsg extends NeedReply
     private String primaryStorageUuid;
     private String hypervisorType;
     private String hostUuid;
-    private Boolean stopService = false;
+    private boolean stopService;
+    private boolean removeRefVO;
+
+    public boolean isRemoveRefVO() {
+        return removeRefVO;
+    }
+
+    public void setRemoveRefVO(boolean removeRefVO) {
+        this.removeRefVO = removeRefVO;
+    }
 
     public void setHypervisorType(String hypervisorType) {
         this.hypervisorType = hypervisorType;
@@ -35,11 +44,11 @@ public class DisconnectSharedBlockGroupPrimaryStorageOnHostMsg extends NeedReply
         return hypervisorType;
     }
 
-    public Boolean getStopService() {
+    public boolean getStopService() {
         return stopService;
     }
 
-    public void setStopService(Boolean stopService) {
+    public void setStopService(boolean stopService) {
         this.stopService = stopService;
     }
 }

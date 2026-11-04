@@ -7,7 +7,7 @@ doc {
 
 	category "cloudformation"
 
-	desc """获取资源栈中云主机端口监控状态"""
+	desc """获取资源栈中虚拟机端口监控状态"""
 
 	rest {
 		request {
@@ -28,7 +28,7 @@ doc {
 					location "query"
 					type "String"
 					optional false
-					since "3.9.0"
+					since "zsv_3.9.0"
 				}
 				column {
 					name "systemTags"
@@ -37,7 +37,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "3.9.0"
+					since "zsv_3.9.0"
 				}
 				column {
 					name "userTags"
@@ -46,7 +46,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "3.9.0"
+					since "zsv_3.9.0"
 				}
 			}
 		}

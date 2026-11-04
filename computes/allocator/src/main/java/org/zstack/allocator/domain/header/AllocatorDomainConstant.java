@@ -36,7 +36,6 @@ public class AllocatorDomainConstant {
         public static final String ZONE_UUID = "zone.uuid";
         public static final String PRIMARY_STORAGE_UUID = "primary.storage.uuid";
         public static final String L3_UUID = "l3.uuid";
-        public static final String BACKUP_STORAGE_UUID = "backup.storage.uuid";
         public static final String RESOURCE_UUID = "resource.uuid";
         public static final String RESOURCE_TYPE = "resource.type";
         public static final String RESOURCE_QUALIFIER = "resource.qualifier";

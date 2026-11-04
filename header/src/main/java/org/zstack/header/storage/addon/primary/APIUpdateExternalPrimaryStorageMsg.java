@@ -1,6 +1,7 @@
 package org.zstack.header.storage.addon.primary;
 
 import org.springframework.http.HttpMethod;
+import org.zstack.header.log.NoLogging;
 import org.zstack.header.message.APIParam;
 import org.zstack.header.rest.RestRequest;
 import org.zstack.header.storage.primary.APIUpdatePrimaryStorageMsg;
@@ -13,7 +14,10 @@ import org.zstack.header.storage.primary.PrimaryStorageMessage;
         responseClass = APIUpdateExternalPrimaryStorageEvent.class
 )
 public class APIUpdateExternalPrimaryStorageMsg extends APIUpdatePrimaryStorageMsg implements PrimaryStorageMessage {
+    // MDS passwords are embedded in config. @NoLogging cannot mask nested values,
+    // so the entire field has to be hidden from logs.
     @APIParam(required = false)
+    @NoLogging
     private String config;
 
     @APIParam(required = false, maxLength = 255, validValues = {"Vhost", "Scsi", "Nvme", "CBD", "file"})

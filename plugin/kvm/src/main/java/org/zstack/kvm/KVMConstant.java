@@ -2,6 +2,7 @@ package org.zstack.kvm;
 
 import org.zstack.header.configuration.PythonClass;
 import org.zstack.header.exception.CloudRuntimeException;
+import org.zstack.header.vm.VmInstanceConstant;
 import org.zstack.header.vm.VmInstanceState;
 import org.zstack.header.vm.additions.VmHostFileType;
 
@@ -10,7 +11,7 @@ public interface KVMConstant {
     String SERVICE_ID = "kvm";
 
     @PythonClass
-    String KVM_HYPERVISOR_TYPE = "KVM";
+    String KVM_HYPERVISOR_TYPE = VmInstanceConstant.KVM_HYPERVISOR_TYPE;
 
     String KVM_CONNECT_PATH = "/host/connect";
     String KVM_PING_PATH = "/host/ping";
@@ -107,6 +108,7 @@ public interface KVMConstant {
     String KVM_RECONNECT_ME = "/kvm/reconnectme";
     String KVM_REPORT_PS_STATUS = "/kvm/reportstoragestatus";
     String KVM_REPORT_SELF_FENCER = "/kvm/reportselffencer";
+    String KVM_REPORT_SELF_FENCER_STATE_CHANGED = "/kvm/reportselffencerstatechanged";
     String KVM_REQUEST_MAINTAIN_HOST = "/kvm/requestmaintainhost";
     String KVM_ANSIBLE_LOG_PATH_FROMAT = "/kvm/ansiblelog/{uuid}";
     String KVM_REPORT_VM_SHUTDOWN_EVENT = "/kvm/reportvmshutdown";
@@ -162,7 +164,6 @@ public interface KVMConstant {
     String KVM_HOST_FILE_UPLOAD_PATH = "/host/file/upload";
     String KVM_HOST_FILE_DOWNLOAD_PROGRESS_PATH = "/host/file/progress";
     String KVM_UPLOAD_FILE_TO_VM_PATH = "/host/file/uploadtovm";
-    String KVM_CLEANUP_UPLOAD_FILE_TO_VM_PATH = "/host/file/uploadtovm/cleanup";
 
     String SET_HOST_PHYSICAL_MEMORY_MONITOR = "/host/physical/memory/monitor/start";
 
@@ -203,7 +204,7 @@ public interface KVMConstant {
     String KVM_HOST_SKIP_PING_NO_FAILURE_EXTENSIONS = "kvm.host.skip.ping.no.failure.extensions";
 
     String MEMORY_LOCATOR_NAME = "locator";
-    String PHSICAL_DEVICE_STATUS_NAME = "status";
+    String PHYSICAL_DEVICE_STATUS_NAME = "status";
     String PHYSICAL_DEVICE_STATE_NAME = "state";
     String PHYSICAL_DEVICE_DISK_UUIDS = "diskUuids";
     String CPU_NAME = "cpuName";
@@ -218,6 +219,10 @@ public interface KVMConstant {
 
     String KVM_AGENT_STATUS_BUSY = "busy";
     String KVM_AGENT_STATUS_AVAILABLE = "available";
+
+    long LIBVIRT_RESTART_ECHO_TIMEOUT_VM_THRESHOLD = 100;
+    long LIBVIRT_RESTART_ECHO_TIMEOUT_PER_VM_SECONDS = 1;
+    long LIBVIRT_RESTART_ECHO_TIMEOUT_MAX_SECONDS = 180;
 
     public static final String L2_PROVIDER_TYPE_LINUX_BRIDGE = "LinuxBridge";
     public static final String L2_PROVIDER_TYPE_OVS_DPDK = "OvsDpdk";

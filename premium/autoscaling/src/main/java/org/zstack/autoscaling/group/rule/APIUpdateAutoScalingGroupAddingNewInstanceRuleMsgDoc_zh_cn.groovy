@@ -24,11 +24,11 @@ doc {
 				column {
 					name "adjustmentType"
 					enclosedIn "updateAutoScalingGroupAddingNewInstanceRule"
-					desc "扩容方式：减少指定数量云主机，按百分比减少云主机，减少云主机数量到指定值"
+					desc "扩容方式：减少指定数量虚拟机，按百分比减少虚拟机，减少虚拟机数量到指定值"
 					location "body"
 					type "String"
 					optional true
-					since "3.1.0"
+					since "zsv_3.1.0"
 					values ("QuantityChangeInCapacity","PercentChangeInCapacity","TotalCapacity")
 				}
 				column {
@@ -38,7 +38,7 @@ doc {
 					location "body"
 					type "Integer"
 					optional true
-					since "3.1.0"
+					since "zsv_3.1.0"
 				}
 				column {
 					name "uuid"
@@ -47,7 +47,7 @@ doc {
 					location "url"
 					type "String"
 					optional false
-					since "3.1.0"
+					since "zsv_3.1.0"
 				}
 				column {
 					name "name"
@@ -56,7 +56,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.1.0"
+					since "zsv_3.1.0"
 				}
 				column {
 					name "description"
@@ -65,7 +65,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.1.0"
+					since "zsv_3.1.0"
 				}
 				column {
 					name "cooldown"
@@ -74,7 +74,7 @@ doc {
 					location "body"
 					type "Long"
 					optional true
-					since "3.1.0"
+					since "zsv_3.1.0"
 				}
 				column {
 					name "systemTags"
@@ -83,7 +83,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.1.0"
+					since "zsv_3.1.0"
 				}
 				column {
 					name "userTags"
@@ -92,7 +92,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.1.0"
+					since "zsv_3.1.0"
 				}
 			}
 		}

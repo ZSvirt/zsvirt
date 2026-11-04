@@ -28,7 +28,7 @@ doc {
 					location "body"
 					type "List"
 					optional false
-					since "4.1.0"
+					since "zsv_4.1.0"
 				}
 				column {
 					name "mode"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "4.1.0"
+					since "zsv_4.1.0"
 					values ("rx_only","tx_only","rx_and_tx","disable")
 				}
 				column {
@@ -47,7 +47,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "4.1.0"
+					since "zsv_4.1.0"
 				}
 				column {
 					name "userTags"
@@ -56,7 +56,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "4.1.0"
+					since "zsv_4.1.0"
 				}
 			}
 		}

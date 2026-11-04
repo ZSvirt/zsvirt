@@ -13,38 +13,38 @@ doc {
 		name "uuid"
 		desc "资源的UUID，唯一标示该资源"
 		type "String"
-		since "zsv 0.6"
+		since "zsv_0.6"
 	}
 	field {
 		name "volumeUuid"
 		desc "云盘UUID"
 		type "String"
-		since "zsv 0.6"
+		since "zsv_0.6"
 	}
 	field {
 		name "current"
 		desc ""
 		type "Boolean"
-		since "zsv 0.6"
+		since "zsv_0.6"
 	}
 	ref {
 		name "tree"
 		path "org.zstack.header.storage.snapshot.VolumeSnapshotTreeInventory.tree"
 		desc "null"
 		type "SnapshotLeafInventory"
-		since "zsv 0.6"
+		since "zsv_0.6"
 		clz SnapshotLeafInventory.class
 	}
 	field {
 		name "createDate"
 		desc "创建时间"
 		type "Timestamp"
-		since "zsv 0.6"
+		since "zsv_0.6"
 	}
 	field {
 		name "lastOpDate"
 		desc "最后一次修改时间"
 		type "Timestamp"
-		since "zsv 0.6"
+		since "zsv_0.6"
 	}
 }

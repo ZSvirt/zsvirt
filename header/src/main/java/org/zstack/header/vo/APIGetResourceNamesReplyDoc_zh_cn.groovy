@@ -11,14 +11,14 @@ doc {
 		name "success"
 		desc ""
 		type "boolean"
-		since "zsv 0.6"
+		since "zsv_0.6"
 	}
 	ref {
 		name "error"
 		path "org.zstack.header.vo.APIGetResourceNamesReply.error"
 		desc "错误码，若不为null，则表示操作失败, 操作成功时该字段为null",false
 		type "ErrorCode"
-		since "zsv 2.0"
+		since "zsv_2.0"
 		clz ErrorCode.class
 	}
 	ref {
@@ -26,7 +26,7 @@ doc {
 		path "org.zstack.header.vo.APIGetResourceNamesReply.inventories"
 		desc "资源结构，包含UUID、名称和类型字段"
 		type "List"
-		since "zsv 2.0"
+		since "zsv_2.0"
 		clz ResourceInventory.class
 	}
 }

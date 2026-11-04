@@ -1,6 +1,6 @@
 package org.zstack.testlib.util.search
 
-import junit.framework.Assert
+import org.junit.Assert
 import org.zstack.header.exception.CloudRuntimeException
 import org.zstack.header.query.QueryOp
 import org.zstack.header.query.Unqueryable

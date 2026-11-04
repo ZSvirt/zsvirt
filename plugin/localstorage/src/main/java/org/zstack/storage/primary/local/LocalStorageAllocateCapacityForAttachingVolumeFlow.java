@@ -87,6 +87,7 @@ public class LocalStorageAllocateCapacityForAttachingVolumeFlow implements Flow 
                 localStorageHostRefVOList.forEach(r -> amsg.addExcludePrimaryStorageUuid(r.getPrimaryStorageUuid()));
             }
             if (Boolean.TRUE.equals(volume.getEncrypted())) {
+                // TODO: FIX — allocate should only allocate. requiredFeatures is a caller stamp, not a capability check.
                 amsg.addRequiredFeature(PrimaryStorageFeature.ENCRYPTED_VOLUME);
             }
         } else {

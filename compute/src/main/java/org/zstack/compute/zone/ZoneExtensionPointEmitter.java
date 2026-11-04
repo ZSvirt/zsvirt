@@ -1,13 +1,11 @@
 package org.zstack.compute.zone;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.zstack.core.componentloader.PluginExtension;
 import org.zstack.core.componentloader.PluginRegistry;
 import org.zstack.header.Component;
 import org.zstack.header.zone.*;
 import org.zstack.utils.CollectionUtils;
 import org.zstack.utils.Utils;
-import org.zstack.utils.function.ForEachFunction;
 import org.zstack.utils.logging.CLogger;
 
 import java.util.List;
@@ -36,21 +34,11 @@ class ZoneExtensionPointEmitter implements Component {
 	}
 	
 	void beforeDelete(final ZoneInventory zinv) {
-        CollectionUtils.safeForEach(delExts, new ForEachFunction<ZoneDeleteExtensionPoint>() {
-            @Override
-            public void run(ZoneDeleteExtensionPoint arg) {
-                arg.beforeDeleteZone(zinv);
-            }
-        });
+        CollectionUtils.safeForEach(delExts, arg -> arg.beforeDeleteZone(zinv));
 	}
 	
 	void afterDelete(final ZoneInventory zinv) {
-        CollectionUtils.safeForEach(delExts, new ForEachFunction<ZoneDeleteExtensionPoint>() {
-            @Override
-            public void run(ZoneDeleteExtensionPoint arg) {
-                arg.afterDeleteZone(zinv);
-            }
-        });
+        CollectionUtils.safeForEach(delExts, arg -> arg.afterDeleteZone(zinv));
 	}
 	
 	void preChange(ZoneVO vo, ZoneStateEvent event) throws ZoneException {
@@ -73,22 +61,12 @@ class ZoneExtensionPointEmitter implements Component {
 	void beforeChange(ZoneVO vo, final ZoneStateEvent event) {
 		final ZoneInventory zinv = ZoneInventory.valueOf(vo);
 		final ZoneState next = AbstractZone.getNextState(vo.getState(), event);
-        CollectionUtils.safeForEach(changeExts, new ForEachFunction<ZoneChangeStateExtensionPoint>() {
-            @Override
-            public void run(ZoneChangeStateExtensionPoint arg) {
-                arg.beforeChangeZoneState(zinv, event, next);
-            }
-        });
+        CollectionUtils.safeForEach(changeExts, arg -> arg.beforeChangeZoneState(zinv, event, next));
 	}
 	
 	void afterChange(ZoneVO vo, final ZoneStateEvent event, final ZoneState previousState) {
 		final ZoneInventory zinv = ZoneInventory.valueOf(vo);
-        CollectionUtils.safeForEach(changeExts, new ForEachFunction<ZoneChangeStateExtensionPoint>() {
-            @Override
-            public void run(ZoneChangeStateExtensionPoint arg) {
-                arg.afterChangeZoneState(zinv, event, previousState);
-            }
-        });
+        CollectionUtils.safeForEach(changeExts, arg -> arg.afterChangeZoneState(zinv, event, previousState));
 	}
 
     @Override

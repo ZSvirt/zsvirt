@@ -1,5 +1,7 @@
 package org.zstack.softwarePackage.header
 
+import org.zstack.softwarePackage.header.APIUploadSoftwarePackageEvent
+
 doc {
 	title "UploadSoftwarePackage"
 
@@ -26,7 +28,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "4.10.20"
+					since "zsv_4.10.20"
 				}
 				column {
 					name "type"
@@ -35,7 +37,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "4.10.20"
+					since "zsv_4.10.20"
 				}
 				column {
 					name "managementNodeUuid"
@@ -44,7 +46,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "4.10.20"
+					since "zsv_4.10.20"
 				}
 				column {
 					name "hostUuid"
@@ -53,7 +55,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "4.10.20"
+					since "zsv_4.10.20"
 				}
 				column {
 					name "url"
@@ -62,7 +64,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "4.10.20"
+					since "zsv_4.10.20"
 				}
 				column {
 					name "installPath"
@@ -71,7 +73,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "4.10.20"
+					since "zsv_4.10.20"
 				}
 				column {
 					name "resourceUuid"
@@ -80,7 +82,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "4.10.20"
+					since "zsv_4.10.20"
 				}
 				column {
 					name "tagUuids"
@@ -89,7 +91,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "4.10.20"
+					since "zsv_4.10.20"
 				}
 				column {
 					name "systemTags"
@@ -98,7 +100,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "4.10.20"
+					since "zsv_4.10.20"
 				}
 				column {
 					name "userTags"
@@ -107,7 +109,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "4.10.20"
+					since "zsv_4.10.20"
 				}
 			}
 		}

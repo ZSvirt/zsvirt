@@ -2,7 +2,6 @@ package org.zstack.header.identity.login;
 
 import org.zstack.header.identity.SessionInventory;
 import org.zstack.header.log.NoLogging;
-import org.zstack.header.message.APIParam;
 import org.zstack.header.message.NeedReplyMessage;
 
 import java.util.HashMap;

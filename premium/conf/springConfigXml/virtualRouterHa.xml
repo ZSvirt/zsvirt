@@ -18,4 +18,10 @@
             <zstack:extension interface="org.zstack.network.service.virtualrouter.vyos.VyosPostCreateFlowExtensionPoint"/>
         </zstack:plugin>
     </bean>
+
+    <bean id="VirtualRouterHaExtensions" class="org.zstack.mevoco.VirtualRouterHaExtensions">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.network.service.virtualrouter.AfterAcquireVirtualRouterExtensionPoint" />
+        </zstack:plugin>
+    </bean>
 </beans>

@@ -140,6 +140,10 @@ public class ExponStorageController implements PrimaryStorageControllerSvc, Prim
         ExponClient client = new ExponClient();
         client.configure(clientConfig);
 
+        apiHelper = new ExponApiHelper(getAccountInfo(uri), client);
+    }
+
+    private AccountInfo getAccountInfo(URI uri) {
         AccountInfo accountInfo = new AccountInfo();
         accountInfo.username = uri.getUserInfo().split(":")[0];
         try {
@@ -148,7 +152,7 @@ public class ExponStorageController implements PrimaryStorageControllerSvc, Prim
             throw new RuntimeException(e);
         }
 
-        apiHelper = new ExponApiHelper(accountInfo, client);
+        return accountInfo;
     }
 
     private String protocolToString(VolumeProtocol protocol) {
@@ -572,17 +576,20 @@ public class ExponStorageController implements PrimaryStorageControllerSvc, Prim
         logger.debug(String.format("deactivating volume[path: %s, protocol:%s] on host[uuid:%s, ip:%s]",
                 installPath, protocol, h.getUuid(), h.getManagementIp()));
         if (VolumeProtocol.Vhost.toString().equals(protocol)) {
-            deactivateVhost(installPath, h);
-            comp.success();
-            return;
+            ErrorCode error = deactivateVhost(installPath, h);
+            if (error != null) {
+                comp.fail(error);
+                return;
+            }
         } else if (VolumeProtocol.iSCSI.toString().equals(protocol)) {
             // iscsi target is shared by all hosts, we cannot control one volume on one host for now.
             deactivateIscsi(installPath, h);
-            comp.success();
+        } else {
+            comp.fail(operr("not supported protocol[%s] for deactivate", protocol));
             return;
         }
 
-        comp.fail(operr("not supported protocol[%s] for deactivate", protocol));
+        comp.success();
     }
 
     @Override
@@ -735,11 +742,11 @@ public class ExponStorageController implements PrimaryStorageControllerSvc, Prim
         return to;
     }
 
-    private void deactivateVhost(String installPath, HostInventory h) {
+    private ErrorCode deactivateVhost(String installPath, HostInventory h) {
         String volId = getVolIdFromPath(installPath);
         VolumeModule vol = apiHelper.getVolume(volId);
         if (vol == null) {
-            return;
+            return null;
         }
 
         String volUuid = getVolumeInfo(vol.getName()).getUuid();
@@ -748,12 +755,20 @@ public class ExponStorageController implements PrimaryStorageControllerSvc, Prim
         UssGatewayModule uss = getUssGateway(VolumeProtocol.Vhost, h.getManagementIp());
         VhostControllerModule vhost = apiHelper.queryVhostController(vhostName);
         if (vhost == null) {
-            return;
+            return null;
         }
 
         retry(() -> apiHelper.removeVhostVolumeFromUss(volId, vhost.getId(), uss.getId()));
 
+        if (apiHelper.getVhostControllerBoundUss(vhost.getId()).stream().anyMatch(
+                it -> Objects.equals(it.getId(), uss.getId()))) {
+            return operr("failed to remove VHost volume from USS: vhost.id=%s", vhost.getId())
+                    .withOpaque("vhost.id", vhost.getId())
+                    .withOpaque("uss.id", uss.getId());
+        }
+
         apiHelper.removeVolumePathFromBlacklist(buildExponVolumeBoundPath(uss, vol.getVolumeName()), volId, getSelfPools());
+        return null;
     }
 
     private void deactivateIscsi(String installPath, HostInventory h) {
@@ -838,7 +853,13 @@ public class ExponStorageController implements PrimaryStorageControllerSvc, Prim
     }
 
     @Override
+    public ExternalPrimaryStorageInventory maskUpdateEventInventory(ExternalPrimaryStorageInventory inventory) {
+        return inventory;
+    }
+
+    @Override
     public void connect(String config, String url, ReturnValueCompletion<LinkedHashMap> comp) {
+        apiHelper.accountInfo = getAccountInfo(URI.create(url));
         apiHelper.login();
         ExponAddonInfo info = new ExponAddonInfo();
 

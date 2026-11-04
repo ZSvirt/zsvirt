@@ -28,7 +28,7 @@ doc {
 					location "url"
 					type "String"
 					optional false
-					since "3.13.12"
+					since "zsv_3.13.12"
 				}
 				column {
 					name "strategy"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "3.13.12"
+					since "zsv_3.13.12"
 				}
 				column {
 					name "scene"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "3.13.12"
+					since "zsv_3.13.12"
 				}
 				column {
 					name "vcpuNum"
@@ -55,7 +55,7 @@ doc {
 					location "body"
 					type "Integer"
 					optional false
-					since "3.13.12"
+					since "zsv_3.13.12"
 				}
 				column {
 					name "memSize"
@@ -64,7 +64,7 @@ doc {
 					location "body"
 					type "Long"
 					optional true
-					since "3.13.12"
+					since "zsv_3.13.12"
 				}
 				column {
 					name "vcpu"
@@ -73,7 +73,7 @@ doc {
 					location "body"
 					type "int"
 					optional false
-					since "3.13.12"
+					since "zsv_3.13.12"
 				}
 				column {
 					name "systemTags"
@@ -82,7 +82,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.13.12"
+					since "zsv_3.13.12"
 				}
 				column {
 					name "userTags"
@@ -91,7 +91,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.13.12"
+					since "zsv_3.13.12"
 				}
 			}
 		}

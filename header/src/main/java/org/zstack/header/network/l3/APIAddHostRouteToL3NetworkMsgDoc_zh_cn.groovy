@@ -28,7 +28,7 @@ doc {
 					location "url"
 					type "String"
 					optional false
-					since "zsv 2.3"
+					since "zsv_2.3"
 				}
 				column {
 					name "prefix"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "zsv 2.3"
+					since "zsv_2.3"
 				}
 				column {
 					name "nexthop"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "zsv 2.3"
+					since "zsv_2.3"
 				}
 				column {
 					name "systemTags"
@@ -55,7 +55,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 2.3"
+					since "zsv_2.3"
 				}
 				column {
 					name "userTags"
@@ -64,7 +64,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 2.3"
+					since "zsv_2.3"
 				}
 			}
 		}

@@ -26,7 +26,6 @@ import org.zstack.header.storage.snapshot.VolumeSnapshotVO_;
 import org.zstack.header.volume.*;
 import org.zstack.longjob.LongJobUtils;
 import org.zstack.storage.ceph.CephSystemTags;
-import org.zstack.storage.ceph.MonStatus;
 import org.zstack.storage.ceph.primary.CephPrimaryStorageBase.SnapInfo;
 import org.zstack.storage.ceph.primary.*;
 import org.zstack.storage.migration.StorageMigrationConstant;
@@ -327,7 +326,6 @@ public class CephToCephMigrateVolumeFlow implements Flow {
                             return;
                         }
 
-                        List<ErrorCode> errors = Collections.synchronizedList(new ArrayList<>());
                         new While<>(segments)
                                 .enableProgressReport("migrate-volume-segments-from-ceph-ps-to-ceph-ps")
                                 .each((segment, completion) -> {
@@ -350,7 +348,7 @@ public class CephToCephMigrateVolumeFlow implements Flow {
                                                 msg.getSrcInstallPath(), msg.getDstInstallPath()));
                                         completion.done();
                                     } else {
-                                        errors.add(reply.getError());
+                                        completion.addError(reply.getError());
                                         logger.error(String.format("Failed to migrate volume bits from %s to %s.",
                                                 msg.getSrcInstallPath(), msg.getDstInstallPath()));
                                         completion.allDone();
@@ -360,11 +358,7 @@ public class CephToCephMigrateVolumeFlow implements Flow {
                         }).run(new WhileDoneCompletion(cTrigger) {
                             @Override
                             public void done(ErrorCodeList errorCodeList) {
-                                if (!errors.isEmpty()) {
-                                    cTrigger.fail(errors.get(0));
-                                    return;
-                                }
-                                cTrigger.next();
+                                cTrigger.next(errorCodeList.wrapOrNull());
                             }
                         });
                     }

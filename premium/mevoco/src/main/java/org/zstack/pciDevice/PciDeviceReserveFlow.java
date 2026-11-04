@@ -22,6 +22,16 @@ import org.zstack.header.message.MessageReply;
 import org.zstack.header.vm.VmInstanceBeforeStartExtensionPoint;
 import org.zstack.header.vm.VmInstanceConstant.VmOperation;
 import org.zstack.header.vm.VmInstanceInventory;
+import org.zstack.pciDevice.entity.PciDeviceVO;
+import org.zstack.pciDevice.entity.PciDeviceVO_;
+import org.zstack.pciDevice.header.PciDeviceChooser;
+import org.zstack.pciDevice.header.PciDeviceConstants;
+import org.zstack.pciDevice.header.PciDeviceState;
+import org.zstack.pciDevice.header.PciDeviceStatus;
+import org.zstack.pciDevice.header.PciDeviceSystemTags;
+import org.zstack.pciDevice.header.PciDeviceType;
+import org.zstack.pciDevice.message.CheckAndReservePciDeviceBySpecMsg;
+import org.zstack.pciDevice.message.CheckAndReservePciDeviceBySpecReply;
 import org.zstack.utils.Utils;
 import org.zstack.utils.logging.CLogger;
 

@@ -7,7 +7,7 @@ doc {
 
 	category "mevoco"
 
-	desc """设置云主机网卡限速"""
+	desc """设置虚拟机网卡限速"""
 
 	rest {
 		request {
@@ -17,18 +17,18 @@ doc {
 
 			clz APISetNicQosMsg.class
 
-			desc """设置云主机网卡限速"""
+			desc """设置虚拟机网卡限速"""
 
 			params {
 
 				column {
 					name "uuid"
 					enclosedIn "setNicQos"
-					desc "云主机网卡UUID"
+					desc "虚拟机网卡UUID"
 					location "url"
 					type "String"
 					optional false
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "outboundBandwidth"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "Long"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "inboundBandwidth"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "Long"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "systemTags"
@@ -55,7 +55,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "userTags"
@@ -64,7 +64,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 			}
 		}

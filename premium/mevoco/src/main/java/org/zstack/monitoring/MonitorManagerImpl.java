@@ -2,7 +2,7 @@ package org.zstack.monitoring;
 
 import com.google.common.util.concurrent.Striped;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.zstack.compute.host.PostHostConnectExtensionPoint;
+import org.zstack.header.host.spi.HostPostConnectedExtensionPoint;
 import org.zstack.core.Platform;
 import org.zstack.core.cloudbus.CloudBus;
 import org.zstack.core.cloudbus.MessageSafe;
@@ -44,7 +44,6 @@ import org.zstack.monitoring.trigger.expression.TriggerExpression;
 import org.zstack.utils.CollectionUtils;
 import org.zstack.utils.DebugUtils;
 import org.zstack.utils.Utils;
-import org.zstack.utils.function.ForEachFunction;
 import org.zstack.utils.gson.JSONObjectUtil;
 import org.zstack.utils.logging.CLogger;
 
@@ -62,7 +61,7 @@ import static org.zstack.core.Platform.operr;
  * Created by xing5 on 2017/6/3.
  */
 public class MonitorManagerImpl extends AbstractService implements
-        MonitorManager, PostHostConnectExtensionPoint, HostDeleteExtensionPoint,
+        MonitorManager, HostPostConnectedExtensionPoint, HostDeleteExtensionPoint,
         ManagementNodeReadyExtensionPoint, VmJustBeforeDeleteFromDbExtensionPoint {
     private static final CLogger logger = Utils.getLogger(MonitorManagerImpl.class);
 
@@ -318,12 +317,7 @@ public class MonitorManagerImpl extends AbstractService implements
         }.execute();
 
         CollectionUtils.safeForEach(pluginRgty.getExtensionList(MonitorTriggerActionExtension.class),
-                new ForEachFunction<MonitorTriggerActionExtension>() {
-                    @Override
-                    public void run(MonitorTriggerActionExtension arg) {
-                        arg.afterCreateMonitorTriggerAction(vo);
-                    }
-                });
+                arg -> arg.afterCreateMonitorTriggerAction(vo));
 
         evt.setInventory(f.getInventory(vo.getUuid()));
         bus.publish(evt);
@@ -421,12 +415,10 @@ public class MonitorManagerImpl extends AbstractService implements
     }
 
     @Override
-    public Flow createPostHostConnectFlow(HostInventory host) {
-        return new NoRollbackFlow() {
-            String __name__ = "setup-monitor";
-
-            @Override
-            public void run(FlowTrigger trigger, Map data) {
+    public Flow createPostHostConnectFlow() {
+        return Flow.of("setup-monitor")
+            .handle((trigger, data) -> {
+                HostInventory host = findInventoryFromFlowData(data);
                 HostTarget template = new HostTarget(host);
 
                 FlowChain chain = FlowChainBuilder.newSimpleFlowChain();
@@ -467,8 +459,8 @@ public class MonitorManagerImpl extends AbstractService implements
                         trigger.fail(errCode);
                     }
                 }).start();
-            }
-        };
+            })
+            .build();
     }
 
     @Override

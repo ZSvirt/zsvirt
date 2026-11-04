@@ -245,12 +245,11 @@ public class VirtualRouterPortForwardingBackend extends AbstractVirtualRouterBac
 
         FlowChain chain = releaseRuleChainBuilder.build();
         chain.setName(String.format("vr-release-port-forwarding-rule-%s", struct.getRule().getUuid()));
-        Map<String, Object> ctx = new HashMap<String, Object>();
-        ctx.put(VirtualRouterConstant.VR_RESULT_VM, vr);
-        ctx.put(VirtualRouterConstant.VR_PORT_FORWARDING_RULE, to);
-        ctx.put(VirtualRouterConstant.VR_VIP_L3NETWORK, struct.getVip().getL3NetworkUuid());
+        chain.putData(VirtualRouterConstant.VR_RESULT_VM, vr);
+        chain.putData(VirtualRouterConstant.VR_PORT_FORWARDING_RULE, to);
+        chain.putData(VirtualRouterConstant.VR_VIP_L3NETWORK, struct.getVip().getL3NetworkUuid());
 
-        chain.setData(ctx).done(new FlowDoneHandler(completion) {
+        chain.done(new FlowDoneHandler(completion) {
             @Override
             public void handle(Map data) {
                 completion.success();

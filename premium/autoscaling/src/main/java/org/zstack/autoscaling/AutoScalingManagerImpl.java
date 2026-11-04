@@ -703,8 +703,6 @@ public class AutoScalingManagerImpl extends AbstractService implements AutoScali
         chain.then(new ShareFlow() {
             @Override
             public void setup() {
-                List<ErrorCode> errors = Collections.synchronizedList(new LinkedList<ErrorCode>());
-
                 flow(new NoRollbackFlow() {
                     String __name__ = "detach-template-from-groups";
 
@@ -732,7 +730,7 @@ public class AutoScalingManagerImpl extends AbstractService implements AutoScali
                                 @Override
                                 public void run(MessageReply rly) {
                                     if (!rly.isSuccess()) {
-                                        errors.add(rly.getError());
+                                        completion.addError(rly.getError());
                                     }
                                     completion.done();
                                 }
@@ -740,9 +738,9 @@ public class AutoScalingManagerImpl extends AbstractService implements AutoScali
                         }, 10).run(new WhileDoneCompletion(trigger) {
                             @Override
                             public void done(ErrorCodeList errorCodeList) {
-                                if (errors.size() != 0) {
+                                if (errorCodeList.hasError()) {
                                     trigger.fail(operr("detach autoScalingTemplate[%s] from AutoScalingGroup failed, errors are %s"
-                                            ,msg.getTemplateUuid(), JSONObjectUtil.toJsonString(errors)));
+                                            , msg.getTemplateUuid(), JSONObjectUtil.toJsonString(errorCodeList.getCauses())));
                                     return;
                                 }
                                 trigger.next();

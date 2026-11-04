@@ -8,7 +8,7 @@ import org.zstack.storage.primary.local.LocalStorageConstants;
 import org.zstack.storage.primary.local.LocalStorageResourceRefVO;
 import org.zstack.storage.primary.local.LocalStorageResourceRefVO_;
 import org.zstack.storage.primary.local.LocalStorageSystemTags;
-import org.zstack.tag.PatternedSystemTag;
+import org.zstack.tag.SystemTag;
 
 import java.util.List;
 
@@ -52,7 +52,7 @@ public class LocalToLocalVmStorageMigrationMetric implements VmStorageMigrationM
     @Override
     public boolean needMigration(VolumeVO vo, String dstPsUuid, String dstHostUuid, List<String> systemTags) {
         if (dstHostUuid == null && !systemTags.isEmpty()) {
-            PatternedSystemTag lsTag = LocalStorageSystemTags.DEST_HOST_FOR_CREATING_DATA_VOLUME;
+            SystemTag lsTag = LocalStorageSystemTags.DEST_HOST_FOR_CREATING_DATA_VOLUME;
             dstHostUuid = systemTags.stream().filter(lsTag::isMatch)
                     .map(it -> lsTag.getTokenByTag(it, LocalStorageSystemTags.DEST_HOST_FOR_CREATING_DATA_VOLUME_TOKEN))
                     .findAny().orElse(null);

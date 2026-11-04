@@ -49,7 +49,6 @@ import org.zstack.header.managementnode.ManagementNodeReadyExtensionPoint;
 import org.zstack.header.message.APIMessage;
 import org.zstack.header.message.Message;
 import org.zstack.header.message.MessageReply;
-import org.zstack.header.query.QueryOp;
 import org.zstack.header.storage.backup.*;
 import org.zstack.header.storage.database.backup.DatabaseBackupStatus;
 import org.zstack.header.storage.database.backup.DatabaseBackupStorageRefVO;
@@ -68,7 +67,6 @@ import org.zstack.storage.volume.VolumeManager;
 import org.zstack.tag.SystemTagCreator;
 import org.zstack.tag.TagManager;
 import org.zstack.utils.*;
-import org.zstack.utils.function.ForEachFunction;
 import org.zstack.utils.gson.JSONObjectUtil;
 import org.zstack.utils.logging.CLogger;
 import org.zstack.utils.network.NetworkUtils;
@@ -278,11 +276,9 @@ public class ImageStoreBackupStorageManagerImpl extends AbstractService
 
     @Override
     public void beforeCommitVolume(KVMHostInventory host, CommitVolumeSnapshotOnHypervisorMsg msg, KVMAgentCommands.BlockCommitCmd cmd, Completion completion) {
-        completion.success();
-    }
-
-    @Override
-    public void afterCommitVolume(KVMHostInventory host, CommitVolumeSnapshotOnHypervisorMsg msg, KVMAgentCommands.BlockCommitCmd cmd, CommitVolumeSnapshotOnHypervisorReply reply, Completion completion) {
+        // Invalidate the destination metadata before block commit changes its contents.
+        // A cleanup failure must stop before the irreversible commit/pivot, not prevent
+        // the database update after the hypervisor has already switched the active layer.
         CleanImageMetaOnPrimaryStorageMsg cmsg = new CleanImageMetaOnPrimaryStorageMsg();
         cmsg.setVolumeUuid(msg.getVolume().getUuid());
         cmsg.setPrimaryStorageInstallPath(cmd.getBase());
@@ -292,14 +288,17 @@ public class ImageStoreBackupStorageManagerImpl extends AbstractService
             @Override
             public void run(MessageReply reply) {
                 if (!reply.isSuccess()) {
-                    completion.fail(operr(String.format("failed to clean image meta on primary storage %s, error: %s",
-                            msg.getVolume().getPrimaryStorageUuid(), reply.getError())));
-                    // TODO add gc
+                    completion.fail(reply.getError());
                     return;
                 }
                 completion.success();
             }
         });
+    }
+
+    @Override
+    public void afterCommitVolume(KVMHostInventory host, CommitVolumeSnapshotOnHypervisorMsg msg, KVMAgentCommands.BlockCommitCmd cmd, CommitVolumeSnapshotOnHypervisorReply reply, Completion completion) {
+        completion.success();
     }
 
     @Override
@@ -971,12 +970,8 @@ public class ImageStoreBackupStorageManagerImpl extends AbstractService
                         dbf.updateAndRefresh(ivo);
                         final ImageInventory inv = ImageInventory.valueOf(dbf.findByUuid(ivo.getUuid(), ImageVO.class));
                         evt.setInventory(inv);
-                        CollectionUtils.safeForEach(pluginRgty.getExtensionList(AddImageExtensionPoint.class), new ForEachFunction<AddImageExtensionPoint>() {
-                            @Override
-                            public void run(AddImageExtensionPoint ext) {
-                                ext.afterAddImage(inv);
-                            }
-                        });
+                        CollectionUtils.safeForEach(pluginRgty.getExtensionList(AddImageExtensionPoint.class),
+                                ext -> ext.afterAddImage(inv));
 
                         bus.publish(evt);
                     }
@@ -1149,12 +1144,8 @@ public class ImageStoreBackupStorageManagerImpl extends AbstractService
                         dbf.updateAndRefresh(ivo);
                         final ImageInventory inv = ImageInventory.valueOf(dbf.findByUuid(ivo.getUuid(), ImageVO.class));
 
-                        CollectionUtils.safeForEach(pluginRgty.getExtensionList(AddImageExtensionPoint.class), new ForEachFunction<AddImageExtensionPoint>() {
-                            @Override
-                            public void run(AddImageExtensionPoint ext) {
-                                ext.afterAddImage(inv);
-                            }
-                        });
+                        CollectionUtils.safeForEach(pluginRgty.getExtensionList(AddImageExtensionPoint.class),
+                                ext -> ext.afterAddImage(inv));
 
                         completion.success(inv);
                     }

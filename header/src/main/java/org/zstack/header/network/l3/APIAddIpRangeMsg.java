@@ -45,7 +45,7 @@ import org.zstack.header.tag.TagResourceType;
  * }
  * }
  * @result see :ref:`APIAddIpRangeEvent`
- * @since 0.1.0
+ * @since zsv_0.1.0
  */
 @TagResourceType(L3NetworkVO.class)
 @RestRequest(
@@ -165,7 +165,7 @@ public class APIAddIpRangeMsg extends APICreateMessage implements L3NetworkMessa
     public static APIAddIpRangeMsg __example__() {
         APIAddIpRangeMsg msg = new APIAddIpRangeMsg();
 
-        msg.setL3NetworkUuid(uuid());
+        msg.setL3NetworkUuid(uuid(L3NetworkVO.class));
         msg.setName("Test-IP-Range");
         msg.setStartIp("192.168.100.10");
         msg.setEndIp("192.168.100.250");

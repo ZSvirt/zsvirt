@@ -1,6 +1,6 @@
 package org.zstack.header.allocator;
 
-import org.zstack.allocator.domain.entity.AllocatorHostRuleSet;
+import org.zstack.header.allocator.domain.AllocatorHostRuleSet;
 import org.zstack.header.configuration.DiskOfferingInventory;
 import org.zstack.header.image.ImageInventory;
 import org.zstack.header.vm.VmInstanceInventory;

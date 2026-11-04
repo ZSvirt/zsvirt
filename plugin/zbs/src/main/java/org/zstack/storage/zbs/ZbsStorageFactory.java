@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static org.zstack.core.Platform.operr;
 import static org.zstack.storage.zbs.ZbsHelper.*;
 
 /**
@@ -54,7 +55,7 @@ public class ZbsStorageFactory implements ExternalPrimaryStorageSvcBuilder, Back
 
     @Override
     public void discover(String url, String config, ReturnValueCompletion<LinkedHashMap> completion) {
-
+        completion.fail(operr("ZBS does not support primary storage discovery"));
     }
 
     public void setPreferBackupStorageTypes(List<String> preferBackupStorageTypes) {

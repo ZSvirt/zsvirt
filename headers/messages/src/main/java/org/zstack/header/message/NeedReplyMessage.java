@@ -1,5 +1,6 @@
 package org.zstack.header.message;
 
+import org.zstack.header.configuration.ConfigAO;
 import org.zstack.header.rest.APINoSee;
 
 import java.util.ArrayList;
@@ -18,6 +19,8 @@ public abstract class NeedReplyMessage extends Message {
     protected long messageDeadline = -1;
     protected List<String> systemTags;
     protected List<String> userTags;
+    @APINoSee
+    protected List<ConfigAO> configs;
 
     public List<String> getSystemTags() {
         return systemTags;
@@ -37,6 +40,14 @@ public abstract class NeedReplyMessage extends Message {
         }
 
         systemTags.add(systemTag);
+    }
+
+    public List<ConfigAO> getConfigs() {
+        return configs;
+    }
+
+    public void setConfigs(List<ConfigAO> configs) {
+        this.configs = configs;
     }
 
     public List<String> getUserTags() {

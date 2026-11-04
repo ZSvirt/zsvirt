@@ -2,9 +2,7 @@ package org.zstack.cloudformation;
 
 import org.zstack.header.cloudformation.StackTemplateVO;
 import org.zstack.header.tag.TagDefinition;
-import org.zstack.header.vm.VmInstance;
-import org.zstack.header.vm.VmInstanceVO;
-import org.zstack.tag.PatternedSystemTag;
+import org.zstack.tag.SystemTag;
 
 /**
  * Created by mingjian.deng on 2018/6/27.
@@ -12,10 +10,10 @@ import org.zstack.tag.PatternedSystemTag;
 @TagDefinition
 public class CloudFormationSystemTags {
     public static final String SYSTEM_TEMPLATE_TOKEN = "systemtemplate";
-    public static PatternedSystemTag SYSTEM_TEMPLATE = new PatternedSystemTag(
+    public static SystemTag SYSTEM_TEMPLATE = new SystemTag(
             SYSTEM_TEMPLATE_TOKEN, StackTemplateVO.class);
 
     public static final String CREATE_BY_CLOUDFORMATION_TOKEN = "cloudformation::autotag";
-    public static PatternedSystemTag CREATE_BY_CLOUDFORMATION = new PatternedSystemTag(
+    public static SystemTag CREATE_BY_CLOUDFORMATION = new SystemTag(
             CREATE_BY_CLOUDFORMATION_TOKEN, StackTemplateVO.class);
 }

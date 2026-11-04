@@ -28,7 +28,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "zsv 4.2.0"
+					since "zsv_4.2.0"
 				}
 				column {
 					name "endpointUuid"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "zsv 4.2.0"
+					since "zsv_4.2.0"
 				}
 				column {
 					name "resourceUuid"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 4.2.0"
+					since "zsv_4.2.0"
 				}
 				column {
 					name "tagUuids"
@@ -55,7 +55,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 4.2.0"
+					since "zsv_4.2.0"
 				}
 				column {
 					name "systemTags"
@@ -64,7 +64,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 4.2.0"
+					since "zsv_4.2.0"
 				}
 				column {
 					name "userTags"
@@ -73,7 +73,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 4.2.0"
+					since "zsv_4.2.0"
 				}
 				column {
 					name "remark"
@@ -82,7 +82,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 4.2.0"
+					since "zsv_4.2.0"
 				}
 			}
 		}

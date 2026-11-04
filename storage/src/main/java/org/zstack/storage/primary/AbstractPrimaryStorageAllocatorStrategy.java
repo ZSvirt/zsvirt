@@ -9,8 +9,8 @@ import org.zstack.header.core.workflow.FlowChain;
 import org.zstack.header.core.workflow.FlowDoneHandler;
 import org.zstack.header.core.workflow.FlowErrorHandler;
 import org.zstack.header.errorcode.ErrorCode;
-import org.zstack.header.errorcode.OperationFailureException;
 import org.zstack.header.storage.primary.*;
+import org.zstack.storage.primary.allocate.PrimaryStorageAllocatorChainBuilder;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -18,21 +18,15 @@ import java.util.List;
 import java.util.Map;
 
 import static org.zstack.header.Constants.THREAD_CONTEXT_API;
-import static org.zstack.utils.CollectionDSL.e;
-import static org.zstack.utils.CollectionDSL.map;
 
 @Configurable(preConstruction = true, autowire = Autowire.BY_TYPE)
 public abstract class AbstractPrimaryStorageAllocatorStrategy implements PrimaryStorageAllocatorStrategy {
-    private final FlowChainBuilder allocateBuilder;
+    private final PrimaryStorageAllocatorChainBuilder allocateBuilder;
     private FlowChainBuilder sortBuilder;
     @Autowired
     private DiskCapacityTracer tracker;
 
-    AbstractPrimaryStorageAllocatorStrategy(FlowChainBuilder allocateBuilder) {
-        this.allocateBuilder = allocateBuilder;
-    }
-
-    AbstractPrimaryStorageAllocatorStrategy(FlowChainBuilder allocateBuilder, FlowChainBuilder sortBuilder) {
+    AbstractPrimaryStorageAllocatorStrategy(PrimaryStorageAllocatorChainBuilder allocateBuilder, FlowChainBuilder sortBuilder) {
         this.allocateBuilder = allocateBuilder;
         this.sortBuilder = sortBuilder;
     }
@@ -52,36 +46,7 @@ public abstract class AbstractPrimaryStorageAllocatorStrategy implements Primary
     }
 
     private List<PrimaryStorageVO> allocateAll(PrimaryStorageAllocationSpec spec) {
-        class Result {
-            List<PrimaryStorageVO> result;
-            ErrorCode errorCode;
-        }
-
-        final Result ret = new Result();
-        FlowChain allocatorChain = allocateBuilder.build();
-        allocatorChain.setName(String.format("allocate-primary-storage-msg-%s", spec.getAllocationMessage().getId()));
-        allocatorChain.setData(map(e(PrimaryStorageConstant.AllocatorParams.SPEC, spec)));
-        allocatorChain.done(new FlowDoneHandler(null) {
-            @Override
-            public void handle(Map data) {
-                ret.result = (List<PrimaryStorageVO>) data.get(PrimaryStorageConstant.AllocatorParams.CANDIDATES);
-            }
-        }).error(new FlowErrorHandler(null) {
-            @Override
-            public void handle(ErrorCode errCode, Map data) {
-                ret.errorCode = errCode;
-            }
-        });
-
-        tracker.trackAllocatorChain(allocatorChain);
-
-        allocatorChain.start();
-
-        if (ret.errorCode != null) {
-            throw new OperationFailureException(ret.errorCode);
-        } else {
-            return ret.result;
-        }
+        return allocateBuilder.build().allocate(spec);
     }
 
     @Override
@@ -96,7 +61,8 @@ public abstract class AbstractPrimaryStorageAllocatorStrategy implements Primary
         FlowChain sorterChain = sortBuilder.build();
         String apiId = ThreadContext.get(THREAD_CONTEXT_API);
         sorterChain.setName(String.format("sort-allocated-primary-storage-msg-%s", spec.getAllocationMessage() == null ? apiId : spec.getAllocationMessage().getId()));
-        sorterChain.setData(map(e(PrimaryStorageConstant.AllocatorParams.SPEC, spec), e(PrimaryStorageConstant.AllocatorParams.CANDIDATES, allocated)));
+        sorterChain.putData(PrimaryStorageConstant.AllocatorParams.SPEC, spec);
+        sorterChain.putData(PrimaryStorageConstant.AllocatorParams.CANDIDATES, allocated);
         sorterChain.done(new FlowDoneHandler(null) {
             @Override
             public void handle(Map data) {

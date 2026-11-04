@@ -9,7 +9,7 @@ doc {
 		name "success"
 		desc ""
 		type "boolean"
-		since "zsv 5.0.0"
+		since "zsv_5.0.0"
 	}
 
 	ref {
@@ -17,7 +17,7 @@ doc {
 		path "org.zstack.header.identity.APIChangeAccountTypeEvent.error"
 		desc "错误码，若不为null，则表示操作失败, 操作成功时该字段为null", false
 		type "ErrorCode"
-		since "zsv 5.0.0"
+		since "zsv_5.0.0"
 		clz ErrorCode.class
 	}
 }

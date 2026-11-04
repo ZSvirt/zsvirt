@@ -10,48 +10,48 @@ doc {
 		name "uuid"
 		desc "账户的UUID，唯一标示该资源"
 		type "String"
-		since "zsv 4.0.0"
+		since "zsv_4.0.0"
 	}
 	field {
 		name "name"
 		desc "账户名称"
 		type "String"
-		since "zsv 4.0.0"
+		since "zsv_4.0.0"
 	}
 	field {
 		name "description"
 		desc "账户的详细描述"
 		type "String"
-		since "zsv 4.0.0"
+		since "zsv_4.0.0"
 	}
 	field {
 		name "type"
 		desc "账户类型"
 		type "String"
-		since "zsv 4.0.0"
+		since "zsv_4.0.0"
 	}
 	field {
 		name "source"
 		desc "账户来源，创建时确定且不可修改"
 		type "String"
-		since "zsv 5.1.0"
+		since "1.0.0, zsv_5.1.0"
 	}
 	field {
 		name "state"
 		desc "账户状态"
 		type "String"
-		since "zsv 4.0.0"
+		since "zsv_4.0.0"
 	}
 	field {
 		name "createDate"
 		desc "创建时间"
 		type "Timestamp"
-		since "zsv 4.0.0"
+		since "zsv_4.0.0"
 	}
 	field {
 		name "lastOpDate"
 		desc "最后一次修改时间"
 		type "Timestamp"
-		since "zsv 4.0.0"
+		since "zsv_4.0.0"
 	}
 }

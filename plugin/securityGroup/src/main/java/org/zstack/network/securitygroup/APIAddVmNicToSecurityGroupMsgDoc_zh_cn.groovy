@@ -28,16 +28,16 @@ doc {
 					location "url"
 					type "String"
 					optional false
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "vmNicUuids"
 					enclosedIn "params"
-					desc "云主机网卡的uuid列表"
+					desc "虚拟机网卡的uuid列表"
 					location "body"
 					type "List"
 					optional false
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "systemTags"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "userTags"
@@ -55,7 +55,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 			}
 		}

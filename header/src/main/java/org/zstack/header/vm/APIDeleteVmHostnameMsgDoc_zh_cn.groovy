@@ -3,11 +3,11 @@ package org.zstack.header.vm
 import org.zstack.header.vm.APIDeleteVmHostnameEvent
 
 doc {
-	title "删除云主机Hostname(DeleteVmHostname)"
+	title "删除虚拟机Hostname(DeleteVmHostname)"
 
 	category "vmInstance"
 
-	desc """删除云主机的Hostname。注意，该删除操作仅仅是删除配置在数据库中以及DHCP服务器上的云主机hostname，无法改变云主机内部手动配置的hostname。"""
+	desc """删除虚拟机的Hostname。注意，该删除操作仅仅是删除配置在数据库中以及DHCP服务器上的虚拟机hostname，无法改变虚拟机内部手动配置的hostname。"""
 
 	rest {
 		request {
@@ -24,11 +24,11 @@ doc {
 				column {
 					name "uuid"
 					enclosedIn ""
-					desc "云主机UUID"
+					desc "虚拟机UUID"
 					location "url"
 					type "String"
 					optional false
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "systemTags"
@@ -37,7 +37,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "userTags"
@@ -46,7 +46,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "deleteMode"
@@ -55,7 +55,7 @@ doc {
 					location "query"
 					type "String"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 			}
 		}

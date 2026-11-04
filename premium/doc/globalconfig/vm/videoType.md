@@ -44,7 +44,7 @@ vm
 ### DefaultValue
 
 ```
-virtio
+vga
 ```
 
 ### 默认值补充说明

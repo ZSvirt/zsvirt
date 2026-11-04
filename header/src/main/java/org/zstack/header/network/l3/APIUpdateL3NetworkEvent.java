@@ -27,13 +27,7 @@ public class APIUpdateL3NetworkEvent extends APIEvent {
  
     public static APIUpdateL3NetworkEvent __example__() {
         APIUpdateL3NetworkEvent event = new APIUpdateL3NetworkEvent();
-        L3NetworkInventory l3 = new L3NetworkInventory();
-
-        l3.setName("Test-L3Network");
-        l3.setUuid(uuid());
-
-        event.setInventory(l3);
+        event.setInventory(L3NetworkInventory.__example__());
         return event;
     }
-
 }

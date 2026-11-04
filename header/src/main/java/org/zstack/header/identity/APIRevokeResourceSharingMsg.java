@@ -61,8 +61,8 @@ public class APIRevokeResourceSharingMsg extends APIMessage {
 
     public static APIRevokeResourceSharingMsg __example__() {
         APIRevokeResourceSharingMsg msg = new APIRevokeResourceSharingMsg();
-        msg.setAccountUuids(list(uuid(), uuid()));
-        msg.setResourceUuids(list(uuid(), uuid()));
+        msg.setAccountUuids(list(uuid(AccountVO.class)));
+        msg.setResourceUuids(list(uuid(ResourceVO.class)));
         msg.setToPublic(false);
         msg.setAll(false);
         return msg;

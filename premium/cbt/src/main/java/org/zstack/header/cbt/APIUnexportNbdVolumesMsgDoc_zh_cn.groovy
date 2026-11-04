@@ -28,16 +28,16 @@ doc {
 					location "body"
 					type "List"
 					optional false
-					since "4.10.10"
+					since "zsv_4.10.10"
 				}
 				column {
 					name "vmInstanceUuid"
 					enclosedIn "params"
-					desc "云主机UUID"
+					desc "虚拟机UUID"
 					location "body"
 					type "String"
 					optional false
-					since "4.10.10"
+					since "zsv_4.10.10"
 				}
 				column {
 					name "systemTags"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "4.10.10"
+					since "zsv_4.10.10"
 				}
 				column {
 					name "userTags"
@@ -55,7 +55,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "4.10.10"
+					since "zsv_4.10.10"
 				}
 			}
 		}

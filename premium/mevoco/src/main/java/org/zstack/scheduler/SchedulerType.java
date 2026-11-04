@@ -18,6 +18,7 @@ public interface SchedulerType {
     String ROOT_VOLUME_BACKUP = "rootVolumeBackup";
     String VM_BACKUP = "vmBackup";
     String DATABASE_BACKUP = "databaseBackup";
+    String ZCENTER_BACKUP = "zcenterBackup";
 
     String LOCAL_RAID_SELF_TEST = "localRaidSelfTest";
     String RUN_AUTO_SCALING_GROUP = "runAutoScalingGroup";

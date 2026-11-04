@@ -31,7 +31,6 @@ import org.zstack.header.tag.SystemTagCreateMessageValidator;
 import org.zstack.header.tag.SystemTagValidator;
 import org.zstack.tag.TagManager;
 import org.zstack.utils.*;
-import org.zstack.utils.function.ForEachFunction;
 import org.zstack.utils.logging.CLogger;
 import org.zstack.utils.network.NetworkUtils;
 
@@ -186,12 +185,8 @@ public class BackupStorageManagerImpl extends AbstractService implements BackupS
                 if (reply.isSuccess()) {
                     evt.setInventory(factory.reload(inv.getUuid()));
                     bus.publish(evt);
-                    CollectionUtils.safeForEach(pluginRgty.getExtensionList(AddBackupStorageExtensionPoint.class), new ForEachFunction<AddBackupStorageExtensionPoint>() {
-                        @Override
-                        public void run(AddBackupStorageExtensionPoint ext) {
-                            ext.afterAddBackupStorage(addBackupStoragestruct);
-                        }
-                    });
+                    CollectionUtils.safeForEach(pluginRgty.getExtensionList(AddBackupStorageExtensionPoint.class),
+                            ext -> ext.afterAddBackupStorage(addBackupStoragestruct));
                     tagMgr.createTagsFromAPICreateMessage(msg, inv.getUuid(), BackupStorageVO.class.getSimpleName());
 
                 } else {

@@ -77,6 +77,11 @@
     </code>
 
     <code>
+        <id>2015</id>
+        <description>Failed to list package files from ZMigrate</description>
+    </code>
+
+    <code>
         <id>3000</id>
         <description>Unexpected ZMigrate VM State</description>
     </code>

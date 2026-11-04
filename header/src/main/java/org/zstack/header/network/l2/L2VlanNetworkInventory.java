@@ -1,8 +1,10 @@
 package org.zstack.header.network.l2;
 
 import org.zstack.header.configuration.PythonClassInventory;
+import org.zstack.header.message.DocUtils;
 import org.zstack.header.search.Inventory;
 import org.zstack.header.search.Parent;
+import org.zstack.header.zone.ZoneVO;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -66,5 +68,17 @@ public class L2VlanNetworkInventory extends L2NetworkInventory {
 
     public void setVlan(int vlan) {
         this.vlan = vlan;
+    }
+
+    public static L2VlanNetworkInventory __example__() {
+        L2VlanNetworkInventory net = new L2VlanNetworkInventory();
+        net.setUuid(DocUtils.createFixedUuid(L2VlanNetworkVO.class));
+        net.setName("Test-Net");
+        net.setVlan(10);
+        net.setDescription("Test");
+        net.setZoneUuid(DocUtils.createFixedUuid(ZoneVO.class));
+        net.setPhysicalInterface("eth0");
+        net.setType("L2VlanNetwork");
+        return net;
     }
 }

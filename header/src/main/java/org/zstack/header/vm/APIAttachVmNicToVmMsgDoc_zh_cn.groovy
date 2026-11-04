@@ -7,7 +7,7 @@ doc {
 
 	category "vmInstance"
 
-	desc """加载网卡到云主机"""
+	desc """加载网卡到虚拟机"""
 
 	rest {
 		request {
@@ -24,20 +24,20 @@ doc {
 				column {
 					name "vmNicUuid"
 					enclosedIn "params"
-					desc "云主机网卡UUID"
+					desc "虚拟机网卡UUID"
 					location "url"
 					type "String"
 					optional false
-					since "zsv 3.10"
+					since "zsv_3.10"
 				}
 				column {
 					name "vmInstanceUuid"
 					enclosedIn "params"
-					desc "云主机UUID"
+					desc "虚拟机UUID"
 					location "url"
 					type "String"
 					optional false
-					since "zsv 3.10"
+					since "zsv_3.10"
 				}
 				column {
 					name "systemTags"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 3.10"
+					since "zsv_3.10"
 				}
 				column {
 					name "userTags"
@@ -55,7 +55,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 3.10"
+					since "zsv_3.10"
 				}
 			}
 		}

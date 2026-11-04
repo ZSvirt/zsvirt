@@ -28,7 +28,7 @@ doc {
 					location "url"
 					type "String"
 					optional false
-					since "zsv 3.18.0"
+					since "zsv_3.18.0"
 				}
 				column {
 					name "hostUuid"
@@ -37,7 +37,7 @@ doc {
 					location "url"
 					type "String"
 					optional false
-					since "zsv 3.18.0"
+					since "zsv_3.18.0"
 				}
 				column {
 					name "l2ProviderType"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 3.18.0"
+					since "zsv_3.18.0"
 					values ("LinuxBridge")
 				}
 				column {
@@ -56,7 +56,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 3.18.0"
+					since "zsv_3.18.0"
 				}
 				column {
 					name "userTags"
@@ -65,7 +65,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 3.18.0"
+					since "zsv_3.18.0"
 				}
 				column {
 					name "hostParam"
@@ -74,7 +74,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 4.3.0"
+					since "zsv_4.3.0"
 				}
 			}
 		}

@@ -3,15 +3,12 @@ package org.zstack.zwatch.migratedb;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.zstack.header.configuration.PythonClassInventory;
-import org.zstack.header.query.ExpandedQueries;
-import org.zstack.header.query.ExpandedQuery;
 import org.zstack.header.search.Inventory;
-import org.zstack.zwatch.ZWatchConstants;
 import org.zstack.zwatch.datatype.AuditData;
 import org.zstack.zwatch.datatype.AuditDataV2;
+import org.zstack.zwatch.header.ZWatchConstants;
 
 import java.io.Serializable;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;

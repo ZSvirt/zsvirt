@@ -28,7 +28,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "4.10.0"
+					since "zsv_4.10.0"
 				}
 				column {
 					name "username"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "4.10.0"
+					since "zsv_4.10.0"
 				}
 				column {
 					name "password"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "4.10.0"
+					since "zsv_4.10.0"
 				}
 				column {
 					name "endpointUuid"
@@ -55,7 +55,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "4.10.0"
+					since "zsv_4.10.0"
 				}
 				column {
 					name "systemTags"
@@ -64,7 +64,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "4.10.0"
+					since "zsv_4.10.0"
 				}
 				column {
 					name "userTags"
@@ -73,7 +73,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "4.10.0"
+					since "zsv_4.10.0"
 				}
 			}
 		}

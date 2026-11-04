@@ -10,24 +10,25 @@ import org.zstack.header.core.Completion;
 import org.zstack.header.errorcode.ErrorCode;
 import org.zstack.header.sriov.EthernetVfPciDeviceVO;
 import org.zstack.header.sriov.EthernetVfPciDeviceVO_;
-import org.zstack.header.sriov.EthernetVfStatus;
 import org.zstack.network.hostNetworkInterface.HostNetworkBondingVO;
 import org.zstack.network.hostNetworkInterface.HostNetworkInterfaceUpdateExtensionPoint;
 import org.zstack.network.hostNetworkInterface.HostNetworkInterfaceVO;
-import org.zstack.network.hostNetworkInterface.HostNetworkInterfaceVO_;
-import org.zstack.pciDevice.*;
+import org.zstack.pciDevice.PciDeviceManager;
+import org.zstack.pciDevice.entity.PciDeviceInventory;
+import org.zstack.pciDevice.entity.PciDeviceVO;
+import org.zstack.pciDevice.entity.PciDeviceVO_;
+import org.zstack.pciDevice.header.PciDeviceConstants;
+import org.zstack.pciDevice.header.PciDeviceType;
+import org.zstack.pciDevice.spi.PciDeviceBackend;
+import org.zstack.pciDevice.spi.VirtualPciDeviceFactory;
 import org.zstack.pciDevice.virtual.APIGenerateVirtualPciDevicesMsg;
 import org.zstack.pciDevice.virtual.APIUngenerateVirtualPciDevicesMsg;
-import org.zstack.pciDevice.virtual.VirtualPciDeviceFactory;
 import org.zstack.utils.Utils;
-import org.zstack.utils.gson.JSONObjectUtil;
 import org.zstack.utils.logging.CLogger;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * Created by GuoYi on 2019-04-24.

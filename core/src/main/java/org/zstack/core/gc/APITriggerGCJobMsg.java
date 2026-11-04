@@ -1,7 +1,6 @@
 package org.zstack.core.gc;
 
 import org.springframework.http.HttpMethod;
-import org.zstack.header.message.APIEvent;
 import org.zstack.header.message.APIMessage;
 import org.zstack.header.message.APIParam;
 import org.zstack.header.rest.RestRequest;
@@ -33,7 +32,7 @@ public class APITriggerGCJobMsg extends APIMessage implements GarbageCollectorMe
     }
     public static APITriggerGCJobMsg __example__() {
         APITriggerGCJobMsg msg = new APITriggerGCJobMsg();
-        msg.setUuid(uuid());
+        msg.setUuid(uuid(GarbageCollectorVO.class));
         return msg;
     }
 }

@@ -7,7 +7,7 @@ doc {
 
 	category "allocator.domain"
 
-	desc """按调度域查询关联虚拟机。返回当前在域中的列表，以及下次启动会进入该域且不在前一列表中的虚拟机"""
+	desc """按调度域查询关联虚拟机。返回当前在域中的列表、下次启动会进入该域且不在前一列表中的虚拟机、以及当前可以被加入该域的虚拟机"""
 
 	rest {
 		request {
@@ -28,7 +28,7 @@ doc {
 					location "url"
 					type "String"
 					optional false
-					since "1.0.1, zsv 5.2.0"
+					since "1.0.1, zsv_5.2.0"
 				}
 				column {
 					name "systemTags"
@@ -37,7 +37,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "1.0.1, zsv 5.2.0"
+					since "1.0.1, zsv_5.2.0"
 				}
 				column {
 					name "userTags"
@@ -46,7 +46,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "1.0.1, zsv 5.2.0"
+					since "1.0.1, zsv_5.2.0"
 				}
 			}
 		}

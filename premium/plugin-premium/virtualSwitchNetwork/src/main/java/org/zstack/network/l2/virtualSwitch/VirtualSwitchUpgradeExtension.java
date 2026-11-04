@@ -48,7 +48,7 @@ public class VirtualSwitchUpgradeExtension implements Component {
             return;
         }
 
-        List<SystemTagInventory> tagInventories = VirtualSwitchSystemTags.UPLINK_BONDING.getTagInventories(
+        List<SystemTagInventory> tagInventories = (List) VirtualSwitchSystemTags.UPLINK_BONDING.getTagInventories(
                 tuples.stream().map(tuple -> tuple.get(0, String.class)).collect(Collectors.toList()));
         List<String> l2WithTag = tagInventories.stream().map(SystemTagInventory::getResourceUuid).collect(Collectors.toList());
         List<Tuple> tuplesWithoutTag = tuples.stream().filter(tuple -> !l2WithTag.contains(tuple.get(0, String.class))).collect(Collectors.toList());

@@ -28,7 +28,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "zsv 3.16.0"
+					since "zsv_3.16.0"
 				}
 				column {
 					name "password"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "zsv 3.16.0"
+					since "zsv_3.16.0"
 				}
 				column {
 					name "loginType"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "zsv 3.16.0"
+					since "zsv_3.16.0"
 				}
 				column {
 					name "captchaUuid"
@@ -55,7 +55,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 3.16.0"
+					since "zsv_3.16.0"
 				}
 				column {
 					name "verifyCode"
@@ -64,7 +64,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 3.16.0"
+					since "zsv_3.16.0"
 				}
 				column {
 					name "clientInfo"
@@ -73,7 +73,7 @@ doc {
 					location "body"
 					type "Map"
 					optional true
-					since "zsv 3.16.0"
+					since "zsv_3.16.0"
 				}
 				column {
 					name "properties"
@@ -82,7 +82,7 @@ doc {
 					location "body"
 					type "Map"
 					optional true
-					since "zsv 3.16.0"
+					since "zsv_3.16.0"
 				}
 				column {
 					name "systemTags"
@@ -91,7 +91,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 3.16.0"
+					since "zsv_3.16.0"
 				}
 				column {
 					name "userTags"
@@ -100,7 +100,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 3.16.0"
+					since "zsv_3.16.0"
 				}
 			}
 		}

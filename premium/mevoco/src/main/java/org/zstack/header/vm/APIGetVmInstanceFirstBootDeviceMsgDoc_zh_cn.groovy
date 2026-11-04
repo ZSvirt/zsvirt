@@ -7,7 +7,7 @@ doc {
 
 	category "mevoco"
 
-	desc """获取云主机第一启动项"""
+	desc """获取虚拟机第一启动项"""
 
 	rest {
 		request {
@@ -17,7 +17,7 @@ doc {
 
 			clz APIGetVmInstanceFirstBootDeviceMsg.class
 
-			desc """获取云主机第一启动项"""
+			desc """获取虚拟机第一启动项"""
 
 			params {
 
@@ -28,7 +28,7 @@ doc {
 					location "url"
 					type "String"
 					optional false
-					since "3.7.0"
+					since "zsv_3.7.0"
 				}
 				column {
 					name "systemTags"
@@ -37,7 +37,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "3.7.0"
+					since "zsv_3.7.0"
 				}
 				column {
 					name "userTags"
@@ -46,7 +46,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "3.7.0"
+					since "zsv_3.7.0"
 				}
 			}
 		}

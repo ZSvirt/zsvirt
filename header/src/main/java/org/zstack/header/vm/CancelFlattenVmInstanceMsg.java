@@ -1,7 +1,6 @@
 package org.zstack.header.vm;
 
 import org.zstack.header.message.CancelMessage;
-import org.zstack.header.message.NeedReplyMessage;
 
 public class CancelFlattenVmInstanceMsg extends CancelMessage implements VmInstanceMessage {
     private String uuid;

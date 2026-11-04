@@ -10,20 +10,20 @@ doc {
 		name "time"
 		desc ""
 		type "long"
-		since "0.6"
+		since "zsv_0.6"
 	}
 	field {
 		name "count"
 		desc ""
 		type "long"
-		since "0.6"
+		since "zsv_0.6"
 	}
 	ref {
 		name "tags"
 		path "org.zstack.zwatch.api.Histogram.tags"
 		desc "null"
 		type "List"
-		since "0.6"
+		since "zsv_0.6"
 		clz Tag.class
 	}
 }

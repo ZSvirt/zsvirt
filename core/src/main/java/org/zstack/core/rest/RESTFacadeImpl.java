@@ -562,12 +562,14 @@ public class RESTFacadeImpl extends AbstractRESTFacade {
                 .withErrorCodeBuilder((e, http2) -> {
                     if (e instanceof HttpStatusCodeException) {
                         final HttpStatusCodeException exception = (HttpStatusCodeException) e;
-                        return operr("failed to %s to %s, status code: %s, response body: %s",
+                        return err(SysErrors.HTTP_ERROR, "failed to %s to %s, status code: %s, response body: %s",
                                 http2.getMethod().toString().toLowerCase(),
                                 http2.getPath(),
-                                exception.getStatusCode(), exception.getResponseBodyAsString());
+                                exception.getStatusCode(), exception.getResponseBodyAsString())
+                                .withOpaque("http.code", exception.getStatusCode())
+                                .withOpaque("body", exception.getResponseBodyAsString());
                     } else if (e instanceof ResourceAccessException) {
-                        return operr("failed to %s to %s: IO Error",
+                        return err(SysErrors.HTTP_ERROR, "failed to %s to %s: IO Error",
                                 http2.getMethod().toString().toLowerCase(),
                                 http2.getPath())
                                 .withException(e);

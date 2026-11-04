@@ -7,7 +7,7 @@ doc {
 
 	category "vmInstance"
 
-	desc """获取云主机内部与云平台资源对应的设备地址"""
+	desc """获取虚拟机内部与云平台资源对应的设备地址"""
 
 	rest {
 		request {
@@ -24,11 +24,11 @@ doc {
 				column {
 					name "uuid"
 					enclosedIn ""
-					desc "云主机UUID"
+					desc "虚拟机UUID"
 					location "query"
 					type "String"
 					optional false
-					since "zsv 3.10.0"
+					since "zsv_3.10.0"
 				}
 				column {
 					name "resourceTypes"
@@ -37,7 +37,7 @@ doc {
 					location "query"
 					type "List"
 					optional false
-					since "zsv 3.10.0"
+					since "zsv_3.10.0"
 					values ("VolumeVO")
 				}
 				column {
@@ -47,7 +47,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "zsv 3.10.0"
+					since "zsv_3.10.0"
 				}
 				column {
 					name "userTags"
@@ -56,7 +56,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "zsv 3.10.0"
+					since "zsv_3.10.0"
 				}
 			}
 		}

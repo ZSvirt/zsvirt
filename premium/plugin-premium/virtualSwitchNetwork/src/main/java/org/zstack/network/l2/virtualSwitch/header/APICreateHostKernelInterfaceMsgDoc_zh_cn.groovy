@@ -28,7 +28,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "4.1.0"
+					since "zsv_4.1.0"
 				}
 				column {
 					name "description"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "4.1.0"
+					since "zsv_4.1.0"
 				}
 				column {
 					name "hostUuid"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "4.1.0"
+					since "zsv_4.1.0"
 				}
 				column {
 					name "l3NetworkUuid"
@@ -55,7 +55,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "4.1.0"
+					since "zsv_4.1.0"
 				}
 				column {
 					name "requiredIp"
@@ -64,7 +64,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "4.1.0"
+					since "zsv_4.1.0"
 				}
 				column {
 					name "netmask"
@@ -73,7 +73,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "4.1.0"
+					since "zsv_4.1.0"
 				}
 				column {
 					name "trafficTypes"
@@ -82,7 +82,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "4.1.0"
+					since "zsv_4.1.0"
 					values ("Management","Storage")
 				}
 				column {
@@ -92,7 +92,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "4.1.0"
+					since "zsv_4.1.0"
 				}
 				column {
 					name "tagUuids"
@@ -101,7 +101,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "4.1.0"
+					since "zsv_4.1.0"
 				}
 				column {
 					name "systemTags"
@@ -110,7 +110,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "4.1.0"
+					since "zsv_4.1.0"
 				}
 				column {
 					name "userTags"
@@ -119,7 +119,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "4.1.0"
+					since "zsv_4.1.0"
 				}
 			}
 		}

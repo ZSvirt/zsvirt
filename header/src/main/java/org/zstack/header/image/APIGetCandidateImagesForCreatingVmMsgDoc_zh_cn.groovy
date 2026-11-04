@@ -7,7 +7,7 @@ doc {
 
 	category "host.allocator"
 
-	desc """获取用于创建云主机的候选镜像"""
+	desc """获取用于创建虚拟机的候选镜像"""
 
 	rest {
 		request {
@@ -28,7 +28,7 @@ doc {
 					location "url"
 					type "String"
 					optional false
-					since "zsv 4.1.1"
+					since "zsv_4.1.1"
 				}
 				column {
 					name "systemTags"
@@ -37,7 +37,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "zsv 4.1.1"
+					since "zsv_4.1.1"
 				}
 				column {
 					name "userTags"
@@ -46,7 +46,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "zsv 4.1.1"
+					since "zsv_4.1.1"
 				}
 			}
 		}

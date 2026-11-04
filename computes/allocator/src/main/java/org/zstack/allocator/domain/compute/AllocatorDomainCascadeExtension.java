@@ -53,6 +53,10 @@ public class AllocatorDomainCascadeExtension extends AbstractAsyncCascadeExtensi
     }
 
     private void handleDeletionCheck(CascadeAction action, Completion completion) {
+        if (isRootZone(action)) {
+            completion.success();
+            return;
+        }
         if (isZoneIssuer(action)) {
             List<AllocatorDomainInventory> domains = domainsFromAction(action);
             if (domains != null && !domains.isEmpty()) {
@@ -67,7 +71,8 @@ public class AllocatorDomainCascadeExtension extends AbstractAsyncCascadeExtensi
     }
 
     private void handleDeletion(CascadeAction action, Completion completion) {
-        if (isZoneIssuer(action) && !action.isActionCode(CascadeConstant.DELETION_FORCE_DELETE_CODE)) {
+        if (isZoneIssuer(action) && !action.isActionCode(CascadeConstant.DELETION_FORCE_DELETE_CODE)
+                && !isRootZone(action)) {
             completion.success();
             return;
         }
@@ -78,7 +83,9 @@ public class AllocatorDomainCascadeExtension extends AbstractAsyncCascadeExtensi
             return;
         }
 
-        boolean forceDelete = action.isActionCode(CascadeConstant.DELETION_FORCE_DELETE_CODE) || isAccountIssuer(action);
+        boolean forceDelete = action.isActionCode(CascadeConstant.DELETION_FORCE_DELETE_CODE)
+                || isAccountIssuer(action)
+                || isRootZone(action);
         List<AllocatorDomainDeletionMsg> msgs = CollectionUtils.transformAndRemoveNull(domains, inv -> {
             AllocatorDomainDeletionMsg msg = new AllocatorDomainDeletionMsg();
             msg.setUuid(inv.getUuid());
@@ -129,6 +136,10 @@ public class AllocatorDomainCascadeExtension extends AbstractAsyncCascadeExtensi
             }
         }
         return null;
+    }
+
+    private boolean isRootZone(CascadeAction action) {
+        return ZoneVO.class.getSimpleName().equals(action.getRootIssuer());
     }
 
     private boolean isZoneIssuer(CascadeAction action) {

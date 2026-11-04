@@ -1,7 +1,7 @@
 package org.zstack.header.tag;
 
-/**
- */
+import org.zstack.header.configuration.ConfigAO;
+
 public interface TagConstant {
     String SERVICE_ID = "tag";
 
@@ -9,8 +9,8 @@ public interface TagConstant {
 
     String EPHEMERAL_TAG_PREFIX = "ephemeral";
 
-    String RESOURCE_CONFIG_TAG_PREFIX = "resourceConfig";
-    String RESOURCE_CONFIG_CATEGORY_TOKEN = "category";
-    String RESOURCE_CONFIG_NAME_TOKEN = "name";
-    String RESOURCE_CONFIG_VALUE_TOKEN = "value";
+    String RESOURCE_CONFIG_TAG_PREFIX = ConfigAO.RESOURCE_CONFIG_TAG_PREFIX;
+    String RESOURCE_CONFIG_CATEGORY_TOKEN = ConfigAO.RESOURCE_CONFIG_CATEGORY_TOKEN;
+    String RESOURCE_CONFIG_NAME_TOKEN = ConfigAO.RESOURCE_CONFIG_NAME_TOKEN;
+    String RESOURCE_CONFIG_VALUE_TOKEN = ConfigAO.RESOURCE_CONFIG_VALUE_TOKEN;
 }

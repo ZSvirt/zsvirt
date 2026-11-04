@@ -28,7 +28,7 @@ doc {
 					location "query"
 					type "String"
 					optional false
-					since "zsv 4.3.0"
+					since "zsv_4.3.0"
 				}
 				column {
 					name "password"
@@ -37,7 +37,7 @@ doc {
 					location "query"
 					type "String"
 					optional true
-					since "zsv 4.3.0"
+					since "zsv_4.3.0"
 				}
 				column {
 					name "sshPort"
@@ -46,7 +46,7 @@ doc {
 					location "query"
 					type "Integer"
 					optional false
-					since "zsv 4.3.0"
+					since "zsv_4.3.0"
 				}
 				column {
 					name "hostName"
@@ -55,7 +55,7 @@ doc {
 					location "query"
 					type "String"
 					optional false
-					since "zsv 4.3.0"
+					since "zsv_4.3.0"
 				}
 				column {
 					name "excludedTypes"
@@ -64,7 +64,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "zsv 4.3.0"
+					since "zsv_4.3.0"
 				}
 				column {
 					name "systemTags"
@@ -73,7 +73,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "zsv 4.3.0"
+					since "zsv_4.3.0"
 				}
 				column {
 					name "userTags"
@@ -82,7 +82,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "zsv 4.3.0"
+					since "zsv_4.3.0"
 				}
 			}
 		}

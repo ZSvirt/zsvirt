@@ -40,7 +40,6 @@ import org.zstack.network.service.virtualrouter.vyos.VyosVersionCheckResult;
 import org.zstack.network.service.virtualrouter.vyos.VyosVersionManager;
 import org.zstack.utils.CollectionUtils;
 import org.zstack.utils.Utils;
-import org.zstack.utils.function.ForEachFunction;
 import org.zstack.utils.logging.CLogger;
 
 import java.util.Collections;
@@ -306,13 +305,7 @@ public class UpgradeManagerImpl implements ManagementNodeReadyExtensionPoint, Gl
         }
 
         CollectionUtils.safeForEach(pluginRgty.getExtensionList(AfterChangeHostStatusExtensionPoint.class),
-                new ForEachFunction<AfterChangeHostStatusExtensionPoint>() {
-                    @Override
-                    public void run(AfterChangeHostStatusExtensionPoint arg) {
-                        arg.afterChangeHostStatus(hostUuid, hostVO.getStatus(), HostStatus.Disconnected);
-                    }
-                }
-        );
+                arg -> arg.afterChangeHostStatus(hostUuid, hostVO.getStatus(), HostStatus.Disconnected));
     }
 
     @Override

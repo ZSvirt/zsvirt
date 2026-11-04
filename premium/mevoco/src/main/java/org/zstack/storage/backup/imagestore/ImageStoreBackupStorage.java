@@ -53,7 +53,7 @@ import org.zstack.storage.backup.BackupStorageBase;
 import org.zstack.storage.backup.BackupStorageGlobalConfig;
 import org.zstack.storage.backup.BackupStorageSystemTags;
 import org.zstack.storage.backup.imagestore.ImageStoreBackupStorageCommands.*;
-import org.zstack.tag.PatternedSystemTag;
+import org.zstack.tag.SystemTag;
 import org.zstack.tag.SystemTagCreator;
 import org.zstack.utils.*;
 import org.zstack.utils.gson.JSONObjectUtil;
@@ -66,13 +66,13 @@ import org.zstack.utils.ssh.SshException;
 
 import javax.persistence.Query;
 import java.io.File;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 import static org.zstack.core.Platform.err;
@@ -234,7 +234,7 @@ public class ImageStoreBackupStorage extends BackupStorageBase {
         chain.then(new NoRollbackFlow() {
             @Override
             public void run(FlowTrigger trigger, Map data) {
-                init(new Completion(trigger) {
+                init(newAdded, new Completion(trigger) {
                     @Override
                     public void success() {
                         trigger.next();
@@ -266,14 +266,17 @@ public class ImageStoreBackupStorage extends BackupStorageBase {
         }).start();
     }
 
-    private void init(final Completion complete) {
+    private void init(boolean newAdded, final Completion complete) {
         restf.echo(buildUrl(ImageStoreBackupStorageConstant.ECHO_PATH), new Completion(complete) {
             @Override
             public void success() {
                 String url = buildUrl(ImageStoreBackupStorageConstant.CONNECT_PATH);
                 ConnectCmd cmd = new ConnectCmd();
                 cmd.setUuid(self.getUuid());
+                boolean createInitializedFile = newAdded || !ImageStoreSystemTags.INITIALIZED_FILE.hasTag(self.getUuid());
+                cmd.setCreateInitializedFile(createInitializedFile);
                 ConnectResponse rsp = restf.syncJsonPost(url, cmd, ConnectResponse.class);
+                fireInitializedFileFailureEvent(rsp.getInitializedFileExists(), rsp.getError());
                 if (!rsp.isSuccess()) {
                     ErrorCode err = operr("unable to connect to SimpleHttpBackupStorage[url:%s], because %s",
                             url, rsp.getError());
@@ -287,6 +290,13 @@ public class ImageStoreBackupStorage extends BackupStorageBase {
                 initIscsiInitiatorName(rsp.getIscsiInitiatorName());
                 initStorageInfo(rsp.getStorageInfo());
                 updateIORate(rsp.getIoRate());
+
+                if (createInitializedFile) {
+                    SystemTagCreator creator = ImageStoreSystemTags.INITIALIZED_FILE.newSystemTagCreator(self.getUuid());
+                    creator.inherent = true;
+                    creator.recreate = false;
+                    creator.create();
+                }
 
                 logger.debug(String.format("connected to backup storage[uuid:%s, name:%s, total capacity:%sG, available capacity: %sG",
                         getSelf().getUuid(), getSelf().getName(), rsp.getTotalSize(), rsp.getFreeSize()));
@@ -965,105 +975,70 @@ public class ImageStoreBackupStorage extends BackupStorageBase {
         bus.reply(msg, r);
     }
 
-    private void doReclaimSpaceLocally(final RunGarbageCollectorCmd cmd, ReturnValueCompletion<Long> completion) {
-        restf.asyncJsonPost(buildUrl(ImageStoreBackupStorageConstant.RUNGC_IMAGE_PATH), cmd, new JsonAsyncRESTCallback<RunGarbageCollectorResponse>(completion) {
+    private void handle(final ReclaimSpaceFromImageStoreMsg msg) {
+        ReclaimSpaceFromImageStoreReply reply = new ReclaimSpaceFromImageStoreReply();
+
+        thdf.singleFlightSubmit(new SingleFlightTask(msg) {
             @Override
-            public void fail(ErrorCode err) {
-                completion.fail(err);
+            public String getSyncSignature() {
+                return getName();
             }
 
             @Override
-            public void success(RunGarbageCollectorResponse ret) {
-                if (!ret.isSuccess()) {
-                    completion.fail(Platform.experr("operation error, because: %1$s", ret.getError()));
-                    return;
+            public String getName() {
+                return String.format("reclaim-space-from-image-store-%s", msg.getBackupStorageUuid());
+            }
+        }.run(completion -> {
+            final List<String> installPaths = getAvailableImages(msg.getBackupStorageUuid());
+            RunGarbageCollectorCmd cmd = new RunGarbageCollectorCmd();
+            cmd.setImagesToKeep(installPaths);
+
+            setImageStoreGCTaskStatus(true);
+            if (ImageStoreBackupStorageSelector.isRemote(msg.getBackupStorageUuid())) {
+                RunGarbageCollectorResponse ret = restf.syncJsonPost(buildUrl(ImageStoreBackupStorageConstant.SYNC_RUNGC_IMAGE_PATH), cmd, RunGarbageCollectorResponse.class, TimeUnit.MINUTES, 10);
+                handleGcResult(ret, completion);
+                setImageStoreGCTaskStatus(false);
+                return;
+            }
+            restf.asyncJsonPost(buildUrl(ImageStoreBackupStorageConstant.RUNGC_IMAGE_PATH), cmd, new JsonAsyncRESTCallback<RunGarbageCollectorResponse>(completion) {
+                @Override
+                public void fail(ErrorCode err) {
+                    setImageStoreGCTaskStatus(false);
+                    completion.fail(err);
                 }
 
-                if (ret.getFreed() > 0) {
-                    updateCapacity(self.getTotalCapacity(), self.getAvailableCapacity() + ret.getFreed());
+                @Override
+                public void success(RunGarbageCollectorResponse ret) {
+                    setImageStoreGCTaskStatus(false);
+                    handleGcResult(ret, completion);
                 }
-                completion.success(ret.getFreed());
-            }
 
-            @Override
-            public Class<RunGarbageCollectorResponse> getReturnClass() {
-                return RunGarbageCollectorResponse.class;
+                @Override
+                public Class<RunGarbageCollectorResponse> getReturnClass() {
+                    return RunGarbageCollectorResponse.class;
+                }
+            });
+        }).done(result -> {
+            if (!result.isSuccess()) {
+                reply.setError(result.getErrorCode());
+            } else {
+                reply.setFreedSpaceInBytes(((AtomicLong) result.getResult()).getAndSet(0));
             }
-        });
+            bus.reply(msg, reply);
+        }));
     }
 
-    private void handle(final ReclaimSpaceFromImageStoreMsg msg) {
-        final List<String> installPaths = getAvailableImages(msg.getBackupStorageUuid());
-        RunGarbageCollectorCmd cmd = new RunGarbageCollectorCmd();
-        cmd.setImagesToKeep(installPaths);
-        ReclaimSpaceFromImageStoreReply reply = new ReclaimSpaceFromImageStoreReply();
-        if (ImageStoreBackupStorageSelector.isRemote(msg.getBackupStorageUuid())) {
-            thdf.syncSubmit(new SyncTask<Object>() {
-                @Override
-                public String getSyncSignature() {
-                    return String.format("reclaim-imagestore-thdf-for-bs-%s", self.getUuid());
-                }
-
-                @Override
-                public int getSyncLevel() {
-                    return 10;
-                }
-
-                @Override
-                public String getName() {
-                    return getSyncSignature();
-                }
-
-                @Override
-                public Object call() {
-                    RunGarbageCollectorResponse ret = restf.syncJsonPost(buildUrl(ImageStoreBackupStorageConstant.SYNC_RUNGC_IMAGE_PATH), cmd, RunGarbageCollectorResponse.class, TimeUnit.MINUTES, 10);
-                    if (!ret.isSuccess()) {
-                        reply.setError(operr("reclaim imagestore error, because:%s", ret.getError()));
-                    } else {
-                        reply.setFreedSpaceInBytes(ret.getFreed());
-                        if (ret.getFreed() > 0) {
-                            updateCapacity(self.getTotalCapacity(), self.getAvailableCapacity() + ret.getFreed());
-                        }
-                    }
-                    bus.reply(msg, reply);
-                    return null;
-                }
-            });
-        } else {
-            thdf.chainSubmit(new ChainTask(msg) {
-                @Override
-                public String getSyncSignature() {
-                    return getName();
-                }
-
-                @Override
-                public void run(SyncTaskChain chain) {
-                    setImageStoreGCTaskStatus(true);
-                    doReclaimSpaceLocally(cmd, new ReturnValueCompletion<Long>(chain) {
-                        @Override
-                        public void success(Long freed) {
-                            setImageStoreGCTaskStatus(false);
-                            reply.setFreedSpaceInBytes(freed);
-                            bus.reply(msg, reply);
-                            chain.next();
-                        }
-
-                        @Override
-                        public void fail(ErrorCode errorCode) {
-                            setImageStoreGCTaskStatus(false);
-                            reply.setError(errorCode);
-                            bus.reply(msg, reply);
-                            chain.next();
-                        }
-                    });
-                }
-
-                @Override
-                public String getName() {
-                    return String.format("reclaim-space-from-image-store-%s", msg.getBackupStorageUuid());
-                }
-            });
+    private void handleGcResult(RunGarbageCollectorResponse ret, ReturnValueCompletion<Object> completion) {
+        if (!ret.isSuccess()) {
+            completion.fail(operr("operation error, because:%s", ret.getError()));
+            return;
         }
+
+        if (ret.getFreed() > 0) {
+            updateCapacity(self.getTotalCapacity(), self.getAvailableCapacity() + ret.getFreed());
+        }
+
+        completion.success(new AtomicLong(ret.getFreed()));
     }
 
     private void handle(final SetImageStoreQuotaMsg msg) {
@@ -1876,6 +1851,11 @@ public class ImageStoreBackupStorage extends BackupStorageBase {
 
                 @Override
                 public void success(PingResponse ret) {
+                    fireInitializedFileFailureEvent(ret.getInitializedFileExists(), ret.getError());
+                    if (Boolean.FALSE.equals(ret.getInitializedFileExists())) {
+                        completion.success();
+                        return;
+                    }
                     if (ret.isSuccess()) {
                         if (ret.getUuid() == null || ret.getUuid().equals("")) {
                             connect(new Completion(completion) {
@@ -1918,6 +1898,11 @@ public class ImageStoreBackupStorage extends BackupStorageBase {
         } else {
             // image store deployed in public cloud, it couldn't callback mn node
             PingResponse resp = restf.syncJsonPost(buildUrl(ImageStoreBackupStorageConstant.SYNC_PING_PATH), cmd, PingResponse.class, TimeUnit.SECONDS, 5);
+            fireInitializedFileFailureEvent(resp.getInitializedFileExists(), resp.getError());
+            if (Boolean.FALSE.equals(resp.getInitializedFileExists())) {
+                completion.success();
+                return;
+            }
             if (resp.isSuccess()) {
                 if (resp.getUuid() == null || resp.getUuid().equals("")) {
                     connect(new Completion(completion) {
@@ -1948,6 +1933,17 @@ public class ImageStoreBackupStorage extends BackupStorageBase {
                 completion.fail(operr("operation error, because:%s", resp.getError()));
             }
         }
+    }
+
+    private void fireInitializedFileFailureEvent(Boolean initializedFileExists, String details) {
+        if (!Boolean.FALSE.equals(initializedFileExists)) {
+            return;
+        }
+
+        BackupStorageCanonicalEvents.BackupStorageMountData data = new BackupStorageCanonicalEvents.BackupStorageMountData();
+        data.backupStorageUuid = self.getUuid();
+        data.details = details;
+        evtf.fire(BackupStorageCanonicalEvents.BACKUP_STORAGE_CHECK_INITIALIZED_FAILED, data);
     }
 
     @Override
@@ -2305,7 +2301,7 @@ public class ImageStoreBackupStorage extends BackupStorageBase {
         return ThreadContext.get(THREAD_CONTEXT_TASK_NAME).contains(VOLUME_BACKUP_PACKAGE_NAME);
     }
 
-    public static String getNetworkAddress(String bsUuid, PatternedSystemTag systemTag, String token) {
+    public static String getNetworkAddress(String bsUuid, SystemTag systemTag, String token) {
         final String cidr = systemTag.getTokenByResourceUuid(bsUuid, token);
         if (cidr == null) {
             logger.warn(String.format("BS[uuid:%s] has no %s config", bsUuid, token));
@@ -2755,7 +2751,9 @@ public class ImageStoreBackupStorage extends BackupStorageBase {
     }
 
     private void uploadToRemote(UploadImageToRemoteTargetCmd cmd, Completion completion) {
-        restf.asyncJsonPost(buildUrl(ImageStoreBackupStorageConstant.UPLOAD_IMAGE_TO_REMOTE_PATH), cmd, new JsonAsyncRESTCallback<UploadImageToRemoteTargetRsp>(completion) {
+        restf.asyncJsonPost(buildUrl(ImageStoreBackupStorageConstant.UPLOAD_IMAGE_TO_REMOTE_PATH), cmd,
+                Collections.singletonMap(ImageStoreBackupStorageConstant.IMAGE_STORE_UUID_HEADER, self.getUuid()),
+                new JsonAsyncRESTCallback<UploadImageToRemoteTargetRsp>(completion) {
             @Override
             public void fail(ErrorCode err) {
                 completion.fail(err);

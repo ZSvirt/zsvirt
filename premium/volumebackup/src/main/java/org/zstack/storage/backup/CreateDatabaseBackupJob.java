@@ -4,7 +4,6 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
-import org.zstack.core.Platform;
 import org.zstack.core.cloudbus.CloudBus;
 import org.zstack.core.cloudbus.CloudBusCallBack;
 import org.zstack.core.cloudbus.EventFacade;
@@ -20,7 +19,6 @@ import org.zstack.header.core.Completion;
 import org.zstack.header.core.ExceptionSafe;
 import org.zstack.header.core.ReturnValueCompletion;
 import org.zstack.header.errorcode.ErrorCode;
-import org.zstack.header.errorcode.OperationFailureException;
 import org.zstack.header.identity.AccountConstant;
 import org.zstack.header.longjob.LongJobState;
 import org.zstack.header.longjob.LongJobVO;
@@ -28,14 +26,12 @@ import org.zstack.header.longjob.LongJobVO_;
 import org.zstack.header.longjob.SubmitLongJobMsg;
 import org.zstack.header.message.APIEvent;
 import org.zstack.header.message.MessageReply;
-import org.zstack.header.scheduler.CascadeUpdate;
 import org.zstack.header.scheduler.CreateSchedulerJobDescMsg;
 import org.zstack.header.scheduler.SchedulerCanonicalEvents;
 import org.zstack.header.storage.backup.*;
 import org.zstack.header.storage.database.backup.*;
 import org.zstack.longjob.LongJobManager;
 import org.zstack.mevoco.MevocoGlobalProperty;
-import org.zstack.scheduler.AbstractSchedulerJob;
 import org.zstack.scheduler.SchedulerType;
 import org.zstack.utils.Utils;
 import org.zstack.utils.gson.JSONObjectUtil;
@@ -43,13 +39,16 @@ import org.zstack.utils.logging.CLogger;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static org.zstack.core.Platform.operr;
 
 @Configurable(preConstruction = true, autowire = Autowire.BY_TYPE)
-public class CreateDatabaseBackupJob extends AbstractSchedulerJob {
+public class CreateDatabaseBackupJob extends CreateBackupAbstractJob<DatabaseBackupLongJobParams, APIEvent> {
     private static final CLogger logger = Utils.getLogger(CreateDatabaseBackupJob.class);
 
     @Autowired
@@ -65,13 +64,6 @@ public class CreateDatabaseBackupJob extends AbstractSchedulerJob {
     @Autowired
     private transient PluginRegistry pluginRgty;
 
-    private BackupRetentionPolicy retentionPolicy;
-    private BackupRetentionPolicy remoteRetentionPolicy;
-    @CascadeUpdate(resourceType = BackupStorageVO.class, disableWhenEmpty = true)
-    private List<String> backupStorageUuids;
-    @CascadeUpdate(resourceType = BackupStorageVO.class)
-    private String remoteBackupStorageUuid;
-
     public CreateDatabaseBackupJob() {
         super();
     }
@@ -82,7 +74,7 @@ public class CreateDatabaseBackupJob extends AbstractSchedulerJob {
     }
 
     @Override
-    public void execute(Object request, ReturnValueCompletion completion) {
+    public void execute(DatabaseBackupLongJobParams request, ReturnValueCompletion<APIEvent> completion) {
         backupStorageUuids = backupStorageUuids.stream().filter(bsUuid -> Q.New(BackupStorageVO.class).eq(BackupStorageVO_.uuid, bsUuid).isExists()).collect(Collectors.toList());
         if (backupStorageUuids.isEmpty()) {
             ErrorCode err = operr("No available backup storage found, skip this job");
@@ -264,13 +256,6 @@ public class CreateDatabaseBackupJob extends AbstractSchedulerJob {
         return msg;
     }
 
-    private void mergeFields(Map<String, String> parameters) {
-        mergeBackupPolicy(parameters);
-        validateRemoteRetentionPolicyParam(parameters);
-        mergeRetentionPolicy(parameters);
-        validateParam();
-    }
-
     public CreateDatabaseBackupJob(CreateSchedulerJobDescMsg msg) {
         super(msg);
         mergeFields(msg.getParameters());
@@ -294,72 +279,6 @@ public class CreateDatabaseBackupJob extends AbstractSchedulerJob {
                 .orderBy(LongJobVO_.createDate, SimpleQuery.Od.DESC)
                 .limit(1).select(LongJobVO_.state).findValue();
         return Objects.equals(longJobState, LongJobState.Running);
-    }
-
-    private void mergeRetentionPolicy(Map<String, String> params) {
-        if (retentionPolicy == null) {
-            retentionPolicy = new BackupRetentionPolicy();
-        }
-
-        Optional.ofNullable(params.get("retentionType")).ifPresent(it ->
-                retentionPolicy.setRetentionType(StringUtils.isBlank(it) ? null : BackupRetentionType.valueOf(it)));
-        Optional.ofNullable(params.get("retentionValue")).ifPresent(it ->
-                retentionPolicy.setRetentionValue(StringUtils.isBlank(it) ? 0 : Long.valueOf(it)));
-
-        if (remoteRetentionPolicy == null) {
-            remoteRetentionPolicy = new BackupRetentionPolicy();
-        }
-        Optional.ofNullable(params.get("remoteRetentionType")).ifPresent(it ->
-                remoteRetentionPolicy.setRetentionType(StringUtils.isBlank(it) ? null : BackupRetentionType.valueOf(it)));
-        Optional.ofNullable(params.get("remoteRetentionValue")).ifPresent(it ->
-                remoteRetentionPolicy.setRetentionValue(StringUtils.isBlank(it) ? 0 : Long.valueOf(it)));
-
-        if (isUpdateRemoteRetentionPolicyPermanent(remoteRetentionPolicy) || remoteBackupStorageUuid == null) {
-            remoteRetentionPolicy = null;
-        }
-    }
-
-    private static boolean isUpdateRemoteRetentionPolicyPermanent(BackupRetentionPolicy remoteRetentionPolicy) {
-        return remoteRetentionPolicy.getRetentionType() == null || remoteRetentionPolicy.getRetentionValue() == 0;
-    }
-
-    private void mergeBackupPolicy(Map<String, String> params) {
-        Optional.ofNullable(params.get("remoteBackupStorageUuid")).ifPresent(it ->
-                this.remoteBackupStorageUuid = StringUtils.isBlank(it) ? null : it);
-        Optional.ofNullable(params.get("backupStorageUuids")).ifPresent(it ->
-                this.backupStorageUuids = Arrays.asList(StringUtils.split(it.replace("\\s", ""),",")));
-    }
-
-    private void validateParam() {
-        if (retentionPolicy.getRetentionType() == null) {
-            throw new OperationFailureException(Platform.operr("missing 'retentionType' in job parameters"));
-        }
-
-        if (retentionPolicy.getRetentionValue() == 0) {
-            throw new OperationFailureException(Platform.operr("missing 'retentionValue' in job parameters"));
-        }
-
-        if (backupStorageUuids == null) {
-            throw new OperationFailureException(Platform.operr("missing 'backupStorageUuids' in job parameters"));
-        }
-
-        if (backupStorageUuids.isEmpty()) {
-            throw new OperationFailureException(Platform.operr("job parameter 'backupStorageUuids' is empty"));
-        }
-
-        for (String bsUuid: backupStorageUuids) {
-            if (!Q.New(BackupStorageVO.class).eq(BackupStorageVO_.uuid, bsUuid).isExists()) {
-                throw new OperationFailureException(Platform.operr("unexpected backup storage uuid: %s", bsUuid));
-            }
-        }
-    }
-
-    private void validateRemoteRetentionPolicyParam(Map<String, String> params) {
-        if (StringUtils.isBlank(params.get("remoteRetentionType")) && !StringUtils.isBlank(params.get("remoteRetentionValue"))) {
-            throw new OperationFailureException(Platform.operr("missing 'remoteRetentionType' in job parameters"));
-        } else if (StringUtils.isBlank(params.get("remoteRetentionValue")) && !StringUtils.isBlank(params.get("remoteRetentionType"))) {
-            throw new OperationFailureException(Platform.operr("missing 'remoteRetentionValue' in job parameters"));
-        }
     }
 
     private void fireEvent(ErrorCode errorCode) {

@@ -1,0 +1,334 @@
+#!/usr/bin/env python 
+#
+# An example hook script to prepare the commit log message.
+# Called by "git commit" with the name of the file that has the
+# commit message, followed by the description of the commit
+# message's source.  The hook's purpose is to edit the commit
+# message file.  If the hook fails with a non-zero status,
+# the commit is aborted.
+#
+# To enable this hook, rename this file to "prepare-commit-msg".
+
+# This hook includes three examples.  The first comments out the
+# "Conflicts:" part of a merge commit.
+#
+# The second includes the output of "git diff --name-status -r"
+# into the message, just before the "git status" output.  It is
+# commented because it doesn't cope with --amend or with squashed
+# commits.
+#
+# The third example adds a Signed-off-by line to the message, that can
+# still be edited.  This is rarely a good idea.
+
+import binascii
+import random
+import os
+import re
+import string
+import subprocess
+import sys
+import traceback
+from collections import Counter
+
+
+# default open function(python3)
+open = open
+# using python2 codecs.open func if python version is 2
+if sys.version_info.major == 2:
+    import codecs
+    open = codecs.open
+
+def main():
+    try:
+        if not auto_commit_msg_enabled():
+            return
+        commit_msg_file = sys.argv[1]
+        changed_folders, changed_paths = process_metadata(commit_msg_file)
+        scope = get_scope(changed_folders, changed_paths)
+        type = get_type(changed_folders, changed_paths)
+        tags = get_tags(changed_folders, changed_paths)
+        jiras = get_jiras()
+        change_id = get_change_id()
+        write_commit_msg(commit_msg_file, type, scope, tags, jiras)
+    except Exception as e:
+        print("get exception while prepare commit msg: %s" % e)
+        traceback.print_exc()
+
+
+def auto_commit_msg_enabled():
+    if len(sys.argv) >= 3 and sys.argv[2] != "template":
+        # NOTE(weiw): it's maybe cherry pick or amend or something
+        return False
+    bashCommand = "git config --get zstack.autoCommitMsg"
+    process = subprocess.Popen(bashCommand.split(), stdout=subprocess.PIPE)
+    output, error = process.communicate()
+    output = output.decode()
+    if error != None:
+        print("get error while running git config --get zstack.autoCommitMsg: %s" % error)
+        return False
+    elif "false" in output.lower():
+        return False
+    return True
+
+def write_commit_msg(commit_msg_filepath, type, scope, tags, jiras):
+    template = '''# Possible types: fix/feature/test/refactor/chore
+# Possible tags: APIImpact/GlobalConfigImpact/GlobalPropertyImpact/DBImpact/ZQLImpact
+# Possible jira-footers: Resolves/Related
+# Please describe the commit as detailed as possible!
+# 1. Why is this change necessary?
+# 2. How does it address the problem?
+# 3. Are there any side effects?\n
+'''
+
+    with open(commit_msg_filepath, 'r+', encoding='utf8') as msg:
+        in_usable_content = False
+        useable_contents = []
+        for line in msg.readlines():
+            if line.startswith("Resolves/Related: ZSTAC"):
+                in_usable_content = True
+                continue
+            if line.startswith("# ------------------------ >8 ------------------------"):
+                in_usable_content = True
+                # NOTE(weiw): do not continue, it's usable!
+            if in_usable_content is False:
+                continue
+            useable_contents.append(line)
+
+        real_commit_msg = []
+        real_commit_msg.append("<%s>[%s]: <description>\n\n" % (type, scope))
+        real_commit_msg.append(template)
+        if len(tags) > 0:
+            real_commit_msg.append("%s\n" % "\n".join(tags))
+
+        real_commit_msg.append("\n")
+        if jiras:
+            for jira in jiras:
+                real_commit_msg.append("Resolves: %s\n" % jira.upper())
+        else:
+            real_commit_msg.append("Resolves: ZSTAC-XXXX\n")
+        
+        real_commit_msg.append("\nChange-Id: %s\n" % get_change_id())
+
+    with open(commit_msg_filepath, 'w', encoding='utf8') as msg:
+        real_commit_msg.extend(useable_contents)
+        msg.writelines(real_commit_msg)
+
+
+def process_metadata(commit_msg_filepath):
+    # @return: 
+    # changed_folders:  list of changed first level folder, 
+    #                   if root path of code repo, then return root. 
+    #                   eg. ["root", "conf", "network", "root"]
+    # changed_paths:    dict of paths of changed files with its changed type, 
+    #                   eg. {".gitmessage":"new file", "conf/web.xml":"modified"}
+    #                   !! changed type not support yet !!
+
+    changed_folders = []
+    changed_paths = {}
+    with open(commit_msg_filepath, 'r+', encoding='utf8') as msg:
+        content = msg.readlines()
+        for no, line in enumerate(content):
+            line = line.strip()
+            if not line.startswith("diff --git a/"):
+                continue
+
+            path = line.split(" ")[2][2:]
+            changed_folders.append(get_top_folder_from_path(path))
+            changed_paths[path] = 'new file' if content[no+1].startswith('new file') else 'modified'
+
+    if changed_folders != []:
+        return changed_folders, changed_paths
+
+    bashCommand = "git diff HEAD"
+    process = subprocess.Popen(bashCommand.split(), stdout=subprocess.PIPE)
+    output, error = process.communicate()
+    content = output.decode()
+    if error != None:
+        raise Exception(error)
+
+    for no, line in enumerate(content.splitlines()):
+        line = line.strip()
+        if not line.startswith("diff --git a/"):
+            continue
+
+        path = line.split(" ")[2][2:]
+        changed_folders.append(get_top_folder_from_path(path))
+        changed_paths[path] = 'new file' if content[no+1].startswith('new file') else 'modified'
+    return changed_folders, changed_paths
+
+def get_top_folder_from_path(filepath):
+    if "/" not in filepath and "\\" not in filepath:
+        return "root"
+    elif "/" in filepath:
+        return filepath.split("/")[0]
+    else:
+        return filepath.split("\\")[0]
+
+def get_scope(changed_folders, changed_paths):
+    folder_counter = Counter(changed_folders)
+    most_common = folder_counter.most_common(1)[0][0]
+    if most_common not in ["plugin", "plugin-premium", "test", "test-premium", 
+                           "sdk", "header", "core", "doc", "conf"]:
+        return most_common
+
+    scopes = []
+    for p in changed_paths.keys():
+        if "/org/zstack/sdk/" in p:
+            word_after_sdk = p.split("org/zstack/sdk/")[-1].split("/")[0]
+            if "." in word_after_sdk:
+                # eg. sdk/src/main/java/org/zstack/sdk/CreateSchedulerJobGroupAction.java
+                scopes.append("sdk")
+            else:
+                # eg. sdk/src/main/java/org/zstack/sdk/iam2/api/AddRolesToIAM2VirtualIDGroupAction.java
+                scopes.append(word_after_sdk)
+        elif "/org/zstack/header/" in p:
+            # eg. header/src/main/java/org/zstack/header/image/APIAddImageMsg.java
+            scopes.append(p.split("org/zstack/header/")[-1].split("/")[0])
+        elif "/org/zstack/core/" in p:
+            word_after_core = p.split("org/zstack/core/")[-1].split("/")[0]
+            if "." in word_after_core:
+                # eg. core/src/main/java/org/zstack/core/rest/RESTFacadeImpl.java
+                scopes.append("core")
+            else:
+                # eg. core/src/main/java/org/zstack/core/Platform.java
+                scopes.append(word_after_core)
+        elif "plugin/" in p or "plugin-premium/" in p:
+            # eg. plugin/kvm/src/main/java/org/zstack/kvm/KVMConstant.java
+            # eg. plugin-premium/ticket/src/main/java/org/zstack/ticket/TicketBase.java
+            if "/" in p:
+                scopes.append(p.split("/")[1])
+            else:
+                scopes.append("root")
+        elif "test/" in p or "test-premium/" in p or "doc/" in p:
+            # eg. test-premium/src/test/groovy/org/zstack/test/integration/guesttools/GuestToolsCase.groovy
+            # eg. doc/globalconfig/accessControl/enable.request.source.ip.address.check.md
+            scope = p.split("/")[-2]
+            if scope in ["test", "test-premium", "resources", "groovy"]:
+                # eg. test/pom.xml
+                # eg. test/src/test/resources/zstack.properties
+                # eg. test/src/test/groovy/Test5.groovy
+                scope = "test"
+            scopes.append(scope)
+        elif "conf/" in p:
+            # eg. ./conf/errorCodes/hostAllocator.xml
+            # eg. ./conf/errorCodes/hybrid/aliyun.xml
+            # eg. ./conf/globalConfig/encrypt.xml
+            # eg. ./conf/springConfigXml/hybrid/ecsimage.xml
+            found_magic = False
+            conf_magics = ["errorCodes/", "globalConfig/", "serviceConfig/", "springConfigXml/", "simulatorSpringConfigXml/"]
+            for magic in conf_magics:
+                if magic not in p:
+                    continue
+
+                word_after_magic = p.split(magic)[1]
+                if "/" in word_after_magic:
+                    scopes.append(word_after_magic.split("/")[0])
+                else:
+                    scopes.append(word_after_magic.split(".")[0])
+                found_magic = True
+                break
+            if not found_magic:
+                scopes.append("conf")
+        elif "pom.xml" in p:
+            # eg. header/pom.xml
+            # eg. pom.xml
+            scopes.append("dependencies")
+
+    scope_counter = Counter(scopes)
+    most_common = scope_counter.most_common(1)[0][0]
+
+    return most_common
+        
+def get_type(changed_folders, changed_paths):
+    if set(changed_folders).issubset(set(["test", "testlib", "test-premium", "testlib-premium"])):
+        return "test"
+    elif set(changed_folders).issubset(set(["doc"])):
+        return "doc"
+
+    new_file = 0
+    modified = 0
+    doc = 0
+
+    for p, t in changed_paths.items():
+        if t == "new file":
+            new_file += 1
+        else:
+            modified += 1
+        if "Doc_zh_cn" in p or p.endswith(".md") or p.startswith("doc/"):
+            doc += 1
+
+    if doc == len(changed_paths):
+        return "doc"
+    if new_file >= modified:
+        return "feature"
+    else:
+        return "fix"
+
+def get_tags(changed_folders, changed_paths):
+    tags = set()
+    for p in changed_paths.keys():
+        file_name = os.path.split(p)[1]
+        if file_name.endswith("Msg.java") and file_name.startswith("API"):
+            tags.add("APIImpact")
+        elif file_name.endswith("GlobalConfig.java"):
+            tags.add("GlobalConfigImpact")
+        elif file_name.endswith("GlobalProperty.java"):
+            tags.add("GlobalPropertyImpact")
+        elif file_name.endswith(".sql") or file_name.endswith("VO.java") or \
+                file_name.endswith("VO_.java") or file_name.endswith("EO.java") or \
+                file_name.endswith("AO.java") or file_name.endswith("AO_.java"):
+            tags.add("DBImpact")
+        elif "zql" in p:
+            tags.add("ZQLImpact")
+    
+    return tags
+
+def get_jiras():
+    jiras = []
+    jira_patterns = [r"\bZSTAC-\d+\b", r"\bZSTACK-\d+\b", r"\bMINI-\d+\b", 
+                     r"\bZOPS-\d+\b", r"\bZHCI-\d+\b", r"\bZSV-\d+\b"]
+
+    bashCommand = "git rev-parse --abbrev-ref HEAD"
+    process = subprocess.Popen(bashCommand.split(), stdout=subprocess.PIPE)
+    output, error = process.communicate()
+    output = output.decode()
+    if error != None:
+        print("get error while reading current branch: %s" % error)
+        return jiras
+    for pattern in jira_patterns:
+        searchObj = re.search(pattern, output, re.I)
+        if searchObj:
+            jiras.append(searchObj.group())
+    return jiras
+
+def get_change_id():
+    letters = string.ascii_lowercase
+    data = ''.join(random.choice(letters) for i in range(20)).encode()
+    return("I{}".format(binascii.hexlify(data).decode('iso8859-1')))
+
+def get_git_root_path():
+    bashCommand = "git rev-parse --show-toplevel"
+    process = subprocess.Popen(bashCommand.split(), stdout=subprocess.PIPE)
+    output, error = process.communicate()
+    output = output.decode()
+    if error != None:
+        raise Exception(error)
+    return output
+
+if __name__ == "__main__":
+    main()
+
+#case "$2,$3" in
+#  merge,)
+#    /usr/bin/perl -i.bak -ne 's/^/# /, s/^# #/#/ if /^Conflicts/ .. /#/; print' "$1" ;;
+#
+## ,|template,)
+##   /usr/bin/perl -i.bak -pe '
+##      print "\n" . `git diff --cached --name-status -r`
+##      if /^#/ && $first++ == 0' "$1" ;;
+#
+#  *) ;;
+#esac
+
+# SOB=$(git var GIT_AUTHOR_IDENT | sed -n 's/^\(.*>\).*$/Signed-off-by: \1/p')
+# grep -qs "^$SOB" "$1" || echo "$SOB" >> "$1"

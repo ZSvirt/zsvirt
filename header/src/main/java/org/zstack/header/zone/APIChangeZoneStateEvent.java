@@ -22,7 +22,7 @@ import java.sql.Timestamp;
  * "success": true
  * }
  * }
- * @since 0.1.0
+ * @since zsv_0.1.0
  */
 @RestResponse(allTo = "inventory")
 public class APIChangeZoneStateEvent extends APIEvent {
@@ -51,15 +51,7 @@ public class APIChangeZoneStateEvent extends APIEvent {
  
     public static APIChangeZoneStateEvent __example__() {
         APIChangeZoneStateEvent event = new APIChangeZoneStateEvent();
-        ZoneInventory zone = new ZoneInventory();
-        zone.setName("TestZone");
-        zone.setUuid(uuid());
-        zone.setDescription("Test");
-        zone.setState(ZoneState.Enabled.toString());
-        zone.setType("zstack");
-        zone.setCreateDate(new Timestamp(org.zstack.header.message.DocUtils.date));
-        zone.setLastOpDate(new Timestamp(org.zstack.header.message.DocUtils.date));
-        event.setInventory(zone);
+        event.setInventory(ZoneInventory.__example__());
         return event;
     }
 

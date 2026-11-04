@@ -97,13 +97,12 @@ public class AutoScalingGroupActivityCascadeExtension extends AbstractAsyncCasca
             msgs.add(msg);
         }
 
-        List<ErrorCode> errorCodes = Collections.synchronizedList(new LinkedList<ErrorCode>());
         new While<>(msgs).step((deleteMsg, whileCompletion) -> {
             bus.send(deleteMsg, new CloudBusCallBack(completion) {
                 @Override
                 public void run(MessageReply reply) {
                     if (!reply.isSuccess()) {
-                        errorCodes.add(reply.getError());
+                        whileCompletion.addError(reply.getError());
                     }
                     whileCompletion.done();
                 }
@@ -111,12 +110,7 @@ public class AutoScalingGroupActivityCascadeExtension extends AbstractAsyncCasca
         }, 10).run(new WhileDoneCompletion(completion) {
             @Override
             public void done(ErrorCodeList errorCodeList) {
-                if (errorCodes.isEmpty()) {
-                    completion.success();
-                    return;
-                }
-
-                completion.fail(errorCodes.get(0));
+                completion.next(errorCodeList);
             }
         });
     }

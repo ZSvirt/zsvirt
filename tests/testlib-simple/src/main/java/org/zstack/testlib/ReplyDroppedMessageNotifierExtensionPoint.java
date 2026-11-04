@@ -16,14 +16,14 @@ import static org.zstack.core.Platform.getReflections;
 public class ReplyDroppedMessageNotifierExtensionPoint implements MarshalReplyMessageExtensionPoint {
     private static final CLogger logger = Utils.getLogger(ReplyDroppedMessageNotifierExtensionPoint.class);
 
-    private static final List<Class> replyClasses = new ArrayList<>();
+    private static final List<Class<? extends Message>> replyClasses = new ArrayList<>();
 
     static {
         replyClasses.addAll(getReflections().getSubTypesOf(MessageReply.class));
     }
 
     @Override
-    public List<Class> getReplyMessageClassForMarshalExtensionPoint() {
+    public List<Class<? extends Message>> getReplyMessageClassForMarshalExtensionPoint() {
         return replyClasses;
     }
 

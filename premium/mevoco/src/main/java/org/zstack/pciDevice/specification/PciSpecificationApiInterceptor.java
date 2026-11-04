@@ -22,7 +22,16 @@ import org.zstack.header.vm.VmInstanceVO_;
 import org.zstack.pciDevice.*;
 import org.zstack.pciDevice.specification.mdev.*;
 import org.zstack.pciDevice.specification.pci.*;
-import org.zstack.pciDevice.virtual.vfio_mdev.MdevDeviceType;
+import org.zstack.pciDevice.entity.specification.mdev.VmInstanceMdevDeviceSpecRefVO;
+import org.zstack.pciDevice.entity.specification.mdev.VmInstanceMdevDeviceSpecRefVO_;
+import org.zstack.pciDevice.entity.specification.pci.PciDeviceSpecVO;
+import org.zstack.pciDevice.entity.specification.pci.VmInstancePciDeviceSpecRefVO;
+import org.zstack.pciDevice.entity.specification.pci.VmInstancePciDeviceSpecRefVO_;
+import org.zstack.pciDevice.header.HostIommuStateType;
+import org.zstack.pciDevice.header.HostIommuStatusType;
+import org.zstack.pciDevice.header.PciDeviceConstants;
+import org.zstack.pciDevice.header.PciDeviceType;
+import org.zstack.pciDevice.header.virtual.vfio_mdev.MdevDeviceType;
 import org.zstack.utils.Utils;
 import org.zstack.utils.logging.CLogger;
 

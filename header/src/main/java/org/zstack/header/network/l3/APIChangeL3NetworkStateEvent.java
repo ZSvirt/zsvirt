@@ -26,7 +26,7 @@ import org.zstack.header.rest.RestResponse;
  * "success": true
  * }
  * }
- * @since 0.1.0
+ * @since zsv_0.1.0
  */
 @RestResponse(allTo = "inventory")
 public class APIChangeL3NetworkStateEvent extends APIEvent {
@@ -53,12 +53,7 @@ public class APIChangeL3NetworkStateEvent extends APIEvent {
  
     public static APIChangeL3NetworkStateEvent __example__() {
         APIChangeL3NetworkStateEvent event = new APIChangeL3NetworkStateEvent();
-        L3NetworkInventory l3 = new L3NetworkInventory();
-
-        l3.setName("Test-L3Network");
-        l3.setL2NetworkUuid(uuid());
-
-        event.setInventory(l3);
+        event.setInventory(L3NetworkInventory.__example__());
         return event;
     }
 

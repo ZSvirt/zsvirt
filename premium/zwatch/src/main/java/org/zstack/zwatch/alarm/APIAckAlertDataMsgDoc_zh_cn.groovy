@@ -28,7 +28,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "3.10.0"
+					since "zsv_3.10.0"
 				}
 				column {
 					name "dataType"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "3.10.0"
+					since "zsv_3.10.0"
 					values ("alarm","event")
 				}
 				column {
@@ -47,7 +47,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.10.0"
+					since "zsv_3.10.0"
 				}
 				column {
 					name "ackPeriodSec"
@@ -56,7 +56,7 @@ doc {
 					location "body"
 					type "Integer"
 					optional false
-					since "3.10.0"
+					since "zsv_3.10.0"
 				}
 				column {
 					name "systemTags"
@@ -65,7 +65,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.10.0"
+					since "zsv_3.10.0"
 				}
 				column {
 					name "userTags"
@@ -74,7 +74,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.10.0"
+					since "zsv_3.10.0"
 				}
 			}
 		}

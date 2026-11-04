@@ -22,8 +22,8 @@ final class MountBlockDeviceHelper {
 
     static final String LOG_PREFIX = "[MountBlockDevice]";
     private static final String FSTAB_SCAN_NO_UUID_SENTINEL = "__zs_no_uuid__";
-    private static final String FSTAB_OPTIONS_MULTIPATH = "defaults,_netdev,x-systemd.device-timeout=10";
-    private static final String FSTAB_OPTIONS_DEFAULT = "defaults";
+    private static final String FSTAB_OPTIONS_MULTIPATH = "defaults,_netdev,nofail,x-systemd.device-timeout=10";
+    private static final String FSTAB_OPTIONS_DEFAULT = "defaults,nofail,x-systemd.device-timeout=10";
     private static final String MULTIPATH_PREFIX = "/dev/mapper/mpath";
 
     private MountBlockDeviceHelper() {

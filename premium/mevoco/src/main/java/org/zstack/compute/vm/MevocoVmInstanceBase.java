@@ -45,8 +45,7 @@ import org.zstack.header.message.MessageReply;
 import org.zstack.header.message.NeedReplyMessage;
 import org.zstack.header.storage.primary.*;
 import org.zstack.header.storage.snapshot.*;
-import org.zstack.header.storage.snapshot.group.VolumeSnapshotGroupInventory;
-import org.zstack.header.storage.snapshot.group.VolumeSnapshotGroupRefInventory;
+import org.zstack.header.storage.snapshot.group.*;
 import org.zstack.header.tpm.TpmConstants;
 import org.zstack.header.vm.ChangeVmPasswordMsg;
 import org.zstack.header.vm.ChangeVmPasswordReply;
@@ -217,7 +216,7 @@ public class MevocoVmInstanceBase extends VmInstanceBase {
         } else if (msg instanceof APISyncVmClockMsg) {
             handle((APISyncVmClockMsg) msg);
         } else {
-            bus.dealWithUnknownMessage(msg);
+            super.handleApiMessage(msg);
         }
     }
 
@@ -241,7 +240,7 @@ public class MevocoVmInstanceBase extends VmInstanceBase {
         } else if (msg instanceof SetVmNicQosMsg) {
             handle((SetVmNicQosMsg) msg);
         } else {
-            bus.dealWithUnknownMessage(msg);
+            super.handleLocalMessage(msg);
         }
     }
 
@@ -1041,19 +1040,23 @@ public class MevocoVmInstanceBase extends VmInstanceBase {
                     String __name__ = String.format("create-volume-snapshot-group-for-clone-vm-%s", msg.getVmInstanceUuid());
 
                     @Override
-                    public boolean skip(Map data) {
-                        if (msg.getVolumeSnapshotGroup() == null) {
-                            return false;
-                        }
-
-                        for (VolumeSnapshotGroupRefInventory ref : msg.getVolumeSnapshotGroup().getVolumeSnapshotRefs()) {
-                            putVolumeImageSpec(VolumeSnapshotInventory.valueOf(ref), ref.getDeviceId(), ref.getVolumeLastAttachDate());
-                        }
-                        return true;
-                    }
-
-                    @Override
                     public void run(FlowTrigger trigger, Map data) {
+                        if (msg.getVolumeSnapshotGroup() != null) {
+                            List<VolumeSnapshotGroupRefInventory> refs = getUsableSnapshotGroupRefs(msg.getVolumeSnapshotGroup());
+                            List<String> missingVolumeUuids = getMissingSnapshotVolumeUuids(refs);
+                            if (!missingVolumeUuids.isEmpty()) {
+                                trigger.fail(operr("volume snapshot group[uuid:%s] has no available snapshot for volumes%s",
+                                        msg.getVolumeSnapshotGroup().getUuid(), missingVolumeUuids));
+                                return;
+                            }
+
+                            for (VolumeSnapshotGroupRefInventory ref : refs) {
+                                putVolumeImageSpec(VolumeSnapshotInventory.valueOf(ref), ref.getDeviceId(), ref.getVolumeLastAttachDate());
+                            }
+                            trigger.next();
+                            return;
+                        }
+
                         CreateVolumeSnapshotGroupMsg cmsg = new CreateVolumeSnapshotGroupMsg();
                         cmsg.setRootVolumeUuid(vivo.getRootVolumeUuid());
                         cmsg.setVmInstance(VmInstanceInventory.valueOf(vivo));
@@ -1061,6 +1064,7 @@ public class MevocoVmInstanceBase extends VmInstanceBase {
                         cmsg.setName("snapshot-group-for-clone");
                         cmsg.setDescription(String.format("bulk snapshot for clone vm[%s]", vivo.getUuid()));
                         cmsg.setSession(msg.getSession());
+                        cmsg.setAllowPartialSuccess(false);
 
                         bus.makeTargetServiceIdByResourceUuid(cmsg, VolumeConstant.SERVICE_ID, cmsg.getVolumeUuid());
                         bus.send(cmsg, new CloudBusCallBack(trigger) {
@@ -1075,7 +1079,15 @@ public class MevocoVmInstanceBase extends VmInstanceBase {
                                 VolumeSnapshotGroupInventory group = cr.getInventory();
 
                                 logger.debug(String.format("created volume snapshot group %s", group.getUuid()));
-                                for (VolumeSnapshotGroupRefInventory ref : group.getVolumeSnapshotRefs()) {
+                                List<VolumeSnapshotGroupRefInventory> refs = getUsableSnapshotGroupRefs(group);
+                                List<String> missingVolumeUuids = getMissingSnapshotVolumeUuids(refs);
+                                if (!missingVolumeUuids.isEmpty()) {
+                                    trigger.fail(operr("failed to create snapshots for volumes%s in volume snapshot group[uuid:%s] when cloning vm[uuid:%s]",
+                                            missingVolumeUuids, group.getUuid(), vivo.getUuid()));
+                                    return;
+                                }
+
+                                for (VolumeSnapshotGroupRefInventory ref : refs) {
                                     handleVolumeSnapshotCreate(VolumeSnapshotInventory.valueOf(ref), ref.getDeviceId(), ref.getVolumeLastAttachDate());
                                 }
 
@@ -1089,6 +1101,40 @@ public class MevocoVmInstanceBase extends VmInstanceBase {
                             }
                         });
                     }
+
+                    private List<VolumeSnapshotGroupRefInventory> getUsableSnapshotGroupRefs(VolumeSnapshotGroupInventory group) {
+                        Set<String> volumeUuids = volumesToClone.stream().map(VolumeVO::getUuid).collect(Collectors.toSet());
+                        List<VolumeSnapshotGroupRefInventory> refs = group.getVolumeSnapshotRefs().stream()
+                                .filter(ref -> volumeUuids.contains(ref.getVolumeUuid()))
+                                .filter(ref -> !ref.isSnapshotDeleted())
+                                .collect(Collectors.toList());
+                        if (refs.isEmpty()) {
+                            return refs;
+                        }
+
+                        Set<String> readySnapshotUuids = new HashSet<>(Q.New(VolumeSnapshotVO.class)
+                                .select(VolumeSnapshotVO_.uuid)
+                                .in(VolumeSnapshotVO_.uuid, refs.stream()
+                                        .map(VolumeSnapshotGroupRefInventory::getVolumeSnapshotUuid)
+                                        .collect(Collectors.toSet()))
+                                .eq(VolumeSnapshotVO_.status, VolumeSnapshotStatus.Ready)
+                                .listValues());
+                        return refs.stream()
+                                .filter(ref -> readySnapshotUuids.contains(ref.getVolumeSnapshotUuid()))
+                                .collect(Collectors.toList());
+                    }
+
+                    private List<String> getMissingSnapshotVolumeUuids(List<VolumeSnapshotGroupRefInventory> refs) {
+                        Set<String> availableVolumeUuids = refs.stream()
+                                .map(VolumeSnapshotGroupRefInventory::getVolumeUuid)
+                                .collect(Collectors.toSet());
+                        return volumesToClone.stream()
+                                .map(VolumeVO::getUuid)
+                                .filter(uuid -> !availableVolumeUuids.contains(uuid))
+                                .sorted()
+                                .collect(Collectors.toList());
+                    }
+
                 });
             }
 
@@ -1287,6 +1333,7 @@ public class MevocoVmInstanceBase extends VmInstanceBase {
                         cvmsg.setMemorySize(msg.getMemorySize() != null ? msg.getMemorySize() : vivo.getMemorySize());
                         cvmsg.setDescription(msg.getDescription());
                         cvmsg.setSystemTags(msg.getSystemTags());
+                        cvmsg.setConfigs(msg.getConfigs());
                         cvmsg.setPlatform(msg.getPlatform());
                         cvmsg.setGuestOsType(msg.getGuestOsType());
                         cvmsg.setArchitecture(msg.getArchitecture());
@@ -1660,6 +1707,7 @@ public class MevocoVmInstanceBase extends VmInstanceBase {
                                     spec.snapshot.getVolumeUuid()));
                             cmsg.setVolumeSnapshotUuid(spec.snapshot.getUuid());
                             cmsg.setSystemTags(diskAO != null ? diskAO.getSystemTags() : null);
+                            cmsg.setConfigs(diskAO != null ? diskAO.getConfigs() : null);
                             cmsg.setEncrypted(diskAO == null ? null : diskAO.getEncrypted());
                             cmsg.addSystemTag(VolumeSystemTags.FAST_CREATE.getTagFormat());
                             cmsg.setSession(msg.getSession());
@@ -1678,6 +1726,7 @@ public class MevocoVmInstanceBase extends VmInstanceBase {
                                     spec.snapshot.getVolumeUuid()));
                             if (diskAO != null) {
                                 cmsg.setSystemTags(diskAO.getSystemTags() != null ? diskAO.getSystemTags() : null);
+                                cmsg.setConfigs(diskAO.getConfigs());
                                 cmsg.setPrimaryStorageUuid(diskAO.getPrimaryStorageUuid() != null ?
                                         diskAO.getPrimaryStorageUuid() : originVol.getPrimaryStorageUuid());
                                 cmsg.setEncrypted(diskAO.getEncrypted());

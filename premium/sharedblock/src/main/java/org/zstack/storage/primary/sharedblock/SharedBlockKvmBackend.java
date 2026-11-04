@@ -26,7 +26,7 @@ import org.zstack.core.thread.ThreadFacade;
 import org.zstack.core.timeout.ApiTimeoutManager;
 import org.zstack.core.workflow.FlowChainBuilder;
 import org.zstack.core.workflow.ShareFlow;
-import org.zstack.ha.HaConstants;
+import org.zstack.ha.header.HaErrors;
 import org.zstack.header.Component;
 import org.zstack.header.cluster.ClusterConnectionStatus;
 import org.zstack.header.core.*;
@@ -136,6 +136,73 @@ public class SharedBlockKvmBackend extends SharedBlockHypervisorBackend implemen
         super(self);
     }
 
+    @Override
+    void handle(ExtendSharedBlockVolumeOnPrimaryStorageMsg msg, VolumeInventory volume, Completion completion) {
+        List<HostInventory> hosts = primaryStorageFactory.getConnectedHostsForOperation(getSelfInventory(), volume);
+        if (hosts.isEmpty()) {
+            completion.fail(operr("cannot find any connected host to extend logical volume[uuid:%s] on shared block group primary storage[uuid:%s]",
+                    volume.getUuid(), msg.getPrimaryStorageUuid()));
+            return;
+        }
+
+        ExtendLogicalVolumeCmd cmd = new ExtendLogicalVolumeCmd();
+        cmd.destPath = convertInstallPathToAbsolute(volume.getInstallPath());
+        cmd.volumeUuid = volume.getUuid();
+        cmd.requiredSize = msg.getSize();
+        // Honor the target size without adding thin-provisioning initialization headroom.
+        cmd.getAddons().put(THIN_PROVISIONING_INITIALIZE_SIZE_TAG_TOKEN, 0L);
+        cmd.vgUuid = msg.getPrimaryStorageUuid();
+
+        new Do(hosts.get(0).getUuid(), msg.getPrimaryStorageUuid()).go(
+                EXTEND_LOGICAL_VOLUME_PATH, cmd, ExtendLogicalVolumeRsp.class,
+                new ReturnValueCompletion<ExtendLogicalVolumeRsp>(completion) {
+                    @Override
+                    public void success(ExtendLogicalVolumeRsp rsp) {
+                        completion.success();
+                    }
+
+                    @Override
+                    public void fail(ErrorCode errorCode) {
+                        completion.fail(errorCode);
+                    }
+                });
+    }
+
+    @Override
+    void handle(ShrinkVolumeOnPrimaryStorageMsg msg, ReturnValueCompletion<ShrinkVolumeOnPrimaryStorageReply> completion) {
+        VolumeInventory volume = msg.getVolume();
+        List<HostInventory> hosts = primaryStorageFactory.getConnectedHostsForOperation(getSelfInventory(), volume);
+        if (hosts.isEmpty()) {
+            completion.fail(operr("cannot find any connected host to shrink logical volume[uuid:%s] on shared block group primary storage[uuid:%s]",
+                    volume.getUuid(), msg.getPrimaryStorageUuid()));
+            return;
+        }
+
+        ShrinkSnapshotCmd cmd = new ShrinkSnapshotCmd();
+        cmd.installPath = volume.getInstallPath();
+        cmd.vgUuid = msg.getPrimaryStorageUuid();
+
+        new Do(hosts.get(0).getUuid(), msg.getPrimaryStorageUuid()).go(
+                SHRINK_SNAPSHOT_PATH, cmd, ShrinkSnapshotRsp.class,
+                new ReturnValueCompletion<ShrinkSnapshotRsp>(completion) {
+                    @Override
+                    public void success(ShrinkSnapshotRsp rsp) {
+                        ShrinkResult result = new ShrinkResult();
+                        result.setOldSize(rsp.oldSize);
+                        result.setSize(rsp.size);
+                        result.setDeltaSize(rsp.oldSize - rsp.size);
+                        ShrinkVolumeOnPrimaryStorageReply reply = new ShrinkVolumeOnPrimaryStorageReply();
+                        reply.setShrinkResult(result);
+                        completion.success(reply);
+                    }
+
+                    @Override
+                    public void fail(ErrorCode errorCode) {
+                        completion.fail(errorCode);
+                    }
+                });
+    }
+
     private void connect(String hostUuid, String primaryStorageUuid, final ReturnValueCompletion<SharedBlockKvmCommands.ConnectRsp> completion) {
         thdf.chainSubmit(new ChainTask(completion) {
             @Override
@@ -145,6 +212,13 @@ public class SharedBlockKvmBackend extends SharedBlockHypervisorBackend implemen
 
             @Override
             public void run(final SyncTaskChain chain) {
+                if (SharedBlockSystemTags.SHARED_BLOCK_TAKEOVER.hasTag(primaryStorageUuid)) {
+                    completion.fail(operr("primary storage[uuid:%s] registration takeover has not completed; " +
+                            "retry attaching the primary storage before reconnecting", primaryStorageUuid));
+                    chain.next();
+                    return;
+                }
+
                 boolean vgCreated = !SharedBlockSystemTags.SHARED_BLOCK_NOT_INITIALIZED.hasTag(primaryStorageUuid);
 
                 if (!SharedBlockSystemTags.SHARED_BLOCK_FORCE_WIPE.hasTag(primaryStorageUuid) && vgCreated) {
@@ -312,10 +386,10 @@ public class SharedBlockKvmBackend extends SharedBlockHypervisorBackend implemen
     }
 
     private void disconnect(String hostUuid, final Completion completion) {
-        disconnect(hostUuid, self.getUuid(), false, completion);
+        disconnect(hostUuid, self.getUuid(), false, true, completion);
     }
 
-    private void disconnect(String hostUuid, String primaryStorageUuid, boolean stopServices, final Completion completion) {
+    private void disconnect(String hostUuid, String primaryStorageUuid, boolean stopServices, boolean isRemoveRefVO, final Completion completion) {
         SharedBlockKvmCommands.DisonnectCmd cmd = new SharedBlockKvmCommands.DisonnectCmd();
         cmd.vgUuid = primaryStorageUuid;
         cmd.hostUuid = hostUuid;
@@ -324,12 +398,23 @@ public class SharedBlockKvmBackend extends SharedBlockHypervisorBackend implemen
         httpCall(SharedBlockKvmCommands.DISCONNECT_PATH, hostUuid, cmd, true, SharedBlockKvmCommands.AgentRsp.class, new ReturnValueCompletion<SharedBlockKvmCommands.AgentRsp>(completion) {
             @Override
             public void success(SharedBlockKvmCommands.AgentRsp rsp) {
-                SharedBlockGroupPrimaryStorageHostRefVO vo = Q.New(SharedBlockGroupPrimaryStorageHostRefVO.class)
-                        .eq(SharedBlockGroupPrimaryStorageHostRefVO_.hostUuid, hostUuid)
-                        .eq(SharedBlockGroupPrimaryStorageHostRefVO_.primaryStorageUuid, self.getUuid())
-                        .find();
-                if (vo != null) {
-                    dbf.remove(vo);
+                if (isRemoveRefVO) {
+                    SharedBlockGroupPrimaryStorageHostRefVO vo = Q.New(SharedBlockGroupPrimaryStorageHostRefVO.class)
+                            .eq(SharedBlockGroupPrimaryStorageHostRefVO_.hostUuid, hostUuid)
+                            .eq(SharedBlockGroupPrimaryStorageHostRefVO_.primaryStorageUuid, self.getUuid())
+                            .find();
+                    if (vo != null) {
+                        dbf.remove(vo);
+                    }
+                } else {
+                    UpdatePrimaryStorageHostStatusMsg umsg = new UpdatePrimaryStorageHostStatusMsg();
+                    umsg.setStatus(PrimaryStorageHostStatus.Disconnected);
+                    umsg.setPrimaryStorageUuid(primaryStorageUuid);
+                    umsg.setReason(Platform.err(HaErrors.PRIMARY_STORAGE_HOST_DISCONNECTED,
+                            "primary storage %s disconnect on host %s", primaryStorageUuid, hostUuid));
+                    umsg.setHostUuid(hostUuid);
+                    bus.makeTargetServiceIdByResourceUuid(umsg, PrimaryStorageConstant.SERVICE_ID, primaryStorageUuid);
+                    bus.send(umsg);
                 }
 
                 completion.success();
@@ -431,7 +516,7 @@ public class SharedBlockKvmBackend extends SharedBlockHypervisorBackend implemen
         disconnectByClusterUuid(clusterUuid, new Completion(completion) {
             @Override
             public void success() {
-                completion.success();
+                doConfigFilter(Collections.singletonList(clusterUuid), self.getUuid(), new ArrayList<>(), completion);
             }
 
             @Override
@@ -984,6 +1069,15 @@ public class SharedBlockKvmBackend extends SharedBlockHypervisorBackend implemen
     @Override
     void
     handle(DeleteVolumeOnPrimaryStorageMsg msg, final ReturnValueCompletion<DeleteVolumeOnPrimaryStorageReply> completion) {
+        List<StoragePathOwnershipHelper.Owner> otherOwners = StoragePathOwnershipHelper.findOtherOwners(
+                self.getUuid(), msg.getVolume().getInstallPath(),
+                Collections.singleton(msg.getVolume().getUuid()));
+        if (!otherOwners.isEmpty()) {
+            completion.fail(Platform.err(VolumeErrors.VOLUME_IN_USE,
+                    "refuse to delete volume[uuid:%s, path:%s] because the physical path is still owned by %s",
+                    msg.getVolume().getUuid(), msg.getVolume().getInstallPath(), otherOwners));
+            return;
+        }
         deleteBits(msg.getVolume().getInstallPath(), new Completion(completion) {
             @Override
             public void success() {
@@ -1363,6 +1457,11 @@ public class SharedBlockKvmBackend extends SharedBlockHypervisorBackend implemen
 
     @Override
     void handle(DeleteSnapshotOnPrimaryStorageMsg msg, final ReturnValueCompletion<DeleteSnapshotOnPrimaryStorageReply> completion) {
+        ErrorCode ownershipError = validateSnapshotPathOwnership(msg.getSnapshot());
+        if (ownershipError != null) {
+            completion.fail(ownershipError);
+            return;
+        }
         deleteBits(msg.getSnapshot().getPrimaryStorageInstallPath(), new Completion(completion) {
             @Override
             public void success() {
@@ -2809,10 +2908,9 @@ public class SharedBlockKvmBackend extends SharedBlockHypervisorBackend implemen
                         umsg.setStatus(PrimaryStorageHostStatus.Disconnected);
                         umsg.setPrimaryStorageUuid(entry.getKey());
 
-                        ErrorCode reason = HaConstants.PRIMARY_STORAGE_HOST_DISCONNECTED_ERROR;
-                        reason.setDetails(String.format("primary storage %s disconnect on host %s, details: %s",
+                        umsg.setReason(Platform.err(HaErrors.PRIMARY_STORAGE_HOST_DISCONNECTED,
+                                "primary storage %s disconnect on host %s, details: %s",
                                 entry.getKey(), msg.getHostUuid(), entry.getValue()));
-                        umsg.setReason(reason);
                         umsg.setHostUuid(msg.getHostUuid());
                         bus.makeTargetServiceIdByResourceUuid(umsg, PrimaryStorageConstant.SERVICE_ID, entry.getKey());
                         bus.send(umsg);
@@ -2821,7 +2919,7 @@ public class SharedBlockKvmBackend extends SharedBlockHypervisorBackend implemen
     }
     private void handle(final DisconnectSharedBlockGroupPrimaryStorageOnHostMsg msg) {
         final DisconnectSharedBlockGroupPrimaryStorageOnHostReply reply = new DisconnectSharedBlockGroupPrimaryStorageOnHostReply();
-        disconnect(msg.getHostUuid(), msg.getPrimaryStorageUuid(), msg.getStopService(), new Completion(msg) {
+        disconnect(msg.getHostUuid(), msg.getPrimaryStorageUuid(), msg.getStopService(), msg.isRemoveRefVO(), new Completion(msg) {
             @Override
             public void success() {
                 bus.reply(msg, reply);
@@ -5639,6 +5737,64 @@ public class SharedBlockKvmBackend extends SharedBlockHypervisorBackend implemen
     }
 
     @Override
+    void handle(GetSharedBlockVolumeSnapshotLanFreeLayoutMsg msg,
+                ReturnValueCompletion<GetSharedBlockVolumeSnapshotLanFreeLayoutReply> completion) {
+        SharedBlockKvmCommands.GetVolumeSnapshotLanFreeLayoutsCmd cmd =
+                new SharedBlockKvmCommands.GetVolumeSnapshotLanFreeLayoutsCmd();
+        cmd.vgUuid = msg.getPrimaryStorageUuid();
+        cmd.targets = msg.getTargets();
+
+        new KvmAgentCommandDispatcher(msg.getPrimaryStorageUuid()).go(
+                SharedBlockKvmCommands.GET_VOLUME_SNAPSHOT_LAN_FREE_LAYOUTS_PATH,
+                cmd,
+                SharedBlockKvmCommands.GetVolumeSnapshotLanFreeLayoutsRsp.class,
+                new ReturnValueCompletion<SharedBlockKvmCommands.GetVolumeSnapshotLanFreeLayoutsRsp>(completion) {
+                    @Override
+                    public void success(SharedBlockKvmCommands.GetVolumeSnapshotLanFreeLayoutsRsp rsp) {
+                        GetSharedBlockVolumeSnapshotLanFreeLayoutReply reply =
+                                new GetSharedBlockVolumeSnapshotLanFreeLayoutReply();
+                        reply.setLuns(rsp.luns);
+                        reply.setLayouts(rsp.layouts);
+                        completion.success(reply);
+                    }
+
+                    @Override
+                    public void fail(ErrorCode errorCode) {
+                        completion.fail(errorCode);
+                    }
+                });
+    }
+
+    @Override
+    void handle(GetSharedBlockVolumeLanFreeLayoutMsg msg,
+                ReturnValueCompletion<GetSharedBlockVolumeLanFreeLayoutReply> completion) {
+        SharedBlockKvmCommands.GetVolumeLanFreeLayoutsCmd cmd =
+                new SharedBlockKvmCommands.GetVolumeLanFreeLayoutsCmd();
+        cmd.vgUuid = msg.getPrimaryStorageUuid();
+        cmd.targets = msg.getTargets();
+
+        new KvmAgentCommandDispatcher(msg.getPrimaryStorageUuid()).go(
+                SharedBlockKvmCommands.GET_VOLUME_LAN_FREE_LAYOUTS_PATH,
+                cmd,
+                SharedBlockKvmCommands.GetVolumeLanFreeLayoutsRsp.class,
+                new ReturnValueCompletion<SharedBlockKvmCommands.GetVolumeLanFreeLayoutsRsp>(completion) {
+                    @Override
+                    public void success(SharedBlockKvmCommands.GetVolumeLanFreeLayoutsRsp rsp) {
+                        GetSharedBlockVolumeLanFreeLayoutReply reply =
+                                new GetSharedBlockVolumeLanFreeLayoutReply();
+                        reply.setLuns(rsp.luns);
+                        reply.setLayouts(rsp.layouts);
+                        completion.success(reply);
+                    }
+
+                    @Override
+                    public void fail(ErrorCode errorCode) {
+                        completion.fail(errorCode);
+                    }
+                });
+    }
+
+    @Override
     void handle(ConfigureFilterMsg msg, Completion completion) {
         doConfigFilter(Collections.singletonList(msg.getClusterUuid()), msg.getPrimaryStorageUuid(), new ArrayList<>(), completion);
     }
@@ -5672,6 +5828,8 @@ public class SharedBlockKvmBackend extends SharedBlockHypervisorBackend implemen
 
                 @Override
                 public void fail(ErrorCode errorCode) {
+                    logger.warn(String.format("failed to configure LVM filter on host[uuid:%s] for primary storage[uuid:%s]: %s",
+                            hostUuid, psUuid, errorCode));
                     whileCompletion.done();
                 }
             });
@@ -5911,7 +6069,7 @@ public class SharedBlockKvmBackend extends SharedBlockHypervisorBackend implemen
     void ping(String psUuid, Completion completion) {
         AgentCmd cmd = new AgentCmd();
         cmd.vgUuid = psUuid;
-        new KvmAgentCommandDispatcher(psUuid).go(PING_PATH, cmd, SharedBlockKvmCommands.AgentRsp.class, new ReturnValueCompletion<AgentRsp>(completion) {
+        new KvmAgentCommandDispatcher(psUuid, Comparator.naturalOrder()).go(PING_PATH, cmd, SharedBlockKvmCommands.AgentRsp.class, new ReturnValueCompletion<AgentRsp>(completion) {
             @Override
             public void success(AgentRsp returnValue) {
                 completion.success();
@@ -6220,6 +6378,11 @@ public class SharedBlockKvmBackend extends SharedBlockHypervisorBackend implemen
 
     @Override
     public void protect(VolumeSnapshotInventory snapshot, Completion completion) {
+        ErrorCode ownershipError = validateSnapshotPathOwnership(snapshot);
+        if (ownershipError != null) {
+            completion.fail(ownershipError);
+            return;
+        }
         completion.success();
         //NOTE(weiw): skip sharedblock protector
 //        VolumeSnapshotTreeVO treeVO = Q.New(VolumeSnapshotTreeVO.class)
@@ -6272,6 +6435,18 @@ public class SharedBlockKvmBackend extends SharedBlockHypervisorBackend implemen
 //                completion.fail(errorCode);
 //            }
 //        });
+    }
+
+    private ErrorCode validateSnapshotPathOwnership(VolumeSnapshotInventory snapshot) {
+        List<StoragePathOwnershipHelper.Owner> otherOwners = StoragePathOwnershipHelper.findOtherOwners(
+                snapshot.getPrimaryStorageUuid(), snapshot.getPrimaryStorageInstallPath(),
+                Collections.singleton(snapshot.getUuid()));
+        if (!otherOwners.isEmpty()) {
+            return inerr("refuse to delete snapshot[name:%s, uuid:%s, path:%s] because the physical " +
+                            "path is still owned by %s",
+                    snapshot.getName(), snapshot.getUuid(), snapshot.getPrimaryStorageInstallPath(), otherOwners);
+        }
+        return null;
     }
 
     static class BlockCommitStruct {

@@ -240,8 +240,6 @@ public class MonitorGroupBase {
         fchain.then(new NoRollbackFlow() {
             @Override
             public void run(FlowTrigger trigger, Map data) {
-
-                List<ErrorCode> errs = new ArrayList<>();
                 new While<>(alarmUuids).each((alarmUuid, compl) -> {
                     UpdateAlarmMsg updateAlarmMsg = new UpdateAlarmMsg();
                     updateAlarmMsg.setUuid(alarmUuid);
@@ -251,27 +249,16 @@ public class MonitorGroupBase {
                         @Override
                         public void run(MessageReply reply) {
                             if (!reply.isSuccess()) {
-                                errs.add(reply.getError());
+                                compl.addError(reply.getError());
                             }
                             compl.done();
                         }
                     });
-                }).run(new WhileDoneCompletion(trigger){
-                    @Override
-                    public void done(ErrorCodeList errorCodeList) {
-                        if (!errs.isEmpty()) {
-                            trigger.fail(errs.get(0));
-                            return;
-                        }
-                        trigger.next();
-                    }
-                });
+                }).runAndSendErrorTo(trigger);
             }
         }).then(new NoRollbackFlow() {
             @Override
             public void run(FlowTrigger trigger, Map data) {
-
-                List<ErrorCode> errs = new ArrayList<>();
                 new While<>(eventSubscriptionUuids).each((eventSubscriptionUuid, compl) -> {
                     UpdateEventSubscriptionMsg subscriptionMsg = new UpdateEventSubscriptionMsg();
                     subscriptionMsg.setUuid(eventSubscriptionUuid);
@@ -281,21 +268,12 @@ public class MonitorGroupBase {
                         @Override
                         public void run(MessageReply reply) {
                             if (!reply.isSuccess()) {
-                                errs.add(reply.getError());
+                                compl.addError(reply.getError());
                             }
                             compl.done();
                         }
                     });
-                }).run(new WhileDoneCompletion(trigger) {
-                    @Override
-                    public void done(ErrorCodeList errorCodeList) {
-                        if (!errs.isEmpty()) {
-                            trigger.fail(errs.get(0));
-                            return;
-                        }
-                        trigger.next();
-                    }
-                });
+                }).runAndSendErrorTo(trigger);
             }
         }).done(new FlowDoneHandler(completion) {
             @Override
@@ -428,7 +406,6 @@ public class MonitorGroupBase {
                     return;
                 }
 
-                List<ErrorCode> errs = new ArrayList<>();
                 new While<>(alarmUuids).each((alarmUuid, compl) -> {
                     AlarmLabelVO labelVO = Q.New(AlarmLabelVO.class)
                             .eq(AlarmLabelVO_.alarmUuid, alarmUuid)
@@ -446,7 +423,7 @@ public class MonitorGroupBase {
                             @Override
                             public void run(MessageReply reply) {
                                 if (!reply.isSuccess()) {
-                                    errs.add(reply.getError());
+                                    compl.addError(reply.getError());
                                 }
                                 compl.done();
                             }
@@ -455,17 +432,7 @@ public class MonitorGroupBase {
                     }
                     compl.done();
 
-                }).run(new WhileDoneCompletion(trigger){
-                    @Override
-                    public void done(ErrorCodeList errorCodeList) {
-                        if (!errs.isEmpty()) {
-                            trigger.fail(errs.get(0));
-                            return;
-                        }
-
-                        trigger.next();
-                    }
-                });
+                }).runAndSendErrorTo(trigger);
             }
         }).then(new NoRollbackFlow() {
             String __name__ = "update-eventSubscriptions-label";
@@ -491,7 +458,6 @@ public class MonitorGroupBase {
                     return;
                 }
 
-                List<ErrorCode> errs = new ArrayList<>();
                 new While<>(subscriptionUuids).each((subscriptionUuid, compl) -> {
                     EventSubscriptionLabelVO labelVO = Q.New(EventSubscriptionLabelVO.class)
                             .eq(EventSubscriptionLabelVO_.subscriptionUuid, subscriptionUuid)
@@ -509,7 +475,7 @@ public class MonitorGroupBase {
                             @Override
                             public void run(MessageReply reply) {
                                 if (!reply.isSuccess()) {
-                                    errs.add(reply.getError());
+                                    compl.addError(reply.getError());
                                 }
                                 compl.done();
                             }
@@ -517,17 +483,7 @@ public class MonitorGroupBase {
                         return;
                     }
                     compl.done();
-                }).run(new WhileDoneCompletion(trigger){
-                    @Override
-                    public void done(ErrorCodeList errorCodeList) {
-                        if (!errs.isEmpty()) {
-                            trigger.fail(errs.get(0));
-                            return;
-                        }
-
-                        trigger.next();
-                    }
-                });
+                }).runAndSendErrorTo(trigger);
             }
         }).done(new FlowDoneHandler(completion) {
             @Override
@@ -626,7 +582,6 @@ public class MonitorGroupBase {
                     return;
                 }
 
-                List<ErrorCode> errs = new ArrayList<>();
                 new While<>(alarmUuids).each((alarmUuid, compl) -> {
                     AlarmLabelVO labelVO = Q.New(AlarmLabelVO.class)
                             .eq(AlarmLabelVO_.alarmUuid, alarmUuid)
@@ -644,7 +599,7 @@ public class MonitorGroupBase {
                             @Override
                             public void run(MessageReply reply) {
                                 if (!reply.isSuccess()) {
-                                    errs.add(reply.getError());
+                                    compl.addError(reply.getError());
                                 }
                                 compl.done();
                             }
@@ -653,17 +608,7 @@ public class MonitorGroupBase {
                     }
                     compl.done();
 
-                }).run(new WhileDoneCompletion(trigger){
-                    @Override
-                    public void done(ErrorCodeList errorCodeList) {
-                        if (!errs.isEmpty()) {
-                            trigger.fail(errs.get(0));
-                            return;
-                        }
-
-                        trigger.next();
-                    }
-                });
+                }).runAndSendErrorTo(trigger);
             }
         }).then(new NoRollbackFlow() {
             String __name__ = "update-eventSubscriptions-label";
@@ -689,7 +634,6 @@ public class MonitorGroupBase {
                     return;
                 }
 
-                List<ErrorCode> errs = new ArrayList<>();
                 new While<>(subscriptionUuids).each((subscriptionUuid, compl) -> {
                     EventSubscriptionLabelVO labelVO = Q.New(EventSubscriptionLabelVO.class)
                             .eq(EventSubscriptionLabelVO_.subscriptionUuid, subscriptionUuid)
@@ -707,7 +651,7 @@ public class MonitorGroupBase {
                             @Override
                             public void run(MessageReply reply) {
                                 if (!reply.isSuccess()) {
-                                    errs.add(reply.getError());
+                                    compl.addError(reply.getError());
                                 }
                                 compl.done();
                             }
@@ -715,17 +659,7 @@ public class MonitorGroupBase {
                         return;
                     }
                     compl.done();
-                }).run(new WhileDoneCompletion(trigger){
-                    @Override
-                    public void done(ErrorCodeList errorCodeList) {
-                        if (!errs.isEmpty()) {
-                            trigger.fail(errs.get(0));
-                            return;
-                        }
-
-                        trigger.next();
-                    }
-                });
+                }).runAndSendErrorTo(trigger);
             }
         }).done(new FlowDoneHandler(completion) {
             @Override
@@ -985,7 +919,6 @@ public class MonitorGroupBase {
                     return;
                 }
 
-                List<ErrorCode> errs = new ArrayList<>();
                 new While<>(subscriptionUuids).each((subscriptionUuid, compl) -> {
                     EventSubscriptionDeletionMsg eventSubscriptionDeletionMsg = new EventSubscriptionDeletionMsg();
                     eventSubscriptionDeletionMsg.setUuid(subscriptionUuid);
@@ -994,22 +927,12 @@ public class MonitorGroupBase {
                         @Override
                         public void run(MessageReply reply) {
                             if (!reply.isSuccess()) {
-                                errs.add(reply.getError());
+                                compl.addError(reply.getError());
                             }
                             compl.done();
                         }
                     });
-                }).run(new WhileDoneCompletion(trigger) {
-                    @Override
-                    public void done(ErrorCodeList errorCodeList) {
-                        if (!errs.isEmpty()) {
-                            trigger.fail(errs.get(0));
-                            return;
-                        }
-
-                        trigger.next();
-                    }
-                });
+                }).runAndSendErrorTo(trigger);
             }
         }).then(new NoRollbackFlow() {
             String __name__ = "create-alarms";
@@ -1134,13 +1057,12 @@ public class MonitorGroupBase {
                     return;
                 }
 
-                List<ErrorCode> errs = new ArrayList<>();
                 new While<>(createAlarmMsgs).each((createAlarmMsg, compl) -> {
                     bus.send(createAlarmMsg, new CloudBusCallBack(compl, trigger) {
                         @Override
                         public void run(MessageReply reply) {
                             if (!reply.isSuccess()) {
-                                errs.add(reply.getError());
+                                compl.addError(reply.getError());
                                 compl.done();
                                 return;
                             }
@@ -1158,17 +1080,7 @@ public class MonitorGroupBase {
                             compl.done();
                         }
                     });
-                }).run(new WhileDoneCompletion(trigger) {
-                    @Override
-                    public void done(ErrorCodeList errorCodeList) {
-                        if (!errs.isEmpty()) {
-                            trigger.fail(errs.get(0));
-                            return;
-                        }
-
-                        trigger.next();
-                    }
-                });
+                }).runAndSendErrorTo(trigger);
             }
         }).then(new NoRollbackFlow() {
             String __name = "create-event-subscription";
@@ -1261,13 +1173,12 @@ public class MonitorGroupBase {
                     return;
                 }
 
-                List<ErrorCode> errs = new ArrayList<>();
                 new While<>(subscribeEventMsgs).each((subscribeEventMsg, compl) -> {
                     bus.send(subscribeEventMsg, new CloudBusCallBack(compl, trigger) {
                         @Override
                         public void run(MessageReply reply) {
                             if (!reply.isSuccess()) {
-                                errs.add(reply.getError());
+                                compl.addError(reply.getError());
                                 compl.done();
                                 return;
                             }
@@ -1285,17 +1196,7 @@ public class MonitorGroupBase {
                             compl.done();
                         }
                     });
-                }).run(new WhileDoneCompletion(trigger) {
-                    @Override
-                    public void done(ErrorCodeList errorCodeList) {
-                        if (!errs.isEmpty()) {
-                            trigger.fail(errs.get(0));
-                            return;
-                        }
-
-                        trigger.next();
-                    }
-                });
+                }).runAndSendErrorTo(trigger);
             }
         }).done(new FlowDoneHandler(completion) {
             @Override
@@ -1373,7 +1274,6 @@ public class MonitorGroupBase {
             return;
         }
 
-        List<ErrorCode> errs = new ArrayList<>();
         new While<>(alarmUuids).each((alarmUuid, compl) -> {
             AlarmDeletionMsg deleteAlarmMsg = new AlarmDeletionMsg();
             deleteAlarmMsg.setUuid(alarmUuid);
@@ -1382,7 +1282,7 @@ public class MonitorGroupBase {
                 @Override
                 public void run(MessageReply reply) {
                     if (!reply.isSuccess()) {
-                        errs.add(reply.getError());
+                        compl.addError(reply.getError());
                         compl.done();
                         return;
                     }
@@ -1397,8 +1297,8 @@ public class MonitorGroupBase {
         }).run(new WhileDoneCompletion(reply){
             @Override
             public void done(ErrorCodeList errorCodeList) {
-                if (!errs.isEmpty()) {
-                    reply.setError(errs.get(0));
+                if (errorCodeList.hasError()) {
+                    reply.setError(errorCodeList.wrapOrNull());
                 }
 
                 bus.reply(msg, reply);
@@ -1438,7 +1338,6 @@ public class MonitorGroupBase {
             return;
         }
 
-        List<ErrorCode> errs = new ArrayList<>();
         new While<>(subscriptionUuids).each((subscriptionUuid, compl) -> {
             EventSubscriptionDeletionMsg deleteMsg = new EventSubscriptionDeletionMsg();
             deleteMsg.setUuid(subscriptionUuid);
@@ -1447,7 +1346,7 @@ public class MonitorGroupBase {
                 @Override
                 public void run(MessageReply reply) {
                     if (!reply.isSuccess()) {
-                        errs.add(reply.getError());
+                        compl.addError(reply.getError());
                         compl.done();
                         return;
                     }
@@ -1462,8 +1361,8 @@ public class MonitorGroupBase {
         }).run(new WhileDoneCompletion(msg){
             @Override
             public void done(ErrorCodeList errorCodeList) {
-                if (!errs.isEmpty()) {
-                    reply.setError(errs.get(0));
+                if (errorCodeList.hasError()) {
+                    reply.setError(errorCodeList.wrapOrNull());
                 }
 
                 bus.reply(msg, reply);

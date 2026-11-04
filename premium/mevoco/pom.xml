@@ -19,12 +19,22 @@
         </dependency>
         <dependency>
             <groupId>org.zstack</groupId>
-            <artifactId>configuration</artifactId>
+            <artifactId>offering</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.zstack</groupId>
             <artifactId>compute</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.zstack</groupId>
+            <artifactId>header-ha</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.zstack</groupId>
+            <artifactId>header-zwatch</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -54,7 +64,7 @@
         </dependency>
         <dependency>
             <groupId>org.zstack</groupId>
-            <artifactId>resourceconfig</artifactId>
+            <artifactId>resource-config</artifactId>
             <version>${project.version}</version>
         </dependency>
         <!--<dependency>
@@ -161,6 +171,21 @@
             <artifactId>expon</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.zstack</groupId>
+            <artifactId>ha</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.zstack</groupId>
+            <artifactId>header-pci</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.zstack</groupId>
+            <artifactId>header-usb</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
     <profiles>
@@ -235,7 +260,6 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
-                <version>${aspectj.plugin.version}</version>
                 <executions>
                     <execution>
                         <id>antlr-add-source</id>
@@ -258,6 +282,9 @@
                 <version>${project.compiler.version}</version>
                 <configuration>
                     <compilerId>groovy-eclipse-compiler</compilerId>
+                    <compilerArgs>
+                        <arg>-warn:-serial</arg>
+                    </compilerArgs>
                     <source>${project.java.version}</source>
                     <target>${project.java.version}</target>
                     <debuglevel>lines,vars,source</debuglevel>

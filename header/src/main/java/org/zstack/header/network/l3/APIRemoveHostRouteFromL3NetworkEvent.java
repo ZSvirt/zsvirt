@@ -3,10 +3,6 @@ package org.zstack.header.network.l3;
 import org.zstack.header.message.APIEvent;
 import org.zstack.header.rest.RestResponse;
 
-import java.util.Arrays;
-
-/**
- */
 @RestResponse(allTo = "inventory")
 public class APIRemoveHostRouteFromL3NetworkEvent extends APIEvent {
     /**
@@ -32,14 +28,7 @@ public class APIRemoveHostRouteFromL3NetworkEvent extends APIEvent {
  
     public static APIRemoveHostRouteFromL3NetworkEvent __example__() {
         APIRemoveHostRouteFromL3NetworkEvent event = new APIRemoveHostRouteFromL3NetworkEvent();
-        L3NetworkInventory l3 = new L3NetworkInventory();
-
-        l3.setName("Test-L3Network");
-        l3.setL2NetworkUuid(uuid());
-        l3.setDns(Arrays.asList());
-
-        event.setInventory(l3);
+        event.setInventory(L3NetworkInventory.__example__());
         return event;
     }
-
 }

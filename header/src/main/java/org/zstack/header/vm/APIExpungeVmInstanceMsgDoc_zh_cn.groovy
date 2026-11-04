@@ -3,11 +3,11 @@ package org.zstack.header.vm
 import org.zstack.header.vm.APIExpungeVmInstanceEvent
 
 doc {
-	title "彻底删除云主机(ExpungeVmInstance)"
+	title "彻底删除虚拟机(ExpungeVmInstance)"
 
 	category "vmInstance"
 
-	desc """彻底删除一个处于Destroyed状态的云主机。该操作会从数据库里面删除云主机并在主存储上删除该云主机的根云盘。该操作一旦执行就不可恢复"""
+	desc """彻底删除一个处于Destroyed状态的虚拟机。该操作会从数据库里面删除虚拟机并在主存储上删除该虚拟机的根云盘。该操作一旦执行就不可恢复"""
 
 	rest {
 		request {
@@ -24,11 +24,11 @@ doc {
 				column {
 					name "uuid"
 					enclosedIn "expungeVmInstance"
-					desc "云主机UUID"
+					desc "虚拟机UUID"
 					location "url"
 					type "String"
 					optional false
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "systemTags"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "userTags"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 			}
 		}

@@ -10,18 +10,18 @@ doc {
 		name "value"
 		desc "监控值"
 		type "double"
-		since "0.6"
+		since "zsv_0.6"
 	}
 	field {
 		name "time"
 		desc "记录生成时间"
 		type "long"
-		since "0.6"
+		since "zsv_0.6"
 	}
 	field {
 		name "labels"
 		desc "标签"
 		type "Map"
-		since "0.6"
+		since "zsv_0.6"
 	}
 }

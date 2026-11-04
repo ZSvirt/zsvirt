@@ -15,20 +15,38 @@ import org.zstack.header.network.l2.L2NetworkVO;
 import org.zstack.header.network.l2.L2NetworkVO_;
 import org.zstack.header.network.l3.L3NetworkVO;
 import org.zstack.header.network.l3.L3NetworkVO_;
-import org.zstack.header.sriov.*;
+import org.zstack.header.sriov.EthernetVfPciDeviceInventory;
+import org.zstack.header.sriov.EthernetVfPciDeviceVO;
+import org.zstack.header.sriov.EthernetVfPciDeviceVO_;
+import org.zstack.header.sriov.EthernetVfStatus;
+import org.zstack.header.sriov.VmVfNicConstant;
+import org.zstack.header.sriov.VmVfNicVO;
+import org.zstack.header.sriov.VmVfNicVO_;
 import org.zstack.header.vdpa.VmVdpaNicConstant;
 import org.zstack.header.vdpa.VmVdpaNicVO;
 import org.zstack.header.vdpa.VmVdpaNicVO_;
-import org.zstack.header.vm.*;
-import org.zstack.network.hostNetworkInterface.*;
+import org.zstack.header.vm.VmInstanceInventory;
+import org.zstack.header.vm.VmInstanceVO;
+import org.zstack.header.vm.VmNicInventory;
+import org.zstack.header.vm.VmNicParam;
+import org.zstack.header.vm.VmNicType;
+import org.zstack.header.vm.VmNicVO;
+import org.zstack.network.hostNetworkInterface.HostNetworkBondingVO;
+import org.zstack.network.hostNetworkInterface.HostNetworkBondingVO_;
+import org.zstack.network.hostNetworkInterface.HostNetworkInterfaceVO;
+import org.zstack.network.hostNetworkInterface.HostNetworkInterfaceVO_;
 import org.zstack.network.service.NetworkServiceGlobalConfig;
-import org.zstack.pciDevice.PciDeviceInventory;
-import org.zstack.pciDevice.PciDeviceStatus;
+import org.zstack.pciDevice.entity.PciDeviceInventory;
+import org.zstack.pciDevice.header.PciDeviceStatus;
 import org.zstack.utils.Utils;
 import org.zstack.utils.logging.CLogger;
 
 import javax.persistence.Tuple;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Configurable(preConstruction = true, autowire = Autowire.BY_TYPE)
@@ -151,7 +169,7 @@ public class VfPciDeviceUtils {
                     /* vm is running on another host, release old vf device */
                     releaseVfDevice(EthernetVfPciDeviceInventory.valueOf(oldVo));
                 } else {
-                    /* 在vm迁移时使用: 源云主机在选择了目的物理机之后，变成Paused
+                    /* 在vm迁移时使用: 源虚拟机在选择了目的物理机之后，变成Paused
                     *  迁移成功，释放他变成Available; 迁移失败，恢复使用变成Attached */
                     pauseVfPciDevice(EthernetVfPciDeviceInventory.valueOf(oldVo));
                 }

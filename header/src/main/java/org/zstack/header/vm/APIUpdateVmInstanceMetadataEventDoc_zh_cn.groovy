@@ -4,20 +4,20 @@ import org.zstack.header.errorcode.ErrorCode
 
 doc {
 
-	title "更新云主机元数据返回"
+	title "更新虚拟机元数据返回"
 
 	field {
 		name "success"
 		desc "操作是否成功"
 		type "boolean"
-		since "zsv 5.0.0"
+		since "zsv_5.0.0"
 	}
 	ref {
 		name "error"
 		path "org.zstack.header.vm.APIUpdateVmInstanceMetadataEvent.error"
 		desc "错误码，若不为null，则表示操作失败, 操作成功时该字段为null"
 		type "ErrorCode"
-		since "zsv 5.0.0"
+		since "zsv_5.0.0"
 		clz ErrorCode.class
 	}
 }

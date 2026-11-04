@@ -7,7 +7,7 @@ doc {
 
 	category "mevoco"
 
-	desc """设置云主机是否开启了Vnuma功能,如果开启，云主机在重启后会自动生成numa结构"""
+	desc """设置虚拟机是否开启了Vnuma功能,如果开启，虚拟机在重启后会自动生成numa结构"""
 
 	rest {
 		request {
@@ -28,16 +28,16 @@ doc {
 					location "url"
 					type "String"
 					optional false
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "enable"
 					enclosedIn "setVmNuma"
-					desc "云主机是否被标识为Vnuma可访问"
+					desc "虚拟机是否被标识为Vnuma可访问"
 					location "body"
 					type "boolean"
 					optional false
-					since "3.13.12"
+					since "zsv_3.13.12"
 				}
 				column {
 					name "systemTags"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.13.12"
+					since "zsv_3.13.12"
 				}
 				column {
 					name "userTags"
@@ -55,7 +55,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.13.12"
+					since "zsv_3.13.12"
 				}
 			}
 		}

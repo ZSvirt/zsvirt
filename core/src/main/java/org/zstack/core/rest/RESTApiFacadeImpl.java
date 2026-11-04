@@ -1,6 +1,5 @@
 package org.zstack.core.rest;
 
-import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
@@ -11,12 +10,15 @@ import org.zstack.core.cloudbus.CloudBus;
 import org.zstack.core.cloudbus.CloudBusEventListener;
 import org.zstack.core.cloudbus.MessageSafe;
 import org.zstack.core.cloudbus.ResourceDestinationMaker;
+import org.zstack.core.errorcode.ErrorFacade;
 import org.zstack.core.log.LogSafeGson;
 import org.zstack.core.thread.PeriodicTask;
 import org.zstack.core.thread.ThreadFacade;
 import org.zstack.header.AbstractService;
 import org.zstack.header.Component;
 import org.zstack.header.apimediator.ApiMediatorConstant;
+import org.zstack.header.errorcode.ErrorCode;
+import org.zstack.header.errorcode.SysErrors;
 import org.zstack.header.exception.CloudRuntimeException;
 import org.zstack.header.log.MaskSensitiveInfo;
 import org.zstack.header.message.*;
@@ -33,6 +35,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import javax.persistence.Query;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -46,6 +49,7 @@ public class RESTApiFacadeImpl extends AbstractService implements RESTApiFacade,
     private List<String> processingRequests = Collections.synchronizedList(new ArrayList<>(100));
     private Future<Void> restAPIVOCleanTask = null;
     private final static int restResultMaxLength = initMaxRestResultLength();
+    private static final int REST_RESULT_MEDIUMTEXT_MAX_BYTES = 16 * 1024 * 1024 - 1;
 
     private static final Set<String> maskSensitiveInfoClassNames = Platform.getReflections()
             .getTypesAnnotatedWith(MaskSensitiveInfo.class).stream()
@@ -59,6 +63,9 @@ public class RESTApiFacadeImpl extends AbstractService implements RESTApiFacade,
 
     @Autowired
     private ThreadFacade thdf;
+
+    @Autowired
+    private ErrorFacade errf;
 
     @Override
     @MessageSafe
@@ -247,11 +254,40 @@ public class RESTApiFacadeImpl extends AbstractService implements RESTApiFacade,
         }
     }
 
-    private static String getApiResult(APIEvent e) {
+    private String getApiResult(APIEvent e) {
         String apiResult = RESTApiDecoder.dump(e);
-        apiResult = StringUtils.length(apiResult) > restResultMaxLength ?
-                StringUtils.left(apiResult, restResultMaxLength) : apiResult;
+        if (apiResult.length() > restResultMaxLength) {
+            ErrorCode errorCode = errf.instantiateErrorCode(
+                    SysErrors.REST_API_RESULT_TOO_LARGE,
+                    "the serialized REST API result[event:%s, length:%s characters] exceeds the maximum allowed length[%s characters]",
+                    e.getClass().getName(), apiResult.length(), restResultMaxLength);
+            return getFailedApiResult(e, errorCode);
+        }
+
+        // A UTF-16 code unit needs at most three UTF-8 bytes, so small results fit without encoding them again.
+        if (apiResult.length() > REST_RESULT_MEDIUMTEXT_MAX_BYTES / 3) {
+            int byteLength = apiResult.getBytes(StandardCharsets.UTF_8).length;
+            if (byteLength > REST_RESULT_MEDIUMTEXT_MAX_BYTES) {
+                ErrorCode errorCode = errf.instantiateErrorCode(
+                        SysErrors.REST_API_RESULT_TOO_LARGE,
+                        "the serialized REST API result[event:%s, length:%s UTF-8 bytes] exceeds the maximum database size[%s bytes]",
+                        e.getClass().getName(), byteLength, REST_RESULT_MEDIUMTEXT_MAX_BYTES);
+                return getFailedApiResult(e, errorCode);
+            }
+        }
+
         return apiResult;
+    }
+
+    private String getFailedApiResult(APIEvent e, ErrorCode errorCode) {
+        APIEvent failedEvent;
+        try {
+            failedEvent = e.getClass().newInstance();
+        } catch (InstantiationException | IllegalAccessException ex) {
+            throw new CloudRuntimeException(ex);
+        }
+        failedEvent.setError(errorCode);
+        return RESTApiDecoder.dump(failedEvent);
     }
 
     @Override

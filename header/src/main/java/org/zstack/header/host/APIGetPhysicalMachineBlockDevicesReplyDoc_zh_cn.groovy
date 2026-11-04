@@ -12,21 +12,21 @@ doc {
 		path "org.zstack.header.host.APIGetPhysicalMachineBlockDevicesReply.blockDevices"
 		desc "物理机磁盘信息"
 		type "BlockDevices"
-		since "zsv 4.3.0"
+		since "zsv_4.3.0"
 		clz BlockDevices.class
 	}
 	field {
 		name "success"
 		desc ""
 		type "boolean"
-		since "zsv 4.3.0"
+		since "zsv_4.3.0"
 	}
 	ref {
 		name "error"
 		path "org.zstack.header.host.APIGetPhysicalMachineBlockDevicesReply.error"
 		desc "错误码，若不为null，则表示操作失败, 操作成功时该字段为null",false
 		type "ErrorCode"
-		since "zsv 4.3.0"
+		since "zsv_4.3.0"
 		clz ErrorCode.class
 	}
 }

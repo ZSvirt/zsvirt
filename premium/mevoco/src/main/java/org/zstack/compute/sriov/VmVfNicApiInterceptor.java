@@ -23,12 +23,21 @@ import org.zstack.header.sriov.VmVfNicConstant;
 import org.zstack.header.sriov.VmVfNicHaState;
 import org.zstack.header.sriov.VmVfNicVO;
 import org.zstack.header.sriov.VmVfNicVO_;
-import org.zstack.header.vm.*;
+import org.zstack.header.vm.APIAttachL3NetworkToVmMsg;
+import org.zstack.header.vm.APIChangeVmNicNetworkMsg;
+import org.zstack.header.vm.APICreateVmInstanceMsg;
+import org.zstack.header.vm.APIMigrateVmMsg;
+import org.zstack.header.vm.APIUpdateVmNicDriverMsg;
+import org.zstack.header.vm.VmInstanceState;
+import org.zstack.header.vm.VmInstanceVO;
+import org.zstack.header.vm.VmNicConstant;
+import org.zstack.header.vm.VmNicParam;
+import org.zstack.header.vm.VmNicVO;
 import org.zstack.header.volume.VolumeVO;
 import org.zstack.header.volume.VolumeVO_;
 import org.zstack.storage.migration.primary.APIPrimaryStorageMigrateVmMsg;
 import org.zstack.storage.primary.local.APILocalStorageMigrateVolumeMsg;
-import org.zstack.tag.PatternedSystemTag;
+import org.zstack.tag.SystemTag;
 import org.zstack.tag.SystemTagUtils;
 import org.zstack.utils.Utils;
 import org.zstack.utils.gson.JSONObjectUtil;
@@ -40,7 +49,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.zstack.core.Platform.*;
+import static org.zstack.core.Platform.argerr;
 
 /**
  * Created by GuoYi on 11/28/19.
@@ -205,7 +214,7 @@ public class VmVfNicApiInterceptor implements GlobalApiMessageInterceptor {
             return;
         }
 
-        PatternedSystemTag tag = SriovSystemTags.L2_ENABLE_SRIOV;
+        SystemTag tag = SriovSystemTags.L2_ENABLE_SRIOV;
         String tagValue = SystemTagUtils.findTagValue(msg.getSystemTags(), tag);
         if (StringUtils.isEmpty(tagValue)) {
             return;

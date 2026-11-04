@@ -1,5 +1,6 @@
 package org.zstack.header.network.l3;
 
+import org.zstack.header.message.DocUtils;
 import org.zstack.header.search.Inventory;
 
 import java.sql.Timestamp;
@@ -81,5 +82,13 @@ public class L3NetworkHostRouteInventory {
 
     public void setLastOpDate(Timestamp lastOpDate) {
         this.lastOpDate = lastOpDate;
+    }
+
+    public static L3NetworkHostRouteInventory __example__() {
+        L3NetworkHostRouteInventory route = new L3NetworkHostRouteInventory();
+        route.setL3NetworkUuid(DocUtils.createFixedUuid(L3NetworkVO.class));
+        route.setPrefix("169.254.169.254/32");
+        route.setNexthop("192.168.1.254");
+        return route;
     }
 }

@@ -28,7 +28,7 @@ doc {
 					location "url"
 					type "String"
 					optional false
-					since "3.6.0"
+					since "zsv_3.6.0"
 				}
 				column {
 					name "category"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "3.6.0"
+					since "zsv_3.6.0"
 				}
 				column {
 					name "name"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "3.6.0"
+					since "zsv_3.6.0"
 				}
 				column {
 					name "value"
@@ -55,7 +55,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "3.6.0"
+					since "zsv_3.6.0"
 				}
 				column {
 					name "systemTags"
@@ -64,7 +64,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.6.0"
+					since "zsv_3.6.0"
 				}
 				column {
 					name "userTags"
@@ -73,7 +73,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.6.0"
+					since "zsv_3.6.0"
 				}
 			}
 		}

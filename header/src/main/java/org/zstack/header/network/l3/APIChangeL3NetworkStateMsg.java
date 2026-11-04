@@ -31,7 +31,7 @@ import org.zstack.header.rest.RestRequest;
  * }
  * }
  * @result see :ref:`APIChangeL3NetworkStateEvent`
- * @since 0.1.0
+ * @since zsv_0.1.0
  */
 @RestRequest(
         path = "/l3-networks/{uuid}/actions",
@@ -79,7 +79,7 @@ public class APIChangeL3NetworkStateMsg extends APIMessage implements L3NetworkM
  
     public static APIChangeL3NetworkStateMsg __example__() {
         APIChangeL3NetworkStateMsg msg = new APIChangeL3NetworkStateMsg();
-        msg.setUuid(uuid());
+        msg.setUuid(uuid(L3NetworkVO.class));
         msg.setStateEvent(L3NetworkStateEvent.enable.toString());
         return msg;
     }

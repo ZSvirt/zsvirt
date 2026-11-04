@@ -4,8 +4,8 @@ import org.zstack.header.query.APIQueryReply;
 import org.zstack.header.rest.RestResponse;
 import org.zstack.header.sriov.EthernetVfPciDeviceInventory;
 import org.zstack.header.sriov.EthernetVfStatus;
-import org.zstack.pciDevice.PciDeviceAddress;
-import org.zstack.pciDevice.PciDeviceType;
+import org.zstack.pciDevice.message.PciDeviceAddress;
+import org.zstack.pciDevice.header.PciDeviceType;
 
 
 import java.util.Arrays;

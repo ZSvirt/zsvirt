@@ -7,7 +7,7 @@ doc {
 
 	category "configuration"
 
-	desc """删除云主机规格"""
+	desc """删除虚拟机规格"""
 
 	rest {
 		request {
@@ -17,7 +17,7 @@ doc {
 
 			clz APIDeleteInstanceOfferingMsg.class
 
-			desc """删除云主机规格"""
+			desc """删除虚拟机规格"""
 
 			params {
 
@@ -28,7 +28,7 @@ doc {
 					location "url"
 					type "String"
 					optional false
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "deleteMode"
@@ -37,7 +37,7 @@ doc {
 					location "query"
 					type "String"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "systemTags"
@@ -46,7 +46,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "userTags"
@@ -55,7 +55,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 			}
 		}

@@ -21,11 +21,5 @@
             <zstack:extension interface="org.zstack.header.host.HostAfterConnectedExtensionPoint"/>
         </zstack:plugin>
     </bean>
-
-    <bean id="ClusterManagementNodeRecoverExtensionPoint" class="org.zstack.compute.cluster.ClusterManagementNodeRecoverExtension">
-        <zstack:plugin>
-            <zstack:extension interface="org.zstack.header.backup.ManagementNodeRecoverExtensionPoint" />
-        </zstack:plugin>
-    </bean>
 </beans>
 

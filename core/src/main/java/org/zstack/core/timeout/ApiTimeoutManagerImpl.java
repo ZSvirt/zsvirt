@@ -211,7 +211,7 @@ public class ApiTimeoutManagerImpl implements ApiTimeoutManager, Component,
 
             vo.setValue(getTimeoutGlobalConfigValue(clz, vo));
 
-            results.add(GlobalConfig.valueOf(vo));
+            results.add(GlobalConfigRuntime.valueOf(vo));
         });
 
         return results;
@@ -245,7 +245,7 @@ public class ApiTimeoutManagerImpl implements ApiTimeoutManager, Component,
             String[] vals = valueString.split(",");
             for (String val : vals) {
                 val = val.trim();
-                String[] keyval = val.split("::", 2);
+                String[] keyval = val.split(Tags.SEPARATOR, 2);
                 if (keyval.length != 2) {
                     throw new IllegalArgumentException(String.format("the key/value pair must be in format of key::value;" +
                             "invalid configuration[%s=%s] found, check your zstack.properties", key, valueString));

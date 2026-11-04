@@ -280,7 +280,7 @@ public class KvmMigrateVmWithStorageWorkFlow implements KvmLiveMigrationWorkFlow
                 mmsg.setDownTime(paramIn.getMsg().getDownTime());
                 mmsg.setVmInventory(paramIn.getVmInstanceInventory());
                 mmsg.setStorageMigrationPolicy(MigrateVmOnHypervisorMsg.StorageMigrationPolicy.FullCopy);
-                mmsg.setBandwidth((long) Math.ceil((double) paramIn.getTotalBandwidth() / paramIn.getVolumesToMigrate().size()));
+                mmsg.setBandwidth(paramIn.getTotalBandwidth());
                 mmsg.setEnableMigrationTls(paramIn.getMsg().getEnableMigrationTls());
                 for (KvmMigrateVmWithStorageExtensionPoint ext : pluginRgty.getExtensionList(KvmMigrateVmWithStorageExtensionPoint.class)) {
                     ErrorCode err;

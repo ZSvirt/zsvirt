@@ -287,6 +287,7 @@
             <zstack:extension interface="org.zstack.header.storage.snapshot.VolumeSnapshotCreationExtensionPoint" />
             <zstack:extension interface="org.zstack.header.vm.BeforeHaStartVmInstanceExtensionPoint" />
             <zstack:extension interface="org.zstack.header.vm.ConvertVmInstanceToTemplatedVmExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.vm.VmOperationAdditionalFlowExtensionPoint" />
         </zstack:plugin>
     </bean>
 

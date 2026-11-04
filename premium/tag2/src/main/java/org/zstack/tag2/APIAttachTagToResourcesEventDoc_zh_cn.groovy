@@ -13,7 +13,7 @@ doc {
 		path "org.zstack.tag2.APIAttachTagToResourcesEvent.error"
 		desc "错误码，若不为null，则表示操作失败, 操作成功时该字段为null",false
 		type "ErrorCode"
-		since "3.2.0"
+		since "zsv_3.2.0"
 		clz ErrorCode.class
 	}
 	ref {
@@ -21,13 +21,13 @@ doc {
 		path "org.zstack.tag2.APIAttachTagToResourcesEvent.results"
 		desc "加载标签的结果"
 		type "List"
-		since "3.2.0"
+		since "zsv_3.2.0"
 		clz AttachTagResult.class
 	}
 	field {
 		name "success"
 		desc ""
 		type "boolean"
-		since "3.2.0"
+		since "zsv_3.2.0"
 	}
 }

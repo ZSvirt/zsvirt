@@ -5,7 +5,7 @@ import org.zstack.header.query.ExpandedQueries;
 import org.zstack.header.query.ExpandedQuery;
 import org.zstack.header.search.Inventory;
 import org.zstack.header.vm.VmNicInventory;
-import org.zstack.pciDevice.PciDeviceInventory;
+import org.zstack.pciDevice.entity.PciDeviceInventory;
 
 import java.util.ArrayList;
 import java.util.List;

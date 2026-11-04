@@ -28,7 +28,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "zsv 5.1.0"
+					since "1.0.0, zsv_5.1.0"
 					values ("Enabled","Disabled")
 				}
 				column {
@@ -38,7 +38,7 @@ doc {
 					location "body"
 					type "Boolean"
 					optional true
-					since "zsv 5.1.0"
+					since "1.0.0, zsv_5.1.0"
 				}
 				column {
 					name "systemTags"
@@ -47,7 +47,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 5.1.0"
+					since "1.0.0, zsv_5.1.0"
 				}
 				column {
 					name "userTags"
@@ -56,7 +56,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 5.1.0"
+					since "1.0.0, zsv_5.1.0"
 				}
 			}
 		}

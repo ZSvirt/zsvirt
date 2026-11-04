@@ -28,7 +28,7 @@ doc {
 					location "url"
 					type "String"
 					optional false
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "name"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "description"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "systemTags"
@@ -55,7 +55,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "userTags"
@@ -64,7 +64,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "schedulerInterval"
@@ -73,7 +73,7 @@ doc {
 					location "body"
 					type "Integer"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "repeatCount"
@@ -82,7 +82,7 @@ doc {
 					location "body"
 					type "Integer"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "startTime"
@@ -91,7 +91,7 @@ doc {
 					location "body"
 					type "Long"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "stopTime"
@@ -100,7 +100,7 @@ doc {
 					location "body"
 					type "Long"
 					optional true
-					since "zsv 4.10.6"
+					since "zsv_4.10.6"
 				}
 				column {
 					name "cron"
@@ -109,7 +109,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "schedulerType"
@@ -118,7 +118,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 					values ("cron","simple")
 				}
 			}

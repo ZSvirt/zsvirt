@@ -19,7 +19,7 @@ import org.zstack.header.tag.TagPatternType;
 import org.zstack.header.tag.TagPatternVO;
 import org.zstack.header.tag.TagPatternVO_;
 import org.zstack.identity.ResourceHelper;
-import org.zstack.utils.TagUtils;
+import org.zstack.utils.Tags;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -83,7 +83,7 @@ public class Tag2ApiInterceptor implements ApiMessageInterceptor, GlobalApiMessa
             validatePatternValue(msg.getValue(), pattern.getType());
 
             if (pattern.getType() == TagPatternType.withToken
-                    && !TagUtils.tagPatternToSqlPattern(msg.getValue()).equals(TagUtils.tagPatternToSqlPattern(pattern.getValue()))) {
+                    && !Tags.tagPatternToSqlPattern(msg.getValue()).equals(Tags.tagPatternToSqlPattern(pattern.getValue()))) {
                 throw new ApiMessageInterceptionException(argerr("you can only update token name"));
             } else if (pattern.getType() == TagPatternType.simple) {
                 throw new ApiMessageInterceptionException(argerr("cannot update simple tag pattern format"));
@@ -145,7 +145,7 @@ public class Tag2ApiInterceptor implements ApiMessageInterceptor, GlobalApiMessa
     }
 
     private void validateTokens(String format, Map<String, String> tokens) {
-        List<String> formatTokens = Arrays.stream(format.split("::"))
+        List<String> formatTokens = Arrays.stream(Tags.split(format))
                 .filter(it -> it.startsWith("{"))
                 .map(it -> it.substring(1, it.length() - 1))
                 .collect(Collectors.toList());

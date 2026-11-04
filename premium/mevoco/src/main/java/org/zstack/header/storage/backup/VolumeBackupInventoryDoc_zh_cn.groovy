@@ -13,86 +13,86 @@ doc {
 		name "uuid"
 		desc "卷备份的UUID，唯一标示该资源"
 		type "String"
-		since "2.6"
+		since "zsv_2.6"
 	}
 	field {
 		name "volumeUuid"
 		desc "云盘UUID"
 		type "String"
-		since "2.6"
+		since "zsv_2.6"
 	}
 	field {
 		name "name"
 		desc "备份名称"
 		type "String"
-		since "2.6"
+		since "zsv_2.6"
 	}
 	field {
 		name "description"
 		desc "备份的详细描述"
 		type "String"
-		since "2.6"
+		since "zsv_2.6"
 	}
 	field {
 		name "type"
 		desc "卷的类型"
 		type "String"
-		since "2.6"
+		since "zsv_2.6"
 	}
 	field {
 		name "state"
 		desc "卷备份的启用状态"
 		type "String"
-		since "2.6"
+		since "zsv_2.6"
 	}
 	field {
 		name "status"
 		desc "卷备份的状态"
 		type "String"
-		since "2.6"
+		since "zsv_2.6"
 	}
 	field {
 		name "size"
 		desc "当前卷备份的大小"
 		type "Long"
-		since "2.6"
+		since "zsv_2.6"
 	}
 	field {
 		name "metadata"
 		desc "卷备份相关元数据"
 		type "String"
-		since "2.6"
+		since "zsv_2.6"
 	}
 	field {
 		name "createDate"
 		desc "创建时间"
 		type "Timestamp"
-		since "2.6"
+		since "zsv_2.6"
 	}
 	field {
 		name "lastOpDate"
 		desc "最后一次修改时间"
 		type "Timestamp"
-		since "2.6"
+		since "zsv_2.6"
 	}
 	field {
 		name "encrypted"
 		desc "备份数据是否加密"
 		type "Boolean"
-		since "1.0.1, zsv 5.1.0"
+		since "1.0.0, zsv_5.1.0"
 	}
 	field {
 		name "keyLastOpDate"
 		desc "加密备份密钥最后更新时间，非加密备份为空"
 		type "Timestamp"
-		since "1.0.1, zsv 5.1.0"
+		since "1.0.0, zsv_5.1.0"
 	}
 	ref {
 		name "backupStorageRefs"
 		path "org.zstack.header.storage.backup.VolumeBackupInventory.backupStorageRefs"
 		desc "卷备份所在备份服务器列表"
 		type "List"
-		since "2.6"
+		since "zsv_2.6"
 		clz VolumeBackupStorageRefInventory.class
 	}
 }

@@ -7,7 +7,7 @@ doc {
 
 	category "guest.tools"
 
-	desc """获取云主机内部增强工具的信息"""
+	desc """获取虚拟机内部增强工具的信息"""
 
 	rest {
 		request {
@@ -17,7 +17,7 @@ doc {
 
 			clz APIGetVmGuestToolsInfoMsg.class
 
-			desc """获取云主机内部增强工具的信息"""
+			desc """获取虚拟机内部增强工具的信息"""
 
 			params {
 
@@ -28,7 +28,7 @@ doc {
 					location "url"
 					type "String"
 					optional false
-					since "3.7.0"
+					since "zsv_3.7.0"
 				}
 				column {
 					name "systemTags"
@@ -37,7 +37,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "3.7.0"
+					since "zsv_3.7.0"
 				}
 				column {
 					name "userTags"
@@ -46,7 +46,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "3.7.0"
+					since "zsv_3.7.0"
 				}
 				column {
 					name "debug"
@@ -55,7 +55,7 @@ doc {
 					location "query"
 					type "Set"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 			}
 		}

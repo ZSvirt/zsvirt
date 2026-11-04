@@ -8,7 +8,7 @@ doc {
 
 	category "autoscaling"
 
-	desc """查询伸缩组云主机模板"""
+	desc """查询伸缩组虚拟机模板"""
 
 	rest {
 		request {

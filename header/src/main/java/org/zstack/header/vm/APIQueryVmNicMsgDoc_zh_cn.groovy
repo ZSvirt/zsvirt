@@ -4,11 +4,11 @@ import org.zstack.header.vm.APIQueryVmNicReply
 import org.zstack.header.query.APIQueryMessage
 
 doc {
-	title "查询云主机网卡(QueryVmNic)"
+	title "查询虚拟机网卡(QueryVmNic)"
 
 	category "vmInstance"
 
-	desc """查询云主机网卡"""
+	desc """查询虚拟机网卡"""
 
 	rest {
 		request {

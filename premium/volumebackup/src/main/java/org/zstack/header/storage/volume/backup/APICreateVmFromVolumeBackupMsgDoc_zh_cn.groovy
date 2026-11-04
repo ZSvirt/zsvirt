@@ -7,7 +7,7 @@ doc {
 
 	category "backup.volume"
 
-	desc """从备份创建云主机"""
+	desc """从备份创建虚拟机"""
 
 	rest {
 		request {
@@ -24,11 +24,11 @@ doc {
 				column {
 					name "name"
 					enclosedIn "params"
-					desc "云主机名字"
+					desc "虚拟机名字"
 					location "body"
 					type "String"
 					optional false
-					since "3.18.0"
+					since "zsv_3.18.0"
 				}
 				column {
 					name "backupUuid"
@@ -37,7 +37,7 @@ doc {
 					location "url"
 					type "String"
 					optional false
-					since "3.18.0"
+					since "zsv_3.18.0"
 				}
 				column {
 					name "backupStorageUuid"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.18.0"
+					since "zsv_3.18.0"
 				}
 				column {
 					name "instanceOfferingUuid"
@@ -55,7 +55,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.18.0"
+					since "zsv_3.18.0"
 				}
 				column {
 					name "cpuNum"
@@ -64,7 +64,7 @@ doc {
 					location "body"
 					type "Integer"
 					optional true
-					since "4.10.28"
+					since "zsv_4.10.28"
 				}
 				column {
 					name "memorySize"
@@ -73,7 +73,7 @@ doc {
 					location "body"
 					type "Long"
 					optional true
-					since "4.10.28"
+					since "zsv_4.10.28"
 				}
 				column {
 					name "defaultL3NetworkUuid"
@@ -82,7 +82,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.18.0"
+					since "zsv_3.18.0"
 				}
 				column {
 					name "l3NetworkUuids"
@@ -91,16 +91,16 @@ doc {
 					location "body"
 					type "List"
 					optional false
-					since "3.18.0"
+					since "zsv_3.18.0"
 				}
 				column {
 					name "type"
 					enclosedIn "params"
-					desc "云主机类型"
+					desc "虚拟机类型"
 					location "body"
 					type "String"
 					optional true
-					since "3.18.0"
+					since "zsv_3.18.0"
 					values ("UserVm","ApplianceVm")
 				}
 				column {
@@ -110,7 +110,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.18.0"
+					since "zsv_3.18.0"
 				}
 				column {
 					name "clusterUuid"
@@ -119,7 +119,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.18.0"
+					since "zsv_3.18.0"
 				}
 				column {
 					name "hostUuid"
@@ -128,7 +128,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.18.0"
+					since "zsv_3.18.0"
 				}
 				column {
 					name "primaryStorageUuidForRootVolume"
@@ -137,7 +137,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.18.0"
+					since "zsv_3.18.0"
 				}
 				column {
 					name "description"
@@ -146,7 +146,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.18.0"
+					since "zsv_3.18.0"
 				}
 				column {
 					name "rootVolumeSystemTags"
@@ -155,7 +155,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.18.0"
+					since "zsv_3.18.0"
 				}
 				column {
 					name "resourceUuid"
@@ -164,7 +164,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.18.0"
+					since "zsv_3.18.0"
 				}
 				column {
 					name "tagUuids"
@@ -173,7 +173,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.18.0"
+					since "zsv_3.18.0"
 				}
 				column {
 					name "systemTags"
@@ -182,7 +182,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.18.0"
+					since "zsv_3.18.0"
 				}
 				column {
 					name "userTags"
@@ -191,16 +191,16 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.18.0"
+					since "zsv_3.18.0"
 				}
 				column {
 					name "strategy"
 					enclosedIn "params"
-					desc "云主机创建策略"
+					desc "虚拟机创建策略"
 					location "body"
 					type "String"
 					optional true
-					since "4.10.0"
+					since "zsv_4.10.0"
 					values ("InstantStart","JustCreate","CreateStopped")
 				}
 				column {
@@ -210,7 +210,7 @@ doc {
 					location "body"
 					type "Boolean"
 					optional true
-					since "5.0.0"
+					since "zsv_5.0.0"
 				}
 			}
 		}

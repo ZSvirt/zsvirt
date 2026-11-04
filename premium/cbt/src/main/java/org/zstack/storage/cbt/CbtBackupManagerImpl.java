@@ -28,6 +28,7 @@ import org.zstack.header.exception.CloudRuntimeException;
 import org.zstack.header.message.APIMessage;
 import org.zstack.header.message.Message;
 import org.zstack.header.message.MessageReply;
+import org.zstack.header.storage.backup.BackupOperationConflictChecker;
 import org.zstack.header.storage.primary.PrimaryStorageVO;
 import org.zstack.header.storage.primary.PrimaryStorageVO_;
 import org.zstack.header.vm.VmInstanceState;
@@ -41,8 +42,8 @@ import org.zstack.kvm.KVMHostVO;
 import org.zstack.kvm.VolumeTO;
 import org.zstack.storage.primary.local.LocalStorageConstants;
 import org.zstack.storage.primary.local.LocalStorageSystemTags;
+import org.zstack.storage.backup.BackupOperationConflictManager;
 import org.zstack.storage.volume.VolumeSystemTags;
-import org.zstack.tag.SystemTagCreator;
 import org.zstack.utils.CollectionUtils;
 import org.zstack.utils.Utils;
 import org.zstack.utils.logging.CLogger;
@@ -55,10 +56,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import static java.util.Arrays.asList;
 import static org.zstack.core.Platform.operr;
-import static org.zstack.utils.CollectionDSL.e;
-import static org.zstack.utils.CollectionDSL.map;
+import static org.zstack.storage.backup.BackupOperationConflictManager.sendBackupInVmQueue;
 
-public class CbtBackupManagerImpl extends AbstractService implements Component, CbtBackupManager {
+public class CbtBackupManagerImpl extends AbstractService implements Component, CbtBackupManager, BackupOperationConflictChecker {
     private static final CLogger logger = Utils.getLogger(CbtBackupManagerImpl.class);
     private static final String CBT_HOST_OPERATION_SYNC_SIGNATURE = "cbt-host-operation-on-host-%s";
     private final Map<String, CbtBackupFactory> bkFactories = new ConcurrentHashMap<>();
@@ -71,6 +71,8 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
     protected ThreadFacade thdf;
     @Autowired
     private PluginRegistry pluginRgty;
+    @Autowired
+    private BackupOperationConflictManager conflictManager;
 
     @Override
     public void handleMessage(Message msg) {
@@ -109,12 +111,16 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
     private void handleLocalMessage(Message msg) {
         if (msg instanceof DisableCbtTaskMsg) {
             handle((DisableCbtTaskMsg) msg);
+        } else if (msg instanceof CreateCbtTaskMsg) {
+            handle((CreateCbtTaskMsg) msg);
         } else if (msg instanceof EnableCbtTaskMsg) {
             handle((EnableCbtTaskMsg) msg);
         } else if (msg instanceof EnableCbtTaskOnHostMsg) {
             handle((EnableCbtTaskOnHostMsg) msg);
         } else if (msg instanceof DeleteCbtTaskMsg) {
             handle((DeleteCbtTaskMsg) msg);
+        } else if (msg instanceof UnexportNbdVolumesMsg) {
+            handle((UnexportNbdVolumesMsg) msg);
         } else {
             bus.dealWithUnknownMessage(msg);
         }
@@ -130,14 +136,6 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
             @Override
             public void run(SyncTaskChain chain) {
                 final APIExportNbdVolumesEvent evt = new APIExportNbdVolumesEvent(msg.getId());
-                ErrorCode err = validateVmStateForOperation(msg.getVmInstanceUuid(), VmInstanceState.Stopped, "export NBD volumes");
-                if (err != null) {
-                    evt.setError(err);
-                    bus.publish(evt);
-                    chain.next();
-                    return;
-                }
-
                 String hostUuid = getVmHostUuid(msg.getVmInstanceUuid());
                 if (hostUuid == null) {
                     evt.setError(operr("host not found for VM: %s", msg.getVmInstanceUuid()));
@@ -187,42 +185,18 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
             @Override
             public void run(SyncTaskChain chain) {
                 final APIUnexportNbdVolumesEvent evt = new APIUnexportNbdVolumesEvent(msg.getId());
-                ErrorCode err = validateVmStateForOperation(msg.getVmInstanceUuid(), VmInstanceState.Stopped, "unexport NBD volumes");
-                if (err != null) {
-                    evt.setError(err);
-                    bus.publish(evt);
-                    chain.next();
-                    return;
-                }
-
-                String hostUuid = getVmHostUuid(msg.getVmInstanceUuid());
-                if (hostUuid == null) {
-                    evt.setError(operr("host not found for VM: %s", msg.getVmInstanceUuid()));
-                    bus.publish(evt);
-                    chain.next();
-                    return;
-                }
-
-                runInCbtHostOperationQueue(hostUuid, msg, String.format("unexport-nbd-volumes-on-host-%s", hostUuid), new CbtHostOperation() {
+                UnexportNbdVolumesMsg umsg = new UnexportNbdVolumesMsg();
+                umsg.setVmInstanceUuid(msg.getVmInstanceUuid());
+                umsg.setVolumeUuids(msg.getVolumeUuids());
+                bus.makeLocalServiceId(umsg, CbtBackupConstant.SERVICE_ID);
+                bus.send(umsg, new CloudBusCallBack(umsg) {
                     @Override
-                    public void run(SyncTaskChain hostChain) {
-                        CbtBackupHypervisorBackend backend = getCbtBackend(msg.getVmInstanceUuid());
-                        backend.unexportNbdVolumesForRecovery(msg.getVmInstanceUuid(), msg.getVolumeUuids(), new Completion(msg, hostChain) {
-                            @Override
-                            public void success() {
-                                bus.publish(evt);
-                                hostChain.next();
-                                chain.next();
-                            }
-
-                            @Override
-                            public void fail(ErrorCode errorCode) {
-                                evt.setError(errorCode);
-                                bus.publish(evt);
-                                hostChain.next();
-                                chain.next();
-                            }
-                        });
+                    public void run(MessageReply reply) {
+                        if (!reply.isSuccess()) {
+                            evt.setError(reply.getError());
+                        }
+                        bus.publish(evt);
+                        chain.next();
                     }
                 });
             }
@@ -234,43 +208,91 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
         });
     }
 
-    private void handle(final APICreateCbtTaskMsg msg) {
-        thdf.chainSubmit(new ChainTask(msg) {
-            @Override
-            public String getSyncSignature() {
-                return "create-cbt-task";
-            }
+    private void handle(final UnexportNbdVolumesMsg msg) {
+        final UnexportNbdVolumesReply reply = new UnexportNbdVolumesReply();
+        String hostUuid = getVmHostUuid(msg.getVmInstanceUuid());
+        if (hostUuid == null) {
+            reply.setError(operr("host not found for VM: %s", msg.getVmInstanceUuid()));
+            bus.reply(msg, reply);
+            return;
+        }
 
+        runInCbtHostOperationQueue(hostUuid, msg, String.format("unexport-nbd-volumes-on-host-%s", hostUuid), new CbtHostOperation() {
             @Override
-            public void run(SyncTaskChain chain) {
-                doCreateCbtTask(msg, new ReturnValueCompletion<CbtTaskInventory>(chain) {
-                    final APICreateCbtTaskEvent evt = new APICreateCbtTaskEvent(msg.getId());
-
+            public void run(SyncTaskChain hostChain) {
+                CbtBackupHypervisorBackend backend = getCbtBackend(msg.getVmInstanceUuid());
+                backend.unexportNbdVolumesForRecovery(msg.getVmInstanceUuid(), msg.getVolumeUuids(), new Completion(msg, hostChain) {
                     @Override
-                    public void success(CbtTaskInventory inv) {
-                        evt.setInventory(inv);
-                        bus.publish(evt);
-                        chain.next();
+                    public void success() {
+                        bus.reply(msg, reply);
+                        hostChain.next();
                     }
 
                     @Override
                     public void fail(ErrorCode errorCode) {
-                        evt.setError(errorCode);
-                        bus.publish(evt);
-                        chain.next();
+                        reply.setError(errorCode);
+                        bus.reply(msg, reply);
+                        hostChain.next();
                     }
                 });
             }
+        });
+    }
+
+    private void handle(final APICreateCbtTaskMsg msg) {
+        CreateCbtTaskMsg cmsg = new CreateCbtTaskMsg();
+        cmsg.setUuid(msg.getResourceUuid() == null ? Platform.getUuid() : msg.getResourceUuid());
+        cmsg.setName(msg.getName());
+        cmsg.setDescription(msg.getDescription());
+        cmsg.setVmInstanceUuid(msg.getVmInstanceUuid());
+        bus.makeTargetServiceIdByResourceUuid(cmsg, CbtBackupConstant.SERVICE_ID, cmsg.getVmInstanceUuid());
+
+        sendBackupInVmQueue(bus, cmsg, cmsg.getVmInstanceUuid(), new CloudBusCallBack(msg) {
+            @Override
+            public void run(MessageReply reply) {
+                APICreateCbtTaskEvent evt = new APICreateCbtTaskEvent(msg.getId());
+                if (!reply.isSuccess()) {
+                    evt.setError(reply.getError());
+                } else {
+                    CreateCbtTaskReply r = reply.castReply();
+                    evt.setInventory(r.getInventory());
+                }
+                bus.publish(evt);
+            }
+        });
+    }
+
+    private void handle(final CreateCbtTaskMsg msg) {
+        ErrorCode error = conflictManager.check(msg.getVmInstanceUuid(), msg.getUuid());
+        if (error != null) {
+            bus.replyErrorByMessageType(msg, error);
+            return;
+        }
+
+        doCreateCbtTask(msg, new ReturnValueCompletion<CbtTaskInventory>(msg) {
+            @Override
+            public void success(CbtTaskInventory inventory) {
+                CreateCbtTaskReply reply = new CreateCbtTaskReply();
+                reply.setInventory(inventory);
+                bus.reply(msg, reply);
+            }
 
             @Override
-            public String getName() {
-                return String.format("create-cbt-task-%s", msg.getName());
+            public void fail(ErrorCode errorCode) {
+                bus.replyErrorByMessageType(msg, errorCode);
             }
         });
     }
 
     private void handle(final EnableCbtTaskMsg msg) {
         final CbtTaskVO taskVO = dbf.findByUuid(msg.getUuid(), CbtTaskVO.class);
+        if (taskVO == null) {
+            EnableCbtTaskReply reply = new EnableCbtTaskReply();
+            reply.setError(operr("Cbt task not found[uuid: %s]", msg.getUuid()));
+            bus.reply(msg, reply);
+            return;
+        }
+
         thdf.chainSubmit(new ChainTask(msg) {
             @Override
             public String getSyncSignature() {
@@ -284,6 +306,24 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
 
             @Override
             public void run(SyncTaskChain chain) {
+                String vmUuid = getVmUuidByCbtTaskUuid(msg.getUuid());
+                if (vmUuid == null) {
+                    EnableCbtTaskReply reply = new EnableCbtTaskReply();
+                    reply.setError(operr("CBT task[uuid: %s] has no VM attached", msg.getUuid()));
+                    bus.reply(msg, reply);
+                    chain.next();
+                    return;
+                }
+
+                ErrorCode err = conflictManager.check(vmUuid, msg.getUuid());
+                if (err != null) {
+                    EnableCbtTaskReply reply = new EnableCbtTaskReply();
+                    reply.setError(err);
+                    bus.reply(msg, reply);
+                    chain.next();
+                    return;
+                }
+
                 EnableCbtTaskOnHostMsg emsg = new EnableCbtTaskOnHostMsg();
                 emsg.setBitmapName(msg.getBitmapName());
                 emsg.setUuid(msg.getUuid());
@@ -295,12 +335,10 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
                         if (reply.isSuccess()) {
                             EnableCbtTaskReply ereply = new EnableCbtTaskReply();
                             EnableCbtTaskOnHostReply r = reply.castReply();
-                            changeCbtTaskStatus(msg.getUuid(), CbtTaskStatus.Running);
                             ereply.setVolumeCbtBackupInfos(r.getVolumeCbtBackupInfos());
                             bus.reply(msg, ereply);
                             chain.next();
                         } else {
-                            changeCbtTaskStatus(msg.getUuid(), CbtTaskStatus.Failed);
                             reply.setError(reply.getError());
                             bus.reply(msg, reply);
                             chain.next();
@@ -333,7 +371,6 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
     }
 
     private void handle(final EnableCbtTaskOnHostMsg msg) {
-        final CbtTaskVO taskVO = dbf.findByUuid(msg.getUuid(), CbtTaskVO.class);
         final EnableCbtTaskOnHostReply reply = new EnableCbtTaskOnHostReply();
         final String vmUuid = Q.New(CbtTaskResourceRefVO.class)
                 .eq(CbtTaskResourceRefVO_.resourceType, VmInstanceVO.class.getSimpleName())
@@ -342,7 +379,7 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
         thdf.chainSubmit(new ChainTask(msg) {
             @Override
             public String getSyncSignature() {
-                return getVmSyncSignature(vmUuid);
+                return String.format("enable-cbt-host-%s", msg.getUuid());
             }
 
             @Override
@@ -357,12 +394,26 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
 
                 String hostUuid = getVmHostUuid(vmUuid);
                 if (hostUuid == null) {
+                    changeCbtTaskStatus(msg.getUuid(), CbtTaskStatus.Failed);
                     reply.setError(operr("host not found for VM: %s", vmUuid));
                     bus.reply(msg, reply);
                     chain.next();
                     return;
                 }
 
+                CbtTaskVO taskVO = dbf.findByUuid(msg.getUuid(), CbtTaskVO.class);
+                if (taskVO == null) {
+                    reply.setError(operr("Cbt task not found[uuid: %s]", msg.getUuid()));
+                    bus.reply(msg, reply);
+                    chain.next();
+                    return;
+                }
+                if (taskVO.getStatus() == CbtTaskStatus.Running) {
+                    reply.setError(operr("Cbt task[uuid: %s] has already enabled, please disable it.", msg.getUuid()));
+                    bus.reply(msg, reply);
+                    chain.next();
+                    return;
+                }
                 CbtBackupHypervisorBackend backend = getCbtBackend(vmUuid);
                 runStartVmInstanceCbtFlow(backend, vmUuid, taskVO, msg.getAccountUuid(), msg.getBitmapName(), new ReturnValueCompletion<List<VolumeCbtBackupInfo>>(msg, chain) {
                     @Override
@@ -385,7 +436,7 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
 
             @Override
             public String getName() {
-                return String.format("running-cbt-task-%s", taskVO.getUuid());
+                return String.format("running-cbt-task-%s", msg.getUuid());
             }
         });
     }
@@ -441,7 +492,7 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
                 DisableCbtTaskMsg dmsg = new DisableCbtTaskMsg();
                 dmsg.setUuid(taskUuid);
                 dmsg.setForce(force);
-                bus.makeLocalServiceId(dmsg, CbtBackupConstant.SERVICE_ID);
+                bus.makeTargetServiceIdByResourceUuid(dmsg, CbtBackupConstant.SERVICE_ID, vmUuid);
                 bus.send(dmsg, new CloudBusCallBack(dmsg) {
                     @Override
                     public void run(MessageReply reply) {
@@ -456,7 +507,24 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
 
             @Override
             public boolean skip(Map data) {
-                return vmNotRunning(vmUuid) || cbtNotRunning(taskUuid);
+                return vmNotRunning(vmUuid) || (cbtNotRunning(taskUuid) && !hasCbtCleanupRecords(taskUuid));
+            }
+        }).then(new NoRollbackFlow() {
+            final String __name__ = "destroy-retained-cbt-volumes";
+
+            @Override
+            public void run(FlowTrigger trigger, Map data) {
+                destroyCbtVolumes(taskUuid, new Completion(trigger) {
+                    @Override
+                    public void success() {
+                        trigger.next();
+                    }
+
+                    @Override
+                    public void fail(ErrorCode errorCode) {
+                        trigger.fail(errorCode);
+                    }
+                });
             }
         }).then(new NoRollbackFlow() {
             final String __name__ = "delete-cbt-data";
@@ -497,9 +565,12 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
                                       List<String> volumeUuids,
                                       final ReturnValueCompletion<List<VolumeCbtBackupInfo>> completion) {
         final List<VolumeCbtBackupInfo>[] volumeInfos = new List[]{new ArrayList<VolumeCbtBackupInfo>()};
-        ErrorCode err = validateVmStateForOperation(vmUuid, VmInstanceState.Stopped, "export NBD volumes");
-        if (err != null) {
-            completion.fail(err);
+        boolean running = Q.New(VmInstanceVO.class)
+                .eq(VmInstanceVO_.uuid, vmUuid)
+                .eq(VmInstanceVO_.state, VmInstanceState.Running)
+                .isExists();
+        if (running) {
+            completion.fail(operr("vm[uuid: %s] is running, please stop it and try again.", vmUuid));
             return;
         }
 
@@ -608,6 +679,33 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
         FlowChain chain = FlowChainBuilder.newSimpleFlowChain();
         chain.setName(String.format("start-cbt-task-for-vm-%s", vmUuid));
         chain.then(new NoRollbackFlow() {
+            final String __name__ = "cleanup-failed-cbt-task-before-retry";
+
+            @Override
+            public boolean skip(Map data) {
+                return taskVO.getStatus() != CbtTaskStatus.Failed;
+            }
+
+            @Override
+            public void run(FlowTrigger trigger, Map data) {
+                // Keep Enable retryable without a separate public Disable call.
+                // Retry scratch deletion too when rollback records are already gone.
+                DisableCbtTaskMsg dmsg = new DisableCbtTaskMsg();
+                dmsg.setUuid(taskVO.getUuid());
+                doDisableCbtTask(dmsg, new Completion(trigger) {
+                    @Override
+                    public void success() {
+                        trigger.next();
+                    }
+
+                    @Override
+                    public void fail(ErrorCode errorCode) {
+                        trigger.fail(errorCode);
+                    }
+                });
+            }
+        });
+        chain.then(new NoRollbackFlow() {
             final String __name__ = "sync-volumes-size";
 
             @Override
@@ -646,18 +744,27 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
 
             @Override
             public void rollback(FlowRollback trigger, Map data) {
+                if (shouldRetainCbtVolumesAfterRollback(taskVO.getUuid())) {
+                    logger.warn(String.format("retain cbt[uuid:%s] volumes because runtime cleanup is pending",
+                            taskVO.getUuid()));
+                    trigger.rollback();
+                    return;
+                }
+
                 destroyCbtVolumes(taskVO.getUuid(), new Completion(trigger) {
                     @Override
                     public void success() {
                         logger.warn(String.format("rollback prepare cbt[uuid %s] volume successfully.", taskVO.getUuid()));
+                        trigger.rollback();
                     }
 
                     @Override
                     public void fail(ErrorCode errorCode) {
-                        logger.warn(String.format("rollback prepare cbt[uuid %s] volume failed.", taskVO.getUuid()));
+                        logger.warn(String.format("rollback prepare cbt[uuid %s] volume failed: %s",
+                                taskVO.getUuid(), errorCode));
+                        trigger.rollback();
                     }
                 });
-                trigger.rollback();
             }
         });
         chain.then(new Flow() {
@@ -682,14 +789,27 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
 
             @Override
             public void rollback(FlowRollback trigger, Map data) {
-                backend.disableVolumeCbtBackup(taskVO, vmUuid, hostUuid, new Completion(trigger) {
+                boolean backupTaken = volumeInfos.stream().anyMatch(info -> !Strings.isNullOrEmpty(info.getScratchNodeName()));
+                if (!backupTaken) {
+                    trigger.rollback();
+                    return;
+                }
+
+                List<VolumeCbtBackupRecordVO> rollbackRecords = buildVolumeCbtBackupRecords(
+                        taskVO.getUuid(), bitmapName, volumeInfos, true);
+                dbf.persistCollection(rollbackRecords);
+
+                backend.rollbackVolumeCbtBackup(vmUuid, hostUuid, bitmapName, volumeInfos, new Completion(trigger) {
                     @Override
                     public void success() {
+                        dbf.removeCollection(rollbackRecords, VolumeCbtBackupRecordVO.class);
                         trigger.rollback();
                     }
 
                     @Override
                     public void fail(ErrorCode errorCode) {
+                        logger.warn(String.format("rollback cbt[uuid:%s] backup for vm[uuid:%s] on host[uuid:%s] failed, continue rollback. %s",
+                                taskVO.getUuid(), vmUuid, hostUuid, errorCode));
                         trigger.rollback();
                     }
                 });
@@ -705,8 +825,17 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
                     public void success(List<VolumeCbtBackupInfo> infos) {
                         volumeInfos.clear();
                         volumeInfos.addAll(infos);
-                        persistVolumeCbtBackupRecord(taskVO.getUuid(), bitmapName, volumeInfos);
-                        trigger.next();
+                        persistVolumeCbtBackupRecord(taskVO.getUuid(), bitmapName, volumeInfos, new Completion(trigger) {
+                            @Override
+                            public void success() {
+                                trigger.next();
+                            }
+
+                            @Override
+                            public void fail(ErrorCode errorCode) {
+                                trigger.fail(errorCode);
+                            }
+                        });
                     }
 
                     @Override
@@ -767,7 +896,9 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
 
     private void handle(final DisableCbtTaskMsg msg) {
         String vmUuid = getVmUuidByCbtTaskUuid(msg.getUuid());
-        final String syncSignature = vmUuid == null ? String.format("disable-cbt-task-%s", msg.getUuid()) : getVmSyncSignature(vmUuid);
+        // VM state-change callbacks hold the VM queue while waiting for forced disable.
+        final String syncSignature = msg.isFromVmStateChange() || vmUuid == null
+                ? String.format("disable-cbt-task-%s", msg.getUuid()) : getVmSyncSignature(vmUuid);
         thdf.chainSubmit(new ChainTask(msg) {
             @Override
             public String getSyncSignature() {
@@ -810,6 +941,11 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
             return;
         }
 
+        if (taskVO.getStatus() == CbtTaskStatus.Stopped) {
+            completion.success();
+            return;
+        }
+
         final CbtTaskResourceRefVO refVO = Q.New(CbtTaskResourceRefVO.class)
                 .eq(CbtTaskResourceRefVO_.taskUuid, msg.getUuid())
                 .eq(CbtTaskResourceRefVO_.resourceType, VmInstanceVO.class.getSimpleName())
@@ -821,18 +957,6 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
         }
 
         final String vmUuid = refVO.getResourceUuid();
-        ErrorCode err = validateVmStateForOperation(vmUuid, VmInstanceState.Running, "disable cbt task");
-        if (err != null) {
-            completion.fail(err);
-            return;
-        }
-
-        String hostUuid = getVmHostUuid(vmUuid);
-        if (hostUuid == null) {
-            completion.fail(operr("host not found for VM: %s", vmUuid));
-            return;
-        }
-        CbtBackupHypervisorBackend backend = getCbtBackend(vmUuid);
         FlowChain chain = FlowChainBuilder.newSimpleFlowChain();
         chain.setName(String.format("start-cbt-task-for-vm-%s", vmUuid));
         chain.then(new NoRollbackFlow() {
@@ -840,6 +964,12 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
 
             @Override
             public void run(final FlowTrigger trigger, Map data) {
+                String hostUuid = getVmHostUuid(vmUuid);
+                if (hostUuid == null) {
+                    trigger.fail(operr("host not found for VM: %s", vmUuid));
+                    return;
+                }
+                CbtBackupHypervisorBackend backend = getCbtBackend(vmUuid);
                 backend.disableVolumeCbtBackup(taskVO, vmUuid, hostUuid, new Completion(completion) {
                     @Override
                     public void success() {
@@ -851,6 +981,11 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
                         trigger.fail(errorCode);
                     }
                 });
+            }
+
+            @Override
+            public boolean skip(Map data) {
+                return vmNotRunning(vmUuid);
             }
         });
         chain.then(new NoRollbackFlow() {
@@ -915,19 +1050,16 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
         });
     }
 
-    private void doCreateCbtTask(final APICreateCbtTaskMsg msg,
+    private void doCreateCbtTask(final CreateCbtTaskMsg msg,
                                  ReturnValueCompletion<CbtTaskInventory> completion) {
-        final String uuid = msg.getResourceUuid() == null ? Platform.getUuid() : msg.getResourceUuid();
+        final String uuid = msg.getUuid();
         final String vmUuid = msg.getVmInstanceUuid();
-        List<String> tasks = Q.New(CbtTaskResourceRefVO.class)
-                .eq(CbtTaskResourceRefVO_.resourceUuid, vmUuid)
-                .select(CbtTaskResourceRefVO_.taskUuid)
-                .listValues();
-        if (!tasks.isEmpty()) {
-            completion.fail(operr("VM [uuid: %s] have been protected by task: %s", vmUuid, tasks.get(0)));
+        List<String> existingTaskUuids = CbtTaskConflictChecker.getTaskUuids(vmUuid);
+        if (!existingTaskUuids.isEmpty()) {
+            completion.fail(operr("VM[uuid: %s] already has a CBT task[uuid: %s], cannot create another task.",
+                    vmUuid, existingTaskUuids.get(0)));
             return;
         }
-
         CbtTaskVO taskVO = new SQLBatchWithReturn<CbtTaskVO>() {
             @Override
             protected CbtTaskVO scripts() {
@@ -959,8 +1091,8 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
     public void prepareCbtVolumes(List<String> volumeUuids, String accountUuid, String hostUuid, String cbtTaskUuid, ReturnValueCompletion<List<VolumeCbtBackupInfo>> completion) {
         List<VolumeCbtBackupInfo> infos = new ArrayList<VolumeCbtBackupInfo>();
         KVMHostInventory inv = KVMHostInventory.valueOf(dbf.findByUuid(hostUuid, KVMHostVO.class));
+        String nbdServer = CbtBackupNetworkUtils.getBackupAddress(inv);
 
-        List<ErrorCode> errs = new ArrayList<>();
         new While<>(volumeUuids).step((uuid, wcompl) -> {
             VolumeVO vo = getVolumeByUuid(uuid);
             PrimaryStorageVO ps = Q.New(PrimaryStorageVO.class).eq(PrimaryStorageVO_.uuid, vo.getPrimaryStorageUuid()).find();
@@ -984,7 +1116,7 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
                 @Override
                 public void run(MessageReply reply) {
                     if (!reply.isSuccess()) {
-                        errs.add(operr("create cbt volumes failed. details is: %s", reply.getError().getDetails()));
+                        wcompl.addError(operr("create cbt volumes failed. details is: %s", reply.getError().getDetails()));
                         wcompl.done();
                         return;
                     }
@@ -993,8 +1125,8 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
 
                     VolumeCbtBackupInfo info = new VolumeCbtBackupInfo();
                     info.setVolume(VolumeTO.valueOf(VolumeInventory.valueOf(vo), inv));
-                    info.setTarget(cReply.getInventory().getInstallPath());
-                    info.setNbdServer(inv.getManagementIp());
+                    info.setTarget(VolumeTO.valueOf(cReply.getInventory(), inv).getInstallPath());
+                    info.setNbdServer(nbdServer);
                     infos.add(info);
                     wcompl.done();
                 }
@@ -1002,10 +1134,10 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
         }, 5).run(new WhileDoneCompletion(completion) {
             @Override
             public void done(ErrorCodeList errorCodeList) {
-                if (errs.isEmpty()) {
+                if (errorCodeList.isEmpty()) {
                     completion.success(infos);
                 } else {
-                    completion.fail(errs.get(0));
+                    completion.fail(errorCodeList.wrapOrNull());
                 }
             }
         });
@@ -1018,33 +1150,43 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
             return;
         }
 
-        List<ErrorCode> errs = new ArrayList<>();
         new While<>(uuids).step((uuid, wcompl) -> {
-            DeleteVolumeMsg msg = new DeleteVolumeMsg();
-            msg.setDeletionPolicy(VolumeDeletionPolicyManager.VolumeDeletionPolicy.Direct.toString());
-            msg.setUuid(uuid);
-            bus.makeTargetServiceIdByResourceUuid(msg, VolumeConstant.SERVICE_ID, uuid);
-            bus.send(msg, new CloudBusCallBack(wcompl) {
+            DeleteVolumeMsg delete = new DeleteVolumeMsg();
+            delete.setUuid(uuid);
+            delete.setDeletionPolicy(VolumeDeletionPolicyManager.VolumeDeletionPolicy.Delay.toString());
+            bus.makeTargetServiceIdByResourceUuid(delete, VolumeConstant.SERVICE_ID, uuid);
+            bus.send(delete, new CloudBusCallBack(wcompl) {
                 @Override
-                public void run(MessageReply reply) {
-                    if (!reply.isSuccess()) {
-                        logger.warn(String.format("failed to expunge the volume[uuid:%s], %s", uuid, reply.getError()));
-                        errs.add(reply.getError());
-                    } else {
-                        deleteResourceUuidsForCbtTask(uuid, taskUuid);
-                        logger.debug(String.format("successfully expunged the volume [uuid:%s]", uuid));
+                public void run(MessageReply deleteReply) {
+                    if (!deleteReply.isSuccess()) {
+                        logger.warn(String.format("failed to delete the volume[uuid:%s], %s", uuid, deleteReply.getError()));
+                        wcompl.addError(deleteReply.getError());
+                        wcompl.done();
+                        return;
                     }
-                    wcompl.done();
+
+                    ExpungeVolumeMsg expunge = new ExpungeVolumeMsg();
+                    expunge.setVolumeUuid(uuid);
+                    bus.makeTargetServiceIdByResourceUuid(expunge, VolumeConstant.SERVICE_ID, uuid);
+                    bus.send(expunge, new CloudBusCallBack(wcompl) {
+                        @Override
+                        public void run(MessageReply expungeReply) {
+                            if (expungeReply.isSuccess()) {
+                                deleteResourceUuidsForCbtTask(uuid, taskUuid);
+                                logger.debug(String.format("successfully expunged the volume [uuid:%s]", uuid));
+                            } else {
+                                logger.warn(String.format("failed to expunge the volume[uuid:%s], %s", uuid, expungeReply.getError()));
+                                wcompl.addError(expungeReply.getError());
+                            }
+                            wcompl.done();
+                        }
+                    });
                 }
             });
         }, 5).run(new WhileDoneCompletion(completion) {
             @Override
             public void done(ErrorCodeList errorCodeList) {
-                if (errs.isEmpty()) {
-                    completion.success();
-                } else {
-                    completion.fail(errs.get(0));
-                }
+                completion.next(errorCodeList.wrapOrNull());
             }
         });
     }
@@ -1197,6 +1339,26 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
                 .findValue();
     }
 
+    private boolean hasCbtCleanupRecords(String taskUuid) {
+        return Q.New(VolumeCbtBackupRecordVO.class)
+                .eq(VolumeCbtBackupRecordVO_.taskUuid, taskUuid)
+                .isExists();
+    }
+
+    private boolean shouldRetainCbtVolumesAfterRollback(String taskUuid) {
+        List<VolumeCbtBackupRecordVO> records = Q.New(VolumeCbtBackupRecordVO.class)
+                .eq(VolumeCbtBackupRecordVO_.taskUuid, taskUuid)
+                .notNull(VolumeCbtBackupRecordVO_.cleanupAttemptUuid)
+                .list();
+        return CbtCleanupRecordPolicy.shouldRetainScratchVolumes(records);
+    }
+
+
+    @Override
+    public ErrorCode check(String vmUuid, String currentResourceUuid) {
+        return CbtTaskConflictChecker.checkTaskConflict(vmUuid, currentResourceUuid);
+    }
+
     @Override
     public String getId() {
         return bus.makeLocalServiceId(CbtBackupConstant.SERVICE_ID);
@@ -1226,8 +1388,26 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
         logger.debug(String.format("Cbt task[%s]'s status changed from %s to %s", cbtTaskUuid, vo.getStatus(), newStatus));
     }
 
-    protected void persistVolumeCbtBackupRecord(String cbtTaskUuid, String lastBitmapName, List<VolumeCbtBackupInfo> backupInfos) {
+    protected void persistVolumeCbtBackupRecord(String cbtTaskUuid, String lastBitmapName,
+                                                 List<VolumeCbtBackupInfo> backupInfos, Completion completion) {
+        List<VolumeCbtBackupRecordVO> records = buildVolumeCbtBackupRecords(cbtTaskUuid, lastBitmapName, backupInfos, false);
+        if (records.isEmpty()) {
+            completion.success();
+            return;
+        }
+        dbf.persistCollection(records);
+        completion.success();
+    }
+
+    private List<VolumeCbtBackupRecordVO> buildVolumeCbtBackupRecords(String cbtTaskUuid, String lastBitmapName,
+                                                                      List<VolumeCbtBackupInfo> backupInfos,
+                                                                      boolean onlyStarted) {
+        List<VolumeCbtBackupRecordVO> records = new ArrayList<>(backupInfos.size());
+        String cleanupAttemptUuid = onlyStarted ? Platform.getUuid() : null;
         for (VolumeCbtBackupInfo info : backupInfos) {
+            if (onlyStarted && Strings.isNullOrEmpty(info.getScratchNodeName())) {
+                continue;
+            }
             VolumeCbtBackupRecordVO recodeVO = new VolumeCbtBackupRecordVO();
             recodeVO.setTaskUuid(cbtTaskUuid);
             recodeVO.setMode(info.getMode());
@@ -1236,7 +1416,9 @@ public class CbtBackupManagerImpl extends AbstractService implements Component, 
             recodeVO.setTarget(info.getTarget());
             recodeVO.setVolumeUuid(info.getVolume().getVolumeUuid());
             recodeVO.setScratchNodeName(info.getScratchNodeName());
-            dbf.persistAndRefresh(recodeVO);
+            recodeVO.setCleanupAttemptUuid(cleanupAttemptUuid);
+            records.add(recodeVO);
         }
+        return records;
     }
 }

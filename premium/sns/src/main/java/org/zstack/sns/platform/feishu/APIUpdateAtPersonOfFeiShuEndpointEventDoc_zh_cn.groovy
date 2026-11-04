@@ -12,21 +12,21 @@ doc {
 		path "org.zstack.sns.platform.feishu.APIUpdateAtPersonOfFeiShuEndpointEvent.inventory"
 		desc "更新飞书@用户结果"
 		type "SNSFeiShuAtPersonInventory"
-		since "zsv 4.2.0"
+		since "zsv_4.2.0"
 		clz SNSFeiShuAtPersonInventory.class
 	}
 	field {
 		name "success"
 		desc ""
 		type "boolean"
-		since "zsv 4.2.0"
+		since "zsv_4.2.0"
 	}
 	ref {
 		name "error"
 		path "org.zstack.sns.platform.feishu.APIUpdateAtPersonOfFeiShuEndpointEvent.error"
 		desc "错误码，若不为null，则表示操作失败, 操作成功时该字段为null",false
 		type "ErrorCode"
-		since "zsv 4.2.0"
+		since "zsv_4.2.0"
 		clz ErrorCode.class
 	}
 }

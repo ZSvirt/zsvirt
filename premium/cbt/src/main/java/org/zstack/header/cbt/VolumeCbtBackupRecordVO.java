@@ -37,6 +37,9 @@ public class VolumeCbtBackupRecordVO implements Serializable {
     private String lastBitmapName;
 
     @Column
+    private String cleanupAttemptUuid;
+
+    @Column
     private Timestamp createDate;
 
     @Column
@@ -109,6 +112,14 @@ public class VolumeCbtBackupRecordVO implements Serializable {
 
     public void setLastBitmapName(String lastBitmapName) {
         this.lastBitmapName = lastBitmapName;
+    }
+
+    public String getCleanupAttemptUuid() {
+        return cleanupAttemptUuid;
+    }
+
+    public void setCleanupAttemptUuid(String cleanupAttemptUuid) {
+        this.cleanupAttemptUuid = cleanupAttemptUuid;
     }
 
     public Timestamp getCreateDate() {

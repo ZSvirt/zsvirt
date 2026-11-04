@@ -1,6 +1,7 @@
 package org.zstack.header.longjob;
 
 import org.zstack.header.configuration.PythonClassInventory;
+import org.zstack.header.message.DocUtils;
 import org.zstack.header.message.NoJsonSchema;
 import org.zstack.header.search.Inventory;
 
@@ -174,5 +175,11 @@ public class LongJobInventory implements Serializable {
 
     public void setExecuteTime(Long executeTime) {
         this.executeTime = executeTime;
+    }
+
+    public static LongJobInventory __example__() {
+        LongJobInventory inv = new LongJobInventory();
+        inv.setUuid(DocUtils.createFixedUuid(LongJobVO.class));
+        return inv;
     }
 }

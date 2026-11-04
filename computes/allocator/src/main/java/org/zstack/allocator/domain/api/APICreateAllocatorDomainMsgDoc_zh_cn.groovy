@@ -28,7 +28,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "1.0.1, zsv 5.2.0"
+					since "1.0.1, zsv_5.2.0"
 				}
 				column {
 					name "description"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "1.0.1, zsv 5.2.0"
+					since "1.0.1, zsv_5.2.0"
 				}
 				column {
 					name "zoneUuid"
@@ -46,16 +46,16 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "1.0.1, zsv 5.2.0"
+					since "1.0.1, zsv_5.2.0"
 				}
 				column {
 					name "rules"
 					enclosedIn "params"
-					desc "有序规则列表，顺序即求值顺序（自上而下、先匹配先生效，类似 iptables）。落库时列表下标写入 priority，从 0 开始"
+					desc "有序规则列表，顺序即求值顺序（自上而下、后写覆盖）。Host/Cluster、主存储、L3 分链求值；链上有 Include 则为白名单，否则为黑名单。例外规则放在更宽规则后面。落库时列表下标写入 priority，从 0 开始"
 					location "body"
 					type "List"
 					optional true
-					since "1.0.1, zsv 5.2.0"
+					since "1.0.1, zsv_5.2.0"
 				}
 				column {
 					name "scenes"
@@ -64,7 +64,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "1.0.1, zsv 5.2.0"
+					since "1.0.1, zsv_5.2.0"
 					values ("NewCreate","Start","Migrate","Ha","HostMaintenance","Drs")
 				}
 				column {
@@ -74,7 +74,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "1.0.1, zsv 5.2.0"
+					since "1.0.1, zsv_5.2.0"
 				}
 				column {
 					name "tagUuids"
@@ -83,7 +83,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "1.0.1, zsv 5.2.0"
+					since "1.0.1, zsv_5.2.0"
 				}
 				column {
 					name "systemTags"
@@ -92,7 +92,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "1.0.1, zsv 5.2.0"
+					since "1.0.1, zsv_5.2.0"
 				}
 				column {
 					name "userTags"
@@ -101,7 +101,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "1.0.1, zsv 5.2.0"
+					since "1.0.1, zsv_5.2.0"
 				}
 			}
 		}

@@ -1,7 +1,5 @@
 package org.zstack.header.core.encrypt;
 
-import org.zstack.header.core.trash.InstallPathRecycleVO;
-
 import javax.persistence.metamodel.SingularAttribute;
 import javax.persistence.metamodel.StaticMetamodel;
 import java.sql.Timestamp;

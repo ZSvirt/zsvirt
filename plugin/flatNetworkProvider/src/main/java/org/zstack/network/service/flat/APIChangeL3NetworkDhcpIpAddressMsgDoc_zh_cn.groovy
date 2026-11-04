@@ -28,7 +28,7 @@ doc {
 					location "url"
 					type "String"
 					optional false
-					since "4.10.16"
+					since "zsv_4.10.16"
 				}
 				column {
 					name "dhcpServerIp"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "4.10.16"
+					since "zsv_4.10.16"
 				}
 				column {
 					name "dhcpv6ServerIp"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "4.10.16"
+					since "zsv_4.10.16"
 				}
 				column {
 					name "systemTags"
@@ -55,7 +55,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "4.10.16"
+					since "zsv_4.10.16"
 				}
 				column {
 					name "userTags"
@@ -64,7 +64,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "4.10.16"
+					since "zsv_4.10.16"
 				}
 			}
 		}

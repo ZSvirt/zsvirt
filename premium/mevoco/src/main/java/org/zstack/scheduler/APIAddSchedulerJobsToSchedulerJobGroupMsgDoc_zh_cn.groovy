@@ -28,7 +28,7 @@ doc {
 					location "url"
 					type "String"
 					optional false
-					since "3.4.0"
+					since "zsv_3.4.0"
 				}
 				column {
 					name "schedulerJobUuids"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "List"
 					optional false
-					since "3.4.0"
+					since "zsv_3.4.0"
 				}
 				column {
 					name "priorities"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "Map"
 					optional true
-					since "zsv 4.3.0"
+					since "zsv_4.3.0"
 				}
 				column {
 					name "systemTags"
@@ -55,7 +55,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.4.0"
+					since "zsv_3.4.0"
 				}
 				column {
 					name "userTags"
@@ -64,7 +64,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.4.0"
+					since "zsv_3.4.0"
 				}
 			}
 		}

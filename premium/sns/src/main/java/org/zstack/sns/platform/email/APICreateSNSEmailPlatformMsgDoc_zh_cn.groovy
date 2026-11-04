@@ -28,7 +28,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "2.3"
+					since "zsv_2.3"
 				}
 				column {
 					name "smtpPort"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "Integer"
 					optional false
-					since "2.3"
+					since "zsv_2.3"
 				}
 				column {
 					name "username"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "2.3"
+					since "zsv_2.3"
 				}
 				column {
 					name "password"
@@ -55,7 +55,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "2.3"
+					since "zsv_2.3"
 				}
 				column {
 					name "name"
@@ -64,7 +64,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "2.3"
+					since "zsv_2.3"
 				}
 				column {
 					name "description"
@@ -73,7 +73,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "2.3"
+					since "zsv_2.3"
 				}
 				column {
 					name "resourceUuid"
@@ -82,7 +82,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "2.3"
+					since "zsv_2.3"
 				}
 				column {
 					name "systemTags"
@@ -91,7 +91,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "2.3"
+					since "zsv_2.3"
 				}
 				column {
 					name "userTags"
@@ -100,7 +100,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "2.3"
+					since "zsv_2.3"
 				}
 				column {
 					name "encryptType"
@@ -109,7 +109,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 					values ("SSL","STARTTLS","NONE")
 				}
 				column {
@@ -119,7 +119,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.4.0"
+					since "zsv_3.4.0"
 				}
 			}
 		}

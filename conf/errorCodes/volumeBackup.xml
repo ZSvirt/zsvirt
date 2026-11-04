@@ -6,4 +6,9 @@
         <description>Unable to create volume backup for stopped vm.</description>
     </code>
 
+    <code>
+        <id>1001</id>
+        <description>Root volume backup not found when synchronizing VM backups.</description>
+    </code>
+
 </error>

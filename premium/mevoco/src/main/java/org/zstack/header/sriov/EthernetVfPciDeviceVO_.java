@@ -1,6 +1,6 @@
 package org.zstack.header.sriov;
 
-import org.zstack.pciDevice.PciDeviceVO_;
+import org.zstack.pciDevice.entity.PciDeviceVO_;
 
 import javax.persistence.metamodel.SingularAttribute;
 import javax.persistence.metamodel.StaticMetamodel;

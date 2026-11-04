@@ -18,7 +18,6 @@ public class InstantiateVmFromNewCreatedStruct {
     private List<String> dataVolumeTemplateUuids;
     private Map<String, List<String>> dataVolumeFromTemplateSystemTags;
     private List<VmNicSpec> l3NetworkUuids;
-    private String rootDiskOfferingUuid;
     private VmCreationStrategy strategy = VmCreationStrategy.InstantStart;
     private CpuArchitecture architecture;
     private List<String> rootVolumeSystemTags;
@@ -135,14 +134,6 @@ public class InstantiateVmFromNewCreatedStruct {
         this.l3NetworkUuids = l3NetworkUuids;
     }
 
-    public String getRootDiskOfferingUuid() {
-        return rootDiskOfferingUuid;
-    }
-
-    public void setRootDiskOfferingUuid(String rootDiskOfferingUuid) {
-        this.rootDiskOfferingUuid = rootDiskOfferingUuid;
-    }
-
     public void setStrategy(VmCreationStrategy strategy) {
         this.strategy = strategy;
     }
@@ -164,7 +155,6 @@ public class InstantiateVmFromNewCreatedStruct {
         struct.setDataVolumeTemplateUuids(msg.getDataVolumeTemplateUuids());
         struct.setDataVolumeFromTemplateSystemTags(msg.getDataVolumeFromTemplateSystemTags());
         struct.setL3NetworkUuids(msg.getL3NetworkUuids());
-        struct.setRootDiskOfferingUuid(msg.getRootDiskOfferingUuid());
         struct.setCandidatePrimaryStorageUuidsForRootVolume(msg.getCandidatePrimaryStorageUuidsForRootVolume());
         struct.setCandidatePrimaryStorageUuidsForDataVolume(msg.getCandidatePrimaryStorageUuidsForDataVolume());
         struct.strategy = VmCreationStrategy.valueOf(msg.getStrategy());

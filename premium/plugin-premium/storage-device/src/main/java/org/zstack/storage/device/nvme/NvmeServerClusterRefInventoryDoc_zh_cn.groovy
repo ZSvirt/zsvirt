@@ -10,24 +10,24 @@ doc {
 		name "nvmeServerUuid"
 		desc "NVMe 服务器 UUID"
 		type "String"
-		since "3.17.21"
+		since "zsv_3.17.21"
 	}
 	field {
 		name "clusterUuid"
 		desc "集群 UUID"
 		type "String"
-		since "3.17.21"
+		since "zsv_3.17.21"
 	}
 	field {
 		name "createDate"
 		desc "创建时间"
 		type "Timestamp"
-		since "3.17.21"
+		since "zsv_3.17.21"
 	}
 	field {
 		name "lastOpDate"
 		desc "最后一次修改时间"
 		type "Timestamp"
-		since "3.17.21"
+		since "zsv_3.17.21"
 	}
 }

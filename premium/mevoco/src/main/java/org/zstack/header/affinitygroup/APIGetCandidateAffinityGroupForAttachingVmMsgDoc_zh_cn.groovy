@@ -7,7 +7,7 @@ doc {
 
 	category "affinityGroup"
 
-	desc """获取可绑定云主机的亲和组"""
+	desc """获取可绑定虚拟机的亲和组"""
 
 	rest {
 		request {
@@ -28,7 +28,7 @@ doc {
 					location "query"
 					type "String"
 					optional false
-					since "3.10.0"
+					since "zsv_3.10.0"
 				}
 				column {
 					name "systemTags"
@@ -37,7 +37,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "3.10.0"
+					since "zsv_3.10.0"
 				}
 				column {
 					name "userTags"
@@ -46,7 +46,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "3.10.0"
+					since "zsv_3.10.0"
 				}
 			}
 		}

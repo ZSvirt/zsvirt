@@ -28,10 +28,9 @@
         <property name="ignoreUnresolvablePlaceholders" value="true"/>
     </bean>
 
-    <bean id="messageSource" class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
-        <property name="basename" value="i18n/messages"></property>
-        <property name="defaultEncoding" value="UTF-8"></property>
-        <property name="alwaysUseMessageFormat" value="true"></property>
+    <bean id="messageSource" class="org.zstack.core.i18n.ZSVirtI18nMessageSource">
+        <property name="defaultEncoding" value="UTF-8"/>
+        <property name="alwaysUseMessageFormat" value="true"/>
     </bean>
 
     <import resource="springConfigXml/AccountManager.xml"/>
@@ -74,8 +73,6 @@
     <import resource="springConfigXml/Kvm.xml"/>
     <import resource="springConfigXml/lb.xml"/>
     <import resource="springConfigXml/acl.xml"/>
-    <import resource="springConfigXml/accountImport.xml"/>
-    <import resource="springConfigXml/LdapManagerImpl.xml"/>
     <import resource="springConfigXml/localStorage.xml"/>
     <import resource="springConfigXml/ManagementNodeManager.xml"/>
     <import resource="springConfigXml/mediator.xml"/>
@@ -118,4 +115,9 @@
     <import resource="springConfigXml/HostNetworkManager.xml"/>
     <import resource="springConfigXml/telemetry.xml"/>
     <import resource="springConfigXml/allocatorDomain.xml"/>
+
+    <!-- authentications modules -->
+    <import resource="springConfigXml/authentications/accountImport.xml"/>
+    <import resource="springConfigXml/authentications/ldap.xml"/>
+    <import resource="springConfigXml/authentications/accessKey.xml"/>
 </beans>

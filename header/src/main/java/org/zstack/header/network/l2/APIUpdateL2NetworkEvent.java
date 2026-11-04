@@ -27,17 +27,7 @@ public class APIUpdateL2NetworkEvent extends APIEvent {
  
     public static APIUpdateL2NetworkEvent __example__() {
         APIUpdateL2NetworkEvent event = new APIUpdateL2NetworkEvent();
-        L2VlanNetworkInventory net = new L2VlanNetworkInventory();
-
-        net.setName("Test-Net");
-        net.setVlan(10);
-        net.setDescription("Test");
-        net.setZoneUuid(uuid());
-        net.setPhysicalInterface("eth0");
-        net.setType("L2VlanNetwork");
-
-        event.setInventory(net);
+        event.setInventory(L2VlanNetworkInventory.__example__());
         return event;
     }
-
 }

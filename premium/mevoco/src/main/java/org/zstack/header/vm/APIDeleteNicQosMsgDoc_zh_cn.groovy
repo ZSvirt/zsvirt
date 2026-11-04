@@ -7,7 +7,7 @@ doc {
 
 	category "mevoco"
 
-	desc """取消云主机网卡限速"""
+	desc """取消虚拟机网卡限速"""
 
 	rest {
 		request {
@@ -17,18 +17,18 @@ doc {
 
 			clz APIDeleteNicQosMsg.class
 
-			desc """取消云主机网卡限速"""
+			desc """取消虚拟机网卡限速"""
 
 			params {
 
 				column {
 					name "uuid"
 					enclosedIn ""
-					desc "云主机网卡的UUID"
+					desc "虚拟机网卡的UUID"
 					location "url"
 					type "String"
 					optional false
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "direction"
@@ -37,7 +37,7 @@ doc {
 					location "query"
 					type "String"
 					optional false
-					since "0.6"
+					since "zsv_0.6"
 					values ("in","out")
 				}
 				column {
@@ -47,7 +47,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "userTags"
@@ -56,7 +56,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 			}
 		}

@@ -8,7 +8,6 @@ import org.zstack.core.db.SQLBatchWithReturn;
 import org.zstack.header.message.APICreateMessage;
 import org.zstack.header.network.l3.*;
 import org.zstack.utils.CollectionUtils;
-import org.zstack.utils.function.ForEachFunction;
 
 public class AddressPoolIpRangeFactory implements IpRangeFactory {
     @Autowired
@@ -49,12 +48,8 @@ public class AddressPoolIpRangeFactory implements IpRangeFactory {
         }.execute();
 
         final IpRangeInventory finalIpr = AddressPoolInventory.valueOf1(vo);
-        CollectionUtils.safeForEach(pluginRgty.getExtensionList(AfterAddIpRangeExtensionPoint.class), new ForEachFunction<AfterAddIpRangeExtensionPoint>() {
-            @Override
-            public void run(AfterAddIpRangeExtensionPoint ext) {
-                ext.afterAddIpRange(finalIpr, msg.getSystemTags());
-            }
-        });
+        CollectionUtils.safeForEach(pluginRgty.getExtensionList(AfterAddIpRangeExtensionPoint.class),
+                ext -> ext.afterAddIpRange(finalIpr, msg.getSystemTags()));
 
         return finalIpr;
     }

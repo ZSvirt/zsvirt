@@ -3,11 +3,11 @@ package org.zstack.header.vm
 import org.zstack.header.vm.APIMigrateVmEvent
 
 doc {
-	title "热迁移云主机(MigrateVm)"
+	title "热迁移虚拟机(MigrateVm)"
 
 	category "vmInstance"
 
-	desc """将云主机热迁移至另一个物理机"""
+	desc """将虚拟机热迁移至另一个物理机"""
 
 	rest {
 		request {
@@ -24,11 +24,11 @@ doc {
 				column {
 					name "vmInstanceUuid"
 					enclosedIn "migrateVm"
-					desc "云主机UUID"
+					desc "虚拟机UUID"
 					location "url"
 					type "String"
 					optional false
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "hostUuid"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "migrateFromDestination"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "Boolean"
 					optional true
-					since "zsv 2.3"
+					since "zsv_2.3"
 				}
 				column {
 					name "allowUnknown"
@@ -55,7 +55,7 @@ doc {
 					location "body"
 					type "boolean"
 					optional true
-					since "zsv 3.6.0"
+					since "zsv_3.6.0"
 				}
 				column {
 					name "strategy"
@@ -64,7 +64,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 3.6.0"
+					since "zsv_3.6.0"
 					values ("auto-converge")
 				}
 				column {
@@ -74,7 +74,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "userTags"
@@ -83,7 +83,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "downTime"
@@ -92,7 +92,7 @@ doc {
 					location "body"
 					type "Integer"
 					optional true
-					since "zsv 3.16.21"
+					since "zsv_3.16.21"
 				}
 				column {
 					name "enableMigrationTls"
@@ -101,7 +101,7 @@ doc {
 					location "body"
 					type "Boolean"
 					optional true
-					since "1.0.1, zsv 5.1.0"
+					since "1.0.0, zsv_5.1.0"
 				}
 			}
 		}

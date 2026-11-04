@@ -24,12 +24,13 @@ public class BlockPrimaryStorageConstants {
 
     public static final String BLOCK_SNAPSHOT_LUN_NAME_PREFIX = "cloud-snapshot-";
 
-    enum Params {
-        BlockPrimaryStorageHostRef,
-        BlockPrimaryStorageBackend,
-        BlockScsiLun,
-        TemplateLun,
-        VolumeProvisioningStrategy,
-        CheckBeforeDeleteLunMap
+    static class Params {
+        public static final String
+            BlockPrimaryStorageHostRef = "BlockPrimaryStorageHostRef",
+            BlockPrimaryStorageBackend = "BlockPrimaryStorageBackend",
+            BlockScsiLun = "BlockScsiLun",
+            TemplateLun = "TemplateLun",
+            VolumeProvisioningStrategy = "VolumeProvisioningStrategy",
+            CheckBeforeDeleteLunMap = "CheckBeforeDeleteLunMap";
     }
 }

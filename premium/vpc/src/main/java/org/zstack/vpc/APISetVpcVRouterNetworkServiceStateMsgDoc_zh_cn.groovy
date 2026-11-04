@@ -28,7 +28,7 @@ doc {
 					location "url"
 					type "String"
 					optional false
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "networkService"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "0.6"
+					since "zsv_0.6"
 					values ("SNAT")
 				}
 				column {
@@ -47,7 +47,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "0.6"
+					since "zsv_0.6"
 					values ("enable","disable")
 				}
 				column {
@@ -57,7 +57,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.13.6"
+					since "zsv_3.13.6"
 				}
 				column {
 					name "systemTags"
@@ -66,7 +66,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.13.6"
+					since "zsv_3.13.6"
 				}
 				column {
 					name "userTags"
@@ -75,7 +75,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.13.6"
+					since "zsv_3.13.6"
 				}
 			}
 		}

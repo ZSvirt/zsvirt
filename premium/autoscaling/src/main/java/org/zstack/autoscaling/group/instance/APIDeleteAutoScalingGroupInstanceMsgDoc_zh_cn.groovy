@@ -7,7 +7,7 @@ doc {
 
 	category "autoscaling"
 
-	desc """手动删除伸缩组内云主机"""
+	desc """手动删除伸缩组内虚拟机"""
 
 	rest {
 		request {
@@ -24,11 +24,11 @@ doc {
 				column {
 					name "instanceUuid"
 					enclosedIn ""
-					desc "云主机UUID"
+					desc "虚拟机UUID"
 					location "url"
 					type "String"
 					optional false
-					since "3.1.0"
+					since "zsv_3.1.0"
 				}
 				column {
 					name "systemTags"
@@ -37,7 +37,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "3.1.0"
+					since "zsv_3.1.0"
 				}
 				column {
 					name "userTags"
@@ -46,7 +46,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "3.1.0"
+					since "zsv_3.1.0"
 				}
 				column {
 					name "deleteMode"
@@ -55,7 +55,7 @@ doc {
 					location "query"
 					type "String"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 			}
 		}

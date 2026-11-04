@@ -3,11 +3,11 @@ package org.zstack.header.vm
 import org.zstack.header.vm.APICleanupVmInstanceMetadataEvent
 
 doc {
-	title "清理云主机元数据"
+	title "清理虚拟机元数据"
 
-	category "云主机"
+	category "虚拟机"
 
-	desc """清理指定云主机在主存储上的元数据文件"""
+	desc """清理指定虚拟机在主存储上的元数据文件"""
 
 	rest {
 		request {
@@ -24,11 +24,11 @@ doc {
 				column {
 					name "vmUuids"
 					enclosedIn "cleanupVmInstanceMetadata"
-					desc "需要清理元数据的云主机UUID列表"
+					desc "需要清理元数据的虚拟机UUID列表"
 					location "body"
 					type "List"
 					optional false
-					since "zsv 5.0.0"
+					since "zsv_5.0.0"
 				}
 				column {
 					name "systemTags"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 5.0.0"
+					since "zsv_5.0.0"
 				}
 				column {
 					name "userTags"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 5.0.0"
+					since "zsv_5.0.0"
 				}
 			}
 		}

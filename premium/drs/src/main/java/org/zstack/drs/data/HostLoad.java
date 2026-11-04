@@ -15,6 +15,17 @@ public class HostLoad {
 
     private List<HostLoadOccupiedByVm> vmList = new ArrayList<>();
 
+    public HostLoad() {
+    }
+
+    public HostLoad(String hostUuid, Float usedCPUPercent, Long usedPhysicalMemoryBit, List<HostLoadOccupiedByVm> vmList) {
+        this.hostUuid = hostUuid;
+        this.usedCPUPercent = usedCPUPercent;
+        this.usedPhysicalMemoryBit = usedPhysicalMemoryBit;
+        this.vmList = vmList;
+    }
+
+
     public String getHostUuid() {
         return hostUuid;
     }

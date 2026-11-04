@@ -6,7 +6,6 @@ import org.zstack.header.Component;
 import org.zstack.header.storage.primary.*;
 import org.zstack.utils.CollectionUtils;
 import org.zstack.utils.Utils;
-import org.zstack.utils.function.ForEachFunction;
 import org.zstack.utils.logging.CLogger;
 
 import java.util.List;
@@ -37,22 +36,12 @@ class PrimaryStorageExtensionPointEmitter implements Component {
     }
 
     void beforeDelete(final PrimaryStorageInventory inv) {
-        CollectionUtils.safeForEach(delExts, new ForEachFunction<PrimaryStorageDeleteExtensionPoint>() {
-            @Override
-            public void run(PrimaryStorageDeleteExtensionPoint arg) {
-                arg.beforeDeletePrimaryStorage(inv);
-            }
-        });
+        CollectionUtils.safeForEach(delExts, arg -> arg.beforeDeletePrimaryStorage(inv));
     }
 
 
     void afterDelete(final PrimaryStorageInventory inv) {
-        CollectionUtils.safeForEach(delExts, new ForEachFunction<PrimaryStorageDeleteExtensionPoint>() {
-            @Override
-            public void run(PrimaryStorageDeleteExtensionPoint arg) {
-                arg.afterDeletePrimaryStorage(inv);
-            }
-        });
+        CollectionUtils.safeForEach(delExts, arg -> arg.afterDeletePrimaryStorage(inv));
     }
 
     void preChange(PrimaryStorageVO vo, PrimaryStorageStateEvent evt) throws PrimaryStorageException {
@@ -74,23 +63,13 @@ class PrimaryStorageExtensionPointEmitter implements Component {
     void beforeChange(PrimaryStorageVO vo, final PrimaryStorageStateEvent evt) {
         final PrimaryStorageInventory inv = PrimaryStorageInventory.valueOf(vo);
         final PrimaryStorageState next = AbstractPrimaryStorage.getNextState(vo.getState(), evt);
-        CollectionUtils.safeForEach(changeExts, new ForEachFunction<PrimaryStorageChangeStateExtensionPoint>() {
-            @Override
-            public void run(PrimaryStorageChangeStateExtensionPoint arg) {
-                arg.beforeChangePrimaryStorageState(inv, evt, next);
-            }
-        });
+        CollectionUtils.safeForEach(changeExts, arg -> arg.beforeChangePrimaryStorageState(inv, evt, next));
     }
 
 
     void afterChange(PrimaryStorageVO vo, final PrimaryStorageStateEvent evt, final PrimaryStorageState preState) {
         final PrimaryStorageInventory inv = PrimaryStorageInventory.valueOf(vo);
-        CollectionUtils.safeForEach(changeExts, new ForEachFunction<PrimaryStorageChangeStateExtensionPoint>() {
-            @Override
-            public void run(PrimaryStorageChangeStateExtensionPoint arg) {
-                arg.afterChangePrimaryStorageState(inv, evt, preState);
-            }
-        });
+        CollectionUtils.safeForEach(changeExts, arg -> arg.afterChangePrimaryStorageState(inv, evt, preState));
     }
 
     void preAttach(PrimaryStorageVO vo, String clusterUuid) throws PrimaryStorageException {
@@ -110,33 +89,18 @@ class PrimaryStorageExtensionPointEmitter implements Component {
 
     void beforeAttach(PrimaryStorageVO vo, final String clusterUuid) {
         final PrimaryStorageInventory inv = PrimaryStorageInventory.valueOf(vo);
-        CollectionUtils.safeForEach(attachExts, new ForEachFunction<PrimaryStorageAttachExtensionPoint>() {
-            @Override
-            public void run(PrimaryStorageAttachExtensionPoint arg) {
-                arg.beforeAttachPrimaryStorage(inv, clusterUuid);
-            }
-        });
+        CollectionUtils.safeForEach(attachExts, arg -> arg.beforeAttachPrimaryStorage(inv, clusterUuid));
     }
 
     void failToAttach(PrimaryStorageVO vo, final String clusterUuid) {
         final PrimaryStorageInventory inv = PrimaryStorageInventory.valueOf(vo);
-        CollectionUtils.safeForEach(attachExts, new ForEachFunction<PrimaryStorageAttachExtensionPoint>() {
-            @Override
-            public void run(PrimaryStorageAttachExtensionPoint arg) {
-                arg.failToAttachPrimaryStorage(inv, clusterUuid);
-            }
-        });
+        CollectionUtils.safeForEach(attachExts, arg -> arg.failToAttachPrimaryStorage(inv, clusterUuid));
     }
 
 
     void afterAttach(PrimaryStorageVO vo, final String clusterUuid) {
         final PrimaryStorageInventory inv = PrimaryStorageInventory.valueOf(vo);
-        CollectionUtils.safeForEach(attachExts, new ForEachFunction<PrimaryStorageAttachExtensionPoint>() {
-            @Override
-            public void run(PrimaryStorageAttachExtensionPoint arg) {
-                arg.afterAttachPrimaryStorage(inv, clusterUuid);
-            }
-        });
+        CollectionUtils.safeForEach(attachExts, arg -> arg.afterAttachPrimaryStorage(inv, clusterUuid));
     }
 
     String preDetach(PrimaryStorageVO vo, String clusterUuid) throws PrimaryStorageException {
@@ -158,32 +122,17 @@ class PrimaryStorageExtensionPointEmitter implements Component {
 
     void beforeDetach(PrimaryStorageVO vo, final String clusterUuid) {
         final PrimaryStorageInventory inv = PrimaryStorageInventory.valueOf(vo);
-        CollectionUtils.safeForEach(detachExts, new ForEachFunction<PrimaryStorageDetachExtensionPoint>() {
-            @Override
-            public void run(PrimaryStorageDetachExtensionPoint arg) {
-                arg.beforeDetachPrimaryStorage(inv, clusterUuid);
-            }
-        });
+        CollectionUtils.safeForEach(detachExts, arg -> arg.beforeDetachPrimaryStorage(inv, clusterUuid));
     }
 
     void failToDetach(PrimaryStorageVO vo, final String clusterUuid) {
         final PrimaryStorageInventory inv = PrimaryStorageInventory.valueOf(vo);
-        CollectionUtils.safeForEach(detachExts, new ForEachFunction<PrimaryStorageDetachExtensionPoint>() {
-            @Override
-            public void run(PrimaryStorageDetachExtensionPoint arg) {
-                arg.failToDetachPrimaryStorage(inv, clusterUuid);
-            }
-        });
+        CollectionUtils.safeForEach(detachExts, arg -> arg.failToDetachPrimaryStorage(inv, clusterUuid));
     }
 
     void afterDetach(PrimaryStorageVO vo, final String clusterUuid) {
         final PrimaryStorageInventory inv = PrimaryStorageInventory.valueOf(vo);
-        CollectionUtils.safeForEach(detachExts, new ForEachFunction<PrimaryStorageDetachExtensionPoint>() {
-            @Override
-            public void run(PrimaryStorageDetachExtensionPoint arg) {
-                arg.afterDetachPrimaryStorage(inv, clusterUuid);
-            }
-        });
+        CollectionUtils.safeForEach(detachExts, arg -> arg.afterDetachPrimaryStorage(inv, clusterUuid));
     }
 
     @Override

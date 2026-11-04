@@ -48,8 +48,10 @@ import org.zstack.header.volume.*;
 import org.zstack.kvm.KVMConstant;
 import org.zstack.storage.primary.EstimateVolumeTemplateSizeOnPrimaryStorageMsg;
 import org.zstack.storage.primary.EstimateVolumeTemplateSizeOnPrimaryStorageReply;
+import org.zstack.storage.primary.ImageCacheCleanParam;
 import org.zstack.storage.primary.PrimaryStorageBase;
 import org.zstack.storage.primary.PrimaryStorageCapacityUpdater;
+import org.zstack.storage.primary.StoragePathOwnershipHelper;
 import org.zstack.storage.snapshot.reference.VolumeSnapshotReferenceUtils;
 import org.zstack.storage.volume.VolumeErrors;
 import org.zstack.storage.volume.VolumeSystemTags;
@@ -63,6 +65,7 @@ import javax.persistence.TypedQuery;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -205,6 +208,7 @@ public class NfsPrimaryStorage extends PrimaryStorageBase {
         List<String> cuuids = q.listValue();
         if (cuuids.isEmpty()) {
             completion.success();
+            return;
         }
 
         for (UpdatePrimaryStorageExtensionPoint ext : pluginRgty.getExtensionList(UpdatePrimaryStorageExtensionPoint.class)) {
@@ -297,7 +301,7 @@ public class NfsPrimaryStorage extends PrimaryStorageBase {
     @Override
     protected void handle(APICleanUpImageCacheOnPrimaryStorageMsg msg) {
         APICleanUpImageCacheOnPrimaryStorageEvent evt = new APICleanUpImageCacheOnPrimaryStorageEvent(msg.getId());
-        imageCacheCleaner.cleanup(msg.getUuid(), false);
+        imageCacheCleaner.cleanup(msg.getUuid(), new ImageCacheCleanParam(true, msg.isForce()));
         bus.publish(evt);
     }
 
@@ -1008,6 +1012,15 @@ public class NfsPrimaryStorage extends PrimaryStorageBase {
         final VolumeInventory vol = msg.getVolume();
         final NfsPrimaryStorageBackend backend = getBackend(nfsMgr.findHypervisorTypeByImageFormatAndPrimaryStorageUuid(vol.getFormat(), self.getUuid()));
 
+        List<StoragePathOwnershipHelper.Owner> otherOwners = StoragePathOwnershipHelper.findOtherOwners(
+                self.getUuid(), vol.getInstallPath(), Collections.singleton(vol.getUuid()));
+        if (!otherOwners.isEmpty()) {
+            reply.setError(err(VolumeErrors.VOLUME_IN_USE,
+                    "refuse to delete volume[uuid:%s, path:%s] because the physical path is still owned by %s",
+                    vol.getUuid(), vol.getInstallPath(), otherOwners));
+            bus.reply(msg, reply);
+            return;
+        }
         Completion completion = new Completion(msg) {
             @Override
             public void success() {

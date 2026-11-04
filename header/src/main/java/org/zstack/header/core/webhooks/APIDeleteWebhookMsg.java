@@ -28,7 +28,7 @@ public class APIDeleteWebhookMsg extends APIDeleteMessage {
 
     public static APIDeleteWebhookMsg __example__() {
         APIDeleteWebhookMsg msg = new APIDeleteWebhookMsg();
-        msg.setUuid(uuid());
+        msg.setUuid(uuid(WebhookVO.class));
         return msg;
     }
 }

@@ -28,7 +28,7 @@ doc {
 					location "url"
 					type "String"
 					optional false
-					since "2.6"
+					since "zsv_2.6"
 				}
 				column {
 					name "backupStorageUuid"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "2.6"
+					since "zsv_2.6"
 				}
 				column {
 					name "name"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "2.6"
+					since "zsv_2.6"
 				}
 				column {
 					name "description"
@@ -55,7 +55,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "2.6"
+					since "zsv_2.6"
 				}
 				column {
 					name "resourceUuid"
@@ -64,7 +64,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "2.6"
+					since "zsv_2.6"
 				}
 				column {
 					name "systemTags"
@@ -73,7 +73,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "2.6"
+					since "zsv_2.6"
 				}
 				column {
 					name "userTags"
@@ -82,7 +82,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "2.6"
+					since "zsv_2.6"
 				}
 				column {
 					name "volumeReadBandwidth"
@@ -91,7 +91,7 @@ doc {
 					location "body"
 					type "Long"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "volumeWriteBandwidth"
@@ -100,7 +100,7 @@ doc {
 					location "body"
 					type "Long"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "networkReadBandwidth"
@@ -109,7 +109,7 @@ doc {
 					location "body"
 					type "Long"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "networkWriteBandwidth"
@@ -118,7 +118,7 @@ doc {
 					location "body"
 					type "Long"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "mode"
@@ -127,7 +127,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 					values ("full")
 				}
 				column {
@@ -137,7 +137,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.4.0"
+					since "zsv_3.4.0"
 				}
 			}
 		}

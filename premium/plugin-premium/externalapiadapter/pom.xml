@@ -76,7 +76,12 @@
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>fastjson</artifactId>
-            <version>1.2.83</version>
+            <version>2.0.65</version>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
         </dependency>
 <!--        end ummAk dependencies-->
 <!--        begin EagleEye dependencies-->
@@ -101,6 +106,9 @@
                 <version>${project.compiler.version}</version>
                 <configuration>
                     <compilerId>groovy-eclipse-compiler</compilerId>
+                    <compilerArgs>
+                        <arg>-warn:-serial</arg>
+                    </compilerArgs>
                     <source>${project.java.version}</source>
                     <target>${project.java.version}</target>
                     <debuglevel>lines,vars,source</debuglevel>

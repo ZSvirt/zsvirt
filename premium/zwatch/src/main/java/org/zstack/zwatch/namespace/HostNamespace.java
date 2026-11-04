@@ -14,6 +14,7 @@ import org.zstack.zwatch.namespace.event.HostNamespaceEvent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.zstack.pciDevice.message.PciDeviceAddress;
 
 public class HostNamespace extends HostAbstractNamespace implements Component{
     public static final String NAME = "Host";

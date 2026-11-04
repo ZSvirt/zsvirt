@@ -19,4 +19,12 @@ public class GetAllocatorDomainVmsResult {
         return this.nextStartVms;
     }
 
+    public java.util.List candidateVms;
+    public void setCandidateVms(java.util.List candidateVms) {
+        this.candidateVms = candidateVms;
+    }
+    public java.util.List getCandidateVms() {
+        return this.candidateVms;
+    }
+
 }

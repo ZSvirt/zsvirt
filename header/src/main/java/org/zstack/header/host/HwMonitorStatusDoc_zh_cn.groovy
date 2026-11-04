@@ -10,18 +10,18 @@ doc {
 		name "Normal"
 		desc "正常"
 		type "HwMonitorStatus"
-		since "zsv 4.10.0"
+		since "zsv_4.10.0"
 	}
 	field {
 		name "Error"
 		desc "异常"
 		type "HwMonitorStatus"
-		since "zsv 4.10.0"
+		since "zsv_4.10.0"
 	}
 	field {
 		name "Unknown"
 		desc "未知"
 		type "HwMonitorStatus"
-		since "zsv 4.10.0"
+		since "zsv_4.10.0"
 	}
 }

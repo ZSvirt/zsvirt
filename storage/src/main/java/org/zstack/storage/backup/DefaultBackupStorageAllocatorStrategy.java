@@ -16,8 +16,6 @@ import java.util.List;
 import java.util.Map;
 
 import static org.zstack.core.Platform.err;
-import static org.zstack.utils.CollectionDSL.e;
-import static org.zstack.utils.CollectionDSL.map;
 
 
 @Configurable(preConstruction = true, autowire = Autowire.BY_TYPE)
@@ -45,7 +43,7 @@ public class DefaultBackupStorageAllocatorStrategy implements BackupStorageAlloc
 
         final Result ret = new Result();
         allocatorChain.setName(String.format("allocate-backup-storage-msg-%s", spec.getAllocationMessage().getId()));
-        allocatorChain.setData(map(e(AllocatorParams.SPEC, spec)));
+        allocatorChain.putData(AllocatorParams.SPEC, spec);
         allocatorChain.done(new FlowDoneHandler(null) {
             @Override
             public void handle(Map data) {

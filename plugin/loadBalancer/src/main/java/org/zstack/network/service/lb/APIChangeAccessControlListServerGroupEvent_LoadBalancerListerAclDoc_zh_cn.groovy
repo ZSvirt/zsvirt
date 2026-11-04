@@ -10,18 +10,18 @@ doc {
 		name "aclUuid"
 		desc ""
 		type "String"
-		since "0.6"
+		since "zsv_0.6"
 	}
 	field {
 		name "listenerUuid"
 		desc ""
 		type "String"
-		since "0.6"
+		since "zsv_0.6"
 	}
 	field {
 		name "serverGroupUuids"
 		desc ""
 		type "List"
-		since "0.6"
+		since "zsv_0.6"
 	}
 }

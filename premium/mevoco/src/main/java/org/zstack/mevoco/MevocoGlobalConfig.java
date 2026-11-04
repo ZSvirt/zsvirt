@@ -1,5 +1,6 @@
 package org.zstack.mevoco;
 
+import org.zstack.core.config.BindResourceConfig;
 import org.zstack.core.config.GlobalConfig;
 import org.zstack.core.config.GlobalConfigDef;
 import org.zstack.core.config.GlobalConfigDefinition;
@@ -10,7 +11,6 @@ import org.zstack.header.storage.primary.PrimaryStorageVO;
 import org.zstack.header.vm.VmInstanceVO;
 import org.zstack.header.volume.VolumeVO;
 import org.zstack.header.zone.ZoneVO;
-import org.zstack.resourceconfig.BindResourceConfig;
 
 /**
  * Created by frank on 9/16/2015.
@@ -90,9 +90,6 @@ public class MevocoGlobalConfig {
 
     @GlobalConfigValidation
     public static GlobalConfig ENABLE_SECURITY_LEVEL = new GlobalConfig(CATEGORY,"enable.security.level");
-
-    @GlobalConfigValidation(validValues = {"true", "false"})
-    public static GlobalConfig PAUSE_THE_WORLD = new GlobalConfig(CATEGORY, "pause.world");
 
     @GlobalConfigValidation(inNumberRange = {720, 1440})
     @GlobalConfigDef(defaultValue = "1440", type = Long.class, description = "Accumulated hours for UKey to stay inserted")

@@ -4,10 +4,14 @@ import org.zstack.header.host.HostEO;
 import org.zstack.header.network.l3.L3NetworkEO;
 import org.zstack.header.vm.VmInstanceVO;
 import org.zstack.header.vo.ForeignKey;
-import org.zstack.header.vo.Index;
-import org.zstack.pciDevice.*;
+import org.zstack.pciDevice.entity.PciDeviceVO;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.PrimaryKeyJoinColumn;
+import javax.persistence.Table;
 
 /**
  * Created by shixin.ruan 2023/10/20

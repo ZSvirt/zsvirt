@@ -1,5 +1,6 @@
 package org.zstack.header.tag;
 
+import org.zstack.header.message.DocUtils;
 import org.zstack.header.query.ExpandedQueries;
 import org.zstack.header.query.ExpandedQuery;
 import org.zstack.header.search.Inventory;
@@ -110,5 +111,18 @@ public class TagPatternInventory {
 
     public void setType(TagPatternType type) {
         this.type = type;
+    }
+
+    public static TagPatternInventory __example__() {
+        TagPatternInventory tag = new TagPatternInventory();
+        tag.setType(TagPatternType.simple);
+        tag.setValue("SSD");
+        tag.setName("SSD");
+        tag.setColor("#FFFFFF");
+        tag.setDescription("SSD volume");
+        tag.setUuid(DocUtils.createFixedUuid(TagPatternVO.class));
+        tag.setCreateDate(DocUtils.timestamp());
+        tag.setLastOpDate(DocUtils.timestamp());
+        return tag;
     }
 }

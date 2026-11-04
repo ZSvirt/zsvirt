@@ -73,7 +73,6 @@ import org.zstack.network.l3.L3NetworkManager;
 import org.zstack.resourceconfig.*;
 import org.zstack.tag.*;
 import org.zstack.utils.*;
-import org.zstack.utils.function.Function;
 import org.zstack.utils.logging.CLogger;
 import org.zstack.utils.network.IPv6Constants;
 import org.zstack.utils.network.IPv6NetworkUtils;
@@ -948,7 +947,6 @@ public class VmInstanceManagerImpl extends AbstractService implements
 
             @Override
             public void run(FlowTrigger trigger, Map data) {
-                List<ErrorCode> errors = new ArrayList<>();
                 L3NetworkVO l3NetworkVO = dbf.findByUuid(msg.getL3NetworkUuid(), L3NetworkVO.class);
                 new While<>(l3NetworkVO.getIpVersions()).each((version, wcomp) -> {
                     AllocateIpMsg allocateIpMsg = new AllocateIpMsg();
@@ -965,7 +963,7 @@ public class VmInstanceManagerImpl extends AbstractService implements
                         @Override
                         public void run(MessageReply reply) {
                             if (!reply.isSuccess()) {
-                                errors.add(reply.getError());
+                                wcomp.addError(reply.getError());
                                 wcomp.allDone();
                                 return;
                             }
@@ -990,11 +988,7 @@ public class VmInstanceManagerImpl extends AbstractService implements
                 }).run(new WhileDoneCompletion(trigger) {
                     @Override
                     public void done(ErrorCodeList errorCodeList) {
-                        if (errors.size() > 0) {
-                            trigger.fail(errors.get(0));
-                        } else {
-                            trigger.next();
-                        }
+                        trigger.next(errorCodeList.wrapOrNull());
                     }
                 });
 
@@ -1081,6 +1075,7 @@ public class VmInstanceManagerImpl extends AbstractService implements
             tagMgr.createTagsFromAPICreateMessage(cmsg, finalVo.getUuid(), VmInstanceVO.class.getSimpleName());
         } else {
             tagMgr.createTags(msg.getSystemTags(), msg.getUserTags(), finalVo.getUuid(), VmInstanceVO.class.getSimpleName());
+            tagMgr.createResourceConfigs(msg.getConfigs(), finalVo.getUuid());
         }
 
         Boolean isVirtio = msg.getVirtio();
@@ -1329,28 +1324,6 @@ public class VmInstanceManagerImpl extends AbstractService implements
                         smsg.setDataVolumeFromTemplateSystemTags(msg.getDataVolumeFromTemplateSystemTags());
                         smsg.setL3NetworkUuids(msg.getL3NetworkSpecs());
                         smsg.setVmNicSecurityPolicyByDeviceId(msg.getVmNicSecurityPolicyByDeviceId());
-
-                        final DiskAO rootDisk = msg.getRootDisk();
-                        DiskOfferingVO dvo = null;
-                        if (rootDisk != null) {
-                            if (rootDisk.getDiskOfferingUuid() != null) {
-                                smsg.setRootDiskOfferingUuid(rootDisk.getDiskOfferingUuid());
-                            } else if (rootDisk.getSize() > 0) {
-                                dvo = new DiskOfferingVO();
-                                dvo.setUuid(getUuid());
-                                dvo.setAccountUuid(msg.getAccountUuid());
-                                dvo.setDiskSize(rootDisk.getSize());
-                                dvo.setName("for-create-vm-" + finalVo.getUuid());
-                                dvo.setType("TemporaryDiskOfferingType");
-                                dvo.setState(DiskOfferingState.Enabled);
-                                dvo.setAllocatorStrategy(PrimaryStorageConstant.DEFAULT_PRIMARY_STORAGE_ALLOCATION_STRATEGY_TYPE);
-                                dbf.persist(dvo);
-                                smsg.setRootDiskOfferingUuid(dvo.getUuid());
-                            }
-                        }
-
-                        String newCreateDiskOfferingUuid = dvo == null ? null : dvo.getUuid();
-
                         smsg.setVmInstanceInventory(VmInstanceInventory.valueOf(finalVo));
                         smsg.setCandidatePrimaryStorageUuidsForDataVolume(msg.getCandidatePrimaryStorageUuidsForDataVolume());
                         smsg.setCandidatePrimaryStorageUuidsForRootVolume(msg.getCandidatePrimaryStorageUuidsForRootVolume());
@@ -1379,10 +1352,6 @@ public class VmInstanceManagerImpl extends AbstractService implements
                         bus.send(smsg, new CloudBusCallBack(smsg) {
                             @Override
                             public void run(MessageReply reply) {
-                                if (newCreateDiskOfferingUuid != null) {
-                                    dbf.removeByPrimaryKey(newCreateDiskOfferingUuid, DiskOfferingVO.class);
-                                }
-
                                 if (reply.isSuccess()) {
                                     InstantiateNewCreatedVmInstanceReply r = (InstantiateNewCreatedVmInstanceReply) reply;
                                     instantiateVm = r.getVmInventory();
@@ -1688,12 +1657,8 @@ public class VmInstanceManagerImpl extends AbstractService implements
             }, StartVmInstanceMsg.class);
 
             deleteMigrateSystemTagWhenVmStateChangedToRunning();
-            pluginRgty.saveExtensionAsMap(VmAttachOtherDiskExtensionPoint.class, new Function<Object, VmAttachOtherDiskExtensionPoint>() {
-                @Override
-                public Object call(VmAttachOtherDiskExtensionPoint arg) {
-                    return arg.getDiskType();
-                }
-            });
+            pluginRgty.saveExtensionAsMap(VmAttachOtherDiskExtensionPoint.class,
+                    VmAttachOtherDiskExtensionPoint::getDiskType);
 
             return true;
         } catch (Exception e) {
@@ -2868,7 +2833,7 @@ public class VmInstanceManagerImpl extends AbstractService implements
 
     @Override
     public ErrorCode handleSystemTag(String vmUuid, List<String> tags) {
-        PatternedSystemTag tag = VmSystemTags.DIRECTORY_UUID;
+        SystemTag tag = VmSystemTags.DIRECTORY_UUID;
         String token = VmSystemTags.DIRECTORY_UUID_TOKEN;
 
         String directoryUuid = SystemTagUtils.findTagValue(tags, tag, token);

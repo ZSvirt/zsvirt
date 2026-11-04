@@ -1,11 +1,13 @@
 package org.zstack.header.network.l2;
 
 import org.zstack.header.configuration.PythonClassInventory;
+import org.zstack.header.message.DocUtils;
 import org.zstack.header.network.l3.L3NetworkInventory;
 import org.zstack.header.query.*;
 import org.zstack.header.search.Inventory;
 import org.zstack.header.search.TypeField;
 import org.zstack.header.zone.ZoneInventory;
+import org.zstack.header.zone.ZoneVO;
 
 import javax.persistence.JoinColumn;
 import java.io.Serializable;
@@ -227,5 +229,14 @@ public class L2NetworkInventory implements Serializable {
 
     public void setAttachedHostRefs(List<L2NetworkHostRefInventory> attachedHostRefs) {
         this.attachedHostRefs = attachedHostRefs;
+    }
+
+    public static L2NetworkInventory __example__() {
+        L2NetworkInventory inv = new L2NetworkInventory();
+        inv.setName("test");
+        inv.setPhysicalInterface("eth0");
+        inv.setUuid(DocUtils.createFixedUuid(L2NetworkVO.class));
+        inv.setZoneUuid(DocUtils.createFixedUuid(ZoneVO.class));
+        return inv;
     }
 }

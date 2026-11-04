@@ -1,24 +1,25 @@
 package org.zstack.mttyDevice;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.zstack.compute.host.PostHostConnectExtensionPoint;
+import org.zstack.header.host.spi.HostPostConnectedExtensionPoint;
 import org.zstack.core.asyncbatch.While;
 import org.zstack.core.db.Q;
 import org.zstack.header.core.Completion;
 import org.zstack.header.core.WhileDoneCompletion;
 import org.zstack.header.core.workflow.Flow;
-import org.zstack.header.core.workflow.FlowTrigger;
-import org.zstack.header.core.workflow.NoRollbackFlow;
 import org.zstack.header.errorcode.ErrorCode;
 import org.zstack.header.errorcode.ErrorCodeList;
 import org.zstack.header.host.HostInventory;
-import org.zstack.pciDevice.virtual.vfio_mdev.MdevDeviceVO;
-import org.zstack.pciDevice.virtual.vfio_mdev.MdevDeviceVO_;
+import org.zstack.pciDevice.entity.virtual.vfio_mdev.MdevDeviceVO;
+import org.zstack.pciDevice.entity.virtual.vfio_mdev.MdevDeviceVO_;
+import org.zstack.mttyDevice.entity.MttyDeviceVO;
+import org.zstack.mttyDevice.entity.MttyDeviceVO_;
+import org.zstack.mttyDevice.header.MttyDeviceVirtStatus;
+import org.zstack.mttyDevice.spi.MttyDeviceBackend;
 import org.zstack.utils.Utils;
 import org.zstack.utils.logging.CLogger;
 
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -27,20 +28,17 @@ import java.util.stream.Collectors;
  *
  * see: ZSTAC-51096
  */
-public class MttyResplitIntoMdevAfterHostConnectFlowFactory implements PostHostConnectExtensionPoint {
+public class MttyResplitIntoMdevAfterHostConnectFlowFactory implements HostPostConnectedExtensionPoint {
     private static final CLogger logger = Utils.getLogger(MttyResplitIntoMdevAfterHostConnectFlowFactory.class);
 
     @Autowired
     private MttyDeviceManager mttyDeviceManager;
 
     @Override
-    public Flow createPostHostConnectFlow(HostInventory host) {
-        return new NoRollbackFlow() {
-
-            String __name__ = "resplit-mtty-devices-into-mdev-devices";
-
-            @Override
-            public void run(FlowTrigger trigger, Map data) {
+    public Flow createPostHostConnectFlow() {
+        return Flow.of("resplit-mtty-devices-into-mdev-devices")
+            .handle((trigger, data) -> {
+                HostInventory host = findInventoryFromFlowData(data);
                 List<MttyDeviceVO> mttys = Q.New(MttyDeviceVO.class)
                         .eq(MttyDeviceVO_.hostUuid, host.getUuid())
                         .eq(MttyDeviceVO_.virtStatus, MttyDeviceVirtStatus.VFIO_MDEV_VIRTUALIZED)
@@ -77,7 +75,7 @@ public class MttyResplitIntoMdevAfterHostConnectFlowFactory implements PostHostC
                         trigger.next();
                     }
                 });
-            }
-        };
+            })
+            .build();
     }
 }

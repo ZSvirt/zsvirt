@@ -1,9 +1,9 @@
 package org.zstack.testlib
 
 import org.zstack.sdk.HostInventory
-import org.zstack.sdk.PrimaryStorageInventory
 import org.zstack.sdk.VolumeInventory
 import org.zstack.storage.primary.local.LocalStorageConstants
+import org.zstack.utils.data.SizeUnit
 
 /**
  * Created by mingjian.deng on 2018/1/3.
@@ -13,6 +13,8 @@ class DataVolumeSpec extends Spec implements HasSession {
     String name = "data-volume"
     @SpecParam
     String description
+    @SpecParam(required = false)
+    Long size
     private Closure diskOfferings = {}
     private Closure primaryStorage = {}
     private Closure host = {}
@@ -29,6 +31,11 @@ class DataVolumeSpec extends Spec implements HasSession {
             delegate.name = name
             delegate.primaryStorageUuid = primaryStorage()
             delegate.diskOfferingUuid = diskOfferings()
+
+            if (size != null) {
+                delegate.diskSize = size
+            }
+
             delegate.description = description
             delegate.systemTags = host() ? ["localStorage::hostUuid::${host()}".toString()] : null
             delegate.sessionId = sessionId
@@ -41,6 +48,10 @@ class DataVolumeSpec extends Spec implements HasSession {
         }
 
         return id(name, inventory.uuid)
+    }
+
+    void sizeGB(long sizeGB) {
+        this.size = SizeUnit.GIGABYTE.toByte(sizeGB)
     }
 
     @SpecMethod

@@ -14,13 +14,10 @@ import org.zstack.core.Platform;
 import org.zstack.core.asyncbatch.While;
 import org.zstack.core.cloudbus.CloudBus;
 import org.zstack.core.cloudbus.CloudBusCallBack;
-import org.zstack.core.cloudbus.ResourceDestinationMaker;
+import org.zstack.core.config.GlobalConfigException;
 import org.zstack.core.db.DatabaseFacade;
 import org.zstack.core.db.Q;
 import org.zstack.core.db.SQLBatch;
-import org.zstack.core.thread.CancelablePeriodicTask;
-import org.zstack.core.thread.ChainTask;
-import org.zstack.core.thread.SyncTaskChain;
 import org.zstack.core.thread.Task;
 import org.zstack.core.thread.ThreadFacade;
 import org.zstack.core.workflow.SimpleFlowChain;
@@ -32,7 +29,6 @@ import org.zstack.header.errorcode.ErrorCode;
 import org.zstack.header.errorcode.ErrorCodeList;
 import org.zstack.header.errorcode.ErrorableValue;
 import org.zstack.header.errorcode.OperationFailureException;
-import org.zstack.header.exception.CloudRuntimeException;
 import org.zstack.header.identity.AccountConstant;
 import org.zstack.header.identity.SessionInventory;
 import org.zstack.header.image.AddImageMsg;
@@ -43,6 +39,8 @@ import org.zstack.header.image.ImageDeletionMsg;
 import org.zstack.header.image.ImageDeletionPolicyManager;
 import org.zstack.header.image.ImageInventory;
 import org.zstack.header.image.ImagePlatform;
+import org.zstack.header.image.ImageVO;
+import org.zstack.header.image.ImageVO_;
 import org.zstack.header.message.APIMessage;
 import org.zstack.header.message.Message;
 import org.zstack.header.message.MessageReply;
@@ -62,8 +60,6 @@ import org.zstack.header.vm.VmInstanceInventory;
 import org.zstack.header.vm.VmInstanceState;
 import org.zstack.header.vm.VmInstanceVO;
 import org.zstack.header.vm.VmInstanceVO_;
-import org.zstack.header.vm.VmNicVO;
-import org.zstack.header.vm.VmNicVO_;
 import org.zstack.portal.apimediator.ApiMediator;
 import org.zstack.managements.entity.common.ManagementNodeStatusView;
 import org.zstack.managements.header.PremiumManagementsConstant;
@@ -79,16 +75,16 @@ import org.zstack.softwarePackage.compute.UploadSoftwarePackageToBackupStorageEx
 import org.zstack.softwarePackage.entity.SoftwarePackageVO;
 import org.zstack.softwarePackage.entity.UpgradeType;
 import org.zstack.softwarePackage.entity.UploadSoftwarePackageToBackupStorageLongJobData;
-import org.zstack.tag.PatternedSystemTag;
+import org.zstack.tag.SystemTag;
 import org.zstack.tag.SystemTagCreator;
 import org.zstack.utils.TagUtils;
 import org.zstack.utils.ShellResult;
 import org.zstack.utils.Utils;
 import org.zstack.utils.gson.JSONObjectUtil;
 import org.zstack.utils.logging.CLogger;
-import org.zstack.utils.network.NetworkUtils;
 import org.zstack.utils.path.PathUtil;
 import org.zstack.zmigrate.ZMigrateGlobalConfig;
+import org.zstack.zmigrate.ZMigrateVddkBundle;
 import org.zstack.zmigrate.api.*;
 import org.zstack.zmigrate.client.ZMigrateGatewayHelper;
 import org.zstack.zmigrate.client.ZMigrateHttpClient;
@@ -104,19 +100,20 @@ import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.zstack.core.Platform.err;
+import static org.zstack.core.Platform.operr;
 import static org.zstack.core.config.schema.GuestOsCategory.getDefaultGuestOsTypeByPlatform;
 import static org.zstack.utils.CollectionDSL.*;
 import static org.zstack.zmigrate.ZMigrateConstant.*;
@@ -134,8 +131,6 @@ public class ZMigrateManager extends AbstractService implements
         , ManagementNodeReadyExtensionPoint
 {
     private static final CLogger logger = Utils.getLogger(ZMigrateManager.class);
-    static final int VDDK_DISTRIBUTION_CONCURRENCY = 3;
-
     @Autowired
     private CloudBus bus;
     @Autowired
@@ -143,38 +138,42 @@ public class ZMigrateManager extends AbstractService implements
     @Autowired
     private ThreadFacade thdf;
     @Autowired
-    private ResourceDestinationMaker destinationMaker;
-    @Autowired
     private ApiMediator apiMediator;
 
     private Supplier<ZMigrateSshClient> sshClientFactory =
             () -> Platform.New(ZMigrateSshClient::new);
-    private final AtomicBoolean vddkDistributionReady = new AtomicBoolean(false);
-    private final AtomicBoolean vddkDistributionScanning = new AtomicBoolean(false);
-    private VddkDistributionTask vddkDistributionTask;
+    private final ZMigrateVddkUploadLifecycle vddkUploadLifecycle = new ZMigrateVddkUploadLifecycle();
+
+    public Supplier<ZMigrateSshClient> replaceSshClientFactoryForTest(
+            Supplier<ZMigrateSshClient> factory) {
+        Supplier<ZMigrateSshClient> originalFactory = sshClientFactory;
+        sshClientFactory = Objects.requireNonNull(factory);
+        return originalFactory;
+    }
 
     @Override
-    public synchronized boolean start() {
-        startVddkDistributionTask();
-        ZMigrateGlobalConfig.VDDK_DISTRIBUTION_SCAN_INTERVAL.installUpdateExtension(
-                (oldConfig, newConfig) -> startVddkDistributionTask());
+    public boolean start() {
+        ZMigrateGlobalConfig.VDDK_VERSION_MD5.installValidateExtension(
+                (category, name, oldValue, newValue) -> {
+                    try {
+                        ZMigrateVddkBundle.parseVersionMd5Config(newValue);
+                    } catch (IllegalArgumentException e) {
+                        throw new GlobalConfigException(
+                                "invalid ZMigrate VDDK version and MD5 configuration: expected exactly two " +
+                                        "unique version-md5 entries separated by ';', with each MD5 using 32 " +
+                                        "lowercase hexadecimal characters");
+                    }
+                });
         return true;
     }
 
     @Override
-    public synchronized boolean stop() {
-        vddkDistributionReady.set(false);
-        if (vddkDistributionTask != null) {
-            vddkDistributionTask.stop();
-            vddkDistributionTask = null;
-        }
+    public boolean stop() {
         return true;
     }
 
     @Override
     public void managementNodeReady() {
-        vddkDistributionReady.set(true);
-        triggerVddkDistributionScan();
     }
 
     @Override
@@ -216,7 +215,7 @@ public class ZMigrateManager extends AbstractService implements
         }
 
         reply.setZmigrateVmInstanceStatus(state.toString());
-        reply.setVddkUploaded(uploadedVddkTaskUuid(managementVmUuid) != null);
+        reply.setVddkUploaded(isVddkUploaded(managementVmUuid));
         if (CoreGlobalProperty.UNIT_TEST_ON) {
             bus.reply(msg, reply);
             return;
@@ -272,9 +271,33 @@ public class ZMigrateManager extends AbstractService implements
 
     private void handle(APIGetZMigrateImagesMsg msg) {
         APIGetZMigrateImagesReply reply = new APIGetZMigrateImagesReply();
-        reply.setImages(getZMigrateImages());
+        reply.setImages(new HashMap<>(getZMigrateImages()));
         reply.getImages().putAll(getZMigrateUpgradeImages());
         bus.reply(msg, reply);
+    }
+
+    private List<String> getExistingImageUuids(List<String> imageUuids) {
+        if (imageUuids.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return Q.New(ImageVO.class).in(ImageVO_.uuid, imageUuids).select(ImageVO_.uuid).listValues();
+    }
+
+    private boolean hasGatewayImage(List<String> imagePaths) {
+        return imagePaths.stream().anyMatch(path -> PathUtil.fileName(path).startsWith(GATEWAY_IMAGE_PREFIX));
+    }
+
+    private void deleteUpgradeImageSystemTags(String softwarePackageUuid) {
+        ZMIGRATE_GATEWAY_UPGRADE_IMAGE.delete(softwarePackageUuid);
+        ZMIGRATE_LINUX_BOOT_UPGRADE_IMAGE.delete(softwarePackageUuid);
+        ZMIGRATE_WINDOWS_BOOT_UPGRADE_IMAGE.delete(softwarePackageUuid);
+    }
+
+    private void deleteImageSystemTags(String softwarePackageUuid) {
+        ZMIGRATE_GATEWAY_IMAGE.delete(softwarePackageUuid);
+        ZMIGRATE_LINUX_BOOT_IMAGE.delete(softwarePackageUuid);
+        ZMIGRATE_WINDOWS_BOOT_IMAGE.delete(softwarePackageUuid);
+        deleteUpgradeImageSystemTags(softwarePackageUuid);
     }
 
     private void handle(APIGetZMigrateGatewayVmInstancesMsg msg) {
@@ -320,6 +343,7 @@ public class ZMigrateManager extends AbstractService implements
         String platformUuidOnZMigrate;
         String mnIpToAddZMigrate;
         String vmUuid; // gateway VM UUID
+        String managementIp;
         String accessKeyID;
         String accessKeySecret;
     }
@@ -332,9 +356,11 @@ public class ZMigrateManager extends AbstractService implements
         .then(Flow.of("find-gateway-image")
             .handle(trigger -> {
                 context.gatewayImageUuid = ZMIGRATE_GATEWAY_IMAGE.getTokenByResourceUuid(softwarePackage.getUuid(), ZMIGRATE_GATEWAY_IMAGE_TOKEN);
-                if (context.gatewayImageUuid == null) {
+                if (context.gatewayImageUuid == null
+                        || !Q.New(ImageVO.class).eq(ImageVO_.uuid, context.gatewayImageUuid).isExists()) {
                     trigger.fail(err(INVALID_ZMIGRATE_TAGS, "can not find image %s for zmigrate gateway", ZMIGRATE_GATEWAY_IMAGE_TOKEN)
                             .withOpaque("image.uuid", context.gatewayImageUuid));
+                    return;
                 }
                 trigger.next();
             })
@@ -362,6 +388,7 @@ public class ZMigrateManager extends AbstractService implements
                 systemTags.removeIf(tag -> Objects.equals(tag, ZMIGRATE_MANAGEMENT.getTagFormat()) || Objects.equals(tag, ZMIGRATE_GATEWAY.getTagFormat()));
                 systemTags.add(ZMIGRATE_MANAGEMENT.getTagFormat());
                 cvmsg.setSystemTags(systemTags);
+                context.managementIp = ZMigrateGatewayHelper.getManagementIpFromCreateMessage(cvmsg);
                 cvmsg.setImageUuid(context.gatewayImageUuid);
                 bus.makeLocalServiceId(cvmsg, VmInstanceConstant.SERVICE_ID);
                 bus.send(cvmsg, new CloudBusCallBack(trigger) {
@@ -430,7 +457,7 @@ public class ZMigrateManager extends AbstractService implements
             .build())
         .then(Flow.of("check-zmigrate-management-vm-is-ready")
             .skipIf(data -> CoreGlobalProperty.UNIT_TEST_ON)
-            .handle(trigger -> createSshClient().checkZMigrateManagementIsReady(context.mnIps, trigger.toCompletion()))
+            .handle(trigger -> createSshClient(context.managementIp).checkZMigrateManagementIsReady(context.mnIps, trigger.toCompletion()))
             .build())
         .then(Flow.of("configure-systemd-timesyncd")
             .skipIf(data -> CoreGlobalProperty.UNIT_TEST_ON)
@@ -470,7 +497,7 @@ public class ZMigrateManager extends AbstractService implements
                             return;
                         }
 
-                        ErrorableValue<Boolean> result = createSshClient().configureTimesyncd(ntpServers);
+                        ErrorableValue<Boolean> result = createSshClient(context.managementIp).configureTimesyncd(ntpServers);
                         if (!result.isSuccess()) {
                             trigger.fail(err(GENERIC_ERROR, "configure systemd-timesyncd failed")
                                     .withCause(result.error));
@@ -485,7 +512,7 @@ public class ZMigrateManager extends AbstractService implements
         .then(Flow.of("overwrite-zmigrate-management-auth-addr")
             .skipIf(data -> CoreGlobalProperty.UNIT_TEST_ON)
             .handle(trigger -> {
-                final ErrorableValue<Boolean> rsp = createSshClient().overwriteZMigrateManagementAuthAddr();
+                final ErrorableValue<Boolean> rsp = createSshClient(context.managementIp).overwriteZMigrateManagementAuthAddr();
                 if (!rsp.isSuccess()) {
                     trigger.fail(err(GENERIC_ERROR, "overwrite zmigrate management auth_addr failed")
                             .withCause(rsp.error));
@@ -498,7 +525,7 @@ public class ZMigrateManager extends AbstractService implements
             .skipIf(data -> CoreGlobalProperty.UNIT_TEST_ON)
             .handle(trigger -> {
                 ErrorableValue<ZMigrateHttpClient.GetZMigrateInfoResponse> rsp =
-                        createHttpClient().getZMigrateManagementServerInfo(5, 30);
+                        createHttpClient(context.managementIp).getZMigrateManagementServerInfo(5, 30);
                 if (!rsp.isSuccess()) {
                     trigger.fail(err(GENERIC_ERROR, "check zmigrate management server failed")
                             .withCause(rsp.error));
@@ -510,7 +537,7 @@ public class ZMigrateManager extends AbstractService implements
         .then(Flow.of("create-zmigrate-user")
             .skipIf(data -> CoreGlobalProperty.UNIT_TEST_ON)
             .handle(trigger -> {
-                ErrorableValue<Boolean> rsp = createHttpClient().createAccount();
+                ErrorableValue<Boolean> rsp = createHttpClient(context.managementIp).createAccount();
                 if (!rsp.isSuccess()) {
                     trigger.fail(err(GENERIC_ERROR, "create zmigrate user failed").withCause(rsp.error));
                     return;
@@ -560,7 +587,7 @@ public class ZMigrateManager extends AbstractService implements
         /*.then(Flow.of("verify-zmigrate-platform-connection")
                 .skipIf(data -> CoreGlobalProperty.UNIT_TEST_ON)
                 .handle(trigger -> {
-                    ErrorableValue<Boolean> rsp = createHttpClient().verifyPlatformConnection(
+                    ErrorableValue<Boolean> rsp = createHttpClient(context.managementIp).verifyPlatformConnection(
                             context.mnIpToAddZMigrate, context.accessKeyID, context.accessKeySecret);
                     if (!rsp.isSuccess()) {
                         trigger.fail(err(GENERIC_ERROR, "verify zmigrate platform connection failed")
@@ -573,7 +600,7 @@ public class ZMigrateManager extends AbstractService implements
         .then(Flow.of("register-zsv-to-zmigrate")
             .skipIf(data -> CoreGlobalProperty.UNIT_TEST_ON)
             .handle(trigger -> {
-                ErrorableValue<RegisterZsvToZMigratePlatformResponse> rsp = createHttpClient()
+                ErrorableValue<RegisterZsvToZMigratePlatformResponse> rsp = createHttpClient(context.managementIp)
                         .registerZsvToZMigrate(context.mnIpToAddZMigrate, context.accessKeyID, context.accessKeySecret);
                 if (!rsp.isSuccess()) {
                     trigger.fail(err(GENERIC_ERROR, "register zsv to zmigrate platform failed")
@@ -586,7 +613,7 @@ public class ZMigrateManager extends AbstractService implements
         .then(Flow.of("get-zsv-platform-uuid-on-zmigrate-platform")
             .skipIf(data -> CoreGlobalProperty.UNIT_TEST_ON)
             .handle(trigger -> {
-                ErrorableValue<String> platformInfos = createHttpClient().getPlatformInfos();
+                ErrorableValue<String> platformInfos = createHttpClient(context.managementIp).getPlatformInfos();
                 if (!platformInfos.isSuccess()) {
                     trigger.fail(err(GENERIC_ERROR, "get platform infos failed")
                             .withCause(platformInfos.error));
@@ -618,7 +645,7 @@ public class ZMigrateManager extends AbstractService implements
         .then(Flow.of("verify-zmigrate-gateway-connection")
             .skipIf(data -> CoreGlobalProperty.UNIT_TEST_ON)
             .handle(trigger -> {
-                ErrorableValue<Boolean> rsp = createHttpClient().verifyGatewayConnection();
+                ErrorableValue<Boolean> rsp = createHttpClient(context.managementIp).verifyGatewayConnection();
                 if (!rsp.isSuccess()) {
                     trigger.fail(err(GENERIC_ERROR, "verify zmigrate gateway connection failed")
                             .withCause(rsp.error));
@@ -630,7 +657,7 @@ public class ZMigrateManager extends AbstractService implements
         .then(Flow.of("register-zmigrate-gateway")
             .skipIf(data -> CoreGlobalProperty.UNIT_TEST_ON)
             .handle(trigger -> {
-                ErrorableValue<Boolean> rsp = createHttpClient().registerGatewayToZMigrate(context.platformUuidOnZMigrate);
+                ErrorableValue<Boolean> rsp = createHttpClient(context.managementIp).registerGatewayToZMigrate(context.platformUuidOnZMigrate);
                 if (!rsp.isSuccess()) {
                     trigger.fail(err(GENERIC_ERROR, "register zmigrate gateway to platform failed").withCause(rsp.error));
                     return;
@@ -641,7 +668,7 @@ public class ZMigrateManager extends AbstractService implements
         .then(Flow.of("get-zmigrate-license-key")
             .skipIf(data -> CoreGlobalProperty.UNIT_TEST_ON)
             .handle(trigger -> {
-                ErrorableValue<String> rsp = createHttpClient().exportActivationInfos();
+                ErrorableValue<String> rsp = createHttpClient(context.managementIp).exportActivationInfos();
                 if (!rsp.isSuccess()) {
                     trigger.fail(err(GENERIC_ERROR, "failed to get zmigrate license key").withCause(rsp.error));
                     return;
@@ -719,6 +746,7 @@ public class ZMigrateManager extends AbstractService implements
                         gatewayUpgradeImageUuid, linuxBootUpgradeImageUuid, windowsBootUpgradeImageUuid
                         ).filter(Objects::nonNull)
                         .collect(Collectors.toList());
+                imageUuids = getExistingImageUuids(imageUuids);
                 if (imageUuids.isEmpty()) {
                     trigger.next();
                     return;
@@ -754,7 +782,10 @@ public class ZMigrateManager extends AbstractService implements
             })
             .build())
         .propagateExceptionTo(completion)
-        .done(completion::success)
+        .done(() -> {
+            deleteImageSystemTags(softwarePackage.getUuid());
+            completion.success();
+        })
         .error(completion::fail)
         .start();
     }
@@ -785,6 +816,7 @@ public class ZMigrateManager extends AbstractService implements
                 if (windowsBootImageUuid != null) {
                     imageUuids.add(windowsBootImageUuid);
                 }
+                imageUuids = getExistingImageUuids(imageUuids);
                 if (imageUuids.isEmpty()) {
                     trigger.next();
                     return;
@@ -857,7 +889,10 @@ public class ZMigrateManager extends AbstractService implements
             })
             .build())
         .propagateExceptionTo(completion)
-        .done(completion::success)
+        .done(() -> {
+            deleteImageSystemTags(softwarePackage.getUuid());
+            completion.success();
+        })
         .error(completion::fail)
         .start();
     }
@@ -875,6 +910,11 @@ public class ZMigrateManager extends AbstractService implements
 
     @Override
     public void upgradeSoftwarePackage(SoftwarePackageVO softwarePackage, UploadSoftwarePackageToBackupStorageLongJobData msgData, Completion completion) {
+        if (!Objects.equals(msgData.upgradeType, UpgradeType.Reexecute.toString())
+                && !hasGatewayImage(msgData.imagesPath)) {
+            completion.fail(err(GENERIC_ERROR, "the required Linux Gateway upgrade image is missing"));
+            return;
+        }
         UpgradeZMigrateContext context = new UpgradeZMigrateContext();
 
         SimpleFlowChain.of("upgrade-software-package")
@@ -931,7 +971,7 @@ public class ZMigrateManager extends AbstractService implements
                     amsg.setArchitecture(ImageArchitecture.x86_64.toString());
                     amsg.setDescription(imageName.startsWith(GATEWAY_IMAGE_PREFIX) ? GATEWAY_IMAGE_DESCRIPTION : BOOT_IMAGE_DESCRIPTION);
 
-                    final PatternedSystemTag upgradeImageSystemTag;
+                    final SystemTag upgradeImageSystemTag;
                     final String upgradeImageTokenName;
                     if (imageName.startsWith(GATEWAY_IMAGE_PREFIX)) {
                         upgradeImageSystemTag = ZMIGRATE_GATEWAY_UPGRADE_IMAGE;
@@ -1030,6 +1070,10 @@ public class ZMigrateManager extends AbstractService implements
             .build())
         .then(Flow.of("deploy-and-execute-upgrade-package-on-gateway-vm")
             .handle(trigger -> {
+                if (context.gatewayUpgradeImageUuid == null) {
+                    trigger.fail(err(GENERIC_ERROR, "the required Linux Gateway upgrade image is missing"));
+                    return;
+                }
                 SoftwareUpgradePackageDeployMsg dmsg = new SoftwareUpgradePackageDeployMsg();
                 dmsg.setBackupStorageUuid(msgData.backupStorageUuid);
                 dmsg.setBackupStorageHostUuid(msgData.backupStorageHostUuid);
@@ -1081,22 +1125,12 @@ public class ZMigrateManager extends AbstractService implements
                         doDeleteImageSystemTag(ZMIGRATE_GATEWAY_UPGRADE_IMAGE);
                         doDeleteImageSystemTag(ZMIGRATE_LINUX_BOOT_UPGRADE_IMAGE);
                         doDeleteImageSystemTag(ZMIGRATE_WINDOWS_BOOT_UPGRADE_IMAGE);
-                        context.zMigrateImages.forEach((k, v) -> {
-                            switch (k) {
-                                case ZMIGRATE_GATEWAY_IMAGE_TOKEN:
-                                    doDeleteImageSystemTag(ZMIGRATE_GATEWAY_IMAGE);
-                                    break;
-                                case ZMIGRATE_LINUX_BOOT_IMAGE_TOKEN:
-                                    doDeleteImageSystemTag(ZMIGRATE_LINUX_BOOT_IMAGE);
-                                    break;
-                                case ZMIGRATE_WINDOWS_BOOT_IMAGE_TOKEN:
-                                    doDeleteImageSystemTag(ZMIGRATE_WINDOWS_BOOT_IMAGE);
-                                    break;
-                            }
-                        });
+                        doDeleteImageSystemTag(ZMIGRATE_GATEWAY_IMAGE);
+                        doDeleteImageSystemTag(ZMIGRATE_LINUX_BOOT_IMAGE);
+                        doDeleteImageSystemTag(ZMIGRATE_WINDOWS_BOOT_IMAGE);
                     }
 
-                    private void doDeleteImageSystemTag(PatternedSystemTag systemtag) {
+                    private void doDeleteImageSystemTag(SystemTag systemtag) {
                         sql(SystemTagVO.class)
                                 .like(SystemTagVO_.tag, TagUtils.tagPatternToSqlPattern(systemtag.getTagFormat()))
                                 .eq(SystemTagVO_.resourceType, SoftwarePackageVO.class.getSimpleName())
@@ -1105,28 +1139,9 @@ public class ZMigrateManager extends AbstractService implements
                     }
                 }.execute();
 
-                if (context.gatewayUpgradeImageUuid == null || context.linuxBootUpgradeImageUuid == null || context.windowsBootUpgradeImageUuid == null) {
-                    trigger.fail(err(GENERIC_ERROR, "upgrade images are incomplete, cannot update ZMigrate image system tags"));
-                    return;
-                }
-
-                SystemTagCreator creator = ZMIGRATE_GATEWAY_IMAGE.newSystemTagCreator(softwarePackage.getUuid());
-                creator.inherent = false;
-                creator.recreate = true;
-                creator.setTagByTokens(map(e(ZMIGRATE_GATEWAY_IMAGE_TOKEN, context.gatewayUpgradeImageUuid)));
-                creator.create();
-
-                creator = ZMIGRATE_LINUX_BOOT_IMAGE.newSystemTagCreator(softwarePackage.getUuid());
-                creator.inherent = false;
-                creator.recreate = true;
-                creator.setTagByTokens(map(e(ZMIGRATE_LINUX_BOOT_IMAGE_TOKEN, context.linuxBootUpgradeImageUuid)));
-                creator.create();
-
-                creator = ZMIGRATE_WINDOWS_BOOT_IMAGE.newSystemTagCreator(softwarePackage.getUuid());
-                creator.inherent = false;
-                creator.recreate = true;
-                creator.setTagByTokens(map(e(ZMIGRATE_WINDOWS_BOOT_IMAGE_TOKEN, context.windowsBootUpgradeImageUuid)));
-                creator.create();
+                createImageSystemTag(ZMIGRATE_GATEWAY_IMAGE, ZMIGRATE_GATEWAY_IMAGE_TOKEN, context.gatewayUpgradeImageUuid, softwarePackage.getUuid());
+                createImageSystemTag(ZMIGRATE_LINUX_BOOT_IMAGE, ZMIGRATE_LINUX_BOOT_IMAGE_TOKEN, context.linuxBootUpgradeImageUuid, softwarePackage.getUuid());
+                createImageSystemTag(ZMIGRATE_WINDOWS_BOOT_IMAGE, ZMIGRATE_WINDOWS_BOOT_IMAGE_TOKEN, context.windowsBootUpgradeImageUuid, softwarePackage.getUuid());
 
                 trigger.next();
             })
@@ -1229,6 +1244,10 @@ public class ZMigrateManager extends AbstractService implements
 
     @Override
     public void afterUploadSoftwarePackageToBackupStorage(SoftwarePackageVO softwarePackage, UploadSoftwarePackageToBackupStorageLongJobData msgData, Completion completion) {
+        if (!hasGatewayImage(msgData.imagesPath)) {
+            completion.fail(err(GENERIC_ERROR, "the required Linux Gateway image is missing"));
+            return;
+        }
         AddImagesToBsContext context = new AddImagesToBsContext();
 
         SimpleFlowChain.of("add-images-to-backup-storage")
@@ -1253,7 +1272,7 @@ public class ZMigrateManager extends AbstractService implements
                     amsg.setUrl(String.format("file://%s", imagePath));
                     amsg.setArchitecture(ImageArchitecture.x86_64.toString());
                     amsg.setDescription(imageName.startsWith(GATEWAY_IMAGE_PREFIX) ? GATEWAY_IMAGE_DESCRIPTION : BOOT_IMAGE_DESCRIPTION);
-                    final PatternedSystemTag imageSystemTag;
+                    final SystemTag imageSystemTag;
                     final String imageTokenName;
                     if (imageName.startsWith(GATEWAY_IMAGE_PREFIX)) {
                         imageSystemTag = ZMIGRATE_GATEWAY_IMAGE;
@@ -1394,6 +1413,7 @@ public class ZMigrateManager extends AbstractService implements
                 if (windowsBootImageUuid != null) {
                     imageUuids.add(windowsBootImageUuid);
                 }
+                imageUuids = getExistingImageUuids(imageUuids);
                 if (imageUuids.isEmpty()) {
                     trigger.next();
                     return;
@@ -1456,9 +1476,23 @@ public class ZMigrateManager extends AbstractService implements
             })
             .build())
         .propagateExceptionTo(completion)
-        .done(completion::success)
+        .done(() -> {
+            deleteUpgradeImageSystemTags(softwarePackage.getUuid());
+            completion.success();
+        })
         .error(completion::fail)
         .start();
+    }
+
+    private void createImageSystemTag(SystemTag systemTag, String tokenName, String tokenValue, String softwarePackageUuid) {
+        if (tokenValue == null) {
+            return;
+        }
+        SystemTagCreator creator = systemTag.newSystemTagCreator(softwarePackageUuid);
+        creator.inherent = false;
+        creator.recreate = true;
+        creator.setTagByTokens(map(e(tokenName, tokenValue)));
+        creator.create();
     }
 
     // ------------------------------------- UploadSoftwarePackageToVmBackend ------------------------------------
@@ -1479,18 +1513,11 @@ public class ZMigrateManager extends AbstractService implements
                 return err(INVALID_ZMIGRATE_TAGS,
                         "VM instance[uuid:%s] is not the ZMigrate management VM", vm.getUuid());
             }
+            if (isVddkUploaded(managementVmUuid)) {
+                return operr("ZMigrate VDDK has already been uploaded to management VM[uuid:%s]",
+                        managementVmUuid);
+            }
 
-            String softwarePackageUuid = getSoftwarePackageUuid();
-            String gatewayImageUuid = getTokenFromTag(ZMIGRATE_GATEWAY_IMAGE,
-                    ZMIGRATE_GATEWAY_IMAGE_TOKEN, softwarePackageUuid);
-            if (gatewayImageUuid == null) {
-                return err(INVALID_ZMIGRATE_TAGS, "ZMigrate gateway image is not configured");
-            }
-            if (!Objects.equals(gatewayImageUuid, vm.getImageUuid())) {
-                return err(INVALID_ZMIGRATE_TAGS,
-                        "ZMigrate management VM[uuid:%s] image[uuid:%s] does not match gateway image[uuid:%s]",
-                        vm.getUuid(), vm.getImageUuid(), gatewayImageUuid);
-            }
             return null;
         } catch (OperationFailureException e) {
             return e.getErrorCode();
@@ -1498,13 +1525,51 @@ public class ZMigrateManager extends AbstractService implements
     }
 
     @Override
-    public UploadSoftwarePackageToVmSpec getUploadSpec(String uploadTaskUuid) {
+    public UploadSoftwarePackageToVmSpec getUploadSpec(String uploadTaskUuid, long uploadTimestamp) {
         UploadSoftwarePackageToVmSpec spec = new UploadSoftwarePackageToVmSpec();
-        spec.setTargetPath(vddkUploadPath(uploadTaskUuid));
+        spec.setTargetPath(vddkUploadPath(uploadTimestamp));
         spec.setUsername(GATEWAY_SSH_USERNAME);
         spec.setSshPort(GATEWAY_SSH_PORT);
         spec.setPassword(getGatewaySshPassword());
         return spec;
+    }
+
+    @Override
+    public ErrorCode prepareUpload(String vmInstanceUuid, String targetIp, String uploadTaskUuid,
+                                   long uploadTimestamp) {
+        ShellResult result = createSshClient().run(
+                targetIp, ZMigrateVddkBundle.buildPrepareCommand(uploadTimestamp),
+                VDDK_INSTALL_TIMEOUT_SECONDS);
+        if (result.getRetCode() != 0) {
+            return vddkUploadCommandError("prepare upload directory", result);
+        }
+        return null;
+    }
+
+    @Override
+    public ErrorCode cleanupUpload(String targetIp, long uploadTimestamp) {
+        ShellResult result = createSshClient().run(
+                targetIp, ZMigrateVddkBundle.buildCleanupCommand(uploadTimestamp),
+                VDDK_INSTALL_TIMEOUT_SECONDS);
+        if (result.getRetCode() != 0) {
+            return vddkUploadCommandError("clean upload directory", result);
+        }
+        return null;
+    }
+
+    @Override
+    public boolean isUploadCancelable(String uploadTaskUuid) {
+        return vddkUploadLifecycle.isCancelable(uploadTaskUuid);
+    }
+
+    @Override
+    public void runAfterUploadFinished(String uploadTaskUuid, Runnable action) {
+        vddkUploadLifecycle.runAfterFinished(uploadTaskUuid, action);
+    }
+
+    @Override
+    public void markUploadSettled(String uploadTaskUuid) {
+        vddkUploadLifecycle.markUploadSettled(uploadTaskUuid);
     }
 
     private String getGatewaySshPassword() {
@@ -1518,86 +1583,165 @@ public class ZMigrateManager extends AbstractService implements
 
     @Override
     public void install(String vmInstanceUuid, String targetIp, String uploadTaskUuid,
+                        long uploadTimestamp,
                         BooleanSupplier canceled, Completion completion) {
-        thdf.submit(new Task<Void>() {
-            @Override
-            public Void call() {
-                try {
-                    activateUploadedVddk(vmInstanceUuid, targetIp, uploadTaskUuid, canceled, completion);
-                } catch (RuntimeException e) {
-                    completion.fail(err(GENERIC_ERROR,
-                            "failed to activate uploaded ZMigrate VDDK on VM[uuid:%s]: %s",
-                            vmInstanceUuid, summarizeVddkError(e.getMessage())));
-                }
-                return null;
-            }
-
-            @Override
-            public String getName() {
-                return String.format("activate uploaded ZMigrate VDDK on VM[uuid:%s]", vmInstanceUuid);
-            }
-        });
-    }
-
-    private void activateUploadedVddk(String vmInstanceUuid, String targetIp, String uploadTaskUuid,
-                                      BooleanSupplier canceled, Completion completion) {
         if (canceled.getAsBoolean()) {
             completion.fail(err(GENERIC_ERROR, "ZMigrate VDDK upload task[uuid:%s] was canceled",
                     uploadTaskUuid));
             return;
         }
+        if (!vddkUploadLifecycle.begin(uploadTaskUuid)) {
+            completion.fail(operr("ZMigrate VDDK upload task[uuid:%s] is already being activated",
+                    uploadTaskUuid));
+            return;
+        }
 
-        String activateUploadCommand = buildVddkActivationCommand(uploadTaskUuid);
+        try {
+            thdf.submit(new Task<Void>() {
+                @Override
+                public Void call() {
+                    try {
+                        activateUploadedVddk(vmInstanceUuid, targetIp, uploadTaskUuid,
+                                uploadTimestamp, completion);
+                    } catch (RuntimeException e) {
+                        completion.fail(operr("failed to activate uploaded ZMigrate VDDK on VM[uuid:%s]: %s",
+                                vmInstanceUuid, summarizeVddkError(e.getMessage())));
+                    } finally {
+                        vddkUploadLifecycle.finishActivation(uploadTaskUuid);
+                    }
+                    return null;
+                }
+
+                @Override
+                public String getName() {
+                    return String.format("activate uploaded ZMigrate VDDK on VM[uuid:%s]", vmInstanceUuid);
+                }
+            });
+        } catch (RuntimeException e) {
+            vddkUploadLifecycle.finishActivation(uploadTaskUuid);
+            throw e;
+        }
+    }
+
+    private void activateUploadedVddk(String vmInstanceUuid, String targetIp, String uploadTaskUuid,
+                                      long uploadTimestamp, Completion completion) {
+        Map<String, String> required = ZMigrateVddkBundle.parseVersionMd5Config(
+                ZMigrateGlobalConfig.VDDK_VERSION_MD5.value());
+        String activateUploadCommand = ZMigrateVddkBundle.buildActivationCommand(uploadTimestamp, required);
         ShellResult activateUploadResult = createSshClient().runWithSudoPassword(
                 targetIp, activateUploadCommand, VDDK_INSTALL_TIMEOUT_SECONDS);
         if (activateUploadResult.getRetCode() != 0) {
             completion.fail(vddkUploadCommandError("activate uploaded VDDK", activateUploadResult));
             return;
         }
-        String previousUploadTaskUuid = uploadedVddkTaskUuid(vmInstanceUuid);
         createVddkUploadedTag(vmInstanceUuid, uploadTaskUuid);
-        cleanupObsoleteVddkGenerations(
-                targetIp, uploadTaskUuid, previousUploadTaskUuid);
-        completion.success();
+        distributeVddkToDefaultGateway(vmInstanceUuid, activateUploadResult.getStdout(), required, completion);
     }
 
-    static String buildVddkActivationCommand(String uploadTaskUuid) {
-        String uploadPath = vddkUploadPath(uploadTaskUuid);
-        String generationPath = vddkGenerationPath(uploadTaskUuid);
-        return String.format(
-                "sudo -S -p '' sh -c 'if test -f %s && test ! -L %s; " +
-                        "then rm -f -- %s; exit 0; fi; " +
-                        "test -f %s && test ! -L %s && mv -T -- %s %s'",
-                generationPath, generationPath, uploadPath,
-                uploadPath, uploadPath, uploadPath, generationPath);
-    }
-
-    private void cleanupObsoleteVddkGenerations(String targetIp, String currentTaskUuid,
-                                                String previousTaskUuid) {
-        String command = buildVddkGenerationCleanupCommand(currentTaskUuid, previousTaskUuid);
-        ShellResult result = createSshClient().runWithSudoPassword(
-                targetIp, command, VDDK_INSTALL_TIMEOUT_SECONDS);
-        if (result.getRetCode() != 0) {
+    private void distributeVddkToDefaultGateway(String vmUuid, String activationOutput,
+                                                Map<String, String> required, Completion completion) {
+        SimpleFlowChain.of(String.format("distribute-VDDK-to-ZMigrate-gateway-%s", vmUuid))
+        .then(Flow.of("distribute-VDDK-to-default-ZMigrate-gateway")
+            .handle(trigger -> {
+                Map<String, String> vddkFiles = parsePublishedVddkFiles(activationOutput, required);
+                ZMigrateHttpClient httpClient = createHttpClient();
+                String servUuid = getGatewayServUuid(httpClient, vmUuid);
+                distributeVddks(httpClient, servUuid, vddkFiles);
+                trigger.next();
+            })
+            .build())
+        .propagateExceptionTo(completion)
+        .done(completion::success)
+        .error(errorCode -> {
             logger.warn(String.format(
-                    "failed to clean obsolete ZMigrate VDDK generations on VM[ip:%s]: %s",
-                    targetIp, summarizeVddkError(result.getStderr())));
-        }
+                    "failed to distribute VDDK to the default ZMigrate gateway: %s",
+                    errorCode.getReadableDetails()));
+            completion.success();
+        })
+        .start();
     }
 
-    static String buildVddkGenerationCleanupCommand(String currentTaskUuid,
-                                                    String previousTaskUuid) {
-        String currentPath = vddkGenerationPath(currentTaskUuid);
-        String previousClause = "";
-        if (previousTaskUuid != null && !previousTaskUuid.equals(currentTaskUuid)) {
-            try {
-                previousClause = String.format(" ! -path '%s'", vddkGenerationPath(previousTaskUuid));
-            } catch (IllegalArgumentException ignored) {
-            }
+    private Map<String, String> parsePublishedVddkFiles(String activationOutput, Map<String, String> required) {
+        List<String> vddkFiles = ZMigrateVddkBundle.parsePublishedFileNames(activationOutput);
+        int distinctFileCount = new HashSet<>(vddkFiles).size();
+        if (vddkFiles.size() != 2 || distinctFileCount != 2) {
+            throw new OperationFailureException(operr(
+                    "activation returned %d distinct VDDK package files", distinctFileCount));
         }
-        return String.format(
-                "sudo -S -p '' sh -c \"find /root -maxdepth 1 -type f -name 'vddk-*.tar.gz' " +
-                        "! -path '%s'%s -delete\"",
-                currentPath, previousClause);
+        List<String> versions = ZMigrateVddkBundle.getDistributionVersions(required);
+        Map<String, String> filesByVersion = new LinkedHashMap<>();
+        for (int i = 0; i < versions.size(); i++) {
+            filesByVersion.put(versions.get(i), vddkFiles.get(i));
+        }
+        return filesByVersion;
+    }
+
+    private String getGatewayServUuid(ZMigrateHttpClient httpClient, String vmUuid) {
+        ErrorableValue<String> gatewayServerInfos = httpClient.getGatewayServerInfos(0);
+        if (!gatewayServerInfos.isSuccess()) {
+            throw new OperationFailureException(operr(
+                    "failed to query ZMigrate gateway for VM[uuid:%s]", vmUuid)
+                    .withCause(gatewayServerInfos.error));
+        }
+
+        List<Map<String, Object>> gateways = JSONObjectUtil.toObject(gatewayServerInfos.result, List.class);
+        List<Map<String, Object>> matchedGateways = gateways == null ? Collections.emptyList() : gateways.stream()
+                .filter(Objects::nonNull)
+                .filter(gateway -> vmUuid.equals(gateway.get("CLOUD_SERV")))
+                .collect(Collectors.toList());
+        if (matchedGateways.isEmpty()) {
+            throw new OperationFailureException(operr("no ZMigrate gateway matches VM[uuid:%s]", vmUuid));
+        }
+        if (matchedGateways.size() > 1) {
+            throw new OperationFailureException(operr("multiple ZMigrate gateways match VM[uuid:%s]", vmUuid));
+        }
+
+        Object servUuid = matchedGateways.get(0).get("SERV_UUID");
+        if (!(servUuid instanceof String) || StringUtils.isEmpty((String) servUuid)) {
+            throw new OperationFailureException(operr(
+                    "ZMigrate gateway for VM[uuid:%s] has no service UUID", vmUuid));
+        }
+        return (String) servUuid;
+    }
+
+    private void distributeVddks(ZMigrateHttpClient httpClient, String servUuid, Map<String, String> vddkFiles) {
+        new ZMigrateVddkDistribution(new ZMigrateVddkDistribution.Gateway() {
+            @Override
+            public Set<String> queryVersions(long timeoutInMillis) {
+                ErrorableValue<Set<String>> response = httpClient.getVddkVersions(servUuid, timeoutInMillis);
+                if (!response.isSuccess()) {
+                    throw new OperationFailureException(operr(
+                            "failed to query VDDK versions on ZMigrate gateway[servUuid:%s]", servUuid)
+                            .withCause(response.error));
+                }
+                return response.result;
+            }
+
+            @Override
+            public void upload(String file) {
+                distributeVddk(httpClient, servUuid, file);
+            }
+        }).distribute(vddkFiles);
+    }
+
+    private void distributeVddk(ZMigrateHttpClient httpClient, String servUuid, String vddkFile) {
+        ErrorableValue<ZMigrateHttpClient.UploadVddkResponse> response =
+                httpClient.uploadVddk(servUuid, vddkFile);
+        if (!response.isSuccess()) {
+            throw new OperationFailureException(operr(
+                    "failed to distribute VDDK[file:%s] to ZMigrate gateway[servUuid:%s]",
+                    vddkFile, servUuid).withCause(response.error));
+        }
+
+        ZMigrateHttpClient.UploadVddkResponse result = response.result;
+        if (result == null || !Boolean.parseBoolean(result.status)) {
+            throw new OperationFailureException(operr(
+                    "failed to distribute VDDK[file:%s] to ZMigrate gateway[servUuid:%s]: %s",
+                    vddkFile, servUuid, result == null ? "empty response" : result.msg));
+        }
+        logger.info(String.format(
+                "ZMigrate accepted VDDK distribution request[file:%s, version:%s] for gateway[servUuid:%s]: %s",
+                vddkFile, result.version, servUuid, result.msg));
     }
 
     private ErrorCode vddkUploadCommandError(String command, ShellResult result) {
@@ -1619,296 +1763,8 @@ public class ZMigrateManager extends AbstractService implements
         creator.create();
     }
 
-    private synchronized void startVddkDistributionTask() {
-        if (vddkDistributionTask != null) {
-            vddkDistributionTask.stop();
-        }
-
-        vddkDistributionTask = new VddkDistributionTask();
-        thdf.submitCancelablePeriodicTask(vddkDistributionTask);
-    }
-
-    private class VddkDistributionTask extends CancelablePeriodicTask {
-        private final AtomicBoolean stopped = new AtomicBoolean(false);
-
-        void stop() {
-            stopped.set(true);
-        }
-
-        @Override
-        public boolean run() {
-            if (stopped.get()) {
-                return true;
-            }
-            triggerVddkDistributionScan();
-            return stopped.get();
-        }
-
-        @Override
-        public TimeUnit getTimeUnit() {
-            return TimeUnit.SECONDS;
-        }
-
-        @Override
-        public long getInterval() {
-            return ZMigrateGlobalConfig.VDDK_DISTRIBUTION_SCAN_INTERVAL.value(Long.class);
-        }
-
-        @Override
-        public String getName() {
-            return "scan ZMigrate VDDK distribution";
-        }
-    }
-
-    private void triggerVddkDistributionScan() {
-        scanVddkDistributionOnce(new Completion(null) {
-            @Override
-            public void success() {
-            }
-
-            @Override
-            public void fail(ErrorCode errorCode) {
-                logger.warn(String.format("failed to scan ZMigrate VDDK distribution: %s",
-                        errorCode.getReadableDetails()));
-            }
-        });
-    }
-
-    void scanVddkDistributionOnce(Completion completion) {
-        if (!vddkDistributionReady.get()) {
-            completion.success();
-            return;
-        }
-        if (!vddkDistributionScanning.compareAndSet(false, true)) {
-            completion.success();
-            return;
-        }
-
-        VddkDistributionSource source;
-        try {
-            source = findVddkDistributionSource();
-        } catch (Exception e) {
-            vddkDistributionScanning.set(false);
-            completion.fail(e instanceof OperationFailureException
-                    ? ((OperationFailureException) e).getErrorCode()
-                    : err(GENERIC_ERROR, "failed to resolve ZMigrate VDDK source: %s", e.getMessage()));
-            return;
-        }
-        if (source == null) {
-            vddkDistributionScanning.set(false);
-            completion.success();
-            return;
-        }
-
-        List<VmInstanceVO> targets;
-        try {
-            targets = findVddkDistributionTargets().stream()
-                    .filter(vm -> destinationMaker.isManagedByUs(vm.getUuid()))
-                    .filter(vm -> !source.uploadTaskUuid.equals(installedVddkTaskUuid(vm.getUuid())))
-                    .collect(Collectors.toList());
-        } catch (Exception e) {
-            vddkDistributionScanning.set(false);
-            completion.fail(err(GENERIC_ERROR,
-                    "failed to find ZMigrate VDDK distribution targets: %s", e.getMessage()));
-            return;
-        }
-
-        if (targets.isEmpty()) {
-            vddkDistributionScanning.set(false);
-            completion.success();
-            return;
-        }
-
-        new While<>(targets).step((vm, whileCompletion) ->
-                distributeVddk(source, vm.getUuid(), new Completion(whileCompletion) {
-                    @Override
-                    public void success() {
-                        whileCompletion.done();
-                    }
-
-                    @Override
-                    public void fail(ErrorCode errorCode) {
-                        logger.warn(String.format("failed to distribute ZMigrate VDDK to VM[uuid:%s]: %s",
-                                vm.getUuid(), errorCode.getReadableDetails()));
-                        whileCompletion.done();
-                    }
-                }), VDDK_DISTRIBUTION_CONCURRENCY).run(new WhileDoneCompletion(completion) {
-            @Override
-            public void done(ErrorCodeList errorCodeList) {
-                vddkDistributionScanning.set(false);
-                completion.success();
-            }
-        });
-    }
-
-    private List<VmInstanceVO> findVddkDistributionTargets() {
-        Set<String> targetVmUuids = new LinkedHashSet<>();
-        targetVmUuids.addAll(findZMigrateVmUuids(ZMIGRATE_MANAGEMENT));
-        targetVmUuids.addAll(findZMigrateVmUuids(ZMIGRATE_GATEWAY));
-        if (targetVmUuids.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        return Q.New(VmInstanceVO.class)
-                .in(VmInstanceVO_.uuid, targetVmUuids)
-                .eq(VmInstanceVO_.state, VmInstanceState.Running)
-                .list();
-    }
-
-    private VddkDistributionSource findVddkDistributionSource() {
-        String managementVmUuid = findZMigrateVmUuid(ZMIGRATE_MANAGEMENT);
-        if (managementVmUuid == null) {
-            return null;
-        }
-        VmInstanceVO managementVm = Q.New(VmInstanceVO.class)
-                .eq(VmInstanceVO_.uuid, managementVmUuid)
-                .eq(VmInstanceVO_.state, VmInstanceState.Running)
-                .find();
-        if (managementVm == null) {
-            return null;
-        }
-
-        String uploadTaskUuid = uploadedVddkTaskUuid(managementVmUuid);
-        if (uploadTaskUuid == null) {
-            return null;
-        }
-        return new VddkDistributionSource(managementVmUuid,
-                requireVmManagementIp(managementVmUuid), uploadTaskUuid);
-    }
-
-    private void distributeVddk(VddkDistributionSource source, String vmUuid, Completion completion) {
-        thdf.chainSubmit(new ChainTask(completion) {
-            @Override
-            public String getSyncSignature() {
-                return "zmigrate-vddk-distribute-" + vmUuid;
-            }
-
-            @Override
-            public void run(SyncTaskChain chain) {
-                thdf.submit(new Task<Void>() {
-                    @Override
-                    public Void call() {
-                        try {
-                            distributeVddkNow(source, vmUuid, completion);
-                        } catch (OperationFailureException e) {
-                            completion.fail(e.getErrorCode());
-                        } catch (Throwable t) {
-                            completion.fail(err(GENERIC_ERROR,
-                                    "unexpected failure while distributing VDDK to VM[uuid:%s]: %s",
-                                    vmUuid, t.getMessage()));
-                        } finally {
-                            chain.next();
-                        }
-                        return null;
-                    }
-
-                    @Override
-                    public String getName() {
-                        return "distribute ZMigrate VDDK to VM " + vmUuid;
-                    }
-                });
-            }
-
-            @Override
-            public String getName() {
-                return getSyncSignature();
-            }
-        });
-    }
-
-    private void distributeVddkNow(VddkDistributionSource source, String vmUuid,
-                                   Completion completion) {
-        if (!Objects.equals(source.uploadTaskUuid, uploadedVddkTaskUuid(source.managementVmUuid))) {
-            completion.success();
-            return;
-        }
-        if (Objects.equals(source.uploadTaskUuid, installedVddkTaskUuid(vmUuid))) {
-            completion.success();
-            return;
-        }
-
-        VmInstanceVO target = Q.New(VmInstanceVO.class)
-                .eq(VmInstanceVO_.uuid, vmUuid)
-                .eq(VmInstanceVO_.state, VmInstanceState.Running)
-                .find();
-        if (target == null || !isVddkDistributionTarget(target)) {
-            completion.success();
-            return;
-        }
-        String targetIp;
-        try {
-            targetIp = requireVmManagementIp(vmUuid);
-        } catch (CloudRuntimeException e) {
-            completion.fail(err(GENERIC_ERROR,
-                    "failed to get management IP for VM[uuid:%s]: %s", vmUuid, e.getMessage()));
-            return;
-        }
-
-        long outerTimeout = VDDK_DISTRIBUTION_TIMEOUT_SECONDS + VDDK_INSTALL_TIMEOUT_SECONDS + 60;
-        ShellResult result = createSshClient().distributeVddk(
-                source.managementIp, targetIp, source.uploadTaskUuid, outerTimeout);
-        if (result.getRetCode() != 0) {
-            completion.fail(err(GENERIC_ERROR,
-                    "ZMigrate VDDK distribution to VM[uuid:%s] failed with return code %s: %s",
-                    vmUuid, result.getRetCode(), summarizeVddkError(result.getStderr())));
-            return;
-        }
-
-        if (!Objects.equals(source.uploadTaskUuid, uploadedVddkTaskUuid(source.managementVmUuid))) {
-            completion.success();
-            return;
-        }
-        createVddkInstalledTag(vmUuid, source.uploadTaskUuid);
-        completion.success();
-    }
-
-    private boolean isVddkDistributionTarget(VmInstanceVO vm) {
-        return ZMIGRATE_MANAGEMENT.hasTag(vm.getUuid()) ||
-                ZMIGRATE_GATEWAY.hasTag(vm.getUuid());
-    }
-
-    private String requireVmManagementIp(String vmUuid) {
-        String ip = Q.New(VmNicVO.class)
-                .eq(VmNicVO_.vmInstanceUuid, vmUuid)
-                .eq(VmNicVO_.deviceId, 0)
-                .select(VmNicVO_.ip)
-                .findValue();
-        if (!NetworkUtils.isIpv4Address(ip)) {
-            throw new CloudRuntimeException(String.format(
-                    "VM[uuid:%s] has no valid IPv4 management address", vmUuid));
-        }
-        return ip;
-    }
-
-    private String uploadedVddkTaskUuid(String gatewayVmUuid) {
-        return ZMIGRATE_VDDK_UPLOADED.getTokenByResourceUuid(
-                gatewayVmUuid, ZMIGRATE_VDDK_UPLOAD_TASK_UUID_TOKEN);
-    }
-
-    private String installedVddkTaskUuid(String vmUuid) {
-        return ZMIGRATE_VDDK_INSTALLED.getTokenByResourceUuid(
-                vmUuid, ZMIGRATE_VDDK_UPLOAD_TASK_UUID_TOKEN);
-    }
-
-    private void createVddkInstalledTag(String vmUuid, String uploadTaskUuid) {
-        SystemTagCreator creator = ZMIGRATE_VDDK_INSTALLED.newSystemTagCreator(vmUuid);
-        creator.inherent = false;
-        creator.recreate = true;
-        creator.setTagByTokens(map(e(ZMIGRATE_VDDK_UPLOAD_TASK_UUID_TOKEN, uploadTaskUuid)));
-        creator.create();
-    }
-
-    private static class VddkDistributionSource {
-        private final String managementVmUuid;
-        private final String managementIp;
-        private final String uploadTaskUuid;
-
-        private VddkDistributionSource(String managementVmUuid, String managementIp,
-                                       String uploadTaskUuid) {
-            this.managementVmUuid = managementVmUuid;
-            this.managementIp = managementIp;
-            this.uploadTaskUuid = uploadTaskUuid;
-        }
+    private boolean isVddkUploaded(String managementVmUuid) {
+        return ZMIGRATE_VDDK_UPLOADED.hasTag(managementVmUuid);
     }
 
     // ------------------------------------- EstimatedImageSizeExtensionPoint ------------------------------------
@@ -1921,10 +1777,21 @@ public class ZMigrateManager extends AbstractService implements
     // ------------------------------------- Utility Handers ------------------------------------
 
     private ZMigrateHttpClient createHttpClient() {
-        return Platform.New(ZMigrateHttpClient::new);
+        return createHttpClient(null);
+    }
+
+    private ZMigrateHttpClient createHttpClient(String managementIp) {
+        return Platform.New(() -> new ZMigrateHttpClient(managementIp));
     }
 
     private ZMigrateSshClient createSshClient() {
         return sshClientFactory.get();
+    }
+
+    private ZMigrateSshClient createSshClient(String managementIp) {
+        if (managementIp == null) {
+            return createSshClient();
+        }
+        return Platform.New(() -> new ZMigrateSshClient(managementIp));
     }
 }

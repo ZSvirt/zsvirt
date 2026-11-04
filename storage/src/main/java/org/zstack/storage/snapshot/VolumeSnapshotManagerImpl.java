@@ -41,6 +41,7 @@ import org.zstack.identity.QuotaUtil;
 import org.zstack.storage.snapshot.group.MemorySnapshotGroupReferenceFactory;
 import org.zstack.storage.snapshot.group.VolumeSnapshotGroupBase;
 import org.zstack.storage.snapshot.group.VolumeSnapshotGroupChecker;
+import org.zstack.storage.snapshot.group.VolumeSnapshotGroupTreeBuilder;
 import org.zstack.storage.snapshot.reference.VolumeSnapshotReferenceTreeBase;
 import org.zstack.storage.snapshot.reference.VolumeSnapshotReferenceUtils;
 import org.zstack.storage.volume.FireSnapShotCanonicalEvent;
@@ -482,6 +483,23 @@ public class VolumeSnapshotManagerImpl extends AbstractService implements
         APICheckVolumeSnapshotGroupAvailabilityReply reply = new APICheckVolumeSnapshotGroupAvailabilityReply();
         reply.setResults(VolumeSnapshotGroupChecker.getAvailability(msg.getUuids()));
         bus.reply(msg, reply);
+    }
+
+    private void handle(APIGetVolumeSnapshotGroupTreeMsg msg) {
+        APIGetVolumeSnapshotGroupTreeReply reply = new APIGetVolumeSnapshotGroupTreeReply();
+        List<VolumeSnapshotGroupTreeInventory> inventories = buildVolumeSnapshotGroupTrees(msg);
+        reply.setInventories(inventories);
+
+        bus.reply(msg, reply);
+    }
+
+    private List<VolumeSnapshotGroupTreeInventory> buildVolumeSnapshotGroupTrees(APIGetVolumeSnapshotGroupTreeMsg msg) {
+        String vmInstanceUuid = msg.getVmInstanceUuid();
+        if (vmInstanceUuid == null) {
+            return Collections.emptyList();
+        }
+
+        return groupTreeBuilder.buildForVm(vmInstanceUuid);
     }
 
 /*
@@ -1201,6 +1219,8 @@ public class VolumeSnapshotManagerImpl extends AbstractService implements
             handle((APIBatchDeleteVolumeSnapshotMsg) msg);
         } else if (msg instanceof APICheckVolumeSnapshotGroupAvailabilityMsg) {
             handle((APICheckVolumeSnapshotGroupAvailabilityMsg) msg);
+        } else if (msg instanceof APIGetVolumeSnapshotGroupTreeMsg) {
+            handle((APIGetVolumeSnapshotGroupTreeMsg) msg);
         } else if (msg instanceof APIGetMemorySnapshotGroupReferenceMsg) {
             handle((APIGetMemorySnapshotGroupReferenceMsg) msg);
         } else if (msg instanceof APICheckMemorySnapshotGroupConflictMsg) {
@@ -1302,7 +1322,7 @@ public class VolumeSnapshotManagerImpl extends AbstractService implements
         }
 
         pluginRgty.saveExtensionAsMap(CreateTemplateFromVolumeSnapshotExtensionPoint.class,
-                (Function<Object, CreateTemplateFromVolumeSnapshotExtensionPoint>) arg -> arg.createTemplateFromVolumeSnapshotPrimaryStorageType());
+                CreateTemplateFromVolumeSnapshotExtensionPoint::createTemplateFromVolumeSnapshotPrimaryStorageType);
 
         bus.installBeforeDeliveryMessageInterceptor(new AbstractBeforeDeliveryMessageInterceptor() {
             @Override
@@ -1334,10 +1354,8 @@ public class VolumeSnapshotManagerImpl extends AbstractService implements
     }
 
     @Override
-    public List<Class> getReplyMessageClassForMarshalExtensionPoint() {
-        List<Class> ret = new ArrayList<>();
-        ret.add(APIQueryVolumeSnapshotTreeReply.class);
-        return ret;
+    public List<Class<? extends Message>> getReplyMessageClassForMarshalExtensionPoint() {
+        return list(APIQueryVolumeSnapshotTreeReply.class);
     }
 
     @Override
@@ -1369,6 +1387,8 @@ public class VolumeSnapshotManagerImpl extends AbstractService implements
         return invs != null ? invs.stream().map(it -> ((VolumeSnapshotInventory) it).getUuid()).collect(Collectors.toSet())
                 : Collections.emptySet();
     }
+
+    private final VolumeSnapshotGroupTreeBuilder groupTreeBuilder = new VolumeSnapshotGroupTreeBuilder();
 
     @Override
     public void volumePreExpunge(VolumeInventory volume) {}

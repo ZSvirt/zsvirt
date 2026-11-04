@@ -1,7 +1,6 @@
 package org.zstack.compute.vm;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.zstack.core.componentloader.PluginExtension;
 import org.zstack.core.componentloader.PluginRegistry;
 import org.zstack.core.thread.AsyncThread;
 import org.zstack.header.Component;
@@ -11,7 +10,6 @@ import org.zstack.header.vm.VmInstanceState;
 import org.zstack.header.vm.VmInstanceStateChangeNotifyPoint;
 import org.zstack.utils.CollectionUtils;
 import org.zstack.utils.Utils;
-import org.zstack.utils.function.ForEachFunction;
 import org.zstack.utils.logging.CLogger;
 
 import java.util.ArrayList;
@@ -50,12 +48,7 @@ public class VmInstanceNotifyPointEmitter implements Component {
             return;
         }
 
-        CollectionUtils.safeForEach(exts, new ForEachFunction<VmInstanceStateChangeNotifyPoint>() {
-            @Override
-            public void run(VmInstanceStateChangeNotifyPoint arg) {
-                arg.notifyVmInstanceStateChange(vm, pre, curr);
-            }
-        });
+        CollectionUtils.safeForEach(exts, arg -> arg.notifyVmInstanceStateChange(vm, pre, curr));
     }
     
     @Override

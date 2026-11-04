@@ -10,12 +10,12 @@ doc {
 		name "Enabled"
 		desc ""
 		type "ReplicationGroupState"
-		since "3.5"
+		since "zsv_3.5"
 	}
 	field {
 		name "Disabled"
 		desc ""
 		type "ReplicationGroupState"
-		since "3.5"
+		since "zsv_3.5"
 	}
 }

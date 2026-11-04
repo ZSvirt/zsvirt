@@ -44,7 +44,6 @@ import org.zstack.utils.ShellUtils;
 import org.zstack.utils.Utils;
 import org.zstack.utils.logging.CLogger;
 import org.zstack.utils.path.PathUtil;
-import org.zstack.utils.string.StringSimilarity;
 import org.zstack.zsv.core.api.APIGetNodeRolesMsg;
 import org.zstack.zsv.core.api.APIGetNodeRolesReply;
 import org.zstack.zsv.core.entity.NodeRolesItemView;
@@ -83,9 +82,6 @@ public class ZsvManagerImpl extends AbstractService implements ZsvManager, Manag
     public boolean start() {
         ImageDefaultBehavior.setDefaultPlatform(null);
         ImageDefaultBehavior.setDefaultBootMode(null);
-
-        StringSimilarity.elaborateFolder = "zsvErrorElaborations";
-        StringSimilarity.refreshErrorTemplates();
         return true;
     }
 

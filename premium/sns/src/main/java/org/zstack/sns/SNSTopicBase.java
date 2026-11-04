@@ -26,7 +26,6 @@ import org.zstack.header.message.APIMessage;
 import org.zstack.header.message.Message;
 import org.zstack.utils.CollectionUtils;
 import org.zstack.utils.Utils;
-import org.zstack.utils.function.ForEachFunction;
 import org.zstack.utils.logging.CLogger;
 import static org.zstack.core.Platform.*;
 
@@ -178,12 +177,9 @@ public class SNSTopicBase implements SNSTopic {
                                                 .param("ptype", SNSConstants.SYSTEM_PLATFORM)
                                                 .list();
 
-                                        CollectionUtils.safeForEach(extensions, new ForEachFunction<SNSPublishExtension>() {
-                                            @Override
-                                            public void run(SNSPublishExtension ext) {
-                                                for (String endpointUuid : endpointUuids) {
-                                                    ext.afterPublishToEndpoint(endpointUuid, msg.getMessage());
-                                                }
+                                        CollectionUtils.safeForEach(extensions, ext -> {
+                                            for (String endpointUuid : endpointUuids) {
+                                                ext.afterPublishToEndpoint(endpointUuid, msg.getMessage());
                                             }
                                         });
 
@@ -234,12 +230,7 @@ public class SNSTopicBase implements SNSTopic {
                                 endpoint.publish(createMessageStruct(msg, item.getType()), new Completion(completion) {
                                     @Override
                                     public void success() {
-                                        CollectionUtils.safeForEach(extensions, new ForEachFunction<SNSPublishExtension>() {
-                                            @Override
-                                            public void run(SNSPublishExtension ext) {
-                                                ext.afterPublishToEndpoint(item.getUuid(), msg.getMessage());
-                                            }
-                                        });
+                                        CollectionUtils.safeForEach(extensions, ext -> ext.afterPublishToEndpoint(item.getUuid(), msg.getMessage()));
 
                                         completion.done();
                                     }

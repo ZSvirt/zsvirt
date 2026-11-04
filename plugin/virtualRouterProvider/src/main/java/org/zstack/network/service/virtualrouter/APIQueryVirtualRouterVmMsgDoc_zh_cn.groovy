@@ -4,11 +4,11 @@ import org.zstack.appliancevm.APIQueryApplianceVmReply
 import org.zstack.header.query.APIQueryMessage
 
 doc {
-	title "查询虚拟路由器云主机(QueryVirtualRouterVm)"
+	title "查询虚拟路由器虚拟机(QueryVirtualRouterVm)"
 
 	category "虚拟路由器"
 
-	desc """查询虚拟路由器云主机"""
+	desc """查询虚拟路由器虚拟机"""
 
 	rest {
 		request {

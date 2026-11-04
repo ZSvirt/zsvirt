@@ -726,9 +726,7 @@ public class SecurityGroupManagerImpl extends AbstractService implements Securit
 
 
     private void setVmNicSecurityGroup(APISetVmNicSecurityGroupMsg msg, Completion completion) {
-        Map data = new HashMap();
         FlowChain chain = FlowChainBuilder.newShareFlowChain();
-        chain.setData(data);
         chain.then(new ShareFlow() {
             @Override
             public void setup() {
@@ -890,9 +888,7 @@ public class SecurityGroupManagerImpl extends AbstractService implements Securit
     }
 
     private void doChangeSecurityGroupRuleState(APIChangeSecurityGroupRuleStateMsg msg, Completion completion) {
-        Map data = new HashMap();
         FlowChain chain = FlowChainBuilder.newShareFlowChain();
-        chain.setData(data);
         chain.setName(String.format("change-security-group-%s-rule-state", msg.getSecurityGroupUuid()));
         chain.then(new ShareFlow() {
             @Override
@@ -1015,9 +1011,7 @@ public class SecurityGroupManagerImpl extends AbstractService implements Securit
     }
 
     private void doUpdateSecurityGroupRulePriority(APIUpdateSecurityGroupRulePriorityMsg msg, Completion completion) {
-        Map data = new HashMap();
         FlowChain chain = FlowChainBuilder.newShareFlowChain();
-        chain.setData(data);
         chain.setName(String.format("update-security-group-%s-rule-priority", msg.getSecurityGroupUuid()));
         chain.then(new ShareFlow() {
             @Override
@@ -1159,9 +1153,7 @@ public class SecurityGroupManagerImpl extends AbstractService implements Securit
     }
 
     private void doChangeSecurityGroupRule(APIChangeSecurityGroupRuleMsg msg, String sgUuid, Completion completion) {
-        Map data = new HashMap();
         FlowChain chain = FlowChainBuilder.newShareFlowChain();
-        chain.setData(data);
         chain.then(new ShareFlow() {
             @Override
             public void setup() {
@@ -1477,9 +1469,7 @@ public class SecurityGroupManagerImpl extends AbstractService implements Securit
     }
 
     private void removeNicFromSecurityGroup(String sgUuid, List<String> vmNicUuids, Completion completion) {
-        Map data = new HashMap();
         FlowChain chain = FlowChainBuilder.newShareFlowChain();
-        chain.setData(data);
         chain.setName( String.format("remove-vm-nic-from-security-group-%s", sgUuid));
         chain.then(new ShareFlow() {
             @Override
@@ -1597,9 +1587,7 @@ public class SecurityGroupManagerImpl extends AbstractService implements Securit
     }
 
     private void deleteSecurityGroup(String sgUuid, Completion completion) {
-        Map data = new HashMap();
         FlowChain chain = FlowChainBuilder.newShareFlowChain();
-        chain.setData(data);
         chain.then(new ShareFlow() {
             @Override
             public void setup() {
@@ -1818,9 +1806,7 @@ public class SecurityGroupManagerImpl extends AbstractService implements Securit
     }
 
     private void deleteSecurityGroupRule(APIDeleteSecurityGroupRuleMsg msg, String sgUuid, Completion completion) {
-        Map data = new HashMap();
         FlowChain chain = FlowChainBuilder.newShareFlowChain();
-        chain.setData(data);
         chain.then(new ShareFlow() {
             @Override
             public void setup() {
@@ -1962,9 +1948,7 @@ public class SecurityGroupManagerImpl extends AbstractService implements Securit
     }
 
     private void addVmNicToSecurityGroup(String sgUuid, List<String> vmNicUuids, Completion completion) {
-        Map data = new HashMap();
         FlowChain chain = FlowChainBuilder.newShareFlowChain();
-        chain.setData(data);
         chain.then(new ShareFlow() {
             @Override
             public void setup() {
@@ -2195,9 +2179,7 @@ public class SecurityGroupManagerImpl extends AbstractService implements Securit
     }
 
     private void doAddSecurityGroupRule(AddSecurityGroupRuleMessage msg,  Completion completion) {
-        Map data = new HashMap();
         FlowChain chain = FlowChainBuilder.newShareFlowChain();
-        chain.setData(data);
         chain.setName(String.format("add-security-group[%s]-rules", msg.getSecurityGroupUuid()));
         chain.then(new ShareFlow() {
             @Override

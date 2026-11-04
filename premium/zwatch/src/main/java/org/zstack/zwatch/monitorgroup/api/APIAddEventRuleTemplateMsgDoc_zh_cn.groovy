@@ -28,7 +28,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "3.10.0"
+					since "zsv_3.10.0"
 				}
 				column {
 					name "monitorTemplateUuid"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "3.10.0"
+					since "zsv_3.10.0"
 				}
 				column {
 					name "namespace"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "3.10.0"
+					since "zsv_3.10.0"
 				}
 				column {
 					name "eventName"
@@ -55,7 +55,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "3.10.0"
+					since "zsv_3.10.0"
 				}
 				column {
 					name "emergencyLevel"
@@ -64,7 +64,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.10.0"
+					since "zsv_3.10.0"
 					values ("Emergent","Important","Normal")
 				}
 				column {
@@ -74,7 +74,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.10.0"
+					since "zsv_3.10.0"
 				}
 				column {
 					name "resourceUuid"
@@ -83,7 +83,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.10.0"
+					since "zsv_3.10.0"
 				}
 				column {
 					name "tagUuids"
@@ -92,7 +92,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.10.0"
+					since "zsv_3.10.0"
 				}
 				column {
 					name "systemTags"
@@ -101,7 +101,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.10.0"
+					since "zsv_3.10.0"
 				}
 				column {
 					name "userTags"
@@ -110,7 +110,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.10.0"
+					since "zsv_3.10.0"
 				}
 			}
 		}

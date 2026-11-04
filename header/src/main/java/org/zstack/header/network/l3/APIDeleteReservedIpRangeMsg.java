@@ -58,7 +58,7 @@ public class APIDeleteReservedIpRangeMsg extends APIDeleteMessage implements L3N
  
     public static APIDeleteReservedIpRangeMsg __example__() {
         APIDeleteReservedIpRangeMsg msg = new APIDeleteReservedIpRangeMsg();
-        msg.setUuid(uuid());
+        msg.setUuid(uuid(ReservedIpRangeVO.class));
         return msg;
     }
 }

@@ -13,19 +13,19 @@ doc {
 		path "org.zstack.header.managementnode.APIGetFactoryModeStateReply.error"
 		desc "错误码，若不为null，则表示操作失败, 操作成功时该字段为null",false
 		type "ErrorCode"
-		since "3.8"
+		since "zsv_3.8"
 		clz ErrorCode.class
 	}
 	field {
 		name "factoryModeState"
 		desc ""
 		type "Boolean"
-		since "3.8"
+		since "zsv_3.8"
 	}
 	field {
 		name "success"
 		desc ""
 		type "boolean"
-		since "3.8"
+		since "zsv_3.8"
 	}
 }

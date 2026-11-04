@@ -28,7 +28,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.0.0"
+					since "zsv_3.0.0"
 					values ("zstack")
 				}
 				column {
@@ -38,7 +38,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.0.0"
+					since "zsv_3.0.0"
 				}
 				column {
 					name "uuid"
@@ -47,7 +47,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.0.0"
+					since "zsv_3.0.0"
 				}
 				column {
 					name "parameters"
@@ -56,7 +56,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.0.0"
+					since "zsv_3.0.0"
 				}
 				column {
 					name "systemTags"
@@ -65,7 +65,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.0.0"
+					since "zsv_3.0.0"
 				}
 				column {
 					name "userTags"
@@ -74,7 +74,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.0.0"
+					since "zsv_3.0.0"
 				}
 				column {
 					name "preparameters"
@@ -83,7 +83,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.9.0"
+					since "zsv_3.9.0"
 				}
 			}
 		}

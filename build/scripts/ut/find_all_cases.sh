@@ -20,6 +20,10 @@ cd ../../../     # under zvirt
 
 CASELIST=""
 for module in `ls test/src/test/resources/UTCapabilities`; do
+    case "$module" in
+        module-*) ;;
+        *) continue ;;
+    esac
     module_name="${module#module-}"
 
     # find ${module}/pom.xml
@@ -56,3 +60,8 @@ for module in `ls test/src/test/resources/UTCapabilities`; do
         fi
     done
 done
+
+ee_script="zsvirt-ee/build-ee/scripts/ut/find_all_cases_ee.sh"
+if [ -f "$ee_script" ]; then
+    bash "$ee_script"
+fi

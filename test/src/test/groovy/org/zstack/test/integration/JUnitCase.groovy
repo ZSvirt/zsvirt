@@ -2,6 +2,7 @@ package org.zstack.test.integration
 
 import org.zstack.test.unittest.JUnitTestSuite
 import org.zstack.testlib.SubCase
+import org.zstack.testlib.premium.PremiumEnv
 
 /**
  * Created by lining on 2018/3/18.
@@ -10,7 +11,7 @@ class JUnitCase extends SubCase{
 
     @Override
     void setup() {
-        useSpring(ZStackTest.springSpec)
+        useSpring(PremiumEnv.makeSpring())
     }
 
     @Override

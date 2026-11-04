@@ -3,12 +3,10 @@ package org.zstack.header.errorcode;
 import org.apache.commons.collections.CollectionUtils;
 import org.zstack.header.core.I18nMessage;
 import org.zstack.header.message.NoJsonSchema;
-import org.zstack.header.rest.APINoSee;
 import org.zstack.utils.gson.JSONObjectUtil;
 import org.zstack.utils.logging.CLogger;
 import org.zstack.utils.opaque.OpaqueCollection;
 import org.zstack.utils.opaque.OpaqueScripts;
-import org.zstack.utils.string.ErrorCodeElaboration;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -40,34 +38,26 @@ import static org.zstack.utils.opaque.OpaqueConstants.*;
  * }
  * </pre></blockquote>
  */
-public class ErrorCode implements Serializable, Cloneable, OpaqueCollection, I18nMessage {
+public final class ErrorCode implements Serializable, Cloneable, OpaqueCollection, I18nMessage {
     private String code;
     private String description;
     private String details;
     private String i18nDetails;
 
-    @Deprecated
-    private String elaboration;
-    @APINoSee
-    @Deprecated
-    private ErrorCodeElaboration messages;
-    @APINoSee
-    @Deprecated
-    private String cost;
     /**
      * TODO: merge cause to causes
      */
     @Deprecated
     private ErrorCode cause;
-    protected final List<ErrorCode> causes = Collections.synchronizedList(new ArrayList<>());
+    private final List<ErrorCode> causes = Collections.synchronizedList(new ArrayList<>());
     @NoJsonSchema
     private LinkedHashMap<String, Object> opaque;
 
-    public LinkedHashMap getOpaque() {
+    public LinkedHashMap<String, Object> getOpaque() {
         return opaque;
     }
 
-    public void setOpaque(LinkedHashMap opaque) {
+    public void setOpaque(LinkedHashMap<String, Object> opaque) {
         this.opaque = opaque;
     }
 
@@ -128,8 +118,6 @@ public class ErrorCode implements Serializable, Cloneable, OpaqueCollection, I18
         this.description = other.description;
         this.details = other.details;
         this.i18nDetails = other.i18nDetails;
-        this.elaboration = other.elaboration;
-        this.messages = other.messages;
         this.cause = other.cause;
         this.causes.addAll(other.causes);
         if (other.opaque != null) {
@@ -180,10 +168,12 @@ public class ErrorCode implements Serializable, Cloneable, OpaqueCollection, I18
         return JSONObjectUtil.toJsonString(this);
     }
 
+    @Deprecated
     public ErrorCode getCause() {
         return cause;
     }
 
+    @Deprecated
     public void setCause(ErrorCode cause) {
         this.cause = cause;
     }
@@ -224,14 +214,6 @@ public class ErrorCode implements Serializable, Cloneable, OpaqueCollection, I18
     @Deprecated
     public ErrorCode causedBy(List<ErrorCode> cause) {
         return withCause(cause);
-    }
-
-    public String getElaboration() {
-        return elaboration;
-    }
-
-    public void setElaboration(String elaboration) {
-        this.elaboration = elaboration;
     }
 
     public boolean isError(Enum<?>... errorEnums) {
@@ -354,22 +336,6 @@ public class ErrorCode implements Serializable, Cloneable, OpaqueCollection, I18
 
         ErrorCode root = getRootCause();
         return root.getReadableDetails();
-    }
-
-    public ErrorCodeElaboration getMessages() {
-        return messages;
-    }
-
-    public void setMessages(ErrorCodeElaboration messages) {
-        this.messages = messages;
-    }
-
-    public String getCost() {
-        return cost;
-    }
-
-    public void setCost(String cost) {
-        this.cost = cost;
     }
 
     public String getLocation() {

@@ -27,7 +27,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "zsv 0.6"
+					since "zsv_0.6"
 					
 				}
 				column {
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "zsv 0.6"
+					since "zsv_0.6"
 					
 				}
 				column {
@@ -47,7 +47,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 					
 				}
 				column {
@@ -57,7 +57,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 					
 				}
 				column {
@@ -67,7 +67,7 @@ doc {
 					location "body"
 					type "boolean"
 					optional true
-					since "zsv 1.9"
+					since "zsv_1.9"
 					
 				}
 				column {
@@ -77,7 +77,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 					
 				}
 				column {
@@ -87,7 +87,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 					
 				}
 				column {
@@ -97,7 +97,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 					
 				}
 			}

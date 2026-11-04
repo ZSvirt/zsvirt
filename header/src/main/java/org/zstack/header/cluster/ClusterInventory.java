@@ -2,6 +2,7 @@ package org.zstack.header.cluster;
 
 import org.zstack.header.configuration.PythonClassInventory;
 import org.zstack.header.host.HostInventory;
+import org.zstack.header.message.DocUtils;
 import org.zstack.header.network.l2.L2NetworkClusterRefInventory;
 import org.zstack.header.query.ExpandedQueries;
 import org.zstack.header.query.ExpandedQuery;
@@ -11,6 +12,7 @@ import org.zstack.header.search.Inventory;
 import org.zstack.header.storage.primary.PrimaryStorageClusterRefInventory;
 import org.zstack.header.vm.VmInstanceInventory;
 import org.zstack.header.zone.ZoneInventory;
+import org.zstack.header.zone.ZoneVO;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
@@ -205,5 +207,19 @@ public class ClusterInventory implements Serializable {
 
     public void setLastOpDate(Timestamp lastOpDate) {
         this.lastOpDate = lastOpDate;
+    }
+
+    public static ClusterInventory __example__() {
+        ClusterInventory cluster = new ClusterInventory();
+        cluster.setHypervisorType("KVM");
+        cluster.setName("cluster1");
+        cluster.setDescription("test");
+        cluster.setState(ClusterState.Enabled.toString());
+        cluster.setZoneUuid(DocUtils.createFixedUuid(ZoneVO.class));
+        cluster.setUuid(DocUtils.createFixedUuid(ClusterVO.class));
+        cluster.setType("zstack");
+        cluster.setCreateDate(DocUtils.timestamp());
+        cluster.setLastOpDate(DocUtils.timestamp());
+        return cluster;
     }
 }

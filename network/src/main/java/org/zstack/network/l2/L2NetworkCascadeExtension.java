@@ -14,9 +14,6 @@ import org.zstack.core.db.DatabaseFacade;
 import org.zstack.core.db.Q;
 import org.zstack.core.errorcode.ErrorFacade;
 import org.zstack.header.core.Completion;
-import org.zstack.header.core.WhileDoneCompletion;
-import org.zstack.header.errorcode.ErrorCode;
-import org.zstack.header.errorcode.ErrorCodeList;
 import org.zstack.header.identity.AccessLevel;
 import org.zstack.header.identity.AccountInventory;
 import org.zstack.header.identity.AccountVO;
@@ -107,7 +104,6 @@ public class L2NetworkCascadeExtension extends AbstractAsyncCascadeExtension {
             return msg;
         });
 
-        List<ErrorCode> errors = Collections.synchronizedList(new LinkedList<ErrorCode>());
         new While<>(msgs).step((dmsg, wcomp) ->
                 bus.send(dmsg, new CloudBusCallBack(wcomp) {
                     @Override
@@ -115,19 +111,11 @@ public class L2NetworkCascadeExtension extends AbstractAsyncCascadeExtension {
                         if (reply.isSuccess()) {
                             wcomp.done();
                         } else {
-                            errors.add(reply.getError());
+                            wcomp.addError(reply.getError());
                             wcomp.allDone();
                         }
                     }
-                }), 10).run(new WhileDoneCompletion(null) {
-                    @Override
-                    public void done(ErrorCodeList errorCodeList) {
-                        if (!errors.isEmpty()) {
-                            completion.fail(errors.get(0));
-                            return;
-                        }
-                        completion.success();
-                    }});
+                }), 10).runAndSendErrorTo(completion);
     }
 
     private void handleDeletionCleanup(CascadeAction action, Completion completion) {

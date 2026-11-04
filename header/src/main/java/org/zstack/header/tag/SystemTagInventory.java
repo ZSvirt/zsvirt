@@ -9,7 +9,7 @@ import java.util.List;
 /**
  */
 @Inventory(mappingVOClass = SystemTagVO.class)
-public class SystemTagInventory extends TagInventory {
+public class SystemTagInventory extends TagInventory implements SystemTagInventoryDefinition {
     private Boolean inherent;
 
     public static SystemTagInventory valueOf(SystemTagVO vo) {
@@ -33,6 +33,7 @@ public class SystemTagInventory extends TagInventory {
         return invs;
     }
 
+    @Override
     public boolean isInherent() {
         return inherent;
     }

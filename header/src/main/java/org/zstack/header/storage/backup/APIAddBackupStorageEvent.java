@@ -1,7 +1,10 @@
 package org.zstack.header.storage.backup;
 
+import org.zstack.header.log.MaskSensitiveInfo;
+import org.zstack.header.log.NoLogging;
 import org.zstack.header.message.APIEvent;
 import org.zstack.header.rest.RestResponse;
+import org.zstack.header.storage.AddBackupStorageReply;
 
 import java.sql.Timestamp;
 import java.util.Collections;
@@ -32,10 +35,12 @@ import java.util.Collections;
  */
 
 @RestResponse(allTo = "inventory")
-public class APIAddBackupStorageEvent extends APIEvent {
+@MaskSensitiveInfo
+public class APIAddBackupStorageEvent extends APIEvent implements AddBackupStorageReply {
     /**
      * @desc see :ref:`BackupStorageInventory`
      */
+    @NoLogging(behavior = NoLogging.Behavior.Auto)
     private BackupStorageInventory inventory;
 
     public APIAddBackupStorageEvent(String apiId) {
@@ -73,4 +78,8 @@ public class APIAddBackupStorageEvent extends APIEvent {
         return event;
     }
 
+    @Override
+    public BackupStorageInventory backupStorageInventory() {
+        return getInventory();
+    }
 }

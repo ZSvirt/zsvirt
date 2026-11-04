@@ -7,7 +7,7 @@ doc {
 
 	category "vmInstance"
 
-	desc """修改云主机网卡状态"""
+	desc """修改虚拟机网卡状态"""
 
 	rest {
 		request {
@@ -24,20 +24,20 @@ doc {
 				column {
 					name "vmNicUuid"
 					enclosedIn "changeVmNicState"
-					desc "云主机网卡UUID"
+					desc "虚拟机网卡UUID"
 					location "url"
 					type "String"
 					optional false
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "state"
 					enclosedIn "changeVmNicState"
-					desc "云主机网卡状态"
+					desc "虚拟机网卡状态"
 					location "body"
 					type "String"
 					optional false
-					since "zsv 3.15"
+					since "zsv_3.15"
 					values ("enable","disable")
 				}
 				column {
@@ -47,7 +47,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "userTags"
@@ -56,7 +56,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 			}
 		}

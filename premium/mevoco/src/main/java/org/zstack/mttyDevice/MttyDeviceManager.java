@@ -1,7 +1,7 @@
 package org.zstack.mttyDevice;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.zstack.compute.host.PostHostConnectExtensionPoint;
+import org.zstack.header.host.spi.HostPostConnectedExtensionPoint;
 import org.zstack.compute.vm.VmSystemTags;
 import org.zstack.core.Platform;
 import org.zstack.core.cloudbus.CloudBus;
@@ -16,8 +16,6 @@ import org.zstack.core.thread.ThreadFacade;
 import org.zstack.header.AbstractService;
 import org.zstack.header.core.Completion;
 import org.zstack.header.core.workflow.Flow;
-import org.zstack.header.core.workflow.FlowTrigger;
-import org.zstack.header.core.workflow.NoRollbackFlow;
 import org.zstack.header.errorcode.ErrorCode;
 import org.zstack.header.exception.CloudRuntimeException;
 import org.zstack.header.host.*;
@@ -25,7 +23,17 @@ import org.zstack.header.message.APIMessage;
 import org.zstack.header.message.Message;
 import org.zstack.header.message.MessageReply;
 import org.zstack.header.vm.*;
-import org.zstack.pciDevice.virtual.vfio_mdev.*;
+import org.zstack.mttyDevice.entity.MttyDeviceInventory;
+import org.zstack.mttyDevice.entity.MttyDeviceVO;
+import org.zstack.mttyDevice.entity.MttyDeviceVO_;
+import org.zstack.mttyDevice.header.MttyDeviceConstants;
+import org.zstack.mttyDevice.message.SyncMttyDeviceMsg;
+import org.zstack.mttyDevice.message.SyncMttyDeviceReply;
+import org.zstack.mttyDevice.spi.MttyDeviceBackend;
+import org.zstack.pciDevice.entity.virtual.vfio_mdev.MdevDeviceVO;
+import org.zstack.pciDevice.entity.virtual.vfio_mdev.MdevDeviceVO_;
+import org.zstack.pciDevice.header.virtual.vfio_mdev.MdevDeviceStatus;
+import org.zstack.pciDevice.header.virtual.vfio_mdev.MdevDeviceType;
 import org.zstack.utils.Utils;
 import org.zstack.utils.logging.CLogger;
 
@@ -36,7 +44,7 @@ import java.util.*;
  * @date 2022/11/17 13:19
  **/
 public class MttyDeviceManager extends AbstractService implements
-        PostHostConnectExtensionPoint,
+HostPostConnectedExtensionPoint,
         PreVmInstantiateResourceExtensionPoint,
         PostVmInstantiateResourceExtensionPoint {
     private static final CLogger logger = Utils.getLogger(MttyDeviceManager.class);
@@ -66,13 +74,10 @@ public class MttyDeviceManager extends AbstractService implements
     }
 
     @Override
-    public Flow createPostHostConnectFlow(HostInventory host) {
-        return new NoRollbackFlow() {
-            String __name__ = "sync-mtty-devices";
-
-            @Override
-            public void run(FlowTrigger trigger, Map data) {
-                String hostUuid = host.getUuid();
+    public Flow createPostHostConnectFlow() {
+        return Flow.of("sync-mtty-devices")
+            .handle((trigger, data) -> {
+                String hostUuid = findInventoryFromFlowData(data).getUuid();
                 HostVO host = dbf.findByUuid(hostUuid, HostVO.class);
                 String hostArch = host.getArchitecture();
                 if (!CpuArchitecture.loongarch64.toString().equals(hostArch)) {
@@ -99,8 +104,8 @@ public class MttyDeviceManager extends AbstractService implements
                         }
                     }
                 });
-            }
-        };
+            })
+            .build();
     }
     
     public MttyDeviceBackend getMttyDeviceBackendByHostUuid(String hostUuid) {

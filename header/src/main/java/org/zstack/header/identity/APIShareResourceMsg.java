@@ -66,10 +66,9 @@ public class APIShareResourceMsg extends APIMessage {
 
     public static APIShareResourceMsg __example__() {
         APIShareResourceMsg msg = new APIShareResourceMsg();
-        msg.setAccountUuids(list(uuid(), uuid()));
+        msg.setAccountUuids(list(uuid(AccountVO.class)));
         msg.setToPublic(false);
-        msg.setResourceUuids(list(uuid(), uuid()));
+        msg.setResourceUuids(list(uuid(ResourceVO.class)));
         return msg;
     }
-
 }

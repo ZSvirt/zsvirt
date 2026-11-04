@@ -3,11 +3,11 @@ package org.zstack.header.vm
 import org.zstack.header.vm.APIDeleteVmStaticIpEvent
 
 doc {
-	title "删除云主机指定IP(DeleteVmStaticIp)"
+	title "删除虚拟机指定IP(DeleteVmStaticIp)"
 
 	category "vmInstance"
 
-	desc """删除云主机三层网络上指定的IP"""
+	desc """删除虚拟机三层网络上指定的IP"""
 
 	rest {
 		request {
@@ -24,11 +24,11 @@ doc {
 				column {
 					name "vmInstanceUuid"
 					enclosedIn ""
-					desc "云主机UUID"
+					desc "虚拟机UUID"
 					location "url"
 					type "String"
 					optional false
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "l3NetworkUuid"
@@ -37,7 +37,7 @@ doc {
 					location "query"
 					type "String"
 					optional false
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "systemTags"
@@ -46,7 +46,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "userTags"
@@ -55,7 +55,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "deleteMode"
@@ -64,7 +64,7 @@ doc {
 					location "query"
 					type "String"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "staticIp"
@@ -73,7 +73,7 @@ doc {
 					location "query"
 					type "String"
 					optional true
-					since "zsv 3.10.0"
+					since "zsv_3.10.0"
 				}
 			}
 		}

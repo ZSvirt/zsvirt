@@ -4,6 +4,7 @@ import org.springframework.http.HttpMethod;
 import org.zstack.header.message.APIParam;
 import org.zstack.header.rest.RestRequest;
 import org.zstack.header.tag.TagResourceType;
+import org.zstack.header.zone.ZoneVO;
 
 /**
  * @api create a l2VlanNetwork
@@ -39,7 +40,7 @@ import org.zstack.header.tag.TagResourceType;
  * }
  * }
  * @result see :ref:`APICreateL2VlanNetworkEvent`
- * @since 0.1.0
+ * @since zsv_0.1.0
  */
 @TagResourceType(L2NetworkVO.class)
 @RestRequest(
@@ -70,13 +71,11 @@ public class APICreateL2VlanNetworkMsg extends APICreateL2NetworkMsg {
 
     public static APICreateL2VlanNetworkMsg __example__() {
         APICreateL2VlanNetworkMsg msg = new APICreateL2VlanNetworkMsg();
-
         msg.setName("Test-Net");
         msg.setVlan(10);
         msg.setDescription("Test");
-        msg.setZoneUuid(uuid());
+        msg.setZoneUuid(uuid(ZoneVO.class));
         msg.setPhysicalInterface("eth0");
-
         return msg;
     }
 }

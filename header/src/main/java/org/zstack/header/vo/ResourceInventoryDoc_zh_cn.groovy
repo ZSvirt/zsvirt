@@ -10,18 +10,18 @@ doc {
 		name "uuid"
 		desc "资源的UUID，唯一标示该资源"
 		type "String"
-		since "zsv 4.0.0"
+		since "zsv_4.0.0"
 	}
 	field {
 		name "resourceName"
 		desc "资源名称"
 		type "String"
-		since "zsv 4.0.0"
+		since "zsv_4.0.0"
 	}
 	field {
 		name "resourceType"
 		desc "资源类型"
 		type "String"
-		since "zsv 4.0.0"
+		since "zsv_4.0.0"
 	}
 }

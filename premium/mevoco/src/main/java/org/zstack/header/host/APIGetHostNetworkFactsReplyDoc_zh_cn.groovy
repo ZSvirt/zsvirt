@@ -14,7 +14,7 @@ doc {
 		path "org.zstack.header.host.APIGetHostNetworkFactsReply.error"
 		desc "错误码，若不为null，则表示操作失败, 操作成功时该字段为null",false
 		type "ErrorCode"
-		since "3.5.0"
+		since "zsv_3.5.0"
 		clz ErrorCode.class
 	}
 	ref {
@@ -22,7 +22,7 @@ doc {
 		path "org.zstack.header.host.APIGetHostNetworkFactsReply.bondings"
 		desc "bond设备"
 		type "List"
-		since "3.5.0"
+		since "zsv_3.5.0"
 		clz HostNetworkBondingInventory.class
 	}
 	ref {
@@ -30,13 +30,13 @@ doc {
 		path "org.zstack.header.host.APIGetHostNetworkFactsReply.nics"
 		desc "网卡设备"
 		type "List"
-		since "3.5.0"
+		since "zsv_3.5.0"
 		clz HostNetworkInterfaceInventory.class
 	}
 	field {
 		name "success"
 		desc ""
 		type "boolean"
-		since "3.5.0"
+		since "zsv_3.5.0"
 	}
 }

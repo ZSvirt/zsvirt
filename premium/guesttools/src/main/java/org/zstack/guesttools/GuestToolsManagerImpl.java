@@ -29,6 +29,7 @@ import org.zstack.core.workflow.SimpleFlowChain;
 import org.zstack.guesttools.advanced.*;
 import org.zstack.guesttools.kvm.GuestToolsKvmCommands;
 import org.zstack.guesttools.kvm.GuestToolsKvmCommands.GetVmGuestToolsInfoRsp;
+import org.zstack.guesttools.kvm.GuestToolsKvmCommands.GetVmZWatchStatusRsp;
 import org.zstack.header.AbstractService;
 import org.zstack.header.configuration.VmCustomSpecificationStruct;
 import org.zstack.header.core.*;
@@ -151,6 +152,8 @@ public class GuestToolsManagerImpl extends AbstractService implements GuestTools
             handle((UpdateVmNetworkConfigMsg) msg);
         } else if (msg instanceof GetVmGuestToolsInfoMsg) {
             handle((GetVmGuestToolsInfoMsg) msg);
+        } else if (msg instanceof GetVmZWatchStatusMsg) {
+            handle((GetVmZWatchStatusMsg) msg);
         }  else if (msg instanceof UpdateGuestToolsStateMsg) {
             handle((UpdateGuestToolsStateMsg) msg);
         } else {
@@ -276,6 +279,11 @@ public class GuestToolsManagerImpl extends AbstractService implements GuestTools
         }
 
         if (qevent == GuestToolsQgaStateEvent.noOperation && zevent == GuestToolsZWatchStateEvent.noOperation) {
+            String version = StringUtils.isNotEmpty(qversion) ? qversion : zversion;
+            if (StringUtils.isNotEmpty(version) && !version.equals(stateVO.getVersion())) {
+                stateVO.setVersion(version);
+                stateVO = dbf.updateAndRefresh(stateVO);
+            }
             return stateVO;
         }
 
@@ -572,7 +580,7 @@ public class GuestToolsManagerImpl extends AbstractService implements GuestTools
                         whileCompletion.done();
                         return;
                     }
-                    getVmGuestToolsInfo(bundles, vmUuid, new Completion(whileCompletion) {
+                    getVmZWatchStatus(bundles, vmUuid, new Completion(whileCompletion) {
                         @Override
                         public void success() {
                             whileCompletion.done();
@@ -596,11 +604,9 @@ public class GuestToolsManagerImpl extends AbstractService implements GuestTools
                 });
             }
 
-            private void getVmGuestToolsInfo(final Map<String, GuestToolsInfoBundle> bundles, String vmInstanceUuid, Completion getInfoCompletion) {
-                GetVmGuestToolsInfoMsg infoMsg = new GetVmGuestToolsInfoMsg();
-                infoMsg.setUuid(vmInstanceUuid);
-                infoMsg.setDebug(new HashSet<>());
-                infoMsg.setReadMetricOnly(true);
+            private void getVmZWatchStatus(final Map<String, GuestToolsInfoBundle> bundles, String vmInstanceUuid, Completion getInfoCompletion) {
+                GetVmZWatchStatusMsg infoMsg = new GetVmZWatchStatusMsg();
+                infoMsg.setVmInstanceUuid(vmInstanceUuid);
                 bus.makeTargetServiceIdByResourceUuid(infoMsg, GuestToolsConstant.SERVICE_ID, infoMsg.getVmInstanceUuid());
                 bus.send(infoMsg, new CloudBusCallBack(getInfoCompletion) {
                     @Override
@@ -611,7 +617,7 @@ public class GuestToolsManagerImpl extends AbstractService implements GuestTools
                         GuestToolsInfoBundle bundle = new GuestToolsInfoBundle();
                         bundles.put(vmInstanceUuid, bundle);
                         if (reply.isSuccess()) {
-                            GetVmGuestToolsInfoReply reply1 = reply.castReply();
+                            GetVmZWatchStatusReply reply1 = reply.castReply();
                             logger.debug(String.format("get vm[uuid:%s] zwatch state Status[%s] Version[%s]",
                                     vmInstanceUuid, reply1.getStatus(), reply1.getVersion()));
                             if (reply1.getStatus() != null) {
@@ -629,7 +635,7 @@ public class GuestToolsManagerImpl extends AbstractService implements GuestTools
 
                         } else {
                             logger.debug(String.format("get vm[uuid:%s] zwatch state failed %s",
-                                    vmInstanceUuid, reply.getMessageName()));
+                                    vmInstanceUuid, reply.getError().getReadableDetails()));
                             getInfoCompletion.fail(reply.getError());
                             return;
                         }
@@ -1071,6 +1077,56 @@ public class GuestToolsManagerImpl extends AbstractService implements GuestTools
         bus.publish(evt);
     }
 
+    private void handle(GetVmZWatchStatusMsg msg) {
+        thdf.chainSubmit(new ChainTask(msg) {
+            @Override
+            public String getSyncSignature() {
+                return "get-zwatch-status-for-vm-" + msg.getVmInstanceUuid();
+            }
+
+            @Override
+            public void run(SyncTaskChain chain) {
+                VmInstanceVO vm = dbf.findByUuid(msg.getVmInstanceUuid(), VmInstanceVO.class);
+                GuestToolsAgentType agentType = GuestToolsAgentType.fromImagePlatformAndHypervisorType(
+                        ImagePlatform.valueOf(vm.getPlatform()), vm.getHypervisorType());
+                GetVmZWatchStatusReply reply = new GetVmZWatchStatusReply();
+                if (agentType == null) {
+                    reply.setStatus(GuestToolsAgentStatus.NOT_SUPPORTED.toString());
+                    bus.reply(msg, reply);
+                    chain.next();
+                    return;
+                }
+
+                GuestToolsHypervisorBackend bkd = getGuestToolsHypervisorBackend(agentType);
+                bkd.getVmZWatchStatus(VmInstanceInventory.valueOf(vm), new ReturnValueCompletion<GetVmZWatchStatusRsp>(chain) {
+                    @Override
+                    public void success(GetVmZWatchStatusRsp rsp) {
+                        reply.setStatus(rsp.getStatus());
+                        reply.setVersion(rsp.getVersion());
+                        bus.reply(msg, reply);
+                        chain.next();
+                    }
+
+                    @Override
+                    public void fail(ErrorCode errorCode) {
+                        if (errorCode.getDetails().contains(GuestToolsConstant.GUEST_TOOLS_NOT_CONNNETED)) {
+                            reply.setStatus(GuestToolsAgentStatus.NOT_CONNECTED.toString());
+                        } else {
+                            reply.setError(errorCode);
+                        }
+                        bus.reply(msg, reply);
+                        chain.next();
+                    }
+                });
+            }
+
+            @Override
+            public String getName() {
+                return getSyncSignature();
+            }
+        });
+    }
+
     private void handle(GetVmGuestToolsInfoMsg msg) {
         thdf.chainSubmit(new ChainTask(msg) {
             @Override
@@ -1222,6 +1278,28 @@ public class GuestToolsManagerImpl extends AbstractService implements GuestTools
             public void run(SyncTaskChain chain) {
                 VmInstanceVO vm = dbf.findByUuid(vmUuid, VmInstanceVO.class);
                 List<VmConfigSyncStruct.VmPortConfig> ports = getVmPortsConfig(msg.getVmInstanceUuid(), msg.getVmNicUuids(), msg.getHaState());
+                // A transient Guest snapshot may remove UsedIp while VmNic still
+                // records the static address. Never turn that inconsistency into
+                // an apparently successful request that clears Windows IPv4.
+                if (ImagePlatform.Windows.toString().equals(vm.getPlatform())) {
+                    for (VmConfigSyncStruct.VmPortConfig port : ports) {
+                        VmNicVO nic = vm.getVmNics().stream()
+                                .filter(n -> Objects.equals(n.getMac(), port.getMac())).findFirst().orElse(null);
+                        if (nic == null) {
+                            continue;
+                        }
+                        for (VmConfigSyncStruct.VmIpConfig ip : port.getVmIps()) {
+                            if (ip.getVersion() == IPv6Constants.IPv4 &&
+                                    WindowsNetworkConfigValidator.isMissingStaticIpv4(nic.getIp(), ip.getProto(), ip.getIp(), ip.getNetmask())) {
+                                reply.setError(operr("cannot sync Windows vm[uuid:%s] nic[uuid:%s]: static IPv4 configuration is missing, recorded IP is %s",
+                                        vmUuid, nic.getUuid(), nic.getIp()));
+                                bus.reply(msg, reply);
+                                chain.next();
+                                return;
+                            }
+                        }
+                    }
+                }
                 logger.debug(String.format("get vm[uuid:%s] ports config: %s", vmUuid, ports));
                 VmPortsConfigSyncOnHypervisorMsg syncMsg = new VmPortsConfigSyncOnHypervisorMsg();
                 syncMsg.setPorts(ports);

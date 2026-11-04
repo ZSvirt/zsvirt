@@ -6,6 +6,9 @@ import org.springframework.beans.factory.annotation.Configurable;
 import org.zstack.core.componentloader.PluginRegistry;
 import org.zstack.utils.Utils;
 import org.zstack.utils.logging.CLogger;
+import org.zstack.pciDevice.header.HostIommuStateType;
+import org.zstack.pciDevice.header.HostIommuStatusType;
+import org.zstack.pciDevice.header.PciDeviceSystemTags;
 
 @Configurable(preConstruction = true, autowire = Autowire.BY_TYPE)
 public class HostIommuGetter {

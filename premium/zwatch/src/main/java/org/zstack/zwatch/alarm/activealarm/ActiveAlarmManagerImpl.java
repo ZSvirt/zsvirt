@@ -243,7 +243,6 @@ public class ActiveAlarmManagerImpl extends AbstractService
                 .in(ActiveAlarmTemplateVO_.uuid, tempUuids)
                 .list();
 
-        List<ErrorCode> errs = new ArrayList<>();
         new While<>(templateVOS).each((templateVO, compl) -> {
             CreateAlarmMsg createAlarmMsg = new CreateAlarmMsg();
             createAlarmMsg.setUuid(Platform.getUuid());
@@ -272,7 +271,7 @@ public class ActiveAlarmManagerImpl extends AbstractService
                 @Override
                 public void run(MessageReply reply) {
                     if (!reply.isSuccess()) {
-                        errs.add(reply.getError());
+                        compl.addError(reply.getError());
                     } else {
                         CreateAlarmReply rly = (CreateAlarmReply) reply;
                         String alarmUuid = rly.getInventory().getUuid();
@@ -287,16 +286,7 @@ public class ActiveAlarmManagerImpl extends AbstractService
                     compl.done();
                 }
             });
-        }).run(new WhileDoneCompletion(completion) {
-            @Override
-            public void done(ErrorCodeList errorCodeList) {
-                if (errs.isEmpty()) {
-                    completion.success();
-                } else {
-                    completion.fail(errs.get(0));
-                }
-            }
-        });
+        }).runAndSendErrorTo(completion);
     }
 
     private void disableActiveAlarm(String accountUuid, String namespace, Completion completion) {
@@ -327,7 +317,6 @@ public class ActiveAlarmManagerImpl extends AbstractService
             return;
         }
 
-        List<ErrorCode> errs = new ArrayList<>();
         new While<>(existingAlarmUuids).each((alarmUuid, compl) -> {
             AlarmDeletionMsg deleteAlarmMsg = new AlarmDeletionMsg();
             deleteAlarmMsg.setUuid(alarmUuid);
@@ -336,7 +325,7 @@ public class ActiveAlarmManagerImpl extends AbstractService
                 @Override
                 public void run(MessageReply reply) {
                     if (!reply.isSuccess()) {
-                        errs.add(reply.getError());
+                        compl.addError(reply.getError());
                     } else {
                         SQL.New(ActiveAlarmVO.class)
                                 .eq(ActiveAlarmVO_.alarmUuid, alarmUuid)
@@ -348,12 +337,7 @@ public class ActiveAlarmManagerImpl extends AbstractService
         }).run(new WhileDoneCompletion(completion){
             @Override
             public void done(ErrorCodeList errorCodeList) {
-                if (!errs.isEmpty()) {
-                    completion.fail(errs.get(0));
-                    return;
-                }
-
-                completion.success();
+                completion.next(errorCodeList);
             }
         });
     }

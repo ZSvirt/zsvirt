@@ -16,6 +16,7 @@ public class SchedulerCanonicalEvents {
     public static final String VOLUME_SNAPSHOT_GROUP_SCHEDULER_PATH = "/scheduler/volume/snapshot/group";
     public static final String VOLUME_BACKUP_SCHEDULER_PATH = "/scheduler/volume/backup";
     public static final String DATABASE_BACKUP_SCHEDULER_PATH = "/scheduler/database/backup";
+    public static final String ZCENTER_BACKUP_SCHEDULER_PATH = "/scheduler/platform-service/zcenter/backup";
     public static final String GROUP_SCHEDULER_PATH = "/scheduler/group";
 
     @NeedJsonSchema

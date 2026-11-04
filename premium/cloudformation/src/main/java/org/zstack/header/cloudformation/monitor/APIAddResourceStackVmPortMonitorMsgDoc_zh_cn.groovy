@@ -7,7 +7,7 @@ doc {
 
 	category "cloudformation"
 
-	desc """添加资源栈中云主机的端口监控"""
+	desc """添加资源栈中虚拟机的端口监控"""
 
 	rest {
 		request {
@@ -28,16 +28,16 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.9.0"
+					since "zsv_3.9.0"
 				}
 				column {
 					name "vmInstanceUuid"
 					enclosedIn "params"
-					desc "云主机UUID"
+					desc "虚拟机UUID"
 					location "body"
 					type "String"
 					optional false
-					since "3.9.0"
+					since "zsv_3.9.0"
 				}
 				column {
 					name "port"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "Integer"
 					optional false
-					since "3.9.0"
+					since "zsv_3.9.0"
 				}
 				column {
 					name "systemTags"
@@ -55,7 +55,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.9.0"
+					since "zsv_3.9.0"
 				}
 				column {
 					name "userTags"
@@ -64,7 +64,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.9.0"
+					since "zsv_3.9.0"
 				}
 			}
 		}

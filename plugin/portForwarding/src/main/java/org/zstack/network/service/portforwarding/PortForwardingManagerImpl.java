@@ -1,7 +1,6 @@
 package org.zstack.network.service.portforwarding;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
 import org.zstack.core.Platform;
 import org.zstack.core.cloudbus.CloudBus;
 import org.zstack.core.cloudbus.MessageSafe;
@@ -39,14 +38,12 @@ import org.zstack.network.service.NetworkServiceManager;
 import org.zstack.network.service.vip.*;
 import org.zstack.tag.TagManager;
 import org.zstack.utils.*;
-import org.zstack.utils.function.ForEachFunction;
 import org.zstack.utils.gson.JSONObjectUtil;
 import org.zstack.utils.logging.CLogger;
 import org.zstack.utils.network.IPv6Constants;
 import org.zstack.utils.network.IPv6NetworkUtils;
 
 import javax.persistence.Tuple;
-import javax.persistence.TypedQuery;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -518,12 +515,7 @@ public class PortForwardingManagerImpl extends AbstractService implements PortFo
             }
         }
 
-        CollectionUtils.safeForEach(revokeRuleExts, new ForEachFunction<RevokePortForwardingRuleExtensionPoint>() {
-            @Override
-            public void run(RevokePortForwardingRuleExtensionPoint extp) {
-                extp.beforeRevokePortForwardingRule(inv, providerType);
-            }
-        });
+        CollectionUtils.safeForEach(revokeRuleExts, extp -> extp.beforeRevokePortForwardingRule(inv, providerType));
 
         FlowChain chain = FlowChainBuilder.newShareFlowChain();
         chain.then(new ShareFlow() {
@@ -538,7 +530,7 @@ public class PortForwardingManagerImpl extends AbstractService implements PortFo
                         bkd.revokePortForwardingRule(struct, new Completion(trigger) {
                             @Override
                             public void success() {
-                                logger.debug(String.format("successfully detached %s", struct.toString()));
+                                logger.debug(String.format("successfully detached %s", struct));
 
                                 trigger.next();
                             }
@@ -591,12 +583,7 @@ public class PortForwardingManagerImpl extends AbstractService implements PortFo
                     public void handle(Map data) {
                         dbf.remove(vo);
 
-                        CollectionUtils.safeForEach(revokeRuleExts, new ForEachFunction<RevokePortForwardingRuleExtensionPoint>() {
-                            @Override
-                            public void run(RevokePortForwardingRuleExtensionPoint extp) {
-                                extp.afterRevokePortForwardingRule(inv, providerType);
-                            }
-                        });
+                        CollectionUtils.safeForEach(revokeRuleExts, extp -> extp.afterRevokePortForwardingRule(inv, providerType));
 
                         logger.debug(String.format("successfully revoked port forwarding rule[uuid:%s]", inv.getUuid()));
                         complete.success();
@@ -606,12 +593,7 @@ public class PortForwardingManagerImpl extends AbstractService implements PortFo
                 error(new FlowErrorHandler(complete) {
                     @Override
                     public void handle(ErrorCode errCode, Map data) {
-                        CollectionUtils.safeForEach(revokeRuleExts, new ForEachFunction<RevokePortForwardingRuleExtensionPoint>() {
-                            @Override
-                            public void run(RevokePortForwardingRuleExtensionPoint extp) {
-                                extp.failToRevokePortForwardingRule(inv, providerType);
-                            }
-                        });
+                        CollectionUtils.safeForEach(revokeRuleExts, extp -> extp.failToRevokePortForwardingRule(inv, providerType));
 
                         logger.warn(String.format("failed to revoke port forwarding rule[uuid:%s] because %s", inv.getUuid(), errCode));
                         complete.fail(errCode);
@@ -799,12 +781,7 @@ public class PortForwardingManagerImpl extends AbstractService implements PortFo
                     @Override
                     public void run(FlowTrigger trigger, Map data) {
                         NetworkServiceProviderType providerType = (NetworkServiceProviderType)data.get("providerType");
-                        CollectionUtils.safeForEach(attachRuleExts, new ForEachFunction<AttachPortForwardingRuleExtensionPoint>() {
-                            @Override
-                            public void run(AttachPortForwardingRuleExtensionPoint extp) {
-                                extp.beforeAttachPortForwardingRule(ruleInv, providerType);
-                            }
-                        });
+                        CollectionUtils.safeForEach(attachRuleExts, extp -> extp.beforeAttachPortForwardingRule(ruleInv, providerType));
                         trigger.next();
                     }
                 });
@@ -817,12 +794,7 @@ public class PortForwardingManagerImpl extends AbstractService implements PortFo
                         attachPortForwardingRule(struct, providerType.toString(), new Completion(msg) {
                             @Override
                             public void success() {
-                                CollectionUtils.safeForEach(attachRuleExts, new ForEachFunction<AttachPortForwardingRuleExtensionPoint>() {
-                                    @Override
-                                    public void run(AttachPortForwardingRuleExtensionPoint extp) {
-                                        extp.afterAttachPortForwardingRule(ruleInv, providerType);
-                                    }
-                                });
+                                CollectionUtils.safeForEach(attachRuleExts, extp -> extp.afterAttachPortForwardingRule(ruleInv, providerType));
                                 trigger.next();
                             }
 

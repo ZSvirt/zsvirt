@@ -1,11 +1,11 @@
 package org.zstack.storage.primary;
 
+import org.zstack.core.config.BindResourceConfig;
 import org.zstack.core.config.GlobalConfig;
 import org.zstack.core.config.GlobalConfigDef;
 import org.zstack.core.config.GlobalConfigDefinition;
 import org.zstack.core.config.GlobalConfigValidation;
 import org.zstack.header.storage.primary.PrimaryStorageVO;
-import org.zstack.resourceconfig.BindResourceConfig;
 
 /**
  */

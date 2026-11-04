@@ -5,7 +5,7 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.zstack.appliancevm.ApplianceVmConstant;
-import org.zstack.compute.host.PostHostConnectExtensionPoint;
+import org.zstack.header.host.spi.HostPostConnectedExtensionPoint;
 import org.zstack.compute.vm.VmCapabilitiesExtensionPoint;
 import org.zstack.core.Platform;
 import org.zstack.core.asyncbatch.While;
@@ -20,7 +20,6 @@ import org.zstack.core.thread.SyncTaskChain;
 import org.zstack.core.thread.ThreadFacade;
 import org.zstack.core.workflow.FlowChainBuilder;
 import org.zstack.core.workflow.ShareFlow;
-import org.zstack.ha.HaHostDeviceExtensionPoint;
 import org.zstack.header.AbstractService;
 import org.zstack.header.apimediator.ApiMessageInterceptionException;
 import org.zstack.header.apimediator.GlobalApiMessageInterceptor;
@@ -57,19 +56,49 @@ import org.zstack.kvm.*;
 import org.zstack.network.hostNetworkInterface.HostNetworkBondingVO;
 import org.zstack.network.hostNetworkInterface.HostNetworkCandidateFilterExtensionPoint;
 import org.zstack.network.hostNetworkInterface.HostNetworkInterfaceVO;
-import org.zstack.pciDevice.gpu.GpuDeviceVO;
-import org.zstack.pciDevice.gpu.GpuDeviceVO_;
+import org.zstack.pciDevice.entity.PciDeviceInventory;
+import org.zstack.pciDevice.entity.PciDeviceOfferingInventory;
+import org.zstack.pciDevice.entity.PciDeviceOfferingVO;
+import org.zstack.pciDevice.entity.PciDeviceOfferingVO_;
+import org.zstack.pciDevice.entity.PciDevicePciDeviceOfferingRefVO;
+import org.zstack.pciDevice.entity.PciDevicePciDeviceOfferingRefVO_;
+import org.zstack.pciDevice.entity.PciDeviceVO;
+import org.zstack.pciDevice.entity.PciDeviceVO_;
+import org.zstack.pciDevice.entity.gpu.GpuDeviceVO;
+import org.zstack.pciDevice.entity.gpu.GpuDeviceVO_;
+import org.zstack.pciDevice.entity.specification.mdev.MdevDeviceSpecVO;
+import org.zstack.pciDevice.entity.specification.mdev.MdevDeviceSpecVO_;
+import org.zstack.pciDevice.entity.specification.pci.PciDeviceSpecVO;
+import org.zstack.pciDevice.entity.specification.pci.PciDeviceSpecVO_;
+import org.zstack.pciDevice.entity.specification.pci.VmInstancePciDeviceSpecRefVO;
+import org.zstack.pciDevice.entity.specification.pci.VmInstancePciDeviceSpecRefVO_;
+import org.zstack.pciDevice.entity.virtual.vfio_mdev.MdevDeviceVO;
+import org.zstack.pciDevice.entity.virtual.vfio_mdev.MdevDeviceVO_;
+import org.zstack.pciDevice.header.virtual.vfio_mdev.MdevDeviceType;
+import org.zstack.pciDevice.header.HostIommuStateType;
+import org.zstack.pciDevice.header.HostIommuStatusType;
+import org.zstack.pciDevice.header.PciDeviceCanonicalEvents;
+import org.zstack.pciDevice.header.PciDeviceChooser;
+import org.zstack.pciDevice.header.PciDeviceConstants;
+import org.zstack.pciDevice.header.PciDeviceOfferingType;
+import org.zstack.pciDevice.header.PciDevicePassThroughState;
+import org.zstack.pciDevice.header.PciDeviceState;
+import org.zstack.pciDevice.header.PciDeviceStatus;
+import org.zstack.pciDevice.header.PciDeviceSystemTags;
+import org.zstack.pciDevice.header.PciDeviceType;
+import org.zstack.pciDevice.header.virtual.PciDeviceVirtStatus;
+import org.zstack.pciDevice.message.*;
+import org.zstack.pciDevice.specification.mdev.APIAddMdevDeviceSpecToVmInstanceMsg;
+import org.zstack.pciDevice.specification.pci.*;
+import org.zstack.pciDevice.spi.PciDeviceBackend;
+import org.zstack.pciDevice.spi.PciDeviceManagerInterface;
+import org.zstack.pciDevice.spi.PciDeviceTypeFactory;
+import org.zstack.pciDevice.spi.VirtualPciDeviceFactory;
 import org.zstack.pciDevice.quota.GPUNumQuotaDefinition;
 import org.zstack.pciDevice.quota.GenericPCIDeviceNumQuotaDefinition;
-import org.zstack.pciDevice.specification.mdev.APIAddMdevDeviceSpecToVmInstanceMsg;
-import org.zstack.pciDevice.specification.mdev.MdevDeviceSpecVO;
-import org.zstack.pciDevice.specification.mdev.MdevDeviceSpecVO_;
-import org.zstack.pciDevice.specification.pci.*;
+import org.zstack.pciDevice.sync.PciDeviceDbSyncer;
 import org.zstack.pciDevice.virtual.*;
 import org.zstack.pciDevice.virtual.vfio_mdev.APIAttachMdevDeviceToVmMsg;
-import org.zstack.pciDevice.virtual.vfio_mdev.MdevDeviceType;
-import org.zstack.pciDevice.virtual.vfio_mdev.MdevDeviceVO;
-import org.zstack.pciDevice.virtual.vfio_mdev.MdevDeviceVO_;
 import org.zstack.storage.migration.primary.APIPrimaryStorageMigrateVmMsg;
 import org.zstack.storage.migration.primary.APIPrimaryStorageMigrateVolumeMsg;
 import org.zstack.storage.primary.local.APILocalStorageMigrateVolumeMsg;
@@ -92,10 +121,10 @@ import static org.zstack.utils.CollectionDSL.map;
 public class PciDeviceManager extends AbstractService implements
         PciDeviceManagerInterface,
         ReportQuotaExtensionPoint,
-        HaHostDeviceExtensionPoint,
+        VmHaExtensionPoint,
         GlobalApiMessageInterceptor,
         VmCapabilitiesExtensionPoint,
-        PostHostConnectExtensionPoint,
+        HostPostConnectedExtensionPoint,
         KVMStartVmAddonExtensionPoint,
         VmInstanceMigrateExtensionPoint,
         VmReleaseResourceExtensionPoint,
@@ -206,6 +235,7 @@ public class PciDeviceManager extends AbstractService implements
     @Override
     public PciDeviceBackend getPciDeviceBackendByHostUuid(String hostUuid) {
         HostVO hvo = Q.New(HostVO.class).eq(HostVO_.uuid, hostUuid).find();
+        Objects.requireNonNull(hvo, "failed to find host[uuid=" + hostUuid + "]");
         return backends.get(HypervisorType.valueOf(hvo.getHypervisorType()));
     }
 
@@ -239,6 +269,8 @@ public class PciDeviceManager extends AbstractService implements
     private void handleLocalMessage(Message msg) {
         if (msg instanceof SyncPciDeviceMsg) {
             handle((SyncPciDeviceMsg) msg);
+        } else if (msg instanceof SyncPciDeviceInDbMsg) {
+            handle((SyncPciDeviceInDbMsg) msg);
         } else if (msg instanceof AttachPciDeviceToVmMsg) {
             handle((AttachPciDeviceToVmMsg) msg);
         } else if (msg instanceof DetachPciDeviceFromVmMsg) {
@@ -604,7 +636,8 @@ public class PciDeviceManager extends AbstractService implements
         thdf.chainSubmit(new ChainTask(msg) {
             @Override
             public String getSyncSignature() {
-                return PciDeviceConstants.SYNC_PCI_DEVICE_SIGNATURE;
+                return String.format("%s-%s",
+                        PciDeviceConstants.SYNC_PCI_DEVICE_SIGNATURE, msg.getHostUuid());
             }
 
             @Override
@@ -644,6 +677,40 @@ public class PciDeviceManager extends AbstractService implements
             }
         });
 
+    }
+
+    private void handle(SyncPciDeviceInDbMsg msg) {
+        thdf.chainSubmit(new ChainTask(msg) {
+            @Override
+            public String getSyncSignature() {
+                return PciDeviceConstants.SYNC_PCI_DEVICE_IN_DB_SIGNATURE;
+            }
+
+            @Override
+            public void run(SyncTaskChain chain) {
+                PciDeviceDbSyncer syncer = new PciDeviceDbSyncer(msg.getHostUuid(), msg.getPciDevices());
+
+                switch (msg.getSyncMode()) {
+                    case Full:
+                        syncer.doSyncPciWithDb();
+                        break;
+                    case Ethernet:
+                        syncer.doSyncEthPciWithDb();
+                        break;
+                    default:
+                        throw new IllegalArgumentException(String.format(
+                                "unknown pci device database sync mode[%s]", msg.getSyncMode()));
+                }
+
+                bus.reply(msg, new SyncPciDeviceInDbReply());
+                chain.next();
+            }
+
+            @Override
+            public String getName() {
+                return String.format("%s-%s", getSyncSignature(), msg.getHostUuid());
+            }
+        });
     }
 
     private void handle(DetachPciDeviceFromVmMsg msg) {
@@ -2036,12 +2103,10 @@ public class PciDeviceManager extends AbstractService implements
     }
 
     @Override
-    public Flow createPostHostConnectFlow(HostInventory host) {
-        return new NoRollbackFlow() {
-            String __name__ = "sync-pci-devices";
-
-            @Override
-            public void run(final FlowTrigger trigger, Map data) {
+    public Flow createPostHostConnectFlow() {
+        return Flow.of("sync-pci-devices")
+            .handle((trigger, data) -> {
+                HostInventory host = findInventoryFromFlowData(data);
                 String hostUuid = host.getUuid();
                 String hostIommu = new HostIommuGetter().getState(hostUuid).toString();
                 SyncPciDeviceMsg smsg = new SyncPciDeviceMsg();
@@ -2063,8 +2128,8 @@ public class PciDeviceManager extends AbstractService implements
                         }
                     }
                 });
-            }
-        };
+            })
+            .build();
     }
 
     public Flow createAttachPciDeviceToVmFlow(List<String> pciUuids, String vmUuid) {
@@ -2073,7 +2138,6 @@ public class PciDeviceManager extends AbstractService implements
 
             @Override
             public void run(FlowTrigger trigger, Map data) {
-                List<ErrorCode> errs = new ArrayList<>();
                 new While<>(pciUuids).each((pciUuid, compl) -> {
                     AttachPciDeviceToVmMsg amsg = new AttachPciDeviceToVmMsg();
                     amsg.setPciDeviceUuid(pciUuid);
@@ -2086,7 +2150,7 @@ public class PciDeviceManager extends AbstractService implements
                                 logger.debug(String.format("attached pci device[uuid:%s] to vm[uuid:%s]", pciUuid, vmUuid));
                                 compl.done();
                             } else {
-                                errs.add(reply.getError());
+                                compl.addError(reply.getError());
                                 compl.allDone();
                                 logger.error(String.format("failed to attach pci device[uuid:%s] to vm[uuid:%s], %s", pciUuid, vmUuid, reply.getError()));
                             }
@@ -2095,11 +2159,7 @@ public class PciDeviceManager extends AbstractService implements
                 }).run(new WhileDoneCompletion(trigger) {
                     @Override
                     public void done(ErrorCodeList errorCodeList) {
-                        if (!errs.isEmpty()) {
-                            trigger.fail(errs.get(0));
-                        } else {
-                            trigger.next();
-                        }
+                        trigger.next(errorCodeList.wrapOrNull());
                     }
                 });
             }
@@ -2145,7 +2205,6 @@ public class PciDeviceManager extends AbstractService implements
 
             @Override
             public void run(FlowTrigger trigger, Map data) {
-                List<ErrorCode> errs = new ArrayList<>();
                 new While<>(invs).each((inv, compl) -> {
                     DetachPciDeviceFromVmMsg dmsg = new DetachPciDeviceFromVmMsg();
                     dmsg.setPciDeviceUuid(inv.getUuid());
@@ -2158,7 +2217,7 @@ public class PciDeviceManager extends AbstractService implements
                                 logger.error(String.format(
                                         "failed to detach pci device[uuid:%s] from vm[uuid:%s]: %s",
                                         inv.getUuid(), dmsg.getVmInstanceUuid(), reply.getError().toString()));
-                                errs.add(reply.getError());
+                                compl.addError(reply.getError());
                                 compl.allDone();
                             } else {
                                 logger.debug(String.format("successfully detached pci device[uuid:%s] from vm[uuid:%s]",
@@ -2170,11 +2229,7 @@ public class PciDeviceManager extends AbstractService implements
                 }).run(new WhileDoneCompletion(trigger) {
                     @Override
                     public void done(ErrorCodeList errorCodeList) {
-                        if (errs.isEmpty()) {
-                            trigger.next();
-                        } else {
-                            trigger.fail(errs.get(0));
-                        }
+                        trigger.next(errorCodeList.wrapOrNull());
                     }
                 });
             }
@@ -2379,23 +2434,21 @@ public class PciDeviceManager extends AbstractService implements
 
     @Override
     public void failedToMigrateVm(VmInstanceInventory inv, String destHostUuid, ErrorCode reason) {
-        // release pci devices if vm failed to migrate
-        detachPciDevicesFromVm(inv.getUuid(), true, true, true, new Completion(null) {
-            @Override
-            public void success() {
-                logger.debug(String.format("auto detached pci devices from vm[uuid:%s] because it failed to migrate", inv.getUuid()));
-            }
-
-            @Override
-            public void fail(ErrorCode errorCode) {
-                logger.error(String.format("failed to auto detach pci devices from vm[uuid:%s] because it's failed to migrate", inv.getUuid()));
-            }
-        });
+        List<PciDeviceVO> devices = Q.New(PciDeviceVO.class)
+                .eq(PciDeviceVO_.vmInstanceUuid, inv.getUuid())
+                .eq(PciDeviceVO_.hostUuid, destHostUuid)
+                .eq(PciDeviceVO_.status, PciDeviceStatus.Attached)
+                .notEq(PciDeviceVO_.type, PciDeviceType.Ethernet_Controller)
+                .list();
+        devices.forEach(device -> device.setStatus(PciDeviceStatus.Reserved));
+        if (!devices.isEmpty()) {
+            dbf.updateCollection(devices);
+        }
     }
 
     @Override
     @Transactional
-    public boolean canDoVmHa(String vmUuid) {
+    public ErrorCode preHaStartVm(String vmUuid) {
         // release pci devices before check
         VmInstanceState state = Q.New(VmInstanceVO.class).eq(VmInstanceVO_.uuid, vmUuid).select(VmInstanceVO_.state).findValue();
         if (state == VmInstanceState.Stopped || state == VmInstanceState.Unknown) {
@@ -2414,15 +2467,19 @@ public class PciDeviceManager extends AbstractService implements
                 .limit(1)
                 .findValue();
         if (StringUtils.isEmpty(hostUuid)) {
-            return true;
+            return null;
         }
 
         // the vm can only start in the host where the pci device on
-        return Q.New(HostVO.class)
+        boolean oldHostReady = Q.New(HostVO.class)
                 .eq(HostVO_.uuid, hostUuid)
                 .eq(HostVO_.state, HostState.Enabled)
                 .eq(HostVO_.status, HostStatus.Connected)
                 .isExists();
+        if (oldHostReady) {
+            return null; // only can start on the old host
+        }
+        return operr("vm[%s] cannot start because pci redirect host is not connected", vmUuid);
     }
 
     @Override

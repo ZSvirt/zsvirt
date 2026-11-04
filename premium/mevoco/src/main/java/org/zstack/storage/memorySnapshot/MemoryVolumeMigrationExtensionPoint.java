@@ -37,6 +37,10 @@ public class MemoryVolumeMigrationExtensionPoint implements StorageMigrationExte
                     return;
                 }
 
+                String rootPrimaryStorageUuid = q(VolumeVO.class)
+                        .eq(VolumeVO_.uuid, vm.getRootVolumeUuid())
+                        .select(VolumeVO_.primaryStorageUuid)
+                        .findValue();
                 if (q(PrimaryStorageVO.class)
                         .eq(PrimaryStorageVO_.uuid, memoryVolume.getPrimaryStorageUuid())
                         .eq(PrimaryStorageVO_.type, LocalStorageConstants.LOCAL_STORAGE_TYPE)
@@ -47,31 +51,31 @@ public class MemoryVolumeMigrationExtensionPoint implements StorageMigrationExte
                 }
 
                 if (q(PrimaryStorageVO.class)
-                        .eq(PrimaryStorageVO_.uuid, msg.getDstPrimaryStorageUuid())
+                        .eq(PrimaryStorageVO_.uuid, rootPrimaryStorageUuid)
                         .eq(PrimaryStorageVO_.type, LocalStorageConstants.LOCAL_STORAGE_TYPE)
                         .isExists()) {
                     if (q(LocalStorageResourceRefVO.class)
                             .eq(LocalStorageResourceRefVO_.resourceUuid, memoryVolume.getUuid())
-                            .eq(LocalStorageResourceRefVO_.primaryStorageUuid, msg.getDstPrimaryStorageUuid())
+                            .eq(LocalStorageResourceRefVO_.primaryStorageUuid, rootPrimaryStorageUuid)
                             .isExists()) {
                         return;
                     }
 
                     LocalStorageResourceRefVO ref = q(LocalStorageResourceRefVO.class)
                             .eq(LocalStorageResourceRefVO_.resourceUuid, vm.getRootVolume().getUuid())
-                            .eq(LocalStorageResourceRefVO_.primaryStorageUuid, msg.getDstPrimaryStorageUuid())
+                            .eq(LocalStorageResourceRefVO_.primaryStorageUuid, rootPrimaryStorageUuid)
                             .find();
 
                     LocalStorageResourceRefVO newRef = new LocalStorageResourceRefVO();
                     newRef.setHostUuid(ref.getHostUuid());
                     newRef.setResourceUuid(memoryVolume.getUuid());
-                    newRef.setPrimaryStorageUuid(msg.getDstPrimaryStorageUuid());
+                    newRef.setPrimaryStorageUuid(rootPrimaryStorageUuid);
                     newRef.setResourceType(memoryVolume.getResourceType());
                     newRef.setSize(memoryVolume.getSize());
                     persist(newRef);
                 }
 
-                memoryVolume.setPrimaryStorageUuid(msg.getDstPrimaryStorageUuid());
+                memoryVolume.setPrimaryStorageUuid(rootPrimaryStorageUuid);
                 merge(memoryVolume);
             }
         }.execute();

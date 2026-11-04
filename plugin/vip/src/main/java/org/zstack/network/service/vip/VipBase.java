@@ -43,7 +43,6 @@ import org.zstack.utils.CollectionUtils;
 import org.zstack.utils.DebugUtils;
 import org.zstack.utils.Utils;
 import org.zstack.utils.VipUseForList;
-import org.zstack.utils.function.ForEachFunction;
 import org.zstack.utils.logging.CLogger;
 
 import java.util.*;
@@ -381,13 +380,10 @@ public class VipBase {
         }
 
         CollectionUtils.safeForEach(pluginRgty.getExtensionList(BeforeReleaseVipExtensionPoint.class),
-                new ForEachFunction<BeforeReleaseVipExtensionPoint>() {
-                    @Override
-                    public void run(BeforeReleaseVipExtensionPoint ext) {
-                        logger.debug(String.format("execute before release vip extension point %s", ext));
-                        ext.beforeReleaseVip(VipInventory.valueOf(getSelf()));
-                    }
-                });
+            ext -> {
+                logger.debug(String.format("execute before release vip extension point %s", ext));
+                ext.beforeReleaseVip(VipInventory.valueOf(getSelf()));
+            });
 
         VipFactory f = vipMgr.getVipFactory(self.getServiceProvider());
         VipBaseBackend vip = f.getVip(getSelf());

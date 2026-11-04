@@ -11,7 +11,7 @@ doc {
 		path "org.zstack.header.cloudformation.PreviewResourceStruct.actions"
 		desc "资源编排模板清单列表"
 		type "List"
-		since "2.5.0"
+		since "zsv_2.5.0"
 		clz ActionStruct.class
 	}
 
@@ -19,6 +19,6 @@ doc {
 		name "conditions"
 		desc "条件的执行结果"
 		type "Map"
-		since "3.7.0"
+		since "zsv_3.7.0"
 	}
 }

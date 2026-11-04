@@ -39,7 +39,7 @@ import org.zstack.header.zone.ZoneVO;
  * }
  * }
  * @result see :ref:`APICreateClusterEvent`
- * @since 0.1.0
+ * @since zsv_0.1.0
  */
 @TagResourceType(ClusterVO.class)
 @RestRequest(
@@ -139,7 +139,7 @@ public class APICreateClusterMsg extends APICreateMessage implements CreateClust
         msg.setClusterName("cluster1");
         msg.setDescription("test");
         msg.setHypervisorType("KVM");
-        msg.setZoneUuid(uuid());
+        msg.setZoneUuid(uuid(ZoneVO.class));
         return msg;
     }
 

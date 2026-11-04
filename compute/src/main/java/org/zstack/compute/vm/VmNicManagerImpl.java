@@ -295,19 +295,19 @@ public class VmNicManagerImpl implements VmNicManager, VmNicExtensionPoint, Prep
     public boolean start() {
         VmSystemTags.VIRTIO.installLifeCycleListener(new SystemTagLifeCycleListener() {
             @Override
-            public void tagCreated(SystemTagInventory tag) {
+            public void tagCreated(SystemTagInventoryDefinition tag) {
                 resetVmNicDriverType(tag.getResourceUuid(), defaultPVNicDriver);
                 vidm.deleteResourceMetadataByVmModifyVirtIO(tag.getResourceUuid());
             }
 
             @Override
-            public void tagDeleted(SystemTagInventory tag) {
+            public void tagDeleted(SystemTagInventoryDefinition tag) {
                 resetVmNicDriverType(tag.getResourceUuid(), defaultNicDriver);
                 vidm.deleteResourceMetadataByVmModifyVirtIO(tag.getResourceUuid());
             }
 
             @Override
-            public void tagUpdated(SystemTagInventory old, SystemTagInventory newTag) {
+            public void tagUpdated(SystemTagInventoryDefinition old, SystemTagInventoryDefinition newTag) {
 
             }
         });

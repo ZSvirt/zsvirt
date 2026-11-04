@@ -29,7 +29,7 @@ import org.zstack.storage.primary.local.LocalStorageHostRefVO_;
 import org.zstack.storage.primary.local.LocalStorageResourceRefVO;
 import org.zstack.storage.primary.local.LocalStorageResourceRefVO_;
 import org.zstack.storage.primary.local.LocalStorageSystemTags;
-import org.zstack.tag.PatternedSystemTag;
+import org.zstack.tag.SystemTag;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -577,7 +577,7 @@ final class StorageMigrationLayoutChecker {
             return dstHostUuid;
         }
 
-        PatternedSystemTag hostTag = LocalStorageSystemTags.DEST_HOST_FOR_CREATING_DATA_VOLUME;
+        SystemTag hostTag = LocalStorageSystemTags.DEST_HOST_FOR_CREATING_DATA_VOLUME;
         return systemTags.stream().filter(hostTag::isMatch)
                 .map(tag -> hostTag.getTokenByTag(
                         tag, LocalStorageSystemTags.DEST_HOST_FOR_CREATING_DATA_VOLUME_TOKEN))

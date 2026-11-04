@@ -28,6 +28,10 @@ public abstract class SharedBlockHypervisorBackend extends SharedBlockGroupPrima
         super(self);
     }
 
+    abstract void handle(ExtendSharedBlockVolumeOnPrimaryStorageMsg msg, VolumeInventory volume, Completion completion);
+
+    abstract void handle(ShrinkVolumeOnPrimaryStorageMsg msg, ReturnValueCompletion<ShrinkVolumeOnPrimaryStorageReply> completion);
+
     abstract void handle(InstantiateVolumeOnPrimaryStorageMsg msg, ReturnValueCompletion<InstantiateVolumeOnPrimaryStorageReply> completion);
 
     abstract void handle(EncryptVolumeBitsOnPrimaryStorageMsg msg, ReturnValueCompletion<EncryptVolumeBitsOnPrimaryStorageReply> completion);
@@ -120,6 +124,12 @@ public abstract class SharedBlockHypervisorBackend extends SharedBlockGroupPrima
     abstract void handle(GetDownloadBitsFromKVMHostProgressMsg msg, ReturnValueCompletion<GetDownloadBitsFromKVMHostProgressReply> completion);
 
     abstract void handle(GetVolumeBackingChainFromPrimaryStorageMsg msg, ReturnValueCompletion<GetVolumeBackingChainFromPrimaryStorageReply> completion);
+
+    abstract void handle(GetSharedBlockVolumeSnapshotLanFreeLayoutMsg msg,
+                         ReturnValueCompletion<GetSharedBlockVolumeSnapshotLanFreeLayoutReply> completion);
+
+    abstract void handle(GetSharedBlockVolumeLanFreeLayoutMsg msg,
+                         ReturnValueCompletion<GetSharedBlockVolumeLanFreeLayoutReply> completion);
 
     abstract void handle(ConfigureFilterMsg msg, Completion completion);
 

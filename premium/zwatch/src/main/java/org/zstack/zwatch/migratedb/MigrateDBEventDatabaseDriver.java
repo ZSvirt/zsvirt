@@ -26,7 +26,6 @@ import org.zstack.utils.FieldUtils;
 import org.zstack.utils.Utils;
 import org.zstack.utils.gson.JSONObjectUtil;
 import org.zstack.utils.logging.CLogger;
-import org.zstack.zwatch.ZWatchConstants;
 import org.zstack.zwatch.ZWatchGlobalConfig;
 import org.zstack.zwatch.ZWatchGlobalProperty;
 import org.zstack.zwatch.datatype.AlarmData;
@@ -44,6 +43,7 @@ import org.zstack.zwatch.driver.AfterSaveAuditsExtensionPoint;
 import org.zstack.zwatch.driver.EventDatabaseDriver;
 import org.zstack.zwatch.driver.PagedQueryResult;
 import org.zstack.zwatch.driver.PagedQueryResultHandler;
+import org.zstack.zwatch.header.ZWatchConstants;
 import javax.persistence.Query;
 import javax.transaction.Transactional;
 import java.lang.reflect.Field;
@@ -66,6 +66,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static org.zstack.core.Platform.argerr;
+import static org.zstack.zwatch.header.ZWatchConstants.TASK_NAME_EVENT_AUDIT_RETENTION;
 
 
 public class MigrateDBEventDatabaseDriver implements EventDatabaseDriver, Component, ManagementNodeReadyExtensionPoint {
@@ -143,7 +144,7 @@ public class MigrateDBEventDatabaseDriver implements EventDatabaseDriver, Compon
 
             @Override
             public String getName() {
-                return "zwatch-alarm-event-audit-retention";
+                return TASK_NAME_EVENT_AUDIT_RETENTION;
             }
 
             @Override

@@ -1,17 +1,7 @@
 package org.zstack.header.vm;
 
-import org.zstack.header.allocator.HostAllocatorConstant;
 import org.zstack.header.message.APIEvent;
 import org.zstack.header.rest.RestResponse;
-import org.zstack.header.volume.VolumeInventory;
-import org.zstack.header.volume.VolumeState;
-import org.zstack.header.volume.VolumeStatus;
-import org.zstack.header.volume.VolumeType;
-import org.zstack.utils.data.SizeUnit;
-
-import java.sql.Timestamp;
-
-import static java.util.Arrays.asList;
 
 /**
  * @apiResult api event for message :ref:`APIDestroyVmInstanceMsg`

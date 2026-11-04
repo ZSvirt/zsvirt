@@ -28,7 +28,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "2.3"
+					since "zsv_2.3"
 				}
 				column {
 					name "atAll"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "Boolean"
 					optional true
-					since "2.3"
+					since "zsv_2.3"
 				}
 				column {
 					name "atPersonPhoneNumbers"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "2.3"
+					since "zsv_2.3"
 				}
 				column {
 					name "name"
@@ -55,7 +55,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "2.3"
+					since "zsv_2.3"
 				}
 				column {
 					name "description"
@@ -64,7 +64,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "2.3"
+					since "zsv_2.3"
 				}
 				column {
 					name "resourceUuid"
@@ -73,7 +73,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "2.3"
+					since "zsv_2.3"
 				}
 				column {
 					name "systemTags"
@@ -82,7 +82,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "2.3"
+					since "zsv_2.3"
 				}
 				column {
 					name "userTags"
@@ -91,7 +91,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "2.3"
+					since "zsv_2.3"
 				}
 				column {
 					name "platformUuid"
@@ -100,7 +100,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "tagUuids"
@@ -109,7 +109,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.4.0"
+					since "zsv_3.4.0"
 				}
 				column {
 					name "secret"
@@ -118,7 +118,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 4.2.0"
+					since "zsv_4.2.0"
 				}
 				column {
 					name "atPersonList"
@@ -127,7 +127,7 @@ doc {
 					location "body"
 					type "Map"
 					optional true
-					since "zsv 4.2.0"
+					since "zsv_4.2.0"
 				}
 			}
 		}

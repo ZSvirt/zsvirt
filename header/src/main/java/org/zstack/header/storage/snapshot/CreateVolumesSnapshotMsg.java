@@ -18,6 +18,8 @@ public class CreateVolumesSnapshotMsg extends NeedReplyMessage implements NeedQu
 
     private boolean backupHostFileIfNeeded;
 
+    private boolean allowPartialSuccess;
+
     public String getAccountUuid() {
         return accountUuid;
     }
@@ -53,5 +55,13 @@ public class CreateVolumesSnapshotMsg extends NeedReplyMessage implements NeedQu
 
     public void setBackupHostFileIfNeeded(boolean backupHostFileIfNeeded) {
         this.backupHostFileIfNeeded = backupHostFileIfNeeded;
+    }
+
+    public boolean isAllowPartialSuccess() {
+        return allowPartialSuccess;
+    }
+
+    public void setAllowPartialSuccess(boolean allowPartialSuccess) {
+        this.allowPartialSuccess = allowPartialSuccess;
     }
 }

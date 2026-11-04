@@ -2,6 +2,7 @@ package org.zstack.log;
 
 import org.zstack.core.Platform;
 import org.zstack.core.jsonlabel.JsonLabelInventory;
+import org.zstack.core.jsonlabel.JsonLabelVO;
 import org.zstack.header.message.APIEvent;
 import org.zstack.header.rest.RestResponse;
 
@@ -27,7 +28,7 @@ public class APIUpdateLogConfigurationEvent extends APIEvent {
     public static APIUpdateLogConfigurationEvent __example__() {
         APIUpdateLogConfigurationEvent evt = new APIUpdateLogConfigurationEvent();
         JsonLabelInventory inv = new JsonLabelInventory();
-        inv.setLabelKey("log4j2-" + Platform.getUuid());
+        inv.setLabelKey("log4j2-" + uuid(JsonLabelVO.class));
         inv.setLabelValue("{\n" +
                 "\"appenderType\": \"Syslog\",\n" +
                 "\"configuration\": {\n" +

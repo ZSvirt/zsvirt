@@ -28,7 +28,7 @@ doc {
 					location "url"
 					type "String"
 					optional false
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "name"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "description"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "guestOsType"
@@ -55,7 +55,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "mediaType"
@@ -64,7 +64,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 					values ("RootVolumeTemplate","DataVolumeTemplate","ISO")
 				}
 				column {
@@ -74,7 +74,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 					values ("raw","qcow2","iso")
 				}
 				column {
@@ -84,7 +84,7 @@ doc {
 					location "body"
 					type "Boolean"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "platform"
@@ -93,7 +93,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 					values ("Linux","Windows","Other","Paravirtualization","WindowsVirtio")
 				}
 				column {
@@ -103,7 +103,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "userTags"
@@ -112,7 +112,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "architecture"
@@ -121,7 +121,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 3.10"
+					since "zsv_3.10"
 					values ("x86_64","aarch64","mips64el","loongarch64")
 				}
 				column {
@@ -131,7 +131,7 @@ doc {
 					location "body"
 					type "Boolean"
 					optional true
-					since "zsv 3.11.2"
+					since "zsv_3.11.2"
 				}
 			}
 		}

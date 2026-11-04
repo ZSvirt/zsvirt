@@ -22,6 +22,7 @@
         <hibernate.search.version>5.10.12.Final</hibernate.search.version>
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
+        <prometheus.simpleclient.version>0.16.0</prometheus.simpleclient.version>
     </properties>
 
     <modelVersion>4.0.0</modelVersion>
@@ -32,6 +33,7 @@
     <name>zstack</name>
     <modules>
         <module>core</module>
+        <module>cores</module>
         <module>computes</module>
         <module>compute</module>
         <module>utils</module>
@@ -44,16 +46,14 @@
         <module>plugin</module>
         <module>image</module>
         <module>network</module>
-        <module>configuration</module>
         <module>identity</module>
+        <module>authentications</module>
         <module>search</module>
         <module>console</module>
-        <module>tag</module>
         <module>rest</module>
         <module>sdk</module>
         <module>externalservice</module>
         <module>longjob</module>
-        <module>resourceconfig</module>
         <module>plugin/iscsi</module>
         <module>abstraction</module>
         <module>premium</module>
@@ -460,12 +460,12 @@
 	        <dependency>
 	            <groupId>io.prometheus</groupId>
 	            <artifactId>simpleclient</artifactId>
-	            <version>0.0.26</version>
+	            <version>${prometheus.simpleclient.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.prometheus</groupId>
                 <artifactId>simpleclient_httpserver</artifactId>
-                <version>0.0.26</version>
+                <version>${prometheus.simpleclient.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.dom4j</groupId>
@@ -547,6 +547,8 @@
             <id>premium</id>
             <modules>
                 <module>core</module>
+                <module>cores</module>
+                <module>computes</module>
                 <module>compute</module>
                 <module>utils</module>
                 <module>headers</module>
@@ -559,15 +561,49 @@
                 <module>plugin</module>
                 <module>image</module>
                 <module>network</module>
-                <module>configuration</module>
                 <module>identity</module>
                 <module>search</module>
                 <module>console</module>
-                <module>tag</module>
                 <module>premium</module>
                 <module>rest</module>
                 <module>sdk</module>
                 <module>platforms</module>
+            </modules>
+        </profile>
+
+        <profile>
+            <id>ee</id>
+            <modules>
+                <module>core</module>
+                <module>cores</module>
+                <module>computes</module>
+                <module>compute</module>
+                <module>utils</module>
+                <module>headers</module>
+                <module>header</module>
+                <module>portal</module>
+                <module>simulator</module>
+                <module>build</module>
+                <module>storage</module>
+                <module>plugin</module>
+                <module>image</module>
+                <module>network</module>
+                <module>identity</module>
+                <module>authentications</module>
+                <module>search</module>
+                <module>console</module>
+                <module>rest</module>
+                <module>sdk</module>
+                <module>externalservice</module>
+                <module>longjob</module>
+                <module>plugin/iscsi</module>
+                <module>abstraction</module>
+                <module>premium</module>
+                <module>test</module>
+                <module>tests</module>
+                <module>agents</module>
+                <module>platforms</module>
+                <module>zsvirt-ee</module>
             </modules>
         </profile>
 

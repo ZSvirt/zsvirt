@@ -1,5 +1,6 @@
 package org.zstack.header.apimediator;
 
+import org.zstack.header.managementnode.ManagementNodeVO;
 import org.zstack.header.message.APIReply;
 import org.zstack.header.rest.RestResponse;
 
@@ -20,7 +21,7 @@ public class APIIsReadyToGoReply extends APIReply {
  
     public static APIIsReadyToGoReply __example__() {
         APIIsReadyToGoReply reply = new APIIsReadyToGoReply();
-        reply.setManagementNodeId(uuid());
+        reply.setManagementNodeId(uuid(ManagementNodeVO.class));
 
         return reply;
     }

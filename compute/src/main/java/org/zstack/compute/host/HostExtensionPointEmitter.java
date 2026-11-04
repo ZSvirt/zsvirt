@@ -5,11 +5,9 @@ import org.zstack.core.componentloader.PluginRegistry;
 import org.zstack.header.Component;
 import org.zstack.header.core.Completion;
 import org.zstack.header.errorcode.ErrorCode;
-import org.zstack.header.errorcode.OperationFailureException;
 import org.zstack.header.host.*;
 import org.zstack.utils.CollectionUtils;
 import org.zstack.utils.Utils;
-import org.zstack.utils.function.ForEachFunction;
 import org.zstack.utils.logging.CLogger;
 
 import java.util.ArrayList;
@@ -51,51 +49,29 @@ public class HostExtensionPointEmitter implements Component {
     public void beforeChange(HostVO vo, final HostStateEvent event) {
         final HostInventory hinv = HostInventory.valueOf(vo);
         final HostState next = vo.getState().nextState(event);
-        CollectionUtils.safeForEach(changeStateExts, new ForEachFunction<HostChangeStateExtensionPoint>() {
-            @Override
-            public void run(HostChangeStateExtensionPoint extp) {
-                extp.beforeChangeHostState(hinv, event, next);
-            }
-        });
+        CollectionUtils.safeForEach(changeStateExts, extp -> extp.beforeChangeHostState(hinv, event, next));
     }
 
     public void afterChange(HostVO vo, final HostStateEvent event, final HostState prevState) {
         final HostInventory hinv = HostInventory.valueOf(vo);
-        CollectionUtils.safeForEach(changeStateExts, new ForEachFunction<HostChangeStateExtensionPoint>() {
-            @Override
-            public void run(HostChangeStateExtensionPoint extp) {
-                extp.afterChangeHostState(hinv, event, prevState);
-            }
-        });
+        CollectionUtils.safeForEach(changeStateExts, extp -> extp.afterChangeHostState(hinv, event, prevState));
     }
 
     public void beforeDelete(final HostInventory hinv) {
-        CollectionUtils.safeForEach(deleteHostExts, new ForEachFunction<HostDeleteExtensionPoint>() {
-            @Override
-            public void run(HostDeleteExtensionPoint extp) {
-                extp.beforeDeleteHost(hinv);
-            }
-        });
+        CollectionUtils.safeForEach(deleteHostExts, extp -> extp.beforeDeleteHost(hinv));
     }
 
     public void afterDelete(final HostInventory hinv) {
-        CollectionUtils.safeForEach(deleteHostExts, new ForEachFunction<HostDeleteExtensionPoint>() {
-            @Override
-            public void run(HostDeleteExtensionPoint extp) {
-                extp.afterDeleteHost(hinv);
-            }
-        });
+        CollectionUtils.safeForEach(deleteHostExts, extp -> extp.afterDeleteHost(hinv));
     }
 
     public void hostPingTask(final HypervisorType type, final HostInventory inv) {
-        CollectionUtils.safeForEach(pingTaskExts, new ForEachFunction<HostPingTaskExtensionPoint>() {
-            @Override
-            public void run(HostPingTaskExtensionPoint ext) {
+        CollectionUtils.safeForEach(pingTaskExts,
+            ext -> {
                 if (ext.getHypervisorType().equals(type)) {
                     ext.executeTaskAlongWithPingTask(inv);
                 }
-            }
-        });
+            });
     }
 
     public void connectionReestablished(HypervisorType hvType, HostInventory host) throws HostException {

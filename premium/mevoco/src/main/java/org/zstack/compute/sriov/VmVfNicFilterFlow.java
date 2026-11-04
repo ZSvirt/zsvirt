@@ -13,8 +13,8 @@ import org.zstack.header.sriov.VmVfNicManager;
 import org.zstack.header.vm.VmInstanceConstant;
 import org.zstack.identity.AccountManager;
 import org.zstack.pciDevice.HostIommuGetter;
-import org.zstack.pciDevice.HostIommuStateType;
-import org.zstack.pciDevice.HostIommuStatusType;
+import org.zstack.pciDevice.header.HostIommuStateType;
+import org.zstack.pciDevice.header.HostIommuStatusType;
 import org.zstack.utils.Utils;
 import org.zstack.utils.logging.CLogger;
 

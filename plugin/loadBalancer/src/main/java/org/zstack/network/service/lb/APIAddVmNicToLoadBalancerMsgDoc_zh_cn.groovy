@@ -3,11 +3,11 @@ package org.zstack.network.service.lb
 import org.zstack.network.service.lb.APIAddVmNicToLoadBalancerEvent
 
 doc {
-	title "添加云主机网卡到负载均衡(AddVmNicToLoadBalancer)"
+	title "添加虚拟机网卡到负载均衡(AddVmNicToLoadBalancer)"
 
 	category "负载均衡"
 
-	desc """添加云主机网卡到负载均衡"""
+	desc """添加虚拟机网卡到负载均衡"""
 
 	rest {
 		request {
@@ -24,11 +24,11 @@ doc {
 				column {
 					name "vmNicUuids"
 					enclosedIn "params"
-					desc "云主机网卡UUID"
+					desc "虚拟机网卡UUID"
 					location "body"
 					type "List"
 					optional false
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "listenerUuid"
@@ -37,7 +37,7 @@ doc {
 					location "url"
 					type "String"
 					optional false
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "systemTags"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "userTags"
@@ -55,7 +55,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 			}
 		}

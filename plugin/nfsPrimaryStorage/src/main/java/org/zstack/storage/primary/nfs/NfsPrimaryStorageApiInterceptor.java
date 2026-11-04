@@ -37,7 +37,9 @@ public class NfsPrimaryStorageApiInterceptor implements GlobalApiMessageIntercep
     }
 
     private void validate(APIAddNfsPrimaryStorageMsg msg) {
-        new NfsApiParamChecker().checkUrl(msg.getZoneUuid(), msg.getSystemTags(), msg.getUrl());
+        String normalizedUrl = NfsApiParamChecker.normalizeUrl(msg.getUrl());
+        new NfsApiParamChecker().checkUrl(msg.getZoneUuid(), msg.getSystemTags(), normalizedUrl);
+        msg.setUrl(normalizedUrl);
     }
 
     private void validate(APIUpdatePrimaryStorageMsg msg){
@@ -53,12 +55,19 @@ public class NfsPrimaryStorageApiInterceptor implements GlobalApiMessageIntercep
             return;
         }
 
-        if (msg.getUrl() != null && !msg.getUrl().equals(url)){
+        if (msg.getUrl() != null) {
+            String normalizedUrl = NfsApiParamChecker.normalizeUrl(msg.getUrl());
+            String normalizedCurrentUrl = NfsApiParamChecker.normalizeUrl(url);
+            msg.setUrl(normalizedUrl);
+            if (normalizedUrl.equals(normalizedCurrentUrl)) {
+                return;
+            }
+
             new SQLBatch(){
                 @Override
                 protected void scripts() {
                     NfsApiParamChecker checker = new NfsApiParamChecker();
-                    checker.checkUrl(zoneUuid, msg.getSystemTags(), msg.getUrl());
+                    checker.checkUrl(zoneUuid, msg.getSystemTags(), normalizedUrl);
                     checker.checkRunningVmForUpdateUrl(msg.getUuid());
                 }
             }.execute();

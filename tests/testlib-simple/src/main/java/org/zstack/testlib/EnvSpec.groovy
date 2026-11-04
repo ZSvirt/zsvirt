@@ -63,7 +63,6 @@ import org.zstack.sdk.zwatch.monitorgroup.api.DeleteMonitorGroupAction
 import org.zstack.sdk.zwatch.monitorgroup.api.DeleteMonitorTemplateAction
 import org.zstack.storage.volume.VolumeGlobalConfig
 import org.zstack.testlib.identity.AccountSpec
-import org.zstack.testlib.identity.IdentitySpec
 import org.zstack.testlib.identity.ldap.LdapServerSpec
 import org.zstack.testlib.identity.ldap.LdapVirtualEndpointSpec
 import org.zstack.testlib.vfs.VFS
@@ -309,14 +308,6 @@ class EnvSpec extends ApiHelper implements Node  {
         storageObjectSizeMocks.clear()
     }
 
-    void identities(@DelegatesTo(strategy = Closure.DELEGATE_FIRST, value = IdentitySpec.class) Closure c) {
-        def ispec = new IdentitySpec(this)
-        c.delegate = ispec
-        c.resolveStrategy = Closure.DELEGATE_FIRST
-        c()
-        addChild(ispec)
-    }
-
     ZoneSpec zone(@DelegatesTo(strategy = Closure.DELEGATE_FIRST, value = ZoneSpec.class) Closure c)  {
         def zspec = new ZoneSpec(this)
         c.delegate = zspec
@@ -346,6 +337,8 @@ class EnvSpec extends ApiHelper implements Node  {
         return spec
     }
 
+    // sftpBackupStorage is not used in ZSphere.
+    // Note: sftpBackupStorage do not support VM clone (and any feature with volume snapshot)
     BackupStorageSpec sftpBackupStorage(@DelegatesTo(strategy = Closure.DELEGATE_FIRST, value = SftpBackupStorageSpec.class) Closure c) {
         def spec = new SftpBackupStorageSpec(this)
         c.resolveStrategy = Closure.DELEGATE_FIRST

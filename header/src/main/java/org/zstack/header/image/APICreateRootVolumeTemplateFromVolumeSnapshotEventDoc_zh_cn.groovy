@@ -11,14 +11,14 @@ doc {
 		name "success"
 		desc ""
 		type "boolean"
-		since "zsv 0.6"
+		since "zsv_0.6"
 	}
 	ref {
 		name "error"
 		path "org.zstack.header.image.APICreateRootVolumeTemplateFromVolumeSnapshotEvent.error"
 		desc "错误码，若不为null，则表示操作失败, 操作成功时该字段为null",false
 		type "ErrorCode"
-		since "zsv 0.6"
+		since "zsv_0.6"
 		clz ErrorCode.class
 	}
 	ref {
@@ -26,7 +26,7 @@ doc {
 		path "org.zstack.header.image.APICreateRootVolumeTemplateFromVolumeSnapshotEvent.inventory"
 		desc "null"
 		type "ImageInventory"
-		since "zsv 0.6"
+		since "zsv_0.6"
 		clz ImageInventory.class
 	}
 	ref {
@@ -34,7 +34,7 @@ doc {
 		path "org.zstack.header.image.APICreateRootVolumeTemplateFromVolumeSnapshotEvent.failuresOnBackupStorage"
 		desc "null"
 		type "List"
-		since "zsv 0.6"
+		since "zsv_0.6"
 		clz Failure.class
 	}
 }

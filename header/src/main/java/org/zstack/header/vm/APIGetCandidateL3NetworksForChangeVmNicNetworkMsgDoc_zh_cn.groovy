@@ -3,11 +3,11 @@ package org.zstack.header.vm
 import org.zstack.header.vm.APIGetCandidateL3NetworksForChangeVmNicNetworkReply
 
 doc {
-	title "获取云主机网卡可以加载的L3网络"
+	title "获取虚拟机网卡可以加载的L3网络"
 
 	category "vmInstance"
 
-	desc """获取云主机网卡可以加载的L3网络列表"""
+	desc """获取虚拟机网卡可以加载的L3网络列表"""
 
 	rest {
 		request {
@@ -24,11 +24,11 @@ doc {
 				column {
 					name "vmNicUuid"
 					enclosedIn ""
-					desc "云主机网卡UUID"
+					desc "虚拟机网卡UUID"
 					location "url"
 					type "String"
 					optional false
-					since "zsv 3.11.0"
+					since "zsv_3.11.0"
 				}
 				column {
 					name "systemTags"
@@ -37,7 +37,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "zsv 3.11.0"
+					since "zsv_3.11.0"
 				}
 				column {
 					name "userTags"
@@ -46,7 +46,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "zsv 3.11.0"
+					since "zsv_3.11.0"
 				}
 			}
 		}

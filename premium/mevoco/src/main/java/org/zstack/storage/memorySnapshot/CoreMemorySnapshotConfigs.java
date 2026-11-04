@@ -4,6 +4,7 @@ import org.zstack.compute.vm.MevocoVmSystemTags;
 import org.zstack.compute.vm.VmGlobalConfig;
 import org.zstack.compute.vm.VmHardwareSystemTags;
 import org.zstack.compute.vm.VmSystemTags;
+import org.zstack.core.config.BindResourceConfig;
 import org.zstack.core.config.GlobalConfig;
 import org.zstack.header.exception.CloudRuntimeException;
 import org.zstack.header.managementnode.ManagementNodeReadyExtensionPoint;
@@ -13,22 +14,27 @@ import org.zstack.header.volume.VolumeVO;
 import org.zstack.kvm.KVMGlobalConfig;
 import org.zstack.kvm.KVMSystemTags;
 import org.zstack.mevoco.MevocoGlobalConfig;
-import org.zstack.pciDevice.PciDeviceGlobalConfig;
-import org.zstack.resourceconfig.BindResourceConfig;
-import org.zstack.tag.PatternedSystemTag;
+import org.zstack.pciDevice.header.PciDeviceGlobalConfig;
+import org.zstack.storage.volume.VolumeSystemTags;
 import org.zstack.tag.SystemTag;
 import org.zstack.utils.BeanUtils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class CoreMemorySnapshotConfigs implements ManagementNodeReadyExtensionPoint {
-    public static final List<PatternedSystemTag> restoreCandidatePatternedSystemTags = Stream.of(
+    public static final List<SystemTag> restoreCandidatePatternedSystemTags = Stream.of(
             // vm
             VmSystemTags.USERDATA, VmSystemTags.USB_REDIRECT, VmSystemTags.SSHKEY, VmSystemTags.BOOT_MODE, VmSystemTags.CLEAN_TRAFFIC,
             VmSystemTags.HOSTNAME, MevocoVmSystemTags.VM_CPU_PINNING, MevocoVmSystemTags.VM_NUMA_ENABLE, VmHardwareSystemTags.CPU_CORES,
-            VmSystemTags.VM_GUEST_TOOLS, VmSystemTags.MACHINE_TYPE
+            VmSystemTags.VM_GUEST_TOOLS, VmSystemTags.MACHINE_TYPE,
+
+            // volume
+            VolumeSystemTags.OVERWRITED_VOLUME
     ).collect(Collectors.toList());
 
     public static final List<SystemTag> restoreCandidateSystemTags = Stream.of(
@@ -106,7 +112,7 @@ public class CoreMemorySnapshotConfigs implements ManagementNodeReadyExtensionPo
     }
 
     public static boolean systemTagIsRegistered(String configName) {
-        for (PatternedSystemTag tag : restoreCandidatePatternedSystemTags) {
+        for (SystemTag tag : restoreCandidatePatternedSystemTags) {
             if (Objects.equals(tag.getTagFormat(), configName)) {
                 return true;
             }

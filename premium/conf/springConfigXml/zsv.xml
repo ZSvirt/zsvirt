@@ -25,12 +25,6 @@
         </zstack:plugin>
     </bean>
 
-    <bean id="ZsvGlobalConfigInitExtensionPoint" class="org.zstack.zsv.config.ZsvGlobalConfigInitExtensionPoint">
-        <zstack:plugin>
-            <zstack:extension interface="org.zstack.core.config.GlobalConfigInitExtensionPoint"/>
-        </zstack:plugin>
-    </bean>
-
     <bean id="ZsvApiInterceptor" class="org.zstack.zsv.ZsvApiInterceptor">
         <zstack:plugin>
             <zstack:extension interface="org.zstack.header.apimediator.ApiMessageInterceptor"/>

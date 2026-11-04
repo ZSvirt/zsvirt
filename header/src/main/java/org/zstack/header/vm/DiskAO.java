@@ -1,5 +1,6 @@
 package org.zstack.header.vm;
 
+import org.zstack.header.configuration.ConfigAO;
 import org.zstack.header.configuration.PythonClassInventory;
 import org.zstack.header.rest.SDK;
 import org.zstack.header.message.NoJsonSchema;
@@ -28,6 +29,9 @@ public class DiskAO {
      */
     private String sourceUuid;
     private List<String> systemTags;
+    @APINoSee
+    @NoJsonSchema
+    private List<ConfigAO> configs;
     private String name;
     private Boolean encrypted;
     @APINoSee
@@ -137,6 +141,14 @@ public class DiskAO {
 
     public void setSystemTags(List<String> systemTags) {
         this.systemTags = systemTags;
+    }
+
+    public List<ConfigAO> getConfigs() {
+        return configs;
+    }
+
+    public void setConfigs(List<ConfigAO> configs) {
+        this.configs = configs;
     }
 
     public String getName() {

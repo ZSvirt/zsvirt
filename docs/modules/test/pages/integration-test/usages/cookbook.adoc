@@ -413,7 +413,6 @@ org.zstack.test.integration.kvm.vm.OneVmBasicLifeCycleCase
 org.zstack.test.integration.kvm.globalconfig.KvmGlobalConfigCase
 org.zstack.test.integration.kvm.vm.UpdateVmCase
 org.zstack.test.integration.kvm.status.DBOnlyCase
-org.zstack.test.integration.kvm.capacity.CheckHostCapacityWhenAddHostCase
 ----
 
 == 使用`-Dapipath` 参数打印 API 调用的 call graph

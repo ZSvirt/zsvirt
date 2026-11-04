@@ -26,6 +26,7 @@ import org.zstack.header.storage.backup.BackupStoragePrimaryStorageExtensionPoin
 import org.zstack.header.storage.primary.*;
 import org.zstack.header.volume.VolumeStatus;
 import org.zstack.header.volume.VolumeVO;
+import org.zstack.storage.primary.ImageCacheCleanParam;
 import org.zstack.storage.primary.ImageCacheCleaner;
 import org.zstack.storage.primary.local.LocalStorageUtils.InstallPath;
 import org.zstack.utils.CollectionUtils;
@@ -58,38 +59,13 @@ public class LocalStorageImageCleaner extends ImageCacheCleaner implements Manag
         return LocalStorageConstants.LOCAL_STORAGE_TYPE;
     }
 
-    private boolean force;
-
-    public boolean isForce() {
-        return force;
-    }
-
-    public void setForce(boolean force) {
-        this.force = force;
-    }
-
     @Transactional
-    protected List<ImageCacheShadowVO> createShadowImageCacheVOsForNewDeletedAndOld(String psUUid) {
+    protected List<ImageCacheShadowVO> createShadowImageCacheVOsForNewDeletedAndOld(String psUUid, ImageCacheCleanParam param) {
         // 1. images has been deleted
         List<Long> staleImageCacheIds = new ArrayList<>();
-        List<Long> imageDeletedCacheIds = getStaleImageCacheIds(psUUid);
+        List<Long> imageDeletedCacheIds = getStaleImageCacheIds(psUUid, param.includeReadyImage);
         if (!CollectionUtils.isEmpty(imageDeletedCacheIds)) {
             staleImageCacheIds.addAll(imageDeletedCacheIds);
-        }
-
-        if (force){
-            // 2. no vm used but image is not deleted
-            // FIXME: it means nothing. think about host ref.
-            String sql;
-            if (psUUid == null) {
-                sql = "select c.id from ImageCacheVO c, PrimaryStorageVO pri where c.imageUuid not in (select vm.imageUuid from VmInstanceVO vm) and" +
-                        " c.primaryStorageUuid = pri.uuid and pri.type = :psType";
-                staleImageCacheIds.addAll(SQL.New(sql).param("psType", getPrimaryStorageType()).list());
-            } else {
-                sql = "select c.id from ImageCacheVO c, PrimaryStorageVO pri where c.imageUuid not in (select vm.imageUuid from VmInstanceVO vm) and" +
-                        " c.primaryStorageUuid = pri.uuid and pri.type = :psType and pri.uuid = :psUuid";
-                staleImageCacheIds.addAll(SQL.New(sql).param("psType", getPrimaryStorageType()).param("psUuid", psUUid).list());
-            }
         }
 
         if (staleImageCacheIds.isEmpty()) {
@@ -244,19 +220,19 @@ public class LocalStorageImageCleaner extends ImageCacheCleaner implements Manag
     }
 
     @Override
-    protected void cleanUpVolumeCache(String psUuid, boolean needDestinationCheck, NoErrorCompletion completion) {
-        List<ImageCacheShadowVO> shadowVOs = createShadowImageCacheVOs(psUuid);
+    protected void cleanUpVolumeCache(String psUuid, ImageCacheCleanParam param, NoErrorCompletion completion) {
+        List<ImageCacheShadowVO> shadowVOs = createShadowImageCacheVOs(psUuid, param);
         if (shadowVOs == null || shadowVOs.isEmpty()) {
             completion.done();
             return;
         }
 
-        new While<>(shadowVOs).each((vo, whileCompletion) -> {
-            if (needDestinationCheck && !destMaker.isManagedByUs(vo.getImageUuid())) {
-                whileCompletion.done();
-                return;
-            }
 
+        if (!param.triggerByApi) {
+            shadowVOs.removeIf(vo -> !destMaker.isManagedByUs(vo.getImageUuid()));
+        }
+
+        new While<>(shadowVOs).each((vo, whileCompletion) -> {
             InstallPath p = new InstallPath();
             p.fullPath = vo.getInstallUrl();
             p.disassemble();
@@ -297,7 +273,7 @@ public class LocalStorageImageCleaner extends ImageCacheCleaner implements Manag
     }
 
     @Override
-    protected void doCleanup(String psUuid, boolean needDestinationCheck, NoErrorCompletion completion) {
+    protected void doCleanup(String psUuid, ImageCacheCleanParam param, NoErrorCompletion completion) {
         List<String> psUuids = new ArrayList<>();
         if (psUuid == null) {
             psUuids.addAll(listPrimaryStoragesBySelfType());
@@ -310,7 +286,7 @@ public class LocalStorageImageCleaner extends ImageCacheCleaner implements Manag
         chain.then(new NoRollbackFlow() {
             @Override
             public void run(FlowTrigger trigger, Map data) {
-                cleanUpVolumeCache(psUuid, needDestinationCheck, new NoErrorCompletion() {
+                cleanUpVolumeCache(psUuid, param, new NoErrorCompletion() {
                     @Override
                     public void done() {
                         trigger.next();
@@ -381,7 +357,7 @@ public class LocalStorageImageCleaner extends ImageCacheCleaner implements Manag
     }
 
     @Override
-    public void cleanup(String psUuid, boolean needDestinationCheck) {
+    public void cleanup(String psUuid, ImageCacheCleanParam param) {
         ImageCacheCleaner self = this;
         thdf.chainSubmit(new ChainTask(null) {
             @Override
@@ -392,7 +368,7 @@ public class LocalStorageImageCleaner extends ImageCacheCleaner implements Manag
             @Override
             public void run(SyncTaskChain chain) {
                 logger.debug("start clean up cache");
-                doCleanup(psUuid, needDestinationCheck, new NoErrorCompletion() {
+                doCleanup(psUuid, param, new NoErrorCompletion() {
                     @Override
                     public void done() {
                         chain.next();

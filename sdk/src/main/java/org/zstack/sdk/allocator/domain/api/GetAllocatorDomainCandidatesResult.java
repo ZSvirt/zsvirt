@@ -27,14 +27,6 @@ public class GetAllocatorDomainCandidatesResult {
         return this.primaryStorages;
     }
 
-    public java.util.List backupStorages;
-    public void setBackupStorages(java.util.List backupStorages) {
-        this.backupStorages = backupStorages;
-    }
-    public java.util.List getBackupStorages() {
-        return this.backupStorages;
-    }
-
     public java.util.List l3Networks;
     public void setL3Networks(java.util.List l3Networks) {
         this.l3Networks = l3Networks;

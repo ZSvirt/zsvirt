@@ -3,6 +3,8 @@ package org.zstack.drs;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
+import org.zstack.compute.allocator.HostAllocatorGlobalConfig;
+import org.zstack.compute.allocator.HostCapacityReserveManager;
 import org.zstack.core.Platform;
 import org.zstack.core.asyncbatch.While;
 import org.zstack.core.cascade.CascadeFacade;
@@ -29,6 +31,8 @@ import org.zstack.drs.message.*;
 import org.zstack.drs.util.DRSActivityConcurrencyControl;
 import org.zstack.drs.util.DRSUtils;
 import org.zstack.header.allocator.HostCapacityVO;
+import org.zstack.header.allocator.HostCapacityOverProvisioningManager;
+import org.zstack.header.allocator.ReservedHostCapacity;
 import org.zstack.header.allocator.AllocatorDomainScene;
 import org.zstack.header.core.Completion;
 import org.zstack.header.core.WhileDoneCompletion;
@@ -62,8 +66,11 @@ import org.zstack.zwatch.ruleengine.RuleEvaluationResult;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.zstack.core.Platform.*;
@@ -97,6 +104,10 @@ public class DRSBase {
     protected CascadeFacade casf;
     @Autowired
     private ResourceConfigFacade rcf;
+    @Autowired
+    private HostCapacityOverProvisioningManager memoryRatioMgr;
+    @Autowired
+    private HostCapacityReserveManager capacityReserveMgr;
 
     protected ClusterDRSVO self;
     protected ClusterDRSVO originalCopy;
@@ -523,6 +534,7 @@ public class DRSBase {
                 // filter out base on vm metric data
                 buildHostVmList(hostLoads, cpuUsedPercentThreshold, memUsedPercentThreshold);
                 List<HostNode> hostNodes = buildHostNodes(hostLoads);
+                excludeVmsBoundToHostByPassthroughDevice(hostNodes);
                 saveHostLoadOverThreshold(hostNodes, cpuUsedPercentThreshold, memUsedPercentThreshold);
 
                 DefaultBalanceAlgorithm balancer = new DefaultBalanceAlgorithm();
@@ -531,6 +543,12 @@ public class DRSBase {
                     logger.debug("skip executeDRSScheduling, migrateTasks is empty");
                     trigger.next();
                     return;
+                } else {
+                    logger.debug(String.format("DRS[%s] found %d migrate tasks", self.getUuid(), migrateTasks.size()));
+                    for (MigrateTask migrateTask : migrateTasks) {
+                        logger.debug(String.format("DRS[%s] migrate task, vm[uuid:%s] from host[uuid:%s] to host[uuid:%s]",
+                                self.getUuid(), migrateTask.getVmUuid(), migrateTask.getSourceHostUuid(), migrateTask.getTargetHostUuid()));
+                    }
                 }
 
                 if (DRSAutomationLevel.Automatic == self.getAutomationLevel()) {
@@ -562,7 +580,7 @@ public class DRSBase {
         if (cpuUsedPercentThreshold != null && memUsedPercentThreshold == null) {
             for (HostLoad hostLoad : hostLoads) {
                 List<HostLoadOccupiedByVm> vmList = hostLoad.getVmList().stream()
-                        .filter(vm -> vm.getUsedHostCPUPercent() != null)
+                        .filter(vm -> vm.getUsedHostPhysicalCpuNum() != null)
                         .collect(Collectors.toList());
                 hostLoad.setVmList(vmList);
             }
@@ -576,7 +594,7 @@ public class DRSBase {
         } else if (cpuUsedPercentThreshold != null) {
             for (HostLoad hostLoad : hostLoads) {
                 List<HostLoadOccupiedByVm> vmList = hostLoad.getVmList().stream()
-                        .filter(vm -> vm.getUsedHostCPUPercent() != null && vm.getUsedHostPhysicalMemoryBit() != null)
+                        .filter(vm -> vm.getUsedHostPhysicalCpuNum() != null && vm.getUsedHostPhysicalMemoryBit() != null)
                         .collect(Collectors.toList());
                 hostLoad.setVmList(vmList);
             }
@@ -697,6 +715,7 @@ public class DRSBase {
 
     private List<HostNode> buildHostNodes(List<HostLoad> hostLoads) {
         List<HostNode> hostNodes = new ArrayList<>();
+        boolean checkMaxMemory = HostAllocatorGlobalConfig.HOST_ALLOCATOR_MAX_MEMORY.value(Boolean.class);
 
         for (HostLoad hostLoad : hostLoads) {
             HostCapacityVO hostCapacityVO = dbf.findByUuid(hostLoad.getHostUuid(), HostCapacityVO.class);
@@ -705,16 +724,24 @@ public class DRSBase {
                     hostLoad.getUsedCPUPercent(),
                     hostLoad.getUsedPhysicalMemoryBit(),
                     hostCapacityVO.getAvailableCpu(),
-                    hostCapacityVO.getAvailablePhysicalMemory(),
+                    hostCapacityVO.getAvailableMemory(),
+                    hostCapacityVO.getCpuNum(),
                     hostCapacityVO.getTotalMemory()
             );
+
+            ReservedHostCapacity reserved = capacityReserveMgr.getReservedHostCapacityByHosts(
+                    Collections.singletonList(hostLoad.getHostUuid()));
+            hostNode.setMemoryCapacityPolicy(memoryRatioMgr.getMemoryRatio(hostLoad.getHostUuid()),
+                    reserved.getReservedMemoryCapacity(),
+                    checkMaxMemory ? hostCapacityVO.getTotalPhysicalMemory() : null);
 
             for (HostLoadOccupiedByVm vmLoad : hostLoad.getVmList()) {
                 VmInstanceVO vmInstanceVO = dbf.findByUuid(vmLoad.getVmUuid(), VmInstanceVO.class);
                 float usedMemoryPercent = vmLoad.getUsedHostPhysicalMemoryBit() == null ? 0.0f : (1.0f * vmLoad.getUsedHostPhysicalMemoryBit() / hostNode.getTotalMemoryBit()) * 100;
-                float usedHostCPUPercent = vmLoad.getUsedHostCPUPercent() == null ? 0.0f : (vmLoad.getUsedHostCPUPercent() / hostCapacityVO.getCpuNum()) * 100;
+                float usedHostCPUPercent = vmLoad.getUsedHostPhysicalCpuNum() == null ? 0.0f : (vmLoad.getUsedHostPhysicalCpuNum() / hostCapacityVO.getCpuNum()) * 100;
                 VmNode vmNode = new VmNode(
                         vmLoad.getVmUuid(),
+                        vmLoad.getUsedHostPhysicalCpuNum() == null ? 0.0f : vmLoad.getUsedHostPhysicalCpuNum(),
                         usedHostCPUPercent,
                         vmLoad.getUsedHostPhysicalMemoryBit() == null ? 0L : vmLoad.getUsedHostPhysicalMemoryBit(),
                         usedMemoryPercent,
@@ -728,6 +755,28 @@ public class DRSBase {
         }
 
         return hostNodes;
+    }
+
+    private void excludeVmsBoundToHostByPassthroughDevice(List<HostNode> hostNodes) {
+        List<String> candidateVmUuids = hostNodes.stream()
+                .flatMap(hostNode -> hostNode.getVmList().stream())
+                .map(VmNode::getUuid)
+                .collect(Collectors.toList());
+        if (candidateVmUuids.isEmpty()) {
+            return;
+        }
+
+        Set<String> hostBoundVmUuids = new HashSet<>();
+        for (VmMigrateHostConstraintExtensionPoint ext : pluginRgty.getExtensionList(VmMigrateHostConstraintExtensionPoint.class)) {
+            hostBoundVmUuids.addAll(ext.getHostBoundVmUuids(new ArrayList<>(candidateVmUuids)));
+        }
+        if (hostBoundVmUuids.isEmpty()) {
+            return;
+        }
+
+        hostNodes.forEach(hostNode -> hostNode.getVmList().removeIf(vmNode -> hostBoundVmUuids.contains(vmNode.getUuid())));
+        logger.debug(String.format("DRS[%s] skips migrating vms%s bound to their host by passthrough devices",
+                self.getUuid(), hostBoundVmUuids));
     }
 
     private void makeAdvice(String adviceGroupUuid, List<MigrateTask> migrateTasks, List<HostNode> hostNodes) {

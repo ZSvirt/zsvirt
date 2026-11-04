@@ -58,6 +58,8 @@ import java.util.Map;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
+import static org.zstack.zwatch.header.ZWatchConstants.TASK_NAME_METRIC_PUSHER_THIRD_PARTY;
+
 public class ThirdpartyAlertManagerImpl extends AbstractService
         implements ThirdpartyAlertManager, ManagementNodeReadyExtensionPoint, SNSPublishExtension {
     protected static final CLogger logger = Utils.getLogger(ThirdpartyAlertManagerImpl.class);
@@ -189,7 +191,7 @@ public class ThirdpartyAlertManagerImpl extends AbstractService
 
             @Override
             public String getName() {
-                return "push-metric-data-to-receiver";
+                return TASK_NAME_METRIC_PUSHER_THIRD_PARTY;
             }
 
             @Override

@@ -3,11 +3,11 @@ package org.zstack.header.vm
 import org.zstack.header.vm.APISetVmBootOrderEvent
 
 doc {
-	title "指定云主机启动设备(SetVmBootOrder)"
+	title "指定虚拟机启动设备(SetVmBootOrder)"
 
 	category "vmInstance"
 
-	desc """指定一个云主机的启动设备"""
+	desc """指定一个虚拟机的启动设备"""
 
 	rest {
 		request {
@@ -24,11 +24,11 @@ doc {
 				column {
 					name "uuid"
 					enclosedIn "setVmBootOrder"
-					desc "云主机UUID"
+					desc "虚拟机UUID"
 					location "url"
 					type "String"
 					optional false
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "bootOrder"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "systemTags"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "userTags"
@@ -55,7 +55,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 			}
 		}

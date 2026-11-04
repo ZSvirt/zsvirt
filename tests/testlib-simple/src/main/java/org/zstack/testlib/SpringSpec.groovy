@@ -26,14 +26,13 @@ class SpringSpec {
     ]
 
     Set<String> xmls = []
-    boolean all
 
     void include(String xml) {
         xmls.add(xml)
     }
 
-    void includeAll() {
-        all = true
+    void include(SpringSpec spec) {
+        xmls.addAll(spec.xmls)
     }
 
     void includeCoreServices() {
@@ -119,5 +118,27 @@ class SpringSpec {
 
     void console() {
         include("ConsoleManager.xml")
+    }
+
+    void telemetry() {
+        include("telemetry.xml")
+    }
+
+    // ------------------------------------- Premium includes ------------------------------------
+    //   DO NOT USE IT IN test-simple module
+
+    void agents() {
+        include("agents/softwarePackagePlugin.xml")
+        include("agents/zmigratePlugin.xml")
+    }
+
+    void computesPremium() {
+        include("pciDevice.xml")
+        include("mttyDevice.xml")
+        include("usbDevice.xml")
+    }
+
+    void platformsPremium() {
+        include("ha.xml")
     }
 }

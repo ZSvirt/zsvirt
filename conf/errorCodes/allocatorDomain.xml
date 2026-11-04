@@ -132,26 +132,6 @@
     </code>
 
     <code>
-        <id>3500</id>
-        <description>Invalid backup storage allocator domain rule</description>
-    </code>
-
-    <code>
-        <id>3501</id>
-        <description>Backup storage is not attached to the allocator domain zone</description>
-    </code>
-
-    <code>
-        <id>3502</id>
-        <description>Backup storage allocator domain rule must not set resourceQualifier</description>
-    </code>
-
-    <code>
-        <id>3503</id>
-        <description>Backup storage is not found or is not a BackupStorageVO</description>
-    </code>
-
-    <code>
         <id>4000</id>
         <description>Allocator domain allocation related error</description>
     </code>
@@ -164,5 +144,10 @@
     <code>
         <id>4002</id>
         <description>Changing the VM allocator domain to another domain uuid is not allowed via this API</description>
+    </code>
+
+    <code>
+        <id>4003</id>
+        <description>No candidate resource remains in the allocator domain</description>
     </code>
 </error>

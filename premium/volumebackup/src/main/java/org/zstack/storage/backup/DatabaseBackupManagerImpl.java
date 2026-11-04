@@ -39,13 +39,12 @@ import org.zstack.header.message.Message;
 import org.zstack.header.message.MessageReply;
 import org.zstack.header.storage.backup.*;
 import org.zstack.header.storage.database.backup.*;
-import org.zstack.header.tag.SystemTagInventory;
+import org.zstack.header.tag.SystemTagInventoryDefinition;
 import org.zstack.header.tag.SystemTagLifeCycleListener;
 import org.zstack.mevoco.MevocoGlobalProperty;
 import org.zstack.storage.backup.imagestore.*;
 import org.zstack.tag.TagManager;
 import org.zstack.utils.*;
-import org.zstack.utils.function.Function;
 import org.zstack.utils.gson.JSONObjectUtil;
 import org.zstack.utils.logging.CLogger;
 import org.zstack.utils.path.PathUtil;
@@ -533,7 +532,6 @@ public class DatabaseBackupManagerImpl extends AbstractService implements Databa
                             checkVersion(metadata.version);
                             checkType(metadata.type);
 
-                            List<ErrorCode> errs = Collections.synchronizedList(new ArrayList<>());
                             new While<>(vo.getBackupStorageRefs()).each((ref, compl) -> {
                                 PullImageToLocalMsg pmsg = new PullImageToLocalMsg();
                                 pmsg.setInstallPath(ref.getInstallPath());
@@ -549,15 +547,15 @@ public class DatabaseBackupManagerImpl extends AbstractService implements Databa
                                             return;
                                         }
 
-                                        errs.add(reply.getError());
+                                        compl.addError(reply.getError());
                                         compl.done();
                                     }
                                 });
                             }).run(new WhileDoneCompletion(trigger) {
                                 @Override
                                 public void done(ErrorCodeList errorCodeList) {
-                                    if (errs.size() == vo.getBackupStorageRefs().size()) {
-                                        trigger.fail(errs.get(0));
+                                    if (errorCodeList.size() == vo.getBackupStorageRefs().size()) {
+                                        trigger.fail(errorCodeList.wrapOrNull());
                                         return;
                                     }
                                     trigger.next();
@@ -810,12 +808,12 @@ public class DatabaseBackupManagerImpl extends AbstractService implements Databa
     private void initSystemTags() {
         SystemTagLifeCycleListener listener = new SystemTagLifeCycleListener() {
             @Override
-            public void tagCreated(SystemTagInventory tag) {
+            public void tagCreated(SystemTagInventoryDefinition tag) {
 
             }
 
             @Override
-            public void tagDeleted(SystemTagInventory tag) {
+            public void tagDeleted(SystemTagInventoryDefinition tag) {
                 List<String> databaseBackupUuids = Q.New(DatabaseBackupStorageRefVO.class)
                         .select(DatabaseBackupStorageRefVO_.databaseBackupUuid)
                         .eq(DatabaseBackupStorageRefVO_.backupStorageUuid, tag.getResourceUuid())
@@ -834,7 +832,7 @@ public class DatabaseBackupManagerImpl extends AbstractService implements Databa
             }
 
             @Override
-            public void tagUpdated(SystemTagInventory old, SystemTagInventory newTag) {
+            public void tagUpdated(SystemTagInventoryDefinition old, SystemTagInventoryDefinition newTag) {
 
             }
         };
@@ -856,12 +854,8 @@ public class DatabaseBackupManagerImpl extends AbstractService implements Databa
 
         initSystemTags();
 
-        pluginRgty.saveExtensionAsMap(DatabaseBackupVersionExtensionPoint.class, new Function<Object, DatabaseBackupVersionExtensionPoint>() {
-            @Override
-            public Object call(DatabaseBackupVersionExtensionPoint arg) {
-                return arg.getDeployMode();
-            }
-        });
+        pluginRgty.saveExtensionAsMap(DatabaseBackupVersionExtensionPoint.class,
+                DatabaseBackupVersionExtensionPoint::getDeployMode);
         return true;
     }
 

@@ -1,5 +1,6 @@
 package org.zstack.header.console;
 
+import org.zstack.header.message.DocUtils;
 import org.zstack.header.search.Inventory;
 
 import java.sql.Timestamp;
@@ -124,5 +125,15 @@ public class ConsoleProxyAgentInventory {
 
     public void setConsoleProxyOverriddenIp(String consoleProxyOverriddenIp) {
         this.consoleProxyOverriddenIp = consoleProxyOverriddenIp;
+    }
+
+    public static ConsoleProxyAgentInventory __example__() {
+        ConsoleProxyAgentInventory inventory = new ConsoleProxyAgentInventory();
+        inventory.setManagementIp("127.0.0.1");
+        inventory.setState(ConsoleProxyAgentState.Enabled.toString());
+        inventory.setType("ManagementServerConsoleProxy");
+        inventory.setStatus(ConsoleProxyAgentStatus.Connected.toString());
+        inventory.setUuid(DocUtils.createFixedUuid(ConsoleProxyAgentVO.class));
+        return inventory;
     }
 }

@@ -3,11 +3,11 @@ package org.zstack.header.vm
 import org.zstack.header.vm.APIPauseVmInstanceEvent
 
 doc {
-	title "暂停云主机(PauseVmInstance)"
+	title "暂停虚拟机(PauseVmInstance)"
 
 	category "vmInstance"
 
-	desc """暂停一个云主机，云主机状态仍然存在内存里面，稍后可以恢复"""
+	desc """暂停一个虚拟机，虚拟机状态仍然存在内存里面，稍后可以恢复"""
 
 	rest {
 		request {
@@ -24,11 +24,11 @@ doc {
 				column {
 					name "uuid"
 					enclosedIn "pauseVmInstance"
-					desc "云主机UUID"
+					desc "虚拟机UUID"
 					location "url"
 					type "String"
 					optional false
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "systemTags"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "userTags"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 			}
 		}

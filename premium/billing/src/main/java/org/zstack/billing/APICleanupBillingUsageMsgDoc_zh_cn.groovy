@@ -7,7 +7,7 @@ doc {
 
 	category "billing"
 
-	desc """删除全部计费资源(例如：云主机，根云盘，数据盘)打点数据"""
+	desc """删除全部计费资源(例如：虚拟机，根云盘，数据盘)打点数据"""
 
 	rest {
 		request {
@@ -28,7 +28,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "3.10"
+					since "zsv_3.10"
 				}
 				column {
 					name "userTags"
@@ -37,7 +37,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "3.10"
+					since "zsv_3.10"
 				}
 				column {
 					name "deleteMode"
@@ -46,7 +46,7 @@ doc {
 					location "query"
 					type "String"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 			}
 		}

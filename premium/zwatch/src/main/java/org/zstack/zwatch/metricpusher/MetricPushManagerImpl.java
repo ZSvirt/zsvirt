@@ -45,6 +45,8 @@ import java.util.*;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
+import static org.zstack.zwatch.header.ZWatchConstants.TASK_NAME_METRIC_PUSHER;
+
 public class MetricPushManagerImpl extends AbstractService implements ManagementNodeReadyExtensionPoint {
     protected static final CLogger logger = Utils.getLogger(MetricPushManagerImpl.class);
 
@@ -124,7 +126,7 @@ public class MetricPushManagerImpl extends AbstractService implements Management
 
             @Override
             public String getName() {
-                return "push-metric-data-to-receiver";
+                return TASK_NAME_METRIC_PUSHER;
             }
 
             @Override

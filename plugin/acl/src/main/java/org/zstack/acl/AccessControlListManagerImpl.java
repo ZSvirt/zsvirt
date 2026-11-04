@@ -29,7 +29,6 @@ import org.zstack.identity.AccountManager;
 import org.zstack.tag.TagManager;
 import org.zstack.utils.CollectionUtils;
 import org.zstack.utils.Utils;
-import org.zstack.utils.function.ForEachFunction;
 import org.zstack.utils.logging.CLogger;
 
 import java.util.Arrays;
@@ -155,23 +154,17 @@ public class AccessControlListManagerImpl extends AbstractService implements Acc
 
                 final AccessControlListEntryVO fentry = entry;
                 CollectionUtils.safeForEach(pluginRgty.getExtensionList(RefreshAccessControlListExtensionPoint.class),
-                        new ForEachFunction<RefreshAccessControlListExtensionPoint>() {
-                            @Override
-                            public void run(RefreshAccessControlListExtensionPoint ext) {
-                                logger.debug(String.format("execute before add acl ip entry extension point %s", ext));
-                                ext.beforeAddIpEntry(aclVO.toInventory(), fentry.toInventory());
-                            }
+                        ext -> {
+                            logger.debug(String.format("execute before add acl ip entry extension point %s", ext));
+                            ext.beforeAddIpEntry(aclVO.toInventory(), fentry.toInventory());
                         });
 
                 entry = dbf.persistAndRefresh(entry);
                 /*apply acl*/
                 CollectionUtils.safeForEach(pluginRgty.getExtensionList(RefreshAccessControlListExtensionPoint.class),
-                        new ForEachFunction<RefreshAccessControlListExtensionPoint>() {
-                            @Override
-                            public void run(RefreshAccessControlListExtensionPoint ext) {
-                                logger.debug(String.format("execute after add acl ip entry extension point %s", ext));
-                                ext.afterAddIpEntry(aclVO.toInventory(), fentry.toInventory());
-                            }
+                        ext -> {
+                            logger.debug(String.format("execute after add acl ip entry extension point %s", ext));
+                            ext.afterAddIpEntry(aclVO.toInventory(), fentry.toInventory());
                         });
 
                 evt.setInventory(entry.toInventory());
@@ -229,23 +222,17 @@ public class AccessControlListManagerImpl extends AbstractService implements Acc
 
                 final AccessControlListEntryVO fentry = entry;
                 CollectionUtils.safeForEach(pluginRgty.getExtensionList(RefreshAccessControlListExtensionPoint.class),
-                        new ForEachFunction<RefreshAccessControlListExtensionPoint>() {
-                            @Override
-                            public void run(RefreshAccessControlListExtensionPoint ext) {
-                                logger.debug(String.format("execute before add acl ip entry extension point %s", ext));
-                                ext.beforeAddIpEntry(aclVO.toInventory(), fentry.toInventory());
-                            }
+                        ext -> {
+                            logger.debug(String.format("execute before add acl ip entry extension point %s", ext));
+                            ext.beforeAddIpEntry(aclVO.toInventory(), fentry.toInventory());
                         });
 
                 entry = dbf.persistAndRefresh(entry);
                 /*apply acl*/
                 CollectionUtils.safeForEach(pluginRgty.getExtensionList(RefreshAccessControlListExtensionPoint.class),
-                        new ForEachFunction<RefreshAccessControlListExtensionPoint>() {
-                            @Override
-                            public void run(RefreshAccessControlListExtensionPoint ext) {
-                                logger.debug(String.format("execute after add acl ip entry extension point %s", ext));
-                                ext.afterAddIpEntry(aclVO.toInventory(), fentry.toInventory());
-                            }
+                        ext -> {
+                            logger.debug(String.format("execute after add acl ip entry extension point %s", ext));
+                            ext.afterAddIpEntry(aclVO.toInventory(), fentry.toInventory());
                         });
 
                 evt.setInventory(entry.toInventory());
@@ -274,12 +261,9 @@ public class AccessControlListManagerImpl extends AbstractService implements Acc
                 AccessControlListEntryVO entry = dbf.findByUuid(msg.getUuid(), AccessControlListEntryVO.class);
 
                 CollectionUtils.safeForEach(pluginRgty.getExtensionList(RefreshAccessControlListExtensionPoint.class),
-                        new ForEachFunction<RefreshAccessControlListExtensionPoint>() {
-                            @Override
-                            public void run(RefreshAccessControlListExtensionPoint ext) {
-                                logger.debug(String.format("execute before del acl ip entry extension point %s", ext));
-                                ext.beforeDeleteIpEntry(aclVO.toInventory(), entry.toInventory());
-                            }
+                        ext -> {
+                            logger.debug(String.format("execute before del acl ip entry extension point %s", ext));
+                            ext.beforeDeleteIpEntry(aclVO.toInventory(), entry.toInventory());
                         });
 
                 new SQLBatch() {
@@ -290,12 +274,9 @@ public class AccessControlListManagerImpl extends AbstractService implements Acc
                 }.execute();
                 /*apply acl*/
                 CollectionUtils.safeForEach(pluginRgty.getExtensionList(RefreshAccessControlListExtensionPoint.class),
-                        new ForEachFunction<RefreshAccessControlListExtensionPoint>() {
-                            @Override
-                            public void run(RefreshAccessControlListExtensionPoint ext) {
-                                logger.debug(String.format("execute after del acl ip entry extension point %s", ext));
-                                ext.afterDeleteIpEntry(aclVO.toInventory(), entry.toInventory());
-                            }
+                        ext -> {
+                            logger.debug(String.format("execute after del acl ip entry extension point %s", ext));
+                            ext.afterDeleteIpEntry(aclVO.toInventory(), entry.toInventory());
                         });
 
                 bus.publish(evt);
@@ -361,7 +342,7 @@ public class AccessControlListManagerImpl extends AbstractService implements Acc
                 if (mode == APIDeleteMessage.DeletionMode.Permissive) {
                     fchain.then(new NoRollbackFlow() {
                         @Override
-                        public void run(final FlowTrigger trigger, Map data) {
+                        public void run(final FlowTrigger trigger, Map<String, Object> data) {
                             casf.asyncCascade(CascadeConstant.DELETION_CHECK_CODE, issuer, ctx, new Completion(trigger) {
                                 @Override
                                 public void success() {
@@ -376,7 +357,7 @@ public class AccessControlListManagerImpl extends AbstractService implements Acc
                         }
                     }).then(new NoRollbackFlow() {
                         @Override
-                        public void run(final FlowTrigger trigger, Map data) {
+                        public void run(final FlowTrigger trigger, Map<String, Object> data) {
                             casf.asyncCascade(CascadeConstant.DELETION_DELETE_CODE, issuer, ctx, new Completion(trigger) {
                                 @Override
                                 public void success() {
@@ -393,7 +374,7 @@ public class AccessControlListManagerImpl extends AbstractService implements Acc
                 } else {
                     fchain.then(new NoRollbackFlow() {
                         @Override
-                        public void run(final FlowTrigger trigger, Map data) {
+                        public void run(final FlowTrigger trigger, Map<String, Object> data) {
                             casf.asyncCascade(CascadeConstant.DELETION_FORCE_DELETE_CODE, issuer, ctx, new Completion(trigger) {
                                 @Override
                                 public void success() {
@@ -410,14 +391,14 @@ public class AccessControlListManagerImpl extends AbstractService implements Acc
                 }
                 fchain.done(new FlowDoneHandler(completion) {
                     @Override
-                    public void handle(Map data) {
+                    public void handle(Map<String, Object> data) {
                         new SQLBatch() {
                             @Override
                             protected void scripts() {
                                 List<AccessControlListEntryVO> entrys = Q.New(AccessControlListEntryVO.class)
                                         .eq(AccessControlListEntryVO_.aclUuid, aclVO.getUuid()).list();
                                 if (!entrys.isEmpty()) {
-                                    entrys.forEach( entry-> remove(entry));
+                                    entrys.forEach(this::remove);
                                 }
                                 remove(aclVO);
                             }
@@ -427,7 +408,7 @@ public class AccessControlListManagerImpl extends AbstractService implements Acc
                     }
                 }).error(new FlowErrorHandler(completion) {
                     @Override
-                    public void handle(ErrorCode errCode, Map data) {
+                    public void handle(ErrorCode errCode, Map<String, Object> data) {
                         completion.fail(errCode);
                         chain.next();
                     }

@@ -11,24 +11,24 @@ doc {
 		name "accountUuid"
 		desc "账户UUID"
 		type "String"
-		since "3.7"
+		since "zsv_3.7"
 	}
 	field {
 		name "tableUuid"
 		desc "价目表UUID"
 		type "String"
-		since "3.7"
+		since "zsv_3.7"
 	}
 	field {
 		name "createDate"
 		desc "创建时间"
 		type "Timestamp"
-		since "3.7"
+		since "zsv_3.7"
 	}
 	field {
 		name "lastOpDate"
 		desc "最后一次修改时间"
 		type "Timestamp"
-		since "3.7"
+		since "zsv_3.7"
 	}
 }

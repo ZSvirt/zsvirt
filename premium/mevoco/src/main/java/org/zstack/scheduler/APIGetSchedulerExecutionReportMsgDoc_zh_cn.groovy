@@ -28,7 +28,7 @@ doc {
 					location "query"
 					type "long"
 					optional false
-					since "3.9.0"
+					since "zsv_3.9.0"
 				}
 				column {
 					name "intervalTimeUnit"
@@ -37,7 +37,7 @@ doc {
 					location "query"
 					type "String"
 					optional false
-					since "3.9.0"
+					since "zsv_3.9.0"
 					values ("Hour","Day","Month")
 				}
 				column {
@@ -47,7 +47,7 @@ doc {
 					location "query"
 					type "int"
 					optional false
-					since "3.9.0"
+					since "zsv_3.9.0"
 				}
 				column {
 					name "schedulerJobTypes"
@@ -56,7 +56,7 @@ doc {
 					location "query"
 					type "List"
 					optional false
-					since "3.9.0"
+					since "zsv_3.9.0"
 				}
 				column {
 					name "systemTags"
@@ -65,7 +65,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "3.9.0"
+					since "zsv_3.9.0"
 				}
 				column {
 					name "userTags"
@@ -74,7 +74,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "3.9.0"
+					since "zsv_3.9.0"
 				}
 			}
 		}

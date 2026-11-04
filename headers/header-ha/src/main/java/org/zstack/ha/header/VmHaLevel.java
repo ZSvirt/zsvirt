@@ -1,0 +1,44 @@
+package org.zstack.ha.header;
+
+import org.zstack.ha.entity.VmHaVO;
+
+/**
+ * Created by xing5 on 2016/3/28.
+ */
+public enum VmHaLevel {
+    NeverStop,
+    /**
+     * ZSphere only use {@code NeverStop} now. (zsvirt_1.0.1, zsv_5.2.0)
+     */
+    OnHostFailure,
+    None,
+    /**
+     * <p>This is a special value, only used when the VM is first created.
+     *
+     * <p>Because when the VM was first created, the cluster to be created was not determined,
+     * and it is not possible to determine whether the VM has enabled HA
+     * based on the configuration of "whether the VM in this cluster has enabled HA"
+     * {@link VmHaVO#getHaLevel()}
+     *
+     * <p>The value 'Undefined' indicates that the VM needs to determine
+     * the assigned cluster before deciding whether to enable HA
+     * </p>
+     */
+    Undefined;
+
+    public static VmHaLevel valueOfOrNull(String text) {
+        try {
+            return valueOf(text);
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
+    }
+
+    public boolean isEnabled() {
+        return this != None && this != Undefined;
+    }
+
+    public boolean isDisabled() {
+        return this == None;
+    }
+}

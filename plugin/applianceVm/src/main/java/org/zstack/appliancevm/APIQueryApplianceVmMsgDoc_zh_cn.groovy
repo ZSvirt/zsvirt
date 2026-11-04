@@ -4,11 +4,11 @@ import org.zstack.appliancevm.APIQueryApplianceVmReply
 import org.zstack.header.query.APIQueryMessage
 
 doc {
-	title "查询系统云主机(QueryApplianceVm)"
+	title "查询系统虚拟机(QueryApplianceVm)"
 
-	category "系统云主机"
+	category "系统虚拟机"
 
-	desc """查询系统云主机"""
+	desc """查询系统虚拟机"""
 
 	rest {
 		request {

@@ -10,20 +10,20 @@ doc {
 		name "snapshotUuid"
 		desc "快照UUID"
 		type "String"
-		since "zsv 3.3"
+		since "zsv_3.3"
 	}
 	field {
 		name "success"
 		desc "是否成功"
 		type "boolean"
-		since "zsv 3.3"
+		since "zsv_3.3"
 	}
 	ref {
 		name "error"
 		path "org.zstack.header.storage.snapshot.BatchDeleteVolumeSnapshotStruct.error"
 		desc ""
 		type "ErrorCode"
-		since "zsv 3.3"
+		since "zsv_3.3"
 		clz ErrorCode.class
 	}
 }

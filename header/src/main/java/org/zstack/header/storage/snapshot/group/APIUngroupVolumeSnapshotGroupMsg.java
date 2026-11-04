@@ -17,7 +17,8 @@ import org.zstack.header.vm.metadata.MetadataImpact;
 )
 @MetadataImpact(value = MetadataImpact.Impact.STORAGE, resolver = "SnapshotGroupUuidToVmUuidResolver", field = "uuid")
 public class APIUngroupVolumeSnapshotGroupMsg extends APIMessage implements VolumeSnapshotGroupMessage {
-    @APIParam(resourceType = VolumeSnapshotGroupVO.class, successIfResourceNotExisting = true)
+    @APIParam(resourceType = VolumeSnapshotGroupVO.class, successIfResourceNotExisting = true,
+            scope = APIParam.SCOPE_ALLOWED_ALL)
     private String uuid;
 
     @Override

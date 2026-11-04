@@ -7,7 +7,7 @@ doc {
 
 	category "mevoco"
 
-	desc """获取云主机网卡限速"""
+	desc """获取虚拟机网卡限速"""
 
 	rest {
 		request {
@@ -17,18 +17,18 @@ doc {
 
 			clz APIGetNicQosMsg.class
 
-			desc """获取云主机网卡限速"""
+			desc """获取虚拟机网卡限速"""
 
 			params {
 
 				column {
 					name "uuid"
 					enclosedIn ""
-					desc "云主机网卡的UUID"
+					desc "虚拟机网卡的UUID"
 					location "url"
 					type "String"
 					optional false
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "forceSync"
@@ -37,7 +37,7 @@ doc {
 					location "query"
 					type "Boolean"
 					optional true
-					since "3.3.0"
+					since "zsv_3.3.0"
 				}
 				column {
 					name "systemTags"
@@ -46,7 +46,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "userTags"
@@ -55,7 +55,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 			}
 		}

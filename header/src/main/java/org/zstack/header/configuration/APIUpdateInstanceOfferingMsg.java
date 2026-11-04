@@ -65,8 +65,7 @@ public class APIUpdateInstanceOfferingMsg extends APIMessage implements Instance
     public static APIUpdateInstanceOfferingMsg __example__() {
         APIUpdateInstanceOfferingMsg msg = new APIUpdateInstanceOfferingMsg();
         msg.setName("new name");
-        msg.setUuid(uuid());
-
+        msg.setUuid(uuid(InstanceOfferingVO.class));
         return msg;
     }
 }

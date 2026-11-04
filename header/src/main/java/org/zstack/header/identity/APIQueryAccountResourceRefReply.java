@@ -24,14 +24,7 @@ public class APIQueryAccountResourceRefReply extends APIQueryReply {
  
     public static APIQueryAccountResourceRefReply __example__() {
         APIQueryAccountResourceRefReply reply = new APIQueryAccountResourceRefReply();
-        AccountResourceRefInventory inventory = new AccountResourceRefInventory();
-        inventory.setAccountUuid(uuid());
-        inventory.setId(1);
-        inventory.setResourceType("ImageVO");
-        inventory.setResourceUuid(uuid());
-        inventory.setType("Own");
-        reply.setInventories(list(inventory));
+        reply.setInventories(list(AccountResourceRefInventory.__example__()));
         return reply;
     }
-
 }

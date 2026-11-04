@@ -139,6 +139,7 @@ public class RBACInfo implements PackageDescription {
                         APIChangeInstanceOfferingMsg.class,
                         APIChangeVmNicNetworkMsg.class,
                         APIChangeVmNicStateMsg.class,
+                        APICleanupAllVmInstanceMetadataMsg.class,
                         APICleanupVmInstanceMetadataMsg.class,
                         APIConvertTemplatedVmInstanceToVmInstanceMsg.class,
                         APIConvertVmInstanceToTemplatedVmInstanceMsg.class,

@@ -6,9 +6,18 @@ package org.zstack.drs.data;
 public class HostLoadOccupiedByVm {
     private String vmUuid;
 
-    private Float usedHostCPUPercent;
+    private Float usedHostPhysicalCpuNum; // Occupies the CPU cores of the physical machine from top command
 
     private Long usedHostPhysicalMemoryBit;
+
+    public HostLoadOccupiedByVm() {}
+
+    public HostLoadOccupiedByVm(String vmUuid, Float usedHostPhysicalCpuNum, Long usedHostPhysicalMemoryBit) {
+        this.vmUuid = vmUuid;
+        this.usedHostPhysicalCpuNum = usedHostPhysicalCpuNum;
+        this.usedHostPhysicalMemoryBit = usedHostPhysicalMemoryBit;
+    }
+
 
     public String getVmUuid() {
         return vmUuid;
@@ -18,12 +27,12 @@ public class HostLoadOccupiedByVm {
         this.vmUuid = vmUuid;
     }
 
-    public Float getUsedHostCPUPercent() {
-        return usedHostCPUPercent;
+    public Float getUsedHostPhysicalCpuNum() {
+        return usedHostPhysicalCpuNum;
     }
 
-    public void setUsedHostCPUPercent(Float usedHostCPUPercent) {
-        this.usedHostCPUPercent = usedHostCPUPercent;
+    public void setUsedHostPhysicalCpuNum(Float usedHostPhysicalCpuNum) {
+        this.usedHostPhysicalCpuNum = usedHostPhysicalCpuNum;
     }
 
     public Long getUsedHostPhysicalMemoryBit() {

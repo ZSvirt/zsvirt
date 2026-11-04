@@ -12,7 +12,7 @@
     http://zstack.org/schema/zstack/plugin.xsd"
     default-init-method="init" default-destroy-method="destroy">
 
-    <bean id="PremiumApiMediatorValidator" class="org.zstack.apimediator.ApiValidator">
+    <bean id="PremiumApiMediatorValidator" class="org.zstack.storage.backup.imagestore.ImageStoreBackupStorageEndApiInterceptor">
         <zstack:plugin>
             <zstack:extension interface="org.zstack.header.apimediator.GlobalApiMessageInterceptor" />
         </zstack:plugin>

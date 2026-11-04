@@ -11,9 +11,11 @@ import org.zstack.header.host.HostStatus;
 import org.zstack.header.host.HostVO;
 import org.zstack.header.host.HostVO_;
 import org.zstack.header.message.APIMessage;
-import org.zstack.pciDevice.virtual.vfio_mdev.MdevDeviceStatus;
-import org.zstack.pciDevice.virtual.vfio_mdev.MdevDeviceVO;
-import org.zstack.pciDevice.virtual.vfio_mdev.MdevDeviceVO_;
+import org.zstack.mttyDevice.entity.MttyDeviceVO;
+import org.zstack.mttyDevice.header.MttyDeviceVirtStatus;
+import org.zstack.pciDevice.header.virtual.vfio_mdev.MdevDeviceStatus;
+import org.zstack.pciDevice.entity.virtual.vfio_mdev.MdevDeviceVO;
+import org.zstack.pciDevice.entity.virtual.vfio_mdev.MdevDeviceVO_;
 
 import java.util.List;
 

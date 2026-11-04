@@ -2,35 +2,32 @@ package org.zstack.pciDevice.gpu;
 
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.zstack.core.cloudbus.CloudBus;
-import org.zstack.core.cloudbus.CloudBusCallBack;
 import org.zstack.core.cloudbus.EventCallback;
 import org.zstack.core.cloudbus.EventFacade;
 import org.zstack.core.db.DatabaseFacade;
 import org.zstack.core.db.Q;
 import org.zstack.core.db.SQL;
 import org.zstack.header.Component;
-import org.zstack.header.host.AfterSyncPciDeviceExtensionPoint;
 import org.zstack.header.host.HostCanonicalEvents;
-import org.zstack.header.host.HostConstant;
-import org.zstack.header.message.MessageReply;
-import org.zstack.kvm.KVMAgentCommands;
-import org.zstack.kvm.KVMHostAsyncHttpCallMsg;
-import org.zstack.kvm.KVMHostAsyncHttpCallReply;
 import org.zstack.pciDevice.*;
-import org.zstack.pciDevice.virtual.vfio_mdev.MdevDeviceVO;
-import org.zstack.pciDevice.virtual.vfio_mdev.MdevDeviceVO_;
+import org.zstack.pciDevice.entity.PciDeviceVO;
+import org.zstack.pciDevice.entity.PciDeviceVO_;
+import org.zstack.pciDevice.entity.gpu.GpuDeviceVO;
+import org.zstack.pciDevice.entity.gpu.GpuDeviceVO_;
+import org.zstack.pciDevice.entity.virtual.vfio_mdev.MdevDeviceVO;
+import org.zstack.pciDevice.entity.virtual.vfio_mdev.MdevDeviceVO_;
+import org.zstack.pciDevice.header.PciDeviceType;
+import org.zstack.pciDevice.header.gpu.GpuConstant;
+import org.zstack.pciDevice.message.PciDeviceTO;
+import org.zstack.pciDevice.spi.PciDeviceTypeFactory;
 import org.zstack.utils.CollectionUtils;
 import org.zstack.utils.SizeUtils;
 import org.zstack.utils.Utils;
 import org.zstack.utils.logging.CLogger;
 
-
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * @Author: qiuyu.zhang
@@ -78,7 +75,7 @@ public class GpuDeviceFactory implements PciDeviceTypeFactory, Component {
             if (gpu == null) {
                 continue;
             }
-            gpu.setDevice(vo.getDevice());
+            gpu = gpu.update(vo);
             if (vo.getAddonInfo() != null && !vo.getAddonInfo().isEmpty()) {
                 gpu.setMemory(SizeUtils.sizeStringToBytes(vo.getAddonInfo().get(GpuConstant.GPU_MEMORY_NAME).trim()));
                 gpu.setPower(Double.valueOf(vo.getAddonInfo().get(GpuConstant.GPU_POWER_NAME)

@@ -6,9 +6,6 @@ import org.zstack.core.cloudbus.CloudBusCallBack;
 import org.zstack.core.errorcode.ErrorFacade;
 import org.zstack.core.timeout.ApiTimeoutManager;
 import org.zstack.header.core.Completion;
-import org.zstack.header.core.workflow.Flow;
-import org.zstack.header.core.workflow.FlowTrigger;
-import org.zstack.header.core.workflow.NoRollbackFlow;
 import org.zstack.header.errorcode.ErrorCode;
 import org.zstack.header.host.*;
 import org.zstack.header.message.MessageReply;
@@ -25,8 +22,6 @@ import org.zstack.utils.logging.CLogger;
 
 import static java.util.Arrays.asList;
 import static org.zstack.core.Platform.operr;
-
-import java.util.Map;
 
 public class KVMSecurityGroupBackend implements SecurityGroupHypervisorBackend, HostAfterConnectedExtensionPoint {
     private static CLogger logger = Utils.getLogger(KVMSecurityGroupBackend.class);
@@ -225,7 +220,7 @@ public class KVMSecurityGroupBackend implements SecurityGroupHypervisorBackend, 
     }
 
     @Override
-    public void afterHostConnected(HostInventory host) {
+    public void afterHostConnected(HostInventory host, ConnectHostInfo hostInfo) {
         RefreshSecurityGroupRulesOnHostMsg msg = new RefreshSecurityGroupRulesOnHostMsg();
         msg.setHostUuid(host.getUuid());
         bus.makeTargetServiceIdByResourceUuid(msg, SecurityGroupConstant.SERVICE_ID, host.getUuid());

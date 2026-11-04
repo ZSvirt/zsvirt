@@ -7,7 +7,7 @@ doc {
 
 	category "ovf"
 
-	desc """导出云主机的OVA包"""
+	desc """导出虚拟机的OVA包"""
 
 	rest {
 		request {
@@ -28,7 +28,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.14.6"
+					since "zsv_3.14.6"
 				}
 				column {
 					name "description"
@@ -37,16 +37,16 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.14.6"
+					since "zsv_3.14.6"
 				}
 				column {
 					name "vmUuid"
 					enclosedIn "params"
-					desc "源云主机UUID"
+					desc "源虚拟机UUID"
 					location "body"
 					type "String"
 					optional false
-					since "3.14.6"
+					since "zsv_3.14.6"
 				}
 				column {
 					name "backupStorageUuid"
@@ -55,7 +55,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "3.14.6"
+					since "zsv_3.14.6"
 				}
 				column {
 					name "resourceUuid"
@@ -64,7 +64,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.14.6"
+					since "zsv_3.14.6"
 				}
 				column {
 					name "tagUuids"
@@ -73,7 +73,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.14.6"
+					since "zsv_3.14.6"
 				}
 				column {
 					name "systemTags"
@@ -82,7 +82,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.14.6"
+					since "zsv_3.14.6"
 				}
 				column {
 					name "userTags"
@@ -91,7 +91,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.14.6"
+					since "zsv_3.14.6"
 				}
 			}
 		}

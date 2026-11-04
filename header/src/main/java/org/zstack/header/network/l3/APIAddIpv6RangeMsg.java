@@ -141,7 +141,7 @@ public class APIAddIpv6RangeMsg extends APICreateMessage implements L3NetworkMes
     public static APIAddIpv6RangeMsg __example__() {
         APIAddIpv6RangeMsg msg = new APIAddIpv6RangeMsg();
 
-        msg.setL3NetworkUuid(uuid());
+        msg.setL3NetworkUuid(uuid(L3NetworkVO.class));
         msg.setName("Test-IP-Range");
         msg.setStartIp("2002:2001::02");
         msg.setEndIp("2002:2001::FE");

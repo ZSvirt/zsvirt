@@ -270,6 +270,18 @@ public class ZbsStorageController implements PrimaryStorageControllerSvc, Primar
     }
 
     @Override
+    public ExternalPrimaryStorageInventory maskUpdateEventInventory(ExternalPrimaryStorageInventory inventory) {
+        if (inventory.getConfig() != null && inventory.getConfig().get("mdsUrls") instanceof List) {
+            ((List<String>) inventory.getConfig().get("mdsUrls")).replaceAll(url ->
+                    url.replaceFirst("(?s)^([^:]+:).*@", "$1*****@"));
+        }
+        if (inventory.getAddonInfo() != null && inventory.getAddonInfo().get("mdsInfos") instanceof List) {
+            ((List<Map>) inventory.getAddonInfo().get("mdsInfos")).forEach(info -> info.replace("password", "*****"));
+        }
+        return inventory;
+    }
+
+    @Override
     public void connect(String cfg, String url, ReturnValueCompletion<LinkedHashMap> completion) {
         AddonInfo newAddonInfo = new AddonInfo();
         Config current = JSONObjectUtil.toObject(cfg, Config.class);

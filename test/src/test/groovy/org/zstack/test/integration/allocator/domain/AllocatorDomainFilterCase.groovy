@@ -2,7 +2,8 @@ package org.zstack.test.integration.allocator.domain
 
 import org.zstack.allocator.domain.entity.AllocatorDomainVO
 import org.zstack.allocator.domain.header.AllocatorDomainState
-import org.zstack.sdk.BackupStorageInventory
+import org.zstack.network.l2.virtualSwitch.header.VirtualSwitchConstant
+import org.zstack.network.l2.virtualSwitch.header.VirtualSwitchSystemTags
 import org.zstack.sdk.ClusterInventory
 import org.zstack.sdk.HostInventory
 import org.zstack.sdk.L3NetworkInventory
@@ -20,7 +21,6 @@ class AllocatorDomainFilterCase extends SubCase {
     HostInventory host
     ClusterInventory cluster
     PrimaryStorageInventory ps
-    BackupStorageInventory bs
     L3NetworkInventory l3
 
     @Override
@@ -49,7 +49,7 @@ class AllocatorDomainFilterCase extends SubCase {
 
                     kvm {
                         name = "kvm"
-                        managementIp = "localhost"
+                        managementIp = "127.0.0.1"
                         username = "root"
                         password = "password"
                     }
@@ -98,12 +98,11 @@ class AllocatorDomainFilterCase extends SubCase {
         host = env.inventoryByName("kvm") as HostInventory
         cluster = env.inventoryByName("cluster") as ClusterInventory
         ps = env.inventoryByName("local") as PrimaryStorageInventory
-        bs = env.inventoryByName("sftp") as BackupStorageInventory
         l3 = env.inventoryByName("l3") as L3NetworkInventory
     }
 
     void testGetCandidates() {
-        logger.info("Test 001: get allocator domain candidates, expect the zone host/cluster/PS/BS/L3")
+        logger.info("Test 001: get allocator domain candidates, expect the zone host/cluster/PS/L3")
         GetAllocatorDomainCandidatesResult result = getAllocatorDomainCandidates {
             delegate.zoneUuid = zone.uuid
         } as GetAllocatorDomainCandidatesResult
@@ -113,10 +112,12 @@ class AllocatorDomainFilterCase extends SubCase {
         assert result.clusters[0].uuid == cluster.uuid
         assert result.primaryStorages.size() == 1
         assert result.primaryStorages[0].uuid == ps.uuid
-        assert result.backupStorages.size() == 1
-        assert result.backupStorages[0].uuid == bs.uuid
-        assert result.l3Networks.size() == 1
-        assert result.l3Networks[0].uuid == l3.uuid
+        assert result.l3Networks.size() == 2
+        assert result.l3Networks.findAll { !it.system }*.uuid == [l3.uuid]
+
+        def managementNetwork = result.l3Networks.find { it.system }
+        assert managementNetwork.type == VirtualSwitchConstant.PORT_GROUP_NETWORK_TYPE
+        assert VirtualSwitchSystemTags.PORT_GROUP_DEFAULT.hasTag(managementNetwork.uuid)
     }
 
     void testGetVmsOnUnusedDomain() {
@@ -144,6 +145,7 @@ class AllocatorDomainFilterCase extends SubCase {
         } as GetAllocatorDomainVmsResult
         assert (result.currentVms ?: []).isEmpty()
         assert (result.nextStartVms ?: []).isEmpty()
+        assert (result.candidateVms ?: []).isEmpty()
 
         logger.info("Test 199: delete unused allocator domain, expect it gone")
         deleteAllocatorDomain {

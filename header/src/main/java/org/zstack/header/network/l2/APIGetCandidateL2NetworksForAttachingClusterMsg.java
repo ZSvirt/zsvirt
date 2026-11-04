@@ -25,7 +25,7 @@ public class APIGetCandidateL2NetworksForAttachingClusterMsg extends APIGetMessa
 
     public static APIGetCandidateL2NetworksForAttachingClusterMsg __example__() {
         APIGetCandidateL2NetworksForAttachingClusterMsg msg = new APIGetCandidateL2NetworksForAttachingClusterMsg();
-        msg.clusterUuid = uuid();
+        msg.clusterUuid = uuid(ClusterVO.class);
         return msg;
     }
 }

@@ -1102,15 +1102,13 @@ public class VirtualRouter extends ApplianceVmBase {
         logger.debug(String.format("updated metadata of vmnic[uuid: %s]", vo.getUuid()));
 
         VirtualRouterVmVO vrVo = dbf.findByUuid(self.getUuid(), VirtualRouterVmVO.class);
-        Map<String, Object> data = new HashMap<String, Object>();
-        data.put(Param.VR_NIC.toString(), VmNicInventory.valueOf(vo));
-        data.put(Param.SNAT.toString(), Boolean.FALSE);
-        data.put(Param.VR.toString(), VirtualRouterVmInventory.valueOf(vrVo));
-        data.put(Param.APPLY_TO_VIRTUALROUTER.toString(), applyToBackend);
 
         FlowChain chain = FlowChainBuilder.newSimpleFlowChain();
         chain.setName(String.format("apply-services-after-attach-nic-%s-from-virtualrouter-%s", nicInventory.getUuid(), nicInventory.getVmInstanceUuid()));
-        chain.setData(data);
+        chain.putData(Param.VR_NIC.toString(), VmNicInventory.valueOf(vo));
+        chain.putData(Param.SNAT.toString(), Boolean.FALSE);
+        chain.putData(Param.VR.toString(), VirtualRouterVmInventory.valueOf(vrVo));
+        chain.putData(Param.APPLY_TO_VIRTUALROUTER.toString(), applyToBackend);
         chain.then(new virtualRouterAfterAttachNicFlow());
         chain.then(new VirtualRouterCreatePublicVipFlow());
         chain.then(new virtualRouterApplyServicesAfterAttachNicFlow());
@@ -1380,9 +1378,6 @@ public class VirtualRouter extends ApplianceVmBase {
 
     @Override
     protected void beforeDetachNic(VmNicInventory nicInventory, Completion completion) {
-        Map data = new HashMap();
-        data.put(Param.VR_NIC.toString(), nicInventory);
-        data.put(Param.VR.toString(), vr);
         ApplianceVmVO appvm = Q.New(ApplianceVmVO.class)
                 .eq(ApplianceVmVO_.uuid, nicInventory.getVmInstanceUuid()).find();
         if (appvm.getStatus().equals(ApplianceVmStatus.Disconnected)) {
@@ -1401,7 +1396,8 @@ public class VirtualRouter extends ApplianceVmBase {
 
         FlowChain chain = FlowChainBuilder.newSimpleFlowChain();
         chain.setName(String.format("release-services-before-detach-nic-%s-from-virtualrouter-%s", nicInventory.getUuid(), nicInventory.getVmInstanceUuid()));
-        chain.setData(data);
+        chain.putData(Param.VR_NIC.toString(), nicInventory);
+        chain.putData(Param.VR.toString(), vr);
         chain.insert(new virtualRouterReleaseServicesbeforeDetachNicFlow());
         chain.then(new virtualRouterReleaseVipbeforeDetachNic());
         chain.then(new virtualRouterbeforeDetachNic());

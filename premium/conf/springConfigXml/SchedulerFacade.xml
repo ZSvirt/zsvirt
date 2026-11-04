@@ -21,6 +21,7 @@
             <zstack:extension interface="org.zstack.header.Component" />
             <zstack:extension interface="org.zstack.header.Service" />
             <zstack:extension interface="org.zstack.header.managementnode.ManagementNodeReadyExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.storage.backup.BackupOperationConflictChecker" order="30"/>
             <zstack:extension interface="org.zstack.header.managementnode.ManagementNodeChangeListener"/>
             <zstack:extension interface="org.zstack.header.identity.ResourceOwnerAfterChangeExtensionPoint"/>
             <zstack:extension interface="org.zstack.header.vm.VmStateChangedExtensionPoint"/>

@@ -28,7 +28,7 @@ doc {
 					location "body"
 					type "List"
 					optional false
-					since "4.10.20"
+					since "zsv_4.10.20"
 				}
 				column {
 					name "l3NetworkUuid"
@@ -37,7 +37,7 @@ doc {
 					location "url"
 					type "String"
 					optional false
-					since "4.10.20"
+					since "zsv_4.10.20"
 				}
 				column {
 					name "trafficTypes"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "4.10.20"
+					since "zsv_4.10.20"
 					values ("Management","Storage")
 				}
 				column {
@@ -56,7 +56,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "4.10.20"
+					since "zsv_4.10.20"
 				}
 				column {
 					name "userTags"
@@ -65,7 +65,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "4.10.20"
+					since "zsv_4.10.20"
 				}
 			}
 		}

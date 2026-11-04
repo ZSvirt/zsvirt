@@ -6,6 +6,7 @@ import org.zstack.core.componentloader.PluginRegistry;
 import org.zstack.header.Component;
 import org.zstack.header.core.Completion;
 import org.zstack.header.core.WhileDoneCompletion;
+import org.zstack.header.core.workflow.FlowChain;
 import org.zstack.header.errorcode.ErrorCode;
 import org.zstack.header.errorcode.ErrorCodeList;
 import org.zstack.header.host.*;
@@ -17,7 +18,6 @@ import org.zstack.kvm.KVMAgentCommands.DetachDataVolumeCmd;
 import org.zstack.kvm.KVMAgentCommands.StartVmCmd;
 import org.zstack.utils.CollectionUtils;
 import org.zstack.utils.Utils;
-import org.zstack.utils.function.ForEachFunction;
 import org.zstack.utils.logging.CLogger;
 
 import java.util.ArrayList;
@@ -64,37 +64,17 @@ public class KVMExtensionEmitter implements Component {
     }
 
     public void afterReceiveSyncVmDeviceInfoResponse(final VmInstanceInventory vm, final KVMAgentCommands.VmDevicesInfoResponse rsp, VmInstanceSpec spec) {
-        CollectionUtils.safeForEach(syncVmDeviceInfoExts, new ForEachFunction<KVMSyncVmDeviceInfoExtensionPoint>() {
-            @Override
-            public void run(KVMSyncVmDeviceInfoExtensionPoint arg) {
-                arg.afterReceiveVmDeviceInfoResponse(vm, rsp, spec);
-            }
-        });
+        CollectionUtils.safeForEach(syncVmDeviceInfoExts, arg -> arg.afterReceiveVmDeviceInfoResponse(vm, rsp, spec));
     }
 
-    public void beforeStartVmOnKvm(final KVMHostInventory host, final VmInstanceSpec spec, final StartVmCmd cmd) {
+    public void beforeStartVmOnKvm(FlowChain chain) {
         for (KVMStartVmExtensionPoint extp : startVmExts) {
-            extp.beforeStartVmOnKvm(host, spec, cmd);
+            chain.then(extp.beforeStartVmOnKvmFlow());
         }
     }
 
-
     public void startVmOnKvmSuccess(final KVMHostInventory host, final VmInstanceSpec spec) {
-        CollectionUtils.safeForEach(startVmExts, new ForEachFunction<KVMStartVmExtensionPoint>() {
-            @Override
-            public void run(KVMStartVmExtensionPoint arg) {
-                arg.startVmOnKvmSuccess(host, spec);
-            }
-        });
-    }
-
-    public void startVmOnKvmFailed(final KVMHostInventory host, final VmInstanceSpec spec, final ErrorCode err) {
-        CollectionUtils.safeForEach(startVmExts, new ForEachFunction<KVMStartVmExtensionPoint>() {
-            @Override
-            public void run(KVMStartVmExtensionPoint arg) {
-                arg.startVmOnKvmFailed(host, spec, err);
-            }
-        });
+        CollectionUtils.safeForEach(startVmExts, arg -> arg.startVmOnKvmSuccess(host, spec));
     }
 
     public void beforeDestroyVmOnKvm(KVMHostInventory host, VmInstanceInventory vm, KVMAgentCommands.DestroyVmCmd cmd) throws KVMException {
@@ -110,21 +90,11 @@ public class KVMExtensionEmitter implements Component {
     }
 
     public void destroyVmOnKvmSuccess(final KVMHostInventory host, final VmInstanceInventory vm) {
-        CollectionUtils.safeForEach(destroyVmExts, new ForEachFunction<KVMDestroyVmExtensionPoint>() {
-            @Override
-            public void run(KVMDestroyVmExtensionPoint arg) {
-                arg.destroyVmOnKvmSuccess(host, vm);
-            }
-        });
+        CollectionUtils.safeForEach(destroyVmExts, arg -> arg.destroyVmOnKvmSuccess(host, vm));
     }
 
     public void destroyVmOnKvmFailed(final KVMHostInventory host, final VmInstanceInventory vm, final ErrorCode err) {
-        CollectionUtils.safeForEach(destroyVmExts, new ForEachFunction<KVMDestroyVmExtensionPoint>() {
-            @Override
-            public void run(KVMDestroyVmExtensionPoint arg) {
-                arg.destroyVmOnKvmFailed(host, vm, err);
-            }
-        });
+        CollectionUtils.safeForEach(destroyVmExts, arg -> arg.destroyVmOnKvmFailed(host, vm, err));
     }
 
     public void beforeStopVmOnKvm(KVMHostInventory host, VmInstanceInventory vm, KVMAgentCommands.StopVmCmd cmd) throws KVMException {
@@ -134,21 +104,11 @@ public class KVMExtensionEmitter implements Component {
     }
 
     public void stopVmOnKvmSuccess(final KVMHostInventory host, final VmInstanceInventory vm) {
-        CollectionUtils.safeForEach(stopVmExts, new ForEachFunction<KVMStopVmExtensionPoint>() {
-            @Override
-            public void run(KVMStopVmExtensionPoint arg) {
-                arg.stopVmOnKvmSuccess(host, vm);
-            }
-        });
+        CollectionUtils.safeForEach(stopVmExts, arg -> arg.stopVmOnKvmSuccess(host, vm));
     }
 
     public void stopVmOnKvmFailed(final KVMHostInventory host, final VmInstanceInventory vm, final ErrorCode err) {
-        CollectionUtils.safeForEach(stopVmExts, new ForEachFunction<KVMStopVmExtensionPoint>() {
-            @Override
-            public void run(KVMStopVmExtensionPoint arg) {
-                arg.stopVmOnKvmFailed(host, vm, err);
-            }
-        });
+        CollectionUtils.safeForEach(stopVmExts, arg -> arg.stopVmOnKvmFailed(host, vm, err));
     }
 
     public void beforeRebootVmOnKvm(KVMHostInventory host, VmInstanceInventory vm) throws KVMException {
@@ -165,21 +125,13 @@ public class KVMExtensionEmitter implements Component {
     }
 
     public void rebootVmOnKvmFailed(final KVMHostInventory host, final VmInstanceInventory vm, final ErrorCode err) {
-        CollectionUtils.safeForEach(rebootVmExts, new ForEachFunction<KVMRebootVmExtensionPoint>() {
-            @Override
-            public void run(KVMRebootVmExtensionPoint arg) {
-                arg.rebootVmOnKvmFailed(host, vm, err);
-            }
-        });
+        CollectionUtils.safeForEach(rebootVmExts, arg -> arg.rebootVmOnKvmFailed(host, vm, err));
     }
 
     public void addOn(final KVMHostInventory host, final VmInstanceSpec spec, final StartVmCmd cmd) {
-        CollectionUtils.safeForEach(addonsExts, new ForEachFunction<KVMStartVmAddonExtensionPoint>() {
-            @Override
-            public void run(KVMStartVmAddonExtensionPoint extp) {
-                if (spec.getVmInventory().getType().equals(extp.getVmTypeForAddonExtension().toString())) {
-                    extp.addAddon(host, spec, cmd);
-                }
+        CollectionUtils.safeForEach(addonsExts, extp -> {
+            if (spec.getVmInventory().getType().equals(extp.getVmTypeForAddonExtension().toString())) {
+                extp.addAddon(host, spec, cmd);
             }
         });
     }

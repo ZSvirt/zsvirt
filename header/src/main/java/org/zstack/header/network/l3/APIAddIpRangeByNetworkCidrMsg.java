@@ -6,8 +6,6 @@ import org.zstack.header.message.APIParam;
 import org.zstack.header.rest.RestRequest;
 import org.zstack.header.tag.TagResourceType;
 
-/**
- */
 @TagResourceType(L3NetworkVO.class)
 @RestRequest(
         path = "/l3-networks/{l3NetworkUuid}/ip-ranges/by-cidr",
@@ -84,12 +82,10 @@ public class APIAddIpRangeByNetworkCidrMsg extends APICreateMessage implements L
 
     public static APIAddIpRangeByNetworkCidrMsg __example__() {
         APIAddIpRangeByNetworkCidrMsg msg = new APIAddIpRangeByNetworkCidrMsg();
-
         msg.setName("Test-IPRange");
-        msg.setL3NetworkUuid(uuid());
+        msg.setL3NetworkUuid(uuid(L3NetworkVO.class));
         msg.setNetworkCidr("192.168.10.0/24");
         msg.setIpRangeType(IpRangeType.Normal.toString());
-
         return msg;
     }
 }

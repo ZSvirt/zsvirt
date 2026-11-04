@@ -7,7 +7,7 @@ doc {
 
 	category "vmInstance"
 
-	desc """扁平合并云主机"""
+	desc """扁平合并虚拟机"""
 
 	rest {
 		request {
@@ -28,16 +28,16 @@ doc {
 					location "url"
 					type "String"
 					optional false
-					since "zsv 3.17.0"
+					since "zsv_3.17.0"
 				}
 				column {
 					name "full"
 					enclosedIn "flattenVmInstance"
-					desc "扁平合并云主机上所有云盘"
+					desc "扁平合并虚拟机上所有云盘"
 					location "body"
 					type "boolean"
 					optional true
-					since "zsv 3.17.0"
+					since "zsv_3.17.0"
 				}
 				column {
 					name "dryRun"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "boolean"
 					optional true
-					since "zsv 3.17.0"
+					since "zsv_3.17.0"
 				}
 				column {
 					name "systemTags"
@@ -55,7 +55,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 3.17.0"
+					since "zsv_3.17.0"
 				}
 				column {
 					name "userTags"
@@ -64,7 +64,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 3.17.0"
+					since "zsv_3.17.0"
 				}
 			}
 		}

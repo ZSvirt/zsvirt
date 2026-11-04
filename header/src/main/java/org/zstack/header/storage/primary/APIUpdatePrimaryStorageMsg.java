@@ -2,7 +2,6 @@ package org.zstack.header.storage.primary;
 
 import org.springframework.http.HttpMethod;
 import org.zstack.header.log.NoLogging;
-import org.zstack.header.message.APIEvent;
 import org.zstack.header.message.APIMessage;
 import org.zstack.header.message.APIParam;
 import org.zstack.header.rest.RestRequest;

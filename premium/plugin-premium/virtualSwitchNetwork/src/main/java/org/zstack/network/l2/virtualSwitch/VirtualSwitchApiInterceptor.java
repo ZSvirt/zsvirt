@@ -32,12 +32,11 @@ import org.zstack.network.hostNetworkInterface.HostNetworkInterfaceVO;
 import org.zstack.network.hostNetworkInterface.HostNetworkInterfaceVO_;
 import org.zstack.network.l2.virtualSwitch.header.*;
 import org.zstack.pciDevice.PciDeviceUtils;
-import org.zstack.tag.PatternedSystemTag;
+import org.zstack.tag.SystemTag;
 import org.zstack.utils.CollectionUtils;
 import org.zstack.utils.Utils;
 import org.zstack.utils.gson.JSONObjectUtil;
 import org.zstack.utils.logging.CLogger;
-import org.zstack.utils.network.IPv6Constants;
 import org.zstack.utils.network.NetworkUtils;
 import org.zstack.utils.network.NicIpAddressInfo;
 
@@ -393,7 +392,7 @@ public class VirtualSwitchApiInterceptor implements GlobalApiMessageInterceptor 
         List<String> systemTags = new ArrayList<>(msg.getSystemTags());
         List<String> oldSystemTags = new ArrayList<>();
         List<String> updatedSystemTags = new ArrayList<>();
-        Set<PatternedSystemTag> set = new HashSet<>();
+        Set<SystemTag> set = new HashSet<>();
 
         for (String systemTag : systemTags) {
             if (VirtualSwitchSystemTags.UPLINK_BONDING.isMatch(systemTag)) {

@@ -3,8 +3,6 @@ package org.zstack.header.cluster;
 import org.zstack.header.message.APIEvent;
 import org.zstack.header.rest.RestResponse;
 
-import java.sql.Timestamp;
-
 /**
  * @apiResult api event for message :ref:`APICreateClusterMsg`
  * @example {
@@ -23,7 +21,7 @@ import java.sql.Timestamp;
  * "success": true
  * }
  * }
- * @since 0.1.0
+ * @since zsv_0.1.0
  */
 @RestResponse(allTo = "inventory")
 public class APICreateClusterEvent extends APIEvent {
@@ -50,18 +48,7 @@ public class APICreateClusterEvent extends APIEvent {
  
     public static APICreateClusterEvent __example__() {
         APICreateClusterEvent event = new APICreateClusterEvent();
-        ClusterInventory cluster = new ClusterInventory();
-        cluster.setHypervisorType("KVM");
-        cluster.setName("cluster1");
-        cluster.setDescription("test");
-        cluster.setState(ClusterState.Enabled.toString());
-        cluster.setZoneUuid(uuid());
-        cluster.setUuid(uuid());
-        cluster.setType("zstack");
-        cluster.setCreateDate(new Timestamp(org.zstack.header.message.DocUtils.date));
-        cluster.setLastOpDate(new Timestamp(org.zstack.header.message.DocUtils.date));
-        event.setInventory(cluster);
+        event.setInventory(ClusterInventory.__example__());
         return event;
     }
-
 }

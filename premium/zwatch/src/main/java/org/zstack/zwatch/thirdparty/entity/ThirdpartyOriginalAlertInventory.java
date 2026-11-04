@@ -3,7 +3,7 @@ package org.zstack.zwatch.thirdparty.entity;
 import org.zstack.header.configuration.PythonClassInventory;
 import org.zstack.header.message.DocUtils;
 import org.zstack.header.search.Inventory;
-import org.zstack.zwatch.ZWatchConstants;
+import org.zstack.zwatch.header.ZWatchConstants;
 
 import java.io.Serializable;
 import java.sql.Timestamp;

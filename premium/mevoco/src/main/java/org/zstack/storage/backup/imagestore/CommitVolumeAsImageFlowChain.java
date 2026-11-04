@@ -350,7 +350,6 @@ public class CommitVolumeAsImageFlowChain {
                     }
 
                     void allocateSpecifiedBackupStorage(FlowTrigger trigger) {
-                        List<ErrorCode> errorCodes = new ArrayList<>();
                         new While<>(msg.getBackupStorageUuids()).all((backupStorageUuid, completion) -> {
 
                             AllocateBackupStorageMsg abmsg = new AllocateBackupStorageMsg();
@@ -364,7 +363,7 @@ public class CommitVolumeAsImageFlowChain {
                                     if (reply.isSuccess()) {
                                         backupStorages.add(((AllocateBackupStorageReply) reply).getInventory());
                                     } else {
-                                        errorCodes.add(reply.getError());
+                                        completion.addError(reply.getError());
                                     }
                                     completion.done();
                                 }
@@ -372,13 +371,13 @@ public class CommitVolumeAsImageFlowChain {
                         }).run(new WhileDoneCompletion(trigger) {
                             @Override
                             public void done(ErrorCodeList errorCodeList) {
-                                if (errorCodes.isEmpty()) {
+                                if (errorCodeList.isEmpty()) {
                                     trigger.next();
                                     return;
                                 }
 
-                                ErrorCode ec = multiErr(errorCodes, "unable to allocate backup storage specified by uuids: %s, becasue: %s",
-                                        String.join(",", msg.getBackupStorageUuids()), errorCodes.get(0).getDetails());
+                                ErrorCode ec = multiErr(errorCodeList, "unable to allocate backup storage specified by uuids: %s, becasue: %s",
+                                        String.join(",", msg.getBackupStorageUuids()), errorCodeList.getCauses().get(0).getDetails());
                                 trigger.fail(ec);
                             }
                         });

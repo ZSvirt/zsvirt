@@ -3,10 +3,9 @@ package org.zstack.header.zone;
 import org.zstack.header.message.APIReply;
 import org.zstack.header.rest.RestResponse;
 
-import java.sql.Timestamp;
 import java.util.List;
 
-import static java.util.Arrays.asList;
+import static org.zstack.utils.CollectionDSL.list;
 
 @RestResponse(allTo = "inventories")
 public class APIGetZoneReply extends APIReply {
@@ -22,15 +21,7 @@ public class APIGetZoneReply extends APIReply {
  
     public static APIGetZoneReply __example__() {
         APIGetZoneReply reply = new APIGetZoneReply();
-        ZoneInventory zone = new ZoneInventory();
-        zone.setName("TestZone");
-        zone.setUuid(uuid());
-        zone.setDescription("Test");
-        zone.setState(ZoneState.Enabled.toString());
-        zone.setType("zstack");
-        zone.setCreateDate(new Timestamp(org.zstack.header.message.DocUtils.date));
-        zone.setLastOpDate(new Timestamp(org.zstack.header.message.DocUtils.date));
-        reply.setInventories(asList(zone));
+        reply.setInventories(list(ZoneInventory.__example__()));
         reply.setSuccess(true);
         return reply;
     }

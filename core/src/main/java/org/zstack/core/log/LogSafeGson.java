@@ -1,6 +1,7 @@
 package org.zstack.core.log;
 
 import com.google.gson.*;
+import com.google.gson.annotations.SerializedName;
 import org.apache.logging.log4j.util.Strings;
 import org.zstack.core.cloudbus.CloudBus;
 import org.zstack.header.exception.CloudRuntimeException;
@@ -77,7 +78,8 @@ public class LogSafeGson {
         }
 
         String getName() {
-            return field.getName();
+            SerializedName serializedName = field.getAnnotation(SerializedName.class);
+            return serializedName == null ? field.getName() : serializedName.value();
         }
 
         Object getValue(Object obj) {
@@ -253,9 +255,8 @@ public class LogSafeGson {
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
-        logger.trace(String.format("object class: %s \ntransform sensitive object: %s \n to insensitive object: %s",
+        logger.trace(String.format("object class: %s \ntransformed insensitive object: %s",
                 o.getClass().getName(),
-                JSONObjectUtil.toJsonString(o),
                 JSONObjectUtil.toJsonString(result)));
 
         return result;

@@ -20,11 +20,9 @@ import org.zstack.core.workflow.FlowChainBuilder;
 import org.zstack.core.workflow.ShareFlow;
 import org.zstack.header.core.Completion;
 import org.zstack.header.core.NoErrorCompletion;
-import org.zstack.header.core.WhileDoneCompletion;
 import org.zstack.header.core.NopeCompletion;
 import org.zstack.header.core.workflow.*;
 import org.zstack.header.errorcode.ErrorCode;
-import org.zstack.header.errorcode.ErrorCodeList;
 import org.zstack.header.message.APIDeleteMessage;
 import org.zstack.header.message.APIMessage;
 import org.zstack.header.message.Message;
@@ -582,7 +580,6 @@ public class IPsecconnectionBase {
                             return;
                         }
 
-                        List<ErrorCode> errs = new ArrayList<>();
                         new While<>(msg.getL3NetworkUuids()).each((l3Uuid, whileComplection) -> {
                             ModifyVipAttributesStruct vipStruct = new ModifyVipAttributesStruct();
                             vipStruct.setUseFor(IPsecConstants.IPSEC_NETWORK_SERVICE_TYPE.toString());
@@ -600,20 +597,11 @@ public class IPsecconnectionBase {
 
                                 @Override
                                 public void fail(ErrorCode errorCode) {
-                                    errs.add(errorCode);
+                                    whileComplection.addError(errorCode);
                                     whileComplection.done();
                                 }
                             });
-                        }).run(new WhileDoneCompletion(trigger) {
-                            @Override
-                            public void done(ErrorCodeList errorCodeList) {
-                                if (errs.size() > 0) {
-                                    trigger.fail(errs.get(0));
-                                } else {
-                                    trigger.next();
-                                }
-                            }
-                        });
+                        }).runAndSendErrorTo(trigger);
                     }
                 });
 

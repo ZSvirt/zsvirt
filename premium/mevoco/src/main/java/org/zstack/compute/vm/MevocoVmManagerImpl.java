@@ -53,10 +53,12 @@ import org.zstack.kvm.KVMConstant;
 import org.zstack.resourceconfig.ResourceConfigFacade;
 import org.zstack.storage.ceph.CephConstants;
 import org.zstack.storage.encrypt.SnapshotGroupRevertVolumeEncryptionHelper;
+import org.zstack.storage.primary.StoragePathOwnershipHelper;
+import org.zstack.storage.primary.local.LocalStorageConstants;
+import org.zstack.storage.primary.local.LocalStoragePathOwnershipHelper;
 import org.zstack.tag.TagManager;
 import org.zstack.storage.snapshot.group.VolumeSnapshotGroupBase;
 import org.zstack.utils.Utils;
-import org.zstack.utils.function.Function;
 import org.zstack.utils.gson.JSONObjectUtil;
 import org.zstack.utils.logging.CLogger;
 
@@ -141,18 +143,8 @@ public class MevocoVmManagerImpl implements VmInstanceExtensionManager, BeforeVm
 
     @Override
     public boolean start() {
-        pluginRgty.saveExtensionAsMap(VmMetadataPathBuildExtensionPoint.class, new Function<Object, VmMetadataPathBuildExtensionPoint>() {
-            @Override
-            public Object call(VmMetadataPathBuildExtensionPoint arg) {
-                return arg.getPrimaryStorageType();
-            }
-        });
-        pluginRgty.saveExtensionAsMap(VmMetadataPathReplacementExtensionPoint.class, new Function<Object, VmMetadataPathReplacementExtensionPoint>() {
-            @Override
-            public Object call(VmMetadataPathReplacementExtensionPoint arg) {
-                return arg.getPrimaryStorageType();
-            }
-        });
+        pluginRgty.saveExtensionAsMap(VmMetadataPathBuildExtensionPoint.class, VmMetadataPathBuildExtensionPoint::getPrimaryStorageType);
+        pluginRgty.saveExtensionAsMap(VmMetadataPathReplacementExtensionPoint.class, VmMetadataPathReplacementExtensionPoint::getPrimaryStorageType);
         createVmFlowChainBuilder();
         return true;
     }
@@ -188,11 +180,9 @@ public class MevocoVmManagerImpl implements VmInstanceExtensionManager, BeforeVm
         spec.setPrimaryStorageUuidForRootVolume(msg.getPrimaryStorageUuid());
         spec.setOriginVolumeUuidForRootVolume(msg.getVolumeUuid());
 
-        Map<String, Object> datas = new HashMap<>();
-        datas.put(PremiumVmInstanceConstant.VM_INSTANCE_FROM_VOLUME_SPEC, spec);
         FlowChain chain = getCreateVmFromVolumeWorkFlowChain();
+        chain.putData(PremiumVmInstanceConstant.VM_INSTANCE_FROM_VOLUME_SPEC, spec);
         chain.setName("create-vm-from-volume-" + msg.getVolumeUuid());
-        chain.setData(datas);
         chain.done(new FlowDoneHandler(msg) {
             @Override
             public void handle(Map data) {
@@ -222,11 +212,9 @@ public class MevocoVmManagerImpl implements VmInstanceExtensionManager, BeforeVm
         spec.setOriginVolumeUuidForRootVolume(volumeUuid);
         spec.setRootVolumeSystemTags(msg.getRootVolumeSystemTags());
 
-        Map<String, Object> datas = new HashMap<>();
-        datas.put(PremiumVmInstanceConstant.VM_INSTANCE_FROM_VOLUME_SPEC, spec);
         FlowChain chain = getCreateVmFromSnapshotWorkFlowChain();
+        chain.putData(PremiumVmInstanceConstant.VM_INSTANCE_FROM_VOLUME_SPEC, spec);
         chain.setName("create-vm-from-snapshot-" + msg.getVolumeSnapshotUuid());
-        chain.setData(datas);
         chain.done(new FlowDoneHandler(msg) {
             @Override
             public void handle(Map data) {
@@ -272,12 +260,10 @@ public class MevocoVmManagerImpl implements VmInstanceExtensionManager, BeforeVm
         spec.setOriginVolumeUuidForRootVolume(rootVolumeUuid);
         spec.setRootVolumeSystemTags(msg.getRootVolumeSystemTags());
 
-        Map<String, Object> datas = new HashMap<>();
-        datas.put(PremiumVmInstanceConstant.VM_INSTANCE_FROM_VOLUME_SPEC, spec);
-        datas.put(PremiumVmInstanceConstant.DATA_VOLUME_SNAPSHOT, snaps);
         FlowChain chain = getCreateVmFromSnapshotGroupWorkFlowChain();
+        chain.putData(PremiumVmInstanceConstant.VM_INSTANCE_FROM_VOLUME_SPEC, spec);
+        chain.putData(PremiumVmInstanceConstant.DATA_VOLUME_SNAPSHOT, snaps);
         chain.setName("create-vm-from-snaphost-group-" + msg.getVolumeSnapshotGroupUuid());
-        chain.setData(datas);
         chain.done(new FlowDoneHandler(msg) {
             @Override
             public void handle(Map data) {
@@ -395,7 +381,7 @@ public class MevocoVmManagerImpl implements VmInstanceExtensionManager, BeforeVm
         thdf.chainSubmit(new ChainTask(msg) {
             @Override
             public String getSyncSignature() {
-                return "register-vm-from-metadata-" + msg.getMetadataPath();
+                return "register-vm-from-metadata-" + msg.getMetadataRegistrationKey();
             }
 
             @Override
@@ -451,6 +437,11 @@ public class MevocoVmManagerImpl implements VmInstanceExtensionManager, BeforeVm
 
                     @Override
                     public void run(FlowTrigger trigger, Map data) {
+                        if (msg.isInlineMetadata()) {
+                            metadataJson = msg.getMetadata();
+                            trigger.next();
+                            return;
+                        }
                         GetVmInstanceMetadataFromPrimaryStorageMsg gmsg = new GetVmInstanceMetadataFromPrimaryStorageMsg();
                         gmsg.setPrimaryStorageUuid(primaryStorageUuid);
                         gmsg.setHostUuid(msg.getHostUuid());
@@ -506,7 +497,7 @@ public class MevocoVmManagerImpl implements VmInstanceExtensionManager, BeforeVm
                             vmUuid = rewriteResult.targetVmUuid;
                             regeneratedVmUuid = rewriteResult.changed;
                         } catch (Exception e) {
-                            trigger.fail(Platform.operr("failed to rewrite VM UUID in metadata: %s", e.getMessage()));
+                            trigger.fail(Platform.operr("failed to regenerate resource UUIDs in metadata: %s", e.getMessage()));
                             return;
                         }
 
@@ -572,6 +563,14 @@ public class MevocoVmManagerImpl implements VmInstanceExtensionManager, BeforeVm
                         psType = Q.New(PrimaryStorageVO.class).select(PrimaryStorageVO_.type)
                                 .eq(PrimaryStorageVO_.uuid, primaryStorageUuid).findValue();
 
+                        metadataToCurrentPathMap = Collections.emptyMap();
+                        replacement = null;
+                        if (msg.isInlineMetadata()) {
+                            // Inline metadata describes existing bits at their final paths.
+                            trigger.next();
+                            return;
+                        }
+
                         List<String> allOldPaths = new ArrayList<>();
                         if (dto.getVolumes() != null) {
                             for (VolumeResourceMetadata volMeta : dto.getVolumes()) {
@@ -608,12 +607,26 @@ public class MevocoVmManagerImpl implements VmInstanceExtensionManager, BeforeVm
                             }
                         }
 
-                        metadataToCurrentPathMap = Collections.emptyMap();
-                        replacement = null;
                         VmMetadataPathReplacementExtensionPoint ext = pluginRgty.getExtensionFromMap(psType, VmMetadataPathReplacementExtensionPoint.class);
                         if (ext != null) {
                             replacement = ext.calculatePathReplacements(primaryStorageUuid, allOldPaths);
                             metadataToCurrentPathMap = replacement.getMetadataToCurrentPathMap() != null ? replacement.getMetadataToCurrentPathMap() : Collections.emptyMap();
+                        }
+
+                        trigger.next();
+                    }
+                });
+
+                flow(new NoRollbackFlow() {
+                    String __name__ = "validate-physical-volume-ownership";
+
+                    @Override
+                    public void run(FlowTrigger trigger, Map data) {
+                        ErrorCode error = validateTargetPathOwnership(
+                                dto, primaryStorageUuid, psType, hostUuid, metadataToCurrentPathMap);
+                        if (error != null) {
+                            trigger.fail(error);
+                            return;
                         }
 
                         trigger.next();
@@ -688,6 +701,13 @@ public class MevocoVmManagerImpl implements VmInstanceExtensionManager, BeforeVm
 
                     @Override
                     public void run(FlowTrigger trigger, Map data) {
+                        ErrorCode ownershipError = validateTargetPathOwnership(
+                                dto, primaryStorageUuid, psType, hostUuid, metadataToCurrentPathMap);
+                        if (ownershipError != null) {
+                            trigger.fail(ownershipError);
+                            return;
+                        }
+
                         try {
                             MetadataRegistrationPersistHelper.PersistContext ctx =
                                     new MetadataRegistrationPersistHelper.PersistContext(dto, vmUuid, primaryStorageUuid,
@@ -717,6 +737,7 @@ public class MevocoVmManagerImpl implements VmInstanceExtensionManager, BeforeVm
                     public void run(FlowTrigger trigger, Map data) {
                         try {
                             tagMgr.createTags(msg.getSystemTags(), msg.getUserTags(), vmUuid, VmInstanceVO.class.getSimpleName());
+                            tagMgr.createResourceConfigs(msg.getConfigs(), vmUuid);
                         } catch (Exception e) {
                             trigger.fail(Platform.operr(
                                     "failed to persist api tags for vm[uuid:%s]: %s", vmUuid, e.getMessage()));
@@ -747,7 +768,7 @@ public class MevocoVmManagerImpl implements VmInstanceExtensionManager, BeforeVm
 
                     @Override
                     public void run(FlowTrigger trigger, Map data) {
-                        if (!regeneratedVmUuid) {
+                        if (msg.isInlineMetadata() || !regeneratedVmUuid) {
                             trigger.next();
                             return;
                         }
@@ -777,6 +798,31 @@ public class MevocoVmManagerImpl implements VmInstanceExtensionManager, BeforeVm
                                 logger.info(String.format("[MetadataRegistration] cleaned up original metadata[path:%s] " +
                                                 "after regenerated vm uuid registration[oldUuid:%s, newUuid:%s]",
                                         msg.getMetadataPath(), metadataVmUuid, vmUuid));
+                                trigger.next();
+                            }
+                        });
+                    }
+                });
+                flow(new NoRollbackFlow() {
+                    String __name__ = "refresh-registered-vm-metadata";
+                    @Override
+                    public void run(FlowTrigger trigger, Map data) {
+                        if (msg.isInlineMetadata() || !VmGlobalConfig.VM_METADATA_ENABLED.value(Boolean.class)) {
+                            trigger.next();
+                            return;
+                        }
+                        UpdateVmInstanceMetadataMsg umsg = new UpdateVmInstanceMetadataMsg();
+                        umsg.setVmInstanceUuid(vmUuid);
+                        umsg.setStorageStructureChange(true);
+                        bus.makeLocalServiceId(umsg, VmInstanceConstant.SERVICE_ID);
+                        bus.send(umsg, new CloudBusCallBack(trigger) {
+                            @Override
+                            public void run(MessageReply reply) {
+                                if (!reply.isSuccess()) {
+                                    logger.warn(String.format("[MetadataRegistration] failed to refresh metadata " +
+                                            "for registered vm[uuid:%s], continue registration: %s",
+                                            vmUuid, reply.getError()));
+                                }
                                 trigger.next();
                             }
                         });
@@ -824,6 +870,57 @@ public class MevocoVmManagerImpl implements VmInstanceExtensionManager, BeforeVm
                 });
             }
         }).start();
+    }
+
+    private ErrorCode validateTargetPathOwnership(VmInstanceMetadataDTO dto, String primaryStorageUuid,
+                                                  String psType, String hostUuid,
+                                                  Map<String, String> pathReplacements) {
+        Map<String, Set<String>> incomingOwnersByPath = new LinkedHashMap<>();
+        if (dto.getVolumes() != null) {
+            for (VolumeResourceMetadata volumeMetadata : dto.getVolumes()) {
+                VolumeVO volume = JSONObjectUtil.toObject(volumeMetadata.getVo(), VolumeVO.class);
+                addIncomingPhysicalPath(incomingOwnersByPath, volume.getInstallPath(),
+                        volume.getUuid(), pathReplacements);
+            }
+        }
+        if (dto.getSnapshots() != null) {
+            for (String snapshotJson : dto.getSnapshots()) {
+                VolumeSnapshotVO snapshot = JSONObjectUtil.toObject(snapshotJson, VolumeSnapshotVO.class);
+                addIncomingPhysicalPath(incomingOwnersByPath, snapshot.getPrimaryStorageInstallPath(),
+                        snapshot.getUuid(), pathReplacements);
+            }
+        }
+        for (Map.Entry<String, Set<String>> entry : incomingOwnersByPath.entrySet()) {
+            if (entry.getValue().size() > 1) {
+                return Platform.operr("metadata resources%s resolve to the same physical path[%s] on " +
+                                "primaryStorage[uuid:%s], refuse registration",
+                        entry.getValue(), entry.getKey(), primaryStorageUuid);
+            }
+            List<StoragePathOwnershipHelper.Owner> owners;
+            if (LocalStorageConstants.LOCAL_STORAGE_TYPE.equals(psType)) {
+                owners = LocalStoragePathOwnershipHelper.findOtherOwnersAtHost(
+                        primaryStorageUuid, hostUuid, entry.getKey(), Collections.emptySet());
+            } else {
+                owners = StoragePathOwnershipHelper.findOtherOwners(
+                        primaryStorageUuid, entry.getKey(), Collections.emptySet());
+            }
+            if (!owners.isEmpty()) {
+                return Platform.operr("physical path[%s] on primaryStorage[uuid:%s] is already owned by %s, " +
+                                "refuse metadata registration for resource%s",
+                        entry.getKey(), primaryStorageUuid, owners, entry.getValue());
+            }
+        }
+        return null;
+    }
+
+    private static void addIncomingPhysicalPath(Map<String, Set<String>> ownersByPath,
+                                                String metadataPath, String resourceUuid,
+                                                Map<String, String> pathReplacements) {
+        if (StringUtils.isBlank(metadataPath) || StringUtils.isBlank(resourceUuid)) {
+            return;
+        }
+        String finalPath = pathReplacements.getOrDefault(metadataPath, metadataPath);
+        ownersByPath.computeIfAbsent(finalPath, key -> new LinkedHashSet<>()).add(resourceUuid);
     }
 
     private void handle(UpdateVmInstanceMetadataMsg msg) {

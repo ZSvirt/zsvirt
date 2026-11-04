@@ -1,5 +1,7 @@
 package org.zstack.appliancevm;
 
+import org.zstack.header.vm.VmInstanceConstant;
+
 /**
  * Created with IntelliJ IDEA.
  * User: frank
@@ -7,7 +9,7 @@ package org.zstack.appliancevm;
  * To change this template use File | Settings | File Templates.
  */
 public class ApplianceVmConstant {
-    public static final String APPLIANCE_VM_TYPE = "ApplianceVm";
+    public static final String APPLIANCE_VM_TYPE = VmInstanceConstant.APPLIANCE_VM_TYPE;
     public static final String SERVICE_ID = "applianceVm";
 
     public static final String KVM_CHANNEL_AGENT_PATH = "/var/lib/zstack/kvm/agentSocket";

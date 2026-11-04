@@ -1,0 +1,21 @@
+package org.zstack.ha.entity;
+
+import org.zstack.ha.header.HostHaState;
+
+import javax.persistence.metamodel.SingularAttribute;
+import javax.persistence.metamodel.StaticMetamodel;
+import java.sql.Timestamp;
+
+/**
+ * @Author: DaoDao
+ * @Date: 2023/4/14
+ */
+@StaticMetamodel(HostHaStateVO.class)
+public class HostHaStateVO_ {
+    public static volatile SingularAttribute<HostHaStateVO, Long> id;
+    public static volatile SingularAttribute<HostHaStateVO, String> hostUuid;
+    public static volatile SingularAttribute<HostHaStateVO, String> primaryStorageUuid;
+    public static volatile SingularAttribute<HostHaStateVO, HostHaState> state;
+    public static volatile SingularAttribute<HostHaStateVO, Timestamp> createDate;
+    public static volatile SingularAttribute<HostHaStateVO, Timestamp> lastOpDate;
+}

@@ -24,6 +24,7 @@ import org.zstack.sdk.ZSClient
 import org.zstack.sdk.identity.role.RoleInventory
 import org.zstack.testlib.collectstrategy.SubCaseCollectionStrategy
 import org.zstack.testlib.collectstrategy.SubCaseCollectionStrategyFactory
+import org.zstack.testlib.core.ThreadFacadeForTest
 import org.zstack.testlib.util.Retry
 import org.zstack.utils.ShellUtils
 import org.zstack.utils.Utils
@@ -143,8 +144,9 @@ abstract class Test extends ApiHelper implements Retry {
             smp()
             console()
 
-            include("accountImport.xml")
-            include("LdapManagerImpl.xml")
+            include("authentications/accountImport.xml")
+            include("authentications/accountImportTest.xml")
+            include("authentications/ldap.xml")
             include("captcha.xml")
             include("CloudBusAopProxy.xml")
             include("ZoneManager.xml")
@@ -208,11 +210,7 @@ abstract class Test extends ApiHelper implements Retry {
     }
 
     protected EnvSpec env(@DelegatesTo(strategy=Closure.DELEGATE_FIRST, value=EnvSpec.class) Closure c) {
-        def spec = new EnvSpec()
-        c.delegate = spec
-        c.resolveStrategy = Closure.DELEGATE_FIRST
-        c()
-        return spec
+        throw new Exception("please use makeEnv()")
     }
 
     protected SimpleEnvSpec senv(@DelegatesTo(strategy = Closure.DELEGATE_FIRST, value = SimpleEnvSpec.class) Closure c) {
@@ -446,13 +444,9 @@ abstract class Test extends ApiHelper implements Retry {
 
     void buildBeanConstructor() {
         beanConstructor = BeanConstructorFactory.getBeanConstructor(this.getCaseMode())
-        if (_springSpec.all) {
-            beanConstructor.loadAll = true
-        } else {
-            _springSpec.xmls.each {it ->
-                logger.debug("add xml to bean constructor ${it}")
-                beanConstructor.addXml(it)
-            }
+        _springSpec.xmls.each {it ->
+            logger.debug("add xml to bean constructor ${it}")
+            beanConstructor.addXml(it)
         }
 
         componentLoader = beanConstructor.build()
@@ -531,6 +525,14 @@ abstract class Test extends ApiHelper implements Retry {
     protected <T> T bean(Class<T> clz) {
         assert componentLoader != null : "componentLoader is null!!!"
         return componentLoader.getComponent(clz)
+    }
+
+    protected ThreadFacadeForTest threadFacadeForTest() {
+        return bean(ThreadFacadeForTest.class)
+    }
+
+    {
+        onCleanExecute { threadFacadeForTest().reset() }
     }
 
     protected <T> T dbFindById(Long id, Class<T> voClz) {
@@ -831,6 +833,10 @@ mysqldump -u root zstack > ${failureLogDir.absolutePath}/dbdump.sql
         return JSONObjectUtil.toObject(str, type)
     }
 
+    protected static String jsonString(Object o) {
+        return JSONObjectUtil.toJsonString(o)
+    }
+
     SessionInventory loginAsAdmin() {
         return logInByAccount {
             accountName = AccountConstant.INITIAL_SYSTEM_ADMIN_NAME
@@ -1066,5 +1072,9 @@ mysqldump -u root zstack > ${failureLogDir.absolutePath}/dbdump.sql
 
     static long gb(double gb) {
         return SizeUnit.GIGABYTE.toByte(gb)
+    }
+
+    static long tb(double tb) {
+        return SizeUnit.TERABYTE.toByte(tb)
     }
 }

@@ -13,7 +13,7 @@ doc {
 		path "org.zstack.header.storage.snapshot.APIBatchDeleteVolumeSnapshotEvent.error"
 		desc "错误码，若不为null，则表示操作失败, 操作成功时该字段为null",false
 		type "ErrorCode"
-		since "zsv 3.3"
+		since "zsv_3.3"
 		clz ErrorCode.class
 	}
 	ref {
@@ -21,13 +21,13 @@ doc {
 		path "org.zstack.header.storage.snapshot.APIBatchDeleteVolumeSnapshotEvent.results"
 		desc "每个快照的删除结果"
 		type "List"
-		since "zsv 3.3"
+		since "zsv_3.3"
 		clz BatchDeleteVolumeSnapshotStruct.class
 	}
 	field {
 		name "success"
 		desc ""
 		type "boolean"
-		since "zsv 3.3"
+		since "zsv_3.3"
 	}
 }

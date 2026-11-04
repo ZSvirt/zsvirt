@@ -36,9 +36,8 @@ public class APISetL3NetworkRouterInterfaceIpMsg extends APIMessage implements L
 
     public static APISetL3NetworkRouterInterfaceIpMsg __example__() {
         APISetL3NetworkRouterInterfaceIpMsg msg = new APISetL3NetworkRouterInterfaceIpMsg();
-        msg.setL3NetworkUuid(uuid());
+        msg.setL3NetworkUuid(uuid(L3NetworkVO.class));
         msg.setRouterInterfaceIp("192.168.10.2");
-
         return msg;
     }
 }

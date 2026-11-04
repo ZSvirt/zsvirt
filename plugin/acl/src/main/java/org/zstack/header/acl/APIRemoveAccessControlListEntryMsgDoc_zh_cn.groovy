@@ -28,7 +28,7 @@ doc {
 					location "url"
 					type "String"
 					optional false
-					since "3.9"
+					since "zsv_3.9"
 				}
 				column {
 					name "uuid"
@@ -37,7 +37,7 @@ doc {
 					location "url"
 					type "String"
 					optional false
-					since "3.9"
+					since "zsv_3.9"
 				}
 				column {
 					name "deleteMode"
@@ -46,7 +46,7 @@ doc {
 					location "query"
 					type "String"
 					optional true
-					since "3.9"
+					since "zsv_3.9"
 				}
 				column {
 					name "systemTags"
@@ -55,7 +55,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "3.9"
+					since "zsv_3.9"
 				}
 				column {
 					name "userTags"
@@ -64,7 +64,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "3.9"
+					since "zsv_3.9"
 				}
 			}
 		}

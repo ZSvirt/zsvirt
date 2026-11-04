@@ -28,7 +28,7 @@ doc {
 					location "url"
 					type "String"
 					optional false
-					since "zsv 4.2.6"
+					since "zsv_4.2.6"
 				}
 				column {
 					name "name"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 4.2.6"
+					since "zsv_4.2.6"
 				}
 				column {
 					name "description"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 4.2.6"
+					since "zsv_4.2.6"
 				}
 				column {
 					name "cpuNum"
@@ -55,7 +55,7 @@ doc {
 					location "body"
 					type "Integer"
 					optional true
-					since "zsv 4.2.6"
+					since "zsv_4.2.6"
 				}
 				column {
 					name "memorySize"
@@ -64,7 +64,7 @@ doc {
 					location "body"
 					type "Long"
 					optional true
-					since "zsv 4.2.6"
+					since "zsv_4.2.6"
 				}
 				column {
 					name "systemTags"
@@ -73,7 +73,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 4.2.6"
+					since "zsv_4.2.6"
 				}
 				column {
 					name "userTags"
@@ -82,7 +82,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 4.2.6"
+					since "zsv_4.2.6"
 				}
 			}
 		}

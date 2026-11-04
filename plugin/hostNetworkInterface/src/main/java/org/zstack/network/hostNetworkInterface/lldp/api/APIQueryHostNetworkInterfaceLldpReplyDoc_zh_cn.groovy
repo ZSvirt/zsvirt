@@ -12,21 +12,21 @@ doc {
 		path "org.zstack.network.hostNetworkInterface.lldp.api.APIQueryHostNetworkInterfaceLldpReply.inventories"
 		desc "物理网卡 lldp 配置清单列表"
 		type "List"
-		since "4.1.0"
+		since "zsv_4.1.0"
 		clz HostNetworkInterfaceLldpInventory.class
 	}
 	field {
 		name "success"
 		desc "请求是否成功"
 		type "boolean"
-		since "4.1.0"
+		since "zsv_4.1.0"
 	}
 	ref {
 		name "error"
 		path "org.zstack.network.hostNetworkInterface.lldp.api.APIQueryHostNetworkInterfaceLldpReply.error"
 		desc "错误码，若不为null，则表示操作失败, 操作成功时该字段为null"
 		type "ErrorCode"
-		since "4.1.0"
+		since "zsv_4.1.0"
 		clz ErrorCode.class
 	}
 }

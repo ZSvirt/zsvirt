@@ -189,6 +189,13 @@ public abstract class PrimaryStorageBase extends AbstractPrimaryStorage {
         bus.reply(msg, reply);
     }
 
+    protected void handle(ShrinkVolumeOnPrimaryStorageMsg msg) {
+        ShrinkVolumeOnPrimaryStorageReply reply = new ShrinkVolumeOnPrimaryStorageReply();
+        reply.setError(operr("primary storage[type:%s, uuid:%s] does not support shrinking volume[uuid:%s]",
+                self.getType(), self.getUuid(), msg.getVolume().getUuid()));
+        bus.reply(msg, reply);
+    }
+
     public PrimaryStorageBase(PrimaryStorageVO self) {
         this.self = self;
     }
@@ -420,6 +427,8 @@ public abstract class PrimaryStorageBase extends AbstractPrimaryStorage {
             handle((GetPrimaryStorageResourceLocationMsg) msg);
         } else if (msg instanceof CheckVolumeSnapshotOperationOnPrimaryStorageMsg) {
             handleBase((CheckVolumeSnapshotOperationOnPrimaryStorageMsg) msg);
+        } else if (msg instanceof ShrinkVolumeOnPrimaryStorageMsg) {
+            handle((ShrinkVolumeOnPrimaryStorageMsg) msg);
         } else if (msg instanceof ShrinkVolumeSnapshotOnPrimaryStorageMsg) {
             handle((ShrinkVolumeSnapshotOnPrimaryStorageMsg) msg);
         } else if (msg instanceof CheckChangeVolumeTypeOnPrimaryStorageMsg) {
@@ -1954,6 +1963,7 @@ public abstract class PrimaryStorageBase extends AbstractPrimaryStorage {
                 .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
         if (vmUuids.isEmpty()) {
+            VmMetadataRegistrationHelper.enrich(metadata, Collections.emptyMap(), scannedPrimaryStorageUuid);
             return;
         }
 
@@ -1970,18 +1980,7 @@ public abstract class PrimaryStorageBase extends AbstractPrimaryStorage {
                 existingVmRootPrimaryStorageUuids.put(vmUuid, primaryStorageUuid);
             }
         }
-
-        if (existingVmRootPrimaryStorageUuids.isEmpty()) {
-            return;
-        }
-
-        for (VmMetadataScanEntry entry : metadata) {
-            String existingPrimaryStorageUuid = existingVmRootPrimaryStorageUuids.get(entry.getVmUuid());
-            if (existingPrimaryStorageUuid == null) {
-                continue;
-            }
-
-            entry.setRegenerateUuidRequired(!Objects.equals(existingPrimaryStorageUuid, scannedPrimaryStorageUuid));
-        }
+        VmMetadataRegistrationHelper.enrich(
+                metadata, existingVmRootPrimaryStorageUuids, scannedPrimaryStorageUuid);
     }
 }

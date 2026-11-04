@@ -10,7 +10,6 @@ import org.zstack.core.db.Q;
 import org.zstack.header.core.WhileDoneCompletion;
 import org.zstack.header.core.workflow.FlowTrigger;
 import org.zstack.header.core.workflow.NoRollbackFlow;
-import org.zstack.header.errorcode.ErrorCode;
 import org.zstack.header.errorcode.ErrorCodeList;
 import org.zstack.header.message.MessageReply;
 import org.zstack.header.vipQos.*;
@@ -52,7 +51,6 @@ public class VyosVipQosSyncFlow extends NoRollbackFlow {
         vipUuids = vipUuids.stream().filter(vipUuid -> Q.New(VipQosVO.class).eq(VipQosVO_.vipUuid, vipUuid).count() > 0)
                 .collect(Collectors.toList());
 
-        List<ErrorCode> errs = new ArrayList<>();
         new While<>(vipUuids).each((vipUuid, compl) -> {
             SyncVipQosMsg syncMsg = new SyncVipQosMsg();
             syncMsg.setVrUuid(servedVm.getUuid());
@@ -62,7 +60,7 @@ public class VyosVipQosSyncFlow extends NoRollbackFlow {
                 @Override
                 public void run(MessageReply reply) {
                     if (!reply.isSuccess()) {
-                        errs.add(reply.getError());
+                        compl.addError(reply.getError());
                     }
                     compl.done();
                 }
@@ -70,11 +68,7 @@ public class VyosVipQosSyncFlow extends NoRollbackFlow {
         }).run(new WhileDoneCompletion(trigger) {
             @Override
             public void done(ErrorCodeList errorCodeList) {
-                if(!errs.isEmpty()){
-                    trigger.fail(errs.get(0));
-                }else {
-                    trigger.next();;
-                }
+                trigger.next(errorCodeList.wrapOrNull());
             }
         });
     }

@@ -28,7 +28,7 @@ doc {
 					location "body"
 					type "boolean"
 					optional true
-					since "4.10.7"
+					since "zsv_4.10.7"
 				}
 				column {
 					name "hostUuidList"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "4.10.7"
+					since "zsv_4.10.7"
 				}
 				column {
 					name "ipList"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "4.10.7"
+					since "zsv_4.10.7"
 				}
 				column {
 					name "externalHosts"
@@ -55,7 +55,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "4.10.20"
+					since "zsv_4.10.20"
 				}
 				column {
 					name "systemTags"
@@ -64,7 +64,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "4.10.7"
+					since "zsv_4.10.7"
 				}
 				column {
 					name "userTags"
@@ -73,7 +73,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "4.10.7"
+					since "zsv_4.10.7"
 				}
 			}
 		}

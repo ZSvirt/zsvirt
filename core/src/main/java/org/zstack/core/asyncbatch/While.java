@@ -3,8 +3,10 @@ package org.zstack.core.asyncbatch;
 import org.zstack.core.Platform;
 import org.zstack.core.progress.ProgressWhileProcessorFactory;
 import org.zstack.core.thread.ThreadGlobalProperty;
+import org.zstack.header.core.Completion;
 import org.zstack.header.core.WhileDoneCompletion;
 import org.zstack.header.core.WhileCompletion;
+import org.zstack.header.core.workflow.FlowTrigger;
 import org.zstack.header.errorcode.ErrorCode;
 import org.zstack.header.errorcode.ErrorCodeList;
 import org.zstack.utils.CollectionUtils;
@@ -170,6 +172,14 @@ public class While<T> {
                 DebugUtils.Assert(false, "should not be here");
                 break;
         }
+    }
+
+    public final void runAndSendErrorTo(Completion completion) {
+        run(WhileDoneCompletion.of(completion));
+    }
+
+    public final void runAndSendErrorTo(FlowTrigger trigger) {
+        run(WhileDoneCompletion.of(trigger));
     }
 
     private void runStep(WhileDoneCompletion completion) {

@@ -7,7 +7,7 @@ doc {
 
 	category "autoscaling"
 
-	desc """创建伸缩组云主机缩容规则"""
+	desc """创建伸缩组虚拟机缩容规则"""
 
 	rest {
 		request {
@@ -24,11 +24,11 @@ doc {
 				column {
 					name "adjustmentType"
 					enclosedIn "params"
-					desc "缩容方式：减少指定数量云主机，按百分比减少云主机，减少云主机数量到指定值"
+					desc "缩容方式：减少指定数量虚拟机，按百分比减少虚拟机，减少虚拟机数量到指定值"
 					location "body"
 					type "String"
 					optional false
-					since "3.1.0"
+					since "zsv_3.1.0"
 					values ("QuantityChangeInCapacity","PercentChangeInCapacity","TotalCapacity")
 				}
 				column {
@@ -38,16 +38,16 @@ doc {
 					location "body"
 					type "Integer"
 					optional false
-					since "3.1.0"
+					since "zsv_3.1.0"
 				}
 				column {
 					name "removalPolicy"
 					enclosedIn "params"
-					desc "删除云主机策略"
+					desc "删除虚拟机策略"
 					location "body"
 					type "String"
 					optional false
-					since "3.1.0"
+					since "zsv_3.1.0"
 					values ("OldestInstance","NewestInstance","OldestScalingConfiguration","MinimumCPUUsageInstance","MinimumMemoryUsageInstance")
 				}
 				column {
@@ -57,7 +57,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "3.1.0"
+					since "zsv_3.1.0"
 				}
 				column {
 					name "description"
@@ -66,7 +66,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.1.0"
+					since "zsv_3.1.0"
 				}
 				column {
 					name "autoScalingGroupUuid"
@@ -75,7 +75,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "3.1.0"
+					since "zsv_3.1.0"
 				}
 				column {
 					name "type"
@@ -84,7 +84,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.1.0"
+					since "zsv_3.1.0"
 				}
 				column {
 					name "cooldown"
@@ -93,7 +93,7 @@ doc {
 					location "body"
 					type "Long"
 					optional true
-					since "3.1.0"
+					since "zsv_3.1.0"
 				}
 				column {
 					name "resourceUuid"
@@ -102,7 +102,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.1.0"
+					since "zsv_3.1.0"
 				}
 				column {
 					name "tagUuids"
@@ -111,7 +111,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.1.0"
+					since "zsv_3.1.0"
 				}
 				column {
 					name "systemTags"
@@ -120,7 +120,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.1.0"
+					since "zsv_3.1.0"
 				}
 				column {
 					name "userTags"
@@ -129,7 +129,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.1.0"
+					since "zsv_3.1.0"
 				}
 			}
 		}

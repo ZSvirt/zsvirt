@@ -1995,6 +1995,16 @@ public class LocalStorageKvmBackend extends LocalStorageHypervisorBackend {
         final DeleteVolumeOnPrimaryStorageReply dreply = new DeleteVolumeOnPrimaryStorageReply();
         final String hostUuid = getHostUuidByResourceUuid(msg.getVolume().getUuid(), VolumeVO.class.getSimpleName());
 
+        List<StoragePathOwnershipHelper.Owner> otherOwners =
+                LocalStoragePathOwnershipHelper.findOtherOwnersAtHost(
+                        self.getUuid(), hostUuid, msg.getVolume().getInstallPath(),
+                        Collections.singleton(msg.getVolume().getUuid()));
+        if (!otherOwners.isEmpty()) {
+            completion.fail(Platform.err(VolumeErrors.VOLUME_IN_USE,
+                    "refuse to delete volume[uuid:%s, path:%s] because the physical path is still owned by %s",
+                    msg.getVolume().getUuid(), msg.getVolume().getInstallPath(), otherOwners));
+            return;
+        }
         boolean dir = msg.getVolume().getType().equals(VolumeType.Memory.toString());
 
         deleteBits(msg.getVolume().getInstallPath(), hostUuid, dir, new Completion(completion) {
@@ -2128,7 +2138,9 @@ public class LocalStorageKvmBackend extends LocalStorageHypervisorBackend {
         InitCmd cmd = new InitCmd();
         cmd.setHostUuid(msg.getHostUuid());
         cmd.setPath(self.getUrl());
-        cmd.setInitFilePath(makeInitializedFilePath());
+        if (msg.isNewAddedHost()) {
+            cmd.setInitFilePath(makeInitializedFilePath());
+        }
 
         httpCall(INIT_PATH, msg.getHostUuid(), cmd, true, InitRsp.class,
                 new ReturnValueCompletion<InitRsp>(completion) {
@@ -2571,6 +2583,7 @@ public class LocalStorageKvmBackend extends LocalStorageHypervisorBackend {
         GetVolumeSizeCmd cmd = new GetVolumeSizeCmd();
         cmd.installPath = msg.getInstallPath();
         cmd.volumeUuid = msg.getVolumeUuid();
+        cmd.uuid = self.getUuid();
         cmd.storagePath = self.getUrl();
 
         KvmCommandSender sender = new KvmCommandSender(hostUuid);
@@ -2783,6 +2796,7 @@ public class LocalStorageKvmBackend extends LocalStorageHypervisorBackend {
                         GetQCOW2ReferenceCmd cmd = new GetQCOW2ReferenceCmd();
                         cmd.searchingDir = self.getUrl();
                         cmd.path = msg.getInstallPath();
+                        cmd.uuid = ps.getUuid();
                         cmd.storagePath = ps.getUrl();
 
                         new KvmCommandSender(msg.getHostUuid()).send(cmd, GET_QCOW2_REFERENCE, new KvmCommandFailureChecker() {
@@ -3910,7 +3924,8 @@ public class LocalStorageKvmBackend extends LocalStorageHypervisorBackend {
 
             @Override
             public void fail(ErrorCode errorCode) {
-                completion.fail(operr("cannot find flag file [%s] on host [%s], because: %s", makeInitializedFilePath(), hostUuid, errorCode.getCause().getDetails()));
+                completion.fail(operr("cannot find flag file [%s] on host [%s]", makeInitializedFilePath(), hostUuid)
+                        .withCause(errorCode));
             }
         });
     }
@@ -3931,7 +3946,8 @@ public class LocalStorageKvmBackend extends LocalStorageHypervisorBackend {
 
             @Override
             public void fail(ErrorCode errorCode) {
-                completion.fail(operr("cannot create flag file [%s] on host [%s], because: %s", makeInitializedFilePath(), hostUuid, errorCode.getCause().getDetails()));
+                completion.fail(operr("cannot create flag file [%s] on host [%s]", makeInitializedFilePath(), hostUuid)
+                        .withCause(errorCode));
             }
         });
     }

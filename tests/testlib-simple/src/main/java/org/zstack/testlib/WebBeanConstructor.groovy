@@ -44,19 +44,34 @@ class WebBeanConstructor extends BeanConstructor {
     private void generateWarFile() {
         WebArchive war = ShrinkWrap.create(WebArchive.class, "zstack.war")
 
-        def webXmlPath = System.getProperty(WEB_XML_PATH)
-        if (webXmlPath == null) {
-            webXmlPath = "src/test/resources/webapp/WEB-INF/web.xml"
-        }
-
-        def servletContextFilePath = System.getProperty(WEB_SERVLET_CONTEXT_FILE_PATH)
-        if (servletContextFilePath == null) {
-            servletContextFilePath = "src/test/resources/webapp/WEB-INF/zstack-servlet-context-groovy.xml"
-        }
+        def webXmlPath = resolveWebResource(WEB_XML_PATH, "web.xml")
+        def servletContextFilePath = resolveWebResource(WEB_SERVLET_CONTEXT_FILE_PATH, "zstack-servlet-context-groovy.xml")
 
         war.setWebXML(new File(webXmlPath))
         war.addAsWebInfResource(new File(servletContextFilePath), "classes/zstack-servlet-context.xml")
         new ZipExporterImpl(war).exportTo(new File(Utils.getPathUtil().join(BASE_DIR, war.getName())), true)
+    }
+
+    private static String resolveWebResource(String systemProperty, String fileName) {
+        String configured = System.getProperty(systemProperty)
+        if (configured != null) {
+            return configured
+        }
+
+        File local = new File("src/test/resources/webapp/WEB-INF/${fileName}")
+        if (local.exists()) {
+            return local.path
+        }
+
+        File dir = new File(System.getProperty("user.dir"))
+        while (dir != null) {
+            File found = new File(dir, "tests/test-simple/src/test/resources/webapp/WEB-INF/${fileName}")
+            if (found.exists()) {
+                return found.path
+            }
+            dir = dir.parentFile
+        }
+        throw new FileNotFoundException("cannot find web resource ${fileName}")
     }
 
     private void prepareJetty() throws IOException {

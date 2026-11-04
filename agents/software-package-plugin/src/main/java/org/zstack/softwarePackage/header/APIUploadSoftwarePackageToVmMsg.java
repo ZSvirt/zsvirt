@@ -19,7 +19,7 @@ import java.util.concurrent.TimeUnit;
         responseClass = APIUploadSoftwarePackageToVmEvent.class,
         parameterName = "params"
 )
-@DefaultTimeout(timeunit = TimeUnit.HOURS, value = 72)
+@DefaultTimeout(timeunit = TimeUnit.HOURS, value = 6)
 public class APIUploadSoftwarePackageToVmMsg extends APIMessage implements APIAuditor {
     @APIParam(maxLength = 255)
     private String type;
@@ -80,7 +80,7 @@ public class APIUploadSoftwarePackageToVmMsg extends APIMessage implements APIAu
     public static APIUploadSoftwarePackageToVmMsg __example__() {
         APIUploadSoftwarePackageToVmMsg msg = new APIUploadSoftwarePackageToVmMsg();
         msg.setType("ZMigrate");
-        msg.setUrl("upload://VMware-vix-disklib-8.0.1-21562716.x86_64.tar.gz");
+        msg.setUrl("upload://zmigrate-vddk.tar.gz");
         msg.setVmInstanceUuid(uuid(VmInstanceVO.class));
         return msg;
     }

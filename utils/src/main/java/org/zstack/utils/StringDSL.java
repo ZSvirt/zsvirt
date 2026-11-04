@@ -79,6 +79,26 @@ public class StringDSL {
         return new StringWrapper(ss);
     }
 
+    /**
+     * Match {@code text} against {@code pattern}. {@code *} matches any sequence, including empty.
+     * Other characters are literal.
+     */
+    public static boolean matchWildcard(String text, String pattern) {
+        if (text == null || pattern == null) {
+            return false;
+        }
+        String[] parts = pattern.split("\\*", -1);
+        StringBuilder regex = new StringBuilder("^");
+        for (int i = 0; i < parts.length; i++) {
+            if (i > 0) {
+                regex.append(".*");
+            }
+            regex.append(Pattern.quote(parts[i]));
+        }
+        regex.append('$');
+        return text.matches(regex.toString());
+    }
+
     public static boolean equals(String a, String b) {
         if (a == null && b == null) {
             return true;

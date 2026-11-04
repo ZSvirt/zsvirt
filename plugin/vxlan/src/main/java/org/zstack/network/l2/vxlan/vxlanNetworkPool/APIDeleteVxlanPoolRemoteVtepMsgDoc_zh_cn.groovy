@@ -28,7 +28,7 @@ doc {
 					location "url"
 					type "String"
 					optional false
-					since "3.17.11"
+					since "zsv_3.17.11"
 				}
 				column {
 					name "clusterUuid"
@@ -37,7 +37,7 @@ doc {
 					location "url"
 					type "String"
 					optional false
-					since "3.17.11"
+					since "zsv_3.17.11"
 				}
 				column {
 					name "remoteVtepIp"
@@ -46,7 +46,7 @@ doc {
 					location "query"
 					type "String"
 					optional false
-					since "3.17.11"
+					since "zsv_3.17.11"
 				}
 				column {
 					name "deleteMode"
@@ -55,7 +55,7 @@ doc {
 					location "query"
 					type "String"
 					optional true
-					since "3.17.11"
+					since "zsv_3.17.11"
 				}
 				column {
 					name "systemTags"
@@ -64,7 +64,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "3.17.11"
+					since "zsv_3.17.11"
 				}
 				column {
 					name "userTags"
@@ -73,7 +73,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "3.17.11"
+					since "zsv_3.17.11"
 				}
 			}
 		}

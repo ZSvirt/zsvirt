@@ -7,7 +7,7 @@ doc {
 
 	category "vmInstance"
 
-	desc """获取云主机的DNS信息"""
+	desc """获取虚拟机的DNS信息"""
 
 	rest {
 		request {
@@ -24,20 +24,20 @@ doc {
 				column {
 					name "vmInstanceUuid"
 					enclosedIn ""
-					desc "云主机UUID"
+					desc "虚拟机UUID"
 					location "url"
 					type "String"
 					optional false
-					since "zsv 4.10.10"
+					since "zsv_4.10.10"
 				}
 				column {
 					name "vmNicUuid"
 					enclosedIn ""
-					desc "云主机网卡UUID"
+					desc "虚拟机网卡UUID"
 					location "query"
 					type "String"
 					optional true
-					since "zsv 4.10.10"
+					since "zsv_4.10.10"
 				}
 				column {
 					name "ipVersion"
@@ -46,7 +46,7 @@ doc {
 					location "query"
 					type "Integer"
 					optional true
-					since "zsv 4.10.10"
+					since "zsv_4.10.10"
 					values ("4","6")
 				}
 				column {
@@ -56,7 +56,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "zsv 4.10.10"
+					since "zsv_4.10.10"
 				}
 				column {
 					name "userTags"
@@ -65,7 +65,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "zsv 4.10.10"
+					since "zsv_4.10.10"
 				}
 			}
 		}

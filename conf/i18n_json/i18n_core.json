@@ -124,60 +124,6 @@
     "fileName": "src/main/java/org/zstack/core/encrypt/EncryptFacadeImpl.java"
   },
   {
-    "raw": "non file or jsoncontent input",
-    "en_US": "non file or jsoncontent input",
-    "zh_CN": "非文件或JSON内容输入",
-    "arguments": [],
-    "fileName": "src/main/java/org/zstack/core/errorcode/ElaborationManagerImpl.java"
-  },
-  {
-    "raw": "file or jsoncontent cannot both nonempty",
-    "en_US": "file or jsoncontent cannot both nonempty",
-    "zh_CN": "文件或JSONContent不能同时为非空",
-    "arguments": [],
-    "fileName": "src/main/java/org/zstack/core/errorcode/ElaborationManagerImpl.java"
-  },
-  {
-    "raw": "unable to scan folder",
-    "en_US": "unable to scan folder",
-    "zh_CN": "",
-    "arguments": [],
-    "fileName": "src/main/java/org/zstack/core/errorcode/ElaborationManagerImpl.java"
-  },
-  {
-    "raw": "%s is not existed or is empty folder",
-    "en_US": "{0} is not existed or is empty folder",
-    "zh_CN": "{0}不存在或为空文件夹",
-    "arguments": [
-      "filename"
-    ],
-    "fileName": "src/main/java/org/zstack/core/errorcode/ElaborationManagerImpl.java"
-  },
-  {
-    "raw": "elaboration code must be number!",
-    "en_US": "elaboration code must be number!",
-    "zh_CN": "精化代码必须为数字！",
-    "arguments": [],
-    "fileName": "src/main/java/org/zstack/core/errorcode/ElaborationManagerImpl.java"
-  },
-  {
-    "raw": "%s: %s",
-    "en_US": "{0}: {1}",
-    "zh_CN": "{0}: {1}",
-    "arguments": [
-      "returnValue.get(0).getContent()",
-      "returnValue.get(0).getReason()"
-    ],
-    "fileName": "src/main/java/org/zstack/core/errorcode/ElaborationManagerImpl.java"
-  },
-  {
-    "raw": "input args \u0027regex\u0027 or \u0027category\u0027 must be set",
-    "en_US": "input args \u0027regex\u0027 or \u0027category\u0027 must be set",
-    "zh_CN": "必须设置输入参数“ regex ”或“ category ”",
-    "arguments": [],
-    "fileName": "src/main/java/org/zstack/core/errorcode/ElaborationManagerImpl.java"
-  },
-  {
     "raw": "service[%s] has been registered",
     "en_US": "service[{0}] has been registered",
     "zh_CN": "服务(service)[{0}]已经被注册",

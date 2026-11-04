@@ -1,6 +1,5 @@
 package org.zstack.header.host;
 
-import org.zstack.core.Platform;
 import org.zstack.header.cluster.PowerOffHardwareResult;
 import org.zstack.header.message.APIEvent;
 import org.zstack.header.message.NoJsonSchema;
@@ -26,7 +25,7 @@ public class APIPowerOffHostEvent extends APIEvent {
     }
 
     public static APIPowerOffHostEvent __example__() {
-        return new APIPowerOffHostEvent(Platform.getUuid());
+        return new APIPowerOffHostEvent();
     }
 
     public List<PowerOffHardwareResult> getResults() {

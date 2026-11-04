@@ -12,30 +12,30 @@ doc {
 		name "id"
 		desc ""
 		type "Long"
-		since "2.3"
+		since "zsv_2.3"
 	}
 	field {
 		name "listenerUuid"
 		desc ""
 		type "String"
-		since "2.3"
+		since "zsv_2.3"
 	}
 	field {
 		name "certificateUuid"
 		desc ""
 		type "String"
-		since "2.3"
+		since "zsv_2.3"
 	}
 	field {
 		name "createDate"
 		desc "创建时间"
 		type "Timestamp"
-		since "2.3"
+		since "zsv_2.3"
 	}
 	field {
 		name "lastOpDate"
 		desc "最后一次修改时间"
 		type "Timestamp"
-		since "2.3"
+		since "zsv_2.3"
 	}
 }

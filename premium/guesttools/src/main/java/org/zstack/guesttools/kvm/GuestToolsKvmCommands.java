@@ -139,6 +139,39 @@ public class GuestToolsKvmCommands {
         }
     }
 
+    public static class GetVmZWatchStatusCmd extends KVMAgentCommands.AgentCommand {
+        private String vmInstanceUuid;
+
+        public String getVmInstanceUuid() {
+            return vmInstanceUuid;
+        }
+
+        public void setVmInstanceUuid(String vmInstanceUuid) {
+            this.vmInstanceUuid = vmInstanceUuid;
+        }
+    }
+
+    public static class GetVmZWatchStatusRsp extends KVMAgentCommands.AgentResponse {
+        private String status;
+        private String version;
+
+        public String getStatus() {
+            return status;
+        }
+
+        public void setStatus(String status) {
+            this.status = status;
+        }
+
+        public String getVersion() {
+            return version;
+        }
+
+        public void setVersion(String version) {
+            this.version = version;
+        }
+    }
+
     public static class GetVmMetricsRoutingStatusCmd extends KVMAgentCommands.AgentCommand {
         private String vmInstanceUuid;
         private Set<String> items;

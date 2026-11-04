@@ -1,27 +1,24 @@
 package org.zstack.storage.device;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.zstack.core.asyncbatch.While;
 import org.zstack.core.cascade.AbstractAsyncCascadeExtension;
 import org.zstack.core.cascade.CascadeAction;
 import org.zstack.core.cascade.CascadeConstant;
 import org.zstack.core.cloudbus.CloudBus;
-import org.zstack.core.cloudbus.CloudBusCallBack;
 import org.zstack.core.cloudbus.EventFacade;
 import org.zstack.core.db.DatabaseFacade;
 import org.zstack.core.db.Q;
 import org.zstack.core.errorcode.ErrorFacade;
 import org.zstack.header.core.Completion;
-import org.zstack.header.core.NoErrorCompletion;
 import org.zstack.header.host.HostInventory;
 import org.zstack.header.host.HostVO;
-import org.zstack.header.message.MessageReply;
-import org.zstack.header.storageDevice.*;
-import org.zstack.header.vm.VmDeletionStruct;
-import org.zstack.header.vm.VmInstanceInventory;
-import org.zstack.header.vm.VmInstanceVO;
+import org.zstack.header.storageDevice.ScsiLunHostRefVO;
+import org.zstack.header.storageDevice.ScsiLunHostRefVO_;
+import org.zstack.header.storageDevice.ScsiLunVO;
+import org.zstack.header.storageDevice.ScsiLunVO_;
+import org.zstack.header.storageDevice.ScsiLunVmInstanceRefVO;
 import org.zstack.identity.AccountManager;
-import org.zstack.pciDevice.*;
+import org.zstack.pciDevice.entity.PciDeviceVO;
 import org.zstack.storage.device.fibreChannel.FiberChannelStorageVO;
 import org.zstack.utils.Utils;
 import org.zstack.utils.logging.CLogger;
@@ -29,7 +26,6 @@ import org.zstack.utils.logging.CLogger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Created by weiwang on 21/06/2017.

@@ -19,6 +19,7 @@ import org.zstack.header.errorcode.OperationFailureException;
 import org.zstack.header.image.ImageConstant.ImageMediaType;
 import org.zstack.header.image.*;
 import org.zstack.header.message.APIMessage;
+import org.zstack.header.message.APIResourceScope;
 import org.zstack.header.network.l2.*;
 import org.zstack.header.network.l3.*;
 import org.zstack.header.cluster.ClusterVO;
@@ -42,6 +43,8 @@ import org.zstack.header.vm.devices.VmInstanceResourceMetadataGroupVO;
 import org.zstack.header.vm.devices.VmInstanceResourceMetadataGroupVO_;
 import org.zstack.header.vm.metadata.VmMetadataPathBuildExtensionPoint;
 import org.zstack.header.volume.*;
+import org.zstack.identity.Account;
+import org.zstack.identity.rbac.AccessibleResourceChecker;
 import org.zstack.network.l2.L2NetworkHostUtils;
 import org.zstack.resourceconfig.ResourceConfigFacade;
 import org.zstack.tag.SystemTagUtils;
@@ -60,7 +63,9 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.zstack.core.Platform.argerr;
+import static org.zstack.core.Platform.err;
 import static org.zstack.core.Platform.operr;
+import static org.zstack.header.errorcode.SysErrors.RESOURCE_NOT_ACCESSIBLE;
 import static org.zstack.utils.CollectionDSL.*;
 import static org.zstack.utils.CollectionUtils.findOneOrNull;
 import static org.zstack.utils.CollectionUtils.isEmpty;
@@ -88,7 +93,11 @@ public class VmInstanceApiInterceptor implements ApiMessageInterceptor {
     private PluginRegistry pluginRgty;
 
     private void setServiceId(APIMessage msg) {
-        if (msg instanceof VmInstanceMessage) {
+        if (msg instanceof APIRegisterVmInstanceFromMetadataMsg) {
+            APIRegisterVmInstanceFromMetadataMsg rmsg = (APIRegisterVmInstanceFromMetadataMsg) msg;
+            bus.makeTargetServiceIdByResourceUuid(
+                    msg, VmInstanceConstant.SERVICE_ID, rmsg.getMetadataRegistrationKey());
+        } else if (msg instanceof VmInstanceMessage) {
             VmInstanceMessage vmsg = (VmInstanceMessage) msg;
             bus.makeTargetServiceIdByResourceUuid(msg, VmInstanceConstant.SERVICE_ID, vmsg.getVmInstanceUuid());
         }
@@ -1272,8 +1281,22 @@ public class VmInstanceApiInterceptor implements ApiMessageInterceptor {
     }
 
     private void validate(APICreateVmInstanceFromVolumeSnapshotGroupMsg msg) {
-        String vmInstanceUuid = Q.New(VolumeSnapshotGroupVO.class).select(VolumeSnapshotGroupVO_.vmInstanceUuid)
-                .eq(VolumeSnapshotGroupVO_.uuid, msg.getVolumeSnapshotGroupUuid()).findValue();
+        VolumeSnapshotGroupVO group = Q.New(VolumeSnapshotGroupVO.class)
+                .eq(VolumeSnapshotGroupVO_.uuid, msg.getVolumeSnapshotGroupUuid()).find();
+        String vmInstanceUuid = group == null ? null : group.getVmInstanceUuid();
+        String accountUuid = msg.getSession().getAccountUuid();
+        if (!Account.isAdminPermission(msg.getSession())
+                && !AccessibleResourceChecker.forAccount(accountUuid)
+                        .withResourceType(VolumeSnapshotGroupVO.class)
+                        .isAccessible(msg.getVolumeSnapshotGroupUuid())
+                && (!isCompleteOrdinarySnapshotGroup(group) || !AccessibleResourceChecker.forAccount(accountUuid)
+                        .withResourceType(VmInstanceVO.class)
+                        .withScope(APIResourceScope.MustOwner)
+                        .isAccessible(vmInstanceUuid))) {
+            throw new ApiMessageInterceptionException(err(RESOURCE_NOT_ACCESSIBLE,
+                    "account[uuid:%s] cannot create a VM from volume snapshot group[uuid:%s] of VM[uuid:%s]",
+                    accountUuid, msg.getVolumeSnapshotGroupUuid(), vmInstanceUuid));
+        }
         if (vmInstanceUuid == null) {
             return;
         }
@@ -1282,6 +1305,19 @@ public class VmInstanceApiInterceptor implements ApiMessageInterceptor {
                 .eq(VmInstanceVO_.uuid, vmInstanceUuid).findValue();
 
         msg.setPlatform(platform);
+    }
+    private boolean isCompleteOrdinarySnapshotGroup(VolumeSnapshotGroupVO group) {
+        if (group == null || group.getSnapshotCount() == null || group.getVolumeSnapshotRefs().isEmpty()
+                || group.getVolumeSnapshotRefs().size() != group.getSnapshotCount()
+                || group.getVolumeSnapshotRefs().stream().noneMatch(ref -> VolumeType.Root.toString().equals(ref.getVolumeType()))
+                || group.getVolumeSnapshotRefs().stream().anyMatch(ref -> ref.isSnapshotDeleted()
+                        || !(VolumeType.Root.toString().equals(ref.getVolumeType())
+                        || VolumeType.Data.toString().equals(ref.getVolumeType())))) {
+            return false;
+        }
+        List<String> snapshotUuids = new ArrayList<>();
+        group.getVolumeSnapshotRefs().forEach(ref -> snapshotUuids.add(ref.getVolumeSnapshotUuid()));
+        return Q.New(VolumeSnapshotVO.class).in(VolumeSnapshotVO_.uuid, snapshotUuids).count() == group.getSnapshotCount().longValue();
     }
 
     private void validate(APIDestroyVmInstanceMsg msg) {
@@ -1336,11 +1372,13 @@ public class VmInstanceApiInterceptor implements ApiMessageInterceptor {
 
     private void validate(APIRegisterVmInstanceFromMetadataMsg msg) {
         String path = msg.getMetadataPath();
-        if (StringUtils.isEmpty(path)) {
-            throw new ApiMessageInterceptionException(argerr("metadataPath cannot be empty or null"));
+        try {
+            VmMetadataRegistrationInputValidator.validate(path, msg.getMetadata(),
+                    VmGlobalConfig.VM_METADATA_PAYLOAD_REJECT_THRESHOLD.value(Long.class));
+        } catch (IllegalArgumentException e) {
+            throw new ApiMessageInterceptionException(argerr("%s", e.getMessage()));
         }
 
-        // Delegate path validation to the storage-type-specific extension
         String psUuid = msg.getPrimaryStorageUuid();
         String psType = Q.New(PrimaryStorageVO.class).select(PrimaryStorageVO_.type).eq(PrimaryStorageVO_.uuid, psUuid).findValue();
         if (psType == null) {
@@ -1348,15 +1386,16 @@ public class VmInstanceApiInterceptor implements ApiMessageInterceptor {
                     "primary storage[uuid:%s] not found", psUuid));
         }
 
-        VmMetadataPathBuildExtensionPoint ext = pluginRgty.getExtensionFromMap(psType, VmMetadataPathBuildExtensionPoint.class);
-        if (ext == null) {
-            throw new ApiMessageInterceptionException(argerr(
-                    "primary storage[uuid:%s, type:%s] does not support vm metadata", psUuid, psType));
-        }
-
-        String error = ext.validateMetadataPath(psUuid, path);
-        if (error != null) {
-            throw new ApiMessageInterceptionException(argerr("%s", error));
+        if (!msg.isInlineMetadata()) {
+            VmMetadataPathBuildExtensionPoint ext = pluginRgty.getExtensionFromMap(psType, VmMetadataPathBuildExtensionPoint.class);
+            if (ext == null) {
+                throw new ApiMessageInterceptionException(argerr(
+                        "primary storage[uuid:%s, type:%s] does not support vm metadata", psUuid, psType));
+            }
+            String error = ext.validateMetadataPath(psUuid, path);
+            if (error != null) {
+                throw new ApiMessageInterceptionException(argerr("%s", error));
+            }
         }
 
         // Validate cluster belongs to the specified zone

@@ -1,7 +1,6 @@
 package org.zstack.header.vm;
 
 import org.zstack.header.configuration.PythonClass;
-import org.zstack.utils.data.SizeUnit;
 
 @PythonClass
 public interface VmInstanceConstant {
@@ -10,6 +9,7 @@ public interface VmInstanceConstant {
     String ACTION_CATEGORY = "instance";
     @PythonClass
     String USER_VM_TYPE = "UserVm";
+    String APPLIANCE_VM_TYPE = "ApplianceVm";
     Integer VM_MONITOR_NUMBER = 1;
 
     // System limit
@@ -27,34 +27,34 @@ public interface VmInstanceConstant {
     String SHUTDOWN_DETAIL_BY_GUEST = "by guest";
     String SHUTDOWN_DETAIL_FINISHED = "finished";
 
-    enum Params {
-        VmInstanceSpec,
-        AttachingVolumeInventory,
-        AttachedDataVolumeInventories,
-        DestPrimaryStorageInventoryForAttachingVolume,
-        AttachNicInventory,
-        AbnormalLifeCycleStruct,
-        DeletionPolicy,
-        AttachingIsoInventory,
-        DetachingIsoUuid,
-        ignoreDetachError,
-        ReleaseNicAfterDetachNic,
-        VmNicInventory,
-        L3NetworkInventory,
-        UsedIPInventory,
-        vmInventory,
-        vmInstanceUuid,
-        VmAllocateNicFlow_ips,
-        VmAllocateNicFlow_nics,
-        VmAllocateNicFlow_allowDuplicatedAddress,
-        VmAllocateNicFlow_nicNetworkInfo,
-        ApplianceVmSyncHaConfig_applianceVm,
-        ApplianceVmSyncHaConfig_haUuid,
-        AllocatedUrlForAttachingVolume,
-        VmAllocateNicFlow_allowDuplicatedMac,
-        VmNicSecurityPolicyByDeviceId,
-
-        VmInstanceUuid,
+    class Params {
+        public static final String
+            VmInstanceSpec = "VmInstanceSpec",
+            AttachingVolumeInventory = "AttachingVolumeInventory",
+            AttachedDataVolumeInventories = "AttachedDataVolumeInventories",
+            DestPrimaryStorageInventoryForAttachingVolume = "DestPrimaryStorageInventoryForAttachingVolume",
+            AttachNicInventory = "AttachNicInventory",
+            AbnormalLifeCycleStruct = "AbnormalLifeCycleStruct",
+            DeletionPolicy = "DeletionPolicy",
+            AttachingIsoInventory = "AttachingIsoInventory",
+            DetachingIsoUuid = "DetachingIsoUuid",
+            ignoreDetachError = "ignoreDetachError",
+            ReleaseNicAfterDetachNic = "ReleaseNicAfterDetachNic",
+            VmNicInventory = "VmNicInventory",
+            L3NetworkInventory = "L3NetworkInventory",
+            UsedIPInventory = "UsedIPInventory",
+            vmInventory = "vmInventory",
+            vmInstanceUuid = "vmInstanceUuid",
+            VmAllocateNicFlow_ips = "VmAllocateNicFlow_ips",
+            VmAllocateNicFlow_nics = "VmAllocateNicFlow_nics",
+            VmAllocateNicFlow_allowDuplicatedAddress = "VmAllocateNicFlow_allowDuplicatedAddress",
+            VmAllocateNicFlow_nicNetworkInfo = "VmAllocateNicFlow_nicNetworkInfo",
+            ApplianceVmSyncHaConfig_applianceVm = "ApplianceVmSyncHaConfig_applianceVm",
+            ApplianceVmSyncHaConfig_haUuid = "ApplianceVmSyncHaConfig_haUuid",
+            AllocatedUrlForAttachingVolume = "AllocatedUrlForAttachingVolume",
+            VmAllocateNicFlow_allowDuplicatedMac = "VmAllocateNicFlow_allowDuplicatedMac",
+            VmNicSecurityPolicyByDeviceId = "VmNicSecurityPolicyByDeviceId",
+            VmInstanceUuid = "VmInstanceUuid";
     }
 
     enum VmOperation {

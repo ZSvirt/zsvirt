@@ -426,9 +426,7 @@ public class HostNetworkBondingBase {
         List<HostNetworkInterfaceVO> interfaceVOS = Q.New(HostNetworkInterfaceVO.class).in(HostNetworkInterfaceVO_.uuid, msg.getSlaveUuids()).list();
         List<HostNetworkInterfaceInventory> slaves = HostNetworkInterfaceInventory.valueOf(interfaceVOS);
 
-        Map data = new HashMap();
         FlowChain chain = FlowChainBuilder.newShareFlowChain();
-        chain.setData(data);
         chain.setName(String.format("attach-nic-to-bonding-%s-on-host-%s", bondingVO.getBondingName(), bondingVO.getHostUuid()));
         chain.then(new ShareFlow() {
             @Override
@@ -523,9 +521,7 @@ public class HostNetworkBondingBase {
         List<HostNetworkInterfaceVO> interfaceVOS = Q.New(HostNetworkInterfaceVO.class).in(HostNetworkInterfaceVO_.uuid, msg.getSlaveUuids()).list();
         List<HostNetworkInterfaceInventory> slaves = HostNetworkInterfaceInventory.valueOf(interfaceVOS);
 
-        Map data = new HashMap();
         FlowChain chain = FlowChainBuilder.newShareFlowChain();
-        chain.setData(data);
         chain.setName(String.format("detach-nic-from-bonding-%s-on-host-%s", bondingVO.getBondingName(), bondingVO.getHostUuid()));
         chain.then(new ShareFlow() {
             @Override

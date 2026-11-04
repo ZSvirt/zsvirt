@@ -7,7 +7,7 @@ doc {
 
 	category "host"
 
-	desc """获取云主机虚拟化技术类型"""
+	desc """获取虚拟机虚拟化技术类型"""
 
 	rest {
 		request {
@@ -17,7 +17,7 @@ doc {
 
 			clz APIGetHypervisorTypesMsg.class
 
-			desc """获取云主机的虚拟化技术类型"""
+			desc """获取虚拟机的虚拟化技术类型"""
 
 			params {
 
@@ -28,7 +28,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "userTags"
@@ -37,7 +37,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 			}
 		}

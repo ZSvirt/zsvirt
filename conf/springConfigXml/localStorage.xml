@@ -53,9 +53,22 @@
             <zstack:extension interface="org.zstack.header.storage.primary.PSCapacityExtensionPoint"/>
         </zstack:plugin>
 
+        <property name="producerNames">
+            <list>
+                <value>org.zstack.storage.primary.allocate.PrimaryStorageCandidateProducerFlow</value>
+            </list>
+        </property>
         <property name="allocatorFlowNames">
             <list>
-                <value>org.zstack.storage.primary.local.LocalStorageMainAllocatorFlow</value>
+                <value>org.zstack.storage.primary.allocate.PrimaryStorageStateAllocatorFlow</value>
+                <value>org.zstack.storage.primary.local.LocalStorageTypeAllocatorFlow</value>
+                <value>org.zstack.storage.primary.local.LocalStorageHostRefAllocatorFlow</value>
+                <value>org.zstack.storage.primary.local.LocalStorageCapacityAllocatorFlow</value>
+                <value>org.zstack.storage.primary.local.LocalStoragePhysicalCapacityAllocatorFlow</value>
+                <value>org.zstack.storage.primary.local.LocalStorageImageCacheAllocatorFlow</value>
+                <value>org.zstack.storage.primary.allocate.PrimaryStorageTypeAllocatorFlow</value>
+                <value>org.zstack.allocator.domain.compute.flows.DomainPrimaryStorageAllocatorFlow</value>
+                <value>org.zstack.storage.primary.allocate.PrimaryStorageFilterFlow</value>
             </list>
         </property>
     </bean>
@@ -118,14 +131,15 @@
 
         <property name="producerNames">
             <list>
-                <value>org.zstack.compute.allocator.AttachedL2NetworkAllocatorFlow</value>
                 <value>org.zstack.compute.allocator.DesignatedHostAllocatorProducer</value>
+                <value>org.zstack.compute.allocator.AttachedL2NetworkAllocatorProducer</value>
                 <value>org.zstack.compute.allocator.HostStateAndHypervisorAllocatorProducer</value>
             </list>
         </property>
         <property name="allocatorFlowNames">
             <list>
                 <value>org.zstack.compute.allocator.DesignatedHostAllocatorFlow</value>
+                <value>org.zstack.compute.allocator.AttachedL2NetworkAllocatorFlow</value>
                 <value>org.zstack.compute.allocator.AvoidHostAllocatorFlow</value>
                 <value>org.zstack.storage.primary.local.AllocatePrimaryStorageForVmMigrationFlow</value>
                 <value>org.zstack.compute.allocator.HostStateAndHypervisorAllocatorFlow</value>
@@ -133,6 +147,9 @@
                 <value>org.zstack.compute.allocator.AttachedVolumePrimaryStorageAllocatorFlow</value>
                 <value>org.zstack.compute.allocator.HostPrimaryStorageAllocatorFlow</value>
                 <value>org.zstack.compute.allocator.HostOsVersionAllocatorFlow</value>
+                <value>org.zstack.allocator.domain.compute.flows.DomainHostAllocatorFlow</value>
+                <value>org.zstack.allocator.domain.compute.flows.DomainPrimaryStorageHostAllocatorFlow</value>
+                <value>org.zstack.allocator.domain.compute.flows.DomainL3NetworkHostAllocatorFlow</value>
             </list>
         </property>
         <property name="sortFlowNames">

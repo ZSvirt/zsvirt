@@ -35,7 +35,7 @@ public class APIChangeAccountTypeMsg extends APIMessage implements AccountMessag
 
     public static APIChangeAccountTypeMsg __example__() {
         APIChangeAccountTypeMsg msg = new APIChangeAccountTypeMsg();
-        msg.setUuid(uuid());
+        msg.setUuid(uuid(AccountVO.class));
         msg.setType(AccountType.SystemAdmin.toString());
         return msg;
     }

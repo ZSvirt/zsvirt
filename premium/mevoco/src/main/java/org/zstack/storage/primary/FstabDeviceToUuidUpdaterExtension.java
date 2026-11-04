@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 import static org.zstack.storage.primary.FstabDeviceToUuidUpdaterGlobalProperty.FSTAB_DEVICE_TO_UUID_UPDATER;
 
@@ -50,7 +51,7 @@ public class FstabDeviceToUuidUpdaterExtension implements ManagementNodeReadyExt
         String mountPath;
     }
 
-    private List<HostInfo> getImageStoreHostInfos() {
+    static List<HostInfo> findImageStoreHostInfos() {
         List<HostInfo> hostInfos = new ArrayList<>();
 
         List<ImageStoreBackupStorageVO> imageStores = Q.New(ImageStoreBackupStorageVO.class).list();
@@ -72,7 +73,7 @@ public class FstabDeviceToUuidUpdaterExtension implements ManagementNodeReadyExt
         return hostInfos;
     }
 
-    private List<HostInfo> getLocalStorageHostInfos() {
+    static List<HostInfo> findLocalStorageHostInfos() {
         List<HostInfo> hostInfos = new ArrayList<>();
 
         List<Tuple> tuples = Q.New(PrimaryStorageVO.class)
@@ -114,8 +115,8 @@ public class FstabDeviceToUuidUpdaterExtension implements ManagementNodeReadyExt
 
     @AsyncThread
     private void fstabDeviceToUuidUpdater() {
-        List<HostInfo> hostInfos = getImageStoreHostInfos();
-        hostInfos.addAll(getLocalStorageHostInfos());
+        List<HostInfo> hostInfos = findImageStoreHostInfos();
+        hostInfos.addAll(findLocalStorageHostInfos());
         Collections.shuffle(hostInfos);
         hostInfos.forEach(hostInfo -> {
             Ssh ssh = null;
@@ -125,85 +126,134 @@ public class FstabDeviceToUuidUpdaterExtension implements ManagementNodeReadyExt
                         .setHostname(hostInfo.hostname).setTimeout(180);
 
                 // 1 Check if the mountPath exists in /etc/fstab
-                SshResult mountPathCheck = ssh.command(String.format("grep -Fw '%s' /etc/fstab", hostInfo.mountPath)).run();
+                SshResult mountPathCheck = ssh.command(buildFindFstabEntriesCmd(hostInfo.mountPath)).run();
                 ssh.reset();
-                if (mountPathCheck.getReturnCode() != 0) {
+                if (isFstabEntryMissing(mountPathCheck)) {
                     logger.debug(String.format("mountPath[%s] not found in /etc/fstab on host[type:%s, uuid:%s], skipping UUID update",
                             hostInfo.mountPath, hostInfo.type, hostInfo.uuid));
                     return;
                 }
 
-                List<String> entries = Arrays.asList(mountPathCheck.getStdout().split("\n"));
-                Ssh finalSsh = ssh;
-
-                for (String entry : entries) {
-                    if (entry == null || entry.trim().isEmpty()) {
-                        continue;
-                    }
-                    // 2 Check if the fstab entry already uses UUID
-                    String fstabEntry = entry.trim();
-                    if (fstabEntry.startsWith("#")) {
-                        logger.debug(String.format("skipping commented fstab entry[%s] on host[type:%s, uuid:%s]", fstabEntry, hostInfo.type, hostInfo.uuid));
-                        continue;
-                    }
-                    if (fstabEntry.startsWith("UUID")) {
-                        logger.debug(String.format("host[type:%s, uuid:%s] already uses UUID for [%s]", hostInfo.type, hostInfo.uuid, hostInfo.mountPath));
-                        continue;
-                    }
-
-                    // 3 Extract the device path from the fstab entry.  fstabEntry = '/dev/sda /root/data xfs defaults 0 0'
-                    String device = fstabEntry.split("\\s+")[0].trim();
-
-                    // 4 Get the UUID of the device using blkid
-                    SshResult blkidResult = finalSsh.command(String.format("blkid -s UUID -o value '%s'", device)).run();
-                    finalSsh.reset();
-                    if (blkidResult.getReturnCode() != 0 || blkidResult.getStdout().isEmpty()) {
-                        logger.warn(String.format("failed to get UUID for device[%s] on host[type:%s, uuid:%s]: %s", device, hostInfo.type, hostInfo.uuid, blkidResult.getStderr()));
-                        continue;
-                    }
-                    String uuid = blkidResult.getStdout().trim();
-
-                    // 5 Backup the current fstab file and Delete the existing fstabEntry using sed
-                    String sedCmd = String.format("cp -f /etc/fstab /etc/fstab.bak ; sed -i '\\|^%s|d' /etc/fstab", fstabEntry.replace("/", "\\/"));
-                    SshResult delResult = finalSsh.command(sedCmd).run();
-                    finalSsh.reset();
-                    if (delResult.getReturnCode() != 0) {
-                        throw new SshException(String.format("sed[%s] delete failed: %s", sedCmd, delResult.getStderr()));
-                    }
-
-                    // 6 Update the fstab entry with UUID
-                    String newFstabEntry = fstabEntry.replace(device, String.format("UUID=%s", uuid));
-
-                    String cmd = String.format("grep -Fx -- '%s' /etc/fstab >/dev/null 2>&1 || (echo '%s' >> /etc/fstab && grep -Fx -- '%s' /etc/fstab)",
-                            newFstabEntry, newFstabEntry, newFstabEntry);
-                    SshResult appendResult = finalSsh.command(cmd).run();
-                    finalSsh.reset();
-                    if (appendResult.getReturnCode() != 0) {
-                        if (appendResult.getStderr().contains("No such file or directory")) {
-                            throw new SshException("fstab file not found");
-                        } else if (appendResult.getStdout().isEmpty()) {
-                            throw new SshException("failed to add and verify new entry");
-                        } else {
-                            throw new SshException("command failed: " + appendResult.getStderr());
-                        }
-                    }
-                    logger.info(String.format("updated fstab for device[%s] to UUID[%s] on host[type:%s, uuid:%s]", device, uuid, hostInfo.type, hostInfo.uuid));
-                }
+                updateFstabEntries(ssh, mountPathCheck.getStdout(), hostInfo.mountPath, hostInfo.type, hostInfo.uuid);
             } catch (Exception e) {
-                logger.warn(String.format("fstab update failed on host[type:%s, uuid:%s]: %s. attempting rollback", hostInfo.type, hostInfo.uuid, e.getMessage()));
-
-                if (ssh != null) {
-                    SshResult rollback = ssh.command("[ -f /etc/fstab.bak ] && mv -f /etc/fstab.bak /etc/fstab").run();
-                    ssh.reset();
-                    if (rollback.getReturnCode() != 0) {
-                        logger.error(String.format("rollback failed on host[type:%s, uuid:%s] ", hostInfo.type, hostInfo.uuid));
-                    }
-                }
+                logger.warn(String.format("fstab update failed on host[type:%s, uuid:%s]: %s", hostInfo.type, hostInfo.uuid, e.getMessage()));
             } finally {
                 if (ssh != null) {
                     ssh.close();
                 }
             }
         });
+    }
+
+    static void updateFstabEntries(Ssh ssh, String entriesOutput, String mountPath, String hostType, String hostUuid) {
+        List<String> entries = Arrays.asList(entriesOutput.split("\n"));
+        for (String entry : entries) {
+            if (entry == null || entry.trim().isEmpty()) {
+                continue;
+            }
+            String oldFstabEntry = entry;
+            String fstabEntry = entry.trim();
+            if (fstabEntry.startsWith("#")) {
+                logger.debug(String.format("skipping commented fstab entry[%s] on host[type:%s, uuid:%s]", fstabEntry, hostType, hostUuid));
+                continue;
+            }
+
+            String[] fields = fstabEntry.split("\\s+");
+            if (fields.length < 4) {
+                logger.warn(String.format("skipping invalid fstab entry[%s] on host[type:%s, uuid:%s]", fstabEntry, hostType, hostUuid));
+                continue;
+            }
+            if (!fields[1].equals(encodeFstabField(mountPath))) {
+                logger.warn(String.format("skipping fstab entry[%s] because its mount path does not match [%s] on host[type:%s, uuid:%s]",
+                        fstabEntry, mountPath, hostType, hostUuid));
+                continue;
+            }
+
+            String device = fields[0].trim();
+            if (device.startsWith("UUID=")) {
+                String newFstabEntry = FstabNonBlockingMountOptionsUpdaterExtension.buildFstabEntryWithNonBlockingOptions(fstabEntry);
+                if (newFstabEntry.equals(fstabEntry)) {
+                    logger.debug(String.format("host[type:%s, uuid:%s] already uses UUID for [%s]", hostType, hostUuid, mountPath));
+                    continue;
+                }
+                updateFstabEntry(ssh, oldFstabEntry, newFstabEntry);
+                logger.info(String.format("updated fstab non-blocking options for UUID entry on host[type:%s, uuid:%s]", hostType, hostUuid));
+                continue;
+            }
+
+            SshResult blkidResult = ssh.command(String.format("blkid -s UUID -o value '%s'", device)).run();
+            ssh.reset();
+            String uuid = blkidResult.getStdout() == null ? "" : blkidResult.getStdout().trim();
+            if (blkidResult.getReturnCode() != 0 || uuid.isEmpty()) {
+                logger.warn(String.format("failed to get UUID for device[%s] on host[type:%s, uuid:%s]: %s", device, hostType, hostUuid, blkidResult.getStderr()));
+                String newFstabEntry = FstabNonBlockingMountOptionsUpdaterExtension.buildFstabEntryWithNonBlockingOptions(fstabEntry);
+                if (!newFstabEntry.equals(fstabEntry)) {
+                    updateFstabEntry(ssh, oldFstabEntry, newFstabEntry);
+                    logger.info(String.format("updated fstab non-blocking options for device[%s] on host[type:%s, uuid:%s]", device, hostType, hostUuid));
+                }
+                continue;
+            }
+
+            String newFstabEntry = FstabNonBlockingMountOptionsUpdaterExtension.buildUuidFstabEntryWithNonBlockingOptions(fstabEntry, uuid);
+            updateFstabEntry(ssh, oldFstabEntry, newFstabEntry);
+            logger.info(String.format("updated fstab for device[%s] to UUID[%s] on host[type:%s, uuid:%s]", device, uuid, hostType, hostUuid));
+        }
+    }
+
+    static String buildFindFstabEntriesCmd(String mountPath) {
+        return String.format("awk 'BEGIN { mount_path=ARGV[1]; ARGV[1]=\"\" } $1 !~ /^#/ && $2 == mount_path { print; found=1 } END { exit found ? 0 : 1 }' %s /etc/fstab",
+                shellArg(encodeFstabField(mountPath)));
+    }
+
+    static String encodeFstabField(String field) {
+        return field.replace("\\", "\\134")
+                .replace(" ", "\\040")
+                .replace("\t", "\\011")
+                .replace("\n", "\\012");
+    }
+
+    static boolean isFstabEntryMissing(SshResult result) {
+        if (result.isSshFailure() || (result.getReturnCode() != 0 && result.getReturnCode() != 1)) {
+            throw new SshException(String.format("failed to scan /etc/fstab, return code: %s, stderr: %s",
+                    result.getReturnCode(), result.getStderr()));
+        }
+        return result.getReturnCode() == 1;
+    }
+
+    static String buildUpdateFstabEntryCmd(String oldFstabEntry, String newFstabEntry) {
+        if (oldFstabEntry.endsWith("\r")) {
+            oldFstabEntry = oldFstabEntry.substring(0, oldFstabEntry.length() - 1);
+        }
+        String backupPath = String.format("/etc/fstab.zstack.%s.bak", UUID.randomUUID().toString());
+        return String.join("\n",
+                "set -e",
+                String.format("backup=%s", shellArg(backupPath)),
+                "cp -a -- /etc/fstab \"$backup\"",
+                String.format("old_entry=%s", shellArg(oldFstabEntry)),
+                String.format("new_entry=%s", shellArg(newFstabEntry)),
+                "tmp=$(mktemp /etc/fstab.zstack.XXXXXX)",
+                "trap 'rm -f \"$tmp\"' EXIT",
+                "cp -a -- /etc/fstab \"$tmp\"",
+                "OLD_ENTRY=\"$old_entry\" NEW_ENTRY=\"$new_entry\" awk 'BEGIN { old_entry=ENVIRON[\"OLD_ENTRY\"]; new_entry=ENVIRON[\"NEW_ENTRY\"] } { line=$0; sub(/\\r$/, \"\", line); if (line == old_entry) next; if (line == new_entry) found=1; print $0 } END { if (!found) print new_entry }' /etc/fstab > \"$tmp\"",
+                "NEW_ENTRY=\"$new_entry\" awk 'BEGIN { new_entry=ENVIRON[\"NEW_ENTRY\"] } { line=$0; sub(/\\r$/, \"\", line); if (line == new_entry) found=1 } END { exit found ? 0 : 1 }' \"$tmp\"",
+                "mv -f -- \"$tmp\" /etc/fstab || { cp -a -- \"$backup\" /etc/fstab; exit 1; }",
+                "rm -f \"$backup\" || true"
+        );
+    }
+
+    static String shellArg(String value) {
+        return Ssh.shellQuote(value);
+    }
+
+    static void updateFstabEntry(Ssh ssh, String oldFstabEntry, String newFstabEntry) {
+        String cmd = buildUpdateFstabEntryCmd(oldFstabEntry, newFstabEntry);
+        SshResult updateResult = ssh.command(String.format("bash -c %s", shellArg(cmd))).run();
+        ssh.reset();
+        if (updateResult.getReturnCode() != 0) {
+            if (updateResult.getStderr().contains("No such file or directory")) {
+                throw new SshException("fstab file not found");
+            }
+            throw new SshException(String.format("fstab update command failed: %s", updateResult.getStderr()));
+        }
     }
 }

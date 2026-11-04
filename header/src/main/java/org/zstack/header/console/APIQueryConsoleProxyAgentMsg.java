@@ -7,7 +7,7 @@ import org.zstack.header.rest.RestRequest;
 
 import java.util.List;
 
-import static java.util.Arrays.asList;
+import static org.zstack.utils.CollectionDSL.list;
 
 /**
  * Created by xing5 on 2016/3/15.
@@ -22,7 +22,6 @@ import static java.util.Arrays.asList;
 public class APIQueryConsoleProxyAgentMsg extends APIQueryMessage {
 
     public static List<String> __example__() {
-        return asList("uuid=" + uuid());
+        return list("uuid=" + uuid(ConsoleProxyAgentVO.class));
     }
-
 }

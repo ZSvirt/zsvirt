@@ -28,7 +28,7 @@ doc {
 					location "url"
 					type "String"
 					optional false
-					since "3.17.11"
+					since "zsv_3.17.11"
 				}
 				column {
 					name "strategy"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "3.17.11"
+					since "zsv_3.17.11"
 					values ("continuous")
 				}
 				column {
@@ -47,7 +47,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "3.17.11"
+					since "zsv_3.17.11"
 					values ("normal","performance")
 				}
 				column {
@@ -57,7 +57,7 @@ doc {
 					location "body"
 					type "int"
 					optional false
-					since "3.17.11"
+					since "zsv_3.17.11"
 				}
 				column {
 					name "memSize"
@@ -66,7 +66,7 @@ doc {
 					location "body"
 					type "Long"
 					optional true
-					since "3.17.11"
+					since "zsv_3.17.11"
 				}
 				column {
 					name "systemTags"
@@ -75,7 +75,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.17.11"
+					since "zsv_3.17.11"
 				}
 				column {
 					name "userTags"
@@ -84,7 +84,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.17.11"
+					since "zsv_3.17.11"
 				}
 			}
 		}

@@ -25,7 +25,8 @@ public class ZMigrateGlobalConfig {
     @GlobalConfigDef(defaultValue = "8053063680", description = "The upper limit of the estimated total size of all zmigrate images, in bytes", type = Long.class)
     public static GlobalConfig IMAGE_ESTIMATED_TOTAL_SIZE = new GlobalConfig(CATEGORY, "image.estimated.total.size");
 
-    @GlobalConfigValidation(min = 1)
-    @GlobalConfigDef(defaultValue = "60", description = "Interval for scanning ZMigrate Linux boot VMs to distribute VDDK, in seconds", type = Long.class)
-    public static GlobalConfig VDDK_DISTRIBUTION_SCAN_INTERVAL = new GlobalConfig(CATEGORY, "vddk.distribution.scan.interval");
+    @GlobalConfigValidation
+    @GlobalConfigDef(defaultValue = "6.7.3-6d28fff82e478958e5215d14a7ec8573;8.0.3-007ab979e52f52401f02278b75ab5c74",
+            description = "required ZMigrate VDDK versions and MD5 checksums", type = String.class)
+    public static GlobalConfig VDDK_VERSION_MD5 = new GlobalConfig(CATEGORY, "vddk.version.md5");
 }

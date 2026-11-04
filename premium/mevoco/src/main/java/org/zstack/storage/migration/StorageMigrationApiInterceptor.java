@@ -496,7 +496,9 @@ public class StorageMigrationApiInterceptor implements GlobalApiMessageIntercept
             }
         } else if (srcVolume.getType() == VolumeType.Data) {
             if (srcVolume.getVmInstanceUuid() != null) {
-                if (!srcPS.getType().equals(StorageMigrationConstant.SHAREDBLOCK_STORAGE_TYPE)) {
+                List<String> attachedMigrateAllowedTypes = Arrays.asList(StorageMigrationConstant.SHAREDBLOCK_STORAGE_TYPE,
+                        CephConstants.CEPH_PRIMARY_STORAGE_TYPE, NfsPrimaryStorageConstant.NFS_PRIMARY_STORAGE_TYPE);
+                if (!attachedMigrateAllowedTypes.contains(srcPS.getType())) {
                     throw new ApiMessageInterceptionException(Platform.argerr(
                             "the volume[uuid:%s] is still attached on vm[uuid:%s], please detach it before migration.",
                             msg.getVolumeUuid(), srcVolume.getVmInstanceUuid()
@@ -506,7 +508,7 @@ public class StorageMigrationApiInterceptor implements GlobalApiMessageIntercept
                 attachedVm = dbf.findByUuid(srcVolume.getVmInstanceUuid(), VmInstanceVO.class);
                 if (attachedVm.getState() != VmInstanceState.Stopped) {
                     throw new ApiMessageInterceptionException(Platform.argerr(
-                            "cannot migrate data volume[uuid:%s] bewteen sharedblock primary storages when vm[vmuuid:%s] instance is not stopped.",
+                            "cannot migrate data volume[uuid:%s] when vm[uuid:%s] is not stopped, please stop vm or detach volume first.",
                             msg.getVolumeUuid(), srcVolume.getVmInstanceUuid()
                     ));
                 }

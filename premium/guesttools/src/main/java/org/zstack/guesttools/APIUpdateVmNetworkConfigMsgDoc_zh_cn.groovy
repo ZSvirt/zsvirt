@@ -7,7 +7,7 @@ doc {
 
 	category "guest.tools"
 
-	desc """同步云主机网络配置应答"""
+	desc """同步虚拟机网络配置应答"""
 
 	rest {
 		request {
@@ -24,11 +24,11 @@ doc {
 				column {
 					name "vmInstanceUuid"
 					enclosedIn "updateVmNetworkConfig"
-					desc "云主机UUID"
+					desc "虚拟机UUID"
 					location "url"
 					type "String"
 					optional false
-					since "3.16.11"
+					since "zsv_3.16.11"
 				}
 				column {
 					name "vmNicUuids"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "List"
 					optional false
-					since "3.16.11"
+					since "zsv_3.16.11"
 				}
 				column {
 					name "systemTags"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.16.11"
+					since "zsv_3.16.11"
 				}
 				column {
 					name "userTags"
@@ -55,7 +55,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.16.11"
+					since "zsv_3.16.11"
 				}
 			}
 		}

@@ -1,7 +1,7 @@
 package org.zstack.sns;
 
 import org.zstack.header.tag.TagDefinition;
-import org.zstack.tag.PatternedSystemTag;
+import org.zstack.tag.SystemTag;
 
 /**
  * Created by Qi Le on 2019-07-11
@@ -9,5 +9,5 @@ import org.zstack.tag.PatternedSystemTag;
 @TagDefinition
 public class SNSSystemTags {
     public static final String ACCESSKEY_UUID_TOKEN = "accesskey";
-    public static PatternedSystemTag ACCESSKEY_UUID = new PatternedSystemTag(String.format("accesskey::{%s}", ACCESSKEY_UUID_TOKEN), SNSSmsEndpointVO.class);
+    public static SystemTag ACCESSKEY_UUID = new SystemTag(String.format("accesskey::{%s}", ACCESSKEY_UUID_TOKEN), SNSSmsEndpointVO.class);
 }

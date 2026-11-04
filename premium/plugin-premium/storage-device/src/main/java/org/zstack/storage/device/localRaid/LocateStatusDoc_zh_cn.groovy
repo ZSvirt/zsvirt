@@ -10,12 +10,12 @@ doc {
 		name "Enabled"
 		desc "定位灯闪烁"
 		type "LocateStatus"
-		since "3.6"
+		since "zsv_3.6"
 	}
 	field {
 		name "Disabled"
 		desc "定位灯关闭"
 		type "LocateStatus"
-		since "3.6"
+		since "zsv_3.6"
 	}
 }

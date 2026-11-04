@@ -25,8 +25,7 @@ public class APIGetL3NetworkRouterInterfaceIpMsg extends APISyncCallMessage impl
 
     public static APIGetL3NetworkMtuMsg __example__() {
         APIGetL3NetworkMtuMsg msg = new APIGetL3NetworkMtuMsg();
-        msg.setL3NetworkUuid(uuid());
-
+        msg.setL3NetworkUuid(uuid(L3NetworkVO.class));
         return msg;
     }
 }

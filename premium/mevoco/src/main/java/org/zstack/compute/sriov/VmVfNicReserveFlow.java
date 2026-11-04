@@ -4,6 +4,8 @@ import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
+import org.zstack.compute.host.ReserveEthernetVfMsg;
+import org.zstack.compute.host.ReserveHostPciDeviceReply;
 import org.zstack.compute.vm.CleanUpAfterVmFailedToStartExtensionPoint;
 import org.zstack.core.cloudbus.CloudBus;
 import org.zstack.core.cloudbus.CloudBusCallBack;
@@ -17,17 +19,22 @@ import org.zstack.header.core.workflow.FlowTrigger;
 import org.zstack.header.errorcode.ErrorCode;
 import org.zstack.header.host.HostConstant;
 import org.zstack.header.host.HostInventory;
-import org.zstack.compute.host.ReserveEthernetVfMsg;
-import org.zstack.compute.host.ReserveHostPciDeviceReply;
 import org.zstack.header.message.MessageReply;
-import org.zstack.header.vm.*;
+import org.zstack.header.vm.VmInstanceConstant;
 import org.zstack.header.vm.VmInstanceConstant.VmOperation;
+import org.zstack.header.vm.VmInstanceInventory;
+import org.zstack.header.vm.VmInstanceSpec;
+import org.zstack.header.vm.VmNicParam;
+import org.zstack.header.vm.VmNicSpec;
 import org.zstack.identity.AccountManager;
-import org.zstack.pciDevice.PciDeviceInventory;
+import org.zstack.pciDevice.entity.PciDeviceInventory;
 import org.zstack.utils.Utils;
 import org.zstack.utils.logging.CLogger;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Configurable(preConstruction = true, autowire = Autowire.BY_TYPE)
 public class VmVfNicReserveFlow implements HostAllocatorReserveExtensionPoint,

@@ -35,7 +35,7 @@ import static org.zstack.utils.CollectionDSL.list;
  * }
  * }
  * @result see :ref:`APIDeleteL3NetworkEvent`
- * @since 0.1.0
+ * @since zsv_0.1.0
  */
 @RestRequest(
         path = "/l3-networks/{uuid}",
@@ -77,7 +77,7 @@ public class APIDeleteL3NetworkMsg extends APIDeleteMessage implements L3Network
  
     public static APIDeleteL3NetworkMsg __example__() {
         APIDeleteL3NetworkMsg msg = new APIDeleteL3NetworkMsg();
-        msg.setUuid(uuid());
+        msg.setUuid(uuid(L3NetworkVO.class));
         return msg;
     }
 }

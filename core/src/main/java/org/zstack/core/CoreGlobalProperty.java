@@ -88,14 +88,11 @@ public class CoreGlobalProperty {
     public static boolean UPDATE_PKG_WHEN_CONNECT;
     @GlobalProperty(name = "syncNodeTime", defaultValue = "true")
     public static boolean SYNC_NODE_TIME;
-    @GlobalProperty(name = "enableElaboration", defaultValue = "true")
-    public static boolean ENABLE_ELABORATION;
-    @GlobalProperty(name = "recordElaboration", defaultValue = "false")
-    public static boolean RECORD_TO_DB_ELABORATION;
     @GlobalProperty(name = "chain.task.qos", defaultValue = "false")
     public static boolean CHAIN_TASK_QOS;
+    // Character limit; REST persistence also enforces the database byte capacity.
     @NumberRange(min = RESTApiConstant.REST_API_RESULT_MIN_LENGTH, max = RESTApiConstant.REST_API_RESULT_MAX_LENGTH)
-    @GlobalProperty(name = "rest.api.result.max.length", defaultValue = "64000")
+    @GlobalProperty(name = "rest.api.result.max.length", defaultValue = "16777215")
     public static int REST_API_RESULT_MAX_LENGTH;
     @GlobalProperty(name = "pending.queue.minimum.threshold", defaultValue = "50")
     public static int PENDING_QUEUE_MINIMUM_THRESHOLD;

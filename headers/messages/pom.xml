@@ -40,23 +40,4 @@
             <artifactId>hibernate-jpa-2.1-api</artifactId>
         </dependency>
     </dependencies>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>${project.compiler.version}</version>
-                <configuration>
-                    <source>${project.java.version}</source>
-                    <target>${project.java.version}</target>
-                    <debug>true</debug>
-                    <!-- Doc generator parses these DSL sources; do not compile them. -->
-                    <excludes>
-                        <exclude>**/*Doc_zh_cn.groovy</exclude>
-                    </excludes>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
 </project>

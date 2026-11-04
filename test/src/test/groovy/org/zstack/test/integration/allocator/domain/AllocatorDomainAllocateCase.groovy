@@ -1,18 +1,20 @@
 package org.zstack.test.integration.allocator.domain
 
 import org.zstack.allocator.domain.header.AllocatorDomainConstant
+import org.zstack.allocator.domain.header.AllocatorDomainErrors
 import org.zstack.allocator.domain.header.AllocatorDomainGlobalConfig
 import org.zstack.allocator.domain.header.AllocatorDomainState
 import org.zstack.allocator.domain.header.AllocatorDomainSystemTags
 import org.zstack.sdk.HostInventory
 import org.zstack.sdk.L3NetworkInventory
+import org.zstack.sdk.PrimaryStorageInventory
 import org.zstack.sdk.SystemTagInventory
 import org.zstack.sdk.VmInstanceInventory
 import org.zstack.sdk.ZoneInventory
 import org.zstack.sdk.allocator.domain.api.GetAllocatorDomainVmsResult
 import org.zstack.sdk.allocator.domain.entity.AllocatorDomainInventory
 import org.zstack.sdk.allocator.domain.entity.AllocatorDomainRuleParam
-import org.zstack.tag.ResourceConfigSystemTag
+import org.zstack.header.configuration.ConfigAO
 import org.zstack.testlib.EnvSpec
 import org.zstack.testlib.SubCase
 
@@ -20,8 +22,10 @@ class AllocatorDomainAllocateCase extends SubCase {
     EnvSpec env
     ZoneInventory zone
     L3NetworkInventory l3
+    L3NetworkInventory l3Other
     HostInventory host1
     HostInventory host2
+    PrimaryStorageInventory localUnattached
 
     @Override
     void setup() {
@@ -49,7 +53,7 @@ class AllocatorDomainAllocateCase extends SubCase {
 
                     kvm {
                         name = "kvm1"
-                        managementIp = "localhost"
+                        managementIp = "127.0.0.1"
                         username = "root"
                         password = "password"
                     }
@@ -70,6 +74,11 @@ class AllocatorDomainAllocateCase extends SubCase {
                     url = "/local_ps"
                 }
 
+                localPrimaryStorage {
+                    name = "local-unattached"
+                    url = "/local_ps_unattached"
+                }
+
                 l2NoVlanNetwork {
                     name = "l2"
                     physicalInterface = "eth0"
@@ -82,6 +91,17 @@ class AllocatorDomainAllocateCase extends SubCase {
                             endIp = "12.16.10.100"
                             netmask = "255.255.255.0"
                             gateway = "12.16.10.1"
+                        }
+                    }
+
+                    l3Network {
+                        name = "l3-other"
+
+                        ip {
+                            startIp = "12.16.11.10"
+                            endIp = "12.16.11.100"
+                            netmask = "255.255.255.0"
+                            gateway = "12.16.11.1"
                         }
                     }
                 }
@@ -100,14 +120,18 @@ class AllocatorDomainAllocateCase extends SubCase {
             testRecommendHostOnCreate()
             testDisabledKeepsTag()
             testSkipNewCreateHasNoTagThenStartWritesTag()
+            testUnattachedPrimaryStorageRejected()
+            testSpecifiedL3OutOfDomainRejected()
         }
     }
 
     void prepare() {
         zone = env.inventoryByName("zone") as ZoneInventory
         l3 = env.inventoryByName("l3") as L3NetworkInventory
+        l3Other = env.inventoryByName("l3-other") as L3NetworkInventory
         host1 = env.inventoryByName("kvm1") as HostInventory
         host2 = env.inventoryByName("kvm2") as HostInventory
+        localUnattached = env.inventoryByName("local-unattached") as PrimaryStorageInventory
     }
 
     void testIncludeHostOnCreate() {
@@ -139,7 +163,7 @@ class AllocatorDomainAllocateCase extends SubCase {
                 ]
             ]
             delegate.systemTags = [
-                    ResourceConfigSystemTag.buildResourceConfig(
+                    ConfigAO.buildResourceConfig(
                             AllocatorDomainGlobalConfig.CATEGORY,
                             AllocatorDomainGlobalConfig.DOMAIN_UUID_NAME,
                             domain.uuid)
@@ -200,7 +224,7 @@ class AllocatorDomainAllocateCase extends SubCase {
                 ]
             ]
             delegate.systemTags = [
-                    ResourceConfigSystemTag.buildResourceConfig(
+                    ConfigAO.buildResourceConfig(
                             AllocatorDomainGlobalConfig.CATEGORY,
                             AllocatorDomainGlobalConfig.DOMAIN_UUID_NAME,
                             domain.uuid)
@@ -262,7 +286,7 @@ class AllocatorDomainAllocateCase extends SubCase {
                 ]
             ]
             delegate.systemTags = [
-                    ResourceConfigSystemTag.buildResourceConfig(
+                    ConfigAO.buildResourceConfig(
                             AllocatorDomainGlobalConfig.CATEGORY,
                             AllocatorDomainGlobalConfig.DOMAIN_UUID_NAME,
                             domain.uuid)
@@ -323,7 +347,7 @@ class AllocatorDomainAllocateCase extends SubCase {
                 ]
             ]
             delegate.systemTags = [
-                    ResourceConfigSystemTag.buildResourceConfig(
+                    ConfigAO.buildResourceConfig(
                             AllocatorDomainGlobalConfig.CATEGORY,
                             AllocatorDomainGlobalConfig.DOMAIN_UUID_NAME,
                             domain.uuid)
@@ -399,7 +423,7 @@ class AllocatorDomainAllocateCase extends SubCase {
                 ]
             ]
             delegate.systemTags = [
-                    ResourceConfigSystemTag.buildResourceConfig(
+                    ConfigAO.buildResourceConfig(
                             AllocatorDomainGlobalConfig.CATEGORY,
                             AllocatorDomainGlobalConfig.DOMAIN_UUID_NAME,
                             domain.uuid)
@@ -449,6 +473,106 @@ class AllocatorDomainAllocateCase extends SubCase {
         }
     }
 
+    void testUnattachedPrimaryStorageRejected() {
+        logger.info("Test 601: domain Include PS not attached to cluster, expect create VM ALLOCATOR.DOMAIN.4001")
+        AllocatorDomainInventory domain = createAllocatorDomain {
+            delegate.name = "include-unattached-ps"
+            delegate.zoneUuid = zone.uuid
+            delegate.rules = [
+                    new AllocatorDomainRuleParam(resourceUuid: localUnattached.uuid, resourceType: "PrimaryStorageVO", effect: "Include")
+            ]
+            delegate.scenes = ["NewCreate", "Start"]
+        } as AllocatorDomainInventory
+
+        expectApiFailure({
+            createVmInstance {
+                delegate.name = "ps-out-vm"
+                delegate.cpuNum = 4
+                delegate.memorySize = gb(8)
+                delegate.l3NetworkUuids = [l3.uuid]
+                delegate.platform = "Linux"
+                delegate.guestOsType = "Linux"
+                delegate.architecture = "x86_64"
+                delegate.diskAOs = [
+                    [
+                        "boot": true,
+                        "size": gb(20),
+                        "platform": "Linux",
+                        "guestOsType": "Linux",
+                        "architecture": "x86_64"
+                    ]
+                ]
+                delegate.systemTags = [
+                        ConfigAO.buildResourceConfig(
+                                AllocatorDomainGlobalConfig.CATEGORY,
+                                AllocatorDomainGlobalConfig.DOMAIN_UUID_NAME,
+                                domain.uuid)
+                ]
+            }
+        }) {
+            assert delegate.code == "HOST_ALLOCATION.1001"
+            assert delegate.opaque instanceof Map
+            assert delegate.opaque["rejectedCandidates"] instanceof List
+            def rejectedCandidates = (delegate.opaque["rejectedCandidates"] as List<Map<String, Object>>)
+            assert rejectedCandidates.size() == 2
+            assert rejectedCandidates.every { it["rejectBy"] == "DomainPrimaryStorageHostAllocatorFlow"}
+            assert rejectedCandidates.every { (it["reject"] as String).startsWith("cluster not attached to allocator domain")}
+            assert rejectedCandidates.every { (it["reject"] as String).endsWith("primary storage")}
+        }
+
+        deleteAllocatorDomain {
+            delegate.uuid = domain.uuid
+        }
+    }
+
+    void testSpecifiedL3OutOfDomainRejected() {
+        logger.info("Test 701: specified l3NetworkUuids not in domain L3 allowed set, expect create VM ALLOCATOR.DOMAIN.4001")
+        AllocatorDomainInventory domain = createAllocatorDomain {
+            delegate.name = "include-other-l3"
+            delegate.zoneUuid = zone.uuid
+            delegate.rules = [
+                    new AllocatorDomainRuleParam(resourceUuid: l3Other.uuid, resourceType: "L3NetworkVO", effect: "Include")
+            ]
+            delegate.scenes = ["NewCreate", "Start"]
+        } as AllocatorDomainInventory
+
+        expectApiFailure({
+            createVmInstance {
+                delegate.name = "l3-out-vm"
+                delegate.cpuNum = 4
+                delegate.memorySize = gb(8)
+                delegate.l3NetworkUuids = [l3.uuid]
+                delegate.platform = "Linux"
+                delegate.guestOsType = "Linux"
+                delegate.architecture = "x86_64"
+                delegate.diskAOs = [
+                    [
+                        "boot": true,
+                        "size": gb(20),
+                        "platform": "Linux",
+                        "guestOsType": "Linux",
+                        "architecture": "x86_64"
+                    ]
+                ]
+                delegate.systemTags = [
+                        ConfigAO.buildResourceConfig(
+                                AllocatorDomainGlobalConfig.CATEGORY,
+                                AllocatorDomainGlobalConfig.DOMAIN_UUID_NAME,
+                                domain.uuid)
+                ]
+            }
+        }) {
+            assert delegate.code == AllocatorDomainErrors.RESOURCE_OUT_OF_DOMAIN.toString()
+            assert delegate.opaque
+            assert delegate.opaque[AllocatorDomainConstant.Opaque.DOMAIN_UUID] == domain.uuid
+            assert delegate.opaque[AllocatorDomainConstant.Opaque.L3_UUID] == l3.uuid
+        }
+
+        deleteAllocatorDomain {
+            delegate.uuid = domain.uuid
+        }
+    }
+
     @Override
     void clean() {
         (queryVmInstance {} as List<VmInstanceInventory>).each { VmInstanceInventory vm ->
@@ -457,6 +581,13 @@ class AllocatorDomainAllocateCase extends SubCase {
                 delegate.category = AllocatorDomainGlobalConfig.CATEGORY
                 delegate.name = AllocatorDomainGlobalConfig.DOMAIN_UUID_NAME
                 delegate.value = AllocatorDomainConstant.UNBOUND_DOMAIN_UUID
+            }
+        }
+        queryAllocatorDomain {}.each { AllocatorDomainInventory domain ->
+            if (domain != null) {
+                deleteAllocatorDomain {
+                    delegate.uuid = domain.uuid
+                }
             }
         }
         env.delete()

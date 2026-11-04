@@ -385,14 +385,17 @@ public class QueryMore {
             builder.deleteCharAt(builder.length() - 1);
         }
 
-        if (limit != null) {
-            builder.append(" limit ").append(limit);
-        }
-        if (start != null) {
-            builder.append(" offset ").append(start);
-        }
-
         return builder.toString();
+    }
+
+    private SQL applyRange(SQL sqlInstance) {
+        if (start != null) {
+            sqlInstance.offset(start);
+        }
+        if (limit != null) {
+            sqlInstance.limit(limit);
+        }
+        return sqlInstance;
     }
 
     @Override
@@ -404,14 +407,14 @@ public class QueryMore {
         final Map<String, Object> paramMap = new HashMap<>();
         final SQL sqlInstance = SQL.New(toSqlAndFillParamMap(paramMap), returnType);
         paramMap.forEach(sqlInstance::param);
-        return sqlInstance;
+        return applyRange(sqlInstance);
     }
 
     public SQL toSqlInstance() {
         final Map<String, Object> paramMap = new HashMap<>();
         final SQL sqlInstance = SQL.New(toSqlAndFillParamMap(paramMap));
         paramMap.forEach(sqlInstance::param);
-        return sqlInstance;
+        return applyRange(sqlInstance);
     }
 
     public <T> List<T> list() {

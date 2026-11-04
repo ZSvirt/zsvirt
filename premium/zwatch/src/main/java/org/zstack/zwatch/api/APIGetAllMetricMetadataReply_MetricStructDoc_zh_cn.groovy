@@ -10,24 +10,24 @@ doc {
 		name "namespace"
 		desc "名字空间"
 		type "String"
-		since "2.3"
+		since "zsv_2.3"
 	}
 	field {
 		name "description"
 		desc "描述"
 		type "String"
-		since "3.9.0"
+		since "zsv_3.9.0"
 	}
 	field {
 		name "name"
 		desc "资源名称"
 		type "String"
-		since "2.3"
+		since "zsv_2.3"
 	}
 	field {
 		name "labelNames"
 		desc "标签名"
 		type "List"
-		since "2.3"
+		since "zsv_2.3"
 	}
 }

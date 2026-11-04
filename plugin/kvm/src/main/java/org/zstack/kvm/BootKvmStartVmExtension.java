@@ -54,7 +54,11 @@ public class BootKvmStartVmExtension implements KVMStartVmExtensionPoint, KVMSyn
 
     @Override
     public void afterReceiveVmDeviceInfoResponse(VmInstanceInventory vm, KVMAgentCommands.VmDevicesInfoResponse rsp, VmInstanceSpec spec) {
-        saveVmEdkStatesFromCommand(spec.getVmInventory().getUuid(), rsp);
+        if (!rsp.isSuccess()) {
+            return;
+        }
+        String vmUuid = spec != null ? spec.getVmInventory().getUuid() : vm.getUuid();
+        saveVmEdkStatesFromCommand(vmUuid, rsp);
     }
 
     @SuppressWarnings("unchecked")

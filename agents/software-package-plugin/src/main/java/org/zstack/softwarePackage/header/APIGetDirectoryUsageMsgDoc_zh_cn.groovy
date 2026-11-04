@@ -1,5 +1,7 @@
 package org.zstack.softwarePackage.header
 
+import org.zstack.softwarePackage.header.APIGetDirectoryUsageReply
+
 doc {
 	title "GetDirectoryUsage"
 
@@ -26,7 +28,7 @@ doc {
 					location "query"
 					type "String"
 					optional false
-					since "4.10.20"
+					since "zsv_4.10.20"
 				}
 				column {
 					name "directoryPath"
@@ -35,7 +37,7 @@ doc {
 					location "query"
 					type "String"
 					optional false
-					since "4.10.20"
+					since "zsv_4.10.20"
 				}
 				column {
 					name "systemTags"
@@ -44,7 +46,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "4.10.20"
+					since "zsv_4.10.20"
 				}
 				column {
 					name "userTags"
@@ -53,7 +55,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "4.10.20"
+					since "zsv_4.10.20"
 				}
 			}
 		}

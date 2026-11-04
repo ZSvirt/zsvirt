@@ -3,8 +3,9 @@ package org.zstack.header.network.l2;
 import org.zstack.header.query.APIQueryReply;
 import org.zstack.header.rest.RestResponse;
 
-import java.util.Arrays;
 import java.util.List;
+
+import static org.zstack.utils.CollectionDSL.list;
 
 @RestResponse(allTo = "inventories")
 public class APIQueryL2NetworkReply extends APIQueryReply {
@@ -20,16 +21,7 @@ public class APIQueryL2NetworkReply extends APIQueryReply {
  
     public static APIQueryL2NetworkReply __example__() {
         APIQueryL2NetworkReply reply = new APIQueryL2NetworkReply();
-        L2VlanNetworkInventory net = new L2VlanNetworkInventory();
-
-        net.setName("Test-Net");
-        net.setVlan(10);
-        net.setDescription("Test");
-        net.setZoneUuid(uuid());
-        net.setPhysicalInterface("eth0");
-        net.setType("L2VlanNetwork");
-
-        reply.setInventories(Arrays.asList(net));
+        reply.setInventories(list(L2VlanNetworkInventory.__example__()));
         return reply;
     }
 

@@ -21,6 +21,8 @@ public class CreateVolumesSnapshotOverlayInnerMsg extends NeedReplyMessage imple
 
     private boolean backupHostFileIfNeeded;
 
+    private boolean allowPartialSuccess;
+
     public List<String> getLockedVmInstanceUuids() {
         return lockedVmInstanceUuids;
     }
@@ -72,5 +74,13 @@ public class CreateVolumesSnapshotOverlayInnerMsg extends NeedReplyMessage imple
 
     public void setBackupHostFileIfNeeded(boolean backupHostFileIfNeeded) {
         this.backupHostFileIfNeeded = backupHostFileIfNeeded;
+    }
+
+    public boolean isAllowPartialSuccess() {
+        return allowPartialSuccess;
+    }
+
+    public void setAllowPartialSuccess(boolean allowPartialSuccess) {
+        this.allowPartialSuccess = allowPartialSuccess;
     }
 }

@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.zstack.header.Component;
 import org.zstack.header.host.HostInventory;
 import org.zstack.header.tag.SystemTagInventory;
+import org.zstack.header.tag.SystemTagInventoryDefinition;
 import org.zstack.header.tag.SystemTagLifeCycleListener;
 import org.zstack.kvm.KVMAgentCommands;
 import org.zstack.kvm.KVMGlobalConfig;
@@ -143,18 +144,18 @@ public class LibvirtUpgradeExtensionPoint implements KvmHostUpdateOsExtensionPoi
     public boolean start() {
         KVMSystemTags.LIBVIRT_PACKAGE_VERSION.installLifeCycleListener(new SystemTagLifeCycleListener() {
             @Override
-            public void tagCreated(SystemTagInventory tag) {
+            public void tagCreated(SystemTagInventoryDefinition tag) {
                 String libvirtPackageVersion = KVMSystemTags.LIBVIRT_PACKAGE_VERSION.getTokenByTag(tag.getTag(), KVMSystemTags.LIBVIRT_PACKAGE_VERSION_TOKEN);
                 enableLibvirtRestartDuringDeployment(libvirtPackageVersion, tag.getResourceUuid());
             }
 
             @Override
-            public void tagDeleted(SystemTagInventory tag) {
+            public void tagDeleted(SystemTagInventoryDefinition tag) {
 
             }
 
             @Override
-            public void tagUpdated(SystemTagInventory old, SystemTagInventory newTag) {
+            public void tagUpdated(SystemTagInventoryDefinition old, SystemTagInventoryDefinition newTag) {
                 String libvirtPackageVersion = KVMSystemTags.LIBVIRT_PACKAGE_VERSION.getTokenByTag(newTag.getTag(), KVMSystemTags.LIBVIRT_PACKAGE_VERSION_TOKEN);
                 enableLibvirtRestartDuringDeployment(libvirtPackageVersion, newTag.getResourceUuid());
             }

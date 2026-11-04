@@ -41,7 +41,7 @@ import java.util.Arrays;
  * "success": true
  * }
  * }
- * @since 0.1.0
+ * @since zsv_0.1.0
  */
 @RestResponse(allTo = "inventory")
 public class APIRemoveDnsFromL3NetworkEvent extends APIEvent {
@@ -68,14 +68,7 @@ public class APIRemoveDnsFromL3NetworkEvent extends APIEvent {
  
     public static APIRemoveDnsFromL3NetworkEvent __example__() {
         APIRemoveDnsFromL3NetworkEvent event = new APIRemoveDnsFromL3NetworkEvent();
-        L3NetworkInventory l3 = new L3NetworkInventory();
-
-        l3.setName("Test-L3Network");
-        l3.setL2NetworkUuid(uuid());
-        l3.setDns(Arrays.asList());
-
-        event.setInventory(l3);
+        event.setInventory(L3NetworkInventory.__example__());
         return event;
     }
-
 }

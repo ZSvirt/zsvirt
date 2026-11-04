@@ -28,7 +28,7 @@ doc {
 					location "query"
 					type "String"
 					optional true
-					since "3.10"
+					since "zsv_3.10"
 				}
 				column {
 					name "publicL3Uuid"
@@ -37,7 +37,7 @@ doc {
 					location "query"
 					type "String"
 					optional true
-					since "3.10"
+					since "zsv_3.10"
 				}
 				column {
 					name "limit"
@@ -46,7 +46,7 @@ doc {
 					location "query"
 					type "Integer"
 					optional true
-					since "3.10"
+					since "zsv_3.10"
 				}
 				column {
 					name "start"
@@ -55,7 +55,7 @@ doc {
 					location "query"
 					type "Integer"
 					optional true
-					since "3.10"
+					since "zsv_3.10"
 				}
 				column {
 					name "systemTags"
@@ -64,7 +64,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "3.10"
+					since "zsv_3.10"
 				}
 				column {
 					name "userTags"
@@ -73,7 +73,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "3.10"
+					since "zsv_3.10"
 				}
 				column {
 					name "vipUuid"
@@ -82,7 +82,7 @@ doc {
 					location "query"
 					type "String"
 					optional true
-					since "3.10"
+					since "zsv_3.10"
 				}
 			}
 		}

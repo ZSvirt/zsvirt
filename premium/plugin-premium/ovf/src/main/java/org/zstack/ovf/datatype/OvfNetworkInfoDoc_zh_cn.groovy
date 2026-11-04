@@ -10,6 +10,6 @@ doc {
 		name "name"
 		desc "网络名称"
 		type "String"
-		since "3.14.6"
+		since "zsv_3.14.6"
 	}
 }

@@ -36,6 +36,7 @@ import org.zstack.utils.network.NetworkUtils;
 import org.zstack.utils.ssh.Ssh;
 import org.zstack.utils.ssh.SshResult;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.List;
@@ -167,7 +168,7 @@ public class VyosConnectFlow extends NoRollbackFlow {
                         for (int i = 0; i < timeoutInSeconds/interval; i++) {
                             steps.add(i);
                         }
-                        List<ErrorCode> errs = new ArrayList<>();
+                        List<ErrorCode> errs = Collections.synchronizedList(new ArrayList<>());
                         new While<>(steps).each((s, wcompl) -> {
                             InitCommand cmd = new InitCommand();
                             cmd.setMgtCidr(Platform.getManagementServerCidr());

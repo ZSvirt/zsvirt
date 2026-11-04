@@ -22,7 +22,6 @@ import org.zstack.utils.logging.CLogger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.util.AbstractMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -68,10 +67,8 @@ public class KVMEnvelopeKeySyncExtension implements KVMPingAgentExtensionPoint {
 
         SimpleFlowChain chain = new SimpleFlowChain();
         chain.setName("kvm-envelope-key-sync-" + hostUuid);
-        chain.putData(
-                new AbstractMap.SimpleEntry<>(DATA_HOST_UUID, hostUuid),
-                new AbstractMap.SimpleEntry<>(DATA_MANAGEMENT_IP, managementIp)
-        );
+        chain.putData(DATA_HOST_UUID, hostUuid);
+        chain.putData(DATA_MANAGEMENT_IP, managementIp);
         chain.then(new LoadIdentityFlow());
         chain.then(new VerifyKeyFlow());
         chain.then(new CreateKeyFlow());

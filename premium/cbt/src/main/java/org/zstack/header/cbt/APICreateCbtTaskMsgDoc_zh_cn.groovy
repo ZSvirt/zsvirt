@@ -28,7 +28,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "4.10.10"
+					since "zsv_4.10.10"
 				}
 				column {
 					name "description"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "4.10.10"
+					since "zsv_4.10.10"
 				}
 				column {
 					name "taskType"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "4.10.10"
+					since "zsv_4.10.10"
 				}
 				column {
 					name "resourceUuids"
@@ -55,7 +55,7 @@ doc {
 					location "body"
 					type "List"
 					optional false
-					since "4.10.10"
+					since "zsv_4.10.10"
 				}
 				column {
 					name "resourceUuid"
@@ -64,7 +64,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "4.10.10"
+					since "zsv_4.10.10"
 				}
 				column {
 					name "tagUuids"
@@ -73,7 +73,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "4.10.10"
+					since "zsv_4.10.10"
 				}
 				column {
 					name "systemTags"
@@ -82,7 +82,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "4.10.10"
+					since "zsv_4.10.10"
 				}
 				column {
 					name "userTags"
@@ -91,7 +91,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "4.10.10"
+					since "zsv_4.10.10"
 				}
 			}
 		}

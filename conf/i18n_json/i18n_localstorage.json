@@ -527,24 +527,22 @@
     "fileName": "src/main/java/org/zstack/storage/primary/local/LocalStorageKvmBackend.java"
   },
   {
-    "raw": "cannot find flag file [%s] on host [%s], because: %s",
-    "en_US": "cannot find flag file [{0}] on host [{1}], because: {2}",
-    "zh_CN": "找不到标记文件[{0}]（在物理机[{1}]上），因为：{2}",
+    "raw": "cannot find flag file [%s] on host [%s]",
+    "en_US": "cannot find flag file [{0}] on host [{1}]",
+    "zh_CN": "找不到标记文件[{0}]（在物理机[{1}]上）",
     "arguments": [
       "makeInitializedFilePath()",
-      "hostUuid",
-      "errorCode.getCause().getDetails()"
+      "hostUuid"
     ],
     "fileName": "src/main/java/org/zstack/storage/primary/local/LocalStorageKvmBackend.java"
   },
   {
-    "raw": "cannot create flag file [%s] on host [%s], because: %s",
-    "en_US": "cannot create flag file [{0}] on host [{1}], because: {2}",
-    "zh_CN": "无法在物理机[{1}]上创建标志文件[{0}]，因为：{2}",
+    "raw": "cannot create flag file [%s] on host [%s]",
+    "en_US": "cannot create flag file [{0}] on host [{1}]",
+    "zh_CN": "无法在物理机[{1}]上创建标志文件[{0}]",
     "arguments": [
       "makeInitializedFilePath()",
-      "hostUuid",
-      "errorCode.getCause().getDetails()"
+      "hostUuid"
     ],
     "fileName": "src/main/java/org/zstack/storage/primary/local/LocalStorageKvmBackend.java"
   },

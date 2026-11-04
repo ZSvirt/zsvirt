@@ -7,8 +7,6 @@ import org.zstack.core.db.DatabaseFacade;
 import org.zstack.core.db.Q;
 import org.zstack.core.db.SQL;
 import org.zstack.header.core.workflow.Flow;
-import org.zstack.header.core.workflow.FlowTrigger;
-import org.zstack.header.core.workflow.NoRollbackFlow;
 import org.zstack.header.host.GetHostNumaTopologyMsg;
 import org.zstack.header.host.GetHostNumaTopologyReply;
 import org.zstack.header.host.HostConstant;
@@ -16,6 +14,7 @@ import org.zstack.header.host.HostInventory;
 import org.zstack.header.host.HostNUMANode;
 import org.zstack.header.host.HostNumaNodeVO;
 import org.zstack.header.host.HostNumaNodeVO_;
+import org.zstack.header.host.spi.HostPostConnectedExtensionPoint;
 import org.zstack.header.message.MessageReply;
 import org.zstack.utils.Utils;
 import org.zstack.utils.gson.JSONObjectUtil;
@@ -27,7 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-public class PostHostExtensionPointForNuma implements PostHostConnectExtensionPoint {
+public class PostHostExtensionPointForNuma implements HostPostConnectedExtensionPoint {
     @Autowired
     private DatabaseFacade dbf;
     @Autowired
@@ -35,12 +34,11 @@ public class PostHostExtensionPointForNuma implements PostHostConnectExtensionPo
     protected static final CLogger logger = Utils.getLogger(PostHostExtensionPointForNuma.class);
 
     @Override
-    public Flow createPostHostConnectFlow(HostInventory host) {
-        return new NoRollbackFlow() {
-            String __name__ = "update-host-NUMA";
+    public Flow createPostHostConnectFlow() {
+        return Flow.of("update-host-NUMA")
+            .handle((trigger, data) -> {
+                HostInventory host = findInventoryFromFlowData(data);
 
-            @Override
-            public void run(FlowTrigger trigger, Map data) {
                 GetHostNumaTopologyMsg msg = new GetHostNumaTopologyMsg();
                 msg.setHostUuid(host.getUuid());
                 bus.makeTargetServiceIdByResourceUuid(msg, HostConstant.SERVICE_ID, msg.getHostUuid());
@@ -63,7 +61,7 @@ public class PostHostExtensionPointForNuma implements PostHostConnectExtensionPo
                             List<HostNumaNodeVO> oldHostNumaNodes = Q.New(HostNumaNodeVO.class)
                                     .eq(HostNumaNodeVO_.hostUuid, host.getUuid())
                                     .list();
-                            
+
                             List<HostNumaNodeVO> newHostNumaNodes = new ArrayList<>();
                             Iterator<Map.Entry<String, HostNUMANode>> nodeEntries = nodes.entrySet().iterator();
                             while (nodeEntries.hasNext()) {
@@ -117,7 +115,7 @@ public class PostHostExtensionPointForNuma implements PostHostConnectExtensionPo
                         }
                     }
                 });
-            }
-        };
+            })
+            .build();
     }
 }

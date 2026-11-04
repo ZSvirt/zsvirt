@@ -5,20 +5,20 @@ import org.zstack.header.vm.VmNicInventory
 
 doc {
 
-	title "更新云主机mac地址结果返回"
+	title "更新虚拟机mac地址结果返回"
 
 	field {
 		name "success"
 		desc ""
 		type "boolean"
-		since "0.6"
+		since "zsv_0.6"
 	}
 	ref {
 		name "error"
 		path "org.zstack.header.vm.APIUpdateVmNicMacEvent.error"
 		desc "错误码，若不为null，则表示操作失败, 操作成功时该字段为null",false
 		type "ErrorCode"
-		since "0.6"
+		since "zsv_0.6"
 		clz ErrorCode.class
 	}
 	ref {
@@ -26,7 +26,7 @@ doc {
 		path "org.zstack.header.vm.APIUpdateVmNicMacEvent.inventory"
 		desc "null"
 		type "VmNicInventory"
-		since "0.6"
+		since "zsv_0.6"
 		clz VmNicInventory.class
 	}
 }

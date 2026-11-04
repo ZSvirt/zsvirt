@@ -9,6 +9,7 @@ import org.zstack.core.errorcode.ErrorFacade;
 import org.zstack.header.apimediator.ApiMessageInterceptionException;
 import org.zstack.header.apimediator.GlobalApiMessageInterceptor;
 import org.zstack.header.errorcode.ErrorCode;
+import org.zstack.header.errorcode.OperationFailureException;
 import org.zstack.header.image.APICreateDataVolumeTemplateFromVolumeMsg;
 import org.zstack.header.image.APICreateDataVolumeTemplateFromVolumeSnapshotMsg;
 import org.zstack.header.message.APIMessage;
@@ -53,6 +54,8 @@ public class SharedBlockApiInterceptor implements GlobalApiMessageInterceptor {
     public APIMessage intercept(APIMessage msg) throws ApiMessageInterceptionException {
         if (msg instanceof APIAddSharedBlockGroupPrimaryStorageMsg) {
             validate((APIAddSharedBlockGroupPrimaryStorageMsg) msg);
+        } else if (msg instanceof APIExtendSharedBlockVolumeMsg) {
+            validate((APIExtendSharedBlockVolumeMsg) msg);
         } else if (msg instanceof APIResizeDataVolumeMsg) {
             validate((APIResizeDataVolumeMsg) msg);
         } else if (msg instanceof APICreateVolumeSnapshotMsg) {
@@ -77,9 +80,31 @@ public class SharedBlockApiInterceptor implements GlobalApiMessageInterceptor {
             validate((APIConvertVmInstanceToTemplatedVmInstanceMsg) msg);
         } else if (msg instanceof APICreateTemplatedVmInstanceFromVmInstanceMsg) {
             validate((APICreateTemplatedVmInstanceFromVmInstanceMsg) msg);
+        } else if (msg instanceof APIGetSharedBlockVolumeSnapshotLanFreeLayoutMsg) {
+            validate((APIGetSharedBlockVolumeSnapshotLanFreeLayoutMsg) msg);
+        } else if (msg instanceof APIGetSharedBlockVolumeLanFreeLayoutMsg) {
+            validate((APIGetSharedBlockVolumeLanFreeLayoutMsg) msg);
         }
 
         return msg;
+    }
+
+    private void validate(APIGetSharedBlockVolumeSnapshotLanFreeLayoutMsg msg) {
+        try {
+            SharedBlockVolumeSnapshotLanFreeLayoutValidator.validateRequest(
+                    msg.getSnapshotUuids());
+        } catch (IllegalArgumentException e) {
+            throw new ApiMessageInterceptionException(argerr(e.getMessage()));
+        }
+    }
+
+    private void validate(APIGetSharedBlockVolumeLanFreeLayoutMsg msg) {
+        try {
+            SharedBlockVolumeLanFreeLayoutValidator.validateRequest(
+                    msg.getVolumeUuids());
+        } catch (IllegalArgumentException e) {
+            throw new ApiMessageInterceptionException(argerr(e.getMessage()));
+        }
     }
 
     private void validate(APICreateTemplatedVmInstanceFromVmInstanceMsg msg) {
@@ -155,6 +180,12 @@ public class SharedBlockApiInterceptor implements GlobalApiMessageInterceptor {
     }
 
     private void validate(APIAddSharedBlockGroupPrimaryStorageMsg msg) {
+        if (msg.getSystemTags() != null
+                && msg.getSystemTags().contains(SharedBlockSystemTags.SHARED_BLOCK_TAKEOVER.getTagFormat())
+                && msg.getSystemTags().contains(SharedBlockSystemTags.SHARED_BLOCK_FORCE_WIPE.getTagFormat())) {
+            throw new ApiMessageInterceptionException(argerr("takeover cannot be combined with forceWipe"));
+        }
+
         // NOTE(weiw): no need to validate or format uuid since we actually support wwn
         if (msg.getDiskUuids() == null || msg.getDiskUuids().isEmpty()) {
             throw new ApiMessageInterceptionException(argerr(
@@ -207,6 +238,16 @@ public class SharedBlockApiInterceptor implements GlobalApiMessageInterceptor {
 //                    msg.getUuid(), attachedVminstanceUuids
 //            ));
 //        }
+    }
+
+    private void validate(APIExtendSharedBlockVolumeMsg msg) {
+        try {
+            VolumeVO volumeVO = SharedBlockVolumeResizeValidator.validateExtend(
+                    msg.getVolumeUuid(), msg.getSize(), null);
+            msg.setPrimaryStorageUuid(volumeVO.getPrimaryStorageUuid());
+        } catch (OperationFailureException e) {
+            throw new ApiMessageInterceptionException(e.getErrorCode());
+        }
     }
 
     private void validate(APICreateVolumeSnapshotMsg msg) {
@@ -329,8 +370,11 @@ public class SharedBlockApiInterceptor implements GlobalApiMessageInterceptor {
                 // former serviceConfig(storage.primary / sharedblock) bindings
                 APIAddSharedBlockGroupPrimaryStorageMsg.class,
                 APIAddSharedBlockToSharedBlockGroupMsg.class,
+                APIExtendSharedBlockVolumeMsg.class,
                 APIRefreshSharedblockDeviceCapacityMsg.class,
                 APIGetSharedBlockCandidateMsg.class,
+                APIGetSharedBlockVolumeSnapshotLanFreeLayoutMsg.class,
+                APIGetSharedBlockVolumeLanFreeLayoutMsg.class,
                 APIQuerySharedBlockGroupPrimaryStorageMsg.class,
                 APIQuerySharedBlockMsg.class,
                 APIQuerySharedBlockGroupPrimaryStorageHostRefMsg.class,

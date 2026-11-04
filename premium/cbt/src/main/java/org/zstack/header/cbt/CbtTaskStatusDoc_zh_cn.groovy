@@ -10,30 +10,30 @@ doc {
 		name "Created"
 		desc ""
 		type "CbtTaskStatus"
-		since "4.10.10"
+		since "zsv_4.10.10"
 	}
 	field {
 		name "Starting"
 		desc ""
 		type "CbtTaskStatus"
-		since "4.10.10"
+		since "zsv_4.10.10"
 	}
 	field {
 		name "Running"
 		desc ""
 		type "CbtTaskStatus"
-		since "4.10.10"
+		since "zsv_4.10.10"
 	}
 	field {
 		name "Stopped"
 		desc ""
 		type "CbtTaskStatus"
-		since "4.10.10"
+		since "zsv_4.10.10"
 	}
 	field {
 		name "Failed"
 		desc ""
 		type "CbtTaskStatus"
-		since "4.10.10"
+		since "zsv_4.10.10"
 	}
 }

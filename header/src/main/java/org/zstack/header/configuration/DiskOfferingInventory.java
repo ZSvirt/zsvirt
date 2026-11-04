@@ -1,8 +1,10 @@
 package org.zstack.header.configuration;
 
+import org.zstack.header.message.DocUtils;
 import org.zstack.header.query.ExpandedQueries;
 import org.zstack.header.query.ExpandedQuery;
 import org.zstack.header.search.Inventory;
+import org.zstack.header.storage.primary.PrimaryStorageConstant;
 import org.zstack.header.volume.VolumeInventory;
 
 import java.io.Serializable;
@@ -130,5 +132,16 @@ public class DiskOfferingInventory implements Serializable {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public static DiskOfferingInventory __example__() {
+        DiskOfferingInventory inventory = new DiskOfferingInventory();
+        inventory.setName("diskOffering1");
+        inventory.setDiskSize(100);
+        inventory.setUuid(DocUtils.createFixedUuid(DiskOfferingVO.class));
+        inventory.setAllocatorStrategy(PrimaryStorageConstant.DEFAULT_PRIMARY_STORAGE_ALLOCATION_STRATEGY_TYPE);
+        inventory.setType("DefaultDiskOfferingType");
+        inventory.setState(DiskOfferingState.Enabled.toString());
+        return inventory;
     }
 }

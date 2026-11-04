@@ -1,10 +1,10 @@
 package org.zstack.zwatch.monitorgroup.entity;
 
 import org.zstack.header.configuration.PythonClassInventory;
-import org.zstack.header.query.ExpandedQueries;
-import org.zstack.header.query.ExpandedQuery;
+import org.zstack.header.message.DocUtils;
 import org.zstack.header.search.Inventory;
 import org.zstack.zwatch.datatype.EmergencyLevel;
+import org.zstack.zwatch.namespace.VmNamespace;
 import org.zstack.zwatch.ruleengine.ComparisonOperator;
 
 import java.io.Serializable;
@@ -185,5 +185,22 @@ public class MetricRuleTemplateInventory implements Serializable {
 
     public void setUuid(String $paramName) {
         uuid = $paramName;
+    }
+
+    public static MetricRuleTemplateInventory __example__() {
+        MetricRuleTemplateInventory inventory = new MetricRuleTemplateInventory();
+        inventory.setUuid(DocUtils.createFixedUuid(MetricRuleTemplateVO.class));
+        inventory.setNamespace("ZStack/VM");
+        inventory.setName("vm-cpu");
+        inventory.setPeriod(60);
+        inventory.setThreshold(80d);
+        inventory.setEnableRecovery(true);
+        inventory.setMetricName(VmNamespace.CPUUsedUtilization.getName());
+        inventory.setMonitorTemplateUuid(DocUtils.createFixedUuid(MonitorTemplateVO.class));
+        inventory.setComparisonOperator(ComparisonOperator.GreaterThan);
+        inventory.setEmergencyLevel(EmergencyLevel.Normal);
+        inventory.setLastOpDate(DocUtils.timestamp());
+        inventory.setLastOpDate(DocUtils.timestamp());
+        return inventory;
     }
 }

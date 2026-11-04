@@ -29,7 +29,7 @@ doc {
 					location "url"
 					type "String"
 					optional false
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "networkServices"
@@ -38,7 +38,7 @@ doc {
 					location "query"
 					type "Map"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "systemTags"
@@ -47,7 +47,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "userTags"
@@ -56,7 +56,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "service"
@@ -65,7 +65,7 @@ doc {
 					location "query"
 					type "String"
 					optional true
-					since "zsv 4.10.16"
+					since "zsv_4.10.16"
 				}
 			}
 		}

@@ -19,6 +19,7 @@ import static org.zstack.zwatch.alarm.system.AlarmNameMappingConstant.*;
 import static org.zstack.zwatch.alarm.system.SystemAlarmManager.*;
 import static org.zstack.zwatch.namespace.BackupStorageNamespace.BackupStorageConnected;
 import static org.zstack.zwatch.namespace.BackupStorageNamespace.BackupStorageDisconnected;
+import static org.zstack.zwatch.namespace.BackupStorageNamespace.FaultMountPointOnBackupStorage;
 import static org.zstack.zwatch.namespace.ClusterNamespace.ClusterQemuVersionMismatch;
 import static org.zstack.zwatch.namespace.HaNamespace.MigrateVMFailedWithHostMaintain;
 import static org.zstack.zwatch.namespace.HostNamespace.*;
@@ -140,6 +141,7 @@ public class AlarmSystemTagUtils {
     public static final Map<String, String> EVENT_SUBSCRIPTION_NAME_MAP = map(
             e(BackupStorageDisconnected.getName(), BACKUP_STORAGE_DISCONNECT_EVENT_ALARM_NAME),
             e(BackupStorageConnected.getName(), BACKUP_STORAGE_CONNECTED_EVENT_ALARM_NAME),
+            e(FaultMountPointOnBackupStorage.getName(), FAULT_MOUNT_POINT_ON_BACKUP_STORAGE_EVENT_ALARM_NAME),
             e(PrimaryStorageDisconnected.getName(), PRIMARY_STORAGE_DISCONNECT_EVENT_ALARM_NAME),
             e(PrimaryStorageConnected.getName(), PRIMARY_STORAGE_CONNECTED_EVENT_ALARM_NAME),
             e(ManagementNodeLeft.getName(), MANAGEMENT_NODE_LEFT_EVENT_ALARM_NAME),
@@ -193,6 +195,7 @@ public class AlarmSystemTagUtils {
     public static final Map<String, String> EVENT_SUBSCRIPTION_CN_SYSTEM_TAG_MAP = map(
             e(BackupStorageDisconnected.getName(), BACKUP_STORAGE_DISCONNECT_EVENT_ALARM_NAME_CN),
             e(BackupStorageConnected.getName(), BACKUP_STORAGE_CONNECTED_EVENT_ALARM_NAME_CN),
+            e(FaultMountPointOnBackupStorage.getName(), FAULT_MOUNT_POINT_ON_BACKUP_STORAGE_EVENT_ALARM_NAME_CN),
             e(PrimaryStorageDisconnected.getName(), PRIMARY_STORAGE_DISCONNECT_EVENT_ALARM_NAME_CN),
             e(PrimaryStorageConnected.getName(), PRIMARY_STORAGE_CONNECTED_EVENT_ALARM_NAME_CN),
             e(ManagementNodeLeft.getName(), MANAGEMENT_NODE_LEFT_EVENT_ALARM_NAME_CN),

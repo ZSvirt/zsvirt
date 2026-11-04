@@ -10,12 +10,12 @@ doc {
 		name "Enabled"
 		desc ""
 		type "ReceiverState"
-		since "0.6"
+		since "zsv_0.6"
 	}
 	field {
 		name "Disabled"
 		desc ""
 		type "ReceiverState"
-		since "0.6"
+		since "zsv_0.6"
 	}
 }

@@ -14,6 +14,7 @@ public class VolumeCbtBackupRecordVO_ {
     public static volatile SingularAttribute<VolumeCbtBackupRecordVO, String> scratchNodeName;
     public static volatile SingularAttribute<VolumeCbtBackupRecordVO, String> bitmapName;
     public static volatile SingularAttribute<VolumeCbtBackupRecordVO, String> lastBitmapName;
+    public static volatile SingularAttribute<VolumeCbtBackupRecordVO, String> cleanupAttemptUuid;
     public static volatile SingularAttribute<VolumeCbtBackupRecordVO, Timestamp> createDate;
     public static volatile SingularAttribute<VolumeCbtBackupRecordVO, Timestamp> lastOpDate;
 }

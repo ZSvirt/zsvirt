@@ -1444,7 +1444,6 @@ public class CephBackupStorageBase extends BackupStorageBase {
 
                         DebugUtils.Assert(!mons.isEmpty(), "how can be no connected MON!!! ???");
 
-                        List<ErrorCode> errs = Collections.synchronizedList(new ArrayList<>());
                         new While<>(mons).all((mon, coml) ->{
                             GetFactsCmd cmd = new GetFactsCmd();
                             cmd.uuid = self.getUuid();
@@ -1461,19 +1460,19 @@ public class CephBackupStorageBase extends BackupStorageBase {
 
                                 @Override
                                 public void fail(ErrorCode errorCode) {
-                                    errs.add(errorCode);
+                                    coml.addError(errorCode);
                                     coml.done();
                                 }
                             });
                         }).run(new WhileDoneCompletion(trigger) {
                             @Override
                             public void done(ErrorCodeList errorCodeList) {
-                                if (!errs.isEmpty()){
-                                    trigger.fail(errs.get(0));
+                                if (errorCodeList.hasError()){
+                                    trigger.fail(errorCodeList.wrapOrNull());
                                     return;
                                 }
 
-                                Set<String> set = new HashSet<String>();
+                                Set<String> set = new HashSet<>();
                                 set.addAll(fsids.values());
 
                                 if (set.size() != 1) {

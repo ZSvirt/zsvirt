@@ -269,9 +269,18 @@ public class VmCascadeExtension extends AbstractAsyncCascadeExtension {
             return;
         }
 
+        List<String> pausedVmUuids = Q.New(VmInstanceVO.class)
+                .select(VmInstanceVO_.uuid)
+                .in(VmInstanceVO_.uuid, vmUuids)
+                .eq(VmInstanceVO_.state, VmInstanceState.Paused)
+                .listValues();
         List<StopVmInstanceMsg> msgs = transformAndRemoveNull(vmUuids, arg -> {
             StopVmInstanceMsg msg = new StopVmInstanceMsg();
             msg.setVmInstanceUuid(arg);
+            // Paused guests cannot process graceful shutdown before storage detach.
+            if (pausedVmUuids.contains(arg)) {
+                msg.setType(StopVmType.cold.toString());
+            }
             bus.makeTargetServiceIdByResourceUuid(msg, VmInstanceConstant.SERVICE_ID, arg);
             return msg;
         });
@@ -504,6 +513,8 @@ public class VmCascadeExtension extends AbstractAsyncCascadeExtension {
                 }
                 StopVmInstanceMsg msg = new StopVmInstanceMsg();
                 msg.setVmInstanceUuid(inv.getInventory().getUuid());
+                // Host deletion explicitly requires releasing the VM resources.
+                msg.setType(StopVmType.cold.toString());
                 msg.setGcOnFailure(true);
                 msg.setIgnoreResourceReleaseFailure(ignoreResourceReleaseFailure);
                 bus.makeTargetServiceIdByResourceUuid(msg, VmInstanceConstant.SERVICE_ID, inv.getInventory().getUuid());
@@ -537,6 +548,7 @@ public class VmCascadeExtension extends AbstractAsyncCascadeExtension {
 
 
             int parallelism = 10;
+            List<ErrorCode> directVmDeletionErrors = Collections.synchronizedList(new ArrayList<>());
             Set<String> successfullyDeletedVmUuids = ConcurrentHashMap.newKeySet();
             List<VmDeletionStruct> deletionTargets = appendTemplatedCacheVmDeletionStructs(vminvs);
             Set<String> deletingVmUuids = collectVmUuids(deletionTargets);
@@ -567,8 +579,10 @@ public class VmCascadeExtension extends AbstractAsyncCascadeExtension {
                         if (reply.isSuccess()) {
                             successfullyDeletedVmUuids.add(msg.getVmInstanceUuid());
                         } else if (!action.isActionCode(CascadeConstant.DELETION_FORCE_DELETE_CODE)) {
-                            // TODO
                             logger.warn(reply.getError().toString());
+                            if (VmInstanceVO.class.getSimpleName().equals(action.getParentIssuer())) {
+                                directVmDeletionErrors.add(reply.getError());
+                            }
                         }
 
                         noErrorCompletion.done();
@@ -577,6 +591,10 @@ public class VmCascadeExtension extends AbstractAsyncCascadeExtension {
             }, parallelism).run(new WhileDoneCompletion(completion) {
                 @Override
                 public void done(ErrorCodeList errorCodeList) {
+                    if (!directVmDeletionErrors.isEmpty()) {
+                        completion.fail(directVmDeletionErrors.get(0));
+                        return;
+                    }
                     if (ZoneVO.class.getSimpleName().equals(action.getRootIssuer()) ||
                             PrimaryStorageVO.class.getSimpleName().equals(action.getParentIssuer())) {
                         cleanupDeletedTemplatedVmInstanceRows(successfullyDeletedVmUuids, deletingVmUuids);

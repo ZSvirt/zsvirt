@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 import static org.zstack.storage.backup.imagestore.ImageStoreSystemTags.*;
 import static org.zstack.zwatch.alarm.AlarmSystemTags.ALARM_RESOURCE_NAME;
 import static org.zstack.zwatch.alarm.EventSubscriptionSystemTags.EVENT_SUBSCRIPTION_RESOURCE_NAME;
+import static org.zstack.zwatch.alarm.system.SystemAlarmManager.FAULT_MOUNT_POINT_ON_BACKUP_STORAGE_EVENT_ALARM_UUID;
 import static org.zstack.zwatch.utils.ParserUtils.getResourceUuid;
 
 public class BackupStorageNamespace extends AbstractNamespace {
@@ -197,6 +198,10 @@ public class BackupStorageNamespace extends AbstractNamespace {
             EventLabelNames.Error
     ).setEmergencyLevel(EventFamily.EmergencyLevel.Emergent);
 
+    public static final EventFamily FaultMountPointOnBackupStorage = new EventFamily("FaultMountPointOnBackupStorage", events,
+            EventLabelNames.Error
+    ).setEmergencyLevel(EventFamily.EmergencyLevel.Emergent);
+
     public static final EventFamily BackupStorageConnected = new EventFamily("BackupStorageConnected", events,
             EventLabelNames.OldStatus, EventLabelNames.NewStatus
     ).setEmergencyLevel(EventFamily.EmergencyLevel.Recovery);
@@ -229,6 +234,9 @@ public class BackupStorageNamespace extends AbstractNamespace {
     @Override
     public boolean resourceEventIsMatch(String resourceUuid, String eventUuid) {
         if (resourceUuid == null) {
+            return true;
+        }
+        if (FAULT_MOUNT_POINT_ON_BACKUP_STORAGE_EVENT_ALARM_UUID.equals(eventUuid)) {
             return true;
         }
         List<String> resourceTags = getTags(resourceUuid, ImageStoreBackupStorageVO.class.getSimpleName());

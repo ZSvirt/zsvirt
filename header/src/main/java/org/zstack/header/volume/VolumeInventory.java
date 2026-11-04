@@ -1,6 +1,5 @@
 package org.zstack.header.volume;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import org.zstack.header.configuration.DiskOfferingInventory;
 import org.zstack.header.configuration.PythonClassInventory;
 import org.zstack.header.image.ImageInventory;

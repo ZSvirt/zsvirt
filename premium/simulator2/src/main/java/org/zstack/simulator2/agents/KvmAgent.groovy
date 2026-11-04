@@ -11,8 +11,8 @@ import org.zstack.core.db.SQL
 import org.zstack.guesttools.GuestToolsAgentStatus
 import org.zstack.guesttools.GuestToolsConstant
 import org.zstack.guesttools.kvm.GuestToolsKvmCommands
-import org.zstack.ha.HaKvmHostSiblingChecker
-import org.zstack.ha.SelfFencerKvmBackend
+import org.zstack.ha.fencers.HaKvmHostSiblingChecker
+import org.zstack.ha.header.HaConstants
 import org.zstack.header.Constants
 import org.zstack.header.agent.AgentResponse
 import org.zstack.header.host.*
@@ -23,7 +23,6 @@ import org.zstack.header.vm.VmInstanceState
 import org.zstack.header.vm.VmInstanceVO
 import org.zstack.header.vm.VmInstanceVO_
 import org.zstack.header.vm.additions.VmHostFileContentFormat
-import org.zstack.header.vm.additions.VmHostFileType
 import org.zstack.header.vm.devices.DeviceAddress
 import org.zstack.header.vm.devices.VirtualDeviceInfo
 import org.zstack.header.volume.VolumeType
@@ -34,7 +33,7 @@ import org.zstack.kvm.KVMConstant
 import org.zstack.kvm.KVMGlobalProperty
 import org.zstack.kvm.VolumeTO
 import org.zstack.mttyDevice.KvmMttyDeviceBackend.MttyDeviceKvmBackend
-import org.zstack.mttyDevice.MttyDeviceTO
+import org.zstack.mttyDevice.message.MttyDeviceTO
 import org.zstack.network.hostNetworkInterface.HostKernelInterfaceTO
 import org.zstack.network.hostNetworkInterface.HostNetworkBondingInventory
 import org.zstack.network.hostNetworkInterface.HostNetworkInterfaceInventory
@@ -43,10 +42,8 @@ import org.zstack.network.hostNetworkInterface.lldp.LldpKvmAgentCommands
 import org.zstack.network.l2.vxlan.vxlanNetworkPool.VxlanKvmAgentCommands
 import org.zstack.network.l2.vxlan.vxlanNetworkPool.VxlanNetworkPoolConstant
 import org.zstack.pciDevice.KvmPciDeviceBackend.PciDeviceKvmBackend
-import org.zstack.pciDevice.PciDeviceTO
-import org.zstack.pciDevice.PciDeviceType
-import org.zstack.pciDevice.PciDeviceVO
-import org.zstack.pciDevice.PciDeviceVO_
+import org.zstack.pciDevice.message.PciDeviceTO
+import org.zstack.pciDevice.header.PciDeviceType
 import org.zstack.pciDevice.virtual.vfio_mdev.MdevDeviceBase
 import org.zstack.simulator2.Simulator
 import org.zstack.simulator2.SimulatorGlobalProperty
@@ -71,13 +68,14 @@ import org.zstack.storage.primary.filesystem.AbstractFileSystemHostHeartbeatChec
 import org.zstack.storage.primary.shareblock.ShareBlockHostHeartbeatChecker
 import org.zstack.storage.primary.sharedblock.HaSanlockHostChecker
 import org.zstack.usbDevice.KvmUsbDeviceBackend.UsbDeviceKvmBackend
-import org.zstack.usbDevice.UsbDeviceTO
+import org.zstack.usbDevice.message.UsbDeviceTO
 import org.zstack.utils.data.SizeUnit
 import org.zstack.utils.gson.JSONObjectUtil
 import org.zstack.zwatch.prometheus.KvmHostScrape
 
 import javax.persistence.Tuple
 
+import static org.zstack.ha.entity.HaCommands.*
 import static org.zstack.kvm.KVMAgentCommands.*
 
 /**
@@ -86,6 +84,7 @@ import static org.zstack.kvm.KVMAgentCommands.*
 class KvmAgent extends Agent {
     private String version
     private String sendCommandUrl
+    private final Map<String, Map<String, Set<List<String>>>> kernelInterfaceAddresses = [:]
 
     KvmAgent(Simulator simulator) {
         super(simulator)
@@ -401,20 +400,28 @@ class KvmAgent extends Agent {
             return rsp
         }
 
-        handle(SelfFencerKvmBackend.SETUP_SELF_FENCER_PATH) { HttpEntity<String> e ->
-            def rsp = new SelfFencerKvmBackend.AgentRsp()
-            rsp.success = true
+        handle(HaConstants.SETUP_SELF_FENCER_PATH) {
+            def rsp = new AgentResponse()
             return rsp
         }
 
-        handle(HaKvmHostSiblingChecker.SCAN_HOST_PATH) { HttpEntity<String> e ->
-            def rsp = new HaKvmHostSiblingChecker.ScanRsp()
-            rsp.result = HaKvmHostSiblingChecker.RET_SUCCESS
+        handle(HaConstants.CANCEL_SELF_FENCER_PATH) {
+            def rsp = new AgentResponse()
             return rsp
         }
 
-        handle(HaKvmHostSiblingChecker.SYNC_HA_VM_LIST_PATH) {
-            return new HaKvmHostSiblingChecker.AgentRsp()
+        handle(HaConstants.SYNC_SELF_FENCER_STATE_PATH) {
+            return new GetFencerStateFromHostRsp()
+        }
+
+        handle(HaConstants.SCAN_HOST_PATH) { HttpEntity<String> e ->
+            def rsp = new ScanRsp()
+            rsp.result = ScanRsp.RET_SUCCESS
+            return rsp
+        }
+
+        handle(HaConstants.SYNC_HA_VM_LIST_PATH) {
+            return new AgentResponse()
         }
 
         handle(HaSanlockHostChecker.SANLOCK_SCAN_HOST_PATH) { HttpEntity<String> e ->
@@ -883,6 +890,21 @@ class KvmAgent extends Agent {
             rsp.virtualizerInfo = new VirtualizerInfoTO()
             rsp.virtualizerInfo.version = "4.2.0-627.g36ee592.el7"
             rsp.virtualizerInfo.virtualizer = "qemu-kvm"
+            def hostUuid = e.headers.getFirst(Constants.AGENT_HTTP_HEADER_RESOURCE_UUID)
+            def managementIp = Q.New(HostVO.class)
+                    .eq(HostVO_.uuid, hostUuid)
+                    .select(HostVO_.managementIp)
+                    .findValue() as String
+            Set<String> ips = new LinkedHashSet<>()
+            if (managementIp != null) {
+                ips.add(managementIp)
+            }
+            synchronized (kernelInterfaceAddresses) {
+                kernelInterfaceAddresses.get(hostUuid)?.values()?.each { addresses ->
+                    addresses.each { ips.add(it[0]) }
+                }
+            }
+            rsp.ipAddresses = new ArrayList<String>(ips)
             return rsp
         }
 
@@ -1233,7 +1255,30 @@ class KvmAgent extends Agent {
             return reply
         }
 
-        handle(MevocoKVMConstant.SET_KERNEL_INTERFACE_PATH) {
+        handle(MevocoKVMConstant.SET_KERNEL_INTERFACE_PATH) { HttpEntity<String> e ->
+            def hostUuid = e.headers.getFirst(Constants.AGENT_HTTP_HEADER_RESOURCE_UUID)
+            def cmd = json(e, MevocoKVMAgentCommands.SetHostKernelInterfaceCmd.class)
+            synchronized (kernelInterfaceAddresses) {
+                def interfaces = kernelInterfaceAddresses.computeIfAbsent(hostUuid) { [:] }
+                cmd.interfaces.each { to ->
+                    String interfaceKey = "${to.interfaceName}.${to.vlanId}".toString()
+                    def addresses = interfaces.computeIfAbsent(interfaceKey) { new LinkedHashSet<List<String>>() }
+                    to.ips.each { ip ->
+                        List<String> address = [ip.ip, ip.netmask]
+                        if (ip.actionCode == UsedIpTO.ACTION_CODE_ADD) {
+                            addresses.add(address)
+                        } else if (ip.actionCode == UsedIpTO.ACTION_CODE_REMOVE) {
+                            addresses.remove(address)
+                        }
+                    }
+                    if (addresses.isEmpty()) {
+                        interfaces.remove(interfaceKey)
+                    }
+                }
+                if (interfaces.isEmpty()) {
+                    kernelInterfaceAddresses.remove(hostUuid)
+                }
+            }
             return new MevocoKVMAgentCommands.SetHostKernelInterfaceRsp()
         }
 

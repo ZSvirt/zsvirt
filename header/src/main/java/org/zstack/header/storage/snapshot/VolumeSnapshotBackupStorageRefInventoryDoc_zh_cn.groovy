@@ -10,18 +10,18 @@ doc {
 		name "volumeSnapshotUuid"
 		desc "云盘快照UUID"
 		type "String"
-		since "zsv 0.6"
+		since "zsv_0.6"
 	}
 	field {
 		name "backupStorageUuid"
 		desc "镜像存储UUID"
 		type "String"
-		since "zsv 0.6"
+		since "zsv_0.6"
 	}
 	field {
 		name "installPath"
 		desc ""
 		type "String"
-		since "zsv 0.6"
+		since "zsv_0.6"
 	}
 }

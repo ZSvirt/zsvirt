@@ -74,6 +74,12 @@
         <property name="supportSharedVolumePrimaryStorage" ref="SupportSharedVolumePrimaryStorage"/>
     </bean>
 
+    <bean id="BackupOperationConflictManager" class="org.zstack.storage.backup.BackupOperationConflictManager">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.apimediator.GlobalApiMessageInterceptor"/>
+        </zstack:plugin>
+    </bean>
+
     <bean id="VmMevecoApiInterceptor" class="org.zstack.compute.vm.VmMevocoApiInterceptor">
         <zstack:plugin>
             <zstack:extension interface="org.zstack.header.apimediator.ApiMessageInterceptor"/>
@@ -155,7 +161,7 @@
         <zstack:plugin>
             <zstack:extension interface="org.zstack.header.Component" />
             <zstack:extension interface="org.zstack.compute.host.HostExtensionManager" />
-            <zstack:extension interface="org.zstack.compute.host.PostHostConnectExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.host.spi.HostPostConnectedExtensionPoint" />
             <zstack:extension interface="org.zstack.header.host.HostAfterConnectedExtensionPoint" />
             <zstack:extension interface="org.zstack.network.l3.ServiceTypeExtensionPoint" />
         </zstack:plugin>
@@ -183,18 +189,6 @@
     <bean id="HostSecurityLevelAllocatorFilterExtensionPoint" class="org.zstack.compute.host.HostSecurityLevelAllocatorFilterExtensionPoint">
         <zstack:plugin>
             <zstack:extension interface="org.zstack.header.allocator.HostAllocatorFilterExtensionPoint" />
-        </zstack:plugin>
-    </bean>
-
-    <bean id="HostManagementNodeRecoverExtensionPoint" class="org.zstack.compute.host.HostManagementNodeRecoverExtension">
-        <zstack:plugin>
-            <zstack:extension interface="org.zstack.header.backup.ManagementNodeRecoverExtensionPoint" />
-        </zstack:plugin>
-    </bean>
-
-    <bean id="PrimaryStorageManagementNodeRecoverExtensionPoint" class="org.zstack.storage.primary.PrimaryStorageManagementNodeRecoverExtension">
-        <zstack:plugin>
-            <zstack:extension interface="org.zstack.header.backup.ManagementNodeRecoverExtensionPoint" />
         </zstack:plugin>
     </bean>
 
@@ -302,6 +296,12 @@
     </bean>
 
     <bean id="MevocoVmNicQosConfigBackend" class="org.zstack.compute.vm.MevocoVmNicQosConfigBackend">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.compute.vm.VmNicQosConfigBackend"/>
+        </zstack:plugin>
+    </bean>
+
+    <bean id="MevocoApplicationVmNicQosConfigBackend" class="org.zstack.compute.vm.MevocoApplicationVmNicQosConfigBackend">
         <zstack:plugin>
             <zstack:extension interface="org.zstack.compute.vm.VmNicQosConfigBackend"/>
         </zstack:plugin>
@@ -468,6 +468,12 @@
     <import resource="storageMigration.xml" />
 
     <bean id="FstabDeviceToUuidUpdaterExtension" class="org.zstack.storage.primary.FstabDeviceToUuidUpdaterExtension">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.managementnode.ManagementNodeReadyExtensionPoint" />
+        </zstack:plugin>
+    </bean>
+
+    <bean id="FstabNonBlockingMountOptionsUpdaterExtension" class="org.zstack.storage.primary.FstabNonBlockingMountOptionsUpdaterExtension">
         <zstack:plugin>
             <zstack:extension interface="org.zstack.header.managementnode.ManagementNodeReadyExtensionPoint" />
         </zstack:plugin>

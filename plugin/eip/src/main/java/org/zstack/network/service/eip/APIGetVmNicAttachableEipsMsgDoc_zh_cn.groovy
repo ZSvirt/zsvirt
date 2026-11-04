@@ -7,7 +7,7 @@ doc {
 
 	category "eip"
 
-	desc """获取云主机网卡可挂载弹性IP"""
+	desc """获取虚拟机网卡可挂载弹性IP"""
 
 	rest {
 		request {
@@ -24,11 +24,11 @@ doc {
 				column {
 					name "vmNicUuid"
 					enclosedIn ""
-					desc "云主机网卡UUID"
+					desc "虚拟机网卡UUID"
 					location "url"
 					type "String"
 					optional false
-					since "3.13.18"
+					since "zsv_3.13.18"
 				}
 				column {
 					name "ipVersion"
@@ -37,7 +37,7 @@ doc {
 					location "query"
 					type "Integer"
 					optional true
-					since "3.13.18"
+					since "zsv_3.13.18"
 					values ("4","6")
 				}
 				column {
@@ -47,7 +47,7 @@ doc {
 					location "query"
 					type "Integer"
 					optional true
-					since "3.13.18"
+					since "zsv_3.13.18"
 				}
 				column {
 					name "start"
@@ -56,7 +56,7 @@ doc {
 					location "query"
 					type "Integer"
 					optional true
-					since "3.13.18"
+					since "zsv_3.13.18"
 				}
 				column {
 					name "systemTags"
@@ -65,7 +65,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "3.13.18"
+					since "zsv_3.13.18"
 				}
 				column {
 					name "userTags"
@@ -74,7 +74,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "3.13.18"
+					since "zsv_3.13.18"
 				}
 			}
 		}

@@ -10,12 +10,12 @@ doc {
 		name "namespace"
 		desc "名字空间"
 		type "String"
-		since "3.10.0"
+		since "zsv_3.10.0"
 	}
 	field {
 		name "status"
 		desc "状态"
 		type "String"
-		since "3.10.0"
+		since "zsv_3.10.0"
 	}
 }

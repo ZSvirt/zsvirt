@@ -1,10 +1,10 @@
 package org.zstack.vpc.ha;
 
+import org.zstack.core.config.BindResourceConfig;
 import org.zstack.core.config.GlobalConfig;
 import org.zstack.core.config.GlobalConfigDefinition;
 import org.zstack.core.config.GlobalConfigValidation;
 import org.zstack.header.vpc.ha.VpcHaGroupVO;
-import org.zstack.resourceconfig.BindResourceConfig;
 
 /**
  */

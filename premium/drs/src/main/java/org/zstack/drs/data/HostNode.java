@@ -12,34 +12,59 @@ public class HostNode implements Serializable {
     private List<VmNode> vmList = new ArrayList<>();
 
     private float usedCPUPercent; // [0, 100]
-    private float freeCPUPercent; // [0, 100]
-    private Float maxSize2MoveCPUPercent; // Space that needs to be moved or can be moved in，[0, 100]
+    private long totalCpu;
+    private Float maxSize2MoveCPUPercent; // Space that needs to be moved or can be moved in, [0, 100]
 
     private float usedMemoryPercent; // [0, 100]
-    private float freeMemoryPercent; // [0, 100]
     private long freePhysicalMemoryBit;
     private long totalMemoryBit;
     private Long maxSize2MoveMemoryBit;
 
     private long hostCapacityAvailableCpuNum;
+    // Allocation ledger, separate from the physical memory load above.
     private long hostCapacityAvailableMemoryBit;
+    private double memoryRatio = 1;
+    private long reservedMemoryBit;
+    private Long maxVmMemoryBit;
 
-    public HostNode(String hostUuid, float usedCPUPercent, long usedPhysicalMemoryBit, long hostCapacityAvailableCpuNum, long hostCapacityAvailableMemoryBit, long totalMemoryBit) {
+    public HostNode(String hostUuid, float usedCPUPercent, long usedPhysicalMemoryBit,
+                    long hostCapacityAvailableCpuNum, long hostCapacityAvailableMemoryBit,
+                    long totalCpu, long totalMemoryBit) {
         this.uuid = hostUuid;
         this.usedCPUPercent = usedCPUPercent;
-        this.freeCPUPercent = 100 - usedCPUPercent;
         this.freePhysicalMemoryBit = totalMemoryBit - usedPhysicalMemoryBit;
-        this.freeMemoryPercent = (int) ((1f * freePhysicalMemoryBit / totalMemoryBit) * 100);
-        this.usedMemoryPercent = 100 - freeMemoryPercent;
+        this.usedMemoryPercent = 100 - (int) ((1f * freePhysicalMemoryBit / totalMemoryBit) * 100);;
 
         this.hostCapacityAvailableCpuNum = hostCapacityAvailableCpuNum;
         this.hostCapacityAvailableMemoryBit = hostCapacityAvailableMemoryBit;
         this.totalMemoryBit = totalMemoryBit;
+        this.totalCpu = totalCpu;
     }
 
     private void updateMemoryPercent() {
-        this.freeMemoryPercent = (int) ((1f * freePhysicalMemoryBit / totalMemoryBit) * 100);
-        this.usedMemoryPercent = 100 - freeMemoryPercent;
+        this.usedMemoryPercent = 100 - (int) ((1f * freePhysicalMemoryBit / totalMemoryBit) * 100);
+    }
+
+    public void setMemoryCapacityPolicy(double memoryRatio, long reservedMemoryBit, Long maxVmMemoryBit) {
+        this.memoryRatio = memoryRatio;
+        this.reservedMemoryBit = reservedMemoryBit;
+        this.maxVmMemoryBit = maxVmMemoryBit;
+    }
+
+    public boolean hasMemoryCapacity(long memorySize) {
+        // Match HostCapacityAllocatorFlow and HostCapacityReserveManagerImpl,
+        // including their per-request rounding and optional physical-size limit.
+        return (maxVmMemoryBit == null || memorySize < maxVmMemoryBit)
+                && Math.round(hostCapacityAvailableMemoryBit * memoryRatio) >= memorySize
+                && hostCapacityAvailableMemoryBit - reservedMemoryBit >= Math.round(memorySize / memoryRatio);
+    }
+
+    public void reserveMemoryCapacity(long memorySize) {
+        hostCapacityAvailableMemoryBit -= Math.round(memorySize / memoryRatio);
+    }
+
+    public void releaseMemoryCapacity(long memorySize) {
+        hostCapacityAvailableMemoryBit += Math.round(memorySize / memoryRatio);
     }
 
     public float getUsedCPUPercent() {
@@ -56,14 +81,6 @@ public class HostNode implements Serializable {
 
     public void setUuid(String uuid) {
         this.uuid = uuid;
-    }
-
-    public float getFreeCPUPercent() {
-        return freeCPUPercent;
-    }
-
-    public void setFreeCPUPercent(float freeCPUPercent) {
-        this.freeCPUPercent = freeCPUPercent;
     }
 
     public Float getMaxSize2MoveCPUPercent() {
@@ -107,6 +124,14 @@ public class HostNode implements Serializable {
         this.totalMemoryBit = totalMemoryBit;
     }
 
+    public long getTotalCpu() {
+        return totalCpu;
+    }
+
+    public void setTotalCpu(long totalCpu) {
+        this.totalCpu = totalCpu;
+    }
+
     public Long getMaxSize2MoveMemoryBit() {
         return maxSize2MoveMemoryBit;
     }
@@ -129,13 +154,5 @@ public class HostNode implements Serializable {
 
     private void setUsedMemoryPercent(float usedMemoryPercent) {
         this.usedMemoryPercent = usedMemoryPercent;
-    }
-
-    public float getFreeMemoryPercent() {
-        return freeMemoryPercent;
-    }
-
-    public void setFreeMemoryPercent(float freeMemoryPercent) {
-        this.freeMemoryPercent = freeMemoryPercent;
     }
 }

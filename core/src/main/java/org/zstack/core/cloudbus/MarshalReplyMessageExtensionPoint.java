@@ -5,12 +5,16 @@ import org.zstack.header.message.NeedReplyMessage;
 
 import java.util.List;
 
-/**
- */
 public interface MarshalReplyMessageExtensionPoint {
-    List<Class> getReplyMessageClassForMarshalExtensionPoint();
+    /**
+     * @return a list of {@link org.zstack.header.message.MessageReply} or {@link org.zstack.header.message.Event}
+     */
+    List<Class<? extends Message>> getReplyMessageClassForMarshalExtensionPoint();
 
-    // When "replyOrEvent" is an event, then the second argument "msg" will be null.
+    /**
+     * @param msg
+     *   null if replyOrEvent is an {@link org.zstack.header.message.Event}
+     */
     void marshalReplyMessageBeforeSending(Message replyOrEvent, NeedReplyMessage msg);
 
     default void marshalReplyMessageBeforeDropping(Message replyOrEvent, NeedReplyMessage msg) {

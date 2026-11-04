@@ -65,11 +65,9 @@ public class APIAttachL2NetworkToHostMsg extends APIMessage implements L2Network
 
     public static APIAttachL2NetworkToHostMsg __example__() {
         APIAttachL2NetworkToHostMsg msg = new APIAttachL2NetworkToHostMsg();
-
-        msg.setL2NetworkUuid(uuid());
-        msg.setHostUuid(uuid());
+        msg.setL2NetworkUuid(uuid(L2VlanNetworkVO.class));
+        msg.setHostUuid(uuid(HostVO.class));
         msg.setL2ProviderType(L2NetworkConstant.VSWITCH_TYPE_LINUX_BRIDGE);
-
         return msg;
     }
 }

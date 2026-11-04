@@ -28,7 +28,7 @@ doc {
 					location "url"
 					type "String"
 					optional false
-					since "3.1.0"
+					since "zsv_3.1.0"
 				}
 				column {
 					name "name"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.1.0"
+					since "zsv_3.1.0"
 				}
 				column {
 					name "description"
@@ -46,34 +46,34 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.1.0"
+					since "zsv_3.1.0"
 				}
 				column {
 					name "minResourceSize"
 					enclosedIn "updateAutoScalingGroup"
-					desc "伸缩组内最少云主机数量"
+					desc "伸缩组内最少虚拟机数量"
 					location "body"
 					type "Integer"
 					optional true
-					since "3.1.0"
+					since "zsv_3.1.0"
 				}
 				column {
 					name "maxResourceSize"
 					enclosedIn "updateAutoScalingGroup"
-					desc "伸缩组内最大云主机数量"
+					desc "伸缩组内最大虚拟机数量"
 					location "body"
 					type "Integer"
 					optional true
-					since "3.1.0"
+					since "zsv_3.1.0"
 				}
 				column {
 					name "removalPolicy"
 					enclosedIn "updateAutoScalingGroup"
-					desc "删除云主机策略：创建时间最久的主机优先，新创建的云主机优先"
+					desc "删除虚拟机策略：创建时间最久的主机优先，新创建的虚拟机优先"
 					location "body"
 					type "String"
 					optional true
-					since "3.1.0"
+					since "zsv_3.1.0"
 					values ("OldestInstance","NewestInstance","OldestScalingConfiguration","MinimumCPUUsageInstance","MinimumMemoryUsageInstance")
 				}
 				column {
@@ -83,7 +83,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.1.0"
+					since "zsv_3.1.0"
 				}
 				column {
 					name "userTags"
@@ -92,7 +92,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.1.0"
+					since "zsv_3.1.0"
 				}
 			}
 		}

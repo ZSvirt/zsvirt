@@ -28,7 +28,7 @@ doc {
 					location "url"
 					type "String"
 					optional false
-					since "2.2"
+					since "zsv_2.2"
 				}
 				column {
 					name "port"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "Integer"
 					optional true
-					since "2.2"
+					since "zsv_2.2"
 				}
 				column {
 					name "outboundBandwidth"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "Long"
 					optional true
-					since "2.2"
+					since "zsv_2.2"
 				}
 				column {
 					name "inboundBandwidth"
@@ -55,7 +55,7 @@ doc {
 					location "body"
 					type "Long"
 					optional true
-					since "2.2"
+					since "zsv_2.2"
 				}
 				column {
 					name "systemTags"
@@ -64,7 +64,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "2.2"
+					since "zsv_2.2"
 				}
 				column {
 					name "userTags"
@@ -73,7 +73,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "2.2"
+					since "zsv_2.2"
 				}
 			}
 		}

@@ -9,7 +9,6 @@ import org.zstack.header.network.l3.L3NetworkException;
 import org.zstack.header.network.l3.L3NetworkInventory;
 import org.zstack.utils.CollectionUtils;
 import org.zstack.utils.Utils;
-import org.zstack.utils.function.ForEachFunction;
 import org.zstack.utils.logging.CLogger;
 
 import java.util.List;
@@ -23,12 +22,7 @@ public class L3NetworkExtensionPointEmitter implements Component {
     private PluginRegistry pluginRgty;
 
     public void afterCreate(L3NetworkInventory inv) {
-        CollectionUtils.safeForEach(createExtensions, new ForEachFunction<L3NetworkCreateExtensionPoint>() {
-            @Override
-            public void run(L3NetworkCreateExtensionPoint arg) {
-                arg.afterCreateL3Network(inv);
-            }
-        });
+        CollectionUtils.safeForEach(createExtensions, arg -> arg.afterCreateL3Network(inv));
     }
 
     public void preDelete(L3NetworkInventory inv) throws L3NetworkException {
@@ -45,21 +39,11 @@ public class L3NetworkExtensionPointEmitter implements Component {
     }
 
     public void beforeDelete(final L3NetworkInventory inv) {
-        CollectionUtils.safeForEach(deleteExtensions, new ForEachFunction<L3NetworkDeleteExtensionPoint>() {
-            @Override
-            public void run(L3NetworkDeleteExtensionPoint arg) {
-                arg.beforeDeleteL3Network(inv);
-            }
-        });
+        CollectionUtils.safeForEach(deleteExtensions, arg -> arg.beforeDeleteL3Network(inv));
     }
 
     public void afterDelete(final L3NetworkInventory inv) {
-        CollectionUtils.safeForEach(deleteExtensions, new ForEachFunction<L3NetworkDeleteExtensionPoint>() {
-            @Override
-            public void run(L3NetworkDeleteExtensionPoint arg) {
-                arg.afterDeleteL3Network(inv);
-            }
-        });
+        CollectionUtils.safeForEach(deleteExtensions, arg -> arg.afterDeleteL3Network(inv));
     }
 
     @Override

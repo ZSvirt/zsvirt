@@ -5,7 +5,7 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.zstack.appliancevm.ApplianceVmConstant;
-import org.zstack.compute.host.PostHostConnectExtensionPoint;
+import org.zstack.header.host.spi.HostPostConnectedExtensionPoint;
 import org.zstack.compute.vm.VmCapabilitiesExtensionPoint;
 import org.zstack.core.Platform;
 import org.zstack.core.asyncbatch.While;
@@ -16,7 +16,6 @@ import org.zstack.core.db.SQL;
 import org.zstack.core.thread.ChainTask;
 import org.zstack.core.thread.SyncTaskChain;
 import org.zstack.core.thread.ThreadFacade;
-import org.zstack.ha.HaHostDeviceExtensionPoint;
 import org.zstack.header.AbstractService;
 import org.zstack.header.apimediator.ApiMessageInterceptionException;
 import org.zstack.header.apimediator.GlobalApiMessageInterceptor;
@@ -25,7 +24,6 @@ import org.zstack.header.core.WhileDoneCompletion;
 import org.zstack.header.core.workflow.Flow;
 import org.zstack.header.core.workflow.FlowRollback;
 import org.zstack.header.core.workflow.FlowTrigger;
-import org.zstack.header.core.workflow.NoRollbackFlow;
 import org.zstack.header.errorcode.ErrorCode;
 import org.zstack.header.errorcode.ErrorCodeList;
 import org.zstack.header.errorcode.OperationFailureException;
@@ -47,8 +45,31 @@ import org.zstack.kvm.KVMAgentCommands;
 import org.zstack.kvm.KVMHostInventory;
 import org.zstack.kvm.KVMStartVmAddonExtensionPoint;
 import org.zstack.pciDevice.*;
-import org.zstack.pciDevice.specification.mdev.*;
-import org.zstack.pciDevice.virtual.PciDeviceVirtStatus;
+import org.zstack.pciDevice.entity.PciDeviceVO;
+import org.zstack.pciDevice.entity.PciDeviceVO_;
+import org.zstack.pciDevice.entity.specification.mdev.MdevDeviceSpecVO;
+import org.zstack.pciDevice.entity.specification.mdev.VmInstanceMdevDeviceSpecRefVO;
+import org.zstack.pciDevice.entity.specification.mdev.VmInstanceMdevDeviceSpecRefVO_;
+import org.zstack.pciDevice.entity.virtual.vfio_mdev.MdevDeviceInventory;
+import org.zstack.pciDevice.entity.virtual.vfio_mdev.MdevDeviceVO;
+import org.zstack.pciDevice.entity.virtual.vfio_mdev.MdevDeviceVO_;
+import org.zstack.pciDevice.header.HostIommuStateType;
+import org.zstack.pciDevice.header.HostIommuStatusType;
+import org.zstack.pciDevice.header.PciDeviceType;
+import org.zstack.pciDevice.header.virtual.PciDeviceVirtStatus;
+import org.zstack.pciDevice.header.virtual.vfio_mdev.MdevDeviceChooser;
+import org.zstack.pciDevice.header.virtual.vfio_mdev.MdevDeviceConstants;
+import org.zstack.pciDevice.header.virtual.vfio_mdev.MdevDeviceState;
+import org.zstack.pciDevice.header.virtual.vfio_mdev.MdevDeviceStatus;
+import org.zstack.pciDevice.header.virtual.vfio_mdev.MdevDeviceSystemTags;
+import org.zstack.pciDevice.header.virtual.vfio_mdev.MdevDeviceType;
+import org.zstack.pciDevice.message.virtual.vfio_mdev.CheckAndReserveMdevDeviceBySpecMsg;
+import org.zstack.pciDevice.message.virtual.vfio_mdev.CheckAndReserveMdevDeviceBySpecReply;
+import org.zstack.pciDevice.message.virtual.vfio_mdev.DetachMdevDeviceMsg;
+import org.zstack.pciDevice.message.virtual.vfio_mdev.MdevDeviceMessage;
+import org.zstack.pciDevice.spi.MdevDeviceManager;
+import org.zstack.pciDevice.spi.PciDeviceBackend;
+import org.zstack.pciDevice.spi.PciDeviceManagerInterface;
 import org.zstack.storage.migration.primary.APIPrimaryStorageMigrateVmMsg;
 import org.zstack.storage.migration.primary.APIPrimaryStorageMigrateVolumeMsg;
 import org.zstack.storage.primary.local.APILocalStorageMigrateVolumeMsg;
@@ -66,9 +87,9 @@ import static org.zstack.core.Platform.operr;
  */
 public class MdevDeviceManagerImpl extends AbstractService implements
         MdevDeviceManager,
-        HaHostDeviceExtensionPoint,
+        VmHaExtensionPoint,
         GlobalApiMessageInterceptor,
-        PostHostConnectExtensionPoint,
+        HostPostConnectedExtensionPoint,
         VmCapabilitiesExtensionPoint,
         KVMStartVmAddonExtensionPoint,
         VmInstanceMigrateExtensionPoint,
@@ -721,11 +742,11 @@ public class MdevDeviceManagerImpl extends AbstractService implements
     }
 
     @Override
-    public Flow createPostHostConnectFlow(HostInventory host) {
-        // try to re-splite pci devices in host because mdev devices cannot persist when the host is rebooted
-        return new NoRollbackFlow() {
-            @Override
-            public void run(FlowTrigger trigger, Map data) {
+    public Flow createPostHostConnectFlow() {
+        // try to re-split pci devices in host because mdev devices cannot persist when the host is rebooted
+        return Flow.of("split-pci-to-mdev-in-host")
+            .handle((trigger, data) -> {
+                HostInventory host = findInventoryFromFlowData(data);
                 List<PciDeviceVO> pcis = Q.New(PciDeviceVO.class)
                         .eq(PciDeviceVO_.hostUuid, host.getUuid())
                         .eq(PciDeviceVO_.virtStatus, PciDeviceVirtStatus.VFIO_MDEV_VIRTUALIZED)
@@ -735,7 +756,7 @@ public class MdevDeviceManagerImpl extends AbstractService implements
                     return;
                 }
 
-                logger.debug(String.format("try to re-splite pci devices[uuid:%s] into mdev devices",
+                logger.debug(String.format("try to re-split pci devices[uuid:%s] into mdev devices",
                         pcis.stream().map(PciDeviceVO::getUuid).collect(Collectors.toList())));
                 new While<>(pcis).each((pci, comp) -> {
                     PciDeviceBackend bkd = pciMgr.getPciDeviceBackendByHostUuid(host.getUuid());
@@ -752,13 +773,13 @@ public class MdevDeviceManagerImpl extends AbstractService implements
                     bkd.generateVfioMdevDevices(pci.getHostUuid(), pci.toInventory(), mdevSpec.toInventory(), mdevUuids, new Completion(comp) {
                         @Override
                         public void success() {
-                            logger.debug(String.format("tried to re-splited pci device[uuid:%s] into mdev devices", pci.getUuid()));
+                            logger.debug(String.format("tried to re-split pci device[uuid:%s] into mdev devices", pci.getUuid()));
                             comp.done();
                         }
 
                         @Override
                         public void fail(ErrorCode errorCode) {
-                            logger.error(String.format("failed to re-splited pci device[uuid:%s] into mdev devices", pci.getUuid()));
+                            logger.error(String.format("failed to re-split pci device[uuid:%s] into mdev devices", pci.getUuid()));
                             comp.done();
                         }
                     });
@@ -768,13 +789,13 @@ public class MdevDeviceManagerImpl extends AbstractService implements
                         trigger.next();
                     }
                 });
-            }
-        };
+            })
+            .build();
     }
 
     @Override
     @Transactional
-    public boolean canDoVmHa(String vmUuid) {
+    public ErrorCode preHaStartVm(String vmUuid) {
         // release mdev devices before check
         VmInstanceState state = Q.New(VmInstanceVO.class).eq(VmInstanceVO_.uuid, vmUuid).select(VmInstanceVO_.state).findValue();
         if (state == VmInstanceState.Stopped || state == VmInstanceState.Unknown) {
@@ -790,15 +811,19 @@ public class MdevDeviceManagerImpl extends AbstractService implements
                 .limit(1)
                 .findValue();
         if (StringUtils.isEmpty(hostUuid)) {
-            return true;
+            return null;
         }
 
-        // the vm can only start in the host where the pci device on
-        return Q.New(HostVO.class)
+        // the vm can only start in the host where the mdev device on
+        boolean oldHostReady = Q.New(HostVO.class)
                 .eq(HostVO_.uuid, hostUuid)
                 .eq(HostVO_.state, HostState.Enabled)
                 .eq(HostVO_.status, HostStatus.Connected)
                 .isExists();
+        if (oldHostReady) {
+            return null; // only can start on the old host
+        }
+        return operr("vm[%s] cannot start because mdev redirect host is not connected", vmUuid);
     }
 
     @Override
@@ -823,18 +848,15 @@ public class MdevDeviceManagerImpl extends AbstractService implements
 
     @Override
     public void failedToMigrateVm(VmInstanceInventory inv, String destHostUuid, ErrorCode reason) {
-        // release mdev devices if vm failed to migrate
-        detachMdevDevicesFromVm(inv.getUuid(), true, true, new Completion(null) {
-            @Override
-            public void success() {
-                logger.debug(String.format("auto detached mdev devices from vm[uuid:%s] because it failed to migrate", inv.getUuid()));
-            }
-
-            @Override
-            public void fail(ErrorCode errorCode) {
-                logger.error(String.format("failed to auto detach mdev devices from vm[uuid:%s] because it's failed to migrate", inv.getUuid()));
-            }
-        });
+        List<MdevDeviceVO> devices = Q.New(MdevDeviceVO.class)
+                .eq(MdevDeviceVO_.vmInstanceUuid, inv.getUuid())
+                .eq(MdevDeviceVO_.hostUuid, destHostUuid)
+                .eq(MdevDeviceVO_.status, MdevDeviceStatus.Attached)
+                .list();
+        devices.forEach(device -> device.setStatus(MdevDeviceStatus.Reserved));
+        if (!devices.isEmpty()) {
+            dbf.updateCollection(devices);
+        }
     }
 
     @Override

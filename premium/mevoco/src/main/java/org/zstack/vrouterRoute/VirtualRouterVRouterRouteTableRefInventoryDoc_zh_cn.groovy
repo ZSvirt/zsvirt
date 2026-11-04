@@ -10,12 +10,12 @@ doc {
 		name "virtualRouterVmUuid"
 		desc ""
 		type "String"
-		since "2.1"
+		since "zsv_2.1"
 	}
 	field {
 		name "routeTableUuid"
 		desc ""
 		type "String"
-		since "2.1"
+		since "zsv_2.1"
 	}
 }

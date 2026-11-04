@@ -159,7 +159,7 @@ public class TemplateConfigFacadeImpl extends AbstractService implements Templat
                 String gcKey = GlobalConfig.produceIdentity(c.getCategory(), c.getName());
                 GlobalConfig globalConfig = gcf.getAllConfig().get(gcKey);
                 globalConfig.updateValue(c.getValue());
-                GlobalConfigInventory.valueOf(globalConfig.reload());
+                GlobalConfigInventory.valueOf(((GlobalConfigRuntime) globalConfig).reload());
 
             } catch (GlobalConfigException e) {
                 errorList.add(e.getMessage());

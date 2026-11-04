@@ -4,7 +4,7 @@ import org.zstack.aliyunproxy.vpc.AliyunProxyVpcStatus
 import org.zstack.appliancevm.ApplianceVmStatus
 import org.zstack.header.vm.VmInstanceState
 import org.zstack.network.service.lb.LoadBalancerVO
-import org.zstack.pciDevice.PciDeviceSystemTags
+import org.zstack.pciDevice.header.PciDeviceSystemTags
 import org.zstack.pluginpremium.externalapiadapter.EcsSystemTags
 import org.zstack.pluginpremium.externalapiadapter.ExternalAPIAdapterUtils
 import org.zstack.pluginpremium.externalapiadapter.datatypes.SLBBackendServer

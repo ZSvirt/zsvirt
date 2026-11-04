@@ -3,11 +3,11 @@ package org.zstack.header.vm
 import org.zstack.header.vm.APISetVmStaticIpEvent
 
 doc {
-	title "指定云主机IP(SetVmStaticIp)"
+	title "指定虚拟机IP(SetVmStaticIp)"
 
 	category "vmInstance"
 
-	desc """给云主机网卡指定IP，用户可以通过该API控制ZStack分配给云主机网卡的IP。
+	desc """给虚拟机网卡指定IP，用户可以通过该API控制ZStack分配给虚拟机网卡的IP。
 
 用户要确保指定的IP在指定三层网络，并且IP未被占用。
 """
@@ -27,11 +27,11 @@ doc {
 				column {
 					name "vmInstanceUuid"
 					enclosedIn "setVmStaticIp"
-					desc "云主机UUID"
+					desc "虚拟机UUID"
 					location "url"
 					type "String"
 					optional false
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "l3NetworkUuid"
@@ -40,7 +40,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "ip"
@@ -49,7 +49,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "ip6"
@@ -58,7 +58,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 3.10"
+					since "zsv_3.10"
 				}
 				column {
 					name "systemTags"
@@ -67,7 +67,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "userTags"
@@ -76,7 +76,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "netmask"
@@ -85,7 +85,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "gateway"
@@ -94,7 +94,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "ipv6Gateway"
@@ -103,7 +103,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "ipv6Prefix"
@@ -112,7 +112,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 			}
 		}

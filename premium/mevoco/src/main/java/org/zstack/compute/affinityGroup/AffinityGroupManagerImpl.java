@@ -30,7 +30,7 @@ import org.zstack.header.vm.*;
 import org.zstack.header.vmscheduling.VmSchedulingRuleConstants;
 import org.zstack.identity.AccountManager;
 import org.zstack.identity.ResourceHelper;
-import org.zstack.tag.PatternedSystemTag;
+import org.zstack.tag.SystemTag;
 import org.zstack.tag.SystemTagCreator;
 import org.zstack.tag.SystemTagUtils;
 import org.zstack.tag.TagManager;
@@ -330,7 +330,7 @@ public class AffinityGroupManagerImpl extends AbstractService implements Affinit
     }
 
     public void createVmSystemTagForAffinityGroup(String agUuid, String vmUuid) {
-        PatternedSystemTag tag =  AffinityGroupSystemTags.AFFINITY_GROUP_UUID;
+        SystemTag tag =  AffinityGroupSystemTags.AFFINITY_GROUP_UUID;
 
         /* remove vm old nonherent systemTag  */
         if (tag.getTokenByResourceUuid(vmUuid, AffinityGroupSystemTags.AFFINITY_GROUP_UUID_TOKEN) != null) {
@@ -376,7 +376,7 @@ public class AffinityGroupManagerImpl extends AbstractService implements Affinit
 
     @Override
     public ErrorCode handleSystemTag(String vmUuid, List<String> tags) {
-        PatternedSystemTag tag =  AffinityGroupSystemTags.AFFINITY_GROUP_UUID;
+        SystemTag tag =  AffinityGroupSystemTags.AFFINITY_GROUP_UUID;
         String token = AffinityGroupSystemTags.AFFINITY_GROUP_UUID_TOKEN;
 
         String agUuid = SystemTagUtils.findTagValue(tags, tag, token);

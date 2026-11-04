@@ -15,10 +15,13 @@ import org.zstack.header.core.workflow.*;
 import org.zstack.header.errorcode.ErrorCode;
 import org.zstack.header.message.APIMessage;
 import org.zstack.header.message.Message;
+import org.zstack.log.LogConfigurationFactory;
+import org.zstack.log.LogConfigurationManager;
 
 import java.util.List;
 import java.util.Map;
 
+import static org.zstack.core.Platform.operr;
 import static org.zstack.utils.CollectionDSL.list;
 
 public class LogServerBase {
@@ -26,17 +29,20 @@ public class LogServerBase {
     private DatabaseFacade dbf;
     protected ThreadFacade thdf;
     private CascadeFacade casf;
+    private LogConfigurationManager manager;
 
     protected LogServerVO self;
 
     protected String syncThreadName;
 
-    public LogServerBase(LogServerVO self, CloudBus bus, DatabaseFacade dbf, ThreadFacade thdf, CascadeFacade casf) {
+    public LogServerBase(LogServerVO self, CloudBus bus, DatabaseFacade dbf, ThreadFacade thdf, CascadeFacade casf,
+                         LogConfigurationManager manager) {
         this.self = self;
         this.bus = bus;
         this.dbf = dbf;
         this.thdf = thdf;
         this.casf = casf;
+        this.manager = manager;
         this.syncThreadName = "log-server-" + self.getUuid();
     }
 
@@ -58,19 +64,15 @@ public class LogServerBase {
     }
 
     private void handle(DeleteLogServerConfigurationMsg msg) {
+        String type = self.getType().toString().toLowerCase();
+        LogConfigurationFactory factory = manager.getLogConfigurationFactory(type);
         DeleteLogServerConfigurationReply reply = new DeleteLogServerConfigurationReply();
-        deleteLogServer(new Completion(msg) {
-            @Override
-            public void success() {
-                bus.reply(msg, reply);
-            }
-
-            @Override
-            public void fail(ErrorCode errorCode) {
-                reply.setError(errorCode);
-                bus.reply(msg, reply);
-            }
-        });
+        if (factory == null) {
+            reply.setError(operr("No factory found for type:%s", type));
+        } else {
+            factory.deleteLogConfiguration(self.getUuid());
+        }
+        bus.reply(msg, reply);
     }
 
     private void handleApiMessage(APIMessage msg) {

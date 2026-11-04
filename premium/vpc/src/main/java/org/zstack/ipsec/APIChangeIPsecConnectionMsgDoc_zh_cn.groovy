@@ -28,7 +28,7 @@ doc {
 					location "url"
 					type "String"
 					optional false
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "peerAddress"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "authMode"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 					values ("psk","certs")
 				}
 				column {
@@ -56,7 +56,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "idType"
@@ -65,7 +65,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 					values ("ip","name","fqdn")
 				}
 				column {
@@ -75,7 +75,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "remoteId"
@@ -84,7 +84,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "ikeVersion"
@@ -93,7 +93,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 					values ("ike","ikev1","ikev2")
 				}
 				column {
@@ -103,7 +103,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 					values ("md5","sha1","sha256","sha384","sha512")
 				}
 				column {
@@ -113,7 +113,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 					values ("3des","aes-128","aes-192","aes-256")
 				}
 				column {
@@ -123,7 +123,7 @@ doc {
 					location "body"
 					type "int"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "ikeLifeTime"
@@ -132,7 +132,7 @@ doc {
 					location "body"
 					type "int"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "policyAuthAlgorithm"
@@ -141,7 +141,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 					values ("md5","sha1","sha256","sha384","sha512")
 				}
 				column {
@@ -151,7 +151,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 					values ("3des","aes-128","aes-192","aes-256")
 				}
 				column {
@@ -161,7 +161,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 					values ("none","dh-group2","dh-group5","dh-group14","dh-group15","dh-group16","dh-group17","dh-group18","dh-group19","dh-group20","dh-group21","dh-group22","dh-group23","dh-group24","dh-group25","dh-group26")
 				}
 				column {
@@ -171,7 +171,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 					values ("tunnel","transport")
 				}
 				column {
@@ -181,7 +181,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 					values ("esp","ah","ah-esp")
 				}
 				column {
@@ -191,7 +191,7 @@ doc {
 					location "body"
 					type "int"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "systemTags"
@@ -200,7 +200,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "userTags"
@@ -209,7 +209,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 			}
 		}

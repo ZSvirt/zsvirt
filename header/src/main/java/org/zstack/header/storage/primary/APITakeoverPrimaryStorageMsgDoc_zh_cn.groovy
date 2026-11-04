@@ -31,7 +31,7 @@ dryRun=true时仅执行一致性预检：若一致（无需接管）则返回错
 					location "url"
 					type "String"
 					optional false
-					since "zsv 5.0.0"
+					since "zsv_5.0.0"
 				}
 				column {
 					name "dryRun"
@@ -40,7 +40,7 @@ dryRun=true时仅执行一致性预检：若一致（无需接管）则返回错
 					location "body"
 					type "boolean"
 					optional true
-					since "zsv 5.0.0"
+					since "zsv_5.0.0"
 				}
 				column {
 					name "systemTags"
@@ -49,7 +49,7 @@ dryRun=true时仅执行一致性预检：若一致（无需接管）则返回错
 					location "body"
 					type "List"
 					optional true
-					since "zsv 5.0.0"
+					since "zsv_5.0.0"
 				}
 				column {
 					name "userTags"
@@ -58,7 +58,7 @@ dryRun=true时仅执行一致性预检：若一致（无需接管）则返回错
 					location "body"
 					type "List"
 					optional true
-					since "zsv 5.0.0"
+					since "zsv_5.0.0"
 				}
 			}
 		}

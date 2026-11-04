@@ -2,8 +2,6 @@ package org.zstack.header.host;
 
 import org.zstack.header.message.NeedReplyMessage;
 
-import java.util.List;
-
 public class ConfigSecondaryVmMsg extends NeedReplyMessage implements HostMessage {
     private String hostUuid;
     private String vmInstanceUuid;

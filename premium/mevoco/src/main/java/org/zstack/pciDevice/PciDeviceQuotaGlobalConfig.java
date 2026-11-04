@@ -4,6 +4,7 @@ import org.zstack.core.config.GlobalConfigDefinition;
 import org.zstack.core.config.GlobalConfigValidation;
 import org.zstack.core.config.GlobalConfig;
 import org.zstack.identity.QuotaGlobalConfig;
+import org.zstack.pciDevice.header.PciDeviceConstants;
 
 @GlobalConfigDefinition
 public class PciDeviceQuotaGlobalConfig extends QuotaGlobalConfig {

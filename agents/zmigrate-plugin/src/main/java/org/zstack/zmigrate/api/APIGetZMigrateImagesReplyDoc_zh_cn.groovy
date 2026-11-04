@@ -12,21 +12,21 @@ doc {
 		path "org.zstack.zmigrate.api.APIGetZMigrateImagesReply.images"
 		desc "获取ZMigrate网关镜像列表"
 		type "Map"
-		since "5.0.0"
+		since "zsv_5.0.0"
 		clz ImageInventory.class
 	}
 	field {
 		name "success"
 		desc ""
 		type "boolean"
-		since "5.0.0"
+		since "zsv_5.0.0"
 	}
 	ref {
 		name "error"
 		path "org.zstack.zmigrate.api.APIGetZMigrateImagesReply.error"
 		desc "错误码，若不为null，则表示操作失败, 操作成功时该字段为null"
 		type "ErrorCode"
-		since "5.0.0"
+		since "zsv_5.0.0"
 		clz ErrorCode.class
 	}
 }

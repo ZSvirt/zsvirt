@@ -3,7 +3,7 @@ package org.zstack.compute.sriov;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.zstack.compute.host.MevocoKVMAgentCommands;
 import org.zstack.compute.host.MevocoKVMConstant;
-import org.zstack.compute.host.PostHostConnectExtensionPoint;
+import org.zstack.header.host.spi.HostPostConnectedExtensionPoint;
 import org.zstack.core.asyncbatch.While;
 import org.zstack.core.cloudbus.CloudBus;
 import org.zstack.core.cloudbus.CloudBusCallBack;
@@ -13,8 +13,6 @@ import org.zstack.header.core.Completion;
 import org.zstack.header.core.NopeCompletion;
 import org.zstack.header.core.WhileDoneCompletion;
 import org.zstack.header.core.workflow.Flow;
-import org.zstack.header.core.workflow.FlowTrigger;
-import org.zstack.header.core.workflow.NoRollbackFlow;
 import org.zstack.header.errorcode.ErrorCode;
 import org.zstack.header.errorcode.ErrorCodeList;
 import org.zstack.header.host.HostConstant;
@@ -23,16 +21,33 @@ import org.zstack.header.host.HypervisorType;
 import org.zstack.header.message.MessageReply;
 import org.zstack.header.network.l3.L3NetworkVO;
 import org.zstack.header.network.l3.L3NetworkVO_;
-import org.zstack.header.vm.*;
+import org.zstack.header.vm.VmDetachNicExtensionPoint;
+import org.zstack.header.vm.VmInstanceAttachNicExtensionPoint;
+import org.zstack.header.vm.VmInstanceConstant;
+import org.zstack.header.vm.VmInstanceInventory;
+import org.zstack.header.vm.VmInstanceMigrateExtensionPoint;
+import org.zstack.header.vm.VmInstanceStartExtensionPoint;
+import org.zstack.header.vm.VmInstanceStartNewCreatedVmExtensionPoint;
+import org.zstack.header.vm.VmInstanceState;
+import org.zstack.header.vm.VmInstanceStopExtensionPoint;
+import org.zstack.header.vm.VmInstanceVO;
+import org.zstack.header.vm.VmInstanceVO_;
+import org.zstack.header.vm.VmNicInventory;
+import org.zstack.header.vm.VmNicVO;
+import org.zstack.header.vm.VmNicVO_;
 import org.zstack.kvm.KVMConstant;
 import org.zstack.kvm.KVMHostAsyncHttpCallMsg;
 import org.zstack.kvm.KVMHostAsyncHttpCallReply;
-import org.zstack.pciDevice.PciDeviceInventory;
+import org.zstack.pciDevice.entity.PciDeviceInventory;
 import org.zstack.utils.Utils;
 import org.zstack.utils.gson.JSONObjectUtil;
 import org.zstack.utils.logging.CLogger;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -40,7 +55,7 @@ import java.util.stream.Collectors;
  */
 public class VmVfNicKvmBackend implements VmVfNicHypervisorBackend, VmInstanceStartNewCreatedVmExtensionPoint,
         VmInstanceStartExtensionPoint, VmInstanceStopExtensionPoint, VmInstanceMigrateExtensionPoint,
-        VmInstanceAttachNicExtensionPoint, VmDetachNicExtensionPoint, PostHostConnectExtensionPoint {
+        VmInstanceAttachNicExtensionPoint, VmDetachNicExtensionPoint, HostPostConnectedExtensionPoint {
     private static final CLogger logger = Utils.getLogger(VmVfNicKvmBackend.class);
     private static final VfPciDeviceUtils vfPciDeviceUtils = new VfPciDeviceUtils();
 
@@ -560,12 +575,10 @@ public class VmVfNicKvmBackend implements VmVfNicHypervisorBackend, VmInstanceSt
     }
 
     @Override
-    public Flow createPostHostConnectFlow(HostInventory host) {
-        return new NoRollbackFlow() {
-            String __name__ = "update-vnic-macs-for-sr-iov";
-
-            @Override
-            public void run(FlowTrigger trigger, Map data) {
+    public Flow createPostHostConnectFlow() {
+        return Flow.of("update-vnic-macs-for-sr-iov")
+            .handle((trigger, data) -> {
+                HostInventory host = findInventoryFromFlowData(data);
                 Map<String, List<VmNicInventory>> nicMaps = getSriovFdbInfoByHost(host);
                 if (nicMaps.isEmpty()) {
                     logger.debug(String.format("update sr-iov fdb for host[uuid:%s, name:%s] successfully",
@@ -591,12 +604,12 @@ public class VmVfNicKvmBackend implements VmVfNicHypervisorBackend, VmInstanceSt
                         @Override
                         public void fail(ErrorCode errorCode) {
                             logger.debug(String.format("update sr-iov fdb for host[uuid:%s, name:%s] failed, because %s",
-                                    host.getUuid(), host.getName(), errorCode.getMessages()));
+                                    host.getUuid(), host.getName(), errorCode.getDetails()));
                             trigger.next();
                         }
                     });
                 }
-            }
-        };
+            })
+            .build();
     }
 }

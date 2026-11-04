@@ -10,36 +10,36 @@ doc {
 		name "id"
 		desc ""
 		type "String"
-		since "0.6"
+		since "zsv_0.6"
 	}
 	field {
 		name "priority"
 		desc ""
 		type "String"
-		since "0.6"
+		since "zsv_0.6"
 	}
 	field {
 		name "state"
 		desc ""
 		type "String"
-		since "0.6"
+		since "zsv_0.6"
 	}
 	field {
 		name "deadTime"
 		desc ""
 		type "String"
-		since "0.6"
+		since "zsv_0.6"
 	}
 	field {
 		name "neighborAddress"
 		desc ""
 		type "String"
-		since "0.6"
+		since "zsv_0.6"
 	}
 	field {
 		name "device"
 		desc ""
 		type "String"
-		since "0.6"
+		since "zsv_0.6"
 	}
 }

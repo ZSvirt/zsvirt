@@ -1,6 +1,7 @@
 package org.zstack.identity.rbac;
 
 import org.zstack.core.db.Q;
+import org.zstack.core.db.SQL;
 import org.zstack.header.exception.CloudRuntimeException;
 import org.zstack.header.identity.AccessLevel;
 import org.zstack.header.identity.AccountResourceRefVO;
@@ -9,11 +10,13 @@ import org.zstack.header.identity.rbac.RBAC;
 import org.zstack.header.message.APIResourceScope;
 import org.zstack.header.vo.ResourceVO;
 import org.zstack.header.vo.ResourceVO_;
-import org.zstack.identity.ResourceHelper;
+import org.zstack.identity.Account;
 
 import javax.persistence.Tuple;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -29,6 +32,11 @@ import static org.zstack.utils.CollectionUtils.*;
 public class AccessibleResourceChecker {
     public final String accountUuid;
     private boolean allowGlobalReadableResource = false;
+    /**
+     * When true, every resource is accessible (including MustOwner).
+     * Default false: treat as a normal account even if {@link #accountUuid} is an admin.
+     */
+    private boolean treatAsAdmin = false;
     private APIResourceScope scope = APIResourceScope.AllowedSharing;
     private Class<?> resourceType;
 
@@ -45,6 +53,21 @@ public class AccessibleResourceChecker {
         return this;
     }
 
+    public AccessibleResourceChecker asNormalAccount() {
+        this.treatAsAdmin = false;
+        return this;
+    }
+
+    public AccessibleResourceChecker asSystemAdmin() {
+        this.treatAsAdmin = true;
+        return this;
+    }
+
+    public AccessibleResourceChecker asDetectedAdmin() {
+        this.treatAsAdmin = Account.isAdminPermission(accountUuid);
+        return this;
+    }
+
     public AccessibleResourceChecker withScope(APIResourceScope scope) {
         this.scope = scope;
         return this;
@@ -56,11 +79,72 @@ public class AccessibleResourceChecker {
     }
 
     public boolean isAccessible(String resourceUuid) {
-        return findOutAllInaccessibleResources(Collections.singletonList(resourceUuid)).isEmpty();
+        if (resourceUuid == null) {
+            return false;
+        }
+        return !filterAccessible(Collections.singletonList(resourceUuid)).isEmpty();
+    }
+
+    /**
+     * Resource visible -> include
+     * Resource invisible -> exclude
+     * Resource missing -> exclude
+     */
+    public List<String> filterAccessible(Collection<String> resourceUuids) {
+        return partitionByAccessibility(resourceUuids, true);
+    }
+
+    /**
+     * Resource visible -> exclude
+     * Resource invisible -> include
+     * Resource missing -> exclude
+     */
+    public List<String> filterInaccessible(Collection<String> resourceUuids) {
+        return partitionByAccessibility(resourceUuids, false);
+    }
+
+    private List<String> partitionByAccessibility(Collection<String> resourceUuids, boolean keepAccessible) {
+        if (isEmpty(resourceUuids)) {
+            return Collections.emptyList();
+        }
+
+        List<String> queried = new ArrayList<>(resourceUuids.size());
+        for (String uuid : resourceUuids) {
+            if (uuid != null) {
+                queried.add(uuid);
+            }
+        }
+        if (queried.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        Set<String> existing = new HashSet<>(Q.New(ResourceVO.class)
+                .select(ResourceVO_.uuid)
+                .in(ResourceVO_.uuid, queried)
+                .listValues());
+        if (existing.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        Set<String> inaccessible = new HashSet<>(findOutAllInaccessibleResources(new ArrayList<>(existing)));
+        List<String> result = new ArrayList<>(queried.size());
+        for (String uuid : resourceUuids) {
+            if (uuid == null || !existing.contains(uuid)) {
+                continue;
+            }
+            if (keepAccessible != inaccessible.contains(uuid)) {
+                result.add(uuid);
+            }
+        }
+        return result;
     }
 
     public List<String> findOutAllInaccessibleResources(List<String> resourceUuids) {
         if (isEmpty(resourceUuids)) {
+            return Collections.emptyList();
+        }
+
+        if (treatAsAdmin) {
             return Collections.emptyList();
         }
 
@@ -107,8 +191,18 @@ public class AccessibleResourceChecker {
     }
 
     private List<String> findInaccessibleResourcesWithAllowedSharingScope(List<String> resourceUuids) {
-        List<String> auuids = ResourceHelper.filterAccessibleResources(resourceUuids, accountUuid);
-        return resourceUuids.stream().filter(uuid -> !auuids.contains(uuid)).collect(Collectors.toList());
+        if (isEmpty(resourceUuids)) {
+            return Collections.emptyList();
+        }
+
+        List<String> accessible = SQL.New("select distinct ref.resourceUuid from AccountResourceRefVO ref " +
+                "where (ref.accountUuid = :accountUuid or ref.type = 'SharePublic') and ref.resourceUuid in (:ruuids)",
+                String.class)
+                .param("ruuids", resourceUuids)
+                .param("accountUuid", accountUuid)
+                .list();
+        Set<String> accessibleSet = new HashSet<>(accessible);
+        return resourceUuids.stream().filter(uuid -> !accessibleSet.contains(uuid)).collect(Collectors.toList());
     }
 
     private List<String> findInaccessibleResourcesWithMustOwnerScope(List<String> resourceUuids) {

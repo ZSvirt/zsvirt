@@ -10,48 +10,48 @@ doc {
 		name "OFF"
 		desc ""
 		type "LogLevel"
-		since "1.0.1, zsv 5.1.0"
+		since "1.0.0, zsv_5.1.0"
 	}
 	field {
 		name "FATAL"
 		desc ""
 		type "LogLevel"
-		since "1.0.1, zsv 5.1.0"
+		since "1.0.0, zsv_5.1.0"
 	}
 	field {
 		name "ERROR"
 		desc ""
 		type "LogLevel"
-		since "1.0.1, zsv 5.1.0"
+		since "1.0.0, zsv_5.1.0"
 	}
 	field {
 		name "WARN"
 		desc ""
 		type "LogLevel"
-		since "1.0.1, zsv 5.1.0"
+		since "1.0.0, zsv_5.1.0"
 	}
 	field {
 		name "INFO"
 		desc ""
 		type "LogLevel"
-		since "1.0.1, zsv 5.1.0"
+		since "1.0.0, zsv_5.1.0"
 	}
 	field {
 		name "DEBUG"
 		desc ""
 		type "LogLevel"
-		since "1.0.1, zsv 5.1.0"
+		since "1.0.0, zsv_5.1.0"
 	}
 	field {
 		name "TRACE"
 		desc ""
 		type "LogLevel"
-		since "1.0.1, zsv 5.1.0"
+		since "1.0.0, zsv_5.1.0"
 	}
 	field {
 		name "ALL"
 		desc ""
 		type "LogLevel"
-		since "1.0.1, zsv 5.1.0"
+		since "1.0.0, zsv_5.1.0"
 	}
 }

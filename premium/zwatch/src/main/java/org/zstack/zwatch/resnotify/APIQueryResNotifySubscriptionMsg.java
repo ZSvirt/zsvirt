@@ -5,7 +5,7 @@ import org.zstack.header.identity.Action;
 import org.zstack.header.query.APIQueryMessage;
 import org.zstack.header.query.AutoQuery;
 import org.zstack.header.rest.RestRequest;
-import org.zstack.zwatch.ZWatchConstants;
+import org.zstack.zwatch.header.ZWatchConstants;
 
 @Action(category = ZWatchConstants.CATEGORY)
 @AutoQuery(replyClass = APIQueryResNotifySubscriptionReply.class, inventoryClass = ResNotifySubscriptionInventory.class)

@@ -7,7 +7,7 @@ import org.zstack.header.rest.RestRequest;
 
 import java.util.List;
 
-import static java.util.Arrays.asList;
+import static org.zstack.utils.CollectionDSL.list;
 
 @AutoQuery(replyClass = APIQueryIpRangeReply.class, inventoryClass = IpRangeInventory.class)
 @RestRequest(
@@ -17,9 +17,7 @@ import static java.util.Arrays.asList;
         responseClass = APIQueryIpRangeReply.class
 )
 public class APIQueryIpRangeMsg extends APIQueryMessage {
-
     public static List<String> __example__() {
-        return asList(String.format("uuid=" + uuid()));
+        return list(String.format("uuid=" + uuid(IpRangeVO.class)));
     }
-
 }

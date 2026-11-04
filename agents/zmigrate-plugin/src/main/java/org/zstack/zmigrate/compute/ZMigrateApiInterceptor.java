@@ -12,6 +12,8 @@ import org.zstack.header.apimediator.GlobalApiMessageInterceptor;
 import org.zstack.header.apimediator.InterceptorForService;
 import org.zstack.header.image.ImageInventory;
 import org.zstack.header.message.APIMessage;
+import org.zstack.header.vm.APICreateVmInstanceMsg;
+import org.zstack.mevoco.MevocoConstants;
 import org.zstack.softwarePackage.entity.SoftwarePackageStatus;
 import org.zstack.softwarePackage.entity.SoftwarePackageVO;
 import org.zstack.softwarePackage.entity.SoftwarePackageVO_;
@@ -27,11 +29,12 @@ import java.util.Map;
 import java.util.Objects;
 
 import static org.zstack.core.Platform.argerr;
-import static org.zstack.zmigrate.ZMigrateConstant.ZMIGRATE_SOFTWARE_IMAGE_COUNT;
 import static org.zstack.zmigrate.ZMigrateConstant.ZMIGRATE_SOFTWARE_PACKAGE_TYPE;
+import static org.zstack.zmigrate.ZMigrateSystemTags.ZMIGRATE_GATEWAY_UPGRADE_IMAGE_TOKEN;
 import static org.zstack.zmigrate.compute.ZMigrateUtils.getSoftwarePackageUuid;
 import static org.zstack.zmigrate.compute.ZMigrateUtils.findZMigrateVmUuid;
 import static org.zstack.zmigrate.compute.ZMigrateUtils.getZMigrateUpgradeImages;
+import static org.zstack.zmigrate.compute.ZMigrateUtils.isZMigrateGatewayImage;
 import static org.zstack.zmigrate.ZMigrateSystemTags.ZMIGRATE_MANAGEMENT;
 
 @InterceptorForService("ZMigratePlugin")
@@ -51,8 +54,16 @@ public class ZMigrateApiInterceptor implements ApiMessageInterceptor, GlobalApiM
             validate((APIGetZMigrateInfosMsg) msg);
         } else if (msg instanceof APIGetZMigrateGatewayVmInstancesMsg) {
             validate((APIGetZMigrateGatewayVmInstancesMsg) msg);
+        } else if (msg instanceof APICreateVmInstanceMsg) {
+            validate((APICreateVmInstanceMsg) msg);
         }
         return msg;
+    }
+
+    private void validate(APICreateVmInstanceMsg msg) {
+        if (isZMigrateGatewayImage(msg.getImageUuid())) {
+            msg.setType(MevocoConstants.MEVOCO_VM_TYPE);
+        }
     }
 
     private void validate(APIUploadAndExecuteSoftwareUpgradePackageMsg msg) {
@@ -110,13 +121,13 @@ public class ZMigrateApiInterceptor implements ApiMessageInterceptor, GlobalApiM
                 }
 
                 if (Objects.equals(msg.getUpgradeType(), UpgradeType.Reexecute.toString())) {
-                    if (upgradeImages.size() != ZMIGRATE_SOFTWARE_IMAGE_COUNT) {
+                    if (!upgradeImages.containsKey(ZMIGRATE_GATEWAY_UPGRADE_IMAGE_TOKEN)) {
                         throw new ApiMessageInterceptionException(argerr(
                                 "the upgrade images for software package [uuid:%s] are incomplete: " +
-                                        "expected %s images but found %s. " +
+                                        "the required Linux Gateway image is missing. " +
                                         "Please clean the residual images using APICleanUpgradeSoftwarePackageMsg " +
                                         "and re-upload the upgrade package",
-                                msg.getUuid(), ZMIGRATE_SOFTWARE_IMAGE_COUNT, upgradeImages.size()));
+                                msg.getUuid()));
                     }
                 }
 
@@ -182,7 +193,8 @@ public class ZMigrateApiInterceptor implements ApiMessageInterceptor, GlobalApiM
                 APIUploadAndExecuteSoftwareUpgradePackageMsg.class,
                 APIUploadSoftwarePackageToBackupStorageMsg.class,
                 APIGetZMigrateInfosMsg.class,
-                APIGetZMigrateGatewayVmInstancesMsg.class);
+                APIGetZMigrateGatewayVmInstancesMsg.class,
+                APICreateVmInstanceMsg.class);
     }
 
     @Override

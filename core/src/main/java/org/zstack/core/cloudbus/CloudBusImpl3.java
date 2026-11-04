@@ -448,7 +448,7 @@ public class CloudBusImpl3 implements CloudBus, CloudBusIN {
             }
 
             if (logger.isTraceEnabled()) {
-                logger.trace(String.format("%s in message%s is set, drop reply%s", NO_NEED_REPLY_MSG,
+                logger.trace(String.format("%s in message %s is set, drop reply%s", NO_NEED_REPLY_MSG,
                         dumpMessage(request), dumpMessage(reply)));
             }
 
@@ -1168,12 +1168,12 @@ public class CloudBusImpl3 implements CloudBus, CloudBusIN {
         });
 
         for (MarshalReplyMessageExtensionPoint extp : pluginRgty.getExtensionList(MarshalReplyMessageExtensionPoint.class)) {
-            List<Class> clazzs = extp.getReplyMessageClassForMarshalExtensionPoint();
+            List<Class<? extends Message>> clazzs = extp.getReplyMessageClassForMarshalExtensionPoint();
             if (clazzs == null || clazzs.isEmpty()) {
                 continue;
             }
 
-            for (Class clz : clazzs) {
+            for (Class<? extends Message> clz : clazzs) {
                 if (!(APIEvent.class.isAssignableFrom(clz)) && !(MessageReply.class.isAssignableFrom(clz))) {
                     throw new CloudRuntimeException(String.format("ReplyMessagePreSendingExtensionPoint can only marshal APIEvent or MessageReply. %s claimed by %s is neither APIEvent nor MessageReply",
                             clz.getName(), extp.getClass().getName()));
@@ -1291,19 +1291,28 @@ public class CloudBusImpl3 implements CloudBus, CloudBusIN {
 
     @AsyncThread
     public void handleHttpRequest(HttpEntity<String> e, HttpServletResponse rsp) {
+        Message msg;
+        Map raw;
         try {
-            Message msg = CloudBusGson.fromJson(e.getBody());
-            Map raw = JSONObjectUtil.toObject(e.getBody(), LinkedHashMap.class);
-            try {
-                restoreFromSchema(msg, raw);
-            } catch (ClassNotFoundException e1) {
-                throw new CloudRuntimeException(e1);
-            }
+            msg = CloudBusGson.fromJson(e.getBody());
+            raw = JSONObjectUtil.toObject(e.getBody(), LinkedHashMap.class);
+        } catch (Exception exception) {
+            logger.warn("unable to parse message from HTTP", exception);
+            return;
+        }
 
+        try {
+            restoreFromSchema(msg, raw);
+        } catch (ClassNotFoundException e1) {
+            throw new CloudRuntimeException(e1);
+        }
+
+        try {
             new MessageSender(msg).localSend();
             rsp.setStatus(HttpStatus.OK.value());
         } catch (Throwable t) {
-            logger.warn(String.format("unable to deliver a message received from HTTP. HTTP body: %s", e.getBody()), t);
+            logger.warn(String.format("unable to deliver a message received from HTTP. HTTP body: %s",
+                    CloudBusGson.toLogSafeJson(msg)), t);
         }
     }
 

@@ -13,7 +13,6 @@ import org.zstack.core.db.DatabaseFacade;
 import org.zstack.core.errorcode.ErrorFacade;
 import org.zstack.header.core.Completion;
 import org.zstack.header.core.WhileDoneCompletion;
-import org.zstack.header.errorcode.ErrorCode;
 import org.zstack.header.errorcode.ErrorCodeList;
 import org.zstack.header.message.MessageReply;
 import org.zstack.utils.Utils;
@@ -82,13 +81,12 @@ public class AutoScalingGroupCascadeExtension extends AbstractAsyncCascadeExtens
             msgs.add(msg);
         }
 
-        List<ErrorCode> errorCodes = Collections.synchronizedList(new LinkedList<ErrorCode>());
         new While<>(msgs).step((deleteMsg, whileCompletion) -> {
             bus.send(deleteMsg, new CloudBusCallBack(completion) {
                 @Override
                 public void run(MessageReply reply) {
                     if (!reply.isSuccess()) {
-                        errorCodes.add(reply.getError());
+                        whileCompletion.addError(reply.getError());
                     }
                     whileCompletion.done();
                 }
@@ -96,12 +94,7 @@ public class AutoScalingGroupCascadeExtension extends AbstractAsyncCascadeExtens
         },10).run(new WhileDoneCompletion(completion) {
             @Override
             public void done(ErrorCodeList errorCodeList) {
-                if (errorCodes.isEmpty()) {
-                    completion.success();
-                    return;
-                }
-
-                completion.fail(errorCodes.get(0));
+                completion.next(errorCodeList.wrapOrNull());
             }
         });
     }

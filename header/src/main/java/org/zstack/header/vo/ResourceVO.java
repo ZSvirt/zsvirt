@@ -14,7 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Entity
 @Table
 @Inheritance(strategy = InheritanceType.JOINED)
-public class ResourceVO {
+public class ResourceVO implements ResourceVODefinition {
     @Id
     @Column
     @Index

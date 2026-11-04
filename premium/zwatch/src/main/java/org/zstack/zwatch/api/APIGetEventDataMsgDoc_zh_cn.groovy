@@ -28,7 +28,7 @@ doc {
 					location "query"
 					type "Long"
 					optional true
-					since "2.3"
+					since "zsv_2.3"
 				}
 				column {
 					name "endTime"
@@ -37,7 +37,7 @@ doc {
 					location "query"
 					type "Long"
 					optional true
-					since "2.3"
+					since "zsv_2.3"
 				}
 				column {
 					name "limit"
@@ -46,7 +46,7 @@ doc {
 					location "query"
 					type "Integer"
 					optional true
-					since "2.3"
+					since "zsv_2.3"
 				}
 				column {
 					name "labels"
@@ -55,7 +55,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "2.3"
+					since "zsv_2.3"
 				}
 				column {
 					name "latest"
@@ -64,7 +64,7 @@ doc {
 					location "query"
 					type "boolean"
 					optional true
-					since "2.3"
+					since "zsv_2.3"
 				}
 				column {
 					name "systemTags"
@@ -73,7 +73,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "2.3"
+					since "zsv_2.3"
 				}
 				column {
 					name "userTags"
@@ -82,7 +82,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "2.3"
+					since "zsv_2.3"
 				}
 				column {
 					name "offsetAheadOfCurrentTime"
@@ -91,7 +91,7 @@ doc {
 					location "query"
 					type "Long"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "conditions"
@@ -100,7 +100,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "count"
@@ -109,7 +109,7 @@ doc {
 					location "query"
 					type "boolean"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "start"
@@ -118,7 +118,7 @@ doc {
 					location "query"
 					type "Integer"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "conditionExpression"
@@ -127,7 +127,7 @@ doc {
 					location "query"
 					type "String"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "endpointUuid"
@@ -136,7 +136,7 @@ doc {
 					location "query"
 					type "String"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 			}
 		}

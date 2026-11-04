@@ -38,15 +38,17 @@ public class APICreateAllocatorDomainMsg extends APICreateMessage implements API
      * @desc ordered allocator-domain rules. List order is the evaluation order and must be preserved.
      * On persist, the list index is stored as priority starting at 0.
      *
-     * Rules are applied top-down like a Linux iptables / nftables chain. Hard (Include / Exclude)
-     * and soft (Recommend / NotRecommend) are two tracks: the first matching hard rule is the
-     * membership verdict and later hard rules are skipped for that candidate; the first matching
-     * soft rule only affects sort order and does not stop the hard track.
+     * Host/Cluster, PrimaryStorage, and L3 are separate chains. In each chain every matching
+     * rule is applied top-down and a later rule overrides the earlier verdict for that
+     * candidate. Hard (Include / Exclude) decides membership; soft (Recommend / NotRecommend)
+     * only affects sort order, only if the candidate is already included, and does not stop
+     * the hard track. A later soft rule also overrides an earlier soft rule.
      *
-     * Overlapping selectors therefore depend on order. Example: Exclude host H, then Include cluster
-     * C that contains H → H is denied. Reverse the two → H is allowed because the cluster Include
-     * matches first. Put more specific rules before broader ones when you need exceptions, exactly
-     * as you would put a host ACCEPT before a subnet DROP.
+     * If any Include exists in a chain, that chain is a whitelist; otherwise it is a blacklist.
+     * Overlapping selectors therefore depend on order. Example: Exclude host H, then Include
+     * cluster C that contains H → H is allowed. Reverse the two → H is denied. Put exceptions
+     * after broader rules. PrimaryStorage resourceQualifier Root / Data scopes that rule;
+     * empty applies to both.
      */
     @APIParam(required = false)
     private List<AllocatorDomainRuleParam> rules;

@@ -2253,7 +2253,7 @@ public class CephPrimaryStorageBase extends PrimaryStorageBase {
     @Override
     protected void handle(APICleanUpImageCacheOnPrimaryStorageMsg msg) {
         APICleanUpImageCacheOnPrimaryStorageEvent evt = new APICleanUpImageCacheOnPrimaryStorageEvent(msg.getId());
-        imageCacheCleaner.cleanup(msg.getUuid(), false);
+        imageCacheCleaner.cleanup(msg.getUuid(), new ImageCacheCleanParam(true, msg.isForce()));
         bus.publish(evt);
     }
 
@@ -2889,6 +2889,7 @@ public class CephPrimaryStorageBase extends PrimaryStorageBase {
                             return;
                         }
 
+                        msg.getVolume().setInstallPath(volumePath);
                         ResizeVolumeOnPrimaryStorageMsg rmsg = new ResizeVolumeOnPrimaryStorageMsg();
                         rmsg.setVolume(msg.getVolume());
                         rmsg.setSize(msg.getVolume().getSize());
@@ -4229,7 +4230,6 @@ public class CephPrimaryStorageBase extends PrimaryStorageBase {
 
                         DebugUtils.Assert(!mons.isEmpty(), "how can be no connected MON !!!???");
 
-                        List<ErrorCode> errors = new ArrayList<>();
                         new While<>(mons).each((mon, compl) -> {
                             GetFactsCmd cmd = new GetFactsCmd();
                             cmd.uuid = self.getUuid();
@@ -4253,15 +4253,15 @@ public class CephPrimaryStorageBase extends PrimaryStorageBase {
                                 @Override
                                 public void fail(ErrorCode errorCode) {
                                     // one mon cannot get the facts, directly error out
-                                    errors.add(errorCode);
+                                    compl.addError(errorCode);
                                     compl.allDone();
                                 }
                             });
                         }).run(new WhileDoneCompletion(trigger) {
                             @Override
                             public void done(ErrorCodeList errorCodeList) {
-                                if (!errors.isEmpty()) {
-                                    trigger.fail(errors.get(0));
+                                if (errorCodeList.hasError()) {
+                                    trigger.fail(errorCodeList.wrapOrNull());
                                     return;
                                 }
 
@@ -5349,12 +5349,10 @@ public class CephPrimaryStorageBase extends PrimaryStorageBase {
         }
 
         final SetupSelfFencerOnKvmHostReply reply = new SetupSelfFencerOnKvmHostReply();
-        new KvmCommandSender(param.getHostUuid()).send(cmd, KVM_HA_SETUP_SELF_FENCER, new KvmCommandFailureChecker() {
-            @Override
-            public ErrorCode getError(KvmResponseWrapper wrapper) {
-                AgentResponse rsp = wrapper.getResponse(AgentResponse.class);
-                return rsp.isSuccess() ? null : operr("%s", rsp.getError());
-            }
+        new KvmCommandSender(param.getHostUuid(), param.isSkipStatusCheck())
+        .send(cmd, KVM_HA_SETUP_SELF_FENCER, wrapper -> {
+            AgentResponse rsp = wrapper.getResponse(AgentResponse.class);
+            return rsp.isSuccess() ? null : operr("%s", rsp.getError());
         }, new ReturnValueCompletion<KvmResponseWrapper>(msg) {
             @Override
             public void success(KvmResponseWrapper wrapper) {

@@ -3,7 +3,7 @@ package org.zstack.header.vm
 import org.zstack.header.vm.APIGetVmvNUMATopologyReply
 
 doc {
-	title "获取云主机的vNUMA拓扑"
+	title "获取虚拟机的vNUMA拓扑"
 
 	category "vm"
 
@@ -24,11 +24,11 @@ doc {
 				column {
 					name "uuid"
 					enclosedIn ""
-					desc "云主机UUID"
+					desc "虚拟机UUID"
 					location "url"
 					type "String"
 					optional false
-					since "3.13.12"
+					since "zsv_3.13.12"
 				}
 				column {
 					name "systemTags"
@@ -37,7 +37,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "3.13.12"
+					since "zsv_3.13.12"
 				}
 				column {
 					name "userTags"
@@ -46,7 +46,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "3.13.12"
+					since "zsv_3.13.12"
 				}
 			}
 		}

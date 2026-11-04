@@ -12,21 +12,21 @@ doc {
 		path "org.zstack.storage.device.nvme.APIQueryNvmeServerReply.inventories"
 		desc "NVMe服务器清单列表"
 		type "List"
-		since "3.17.21"
+		since "zsv_3.17.21"
 		clz NvmeServerInventory.class
 	}
 	field {
 		name "success"
 		desc ""
 		type "boolean"
-		since "3.17.21"
+		since "zsv_3.17.21"
 	}
 	ref {
 		name "error"
 		path "org.zstack.storage.device.nvme.APIQueryNvmeServerReply.error"
 		desc "错误码，若不为null，则表示操作失败, 操作成功时该字段为null"
 		type "ErrorCode"
-		since "3.17.21"
+		since "zsv_3.17.21"
 		clz ErrorCode.class
 	}
 }

@@ -29,7 +29,6 @@ import org.zstack.header.query.APIQueryMessage
 import org.zstack.header.rest.APINoSee
 import org.zstack.header.rest.RestRequest
 import org.zstack.header.rest.RestResponse
-import org.zstack.resourceconfig.BindResourceConfig
 import org.zstack.rest.RestConstants
 import org.zstack.rest.sdk.DocumentGenerator
 import org.zstack.utils.*
@@ -263,7 +262,13 @@ class RestDocumentationGenerator implements DocumentGenerator {
                 } else {
                     c.setValue(StringTemplate.substitute(c.getValue(), propertiesMap))
                 }
-                GlobalConfig config = GlobalConfig.valueOf(c)
+                GlobalConfig config = new GlobalConfig(c.getCategory(), c.getName())
+                config.value = c.value
+                config.type = c.type
+                config.description = c.description
+                config.defaultValue = c.defaultValue
+                config.validatorRegularExpression = c.validatorRegularExpression
+
                 if (configs.containsKey(config.getIdentity())) {
                     throw new IllegalArgumentException(
                             String.format("duplicate GlobalConfig[category: %s, name: %s]",
@@ -451,7 +456,7 @@ class RestDocumentationGenerator implements DocumentGenerator {
             "name": "资源名称",
             "description": "资源的详细描述",
             "primaryStorageUuid": "主存储UUID",
-            "vmInstanceUuid": "云主机UUID",
+            "vmInstanceUuid": "虚拟机UUID",
             "imageUuid": "镜像UUID",
             "backupStorageUuid": "镜像存储UUID",
             "volumeUuid": "云盘UUID",
@@ -468,7 +473,7 @@ class RestDocumentationGenerator implements DocumentGenerator {
             "ipRangeUuid": "IP段UUID",
             "instanceOfferingUuid": "计算规格UUID",
             "vipUuid": "VIP UUID",
-            "vmNicUuid": "云主机网卡UUID",
+            "vmNicUuid": "虚拟机网卡UUID",
             "networkServiceProviderUuid": "网络服务提供模块UUID",
             "virtualRouterUuid": "云路由UUID",
             "securityGroupUuid": "安全组UUID",
@@ -513,18 +518,35 @@ class RestDocumentationGenerator implements DocumentGenerator {
     }
 
     void tryInitVersionOfCurrentRepo() {
-        def f = new File("${rootPath}/VERSION")
-        if (!f.exists()) {
-            println("missing version file[path: ${rootPath}/VERSION]")
-            return
+        def openVersionFile = new File("${rootPath}/VERSION")
+        String openVersion = "???"
+        if (openVersionFile.exists() && openVersionFile.canRead()) {
+            def versionNumber = []
+            FileUtils.readLines(openVersionFile).each { String line ->
+                versionNumber.add(line.split("=")[1].trim())
+            }
+            openVersion = versionNumber.join(".")
+        } else {
+            println("failed to read open version file[path: ${openVersionFile.path}]")
         }
 
-        def versionNumber = []
-        FileUtils.readLines(f).each { String line ->
-            versionNumber.add(line.split("=")[1].trim())
+        def eeVersionFile = new File("${rootPath}/zsvirt-ee/VERSION")
+        String eeVersion = ""
+        if (eeVersionFile.exists() && eeVersionFile.canRead()) {
+            def versionNumber = []
+            FileUtils.readLines(eeVersionFile).each { String line ->
+                versionNumber.add(line.split("=")[1].trim())
+            }
+            eeVersion = versionNumber.join(".")
+        } else {
+            println("failed to read ee version file[path: ${eeVersionFile.path}]")
         }
 
-        projectVersion = versionNumber.join(".")
+        if (eeVersion == "") {
+            projectVersion = "${openVersion}".toString()
+        } else {
+            projectVersion = "${openVersion}, zsv_${eeVersion}".toString()
+        }
     }
 
     @Override

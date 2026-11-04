@@ -1,8 +1,6 @@
 package org.zstack.portal.apimediator;
 
-import org.zstack.header.tag.SystemTagVO;
 import org.zstack.header.tag.TagDefinition;
-import org.zstack.tag.PatternedSystemTag;
 import org.zstack.tag.SystemTag;
 
 /**
@@ -13,5 +11,6 @@ public class PortalSystemTags {
     public static SystemTag VALIDATION_ONLY = SystemTag.makeEphemeralTag("validationOnly");
 
     public static String REPLAY_ID = "replayId";
-    public static PatternedSystemTag FOR_REPLAY = new PatternedSystemTag(String.format("replay::{%s}", REPLAY_ID), SystemTagVO.class);
+    public static SystemTag FOR_REPLAY = new SystemTag(String.format("replay::{%s}", REPLAY_ID), SystemTag.resourceTypeForEphemeralTag())
+            .markAsEphemeral();
 }

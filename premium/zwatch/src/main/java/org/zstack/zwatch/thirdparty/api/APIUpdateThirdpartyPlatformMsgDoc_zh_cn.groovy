@@ -28,7 +28,7 @@ doc {
 					location "url"
 					type "String"
 					optional false
-					since "3.10"
+					since "zsv_3.10"
 				}
 				column {
 					name "name"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.10"
+					since "zsv_3.10"
 				}
 				column {
 					name "description"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.10"
+					since "zsv_3.10"
 				}
 				column {
 					name "template"
@@ -55,7 +55,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.10"
+					since "zsv_3.10"
 				}
 				column {
 					name "url"
@@ -64,7 +64,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.10"
+					since "zsv_3.10"
 				}
 				column {
 					name "stateEvent"
@@ -73,7 +73,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.10"
+					since "zsv_3.10"
 					values ("enable","disable")
 				}
 				column {
@@ -83,7 +83,7 @@ doc {
 					location "body"
 					type "Long"
 					optional true
-					since "3.10"
+					since "zsv_3.10"
 				}
 				column {
 					name "systemTags"
@@ -92,7 +92,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.10"
+					since "zsv_3.10"
 				}
 				column {
 					name "userTags"
@@ -101,7 +101,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.10"
+					since "zsv_3.10"
 				}
 			}
 		}

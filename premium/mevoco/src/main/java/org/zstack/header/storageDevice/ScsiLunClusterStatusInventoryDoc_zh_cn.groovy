@@ -13,7 +13,7 @@ doc {
 		path "org.zstack.header.storageDevice.ScsiLunClusterStatusInventory.attachedHostUuids"
 		desc "与SCSI Lun已加载的物理机"
 		type "List"
-		since "3.1.0"
+		since "zsv_3.1.0"
 		clz HostInventory.class
 	}
 	ref {
@@ -21,13 +21,13 @@ doc {
 		path "org.zstack.header.storageDevice.ScsiLunClusterStatusInventory.unattachedHostUuids"
 		desc "未与SCSI Lun加载的物理机"
 		type "List"
-		since "3.1.0"
+		since "zsv_3.1.0"
 		clz HostInventory.class
 	}
 	field {
 		name "isAllHostsAttached"
 		desc "SCSI Lun是否已与集群全部物理机连接"
 		type "Boolean"
-		since "3.1.0"
+		since "zsv_3.1.0"
 	}
 }

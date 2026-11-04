@@ -1,9 +1,6 @@
 package org.zstack.header.storage.snapshot;
 
-import org.zstack.header.message.APIEvent;
 import org.zstack.header.message.MessageReply;
-import org.zstack.header.rest.RestResponse;
-import org.zstack.utils.data.SizeUnit;
 
 /**
  * @ Author : yh.w

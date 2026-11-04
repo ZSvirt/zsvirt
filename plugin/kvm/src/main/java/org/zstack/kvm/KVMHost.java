@@ -87,7 +87,6 @@ import org.zstack.kvm.hypervisor.KvmHypervisorInfoManager;
 import org.zstack.network.l3.NetworkGlobalProperty;
 import org.zstack.resourceconfig.ResourceConfig;
 import org.zstack.resourceconfig.ResourceConfigFacade;
-import org.zstack.tag.PatternedSystemTag;
 import org.zstack.tag.SystemTag;
 import org.zstack.tag.SystemTagCreator;
 import org.zstack.tag.TagManager;
@@ -241,7 +240,6 @@ public class KVMHost extends HostBase implements Host {
     private String fileUploadPath;
     private String fileDownloadProgressPath;
     private String uploadFileToVmPath;
-    private String cleanupUploadFileToVmPath;
     private String readVmHostFilePath;
     private String writeVmHostFilePath;
 
@@ -500,10 +498,6 @@ public class KVMHost extends HostBase implements Host {
         uploadFileToVmPath = ub.build().toString();
 
         ub = UriComponentsBuilder.fromHttpUrl(baseUrl);
-        ub.path(KVMConstant.KVM_CLEANUP_UPLOAD_FILE_TO_VM_PATH);
-        cleanupUploadFileToVmPath = ub.build().toString();
-
-        ub = UriComponentsBuilder.fromHttpUrl(baseUrl);
         ub.path(KVMConstant.READ_VM_HOST_FILE_PATH);
         readVmHostFilePath = ub.build().toString();
 
@@ -630,7 +624,9 @@ public class KVMHost extends HostBase implements Host {
 
     @Override
     protected void handleLocalMessage(Message msg) {
-        if (msg instanceof CheckNetworkPhysicalInterfaceMsg) {
+        if (msg instanceof RefreshHostExtraIpsMsg) {
+            handle((RefreshHostExtraIpsMsg) msg);
+        } else if (msg instanceof CheckNetworkPhysicalInterfaceMsg) {
             handle((CheckNetworkPhysicalInterfaceMsg) msg);
         } else if (msg instanceof BatchCheckNetworkPhysicalInterfaceMsg) {
             handle((BatchCheckNetworkPhysicalInterfaceMsg) msg);
@@ -766,8 +762,6 @@ public class KVMHost extends HostBase implements Host {
             handle((UploadFileToHostMsg) msg);
         } else if (msg instanceof UploadFileToVmMsg) {
             handle((UploadFileToVmMsg) msg);
-        } else if (msg instanceof CleanupUploadFileToVmMsg) {
-            handle((CleanupUploadFileToVmMsg) msg);
         } else if (msg instanceof GetFileDownloadProgressMsg) {
             handle((GetFileDownloadProgressMsg) msg);
         } else if (msg instanceof RestartKvmAgentMsg) {
@@ -1641,14 +1635,12 @@ public class KVMHost extends HostBase implements Host {
     }
 
     private void handle(CompareCpuFunctionOnHostMsg msg) {
-        CompareCpuFunctionOnHostReply reply = new CompareCpuFunctionOnHostReply();
-
         thdf.singleFlightSubmit(new SingleFlightTask(msg)
                 .setSyncSignature(String.format("compare-host-%s-cpu-function-xml-on-host-%s", msg.getSrcHostUuid(), msg.getDstHostUuid()))
-                .run((com) -> compareCpuFunctionOnHost(msg, new ReturnValueCompletion<CompareCpuFunctionOnHostReply>(com) {
+                .run((com) -> compareCpuFunctionOnHost(msg, new ReturnValueCompletion<VmCompareCpuFunctionResponse>(com) {
                     @Override
-                    public void success(CompareCpuFunctionOnHostReply returnValue) {
-                        com.success(returnValue);
+                    public void success(VmCompareCpuFunctionResponse resp) {
+                        com.success(resp);
                     }
 
                     @Override
@@ -1657,14 +1649,20 @@ public class KVMHost extends HostBase implements Host {
                     }
                 }))
                 .done(((result) -> {
+                    CompareCpuFunctionOnHostReply reply = new CompareCpuFunctionOnHostReply();
                     if (!result.isSuccess()) {
                         reply.setError(result.getErrorCode());
+                        bus.reply(msg, reply);
+                        return;
                     }
+                    VmCompareCpuFunctionResponse resp = (VmCompareCpuFunctionResponse)result.getResult();
+                    reply.setMatch(resp.isMatch());
+                    reply.setCompareError(resp.getCompareError());
                     bus.reply(msg, reply);
                 })));
     }
 
-    private void compareCpuFunctionOnHost(final CompareCpuFunctionOnHostMsg msg, ReturnValueCompletion<CompareCpuFunctionOnHostReply> completion) {
+    private void compareCpuFunctionOnHost(final CompareCpuFunctionOnHostMsg msg, ReturnValueCompletion<VmCompareCpuFunctionResponse> completion) {
         VmCompareCpuFunctionCmd cmd = new VmCompareCpuFunctionCmd();
         cmd.setCpuXml(msg.getCpuXml());
         restf.asyncJsonPost(compareCpuFunctionPath, cmd, new JsonAsyncRESTCallback<VmCompareCpuFunctionResponse>(completion) {
@@ -1674,7 +1672,7 @@ public class KVMHost extends HostBase implements Host {
                     completion.fail(operr(ret.getError()));
                     return;
                 }
-                completion.success(new CompareCpuFunctionOnHostReply());
+                completion.success(ret);
             }
 
             @Override
@@ -2032,7 +2030,7 @@ public class KVMHost extends HostBase implements Host {
         checkStatus();
 
         ConfigPrimaryVmCmd cmd = new ConfigPrimaryVmCmd();
-        cmd.setConfigs(msg.getConfigs().stream().sorted(Comparator.comparing(VmNicRedirectConfig::getDeviceId)).collect(Collectors.toList()));
+        cmd.setConfigs(msg.getRedirectConfigs().stream().sorted(Comparator.comparing(VmNicRedirectConfig::getDeviceId)).collect(Collectors.toList()));
         cmd.setHostIp(msg.getHostIp());
         cmd.setVmInstanceUuid(msg.getVmInstanceUuid());
         new Http<>(configPrimaryVmPath, cmd, AgentResponse.class).call(new ReturnValueCompletion<AgentResponse>(msg, completion) {
@@ -3729,7 +3727,7 @@ public class KVMHost extends HostBase implements Host {
             creator.ignoreIfExisting = true;
             creator.inherent = true;
             creator.setTagByTokens(map(e(VmSystemTags.VM_SYSTEM_SERIAL_NUMBER_TOKEN, UUID.randomUUID().toString())));
-            SystemTagInventory inv = creator.create();
+            SystemTagInventory inv = (SystemTagInventory) creator.create();
             serialNumber = VmSystemTags.VM_SYSTEM_SERIAL_NUMBER.getTokenByTag(inv.getTag(), VmSystemTags.VM_SYSTEM_SERIAL_NUMBER_TOKEN);
         }
 
@@ -4646,67 +4644,110 @@ public class KVMHost extends HostBase implements Host {
 
         addons(spec, cmd);
         KVMHostInventory khinv = KVMHostInventory.valueOf(getSelf());
-        extEmitter.beforeStartVmOnKvm(khinv, spec, cmd);
 
-        extEmitter.addOn(khinv, spec, cmd);
-        //Set account uuid for kvm agent call vrouter agent api
-        cmd.setAccountUuid(accountMgr.getOwnerAccountUuidOfResource(cmd.getVmInstanceUuid()));
+        SimpleFlowChain chain = SimpleFlowChain.of("start-vm-on-kvm");
+        chain.putData(KVMStartVmExtensionPoint.Param.HOST, khinv)
+            .putData(KVMStartVmExtensionPoint.Param.SPEC, spec)
+            .putData(KVMStartVmExtensionPoint.Param.CMD, cmd);
 
-        new Http<>(startVmPath, cmd, StartVmResponse.class).call(new ReturnValueCompletion<StartVmResponse>(msg, completion) {
-            @Override
-            public void success(StartVmResponse ret) {
-                StartVmOnHypervisorReply reply = new StartVmOnHypervisorReply();
-                if (ret.isSuccess()) {
-                    extEmitter.afterReceiveSyncVmDeviceInfoResponse(null, ret, spec);
+        chain.then(Flow.nope("call-before-start-vm-extension-begin"));
+        extEmitter.beforeStartVmOnKvm(chain);
+        chain.then(Flow.nope("call-before-start-vm-extension-end"));
 
-                    String info = String.format("successfully start vm[uuid:%s name:%s] on kvm host[uuid:%s, ip:%s]",
-                            spec.getVmInventory().getUuid(), spec.getVmInventory().getName(),
-                            self.getUuid(), self.getManagementIp());
-                    logger.debug(info);
-                    extEmitter.startVmOnKvmSuccess(KVMHostInventory.valueOf(getSelf()), spec);
-                } else {
-                    reply.setError(err(HostErrors.FAILED_TO_START_VM_ON_HYPERVISOR,
-                            "failed to start vm[uuid:%s, name:%s] on kvm host[uuid:%s, ip:%s]",
-                            spec.getVmInventory().getUuid(), spec.getVmInventory().getName(),
-                            self.getUuid(), self.getManagementIp())
-                            .withOpaque("response.error", ret.getError()));
-                    logger.warn(reply.getError().getReadableDetails());
-                    extEmitter.startVmOnKvmFailed(KVMHostInventory.valueOf(getSelf()), spec, reply.getError());
-                }
-
-                if (ret.getNicInfos() != null && !ret.getNicInfos().isEmpty()) {
-                    Map<String, VmNicInventory> macNicMap = new HashMap<>();
-                    for (VmNicInventory nic : spec.getDestNics()) {
-                        macNicMap.put(nic.getMac(), nic);
-                    }
-
-                    for (VmNicInfo vmNicInfo : ret.getNicInfos()) {
-                        VmNicInventory nic = macNicMap.get(vmNicInfo.getMacAddress());
-                        if (nic == null) {
-                            continue;
+        chain.then(Flow.of("complete-add-on-for-start-vm-cmd")
+            .handle(trigger -> {
+                extEmitter.addOn(khinv, spec, cmd);
+                trigger.next();
+            })
+            .build())
+        .then(Flow.of("complete-account-info-for-start-vm-cmd")
+            .handle(trigger -> {
+                // Set account uuid for kvm agent call vrouter agent api
+                cmd.setAccountUuid(accountMgr.getOwnerAccountUuidOfResource(cmd.getVmInstanceUuid()));
+                trigger.next();
+            })
+            .build())
+        .then(Flow.of("send-start-vm-cmd")
+            .handle((trigger, data) -> {
+                new Http<>(startVmPath, cmd, StartVmResponse.class).call(new ReturnValueCompletion<StartVmResponse>(trigger) {
+                    @Override
+                    public void success(StartVmResponse response) {
+                        data.put(KVMStartVmExtensionPoint.Param.RESPONSE, response);
+                        if (response.isSuccess()) {
+                            logger.debug(String.format("successfully start vm[uuid:%s name:%s] on kvm host[uuid:%s, ip:%s]",
+                                    spec.getVmInventory().getUuid(), spec.getVmInventory().getName(),
+                                    self.getUuid(), self.getManagementIp()));
+                            trigger.next();
+                            return;
                         }
 
-                        SystemTagCreator creator = KVMSystemTags.VMNIC_PCI_ADDRESS.newSystemTagCreator(nic.getUuid());
-                        creator.inherent = true;
-                        creator.recreate = true;
-                        creator.setTagByTokens(map(e(KVMSystemTags.VMNIC_PCI_ADDRESS_TOKEN, vmNicInfo.getDeviceAddress().toString())));
-                        creator.create();
+                        trigger.fail(err(HostErrors.FAILED_TO_START_VM_ON_HYPERVISOR,
+                                "failed to start vm[uuid:%s, name:%s] on kvm host[uuid:%s, ip:%s]",
+                                spec.getVmInventory().getUuid(), spec.getVmInventory().getName(),
+                                self.getUuid(), self.getManagementIp())
+                                .withOpaque("response.error", response.getError()));
                     }
-                }
-                bus.reply(msg, reply);
-                completion.done();
-            }
 
-            @Override
-            public void fail(ErrorCode err) {
-                StartVmOnHypervisorReply reply = new StartVmOnHypervisorReply();
-                reply.setError(err);
-                reply.setSuccess(false);
-                extEmitter.startVmOnKvmFailed(KVMHostInventory.valueOf(getSelf()), spec, err);
-                bus.reply(msg, reply);
-                completion.done();
-            }
-        });
+                    @Override
+                    public void fail(ErrorCode errorCode) {
+                        trigger.fail(errorCode);
+                    }
+                });
+            })
+            .build())
+
+        // TODO: Subsequent flow errors should not affect the earlier flows
+        .then(Flow.of("sync-vm-device-info-from-response")
+            .handle((trigger, data) -> {
+                StartVmResponse response = (StartVmResponse) data.get(KVMStartVmExtensionPoint.Param.RESPONSE);
+                extEmitter.afterReceiveSyncVmDeviceInfoResponse(null, response, spec);
+                trigger.next();
+            })
+            .build())
+        .then(Flow.of("call-after-start-vm-extension")
+            .handle((trigger, data) -> {
+                KVMHostInventory kvmHostInventory = KVMHostInventory.valueOf(getSelf());
+                extEmitter.startVmOnKvmSuccess(kvmHostInventory, spec);
+                trigger.next();
+            })
+            .build())
+        .then(Flow.of("rebuild-vm-nic-tags")
+            .skipIf(data ->
+                    CollectionUtils.isEmpty(((StartVmResponse) data.get(KVMStartVmExtensionPoint.Param.RESPONSE)).getNicInfos()))
+            .handle((trigger, data) -> {
+                Map<String, VmNicInventory> macNicMap = new HashMap<>();
+                for (VmNicInventory nic : spec.getDestNics()) {
+                    macNicMap.put(nic.getMac(), nic);
+                }
+
+                List<VmNicInfo> nicInfos = ((StartVmResponse) data.get(KVMStartVmExtensionPoint.Param.RESPONSE)).getNicInfos();
+                CollectionUtils.safeForEach(nicInfos, vmNicInfo -> {
+                    VmNicInventory nic = macNicMap.get(vmNicInfo.getMacAddress());
+                    if (nic == null) {
+                        return;
+                    }
+
+                    SystemTagCreator creator = KVMSystemTags.VMNIC_PCI_ADDRESS.newSystemTagCreator(nic.getUuid());
+                    creator.inherent = true;
+                    creator.recreate = true;
+                    creator.setTagByTokens(map(e(KVMSystemTags.VMNIC_PCI_ADDRESS_TOKEN, vmNicInfo.getDeviceAddress().toString())));
+                    creator.create();
+                });
+                trigger.next();
+            })
+            .build())
+        .propagateExceptionTo(completion, msg)
+        .done(() -> {
+            bus.reply(msg, new StartVmOnHypervisorReply());
+            completion.done();
+        })
+        .error(error -> {
+            StartVmOnHypervisorReply reply = new StartVmOnHypervisorReply();
+            reply.setError(error);
+            bus.reply(msg, reply);
+            completion.done();
+        })
+        .start();
     }
 
     private void addons(final VmInstanceSpec spec, StartVmCmd cmd) {
@@ -5881,9 +5922,9 @@ public class KVMHost extends HostBase implements Host {
         for (KVMHostConnectExtensionPoint extp : factory.getConnectExtensions()) {
             KVMHostConnectedContext ctx = new KVMHostConnectedContext();
             ctx.setInventory((KVMHostInventory) getSelfInventory());
-            ctx.setNewAddedHost(info.isNewAdded());
+            ctx.setNewAddedHost(info.newAdded);
             ctx.setBaseUrl(baseUrl);
-            ctx.setSkipPackages(info.getSkipPackages());
+            ctx.setSkipPackages(info.skipPackages);
 
             chain.then(extp.createKvmHostConnectingFlow(ctx));
         }
@@ -6052,7 +6093,7 @@ public class KVMHost extends HostBase implements Host {
             String __name__ = "check-if-host-password-has-been-modified";
             @Override
             public boolean skip(Map data) {
-                return CoreGlobalProperty.UNIT_TEST_ON || info.isNewAdded();
+                return CoreGlobalProperty.UNIT_TEST_ON || info.newAdded;
             }
 
             @Override
@@ -6111,7 +6152,7 @@ public class KVMHost extends HostBase implements Host {
                 if (CoreGlobalProperty.UNIT_TEST_ON) {
                     return true;
                 }
-                if (!info.isNewAdded()) {
+                if (!info.newAdded) {
                     return true;
                 }
                 if (AnsibleGlobalProperty.ZSTACK_REPO.contains("zstack-mn") || AnsibleGlobalProperty.ZSTACK_REPO.equals("false")) {
@@ -6204,10 +6245,10 @@ public class KVMHost extends HostBase implements Host {
 
     @Override
     public void connectHook(final ConnectHostInfo info, final Completion complete) {
-        if (!info.isNewAdded()) {
-            String skipPackages = KVMGlobalProperty.SKIP_PACKAGES + " " + StringUtils.trimToEmpty(info.getSkipPackages());
+        if (!info.newAdded) {
+            String skipPackages = KVMGlobalProperty.SKIP_PACKAGES + " " + StringUtils.trimToEmpty(info.skipPackages);
             logger.info("connecting to KVM host and skipping these packages: " + skipPackages);
-            info.setSkipPackages(skipPackages);
+            info.skipPackages = skipPackages;
         }
 
         FlowChain chain = FlowChainBuilder.newShareFlowChain();
@@ -6215,6 +6256,7 @@ public class KVMHost extends HostBase implements Host {
         chain.allowWatch();
         chain.then(new ShareFlow() {
             boolean deployed = false;
+            boolean libvirtRestarted = false;
             @Override
             public void setup() {
                 flow(new NoRollbackFlow() {
@@ -6222,7 +6264,7 @@ public class KVMHost extends HostBase implements Host {
 
                     @Override
                     public boolean skip(Map data) {
-                        return CoreGlobalProperty.UNIT_TEST_ON || !info.isNewAdded();
+                        return CoreGlobalProperty.UNIT_TEST_ON || !info.newAdded;
                     }
 
                     @Override
@@ -6321,7 +6363,7 @@ public class KVMHost extends HostBase implements Host {
                         }
 
                         // for upgrade case, prevent from add host failure.
-                        if (cluster.getArchitecture() == null && !info.isNewAdded()) {
+                        if (cluster.getArchitecture() == null && !info.newAdded) {
                             cluster.setArchitecture(hostArchitecture);
                             dbf.update(cluster);
                             ClusterInventory clusterInventory = ClusterInventory.valueOf(cluster);
@@ -6420,7 +6462,7 @@ public class KVMHost extends HostBase implements Host {
                         runner.setSshPort(getSelf().getPort());
 
                         KVMHostDeployArguments deployArguments = new KVMHostDeployArguments();
-                        if (info.isNewAdded()) {
+                        if (info.newAdded) {
                             deployArguments.setInit("true");
                             runner.setFullDeploy(true);
                         }
@@ -6471,7 +6513,7 @@ public class KVMHost extends HostBase implements Host {
 
                         deployArguments.setRestartLibvirtd(rcf.getResourceConfigValue(KVMGlobalConfig.RECONNECT_HOST_RESTART_LIBVIRTD_SERVICE, self.getUuid(), String.class));
                         deployArguments.setHostname(String.format("%s.zstack.org", self.getManagementIp().replaceAll("\\.", "-")));
-                        deployArguments.setSkipPackages(info.getSkipPackages());
+                        deployArguments.setSkipPackages(info.skipPackages);
                         deployArguments.setUpdatePackages(String.valueOf(CoreGlobalProperty.UPDATE_PKG_WHEN_CONNECT));
 
                         if (deployArguments.isForceRun()) {
@@ -6489,6 +6531,10 @@ public class KVMHost extends HostBase implements Host {
                             public void success(Boolean run) {
                                 if (run != null) {
                                     deployed = run;
+                                }
+                                if (deployed) {
+                                    libvirtRestarted = Objects.equals(deployArguments.getInit(), "true")
+                                            || Objects.equals(deployArguments.getRestartLibvirtd(), "true");
                                 }
                                 trigger.next();
                             }
@@ -6550,6 +6596,10 @@ public class KVMHost extends HostBase implements Host {
 
                     @Override
                     public void run(final FlowTrigger trigger, Map data) {
+                        final long echoTimeout = libvirtRestarted
+                                ? KVMHostUtils.libvirtRestartedEchoTimeoutMillis(self.getUuid())
+                                : TimeUnit.SECONDS.toMillis(CoreGlobalProperty.REST_FACADE_ECHO_TIMEOUT);
+
                         restf.echo(echoPath, new Completion(trigger) {
                             @Override
                             public void success() {
@@ -6582,7 +6632,7 @@ public class KVMHost extends HostBase implements Host {
                                                 public void fail(ErrorCode errorCode) {
                                                     trigger.fail(errorCode);
                                                 }
-                                            });
+                                            }, TimeUnit.SECONDS.toMillis(1), echoTimeout);
                                         }
 
                                         @Override
@@ -6594,7 +6644,7 @@ public class KVMHost extends HostBase implements Host {
                                     trigger.fail(errorCode);
                                 }
                             }
-                        });
+                        }, TimeUnit.SECONDS.toMillis(1), echoTimeout);
                     }
                 });
 
@@ -6614,7 +6664,7 @@ public class KVMHost extends HostBase implements Host {
                         }
 
                         // new added need to update dependency if experimental repo enabled
-                        if (info.isNewAdded() && !rcf.getResourceConfigValue(
+                        if (info.newAdded && !rcf.getResourceConfigValue(
                                 ClusterGlobalConfig.ZSTACK_EXPERIMENTAL_REPO, self.getClusterUuid(), Boolean.class)) {
                             trigger.next();
                             return;
@@ -6624,7 +6674,7 @@ public class KVMHost extends HostBase implements Host {
                         cmd.hostUuid = self.getUuid();
                         cmd.zstackRepo = AnsibleGlobalProperty.ZSTACK_REPO;
 
-                        if (info.isNewAdded()) {
+                        if (info.newAdded) {
                             cmd.enableExpRepo = true;
                             cmd.updatePackages = rcf.getResourceConfigValue(
                                     ClusterGlobalConfig.ZSTACK_EXPERIMENTAL_UPDATE_DEPENDENCY, self.getClusterUuid(), String.class);
@@ -6652,7 +6702,7 @@ public class KVMHost extends HostBase implements Host {
 
                 flow(createCollectHostFactsFlow(info));
 
-                if (info.isNewAdded()) {
+                if (info.newAdded) {
                     flow(new NoRollbackFlow() {
                         String __name__ = "check-qemu-libvirt-version";
 
@@ -6722,6 +6772,68 @@ public class KVMHost extends HostBase implements Host {
         }).start();
     }
 
+    /**
+     * save host extra ips to host tag
+     * host management network ip address and management node vip should be excluded
+     * @param response
+     */
+    private void saveHostExtraIps(HostFactResponse response) {
+        List<String> ips = response.getIpAddresses();
+        if (ips == null) {
+            return;
+        }
+
+        ips.remove(self.getManagementIp());
+        if (CoreGlobalProperty.MN_VIP != null) {
+            ips.remove(CoreGlobalProperty.MN_VIP);
+        }
+
+        if (ips.isEmpty()) {
+            HostSystemTags.EXTRA_IPS.delete(self.getUuid());
+            return;
+        }
+
+        recreateNonInherentTag(HostSystemTags.EXTRA_IPS, HostSystemTags.EXTRA_IPS_TOKEN, StringUtils.join(ips, ","));
+    }
+
+    private void handle(RefreshHostExtraIpsMsg msg) {
+        HostFactCmd cmd = new HostFactCmd();
+        KvmCommandFailureChecker checker = wrapper -> {
+            HostFactResponse rsp = wrapper.getResponse(HostFactResponse.class);
+            if (!rsp.isSuccess()) {
+                return operr("failed to refresh IP addresses on host[uuid:%s], %s",
+                        self.getUuid(), rsp.getError());
+            }
+            if (rsp.getIpAddresses() == null) {
+                return operr("host[uuid:%s] returned no IP address facts", self.getUuid());
+            }
+            return null;
+        };
+
+        String signature = String.format("refresh-host-extra-ips-%s", self.getUuid());
+        new RunInQueue(signature, thdf, 1).name(signature).asyncBackup(msg).run(chain -> {
+            MessageReply reply = new MessageReply();
+            ReturnValueCompletion<KvmResponseWrapper> callback = new ReturnValueCompletion<KvmResponseWrapper>(msg, chain) {
+                @Override
+                public void success(KvmResponseWrapper wrapper) {
+                    saveHostExtraIps(wrapper.getResponse(HostFactResponse.class));
+                    bus.reply(msg, reply);
+                    chain.next();
+                }
+
+                @Override
+                public void fail(ErrorCode errorCode) {
+                    reply.setError(errorCode);
+                    bus.reply(msg, reply);
+                    chain.next();
+                }
+            };
+
+            new KvmCommandSender(self.getUuid()).disableHostStatusCheck()
+                    .send(cmd, KVMConstant.KVM_HOST_FACT_PATH, checker, callback);
+        });
+    }
+
     private NoRollbackFlow createCollectHostFactsFlow(final ConnectHostInfo info) {
         return new NoRollbackFlow() {
             String __name__ = "collect-kvm-host-facts";
@@ -6760,7 +6872,7 @@ public class KVMHost extends HostBase implements Host {
                         });
             }
 
-            private void recordHardwareChangesAndCreateTag(PatternedSystemTag systemTag, Map<String, String> tokenMap) {
+            private void recordHardwareChangesAndCreateTag(SystemTag systemTag, Map<String, String> tokenMap) {
                 if (tokenMap.isEmpty()) {
                     return;
                 }
@@ -6789,10 +6901,12 @@ public class KVMHost extends HostBase implements Host {
                         continue;
                     }
 
-                    hardwareChangedErrors.add(operr("host[uuid:%s]'s %s changed, old:%s, new:%s",
-                            self.getUuid(),
-                            systemTag.getTagFormat(),
-                            oldValue, newValue));
+                    if (!CPU_GHZ.getTagFormat().equals(systemTag.getTagFormat())) {
+                        hardwareChangedErrors.add(operr("host[uuid:%s]'s %s changed, old:%s, new:%s",
+                                self.getUuid(),
+                                systemTag.getTagFormat(),
+                                oldValue, newValue));
+                    }
                 }
 
                 recreateTag(systemTag, tokenMap, true);
@@ -6849,37 +6963,13 @@ public class KVMHost extends HostBase implements Host {
                 }
 
                 // only log the hardware info change for existing host
-                if (info.isNewAdded()) {
+                if (info.newAdded) {
                     logger.debug(String.format("host[uuid:%s]'s hardware info changed, %s",
                             self.getUuid(), multiErr(hardwareChangedErrors).getReadableDetails()));
                     return;
                 }
 
                 new HostHardwareChangedCanonicalEvent(self.getUuid(), multiErr(hardwareChangedErrors)).fire();
-            }
-
-            /**
-             * save host extra ips to host tag
-             * host management network ip address and management node vip should be excluded
-             * @param response
-             */
-            private void saveHostExtraIps(HostFactResponse response) {
-                List<String> ips = response.getIpAddresses();
-                if (ips == null) {
-                    return;
-                }
-
-                ips.remove(self.getManagementIp());
-                if (CoreGlobalProperty.MN_VIP != null) {
-                    ips.remove(CoreGlobalProperty.MN_VIP);
-                }
-
-                if (ips.isEmpty()) {
-                    HostSystemTags.EXTRA_IPS.delete(self.getUuid());
-                    return;
-                }
-
-                recreateNonInherentTag(HostSystemTags.EXTRA_IPS, HostSystemTags.EXTRA_IPS_TOKEN, StringUtils.join(ips, ","));
             }
 
             private boolean checkVirtualizationEnabled(HostFactResponse response) {
@@ -7840,7 +7930,7 @@ public class KVMHost extends HostBase implements Host {
         cmd.targetPath = msg.getTargetPath();
         cmd.username = msg.getUsername();
         cmd.sshPort = msg.getSshPort();
-        cmd.timeout = TimeUnit.MILLISECONDS.toSeconds(msg.getTimeout());
+        cmd.timeout = timeoutManager.getTimeoutSeconds();
         cmd.password = msg.getPassword();
 
         new Http<>(uploadFileToVmPath, cmd, UploadFileToVmResponse.class).call(
@@ -7861,27 +7951,4 @@ public class KVMHost extends HostBase implements Host {
                 });
     }
 
-    private void handle(CleanupUploadFileToVmMsg msg) {
-        CleanupUploadFileToVmReply reply = new CleanupUploadFileToVmReply();
-        CleanupUploadFileToVmCmd cmd = new CleanupUploadFileToVmCmd();
-        cmd.taskUuid = msg.getTaskUuid();
-
-        new Http<>(cleanupUploadFileToVmPath, cmd, CleanupUploadFileToVmResponse.class).call(
-                new ReturnValueCompletion<CleanupUploadFileToVmResponse>(msg) {
-                    @Override
-                    public void success(CleanupUploadFileToVmResponse rsp) {
-                        if (!rsp.isSuccess()) {
-                            reply.setError(operr("failed to clean staged VM upload files, because: %s",
-                                    rsp.getError()));
-                        }
-                        bus.reply(msg, reply);
-                    }
-
-                    @Override
-                    public void fail(ErrorCode errorCode) {
-                        reply.setError(errorCode);
-                        bus.reply(msg, reply);
-                    }
-                });
-    }
 }

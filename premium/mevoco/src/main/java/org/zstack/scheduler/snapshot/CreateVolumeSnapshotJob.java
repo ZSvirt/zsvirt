@@ -39,6 +39,7 @@ import org.zstack.scheduler.SchedulerFacadeImpl;
 import org.zstack.scheduler.SchedulerJobParameters;
 import org.zstack.scheduler.SchedulerType;
 import org.zstack.storage.ceph.CephConstants;
+import org.zstack.storage.backup.BackupOperationConflictManager;
 import org.zstack.storage.snapshot.VolumeSnapshotSystemTags;
 import org.zstack.tag.TagManager;
 import org.zstack.utils.Utils;
@@ -101,6 +102,8 @@ public class CreateVolumeSnapshotJob extends AbstractSchedulerJob {
     private transient DatabaseFacade dbf;
     @Autowired
     private transient TagManager tagMgr;
+    @Autowired
+    private transient BackupOperationConflictManager conflictManager;
 
     private long snapshotMaxNumber;
 
@@ -312,6 +315,12 @@ public class CreateVolumeSnapshotJob extends AbstractSchedulerJob {
 
             @Override
             public void run(SyncTaskChain taskChain) {
+                ErrorCode conflict = conflictManager.check(vo.getVmInstanceUuid(), null);
+                if (conflict != null) {
+                    completion.fail(conflict);
+                    taskChain.next();
+                    return;
+                }
                 FlowChain chain = FlowChainBuilder.newShareFlowChain();
                 chain.setName("CreateVolumeSnapshotJob");
                 chain.then(new ShareFlow() {

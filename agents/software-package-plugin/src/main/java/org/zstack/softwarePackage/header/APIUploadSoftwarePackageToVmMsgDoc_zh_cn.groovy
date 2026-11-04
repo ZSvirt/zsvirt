@@ -7,7 +7,7 @@ doc {
 
 	category "softwarePackage"
 
-	desc """ÉÏ´«Èí¼ş°üµ½µ¥Ì¨ÔËĞĞÖĞµÄKVMĞéÄâ»ú"""
+	desc """ä¸Šä¼ è½¯ä»¶åŒ…åˆ°å•å°è¿è¡Œä¸­çš„KVMè™šæ‹Ÿæœº"""
 
 	rest {
 		request {
@@ -24,47 +24,47 @@ doc {
 				column {
 					name "type"
 					enclosedIn "params"
-					desc "Èí¼ş°üÒµÎñÀàĞÍ"
+					desc "è½¯ä»¶åŒ…ä¸šåŠ¡ç±»å‹"
 					location "body"
 					type "String"
 					optional false
-					since "5.1.0"
+					since "1.0.1, zsv_5.2.0"
 				}
 				column {
 					name "url"
 					enclosedIn "params"
-					desc "Ö§³Öupload¡¢httpºÍhttpsĞ­ÒéµÄÈí¼ş°üµØÖ·£¬µØÖ·ÖĞ±ØĞë°üº¬ÎÄ¼şÃû"
+					desc "æ”¯æŒuploadã€httpå’Œhttpsåè®®çš„è½¯ä»¶åŒ…åœ°å€ï¼Œåœ°å€ä¸­å¿…é¡»åŒ…å«æ–‡ä»¶å"
 					location "body"
 					type "String"
 					optional false
-					since "5.1.0"
+					since "1.0.1, zsv_5.2.0"
 				}
 				column {
 					name "vmInstanceUuid"
 					enclosedIn "params"
-					desc "½ÓÊÕÈí¼ş°üµÄĞéÄâ»úUUID£¬ĞéÄâ»ú±ØĞë´¦ÓÚÔËĞĞ×´Ì¬"
+					desc "æ¥æ”¶è½¯ä»¶åŒ…çš„è™šæ‹ŸæœºUUIDï¼Œè™šæ‹Ÿæœºå¿…é¡»å¤„äºè¿è¡ŒçŠ¶æ€"
 					location "body"
 					type "String"
 					optional false
-					since "5.1.0"
+					since "1.0.1, zsv_5.2.0"
 				}
 				column {
 					name "systemTags"
 					enclosedIn ""
-					desc "ÏµÍ³±êÇ©"
+					desc "ç³»ç»Ÿæ ‡ç­¾"
 					location "body"
 					type "List"
 					optional true
-					since "5.1.0"
+					since "1.0.1, zsv_5.2.0"
 				}
 				column {
 					name "userTags"
 					enclosedIn ""
-					desc "ÓÃ»§±êÇ©"
+					desc "ç”¨æˆ·æ ‡ç­¾"
 					location "body"
 					type "List"
 					optional true
-					since "5.1.0"
+					since "1.0.1, zsv_5.2.0"
 				}
 			}
 		}

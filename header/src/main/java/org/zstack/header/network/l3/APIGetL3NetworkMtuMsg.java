@@ -28,8 +28,7 @@ public class APIGetL3NetworkMtuMsg extends APISyncCallMessage implements L3Netwo
 
     public static APIGetL3NetworkMtuMsg __example__() {
         APIGetL3NetworkMtuMsg msg = new APIGetL3NetworkMtuMsg();
-        msg.setL3NetworkUuid(uuid());
-
+        msg.setL3NetworkUuid(uuid(L3NetworkVO.class));
         return msg;
     }
 }

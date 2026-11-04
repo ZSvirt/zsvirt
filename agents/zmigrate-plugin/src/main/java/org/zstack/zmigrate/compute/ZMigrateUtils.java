@@ -9,7 +9,6 @@ import org.zstack.header.tag.SystemTagVO_;
 import org.zstack.header.vm.VmInstanceVO;
 import org.zstack.softwarePackage.entity.SoftwarePackageVO;
 import org.zstack.softwarePackage.entity.SoftwarePackageVO_;
-import org.zstack.tag.PatternedSystemTag;
 import org.zstack.tag.SystemTag;
 
 import java.util.Collections;
@@ -56,19 +55,40 @@ public class ZMigrateUtils {
 
     public static Map<String, ImageInventory> getZMigrateImages() {
         return getImagesByTags(
-                new PatternedSystemTag[]{ZMIGRATE_GATEWAY_IMAGE, ZMIGRATE_LINUX_BOOT_IMAGE, ZMIGRATE_WINDOWS_BOOT_IMAGE},
+                new SystemTag[]{ZMIGRATE_GATEWAY_IMAGE, ZMIGRATE_LINUX_BOOT_IMAGE, ZMIGRATE_WINDOWS_BOOT_IMAGE},
                 new String[]{ZMIGRATE_GATEWAY_IMAGE_TOKEN, ZMIGRATE_LINUX_BOOT_IMAGE_TOKEN, ZMIGRATE_WINDOWS_BOOT_IMAGE_TOKEN}
         );
     }
 
     public static Map<String, ImageInventory> getZMigrateUpgradeImages() {
         return getImagesByTags(
-                new PatternedSystemTag[]{ZMIGRATE_GATEWAY_UPGRADE_IMAGE, ZMIGRATE_LINUX_BOOT_UPGRADE_IMAGE, ZMIGRATE_WINDOWS_BOOT_UPGRADE_IMAGE},
+                new SystemTag[]{ZMIGRATE_GATEWAY_UPGRADE_IMAGE, ZMIGRATE_LINUX_BOOT_UPGRADE_IMAGE, ZMIGRATE_WINDOWS_BOOT_UPGRADE_IMAGE},
                 new String[]{ZMIGRATE_GATEWAY_UPGRADE_IMAGE_TOKEN, ZMIGRATE_LINUX_BOOT_UPGRADE_IMAGE_TOKEN, ZMIGRATE_WINDOWS_BOOT_UPGRADE_IMAGE_TOKEN}
         );
     }
 
-    private static Map<String, ImageInventory> getImagesByTags(PatternedSystemTag[] tags, String[] tokenNames) {
+    public static List<String> getZMigrateImageUuids() {
+        return Stream.concat(getZMigrateImages().values().stream(), getZMigrateUpgradeImages().values().stream())
+                .map(ImageInventory::getUuid)
+                .filter(Objects::nonNull)
+                .distinct()
+                .collect(Collectors.toList());
+    }
+
+    public static boolean isZMigrateImage(String imageUuid) {
+        return imageUuid != null && getZMigrateImageUuids().contains(imageUuid);
+    }
+
+    public static boolean isZMigrateGatewayImage(String imageUuid) {
+        if (imageUuid == null) {
+            return false;
+        }
+        String softwarePackageUuid = getSoftwarePackageUuid();
+        return imageUuid.equals(getTokenFromTag(ZMIGRATE_GATEWAY_IMAGE,
+                ZMIGRATE_GATEWAY_IMAGE_TOKEN, softwarePackageUuid));
+    }
+
+    private static Map<String, ImageInventory> getImagesByTags(SystemTag[] tags, String[] tokenNames) {
         String softwarePackageUuid = getSoftwarePackageUuid();
         String[] imageUuidsByToken = new String[tags.length];
         for (int i = 0; i < tags.length; i++) {
@@ -92,7 +112,7 @@ public class ZMigrateUtils {
         return imagesMap;
     }
 
-    public static String getTokenFromTag(PatternedSystemTag systemTag, String tokenName, String softwarePackageUuid) {
+    public static String getTokenFromTag(SystemTag systemTag, String tokenName, String softwarePackageUuid) {
         if (softwarePackageUuid == null) {
             return null;
         }

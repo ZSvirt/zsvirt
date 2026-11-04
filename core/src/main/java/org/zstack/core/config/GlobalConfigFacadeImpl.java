@@ -18,12 +18,7 @@ import org.zstack.utils.TypeUtils;
 import org.zstack.utils.Utils;
 import org.zstack.utils.data.StringTemplate;
 import org.zstack.utils.logging.CLogger;
-import org.zstack.utils.path.PathUtil;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
-import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -46,11 +41,7 @@ public class GlobalConfigFacadeImpl extends AbstractService implements GlobalCon
     @Autowired
     private PluginRegistry pluginRgty;
 
-    private JAXBContext context;
     private Map<String, GlobalConfig> allConfig = new ConcurrentHashMap<>();
-
-    private static final String CONFIG_FOLDER = "globalConfig";
-    private static final String OTHER_CATEGORY = "Others";
 
     @Override
     @MessageSafe
@@ -98,7 +89,7 @@ public class GlobalConfigFacadeImpl extends AbstractService implements GlobalCon
         try {
             globalConfig.updateValue(msg.getValue());
 
-            GlobalConfigInventory inv = GlobalConfigInventory.valueOf(globalConfig.reload());
+            GlobalConfigInventory inv = GlobalConfigInventory.valueOf(((GlobalConfigRuntime) globalConfig).reload());
             pluginRgty.getExtensionList(AfterUpdateClobalConfigExtensionPoint.class).forEach(point -> point.saveSaveEncryptAfterUpdateClobalConfig(inv));
             evt.setInventory(inv);
         } catch (GlobalConfigException e) {
@@ -148,8 +139,7 @@ public class GlobalConfigFacadeImpl extends AbstractService implements GlobalCon
                 try {
                     loadSystemProperties();
                     parseGlobalConfigFields();
-                    loadConfigFromXml();
-                    loadConfigFromJava();
+                    loadConfigFromScan();
                     loadConfigFromAutoGeneration();
                     loadConfigFromDatabase();
                     createValidatorForBothXmlAndDatabase();
@@ -206,50 +196,22 @@ public class GlobalConfigFacadeImpl extends AbstractService implements GlobalCon
                 }
             }
 
-            private void loadConfigFromJava() {
-                for (Field field : globalConfigFields) {
-                    try {
-                        GlobalConfig config = (GlobalConfig) field.get(null);
-                        if (config == null) {
-                            throw new CloudRuntimeException(String.format("GlobalConfigDefinition[%s] defines a null GlobalConfig[%s]." +
-                                            "You must assign a value to it using new GlobalConfig(category, name)",
-                                    field.getDeclaringClass().getName(), field.getName()));
-                        }
-
-                        GlobalConfigDef d = field.getAnnotation(GlobalConfigDef.class);
-                        if (d == null) {
-                            continue;
-                        }
-                        // substitute system properties in defaultValue
-                        String defaultValue = StringTemplate.substitute(d.defaultValue(), propertiesMap);
-
-                        GlobalConfig c = new GlobalConfig();
-                        c.setCategory(config.getCategory());
-                        c.setName(config.getName());
-                        c.setDescription(d.description());
-                        c.setDefaultValue(defaultValue);
-                        c.setValue(defaultValue);
-                        c.setType(d.type().getName());
-                        if (!"".equals(d.validatorRegularExpression())) {
-                            c.setValidatorRegularExpression(d.validatorRegularExpression());
-                        }
-
-                        if (configsFromXml.containsKey(c.getIdentity())) {
-                            throw new CloudRuntimeException(String.format("duplicate global configuration. %s defines a" +
-                                    " global config[category: %s, name: %s] that has been defined by a XML configure or" +
-                                    " another java class", field.getDeclaringClass().getName(), c.getCategory(), c.getName()));
-                        }
-
-                        configsFromXml.put(c.getIdentity(), c);
-                    } catch (IllegalAccessException e) {
-                        throw new CloudRuntimeException(e);
+            private void loadConfigFromScan() {
+                for (GlobalConfigDescription d : GlobalConfigDefinitionScanner.scan()) {
+                    if (d.defaultValue == null) {
+                        continue;
                     }
+                    String defaultValue = StringTemplate.substitute(d.defaultValue, propertiesMap);
+                    GlobalConfig c = GlobalConfigRuntime.valueOf(d);
+                    c.setDefaultValue(defaultValue);
+                    c.setValue(defaultValue);
+                    configsFromXml.put(c.getIdentity(), c);
                 }
             }
 
             private void initAllConfig() {
                 for (GlobalConfig config : configsFromXml.values()) {
-                    config.init();
+                    ((GlobalConfigRuntime) config).init();
                 }
             }
 
@@ -315,7 +277,7 @@ public class GlobalConfigFacadeImpl extends AbstractService implements GlobalCon
                     }
 
                     logger.debug(String.format("Add a new global config to database: %s", config.toString()));
-                    toSave.add(config.toVO());
+                    toSave.add(((GlobalConfigRuntime) config).toVO());
                 }
 
                 for (GlobalConfig config : configsFromDatabase.values()) {
@@ -375,26 +337,20 @@ public class GlobalConfigFacadeImpl extends AbstractService implements GlobalCon
             private void loadConfigFromAutoGeneration() {
                 for (GlobalConfigInitExtensionPoint ext : pluginRgty.getExtensionList(GlobalConfigInitExtensionPoint.class)) {
                     List<GlobalConfig> tmp = ext.getGenerationGlobalConfig();
-                    Optional.ofNullable(tmp).ifPresent(configs -> configs.forEach(it ->
-                            configsFromXml.put(it.getIdentity(), it)
-                    ));
+                    Optional.ofNullable(tmp).ifPresent(configs -> configs.forEach(it -> {
+                        GlobalConfigRuntime rt = it instanceof GlobalConfigRuntime
+                                ? (GlobalConfigRuntime) it
+                                : GlobalConfigRuntime.valueOf(it);
+                        configsFromXml.put(rt.getIdentity(), rt);
+                    }));
                 }
             }
 
             private void loadConfigFromDatabase() {
                 List<GlobalConfigVO> vos = dbf.listAll(GlobalConfigVO.class);
                 for (GlobalConfigVO vo : vos) {
-                    GlobalConfig c = GlobalConfig.valueOf(vo);
+                    GlobalConfig c = GlobalConfigRuntime.valueOf(vo);
                     configsFromDatabase.put(c.getIdentity(), c);
-                }
-            }
-
-            private void loadConfigFromXml() throws JAXBException {
-                context = JAXBContext.newInstance("org.zstack.core.config.schema");
-                List<String> filePaths = PathUtil.scanFolderOnClassPath(CONFIG_FOLDER);
-                for (String path : filePaths) {
-                    File f = new File(path);
-                    parseConfig(f);
                 }
             }
 
@@ -499,37 +455,6 @@ public class GlobalConfigFacadeImpl extends AbstractService implements GlobalCon
                 }
             }
 
-            private void parseConfig(File file) throws JAXBException {
-                if (!file.getName().endsWith("xml")) {
-                    logger.warn(String.format("file[%s] in global config folder is not end with .xml, skip it", file.getAbsolutePath()));
-                    return;
-                }
-
-                Unmarshaller unmarshaller = context.createUnmarshaller();
-                org.zstack.core.config.schema.GlobalConfig gb = (org.zstack.core.config.schema.GlobalConfig) unmarshaller.unmarshal(file);
-                for (org.zstack.core.config.schema.GlobalConfig.Config c : gb.getConfig()) {
-                    String category = c.getCategory();
-                    category = category == null ? OTHER_CATEGORY : category;
-                    c.setCategory(category);
-                    // substitute system properties in value and defaultValue
-                    if (c.getDefaultValue() == null) {
-                        throw new IllegalArgumentException(String.format("GlobalConfig[category:%s, name:%s] must have a default value", c.getCategory(), c.getName()));
-                    } else {
-                        c.setDefaultValue(StringTemplate.substitute(c.getDefaultValue(), propertiesMap));
-                    }
-                    if (c.getValue() == null) {
-                        c.setValue(c.getDefaultValue());
-                    } else {
-                        c.setValue(StringTemplate.substitute(c.getValue(), propertiesMap));
-                    }
-                    GlobalConfig config = GlobalConfig.valueOf(c);
-                    if (configsFromXml.containsKey(config.getIdentity())) {
-                        throw new IllegalArgumentException(String.format("duplicate GlobalConfig[category: %s, name: %s]", config.getCategory(), config.getName()));
-                    }
-                    configsFromXml.put(config.getIdentity(), config);
-                }
-            }
-
             private void link() {
                 for (Field field : globalConfigFields) {
                     field.setAccessible(true);
@@ -558,18 +483,18 @@ public class GlobalConfigFacadeImpl extends AbstractService implements GlobalCon
                 GlobalConfig xmlConfig = configsFromXml.get(old.getIdentity());
                 DebugUtils.Assert(xmlConfig != null, String.format("unable to find GlobalConfig[category:%s, name:%s] for linking to %s.%s",
                         old.getCategory(), old.getName(), field.getDeclaringClass().getName(), field.getName()));
-                final GlobalConfig config;
-                if (old.getEvtf() == null) {
-                    if (xmlConfig.getEvtf() != null) {
-                        config = xmlConfig;
+                final GlobalConfigRuntime config;
+                if (!old.isSpringReady()) {
+                    if (xmlConfig.isSpringReady()) {
+                        config = (GlobalConfigRuntime) xmlConfig;
                     } else {
-                        config = new GlobalConfig();
+                        config = new GlobalConfigRuntime();
                         config.copy(xmlConfig);
                     }
                     logger.debug(String.format("GlobalConfig[category: %s, name: %s] static field was initialized before Spring autowiring, relink to autowired instance",
                             config.getCategory(), config.getName()));
                 } else {
-                    config = old.copy(xmlConfig);
+                    config = (GlobalConfigRuntime) old.copy(xmlConfig);
                 }
                 field.set(null, config);
                 // all global config base on Field allConfig which is origin from configsFromXml, so update its value
@@ -751,7 +676,7 @@ public class GlobalConfigFacadeImpl extends AbstractService implements GlobalCon
     @Deprecated
     public GlobalConfig createGlobalConfig(GlobalConfigVO vo) {
         vo = dbf.persistAndRefresh(vo);
-        GlobalConfig c = GlobalConfig.valueOf(vo);
+        GlobalConfig c = GlobalConfigRuntime.valueOf(vo);
         allConfig.put(GlobalConfig.produceIdentity(vo.getCategory(), vo.getName()), c);
         return c;
     }

@@ -28,7 +28,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "description"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "vipUuid"
@@ -46,16 +46,16 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "vmNicUuid"
 					enclosedIn "params"
-					desc "云主机网卡UUID"
+					desc "虚拟机网卡UUID"
 					location "body"
 					type "String"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "usedIpUuid"
@@ -64,16 +64,16 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.1"
+					since "zsv_3.1"
 				}
 				column {
 					name "resourceUuid"
 					enclosedIn "params"
-					desc "资源UUID。若指定，云主机会使用该字段值作为UUID"
+					desc "资源UUID。若指定，虚拟机会使用该字段值作为UUID"
 					location "body"
 					type "String"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "systemTags"
@@ -82,7 +82,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "userTags"
@@ -91,7 +91,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "tagUuids"
@@ -100,7 +100,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.4.0"
+					since "zsv_3.4.0"
 				}
 			}
 		}

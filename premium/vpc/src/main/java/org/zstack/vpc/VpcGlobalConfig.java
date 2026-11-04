@@ -1,10 +1,10 @@
 package org.zstack.vpc;
 
+import org.zstack.core.config.BindResourceConfig;
 import org.zstack.core.config.GlobalConfig;
 import org.zstack.core.config.GlobalConfigDefinition;
 import org.zstack.core.config.GlobalConfigValidation;
 import org.zstack.header.vm.VmInstanceVO;
-import org.zstack.resourceconfig.BindResourceConfig;
 
 /**
  * Created by weiwang on 29/11/2017

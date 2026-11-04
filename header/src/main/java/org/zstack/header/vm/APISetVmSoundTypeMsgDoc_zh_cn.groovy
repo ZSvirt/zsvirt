@@ -3,11 +3,11 @@ package org.zstack.header.vm
 import org.zstack.header.vm.APISetVmSoundTypeEvent
 
 doc {
-	title "设置云主机虚拟声卡类型(SetVmSoundType)"
+	title "设置虚拟机虚拟声卡类型(SetVmSoundType)"
 
 	category "vmInstance"
 
-	desc """指定一个云主机的虚拟声卡类型"""
+	desc """指定一个虚拟机的虚拟声卡类型"""
 
 	rest {
 		request {
@@ -24,11 +24,11 @@ doc {
 				column {
 					name "uuid"
 					enclosedIn "setVmSoundType"
-					desc "云主机UUID"
+					desc "虚拟机UUID"
 					location "url"
 					type "String"
 					optional false
-					since "zsv 3.7"
+					since "zsv_3.7"
 				}
 				column {
 					name "soundType"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "zsv 3.7"
+					since "zsv_3.7"
 					values ("ac97","ich6")
 				}
 				column {
@@ -47,7 +47,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 3.7"
+					since "zsv_3.7"
 				}
 				column {
 					name "userTags"
@@ -56,7 +56,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 3.7"
+					since "zsv_3.7"
 				}
 			}
 		}

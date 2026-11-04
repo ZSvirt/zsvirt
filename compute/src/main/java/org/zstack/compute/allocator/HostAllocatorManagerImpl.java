@@ -15,7 +15,7 @@ import org.zstack.core.thread.ChainTask;
 import org.zstack.core.thread.SyncTaskChain;
 import org.zstack.core.thread.ThreadFacade;
 import org.zstack.core.workflow.FlowChainBuilder;
-import org.zstack.allocator.domain.entity.AllocatorHostRuleSet;
+import org.zstack.header.allocator.domain.AllocatorHostRuleSet;
 import org.zstack.header.AbstractService;
 import org.zstack.header.allocator.*;
 import org.zstack.header.allocator.datatypes.CpuMemoryCapacityData;
@@ -40,6 +40,7 @@ import org.zstack.header.storage.primary.PrimaryStorageVO_;
 import org.zstack.header.vm.VmAbnormalLifeCycleExtensionPoint;
 import org.zstack.header.vm.VmAbnormalLifeCycleStruct;
 import org.zstack.header.vm.VmAbnormalLifeCycleStruct.VmAbnormalLifeCycleOperation;
+import org.zstack.header.vm.VmCanonicalEvents;
 import org.zstack.header.vm.VmInstanceState;
 import org.zstack.header.volume.VolumeFormat;
 import org.zstack.header.zone.ZoneVO;
@@ -258,16 +259,29 @@ public class HostAllocatorManagerImpl extends AbstractService implements HostAll
 
         List<String> hostHasVms = transformAndRemoveNull(hostUsedCpuMemList, arg -> arg.hostUuid);
 
-        hostUuids.stream().filter(huuid -> !hostHasVms.contains(huuid)).forEach(huuid -> {
+        for (String huuid : hostUuids) {
+            if (hostHasVms.contains(huuid)) {
+                continue;
+            }
             HostUsedCpuMem s = new HostUsedCpuMem();
             s.hostUuid = huuid;
             hostUsedCpuMemList.add(s);
-        });
+        }
 
         for (final HostUsedCpuMem s : hostUsedCpuMemList) {
             new HostCapacityUpdater(s.hostUuid).run(cap -> {
+                long reservedMemory = 0;
+                long reservedCpu = 0;
+                for (VmCanonicalEvents.MigrationHostCapacityData reservation : reserveMgr.reservedByVmMigration(s.hostUuid)) {
+                    if (s.hostUuid.equals(reservation.getHostUuid())) {
+                        reservedMemory += ratioMgr.calculateMemoryByRatio(s.hostUuid, reservation.getMemorySize());
+                        reservedCpu += reservation.getCpuNum();
+                    }
+                }
+
                 long before = cap.getAvailableMemory();
                 long avail = s.usedMemory == null ? cap.getTotalMemory() : cap.getTotalMemory() - s.usedMemory;
+                avail -= reservedMemory;
                 cap.setAvailableMemory(avail);
 
                 long totalCpu = cpuRatioMgr.calculateHostCpuByRatio(s.hostUuid, cap.getCpuNum());
@@ -276,6 +290,7 @@ public class HostAllocatorManagerImpl extends AbstractService implements HostAll
 
                 long beforeCpu = cap.getAvailableCpu();
                 long availCpu = s.usedCpu == null ? cap.getTotalCpu() : cap.getTotalCpu() - s.usedCpu;
+                availCpu -= reservedCpu;
                 cap.setAvailableCpu(availCpu);
 
                 logger.debug(String.format("re-calculated available capacity on the host[uuid:%s]:" +
@@ -289,6 +304,8 @@ public class HostAllocatorManagerImpl extends AbstractService implements HostAll
                 return cap;
             });
         }
+
+        bus.reply(msg, new RecalculateHostCapacityReply());
     }
 
     private void handle(ReturnHostCapacityMsg msg) {
@@ -442,9 +459,12 @@ public class HostAllocatorManagerImpl extends AbstractService implements HostAll
     }
 
     private void doHandleAllocateHost(final AllocateHostMsg msg, Completion completion) {
+        HostAllocatorSpec spec = HostAllocatorSpec.fromAllocationMsg(msg);
+        spec.setBackupStoragePrimaryStorageMetrics(backupStoragePrimaryStorageMetrics);
+
         try {
             for (AllocateHostBeforeExtensionPoint ext : pluginRgty.getExtensionList(AllocateHostBeforeExtensionPoint.class)) {
-                ext.beforeAllocateHost(msg);
+                ext.beforeAllocateHost(spec);
             }
         } catch (OperationFailureException e) {
             replyAllocateHostFailure(msg, e.getErrorCode(), completion);
@@ -454,10 +474,7 @@ public class HostAllocatorManagerImpl extends AbstractService implements HostAll
             return;
         }
 
-        logger.debug("allocate host rule sets:\n" + AllocatorHostRuleSet.toString(msg.getRuleSets()));
-
-        HostAllocatorSpec spec = HostAllocatorSpec.fromAllocationMsg(msg);
-        spec.setBackupStoragePrimaryStorageMetrics(backupStoragePrimaryStorageMetrics);
+        logger.debug("allocate host rule sets:\n" + AllocatorHostRuleSet.toString(spec.getRuleSets()));
 
         String hvType = spec.getHypervisorType();
         if (hvType == null && msg instanceof DesignatedAllocateHostMsg) {

@@ -1,11 +1,11 @@
 package org.zstack.storage.device;
 
+import org.zstack.core.config.BindResourceConfig;
 import org.zstack.core.config.GlobalConfig;
 import org.zstack.core.config.GlobalConfigDefinition;
 import org.zstack.core.config.GlobalConfigValidation;
 import org.zstack.header.cluster.ClusterVO;
 import org.zstack.mevoco.PremiumGlobalConfig;
-import org.zstack.resourceconfig.BindResourceConfig;
 
 /**
  * Create by weiwang at 2018/8/7

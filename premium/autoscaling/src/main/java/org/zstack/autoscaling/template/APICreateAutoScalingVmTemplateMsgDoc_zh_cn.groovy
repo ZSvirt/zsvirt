@@ -7,7 +7,7 @@ doc {
 
 	category "autoscaling"
 
-	desc """创建伸缩组云主机模块"""
+	desc """创建伸缩组虚拟机模块"""
 
 	rest {
 		request {
@@ -24,56 +24,56 @@ doc {
 				column {
 					name "vmInstanceName"
 					enclosedIn "params"
-					desc "云主机名称"
+					desc "虚拟机名称"
 					location "body"
 					type "String"
 					optional false
-					since "3.1.0"
+					since "zsv_3.1.0"
 				}
 				column {
 					name "vmInstanceDescription"
 					enclosedIn "params"
-					desc "云主机描述"
+					desc "虚拟机描述"
 					location "body"
 					type "String"
 					optional true
-					since "3.1.0"
+					since "zsv_3.1.0"
 				}
 				column {
 					name "vmInstanceOfferingUuid"
 					enclosedIn "params"
-					desc "云主机实例规则"
+					desc "虚拟机实例规则"
 					location "body"
 					type "String"
 					optional false
-					since "3.1.0"
+					since "zsv_3.1.0"
 				}
 				column {
 					name "imageUuid"
 					enclosedIn "params"
-					desc "云主机镜像UUID"
+					desc "虚拟机镜像UUID"
 					location "body"
 					type "String"
 					optional false
-					since "3.1.0"
+					since "zsv_3.1.0"
 				}
 				column {
 					name "l3NetworkUuids"
 					enclosedIn "params"
-					desc "云主机三层网络列表"
+					desc "虚拟机三层网络列表"
 					location "body"
 					type "List"
 					optional false
-					since "3.1.0"
+					since "zsv_3.1.0"
 				}
 				column {
 					name "rootDiskOfferingUuid"
 					enclosedIn "params"
-					desc "云主机根云盘规格"
+					desc "虚拟机根云盘规格"
 					location "body"
 					type "String"
 					optional true
-					since "3.1.0"
+					since "zsv_3.1.0"
 				}
 				column {
 					name "dataDiskOfferingUuids"
@@ -82,25 +82,25 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.1.0"
+					since "zsv_3.1.0"
 				}
 				column {
 					name "vmInstanceZoneUuid"
 					enclosedIn "params"
-					desc "云主机所属地区"
+					desc "虚拟机所属地区"
 					location "body"
 					type "String"
 					optional true
-					since "3.1.0"
+					since "zsv_3.1.0"
 				}
 				column {
 					name "vmInstanceClusterUuid"
 					enclosedIn "params"
-					desc "云主机所属集群"
+					desc "虚拟机所属集群"
 					location "body"
 					type "String"
 					optional true
-					since "3.1.0"
+					since "zsv_3.1.0"
 				}
 				column {
 					name "hostUuid"
@@ -109,7 +109,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.1.0"
+					since "zsv_3.1.0"
 				}
 				column {
 					name "primaryStorageUuidForRootVolume"
@@ -118,16 +118,16 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.1.0"
+					since "zsv_3.1.0"
 				}
 				column {
 					name "defaultL3NetworkUuid"
 					enclosedIn "params"
-					desc "云主机默认三层网络"
+					desc "虚拟机默认三层网络"
 					location "body"
 					type "String"
 					optional false
-					since "3.1.0"
+					since "zsv_3.1.0"
 				}
 				column {
 					name "name"
@@ -136,7 +136,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "3.1.0"
+					since "zsv_3.1.0"
 				}
 				column {
 					name "description"
@@ -145,7 +145,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.1.0"
+					since "zsv_3.1.0"
 				}
 				column {
 					name "type"
@@ -154,7 +154,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.1.0"
+					since "zsv_3.1.0"
 				}
 				column {
 					name "resourceUuid"
@@ -163,7 +163,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.1.0"
+					since "zsv_3.1.0"
 				}
 				column {
 					name "tagUuids"
@@ -172,7 +172,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.1.0"
+					since "zsv_3.1.0"
 				}
 				column {
 					name "systemTags"
@@ -181,7 +181,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.1.0"
+					since "zsv_3.1.0"
 				}
 				column {
 					name "userTags"
@@ -190,7 +190,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.1.0"
+					since "zsv_3.1.0"
 				}
 				column {
 					name "vmInstanceType"
@@ -199,7 +199,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 					values ("UserVm","ApplianceVm")
 				}
 				column {
@@ -209,7 +209,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 					values ("InstantStart","CreateStopped")
 				}
 			}

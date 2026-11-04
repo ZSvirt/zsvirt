@@ -28,7 +28,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "3.17.0"
+					since "zsv_3.17.0"
 				}
 				column {
 					name "vlanMode"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.17.0"
+					since "zsv_3.17.0"
 					values ("ACCESS","TRUNK","PVLAN")
 				}
 				column {
@@ -47,7 +47,7 @@ doc {
 					location "body"
 					type "Integer"
 					optional false
-					since "3.17.0"
+					since "zsv_3.17.0"
 				}
 				column {
 					name "vlanRanges"
@@ -56,7 +56,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.17.0"
+					since "zsv_3.17.0"
 				}
 				column {
 					name "name"
@@ -65,7 +65,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "3.17.0"
+					since "zsv_3.17.0"
 				}
 				column {
 					name "description"
@@ -74,7 +74,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.17.0"
+					since "zsv_3.17.0"
 				}
 				column {
 					name "zoneUuid"
@@ -83,7 +83,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "3.17.0"
+					since "zsv_3.17.0"
 				}
 				column {
 					name "physicalInterface"
@@ -92,7 +92,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "3.17.0"
+					since "zsv_3.17.0"
 				}
 				column {
 					name "type"
@@ -101,7 +101,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.17.0"
+					since "zsv_3.17.0"
 				}
 				column {
 					name "vSwitchType"
@@ -110,7 +110,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.17.0"
+					since "zsv_3.17.0"
 					values ("LinuxBridge","OvsDpdk","MacVlan")
 				}
 				column {
@@ -120,7 +120,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.17.0"
+					since "zsv_3.17.0"
 				}
 				column {
 					name "tagUuids"
@@ -129,7 +129,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.17.0"
+					since "zsv_3.17.0"
 				}
 				column {
 					name "systemTags"
@@ -138,7 +138,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.17.0"
+					since "zsv_3.17.0"
 				}
 				column {
 					name "userTags"
@@ -147,7 +147,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.17.0"
+					since "zsv_3.17.0"
 				}
 			}
 		}

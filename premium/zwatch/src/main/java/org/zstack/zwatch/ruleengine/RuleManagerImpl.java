@@ -25,6 +25,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import static org.zstack.zwatch.header.ZWatchConstants.TASK_NAME_EVALUATION;
+
 public class RuleManagerImpl implements RuleManager, Component {
     private static final CLogger logger = Utils.getLogger(RuleManagerImpl.class);
 
@@ -98,7 +100,7 @@ public class RuleManagerImpl implements RuleManager, Component {
 
             @Override
             public String getName() {
-                return "zwatch-evaluation-task";
+                return TASK_NAME_EVALUATION;
             }
 
             @Override

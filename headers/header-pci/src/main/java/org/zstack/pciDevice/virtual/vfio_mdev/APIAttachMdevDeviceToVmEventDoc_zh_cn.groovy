@@ -1,0 +1,31 @@
+package org.zstack.pciDevice.virtual.vfio_mdev
+
+import org.zstack.header.errorcode.ErrorCode
+
+doc {
+
+  title"""绑定PCI设备切分出的MDEV设备到虚拟机的结果"""
+
+	field {
+		name "success"
+		desc ""
+		type "boolean"
+		since "zsv_0.6"
+	}
+	ref {
+		name "error"
+		path "org.zstack.pciDevice.virtual.vfio_mdev.APIAttachMdevDeviceToVmEvent.error"
+		desc "错误码，若不为null，则表示操作失败, 操作成功时该字段为null",false
+		type "ErrorCode"
+		since "zsv_3.5.0"
+		clz ErrorCode.class
+	}
+	ref {
+		name "inventory"
+		path "org.zstack.pciDevice.virtual.vfio_mdev.APIAttachMdevDeviceToVmEvent.inventory"
+		desc "MDEV设备清单"
+		type "MdevDeviceInventory"
+		since "zsv_3.5.0"
+		clz MdevDeviceInventory.class
+	}
+}

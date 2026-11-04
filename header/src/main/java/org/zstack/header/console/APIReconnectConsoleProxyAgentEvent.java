@@ -34,11 +34,9 @@ public class APIReconnectConsoleProxyAgentEvent extends APIEvent {
     public static APIReconnectConsoleProxyAgentEvent __example__() {
         APIReconnectConsoleProxyAgentEvent event = new APIReconnectConsoleProxyAgentEvent();
         Map<String, Object> inventory = new HashMap<>();
-        inventory.put(uuid(), true);
-        inventory.put(uuid(), true);
-
+        inventory.put(uuid(ConsoleProxyAgentVO.class), true);
+        inventory.put(uuid(ConsoleProxyAgentInventory.class), true);
         event.setInventory(inventory);
         return event;
     }
-
 }

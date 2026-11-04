@@ -7,7 +7,7 @@ doc {
 
 	category "mevoco"
 
-	desc """更新云主机mac地址"""
+	desc """更新虚拟机mac地址"""
 
 	rest {
 		request {
@@ -17,18 +17,18 @@ doc {
 
 			clz APIUpdateVmNicMacMsg.class
 
-			desc """更新云主机mac地址"""
+			desc """更新虚拟机mac地址"""
 
 			params {
 
 				column {
 					name "vmNicUuid"
 					enclosedIn "updateVmNicMac"
-					desc "云主机网卡UUID"
+					desc "虚拟机网卡UUID"
 					location "url"
 					type "String"
 					optional false
-					since "2.2"
+					since "zsv_2.2"
 				}
 				column {
 					name "mac"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "2.2"
+					since "zsv_2.2"
 				}
 				column {
 					name "systemTags"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "userTags"
@@ -55,7 +55,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 			}
 		}

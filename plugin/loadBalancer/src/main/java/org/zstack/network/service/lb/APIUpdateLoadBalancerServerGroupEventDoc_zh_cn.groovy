@@ -11,14 +11,14 @@ doc {
 		name "success"
 		desc ""
 		type "boolean"
-		since "0.6"
+		since "zsv_0.6"
 	}
 	ref {
 		name "error"
 		path "org.zstack.network.service.lb.APIUpdateLoadBalancerServerGroupEvent.error"
 		desc "错误码，若不为null，则表示操作失败, 操作成功时该字段为null",false
 		type "ErrorCode"
-		since "0.6"
+		since "zsv_0.6"
 		clz ErrorCode.class
 	}
 	ref {
@@ -26,7 +26,7 @@ doc {
 		path "org.zstack.network.service.lb.APIUpdateLoadBalancerServerGroupEvent.inventory"
 		desc "null"
 		type "LoadBalancerServerGroupInventory"
-		since "0.6"
+		since "zsv_0.6"
 		clz LoadBalancerServerGroupInventory.class
 	}
 }

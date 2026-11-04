@@ -9,19 +9,20 @@ import org.zstack.core.db.SQL;
 import org.zstack.header.core.Completion;
 import org.zstack.header.errorcode.ErrorCode;
 import org.zstack.pciDevice.*;
-import org.zstack.pciDevice.specification.mdev.MdevDeviceSpecInventory;
-import org.zstack.pciDevice.specification.mdev.MdevDeviceSpecVO;
-import org.zstack.pciDevice.specification.mdev.PciDeviceMdevSpecRefVO;
-import org.zstack.pciDevice.specification.mdev.PciDeviceMdevSpecRefVO_;
+import org.zstack.pciDevice.entity.PciDeviceInventory;
+import org.zstack.pciDevice.entity.PciDeviceVO;
+import org.zstack.pciDevice.entity.specification.mdev.MdevDeviceSpecInventory;
+import org.zstack.pciDevice.entity.specification.mdev.MdevDeviceSpecVO;
+import org.zstack.pciDevice.entity.specification.mdev.PciDeviceMdevSpecRefVO;
+import org.zstack.pciDevice.entity.specification.mdev.PciDeviceMdevSpecRefVO_;
+import org.zstack.pciDevice.header.PciDeviceConstants;
+import org.zstack.pciDevice.header.virtual.PciDeviceVirtStatus;
 import org.zstack.pciDevice.virtual.APIGenerateVirtualPciDevicesMsg;
 import org.zstack.pciDevice.virtual.APIUngenerateVirtualPciDevicesMsg;
-import org.zstack.pciDevice.virtual.PciDeviceVirtStatus;
-import org.zstack.pciDevice.virtual.VirtualPciDeviceFactory;
+import org.zstack.pciDevice.spi.PciDeviceBackend;
+import org.zstack.pciDevice.spi.VirtualPciDeviceFactory;
 import org.zstack.utils.Utils;
 import org.zstack.utils.logging.CLogger;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by GuoYi on 2019-04-24.

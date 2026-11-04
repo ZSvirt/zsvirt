@@ -36,7 +36,6 @@ import org.zstack.header.volume.*;
 import org.zstack.utils.CollectionDSL;
 import org.zstack.utils.DebugUtils;
 import org.zstack.utils.Utils;
-import org.zstack.utils.function.Function;
 import org.zstack.utils.gson.JSONObjectUtil;
 import org.zstack.utils.logging.CLogger;
 
@@ -399,12 +398,7 @@ public class StorageRecycleImpl implements StorageTrash, VolumeSnapshotAfterDele
 
     @Override
     public boolean start() {
-        pluginRgty.saveExtensionAsMap(DeleteRecycleExtensionPoint.class, new Function<Object, DeleteRecycleExtensionPoint>() {
-            @Override
-            public Object call(DeleteRecycleExtensionPoint arg) {
-                return arg.getPrimaryStorageType().toString();
-            }
-        });
+        pluginRgty.saveExtensionAsMap(DeleteRecycleExtensionPoint.class, arg -> arg.getPrimaryStorageType().toString());
 
         transferTrashDataFromOldVersion();
         if (!CoreGlobalProperty.UNIT_TEST_ON) {

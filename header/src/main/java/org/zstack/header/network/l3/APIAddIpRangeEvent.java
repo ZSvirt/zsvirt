@@ -23,7 +23,7 @@ import org.zstack.header.rest.RestResponse;
  * "success": true
  * }
  * }
- * @since 0.1.0
+ * @since zsv_0.1.0
  */
 @RestResponse(allTo = "inventory")
 public class APIAddIpRangeEvent extends APIEvent {
@@ -50,16 +50,7 @@ public class APIAddIpRangeEvent extends APIEvent {
  
     public static APIAddIpRangeEvent __example__() {
         APIAddIpRangeEvent event = new APIAddIpRangeEvent();
-        IpRangeInventory ipRange = new IpRangeInventory();
-
-        ipRange.setL3NetworkUuid(uuid());
-        ipRange.setName("Test-IP-Range");
-        ipRange.setStartIp("192.168.100.10");
-        ipRange.setEndIp("192.168.100.250");
-        ipRange.setNetmask("255.255.255.0");
-        ipRange.setGateway("192.168.100.1");
-
-        event.setInventory(ipRange);
+        event.setInventory(IpRangeInventory.__example__());
         return event;
     }
 

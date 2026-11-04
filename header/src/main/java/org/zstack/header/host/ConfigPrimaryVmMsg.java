@@ -7,7 +7,7 @@ import java.util.List;
 public class ConfigPrimaryVmMsg extends NeedReplyMessage implements HostMessage {
     private String hostUuid;
     private String vmInstanceUuid;
-    private List<VmNicRedirectConfig> configs;
+    private List<VmNicRedirectConfig> redirectConfigs;
     private String hostIp;
 
     public String getHostUuid() {
@@ -18,12 +18,12 @@ public class ConfigPrimaryVmMsg extends NeedReplyMessage implements HostMessage 
         this.hostUuid = hostUuid;
     }
 
-    public List<VmNicRedirectConfig> getConfigs() {
-        return configs;
+    public List<VmNicRedirectConfig> getRedirectConfigs() {
+        return redirectConfigs;
     }
 
-    public void setConfigs(List<VmNicRedirectConfig> configs) {
-        this.configs = configs;
+    public void setRedirectConfigs(List<VmNicRedirectConfig> redirectConfigs) {
+        this.redirectConfigs = redirectConfigs;
     }
 
     public String getVmInstanceUuid() {

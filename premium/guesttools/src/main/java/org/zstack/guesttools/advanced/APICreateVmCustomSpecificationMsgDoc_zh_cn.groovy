@@ -28,7 +28,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "4.10.18"
+					since "zsv_4.10.18"
 				}
 				column {
 					name "description"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "4.10.18"
+					since "zsv_4.10.18"
 				}
 				column {
 					name "platform"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "4.10.18"
+					since "zsv_4.10.18"
 					values ("Linux","Windows","WindowsVirtio","Other","Paravirtualization")
 				}
 				column {
@@ -56,7 +56,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "4.10.18"
+					since "zsv_4.10.18"
 				}
 				column {
 					name "rootPassword"
@@ -65,7 +65,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "4.10.18"
+					since "zsv_4.10.18"
 				}
 				column {
 					name "generateSID"
@@ -74,7 +74,7 @@ doc {
 					location "body"
 					type "Boolean"
 					optional true
-					since "4.10.18"
+					since "zsv_4.10.18"
 				}
 				column {
 					name "domainMode"
@@ -83,7 +83,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "4.10.18"
+					since "zsv_4.10.18"
 					values ("WorkGroup","Domain")
 				}
 				column {
@@ -93,7 +93,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "4.10.18"
+					since "zsv_4.10.18"
 				}
 				column {
 					name "domainUsername"
@@ -102,7 +102,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "4.10.18"
+					since "zsv_4.10.18"
 				}
 				column {
 					name "domainPassword"
@@ -111,7 +111,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "4.10.18"
+					since "zsv_4.10.18"
 				}
 				column {
 					name "organization"
@@ -120,7 +120,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "4.10.18"
+					since "zsv_4.10.18"
 				}
 				column {
 					name "resourceUuid"
@@ -129,7 +129,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "4.10.18"
+					since "zsv_4.10.18"
 				}
 				column {
 					name "tagUuids"
@@ -138,7 +138,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "4.10.18"
+					since "zsv_4.10.18"
 				}
 				column {
 					name "systemTags"
@@ -147,7 +147,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "4.10.18"
+					since "zsv_4.10.18"
 				}
 				column {
 					name "userTags"
@@ -156,7 +156,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "4.10.18"
+					since "zsv_4.10.18"
 				}
 			}
 		}

@@ -31,7 +31,7 @@ import org.zstack.header.rest.RestRequest;
  * }
  * }
  * @result see :ref:`APIAddDnsToL3NetworkEvent`
- * @since 0.1.0
+ * @since zsv_0.1.0
  */
 @RestRequest(
         path = "/l3-networks/{l3NetworkUuid}/dns",
@@ -69,9 +69,8 @@ public class APIAddDnsToL3NetworkMsg extends APIMessage implements L3NetworkMess
  
     public static APIAddDnsToL3NetworkMsg __example__() {
         APIAddDnsToL3NetworkMsg msg = new APIAddDnsToL3NetworkMsg();
-        msg.setL3NetworkUuid(uuid());
+        msg.setL3NetworkUuid(uuid(L3NetworkVO.class));
         msg.setDns("8.8.8.8");
-
         return msg;
     }
 }

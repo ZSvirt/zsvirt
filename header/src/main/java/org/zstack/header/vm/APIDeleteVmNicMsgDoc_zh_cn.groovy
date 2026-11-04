@@ -7,7 +7,7 @@ doc {
 
 	category "vmInstance"
 
-	desc """删除云主机网卡"""
+	desc """删除虚拟机网卡"""
 
 	rest {
 		request {
@@ -28,7 +28,7 @@ doc {
 					location "url"
 					type "String"
 					optional false
-					since "zsv 3.10"
+					since "zsv_3.10"
 				}
 				column {
 					name "deleteMode"
@@ -37,7 +37,7 @@ doc {
 					location "query"
 					type "String"
 					optional true
-					since "zsv 3.10"
+					since "zsv_3.10"
 				}
 				column {
 					name "systemTags"
@@ -46,7 +46,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "zsv 3.10"
+					since "zsv_3.10"
 				}
 				column {
 					name "userTags"
@@ -55,7 +55,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "zsv 3.10"
+					since "zsv_3.10"
 				}
 			}
 		}

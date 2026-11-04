@@ -11,7 +11,6 @@ import org.zstack.storage.ceph.backup.CephBackupStorageBase
 import org.zstack.storage.ceph.backup.CephBackupStorageMonBase
 import org.zstack.storage.ceph.backup.CephBackupStorageMonVO
 import org.zstack.storage.ceph.backup.CephBackupStorageMonVO_
-import org.zstack.storage.ceph.primary.CephPrimaryStorageBase
 import org.zstack.testlib.vfs.VFS
 import org.zstack.utils.gson.JSONObjectUtil
 

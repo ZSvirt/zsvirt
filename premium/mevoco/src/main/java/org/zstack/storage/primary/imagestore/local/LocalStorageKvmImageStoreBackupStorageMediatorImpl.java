@@ -206,6 +206,7 @@ public class LocalStorageKvmImageStoreBackupStorageMediatorImpl implements Local
                 cmd.setUsername(greply.getUsername());
                 cmd.setBackupStorageInstallPath(backupStorageInstallPath);
                 cmd.setPrimaryStorageInstallPath(primaryStorageInstallPath);
+                cmd.uuid = pinv.getUuid();
                 cmd.storagePath = pinv.getUrl();
                 if (isData) {
                     cmd.setIsData(1);
@@ -284,6 +285,7 @@ public class LocalStorageKvmImageStoreBackupStorageMediatorImpl implements Local
                 cmd.setUsername(r.getUsername());
                 ImageVO ivo = dbf.findByUuid(imageUuid, ImageVO.class);
                 cmd.setImageUuid(ivo.getUuid());
+                cmd.uuid = pinv.getUuid();
                 cmd.storagePath = pinv.getUrl();
                 cmd.concurrency = rcf.getResourceConfigValue(ImageStoreGlobalConfig.BLOB_UPLOAD_CONCURRENCY, bsinv.getUuid(), Integer.class);
 

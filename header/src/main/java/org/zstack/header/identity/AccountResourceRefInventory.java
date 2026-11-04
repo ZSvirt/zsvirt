@@ -1,5 +1,7 @@
 package org.zstack.header.identity;
 
+import org.zstack.header.image.ImageVO;
+import org.zstack.header.message.DocUtils;
 import org.zstack.header.rest.APINoSee;
 import org.zstack.header.search.Inventory;
 import org.zstack.utils.CollectionUtils;
@@ -9,8 +11,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
-/**
- */
 @Inventory(mappingVOClass = AccountResourceRefVO.class)
 public class AccountResourceRefInventory {
     @APINoSee
@@ -112,5 +112,17 @@ public class AccountResourceRefInventory {
 
     public void setLastOpDate(Timestamp lastOpDate) {
         this.lastOpDate = lastOpDate;
+    }
+
+    public static AccountResourceRefInventory __example__() {
+        AccountResourceRefInventory inventory = new AccountResourceRefInventory();
+        inventory.setAccountUuid(DocUtils.createFixedUuid(AccountVO.class));
+        inventory.setResourceUuid(DocUtils.createFixedUuid(ImageVO.class));
+        inventory.setResourceType("ImageVO");
+        inventory.setId(1);
+        inventory.setType("Own");
+        inventory.setCreateDate(DocUtils.timestamp());
+        inventory.setLastOpDate(DocUtils.timestamp());
+        return inventory;
     }
 }

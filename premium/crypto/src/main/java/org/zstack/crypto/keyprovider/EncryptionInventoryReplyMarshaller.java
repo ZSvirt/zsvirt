@@ -42,7 +42,7 @@ import java.util.stream.Collectors;
 
 public class EncryptionInventoryReplyMarshaller implements MarshalReplyMessageExtensionPoint {
     @Override
-    public List<Class> getReplyMessageClassForMarshalExtensionPoint() {
+    public List<Class<? extends Message>> getReplyMessageClassForMarshalExtensionPoint() {
         return Arrays.asList(
                 APIQueryVmInstanceReply.class,
                 APIQueryVolumeReply.class,

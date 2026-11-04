@@ -7,7 +7,7 @@ import org.zstack.header.rest.RestRequest;
 
 import java.util.List;
 
-import static java.util.Arrays.asList;
+import static org.zstack.utils.CollectionDSL.list;
 
 /**
  * Created by frank on 2/25/2016.
@@ -21,7 +21,6 @@ import static java.util.Arrays.asList;
 public class APIQueryAccountResourceRefMsg extends APIQueryMessage {
 
     public static List<String> __example__() {
-        return asList(String.format("acountUuid=%s", uuid()));
+        return list(String.format("acountUuid=%s", uuid(AccountVO.class)));
     }
-
 }

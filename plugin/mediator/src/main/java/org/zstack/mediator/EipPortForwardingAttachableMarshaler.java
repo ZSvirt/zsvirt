@@ -11,7 +11,7 @@ import org.zstack.network.service.eip.APIGetEipAttachableVmNicsReply;
 import org.zstack.network.service.portforwarding.APIGetPortForwardingAttachableVmNicsReply;
 
 import javax.persistence.TypedQuery;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,9 +22,8 @@ public class EipPortForwardingAttachableMarshaler implements MarshalReplyMessage
     private DatabaseFacade dbf;
 
     @Override
-    public List<Class> getReplyMessageClassForMarshalExtensionPoint() {
-        List<Class> clz = new ArrayList<Class>();
-        return clz;
+    public List<Class<? extends Message>> getReplyMessageClassForMarshalExtensionPoint() {
+        return Collections.emptyList();
     }
 
     @Override

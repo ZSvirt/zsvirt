@@ -5,7 +5,7 @@ import org.zstack.header.network.l3.L3NetworkInventory;
 import org.zstack.header.query.ExpandedQueries;
 import org.zstack.header.query.ExpandedQuery;
 import org.zstack.header.search.Inventory;
-import org.zstack.pciDevice.PciDeviceInventory;
+import org.zstack.pciDevice.entity.PciDeviceInventory;
 
 import java.util.ArrayList;
 import java.util.List;

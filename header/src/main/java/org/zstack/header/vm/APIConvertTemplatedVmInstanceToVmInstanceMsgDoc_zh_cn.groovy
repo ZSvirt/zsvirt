@@ -28,7 +28,7 @@ doc {
 					location "url"
 					type "String"
 					optional false
-					since "zsv 4.2.6"
+					since "zsv_4.2.6"
 				}
 				column {
 					name "name"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "zsv 4.2.6"
+					since "zsv_4.2.6"
 				}
 				column {
 					name "systemTags"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 4.2.6"
+					since "zsv_4.2.6"
 				}
 				column {
 					name "userTags"
@@ -55,7 +55,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 4.2.6"
+					since "zsv_4.2.6"
 				}
 				column {
 					name "resetTpm"
@@ -64,7 +64,7 @@ doc {
 					location "body"
 					type "Boolean"
 					optional true
-					since "zsv 5.0.0"
+					since "zsv_5.0.0"
 				}
 			}
 		}

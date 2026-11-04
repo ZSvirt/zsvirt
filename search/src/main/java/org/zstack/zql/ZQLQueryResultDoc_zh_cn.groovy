@@ -10,12 +10,12 @@ doc {
 		name "inventories"
 		desc ""
 		type "List"
-		since "0.6"
+		since "zsv_0.6"
 	}
 	field {
 		name "total"
 		desc ""
 		type "Long"
-		since "0.6"
+		since "zsv_0.6"
 	}
 }

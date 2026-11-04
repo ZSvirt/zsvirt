@@ -28,7 +28,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "5.0.0"
+					since "zsv_5.0.0"
 				}
 				column {
 					name "port"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "Integer"
 					optional true
-					since "5.0.0"
+					since "zsv_5.0.0"
 				}
 				column {
 					name "kmipVersion"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "5.0.0"
+					since "zsv_5.0.0"
 					values ("1.0","1.1","1.2","1.3","1.4","2.0","2.1")
 				}
 				column {
@@ -56,7 +56,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "5.0.0"
+					since "zsv_5.0.0"
 				}
 				column {
 					name "password"
@@ -65,7 +65,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "5.0.0"
+					since "zsv_5.0.0"
 				}
 				column {
 					name "uuid"
@@ -74,7 +74,7 @@ doc {
 					location "url"
 					type "String"
 					optional false
-					since "5.0.0"
+					since "zsv_5.0.0"
 				}
 				column {
 					name "description"
@@ -83,7 +83,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "5.0.0"
+					since "zsv_5.0.0"
 				}
 				column {
 					name "systemTags"
@@ -92,7 +92,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "5.0.0"
+					since "zsv_5.0.0"
 				}
 				column {
 					name "userTags"
@@ -101,7 +101,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "5.0.0"
+					since "zsv_5.0.0"
 				}
 			}
 		}

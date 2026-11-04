@@ -12,10 +12,10 @@ import org.zstack.core.db.Q;
 import org.zstack.header.vm.VmInstanceState;
 import org.zstack.header.vm.VmInstanceVO;
 import org.zstack.header.vm.VmInstanceVO_;
-import org.zstack.pciDevice.PciDeviceInventory;
-import org.zstack.pciDevice.PciDeviceStatus;
-import org.zstack.pciDevice.PciDeviceVO;
-import org.zstack.pciDevice.PciDeviceVO_;
+import org.zstack.pciDevice.entity.PciDeviceInventory;
+import org.zstack.pciDevice.header.PciDeviceStatus;
+import org.zstack.pciDevice.entity.PciDeviceVO;
+import org.zstack.pciDevice.entity.PciDeviceVO_;
 import org.zstack.utils.gson.JSONObjectUtil;
 
 import java.util.ArrayList;

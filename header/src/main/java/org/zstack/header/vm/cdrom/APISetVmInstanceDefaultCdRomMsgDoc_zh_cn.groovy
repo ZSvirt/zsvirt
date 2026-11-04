@@ -7,7 +7,7 @@ doc {
 
 	category "vmInstance"
 
-	desc """设置云主机默认CDROM"""
+	desc """设置虚拟机默认CDROM"""
 
 	rest {
 		request {
@@ -28,16 +28,16 @@ doc {
 					location "url"
 					type "String"
 					optional false
-					since "zsv 3.3"
+					since "zsv_3.3"
 				}
 				column {
 					name "vmInstanceUuid"
 					enclosedIn "setVmInstanceDefaultCdRom"
-					desc "云主机UUID"
+					desc "虚拟机UUID"
 					location "url"
 					type "String"
 					optional false
-					since "zsv 3.3"
+					since "zsv_3.3"
 				}
 				column {
 					name "systemTags"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 3.3"
+					since "zsv_3.3"
 				}
 				column {
 					name "userTags"
@@ -55,7 +55,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 3.3"
+					since "zsv_3.3"
 				}
 			}
 		}

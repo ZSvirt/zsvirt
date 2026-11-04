@@ -4,6 +4,7 @@ import org.zstack.core.workflow.FlowChainBuilder;
 import org.zstack.header.Component;
 import org.zstack.header.host.HostInventory;
 import org.zstack.header.storage.primary.*;
+import org.zstack.storage.primary.allocate.PrimaryStorageAllocatorChainBuilder;
 
 import java.util.List;
 
@@ -12,9 +13,9 @@ public class LeastVolumePrimaryStorageAllocatorFactory implements PrimaryStorage
     private static final PrimaryStorageAllocatorStrategyType type = new PrimaryStorageAllocatorStrategyType(
             PrimaryStorageConstant.LEAST_VOLUME_PRIMARY_STORAGE_ALLOCATION_STRATEGY_TYPE);
     private LeastVolumePrimaryStorageAllocatorStrategy strategy;
+    private List<String> producerNames;
     private List<String> allocatorFlowNames;
     private List<String> sortFlowNames;
-    private FlowChainBuilder allocateBuilder = new FlowChainBuilder();
     private FlowChainBuilder sortBuilder = new FlowChainBuilder();
 
     @Override
@@ -24,6 +25,14 @@ public class LeastVolumePrimaryStorageAllocatorFactory implements PrimaryStorage
 
     public void setAllocatorFlowNames(List<String> allocatorFlowNames) {
         this.allocatorFlowNames = allocatorFlowNames;
+    }
+
+    public List<String> getProducerNames() {
+        return producerNames;
+    }
+
+    public void setProducerNames(List<String> producerNames) {
+        this.producerNames = producerNames;
     }
 
     public List<String> getSortFlowNames() {
@@ -46,7 +55,10 @@ public class LeastVolumePrimaryStorageAllocatorFactory implements PrimaryStorage
 
     @Override
     public boolean start() {
-        allocateBuilder.setFlowClassNames(allocatorFlowNames).construct();
+        PrimaryStorageAllocatorChainBuilder allocateBuilder = PrimaryStorageAllocatorChainBuilder.newBuilder()
+                .setProducerClassNames(producerNames)
+                .setFlowClassNames(allocatorFlowNames)
+                .construct();
         sortBuilder.setFlowClassNames(sortFlowNames).construct();
         strategy = new LeastVolumePrimaryStorageAllocatorStrategy(allocateBuilder, sortBuilder);
         return true;

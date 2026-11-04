@@ -28,7 +28,7 @@ doc {
 					location "query"
 					type "String"
 					optional false
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "startTime"
@@ -37,7 +37,7 @@ doc {
 					location "query"
 					type "Long"
 					optional false
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "endTime"
@@ -46,7 +46,7 @@ doc {
 					location "query"
 					type "Long"
 					optional false
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "intervalHours"
@@ -55,7 +55,7 @@ doc {
 					location "query"
 					type "Integer"
 					optional false
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "groupColumns"
@@ -64,7 +64,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "systemTags"
@@ -73,7 +73,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "userTags"
@@ -82,7 +82,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 			}
 		}

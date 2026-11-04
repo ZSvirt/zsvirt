@@ -7,7 +7,7 @@ doc {
 
 	category "mevoco"
 
-	desc """修改云主机根云盘"""
+	desc """修改虚拟机根云盘"""
 
 	rest {
 		request {
@@ -17,18 +17,18 @@ doc {
 
 			clz APIChangeVmImageMsg.class
 
-			desc """修改云主机根云盘"""
+			desc """修改虚拟机根云盘"""
 
 			params {
 
 				column {
 					name "vmInstanceUuid"
 					enclosedIn "changeVmImage"
-					desc "云主机UUID"
+					desc "虚拟机UUID"
 					location "url"
 					type "String"
 					optional false
-					since "2.2"
+					since "zsv_2.2"
 				}
 				column {
 					name "imageUuid"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "2.2"
+					since "zsv_2.2"
 				}
 				column {
 					name "systemTags"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "2.2"
+					since "zsv_2.2"
 				}
 				column {
 					name "userTags"
@@ -55,7 +55,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "2.2"
+					since "zsv_2.2"
 				}
 				column {
 					name "resourceUuid"
@@ -64,7 +64,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "tagUuids"
@@ -73,7 +73,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 			}
 		}

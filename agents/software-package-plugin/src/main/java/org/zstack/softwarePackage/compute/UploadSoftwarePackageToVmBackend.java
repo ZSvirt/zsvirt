@@ -11,8 +11,24 @@ public interface UploadSoftwarePackageToVmBackend {
 
     ErrorCode validateTargetVm(VmInstanceInventory vm);
 
-    UploadSoftwarePackageToVmSpec getUploadSpec(String uploadTaskUuid);
+    UploadSoftwarePackageToVmSpec getUploadSpec(String uploadTaskUuid, long uploadTimestamp);
 
-    void install(String vmInstanceUuid, String targetIp, String uploadTaskUuid,
+    ErrorCode prepareUpload(String vmInstanceUuid, String targetIp, String uploadTaskUuid,
+                            long uploadTimestamp);
+
+    ErrorCode cleanupUpload(String targetIp, long uploadTimestamp);
+
+    default boolean isUploadCancelable(String uploadTaskUuid) {
+        return true;
+    }
+
+    default void runAfterUploadFinished(String uploadTaskUuid, Runnable action) {
+        action.run();
+    }
+
+    default void markUploadSettled(String uploadTaskUuid) {
+    }
+
+    void install(String vmInstanceUuid, String targetIp, String uploadTaskUuid, long uploadTimestamp,
                  BooleanSupplier canceled, Completion completion);
 }

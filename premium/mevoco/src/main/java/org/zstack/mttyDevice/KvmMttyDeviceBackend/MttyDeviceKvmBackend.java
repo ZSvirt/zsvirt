@@ -8,24 +8,33 @@ import org.zstack.core.db.DatabaseFacade;
 import org.zstack.core.db.Q;
 import org.zstack.core.db.SQL;
 import org.zstack.header.core.Completion;
-import org.zstack.header.core.workflow.Flow;
-import org.zstack.header.core.workflow.FlowTrigger;
-import org.zstack.header.core.workflow.NoRollbackFlow;
-import org.zstack.header.host.CpuArchitecture;
 import org.zstack.header.host.HostConstant;
-import org.zstack.header.host.HostVO;
 import org.zstack.header.host.HypervisorType;
 import org.zstack.header.identity.AccountConstant;
 import org.zstack.header.message.MessageReply;
 import org.zstack.header.rest.RESTFacade;
 import org.zstack.kvm.*;
 import org.zstack.mttyDevice.*;
+import org.zstack.mttyDevice.entity.MttyDeviceInventory;
+import org.zstack.mttyDevice.entity.MttyDeviceVO;
+import org.zstack.mttyDevice.entity.MttyDeviceVO_;
+import org.zstack.mttyDevice.header.MttyDeviceGlobalConfig;
+import org.zstack.mttyDevice.header.MttyDeviceState;
+import org.zstack.mttyDevice.header.MttyDeviceType;
+import org.zstack.mttyDevice.header.MttyDeviceVirtStatus;
+import org.zstack.mttyDevice.message.MttyDeviceTO;
+import org.zstack.mttyDevice.spi.MttyDeviceBackend;
+import org.zstack.pciDevice.entity.virtual.vfio_mdev.MdevDeviceVO;
+import org.zstack.pciDevice.entity.virtual.vfio_mdev.MdevDeviceVO_;
+import org.zstack.pciDevice.header.virtual.vfio_mdev.MdevDeviceChooser;
+import org.zstack.pciDevice.header.virtual.vfio_mdev.MdevDeviceState;
+import org.zstack.pciDevice.header.virtual.vfio_mdev.MdevDeviceStatus;
+import org.zstack.pciDevice.header.virtual.vfio_mdev.MdevDeviceType;
 import org.zstack.pciDevice.virtual.vfio_mdev.*;
 import org.zstack.utils.Utils;
 import org.zstack.utils.logging.CLogger;
 
 import java.util.List;
-import java.util.Map;
 
 import static org.zstack.core.Platform.operr;
 
@@ -36,7 +45,7 @@ import static org.zstack.core.Platform.operr;
 public class MttyDeviceKvmBackend implements MttyDeviceBackend {
     public static final String GET_MTTY_DEVICES = "/mttydevice/get";
     public static final String GENERATE_SE_VFIO_MDEV_DEVICES = "/semdevdevice/generate";
-    private static final String UNGENERATE_SE_VFIO_MDEV_DEVICES = "/semdevdevice/ungenerate";
+    public static final String UNGENERATE_SE_VFIO_MDEV_DEVICES = "/semdevdevice/ungenerate";
     private static CLogger logger = Utils.getLogger(MttyDeviceKvmBackend.class);
     
     @Autowired

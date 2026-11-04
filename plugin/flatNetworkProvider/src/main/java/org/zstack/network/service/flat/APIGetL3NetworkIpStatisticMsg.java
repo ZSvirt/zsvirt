@@ -21,7 +21,7 @@ public class APIGetL3NetworkIpStatisticMsg extends APISyncCallMessage implements
     @APIParam(resourceType = L3NetworkVO.class)
     private String l3NetworkUuid;
 
-    @APIParam(validValues = {ResourceType.ALL, ResourceType.VIP, ResourceType.VM, ResourceType.KERNEL_INTERFACE}, required = false)
+    @APIParam(validValues = {ResourceType.ALL, ResourceType.VIP, ResourceType.VM, ResourceType.KERNEL_INTERFACE, ResourceType.DHCP}, required = false)
     private String resourceType = ResourceType.ALL;
 
     @APIParam(required = false)

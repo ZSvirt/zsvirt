@@ -11,18 +11,17 @@ import org.zstack.core.db.DatabaseFacade;
 import org.zstack.core.db.Q;
 import org.zstack.header.core.WhileDoneCompletion;
 import org.zstack.header.core.ReturnValueCompletion;
-import org.zstack.header.errorcode.ErrorCode;
 import org.zstack.header.errorcode.ErrorCodeList;
 import org.zstack.header.longjob.*;
 import org.zstack.header.message.APIEvent;
 import org.zstack.header.message.MessageReply;
 import org.zstack.header.storage.backup.*;
 import org.zstack.header.storage.volume.backup.*;
+import org.zstack.header.volume.VolumeType;
 import org.zstack.utils.Utils;
 import org.zstack.utils.gson.JSONObjectUtil;
 import org.zstack.utils.logging.CLogger;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -42,7 +41,6 @@ public class CreateVmBackupLongJob implements LongJob {
 
     @Override
     public void start(LongJobVO job, ReturnValueCompletion<APIEvent> completion) {
-        List<ErrorCode> errors = new ArrayList<>();
         APICreateVmBackupEvent evt = new APICreateVmBackupEvent(job.getApiId());
         VmBackupLongJobParams params = JSONObjectUtil.toObject(job.getJobData(), VmBackupLongJobParams.class);
         params.makeCompatibleParams();
@@ -51,16 +49,20 @@ public class CreateVmBackupLongJob implements LongJob {
             CreateVmBackupMsg msg = buildMsg(params);
             msg.setBackupStorageUuid(bsUuid);
             bus.makeTargetServiceIdByResourceUuid(msg, VolumeBackupConstant.SERVICE_ID, bsUuid);
-            bus.send(msg, new CloudBusCallBack(compl) {
+            VolumeBackupUtils.sendBackupInVmQueue(bus, msg, msg.getVolumeUuid(), new CloudBusCallBack(compl) {
                 @Override
                 public void run(MessageReply reply) {
                     if (reply.isSuccess()) {
                         CreateVmBackupReply r = reply.castReply();
-                        evt.setInventories(r.getInventories());
+                        List<VolumeBackupInventory> inventories = r.getInventories();
+                        if (inventories != null) {
+                            inventories.forEach(inv -> inv.setMetadata(null));
+                        }
+                        evt.setInventories(inventories);
                         evt.setActualExecuteTime(r.getActualExecuteTime());
                         compl.allDone();
                     } else {
-                        errors.add(reply.getError());
+                        compl.addError(reply.getError());
                         compl.done();
                     }
                 }
@@ -68,8 +70,8 @@ public class CreateVmBackupLongJob implements LongJob {
         }).run(new WhileDoneCompletion(completion) {
             @Override
             public void done(ErrorCodeList errorCodeList) {
-                if (evt.getInventories() == null && !errors.isEmpty()) {
-                    completion.fail(errors.get(0));
+                if (evt.getInventories() == null && errorCodeList.hasError()) {
+                    completion.fail(errorCodeList.wrapOrNull());
                     return;
                 }
                 if (params.getRemoteBackupStorageUuid() != null) {
@@ -91,31 +93,66 @@ public class CreateVmBackupLongJob implements LongJob {
         String backupStorageUuid = params.getBackupStorageUuid();
         String remoteBackupStorageUuid = params.getRemoteBackupStorageUuid();
 
-        List<SyncBackupFromImageStoreBackupStorageMsg> msgs = new ArrayList<>();
-        for (VolumeBackupInventory inv : evt.getInventories()) {
-            SyncBackupFromImageStoreBackupStorageMsg msg = new SyncBackupFromImageStoreBackupStorageMsg();
-            msg.setUuid(inv.getUuid());
-            msg.setSrcBackupStorageUuid(backupStorageUuid);
-            msg.setDstBackupStorageUuid(remoteBackupStorageUuid);
-            bus.makeTargetServiceIdByResourceUuid(msg, VolumeBackupConstant.SERVICE_ID, msg.getBackupStorageUuid());
-            msgs.add(msg);
+        VolumeBackupInventory root = evt.getInventories().stream()
+                .filter(it -> VolumeType.Root.toString().equals(it.getType())).findFirst().orElse(null);
+        if (root == null) {
+            logger.error(String.format("failed to sync VM backups to remoteImageStoreBackupStorage[%s], root backup not found",
+                    remoteBackupStorageUuid));
+            completion.success(evt);
+            return;
         }
 
-        new While<>(msgs).all((msg, com) -> bus.send(msg, new CloudBusCallBack(com) {
+        SyncBackupFromImageStoreBackupStorageMsg rootMsg = buildSyncMsg(root, backupStorageUuid, remoteBackupStorageUuid);
+        bus.send(rootMsg, new CloudBusCallBack(completion) {
             @Override
             public void run(MessageReply reply) {
                 if (!reply.isSuccess()) {
-                    logger.warn(String.format("failed to sync backup from imageStoreBackupStorage[%s] to " +
-                            "remoteImageStoreBackupStorage[%s], %s", backupStorageUuid, remoteBackupStorageUuid, reply.getError()));
+                    logger.warn(String.format("failed to sync VM root backup[uuid:%s] from imageStoreBackupStorage[%s] to " +
+                            "remoteImageStoreBackupStorage[%s], %s", rootMsg.getUuid(), backupStorageUuid,
+                            remoteBackupStorageUuid, reply.getError()));
+                    completion.success(evt);
+                    return;
+                }
+
+                syncDataBackups(evt, backupStorageUuid, remoteBackupStorageUuid, completion);
+            }
+        });
+    }
+
+    private SyncBackupFromImageStoreBackupStorageMsg buildSyncMsg(VolumeBackupInventory backup, String backupStorageUuid,
+                                                                   String remoteBackupStorageUuid) {
+        SyncBackupFromImageStoreBackupStorageMsg msg = new SyncBackupFromImageStoreBackupStorageMsg();
+        msg.setUuid(backup.getUuid());
+        msg.setSrcBackupStorageUuid(backupStorageUuid);
+        msg.setDstBackupStorageUuid(remoteBackupStorageUuid);
+        bus.makeTargetServiceIdByResourceUuid(msg, VolumeBackupConstant.SERVICE_ID, msg.getBackupStorageUuid());
+        return msg;
+    }
+
+    private void syncDataBackups(APICreateVmBackupEvent evt, String backupStorageUuid, String remoteBackupStorageUuid,
+                                 ReturnValueCompletion<APIEvent> completion) {
+        List<SyncBackupFromImageStoreBackupStorageMsg> msgs = evt.getInventories().stream()
+                .filter(it -> VolumeType.Data.toString().equals(it.getType()))
+                .map(it -> buildSyncMsg(it, backupStorageUuid, remoteBackupStorageUuid)).collect(Collectors.toList());
+        new While<>(msgs).step((msg, com) -> bus.send(msg, new CloudBusCallBack(com) {
+            @Override
+            public void run(MessageReply reply) {
+                if (!reply.isSuccess()) {
+                    logger.warn(String.format("failed to sync VM backup[uuid:%s] from imageStoreBackupStorage[%s] to " +
+                            "remoteImageStoreBackupStorage[%s], %s", msg.getUuid(), backupStorageUuid, remoteBackupStorageUuid, reply.getError()));
                 }
                 com.done();
             }
-        })).run(new WhileDoneCompletion(null) {
+        }), 10).run(new WhileDoneCompletion(null) {
             @Override
             public void done(ErrorCodeList errorCodeList) {
                 List<String> voUuids = evt.getInventories().stream().map(VolumeBackupInventory::getUuid).collect(Collectors.toList());
                 List<VolumeBackupVO> vos = Q.New(VolumeBackupVO.class).in(VolumeBackupVO_.uuid, voUuids).list();
-                evt.setInventories(VolumeBackupInventory.valueOf(vos));
+                List<VolumeBackupInventory> inventories = VolumeBackupInventory.valueOf(vos);
+                if (inventories != null) {
+                    inventories.forEach(inv -> inv.setMetadata(null));
+                }
+                evt.setInventories(inventories);
                 completion.success(evt);
             }
         });

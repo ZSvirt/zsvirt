@@ -3,7 +3,6 @@ package org.zstack.header.network.l2;
 import org.zstack.header.message.APIReply;
 import org.zstack.header.rest.RestResponse;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 

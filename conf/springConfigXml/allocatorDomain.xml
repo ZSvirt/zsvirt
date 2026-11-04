@@ -22,11 +22,21 @@
         </zstack:plugin>
     </bean>
 
+    <bean id="AllocatorDomainVmApiInterceptor" class="org.zstack.allocator.domain.compute.AllocatorDomainVmApiInterceptor">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.apimediator.GlobalApiMessageInterceptor"/>
+        </zstack:plugin>
+    </bean>
+
     <bean id="AllocatorDomainCascadeExtension" class="org.zstack.allocator.domain.compute.AllocatorDomainCascadeExtension">
         <zstack:plugin>
             <zstack:extension interface="org.zstack.core.cascade.CascadeExtensionPoint"/>
         </zstack:plugin>
     </bean>
+
+    <bean id="AllocatorDomainConstraintResolver" class="org.zstack.allocator.domain.compute.evaluator.AllocatorDomainConstraintResolver"/>
+
+    <bean id="AllocatorDomainPrimaryStorageGate" class="org.zstack.allocator.domain.compute.evaluator.AllocatorDomainPrimaryStorageGate"/>
 
     <bean id="AllocatorDomainAllocateExtension" class="org.zstack.allocator.domain.compute.AllocatorDomainAllocateExtension">
         <zstack:plugin>

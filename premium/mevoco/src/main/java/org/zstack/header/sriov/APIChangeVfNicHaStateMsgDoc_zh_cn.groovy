@@ -7,7 +7,7 @@ doc {
 
 	category "sriov"
 
-	desc """修改云主机VF网卡高可用状态"""
+	desc """修改虚拟机VF网卡高可用状态"""
 
 	rest {
 		request {
@@ -17,7 +17,7 @@ doc {
 
 			clz APIChangeVfNicHaStateMsg.class
 
-			desc """修改云主机VF网卡高可用状态"""
+			desc """修改虚拟机VF网卡高可用状态"""
 
 			params {
 
@@ -28,7 +28,7 @@ doc {
 					location "url"
 					type "String"
 					optional false
-					since "4.10.0"
+					since "zsv_4.10.0"
 				}
 				column {
 					name "haState"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "4.10.0"
+					since "zsv_4.10.0"
 					values ("Enabled","Disabled")
 				}
 				column {
@@ -47,7 +47,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "4.10.0"
+					since "zsv_4.10.0"
 				}
 				column {
 					name "userTags"
@@ -56,7 +56,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "4.10.0"
+					since "zsv_4.10.0"
 				}
 			}
 		}

@@ -3,11 +3,11 @@ package org.zstack.header.vm
 import org.zstack.header.vm.APICreateVmInstanceEvent
 
 doc {
-	title "创建云主机(CreateVmInstance)"
+	title "创建虚拟机(CreateVmInstance)"
 
-	category "云主机"
+	category "虚拟机"
 
-	desc """创建一个新的云主机"""
+	desc """创建一个新的虚拟机"""
 
 	rest {
 		request {
@@ -24,38 +24,38 @@ doc {
 				column {
 					name "name"
 					enclosedIn "params"
-					desc "云主机名称"
+					desc "虚拟机名称"
 					location "body"
 					type "String"
 					optional false
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "instanceOfferingUuid"
 					enclosedIn "params"
-					desc "计算规格UUID。指定云主机的CPU、内存等参数。"
+					desc "计算规格UUID。指定虚拟机的CPU、内存等参数。"
 					location "body"
 					type "String"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "imageUuid"
 					enclosedIn "params"
-					desc "镜像UUID。云主机的根云盘会从该字段指定的镜像创建。"
+					desc "镜像UUID。虚拟机的根云盘会从该字段指定的镜像创建。"
 					location "body"
 					type "String"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "l3NetworkUuids"
 					enclosedIn "params"
-					desc "三层网络UUID列表。可以指定一个或多个三层网络，云主机会在每个网络上创建一个网卡。"
+					desc "三层网络UUID列表。可以指定一个或多个三层网络，虚拟机会在每个网络上创建一个网卡。"
 					location "body"
 					type "List"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "vmNicParams"
@@ -64,16 +64,16 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 3.17.0"
+					since "zsv_3.17.0"
 				}
 				column {
 					name "type"
 					enclosedIn "params"
-					desc "云主机类型。保留字段，无需指定。"
+					desc "虚拟机类型。保留字段，无需指定。"
 					location "body"
 					type "String"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 					values ("UserVm","ApplianceVm")
 				}
 				column {
@@ -83,70 +83,70 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "dataDiskSizes"
 					enclosedIn "params"
-					desc "自定义云盘大小列表。可以指定一个或多个云盘大小（可重复）为云主机创建一个或多个数据云盘。"
+					desc "自定义云盘大小列表。可以指定一个或多个云盘大小（可重复）为虚拟机创建一个或多个数据云盘。"
 					location "body"
 					type "List"
 					optional true
-					since "zsv 3.14.6"
+					since "zsv_3.14.6"
 				}
 				column {
 					name "dataDiskOfferingUuids"
 					enclosedIn "params"
-					desc "云盘规格UUID列表。可以指定一个或多个云盘规格UUID（UUID可以重复）为云主机创建一个或多个数据云盘。"
+					desc "云盘规格UUID列表。可以指定一个或多个云盘规格UUID（UUID可以重复）为虚拟机创建一个或多个数据云盘。"
 					location "body"
 					type "List"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "zoneUuid"
 					enclosedIn "params"
-					desc "区域UUID。若指定，云主机会在指定区域创建。"
+					desc "区域UUID。若指定，虚拟机会在指定区域创建。"
 					location "body"
 					type "String"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "clusterUuid"
 					enclosedIn "params"
-					desc "集群UUID。若指定，云主机会在指定集群创建，该字段优先级高于`zoneUuid`。"
+					desc "集群UUID。若指定，虚拟机会在指定集群创建，该字段优先级高于`zoneUuid`。"
 					location "body"
 					type "String"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "hostUuid"
 					enclosedIn "params"
-					desc "物理机UUID。若指定，云主机会在指定物理机创建，该字段优先级高于`zoneUuid`和`clusterUuid`。"
+					desc "物理机UUID。若指定，虚拟机会在指定物理机创建，该字段优先级高于`zoneUuid`和`clusterUuid`。"
 					location "body"
 					type "String"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "primaryStorageUuidForRootVolume"
 					enclosedIn "params"
-					desc "主存储UUID。若指定，云主机的根云盘会在指定主存储创建。"
+					desc "主存储UUID。若指定，虚拟机的根云盘会在指定主存储创建。"
 					location "body"
 					type "String"
 					optional true
-					since "zsv 1.8"
+					since "zsv_1.8"
 				}
 				column {
 					name "description"
 					enclosedIn "params"
-					desc "云主机的详细描述"
+					desc "虚拟机的详细描述"
 					location "body"
 					type "String"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "defaultL3NetworkUuid"
@@ -155,16 +155,16 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "resourceUuid"
 					enclosedIn "params"
-					desc "资源UUID。若指定，云主机会使用该字段值作为UUID。"
+					desc "资源UUID。若指定，虚拟机会使用该字段值作为UUID。"
 					location "body"
 					type "String"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "tagUuids"
@@ -173,53 +173,53 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 3.4"
+					since "zsv_3.4"
 				}
 				column {
 					name "systemTags"
 					enclosedIn ""
-					desc "云主机系统标签"
+					desc "虚拟机系统标签"
 					location "body"
 					type "List"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "userTags"
 					enclosedIn ""
-					desc "云主机用户标签"
+					desc "虚拟机用户标签"
 					location "body"
 					type "List"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "strategy"
 					enclosedIn "params"
-					desc "云主机创建策略,创建后立刻启动或创建后不启动"
+					desc "虚拟机创建策略,创建后立刻启动或创建后不启动"
 					location "body"
 					type "String"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 					values ("InstantStart","JustCreate","CreateStopped")
 				}
 				column {
 					name "rootVolumeSystemTags"
 					enclosedIn "params"
-					desc "云主机根盘所需要的系统标签"
+					desc "虚拟机根盘所需要的系统标签"
 					location "body"
 					type "List"
 					optional true
-					since "zsv 3.0"
+					since "zsv_3.0"
 				}
 				column {
 					name "dataVolumeSystemTags"
 					enclosedIn "params"
-					desc "云主机数据盘所需要的系统标签"
+					desc "虚拟机数据盘所需要的系统标签"
 					location "body"
 					type "List"
 					optional true
-					since "zsv 3.0"
+					since "zsv_3.0"
 				}
 				column {
 					name "cpuNum"
@@ -228,7 +228,7 @@ doc {
 					location "body"
 					type "Integer"
 					optional true
-					since "zsv 3.4.0"
+					since "zsv_3.4.0"
 				}
 				column {
 					name "memorySize"
@@ -237,7 +237,7 @@ doc {
 					location "body"
 					type "Long"
 					optional true
-					since "zsv 3.4.0"
+					since "zsv_3.4.0"
 				}
 				column {
 					name "rootDiskSize"
@@ -246,7 +246,7 @@ doc {
 					location "body"
 					type "Long"
 					optional true
-					since "zsv 3.4.0"
+					since "zsv_3.4.0"
 				}
 				column {
 					name "dataVolumeSystemTagsOnIndex"
@@ -255,7 +255,7 @@ doc {
 					location "body"
 					type "Map"
 					optional true
-					since "zsv 3.14.24"
+					since "zsv_3.14.24"
 				}
 				column {
 					name "sshKeyPairUuids"
@@ -264,7 +264,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 3.17.21"
+					since "zsv_3.17.21"
 				}
 				column {
 					name "dataVolumeTemplateUuids"
@@ -273,16 +273,16 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 3.17.0"
+					since "zsv_3.17.0"
 				}
 				column {
 					name "diskAOs"
 					enclosedIn "params"
-					desc "boot=true表示diskAO用于设置云主机平台、架构、操作系统与根盘总线；diskAO.boot=false表示加载的硬盘"
+					desc "boot=true表示diskAO用于设置虚拟机平台、架构、操作系统与根盘总线；diskAO.boot=false表示加载的硬盘"
 					location "body"
 					type "List"
 					optional true
-					since "zsv 3.17.0"
+					since "zsv_3.17.0"
 				}
 				column {
 					name "platform"
@@ -291,7 +291,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 3.17.0"
+					since "zsv_3.17.0"
 				}
 				column {
 					name "guestOsType"
@@ -300,7 +300,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 3.17.0"
+					since "zsv_3.17.0"
 				}
 				column {
 					name "architecture"
@@ -309,7 +309,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 3.17.21"
+					since "zsv_3.17.21"
 				}
 				column {
 					name "reservedMemorySize"
@@ -318,7 +318,7 @@ doc {
 					location "body"
 					type "Long"
 					optional true
-					since "zsv 3.17.21"
+					since "zsv_3.17.21"
 				}
 				column {
 					name "virtio"
@@ -327,7 +327,7 @@ doc {
 					location "body"
 					type "Boolean"
 					optional true
-					since "zsv 3.17.0"
+					since "zsv_3.17.0"
 				}
 				column {
 					name "allocatorStrategy"
@@ -336,7 +336,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "zsv 4.10.10"
+					since "zsv_4.10.10"
 				}
 				column {
 					name "vmEncryption"
@@ -345,7 +345,7 @@ doc {
 					location "body"
 					type "Boolean"
 					optional true
-					since "1.0.1, zsv_5.1.0"
+					since "1.0.0, zsv_5.1.0"
 				}
 			}
 		}

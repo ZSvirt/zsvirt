@@ -28,16 +28,16 @@ doc {
 					location "url"
 					type "String"
 					optional false
-					since "3.16.31"
+					since "zsv_3.16.31"
 				}
 				column {
 					name "vmUuid"
 					enclosedIn "setVolumeIoThreadPin"
-					desc "云盘加载目标云主机的UUID"
+					desc "云盘加载目标虚拟机的UUID"
 					location "body"
 					type "String"
 					optional false
-					since "3.16.31"
+					since "zsv_3.16.31"
 				}
 				column {
 					name "pin"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "3.16.31"
+					since "zsv_3.16.31"
 				}
 				column {
 					name "ioThreadId"
@@ -55,7 +55,7 @@ doc {
 					location "body"
 					type "int"
 					optional false
-					since "3.16.31"
+					since "zsv_3.16.31"
 				}
 				column {
 					name "systemTags"
@@ -64,7 +64,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.16.31"
+					since "zsv_3.16.31"
 				}
 				column {
 					name "userTags"
@@ -73,7 +73,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.16.31"
+					since "zsv_3.16.31"
 				}
 			}
 		}

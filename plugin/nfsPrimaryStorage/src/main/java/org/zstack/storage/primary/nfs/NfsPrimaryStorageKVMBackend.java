@@ -200,7 +200,6 @@ public class NfsPrimaryStorageKVMBackend implements NfsPrimaryStorageBackend,
             return;
         }
 
-        List<ErrorCode> errs = new ArrayList<>();
         new While<>(hostUuids).all((hostUuid, compl) -> {
             mount(inv, hostUuid, new Completion(compl){
 
@@ -211,7 +210,7 @@ public class NfsPrimaryStorageKVMBackend implements NfsPrimaryStorageBackend,
 
                 @Override
                 public void fail(ErrorCode errorCode) {
-                    errs.add(errorCode);
+                    compl.addError(errorCode);
                     compl.done();
                 }
             });
@@ -219,9 +218,9 @@ public class NfsPrimaryStorageKVMBackend implements NfsPrimaryStorageBackend,
         }).run(new WhileDoneCompletion(completion) {
             @Override
             public void done(ErrorCodeList errorCodeList) {
-                if(!errs.isEmpty()){
-                    completion.fail(errs.get(0));
-                }else {
+                if (errorCodeList.hasError()){
+                    completion.fail(errorCodeList.getCauses().get(0));
+                } else {
                     completion.success(true);
                 }
             }
@@ -436,7 +435,6 @@ public class NfsPrimaryStorageKVMBackend implements NfsPrimaryStorageBackend,
     }
 
     private void doPing(List<String> hostUuids, PrimaryStorageInventory psInv, Completion completion){
-        List<ErrorCode> errs = new ArrayList<>();
         AtomicBoolean isCapacityUpdated = new AtomicBoolean(false);
         new While<>(hostUuids).each((huuid, compl) -> {
             PingCmd cmd = new PingCmd();
@@ -463,12 +461,12 @@ public class NfsPrimaryStorageKVMBackend implements NfsPrimaryStorageBackend,
                             ErrorCode err = operr("failed to ping nfs primary storage[uuid:%s] from host[uuid:%s],because %s. " +
                                             "disconnect this host-ps connection",
                                     psInv.getUuid(), huuid, reply.isSuccess() ? rsp.getError() : reply.getError());
-                            errs.add(err);
+                            compl.addError(err);
                             nfsFactory.updateNfsHostStatus(psInv.getUuid(), huuid, PrimaryStorageHostStatus.Disconnected,
                                     () -> sendWarnning(huuid, psInv));
                         }
                     } else {
-                        errs.add(reply.getError());
+                        compl.addError(reply.getError());
                     }
                     compl.done();
                 }
@@ -476,8 +474,8 @@ public class NfsPrimaryStorageKVMBackend implements NfsPrimaryStorageBackend,
         }).run(new WhileDoneCompletion(completion) {
             @Override
             public void done(ErrorCodeList errorCodeList) {
-                if (errs.size() == hostUuids.size()) {
-                    completion.fail(errs.get(0));
+                if (errorCodeList.size() == hostUuids.size()) {
+                    completion.fail(errorCodeList.wrapOrNull());
                 } else {
                     completion.success();
                 }
@@ -1202,7 +1200,6 @@ public class NfsPrimaryStorageKVMBackend implements NfsPrimaryStorageBackend,
         }
         FutureCompletion compl = new FutureCompletion(null);
 
-        List<ErrorCode> errs = new ArrayList<>();
         new While<>(ps).each((pvo, completion) -> {
             mount(PrimaryStorageInventory.valueOf(pvo), inv.getUuid(), new Completion(completion){
 
@@ -1213,21 +1210,12 @@ public class NfsPrimaryStorageKVMBackend implements NfsPrimaryStorageBackend,
 
                 @Override
                 public void fail(ErrorCode errorCode) {
-                    errs.add(errorCode);
+                    completion.addError(errorCode);
                     completion.done();
                 }
             });
 
-        }).run(new WhileDoneCompletion(compl) {
-            @Override
-            public void done(ErrorCodeList errorCodeList) {
-                if(!errs.isEmpty()){
-                    compl.fail(errs.get(0));
-                }else {
-                    compl.success();
-                }
-            }
-        });
+        }).runAndSendErrorTo(compl);
 
         compl.await();
 
@@ -1618,7 +1606,6 @@ public class NfsPrimaryStorageKVMBackend implements NfsPrimaryStorageBackend,
             return;
         }
 
-        List<ErrorCode> errs = new ArrayList<>();
         new While<>(huuids).all((hostUuid, compl) -> {
             RemountCmd cmd = new RemountCmd();
             cmd.url = pinv.getUrl();
@@ -1636,23 +1623,14 @@ public class NfsPrimaryStorageKVMBackend implements NfsPrimaryStorageBackend,
                 @Override
                 public void fail(ErrorCode errorCode) {
                     nfsFactory.updateNfsHostStatus(pinv.getUuid(), hostUuid, PrimaryStorageHostStatus.Disconnected);
-                    errs.add(errorCode);
+                    compl.addError(errorCode);
 
                     logger.warn(String.format("failed to remount NFS primary storage[uuid:%s, name:%s] on the KVM host[uuid:%s]:%n%s",
                             pinv.getUuid(), pinv.getName(), hostUuid, errorCode.getReadableDetails()));
                     compl.done();
                 }
             });
-        }).run(new WhileDoneCompletion(completion) {
-            @Override
-            public void done(ErrorCodeList errorCodeList) {
-                if(!errs.isEmpty()){
-                    completion.fail(errs.get(0));
-                }else {
-                    completion.success();
-                }
-            }
-        });
+        }).runAndSendErrorTo(completion);
     }
 
     @Override

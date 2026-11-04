@@ -28,7 +28,7 @@ doc {
 					location "url"
 					type "String"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "size"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "long"
 					optional false
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "systemTags"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "userTags"
@@ -55,16 +55,16 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "vmInstanceUuid"
 					enclosedIn "resizeRootVolume"
-					desc "云主机UUID"
+					desc "虚拟机UUID"
 					location "body"
 					type "String"
 					optional true
-					since "0.6"
+					since "zsv_0.6"
 				}
 			}
 		}

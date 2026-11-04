@@ -1,0 +1,1 @@
+ALTER TABLE `RestAPIVO` MODIFY COLUMN `result` mediumtext DEFAULT NULL;

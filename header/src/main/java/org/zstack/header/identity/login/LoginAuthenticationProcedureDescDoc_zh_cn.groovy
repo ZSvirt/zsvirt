@@ -10,18 +10,18 @@ doc {
 		name "order"
 		desc ""
 		type "int"
-		since "zsv 0.6"
+		since "zsv_0.6"
 	}
 	field {
 		name "name"
 		desc "资源名称"
 		type "String"
-		since "zsv 0.6"
+		since "zsv_0.6"
 	}
 	field {
 		name "properties"
 		desc ""
 		type "Map"
-		since "zsv 0.6"
+		since "zsv_0.6"
 	}
 }

@@ -3,11 +3,11 @@ package org.zstack.header.vm
 import org.zstack.header.vm.APIGetVmSshKeyReply
 
 doc {
-	title "获取云主机SSH KEY(GetVmSshKey)"
+	title "获取虚拟机SSH KEY(GetVmSshKey)"
 
 	category "vmInstance"
 
-	desc """获取一个云主机的SSH Key，该SSH key是通过SetVmSshKey设置的。"""
+	desc """获取一个虚拟机的SSH Key，该SSH key是通过SetVmSshKey设置的。"""
 
 	rest {
 		request {
@@ -24,11 +24,11 @@ doc {
 				column {
 					name "uuid"
 					enclosedIn ""
-					desc "云主机UUID"
+					desc "虚拟机UUID"
 					location "url"
 					type "String"
 					optional false
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "systemTags"
@@ -37,7 +37,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "userTags"
@@ -46,7 +46,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 			}
 		}

@@ -15,7 +15,6 @@ import org.zstack.header.cluster.ClusterVO;
 import org.zstack.header.cluster.ClusterVO_;
 import org.zstack.header.configuration.InstanceOfferingState;
 import org.zstack.header.configuration.InstanceOfferingVO;
-import org.zstack.header.errorcode.OperationFailureException;
 import org.zstack.header.host.HostState;
 import org.zstack.header.host.HostStatus;
 import org.zstack.header.host.HostVO;
@@ -35,6 +34,7 @@ import org.zstack.header.zone.ZoneState;
 import org.zstack.header.zone.ZoneVO;
 import org.zstack.header.zone.ZoneVO_;
 import org.zstack.tag.SystemTagUtils;
+import org.zstack.utils.Tags;
 import org.zstack.utils.Utils;
 import org.zstack.utils.gson.JSONObjectUtil;
 import org.zstack.utils.logging.CLogger;
@@ -62,7 +62,7 @@ public class VmInstanceHelper {
         if (null != msg.getSystemTags()) {
             Optional<String> duplicateMac = msg.getSystemTags().stream()
                     .filter(t -> VmSystemTags.CUSTOM_MAC.isMatch(t))
-                    .map(t -> t.split("::")[2].toLowerCase())
+                    .map(t -> Tags.split(t)[2].toLowerCase())
                     .filter(t -> !macs.add(t))
                     .findAny();
             if (duplicateMac.isPresent()){

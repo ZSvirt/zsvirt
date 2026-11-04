@@ -28,7 +28,7 @@ doc {
 					location "body"
 					type "List"
 					optional false
-					since "3.17.0"
+					since "zsv_3.17.0"
 				}
 				column {
 					name "bondingName"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "3.17.0"
+					since "zsv_3.17.0"
 				}
 				column {
 					name "slaveUuids"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.17.0"
+					since "zsv_3.17.0"
 				}
 				column {
 					name "slaveNames"
@@ -55,7 +55,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.17.0"
+					since "zsv_3.17.0"
 				}
 				column {
 					name "type"
@@ -64,7 +64,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "3.17.0"
+					since "zsv_3.17.0"
 					values ("LinuxBonding","OvsBonding")
 				}
 				column {
@@ -74,7 +74,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "3.17.0"
+					since "zsv_3.17.0"
 					values ("802.3ad","active-backup")
 				}
 				column {
@@ -84,7 +84,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.17.0"
+					since "zsv_3.17.0"
 					values ("layer2","layer2+3","layer3+4")
 				}
 				column {
@@ -94,7 +94,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.17.0"
+					since "zsv_3.17.0"
 				}
 				column {
 					name "resourceUuid"
@@ -103,7 +103,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.17.0"
+					since "zsv_3.17.0"
 				}
 				column {
 					name "tagUuids"
@@ -112,7 +112,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.17.0"
+					since "zsv_3.17.0"
 				}
 				column {
 					name "systemTags"
@@ -121,7 +121,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.17.0"
+					since "zsv_3.17.0"
 				}
 				column {
 					name "userTags"
@@ -130,7 +130,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.17.0"
+					since "zsv_3.17.0"
 				}
 			}
 		}

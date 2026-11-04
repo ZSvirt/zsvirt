@@ -25,13 +25,11 @@
         <module>loadBalancer</module>
         <module>flatNetworkProvider</module>
         <module>sharedMountPointPrimaryStorage</module>
-        <module>ldap</module>
         <module>vxlan</module>
         <module>acl</module>
         <module>directory</module>
         <module>sshKeyPair</module>
         <module>hostNetworkInterface</module>
-        <module>account-import</module>
         <module>vhost</module>
         <module>expon</module>
         <module>externalStorage</module>

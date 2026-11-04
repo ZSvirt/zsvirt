@@ -25,7 +25,7 @@ public interface FlowTrigger extends AsyncBackup {
         return new Completion(this) {
             @Override
             public void success() {
-                next();
+                FlowTrigger.this.next();
             }
 
             @Override

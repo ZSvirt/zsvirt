@@ -28,7 +28,7 @@ doc {
 					location "url"
 					type "String"
 					optional false
-					since "3.17.11"
+					since "zsv_3.17.11"
 				}
 				column {
 					name "name"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.17.11"
+					since "zsv_3.17.11"
 				}
 				column {
 					name "description"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "String"
 					optional true
-					since "3.17.11"
+					since "zsv_3.17.11"
 				}
 				column {
 					name "burstTotalBw"
@@ -55,7 +55,7 @@ doc {
 					location "body"
 					type "Long"
 					optional true
-					since "3.17.11"
+					since "zsv_3.17.11"
 				}
 				column {
 					name "burstTotalIops"
@@ -64,7 +64,7 @@ doc {
 					location "body"
 					type "Long"
 					optional true
-					since "3.17.11"
+					since "zsv_3.17.11"
 				}
 				column {
 					name "maxTotalBw"
@@ -73,7 +73,7 @@ doc {
 					location "body"
 					type "Long"
 					optional true
-					since "3.17.11"
+					since "zsv_3.17.11"
 				}
 				column {
 					name "maxTotalIops"
@@ -82,7 +82,7 @@ doc {
 					location "body"
 					type "Long"
 					optional true
-					since "3.17.11"
+					since "zsv_3.17.11"
 				}
 				column {
 					name "systemTags"
@@ -91,7 +91,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.17.11"
+					since "zsv_3.17.11"
 				}
 				column {
 					name "userTags"
@@ -100,7 +100,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.17.11"
+					since "zsv_3.17.11"
 				}
 			}
 		}

@@ -47,6 +47,7 @@ import org.zstack.header.network.l3.*;
 import org.zstack.header.rest.RESTFacade;
 import org.zstack.header.allocator.BeforeAllocateIpExtensionPoint;
 import org.zstack.tag.TagManager;
+import org.zstack.utils.Tags;
 import org.zstack.utils.Utils;
 import org.zstack.utils.logging.CLogger;
 
@@ -1234,11 +1235,11 @@ public class BaremetalInstanceManagerImpl extends AbstractService implements
     private String getSwitchSystemTags(List<String> tags, String mac) {
         String swInfo = null;
         try {
-            if (tags == null || tags.size() == 0) {
+            if (tags == null || tags.isEmpty()) {
                 return null;
             }
             for (String tag : tags) {
-                String[] items = tag.split("::");
+                String[] items = Tags.split(tag);
                 if (BaremetalInstanceSystemTags.SWITCH_INFO_TOKEN.equals(items[0])) {
                     if (items[1].equals(mac)) {
                         swInfo = items[2];

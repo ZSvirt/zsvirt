@@ -1,5 +1,7 @@
 package org.zstack.header.storage.primary;
 
+import org.zstack.header.log.MaskSensitiveInfo;
+import org.zstack.header.log.NoLogging;
 import org.zstack.header.message.APIEvent;
 import org.zstack.header.rest.RestResponse;
 
@@ -9,7 +11,9 @@ import java.util.Collections;
  * Created by frank on 4/23/2015.
  */
 @RestResponse(allTo = "inventory")
+@MaskSensitiveInfo
 public class APIReconnectPrimaryStorageEvent extends APIEvent {
+    @NoLogging(behavior = NoLogging.Behavior.Auto)
     private PrimaryStorageInventory inventory;
 
     public APIReconnectPrimaryStorageEvent() {

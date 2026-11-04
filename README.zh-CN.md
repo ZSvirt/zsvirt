@@ -168,7 +168,7 @@ ZVirt提供**3套全自动化的严密测试系统**，确保每个功能的代�
 * [网络模型 1：二层网络和三层网络](http://en.zstack.io/blog/network-l2.html)
 * [网络模型 2：云路由器网络服务提供商](http://en.zstack.io/blog/virtual-router.html)
 * [存储模型：主存储与镜像服务器](http://en.zstack.io/blog/storage.html)
-* [云主机迁移：场景、存储与常见误解](doc/zh-CN/vm-migration-scenarios.md)（与源码对照的说明）
+* [虚拟机迁移：场景、存储与常见误解](doc/zh-CN/vm-migration-scenarios.md)（与源码对照的说明）
 * [KVM 热迁移 TLS 证书管理系统设计](doc/migration-encryption.md)
 * [KVM 热迁移 TLS 加密框架方案（设计评审稿）](doc/zh-CN/kvm-live-migration-tls-framework-design.md)
 * [KVM 热迁移 TLS（QEMU 证书）规范与扩展](doc/zh-CN/kvm-live-migration-tls.md)

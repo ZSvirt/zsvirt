@@ -92,8 +92,6 @@ public class RBACResourceRequestChecker implements APIRequestChecker {
             return;
         }
 
-        org.zstack.header.description.permission.Permission info = getRBACInfo();
-
         new SQLBatch() {
             @Override
             protected void scripts() {

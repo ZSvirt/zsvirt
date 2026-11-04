@@ -41,6 +41,7 @@ public class ApiPathTracker {
         }
     }
 
+    @SuppressWarnings("unchecked")
     public ApiPathTracker(String apiId) {
         bus = Platform.getComponentLoader().getComponent(CloudBus.class);
         restf = Platform.getComponentLoader().getComponent(RESTFacade.class);

@@ -61,7 +61,7 @@ public class ImageStoreBackupStorageFactory implements BackupStorageFactory, Glo
         lvo.setUrl(amsg.getUrl());
 
         dbf.persistAndRefresh(lvo);
-        tagMgr.createTagsFromAPICreateMessage(msg, lvo.getUuid(), ImageStoreBackupStorageVO.class.getSimpleName(), false);
+        tagMgr.createTagsAndSkipValidation(msg, lvo.getUuid(), ImageStoreBackupStorageVO.class.getSimpleName());
         Defer.guard(() -> {
             dbf.remove(lvo);
         });

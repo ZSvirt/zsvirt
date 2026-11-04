@@ -9,7 +9,6 @@ import org.zstack.header.image.CreateImageExtensionPoint;
 import org.zstack.header.image.CreateTemplateExtensionPoint;
 import org.zstack.header.image.ImageInventory;
 import org.zstack.utils.CollectionUtils;
-import org.zstack.utils.function.ForEachFunction;
 
 import java.util.List;
 

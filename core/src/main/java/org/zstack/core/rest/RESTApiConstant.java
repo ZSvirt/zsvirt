@@ -6,5 +6,5 @@ public class RESTApiConstant {
     public static final String CleanRestAPIVOKey = "CleanRestAPIVOKey";
 
     public static final int REST_API_RESULT_MIN_LENGTH = 1000;
-    public static final int REST_API_RESULT_MAX_LENGTH = 64000;
+    public static final int REST_API_RESULT_MAX_LENGTH = 16 * 1024 * 1024 - 1;
 }

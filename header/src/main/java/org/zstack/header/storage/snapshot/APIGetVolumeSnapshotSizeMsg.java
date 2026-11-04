@@ -16,7 +16,8 @@ import org.zstack.header.rest.RestRequest;
         isAction = true
 )
 public class APIGetVolumeSnapshotSizeMsg extends APIMessage implements VolumeSnapshotMessage {
-    @APIParam(resourceType = VolumeSnapshotVO.class)
+    // The snapshot interceptor checks direct visibility and ownership of the snapshot group's VM.
+    @APIParam(resourceType = VolumeSnapshotVO.class, scope = APIParam.SCOPE_ALLOWED_ALL)
     private String uuid;
 
     @APINoSee

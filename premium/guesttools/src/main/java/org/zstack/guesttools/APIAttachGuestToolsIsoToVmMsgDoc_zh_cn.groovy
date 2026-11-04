@@ -7,7 +7,7 @@ doc {
 
 	category "guest.tools"
 
-	desc """为云主机挂载增强工具镜像"""
+	desc """为虚拟机挂载增强工具镜像"""
 
 	rest {
 		request {
@@ -17,7 +17,7 @@ doc {
 
 			clz APIAttachGuestToolsIsoToVmMsg.class
 
-			desc """为云主机挂载增强工具镜像"""
+			desc """为虚拟机挂载增强工具镜像"""
 
 			params {
 
@@ -28,7 +28,7 @@ doc {
 					location "url"
 					type "String"
 					optional false
-					since "3.7.0"
+					since "zsv_3.7.0"
 				}
 				column {
 					name "systemTags"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.7.0"
+					since "zsv_3.7.0"
 				}
 				column {
 					name "userTags"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.7.0"
+					since "zsv_3.7.0"
 				}
 			}
 		}

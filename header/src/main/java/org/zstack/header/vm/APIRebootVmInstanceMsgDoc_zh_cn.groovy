@@ -3,11 +3,11 @@ package org.zstack.header.vm
 import org.zstack.header.vm.APIRebootVmInstanceEvent
 
 doc {
-	title "重启云主机(RebootVmInstance)"
+	title "重启虚拟机(RebootVmInstance)"
 
 	category "vmInstance"
 
-	desc """重启一个云主机"""
+	desc """重启一个虚拟机"""
 
 	rest {
 		request {
@@ -24,11 +24,11 @@ doc {
 				column {
 					name "uuid"
 					enclosedIn "rebootVmInstance"
-					desc "云主机UUID"
+					desc "虚拟机UUID"
 					location "url"
 					type "String"
 					optional false
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "systemTags"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "userTags"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 			}
 		}

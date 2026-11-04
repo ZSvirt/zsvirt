@@ -28,7 +28,7 @@ doc {
 					location "url"
 					type "String"
 					optional false
-					since "zsv 3.15.0"
+					since "zsv_3.15.0"
 				}
 				column {
 					name "hostUuid"
@@ -37,7 +37,7 @@ doc {
 					location "url"
 					type "String"
 					optional false
-					since "zsv 3.15.0"
+					since "zsv_3.15.0"
 				}
 				column {
 					name "mountPath"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "zsv 3.15.0"
+					since "zsv_3.15.0"
 				}
 				column {
 					name "systemTags"
@@ -55,7 +55,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 3.15.0"
+					since "zsv_3.15.0"
 				}
 				column {
 					name "userTags"
@@ -64,7 +64,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "zsv 3.15.0"
+					since "zsv_3.15.0"
 				}
 			}
 		}

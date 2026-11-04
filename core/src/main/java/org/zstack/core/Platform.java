@@ -940,7 +940,7 @@ public class Platform {
         ErrorCode errorCode = getComponentLoader().getComponent(ErrorFacade.class)
                 .instantiateErrorCode(errCode, fmt, args);
 
-        if (fmt != null && fmt.length() > 0) {
+        if (fmt != null && !fmt.isEmpty()) {
             try {
                 errorCode.setI18nDetails(SysErrors.INTERNAL == errCode ? errorCode.getDetails() : toI18nString(fmt, args));
             } catch (Exception e) {
@@ -974,12 +974,8 @@ public class Platform {
                 .withCause(errorCodeList);
     }
 
-    private static ErrorCode getCoreError(ErrorCode result) {
-        if (result.getCause() == null) {
-            return result;
-        } else {
-            return getCoreError(result.getCause());
-        }
+    static {
+        ErrorCodeList.putMultiErrorGenerator(Platform::multiErr);
     }
 
     public static String missingVariables(Object...args) {

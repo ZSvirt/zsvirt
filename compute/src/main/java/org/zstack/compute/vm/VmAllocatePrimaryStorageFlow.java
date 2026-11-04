@@ -149,7 +149,7 @@ public class VmAllocatePrimaryStorageFlow implements Flow {
             rmsg.setPossiblePrimaryStorageTypes(selectPsTypesFromSpec(spec));
         }
         if (disk != null && Boolean.TRUE.equals(disk.getEncrypted())
-                && disk.getPrimaryStorageUuid() == null && isEmpty(candidatePs)) {
+                && disk.getPrimaryStorageUuid() == null) {
             rmsg.addRequiredFeature(PrimaryStorageFeature.ENCRYPTED_VOLUME);
         }
 

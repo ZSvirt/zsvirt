@@ -1,6 +1,6 @@
 package org.zstack.utils.test;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 import org.junit.Test;
 import org.zstack.utils.ssh.SshResult;
 import org.zstack.utils.ssh.SshShell;

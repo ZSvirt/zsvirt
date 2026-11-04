@@ -28,6 +28,7 @@ import org.zstack.header.message.NeedReplyMessage;
 import org.zstack.header.storage.snapshot.DeleteVolumeSnapshotMsg;
 import org.zstack.header.storage.snapshot.VolumeSnapshotConstant;
 import org.zstack.header.storage.snapshot.VolumeSnapshotVO;
+import org.zstack.header.storage.snapshot.VolumeSnapshotVO_;
 import org.zstack.header.storage.snapshot.group.*;
 import org.zstack.header.tpm.entity.TpmVO;
 import org.zstack.header.tpm.entity.TpmVO_;
@@ -53,6 +54,7 @@ import org.zstack.utils.Utils;
 import org.zstack.utils.logging.CLogger;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.zstack.core.Platform.operr;
 import static org.zstack.header.tpm.TpmConstants.SERVICE_ID;
@@ -156,7 +158,7 @@ public class VolumeSnapshotGroupBase implements VolumeSnapshotGroup {
             @Override
             public void run(SyncTaskChain chain) {
                 APIUngroupVolumeSnapshotGroupEvent evt = new APIUngroupVolumeSnapshotGroupEvent(msg.getId());
-                dbf.remove(self);
+                removeSelf();
                 vmHostFileManager.cleanVmHostBackupFile(msg.getUuid());
                 bus.publish(evt);
                 chain.next();
@@ -220,9 +222,27 @@ public class VolumeSnapshotGroupBase implements VolumeSnapshotGroup {
 
     private void handle(DeleteVolumeSnapshotGroupInnerMsg msg) {
         DeleteVolumeSnapshotGroupInnerReply reply = new DeleteVolumeSnapshotGroupInnerReply();
+        markMissingSnapshotsDeleted();
         List<VolumeSnapshotVO> snapshots = getEffectiveSnapshots();
         if (snapshots.size() < self.getSnapshotCount()) {
             logger.debug(String.format("skip snapshots not belong to origin vm[uuid:%s]", self.getVmInstanceUuid()));
+        }
+        if (snapshots.isEmpty()) {
+            List<String> liveSnapshotUuids = Q.New(VolumeSnapshotGroupRefVO.class)
+                    .eq(VolumeSnapshotGroupRefVO_.volumeSnapshotGroupUuid, self.getUuid())
+                    .eq(VolumeSnapshotGroupRefVO_.snapshotDeleted, false)
+                    .select(VolumeSnapshotGroupRefVO_.volumeSnapshotUuid)
+                    .listValues();
+            boolean hasLiveSnapshot = !liveSnapshotUuids.isEmpty()
+                    && Q.New(VolumeSnapshotVO.class)
+                    .in(VolumeSnapshotVO_.uuid, liveSnapshotUuids)
+                    .isExists();
+            if (!hasLiveSnapshot) {
+                vmHostFileManager.cleanVmHostBackupFile(self.getUuid());
+                removeSelf();
+            }
+            bus.reply(msg, reply);
+            return;
         }
 
         SimpleFlowChain.of("delete-volume-snapshot-group")
@@ -249,8 +269,24 @@ public class VolumeSnapshotGroupBase implements VolumeSnapshotGroup {
                         trigger.next();
                     }
                 }))
-            .then("delete-vm-host-backup-files", trigger -> {
-                vmHostFileManager.cleanVmHostBackupFile(self.getUuid());
+            .then("remove-empty-snapshot-group", trigger -> {
+                boolean groupExists = Q.New(VolumeSnapshotGroupVO.class)
+                        .eq(VolumeSnapshotGroupVO_.uuid, self.getUuid())
+                        .isExists();
+                if (!groupExists) {
+                    vmHostFileManager.cleanVmHostBackupFile(self.getUuid());
+                    trigger.next();
+                    return;
+                }
+
+                boolean hasLiveSnapshot = Q.New(VolumeSnapshotGroupRefVO.class)
+                        .eq(VolumeSnapshotGroupRefVO_.volumeSnapshotGroupUuid, self.getUuid())
+                        .eq(VolumeSnapshotGroupRefVO_.snapshotDeleted, false)
+                        .isExists();
+                if (!hasLiveSnapshot) {
+                    vmHostFileManager.cleanVmHostBackupFile(self.getUuid());
+                    removeSelf();
+                }
                 trigger.next();
             })
             .propagateExceptionTo(msg)
@@ -260,6 +296,41 @@ public class VolumeSnapshotGroupBase implements VolumeSnapshotGroup {
                 bus.reply(msg, reply);
             })
             .start();
+    }
+
+    private void markMissingSnapshotsDeleted() {
+        List<String> liveSnapshotUuids = Q.New(VolumeSnapshotGroupRefVO.class)
+                .eq(VolumeSnapshotGroupRefVO_.volumeSnapshotGroupUuid, self.getUuid())
+                .eq(VolumeSnapshotGroupRefVO_.snapshotDeleted, false)
+                .select(VolumeSnapshotGroupRefVO_.volumeSnapshotUuid)
+                .listValues();
+        if (liveSnapshotUuids.isEmpty()) {
+            return;
+        }
+
+        Set<String> existingSnapshotUuids = new HashSet<>(Q.New(VolumeSnapshotVO.class)
+                .in(VolumeSnapshotVO_.uuid, liveSnapshotUuids)
+                .select(VolumeSnapshotVO_.uuid)
+                .listValues());
+        List<String> missingSnapshotUuids = liveSnapshotUuids.stream()
+                .filter(uuid -> !existingSnapshotUuids.contains(uuid))
+                .collect(Collectors.toList());
+        if (missingSnapshotUuids.isEmpty()) {
+            return;
+        }
+
+        SQL.New(VolumeSnapshotGroupRefVO.class)
+                .eq(VolumeSnapshotGroupRefVO_.volumeSnapshotGroupUuid, self.getUuid())
+                .in(VolumeSnapshotGroupRefVO_.volumeSnapshotUuid, missingSnapshotUuids)
+                .set(VolumeSnapshotGroupRefVO_.snapshotDeleted, true)
+                .update();
+    }
+
+    private void removeSelf() {
+        SQL.New(VolumeSnapshotGroupRefVO.class)
+                .eq(VolumeSnapshotGroupRefVO_.volumeSnapshotGroupUuid, self.getUuid())
+                .delete();
+        dbf.removeByPrimaryKey(self.getUuid(), VolumeSnapshotGroupVO.class);
     }
 
     private void handle(APIRevertVmFromSnapshotGroupMsg msg) {

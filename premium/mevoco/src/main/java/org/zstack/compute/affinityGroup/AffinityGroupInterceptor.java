@@ -14,7 +14,7 @@ import org.zstack.header.apimediator.InterceptorForService;
 import org.zstack.header.message.APIMessage;
 import org.zstack.header.vm.*;
 import org.zstack.identity.AccountManager;
-import org.zstack.tag.PatternedSystemTag;
+import org.zstack.tag.SystemTag;
 import org.zstack.tag.SystemTagUtils;
 import org.zstack.utils.Utils;
 import org.zstack.utils.logging.CLogger;
@@ -92,7 +92,7 @@ public class AffinityGroupInterceptor implements GlobalApiMessageInterceptor {
             return;
         }
 
-        PatternedSystemTag tag =  AffinityGroupSystemTags.AFFINITY_GROUP_UUID;
+        SystemTag tag = AffinityGroupSystemTags.AFFINITY_GROUP_UUID;
         String token = AffinityGroupSystemTags.AFFINITY_GROUP_UUID_TOKEN;
 
         String agUuid = SystemTagUtils.findTagValue(msg.getSystemTags(), tag, token);
@@ -110,7 +110,7 @@ public class AffinityGroupInterceptor implements GlobalApiMessageInterceptor {
             return;
         }
 
-        PatternedSystemTag tag =  AffinityGroupSystemTags.AFFINITY_GROUP_UUID;
+        SystemTag tag =  AffinityGroupSystemTags.AFFINITY_GROUP_UUID;
         String token = AffinityGroupSystemTags.AFFINITY_GROUP_UUID_TOKEN;
 
         String agUuid = SystemTagUtils.findTagValue(msg.getSystemTags(), tag, token);

@@ -1,0 +1,17 @@
+<type>[scope]: <description>
+
+# Possible types: fix/feature/test/refactor/chore
+# Possible tags: APIImpact/GlobalConfigImpact/GlobalPropertyImpact/DBImpact/ZQLImpact
+# Possible jira-footers: Resolves/Related
+# Please describe the commit as detailed as possible!
+# 1. Why is this change necessary?
+# 2. How does it address the problem?
+# 3. Are there any side effects?
+
+[body]
+
+[footer(s)]
+
+APIImpact/GlobalConfigImpact/GlobalPropertyImpact/DBImpact/ZQLImpact
+
+Resolves/Related: ZSTAC-XXXX

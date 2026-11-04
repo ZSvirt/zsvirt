@@ -33,6 +33,7 @@ import org.zstack.header.exception.CloudRuntimeException;
 import org.zstack.header.host.*;
 import org.zstack.header.host.ServiceTypeStatisticConstants.InterfaceType;
 import org.zstack.header.host.ServiceTypeStatisticConstants.SortBy;
+import org.zstack.header.host.spi.HostPostConnectedExtensionPoint;
 import org.zstack.header.message.APIMessage;
 import org.zstack.header.message.Message;
 import org.zstack.header.message.MessageReply;
@@ -68,7 +69,7 @@ import static org.zstack.core.Platform.operr;
 import static org.zstack.longjob.LongJobUtils.buildErrIfCanceled;
 import static org.zstack.longjob.LongJobUtils.jobCanceled;
 
-public class MevocoHostManagerImpl implements HostExtensionManager, PostHostConnectExtensionPoint, HostAfterConnectedExtensionPoint, Component, ServiceTypeExtensionPoint {
+public class MevocoHostManagerImpl implements HostExtensionManager, HostPostConnectedExtensionPoint, HostAfterConnectedExtensionPoint, Component, ServiceTypeExtensionPoint {
     private static final CLogger logger = Utils.getLogger(MevocoHostManagerImpl.class);
     @Autowired
     private CloudBus bus;
@@ -506,7 +507,6 @@ public class MevocoHostManagerImpl implements HostExtensionManager, PostHostConn
             }
         }
 
-        List<ErrorCode> errors = Collections.synchronizedList(new LinkedList<ErrorCode>());
         List<HostNetworkBondingServiceRefInventory> inventories = new ArrayList<>();
         new While<>(msgs).step((smsg, whileCompletion) ->
                 bus.send(smsg, new CloudBusCallBack(whileCompletion) {
@@ -517,15 +517,15 @@ public class MevocoHostManagerImpl implements HostExtensionManager, PostHostConn
                             inventories.addAll(aReply.getInventory());
                             whileCompletion.done();
                         } else {
-                            errors.add(reply.getError());
+                            whileCompletion.addError(reply.getError());
                             whileCompletion.allDone();
                         }
                     }
                 }), 10).run(new WhileDoneCompletion(msg) {
             @Override
             public void done(ErrorCodeList errorCodeList) {
-                if (errors.size() > 0) {
-                    event.setError(errors.get(0));
+                if (errorCodeList.hasError()) {
+                    event.setError(errorCodeList.wrapOrNull());
                     bus.publish(event);
                     return;
                 }
@@ -714,7 +714,6 @@ public class MevocoHostManagerImpl implements HostExtensionManager, PostHostConn
             }
         }
 
-        List<ErrorCode> errors = Collections.synchronizedList(new LinkedList<ErrorCode>());
         List<HostNetworkInterfaceServiceRefInventory> inventories = new ArrayList<>();
         new While<>(msgs).step((smsg, whileCompletion) ->
                 bus.send(smsg, new CloudBusCallBack(whileCompletion) {
@@ -725,15 +724,15 @@ public class MevocoHostManagerImpl implements HostExtensionManager, PostHostConn
                             inventories.addAll(aReply.getInventory());
                             whileCompletion.done();
                         } else {
-                            errors.add(reply.getError());
+                            whileCompletion.addError(reply.getError());
                             whileCompletion.allDone();
                         }
                     }
                 }), 10).run(new WhileDoneCompletion(msg) {
             @Override
             public void done(ErrorCodeList errorCodeList) {
-                if (errors.size() > 0) {
-                    event.setError(errors.get(0));
+                if (errorCodeList.hasError()) {
+                    event.setError(errorCodeList.wrapOrNull());
                     bus.publish(event);
                     return;
                 }
@@ -1206,9 +1205,7 @@ public class MevocoHostManagerImpl implements HostExtensionManager, PostHostConn
     private void handle(SetIpOnHostNetworkInterfaceMsg msg) {
         SetIpOnHostNetworkInterfaceReply reply = new SetIpOnHostNetworkInterfaceReply();
 
-        Map data = new HashMap();
         FlowChain chain = FlowChainBuilder.newShareFlowChain();
-        chain.setData(data);
         chain.setName(String.format("add-ip-to-interface-%s", msg.getInterfaceUuid()));
         chain.then(new ShareFlow() {
             @Override
@@ -1309,9 +1306,7 @@ public class MevocoHostManagerImpl implements HostExtensionManager, PostHostConn
     private void handle(SetIpOnHostNetworkBondingMsg msg) {
         SetIpOnHostNetworkBondingReply reply = new SetIpOnHostNetworkBondingReply();
 
-        Map data = new HashMap();
         FlowChain chain = FlowChainBuilder.newShareFlowChain();
-        chain.setData(data);
         chain.setName(String.format("add-ip-to-bonding-%s", msg.getBondingUuid()));
         chain.then(new ShareFlow() {
             @Override
@@ -1841,7 +1836,6 @@ public class MevocoHostManagerImpl implements HostExtensionManager, PostHostConn
             return;
         }
 
-        List<ErrorCode> errors = Collections.synchronizedList(new LinkedList<>());
         new While<>(hostInterfaceMap.entrySet()).step((entry, whileCompletion) -> {
             getCandidateInterfaceVlanIds(entry.getKey(), entry.getValue(), new ReturnValueCompletion<List<Integer>>(msg) {
                 @Override
@@ -1852,7 +1846,7 @@ public class MevocoHostManagerImpl implements HostExtensionManager, PostHostConn
 
                 @Override
                 public void fail(ErrorCode errorCode) {
-                    errors.add(errorCode);
+                    whileCompletion.addError(errorCode);
                     whileCompletion.done();
                 }
             });
@@ -1861,8 +1855,8 @@ public class MevocoHostManagerImpl implements HostExtensionManager, PostHostConn
             public void done(ErrorCodeList errorCodeList) {
                 List<Integer> vlanIds = new ArrayList<>();
                 APIGetCandidateInterfaceVlanIdsReply reply = new APIGetCandidateInterfaceVlanIdsReply();
-                if (!errors.isEmpty()) {
-                    reply.setError(errors.get(0));
+                if (errorCodeList.hasError()) {
+                    reply.setError(errorCodeList.wrapOrNull());
                     bus.reply(msg, reply);
                     return;
                 }
@@ -2328,10 +2322,10 @@ public class MevocoHostManagerImpl implements HostExtensionManager, PostHostConn
     }
 
     @Override
-    public Flow createPostHostConnectFlow(HostInventory host) {
-        return new NoRollbackFlow() {
-            @Override
-            public void run(FlowTrigger trigger, Map data) {
+    public Flow createPostHostConnectFlow() {
+        return Flow.of("mevoco-host-connect-flows")
+            .handle((trigger, data) -> {
+                HostInventory host = findInventoryFromFlowData(data);
                 FlowChain chain = FlowChainBuilder.newSimpleFlowChain();
                 chain.setName(String.format("get-host-facts-after-host-%s-connected", host.getUuid()));
                 chain.then(new NoRollbackFlow() {
@@ -2412,14 +2406,13 @@ public class MevocoHostManagerImpl implements HostExtensionManager, PostHostConn
                         trigger.next();
                     }
                 }).start();
-            }
-        };
+            })
+            .build();
     }
 
     @Override
     public void afterHostConnected(HostInventory host) {
         FlowChain chain = FlowChainBuilder.newShareFlowChain();
-        chain.setData(new HashMap<>());
         chain.setName(String.format("sync-interface-data-after-host-%s-connected", host.getUuid()));
 
         chain.then(new ShareFlow() {

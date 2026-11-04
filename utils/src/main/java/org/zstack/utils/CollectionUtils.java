@@ -1,13 +1,13 @@
 package org.zstack.utils;
 
-import org.zstack.utils.function.ForEachFunction;
-import org.zstack.utils.function.Function;
 import org.zstack.utils.logging.CLogger;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -28,28 +28,11 @@ public class CollectionUtils {
         return result;
     }
 
-    /**
-     * use {@link #transformAndRemoveNull(Collection, java.util.function.Function)}
-     */
-    @Deprecated
-    public static <K, V> List<K> transformToList(Collection<V> from, Function<K, V> func) {
-        List<K> ret = new ArrayList<K>();
-        for (V v : from) {
-            K k = func.call(v);
-            if (k == null) {
-                continue;
-            }
-            ret.add(k);
-        }
-
-        return ret;
-    }
-
-    public static <FROM, TO> List<TO> transform(Collection<FROM> from, java.util.function.Function<FROM, TO> mapper) {
+    public static <FROM, TO> List<TO> transform(Collection<FROM> from, Function<FROM, TO> mapper) {
         return from.stream().map(mapper).collect(Collectors.toList());
     }
 
-    public static <FROM, TO> List<TO> transformAndRemoveNull(Collection<FROM> from, java.util.function.Function<FROM, TO> mapper) {
+    public static <FROM, TO> List<TO> transformAndRemoveNull(Collection<FROM> from, Function<FROM, TO> mapper) {
         return from.stream().map(mapper).filter(Objects::nonNull).collect(Collectors.toList());
     }
 
@@ -63,50 +46,35 @@ public class CollectionUtils {
     }
 
     public static <FROM, KEY, VALUE> Map<KEY, VALUE> toMap(Collection<FROM> from,
-                                                           java.util.function.Function<FROM, KEY> keyMapper,
-                                                           java.util.function.Function<FROM, VALUE> valueMapper) {
+                                                           Function<FROM, KEY> keyMapper,
+                                                           Function<FROM, VALUE> valueMapper) {
         return from.stream().collect(Collectors.toMap(keyMapper, valueMapper));
     }
 
     public static <KEY, VALUE> Map<KEY, List<VALUE>> groupBy(Collection<VALUE> from,
-                                                             java.util.function.Function<VALUE, KEY> keyMapper) {
+                                                             Function<VALUE, KEY> keyMapper) {
         return from.stream().collect(Collectors.groupingBy(keyMapper));
     }
 
     public static <FROM, TO> Set<TO> transformToSetAndRemoveNull(Collection<FROM> from,
-                                                               java.util.function.Function<FROM, TO> mapper) {
+                                                               Function<FROM, TO> mapper) {
         return from.stream().map(mapper).filter(Objects::nonNull).collect(Collectors.toSet());
     }
 
-    public static <FROM, TO> Set<TO> transformToSet(Collection<FROM> from, java.util.function.Function<FROM, TO> mapper) {
+    public static <FROM, TO> Set<TO> transformToSet(Collection<FROM> from, Function<FROM, TO> mapper) {
         return from.stream().map(mapper).collect(Collectors.toSet());
     }
 
-    /**
-     * use {@link #findOneOrNull}
-     */
-    @Deprecated
-    public static <K, V> K find(Collection<V> from, Function<K, V> func) {
-        for (V v : from) {
-            K k = func.call(v);
-            if (k != null) {
-                return k;
-            }
-        }
-
-        return null;
-    }
-
-    public static <K> void forEach(Collection<K> cols, ForEachFunction<K> func) {
+    public static <K> void forEach(Collection<K> cols, Consumer<K> func) {
         for (K c : cols) {
-            func.run(c);
+            func.accept(c);
         }
     }
 
-    public static <K> void safeForEach(Collection<K> cols, ForEachFunction<K> func) {
+    public static <K> void safeForEach(Collection<K> cols, Consumer<K> func) {
         for (K c : cols) {
             try {
-                func.run(c);
+                func.accept(c);
             } catch (Throwable t) {
                 logger.warn("unhandled exception happened", t);
             }
@@ -114,16 +82,16 @@ public class CollectionUtils {
     }
 
     public static <K> List<K> removeDuplicateFromList(List<K> lst) {
-        return new ArrayList<K>(new LinkedHashSet<K>(lst));
+        return new ArrayList<>(new LinkedHashSet<>(lst));
     }
 
-    public static <T> Predicate<T> distinctByKey(java.util.function.Function<? super T, ?> keyExtractor) {
+    public static <T> Predicate<T> distinctByKey(Function<? super T, ?> keyExtractor) {
         Set<Object> seen = ConcurrentHashMap.newKeySet();
         return t -> seen.add(keyExtractor.apply(t));
     }
 
     @SuppressWarnings("unchecked")
-    public static <T> void shuffleByKeySeed(List<T> list, String keySeed, java.util.function.Function<? super T, Comparable> keyExtractor) {
+    public static <T> void shuffleByKeySeed(List<T> list, String keySeed, Function<? super T, Comparable> keyExtractor) {
         list.sort(Comparator.comparing(keyExtractor));
 
         long seed = 0;
@@ -149,7 +117,7 @@ public class CollectionUtils {
         return list;
     }
 
-    public static boolean isEmpty(Collection coll) {
+    public static boolean isEmpty(Collection<?> coll) {
         return coll == null || coll.isEmpty();
     }
 

@@ -39,6 +39,7 @@ import org.zstack.header.volume.*;
 import org.zstack.kvm.*;
 import org.zstack.storage.primary.EstimateVolumeTemplateSizeOnPrimaryStorageMsg;
 import org.zstack.storage.primary.EstimateVolumeTemplateSizeOnPrimaryStorageReply;
+import org.zstack.storage.primary.ImageCacheCleanParam;
 import org.zstack.storage.primary.PrimaryStorageBase;
 import org.zstack.storage.volume.VolumeErrors;
 import org.zstack.tag.TagManager;
@@ -124,6 +125,10 @@ public class SharedBlockGroupPrimaryStorageBase extends PrimaryStorageBase imple
             handle((CancelDownloadBitsFromKVMHostToPrimaryStorageMsg) msg);
         } else if (msg instanceof GetVolumeBackingChainFromPrimaryStorageMsg) {
             handle((GetVolumeBackingChainFromPrimaryStorageMsg) msg);
+        } else if (msg instanceof GetSharedBlockVolumeSnapshotLanFreeLayoutMsg) {
+            handle((GetSharedBlockVolumeSnapshotLanFreeLayoutMsg) msg);
+        } else if (msg instanceof GetSharedBlockVolumeLanFreeLayoutMsg) {
+            handle((GetSharedBlockVolumeLanFreeLayoutMsg) msg);
         } else if ((msg instanceof GetDownloadBitsFromKVMHostProgressMsg)) {
             handle((GetDownloadBitsFromKVMHostProgressMsg) msg);
         } else if (msg instanceof ConfigureFilterMsg) {
@@ -138,6 +143,8 @@ public class SharedBlockGroupPrimaryStorageBase extends PrimaryStorageBase imple
             handle((EncryptVolumeBitsOnPrimaryStorageMsg) msg);
         } else if (msg instanceof ConvertVolumeEncryptionOnPrimaryStorageMsg) {
             handle((ConvertVolumeEncryptionOnPrimaryStorageMsg) msg);
+        } else if (msg instanceof ExtendSharedBlockVolumeOnPrimaryStorageMsg) {
+            handle((ExtendSharedBlockVolumeOnPrimaryStorageMsg) msg);
         } else {
             super.handleLocalMessage(msg);
         }
@@ -189,6 +196,8 @@ public class SharedBlockGroupPrimaryStorageBase extends PrimaryStorageBase imple
     public void handleApiMessage(APIMessage msg) {
         if (msg instanceof APIAddSharedBlockToSharedBlockGroupMsg) {
             handle((APIAddSharedBlockToSharedBlockGroupMsg) msg);
+        } else if (msg instanceof APIExtendSharedBlockVolumeMsg) {
+            handle((APIExtendSharedBlockVolumeMsg) msg);
         } else if (msg instanceof APIRefreshSharedblockDeviceCapacityMsg) {
             handle((APIRefreshSharedblockDeviceCapacityMsg) msg);
         } else if (msg instanceof APIUpdateSharedBlockMsg) {
@@ -198,6 +207,58 @@ public class SharedBlockGroupPrimaryStorageBase extends PrimaryStorageBase imple
         } else {
             super.handleApiMessage(msg);
         }
+    }
+
+    private void handle(APIExtendSharedBlockVolumeMsg msg) {
+        APIExtendSharedBlockVolumeEvent event = new APIExtendSharedBlockVolumeEvent(msg.getId());
+        ExtendSharedBlockVolumeOnPrimaryStorageMsg innerMsg = new ExtendSharedBlockVolumeOnPrimaryStorageMsg();
+        innerMsg.setPrimaryStorageUuid(msg.getPrimaryStorageUuid());
+        innerMsg.setVolumeUuid(msg.getVolumeUuid());
+        innerMsg.setSize(msg.getSize());
+        bus.makeTargetServiceIdByResourceUuid(
+                innerMsg, PrimaryStorageConstant.SERVICE_ID, msg.getPrimaryStorageUuid());
+
+        ExtendSharedBlockVolumeOverlayMsg overlayMsg = new ExtendSharedBlockVolumeOverlayMsg();
+        overlayMsg.setVolumeUuid(msg.getVolumeUuid());
+        overlayMsg.setMessage(innerMsg);
+        bus.makeTargetServiceIdByResourceUuid(
+                overlayMsg, VolumeConstant.SERVICE_ID, msg.getVolumeUuid());
+        bus.send(overlayMsg, new CloudBusCallBack(msg) {
+            @Override
+            public void run(MessageReply reply) {
+                if (!reply.isSuccess()) {
+                    event.setError(reply.getError());
+                }
+                bus.publish(event);
+            }
+        });
+    }
+
+    private void handle(ExtendSharedBlockVolumeOnPrimaryStorageMsg msg) {
+        MessageReply reply = new MessageReply();
+        VolumeVO volumeVO;
+        try {
+            volumeVO = SharedBlockVolumeResizeValidator.validateExtend(
+                    msg.getVolumeUuid(), msg.getSize(), msg.getPrimaryStorageUuid());
+        } catch (OperationFailureException e) {
+            reply.setError(e.getErrorCode());
+            bus.reply(msg, reply);
+            return;
+        }
+
+        SharedBlockHypervisorBackend backend = getHypervisorBackendByVolumeUuid(msg.getVolumeUuid());
+        backend.handle(msg, VolumeInventory.valueOf(volumeVO), new Completion(msg) {
+            @Override
+            public void success() {
+                bus.reply(msg, reply);
+            }
+
+            @Override
+            public void fail(ErrorCode errorCode) {
+                reply.setError(errorCode);
+                bus.reply(msg, reply);
+            }
+        });
     }
 
     private void handle(APIUpdateSharedBlockMsg msg) {
@@ -318,7 +379,7 @@ public class SharedBlockGroupPrimaryStorageBase extends PrimaryStorageBase imple
     @Override
     protected void handle(APICleanUpImageCacheOnPrimaryStorageMsg msg) {
         APICleanUpImageCacheOnPrimaryStorageEvent evt = new APICleanUpImageCacheOnPrimaryStorageEvent(msg.getId());
-        imageCacheCleaner.cleanup(msg.getUuid(), false);
+        imageCacheCleaner.cleanup(msg.getUuid(), new ImageCacheCleanParam(true, msg.isForce()));
         bus.publish(evt);
     }
 
@@ -1293,6 +1354,24 @@ public class SharedBlockGroupPrimaryStorageBase extends PrimaryStorageBase imple
     }
 
     @Override
+    protected void handle(ShrinkVolumeOnPrimaryStorageMsg msg) {
+        ShrinkVolumeOnPrimaryStorageReply reply = new ShrinkVolumeOnPrimaryStorageReply();
+        SharedBlockHypervisorBackend backend = getHypervisorBackendByVolumeUuid(msg.getVolume().getUuid());
+        backend.handle(msg, new ReturnValueCompletion<ShrinkVolumeOnPrimaryStorageReply>(msg) {
+            @Override
+            public void success(ShrinkVolumeOnPrimaryStorageReply returnValue) {
+                bus.reply(msg, returnValue);
+            }
+
+            @Override
+            public void fail(ErrorCode errorCode) {
+                reply.setError(errorCode);
+                bus.reply(msg, reply);
+            }
+        });
+    }
+
+    @Override
     protected void handle(ShrinkVolumeSnapshotOnPrimaryStorageMsg msg) {
         ShrinkVolumeSnapshotOnPrimaryStorageReply reply = new ShrinkVolumeSnapshotOnPrimaryStorageReply();
         VolumeSnapshotVO snapshotVO = dbf.findByUuid(msg.getSnapshotUuid(), VolumeSnapshotVO.class);
@@ -1574,12 +1653,10 @@ public class SharedBlockGroupPrimaryStorageBase extends PrimaryStorageBase imple
         cmd.fencers = param.getFencers();
 
         final SetupSelfFencerOnKvmHostReply reply = new SetupSelfFencerOnKvmHostReply();
-        new KvmCommandSender(param.getHostUuid()).send(cmd, KVM_HA_SETUP_SELF_FENCER, new KvmCommandFailureChecker() {
-            @Override
-            public ErrorCode getError(KvmResponseWrapper wrapper) {
-                SharedBlockKvmCommands.AgentRsp rsp = wrapper.getResponse(SharedBlockKvmCommands.AgentRsp.class);
-                return rsp.success ? null : operr("%s", rsp.error);
-            }
+        new KvmCommandSender(param.getHostUuid(), param.isSkipStatusCheck())
+        .send(cmd, KVM_HA_SETUP_SELF_FENCER, wrapper -> {
+            SharedBlockKvmCommands.AgentRsp rsp = wrapper.getResponse(SharedBlockKvmCommands.AgentRsp.class);
+            return rsp.success ? null : operr("%s", rsp.error);
         }, new ReturnValueCompletion<KvmResponseWrapper>(msg) {
             @Override
             public void success(KvmResponseWrapper wrapper) {
@@ -1743,6 +1820,46 @@ public class SharedBlockGroupPrimaryStorageBase extends PrimaryStorageBase imple
         });
     }
 
+    private void handle(GetSharedBlockVolumeSnapshotLanFreeLayoutMsg msg) {
+        SharedBlockHypervisorFactory factory = getHypervisorFactoryByHypervisorType(
+                KVMConstant.KVM_HYPERVISOR_TYPE);
+        SharedBlockHypervisorBackend backend = factory.getHypervisorBackend(self);
+        backend.handle(msg, new ReturnValueCompletion<GetSharedBlockVolumeSnapshotLanFreeLayoutReply>(msg) {
+            @Override
+            public void success(GetSharedBlockVolumeSnapshotLanFreeLayoutReply reply) {
+                bus.reply(msg, reply);
+            }
+
+            @Override
+            public void fail(ErrorCode errorCode) {
+                GetSharedBlockVolumeSnapshotLanFreeLayoutReply reply =
+                        new GetSharedBlockVolumeSnapshotLanFreeLayoutReply();
+                reply.setError(errorCode);
+                bus.reply(msg, reply);
+            }
+        });
+    }
+
+    private void handle(GetSharedBlockVolumeLanFreeLayoutMsg msg) {
+        SharedBlockHypervisorFactory factory = getHypervisorFactoryByHypervisorType(
+                KVMConstant.KVM_HYPERVISOR_TYPE);
+        SharedBlockHypervisorBackend backend = factory.getHypervisorBackend(self);
+        backend.handle(msg, new ReturnValueCompletion<GetSharedBlockVolumeLanFreeLayoutReply>(msg) {
+            @Override
+            public void success(GetSharedBlockVolumeLanFreeLayoutReply reply) {
+                bus.reply(msg, reply);
+            }
+
+            @Override
+            public void fail(ErrorCode errorCode) {
+                GetSharedBlockVolumeLanFreeLayoutReply reply =
+                        new GetSharedBlockVolumeLanFreeLayoutReply();
+                reply.setError(errorCode);
+                bus.reply(msg, reply);
+            }
+        });
+    }
+
     private void handle(final CommitVolumeSnapshotOnPrimaryStorageMsg msg) {
         SharedBlockHypervisorBackend bkd = getHypervisorBackendByVolumeUuid(msg.getVolume().getUuid());
         bkd.handle(msg, new ReturnValueCompletion<CommitVolumeSnapshotOnPrimaryStorageReply>(msg) {
@@ -1885,8 +2002,6 @@ public class SharedBlockGroupPrimaryStorageBase extends PrimaryStorageBase imple
 
         FlowChain chain = FlowChainBuilder.newSimpleFlowChain();
         chain.setName(String.format("takeover-primary-storage-%s", self.getUuid()));
-        chain.setData(new HashMap<>());
-
         chain.then(new NoRollbackFlow() {
             String __name__ = "check-primary-storage-consistency";
 

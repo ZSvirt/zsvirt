@@ -8,8 +8,6 @@ import org.zstack.core.cloudbus.*;
 import org.zstack.core.componentloader.PluginRegistry;
 import org.zstack.core.db.DatabaseFacade;
 import org.zstack.core.db.Q;
-import org.zstack.core.db.SimpleQuery;
-import org.zstack.core.db.SimpleQuery.Op;
 import org.zstack.core.thread.ChainTask;
 import org.zstack.core.thread.SyncTaskChain;
 import org.zstack.core.thread.ThreadFacade;
@@ -23,10 +21,10 @@ import org.zstack.header.core.workflow.FlowTrigger;
 import org.zstack.header.core.workflow.NoRollbackFlow;
 import org.zstack.header.errorcode.ErrorCode;
 import org.zstack.header.errorcode.OperationFailureException;
+import org.zstack.header.exception.CloudRuntimeException;
 import org.zstack.header.host.*;
 import org.zstack.header.managementnode.ManagementNodeChangeListener;
 import org.zstack.header.managementnode.ManagementNodeInventory;
-import org.zstack.header.managementnode.ManagementNodeReadyExtensionPoint;
 import org.zstack.header.message.*;
 import org.zstack.header.rest.RESTFacade;
 import org.zstack.header.rest.SyncHttpCallHandler;
@@ -66,13 +64,20 @@ public class KvmVmSyncPingTask extends VmTracer implements KVMPingAgentNoFailure
     private ConcurrentHashMap<String, ConcurrentHashMap<String, String>> vmApis = new ConcurrentHashMap<>();
     private ConcurrentHashMap<String, Set<String>> vmsToSkip = new ConcurrentHashMap<>();
     private List<Class<? extends Message>> skipVmTracerMessages = new ArrayList<>();
-    private List<Class> skipVmTracerReplies = new ArrayList<>();
+    private List<Class<? extends Message>> skipVmTracerReplies = new ArrayList<>();
     private Map<String, Integer> vmInShutdownMap = new ConcurrentHashMap<>();
 
     {
         getReflections().getTypesAnnotatedWith(SkipVmTracer.class).forEach(clz -> {
             skipVmTracerMessages.add(clz.asSubclass(Message.class));
-            skipVmTracerReplies.add(clz.getAnnotation(SkipVmTracer.class).replyClass());
+            Class<?> replyClass = clz.getAnnotation(SkipVmTracer.class).replyClass();
+
+            if (!Message.class.isAssignableFrom(replyClass)) {
+                throw new CloudRuntimeException(String.format(
+                        "%s annotated SkipVmTracer but its reply[%s] is not a subclass of Message",
+                        clz.getName(), replyClass));
+            }
+            skipVmTracerReplies.add(replyClass.asSubclass(Message.class));
         });
     }
 
@@ -154,7 +159,7 @@ public class KvmVmSyncPingTask extends VmTracer implements KVMPingAgentNoFailure
     }
 
     @Override
-    public List<Class> getReplyMessageClassForMarshalExtensionPoint() {
+    public List<Class<? extends Message>> getReplyMessageClassForMarshalExtensionPoint() {
         return skipVmTracerReplies;
     }
 

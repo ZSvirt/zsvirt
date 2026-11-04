@@ -122,14 +122,6 @@
 
     <config>
         <category>mevoco</category>
-        <name>pause.world</name>
-        <description>reject all scheduler job, ha and api which is not read only</description>
-        <type>java.lang.Boolean</type>
-        <defaultValue>false</defaultValue>
-    </config>
-
-    <config>
-        <category>mevoco</category>
         <name>vm.windows.auto.attach.virtio.driver.format</name>
         <description>the format of the virtio dirver installer is attached to a new created windows virtio vm</description>
         <type>java.lang.String</type>

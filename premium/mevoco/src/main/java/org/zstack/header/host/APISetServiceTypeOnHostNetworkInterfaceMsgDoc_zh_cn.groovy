@@ -28,7 +28,7 @@ doc {
 					location "body"
 					type "List"
 					optional false
-					since "3.17.11"
+					since "zsv_3.17.11"
 				}
 				column {
 					name "vlanIds"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.17.11"
+					since "zsv_3.17.11"
 				}
 				column {
 					name "serviceTypes"
@@ -46,7 +46,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.17.11"
+					since "zsv_3.17.11"
 					values ("ManagementNetwork","TenantNetwork","StorageNetwork","BackupNetwork","MigrationNetwork")
 				}
 				column {
@@ -56,7 +56,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.17.11"
+					since "zsv_3.17.11"
 				}
 				column {
 					name "userTags"
@@ -65,7 +65,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.17.11"
+					since "zsv_3.17.11"
 				}
 			}
 		}

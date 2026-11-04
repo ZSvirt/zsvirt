@@ -28,7 +28,7 @@ doc {
 					location "body"
 					type "List"
 					optional false
-					since "3.9"
+					since "zsv_3.9"
 				}
 				column {
 					name "aclType"
@@ -37,7 +37,7 @@ doc {
 					location "body"
 					type "String"
 					optional false
-					since "3.9"
+					since "zsv_3.9"
 					values ("white","black","redirect")
 				}
 				column {
@@ -47,7 +47,7 @@ doc {
 					location "url"
 					type "String"
 					optional false
-					since "3.9"
+					since "zsv_3.9"
 				}
 				column {
 					name "systemTags"
@@ -56,7 +56,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.9"
+					since "zsv_3.9"
 				}
 				column {
 					name "userTags"
@@ -65,7 +65,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.9"
+					since "zsv_3.9"
 				}
 				column {
 					name "serverGroupUuids"
@@ -74,7 +74,7 @@ doc {
 					location "body"
 					type "List"
 					optional true
-					since "3.11.3"
+					since "zsv_3.11.3"
 				}
 			}
 		}

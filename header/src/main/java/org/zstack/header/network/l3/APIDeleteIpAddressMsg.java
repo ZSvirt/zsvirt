@@ -6,8 +6,9 @@ import org.zstack.header.message.*;
 import org.zstack.header.rest.RestRequest;
 import org.zstack.header.tag.TagResourceType;
 
-import java.util.Collections;
 import java.util.List;
+
+import static org.zstack.utils.CollectionDSL.list;
 
 @TagResourceType(L3NetworkVO.class)
 @Action(category = L3NetworkConstant.ACTION_CATEGORY)
@@ -45,10 +46,8 @@ public class APIDeleteIpAddressMsg extends APIDeleteMessage implements L3Network
 
     public static APIDeleteIpAddressMsg __example__() {
         APIDeleteIpAddressMsg msg = new APIDeleteIpAddressMsg();
-
-        msg.setL3NetworkUuid(uuid());
-        msg.setUsedIpUuids(Collections.singletonList(uuid(UsedIpVO.class)));
-
+        msg.setL3NetworkUuid(uuid(L3NetworkVO.class));
+        msg.setUsedIpUuids(list(uuid(UsedIpVO.class)));
         return msg;
     }
 }

@@ -4,10 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.zstack.autoscaling.AutoScalingConstants;
 import org.zstack.autoscaling.group.AutoScalingGroupInventory;
 import org.zstack.autoscaling.group.AutoScalingGroupVO;
-import org.zstack.autoscaling.group.rule.AutoScalingRuleInventory;
-import org.zstack.autoscaling.group.rule.AutoScalingRuleVO;
-import org.zstack.autoscaling.group.rule.AutoScalingRuleVO_;
-import org.zstack.autoscaling.group.rule.DeleteAutoScalingRuleMsg;
 import org.zstack.core.asyncbatch.While;
 import org.zstack.core.cascade.AbstractAsyncCascadeExtension;
 import org.zstack.core.cascade.CascadeAction;
@@ -21,7 +17,6 @@ import org.zstack.core.db.SQL;
 import org.zstack.core.errorcode.ErrorFacade;
 import org.zstack.header.core.Completion;
 import org.zstack.header.core.WhileDoneCompletion;
-import org.zstack.header.errorcode.ErrorCode;
 import org.zstack.header.errorcode.ErrorCodeList;
 import org.zstack.header.message.MessageReply;
 import org.zstack.utils.Utils;
@@ -29,8 +24,6 @@ import org.zstack.utils.logging.CLogger;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -122,13 +115,12 @@ public class AutoScalingTemplateCascadeExtension extends AbstractAsyncCascadeExt
             msgs.add(deleteMsg);
         }
 
-        List<ErrorCode> errorCodes = Collections.synchronizedList(new LinkedList<ErrorCode>());
         new While<>(msgs).step((deleteMsg, whileCompletion) -> {
             bus.send(deleteMsg, new CloudBusCallBack(completion) {
                 @Override
                 public void run(MessageReply reply) {
                     if (!reply.isSuccess()) {
-                        errorCodes.add(reply.getError());
+                        whileCompletion.addError(reply.getError());
                     }
                     whileCompletion.done();
                 }
@@ -136,12 +128,7 @@ public class AutoScalingTemplateCascadeExtension extends AbstractAsyncCascadeExt
         }, 10).run(new WhileDoneCompletion(completion) {
             @Override
             public void done(ErrorCodeList errorCodeList) {
-                if (errorCodes.isEmpty()) {
-                    completion.success();
-                    return;
-                }
-
-                completion.fail(errorCodes.get(0));
+                completion.next(errorCodeList);
             }
         });
     }

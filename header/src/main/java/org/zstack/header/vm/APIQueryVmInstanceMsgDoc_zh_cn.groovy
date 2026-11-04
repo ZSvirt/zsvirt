@@ -4,11 +4,11 @@ import org.zstack.header.vm.APIQueryVmInstanceReply
 import org.zstack.header.query.APIQueryMessage
 
 doc {
-	title "查询云主机(QueryVmInstance)"
+	title "查询虚拟机(QueryVmInstance)"
 
-	category "云主机"
+	category "虚拟机"
 
-	desc """查询云主机"""
+	desc """查询虚拟机"""
 
 	rest {
 		request {

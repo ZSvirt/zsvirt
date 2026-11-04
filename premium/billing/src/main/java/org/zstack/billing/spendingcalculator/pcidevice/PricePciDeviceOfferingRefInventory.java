@@ -6,7 +6,7 @@ import org.zstack.header.query.ExpandedQueries;
 import org.zstack.header.query.ExpandedQuery;
 import org.zstack.header.rest.APINoSee;
 import org.zstack.header.search.Inventory;
-import org.zstack.pciDevice.*;
+import org.zstack.pciDevice.entity.PciDeviceOfferingInventory;
 
 import java.io.Serializable;
 import java.sql.Timestamp;

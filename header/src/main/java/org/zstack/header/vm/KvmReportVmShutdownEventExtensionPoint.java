@@ -7,7 +7,7 @@ import static org.zstack.header.vm.VmInstanceConstant.*;
  * @Date: 2024/3/4 13:14
  */
 public interface KvmReportVmShutdownEventExtensionPoint {
-    void kvmReportVmShutdownEvent(ShutdownDetail vmUuid);
+    void kvmReportVmShutdownEvent(ShutdownDetail detail);
 
     public class ShutdownDetail {
         public String vmUuid;

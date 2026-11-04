@@ -1,11 +1,10 @@
 package org.zstack.compute.sriov;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Autowire;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.transaction.annotation.Transactional;
-
 import org.zstack.compute.host.MevocoKVMAgentCommands.ChangeVfNicHaStateCmd;
 import org.zstack.compute.host.MevocoKVMAgentCommands.ChangeVfNicHaStateRsp;
 import org.zstack.compute.host.MevocoKVMConstant;
@@ -40,14 +39,14 @@ import org.zstack.kvm.KVMCompleteNicInformationExtensionPoint;
 import org.zstack.kvm.KVMHostAsyncHttpCallMsg;
 import org.zstack.kvm.KVMHostAsyncHttpCallReply;
 import org.zstack.kvm.KVMHostFactory;
-import org.zstack.pciDevice.PciDeviceVO;
-import org.zstack.pciDevice.PciDeviceVO_;
+import org.zstack.pciDevice.entity.PciDeviceVO;
+import org.zstack.pciDevice.entity.PciDeviceVO_;
 import org.zstack.utils.Utils;
 import org.zstack.utils.logging.CLogger;
 
-import static org.zstack.core.Platform.operr;
-
 import java.util.Map;
+
+import static org.zstack.core.Platform.operr;
 
 @Configurable(preConstruction = true, autowire = Autowire.BY_TYPE)
 public class VmVfNicChangeHaStateFlow extends NoRollbackFlow{

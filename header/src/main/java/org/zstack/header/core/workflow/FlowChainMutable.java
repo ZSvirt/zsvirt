@@ -27,7 +27,7 @@ public interface FlowChainMutable {
 
     void setChainName(String name);
 
-    Map getChainData();
+    Map<String, Object> getChainData();
 
-    void setChainData(Map data);
+    void setChainData(Map<String, Object> data);
 }

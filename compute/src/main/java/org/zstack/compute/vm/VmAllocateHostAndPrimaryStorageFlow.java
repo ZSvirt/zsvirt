@@ -396,7 +396,6 @@ public class VmAllocateHostAndPrimaryStorageFlow implements Flow {
             @Override
             public void setup() {
                 flow(new VmAllocateHostFlow());
-
                 flow(new VmAllocatePrimaryStorageFlow());
             }
         });

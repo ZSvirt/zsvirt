@@ -3,8 +3,6 @@ package org.zstack.storage.volume;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
-import org.zstack.configuration.DiskOfferingSystemTags;
-import org.zstack.configuration.OfferingUserConfigUtils;
 import org.zstack.core.Platform;
 import org.zstack.core.asyncbatch.While;
 import org.zstack.core.cloudbus.CloudBus;
@@ -21,7 +19,6 @@ import org.zstack.core.thread.ThreadFacade;
 import org.zstack.core.workflow.FlowChainBuilder;
 import org.zstack.core.workflow.ShareFlow;
 import org.zstack.header.AbstractService;
-import org.zstack.header.configuration.userconfig.DiskOfferingUserConfig;
 import org.zstack.header.core.Completion;
 import org.zstack.header.core.ReturnValueCompletion;
 import org.zstack.header.core.WhileDoneCompletion;
@@ -56,7 +53,6 @@ import org.zstack.storage.primary.PrimaryStorageGlobalConfig;
 import org.zstack.tag.TagManager;
 import org.zstack.utils.CollectionUtils;
 import org.zstack.utils.Utils;
-import org.zstack.utils.function.Function;
 import org.zstack.utils.logging.CLogger;
 
 import javax.persistence.Tuple;
@@ -283,6 +279,7 @@ public class VolumeManagerImpl extends AbstractService implements VolumeManager,
         if (msg.getSystemTags() != null) {
             tagMgr.createNonInherentSystemTags(msg.getSystemTags(), vvo.getUuid(), VolumeVO.class.getSimpleName());
         }
+        tagMgr.createResourceConfigs(msg.getConfigs(), vvo.getUuid());
 
         new FireVolumeCanonicalEvent().fireVolumeStatusChangedEvent(null, VolumeInventory.valueOf(vvo));
 
@@ -629,30 +626,7 @@ public class VolumeManagerImpl extends AbstractService implements VolumeManager,
         bus.reply(msg, reply);
     }
 
-    public static void preCheckPrimaryStorage(VolumeCreateMessage msg) {
-        String diskOffering = msg.getDiskOfferingUuid();
-        if (diskOffering == null || msg.getPrimaryStorageUuid() == null ||
-                !DiskOfferingSystemTags.DISK_OFFERING_USER_CONFIG.hasTag(diskOffering)) {
-            return;
-        }
-
-        DiskOfferingUserConfig config = OfferingUserConfigUtils.getDiskOfferingConfig(diskOffering, DiskOfferingUserConfig.class);
-        if (config.getAllocate() == null) {
-            return;
-        }
-
-        if (!config.getAllocate().getAllPrimaryStorages().isEmpty()) {
-            List<String> requiredPrimaryStorageUuids = config.getAllocate().getAllPrimaryStorages().stream()
-                    .map(PrimaryStorageAllocateConfig::getUuid).collect(Collectors.toList());
-            if (!requiredPrimaryStorageUuids.contains(msg.getPrimaryStorageUuid())) {
-                throw new OperationFailureException(operr("primary storage uuid conflict, the primary storage specified by the disk offering are %s, and the primary storage specified in the creation parameter is %s",
-                        requiredPrimaryStorageUuids, msg.getPrimaryStorageUuid()));
-            }
-        }
-    }
-
     private VolumeInventory createVolume(CreateVolumeMsg msg) {
-        preCheckPrimaryStorage(msg);
         VolumeVO vo = new VolumeVO();
         if (msg.getResourceUuid() != null) {
             vo.setUuid(msg.getResourceUuid());
@@ -711,6 +685,7 @@ public class VolumeManagerImpl extends AbstractService implements VolumeManager,
         if (msg.getSystemTags() != null) {
             tagMgr.createNonInherentSystemTags(msg.getSystemTags(), vo.getUuid(), VolumeVO.class.getSimpleName());
         }
+        tagMgr.createResourceConfigs(msg.getConfigs(), vo.getUuid());
 
         for (CreateDataVolumeExtensionPoint ext : exts) {
             ext.afterCreateVolume(vo);
@@ -1042,6 +1017,7 @@ public class VolumeManagerImpl extends AbstractService implements VolumeManager,
                     msg.setSystemTags(originSysTags);
                 }
                 tagMgr.createTags(msg.getSystemTags(), msg.getUserTags(), vo.getUuid(), VolumeVO.class.getSimpleName());
+                tagMgr.createResourceConfigs(msg.getConfigs(), vo.getUuid());
                 return vo;
             }
         }.execute();
@@ -1271,16 +1247,7 @@ public class VolumeManagerImpl extends AbstractService implements VolumeManager,
         }
         dbf.reload(vo);
 
-        List<String> requiredPrimaryStorageUuids = null;
-        if (msg.getDiskOfferingUuid() != null && DiskOfferingSystemTags.DISK_OFFERING_USER_CONFIG.hasTag(msg.getDiskOfferingUuid())) {
-            DiskOfferingUserConfig config = OfferingUserConfigUtils.getDiskOfferingConfig(msg.getDiskOfferingUuid(), DiskOfferingUserConfig.class);
-            if (config.getAllocate() != null && !config.getAllocate().getAllPrimaryStorages().isEmpty()) {
-                requiredPrimaryStorageUuids = config.getAllocate().getAllPrimaryStorages().stream()
-                        .map(PrimaryStorageAllocateConfig::getUuid).collect(Collectors.toList());
-            }
-        }
-
-        if (msg.getPrimaryStorageUuid() == null && requiredPrimaryStorageUuids == null) {
+        if (msg.getPrimaryStorageUuid() == null) {
             new FireVolumeCanonicalEvent().fireVolumeStatusChangedEvent(null, VolumeInventory.valueOf(vo));
 
             VolumeInventory inv = VolumeInventory.valueOf(vo);
@@ -1382,14 +1349,10 @@ public class VolumeManagerImpl extends AbstractService implements VolumeManager,
             }
         });
 
-        pluginRgty.saveExtensionAsMap(InstantiateDataVolumeOnCreationExtensionPoint.class, new Function<Object, InstantiateDataVolumeOnCreationExtensionPoint>() {
-            @Override
-            public Object call(InstantiateDataVolumeOnCreationExtensionPoint arg) {
-                return arg.getPrimaryStorageTypeForInstantiateDataVolumeOnCreationExtensionPoint();
-            }
-        });
-
-        pluginRgty.saveExtensionAsMap(MaxDataVolumeNumberExtensionPoint.class, MaxDataVolumeNumberExtensionPoint::getHypervisorTypeForMaxDataVolumeNumberExtension);
+        pluginRgty.saveExtensionAsMap(InstantiateDataVolumeOnCreationExtensionPoint.class,
+                InstantiateDataVolumeOnCreationExtensionPoint::getPrimaryStorageTypeForInstantiateDataVolumeOnCreationExtensionPoint);
+        pluginRgty.saveExtensionAsMap(MaxDataVolumeNumberExtensionPoint.class,
+                MaxDataVolumeNumberExtensionPoint::getHypervisorTypeForMaxDataVolumeNumberExtension);
 
         {
             List<VolumeFactory> exts = pluginRgty.getExtensionList(

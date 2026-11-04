@@ -5,8 +5,6 @@ import org.zstack.header.message.APIMessage;
 import org.zstack.header.message.APIParam;
 import org.zstack.header.rest.RestRequest;
 
-/**
- */
 @RestRequest(
         path = "/l3-networks/{l3NetworkUuid}/hostroute",
         method = HttpMethod.DELETE,
@@ -43,10 +41,8 @@ public class APIRemoveHostRouteFromL3NetworkMsg extends APIMessage implements L3
 
     public static APIRemoveHostRouteFromL3NetworkMsg __example__() {
         APIRemoveHostRouteFromL3NetworkMsg msg = new APIRemoveHostRouteFromL3NetworkMsg();
-
-        msg.setL3NetworkUuid(uuid());
+        msg.setL3NetworkUuid(uuid(L3NetworkVO.class));
         msg.setPrefix("169.254.169.254/32");
-
         return msg;
     }
 }

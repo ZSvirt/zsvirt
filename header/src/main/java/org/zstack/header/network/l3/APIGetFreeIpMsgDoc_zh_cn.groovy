@@ -30,7 +30,7 @@ doc {
 					location "query"
 					type "String"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "ipRangeUuid"
@@ -39,7 +39,7 @@ doc {
 					location "query"
 					type "String"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "start"
@@ -48,7 +48,7 @@ doc {
 					location "query"
 					type "String"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "ipRangeType"
@@ -57,7 +57,7 @@ doc {
 					location "query"
 					type "String"
 					optional true
-					since "zsv 3.9"
+					since "zsv_3.9"
 					values ("Normal","AddressPool")
 				}
 				column {
@@ -67,7 +67,7 @@ doc {
 					location "query"
 					type "Integer"
 					optional true
-					since "zsv 3.10"
+					since "zsv_3.10"
 					values ("4","6")
 				}
 				column {
@@ -77,7 +77,7 @@ doc {
 					location "query"
 					type "int"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "systemTags"
@@ -86,7 +86,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 				column {
 					name "userTags"
@@ -95,7 +95,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "zsv 0.6"
+					since "zsv_0.6"
 				}
 			}
 		}

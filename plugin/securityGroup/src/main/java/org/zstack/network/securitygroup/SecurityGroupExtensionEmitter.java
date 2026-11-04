@@ -1,14 +1,12 @@
 package org.zstack.network.securitygroup;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.zstack.core.componentloader.PluginExtension;
 import org.zstack.core.componentloader.PluginRegistry;
 import org.zstack.header.Component;
 import org.zstack.header.vm.VmInstanceInventory;
 import org.zstack.header.vm.VmNicInventory;
 import org.zstack.utils.CollectionUtils;
 import org.zstack.utils.Utils;
-import org.zstack.utils.function.ForEachFunction;
 import org.zstack.utils.logging.CLogger;
 
 import java.util.ArrayList;
@@ -38,20 +36,10 @@ public class SecurityGroupExtensionEmitter implements Component {
     }
     
     public void beforeAddVmNicToSecurityGroup(final SecurityGroupInventory sg, final VmInstanceInventory vm, final List<VmNicInventory> nics) {
-        CollectionUtils.safeForEach(addNicExts, new ForEachFunction<AddVmNicToSecurityGroupExtensionPoint>() {
-            @Override
-            public void run(AddVmNicToSecurityGroupExtensionPoint arg) {
-                arg.beforeAddVmNic(sg, vm, nics);
-            }
-        });
+        CollectionUtils.safeForEach(addNicExts, arg -> arg.beforeAddVmNic(sg, vm, nics));
     }
     
     public void afterAddVmNicToSecurityGroup(final SecurityGroupInventory sg, final VmInstanceInventory vm, final List<VmNicInventory> nics) {
-        CollectionUtils.safeForEach(addNicExts, new ForEachFunction<AddVmNicToSecurityGroupExtensionPoint>() {
-            @Override
-            public void run(AddVmNicToSecurityGroupExtensionPoint arg) {
-                arg.afterAddVmNic(sg, vm, nics);
-            }
-        });
+        CollectionUtils.safeForEach(addNicExts, arg -> arg.afterAddVmNic(sg, vm, nics));
     }
 }

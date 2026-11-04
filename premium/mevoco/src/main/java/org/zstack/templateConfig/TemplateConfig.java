@@ -16,13 +16,10 @@ import org.zstack.templateConfig.TemplateConfigCanonicalEvents.TemplateConfigUpd
 import org.zstack.utils.CollectionUtils;
 import org.zstack.utils.TypeUtils;
 import org.zstack.utils.Utils;
-import org.zstack.utils.data.StringTemplate;
-import org.zstack.utils.function.ForEachFunction;
 import org.zstack.utils.gson.JSONObjectUtil;
 import org.zstack.utils.logging.CLogger;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -277,12 +274,7 @@ public class TemplateConfig {
             dbf.update(vo);
 
             final TemplateConfig self = this;
-            CollectionUtils.safeForEach(localUpdateExtensions, new ForEachFunction<TemplateConfigUpdateExtensionPoint>() {
-                @Override
-                public void run(TemplateConfigUpdateExtensionPoint ext) {
-                    ext.updateTemplateConfig(origin, self);
-                }
-            });
+            CollectionUtils.safeForEach(localUpdateExtensions, ext -> ext.updateTemplateConfig(origin, self));
             TemplateConfigUpdateEvent evt = new TemplateConfigUpdateEvent();
             evt.setOldValue(origin.getValue());
             evt.setNewValue(newValue);

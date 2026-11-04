@@ -24,7 +24,7 @@ import java.util.concurrent.TimeUnit;
         isAction = true,
         responseClass = APIBatchDeleteVolumeSnapshotEvent.class
 )
-@DefaultTimeout(timeunit = TimeUnit.HOURS, value = 6)
+@DefaultTimeout(timeunit = TimeUnit.HOURS, value = 12)
 public class APIBatchDeleteVolumeSnapshotMsg extends APIDeleteMessage implements APIMultiAuditor, APIBatchRequest {
     /**
      * @desc volume snapshot uuid

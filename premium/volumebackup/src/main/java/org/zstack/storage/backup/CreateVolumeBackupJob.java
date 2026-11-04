@@ -4,7 +4,6 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
-import org.zstack.core.Platform;
 import org.zstack.core.cloudbus.CloudBus;
 import org.zstack.core.cloudbus.CloudBusCallBack;
 import org.zstack.core.cloudbus.EventFacade;
@@ -19,15 +18,12 @@ import org.zstack.header.core.Completion;
 import org.zstack.header.core.ExceptionSafe;
 import org.zstack.header.core.ReturnValueCompletion;
 import org.zstack.header.errorcode.ErrorCode;
-import org.zstack.header.errorcode.OperationFailureException;
-import org.zstack.header.exception.CloudRuntimeException;
 import org.zstack.header.longjob.LongJobState;
 import org.zstack.header.longjob.LongJobVO;
 import org.zstack.header.longjob.LongJobVO_;
 import org.zstack.header.longjob.SubmitLongJobMsg;
 import org.zstack.header.message.APIEvent;
 import org.zstack.header.message.MessageReply;
-import org.zstack.header.scheduler.CascadeUpdate;
 import org.zstack.header.scheduler.CreateSchedulerJobDescMsg;
 import org.zstack.header.scheduler.SchedulerCanonicalEvents;
 import org.zstack.header.storage.backup.*;
@@ -41,25 +37,23 @@ import org.zstack.header.volume.VolumeVO;
 import org.zstack.header.volume.VolumeVO_;
 import org.zstack.identity.AccountManager;
 import org.zstack.longjob.LongJobManager;
-import org.zstack.scheduler.AbstractSchedulerJob;
 import org.zstack.scheduler.SchedulerConstant;
 import org.zstack.scheduler.SchedulerType;
-import org.zstack.utils.FieldUtils;
 import org.zstack.utils.Utils;
 import org.zstack.utils.gson.JSONObjectUtil;
 import org.zstack.utils.logging.CLogger;
 
 import javax.persistence.Tuple;
-import java.lang.reflect.Field;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static org.zstack.core.Platform.*;
+import static org.zstack.core.Platform.err;
+import static org.zstack.core.Platform.operr;
 
 @Configurable(preConstruction = true, autowire = Autowire.BY_TYPE)
-public class CreateVolumeBackupJob extends AbstractSchedulerJob<VolumeBackupLongJobParams, APIEvent> {
+public class CreateVolumeBackupJob extends CreateBackupAbstractJob<VolumeBackupLongJobParams, APIEvent> {
     private static final CLogger logger = Utils.getLogger(CreateVolumeBackupJob.class);
 
     @Autowired
@@ -76,17 +70,9 @@ public class CreateVolumeBackupJob extends AbstractSchedulerJob<VolumeBackupLong
     private transient LongJobManager longJobMgr;
     @Autowired
     private transient BackupErrorHandler errorHandler;
-
-    private BackupRetentionPolicy retentionPolicy;
-    private BackupRetentionPolicy remoteRetentionPolicy;
-    @CascadeUpdate(resourceType = BackupStorageVO.class, disableWhenEmpty = true)
-    private List<String> backupStorageUuids;
-    @CascadeUpdate(resourceType = BackupStorageVO.class)
-    private String remoteBackupStorageUuid;
-    private BackupQosStruct backupQosStruct;
     private String fullBackupTriggerUuid;
 
-    private static List<Field> qosFields = FieldUtils.getAllFields(BackupQosStruct.class);
+
 
     @Override
     public String getType() {
@@ -109,120 +95,15 @@ public class CreateVolumeBackupJob extends AbstractSchedulerJob<VolumeBackupLong
         return Objects.equals(longJobState, LongJobState.Running);
     }
 
-    private void mergeQosStruct(Map<String, String> params) {
-        if (backupQosStruct == null) {
-            backupQosStruct = new BackupQosStruct();
-        }
-
-        qosFields.forEach(field -> {
-            String value = params.get(field.getName());
-            if (value != null) {
-                field.setAccessible(true);
-                Long qos = StringUtils.isBlank(value) ? null : validateBandWidth(Long.valueOf(value));
-                try {
-                    field.set(backupQosStruct, qos);
-                } catch (IllegalAccessException e) {
-                    throw new CloudRuntimeException(e);
-                }
-            }
-        });
-    }
-
-    private long validateBandWidth(long value) {
-        if (value <= 0) {
-            throw new OperationFailureException(argerr("bandWidth must be a positive number"));
-        }
-
-        if (value < 1024L) {
-            logger.warn(String .format("bandWidth[%s] cannot be lower than 1024 Bps, set it to 1024", value));
-            return 1024L;
-        }
-        return value;
-    }
-
-    private void mergeRetentionPolicy(Map<String, String> params) {
-        if (retentionPolicy == null) {
-            retentionPolicy = new BackupRetentionPolicy();
-        }
-
-        Optional.ofNullable(params.get("retentionType")).ifPresent(it ->
-                retentionPolicy.setRetentionType(StringUtils.isBlank(it) ? null : BackupRetentionType.valueOf(it)));
-        Optional.ofNullable(params.get("retentionValue")).ifPresent(it ->
-                retentionPolicy.setRetentionValue(StringUtils.isBlank(it) ? 0 : Long.valueOf(it)));
-
-        if (remoteRetentionPolicy == null) {
-            remoteRetentionPolicy = new BackupRetentionPolicy();
-        }
-        Optional.ofNullable(params.get("remoteRetentionType")).ifPresent(it ->
-                remoteRetentionPolicy.setRetentionType(StringUtils.isBlank(it) ? null : BackupRetentionType.valueOf(it)));
-        Optional.ofNullable(params.get("remoteRetentionValue")).ifPresent(it ->
-                remoteRetentionPolicy.setRetentionValue(StringUtils.isBlank(it) ? 0 : Long.valueOf(it)));
-
-        if (isUpdateRemoteRetentionPolicyPermanent(remoteRetentionPolicy) || remoteBackupStorageUuid == null) {
-            remoteRetentionPolicy = null;
-        }
-    }
-
-    private static boolean isUpdateRemoteRetentionPolicyPermanent(BackupRetentionPolicy remoteRetentionPolicy) {
-        return remoteRetentionPolicy.getRetentionType() == null || remoteRetentionPolicy.getRetentionValue() == 0;
-    }
-
-    private void mergeBackupPolicy(Map<String, String> params) {
-        Optional.ofNullable(params.get("fullBackupTriggerUuid")).ifPresent(it ->
-                this.fullBackupTriggerUuid = StringUtils.isBlank(it) ? null : it);
-        Optional.ofNullable(params.get("remoteBackupStorageUuid")).ifPresent(it ->
-                this.remoteBackupStorageUuid = StringUtils.isBlank(it) ? null : it);
-        Optional.ofNullable(params.get("backupStorageUuids")).ifPresent(it ->
-                this.backupStorageUuids = Arrays.asList(StringUtils.split(it.replace("\\s", ""),",")));
-    }
-
-    private void validateParam() {
-        if (retentionPolicy.getRetentionType() == null) {
-            throw new OperationFailureException(Platform.operr("missing 'retentionType' in job parameters"));
-        }
-
-        if (retentionPolicy.getRetentionValue() == 0) {
-            throw new OperationFailureException(Platform.operr("missing 'retentionValue' in job parameters"));
-        }
-
-        if (backupStorageUuids == null) {
-            throw new OperationFailureException(Platform.operr("missing 'backupStorageUuids' in job parameters"));
-        }
-
-        if (backupStorageUuids.isEmpty()) {
-            throw new OperationFailureException(Platform.operr("job parameter 'backupStorageUuids' is empty"));
-        }
-
-        for (String bsUuid: backupStorageUuids) {
-            if (!Q.New(BackupStorageVO.class).eq(BackupStorageVO_.uuid, bsUuid).isExists()) {
-                throw new OperationFailureException(Platform.operr("unexpected backup storage uuid: %s", bsUuid));
-            }
-        }
-    }
-
-    private void validateRemoteRetentionPolicyParam(Map<String, String> params) {
-        if (StringUtils.isBlank(params.get("remoteRetentionType")) && !StringUtils.isBlank(params.get("remoteRetentionValue"))) {
-            throw new OperationFailureException(Platform.operr("missing 'remoteRetentionType' in job parameters"));
-        } else if (StringUtils.isBlank(params.get("remoteRetentionValue")) && !StringUtils.isBlank(params.get("remoteRetentionType"))) {
-            throw new OperationFailureException(Platform.operr("missing 'remoteRetentionValue' in job parameters"));
-        }
-    }
-
-    private void mergeFields(Map<String, String> parameters) {
-        if (parameters == null) {
-            throw new OperationFailureException(Platform.operr("missing job parameters"));
-        }
-
-        mergeBackupPolicy(parameters);
-        validateRemoteRetentionPolicyParam(parameters);
-        mergeRetentionPolicy(parameters);
-        mergeQosStruct(parameters);
-        validateParam();
-    }
-
     public CreateVolumeBackupJob(CreateSchedulerJobDescMsg msg) {
         super(msg);
         mergeFields(msg.getParameters());
+    }
+
+    protected void mergeFields(Map<String, String> parameters) {
+        super.mergeFields(parameters);
+        Optional.ofNullable(parameters.get("fullBackupTriggerUuid")).ifPresent(it ->
+                this.fullBackupTriggerUuid = StringUtils.isBlank(it) ? null : it);
     }
 
     public CreateVolumeBackupJob() {

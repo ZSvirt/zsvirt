@@ -34,6 +34,23 @@
             <artifactId>testlib-simple</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.zstack</groupId>
+            <artifactId>log4j2</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+            <!-- Inherited premium plugins require the full premium RBAC environment. -->
+            <exclusions>
+                <exclusion>
+                    <groupId>org.zstack</groupId>
+                    <artifactId>mevoco</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.zstack</groupId>
+                    <artifactId>vpc</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
     </dependencies>
 
 
@@ -71,8 +88,8 @@
                         <classpathDependencyExcludes>c3p0:c3p0:jar:0.9.1.1</classpathDependencyExcludes>
                     </classpathDependencyExcludes>
                     <systemPropertyVariables>
-                        <webXmlPath>${project.basedir}/../../test/src/test/resources/webapp/WEB-INF/web.xml</webXmlPath>
-                        <webServletContextFilePath>${project.basedir}/../../test/src/test/resources/webapp/WEB-INF/zstack-servlet-context-groovy.xml</webServletContextFilePath>
+                        <webXmlPath>${project.basedir}/src/test/resources/webapp/WEB-INF/web.xml</webXmlPath>
+                        <webServletContextFilePath>${project.basedir}/src/test/resources/webapp/WEB-INF/zstack-servlet-context-groovy.xml</webServletContextFilePath>
                     </systemPropertyVariables>
                 </configuration>
             </plugin>
@@ -89,12 +106,15 @@
                 </configuration>
             </plugin>
 
-        <plugin>
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>${project.compiler.version}</version>
                 <configuration>
                     <compilerId>groovy-eclipse-compiler</compilerId>
+                    <compilerArgs>
+                        <arg>-warn:-serial</arg>
+                    </compilerArgs>
                     <source>${project.java.version}</source>
                     <target>${project.java.version}</target>
                     <debuglevel>lines,vars,source</debuglevel>
@@ -172,6 +192,13 @@
                                 <resource>
                                     <directory>../../conf</directory>
                                 </resource>
+                                <resource>
+                                    <directory>../../premium/conf</directory>
+                                    <includes>
+                                        <include>springConfigXml/LogConfiguration.xml</include>
+                                        <include>springConfigXml/Log4j2Configuration.xml</include>
+                                    </includes>
+                                </resource>
                             </resources>
                         </configuration>
                     </execution>
@@ -187,6 +214,9 @@
                             <resources>
                                 <resource>
                                     <directory>../../test/src/test/resources/</directory>
+                                    <includes>
+                                        <include>UTCapabilities/**</include>
+                                    </includes>
                                 </resource>
                             </resources>
                         </configuration>

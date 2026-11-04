@@ -28,7 +28,7 @@ doc {
 					location "query"
 					type "List"
 					optional false
-					since "3.17.0"
+					since "zsv_3.17.0"
 				}
 				column {
 					name "interfaceType"
@@ -37,7 +37,7 @@ doc {
 					location "query"
 					type "String"
 					optional true
-					since "3.17.21"
+					since "zsv_3.17.21"
 					values ("interface","bonding","all")
 				}
 				column {
@@ -47,7 +47,7 @@ doc {
 					location "query"
 					type "Integer"
 					optional true
-					since "3.17.0"
+					since "zsv_3.17.0"
 				}
 				column {
 					name "start"
@@ -56,7 +56,7 @@ doc {
 					location "query"
 					type "Integer"
 					optional true
-					since "3.17.0"
+					since "zsv_3.17.0"
 				}
 				column {
 					name "systemTags"
@@ -65,7 +65,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "3.17.0"
+					since "zsv_3.17.0"
 				}
 				column {
 					name "userTags"
@@ -74,7 +74,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "3.17.0"
+					since "zsv_3.17.0"
 				}
 				column {
 					name "intersecting"
@@ -83,7 +83,7 @@ doc {
 					location "query"
 					type "boolean"
 					optional true
-					since "3.18.0"
+					since "zsv_3.18.0"
 				}
 			}
 		}

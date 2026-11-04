@@ -10,24 +10,24 @@ doc {
 		name "ipRangeUuid"
 		desc "IP段UUID"
 		type "String"
-		since "zsv 0.6"
+		since "zsv_0.6"
 	}
 	field {
 		name "ip"
 		desc ""
 		type "String"
-		since "zsv 0.6"
+		since "zsv_0.6"
 	}
 	field {
 		name "netmask"
 		desc ""
 		type "String"
-		since "zsv 0.6"
+		since "zsv_0.6"
 	}
 	field {
 		name "gateway"
 		desc ""
 		type "String"
-		since "zsv 0.6"
+		since "zsv_0.6"
 	}
 }

@@ -4,7 +4,10 @@ import java.util.Map;
 
 /**
  * Created by xing5 on 2016/4/29.
+ *
+ * use {@link Flow#nope(String)}
  */
+@Deprecated
 public class NopeFlow implements Flow {
     String __name__ = "nope";
 

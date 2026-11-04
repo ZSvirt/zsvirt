@@ -356,19 +356,6 @@ public class VolumeBackupMetadataMaker implements CreateVolumeBackupExtensionPoi
     }
 
     @Deferred
-    private SyncBackupResult syncBackupsMetaDataFromImageStore(String bsUuid, boolean isVmBackup) throws IOException {
-        if (CoreGlobalProperty.UNIT_TEST_ON) {
-            return new SyncBackupResult();
-        }
-
-        String tmpFile = PathUtil.createTempFile("pull-backup-", ".json");
-        Defer.defer(() ->PathUtil.forceRemoveFile(tmpFile));
-        ImageStoreBackupStorageVO imageStore = dbf.findByUuid(bsUuid, ImageStoreBackupStorageVO.class);
-        getSsh(imageStore).scpDownload(PathUtil.join(imageStore.getUrl(), METADATA_FILE_NAME), tmpFile).runErrorByExceptionAndClose();
-        return syncBackupInfo(tmpFile, bsUuid, isVmBackup);
-    }
-
-    @Deferred
     void pushVolumeBackupsMetadataToImageStore(String bsUuid) throws IOException {
         if (CoreGlobalProperty.UNIT_TEST_ON) {
             return;
@@ -420,21 +407,34 @@ public class VolumeBackupMetadataMaker implements CreateVolumeBackupExtensionPoi
     }
 
     @Deferred
-    private SyncBackupResult syncBackupInfo(String infoFile, String bsUuid, boolean isVmBackup) throws IOException {
+    private SyncBackupResult syncBackupsMetaDataFromImageStore(String bsUuid, boolean isVmBackup) throws IOException {
         SyncBackupResult result = new SyncBackupResult();
         String protectTag = VolumeBackupSystemTag.NO_METADATA.instantiateTag(
-                Collections.singletonMap(VolumeBackupSystemTag.NO_METADATA_BSUUID_TOKEN, bsUuid));
+                Collections.singletonMap(VolumeBackupSystemTag.NO_METADATA_BSUUID_TOKEN, "%%"));
         List<String> creatingBackupUuids = Q.New(SystemTagVO.class).select(SystemTagVO_.resourceUuid)
-                .eq(SystemTagVO_.tag, protectTag)
+                .like(SystemTagVO_.tag, protectTag)
                 .listValues();
 
         Map<String, VolumeBackupMetadata> toPersist = new HashMap<>();
-        Q query = Q.New(VolumeBackupVO.class).select(VolumeBackupVO_.uuid);
+        Q query = Q.New(VolumeBackupVO.class).select(VolumeBackupVO_.uuid)
+                .notEq(VolumeBackupVO_.status, VolumeBackupStatus.Creating);
         List<String> toRemoveUuids = isVmBackup ? query.notNull(VolumeBackupVO_.groupUuid).listValues() :
                 query.isNull(VolumeBackupVO_.groupUuid) .listValues();
         toRemoveUuids.removeAll(creatingBackupUuids);
 
-        try (InputStreamReader read = new InputStreamReader(new FileInputStream(new File(infoFile)), Charset.forName("UTF-8"))) {
+        if (CoreGlobalProperty.UNIT_TEST_ON) {
+            assert creatingBackupUuids.size() == Q.New(VolumeBackupVO.class)
+                    .eq(VolumeBackupVO_.status, VolumeBackupStatus.Creating)
+                    .count();
+            return result;
+        }
+
+        String tmpFile = PathUtil.createTempFile("pull-backup-", ".json");
+        Defer.defer(() ->PathUtil.forceRemoveFile(tmpFile));
+        ImageStoreBackupStorageVO imageStore = dbf.findByUuid(bsUuid, ImageStoreBackupStorageVO.class);
+        getSsh(imageStore).scpDownload(PathUtil.join(imageStore.getUrl(), METADATA_FILE_NAME), tmpFile).runErrorByExceptionAndClose();
+
+        try (InputStreamReader read = new InputStreamReader(new FileInputStream(new File(tmpFile)), Charset.forName("UTF-8"))) {
             BufferedReader bufferedReader = new BufferedReader(read);
             bufferedReader.lines().forEach(line -> {
                 VolumeBackupMetadata metadata = JSONObjectUtil.toObject(line, VolumeBackupMetadata.class);

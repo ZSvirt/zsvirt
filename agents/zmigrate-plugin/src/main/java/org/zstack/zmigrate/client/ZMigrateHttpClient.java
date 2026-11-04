@@ -57,6 +57,15 @@ public class ZMigrateHttpClient {
     @Autowired
     protected CloudBus bus;
 
+    private String cachedManagementIp;
+
+    public ZMigrateHttpClient() {
+        this(null);
+    }
+
+    public ZMigrateHttpClient(String managementIp) {
+        cachedManagementIp = managementIp;
+    }
 
     protected <T> RestHttp<T> http(Class<T> returnClass) {
         RestHttp<T> http = restFacade.http(returnClass);
@@ -73,7 +82,7 @@ public class ZMigrateHttpClient {
     }
 
     private ZMigrateSshClient createSshClient() {
-        return Platform.New(ZMigrateSshClient::new);
+        return Platform.New(() -> new ZMigrateSshClient(cachedManagementIp));
     }
 
     private ErrorableValue<String> getEncryptKey() {
@@ -84,15 +93,13 @@ public class ZMigrateHttpClient {
         return res;
     }
 
-    private String cachedManagementIp;
-
-    private ErrorableValue<String> resolveManagementIp(ErrorCode errorTemplate) {
+    ErrorableValue<String> resolveManagementIp() {
         if (cachedManagementIp != null) {
             return ErrorableValue.of(cachedManagementIp);
         }
         ErrorableValue<String> ip = ZMigrateGatewayHelper.getGatewayManagementIp();
         if (!ip.isSuccess()) {
-            return errorTemplate.withCause(ip.error).toErrorableValue();
+            return ip;
         }
         cachedManagementIp = ip.result;
         return ErrorableValue.of(cachedManagementIp);
@@ -126,9 +133,9 @@ public class ZMigrateHttpClient {
             int retryTimes, int retryIntervalSeconds,
             String methodName, ErrorCode failureError,
             BiFunction<String, String, ErrorableValue<T>> action) {
-        ErrorableValue<String> ip = resolveManagementIp(failureError);
+        ErrorableValue<String> ip = resolveManagementIp();
         if (!ip.isSuccess()) {
-            return ip.error.toErrorableValue();
+            return failureError.withCause(ip.error).toErrorableValue();
         }
         String managementIp = ip.result;
         ErrorCode lastError = null;
@@ -255,13 +262,21 @@ public class ZMigrateHttpClient {
     }
 
     public ErrorableValue<Boolean> registerGatewayToZMigrate(String platformUuidOnZMigrate) {
+        ErrorableValue<String> managementIpResult = resolveManagementIp();
+        if (!managementIpResult.isSuccess()) {
+            return err(ZMIGRATE_REGISTER_GATEWAY_TO_ZMIGRATE_ERROR, "failed to register gateway to ZMigrate, gateway not configured")
+                    .withCause(managementIpResult.error)
+                    .toErrorableValue();
+        }
+        String managementIp = managementIpResult.result;
+
         ErrorableValue<String> encryptKey = getEncryptKey();
         if (!encryptKey.isSuccess()) {
             return err(ZMIGRATE_REGISTER_GATEWAY_TO_ZMIGRATE_ERROR, "failed to register gateway to ZMigrate").toErrorableValue();
         }
 
         ErrorableValue<ZMigrateGatewayHelper.GatewayInfo> gatewayInfo = ZMigrateGatewayHelper.getGatewayInfo();
-        // NOTE: this method uses getGatewayInfo() (not resolveManagementIp) because it needs vmUuid and zoneUuid
+        // GatewayInfo is still needed for vmUuid and zoneUuid; the connection address was resolved above.
         if (!gatewayInfo.isSuccess()) {
             return err(ZMIGRATE_REGISTER_GATEWAY_TO_ZMIGRATE_ERROR, "failed to register gateway to ZMigrate, gateway not configured")
                     .withCause(gatewayInfo.error)
@@ -276,11 +291,11 @@ public class ZMigrateHttpClient {
         cloudServ.zone = info.zoneUuid;
         cmd.cloudServ = JSONObjectUtil.toJsonString(cloudServ);
         cmd.cloudUUID = platformUuidOnZMigrate;
-        cmd.mgmtADDR = info.managementIp;
-        cmd.servADDR = info.managementIp;
+        cmd.mgmtADDR = managementIp;
+        cmd.servADDR = managementIp;
         cmd.servName = cmd.servADDR;
         ErrorableValue<String> response = http(String.class)
-                .withPath(String.format("https://%s:%d%s", info.managementIp, GATEWAY_RESTFUL_API_PORT, ZMIGRATE_SERVICE_MANAGEMENT_PATH))
+                .withPath(String.format("https://%s:%d%s", managementIp, GATEWAY_RESTFUL_API_PORT, ZMIGRATE_SERVICE_MANAGEMENT_PATH))
                 .withBodyJson(cmd)
                 .withTimeoutInMillis(timeoutInMillisForGetter)
                 .withoutRetry()
@@ -339,8 +354,12 @@ public class ZMigrateHttpClient {
     }
 
     public ErrorableValue<String> getGatewayServerInfos() {
+        return getGatewayServerInfos(DEFAULT_RETRY_TIMES);
+    }
+
+    public ErrorableValue<String> getGatewayServerInfos(int retryTimes) {
         return retryWithFreshContext(
-                DEFAULT_RETRY_TIMES, DEFAULT_RETRY_INTERVAL_SECONDS,
+                retryTimes, DEFAULT_RETRY_INTERVAL_SECONDS,
                 "getGatewayServerInfos",
                 err(ZMIGRATE_GET_GATEWAY_SERVER_INFOS_ERROR, "failed to get gateway server infos from ZMigrate"),
                 (managementIp, encryptKey) -> {
@@ -358,6 +377,71 @@ public class ZMigrateHttpClient {
                         return ErrorableValue.of(EMPTY_JSON_ARRAY);
                     }
                     return ErrorableValue.of(response.result);
+                });
+    }
+
+    public ErrorableValue<UploadVddkResponse> uploadVddk(String servUuid, String vddkFile) {
+        return retryWithFreshContext(
+                0, 0,
+                "uploadVddk",
+                err(ZMIGRATE_GATEWAY_ERROR, "failed to upload VDDK to ZMigrate gateway"),
+                (managementIp, encryptKey) -> {
+                    UploadVddkCmd cmd = new UploadVddkCmd(encryptKey, servUuid, vddkFile);
+                    cmd.mgmtAddr = managementIp;
+                    ErrorableValue<UploadVddkResponse> response = http(UploadVddkResponse.class)
+                            .withPath(String.format("https://%s:%d%s", managementIp,
+                                    GATEWAY_RESTFUL_API_PORT, ZMIGRATE_VMWARE_WEB_SERVICES_PATH))
+                            .withBodyJson(cmd)
+                            .withTimeoutInMillis(timeoutInMillisForGetter)
+                            .withoutRetry()
+                            .postWithErrorCode();
+                    if (!response.isSuccess() || response.result == null) {
+                        ErrorCode error = err(ZMIGRATE_GATEWAY_ERROR,
+                                "failed to upload VDDK to ZMigrate gateway");
+                        if (!response.isSuccess()) {
+                            error = error.withCause(response.error);
+                        }
+                        return ErrorableValue.ofErrorCode(error);
+                    }
+                    return response;
+                });
+    }
+
+    public ErrorableValue<Set<String>> getVddkVersions(String servUuid, long timeoutInMillis) {
+        long started = System.nanoTime();
+        return retryWithFreshContext(
+                0, 0,
+                "getVddkVersions",
+                err(ZMIGRATE_GATEWAY_ERROR, "failed to query VDDK versions on ZMigrate gateway"),
+                (managementIp, encryptKey) -> {
+                    long remaining = timeoutInMillis - TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - started);
+                    if (remaining <= 0) {
+                        return err(ZMIGRATE_GATEWAY_ERROR,
+                                "VDDK version query timed out for gateway[servUuid:%s]", servUuid).toErrorableValue();
+                    }
+                    GetVddkVersionsCmd cmd = new GetVddkVersionsCmd(encryptKey, servUuid);
+                    ErrorableValue<VddkVersionsResponse> response = http(VddkVersionsResponse.class)
+                            .withPath(String.format("https://%s:%d%s", managementIp,
+                                    GATEWAY_RESTFUL_API_PORT, ZMIGRATE_VMWARE_WEB_SERVICES_PATH))
+                            .withBodyJson(cmd)
+                            .withTimeoutInMillis(Math.min(timeoutInMillisForGetter, remaining))
+                            .withoutRetry()
+                            .postWithErrorCode();
+                    if (!response.isSuccess()) {
+                        return response.cast();
+                    }
+                    VddkVersionsResponse result = response.result;
+                    if (result == null) {
+                        return err(ZMIGRATE_GATEWAY_ERROR,
+                                "empty VDDK version response from gateway[servUuid:%s]", servUuid).toErrorableValue();
+                    }
+                    try {
+                        return ErrorableValue.of(result.getInstalledVersions());
+                    } catch (IllegalArgumentException invalid) {
+                        return err(ZMIGRATE_GATEWAY_ERROR,
+                                "failed to query VDDK versions on gateway[servUuid:%s]: %s",
+                                servUuid, invalid.getMessage()).toErrorableValue();
+                    }
                 });
     }
 
@@ -626,6 +710,64 @@ public class ZMigrateHttpClient {
 
         public GetGatewayServerInfosCmd(String encryptKey) {
             this.encryptKey = encryptKey;
+        }
+    }
+
+    public static class UploadVddkCmd extends AgentCmd {
+        @SerializedName("Action")
+        public String action = ZMIGRATE_UPLOAD_VDDK_ACTION;
+        @SerializedName("ServUUID")
+        public String servUuid;
+        @SerializedName("VddkFile")
+        public String vddkFile;
+        @SerializedName("MgmtAddr")
+        public String mgmtAddr;
+
+        public UploadVddkCmd(String encryptKey, String servUuid, String vddkFile) {
+            this.encryptKey = encryptKey;
+            this.servUuid = servUuid;
+            this.vddkFile = vddkFile;
+        }
+    }
+
+    public static class UploadVddkResponse {
+        public String status;
+        // Acknowledgements may contain a nested object; readiness comes from VersionVDDK.
+        public Object version;
+        public String msg;
+    }
+
+    public static class GetVddkVersionsCmd extends AgentCmd {
+        @SerializedName("Action")
+        public String action = ZMIGRATE_QUERY_VDDK_VERSION_ACTION;
+        @SerializedName("ServUUID")
+        public String servUuid;
+
+        public GetVddkVersionsCmd(String encryptKey, String servUuid) {
+            this.encryptKey = encryptKey;
+            this.servUuid = servUuid;
+        }
+    }
+
+    public static class VddkVersionsResponse {
+        public String status;
+        public Map<String, Boolean> version;
+        public String msg;
+
+        public Set<String> getInstalledVersions() {
+            if ("false".equals(status) && (version == null || version.isEmpty())) {
+                return new HashSet<>();
+            }
+            if (!Boolean.parseBoolean(status) || version == null) {
+                throw new IllegalArgumentException("VersionVDDK did not return a successful version map: " + msg);
+            }
+            Set<String> installed = new HashSet<>();
+            version.forEach((name, ready) -> {
+                if (Boolean.TRUE.equals(ready)) {
+                    installed.add(name);
+                }
+            });
+            return installed;
         }
     }
 

@@ -40,7 +40,7 @@ import org.zstack.header.tag.TagResourceType;
  * }
  * }
  * @result see :ref:`APICreateL3NetworkEvent`
- * @since 0.1.0
+ * @since zsv_0.1.0
  */
 @TagResourceType(L3NetworkVO.class)
 @RestRequest(
@@ -157,11 +157,9 @@ public class APICreateL3NetworkMsg extends APICreateMessage implements APIAudito
 
     public static APICreateL3NetworkMsg __example__() {
         APICreateL3NetworkMsg msg = new APICreateL3NetworkMsg();
-
         msg.setName("Test-L3Network");
-        msg.setL2NetworkUuid(uuid());
+        msg.setL2NetworkUuid(uuid(L2NetworkVO.class));
         msg.setCategory(L3NetworkCategory.Private.toString());
-
         return msg;
     }
 

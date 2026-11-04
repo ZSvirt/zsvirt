@@ -380,7 +380,6 @@ public class ApplianceVmCascadeExtension extends AbstractAsyncCascadeExtension {
                     dmsgs.add(msg);
                 }
 
-                List<ErrorCode> errorCodes = Collections.synchronizedList(new LinkedList<ErrorCode>());
                 new While<>(dmsgs).step((deleteMsg, whileCompletion) -> {
                     bus.send(deleteMsg, new CloudBusCallBack(whileCompletion) {
                         @Override
@@ -426,13 +425,12 @@ public class ApplianceVmCascadeExtension extends AbstractAsyncCascadeExtension {
                     dmsgs.add(msg);
                 }
 
-                List<ErrorCode> errorCodes = Collections.synchronizedList(new LinkedList<ErrorCode>());
                 new While<>(dmsgs).step((deleteMsg, whileCompletion) -> {
                     bus.send(deleteMsg, new CloudBusCallBack(whileCompletion) {
                         @Override
                         public void run(MessageReply reply) {
                             if (!reply.isSuccess()) {
-                                errorCodes.add(reply.getError());
+                                whileCompletion.addError(reply.getError());
                             }
                             whileCompletion.done();
                         }
@@ -440,13 +438,7 @@ public class ApplianceVmCascadeExtension extends AbstractAsyncCascadeExtension {
                 }, 10).run(new WhileDoneCompletion(trigger) {
                     @Override
                     public void done(ErrorCodeList errorCodeList) {
-                        if (errorCodes.isEmpty()) {
-                            logger.debug(String.format("detach nic for " +
-                                    "delete l3 success"));
-                            trigger.next();
-                            return;
-                        }
-                        trigger.fail(errorCodes.get(0));
+                        trigger.next(errorCodeList.wrapOrNull());
                     }
                 });
             }

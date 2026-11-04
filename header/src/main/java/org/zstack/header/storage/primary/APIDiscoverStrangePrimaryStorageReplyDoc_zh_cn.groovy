@@ -10,26 +10,26 @@ doc {
 		name "inventories"
 		desc "发现的主存储清单列表"
 		type "List"
-		since "zsv 5.0.0"
+		since "zsv_5.0.0"
 	}
 	field {
 		name "resetVgUuidRequiredUuids"
 		desc "必须重置VG UUID的候选主存储UUID列表"
 		type "List"
-		since "1.0.1, zsv_5.1.0"
+		since "1.0.0, zsv_5.1.0"
 	}
 	field {
 		name "success"
 		desc "操作是否成功"
 		type "boolean"
-		since "zsv 5.0.0"
+		since "zsv_5.0.0"
 	}
 	ref {
 		name "error"
 		path "org.zstack.header.storage.primary.APIDiscoverStrangePrimaryStorageReply.error"
 		desc "错误码，若不为null，则表示操作失败, 操作成功时该字段为null"
 		type "ErrorCode"
-		since "zsv 5.0.0"
+		since "zsv_5.0.0"
 		clz ErrorCode.class
 	}
 }

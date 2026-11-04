@@ -16,7 +16,7 @@ if [ ! -d $src_dir ]; then
 fi
 
 conf_dir=$src_dir/conf
-t_conf_dir=$src_dir/test/src/test/resources/
+t_conf_dir=$src_dir/tests/test-simple/src/test/resources/
 
 if [ ! -d $conf_dir/globalConfig ]; then
     echo_fail "did not find source $conf_dir/globalConfig"
@@ -34,7 +34,7 @@ if [ ! -d $t_conf_dir/springConfigXml ]; then
     echo_fail "did not find target $t_conf_dir/springConfigXml"
 fi
 
-src_relative_folder=../../../../../conf
+src_relative_folder=../../../../../../conf
 
 for file in `ls $conf_dir/globalConfig`;do
     cd $t_conf_dir/globalConfig

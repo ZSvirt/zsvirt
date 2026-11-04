@@ -1,6 +1,7 @@
 package org.zstack.header.core.external.service;
 
 import org.zstack.header.log.NoLogging;
+import org.zstack.header.message.DocUtils;
 import org.zstack.header.search.Inventory;
 import org.zstack.utils.gson.JSONObjectUtil;
 
@@ -203,5 +204,13 @@ public class ExternalServiceConfigurationInventory {
 
     public void setApplyResults(List<ApplyExternalConfigurationResult> applyResults) {
         this.applyResults = applyResults;
+    }
+
+    public static ExternalServiceConfigurationInventory __example__() {
+        ExternalServiceConfigurationInventory inv = new ExternalServiceConfigurationInventory();
+        inv.setUuid(DocUtils.createFixedUuid(ExternalServiceConfigurationVO.class));
+        inv.setServiceType("Prometheus2");
+        inv.setConfiguration("{}");
+        return inv;
     }
 }

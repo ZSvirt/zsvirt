@@ -28,9 +28,10 @@ public interface PrimaryStorageConstant {
     String MIGRATE_VOLUME_CHECK_MD5_STAGE = "90-100";
     String EXTERNAL_PRIMARY_STORAGE_TYPE = "Addon";
 
-    enum AllocatorParams {
-        SPEC,
-        CANDIDATES,
+    class AllocatorParams {
+        public static final String
+            SPEC = "SPEC",
+            CANDIDATES = "CANDIDATES";
     }
 
     interface StatusConfig {

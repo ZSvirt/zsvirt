@@ -7,7 +7,7 @@ doc {
 
 	category "mevoco"
 
-	desc """获取用于修改云主机根云盘的候选镜像列表"""
+	desc """获取用于修改虚拟机根云盘的候选镜像列表"""
 
 	rest {
 		request {
@@ -17,18 +17,18 @@ doc {
 
 			clz APIGetImageCandidatesForVmToChangeMsg.class
 
-			desc """获取用于修改云主机根云盘的候选镜像列表"""
+			desc """获取用于修改虚拟机根云盘的候选镜像列表"""
 
 			params {
 
 				column {
 					name "vmInstanceUuid"
 					enclosedIn ""
-					desc "云主机UUID"
+					desc "虚拟机UUID"
 					location "url"
 					type "String"
 					optional true
-					since "2.2"
+					since "zsv_2.2"
 				}
 				column {
 					name "systemTags"
@@ -37,7 +37,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "2.2"
+					since "zsv_2.2"
 				}
 				column {
 					name "userTags"
@@ -46,7 +46,7 @@ doc {
 					location "query"
 					type "List"
 					optional true
-					since "2.2"
+					since "zsv_2.2"
 				}
 			}
 		}

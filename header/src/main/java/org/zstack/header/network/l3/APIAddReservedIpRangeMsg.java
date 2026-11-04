@@ -62,11 +62,9 @@ public class APIAddReservedIpRangeMsg extends APICreateMessage implements L3Netw
 
     public static APIAddReservedIpRangeMsg __example__() {
         APIAddReservedIpRangeMsg msg = new APIAddReservedIpRangeMsg();
-
-        msg.setL3NetworkUuid(uuid());
+        msg.setL3NetworkUuid(uuid(L3NetworkVO.class));
         msg.setStartIp("192.168.100.10");
         msg.setEndIp("192.168.100.250");
-
         return msg;
     }
 

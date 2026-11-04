@@ -90,8 +90,8 @@ public class APIGetFreeIpMsg extends APISyncCallMessage implements L3NetworkMess
 
     public static APIGetFreeIpMsg __example__() {
         APIGetFreeIpMsg msg = new APIGetFreeIpMsg();
-        msg.setL3NetworkUuid(uuid());
-        msg.ipRangeUuid = uuid();
+        msg.setL3NetworkUuid(uuid(L3NetworkVO.class));
+        msg.ipRangeUuid = uuid(IpRangeVO.class);
         return msg;
     }
 }

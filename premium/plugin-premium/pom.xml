@@ -17,7 +17,6 @@
         <module>log4j2</module>
         <module>storage-ha-plugin</module>
         <module>ovf</module>
-        <module>sso-plugin</module>
         <module>block-primary-storage</module>
         <module>macvlan</module>
         <module>zops-plugin</module>

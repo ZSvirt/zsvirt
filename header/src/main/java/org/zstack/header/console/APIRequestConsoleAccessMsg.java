@@ -32,8 +32,7 @@ public class APIRequestConsoleAccessMsg extends APIMessage {
  
     public static APIRequestConsoleAccessMsg __example__() {
         APIRequestConsoleAccessMsg msg = new APIRequestConsoleAccessMsg();
-        msg.setVmInstanceUuid(uuid());
-
+        msg.setVmInstanceUuid(uuid(VmInstanceVO.class));
         return msg;
     }
 }

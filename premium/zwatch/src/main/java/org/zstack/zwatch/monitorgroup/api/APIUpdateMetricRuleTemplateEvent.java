@@ -4,7 +4,6 @@ import org.zstack.header.message.APIEvent;
 import org.zstack.header.rest.RestResponse;
 import org.zstack.zwatch.datatype.EmergencyLevel;
 import org.zstack.zwatch.monitorgroup.entity.MetricRuleTemplateInventory;
-import org.zstack.zwatch.monitorgroup.entity.MetricRuleTemplateVO;
 import org.zstack.zwatch.ruleengine.ComparisonOperator;
 
 @RestResponse(allTo = "inventory")

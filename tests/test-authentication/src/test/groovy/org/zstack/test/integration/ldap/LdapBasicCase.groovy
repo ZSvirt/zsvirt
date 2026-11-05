@@ -21,7 +21,6 @@ import org.zstack.test.integration.stabilisation.StabilityTestCase
 import org.zstack.test.integration.stabilisation.TestCaseStabilityTest
 import org.zstack.testlib.EnvSpec
 import org.zstack.testlib.SubCase
-import org.zstack.testlib.Test
 
 /**
  * Created by Administrator on 2017-03-22.
@@ -111,9 +110,7 @@ class LdapBasicCase extends SubCase {
     }
 
     void testLoginByLdap(){
-
         String notExistCn = "nobody"
-        String cn = "Micha Kops"
         String wrongPassword = "error"
         String rightPassword = "password"
 
@@ -125,7 +122,7 @@ class LdapBasicCase extends SubCase {
         assert null != action.call().error
 
         action = new LogInAction(
-                username: cn,
+                username: "Micha Kops",
                 password: wrongPassword,
                 loginType: "ldap"
         )
@@ -134,14 +131,14 @@ class LdapBasicCase extends SubCase {
         IdentityGlobalConfig.MAX_CONCURRENT_SESSION.updateValue(1)
 
         logIn {
-            username = cn
+            username = "Micha Kops"
             password = rightPassword
             loginType = "ldap"
         }
 
         expectApiFailure ({
             logIn {
-                delegate.username = cn
+                delegate.username = "Micha Kops"
                 delegate.password = rightPassword
                 delegate.loginType = "ldap"
             }
@@ -153,7 +150,7 @@ class LdapBasicCase extends SubCase {
         IdentityGlobalConfig.MAX_CONCURRENT_SESSION.resetValue()
 
         logIn {
-            username = cn
+            username = "Micha Kops"
             password = rightPassword
             loginType = "ldap"
         }

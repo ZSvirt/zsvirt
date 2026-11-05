@@ -6,7 +6,24 @@
       width="180"
     >
   </a>
-
+  <p align="center">
+    <a
+      href="https://trendshift.io/repositories/156451?utm_source=trendshift-badge&amp;utm_medium=badge&amp;utm_campaign=badge-trendshift-156451"
+      target="_blank"
+      rel="noopener noreferrer"><img
+        src="https://trendshift.io/api/badge/trendshift/repositories/156451/daily?language=Java"
+        alt="ZSvirt/zsvirt Daily Java | Trendshift"
+        width="250"
+        height="55"
+      /></a> <a href="https://trendshift.io/repositories/156451?utm_source=trendshift-badge&amp;utm_medium=badge&amp;utm_campaign=badge-trendshift-156451"
+       target="_blank"
+       rel="noopener noreferrer"><img
+        src="https://trendshift.io/api/badge/trendshift/repositories/156451/weekly?language=Java"
+        alt="ZSvirt/zsvirt Weekly Java | Trendshift"
+        width="250"
+        height="55"
+      /></a>&nbsp;&nbsp;
+  </p>
   <h1 align="center">
     Open Source Virtualization
     <br>
@@ -14,7 +31,7 @@
   </h1>
 
   <p align="center">
-    <a href="https://zsvirt.io/en">
+    <a href="https://zsvirt.io">
       <img
         src="https://img.shields.io/badge/Website-0F62FE?style=flat-square&logo=googlechrome&logoColor=white"
         alt="ZSvirt Website"
@@ -22,7 +39,7 @@
     </a>
     <a href="https://zsvirt.io/en/docs">
       <img
-        src="https://img.shields.io/badge/Docs-2563EB?style=flat-square&logo=readthedocs&logoColor=white"
+        src="https://img.shields.io/badge/Docs-7C3AED?style=flat-square&logo=readthedocs&logoColor=white"
         alt="Documentation"
       >
     </a>
@@ -32,23 +49,57 @@
         alt="Live Demo"
       >
     </a>
-    <a href="https://zsvirt.io/en/download">
+    <a href="https://zsvirt.io/download">
       <img
-        src="https://img.shields.io/badge/Download-F97316?style=flat-square&logo=download&logoColor=white"
+        src="https://img.shields.io/badge/Download-F97316?style=flat-square&logo=data:image/svg%2Bxml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI%2BPHBhdGggZmlsbD0iI2ZmZiIgZD0iTTUgMjBoMTR2LTJINXYyem0xNC05aC00VjNIOXY4SDVsNyA3IDctN3oiLz48L3N2Zz4%3D"
         alt="Download"
       >
     </a>
   </p>
 
-  <p>
-    <strong>English</strong>
-    &nbsp;&middot;&nbsp;
-    <a href="./README_zh.md">简体中文</a>
+  <p align="center" dir="ltr">
+    <strong>English</strong> |
+    <a href="./README_zh.md">简体中文</a> |
+    <a href="./README.zht.md">繁體中文</a> |
+    <a href="./README.ko.md">한국어</a> |
+    <a href="./README.de.md">Deutsch</a> |
+    <a href="./README.es.md">Español</a> |
+    <a href="./README.fr.md">Français</a> |
+    <a href="./README.it.md">Italiano</a> |
+    <a href="./README.da.md">Dansk</a> |
+    <a href="./README.ja.md">日本語</a> |
+    <a href="./README.pl.md">Polski</a> |
+    <a href="./README.ru.md">Русский</a> |
+    <a href="./README.bs.md">Bosanski</a> |
+    <a href="./README.ar.md">العربية</a> |
+    <a href="./README.no.md">Norsk</a> |
+    <a href="./README.br.md">Português (Brasil)</a> |
+    <a href="./README.th.md">ไทย</a> |
+    <a href="./README.tr.md">Türkçe</a> |
+    <a href="./README.uk.md">Українська</a> |
+    <a href="./README.bn.md">বাংলা</a> |
+    <a href="./README.gr.md">Ελληνικά</a> |
+    <a href="./README.vi.md">Tiếng Việt</a>
   </p>
 </div>
 
+> **Try it now — no physical hardware needed.** Grab the [qcow2 or OVA image](https://zsvirt.io/download), boot it as a VM on VMware, VirtualBox, KVM, or a cloud host (nested virtualization), set an IP, and the ZSvirt management node is ready. See [Run ZSvirt inside a VM](https://zsvirt.io/en/docs/quick-start/nested-virtualization-management-node) or jump to the [Quick Start](https://zsvirt.io/en/docs/quick-start).
+
 ## What is ZSvirt
-ZSvirt brings [ZStack](https://www.zstack-cloud.com/)'s enterprise-proven ZSphere virtualization engine into the open-source world. Backed by [ZStack](https://www.zstack-cloud.com/), a mature infrastructure leader, ZSvirt delivers a lightweight, scalable platform designed for absolute freedom—from high-performance homelabs to hyperscale infrastructure without vendor lock-in.
+ZSvirt brings [ZStack](https://www.zstack-cloud.com/)'s enterprise-proven ZSphere virtualization engine into the open-source world. Backed by [ZStack](https://www.zstack-cloud.com/), a mature infrastructure leader, ZSvirt is a lightweight, scalable platform for running and managing virtual machines without vendor lock-in.
+
+Install a management node, attach KVM-based hosts, and manage your whole environment — VMs, clusters, storage, and networks — through a web UI, a RESTful API (with Terraform and Go/Python/Java SDKs), or a CLI. VMware migration tooling — online migration, OVF import, and VMDK upload — is built in.
+
+## 🗣️ Pronunciation Guide
+
+We have heard "ZSvirt" said a few different ways in the community, and there
+is no wrong one. Our suggestion: blend the **Z** and the **S** into a single
+sound, so the name comes out as **"Z-s Virt"** — close to "zeese Virt".
+
+That is also where the name's playful spirit lives: read as one sound, it says
+**"This is Virtualization"**, which is the core idea behind the project. If you
+prefer to read it letter by letter as **"Z-S-virt,"** that works just as well.
+Say it however comes most naturally to you.
 
 ## Product Tour
 
@@ -112,7 +163,7 @@ ZSvirt brings [ZStack](https://www.zstack-cloud.com/)'s enterprise-proven ZSpher
 
 ## Live Demo
 
-[ZSvirt Live Demo](https://demo.zsvirt.io/) is a free hosted environment for trying ZSvirt online. No local installation is required—after registration and login, you can start exploring the platform right away.
+[ZSvirt Live Demo](https://demo.zsvirt.io/) is a free hosted environment for trying ZSvirt online — no installation or sign-up required. Open the link and click **Demo Login** to start exploring the platform right away.
 
 ## Architecture
 
@@ -154,7 +205,7 @@ extensibility, and automation:
 
 <p align="center">
   <img
-    src="https://github.com/ZSvirt/.github/blob/main/assets/zsvirt-architecture.svg?raw=true"
+    src="./assets/zsvirt-architecture.svg"
     alt="ZSvirt Architecture"
     width="100%"
   >
@@ -162,14 +213,9 @@ extensibility, and automation:
 
 ## VMware Migration Guide
 
-As enterprises reassess their virtualization strategies, migration from VMware
-to alternative platforms has become an important topic for organizations
-seeking cost control, infrastructure flexibility, and long-term operational
-stability.
+As enterprises reassess their virtualization strategies, migration from VMware to alternative platforms has become an important topic for organizations seeking cost control, infrastructure flexibility, and long-term operational stability.
 
-ZSvirt provides migration-oriented capabilities and operational tools to help
-users evaluate, plan, and move workloads from existing VMware environments to
-ZSvirt-based virtualization infrastructure.
+ZSvirt provides migration-oriented capabilities and operational tools to help users evaluate, plan, and move workloads from existing VMware environments to ZSvirt-based virtualization infrastructure.
 
 - [VMware Migration Guide](https://zsvirt.io/vmware-alternative/)
 
@@ -185,10 +231,9 @@ ZSvirt-based virtualization infrastructure.
 
 ## Quick Start
 
-The fastest way to evaluate ZSvirt is to follow the quick start guide in the
-product documentation. It walks you through preparing compute, network, and
-storage resources, initializing the management service, and creating your first
-virtual machine.
+The fastest way to evaluate ZSvirt is to follow the quick start guide in the product documentation. It walks you through preparing compute, network, and storage resources, initializing the management service, and creating your first virtual machine.
+
+Prefer to try it in a VM first? Download the [qcow2 or OVA image](https://zsvirt.io/download) and run the management node inside any hypervisor — see [Running ZSvirt inside a VM](https://zsvirt.io/en/docs/quick-start/nested-virtualization-management-node).
 
 🚀 [Quick Start](https://zsvirt.io/en/docs/quick-start)<br>
 ▶️ [Video](https://youtu.be/LsSJlBRUvYw)
@@ -203,6 +248,29 @@ Powered by the same enterprise engine as ZSphere, ZSvirt inherits proven success
   >
 </p>
 
+## Virtualization Platform Comparison
+
+Proxmox VE vs VMware vSphere vs ZSvirt
+
+<p align="center">
+  <img
+    src="https://raw.githubusercontent.com/ZSvirt/.github/main/assets/zsvirt-comparison.png"
+    alt="Proxmox VE vs ZSvirt virtualization platform comparison"
+    width="100%"
+  >
+</p>
+
+## Roadmap
+
+#### 2026H2
+
+| Area | Planned work |
+|---|---|
+| **Security** | Add virtual machine disk encryption<br>Add virtual machine migration encryption |
+| **DRS & VM Migration** | Add more flexible migration options:<br>• Able to migrate disks individually<br>• Support both hot and cold migration for SAN to SAN scenario |
+| **ZMigrate** | **ZMigrate 2.1**:<br>• Add pre-check to mitigate risks for complex migration<br>• Simpler and smarter migration workflows |
+| **Operations** | Add VM CPU ready time, VM disk read/write latency, network packet drop rate, and host CPU ready time metrics<br>Support more granular log levels for external syslog forwarding<br>Add NVMe and FC device monitoring, including IOPS and latency<br>Add built-in QXL drivers in VMTools for improved VM console display and resolution |
+| **Inventory Management** | Extend storage and VM registration capability to cover same-site registration |
 
 ## Governance
 
@@ -260,7 +328,7 @@ files in each repository for details.
     <td width="50%">
       <h3>🌐 Community Website</h3>
       <p>Explore ZSvirt features, use cases, news, and community resources.</p>
-      <a href="https://zsvirt.io/en"><strong>Visit Website →</strong></a>
+      <a href="https://zsvirt.io"><strong>Visit Website →</strong></a>
     </td>
     <td width="50%">
       <h3>▶️ Videos</h3>
@@ -273,7 +341,7 @@ files in each repository for details.
     <td width="50%">
       <h3>📝 Blog</h3>
       <p>Discover release updates, engineering stories, and virtualization insights.</p>
-      <a href="https://zsvirt.io/en/blog"><strong>Read the Blog →</strong></a>
+      <a href="https://zsvirt.io/blog"><strong>Read the Blog →</strong></a>
     </td>
     <td width="50%">
       <h3>💬 GitHub Discussions</h3>
@@ -302,9 +370,9 @@ files in each repository for details.
       <a href="https://x.com/ZSvirt"><strong>Follow on X →</strong></a>
     </td>
     <td width="50%">
-      <h3>🟠 Reddit</h3>
-      <p>Join community conversations and share your ZSvirt experience.</p>
-      <a href="https://www.reddit.com/r/ZSvirt/"><strong>Join on Reddit →</strong></a>
+      <h3>🎮 Discord</h3>
+      <p>Join the ZSvirt community to ask questions, share ideas, and connect with other users.</p>
+      <a href="https://discord.com/invite/KHsw63z9xA"><strong>Join on Discord →</strong></a>
     </td>
   </tr>
 </table>

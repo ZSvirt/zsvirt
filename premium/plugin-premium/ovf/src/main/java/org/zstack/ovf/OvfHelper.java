@@ -39,6 +39,9 @@ import org.zstack.utils.path.PathUtil;
 import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -103,7 +106,14 @@ public class OvfHelper {
                                 Platform.operr("File reference not fount for disk %s", id));
                     }
                     diskInfo.setFileRef(ref);
-                    diskInfo.setFileName(fileName);
+                    try {
+                        // OVF hrefs use URI escaping, where a literal '+' is not a space.
+                        diskInfo.setFileName(URLDecoder.decode(fileName.replace("+", "%2B"), StandardCharsets.UTF_8.name()));
+                    } catch (IllegalArgumentException | UnsupportedEncodingException ex) {
+                        throw new OperationFailureException(Platform.operr(
+                                "Illegal file href[%s] for disk[%s], file reference[%s]: %s",
+                                fileName, id, ref, ex.getMessage()));
+                    }
                 }
 
                 SizeUnit unit = getSizeUnit(e.attributeValue("capacityAllocationUnits"));

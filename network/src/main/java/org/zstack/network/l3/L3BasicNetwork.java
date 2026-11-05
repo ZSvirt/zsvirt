@@ -53,6 +53,7 @@ import org.zstack.utils.Utils;
 import org.zstack.utils.data.FieldPrinter;
 import org.zstack.utils.gson.JSONObjectUtil;
 import org.zstack.utils.logging.CLogger;
+import org.zstack.utils.network.FreeIpQueryLimit;
 import org.zstack.utils.network.IPv6Constants;
 import org.zstack.utils.network.IPv6NetworkUtils;
 import org.zstack.utils.network.NetworkUtils;
@@ -862,7 +863,7 @@ public class L3BasicNetwork implements L3Network {
             if (freeIpInventorys.size() >= msg.getLimit()) {
                 break;
             }
-            limit -= freeIpInventorys.size();
+            limit = FreeIpQueryLimit.next(limit, tempFreeIpInventorys.size());
         }
         reply.setInventories(freeIpInventorys);
 

@@ -29,6 +29,14 @@ import org.zstack.header.vm.VmInstanceDeletionPolicyManager
 import org.zstack.header.vm.VmSchedHistoryVO
 import org.zstack.header.vo.EO
 import org.zstack.header.volume.VolumeDeletionPolicyManager
+import org.zstack.sdk.guesttools.advanced.CreateVmCustomSpecificationAction
+import org.zstack.sdk.guesttools.advanced.DeleteVmCustomSpecificationAction
+import org.zstack.sdk.iam1.accounts.CreateAccountGroupAction
+import org.zstack.sdk.iam1.accounts.DeleteAccountGroupAction
+import org.zstack.sdk.keyprovider.kms.api.CreateKmsAction
+import org.zstack.sdk.keyprovider.kms.api.DeleteKmsAction
+import org.zstack.sdk.keyprovider.nkp.api.CreateNkpAction
+import org.zstack.sdk.keyprovider.nkp.api.DeleteNkpAction
 import org.zstack.testlib.dbremaining.AllowedDBRemaining
 import org.zstack.image.ImageGlobalConfig
 import org.zstack.sdk.*
@@ -124,6 +132,9 @@ class EnvSpec extends ApiHelper implements Node  {
     static Set<Closure> mockedResources = []
 
     static List deletionMethods = [
+            [CreateAccessKeyAction.metaClass, CreateAccessKeyAction.Result.metaClass, DeleteAccessKeyAction.class],
+            [CreateAccountGroupAction.metaClass, CreateAccountGroupAction.Result.metaClass, DeleteAccountGroupAction.class],
+            [AddAccessControlRuleAction.metaClass, AddAccessControlRuleAction.Result.metaClass, DeleteAccessControlRuleAction.class],
             [CreateZoneAction.metaClass, CreateZoneAction.Result.metaClass, DeleteZoneAction.class],
             [AddCephBackupStorageAction.metaClass, AddCephBackupStorageAction.Result.metaClass, DeleteBackupStorageAction.class],
             [AddCephPrimaryStorageAction.metaClass, AddCephPrimaryStorageAction.Result.metaClass, DeletePrimaryStorageAction.class],
@@ -186,6 +197,12 @@ class EnvSpec extends ApiHelper implements Node  {
             [CreateSNSSnmpEndpointAction.metaClass, CreateSNSSnmpEndpointAction.Result.metaClass, DeleteSNSApplicationEndpointAction.class],
             [CreateResourceAttributeKeyAction.metaClass, CreateResourceAttributeKeyAction.Result.metaClass, DeleteResourceAttributeKeyAction.class],
             [CreateAllocatorDomainAction.metaClass, CreateAllocatorDomainAction.Result.metaClass, DeleteAllocatorDomainAction.class],
+            [CreatePciDeviceOfferingAction.metaClass, CreatePciDeviceOfferingAction.Result.metaClass, DeletePciDeviceOfferingAction.class],
+            [CreateSchedulerJobGroupAction.metaClass, CreateSchedulerJobGroupAction.Result.metaClass, DeleteSchedulerJobGroupAction.class],
+            [CreateVmInstanceFromOvfAction.metaClass, CreateVmInstanceFromOvfAction.Result.metaClass, DestroyVmInstanceAction.class],
+            [CreateVmCustomSpecificationAction.metaClass, CreateVmCustomSpecificationAction.Result.metaClass, DeleteVmCustomSpecificationAction.class],
+            [CreateNkpAction.metaClass, CreateNkpAction.Result.metaClass, DeleteNkpAction.class],
+            [CreateKmsAction.metaClass, CreateKmsAction.Result.metaClass, DeleteKmsAction.class],
     ]
 
     static Closure GLOBAL_DELETE_HOOK

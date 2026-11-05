@@ -39,19 +39,19 @@ class LdapDriverSimulator extends LdapUtil {
     }
 
     @Override
-    boolean isValid(String uid, String password, LdapServerVO ldap) {
+    boolean isValid(String dn, String password, LdapServerVO ldap) {
         def endpoint = findEndpointByLdapVOFunction.apply(ldap)
         if (endpoint != null) {
-            return endpoint.authenticateHandler.apply(uid, password)
+            return endpoint.authenticateHandler.apply(dn, password)
         }
-        return super.isValid(uid, password, ldap)
+        return super.isValid(dn, password, ldap)
     }
 
     @Override
-    String getFullUserDn(LdapServerVO ldap, String key, String val) {
+    List<String> findCandidateLdapDns(LdapServerVO ldap, String key, String val) {
         def endpoint = findEndpointByLdapVOFunction.apply(ldap)
         if (endpoint == null) {
-            return super.getFullUserDn(ldap, key, val)
+            return super.findCandidateLdapDns(ldap, key, val)
         }
 
         LdapSearchSpec spec = new LdapSearchSpec()
@@ -59,11 +59,11 @@ class LdapDriverSimulator extends LdapUtil {
         spec.filter = LdapConstant.DEFAULT_PERSON_FILTER
         spec.returningAttributes = ["entryDN"]
         def list = endpoint.searchHandler.apply(spec)
-        def matchedEntry = list.find { entry ->
+        def matchedEntry = list.findAll { entry ->
             entry.attributes.any { attribute -> attribute.id == key && attribute.values.contains(val) }
         }
 
-        return matchedEntry?.dn
+        return matchedEntry.dn
     }
 
     @Override

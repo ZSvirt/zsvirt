@@ -29,6 +29,7 @@ import org.zstack.resourceconfig.ResourceConfigFacade;
 import org.zstack.utils.Utils;
 import org.zstack.utils.logging.CLogger;
 
+import javax.naming.directory.DirContext;
 import javax.naming.directory.SearchControls;
 import javax.net.ssl.*;
 import java.net.Socket;
@@ -40,12 +41,14 @@ import java.util.*;
 import java.util.function.Predicate;
 
 import static org.zstack.core.Platform.err;
-import static org.zstack.core.Platform.operr;
 import static org.zstack.ldap.LdapErrors.TEST_LDAP_CONNECTION_FAILED;
 import static org.zstack.ldap.LdapErrors.UNABLE_TO_GET_SPECIFIED_LDAP_UID;
 import static org.zstack.utils.CollectionDSL.list;
+import static org.zstack.utils.CollectionUtils.transform;
 
 /**
+ * This is a util class, can not import AccountThirdPartyAccountSourceRefVO in principle.
+ *
  * Created by miao on 12/19/16.
  */
 public class LdapUtil {
@@ -500,20 +503,14 @@ public class LdapUtil {
         }
     }
 
-    public String getFullUserDn(LdapServerVO ldap, String uid) {
-        try {
-            return getFullUserDn(ldap, ldap.getUsernameProperty(), uid);
-        } catch (Exception e) {
-            logger.debug(String.format("Get user dn of uid[%s] failed ", uid));
-            return null;
-        }
+    private String buildUserLookupFilter(LdapServerVO ldap, String key, String val) {
+        return new EqualsFilter(key, val).toString();
     }
 
-    public String getFullUserDn(LdapServerVO ldap, String key, String val) {
+    public List<String> findCandidateLdapDns(LdapServerVO ldap, String key, String val) {
         LdapTemplate ldapTemplate = readLdapServerConfiguration(ldap).getLdapTemplate();
-        String filter = new EqualsFilter(key, val).toString();
+        String filter = buildUserLookupFilter(ldap, key, val);
 
-        String dn;
         try {
             List<Object> result = ldapTemplate.search("", filter, new AbstractContextMapper<Object>() {
                 @Override
@@ -521,45 +518,41 @@ public class LdapUtil {
                     return ctx.getNameInNamespace();
                 }
             });
-            if (result.size() == 1) {
-                dn = result.get(0).toString();
-            } else if (result.size() > 1) {
-                throw new OperationFailureException(err(
-                        UNABLE_TO_GET_SPECIFIED_LDAP_UID, "More than one ldap search result"));
-            } else {
-                return "";
+
+            if (result.isEmpty()) {
+                return Collections.emptyList();
             }
-            logger.info(String.format("getDn success filter:%s, dn:%s", filter, dn));
+
+            return transform(result, Object::toString);
         } catch (NamingException e) {
-            throw new OperationFailureException(err(
-                    TEST_LDAP_CONNECTION_FAILED,
+            throw err(TEST_LDAP_CONNECTION_FAILED,
                     "failed to query LDAP/AD server[uuid=%s] with filter[%s]: %s",
-                    ldap.getUuid(), filter, e.getMessage()));
+                    ldap.getUuid(), filter, e.getMessage()).toException();
         }
-        return dn;
     }
 
-    public boolean isValid(String uid, String password, LdapServerVO ldap) {
-        String ldapUseAsLoginName = ldap.getUsernameProperty();
+    public boolean isValid(String dn, String password, LdapServerVO ldap) {
+        if (StringUtils.isBlank(dn) || StringUtils.isBlank(password)) {
+            return false;
+        }
+
+        DirContext ctx = null;
         try {
-            boolean valid;
-            String fullUserDn = getFullUserDn(ldap, ldapUseAsLoginName, uid);
-            if (fullUserDn.equals("") || password.equals("")) {
-                return false;
-            }
-
             LdapTemplateContextSource source = loadLdap(ldap);
-            String filter = new AndFilter().and(new EqualsFilter(ldapUseAsLoginName, uid)).toString();
-
-            valid = source.getLdapTemplate().authenticate("", filter, password);
-            logger.info(String.format("isValid[%s:%s, dn:%s, valid:%s]", ldapUseAsLoginName, uid, fullUserDn, valid));
-            return valid;
-        } catch (NamingException e) {
-            logger.info("isValid fail userName:" + uid, e);
-            return false;
+            ctx = source.getLdapContextSource().getContext(dn, password);
+            logger.info(String.format("validate dn[%s]: true", dn));
+            return true;
         } catch (Exception e) {
-            logger.info("isValid error userName:" + uid, e);
+            logger.info("failed to validate dn " + dn, e);
             return false;
+        } finally {
+            if (ctx != null) {
+                try {
+                    ctx.close();
+                } catch (Exception e) {
+                    logger.debug("failed to close ldap context for dn " + dn, e);
+                }
+            }
         }
     }
 

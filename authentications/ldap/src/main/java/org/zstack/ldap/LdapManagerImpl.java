@@ -141,11 +141,15 @@ public class LdapManagerImpl extends AbstractService implements LdapManager, Log
 
     @Override
     public boolean isValid(String uid, String password) {
+        ErrorableValue<AccountThirdPartyAccountSourceRefVO> ref = findAccountThirdPartyAccountSourceRefByName(uid);
+        if (!ref.isSuccess()) {
+            return false;
+        }
         final ErrorableValue<LdapServerVO> ldap = findCurrentLdapServer();
         if (!ldap.isSuccess()) {
             return false;
         }
-        return createDriver().isValid(uid, password, ldap.result);
+        return createDriver().isValid(ref.result.getCredentials(), password, ldap.result);
     }
 
     private void handle(APIAddLdapServerMsg msg) {
@@ -414,24 +418,37 @@ public class LdapManagerImpl extends AbstractService implements LdapManager, Log
         return loginType;
     }
 
+    @Override
     public ErrorableValue<AccountThirdPartyAccountSourceRefVO> findAccountThirdPartyAccountSourceRefByName(String ldapLoginName, String ldapLoginPassword) {
+        return findAccountThirdPartyAccountSourceRefByName(ldapLoginName);
+    }
+
+    public ErrorableValue<AccountThirdPartyAccountSourceRefVO> findAccountThirdPartyAccountSourceRefByName(String ldapLoginName) {
         final ErrorableValue<LdapServerVO> currentLdapServer = findCurrentLdapServer();
         if (!currentLdapServer.isSuccess()) {
             return ErrorableValue.ofErrorCode(currentLdapServer.error);
         }
         final LdapServerVO ldap = currentLdapServer.result;
 
-        String dn = createDriver().getFullUserDn(ldap, ldap.getUsernameProperty(), ldapLoginName);
-        AccountThirdPartyAccountSourceRefVO vo = Q.New(AccountThirdPartyAccountSourceRefVO.class)
-                .eq(AccountThirdPartyAccountSourceRefVO_.credentials, dn)
-                .eq(AccountThirdPartyAccountSourceRefVO_.accountSourceUuid, ldap.getUuid())
-                .find();
-
-        if (vo == null) {
+        List<String> dns = createDriver().findCandidateLdapDns(ldap, ldap.getUsernameProperty(), ldapLoginName);
+        if (dns.isEmpty()) {
             return ErrorableValue.ofErrorCode(err(IdentityErrors.AUTHENTICATION_ERROR,
                     "The ldapUid does not have a binding account."));
         }
-        return ErrorableValue.of(vo);
+
+        List<AccountThirdPartyAccountSourceRefVO> list = Q.New(AccountThirdPartyAccountSourceRefVO.class)
+                .in(AccountThirdPartyAccountSourceRefVO_.credentials, dns)
+                .eq(AccountThirdPartyAccountSourceRefVO_.accountSourceUuid, ldap.getUuid())
+                .list();
+
+        if (list.isEmpty()) {
+            return ErrorableValue.ofErrorCode(err(IdentityErrors.AUTHENTICATION_ERROR,
+                    "The ldapUid does not have a binding account."));
+        } else if (list.size() > 1) {
+            return ErrorableValue.ofErrorCode(err(IdentityErrors.AUTHENTICATION_ERROR,
+                    "Failed to find binding account"));
+        }
+        return ErrorableValue.of(list.get(0));
     }
 
     @Override
@@ -443,7 +460,11 @@ public class LdapManagerImpl extends AbstractService implements LdapManager, Log
             return;
         }
 
-        if (!isValid(loginContext.getUsername(), loginContext.getPassword())) {
+        final ErrorableValue<LdapServerVO> ldap = findCurrentLdapServer();
+        if (!ldap.isSuccess() || !createDriver().isValid(
+                accountThirdPartyAccountSourceRef.result.getCredentials(),
+                loginContext.getPassword(),
+                ldap.result)) {
             completion.fail(err(IdentityErrors.AUTHENTICATION_ERROR,
                     "Login validation failed in LDAP"));
             return;
@@ -471,32 +492,13 @@ public class LdapManagerImpl extends AbstractService implements LdapManager, Log
 
     @Override
     public boolean authenticate(String username, String password) {
-        final ErrorableValue<LdapServerVO> ldap = findCurrentLdapServer();
-        if (ldap.isSuccess()) {
-            return createDriver().isValid(username, password, ldap.result);
-        }
-        return false;
+        return isValid(username, password);
     }
 
     @Override
     public String getAccountIdByName(String username) {
-        final ErrorableValue<LdapServerVO> currentLdapServer = findCurrentLdapServer();
-        if (!currentLdapServer.isSuccess()) {
-            return null;
-        }
-        final LdapServerVO ldap = currentLdapServer.result;
-
-        String dn = createDriver().getFullUserDn(ldap, ldap.getUsernameProperty(), username);
-        if (dn == null || dn.isEmpty()) {
-            return null;
-        }
-
-        String accountUuid = Q.New(AccountThirdPartyAccountSourceRefVO.class)
-                .select(AccountThirdPartyAccountSourceRefVO_.accountUuid)
-                .eq(AccountThirdPartyAccountSourceRefVO_.credentials, dn)
-                .eq(AccountThirdPartyAccountSourceRefVO_.accountSourceUuid, ldap.getUuid())
-                .findValue();
-        return accountUuid;
+        ErrorableValue<AccountThirdPartyAccountSourceRefVO> ref = findAccountThirdPartyAccountSourceRefByName(username);
+        return ref.isSuccess() ? ref.result.getAccountUuid() : null;
     }
 
     @Override

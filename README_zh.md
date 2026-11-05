@@ -1,3 +1,4 @@
+<!-- synced-with: README.md@db599ce8 -->
 <div align="center">
   <a href="https://zsvirt.io">
     <img
@@ -6,7 +7,26 @@
       width="180"
     >
   </a>
-
+  
+  <p align="center">
+    <a
+      href="https://trendshift.io/repositories/156451?utm_source=trendshift-badge&amp;utm_medium=badge&amp;utm_campaign=badge-trendshift-156451"
+      target="_blank"
+      rel="noopener noreferrer"><img
+        src="https://trendshift.io/api/badge/trendshift/repositories/156451/daily?language=Java"
+        alt="ZSvirt/zsvirt Daily Java | Trendshift"
+        width="250"
+        height="55"
+      /></a> <a href="https://trendshift.io/repositories/156451?utm_source=trendshift-badge&amp;utm_medium=badge&amp;utm_campaign=badge-trendshift-156451"
+       target="_blank"
+       rel="noopener noreferrer"><img
+        src="https://trendshift.io/api/badge/trendshift/repositories/156451/weekly?language=Java"
+        alt="ZSvirt/zsvirt Weekly Java | Trendshift"
+        width="250"
+        height="55"
+      /></a>&nbsp;&nbsp;
+  </p>
+  
   <h1 align="center">
     开源虚拟化平台
     <br>
@@ -14,15 +34,15 @@
   </h1>
 
   <p align="center">
-    <a href="https://zsvirt.io/en">
+    <a href="https://zsvirt.io/zh">
       <img
         src="https://img.shields.io/badge/官方网站-0F62FE?style=flat-square&logo=googlechrome&logoColor=white"
         alt="ZSvirt 官方网站"
       >
     </a>
-    <a href="https://zsvirt.io/en/docs">
+    <a href="https://zsvirt.io/docs">
       <img
-        src="https://img.shields.io/badge/产品文档-2563EB?style=flat-square&logo=readthedocs&logoColor=white"
+        src="https://img.shields.io/badge/产品文档-7C3AED?style=flat-square&logo=readthedocs&logoColor=white"
         alt="产品文档"
       >
     </a>
@@ -32,26 +52,53 @@
         alt="在线体验"
       >
     </a>
-    <a href="https://zsvirt.io/en/download">
+    <a href="https://zsvirt.io/zh/download">
       <img
-        src="https://img.shields.io/badge/下载-F97316?style=flat-square&logo=download&logoColor=white"
-        alt="下载"
+        src="https://img.shields.io/badge/下载中心-F97316?style=flat-square&logo=data:image/svg%2Bxml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI%2BPHBhdGggZmlsbD0iI2ZmZiIgZD0iTTUgMjBoMTR2LTJINXYyem0xNC05aC00VjNIOXY4SDVsNyA3IDctN3oiLz48L3N2Zz4%3D"
+        alt="下载中心"
       >
     </a>
   </p>
 
-  <p>
-    <a href="./README.md">English</a>
-    &nbsp;&middot;&nbsp;
-    <strong>简体中文</strong>
+  <p align="center" dir="ltr">
+    <a href="./README.md">English</a> |
+    <strong>简体中文</strong> |
+    <a href="./README.zht.md">繁體中文</a> |
+    <a href="./README.ko.md">한국어</a> |
+    <a href="./README.de.md">Deutsch</a> |
+    <a href="./README.es.md">Español</a> |
+    <a href="./README.fr.md">Français</a> |
+    <a href="./README.it.md">Italiano</a> |
+    <a href="./README.da.md">Dansk</a> |
+    <a href="./README.ja.md">日本語</a> |
+    <a href="./README.pl.md">Polski</a> |
+    <a href="./README.ru.md">Русский</a> |
+    <a href="./README.bs.md">Bosanski</a> |
+    <a href="./README.ar.md">العربية</a> |
+    <a href="./README.no.md">Norsk</a> |
+    <a href="./README.br.md">Português (Brasil)</a> |
+    <a href="./README.th.md">ไทย</a> |
+    <a href="./README.tr.md">Türkçe</a> |
+    <a href="./README.uk.md">Українська</a> |
+    <a href="./README.bn.md">বাংলা</a> |
+    <a href="./README.gr.md">Ελληνικά</a> |
+    <a href="./README.vi.md">Tiếng Việt</a>
   </p>
 </div>
 
+> **立即体验 — 无需物理服务器。** 从[下载中心](https://zsvirt.io/zh/download)获取 qcow2 或 OVA 镜像，在 VMware、VirtualBox、KVM 或云主机（嵌套虚拟化）中创建一台虚拟机，配置 IP 后，ZSvirt 管理节点即可就绪。参见[在虚拟机中运行 ZSvirt](https://docs.zsvirt.io/docs/quick-start/nested-virtualization-management-node)，或直接进入[快速开始](https://zsvirt.io/docs/quick-start)。
+
 ## ZSvirt介绍
 
-ZSvirt 将 [ZStack](https://www.zstack-cloud.com/) 经企业级实践验证的 ZSphere 虚拟化引擎带入开源世界。
+ZSvirt 将 [ZStack](https://www.zstack.io/) 经企业级实践验证的 ZSphere 虚拟化引擎带入开源世界。
 
-依托成熟的基础设施厂商 [ZStack](https://www.zstack-cloud.com/)，ZSvirt 提供轻量、可扩展的虚拟化平台。从高性能家庭实验室到超大规模基础设施，ZSvirt 致力于为用户提供不受厂商锁定限制的自由选择。
+依托成熟的基础设施厂商 [ZStack](https://www.zstack.io/)，ZSvirt 提供轻量、可扩展的虚拟化平台。从高性能家庭实验室到超大规模基础设施，ZSvirt 致力于为用户提供不受厂商锁定限制的自由选择。
+
+## 🗣️ 发音指南
+
+我们在社区里听到过 "ZSvirt" 的几种不同读法，没有哪一种算错。我们的建议是：把 **Z** 和 **S** 连成一个音，读作 **"Z-s Virt"** — 接近 "zeese Virt"（兹斯维特）。
+
+名字里的巧思也正藏在这里：连起来读，它听起来就像 **"This is Virtualization"**（这就是虚拟化），而这正是项目背后的核心理念。如果你更习惯逐字母读成 **"Z-S-virt,"**，那也完全没问题。怎么顺口就怎么读。
 
 ## 产品导览
 
@@ -115,7 +162,7 @@ ZSvirt 将 [ZStack](https://www.zstack-cloud.com/) 经企业级实践验证的 Z
 
 ## 在线体验
 
-[ZSvirt 在线体验环境](https://demo.zsvirt.io/)是一个可免费体验 ZSvirt 的托管环境，无需在本地安装。完成注册并登录后，即可开始探索 ZSvirt 的各项功能。
+[ZSvirt 在线体验环境](https://demo.zsvirt.io/)是一个可免费体验 ZSvirt 的托管环境，也无需注册。打开链接，点击 **Demo Login** 即可开始探索 ZSvirt 的各项功能。
 
 ## 系统架构
 
@@ -141,7 +188,7 @@ ZSvirt 采用模块化架构，围绕虚拟化资源管理、管理平面、扩�
 
 <p align="center">
   <img
-    src="https://github.com/ZSvirt/.github/blob/main/assets/zsvirt-architecture.svg?raw=true"
+    src="./assets/zsvirt-architecture.svg"
     alt="ZSvirt Architecture"
     width="100%"
   >
@@ -153,10 +200,10 @@ ZSvirt 采用模块化架构，围绕虚拟化资源管理、管理平面、扩�
 
 ZSvirt 提供面向迁移的功能和运维工具，帮助用户评估、规划并将工作负载从现有 VMware 环境迁移到基于 ZSvirt 的虚拟化基础设施。
 
-🔄 [查看 VMware 迁移指南](https://zsvirt.io/vmware-alternative/)
+🔄 [查看 VMware 迁移指南](https://zsvirt.io/zh/vmware-alternative)
 
 <p align="center">
-  <a href="https://zsvirt.io/vmware-alternative/">
+  <a href="https://zsvirt.io/zh/vmware-alternative">
     <img
       src="https://github.com/ZSvirt/.github/blob/main/assets/zvirt-migrate.png?raw=true"
       alt="从 VMware 迁移到 ZSvirt"
@@ -169,7 +216,9 @@ ZSvirt 提供面向迁移的功能和运维工具，帮助用户评估、规划�
 
 体验 ZSvirt 最快捷的方式是阅读产品文档中的快速开始指南。该指南将引导你准备计算、网络和存储资源，初始化管理服务，并创建第一台虚拟机。
 
-🚀 [快速开始](https://zsvirt.io/en/docs/quick-start)<br>
+想先在虚拟机里试试？从[下载中心](https://zsvirt.io/zh/download)获取 qcow2 或 OVA 镜像，在任何 hypervisor 中运行管理节点即可——参见[在虚拟机中运行 ZSvirt](https://docs.zsvirt.io/docs/quick-start/nested-virtualization-management-node)。
+
+🚀 [快速开始](https://zsvirt.io/docs/quick-start)<br>
 ▶️ [视频链接](https://youtu.be/LsSJlBRUvYw)
 
 ## 最佳实践
@@ -183,6 +232,30 @@ ZSvirt 与 ZSphere 采用相同的企业级虚拟化引擎，继承了经过全�
     width="100%"
   >
 </p>
+
+## 虚拟化平台对比
+
+Proxmox VE、VMware vSphere 与 ZSvirt 对比
+
+<p align="center">
+  <img
+    src="https://raw.githubusercontent.com/ZSvirt/.github/main/assets/zsvirt-comparison.png"
+    alt="Proxmox VE vs ZSvirt virtualization platform comparison"
+    width="100%"
+  >
+</p>
+
+## 路线图
+
+#### 2026年下半年
+
+| 领域 | 计划内容 |
+|---|---|
+| **安全** | 增加虚拟机磁盘加密<br>增加虚拟机迁移加密 |
+| **DRS 与虚拟机迁移** | 增加更灵活的迁移选项：<br>• 支持单独迁移磁盘<br>• 支持 SAN 到 SAN 场景下的热迁移和冷迁移 |
+| **ZMigrate** | **ZMigrate 2.1**：<br>• 增加迁移前检查，降低复杂迁移的风险<br>• 提供更简单、更智能的迁移流程 |
+| **运维** | 增加更多监控指标，包括虚拟机 CPU Ready 时间、虚拟机磁盘读写延迟、网络丢包率和主机 CPU Ready 时间<br>支持向外部 Syslog 转发时使用更细粒度的日志级别<br>增加 NVMe 和 FC 设备监控，包括 IOPS 和延迟<br>在 VMTools 中内置 QXL 驱动，改善虚拟机控制台的显示效果和分辨率 |
+| **资源清单管理** | 扩展存储和虚拟机注册能力，支持同一站点注册 |
 
 ## 社区治理
 
@@ -223,7 +296,7 @@ ZSvirt 基于 [GNU General Public License v3.0](LICENSE) 许可证发布。
     <td width="50%">
       <h3>🌐 社区网站</h3>
       <p>了解 ZSvirt 的产品功能、使用场景、项目动态和社区资源。</p>
-      <a href="https://zsvirt.io/en"><strong>访问网站 →</strong></a>
+      <a href="https://zsvirt.io/zh"><strong>访问网站 →</strong></a>
     </td>
     <td width="50%">
       <h3>▶️ 产品视频</h3>
@@ -236,7 +309,7 @@ ZSvirt 基于 [GNU General Public License v3.0](LICENSE) 许可证发布。
     <td width="50%">
       <h3>📝 博客</h3>
       <p>阅读版本动态、工程实践和虚拟化技术相关文章。</p>
-      <a href="https://zsvirt.io/en/blog"><strong>阅读博客 →</strong></a>
+      <a href="https://zsvirt.io/zh/blog"><strong>阅读博客 →</strong></a>
     </td>
     <td width="50%">
       <h3>💬 GitHub Discussions</h3>
@@ -265,9 +338,9 @@ ZSvirt 基于 [GNU General Public License v3.0](LICENSE) 许可证发布。
       <a href="https://x.com/ZSvirt"><strong>关注 X →</strong></a>
     </td>
     <td width="50%">
-      <h3>🟠 Reddit</h3>
-      <p>加入社区讨论，分享你的 ZSvirt 使用经验。</p>
-      <a href="https://www.reddit.com/r/ZSvirt/"><strong>加入 Reddit 社区 →</strong></a>
+      <h3>🎮 Discord 社区</h3>
+      <p>加入 ZSvirt 社区，在这里提问、分享想法，并与其他用户交流。</p>
+      <a href="https://discord.com/invite/KHsw63z9xA"><strong>加入 Discord 社区 →</strong></a>
     </td>
   </tr>
 </table>

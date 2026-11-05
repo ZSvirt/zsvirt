@@ -1,0 +1,155 @@
+name: Sync GitHub issue and discussion comments to Zendesk
+
+on:
+  issue_comment:
+    types:
+      - created
+  discussion_comment:
+    types:
+      - created
+
+permissions:
+  contents: read
+  issues: read
+  discussions: read
+
+jobs:
+  sync-comment:
+    # issue_comment also fires for pull requests. Exclude pull request comments.
+    if: ${{ github.event_name == 'discussion_comment' || !github.event.issue.pull_request }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Find Zendesk ticket and add private note
+        env:
+          REPOSITORY: ${{ github.repository }}
+          EVENT_NAME: ${{ github.event_name }}
+          ZENDESK_SUBDOMAIN: ${{ secrets.ZENDESK_SUBDOMAIN }}
+          ZENDESK_CLIENT_ID: ${{ secrets.ZENDESK_CLIENT_ID }}
+          ZENDESK_CLIENT_SECRET: ${{ secrets.ZENDESK_CLIENT_SECRET }}
+        run: |
+          set -euo pipefail
+
+          case "$EVENT_NAME" in
+            issue_comment)
+              ITEM_NUMBER="$(jq -r '.issue.number' "$GITHUB_EVENT_PATH")"
+              EXTERNAL_PREFIX="github:"
+              SOURCE_TYPE="Issue"
+              COMMENT_TAG="github_issue_comment_received"
+              ;;
+            discussion_comment)
+              ITEM_NUMBER="$(jq -r '.discussion.number' "$GITHUB_EVENT_PATH")"
+              EXTERNAL_PREFIX="github-discussion:"
+              SOURCE_TYPE="Discussion"
+              COMMENT_TAG="github_discussion_comment_received"
+              ;;
+            *)
+              echo "::error::Unsupported GitHub event: $EVENT_NAME"
+              exit 1
+              ;;
+          esac
+
+          EXTERNAL_ID="${EXTERNAL_PREFIX}${REPOSITORY}#${ITEM_NUMBER}"
+
+          TOKEN_RESPONSE_FILE="$(mktemp)"
+          SEARCH_RESPONSE_FILE="$(mktemp)"
+          UPDATE_RESPONSE_FILE="$(mktemp)"
+          trap 'rm -f "$TOKEN_RESPONSE_FILE" "$SEARCH_RESPONSE_FILE" "$UPDATE_RESPONSE_FILE"' EXIT
+
+          TOKEN_HTTP_STATUS="$(
+            curl \
+              --silent \
+              --show-error \
+              --output "$TOKEN_RESPONSE_FILE" \
+              --write-out "%{http_code}" \
+              --request POST \
+              "https://${ZENDESK_SUBDOMAIN}.zendesk.com/oauth/tokens" \
+              --header "Content-Type: application/x-www-form-urlencoded" \
+              --data-urlencode "grant_type=client_credentials" \
+              --data-urlencode "client_id=${ZENDESK_CLIENT_ID}" \
+              --data-urlencode "client_secret=${ZENDESK_CLIENT_SECRET}" \
+              --data-urlencode "scope=read tickets:write" \
+              --data-urlencode "expires_in=300"
+          )"
+
+          if [[ "$TOKEN_HTTP_STATUS" != "200" ]]; then
+            echo "::error::Zendesk OAuth request failed with HTTP ${TOKEN_HTTP_STATUS}"
+            jq '{error, error_description, description}' "$TOKEN_RESPONSE_FILE" 2>/dev/null ||
+              head -c 1000 "$TOKEN_RESPONSE_FILE"
+            exit 1
+          fi
+
+          ACCESS_TOKEN="$(jq --exit-status --raw-output '.access_token' "$TOKEN_RESPONSE_FILE")"
+
+          SEARCH_HTTP_STATUS="$(
+            curl \
+              --silent \
+              --show-error \
+              --output "$SEARCH_RESPONSE_FILE" \
+              --write-out "%{http_code}" \
+              --get \
+              "https://${ZENDESK_SUBDOMAIN}.zendesk.com/api/v2/search.json" \
+              --header "Authorization: Bearer ${ACCESS_TOKEN}" \
+              --data-urlencode "query=type:ticket external_id:\"${EXTERNAL_ID}\""
+          )"
+
+          if [[ "$SEARCH_HTTP_STATUS" != "200" ]]; then
+            echo "::error::Zendesk ticket search failed with HTTP ${SEARCH_HTTP_STATUS}"
+            jq '{error, error_description, description}' "$SEARCH_RESPONSE_FILE" 2>/dev/null ||
+              head -c 1000 "$SEARCH_RESPONSE_FILE"
+            exit 1
+          fi
+
+          TICKET_ID="$(
+            jq --exit-status --raw-output \
+              --arg external_id "$EXTERNAL_ID" \
+              '[.results[] | select(.external_id == $external_id)] |
+               if length == 1 then
+                 .[0].id
+               elif length == 0 then
+                 error("No matching Zendesk ticket was found")
+               else
+                 error("Multiple Zendesk tickets have the same external_id")
+               end' "$SEARCH_RESPONSE_FILE"
+          )"
+
+          jq \
+            --arg source_type "$SOURCE_TYPE" \
+            --arg comment_tag "$COMMENT_TAG" \
+            '{
+              ticket: {
+                comment: {
+                  public: false,
+                  body: (
+                    "New GitHub " + ($source_type | ascii_downcase) + " comment\n\n" +
+                    "Author: @" + .comment.user.login + "\n" +
+                    "GitHub URL: " + .comment.html_url + "\n\n" +
+                    (.comment.body // "(Empty comment)")
+                  )
+                },
+                additional_tags: [$comment_tag]
+              }
+            }' "$GITHUB_EVENT_PATH" > zendesk-comment.json
+
+          UPDATE_HTTP_STATUS="$(
+            curl \
+              --silent \
+              --show-error \
+              --output "$UPDATE_RESPONSE_FILE" \
+              --write-out "%{http_code}" \
+              --request PUT \
+              "https://${ZENDESK_SUBDOMAIN}.zendesk.com/api/v2/tickets/${TICKET_ID}.json" \
+              --header "Authorization: Bearer ${ACCESS_TOKEN}" \
+              --header "Content-Type: application/json" \
+              --data @zendesk-comment.json
+          )"
+
+          if [[ "$UPDATE_HTTP_STATUS" != "200" ]]; then
+            echo "::error::Zendesk ticket update failed with HTTP ${UPDATE_HTTP_STATUS}"
+            jq '{error, error_description, description, details}' "$UPDATE_RESPONSE_FILE" 2>/dev/null ||
+              head -c 1000 "$UPDATE_RESPONSE_FILE"
+            exit 1
+          fi
+
+          echo "GitHub ${SOURCE_TYPE} comment added to Zendesk ticket ${TICKET_ID}"

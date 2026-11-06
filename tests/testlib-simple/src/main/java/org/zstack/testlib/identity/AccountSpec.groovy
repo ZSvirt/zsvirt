@@ -26,6 +26,7 @@ class AccountSpec extends Spec {
 
     private List<String> roleNames = []
     private List<String> predefineRoleName = []
+    private boolean systemAdmin = false
 
     void useRole(String rname) {
         preCreate {
@@ -47,12 +48,17 @@ class AccountSpec extends Spec {
         predefineRoleName << roleName
     }
 
+    void asSystemAdmin() {
+        systemAdmin = true
+    }
+
     SpecID create(String uuid, String sessionId) {
         inventory = createAccount {
             delegate.resourceUuid = uuid
             delegate.sessionId = sessionId
             delegate.name = name
             delegate.password = password
+            delegate.type = (systemAdmin ? "SystemAdmin" : "Normal")
         }
 
         session = logInByAccount {

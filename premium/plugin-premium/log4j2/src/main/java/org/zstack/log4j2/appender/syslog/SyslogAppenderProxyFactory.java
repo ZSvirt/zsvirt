@@ -133,7 +133,11 @@ public class SyslogAppenderProxyFactory implements Log4j2AppenderProxyFactory {
         boolean immediateFlush;
 
         static Log4jSystemAppenderConfig fromJson(String json) {
-            return JSONObjectUtil.toObject(json, Log4jSystemAppenderConfig.class);
+            try {
+                return JSONObjectUtil.toObject(json, Log4jSystemAppenderConfig.class);
+            } catch (NumberFormatException e) {
+                throw new ApiMessageInterceptionException(argerr("port must be a valid integer"));
+            }
         }
     }
 

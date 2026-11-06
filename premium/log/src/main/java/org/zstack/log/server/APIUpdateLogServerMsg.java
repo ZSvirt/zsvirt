@@ -20,7 +20,7 @@ public class APIUpdateLogServerMsg extends APIMessage implements APIAuditor, Log
     @APIParam(resourceType = LogServerVO.class)
     private String uuid;
 
-    @APIParam(required = false, maxLength = 255)
+    @APIParam(required = false, maxLength = 255, emptyString = false)
     private String name;
 
     @APIParam(required = false, maxLength = 2048)

@@ -385,7 +385,8 @@ public class VmInstanceApiInterceptor implements ApiMessageInterceptor {
         L2NetworkType l2Type = L2NetworkType.valueOf(Q.New(L2NetworkVO.class)
                 .eq(L2NetworkVO_.uuid, l3NetworkVO.getL2NetworkUuid())
                 .select(L2NetworkVO_.type).findValue());
-        if (!l2Type.isAttachToAllHosts() && !L2NetworkHostUtils.checkIfL2AttachedToHost(l3NetworkVO.getL2NetworkUuid(), hostUuid)) {
+        if (!isManagedL2Network(l3NetworkVO.getL2NetworkUuid()) && !l2Type.isAttachToAllHosts()
+                && !L2NetworkHostUtils.checkIfL2AttachedToHost(l3NetworkVO.getL2NetworkUuid(), hostUuid)) {
             throw new ApiMessageInterceptionException(operr("unable to change to L3 network[uuid:%s]" +
                             " whose l2Network is not attached to the host[uuid:%s]", msg.getDestL3NetworkUuid(), hostUuid));
         }

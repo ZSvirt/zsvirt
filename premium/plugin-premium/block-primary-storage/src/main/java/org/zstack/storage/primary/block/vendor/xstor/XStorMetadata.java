@@ -2,6 +2,7 @@ package org.zstack.storage.primary.block.vendor.xstor;
 
 import org.zstack.header.log.NoLogging;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,7 +10,7 @@ import java.util.List;
  * @author Lei Liu lei.liu@zstack.io
  * @date 2022/4/15 11:02
  */
-public class XStorMetadata {
+public class XStorMetadata implements Serializable {
     private String ip;
 
     private Integer port;

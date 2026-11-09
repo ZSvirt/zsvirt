@@ -1,12 +1,9 @@
 package org.zstack.softwarePackage.compute;
 
-import org.zstack.header.log.NoLogging;
-
 public class UploadSoftwarePackageToVmSpec {
     private String targetPath;
     private String username;
     private int sshPort;
-    @NoLogging
     private String password;
 
     public String getTargetPath() {

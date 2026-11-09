@@ -3,11 +3,9 @@ package org.zstack.zwatch.resnotify;
 import org.zstack.header.rest.APINoSee;
 import org.zstack.header.log.NoLogging;
 
-import java.sql.Timestamp;
+import java.io.Serializable;
 
-
-
-public class ResNotifyWebhookRefInventory {
+public class ResNotifyWebhookRefInventory implements Serializable {
     private String uuid;
     private String webhookUrl;
     @APINoSee

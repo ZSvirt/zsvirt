@@ -3,10 +3,12 @@ package org.zstack.identity.imports.header;
 import org.zstack.core.Platform;
 import org.zstack.identity.imports.entity.ThirdPartyAccountSourceVO;
 
+import java.io.Serializable;
+
 /**
  * For creating {@link ThirdPartyAccountSourceVO}
  */
-public abstract class AbstractAccountSourceSpec {
+public abstract class AbstractAccountSourceSpec implements Serializable {
     private String uuid = Platform.getUuid();
     private String type;
     private String description;

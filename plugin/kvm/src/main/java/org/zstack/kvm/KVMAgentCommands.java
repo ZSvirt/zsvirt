@@ -47,7 +47,7 @@ public class KVMAgentCommands {
         }
     }
 
-    public static class AgentResponse implements ConditionalValidation, OpaqueScripts {
+    public static class AgentResponse implements ConditionalValidation, OpaqueScripts, Serializable {
         private boolean success = true;
         private String error;
 
@@ -85,7 +85,7 @@ public class KVMAgentCommands {
         }
     }
 
-    public static class AgentCommand {
+    public static class AgentCommand implements Serializable {
         public LinkedHashMap kvmHostAddons;
     }
 
@@ -3025,7 +3025,7 @@ public class KVMAgentCommands {
     public static class StartVmResponse extends VmDevicesInfoResponse {
     }
 
-    public static class VmHostFileTO {
+    public static class VmHostFileTO implements Serializable {
         private String path;
         /**
          * maybe "NvRam" or "TpmState" ...

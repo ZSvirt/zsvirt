@@ -6844,6 +6844,12 @@ public class VmInstanceBase extends AbstractVmInstance {
                 FlowChain flowChain = FlowChainBuilder.newSimpleFlowChain();
                 flowChain.setName(String.format("changeNicNetwork-vm-%s-nic-%s-%s-to-%s", self.getUuid(), nic.getUuid(), nic.getL3NetworkUuid(), destL3.getUuid()));
                 final VmInstanceSpec spec = buildSpecFromInventory(getSelfInventory(), VmOperation.ChangeNicNetwork);
+                final AfterAllocateExternalNetworkNicExtensionPoint externalNetwork = pluginRgty
+                        .getExtensionList(AfterAllocateExternalNetworkNicExtensionPoint.class).stream()
+                        .filter(ext -> ext.supportsNicNetworkChange(nic, destL3)).findFirst().orElse(null);
+                final String originalDefaultL3Uuid = self.getDefaultL3NetworkUuid();
+                final boolean[] externalNetworkChangeStarted = {false};
+                final boolean[] hostUpdateAttempted = {false};
                 spec.setVmInventory(VmInstanceInventory.valueOf(self));
                 spec.setDestNics(list(nic));
                 L3NetworkVO l3VO = dbf.findByUuid(nic.getL3NetworkUuid(), L3NetworkVO.class);
@@ -6891,6 +6897,17 @@ public class VmInstanceBase extends AbstractVmInstance {
 
                     @Override
                     public void rollback(FlowRollback trigger, Map data) {
+                        List<UsedIpVO> changedIps = new ArrayList<>();
+                        if (externalNetwork != null) {
+                            changedIps = Q.New(UsedIpVO.class).eq(UsedIpVO_.vmNicUuid, nic.getUuid()).list();
+                            Set<String> originalIpUuids = nic.getUsedIps().stream()
+                                    .map(UsedIpInventory::getUuid).collect(Collectors.toSet());
+                            changedIps.removeIf(ip -> originalIpUuids.contains(ip.getUuid()));
+                            SQL.New(UsedIpVO.class).eq(UsedIpVO_.vmNicUuid, nic.getUuid())
+                                    .set(UsedIpVO_.vmNicUuid, null).update();
+                            SQL.New(VmNicVO.class).eq(VmNicVO_.uuid, nic.getUuid())
+                                    .set(VmNicVO_.ipVersion, nic.getIpVersion()).update();
+                        }
                         for (UsedIpInventory ip : nic.getUsedIps()) {
                             SQL.New(UsedIpVO.class).eq(UsedIpVO_.uuid, ip.getUuid())
                                     .set(UsedIpVO_.vmNicUuid, nic.getUuid()).update();
@@ -6901,7 +6918,48 @@ public class VmInstanceBase extends AbstractVmInstance {
                                 .set(VmNicVO_.ip, nic.getIp())
                                 .set(VmNicVO_.gateway, nic.getGateway())
                                 .set(VmNicVO_.netmask, nic.getNetmask()).update();
-                        trigger.rollback();
+                        if (externalNetwork != null && !destL3.enableIpAllocation()) {
+                            dbf.removeCollection(changedIps, UsedIpVO.class);
+                        }
+                        if (externalNetwork == null) {
+                            trigger.rollback();
+                            return;
+                        }
+                        self.setDefaultL3NetworkUuid(originalDefaultL3Uuid);
+                        self = dbf.updateAndRefresh(self);
+                        if (!externalNetworkChangeStarted[0]) {
+                            trigger.rollback();
+                            return;
+                        }
+                        externalNetwork.changeNicNetwork(spec, nic, new Completion(trigger) {
+                            @Override
+                            public void success() {
+                                if (!hostUpdateAttempted[0]) {
+                                    trigger.rollback();
+                                    return;
+                                }
+                                VmUpdateNicOnHypervisorMsg restore = new VmUpdateNicOnHypervisorMsg();
+                                restore.setVmInstanceUuid(self.getUuid());
+                                restore.setHostUuid(spec.getDestHost().getUuid());
+                                restore.setNicsUuid(list(nic.getUuid()));
+                                bus.makeTargetServiceIdByResourceUuid(restore, HostConstant.SERVICE_ID, self.getUuid());
+                                bus.send(restore, new CloudBusCallBack(trigger) {
+                                    @Override
+                                    public void run(MessageReply reply) {
+                                        if (!reply.isSuccess()) {
+                                            data.put("externalNetworkRollbackError", reply.getError());
+                                        }
+                                        trigger.rollback();
+                                    }
+                                });
+                            }
+
+                            @Override
+                            public void fail(ErrorCode errorCode) {
+                                data.put("externalNetworkRollbackError", errorCode);
+                                trigger.rollback();
+                            }
+                        });
                     }
                 });
 
@@ -7026,6 +7084,29 @@ public class VmInstanceBase extends AbstractVmInstance {
                     }
                 });
 
+                if (externalNetwork != null) {
+                    flowChain.then(new NoRollbackFlow() {
+                        String __name__ = "change-external-nic-network";
+
+                        @Override
+                        public void run(FlowTrigger trigger, Map data) {
+                            VmNicInventory current = VmNicInventory.valueOf(dbf.findByUuid(nic.getUuid(), VmNicVO.class));
+                            externalNetworkChangeStarted[0] = true;
+                            externalNetwork.changeNicNetwork(spec, current, new Completion(trigger) {
+                                @Override
+                                public void success() {
+                                    trigger.next();
+                                }
+
+                                @Override
+                                public void fail(ErrorCode errorCode) {
+                                    trigger.fail(errorCode);
+                                }
+                            });
+                        }
+                    });
+                }
+
                 flowChain.then(new NoRollbackFlow() {
                     String __name__ = "set-sync-ports-tag";
 
@@ -7066,6 +7147,7 @@ public class VmInstanceBase extends AbstractVmInstance {
                         cmsg.setHostUuid(dest.getUuid());
                         cmsg.setNicsUuid(list(nic.getUuid()));
                         bus.makeTargetServiceIdByResourceUuid(cmsg, HostConstant.SERVICE_ID, vm.getUuid());
+                        hostUpdateAttempted[0] = externalNetwork != null;
                         bus.send(cmsg, new CloudBusCallBack(trigger) {
                             @Override
                             public void run(MessageReply reply) {
@@ -7119,9 +7201,13 @@ public class VmInstanceBase extends AbstractVmInstance {
                 }).error(new FlowErrorHandler(chain) {
                     @Override
                     public void handle(ErrorCode errCode, Map data) {
+                        ErrorCode rollbackError = (ErrorCode) data.get("externalNetworkRollbackError");
+                        ErrorCode failure = rollbackError == null ? errCode : operr(
+                                "failed to change NIC network: %s; failed to restore external network: %s",
+                                errCode, rollbackError);
                         setStaticIp.rollback();
                         if (data.get(VmInstanceConstant.Params.VmAllocateNicFlow_ips.toString()) == null) {
-                            completion.fail(errCode);
+                            completion.fail(failure);
                             chain.next();
                             return;
                         }
@@ -7149,7 +7235,7 @@ public class VmInstanceBase extends AbstractVmInstance {
                             });
                         }
 
-                        completion.fail(errCode);
+                        completion.fail(failure);
                         chain.next();
                     }
                 }).start();

@@ -1,11 +1,20 @@
 package org.zstack.header.vm;
 
 import org.zstack.header.core.Completion;
+import org.zstack.header.network.l3.L3NetworkInventory;
 
 import java.util.Collections;
 import java.util.List;
 
 public interface AfterAllocateExternalNetworkNicExtensionPoint {
+    default boolean supportsNicNetworkChange(VmNicInventory nic, L3NetworkInventory destination) {
+        return false;
+    }
+
+    default void changeNicNetwork(VmInstanceSpec spec, VmNicInventory nic, Completion completion) {
+        completion.success();
+    }
+
     void afterAllocateExternalNetworkNic(VmInstanceSpec spec, List<VmNicInventory> nics, Completion completion);
 
     void rollbackExternalNetworkNic(VmInstanceSpec spec, List<VmNicInventory> nics, Completion completion);

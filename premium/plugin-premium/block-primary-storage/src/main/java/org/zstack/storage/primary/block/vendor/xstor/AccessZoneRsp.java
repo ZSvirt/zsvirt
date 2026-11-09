@@ -1,5 +1,6 @@
 package org.zstack.storage.primary.block.vendor.xstor;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,7 +38,7 @@ public class AccessZoneRsp extends XStorServerResponse {
         }
     }
 
-    public class AccessZone {
+    public class AccessZone implements Serializable {
         public String access_zone_state;
         public String name;
         public Integer id;

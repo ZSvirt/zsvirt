@@ -5,6 +5,7 @@ import org.zstack.header.message.DocUtils;
 import org.zstack.header.search.Inventory;
 import org.zstack.utils.gson.JSONObjectUtil;
 
+import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -14,10 +15,10 @@ import java.util.Map;
 
 /**
  * @Author: ya.wang
- * @Date: 1/15/26 1:31 AM
+ * @Date: 1/15/26 1:31 AM
  */
 @Inventory(mappingVOClass = ExternalServiceConfigurationVO.class)
-public class ExternalServiceConfigurationInventory {
+public class ExternalServiceConfigurationInventory implements Serializable {
     public static final String MASKED_PASSWORD = "******";
     private String uuid;
     private String serviceType;

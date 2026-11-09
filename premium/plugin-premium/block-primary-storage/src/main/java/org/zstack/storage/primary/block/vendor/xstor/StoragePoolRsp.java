@@ -1,5 +1,6 @@
 package org.zstack.storage.primary.block.vendor.xstor;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,14 +10,14 @@ import java.util.List;
  */
 public class StoragePoolRsp extends XStorServerResponse{
 
-    public class Layer {
+    public class Layer implements Serializable {
         public long SUPER;
         public long MID;
         public long HIGH;
         public long LOW;
     }
 
-    public class Layout {
+    public class Layout implements Serializable {
         public Integer disk_parity_num;
         public Integer minNodeNum;
         public Integer node_parity_num;
@@ -44,7 +45,7 @@ public class StoragePoolRsp extends XStorServerResponse{
         }
     }
 
-    public static class StoragePool {
+    public static class StoragePool implements Serializable {
         public String authority_type;
         public String enable_data_cache;
         public Integer id;

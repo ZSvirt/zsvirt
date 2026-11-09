@@ -61,7 +61,7 @@ class NoLoggingSerializableChecker {
             violations.computeIfAbsent(clz.name) { new ArrayList<String>() }.add(field.name)
         }
 
-        assert violations.isEmpty(): "classes declaring @NoLogging must implement Serializable or Message: " +
-                violations.collect { name, fields -> "${name} [${fields.join(', ')}]" }.join("; ")
+        assert violations.isEmpty(): "classes declaring @NoLogging must implement Serializable or Message: \n" +
+                violations.collect { name, fields -> "${name} [${fields.join(', ')}]" }.join("\n")
     }
 }

@@ -4,6 +4,7 @@ import org.zstack.header.query.ExpandedQueries;
 import org.zstack.header.search.Inventory;
 import org.zstack.core.db.Q;
 
+import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -13,7 +14,7 @@ import java.util.List;
 
 @Inventory(mappingVOClass = ResNotifySubscriptionVO.class)
 @ExpandedQueries({})
-public class ResNotifySubscriptionInventory {
+public class ResNotifySubscriptionInventory implements Serializable {
     private String uuid;
     private String name;
     private String description;

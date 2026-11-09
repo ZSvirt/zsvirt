@@ -22,7 +22,7 @@ import org.zstack.test.checker.route.ApiServiceIdRegistryDump
     DBChecker.class,
     ApiDocSinceChecker.class,
     ApiDocExampleChecker.class,
-    // NoLoggingSerializableChecker.class,
+    NoLoggingSerializableChecker.class,
 ])
 class JUnitCheckTestSuite {
     static void runAllTestCases() {

@@ -5,18 +5,25 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.zstack.core.cloudbus.CloudBus;
 import org.zstack.core.cloudbus.CloudBusCallBack;
-import org.zstack.header.affinitygroup.AffinityGroupConstants;
+import org.zstack.core.db.SQL;
 import org.zstack.header.allocator.HostAllocatorConstant;
 import org.zstack.header.allocator.HostAllocatorReserveExtensionPoint;
 import org.zstack.header.allocator.HostAllocatorSpec;
+import org.zstack.header.allocator.MigrateVmHostReserveRollbackExtensionPoint;
+import org.zstack.header.core.Completion;
 import org.zstack.header.core.workflow.FlowRollback;
 import org.zstack.header.core.workflow.FlowTrigger;
 import org.zstack.header.host.HostInventory;
 import org.zstack.header.message.MessageReply;
+import org.zstack.header.vm.VmInstanceSpec;
+import org.zstack.header.vm.VmInstanceVO;
+import org.zstack.header.vm.VmInstanceVO_;
 import org.zstack.header.vmscheduling.VmSchedulingRuleConstants;
 import org.zstack.header.vmscheduling.VmSchedulingRuleReserveMsg;
 import org.zstack.header.vmscheduling.VmSchedulingRuleReserveReply;
 import org.zstack.header.vmscheduling.VmSchedulingRuleRollbackMsg;
+import org.zstack.utils.Utils;
+import org.zstack.utils.logging.CLogger;
 
 import java.util.Map;
 
@@ -25,7 +32,9 @@ import java.util.Map;
  * @Date: 2022/12/5
  */
 @Configurable(preConstruction = true, autowire = Autowire.BY_TYPE)
-public class VmSchedulingRuleGroupReserveFlow implements HostAllocatorReserveExtensionPoint {
+public class VmSchedulingRuleGroupReserveFlow implements HostAllocatorReserveExtensionPoint, MigrateVmHostReserveRollbackExtensionPoint {
+    private static final CLogger logger = Utils.getLogger(VmSchedulingRuleGroupReserveFlow.class);
+
     @Autowired
     private VmSchedulingRuleFilterFlow ruleFilterFlow;
     @Autowired
@@ -92,6 +101,39 @@ public class VmSchedulingRuleGroupReserveFlow implements HostAllocatorReserveExt
             @Override
             public void run(MessageReply reply) {
                 trigger.rollback();
+            }
+        });
+    }
+
+    @Override
+    public void rollbackAfterFailedMigration(VmInstanceSpec vmSpec, Completion completion) {
+        HostAllocatorSpec allocatorSpec = new HostAllocatorSpec();
+        allocatorSpec.setVmInstance(vmSpec.getVmInventory());
+        String groupUuid = ruleFilterFlow.getVmSchedulingRuleGroupUuid(allocatorSpec);
+        if (groupUuid == null) {
+            completion.success();
+            return;
+        }
+
+        String originHostUuid = vmSpec.getVmInventory().getHostUuid();
+        VmSchedulingRuleRollbackMsg msg = new VmSchedulingRuleRollbackMsg();
+        msg.setHost(vmSpec.getDestHost());
+        msg.setSpec(allocatorSpec);
+        msg.setVmGroupUuid(groupUuid);
+        msg.setOriginHostUuid(originHostUuid);
+        bus.makeTargetServiceIdByResourceUuid(msg, VmSchedulingRuleConstants.SERVICE_ID, VmSchedulingRuleConstants.VM_SCHEDULING_RULE_GROUP_RESERVE_ID);
+        bus.send(msg, new CloudBusCallBack(completion) {
+            @Override
+            public void run(MessageReply reply) {
+                if (!reply.isSuccess()) {
+                    logger.warn(String.format("failed to rollback vm[uuid:%s] hostUuid to %s after migration failure, %s; restore it locally",
+                            vmSpec.getVmInventory().getUuid(), originHostUuid, reply.getError()));
+                    SQL.New(VmInstanceVO.class)
+                            .eq(VmInstanceVO_.uuid, vmSpec.getVmInventory().getUuid())
+                            .set(VmInstanceVO_.hostUuid, originHostUuid)
+                            .update();
+                }
+                completion.success();
             }
         });
     }

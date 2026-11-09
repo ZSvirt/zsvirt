@@ -3,17 +3,24 @@ package org.zstack.compute.vm;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
+import org.zstack.core.asyncbatch.While;
 import org.zstack.core.cloudbus.CloudBus;
 import org.zstack.core.cloudbus.CloudBusCallBack;
+import org.zstack.core.componentloader.PluginRegistry;
 import org.zstack.core.db.DatabaseFacade;
 import org.zstack.core.errorcode.ErrorFacade;
 import org.zstack.header.allocator.AllocateHostReply;
 import org.zstack.header.allocator.DesignatedAllocateHostMsg;
 import org.zstack.header.allocator.HostAllocatorConstant;
+import org.zstack.header.allocator.MigrateVmHostReserveRollbackExtensionPoint;
 import org.zstack.header.allocator.ReturnHostCapacityMsg;
+import org.zstack.header.core.Completion;
+import org.zstack.header.core.WhileDoneCompletion;
 import org.zstack.header.core.workflow.Flow;
 import org.zstack.header.core.workflow.FlowRollback;
 import org.zstack.header.core.workflow.FlowTrigger;
+import org.zstack.header.errorcode.ErrorCode;
+import org.zstack.header.errorcode.ErrorCodeList;
 import org.zstack.header.message.MessageReply;
 import org.zstack.header.network.l3.L3NetworkInventory;
 import org.zstack.header.vm.*;
@@ -32,6 +39,8 @@ public class VmAllocateHostForMigrateVmFlow implements Flow {
     protected CloudBus bus;
     @Autowired
     protected ErrorFacade errf;
+    @Autowired
+    protected PluginRegistry pluginRgty;
 
     private static final String SUCCESS = VmAllocateHostForMigrateVmFlow.class.getName();
 
@@ -89,15 +98,37 @@ public class VmAllocateHostForMigrateVmFlow implements Flow {
 
     @Override
     public void rollback(FlowRollback chain, Map data) {
-        if (data.containsKey(SUCCESS)) {
-            final VmInstanceSpec spec = (VmInstanceSpec) data.get(VmInstanceConstant.Params.VmInstanceSpec.toString());
-            ReturnHostCapacityMsg msg = new ReturnHostCapacityMsg();
-            msg.setHostUuid(spec.getDestHost().getUuid());
-            msg.setCpuCapacity(spec.getVmInventory().getCpuNum());
-            msg.setMemoryCapacity(spec.getVmInventory().getMemorySize());
-            bus.makeLocalServiceId(msg, HostAllocatorConstant.SERVICE_ID);
-            bus.send(msg);
+        if (!data.containsKey(SUCCESS)) {
+            chain.rollback();
+            return;
         }
-        chain.rollback();
+
+        final VmInstanceSpec spec = (VmInstanceSpec) data.get(VmInstanceConstant.Params.VmInstanceSpec.toString());
+        ReturnHostCapacityMsg msg = new ReturnHostCapacityMsg();
+        msg.setHostUuid(spec.getDestHost().getUuid());
+        msg.setCpuCapacity(spec.getVmInventory().getCpuNum());
+        msg.setMemoryCapacity(spec.getVmInventory().getMemorySize());
+        bus.makeLocalServiceId(msg, HostAllocatorConstant.SERVICE_ID);
+        bus.send(msg);
+
+        new While<>(pluginRgty.getExtensionList(MigrateVmHostReserveRollbackExtensionPoint.class))
+                .each((ext, whileCompletion) -> ext.rollbackAfterFailedMigration(spec, new Completion(whileCompletion) {
+                    @Override
+                    public void success() {
+                        whileCompletion.done();
+                    }
+
+                    @Override
+                    public void fail(ErrorCode errorCode) {
+                        whileCompletion.addError(errorCode);
+                        whileCompletion.done();
+                    }
+                }))
+                .run(new WhileDoneCompletion(chain) {
+                    @Override
+                    public void done(ErrorCodeList errorCodeList) {
+                        chain.rollback();
+                    }
+                });
     }
 }

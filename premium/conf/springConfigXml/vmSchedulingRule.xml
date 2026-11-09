@@ -39,6 +39,7 @@
     <bean id="VmSchedulingRuleGroupReserveFlow" class="org.zstack.compute.vmscheduling.VmSchedulingRuleGroupReserveFlow" >
         <zstack:plugin>
             <zstack:extension interface="org.zstack.header.allocator.HostAllocatorReserveExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.allocator.MigrateVmHostReserveRollbackExtensionPoint" />
         </zstack:plugin>
     </bean>
 

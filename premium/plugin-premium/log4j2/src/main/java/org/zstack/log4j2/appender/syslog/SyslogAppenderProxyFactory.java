@@ -49,7 +49,11 @@ public class SyslogAppenderProxyFactory implements Log4j2AppenderProxyFactory {
             throw new ApiMessageInterceptionException(argerr("facility can not be null"));
         }
 
-        if (Facility.toFacility(configuration.facility) == null) {
+        try {
+            if (Facility.toFacility(configuration.facility) == null) {
+                throw new ApiMessageInterceptionException(argerr("invalid facility %s", configuration.facility));
+            }
+        } catch (IllegalArgumentException e) {
             throw new ApiMessageInterceptionException(argerr("invalid facility %s", configuration.facility));
         }
 

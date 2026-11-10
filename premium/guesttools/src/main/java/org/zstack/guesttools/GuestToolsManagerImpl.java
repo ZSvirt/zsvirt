@@ -2555,16 +2555,16 @@ public class GuestToolsManagerImpl extends AbstractService implements GuestTools
             List<L3NetworkVO> l3s = Q.New(L3NetworkVO.class).in(L3NetworkVO_.uuid,
                     updatedNicSet.stream().map(VmNicVO::getL3NetworkUuid).collect(Collectors.toList())).list();
             // Send alarm if nic use l3 without dhcp
-            updatedNicSet.forEach(nicVO -> {
+            for (VmNicVO nicVO : updatedNicSet) {
                 // only support l3 without dhcp
                 if (l3s.stream().noneMatch(l3 -> l3.getUuid().equals(nicVO.getL3NetworkUuid()) && !l3.enableIpAllocation())) {
-                    return;
+                    continue;
                 }
 
                 new GuestNetworkInfoSynchronizer(nicVO, l3s.stream().anyMatch(l3 ->
                         l3.getUuid().equals(nicVO.getL3NetworkUuid()) && l3.getEnableIPAM()))
                         .syncGuestNetworkInfo();
-            });
+            }
         }
 
         if(!updatedNicSet.isEmpty() && !ipConflict) {

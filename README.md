@@ -22,7 +22,7 @@
         alt="ZSvirt/zsvirt Weekly Java | Trendshift"
         width="250"
         height="55"
-      /></a>&nbsp;&nbsp;
+      /><a href="https://trendshift.io/repositories/156451?utm_source=trendshift-badge&amp;utm_medium=badge&amp;utm_campaign=badge-trendshift-156451" target="_blank" rel="noopener noreferrer"><img src="https://trendshift.io/api/badge/trendshift/repositories/156451/monthly?language=Java" alt="ZSvirt%2Fzsvirt | Trendshift" width="250" height="55"/></a></a>&nbsp;&nbsp;
   </p>
   <h1 align="center">
     Open Source Virtualization

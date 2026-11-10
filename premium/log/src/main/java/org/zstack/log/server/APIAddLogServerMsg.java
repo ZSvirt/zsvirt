@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit;
         parameterName = "params"
 )
 public class APIAddLogServerMsg extends APICreateMessage implements APIAuditor {
-    @APIParam(maxLength = 255)
+    @APIParam(maxLength = 255, emptyString = false)
     private String name;
 
     @APIParam(required = false, maxLength = 2048)

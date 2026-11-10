@@ -365,7 +365,7 @@ class GuestToolsStateCase extends SubCase {
         String ip = "192.168.101.20"
         String netmask = "255.255.255.0"
         String gateway = "192.168.101.1"
-        String ipv6 = "2001:db8::20"
+        String ipv6Cidr = "2001:db8::20/64"
         String l2Id = env.inventoryByName("l2").uuid
         String imageId = env.inventoryByName("image1").uuid
         String clusterId = env.inventoryByName("cluster").uuid
@@ -391,12 +391,12 @@ class GuestToolsStateCase extends SubCase {
             l3NetworkUuids = [l3Id]
             clusterUuid = clusterId
             systemTags = ["staticIp::${l3Id}::${ip}", "ipv4Netmask::${l3Id}::${netmask}",
-                          "ipv4Gateway::${l3Id}::${gateway}"]
+                          "ipv4Gateway::${l3Id}::${gateway}"]*.toString()
         }
         String nicUuid = vm.vmNics[0].uuid
         String mac = vm.vmNics[0].mac
         List<String> ipv4Report = ["${ip}/24".toString(), "gateway:${gateway}".toString()]
-        reportGuestAddresses(vm.uuid, mac, ipv4Report + ["${ipv6}/64", "gateway6:2001:db8::1"])
+        reportGuestAddresses(vm.uuid, mac, ipv4Report + [ipv6Cidr, "gateway6:2001:db8::1"])
 
         VmNicVO nic = dbf.findByUuid(nicUuid, VmNicVO.class)
         String usedIpUuid = nic.usedIpUuid
@@ -420,9 +420,9 @@ class GuestToolsStateCase extends SubCase {
         reportGuestAddresses(vm.uuid, mac, ipv4Report)
         assertStaticIpv4()
 
-        reportGuestAddresses(vm.uuid, mac, ["", "${ipv6}/64", "gateway6:2001:db8::1"])
+        reportGuestAddresses(vm.uuid, mac, ["", ipv6Cidr, "gateway6:2001:db8::1"])
         assertStaticIpv4()
-        reportGuestAddresses(vm.uuid, mac, ["", "${ipv6}/64", "gateway6:2001:db8::2"])
+        reportGuestAddresses(vm.uuid, mac, ["", ipv6Cidr, "gateway6:2001:db8::2"])
         assertStaticIpv4()
         assert dbf.findByUuid(nicUuid, VmNicVO.class).usedIps.any {
             it.ipVersion == IPv6Constants.IPv6 && it.gateway == "2001:db8::2"

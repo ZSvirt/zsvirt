@@ -58,7 +58,11 @@ public class NormalIpRangeFactory implements IpRangeFactory {
 
         final IpRangeInventory finalIpr = NormalIpRangeInventory.valueOf1(vo);
         CollectionUtils.safeForEach(pluginRgty.getExtensionList(AfterAddIpRangeExtensionPoint.class),
-                ext -> ext.afterAddIpRange(finalIpr, msg.getSystemTags()));
+                ext -> {
+                    if (!ext.requiresIpRangeSynchronization(finalIpr.getL3NetworkUuid())) {
+                        ext.afterAddIpRange(finalIpr, msg.getSystemTags());
+                    }
+                });
 
         List<UsedIpVO> usedIpVos = Q.New(UsedIpVO.class)
                 .eq(UsedIpVO_.l3NetworkUuid, finalIpr.getL3NetworkUuid())

@@ -283,6 +283,23 @@ public class SimpleFlowChain implements FlowTrigger, FlowRollback, FlowChain, Fl
         return this;
     }
 
+    public SimpleFlowChain Finally(Runnable runnable) {
+        DebugUtils.Assert(!asyncBackups.isEmpty(),
+                "propagateExceptionTo() must be called before Finally(Runnable)."
+                        + " Call .propagateExceptionTo(completion) or .propagateExceptionTo((AsyncBackup) null) if you don't need async backup");
+        AsyncBackup firstAsyncBackup = this.asyncBackups.get(0);
+        AsyncBackup[] otherAsyncBackups = this.asyncBackups.subList(1, this.asyncBackups.size()).toArray(new AsyncBackup[0]);
+
+        DebugUtils.Assert(runnable != null, "runnable of doneHandler should not be null");
+        Finally(new FlowFinallyHandler(firstAsyncBackup, otherAsyncBackups) {
+            @Override
+            public void Finally() {
+                runnable.run();
+            }
+        });
+        return this;
+    }
+
     @Override
     public FlowChain setData(Map<String, Object> data) {
         if (data != null) {
@@ -756,6 +773,16 @@ public class SimpleFlowChain implements FlowTrigger, FlowRollback, FlowChain, Fl
     public FlowChain noRollback(boolean no) {
         skipRestRollbacks = no;
         return this;
+    }
+
+    public SimpleFlowChain noRollbackBefore() {
+        return then(Flow.of("no-rollback-before")
+                .handle(trigger -> trigger.next())
+                .rollback(trigger -> {
+                    trigger.skipRestRollbacks();
+                    trigger.rollback();
+                })
+                .build());
     }
 
     @Override

@@ -65,6 +65,10 @@ public class SyslogAppenderProxyFactory implements Log4j2AppenderProxyFactory {
             throw new ApiMessageInterceptionException(argerr("port can not be null"));
         }
 
+        if (configuration.port < 1 || configuration.port > 65535) {
+            throw new ApiMessageInterceptionException(argerr("port must be between 1 and 65535, but got %s", configuration.port));
+        }
+
         if (configuration.protocol == null) {
             throw new ApiMessageInterceptionException(argerr("protocol can not be null"));
         }

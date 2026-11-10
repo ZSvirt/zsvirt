@@ -488,10 +488,17 @@ public class HostManagerImpl extends AbstractService implements HostManager, Man
     }
 
     private void handle(final APIGetPhysicalMachineBlockDevicesMsg msg) {
+        Set<String> identifiers = extEmitter.getUsedBlockDeviceIdentifiers();
         APIGetPhysicalMachineBlockDevicesReply reply = new APIGetPhysicalMachineBlockDevicesReply();
         if (CoreGlobalProperty.UNIT_TEST_ON) {
             DebugUtils.Assert(msg.getPassword() != null, "password cannot be null");
-            BlockDevices blockDevices = BlockDevices.valueOf(BlockDevicesParser.parse(blockDevicesExample));
+            List<BlockDevicesParser.BlockDevice> collectedDevices = BlockDevicesParser.parse(blockDevicesExample);
+            Map<String, String> wwids = new HashMap<>();
+            Map<String, String> wwns = new HashMap<>();
+            collectBlockDeviceIdentifiers(blockDevicesExample, wwids, wwns);
+            extEmitter.filterUsedBlockDeviceRecords(collectedDevices,
+                    wwids, wwns, identifiers);
+            BlockDevices blockDevices = BlockDevices.valueOf(collectedDevices);
             blockDevices.filter(msg.getExcludedTypes());
             reply.setBlockDevices(blockDevices);
             bus.reply(msg, reply);
@@ -502,15 +509,22 @@ public class HostManagerImpl extends AbstractService implements HostManager, Man
         ssh.setUsername(msg.getUsername()).setPassword(msg.getPassword()).setPort(msg.getSshPort())
                 .setHostname(msg.getHostName()).setTimeout(20);
         try {
-            SshResult ret = ssh.command(getBlockDevicesCommand()).run();
+            SshResult ret = ssh.command(getBlockDevicesCommandWithIdentifiers()).run();
             ssh.reset();
             if (ret.getReturnCode() != 0) {
-                reply.setError(operr("failed to get disk devices, " +
-                                "because [stderr:%s, stdout:%s, exitErrorMessage:%s]",
-                        ret.getStderr(), ret.getStdout(), ret.getExitErrorMessage()));
+                reply.setError(operr("failed to get disk devices").withOpaque(ret));
                 reply.setSuccess(false);
             } else {
-                BlockDevices blockDevices = BlockDevices.valueOf(BlockDevicesParser.parse(ret.getStdout()));
+                logger.warn(String.format("block-device collection on physical machine[%s]: %s",
+                        msg.getHostName(), ret.getStderr()));
+                String blockDevicesStdout = ret.getStdout();
+                List<BlockDevicesParser.BlockDevice> collectedDevices = BlockDevicesParser.parse(blockDevicesStdout);
+                Map<String, String> wwids = new HashMap<>();
+                Map<String, String> wwns = new HashMap<>();
+                collectBlockDeviceIdentifiers(blockDevicesStdout, wwids, wwns);
+                extEmitter.filterUsedBlockDeviceRecords(collectedDevices,
+                        wwids, wwns, identifiers);
+                BlockDevices blockDevices = BlockDevices.valueOf(collectedDevices);
                 blockDevices.filter(msg.getExcludedTypes());
                 reply.setBlockDevices(blockDevices);
             }
@@ -558,12 +572,12 @@ public class HostManagerImpl extends AbstractService implements HostManager, Man
     }
 
     private void handle(final APIGetHostBlockDevicesMsg msg) {
-        APIGetHostBlockDevicesReply reply = new APIGetHostBlockDevicesReply();
         if (CoreGlobalProperty.UNIT_TEST_ON) {
-            bus.reply(msg, reply);
+            bus.reply(msg, new APIGetHostBlockDevicesReply());
             return;
         }
-
+        Set<String> identifiers = extEmitter.getUsedBlockDeviceIdentifiers();
+        APIGetHostBlockDevicesReply reply = new APIGetHostBlockDevicesReply();
         GetHostBlockDevicesMsg gmsg = new GetHostBlockDevicesMsg();
         gmsg.setHostUuid(msg.getUuid());
         bus.makeTargetServiceIdByResourceUuid(gmsg, HostConstant.SERVICE_ID, msg.getUuid());
@@ -574,6 +588,8 @@ public class HostManagerImpl extends AbstractService implements HostManager, Man
                     reply.setError(r.getError());
                 } else {
                     GetHostBlockDevicesReply gr = r.castReply();
+                    extEmitter.filterUsedBlockDevices(gr.getBlockDevices(),
+                            gr.getBlockDeviceWwids(), gr.getBlockDeviceWwns(), identifiers);
                     reply.setBlockDevices(gr.getBlockDevices());
                 }
                 bus.reply(msg, reply);

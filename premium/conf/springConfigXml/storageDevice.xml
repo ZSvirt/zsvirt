@@ -12,6 +12,12 @@
     http://zstack.org/schema/zstack/plugin.xsd"
        default-init-method="init" default-destroy-method="destroy">
 
+    <bean id="ScsiLunDeviceUsages" class="org.zstack.storage.device.ScsiLunDeviceUsages">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.host.HostBlockDeviceUsageExtensionPoint"/>
+        </zstack:plugin>
+    </bean>
+
     <bean id="StorageDeviceManagerImpl" class="org.zstack.storage.device.StorageDeviceManagerImpl">
         <zstack:plugin>
             <zstack:extension interface="org.zstack.header.Service"/>

@@ -11,8 +11,14 @@ import org.zstack.utils.Utils;
 import org.zstack.utils.logging.CLogger;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class HostExtensionPointEmitter implements Component {
     private static final CLogger logger = Utils.getLogger(HostExtensionPointEmitter.class);
@@ -25,6 +31,65 @@ public class HostExtensionPointEmitter implements Component {
     private List<HostChangeStateExtensionPoint> changeStateExts = new ArrayList<>();
     private List<HostConnectionReestablishExtensionPoint> connetionReestablishExts = new ArrayList<>();
     private List<HostAddExtensionPoint> addHostExts = new ArrayList<>();
+    private List<HostBlockDeviceUsageExtensionPoint> blockDeviceUsageExts = new ArrayList<>();
+
+    public Set<String> getUsedBlockDeviceIdentifiers() {
+        Set<String> identifiers = new HashSet<>();
+        for (HostBlockDeviceUsageExtensionPoint extension : blockDeviceUsageExts) {
+            identifiers.addAll(normalizeIdentifiers(extension.getUsedBlockDeviceIdentifiers()));
+        }
+        return identifiers;
+    }
+
+    public void filterUsedBlockDeviceRecords(List<BlockDevicesParser.BlockDevice> devices,
+                                            Map<String, String> wwids, Map<String, String> wwns,
+                                            Collection<String> identifiers) {
+        Set<String> usedIdentifiers = normalizeIdentifiers(identifiers);
+        if (!usedIdentifiers.isEmpty()) {
+            devices.removeIf(device -> hasUsedIdentifier(device, usedIdentifiers, wwids, wwns));
+        }
+    }
+
+    public void filterUsedBlockDevices(List<BlockDevices.BlockDevice> devices,
+                                      Map<String, String> wwids, Map<String, String> wwns,
+                                      Collection<String> identifiers) {
+        Set<String> usedIdentifiers = normalizeIdentifiers(identifiers);
+        if (devices != null && !usedIdentifiers.isEmpty()) {
+            devices.removeIf(device -> hasUsedIdentifier(device, usedIdentifiers, wwids, wwns));
+        }
+    }
+
+    private boolean hasUsedIdentifier(BlockDevicesParser.BlockDevice device, Set<String> identifiers,
+                                      Map<String, String> wwids, Map<String, String> wwns) {
+        return hasUsedIdentifier(device.getName(), identifiers, wwids, wwns) ||
+                device.getChildren() != null && device.getChildren().stream()
+                        .anyMatch(child -> hasUsedIdentifier(child, identifiers, wwids, wwns));
+    }
+
+    private boolean hasUsedIdentifier(BlockDevices.BlockDevice device, Set<String> identifiers,
+                                      Map<String, String> wwids, Map<String, String> wwns) {
+        return hasUsedIdentifier(device.getName(), identifiers, wwids, wwns) ||
+                device.getChildren() != null && device.getChildren().stream()
+                        .anyMatch(child -> hasUsedIdentifier(child, identifiers, wwids, wwns));
+    }
+
+    private boolean hasUsedIdentifier(String name, Set<String> identifiers,
+                                      Map<String, String> wwids, Map<String, String> wwns) {
+        String wwid = BlockDevicesParser.normalizeIdentifier(wwids == null ? null : wwids.get(name));
+        // An explicit empty identity records a failed LUN read. An absent key leaves ordinary local disks unchanged.
+        if (wwid != null && (wwid.isEmpty() || identifiers.contains(wwid))) {
+            return true;
+        }
+        String hexadecimalWwn = BlockDevicesParser.normalizeWwn(wwns == null ? null : wwns.get(name));
+        return hexadecimalWwn != null && !hexadecimalWwn.isEmpty() &&
+                (identifiers.contains(hexadecimalWwn) || identifiers.contains("0x" + hexadecimalWwn));
+    }
+
+    private Set<String> normalizeIdentifiers(Collection<String> identifiers) {
+        return identifiers.stream().map(BlockDevicesParser::normalizeIdentifier).filter(Objects::nonNull)
+                .filter(identifier -> !identifier.isEmpty())
+                .collect(Collectors.toSet());
+    }
 
     public void preDelete(HostInventory hinv) throws HostException {
         for (HostDeleteExtensionPoint extp : deleteHostExts) {
@@ -146,6 +211,7 @@ public class HostExtensionPointEmitter implements Component {
         changeStateExts = pluginRgty.getExtensionList(HostChangeStateExtensionPoint.class);
         connetionReestablishExts = pluginRgty.getExtensionList(HostConnectionReestablishExtensionPoint.class);
         addHostExts = pluginRgty.getExtensionList(HostAddExtensionPoint.class);
+        blockDeviceUsageExts = pluginRgty.getExtensionList(HostBlockDeviceUsageExtensionPoint.class);
     }
 
     @Override

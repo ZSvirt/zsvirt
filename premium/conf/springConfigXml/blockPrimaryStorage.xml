@@ -13,6 +13,12 @@
          http://zstack.org/schema/zstack/plugin.xsd"
        default-init-method="init" default-destroy-method="destroy">
 
+    <bean id="BlockPrimaryStorageDeviceUsages" class="org.zstack.storage.primary.block.BlockPrimaryStorageDeviceUsages">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.host.HostBlockDeviceUsageExtensionPoint"/>
+        </zstack:plugin>
+    </bean>
+
     <bean id="BlockPrimaryStorageFactory" class=" org.zstack.storage.primary.block.BlockPrimaryStorageFactory">
         <zstack:plugin>
             <zstack:extension interface="org.zstack.header.storage.primary.PrimaryStorageFactory" />

@@ -7743,6 +7743,8 @@ public class KVMHost extends HostBase implements Host {
                     return;
                 }
                 reply.setBlockDevices(rsp.getBlockDevices());
+                reply.setBlockDeviceWwids(rsp.getBlockDeviceWwids());
+                reply.setBlockDeviceWwns(rsp.getBlockDeviceWwns());
                 bus.reply(msg, reply);
                 completion.done();
             }

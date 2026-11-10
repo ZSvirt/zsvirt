@@ -1,6 +1,7 @@
 package org.zstack.test.integration.guesttools
 
 import org.springframework.http.HttpEntity
+import org.springframework.web.util.UriComponentsBuilder
 import org.zstack.compute.host.HostGlobalConfig
 import org.zstack.compute.host.HostTrackImpl
 import org.zstack.compute.host.MevocoKVMAgentCommands
@@ -20,14 +21,21 @@ import org.zstack.guesttools.GuestToolsZWatchState
 import org.zstack.guesttools.UpdateGuestToolsStateMsg
 import org.zstack.guesttools.UpdateGuestToolsStateReply
 import org.zstack.guesttools.kvm.GuestToolsKvmCommands
+import org.zstack.header.network.l3.L3NetworkConstant
+import org.zstack.header.network.l3.L3NetworkVO
+import org.zstack.header.network.l3.UsedIpVO
+import org.zstack.header.rest.RESTConstant
+import org.zstack.header.rest.RESTFacade
 import org.zstack.header.vm.DiskAO
 import org.zstack.header.vm.VmInstanceVO
+import org.zstack.header.vm.VmNicVO
 import org.zstack.image.ImageSystemTags
 import org.zstack.sdk.VmInstanceInventory
 import org.zstack.sdk.guesttools.GuestToolsStateInventory
 import org.zstack.testlib.EnvSpec
 import org.zstack.testlib.SubCase
 import org.zstack.utils.gson.JSONObjectUtil
+import org.zstack.utils.network.IPv6Constants
 import org.zstack.zwatch.api.GetMetricDataMsg
 import org.zstack.zwatch.api.GetMetricDataReply
 import org.zstack.zwatch.datatype.Datapoint
@@ -146,6 +154,7 @@ class GuestToolsStateCase extends SubCase {
             testQgaStateAutoUpdated()
             testMissingGuestToolsStateCanBeRecovered()
             testWindowsVersionRefresh()
+            testMigratedStaticIpv4SurvivesIpv6Sync()
         }
     }
 
@@ -350,6 +359,84 @@ class GuestToolsStateCase extends SubCase {
             assert requests == [GuestToolsConstant.GET_VM_ZWATCH_STATUS_PATH]
             assert qgaRequests.isEmpty()
         }
+    }
+
+    void testMigratedStaticIpv4SurvivesIpv6Sync() {
+        String ip = "192.168.101.20"
+        String netmask = "255.255.255.0"
+        String gateway = "192.168.101.1"
+        String ipv6 = "2001:db8::20"
+        String l2Id = env.inventoryByName("l2").uuid
+        String imageId = env.inventoryByName("image1").uuid
+        String clusterId = env.inventoryByName("cluster").uuid
+        def dbf = bean(DatabaseFacade.class)
+        String l3Id = createL3Network {
+            name = "migration-no-ipam"
+            l2NetworkUuid = l2Id
+            type = L3NetworkConstant.L3_BASIC_NETWORK_TYPE
+            category = "Private"
+            enableIPAM = false
+        }.uuid
+        L3NetworkVO l3 = dbf.findByUuid(l3Id, L3NetworkVO.class)
+        assert !l3.enableIpAllocation()
+        assert !l3.enableIPAM
+
+        VmInstanceInventory vm = createVmInstance {
+            name = "migrated-dual-stack"
+            description = "Created By Migration Service"
+            cpuNum = 1
+            memorySize = gb(1)
+            imageUuid = imageId
+            diskAOs = [DiskAO.rootDisk()]
+            l3NetworkUuids = [l3Id]
+            clusterUuid = clusterId
+            systemTags = ["staticIp::${l3Id}::${ip}", "ipv4Netmask::${l3Id}::${netmask}",
+                          "ipv4Gateway::${l3Id}::${gateway}"]
+        }
+        String nicUuid = vm.vmNics[0].uuid
+        String mac = vm.vmNics[0].mac
+        List<String> ipv4Report = ["${ip}/24".toString(), "gateway:${gateway}".toString()]
+        reportGuestAddresses(vm.uuid, mac, ipv4Report + ["${ipv6}/64", "gateway6:2001:db8::1"])
+
+        VmNicVO nic = dbf.findByUuid(nicUuid, VmNicVO.class)
+        String usedIpUuid = nic.usedIpUuid
+        assert usedIpUuid != null
+        assert nic.usedIps.any { it.ipVersion == IPv6Constants.IPv6 }
+
+        def assertStaticIpv4 = {
+            VmNicVO updatedNic = dbf.findByUuid(nicUuid, VmNicVO.class)
+            assert updatedNic.ip == ip
+            assert updatedNic.netmask == netmask
+            assert updatedNic.gateway == gateway
+            assert updatedNic.ipVersion == IPv6Constants.IPv4
+            assert updatedNic.usedIpUuid == usedIpUuid
+            assert dbf.findByUuid(usedIpUuid, UsedIpVO.class).ip == ip
+        }
+
+        reportGuestAddresses(vm.uuid, mac, [""])
+        assertStaticIpv4()
+        assert !dbf.findByUuid(nicUuid, VmNicVO.class).usedIps.any { it.ipVersion == IPv6Constants.IPv6 }
+
+        reportGuestAddresses(vm.uuid, mac, ipv4Report)
+        assertStaticIpv4()
+
+        reportGuestAddresses(vm.uuid, mac, ["", "${ipv6}/64", "gateway6:2001:db8::1"])
+        assertStaticIpv4()
+        reportGuestAddresses(vm.uuid, mac, ["", "${ipv6}/64", "gateway6:2001:db8::2"])
+        assertStaticIpv4()
+        assert dbf.findByUuid(nicUuid, VmNicVO.class).usedIps.any {
+            it.ipVersion == IPv6Constants.IPv6 && it.gateway == "2001:db8::2"
+        }
+    }
+
+    private void reportGuestAddresses(String vmUuid, String mac, List<String> addresses) {
+        RESTFacade restf = bean(RESTFacade.class)
+        String url = UriComponentsBuilder.fromHttpUrl(restf.getBaseUrl())
+                .path(RESTConstant.COMMAND_CHANNEL_PATH).build().toUriString()
+        def cmd = new GuestToolsKvmCommands.QGANicInfoResultCmd(
+                vmUuid: vmUuid, nicInfo: JSONObjectUtil.toJsonString([(mac): addresses]))
+        def headers = [(RESTConstant.COMMAND_PATH): GuestToolsKvmCommands.QGA_VM_SYNC_NETWORK_INFO_PATH]
+        restf.syncJsonPost(url, JSONObjectUtil.toJsonString(cmd), headers, String.class)
     }
 
     private VmInstanceInventory createVm(String vmName, String imageName = "image1") {

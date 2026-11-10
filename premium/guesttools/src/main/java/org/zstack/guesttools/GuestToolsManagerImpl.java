@@ -2420,7 +2420,8 @@ public class GuestToolsManagerImpl extends AbstractService implements GuestTools
                         return;
                     }
 
-                    if (StringUtils.isEmpty(newInfo.getIpAddress())) {
+                    if (StringUtils.isEmpty(newInfo.getIpAddress())
+                            && !nicsRestoringStaticIpv4.contains(nicVO.getUuid())) {
                         nicVO.removeIp();
                         nicVOUpdateSet.add(nicVO);
                     }
@@ -2476,8 +2477,7 @@ public class GuestToolsManagerImpl extends AbstractService implements GuestTools
 
                 // not the first time to sync an empty ip to delete the IPv4,
                 // or the first time to sync an empty IPv4 whose nic does not have IPv4
-                if ((oldInfo.getIpAddress() != null || oldIpv4Set.isEmpty()) &&
-                        StringUtils.isEmpty(newInfo.getIpAddress())) {
+                if (canUpdatePrimaryAddressFromIpv6()) {
                     nicVO.setUsedIpUuid(usedIpVO.getUuid());
                     nicVO.setIp(usedIpVO.getIp());
                     nicVO.setNetmask(usedIpVO.getNetmask());
@@ -2514,6 +2514,12 @@ public class GuestToolsManagerImpl extends AbstractService implements GuestTools
                 nicVOUpdateSet.add(nicVO);
             }
 
+            private boolean canUpdatePrimaryAddressFromIpv6() {
+                return !nicsRestoringStaticIpv4.contains(nicVO.getUuid())
+                        && (oldInfo.getIpAddress() != null || oldIpv4Set.isEmpty())
+                        && StringUtils.isEmpty(newInfo.getIpAddress());
+            }
+
             private void syncIpv6Gateway() {
                 if (!Objects.equals(oldInfo.getIpv6Address(), newInfo.getIpv6Address()) ||
                         Objects.equals(oldInfo.getIpv6Gateway(), newInfo.getIpv6Gateway())) {
@@ -2534,8 +2540,7 @@ public class GuestToolsManagerImpl extends AbstractService implements GuestTools
 
                 usedIpVO.setGateway(newInfo.getIpv6Gateway());
                 usedIpVOUpdateSet.add(usedIpVO);
-                if ((oldInfo.getIpAddress() != null || oldIpv4Set.isEmpty()) &&
-                        StringUtils.isEmpty(newInfo.getIpAddress())) {
+                if (canUpdatePrimaryAddressFromIpv6()) {
                     nicVO.setGateway(usedIpVO.getGateway());
                     nicVOUpdateSet.add(nicVO);
                 }

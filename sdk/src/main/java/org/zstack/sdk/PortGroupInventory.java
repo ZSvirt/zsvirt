@@ -4,6 +4,14 @@ import org.zstack.sdk.PortGroupVlanMode;
 
 public class PortGroupInventory extends org.zstack.sdk.L3NetworkInventory {
 
+    public java.lang.String tenantRouterUuid;
+    public void setTenantRouterUuid(java.lang.String tenantRouterUuid) {
+        this.tenantRouterUuid = tenantRouterUuid;
+    }
+    public java.lang.String getTenantRouterUuid() {
+        return this.tenantRouterUuid;
+    }
+
     public java.lang.String vSwitchUuid;
     public void setVSwitchUuid(java.lang.String vSwitchUuid) {
         this.vSwitchUuid = vSwitchUuid;

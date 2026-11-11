@@ -12,7 +12,7 @@ import org.zstack.header.rest.RestRequest;
         responseClass = APIUpdatePortGroupEvent.class
 )
 public class APIUpdatePortGroupMsg extends APIUpdateL3NetworkMsg {
-    @APIParam(required = false, maxLength = 32, emptyString = false)
+    @APIParam(required = false, maxLength = 32, emptyString = true)
     private String tenantRouterUuid;
 
     public String getTenantRouterUuid() {

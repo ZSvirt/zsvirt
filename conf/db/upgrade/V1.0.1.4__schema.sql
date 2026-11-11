@@ -164,6 +164,7 @@ CREATE TABLE IF NOT EXISTS ZnsSegmentRefVO (
     znsInfoUuid char(32) NOT NULL,
     znsSegmentUuid char(32) NOT NULL,
     znsTransportZoneUuid char(32),
+    tenantRouterUuid char(32) DEFAULT NULL,
     transportType varchar(32),
     virtualNetworkId int,
     configVersion bigint,

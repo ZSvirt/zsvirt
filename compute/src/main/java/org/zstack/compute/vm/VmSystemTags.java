@@ -59,6 +59,9 @@ public class VmSystemTags {
     public static String SYNC_HOSTNAME_TOKEN = "syncHostname";
     public static SystemTag SYNC_HOSTNAME = new SystemTag(String.format("syncHostname::{%s}", SYNC_HOSTNAME_TOKEN), VmInstanceVO.class);
 
+    public static SystemTag ZMIGRATE_TARGET = new SystemTag("zmigrateTarget", VmInstanceVO.class)
+            .markAsAdminOnly().disableClone();
+
     // no need to set vmInstanceUuid
     public static SystemTag SYNC_DNS = new SystemTag("syncConfig::dns", VmInstanceVO.class);
 

@@ -2076,7 +2076,7 @@ public class GuestToolsManagerImpl extends AbstractService implements GuestTools
         VmInstanceVO vm = dbf.findByUuid(vmUuid, VmInstanceVO.class);
         Map<String, List<String>> migrationStaticIps = vm != null
                 && ImagePlatform.Windows.toString().equals(vm.getPlatform())
-                && "Created By Migration Service".equals(vm.getDescription())
+                && VmSystemTags.ZMIGRATE_TARGET.hasTag(vmUuid)
                 ? ipOperator.getStaticIpByVmUuid(vmUuid) : Collections.emptyMap();
         Set<String> nicsRestoringStaticIpv4 = new HashSet<>();
         boolean portsPending = vmConfigSyncHelper.vmNeedSyncPorts(vmUuid);

@@ -8,6 +8,7 @@ import org.zstack.accessKey.AccessKeyVO_;
 import org.zstack.accessKey.CreateAccessKeyMsg;
 import org.zstack.accessKey.CreateAccessKeyReply;
 import org.zstack.compute.vm.VmInstanceUtils;
+import org.zstack.compute.vm.VmSystemTags;
 import org.zstack.header.apimediator.ApiMessageInterceptionException;
 import org.zstack.core.CoreGlobalProperty;
 import org.zstack.core.Platform;
@@ -56,6 +57,7 @@ import org.zstack.header.vm.CreateVmInstanceReply;
 import org.zstack.header.vm.DestroyVmInstanceMsg;
 import org.zstack.header.vm.VmInstanceConstant;
 import org.zstack.header.vm.VmInstanceDeletionPolicyManager;
+import org.zstack.header.vm.VmInstanceCreateExtensionPoint;
 import org.zstack.header.vm.VmInstanceInventory;
 import org.zstack.header.vm.VmInstanceState;
 import org.zstack.header.vm.VmInstanceVO;
@@ -129,6 +131,7 @@ public class ZMigrateManager extends AbstractService implements
         , UploadSoftwarePackageToVmBackend
         , EstimatedImageSizeExtensionPoint
         , ManagementNodeReadyExtensionPoint
+        , VmInstanceCreateExtensionPoint
 {
     private static final CLogger logger = Utils.getLogger(ZMigrateManager.class);
     @Autowired
@@ -174,6 +177,26 @@ public class ZMigrateManager extends AbstractService implements
 
     @Override
     public void managementNodeReady() {
+    }
+
+    @Override
+    public void preCreateVmInstance(CreateVmInstanceMsg msg) {
+    }
+
+    @Override
+    public void afterPersistVmInstanceVO(VmInstanceVO vo, CreateVmInstanceMsg msg) {
+        if (!ImagePlatform.Windows.toString().equals(vo.getPlatform()) || !isZMigrateBootImage(vo.getImageUuid())) {
+            return;
+        }
+        SystemTagCreator creator = VmSystemTags.ZMIGRATE_TARGET.newSystemTagCreator(vo.getUuid());
+        creator.inherent = true;
+        creator.ignoreIfExisting = true;
+        creator.create();
+    }
+
+    @Override
+    public void afterRollbackPersistVmInstanceVO(VmInstanceVO vo, CreateVmInstanceMsg msg) {
+        VmSystemTags.ZMIGRATE_TARGET.deleteInherentTag(vo.getUuid());
     }
 
     @Override

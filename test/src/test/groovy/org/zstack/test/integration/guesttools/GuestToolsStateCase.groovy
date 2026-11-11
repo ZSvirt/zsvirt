@@ -7,6 +7,7 @@ import org.zstack.compute.host.HostTrackImpl
 import org.zstack.compute.host.MevocoKVMAgentCommands
 import org.zstack.compute.host.MevocoKVMConstant
 import org.zstack.compute.vm.VmSystemTags
+import org.zstack.core.Platform
 import org.zstack.core.cloudbus.CloudBus
 import org.zstack.core.db.DatabaseFacade
 import org.zstack.guesttools.GetVmGuestToolsInfoMsg
@@ -32,10 +33,13 @@ import org.zstack.header.vm.VmNicVO
 import org.zstack.image.ImageSystemTags
 import org.zstack.sdk.VmInstanceInventory
 import org.zstack.sdk.guesttools.GuestToolsStateInventory
+import org.zstack.softwarePackage.entity.SoftwarePackageVO
 import org.zstack.testlib.EnvSpec
 import org.zstack.testlib.SubCase
 import org.zstack.utils.gson.JSONObjectUtil
 import org.zstack.utils.network.IPv6Constants
+import org.zstack.zmigrate.ZMigrateConstant
+import org.zstack.zmigrate.ZMigrateSystemTags
 import org.zstack.zwatch.api.GetMetricDataMsg
 import org.zstack.zwatch.api.GetMetricDataReply
 import org.zstack.zwatch.datatype.Datapoint
@@ -43,6 +47,7 @@ import org.zstack.zwatch.namespace.VmNamespace
 
 class GuestToolsStateCase extends SubCase {
     EnvSpec env
+    SoftwarePackageVO migrationPackage
     Integer originalPingInterval
     volatile boolean qgaRunning
     volatile boolean zsToolsFound
@@ -154,7 +159,8 @@ class GuestToolsStateCase extends SubCase {
             testQgaStateAutoUpdated()
             testMissingGuestToolsStateCanBeRecovered()
             testWindowsVersionRefresh()
-            testMigratedStaticIpv4SurvivesIpv6Sync()
+            testStaticIpv4SyncAfterDescriptionEdit(true)
+            testStaticIpv4SyncAfterDescriptionEdit(false)
         }
     }
 
@@ -361,17 +367,17 @@ class GuestToolsStateCase extends SubCase {
         }
     }
 
-    void testMigratedStaticIpv4SurvivesIpv6Sync() {
+    void testStaticIpv4SyncAfterDescriptionEdit(boolean migrationTarget) {
         String ip = "192.168.101.20"
         String netmask = "255.255.255.0"
         String gateway = "192.168.101.1"
         String ipv6Cidr = "2001:db8::20/64"
         String l2Id = env.inventoryByName("l2").uuid
-        String imageId = env.inventoryByName("image1").uuid
+        String imageId = env.inventoryByName(migrationTarget ? "image2" : "image1").uuid
         String clusterId = env.inventoryByName("cluster").uuid
         def dbf = bean(DatabaseFacade.class)
         String l3Id = createL3Network {
-            name = "migration-no-ipam"
+            name = migrationTarget ? "migration-no-ipam" : "ordinary-no-ipam"
             l2NetworkUuid = l2Id
             type = L3NetworkConstant.L3_BASIC_NETWORK_TYPE
             category = "Private"
@@ -381,17 +387,33 @@ class GuestToolsStateCase extends SubCase {
         assert !l3.enableIpAllocation()
         assert !l3.enableIPAM
 
+        if (migrationTarget) {
+            migrationPackage = new SoftwarePackageVO(
+                    uuid: Platform.uuid, name: "migration-test-package",
+                    type: ZMigrateConstant.ZMIGRATE_SOFTWARE_PACKAGE_TYPE)
+            migrationPackage = dbf.persist(migrationPackage)
+            def creator = ZMigrateSystemTags.ZMIGRATE_LINUX_BOOT_IMAGE.newSystemTagCreator(migrationPackage.uuid)
+            creator.inherent = true
+            creator.setTagByTokens([(ZMigrateSystemTags.ZMIGRATE_LINUX_BOOT_IMAGE_TOKEN): imageId])
+            creator.create()
+        }
+
         VmInstanceInventory vm = createVmInstance {
-            name = "migrated-dual-stack"
-            description = "Created By Migration Service"
+            name = migrationTarget ? "migrated-dual-stack" : "ordinary-dual-stack"
             cpuNum = 1
             memorySize = gb(1)
             imageUuid = imageId
+            platform = "Windows"
             diskAOs = [DiskAO.rootDisk()]
             l3NetworkUuids = [l3Id]
             clusterUuid = clusterId
             systemTags = ["staticIp::${l3Id}::${ip}", "ipv4Netmask::${l3Id}::${netmask}",
                           "ipv4Gateway::${l3Id}::${gateway}"]*.toString()
+        }
+        assert VmSystemTags.ZMIGRATE_TARGET.hasTag(vm.uuid) == migrationTarget
+        updateVmInstance {
+            uuid = vm.uuid
+            description = migrationTarget ? "Updated migration VM description" : "Created By Migration Service"
         }
         String nicUuid = vm.vmNics[0].uuid
         String mac = vm.vmNics[0].mac
@@ -414,6 +436,11 @@ class GuestToolsStateCase extends SubCase {
         }
 
         reportGuestAddresses(vm.uuid, mac, [""])
+        if (!migrationTarget) {
+            assert dbf.findByUuid(nicUuid, VmNicVO.class).ip == null
+            assert dbf.findByUuid(usedIpUuid, UsedIpVO.class) == null
+            return
+        }
         assertStaticIpv4()
         assert !dbf.findByUuid(nicUuid, VmNicVO.class).usedIps.any { it.ipVersion == IPv6Constants.IPv6 }
 
@@ -468,6 +495,10 @@ class GuestToolsStateCase extends SubCase {
         HostTrackImpl.alwaysStartRightNow = false
         if (originalPingInterval != null) {
             HostGlobalConfig.PING_HOST_INTERVAL.updateValue(originalPingInterval)
+        }
+        if (migrationPackage != null) {
+            ZMigrateSystemTags.ZMIGRATE_LINUX_BOOT_IMAGE.deleteInherentTag(migrationPackage.uuid)
+            bean(DatabaseFacade.class).remove(migrationPackage)
         }
         env.delete()
     }

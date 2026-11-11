@@ -88,6 +88,18 @@ public class ZMigrateUtils {
                 ZMIGRATE_GATEWAY_IMAGE_TOKEN, softwarePackageUuid));
     }
 
+    public static boolean isZMigrateBootImage(String imageUuid) {
+        if (imageUuid == null) {
+            return false;
+        }
+        String softwarePackageUuid = getSoftwarePackageUuid();
+        // A Windows migration can boot the target from the Linux replication image.
+        return imageUuid.equals(getTokenFromTag(ZMIGRATE_LINUX_BOOT_IMAGE,
+                    ZMIGRATE_LINUX_BOOT_IMAGE_TOKEN, softwarePackageUuid))
+                || imageUuid.equals(getTokenFromTag(ZMIGRATE_WINDOWS_BOOT_IMAGE,
+                    ZMIGRATE_WINDOWS_BOOT_IMAGE_TOKEN, softwarePackageUuid));
+    }
+
     private static Map<String, ImageInventory> getImagesByTags(SystemTag[] tags, String[] tokenNames) {
         String softwarePackageUuid = getSoftwarePackageUuid();
         String[] imageUuidsByToken = new String[tags.length];

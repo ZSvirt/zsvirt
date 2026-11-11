@@ -75,6 +75,7 @@ import org.zstack.utils.logging.CLogger;
 import org.zstack.utils.network.IPv6Constants;
 import org.zstack.utils.network.IPv6NetworkUtils;
 import org.zstack.utils.network.NetworkUtils;
+import org.zstack.zmigrate.ZMigrateSystemTags;
 import org.zstack.utils.path.PathUtil;
 
 import javax.persistence.TypedQuery;
@@ -2073,6 +2074,13 @@ public class GuestToolsManagerImpl extends AbstractService implements GuestTools
             oldInfoMap.putIfAbsent(oldInfo.getVmNicUuid() != null ? oldInfo.getVmNicUuid() : oldInfo.getVmInstanceUuid(), oldInfo);
         }
 
+        VmInstanceVO vm = dbf.findByUuid(vmUuid, VmInstanceVO.class);
+        Map<String, List<String>> migrationStaticIps = vm != null
+                && ImagePlatform.Windows.toString().equals(vm.getPlatform())
+                && ZMigrateSystemTags.ZMIGRATE_TARGET.hasTag(vmUuid)
+                ? ipOperator.getStaticIpByVmUuid(vmUuid) : Collections.emptyMap();
+        Set<String> nicsRestoringStaticIpv4 = new HashSet<>();
+        boolean portsPending = vmConfigSyncHelper.vmNeedSyncPorts(vmUuid);
         Set<VmNicVO> updatedNicSet = new HashSet<>();
         Set<VmNicVO> nicVOUpdateSet = new HashSet<>();
         Set<VmNicVO> nicNeedSyncToVmSet = new HashSet<>();
@@ -2151,12 +2159,23 @@ public class GuestToolsManagerImpl extends AbstractService implements GuestTools
             }
 
             public void getFromIpv4() {
+                String observedIp = NetworkUtils.getIp(newInfo.getIpAddress());
+                String desiredIp = usedIpVO.getIp();
+                if (desiredIp != null && !NetworkUtils.isInternalAddress(desiredIp)
+                        && migrationStaticIps.getOrDefault(nicVO.getL3NetworkUuid(), Collections.emptyList()).contains(desiredIp)
+                        && (StringUtils.isEmpty(observedIp) || NetworkUtils.isInternalAddress(observedIp)
+                            || (portsPending && !Objects.equals(desiredIp, observedIp)))) {
+                    nicsRestoringStaticIpv4.add(nicVO.getUuid());
+                    nicNeedSyncToVmSet.add(nicVO);
+                    return;
+                }
                 if (Objects.equals(oldInfo.getIpAddress(), newInfo.getIpAddress())) {
                     return;
                 }
 
                 // Windows vm with APIPA
-                if (oldInfo.getIpAddress() == null && usedIpVO.getIp() != null && !NetworkUtils.isInternalAddress(usedIpVO.getIp())
+                if (oldInfo.getIpAddress() == null
+                        && usedIpVO.getIp() != null && !NetworkUtils.isInternalAddress(usedIpVO.getIp())
                         && NetworkUtils.isInternalAddress(NetworkUtils.getIp(newInfo.getIpAddress()))) {
                     logger.debug(String.format("QGA find vm[uuid:%s] internal ip[%s] for nic[uuid:%s] which is assigned by APIPA and has not been synced yet",
                             vmUuid, newInfo.getIpAddress(), nicVO.getUuid()));
@@ -2219,6 +2238,9 @@ public class GuestToolsManagerImpl extends AbstractService implements GuestTools
             }
 
             public void getFromGateway() {
+                if (nicsRestoringStaticIpv4.contains(nicVO.getUuid())) {
+                    return;
+                }
                 // ip does not exist, so no need to sync gateway
                 if (usedIpVO.getUuid() == null && StringUtils.isEmpty(newInfo.getIpAddress())) {
                     newInfo.setGateway(null);
@@ -2309,6 +2331,9 @@ public class GuestToolsManagerImpl extends AbstractService implements GuestTools
             }
 
             private void syncIpv4() {
+                if (nicsRestoringStaticIpv4.contains(nicVO.getUuid())) {
+                    return;
+                }
                 if (Objects.equals(oldInfo.getIpAddress(), newInfo.getIpAddress())) {
                     return;
                 }
@@ -2396,7 +2421,8 @@ public class GuestToolsManagerImpl extends AbstractService implements GuestTools
                         return;
                     }
 
-                    if (StringUtils.isEmpty(newInfo.getIpAddress())) {
+                    if (StringUtils.isEmpty(newInfo.getIpAddress())
+                            && !nicsRestoringStaticIpv4.contains(nicVO.getUuid())) {
                         nicVO.removeIp();
                         nicVOUpdateSet.add(nicVO);
                     }
@@ -2452,8 +2478,7 @@ public class GuestToolsManagerImpl extends AbstractService implements GuestTools
 
                 // not the first time to sync an empty ip to delete the IPv4,
                 // or the first time to sync an empty IPv4 whose nic does not have IPv4
-                if ((oldInfo.getIpAddress() != null || oldIpv4Set.isEmpty()) &&
-                        StringUtils.isEmpty(newInfo.getIpAddress())) {
+                if (canUpdatePrimaryAddressFromIpv6()) {
                     nicVO.setUsedIpUuid(usedIpVO.getUuid());
                     nicVO.setIp(usedIpVO.getIp());
                     nicVO.setNetmask(usedIpVO.getNetmask());
@@ -2464,6 +2489,9 @@ public class GuestToolsManagerImpl extends AbstractService implements GuestTools
             }
 
             private void syncGateway() {
+                if (nicsRestoringStaticIpv4.contains(nicVO.getUuid())) {
+                    return;
+                }
                 if (!Objects.equals(oldInfo.getIpAddress(), newInfo.getIpAddress()) ||
                         Objects.equals(oldInfo.getGateway(), newInfo.getGateway())) {
                     return;
@@ -2487,6 +2515,12 @@ public class GuestToolsManagerImpl extends AbstractService implements GuestTools
                 nicVOUpdateSet.add(nicVO);
             }
 
+            private boolean canUpdatePrimaryAddressFromIpv6() {
+                return !nicsRestoringStaticIpv4.contains(nicVO.getUuid())
+                        && (oldInfo.getIpAddress() != null || oldIpv4Set.isEmpty())
+                        && StringUtils.isEmpty(newInfo.getIpAddress());
+            }
+
             private void syncIpv6Gateway() {
                 if (!Objects.equals(oldInfo.getIpv6Address(), newInfo.getIpv6Address()) ||
                         Objects.equals(oldInfo.getIpv6Gateway(), newInfo.getIpv6Gateway())) {
@@ -2507,8 +2541,7 @@ public class GuestToolsManagerImpl extends AbstractService implements GuestTools
 
                 usedIpVO.setGateway(newInfo.getIpv6Gateway());
                 usedIpVOUpdateSet.add(usedIpVO);
-                if ((oldInfo.getIpAddress() != null || oldIpv4Set.isEmpty()) &&
-                        StringUtils.isEmpty(newInfo.getIpAddress())) {
+                if (canUpdatePrimaryAddressFromIpv6()) {
                     nicVO.setGateway(usedIpVO.getGateway());
                     nicVOUpdateSet.add(nicVO);
                 }
@@ -2523,16 +2556,16 @@ public class GuestToolsManagerImpl extends AbstractService implements GuestTools
             List<L3NetworkVO> l3s = Q.New(L3NetworkVO.class).in(L3NetworkVO_.uuid,
                     updatedNicSet.stream().map(VmNicVO::getL3NetworkUuid).collect(Collectors.toList())).list();
             // Send alarm if nic use l3 without dhcp
-            updatedNicSet.forEach(nicVO -> {
+            for (VmNicVO nicVO : updatedNicSet) {
                 // only support l3 without dhcp
                 if (l3s.stream().noneMatch(l3 -> l3.getUuid().equals(nicVO.getL3NetworkUuid()) && !l3.enableIpAllocation())) {
-                    return;
+                    continue;
                 }
 
                 new GuestNetworkInfoSynchronizer(nicVO, l3s.stream().anyMatch(l3 ->
                         l3.getUuid().equals(nicVO.getL3NetworkUuid()) && l3.getEnableIPAM()))
                         .syncGuestNetworkInfo();
-            });
+            }
         }
 
         if(!updatedNicSet.isEmpty() && !ipConflict) {

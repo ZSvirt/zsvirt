@@ -7,6 +7,7 @@ import org.zstack.testlib.Test
 class GuestToolsTest extends Test {
     static SpringSpec springSpec = makeSpring {
         include(ZStackTest.springSpec)
+        agents()
         include("guesttools.xml")
         include("zwatch.xml")
         include("zwatchDB.xml")

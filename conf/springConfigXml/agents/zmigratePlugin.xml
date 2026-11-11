@@ -21,6 +21,7 @@
             <zstack:extension interface="org.zstack.softwarePackage.compute.UploadSoftwarePackageToVmBackend"/>
             <zstack:extension interface="org.zstack.softwarePackage.compute.EstimatedImageSizeExtensionPoint"/>
             <zstack:extension interface="org.zstack.header.managementnode.ManagementNodeReadyExtensionPoint"/>
+            <zstack:extension interface="org.zstack.header.vm.VmInstanceCreateExtensionPoint"/>
         </zstack:plugin>
     </bean>
 

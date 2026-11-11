@@ -12,4 +12,6 @@ public class PrivateKeyConstant {
     public static final String PRIVATE_KEY_FOLDER = "/var/lib/zstack/pk";
     public static final String COMMONS_PRIVATE_KEY_PATH = "commons/ed25519";
     public static final String COMMONS_PUBLIC_KEY_PATH = "commons/ed25519.pub";
+
+    public static final String ED25519_SERVICE_ID = "ed25519";
 }

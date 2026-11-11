@@ -108,6 +108,8 @@ public class VirtualSwitchApiInterceptor implements GlobalApiMessageInterceptor 
             validate((APIUpdateVirtualSwitchUplinkBondingsMsg) msg);
         } else if (msg instanceof APIUpdateVirtualSwitchUplinkGroupMsg) {
             validate((APIUpdateVirtualSwitchUplinkGroupMsg) msg);
+        } else if (msg instanceof APIUpdateL2NetworkMsg) {
+            validate((APIUpdateL2NetworkMsg) msg);
         } else if (msg instanceof APIDeleteL2NetworkMsg) {
             validate((APIDeleteL2NetworkMsg) msg);
         } else if (msg instanceof APIDeletePortGroupMsg) {
@@ -164,6 +166,7 @@ public class VirtualSwitchApiInterceptor implements GlobalApiMessageInterceptor 
         ret.add(APIDetachL2NetworkFromClusterMsg.class);
         ret.add(APIDetachL2NetworkFromHostMsg.class);
         ret.add(APICreateL3NetworkMsg.class);
+        ret.add(APIUpdateL2NetworkMsg.class);
         ret.add(APIDeleteL2NetworkMsg.class);
         ret.add(APIDeleteL3NetworkMsg.class);
         ret.add(APIUpdateL2NetworkVirtualNetworkIdMsg.class);
@@ -176,6 +179,22 @@ public class VirtualSwitchApiInterceptor implements GlobalApiMessageInterceptor 
     @Override
     public InterceptorPosition getPosition() {
         return InterceptorPosition.END;
+    }
+
+    private void validate(APIUpdateL2NetworkMsg msg) {
+        if (msg.getName() == null && msg.getDescription() == null) {
+            return;
+        }
+
+        if (Q.New(L2VirtualSwitchNetworkVO.class)
+                .eq(L2VirtualSwitchNetworkVO_.uuid, msg.getUuid())
+                .eq(L2VirtualSwitchNetworkVO_.vSwitchType, "ZNS")
+                .eq(L2VirtualSwitchNetworkVO_.isDistributed, true)
+                .isExists()) {
+            throw new ApiMessageInterceptionException(operr(
+                    "ZNS system distributed virtual switch[uuid:%s] does not support updating name or description",
+                    msg.getUuid()));
+        }
     }
 
     private void validate(APIDeleteL2NetworkMsg msg) {

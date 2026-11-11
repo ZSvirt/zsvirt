@@ -75,6 +75,7 @@ import org.zstack.utils.logging.CLogger;
 import org.zstack.utils.network.IPv6Constants;
 import org.zstack.utils.network.IPv6NetworkUtils;
 import org.zstack.utils.network.NetworkUtils;
+import org.zstack.zmigrate.ZMigrateSystemTags;
 import org.zstack.utils.path.PathUtil;
 
 import javax.persistence.TypedQuery;
@@ -2076,7 +2077,7 @@ public class GuestToolsManagerImpl extends AbstractService implements GuestTools
         VmInstanceVO vm = dbf.findByUuid(vmUuid, VmInstanceVO.class);
         Map<String, List<String>> migrationStaticIps = vm != null
                 && ImagePlatform.Windows.toString().equals(vm.getPlatform())
-                && VmSystemTags.ZMIGRATE_TARGET.hasTag(vmUuid)
+                && ZMigrateSystemTags.ZMIGRATE_TARGET.hasTag(vmUuid)
                 ? ipOperator.getStaticIpByVmUuid(vmUuid) : Collections.emptyMap();
         Set<String> nicsRestoringStaticIpv4 = new HashSet<>();
         boolean portsPending = vmConfigSyncHelper.vmNeedSyncPorts(vmUuid);

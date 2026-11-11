@@ -8,7 +8,6 @@ import org.zstack.accessKey.AccessKeyVO_;
 import org.zstack.accessKey.CreateAccessKeyMsg;
 import org.zstack.accessKey.CreateAccessKeyReply;
 import org.zstack.compute.vm.VmInstanceUtils;
-import org.zstack.compute.vm.VmSystemTags;
 import org.zstack.header.apimediator.ApiMessageInterceptionException;
 import org.zstack.core.CoreGlobalProperty;
 import org.zstack.core.Platform;
@@ -188,7 +187,7 @@ public class ZMigrateManager extends AbstractService implements
         if (!ImagePlatform.Windows.toString().equals(vo.getPlatform()) || !isZMigrateBootImage(vo.getImageUuid())) {
             return;
         }
-        SystemTagCreator creator = VmSystemTags.ZMIGRATE_TARGET.newSystemTagCreator(vo.getUuid());
+        SystemTagCreator creator = ZMIGRATE_TARGET.newSystemTagCreator(vo.getUuid());
         creator.inherent = true;
         creator.ignoreIfExisting = true;
         creator.create();
@@ -196,7 +195,7 @@ public class ZMigrateManager extends AbstractService implements
 
     @Override
     public void afterRollbackPersistVmInstanceVO(VmInstanceVO vo, CreateVmInstanceMsg msg) {
-        VmSystemTags.ZMIGRATE_TARGET.deleteInherentTag(vo.getUuid());
+        ZMIGRATE_TARGET.deleteInherentTag(vo.getUuid());
     }
 
     @Override

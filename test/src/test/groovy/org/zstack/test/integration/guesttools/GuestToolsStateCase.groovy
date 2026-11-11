@@ -410,7 +410,7 @@ class GuestToolsStateCase extends SubCase {
             systemTags = ["staticIp::${l3Id}::${ip}", "ipv4Netmask::${l3Id}::${netmask}",
                           "ipv4Gateway::${l3Id}::${gateway}"]*.toString()
         }
-        assert VmSystemTags.ZMIGRATE_TARGET.hasTag(vm.uuid) == migrationTarget
+        assert ZMigrateSystemTags.ZMIGRATE_TARGET.hasTag(vm.uuid) == migrationTarget
         updateVmInstance {
             uuid = vm.uuid
             description = migrationTarget ? "Updated migration VM description" : "Created By Migration Service"

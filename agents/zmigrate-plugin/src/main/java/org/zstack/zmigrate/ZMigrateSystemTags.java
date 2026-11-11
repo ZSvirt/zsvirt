@@ -7,6 +7,9 @@ import org.zstack.tag.SystemTag;
 
 @TagDefinition
 public class ZMigrateSystemTags {
+    public static SystemTag ZMIGRATE_TARGET = new SystemTag("zmigrateTarget", VmInstanceVO.class)
+            .markAsAdminOnly().disableClone();
+
     public static SystemTag ZMIGRATE_MANAGEMENT = new SystemTag("ZMigrateManagementNodeVm", VmInstanceVO.class);
     public static SystemTag ZMIGRATE_GATEWAY = new SystemTag("ZMigrateGatewayVm", VmInstanceVO.class);
 

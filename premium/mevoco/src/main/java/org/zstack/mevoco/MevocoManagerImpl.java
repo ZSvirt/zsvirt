@@ -1280,6 +1280,8 @@ public class MevocoManagerImpl extends AbstractService implements MevocoManager,
                         installPaths.add(source.attributeValue("name").trim());
                     } else if (source.attributeValue("file") != null) {
                         installPaths.add(source.attributeValue("file").trim());
+                    } else if (source.attributeValue("dev") != null) {
+                        installPaths.add(source.attributeValue("dev").trim());
                     }
                 }
             }

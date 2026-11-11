@@ -204,8 +204,35 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
         }
     }
 
+    private NetworkServiceDhcpBackend getDhcpServerIpChangeBackend(String l3Uuid) {
+        String providerType = new NetworkProviderFinder().getNetworkProviderTypeByNetworkServiceType(
+                l3Uuid, NetworkServiceType.DHCP.toString());
+        return pluginRgty.getExtensionList(NetworkServiceDhcpBackend.class).stream()
+                .filter(backend -> backend.supportsDhcpServerIpChange()
+                        && backend.getProviderType().toString().equals(providerType))
+                .findFirst().orElse(null);
+    }
+
     private void handle(APIChangeL3NetworkDhcpIpAddressMsg msg) {
         APIChangeL3NetworkDhcpIpAddressEvent event = new APIChangeL3NetworkDhcpIpAddressEvent(msg.getId());
+        NetworkServiceDhcpBackend backend = getDhcpServerIpChangeBackend(msg.getL3NetworkUuid());
+        if (backend != null) {
+            backend.changeDhcpServerIp(msg.getL3NetworkUuid(), msg.getDhcpServerIp(), msg.getDhcpv6ServerIp(),
+                    new Completion(msg) {
+                        @Override
+                        public void success() {
+                            event.setDhcpServerIp(msg.getDhcpServerIp());
+                            bus.publish(event);
+                        }
+
+                        @Override
+                        public void fail(ErrorCode errorCode) {
+                            event.setError(errorCode);
+                            bus.publish(event);
+                        }
+                    });
+            return;
+        }
         L3NetworkVO l3VO = dbf.findByUuid(msg.getL3NetworkUuid(), L3NetworkVO.class);
         List<IpRangeVO> ip4Ranges = l3VO.getIpRanges().stream().filter(ipr -> ipr.getIpVersion() == IPv6Constants.IPv4).collect(Collectors.toList());
         List<IpRangeVO> ip6Ranges = l3VO.getIpRanges().stream().filter(
@@ -2391,7 +2418,8 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
     }
 
     private void validate(APIChangeL3NetworkDhcpIpAddressMsg msg) {
-        if (!isProvidedByMe(msg.getL3NetworkUuid())) {
+        NetworkServiceDhcpBackend backend = getDhcpServerIpChangeBackend(msg.getL3NetworkUuid());
+        if (backend == null && !isProvidedByMe(msg.getL3NetworkUuid())) {
             throw new ApiMessageInterceptionException(argerr("could change dhcp server ip, because flat dhcp is not enabled"));
         }
 
@@ -2399,6 +2427,10 @@ public class FlatDhcpBackend extends AbstractService implements NetworkServiceDh
         if (!acntMgr.isAdmin(msg.getSession()) && !msg.getSession().getAccountUuid().equals(owner)) {
             throw new ApiMessageInterceptionException(argerr("could change dhcp server ip, because %s is not the owner of l3 network[uuid:%s]",
                     msg.getSession().getAccountUuid(), msg.getL3NetworkUuid()));
+        }
+
+        if (backend != null) {
+            return;
         }
 
         L3NetworkVO l3VO = dbf.findByUuid(msg.getL3NetworkUuid(), L3NetworkVO.class);

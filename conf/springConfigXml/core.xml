@@ -21,4 +21,11 @@
 
     <bean id="MultiNodeSingleFlightImpl" class="org.zstack.core.singleflight.MultiNodeSingleFlightImpl" />
 
+    <bean id="Ed25519KeyService" class="org.zstack.core.privatekey.Ed25519KeyService">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.Component"/>
+            <zstack:extension interface="org.zstack.header.Service"/>
+        </zstack:plugin>
+    </bean>
+
 </beans>

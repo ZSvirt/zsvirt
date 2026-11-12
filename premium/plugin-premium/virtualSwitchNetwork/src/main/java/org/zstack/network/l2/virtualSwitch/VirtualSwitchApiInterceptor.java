@@ -564,6 +564,12 @@ public class VirtualSwitchApiInterceptor implements GlobalApiMessageInterceptor 
     }
 
     private void validate(APIDetachL2NetworkFromClusterMsg msg) {
+        PortGroupBackend backend = findBackend(pluginRgty, msg.getL2NetworkUuid());
+        if (backend != null && !backend.requiresLocalClusterBinding()) {
+            throw new ApiMessageInterceptionException(operr("backend-managed virtual switch[uuid:%s] cannot be detached from cluster[uuid:%s]",
+                    msg.getL2NetworkUuid(), msg.getClusterUuid()));
+        }
+
         L2NetworkVO vo = dbf.findByUuid(msg.getL2NetworkUuid(), L2NetworkVO.class);
         if (VirtualSwitchConstant.PORT_GROUP_NETWORK_TYPE.equals(vo.getType())) {
             throw new ApiMessageInterceptionException(operr("could not detach L2PortGroupNetwork[uuid:%s] from cluster[uuid:%s], " +

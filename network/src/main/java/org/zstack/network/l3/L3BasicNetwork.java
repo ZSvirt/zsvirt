@@ -1106,14 +1106,16 @@ public class L3BasicNetwork implements L3Network {
 
     private void handle(final APIRemoveDnsFromL3NetworkMsg msg) {
         final APIRemoveDnsFromL3NetworkEvent evt = new APIRemoveDnsFromL3NetworkEvent(msg.getId());
+        final boolean rollbackDns = getDnsUpdateExtension() != null;
 
         FlowChain chain = FlowChainBuilder.newShareFlowChain();
         chain.setName(String.format("remove-dns-%s-from-l3-%s", msg.getDns(), msg.getL3NetworkUuid()));
         chain.then(new ShareFlow() {
             @Override
             public void setup() {
-                flow(new NoRollbackFlow() {
+                flow(new Flow() {
                     String __name__ = "remove-dns-from-db";
+                    L3NetworkDnsVO removedDns;
 
                     @Override
                     public void run(FlowTrigger trigger, Map data) {
@@ -1124,8 +1126,17 @@ public class L3BasicNetwork implements L3Network {
                         if (dns != null) {
                             //TODO: create extension points
                             dbf.remove(dns);
+                            removedDns = dns;
                         }
                         trigger.next();
+                    }
+
+                    @Override
+                    public void rollback(FlowRollback trigger, Map data) {
+                        if (rollbackDns && removedDns != null) {
+                            restoreDns(removedDns);
+                        }
+                        trigger.rollback();
                     }
                 });
 
@@ -1171,7 +1182,8 @@ public class L3BasicNetwork implements L3Network {
                     }
                 });
             }
-        }).start();
+        });
+        startDnsUpdateFlow(chain, msg);
     }
 
     private void handle(final APIAddDnsToL3NetworkMsg msg) {
@@ -1251,8 +1263,54 @@ public class L3BasicNetwork implements L3Network {
                     }
                 });
             }
-        }).start();
+        });
+        startDnsUpdateFlow(chain, msg);
 	}
+
+    @org.springframework.transaction.annotation.Transactional
+    protected void restoreDns(L3NetworkDnsVO dns) {
+        dbf.getEntityManager().createNativeQuery("insert into L3NetworkDnsVO" +
+                        " (id, l3NetworkUuid, dns, createDate, lastOpDate) values (:id, :l3Uuid, :dns, :createDate, :lastOpDate)")
+                .setParameter("id", dns.getId())
+                .setParameter("l3Uuid", dns.getL3NetworkUuid())
+                .setParameter("dns", dns.getDns())
+                .setParameter("createDate", dns.getCreateDate())
+                .setParameter("lastOpDate", dns.getLastOpDate())
+                .executeUpdate();
+    }
+
+    private void startDnsUpdateFlow(FlowChain flow, APIMessage msg) {
+        if (getDnsUpdateExtension() == null) {
+            flow.start();
+            return;
+        }
+        thdf.chainSubmit(new ChainTask(msg) {
+            @Override
+            public String getSyncSignature() {
+                return "external-network-dns-" + self.getUuid();
+            }
+
+            @Override
+            public String getName() {
+                return "update-external-network-dns-" + self.getUuid();
+            }
+
+            @Override
+            public void run(SyncTaskChain chain) {
+                flow.Finally(new FlowFinallyHandler(chain) {
+                    @Override
+                    public void Finally() {
+                        chain.next();
+                    }
+                }).start();
+            }
+        });
+    }
+
+    private L3NetworkDnsUpdateExtensionPoint getDnsUpdateExtension() {
+        return pluginRgty.getExtensionList(L3NetworkDnsUpdateExtensionPoint.class).stream()
+                .filter(ext -> ext.supportsDnsUpdate(self.getUuid())).findFirst().orElse(null);
+    }
 
     protected NoRollbackFlow getAfterDnsUpdatedFlow(Integer ipVersion) {
         return new NoRollbackFlow() {
@@ -1260,6 +1318,26 @@ public class L3BasicNetwork implements L3Network {
 
             @Override
             public void run(FlowTrigger trigger, Map data) {
+                L3NetworkDnsUpdateExtensionPoint backend = getDnsUpdateExtension();
+                if (backend != null) {
+                    backend.updateDns(self.getUuid(), ipVersion, new Completion(trigger) {
+                        @Override
+                        public void success() {
+                            for (L3NetworkDnsUpdateExtensionPoint ext : pluginRgty.getExtensionList(L3NetworkDnsUpdateExtensionPoint.class)) {
+                                if (ext != backend) {
+                                    ext.afterDnsUpdated(self.getUuid(), ipVersion);
+                                }
+                            }
+                            trigger.next();
+                        }
+
+                        @Override
+                        public void fail(ErrorCode errorCode) {
+                            trigger.fail(errorCode);
+                        }
+                    });
+                    return;
+                }
                 for (L3NetworkDnsUpdateExtensionPoint ext : pluginRgty.getExtensionList(L3NetworkDnsUpdateExtensionPoint.class)) {
                     ext.afterDnsUpdated(self.getUuid(), ipVersion);
                 }

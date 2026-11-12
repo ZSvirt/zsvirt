@@ -2599,18 +2599,107 @@ public class MevocoVmInstanceBase extends VmInstanceBase {
     }
 
     private void handle(final APIUpdateVmNicMacMsg msg) {
+        VmNicInventory nic = VmNicInventory.valueOf(dbf.findByUuid(msg.getVmNicUuid(), VmNicVO.class));
+        AfterAllocateExternalNetworkNicExtensionPoint externalNetwork = pluginRgty
+                .getExtensionList(AfterAllocateExternalNetworkNicExtensionPoint.class).stream()
+                .filter(ext -> ext.supportsNicMacChange(nic)).findFirst().orElse(null);
+        if (externalNetwork != null) {
+            changeExternalNicMac(msg, externalNetwork);
+            return;
+        }
         APIUpdateVmNicMacEvent event = new APIUpdateVmNicMacEvent(msg.getId());
+        event.setInventory(updateNicMac(msg.getVmNicUuid(), msg.getMac()));
+        bus.publish(event);
+    }
+
+    private VmNicInventory updateNicMac(String nicUuid, String mac) {
         VmNicVO vo = new SQLBatchWithReturn<VmNicVO>() {
             @Override
             protected VmNicVO scripts() {
-                VmNicVO vo = dbf.findByUuid(msg.getVmNicUuid(), VmNicVO.class);
-                vo.setMac(msg.getMac());
-                vo = dbf.updateAndRefresh(vo);
-                return vo;
+                VmNicVO vo = dbf.findByUuid(nicUuid, VmNicVO.class);
+                vo.setMac(mac);
+                return dbf.updateAndRefresh(vo);
             }
         }.execute();
-        event.setInventory(VmNicInventory.valueOf(vo));
-        bus.publish(event);
+        return VmNicInventory.valueOf(vo);
+    }
+
+    private void changeExternalNicMac(APIUpdateVmNicMacMsg msg,
+                                      AfterAllocateExternalNetworkNicExtensionPoint externalNetwork) {
+        thdf.chainSubmit(new ChainTask(msg) {
+            @Override
+            public String getSyncSignature() {
+                return syncThreadName;
+            }
+
+            @Override
+            public String getName() {
+                return String.format("change-external-nic-mac-%s", msg.getVmNicUuid());
+            }
+
+            @Override
+            public void run(SyncTaskChain chain) {
+                APIUpdateVmNicMacEvent event = new APIUpdateVmNicMacEvent(msg.getId());
+                Runnable finish = () -> {
+                    bus.publish(event);
+                    chain.next();
+                };
+                VmNicVO current = dbf.findByUuid(msg.getVmNicUuid(), VmNicVO.class);
+                VmInstanceVO vm = dbf.findByUuid(self.getUuid(), VmInstanceVO.class);
+                if (current == null || !self.getUuid().equals(current.getVmInstanceUuid())
+                        || vm == null || vm.getState() != VmInstanceState.Stopped) {
+                    event.setError(operr("cannot change NIC[uuid:%s] MAC unless it belongs to a stopped VM",
+                            msg.getVmNicUuid()));
+                    finish.run();
+                    return;
+                }
+                VmNicInventory original = VmNicInventory.valueOf(current);
+                ErrorCode[] rollbackError = {null};
+                SimpleFlowChain.of(getName()).then(new Flow() {
+                    @Override
+                    public void run(FlowTrigger trigger, Map data) {
+                        externalNetwork.changeNicMac(original, msg.getMac(), new Completion(trigger) {
+                            @Override
+                            public void success() {
+                                trigger.next();
+                            }
+
+                            @Override
+                            public void fail(ErrorCode errorCode) {
+                                trigger.fail(errorCode);
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void rollback(FlowRollback trigger, Map data) {
+                        externalNetwork.changeNicMac(original, original.getMac(), new Completion(trigger) {
+                            @Override
+                            public void success() {
+                                trigger.rollback();
+                            }
+
+                            @Override
+                            public void fail(ErrorCode errorCode) {
+                                rollbackError[0] = errorCode;
+                                trigger.rollback();
+                            }
+                        });
+                    }
+                }).then(new NoRollbackFlow() {
+                    @Override
+                    public void run(FlowTrigger trigger, Map data) {
+                        event.setInventory(updateNicMac(msg.getVmNicUuid(), msg.getMac()));
+                        trigger.next();
+                    }
+                }).propagateExceptionTo(chain).done(finish).error(errorCode -> {
+                    event.setError(rollbackError[0] == null ? errorCode : operr(
+                            "failed to change NIC[uuid:%s] MAC: %s; failed to restore original MAC: %s",
+                            msg.getVmNicUuid(), errorCode, rollbackError[0]));
+                    finish.run();
+                }).start();
+            }
+        });
     }
 
     private void handle(APIGetVmInstanceFirstBootDeviceMsg msg) {

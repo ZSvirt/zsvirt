@@ -7,6 +7,14 @@ import java.util.Collections;
 import java.util.List;
 
 public interface AfterAllocateExternalNetworkNicExtensionPoint {
+    default boolean supportsNicMacChange(VmNicInventory nic) {
+        return false;
+    }
+
+    default void changeNicMac(VmNicInventory nic, String mac, Completion completion) {
+        completion.success();
+    }
+
     default boolean supportsNicNetworkChange(VmNicInventory nic, L3NetworkInventory destination) {
         return false;
     }

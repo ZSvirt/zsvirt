@@ -22,6 +22,7 @@ import org.zstack.header.Constants;
 import org.zstack.header.allocator.AllocateHostDryRunReply;
 import org.zstack.header.allocator.DesignatedAllocateHostMsg;
 import org.zstack.header.allocator.HostAllocatorConstant;
+import org.zstack.header.allocator.HostAllocatorL2NetworkExtensionPoint;
 import org.zstack.header.cluster.ClusterVO;
 import org.zstack.header.cluster.ClusterVO_;
 import org.zstack.header.core.Completion;
@@ -33,6 +34,8 @@ import org.zstack.header.errorcode.ErrorCodeList;
 import org.zstack.header.errorcode.OperationFailureException;
 import org.zstack.header.exception.CloudRuntimeException;
 import org.zstack.header.host.HostInventory;
+import org.zstack.header.host.HostVO;
+import org.zstack.header.host.HostVO_;
 import org.zstack.header.image.ImageConstant;
 import org.zstack.header.image.ImageEO;
 import org.zstack.header.image.ImageInventory;
@@ -51,6 +54,7 @@ import org.zstack.longjob.LongJobFlowContextHandler;
 import org.zstack.longjob.LongJobManagerImpl;
 import org.zstack.longjob.LongJobUtils;
 import org.zstack.mevoco.MevocoConstants;
+import org.zstack.network.l2.L2NetworkHostUtils;
 import org.zstack.storage.ceph.CephConstants;
 import org.zstack.storage.migration.backup.*;
 import org.zstack.storage.migration.primary.*;
@@ -66,6 +70,7 @@ import org.zstack.utils.logging.CLogger;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
+import javax.persistence.Tuple;
 
 import static org.zstack.core.Platform.multiErr;
 import static org.zstack.core.Platform.operr;
@@ -1814,7 +1819,9 @@ public class StorageMigrationBase implements Component {
             String architecture = dbf.findByUuid(srcVolume.getVmInstanceUuid(), VmInstanceVO.class).getArchitecture();
             if (architecture != null) {
                 List<String> cs = Q.New(ClusterVO.class).select(ClusterVO_.uuid).eq(ClusterVO_.architecture, architecture).listValues();
-                List<String> withArchPsUuids = Q.New(PrimaryStorageClusterRefVO.class).select(PrimaryStorageClusterRefVO_.primaryStorageUuid).in(PrimaryStorageClusterRefVO_.clusterUuid, cs).listValues();
+                List<String> withArchPsUuids = cs.isEmpty() ? Collections.emptyList()
+                        : Q.New(PrimaryStorageClusterRefVO.class).select(PrimaryStorageClusterRefVO_.primaryStorageUuid)
+                        .in(PrimaryStorageClusterRefVO_.clusterUuid, cs).listValues();
                 for (PrimaryStorageVO candidate : new ArrayList<>(candidates)) {
                     if (!withArchPsUuids.contains(candidate.getUuid())) {
                         candidates.remove(candidate);
@@ -1870,13 +1877,33 @@ public class StorageMigrationBase implements Component {
             return PrimaryStorageInventory.valueOf(candidates);
         }
 
-        List<String> vmNics = SQL.New("select nic.uuid from VmNicVO nic where nic.vmInstanceUuid = :vmInstanceUuid")
+        List<Tuple> vmNics = SQL.New("select nic.uuid, l3.l2NetworkUuid from VmNicVO nic, L3NetworkVO l3" +
+                        " where nic.vmInstanceUuid = :vmInstanceUuid and l3.uuid = nic.l3NetworkUuid", Tuple.class)
                 .param("vmInstanceUuid", srcVm.getUuid())
                 .list();
+        List<String> l2Uuids = vmNics.stream().map(nic -> nic.get(1, String.class))
+                .distinct().collect(Collectors.toList());
+        Set<String> managedL2Uuids = new HashSet<>();
+        List<String> managedHostUuids = null;
+        for (HostAllocatorL2NetworkExtensionPoint ext : pluginRgty.getExtensionList(HostAllocatorL2NetworkExtensionPoint.class)) {
+            Set<String> managed = ext.getManagedL2NetworkUuids(l2Uuids);
+            managedL2Uuids.addAll(managed);
+            if (!managed.isEmpty()) {
+                List<String> hostUuids = ext.getCandidateHostUuids(managed);
+                if (managedHostUuids == null) {
+                    managedHostUuids = new ArrayList<>(hostUuids);
+                } else {
+                    managedHostUuids.retainAll(hostUuids);
+                }
+            }
+        }
         List<String> mutilNicClusters = Q.New(ClusterVO.class)
                 .select(ClusterVO_.uuid)
                 .listValues();
-        for (String vmNic : vmNics) {
+        for (Tuple vmNic : vmNics) {
+            if (managedL2Uuids.contains(vmNic.get(1, String.class))) {
+                continue;
+            }
             List<String> nicClusters = SQL.New("select ncr.clusterUuid from PrimaryStorageVO ps, VmNicVO nic," +
                             "PrimaryStorageClusterRefVO pcr, L2NetworkClusterRefVO ncr, L3NetworkVO l3, L2NetworkVO l2 where" +
                             " nic.uuid = :vmNicUuid" +
@@ -1885,12 +1912,28 @@ public class StorageMigrationBase implements Component {
                             " and ncr.l2NetworkUuid = l2.uuid" +
                             " and pcr.clusterUuid = ncr.clusterUuid" +
                             " and ps.uuid = pcr.primaryStorageUuid")
-                    .param("vmNicUuid", vmNic)
+                    .param("vmNicUuid", vmNic.get(0, String.class))
                     .list();
             mutilNicClusters.retainAll(nicClusters);
         }
 
-        List<String> psUuids = Q.New(PrimaryStorageClusterRefVO.class)
+        if (managedHostUuids != null) {
+            List<String> hostUuids = new ArrayList<>();
+            if (!managedHostUuids.isEmpty() && !mutilNicClusters.isEmpty()) {
+                hostUuids = Q.New(HostVO.class).select(HostVO_.uuid)
+                        .in(HostVO_.uuid, managedHostUuids)
+                        .in(HostVO_.clusterUuid, mutilNicClusters).listValues();
+                List<String> localL2Uuids = new ArrayList<>(l2Uuids);
+                localL2Uuids.removeAll(managedL2Uuids);
+                hostUuids.removeAll(L2NetworkHostUtils.getExcludeHostUuids(localL2Uuids, hostUuids));
+            }
+            mutilNicClusters = hostUuids.isEmpty() ? Collections.emptyList()
+                    : Q.New(HostVO.class).select(HostVO_.clusterUuid)
+                    .in(HostVO_.uuid, hostUuids).listValues();
+        }
+
+        List<String> psUuids = mutilNicClusters.isEmpty() ? Collections.emptyList()
+                : Q.New(PrimaryStorageClusterRefVO.class)
                 .select(PrimaryStorageClusterRefVO_.primaryStorageUuid)
                 .in(PrimaryStorageClusterRefVO_.clusterUuid, mutilNicClusters)
                 .listValues();

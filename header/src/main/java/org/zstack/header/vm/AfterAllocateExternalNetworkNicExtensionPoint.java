@@ -1,12 +1,17 @@
 package org.zstack.header.vm;
 
 import org.zstack.header.core.Completion;
+import org.zstack.header.core.workflow.Flow;
 import org.zstack.header.network.l3.L3NetworkInventory;
 
 import java.util.Collections;
 import java.util.List;
 
 public interface AfterAllocateExternalNetworkNicExtensionPoint {
+    default Flow createNicCleanTrafficFlow(VmNicInventory nic, boolean enable) {
+        return null;
+    }
+
     default boolean supportsNicMacChange(VmNicInventory nic) {
         return false;
     }

@@ -2766,30 +2766,128 @@ public class MevocoVmInstanceBase extends VmInstanceBase {
 
             @Override
             public void run(SyncTaskChain chain) {
+                List<Flow> externalFlows = new ArrayList<>();
+                for (VmNicVO vo : Q.New(VmNicVO.class).eq(VmNicVO_.vmInstanceUuid, msg.getUuid()).<VmNicVO>list()) {
+                    for (AfterAllocateExternalNetworkNicExtensionPoint ext : pluginRgty.getExtensionList(AfterAllocateExternalNetworkNicExtensionPoint.class)) {
+                        Flow flow = ext.createNicCleanTrafficFlow(VmNicInventory.valueOf(vo), msg.isEnable());
+                        if (flow != null) {
+                            externalFlows.add(flow);
+                            break;
+                        }
+                    }
+                }
+                if (!externalFlows.isEmpty()) {
+                    updateExternalCleanTraffic(externalFlows, chain);
+                    return;
+                }
                 boolean changed = changeTag(msg);
                 String hostUuid = Q.New(VmInstanceVO.class).eq(VmInstanceVO_.uuid, msg.getUuid()).select(VmInstanceVO_.hostUuid).findValue();
                 if (!changed || hostUuid == null) {
-                    bus.publish(event);
-                    chain.next();
+                    finish(null, chain);
                     return;
                 }
 
-                VmUpdateNicOnHypervisorMsg cmsg = new VmUpdateNicOnHypervisorMsg();
-                cmsg.setVmInstanceUuid(msg.getUuid());
-                cmsg.setHostUuid(hostUuid);
-                bus.makeTargetServiceIdByResourceUuid(cmsg, HostConstant.SERVICE_ID, msg.getUuid());
-                bus.send(cmsg, new CloudBusCallBack(chain, event) {
+                updateHostCleanTraffic(hostUuid, new Completion(chain) {
                     @Override
-                    public void run(MessageReply reply) {
-                        if (!reply.isSuccess()) {
-                            doUpdateTag(msg.getUuid(), !msg.isEnable());
-                            event.setError(reply.getError());
-                        }
+                    public void success() {
+                        finish(null, chain);
+                    }
 
-                        bus.publish(event);
-                        chain.next();
+                    @Override
+                    public void fail(ErrorCode error) {
+                        doUpdateTag(msg.getUuid(), !msg.isEnable());
+                        finish(error, chain);
                     }
                 });
+            }
+
+            private void finish(ErrorCode error, SyncTaskChain chain) {
+                if (error != null) {
+                    event.setError(error);
+                }
+                try {
+                    bus.publish(event);
+                } finally {
+                    chain.next();
+                }
+            }
+
+            private void updateHostCleanTraffic(String hostUuid, Completion completion) {
+                if (hostUuid == null) {
+                    completion.success();
+                    return;
+                }
+                VmUpdateNicOnHypervisorMsg update = new VmUpdateNicOnHypervisorMsg();
+                update.setVmInstanceUuid(msg.getUuid());
+                update.setHostUuid(hostUuid);
+                bus.makeTargetServiceIdByResourceUuid(update, HostConstant.SERVICE_ID, msg.getUuid());
+                bus.send(update, new CloudBusCallBack(completion) {
+                    @Override
+                    public void run(MessageReply reply) {
+                        if (reply.isSuccess()) {
+                            completion.success();
+                        } else {
+                            completion.fail(reply.getError());
+                        }
+                    }
+                });
+            }
+
+            private void updateExternalCleanTraffic(List<Flow> externalFlows, SyncTaskChain chain) {
+                String originalTag = VmSystemTags.CLEAN_TRAFFIC.getTokenByResourceUuid(msg.getUuid(), VmSystemTags.CLEAN_TRAFFIC_TOKEN);
+                String hostUuid = Q.New(VmInstanceVO.class).eq(VmInstanceVO_.uuid, msg.getUuid()).select(VmInstanceVO_.hostUuid).findValue();
+                SimpleFlowChain flow = SimpleFlowChain.of("update-external-vm-clean-traffic-" + msg.getUuid());
+                externalFlows.forEach(flow::then);
+                flow.then(new Flow() {
+                    String __name__ = "update-clean-traffic-tag-and-host";
+                    boolean hostAttempted;
+
+                    @Override
+                    public void run(FlowTrigger trigger, Map data) {
+                        changeTag(msg);
+                        hostAttempted = hostUuid != null;
+                        updateHostCleanTraffic(hostUuid, new Completion(trigger) {
+                            @Override
+                            public void success() {
+                                trigger.next();
+                            }
+
+                            @Override
+                            public void fail(ErrorCode error) {
+                                trigger.fail(error);
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void rollback(FlowRollback trigger, Map data) {
+                        if (originalTag == null) {
+                            VmSystemTags.CLEAN_TRAFFIC.delete(msg.getUuid());
+                        } else {
+                            doUpdateTag(msg.getUuid(), Boolean.parseBoolean(originalTag));
+                        }
+                        if (!hostAttempted) {
+                            trigger.rollback();
+                            return;
+                        }
+                        updateHostCleanTraffic(hostUuid, new Completion(trigger) {
+                            @Override
+                            public void success() {
+                                trigger.rollback();
+                            }
+
+                            @Override
+                            public void fail(ErrorCode error) {
+                                trigger.getErrorCode().setDetails(trigger.getErrorCode().getDetails()
+                                        + "; failed to restore host clean traffic: " + error);
+                                trigger.rollback();
+                            }
+                        });
+                    }
+                }).propagateExceptionTo(chain)
+                        .done(() -> finish(null, chain))
+                        .error(error -> finish(error, chain))
+                        .start();
             }
 
             @Override

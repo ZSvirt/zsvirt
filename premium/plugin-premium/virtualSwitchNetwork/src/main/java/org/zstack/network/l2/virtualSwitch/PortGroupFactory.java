@@ -8,6 +8,7 @@ import org.zstack.core.thread.ChainTask;
 import org.zstack.core.thread.SyncTaskChain;
 import org.zstack.core.thread.ThreadFacade;
 import org.zstack.core.workflow.FlowChainBuilder;
+import org.zstack.header.apimediator.ApiMessageInterceptionException;
 import org.zstack.header.core.ReturnValueCompletion;
 import org.zstack.header.core.workflow.*;
 import org.zstack.header.errorcode.ErrorCode;
@@ -28,6 +29,7 @@ import java.util.Map;
 
 import static org.zstack.core.Platform.argerr;
 import static org.zstack.core.Platform.err;
+import static org.zstack.network.l2.virtualSwitch.KVMRealizeL2PortGroupLinuxBridgeBackend.findBackend;
 
 public class PortGroupFactory extends L3BasicNetworkFactory {
     private static final L3NetworkType type = new L3NetworkType.L3NetworkTypeBuilder()
@@ -98,6 +100,15 @@ public class PortGroupFactory extends L3BasicNetworkFactory {
 
             @Override
             public void run(FlowTrigger trigger, Map data) {
+                PortGroupBackend backend = findBackend(pluginRgty, msg.getvSwitchUuid());
+                if (backend != null) {
+                    try {
+                        backend.validateCreate(msg);
+                    } catch (ApiMessageInterceptionException e) {
+                        trigger.fail(e.getError());
+                        return;
+                    }
+                }
                 if (msg.getL2NetworkUuid() != null) {
                     trigger.next();
                     return;

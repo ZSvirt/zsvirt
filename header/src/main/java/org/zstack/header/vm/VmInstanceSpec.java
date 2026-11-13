@@ -48,7 +48,7 @@ public class VmInstanceSpec implements Serializable {
         this.dataVolumeFromTemplateSystemTags = dataVolumeFromTemplateSystemTags;
     }
 
-    public static class VolumeSpec {
+    public static class VolumeSpec implements Serializable {
         private PrimaryStorageInventory primaryStorageInventory;
         private String type;
         private long size;

@@ -33,6 +33,7 @@ import org.zstack.sdk.guesttools.advanced.CreateVmCustomSpecificationAction
 import org.zstack.sdk.guesttools.advanced.DeleteVmCustomSpecificationAction
 import org.zstack.sdk.iam1.accounts.CreateAccountGroupAction
 import org.zstack.sdk.iam1.accounts.DeleteAccountGroupAction
+import org.zstack.sdk.identity.role.api.CreateRoleResult
 import org.zstack.sdk.keyprovider.kms.api.CreateKmsAction
 import org.zstack.sdk.keyprovider.kms.api.DeleteKmsAction
 import org.zstack.sdk.keyprovider.nkp.api.CreateNkpAction
@@ -144,7 +145,11 @@ class EnvSpec extends ApiHelper implements Node  {
             [CreateDiskOfferingAction.metaClass, CreateDiskOfferingAction.Result.metaClass, DeleteDiskOfferingAction.class],
             [CreateInstanceOfferingAction.metaClass, CreateInstanceOfferingAction.Result.metaClass, DeleteInstanceOfferingAction.class],
             [CreateAccountAction.metaClass, CreateAccountAction.Result.metaClass, DeleteAccountAction.class],
-            [CreateRoleAction.metaClass, CreateRoleAction.Result.metaClass, { [new DeleteRoleAction(deleteMode: "Enforcing")] }],
+            [CreateRoleAction.metaClass, CreateRoleAction.Result.metaClass,
+                    { CreateRoleResult it ->
+                        [new DeleteRoleAction(deleteMode: "Enforcing", uuid: it.inventory.uuid)]
+                    }
+            ],
             [AddImageAction.metaClass, AddImageAction.Result.metaClass, DeleteImageAction.class],
             [CreateDataVolumeTemplateFromVolumeAction.metaClass, CreateDataVolumeTemplateFromVolumeAction.Result.metaClass, DeleteImageAction.class],
             [CreateRootVolumeTemplateFromRootVolumeAction.metaClass, CreateRootVolumeTemplateFromRootVolumeAction.Result.metaClass, DeleteImageAction.class],
@@ -241,27 +246,42 @@ class EnvSpec extends ApiHelper implements Node  {
             }
 
             resultMeta.delete = {
-                if (delegate.error != null || delegate.value.inventory == null) {
+                if (delegate.error != null) {
                     return false
                 }
-                String uuid = delegate.value.inventory.uuid
 
-                List<Object> actions = []
                 if (deleteClass instanceof Closure) {
-                    actions.addAll((deleteClass as Closure).call())
-                } else if (deleteClass instanceof List) {
-                    actions.addAll((deleteClass as List<Class>).collect { it.getConstructor().newInstance() })
+                    def deleteClosure = deleteClass as Closure
+                    def actions = deleteClosure.call(delegate.value) as List<Object>
+
+                    actions.each { action ->
+                        logger.debug("auto-deleting resource by ${action.class.name}: use constomer clean handler")
+                        action.sessionId = session.uuid
+                        def res = action.call()
+                        assert res.error == null: "API failure: ${JSONObjectUtil.toJsonString(res.error)}"
+                    }
                 } else {
-                    actions.add((deleteClass as Class).getConstructor().newInstance())
+                    if (delegate.value.inventory == null) {
+                        return false
+                    }
+                    String uuid = delegate.value.inventory.uuid
+
+                    List<Object> actions = []
+                    if (deleteClass instanceof List) {
+                        actions.addAll((deleteClass as List<Class>).collect { it.getConstructor().newInstance() })
+                    } else {
+                        actions.add((deleteClass as Class).getConstructor().newInstance())
+                    }
+
+                    actions.each { action ->
+                        logger.debug("auto-deleting resource by ${action.class.name} uuid:${uuid}")
+                        action.uuid = uuid
+                        action.sessionId = session.uuid
+                        def res = action.call()
+                        assert res.error == null: "API failure: ${JSONObjectUtil.toJsonString(res.error)}"
+                    }
                 }
 
-                actions.each { action ->
-                    logger.debug("auto-deleting resource by ${action.class.name} uuid:${uuid}")
-                    action.uuid = uuid
-                    action.sessionId = session.uuid
-                    def res = action.call()
-                    assert res.error == null: "API failure: ${JSONObjectUtil.toJsonString(res.error)}"
-                }
                 return true
             }
         }

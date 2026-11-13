@@ -12,6 +12,14 @@ public class PortGroupInventory extends org.zstack.sdk.L3NetworkInventory {
         return this.tenantRouterUuid;
     }
 
+    public java.lang.String transportType;
+    public void setTransportType(java.lang.String transportType) {
+        this.transportType = transportType;
+    }
+    public java.lang.String getTransportType() {
+        return this.transportType;
+    }
+
     public java.lang.String vSwitchUuid;
     public void setVSwitchUuid(java.lang.String vSwitchUuid) {
         this.vSwitchUuid = vSwitchUuid;

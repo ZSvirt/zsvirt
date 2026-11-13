@@ -20,6 +20,7 @@ import java.util.List;
 })
 public class PortGroupInventory extends L3NetworkInventory {
     private String tenantRouterUuid;
+    private String transportType;
     private String vSwitchUuid;
     private PortGroupVlanMode vlanMode;
     private Integer vlanId;
@@ -36,6 +37,7 @@ public class PortGroupInventory extends L3NetworkInventory {
         this.setVlanRanges(vo.getVlanRanges());
         if (vo.getZnsSegmentRef() != null) {
             this.tenantRouterUuid = vo.getZnsSegmentRef().getTenantRouterUuid();
+            this.transportType = vo.getZnsSegmentRef().getTransportType();
         }
     }
 
@@ -57,6 +59,14 @@ public class PortGroupInventory extends L3NetworkInventory {
 
     public void setTenantRouterUuid(String tenantRouterUuid) {
         this.tenantRouterUuid = tenantRouterUuid;
+    }
+
+    public String getTransportType() {
+        return transportType;
+    }
+
+    public void setTransportType(String transportType) {
+        this.transportType = transportType;
     }
 
     public String getvSwitchUuid() {

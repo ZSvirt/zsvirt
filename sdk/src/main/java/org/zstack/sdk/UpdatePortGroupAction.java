@@ -25,6 +25,9 @@ public class UpdatePortGroupAction extends AbstractAction {
         }
     }
 
+    @Param(required = false, maxLength = 32, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
+    public java.lang.String tenantRouterUuid;
+
     @Param(required = true, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
     public java.lang.String uuid;
 

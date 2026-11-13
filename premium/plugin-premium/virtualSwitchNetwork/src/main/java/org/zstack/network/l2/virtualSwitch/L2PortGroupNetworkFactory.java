@@ -8,8 +8,10 @@ import org.zstack.core.asyncbatch.While;
 import org.zstack.core.cloudbus.CloudBus;
 import org.zstack.core.cloudbus.CloudBusCallBack;
 import org.zstack.core.db.DatabaseFacade;
+import org.zstack.core.componentloader.PluginRegistry;
 import org.zstack.core.workflow.FlowChainBuilder;
 import org.zstack.header.AbstractService;
+import org.zstack.header.core.Completion;
 import org.zstack.header.core.ReturnValueCompletion;
 import org.zstack.header.core.WhileDoneCompletion;
 import org.zstack.header.core.workflow.*;
@@ -32,8 +34,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import static org.zstack.core.Platform.argerr;
 import static org.zstack.core.Platform.multiErr;
 import static org.zstack.header.network.l2.L2NetworkType.L2NetworkTypeBuilder;
+import static org.zstack.network.l2.virtualSwitch.KVMRealizeL2PortGroupLinuxBridgeBackend.findBackend;
 
 @Configurable(preConstruction = true, autowire = Autowire.BY_TYPE)
 public class L2PortGroupNetworkFactory extends AbstractService implements L2NetworkFactory, L2NetworkDefaultMtu,
@@ -53,6 +57,8 @@ public class L2PortGroupNetworkFactory extends AbstractService implements L2Netw
     private ResourceConfigFacade rcf;
     @Autowired
     private TagManager tagMgr;
+    @Autowired
+    private PluginRegistry pluginRgty;
 
     @Override
     public L2NetworkType getType() {
@@ -63,6 +69,7 @@ public class L2PortGroupNetworkFactory extends AbstractService implements L2Netw
     public void createL2Network(L2NetworkVO ovo, APICreateL2NetworkMsg msg, ReturnValueCompletion<L2NetworkInventory> completion) {
         class Context {
             L2PortGroupNetworkVO vo;
+            PortGroupBackend backend;
             final List<String> attachedClusterUuids = Collections.synchronizedList(new ArrayList<>());
         }
         final Context ctx = new Context();
@@ -70,13 +77,12 @@ public class L2PortGroupNetworkFactory extends AbstractService implements L2Netw
         FlowChain chain = FlowChainBuilder.newSimpleFlowChain();
         chain.setName(String.format("create-port-group-%s", ovo.getName()));
         chain.then(new Flow() {
-            String __name__ = "port-group-write-db";
+            String __name__ = "port-group-create-on-backend";
 
             @Override
             public void run(FlowTrigger trigger, Map data) {
                 APICreateL2PortGroupMsg amsg = (APICreateL2PortGroupMsg) msg;
                 L2VirtualSwitchNetworkVO vSwitchVO = dbf.findByUuid(amsg.getvSwitchUuid(), L2VirtualSwitchNetworkVO.class);
-
                 L2PortGroupNetworkVO vo = new L2PortGroupNetworkVO(ovo);
                 vo.setvSwitchType(vSwitchVO.getvSwitchType());
                 vo.setvSwitchUuid(amsg.getvSwitchUuid());
@@ -86,12 +92,48 @@ public class L2PortGroupNetworkFactory extends AbstractService implements L2Netw
                 vo.setVirtualNetworkId(amsg.getVlan());
                 vo.setVlanMode(PortGroupVlanMode.valueOf(amsg.getVlanMode()));
                 vo.setVlanRanges(amsg.getVlanRanges());
-                vo = dbf.persistAndRefresh(vo);
-                L2PortGroupNetworkInventory inv = L2PortGroupNetworkInventory.valueOf(vo);
+                ctx.vo = vo;
+                ctx.backend = findBackend(pluginRgty, vo.getvSwitchUuid());
+                if (ctx.backend == null) {
+                    if (amsg.getTenantRouterUuid() != null) {
+                        trigger.fail(argerr("tenantRouterUuid requires a ZNS port group"));
+                        return;
+                    }
+                    trigger.next();
+                    return;
+                }
+                ctx.backend.create(L2PortGroupNetworkInventory.valueOf(vo), amsg.getTenantRouterUuid(), trigger.toCompletion());
+            }
+
+            @Override
+            public void rollback(FlowRollback trigger, Map data) {
+                if (ctx.backend == null || ctx.vo == null) {
+                    trigger.rollback();
+                    return;
+                }
+                ctx.backend.delete(L2PortGroupNetworkInventory.valueOf(ctx.vo), new Completion(trigger) {
+                    @Override
+                    public void success() {
+                        trigger.rollback();
+                    }
+
+                    @Override
+                    public void fail(ErrorCode errorCode) {
+                        logger.warn(errorCode.toString());
+                        trigger.rollback();
+                    }
+                });
+            }
+        }).then(new Flow() {
+            String __name__ = "port-group-write-db";
+
+            @Override
+            public void run(FlowTrigger trigger, Map data) {
+                ctx.vo = dbf.persistAndRefresh(ctx.vo);
+                L2PortGroupNetworkInventory inv = L2PortGroupNetworkInventory.valueOf(ctx.vo);
                 String info = String.format("successfully create port group, %s", JSONObjectUtil.toJsonString(inv));
                 logger.debug(info);
 
-                ctx.vo = vo;
                 trigger.next();
             }
 
@@ -104,7 +146,39 @@ public class L2PortGroupNetworkFactory extends AbstractService implements L2Netw
                 trigger.rollback();
             }
         }).then(new Flow() {
+            String __name__ = "port-group-after-local-create";
+
+            @Override
+            public boolean skip(Map data) {
+                return ctx.backend == null;
+            }
+
+            @Override
+            public void run(FlowTrigger trigger, Map data) {
+                ctx.backend.afterLocalCreate(L2PortGroupNetworkInventory.valueOf(ctx.vo), new Completion(trigger) {
+                    @Override
+                    public void success() {
+                        trigger.next();
+                    }
+
+                    @Override
+                    public void fail(ErrorCode errorCode) {
+                        trigger.fail(errorCode);
+                    }
+                });
+            }
+
+            @Override
+            public void rollback(FlowRollback trigger, Map data) {
+                trigger.rollback();
+            }
+        }).then(new Flow() {
             String __name__ = "port-group-apply-cluster";
+
+            @Override
+            public boolean skip(Map data) {
+                return ctx.backend != null && !ctx.backend.requiresLocalClusterBinding();
+            }
 
             @Override
             public void run(FlowTrigger trigger, Map data) {

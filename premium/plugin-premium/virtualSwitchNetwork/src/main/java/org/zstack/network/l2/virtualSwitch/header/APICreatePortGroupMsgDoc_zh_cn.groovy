@@ -177,6 +177,15 @@ doc {
 					optional true
 					since "zsv_4.2.0"
 				}
+				column {
+					name "tenantRouterUuid"
+					enclosedIn "params"
+					desc "租户路由器UUID，仅适用于ZNS端口组"
+					location "body"
+					type "String"
+					optional true
+					since "zsv_5.2.1"
+				}
 			}
 		}
 

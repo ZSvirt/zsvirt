@@ -31,11 +31,14 @@ public class CreatePortGroupAction extends AbstractAction {
     @Param(required = false, validValues = {"ACCESS","TRUNK","PVLAN"}, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
     public java.lang.String vlanMode = "ACCESS";
 
-    @Param(required = true, nonempty = false, nullElements = false, emptyString = true, numberRange = {0L,4094L}, noTrim = false)
+    @Param(required = true, nonempty = false, nullElements = false, emptyString = true, numberRange = {0L,16777215L}, noTrim = false)
     public java.lang.Integer vlan;
 
     @Param(required = false, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
     public java.lang.String vlanRanges;
+
+    @Param(required = false, maxLength = 32, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
+    public java.lang.String tenantRouterUuid;
 
     @Param(required = true, maxLength = 255, nonempty = false, nullElements = false, emptyString = true, noTrim = false)
     public java.lang.String name;

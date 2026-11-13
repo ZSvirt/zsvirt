@@ -45,6 +45,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -263,10 +264,12 @@ public class RESTFacadeImpl extends AbstractRESTFacade {
             }
 
             String ret = handler.handle(entity);
-            if (ret == null) {
-                rsp.setStatus(HttpStatus.SC_OK);
-            } else {
-                rsp.setStatus(HttpStatus.SC_OK, ret);
+            if (!rsp.isCommitted()) {
+                if (ret == null) {
+                    rsp.setStatus(HttpStatus.SC_OK);
+                } else {
+                    rsp.setStatus(HttpStatus.SC_OK, ret);
+                }
             }
         } catch (IOException e) {
             logger.warn(e.getMessage(), e);
@@ -588,7 +591,7 @@ public class RESTFacadeImpl extends AbstractRESTFacade {
 
         HttpHeaders requestHeaders = new HttpHeaders();
         requestHeaders.setAll(http.getHeaders());
-        requestHeaders.setContentLength(body.length());
+        requestHeaders.setContentLength(body.getBytes(StandardCharsets.UTF_8).length);
         HttpEntity<String> req = new HttpEntity<>(body, requestHeaders);
         ResponseEntity<String> rsp = syncRawJson(req, http);
 

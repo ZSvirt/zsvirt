@@ -18,6 +18,7 @@ import org.zstack.core.workflow.FlowChainBuilder;
 import org.zstack.core.workflow.ShareFlow;
 import org.zstack.core.workflow.SimpleFlowChain;
 import org.zstack.header.apimediator.ApiMessageInterceptionException;
+import org.zstack.header.allocator.HostAllocatorL2NetworkExtensionPoint;
 import org.zstack.header.cluster.ClusterInventory;
 import org.zstack.header.cluster.ClusterVO;
 import org.zstack.header.cluster.ClusterVO_;
@@ -231,21 +232,41 @@ public class LocalStorageBase extends PrimaryStorageBase {
                                 err(SysErrors.INTERNAL, "The clusterUuid of vm cannot be null when migrate the vm"));
                     }
 
-
+                    List<String> originL2NetworkList = sql("select l2NetworkUuid from L3NetworkVO" +
+                            " where uuid in(select l3NetworkUuid from VmNicVO where vmInstanceUuid = :vmUuid)")
+                            .param("vmUuid", originVmUuid).list();
+                    Set<String> managedL2NetworkUuids = new HashSet<>();
+                    Set<String> managedCandidateHostUuids = null;
+                    for (HostAllocatorL2NetworkExtensionPoint ext : pluginRgty.getExtensionList(HostAllocatorL2NetworkExtensionPoint.class)) {
+                        Set<String> managed = ext.getManagedL2NetworkUuids(originL2NetworkList);
+                        if (!managed.isEmpty()) {
+                            managedL2NetworkUuids.addAll(managed);
+                            Set<String> candidates = new HashSet<>(ext.getCandidateHostUuids(managed));
+                            if (managedCandidateHostUuids == null) {
+                                managedCandidateHostUuids = candidates;
+                            } else {
+                                managedCandidateHostUuids.retainAll(candidates);
+                            }
+                        }
+                    }
                     Iterator<HostVO> it = hosts.iterator();
                     while (it.hasNext()) {
                         HostVO hostVO = it.next();
                         String destClusterUuid = Q.New(HostVO.class).select(HostVO_.clusterUuid)
                                 .eq(HostVO_.uuid, hostVO.getUuid()).findValue();
                         if (!originClusterUuid.equals(destClusterUuid)) {
-                            List<String> originL2NetworkList = sql("select l2NetworkUuid from L3NetworkVO" +
-                                    " where uuid in(select l3NetworkUuid from VmNicVO where vmInstanceUuid = :vmUuid)")
-                                    .param("vmUuid", originVmUuid).list();
+                            if (managedCandidateHostUuids != null && !managedCandidateHostUuids.contains(hostVO.getUuid())) {
+                                it.remove();
+                                continue;
+                            }
                             List<String> l2NetworkList = sql("select l2NetworkUuid from L2NetworkClusterRefVO" +
                                     " where clusterUuid = :clusterUuid")
                                     .param("clusterUuid", destClusterUuid).list();
 
                             for (String l2 : originL2NetworkList) {
+                                if (managedL2NetworkUuids.contains(l2)) {
+                                    continue;
+                                }
                                 if (!l2NetworkList.contains(l2)) {
                                     //remove inappropriate host from list
                                     it.remove();

@@ -19,6 +19,7 @@ import java.util.List;
                 foreignKey = "vSwitchUuid", expandedInventoryKey = "uuid"),
 })
 public class PortGroupInventory extends L3NetworkInventory {
+    private String tenantRouterUuid;
     private String vSwitchUuid;
     private PortGroupVlanMode vlanMode;
     private Integer vlanId;
@@ -33,6 +34,9 @@ public class PortGroupInventory extends L3NetworkInventory {
         this.setVlanMode(vo.getVlanMode());
         this.setVlanId(vo.getVlanId());
         this.setVlanRanges(vo.getVlanRanges());
+        if (vo.getZnsSegmentRef() != null) {
+            this.tenantRouterUuid = vo.getZnsSegmentRef().getTenantRouterUuid();
+        }
     }
 
     public static PortGroupInventory valueOf(PortGroupVO vo) {
@@ -45,6 +49,14 @@ public class PortGroupInventory extends L3NetworkInventory {
             invs.add(new PortGroupInventory(vo));
         }
         return invs;
+    }
+
+    public String getTenantRouterUuid() {
+        return tenantRouterUuid;
+    }
+
+    public void setTenantRouterUuid(String tenantRouterUuid) {
+        this.tenantRouterUuid = tenantRouterUuid;
     }
 
     public String getvSwitchUuid() {

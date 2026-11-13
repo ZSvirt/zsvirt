@@ -285,7 +285,7 @@ public class VmNicManagerImpl implements VmNicManager, VmNicExtensionPoint, Prep
             type = VmNicType.valueOf(VmInstanceConstant.TF_VIRTUAL_NIC_TYPE);
         } else {
             VSwitchType vSwitchType = VSwitchType.valueOf(l2nw.getvSwitchType());
-            type = vSwitchType.getVmNicTypeWithCondition(enableSriov, enableVhostUser);
+            type = vSwitchType.getVmNicTypeWithCondition(vmUuid, enableSriov, enableVhostUser);
         }
 
         return type;

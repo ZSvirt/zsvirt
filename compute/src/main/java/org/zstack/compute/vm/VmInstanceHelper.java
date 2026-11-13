@@ -6,9 +6,11 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
+import org.zstack.core.componentloader.PluginRegistry;
 import org.zstack.core.db.DatabaseFacade;
 import org.zstack.core.db.Q;
 import org.zstack.core.db.SimpleQuery;
+import org.zstack.header.allocator.HostAllocatorL2NetworkExtensionPoint;
 import org.zstack.header.apimediator.ApiMessageInterceptionException;
 import org.zstack.header.cluster.ClusterState;
 import org.zstack.header.cluster.ClusterVO;
@@ -54,6 +56,8 @@ public class VmInstanceHelper {
     private DatabaseFacade dbf;
     @Autowired
     private VmNicManager nicManager;
+    @Autowired
+    private PluginRegistry pluginRgty;
 
     public void validate(NewVmInstanceMessage2 msg) {
         validateInstanceSettings(msg);
@@ -92,6 +96,21 @@ public class VmInstanceHelper {
                 }
                 if (system && (msg.getType() == null || VmInstanceConstant.USER_VM_TYPE.equals(msg.getType()))) {
                     throw new ApiMessageInterceptionException(operr("l3Network[uuid:%s] is system network, can not create user vm on it", l3Uuid));
+                }
+                boolean managed = false;
+                for (HostAllocatorL2NetworkExtensionPoint ext : pluginRgty.getExtensionList(HostAllocatorL2NetworkExtensionPoint.class)) {
+                    if (!ext.getManagedL2NetworkUuids(Collections.singleton(l2Uuid)).contains(l2Uuid)) {
+                        continue;
+                    }
+                    managed = true;
+                    if (msg.getHostUuid() != null
+                            && !ext.getCandidateHostUuids(Collections.singleton(l2Uuid)).contains(msg.getHostUuid())) {
+                        throw new ApiMessageInterceptionException(operr("host[uuid:%s] does not support managed L2 network[uuid:%s]",
+                                msg.getHostUuid(), l2Uuid));
+                    }
+                }
+                if (managed) {
+                    continue;
                 }
                 L2NetworkVO l2NetworkVO = Q.New(L2NetworkVO.class).eq(L2NetworkVO_.uuid, l2Uuid).find();
                 if (l2NetworkVO.getAttachedClusterRefs() == null || l2NetworkVO.getAttachedClusterRefs().isEmpty()) {

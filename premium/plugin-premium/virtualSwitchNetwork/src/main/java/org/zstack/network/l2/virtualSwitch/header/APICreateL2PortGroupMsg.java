@@ -5,6 +5,7 @@ import org.zstack.header.message.APIParam;
 import org.zstack.header.message.OverriddenApiParam;
 import org.zstack.header.message.OverriddenApiParams;
 import org.zstack.header.network.l2.APICreateL2NetworkMsg;
+import org.zstack.header.rest.APINoSee;
 import org.zstack.header.rest.RestRequest;
 import org.zstack.header.tag.TagResourceType;
 import org.zstack.header.zone.ZoneVO;
@@ -41,6 +42,18 @@ public class APICreateL2PortGroupMsg extends APICreateL2NetworkMsg {
      * max vlan range number is 10 */
     @APIParam(required = false)
     private String vlanRanges;
+
+    @APINoSee
+    @APIParam(required = false, maxLength = 32)
+    private String tenantRouterUuid;
+
+    public String getTenantRouterUuid() {
+        return tenantRouterUuid;
+    }
+
+    public void setTenantRouterUuid(String tenantRouterUuid) {
+        this.tenantRouterUuid = tenantRouterUuid;
+    }
 
     @Override
     public String getType() {

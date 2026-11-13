@@ -1444,6 +1444,8 @@ public class KVMAgentCommands {
         private String mac;
         private List<String> ips;
         private String bridgeName;
+        private String bridgePortType;
+        private String interfaceId;
         // run `bridge fdb add NicTO.mac dev NicTO.physicalInterface` on vnics to allow vf <-> vnic communication
         private String physicalInterface;
         private String uuid;
@@ -1470,6 +1472,22 @@ public class KVMAgentCommands {
         private String srcPath;
         
         private Boolean cleanTraffic;
+
+        public String getBridgePortType() {
+            return bridgePortType;
+        }
+
+        public void setBridgePortType(String bridgePortType) {
+            this.bridgePortType = bridgePortType;
+        }
+
+        public String getInterfaceId() {
+            return interfaceId;
+        }
+
+        public void setInterfaceId(String interfaceId) {
+            this.interfaceId = interfaceId;
+        }
 
         public List<String> getIps() {
             return ips;

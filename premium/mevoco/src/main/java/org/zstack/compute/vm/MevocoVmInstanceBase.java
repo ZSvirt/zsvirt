@@ -2599,18 +2599,107 @@ public class MevocoVmInstanceBase extends VmInstanceBase {
     }
 
     private void handle(final APIUpdateVmNicMacMsg msg) {
+        VmNicInventory nic = VmNicInventory.valueOf(dbf.findByUuid(msg.getVmNicUuid(), VmNicVO.class));
+        AfterAllocateExternalNetworkNicExtensionPoint externalNetwork = pluginRgty
+                .getExtensionList(AfterAllocateExternalNetworkNicExtensionPoint.class).stream()
+                .filter(ext -> ext.supportsNicMacChange(nic)).findFirst().orElse(null);
+        if (externalNetwork != null) {
+            changeExternalNicMac(msg, externalNetwork);
+            return;
+        }
         APIUpdateVmNicMacEvent event = new APIUpdateVmNicMacEvent(msg.getId());
+        event.setInventory(updateNicMac(msg.getVmNicUuid(), msg.getMac()));
+        bus.publish(event);
+    }
+
+    private VmNicInventory updateNicMac(String nicUuid, String mac) {
         VmNicVO vo = new SQLBatchWithReturn<VmNicVO>() {
             @Override
             protected VmNicVO scripts() {
-                VmNicVO vo = dbf.findByUuid(msg.getVmNicUuid(), VmNicVO.class);
-                vo.setMac(msg.getMac());
-                vo = dbf.updateAndRefresh(vo);
-                return vo;
+                VmNicVO vo = dbf.findByUuid(nicUuid, VmNicVO.class);
+                vo.setMac(mac);
+                return dbf.updateAndRefresh(vo);
             }
         }.execute();
-        event.setInventory(VmNicInventory.valueOf(vo));
-        bus.publish(event);
+        return VmNicInventory.valueOf(vo);
+    }
+
+    private void changeExternalNicMac(APIUpdateVmNicMacMsg msg,
+                                      AfterAllocateExternalNetworkNicExtensionPoint externalNetwork) {
+        thdf.chainSubmit(new ChainTask(msg) {
+            @Override
+            public String getSyncSignature() {
+                return syncThreadName;
+            }
+
+            @Override
+            public String getName() {
+                return String.format("change-external-nic-mac-%s", msg.getVmNicUuid());
+            }
+
+            @Override
+            public void run(SyncTaskChain chain) {
+                APIUpdateVmNicMacEvent event = new APIUpdateVmNicMacEvent(msg.getId());
+                Runnable finish = () -> {
+                    bus.publish(event);
+                    chain.next();
+                };
+                VmNicVO current = dbf.findByUuid(msg.getVmNicUuid(), VmNicVO.class);
+                VmInstanceVO vm = dbf.findByUuid(self.getUuid(), VmInstanceVO.class);
+                if (current == null || !self.getUuid().equals(current.getVmInstanceUuid())
+                        || vm == null || vm.getState() != VmInstanceState.Stopped) {
+                    event.setError(operr("cannot change NIC[uuid:%s] MAC unless it belongs to a stopped VM",
+                            msg.getVmNicUuid()));
+                    finish.run();
+                    return;
+                }
+                VmNicInventory original = VmNicInventory.valueOf(current);
+                ErrorCode[] rollbackError = {null};
+                SimpleFlowChain.of(getName()).then(new Flow() {
+                    @Override
+                    public void run(FlowTrigger trigger, Map data) {
+                        externalNetwork.changeNicMac(original, msg.getMac(), new Completion(trigger) {
+                            @Override
+                            public void success() {
+                                trigger.next();
+                            }
+
+                            @Override
+                            public void fail(ErrorCode errorCode) {
+                                trigger.fail(errorCode);
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void rollback(FlowRollback trigger, Map data) {
+                        externalNetwork.changeNicMac(original, original.getMac(), new Completion(trigger) {
+                            @Override
+                            public void success() {
+                                trigger.rollback();
+                            }
+
+                            @Override
+                            public void fail(ErrorCode errorCode) {
+                                rollbackError[0] = errorCode;
+                                trigger.rollback();
+                            }
+                        });
+                    }
+                }).then(new NoRollbackFlow() {
+                    @Override
+                    public void run(FlowTrigger trigger, Map data) {
+                        event.setInventory(updateNicMac(msg.getVmNicUuid(), msg.getMac()));
+                        trigger.next();
+                    }
+                }).propagateExceptionTo(chain).done(finish).error(errorCode -> {
+                    event.setError(rollbackError[0] == null ? errorCode : operr(
+                            "failed to change NIC[uuid:%s] MAC: %s; failed to restore original MAC: %s",
+                            msg.getVmNicUuid(), errorCode, rollbackError[0]));
+                    finish.run();
+                }).start();
+            }
+        });
     }
 
     private void handle(APIGetVmInstanceFirstBootDeviceMsg msg) {
@@ -2677,30 +2766,128 @@ public class MevocoVmInstanceBase extends VmInstanceBase {
 
             @Override
             public void run(SyncTaskChain chain) {
+                List<Flow> externalFlows = new ArrayList<>();
+                for (VmNicVO vo : Q.New(VmNicVO.class).eq(VmNicVO_.vmInstanceUuid, msg.getUuid()).<VmNicVO>list()) {
+                    for (AfterAllocateExternalNetworkNicExtensionPoint ext : pluginRgty.getExtensionList(AfterAllocateExternalNetworkNicExtensionPoint.class)) {
+                        Flow flow = ext.createNicCleanTrafficFlow(VmNicInventory.valueOf(vo), msg.isEnable());
+                        if (flow != null) {
+                            externalFlows.add(flow);
+                            break;
+                        }
+                    }
+                }
+                if (!externalFlows.isEmpty()) {
+                    updateExternalCleanTraffic(externalFlows, chain);
+                    return;
+                }
                 boolean changed = changeTag(msg);
                 String hostUuid = Q.New(VmInstanceVO.class).eq(VmInstanceVO_.uuid, msg.getUuid()).select(VmInstanceVO_.hostUuid).findValue();
                 if (!changed || hostUuid == null) {
-                    bus.publish(event);
-                    chain.next();
+                    finish(null, chain);
                     return;
                 }
 
-                VmUpdateNicOnHypervisorMsg cmsg = new VmUpdateNicOnHypervisorMsg();
-                cmsg.setVmInstanceUuid(msg.getUuid());
-                cmsg.setHostUuid(hostUuid);
-                bus.makeTargetServiceIdByResourceUuid(cmsg, HostConstant.SERVICE_ID, msg.getUuid());
-                bus.send(cmsg, new CloudBusCallBack(chain, event) {
+                updateHostCleanTraffic(hostUuid, new Completion(chain) {
                     @Override
-                    public void run(MessageReply reply) {
-                        if (!reply.isSuccess()) {
-                            doUpdateTag(msg.getUuid(), !msg.isEnable());
-                            event.setError(reply.getError());
-                        }
+                    public void success() {
+                        finish(null, chain);
+                    }
 
-                        bus.publish(event);
-                        chain.next();
+                    @Override
+                    public void fail(ErrorCode error) {
+                        doUpdateTag(msg.getUuid(), !msg.isEnable());
+                        finish(error, chain);
                     }
                 });
+            }
+
+            private void finish(ErrorCode error, SyncTaskChain chain) {
+                if (error != null) {
+                    event.setError(error);
+                }
+                try {
+                    bus.publish(event);
+                } finally {
+                    chain.next();
+                }
+            }
+
+            private void updateHostCleanTraffic(String hostUuid, Completion completion) {
+                if (hostUuid == null) {
+                    completion.success();
+                    return;
+                }
+                VmUpdateNicOnHypervisorMsg update = new VmUpdateNicOnHypervisorMsg();
+                update.setVmInstanceUuid(msg.getUuid());
+                update.setHostUuid(hostUuid);
+                bus.makeTargetServiceIdByResourceUuid(update, HostConstant.SERVICE_ID, msg.getUuid());
+                bus.send(update, new CloudBusCallBack(completion) {
+                    @Override
+                    public void run(MessageReply reply) {
+                        if (reply.isSuccess()) {
+                            completion.success();
+                        } else {
+                            completion.fail(reply.getError());
+                        }
+                    }
+                });
+            }
+
+            private void updateExternalCleanTraffic(List<Flow> externalFlows, SyncTaskChain chain) {
+                String originalTag = VmSystemTags.CLEAN_TRAFFIC.getTokenByResourceUuid(msg.getUuid(), VmSystemTags.CLEAN_TRAFFIC_TOKEN);
+                String hostUuid = Q.New(VmInstanceVO.class).eq(VmInstanceVO_.uuid, msg.getUuid()).select(VmInstanceVO_.hostUuid).findValue();
+                SimpleFlowChain flow = SimpleFlowChain.of("update-external-vm-clean-traffic-" + msg.getUuid());
+                externalFlows.forEach(flow::then);
+                flow.then(new Flow() {
+                    String __name__ = "update-clean-traffic-tag-and-host";
+                    boolean hostAttempted;
+
+                    @Override
+                    public void run(FlowTrigger trigger, Map data) {
+                        changeTag(msg);
+                        hostAttempted = hostUuid != null;
+                        updateHostCleanTraffic(hostUuid, new Completion(trigger) {
+                            @Override
+                            public void success() {
+                                trigger.next();
+                            }
+
+                            @Override
+                            public void fail(ErrorCode error) {
+                                trigger.fail(error);
+                            }
+                        });
+                    }
+
+                    @Override
+                    public void rollback(FlowRollback trigger, Map data) {
+                        if (originalTag == null) {
+                            VmSystemTags.CLEAN_TRAFFIC.delete(msg.getUuid());
+                        } else {
+                            doUpdateTag(msg.getUuid(), Boolean.parseBoolean(originalTag));
+                        }
+                        if (!hostAttempted) {
+                            trigger.rollback();
+                            return;
+                        }
+                        updateHostCleanTraffic(hostUuid, new Completion(trigger) {
+                            @Override
+                            public void success() {
+                                trigger.rollback();
+                            }
+
+                            @Override
+                            public void fail(ErrorCode error) {
+                                trigger.getErrorCode().setDetails(trigger.getErrorCode().getDetails()
+                                        + "; failed to restore host clean traffic: " + error);
+                                trigger.rollback();
+                            }
+                        });
+                    }
+                }).propagateExceptionTo(chain)
+                        .done(() -> finish(null, chain))
+                        .error(error -> finish(error, chain))
+                        .start();
             }
 
             @Override

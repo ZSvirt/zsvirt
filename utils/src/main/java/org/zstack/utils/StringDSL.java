@@ -193,8 +193,15 @@ public class StringDSL {
         return hashOXR(Arrays.asList(str1.split("\n"))) == hashOXR(Arrays.asList(str2.split("\n")));
     }
 
-    public static String transToTfUuid(String zUuid){
-        StringBuilder buffer = new StringBuilder(zUuid);
+    public static String transToZnsUuid(String uuid) {
+        if (uuid == null) {
+            return null;
+        }
+        String raw = transToZsvUuid(uuid);
+        if (raw.length() != 32) {
+            return uuid;
+        }
+        StringBuilder buffer = new StringBuilder(raw);
         buffer.insert(20, '-');
         buffer.insert(16, '-');
         buffer.insert(12, '-');
@@ -202,7 +209,15 @@ public class StringDSL {
         return buffer.toString();
     }
 
-    public static String transToZstackUuid(String tfUuid){
-        return tfUuid.replaceAll("-","");
+    public static String transToZsvUuid(String uuid) {
+        return uuid == null ? null : uuid.replaceAll("-", "");
+    }
+
+    public static String transToTfUuid(String zUuid) {
+        return transToZnsUuid(zUuid);
+    }
+
+    public static String transToZstackUuid(String tfUuid) {
+        return transToZsvUuid(tfUuid);
     }
 }

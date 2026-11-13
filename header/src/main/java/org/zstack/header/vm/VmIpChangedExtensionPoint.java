@@ -9,4 +9,8 @@ import java.util.Map;
  */
 public interface VmIpChangedExtensionPoint {
     void vmIpChanged(VmInstanceInventory vm, VmNicInventory nic, Map<Integer, UsedIpInventory> oldIpMap, Map<Integer, UsedIpInventory> newIpMap);
+
+    default boolean supportsNoIpAllocationChange() {
+        return false;
+    }
 }

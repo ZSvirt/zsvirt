@@ -49,7 +49,11 @@ public class AddressPoolIpRangeFactory implements IpRangeFactory {
 
         final IpRangeInventory finalIpr = AddressPoolInventory.valueOf1(vo);
         CollectionUtils.safeForEach(pluginRgty.getExtensionList(AfterAddIpRangeExtensionPoint.class),
-                ext -> ext.afterAddIpRange(finalIpr, msg.getSystemTags()));
+                ext -> {
+                    if (!ext.requiresIpRangeSynchronization(finalIpr.getL3NetworkUuid())) {
+                        ext.afterAddIpRange(finalIpr, msg.getSystemTags());
+                    }
+                });
 
         return finalIpr;
     }

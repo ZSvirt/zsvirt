@@ -29,6 +29,7 @@ import org.zstack.network.securitygroup.*;
 import org.zstack.resourceconfig.ResourceConfigVO;
 import org.zstack.resourceconfig.ResourceConfigVO_;
 import org.zstack.storage.volume.VolumeSystemTags;
+import org.zstack.tag.PatternedSystemTag;
 import org.zstack.tag.SystemTag;
 import org.zstack.utils.CollectionUtils;
 import org.zstack.utils.TagUtils;
@@ -63,7 +64,8 @@ public class CloneVmInstanceMessageBuilder {
             HaSystemTags.HA,
             VmHardwareSystemTags.CPU_SOCKETS, VmHardwareSystemTags.CPU_CORES, VmHardwareSystemTags.CPU_THREADS,
             MevocoVmSystemTags.VM_CPU_PINNING, MevocoVmSystemTags.VM_NUMA_ENABLE, MevocoVmSystemTags.VM_EMULATOR_PINNING,
-            MevocoSystemTags.VM_CONSOLE_MODE
+            MevocoSystemTags.VM_CONSOLE_MODE,
+            new PatternedSystemTag("ZnsNicMode::{ZnsNicMode}", VmInstanceVO.class)
     ).collect(Collectors.toList());
 
     @Autowired

@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.zstack.core.Platform;
 import org.zstack.core.cloudbus.CloudBus;
 import org.zstack.core.componentloader.PluginRegistry;
+import org.zstack.header.allocator.HostAllocatorL2NetworkExtensionPoint;
 import org.zstack.core.db.*;
 import org.zstack.core.db.SimpleQuery.Op;
 import org.zstack.header.allocator.HostAllocatorStrategyType;
@@ -313,7 +314,8 @@ public class VmInstanceApiInterceptor implements ApiMessageInterceptor {
 
         List<String> clusterUuids = Q.New(L2NetworkClusterRefVO.class).eq(L2NetworkClusterRefVO_.l2NetworkUuid, l3NetworkVO.getL2NetworkUuid())
                 .select(L2NetworkClusterRefVO_.clusterUuid).listValues();
-        if (clusterUuids.isEmpty()) {
+        validateManagedL2Host(l3NetworkVO.getL2NetworkUuid(), hostUuid);
+        if (clusterUuids.isEmpty() && !isManagedL2Network(l3NetworkVO.getL2NetworkUuid())) {
             throw new ApiMessageInterceptionException(operr("unable to change to L3 network. The L3 network[uuid:%s] are belonged to l2 network[uuid:%s] that have not been attached to any cluster",
                     msg.getDestL3NetworkUuid(), l3NetworkVO.getL2NetworkUuid()));
         }
@@ -383,7 +385,8 @@ public class VmInstanceApiInterceptor implements ApiMessageInterceptor {
         L2NetworkType l2Type = L2NetworkType.valueOf(Q.New(L2NetworkVO.class)
                 .eq(L2NetworkVO_.uuid, l3NetworkVO.getL2NetworkUuid())
                 .select(L2NetworkVO_.type).findValue());
-        if (!l2Type.isAttachToAllHosts() && !L2NetworkHostUtils.checkIfL2AttachedToHost(l3NetworkVO.getL2NetworkUuid(), hostUuid)) {
+        if (!isManagedL2Network(l3NetworkVO.getL2NetworkUuid()) && !l2Type.isAttachToAllHosts()
+                && !L2NetworkHostUtils.checkIfL2AttachedToHost(l3NetworkVO.getL2NetworkUuid(), hostUuid)) {
             throw new ApiMessageInterceptionException(operr("unable to change to L3 network[uuid:%s]" +
                             " whose l2Network is not attached to the host[uuid:%s]", msg.getDestL3NetworkUuid(), hostUuid));
         }
@@ -827,7 +830,8 @@ public class VmInstanceApiInterceptor implements ApiMessageInterceptor {
 
         List<String> clusterUuids = Q.New(L2NetworkClusterRefVO.class).eq(L2NetworkClusterRefVO_.l2NetworkUuid, l3NetworkVO.getL2NetworkUuid())
                 .select(L2NetworkClusterRefVO_.clusterUuid).listValues();
-        if (clusterUuids.isEmpty()) {
+        validateManagedL2Host(l3NetworkVO.getL2NetworkUuid(), hostUuid);
+        if (clusterUuids.isEmpty() && !isManagedL2Network(l3NetworkVO.getL2NetworkUuid())) {
             throw new ApiMessageInterceptionException(operr("unable to change to L3 network. The L3 network[uuid:%s] are belonged to l2 network[uuid:%s] that have not been attached to any cluster",
                     msg.getL3NetworkUuid(), l3NetworkVO.getL2NetworkUuid()));
         }
@@ -920,7 +924,8 @@ public class VmInstanceApiInterceptor implements ApiMessageInterceptor {
         L2NetworkType l2Type = L2NetworkType.valueOf(Q.New(L2NetworkVO.class)
                 .eq(L2NetworkVO_.uuid, l3NetworkVO.getL2NetworkUuid())
                 .select(L2NetworkVO_.type).findValue());
-        if (!l2Type.isAttachToAllHosts() && !L2NetworkHostUtils.checkIfL2AttachedToHost(l3NetworkVO.getL2NetworkUuid(), hostUuid)) {
+        if (!isManagedL2Network(l3NetworkVO.getL2NetworkUuid()) && !l2Type.isAttachToAllHosts()
+                && !L2NetworkHostUtils.checkIfL2AttachedToHost(l3NetworkVO.getL2NetworkUuid(), hostUuid)) {
             throw new ApiMessageInterceptionException(operr("unable to attach L3 network[uuid:%s] to VM[uuid:%s]" +
                     " whose l2Network is not attached to the host[uuid:%s]",
                     msg.getL3NetworkUuid(), msg.getVmInstanceUuid(), hostUuid));
@@ -931,6 +936,7 @@ public class VmInstanceApiInterceptor implements ApiMessageInterceptor {
         VmInstanceVO vmInstanceVO = dbf.findByUuid(msg.getVmInstanceUuid(), VmInstanceVO.class);
         String type = vmInstanceVO.getType();
         VmInstanceState state = vmInstanceVO.getState();
+        String hostUuid = vmInstanceVO.getHostUuid() != null ? vmInstanceVO.getHostUuid() : vmInstanceVO.getLastHostUuid();
 
         if (!VmInstanceState.Running.equals(state) && !VmInstanceState.Stopped.equals(state)) {
             throw new ApiMessageInterceptionException(operr("unable to attach the nic. The vm[uuid: %s] is not Running or Stopped; the current state is %s",
@@ -974,9 +980,28 @@ public class VmInstanceApiInterceptor implements ApiMessageInterceptor {
 
         List<String> clusterUuids = Q.New(L2NetworkClusterRefVO.class).eq(L2NetworkClusterRefVO_.l2NetworkUuid, l3NetworkVO.getL2NetworkUuid())
                                      .select(L2NetworkClusterRefVO_.clusterUuid).listValues();
-        if (clusterUuids.isEmpty()) {
+        validateManagedL2Host(l3NetworkVO.getL2NetworkUuid(), hostUuid);
+        if (clusterUuids.isEmpty() && !isManagedL2Network(l3NetworkVO.getL2NetworkUuid())) {
             throw new ApiMessageInterceptionException(operr("unable to attach the nic. Its l2 network [uuid:%s] that have not been attached to any cluster",
                     l3NetworkVO.getL2NetworkUuid()));
+        }
+    }
+
+    private boolean isManagedL2Network(String l2NetworkUuid) {
+        return pluginRgty.getExtensionList(HostAllocatorL2NetworkExtensionPoint.class).stream()
+                .anyMatch(ext -> ext.getManagedL2NetworkUuids(Collections.singleton(l2NetworkUuid)).contains(l2NetworkUuid));
+    }
+
+    private void validateManagedL2Host(String l2NetworkUuid, String hostUuid) {
+        if (hostUuid == null) {
+            return;
+        }
+        for (HostAllocatorL2NetworkExtensionPoint ext : pluginRgty.getExtensionList(HostAllocatorL2NetworkExtensionPoint.class)) {
+            if (ext.getManagedL2NetworkUuids(Collections.singleton(l2NetworkUuid)).contains(l2NetworkUuid)
+                    && !ext.getCandidateHostUuids(Collections.singleton(l2NetworkUuid)).contains(hostUuid)) {
+                throw new ApiMessageInterceptionException(operr("host[uuid:%s] does not support managed L2 network[uuid:%s]",
+                        hostUuid, l2NetworkUuid));
+            }
         }
     }
 

@@ -15,6 +15,7 @@ import org.zstack.core.errorcode.ErrorFacade;
 import org.zstack.core.workflow.FlowChainBuilder;
 import org.zstack.core.workflow.ShareFlow;
 import org.zstack.header.allocator.HostAllocatorConstant;
+import org.zstack.header.allocator.HostAllocatorL2NetworkExtensionPoint;
 import org.zstack.header.allocator.ReturnHostCapacityMsg;
 import org.zstack.header.cluster.ClusterVO;
 import org.zstack.header.cluster.ClusterVO_;
@@ -352,6 +353,11 @@ public class VmAllocateHostAndPrimaryStorageFlow implements Flow {
                     .select(L3NetworkVO_.l2NetworkUuid)
                     .eq(L3NetworkVO_.uuid, l3Uuid)
                     .findValue();
+            boolean managed = pluginRgty.getExtensionList(HostAllocatorL2NetworkExtensionPoint.class).stream()
+                    .anyMatch(ext -> ext.getManagedL2NetworkUuids(Collections.singleton(l2Uuid)).contains(l2Uuid));
+            if (managed) {
+                return possibleClusterUuids;
+            }
             needClusterUuids = Q.New(L2NetworkClusterRefVO.class)
                     .select(L2NetworkClusterRefVO_.clusterUuid)
                     .eq(L2NetworkClusterRefVO_.l2NetworkUuid, l2Uuid)

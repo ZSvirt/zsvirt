@@ -25,5 +25,13 @@ public interface NetworkServiceDhcpBackend {
 
     void enableNetworkService(L3NetworkVO l3VO, List<String> systemTags, Completion completion);
 
+    default boolean supportsDhcpServerIpChange() {
+        return false;
+    }
+
+    default void changeDhcpServerIp(String l3Uuid, String ipv4, String ipv6, Completion completion) {
+        throw new UnsupportedOperationException("DHCP server IP changes are not supported by this provider");
+    }
+
     void disableNetworkService(L3NetworkVO l3VO, Completion completion);
 }

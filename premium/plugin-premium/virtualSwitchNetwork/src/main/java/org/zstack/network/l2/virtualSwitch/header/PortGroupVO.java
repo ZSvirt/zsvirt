@@ -1,9 +1,15 @@
 package org.zstack.network.l2.virtualSwitch.header;
 
+import org.hibernate.annotations.JoinColumnOrFormula;
+import org.hibernate.annotations.JoinFormula;
+import org.hibernate.annotations.NotFound;
+import org.hibernate.annotations.NotFoundAction;
 import org.zstack.header.network.l3.L3NetworkEO;
 import org.zstack.header.network.l3.L3NetworkVO;
 import org.zstack.header.tag.AutoDeleteTag;
 import org.zstack.header.vo.EO;
+import org.zstack.header.vo.NoView;
+import org.zstack.network.zns.entity.ZnsSegmentRefVO;
 import org.zstack.header.vo.ForeignKey;
 
 import javax.persistence.*;
@@ -27,6 +33,18 @@ public class PortGroupVO extends L3NetworkVO {
 
     @Column
     private String vlanRanges;
+
+    @ManyToOne(fetch = FetchType.EAGER, optional = true)
+    @JoinColumnOrFormula(formula = @JoinFormula(
+            value = "(select l3.l2NetworkUuid from L3NetworkVO l3 where l3.uuid = uuid)",
+            referencedColumnName = "l2PortGroupUuid"))
+    @NotFound(action = NotFoundAction.IGNORE)
+    @NoView
+    private ZnsSegmentRefVO znsSegmentRef;
+
+    public ZnsSegmentRefVO getZnsSegmentRef() {
+        return znsSegmentRef;
+    }
 
     public PortGroupVO() {
     }

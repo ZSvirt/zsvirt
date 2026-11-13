@@ -25,6 +25,7 @@ import org.zstack.header.AbstractService;
 import org.zstack.header.allocator.AllocateHostDryRunReply;
 import org.zstack.header.allocator.DesignatedAllocateHostMsg;
 import org.zstack.header.allocator.HostAllocatorConstant;
+import org.zstack.header.allocator.HostAllocatorL2NetworkExtensionPoint;
 import org.zstack.header.apimediator.ApiMessageInterceptionException;
 import org.zstack.header.apimediator.GlobalApiMessageInterceptor;
 import org.zstack.header.cluster.ClusterInventory;
@@ -426,9 +427,29 @@ public class VmInstanceManagerImpl extends AbstractService implements
         return ret;
     }
 
+    private Map<String, List<String>> getManagedL2NetworkClusters(Collection<String> l2Uuids) {
+        Map<String, List<String>> result = new HashMap<>();
+        if (l2Uuids.isEmpty()) {
+            return result;
+        }
+        for (HostAllocatorL2NetworkExtensionPoint ext : pluginRgty.getExtensionList(HostAllocatorL2NetworkExtensionPoint.class)) {
+            for (String l2Uuid : ext.getManagedL2NetworkUuids(l2Uuids)) {
+                List<String> hosts = ext.getCandidateHostUuids(Collections.singletonList(l2Uuid));
+                List<String> clusters = hosts.isEmpty() ? Collections.emptyList() : SQL.New(
+                        "select distinct host.clusterUuid from HostVO host where host.uuid in (:hosts)", String.class)
+                        .param("hosts", hosts).list();
+                result.computeIfAbsent(l2Uuid, key -> new ArrayList<>()).addAll(clusters);
+            }
+        }
+        return result;
+    }
+
     @Transactional(readOnly = true)
     private List<BackupStorageInventory> getInterdependentBackupStoragesByL3NetworkUuids(List<String> l3s) {
         List<List<BackupStorageVO>> bss = new ArrayList<>();
+        List<L3NetworkVO> networks = Q.New(L3NetworkVO.class).in(L3NetworkVO_.uuid, l3s).list();
+        Map<String, List<String>> managedClusters = getManagedL2NetworkClusters(networks.stream()
+                .map(L3NetworkVO::getL2NetworkUuid).collect(Collectors.toSet()));
         for (String l3uuid : l3s) {
             String sql = "select ps" +
                     " from PrimaryStorageVO ps, L2NetworkClusterRefVO l2ref," +
@@ -440,6 +461,15 @@ public class VmInstanceManagerImpl extends AbstractService implements
             TypedQuery<PrimaryStorageVO> psq = dbf.getEntityManager().createQuery(sql, PrimaryStorageVO.class);
             psq.setParameter("l3uuid", l3uuid);
             List<PrimaryStorageVO> pss = psq.getResultList();
+            L3NetworkVO network = networks.stream().filter(l3 -> l3uuid.equals(l3.getUuid())).findFirst().orElse(null);
+            if (network != null && managedClusters.containsKey(network.getL2NetworkUuid())) {
+                List<String> clusters = managedClusters.get(network.getL2NetworkUuid());
+                pss = clusters.isEmpty() ? Collections.emptyList() : SQL.New(
+                        "select distinct ps from PrimaryStorageVO ps, PrimaryStorageClusterRefVO ref" +
+                                " where ps.uuid = ref.primaryStorageUuid and ref.clusterUuid in (:clusters)" +
+                                " and ps.zoneUuid = :zoneUuid", PrimaryStorageVO.class)
+                        .param("clusters", clusters).param("zoneUuid", network.getZoneUuid()).list();
+            }
 
             List<BackupStorageVO> lst = new ArrayList<>();
             for (PrimaryStorageVO ps : pss) {
@@ -593,6 +623,20 @@ public class VmInstanceManagerImpl extends AbstractService implements
                 // relatedPrimaryStorageUuids is not null, but size is 0
                 logger.warn(String.format("the backup storage[uuid:%s, type: %s] needs a strongly-bound primary storage," +
                         " but seems the primary storage is not added", bs.getUuid(), bs.getType()));
+            }
+        }
+
+        List<L3NetworkVO> zoneNetworks = Q.New(L3NetworkVO.class).eq(L3NetworkVO_.zoneUuid, zoneUuid).list();
+        Map<String, List<String>> managedClusters = getManagedL2NetworkClusters(zoneNetworks.stream()
+                .map(L3NetworkVO::getL2NetworkUuid).collect(Collectors.toSet()));
+        Set<String> storageClusters = psUuids.isEmpty() ? Collections.emptySet() : new HashSet<>(
+                Q.New(PrimaryStorageClusterRefVO.class).select(PrimaryStorageClusterRefVO_.clusterUuid)
+                        .in(PrimaryStorageClusterRefVO_.primaryStorageUuid, psUuids).listValues());
+        l3s.removeIf(l3 -> managedClusters.containsKey(l3.getL2NetworkUuid()));
+        for (L3NetworkVO l3 : zoneNetworks) {
+            List<String> clusters = managedClusters.get(l3.getL2NetworkUuid());
+            if (clusters != null && !Collections.disjoint(clusters, storageClusters)) {
+                l3s.add(l3);
             }
         }
 

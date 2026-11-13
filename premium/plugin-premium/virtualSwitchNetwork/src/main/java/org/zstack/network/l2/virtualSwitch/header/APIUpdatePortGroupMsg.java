@@ -2,9 +2,14 @@ package org.zstack.network.l2.virtualSwitch.header;
 
 import org.springframework.http.HttpMethod;
 import org.zstack.header.message.APIParam;
+import org.zstack.header.message.OverriddenApiParam;
+import org.zstack.header.message.OverriddenApiParams;
 import org.zstack.header.network.l3.APIUpdateL3NetworkMsg;
 import org.zstack.header.rest.RestRequest;
 
+@OverriddenApiParams({
+        @OverriddenApiParam(field = "name", param = @APIParam(required = false, maxLength = 255, emptyString = false))
+})
 @RestRequest(
         path = "/l3-networks/port-group/{uuid}/actions",
         isAction = true,

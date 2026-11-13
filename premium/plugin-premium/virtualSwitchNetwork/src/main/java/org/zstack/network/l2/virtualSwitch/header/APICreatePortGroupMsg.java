@@ -13,6 +13,7 @@ import org.zstack.header.tag.TagResourceType;
 
 @TagResourceType(L3NetworkVO.class)
 @OverriddenApiParams({
+        @OverriddenApiParam(field = "name", param = @APIParam(maxLength = 255, emptyString = false)),
         @OverriddenApiParam(field = "l2NetworkUuid", param = @APIParam(required = false, resourceType = L2PortGroupNetworkVO.class)),
 })
 @RestRequest(

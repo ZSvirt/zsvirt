@@ -177,6 +177,7 @@ public class L3BasicNetwork implements L3Network {
             @Override
             public void run(SyncTaskChain chain) {
                 List<IpRangeInventory> created = new ArrayList<>();
+                List<IpRangeInventory> synchronizedRanges = new ArrayList<>();
                 List<String> createdUuids = new ArrayList<>();
                 Map<String, String> originalIpRanges = new HashMap<>();
                 FlowChain flow = FlowChainBuilder.newSimpleFlowChain();
@@ -220,7 +221,23 @@ public class L3BasicNetwork implements L3Network {
                             dbf.removeByPrimaryKeys(createdUuids, IpRangeVO.class);
                             IpRangeHelper.updateL3NetworkIpversion(ranges.get(0));
                         }
-                        trigger.rollback();
+                        if (synchronizedRanges.isEmpty()) {
+                            trigger.rollback();
+                            return;
+                        }
+                        extension.rollbackAddedIpRanges(synchronizedRanges, new Completion(trigger) {
+                            @Override
+                            public void success() {
+                                trigger.rollback();
+                            }
+
+                            @Override
+                            public void fail(ErrorCode errorCode) {
+                                logger.warn(String.format("failed to roll back external IP ranges for L3[uuid:%s]: %s",
+                                        l3Uuid, errorCode));
+                                trigger.rollback();
+                            }
+                        });
                     }
                 }).then(new NoRollbackFlow() {
                     String __name__ = "synchronize-external-network-ip-ranges";
@@ -228,6 +245,7 @@ public class L3BasicNetwork implements L3Network {
                     @Override
                     public void run(FlowTrigger trigger, Map data) {
                         new While<>(created).step((range, done) -> {
+                            synchronizedRanges.add(range);
                             extension.afterAddIpRange(range, msg.getSystemTags(), new Completion(done) {
                                 @Override
                                 public void success() {

@@ -18,4 +18,8 @@ public interface AfterAddIpRangeExtensionPoint {
         afterAddIpRange(ipr, systemTags);
         completion.success();
     }
+
+    default void rollbackAddedIpRanges(List<IpRangeInventory> ipRanges, Completion completion) {
+        completion.success();
+    }
 }

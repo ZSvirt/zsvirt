@@ -39,6 +39,11 @@ public interface PortGroupBackend {
         completion.success();
     }
 
+    default void prepareCreatePortGroup(L3NetworkInventory inventory, APICreatePortGroupMsg msg,
+                                        Completion completion) {
+        completion.success();
+    }
+
     void updateVirtualNetworkId(L2PortGroupNetworkInventory inventory, Integer virtualNetworkId,
                                 Completion completion);
 

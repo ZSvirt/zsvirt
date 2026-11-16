@@ -95,6 +95,12 @@ public class VirtualSwitchApiInterceptor implements GlobalApiMessageInterceptor 
 
     @Override
     public APIMessage intercept(APIMessage msg) throws ApiMessageInterceptionException {
+        if (msg instanceof APIUpdateL3NetworkMsg) {
+            validatePortGroupOwner(msg, ((APIUpdateL3NetworkMsg) msg).getUuid());
+        } else if (msg instanceof APIDeleteL3NetworkMsg) {
+            validatePortGroupOwner(msg, ((APIDeleteL3NetworkMsg) msg).getUuid());
+        }
+
         if (msg instanceof APICreateL2VirtualSwitchMsg) {
             validate((APICreateL2VirtualSwitchMsg) msg);
         } else if (msg instanceof APICreateL2PortGroupMsg) {
@@ -179,6 +185,7 @@ public class VirtualSwitchApiInterceptor implements GlobalApiMessageInterceptor 
         ret.add(APICreateL3NetworkMsg.class);
         ret.add(APIUpdateL2NetworkMsg.class);
         ret.add(APIDeleteL2NetworkMsg.class);
+        ret.add(APIUpdateL3NetworkMsg.class);
         ret.add(APIDeleteL3NetworkMsg.class);
         ret.add(APIUpdateL2NetworkVirtualNetworkIdMsg.class);
         ret.add(APIUpdateBondingMsg.class);
@@ -209,6 +216,20 @@ public class VirtualSwitchApiInterceptor implements GlobalApiMessageInterceptor 
             throw new ApiMessageInterceptionException(err(RESOURCE_NOT_ACCESSIBLE,
                     "account[uuid:%s] must own port groups[uuids:%s] to modify their resource attributes",
                     msg.getSession().getAccountUuid(), inaccessibleUuids));
+        }
+    }
+
+    private void validatePortGroupOwner(APIMessage msg, String uuid) {
+        if (!Q.New(PortGroupVO.class).eq(PortGroupVO_.uuid, uuid).isExists()
+                || Account.isAdminPermission(msg.getSession())) {
+            return;
+        }
+
+        if (!AccessibleResourceChecker.forAccount(msg.getSession().getAccountUuid())
+                .withScope(APIResourceScope.MustOwner).isAccessible(uuid)) {
+            throw new ApiMessageInterceptionException(err(RESOURCE_NOT_ACCESSIBLE,
+                    "account[uuid:%s] must own port group[uuid:%s] to update or delete it",
+                    msg.getSession().getAccountUuid(), uuid));
         }
     }
 

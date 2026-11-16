@@ -145,6 +145,7 @@
                 <value>org.zstack.compute.vm.CreateVmFromTemplateFlow</value>
                 <value>org.zstack.compute.vm.AttachDataVolumeInOrderFlow</value>
                 <value>org.zstack.compute.vm.StartVmInstanceFlow</value>
+                <value>org.zstack.compute.vm.StopVmFromSnapshotGroupFlow</value>
                 <value>org.zstack.compute.vm.DeleteTemplateFlow</value>
             </list>
         </property>

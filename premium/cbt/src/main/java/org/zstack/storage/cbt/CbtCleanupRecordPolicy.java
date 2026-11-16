@@ -1,12 +1,18 @@
 package org.zstack.storage.cbt;
 
+import org.zstack.core.db.Q;
 import org.zstack.header.cbt.VolumeCbtBackupRecordVO;
+import org.zstack.header.volume.VolumeVO;
+import org.zstack.header.volume.VolumeVO_;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 final class CbtCleanupRecordPolicy {
     private CbtCleanupRecordPolicy() {
@@ -35,6 +41,41 @@ final class CbtCleanupRecordPolicy {
 
     static boolean shouldRetainScratchVolumes(List<VolumeCbtBackupRecordVO> records) {
         return records.stream().anyMatch(record -> record.getCleanupAttemptUuid() != null);
+    }
+
+    static List<VolumeCbtBackupRecordVO> stopRecords(List<VolumeCbtBackupRecordVO> records,
+                                                    List<String> scratchVolumeUuids) {
+        if (scratchVolumeUuids == null || scratchVolumeUuids.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        return stopRecordsForVolumes(records,
+                Q.New(VolumeVO.class).in(VolumeVO_.uuid, scratchVolumeUuids).list());
+    }
+
+    static List<VolumeCbtBackupRecordVO> stopRecordsForVolumes(List<VolumeCbtBackupRecordVO> records,
+                                                              List<VolumeVO> scratchVolumes) {
+        Set<String> targets = new HashSet<>();
+        for (VolumeVO volume : scratchVolumes) {
+            String path = volume.getInstallPath();
+            if (path == null) {
+                continue;
+            }
+            if (path.startsWith("sharedblock://")) {
+                path = path.replace("sharedblock://", "/dev/");
+            } else if (path.startsWith("block://")) {
+                path = path.replace("block://", "/dev/disk/by-id/wwn-0x");
+            }
+            targets.add(path);
+        }
+
+        List<VolumeCbtBackupRecordVO> activeRecords = new ArrayList<>();
+        for (VolumeCbtBackupRecordVO record : records) {
+            if (record.getTarget() != null && targets.contains(record.getTarget())) {
+                activeRecords.add(record);
+            }
+        }
+        return stopRecords(activeRecords);
     }
 
     static List<VolumeCbtBackupRecordVO> stopRecords(List<VolumeCbtBackupRecordVO> records) {

@@ -18,8 +18,12 @@ import org.zstack.header.core.workflow.*;
 import org.zstack.header.errorcode.ErrorCode;
 import org.zstack.header.errorcode.ErrorCodeList;
 import org.zstack.header.message.MessageReply;
+import org.zstack.header.vm.TemplatedVmInstanceCacheVO;
+import org.zstack.header.vm.TemplatedVmInstanceCacheVO_;
 import org.zstack.header.vm.VmDeletionStruct;
+import org.zstack.header.vm.VmInstanceState;
 import org.zstack.header.vm.VmInstanceVO;
+import org.zstack.header.vm.VmInstanceVO_;
 import org.zstack.header.volume.VolumeVO;
 import org.zstack.header.volume.VolumeVO_;
 import org.zstack.utils.CollectionUtils;
@@ -227,6 +231,18 @@ public class CbtBackupCascadeExtension extends AbstractCascadeExtension {
 
                     List<UnexportNbdVolumesMsg> msgs = new ArrayList<>();
                     for (String vmInstanceUuid : vmUuids) {
+                        if (q(VmInstanceVO.class)
+                                .eq(VmInstanceVO_.uuid, vmInstanceUuid)
+                                .eq(VmInstanceVO_.state, VmInstanceState.Stopped)
+                                .isNull(VmInstanceVO_.hostUuid)
+                                .isNull(VmInstanceVO_.lastHostUuid)
+                                .isExists()
+                                && q(TemplatedVmInstanceCacheVO.class)
+                                .eq(TemplatedVmInstanceCacheVO_.cacheVmInstanceUuid, vmInstanceUuid)
+                                .isExists()) {
+                            continue;
+                        }
+
                         List<String> volumeUuids = q(VolumeVO.class)
                                 .select(VolumeVO_.uuid)
                                 .eq(VolumeVO_.vmInstanceUuid, vmInstanceUuid)

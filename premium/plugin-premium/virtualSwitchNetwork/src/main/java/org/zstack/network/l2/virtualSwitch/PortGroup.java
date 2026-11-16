@@ -110,6 +110,7 @@ public class PortGroup extends L3BasicNetwork {
         return new Completion(chain) {
             @Override
             public void success() {
+                self = dbf.reload(self);
                 PortGroup.super.handle(msg);
                 chain.next();
             }

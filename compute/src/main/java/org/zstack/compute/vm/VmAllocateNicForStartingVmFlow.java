@@ -51,10 +51,15 @@ public class VmAllocateNicForStartingVmFlow implements Flow {
 
         final List<VmNicInventory> nicsNeedNewIp = new ArrayList<VmNicInventory>(vm.getVmNics().size());
         final List<VmNicInventory> usedIpNics = new ArrayList<VmNicInventory>();
+        final List<String> externalIpAllocationL3Uuids = new ArrayList<>();
         for (VmNicInventory nic : vm.getVmNics()) {
             L3NetworkVO l3VO = dbf.findByUuid(nic.getL3NetworkUuid(), L3NetworkVO.class);
             if (!l3VO.enableIpAllocation()) {
-                continue;
+                if (pluginRgty.getExtensionList(AfterAllocateExternalNetworkNicExtensionPoint.class).stream()
+                        .noneMatch(ext -> ext.requiresIpAllocationOnStart(nic))) {
+                    continue;
+                }
+                externalIpAllocationL3Uuids.add(nic.getL3NetworkUuid());
             }
             if (nic.getUsedIpUuid() == null) {
                 nic.getUsedIps().clear();
@@ -126,6 +131,9 @@ public class VmAllocateNicForStartingVmFlow implements Flow {
                     if (!reply.isSuccess()) {
                         wcompl.addError(reply.getError());
                         wcompl.allDone();
+                        if (externalIpAllocationL3Uuids.contains(msg.getL3NetworkUuid())) {
+                            return;
+                        }
                     }
 
                     final AllocateIpReply ar = reply.castReply();
@@ -135,7 +143,11 @@ public class VmAllocateNicForStartingVmFlow implements Flow {
                     VmNicInventory nic = nicsNeedNewIp.stream()
                             .filter(n -> n.getL3NetworkUuid().equals(ip.getL3NetworkUuid()))
                             .findFirst().orElse(new VmNicInventory());
-                    nicsNeedNewIp.remove(nic);
+                    if (externalIpAllocationL3Uuids.contains(msg.getL3NetworkUuid())) {
+                        ip.setVmNicUuid(nic.getUuid());
+                    } else {
+                        nicsNeedNewIp.remove(nic);
+                    }
 
                     for (VmNicExtensionPoint ext : pluginRgty.getExtensionList(VmNicExtensionPoint.class)) {
                         ext.afterAddIpAddress(nic.getUuid(), ip.getUuid());

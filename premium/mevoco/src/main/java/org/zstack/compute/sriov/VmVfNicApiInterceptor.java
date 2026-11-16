@@ -15,6 +15,8 @@ import org.zstack.header.message.APIMessage;
 import org.zstack.header.network.l2.APICreateL2NetworkMsg;
 import org.zstack.header.network.l2.L2NetworkConstant;
 import org.zstack.header.network.l2.L2NetworkType;
+import org.zstack.header.network.l2.L2NetworkVO;
+import org.zstack.header.network.l2.VSwitchType;
 import org.zstack.header.network.l3.L3NetworkVO;
 import org.zstack.header.network.l3.L3NetworkVO_;
 import org.zstack.header.sriov.APIChangeVfNicHaStateMsg;
@@ -32,6 +34,7 @@ import org.zstack.header.vm.VmInstanceState;
 import org.zstack.header.vm.VmInstanceVO;
 import org.zstack.header.vm.VmNicConstant;
 import org.zstack.header.vm.VmNicParam;
+import org.zstack.header.vm.VmNicType;
 import org.zstack.header.vm.VmNicVO;
 import org.zstack.header.volume.VolumeVO;
 import org.zstack.header.volume.VolumeVO_;
@@ -98,8 +101,9 @@ public class VmVfNicApiInterceptor implements GlobalApiMessageInterceptor {
     }
 
     private void checkL2NetworkVswitchTypeSupportSriov(String vSwitchType) {
-        if (L2NetworkConstant.VSWITCH_TYPE_OVS_DPDK.equals(vSwitchType)) {
-            throw new ApiMessageInterceptionException(argerr("%s don't support sr-iov", L2NetworkConstant.VSWITCH_TYPE_OVS_DPDK));
+        if (L2NetworkConstant.VSWITCH_TYPE_OVS_DPDK.equals(vSwitchType)
+                || VSwitchType.valueOf(vSwitchType).getSupVmNicTypes().stream().noneMatch(VmNicType::isUseSRIOV)) {
+            throw new ApiMessageInterceptionException(argerr("%s don't support sr-iov", vSwitchType));
         }
     }
 
@@ -111,6 +115,9 @@ public class VmVfNicApiInterceptor implements GlobalApiMessageInterceptor {
         if (StringUtils.isEmpty(l2Uuid)) {
             throw new ApiMessageInterceptionException(argerr("L3 Network [uuid:%s] doesn't exist", l3Uuid));
         }
+
+        L2NetworkVO l2 = dbf.findByUuid(l2Uuid, L2NetworkVO.class);
+        checkL2NetworkVswitchTypeSupportSriov(l2.getvSwitchType());
 
         if (!SriovSystemTags.L2_ENABLE_SRIOV.hasTag(l2Uuid)) {
             throw new ApiMessageInterceptionException(argerr("related l2 network[uuid:%s] of l3 network[uuid:%s] is not sr-iov enabled", l2Uuid, l3Uuid));

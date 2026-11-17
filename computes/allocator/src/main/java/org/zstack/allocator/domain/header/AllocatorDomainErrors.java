@@ -49,10 +49,6 @@ public enum AllocatorDomainErrors {
         code = String.format("ALLOCATOR.DOMAIN.%s", id);
     }
 
-    public boolean isEqual(Object t) {
-        return t.toString().equals(this.toString());
-    }
-
     @Override
     public String toString() {
         return code;

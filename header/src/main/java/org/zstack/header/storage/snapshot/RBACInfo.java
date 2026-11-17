@@ -1,6 +1,7 @@
 package org.zstack.header.storage.snapshot;
 
 import org.zstack.header.description.PackageDescription;
+import org.zstack.header.storage.snapshot.group.APIGetVolumeSnapshotGroupTreeMsg;
 import org.zstack.header.storage.snapshot.group.APIQueryVolumeSnapshotGroupMsg;
 import org.zstack.header.volume.VolumeVO;
 
@@ -29,6 +30,14 @@ public class RBACInfo implements PackageDescription {
                 .uuid("a91363c6b4ba4e58966d17a4257668cd")
                 .permissionBaseOnThis()
                 .build();
+
+        roleContributorBuilder()
+                .roleName("other")
+                .actions(
+                        APIGetVolumeSnapshotGroupTreeMsg.class
+                )
+                .build();
+
         apis()
                 .api(
                         APIQueryVolumeSnapshotMsg.class,

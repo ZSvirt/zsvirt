@@ -11,6 +11,8 @@ import org.zstack.core.db.DatabaseFacade;
 import org.zstack.core.db.Q;
 import org.zstack.header.agent.AgentResponse;
 import org.zstack.header.cbt.CbtTaskStatus;
+import org.zstack.header.cbt.CbtTaskResourceRefVO;
+import org.zstack.header.cbt.CbtTaskResourceRefVO_;
 import org.zstack.header.cbt.CbtTaskVO;
 import org.zstack.header.cbt.VolumeCbtBackupInfo;
 import org.zstack.header.cbt.VolumeCbtBackupRecordVO;
@@ -185,7 +187,16 @@ public class CbtBackupKvmBackend implements CbtBackupHypervisorBackend {
             return;
         }
 
-        doDisableVolumeCbtBackup(vmUuid, hostUuid, CbtCleanupRecordPolicy.stopRecords(records), completion);
+        List<String> scratchVolumeUuids = Q.New(CbtTaskResourceRefVO.class)
+                .eq(CbtTaskResourceRefVO_.taskUuid, vo.getUuid())
+                .eq(CbtTaskResourceRefVO_.resourceType, VolumeVO.class.getSimpleName())
+                .select(CbtTaskResourceRefVO_.resourceUuid).listValues();
+        records = CbtCleanupRecordPolicy.stopRecords(records, scratchVolumeUuids);
+        if (records.isEmpty()) {
+            completion.success();
+            return;
+        }
+        doDisableVolumeCbtBackup(vmUuid, hostUuid, records, completion);
     }
 
     private void rollbackVolumeCbtBackupAttempts(String vmUuid, String hostUuid,

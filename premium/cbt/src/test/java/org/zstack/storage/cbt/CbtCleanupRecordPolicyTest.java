@@ -3,8 +3,10 @@ package org.zstack.storage.cbt;
 import org.junit.Test;
 import org.zstack.core.gc.TimeBasedGarbageCollector;
 import org.zstack.header.cbt.VolumeCbtBackupRecordVO;
+import org.zstack.header.volume.VolumeVO;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -12,6 +14,57 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 public class CbtCleanupRecordPolicyTest {
+    @Test
+    public void cephCleanupMatchesPathsWithoutHostMonOrSecretLookup() {
+        VolumeCbtBackupRecordVO active = record(1, "source", null);
+        active.setTarget("ceph://pool/scratch");
+        VolumeCbtBackupRecordVO stale = record(2, "detached", null);
+        stale.setTarget("ceph://pool/deleted-scratch");
+
+        assertEquals(Collections.singletonList(active), CbtCleanupRecordPolicy.stopRecordsForVolumes(
+                Arrays.asList(active, stale), Collections.singletonList(scratch("ceph://pool/scratch"))));
+    }
+
+    @Test
+    public void sharedBlockAndBlockCleanupKeepDevicePathConversions() {
+        VolumeCbtBackupRecordVO sharedBlock = record(1, "source-1", null);
+        sharedBlock.setTarget("/dev/vg/scratch");
+        VolumeCbtBackupRecordVO block = record(2, "source-2", null);
+        block.setTarget("/dev/disk/by-id/wwn-0x1234");
+        VolumeCbtBackupRecordVO stale = record(3, "detached", null);
+        stale.setTarget("/dev/vg/deleted-scratch");
+
+        assertEquals(Arrays.asList(sharedBlock, block), CbtCleanupRecordPolicy.stopRecordsForVolumes(
+                Arrays.asList(stale, block, sharedBlock),
+                Arrays.asList(scratch("sharedblock://vg/scratch"), scratch("block://1234"))));
+    }
+
+    @Test
+    public void filteringKeepsLatestActiveRecordAndExcludesPendingRollback() {
+        VolumeCbtBackupRecordVO old = record(1, "source", null);
+        VolumeCbtBackupRecordVO active = record(2, "source", null);
+        VolumeCbtBackupRecordVO pending = record(3, "source", "attempt");
+        VolumeCbtBackupRecordVO deleted = record(4, "source", null);
+        old.setTarget("/localStorage/scratch.qcow2");
+        active.setTarget(old.getTarget());
+        pending.setTarget(old.getTarget());
+        deleted.setTarget("/localStorage/deleted.qcow2");
+
+        List<VolumeCbtBackupRecordVO> records = Arrays.asList(old, active, pending, deleted);
+        assertEquals(Collections.singletonList(active), CbtCleanupRecordPolicy.stopRecordsForVolumes(
+                records, Collections.singletonList(scratch(active.getTarget()))));
+        assertTrue(CbtCleanupRecordPolicy.stopRecordsForVolumes(records,
+                Arrays.asList(scratch(null), scratch("/unrelated"))).isEmpty());
+        assertTrue(CbtCleanupRecordPolicy.stopRecordsForVolumes(records, Collections.emptyList()).isEmpty());
+        assertEquals(4, records.size());
+    }
+
+    private VolumeVO scratch(String path) {
+        VolumeVO volume = new VolumeVO();
+        volume.setInstallPath(path);
+        return volume;
+    }
+
     @Test
     public void failedCleanupUsesOnlyPendingRecordsAndKeepsAttemptsSeparate() {
         VolumeCbtBackupRecordVO history = record(1, "volume-1", null);

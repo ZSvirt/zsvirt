@@ -91,7 +91,7 @@ public class CbtTaskCleanupGC extends TimeBasedGarbageCollector {
             return;
         }
 
-        cleanupRecords = CbtCleanupRecordPolicy.stopRecords(cleanupRecords);
+        cleanupRecords = CbtCleanupRecordPolicy.stopRecords(cleanupRecords, cbtVolumeUuids);
         if (cleanupRecords.isEmpty()) {
             deleteCbtVolumes(completion);
             return;

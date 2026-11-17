@@ -26,6 +26,7 @@ import org.zstack.header.network.l2.L2NetworkVO;
 import org.zstack.header.vm.VmInstanceVO;
 import org.zstack.header.vm.VmInstanceVO_;
 import org.zstack.header.volume.VolumeInventory;
+import org.zstack.header.volume.VolumeStatus;
 import org.zstack.header.volume.VolumeVO;
 import org.zstack.header.volume.VolumeVO_;
 import org.zstack.storage.cbt.CbtBackupKvmCommands.TakeVolumeCbtBackupCmd;
@@ -135,7 +136,14 @@ public class CbtBackupKvmBackend implements CbtBackupHypervisorBackend {
 
         for (String uuid : volumeUuids) {
             VolumeVO vo = getVolumeByUuid(uuid);
+            if (vo.getStatus() == VolumeStatus.NotInstantiated && StringUtils.isEmpty(vo.getInstallPath())) {
+                continue;
+            }
             volumes.add(VolumeTO.valueOf(VolumeInventory.valueOf(vo), inv));
+        }
+        if (volumes.isEmpty()) {
+            completion.success();
+            return;
         }
         UnexportNbdVolumesCmd cmd = new UnexportNbdVolumesCmd();
         cmd.volumes = volumes;

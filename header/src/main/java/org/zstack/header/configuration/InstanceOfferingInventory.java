@@ -195,7 +195,6 @@ public class InstanceOfferingInventory implements Serializable {
         inventory.setCpuNum(2);
         inventory.setName("instanceOffering1");
         inventory.setUuid(DocUtils.createFixedUuid(InstanceOfferingVO.class));
-        inventory.setAllocatorStrategy("Mevoco");
         inventory.setType("UserVm");
         inventory.setState(InstanceOfferingState.Enabled.toString());
         inventory.setCreateDate(DocUtils.timestamp());

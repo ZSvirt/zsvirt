@@ -22,8 +22,6 @@ public class MevocoConstants {
     public static final String KVM_USER_DEFINED_XML = "userDefinedXml";
     public static final String KVM_USER_DEFINED_XML_HOOK_SCRIPT = "userDefinedXmlHookScript";
 
-    public static final String MEVOCO_HOST_ALLOCATOR_STRATEGY = "Mevoco";
-
     public static final String SERVICE_ID = "mevoco";
     public static final String ACTION_CATEGORY = "mevoco";
 

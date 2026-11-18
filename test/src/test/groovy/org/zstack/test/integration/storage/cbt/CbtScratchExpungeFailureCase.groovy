@@ -2,6 +2,16 @@ package org.zstack.test.integration.storage.cbt
 
 import org.springframework.http.HttpEntity
 import org.zstack.core.db.Q
+import org.zstack.core.db.DatabaseFacade
+import org.zstack.core.gc.GarbageCollector
+import org.zstack.core.gc.GarbageCollectorVO
+import org.zstack.core.gc.GarbageCollectorVO_
+import org.zstack.header.agent.AgentResponse
+import org.zstack.kvm.KVMHostVO
+import org.zstack.sdk.VolumeInventory
+import org.zstack.storage.cbt.UnexportNbdVolumesGC
+import org.zstack.storage.cbt.CbtBackupKvmCommands
+
 import org.zstack.header.cbt.CbtTaskResourceRefVO
 import org.zstack.header.cbt.CbtTaskResourceRefVO_
 import org.zstack.header.cbt.VolumeCbtBackupInfo
@@ -23,9 +33,12 @@ import org.zstack.testlib.SubCase
 import org.zstack.testlib.premium.PremiumEnv
 import org.zstack.utils.gson.JSONObjectUtil
 
+import static org.mockito.Mockito.*
+
 /** Exercise CBT cleanup through the real volume service, including a failed physical-delete reply. */
 class CbtScratchExpungeFailureCase extends SubCase {
     EnvSpec env
+    String unexportGcName
 
     @Override
     void setup() {
@@ -35,6 +48,10 @@ class CbtScratchExpungeFailureCase extends SubCase {
     @Override
     void environment() {
         env = makeEnv {
+            diskOffering {
+                name = "uninitialized-disk"
+                diskSize = 1024L * 1024 * 1024
+            }
             sftpBackupStorage {
                 name = "sftp"
                 url = "/sftp"
@@ -94,13 +111,56 @@ class CbtScratchExpungeFailureCase extends SubCase {
                 useHost("host")
             }
         }
+        env.simulator(CbtBackupKvmCommands.REST_API_UNEXPORT_NDB_VOLUMES_PATH) {
+            return new AgentResponse()
+        }
     }
 
     @Override
     void test() {
         env.create {
+            testUnexportGcVolumeFiltering()
             testPhysicalDeleteFailureRetainsOnlyTheFailedScratch()
         }
+    }
+
+    private void testUnexportGcVolumeFiltering() {
+        VmInstanceInventory vm = env.inventoryByName("vm")
+        unexportGcName = "gc-unexport-nbd-volumes-for-vm-${vm.uuid}-on-host-${vm.hostUuid}"
+        VolumeInventory pending = createDataVolume {
+            name = "uninitialized-nbd-volume"
+            diskOfferingUuid = env.inventoryByName("uninitialized-disk").uuid
+        }
+        assert pending.status == "NotInstantiated" && !pending.installPath :
+                "Fixture must have no backing storage: status=${pending.status}, path=${pending.installPath}"
+
+        def gc = new UnexportNbdVolumesGC()
+        gc.prepare(vm.uuid, [pending.uuid, vm.rootVolumeUuid])
+        assert gc.volumes*.volumeUuid == [vm.rootVolumeUuid] :
+                "GC must retain the initialized volume only: ${gc.volumes*.volumeUuid}"
+        assert gc.volumes[0].installPath : "Initialized volume must retain its cleanup path"
+
+        gc.prepare(vm.uuid, [pending.uuid])
+        assert gc.volumes.isEmpty() : "Uninitialized volumes must not enter GC payload: ${gc.volumes}"
+
+        testFilterBoundary(vm)
+    }
+
+    private void testFilterBoundary(VmInstanceInventory vm) {
+        VolumeVO original = dbFindByUuid(vm.rootVolumeUuid, VolumeVO.class)
+        VolumeVO volume = JSONObjectUtil.toObject(JSONObjectUtil.toJsonString(original), VolumeVO.class)
+        def db = mock(DatabaseFacade.class)
+        when(db.findByUuid(vm.hostUuid, KVMHostVO.class)).thenReturn(dbFindByUuid(vm.hostUuid, KVMHostVO.class))
+        when(db.findByUuid(vm.rootVolumeUuid, VolumeVO.class)).thenReturn(volume)
+        def gc = new UnexportNbdVolumesGC()
+        def dbField = GarbageCollector.getDeclaredField("dbf")
+        dbField.accessible = true
+        dbField.set(gc, db)
+
+        volume.status = VolumeStatus.NotInstantiated
+        gc.prepare(vm.uuid, [volume.uuid])
+        assert gc.volumes*.installPath == [original.installPath] :
+                "A volume with a backing path must remain in cleanup despite NotInstantiated status"
     }
 
     private void testPhysicalDeleteFailureRetainsOnlyTheFailedScratch() {
@@ -203,5 +263,9 @@ class CbtScratchExpungeFailureCase extends SubCase {
     @Override
     void clean() {
         env.delete()
+        if (unexportGcName != null) {
+            assert !Q.New(GarbageCollectorVO.class).eq(GarbageCollectorVO_.name, unexportGcName).isExists() :
+                    "Successful NBD unexport during cleanup must not leave a GC job: ${unexportGcName}"
+        }
     }
 }

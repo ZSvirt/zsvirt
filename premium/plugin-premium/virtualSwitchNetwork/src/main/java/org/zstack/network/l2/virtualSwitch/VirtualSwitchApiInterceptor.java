@@ -23,9 +23,14 @@ import org.zstack.header.host.HostStatus;
 import org.zstack.header.host.HostVO;
 import org.zstack.header.host.HostVO_;
 import org.zstack.header.message.APIMessage;
+import org.zstack.header.message.APIResourceScope;
 import org.zstack.header.network.l2.*;
 import org.zstack.header.network.l3.*;
+import org.zstack.header.resourceattribute.api.APICreateResourceAttributeValueMsg;
+import org.zstack.header.resourceattribute.api.APIDeleteResourceAttributeValueMsg;
 import org.zstack.header.vm.VmInstanceConstant;
+import org.zstack.identity.Account;
+import org.zstack.identity.rbac.AccessibleResourceChecker;
 import org.zstack.kvm.KVMConstant;
 import org.zstack.network.hostNetworkInterface.HostNetworkBondingVO;
 import org.zstack.network.hostNetworkInterface.HostNetworkBondingVO_;
@@ -45,7 +50,9 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.zstack.core.Platform.argerr;
+import static org.zstack.core.Platform.err;
 import static org.zstack.core.Platform.operr;
+import static org.zstack.header.errorcode.SysErrors.RESOURCE_NOT_ACCESSIBLE;
 import static org.zstack.network.l2.virtualSwitch.KVMRealizeL2PortGroupLinuxBridgeBackend.findBackend;
 
 /**
@@ -88,6 +95,12 @@ public class VirtualSwitchApiInterceptor implements GlobalApiMessageInterceptor 
 
     @Override
     public APIMessage intercept(APIMessage msg) throws ApiMessageInterceptionException {
+        if (msg instanceof APIUpdateL3NetworkMsg) {
+            validatePortGroupOwner(msg, ((APIUpdateL3NetworkMsg) msg).getUuid());
+        } else if (msg instanceof APIDeleteL3NetworkMsg) {
+            validatePortGroupOwner(msg, ((APIDeleteL3NetworkMsg) msg).getUuid());
+        }
+
         if (msg instanceof APICreateL2VirtualSwitchMsg) {
             validate((APICreateL2VirtualSwitchMsg) msg);
         } else if (msg instanceof APICreateL2PortGroupMsg) {
@@ -130,6 +143,10 @@ public class VirtualSwitchApiInterceptor implements GlobalApiMessageInterceptor 
             validate((APIUpdateBondingMsg) msg);
         } else if (msg instanceof APIDeleteBondingMsg) {
             validate((APIDeleteBondingMsg) msg);
+        } else if (msg instanceof APICreateResourceAttributeValueMsg) {
+            validatePortGroupAttributeOwner(msg, ((APICreateResourceAttributeValueMsg) msg).getResourceUuids());
+        } else if (msg instanceof APIDeleteResourceAttributeValueMsg) {
+            validatePortGroupAttributeOwner(msg, ((APIDeleteResourceAttributeValueMsg) msg).getResourceUuids());
         }
 
         setServiceId(msg);
@@ -168,10 +185,13 @@ public class VirtualSwitchApiInterceptor implements GlobalApiMessageInterceptor 
         ret.add(APICreateL3NetworkMsg.class);
         ret.add(APIUpdateL2NetworkMsg.class);
         ret.add(APIDeleteL2NetworkMsg.class);
+        ret.add(APIUpdateL3NetworkMsg.class);
         ret.add(APIDeleteL3NetworkMsg.class);
         ret.add(APIUpdateL2NetworkVirtualNetworkIdMsg.class);
         ret.add(APIUpdateBondingMsg.class);
         ret.add(APIDeleteBondingMsg.class);
+        ret.add(APICreateResourceAttributeValueMsg.class);
+        ret.add(APIDeleteResourceAttributeValueMsg.class);
 
         return ret;
     }
@@ -179,6 +199,38 @@ public class VirtualSwitchApiInterceptor implements GlobalApiMessageInterceptor 
     @Override
     public InterceptorPosition getPosition() {
         return InterceptorPosition.END;
+    }
+
+    private void validatePortGroupAttributeOwner(APIMessage msg, List<String> resourceUuids) {
+        List<String> portGroupUuids = Q.New(PortGroupVO.class)
+                .select(PortGroupVO_.uuid)
+                .in(PortGroupVO_.uuid, resourceUuids)
+                .listValues();
+        if (portGroupUuids.isEmpty() || Account.isAdminPermission(msg.getSession())) {
+            return;
+        }
+
+        List<String> inaccessibleUuids = AccessibleResourceChecker.forAccount(msg.getSession().getAccountUuid())
+                .withScope(APIResourceScope.MustOwner).findOutAllInaccessibleResources(portGroupUuids);
+        if (!inaccessibleUuids.isEmpty()) {
+            throw new ApiMessageInterceptionException(err(RESOURCE_NOT_ACCESSIBLE,
+                    "account[uuid:%s] must own port groups[uuids:%s] to modify their resource attributes",
+                    msg.getSession().getAccountUuid(), inaccessibleUuids));
+        }
+    }
+
+    private void validatePortGroupOwner(APIMessage msg, String uuid) {
+        if (!Q.New(PortGroupVO.class).eq(PortGroupVO_.uuid, uuid).isExists()
+                || Account.isAdminPermission(msg.getSession())) {
+            return;
+        }
+
+        if (!AccessibleResourceChecker.forAccount(msg.getSession().getAccountUuid())
+                .withScope(APIResourceScope.MustOwner).isAccessible(uuid)) {
+            throw new ApiMessageInterceptionException(err(RESOURCE_NOT_ACCESSIBLE,
+                    "account[uuid:%s] must own port group[uuid:%s] to update or delete it",
+                    msg.getSession().getAccountUuid(), uuid));
+        }
     }
 
     private void validate(APIUpdateL2NetworkMsg msg) {

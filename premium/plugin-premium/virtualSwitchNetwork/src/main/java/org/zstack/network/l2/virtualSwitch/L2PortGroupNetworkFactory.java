@@ -20,6 +20,7 @@ import org.zstack.header.errorcode.ErrorCodeList;
 import org.zstack.header.message.Message;
 import org.zstack.header.message.MessageReply;
 import org.zstack.header.network.l2.*;
+import org.zstack.header.vm.VmNicType;
 import org.zstack.network.l2.L2NetworkDefaultMtu;
 import org.zstack.network.l2.virtualSwitch.header.*;
 import org.zstack.network.service.NetworkServiceGlobalConfig;
@@ -252,7 +253,9 @@ public class L2PortGroupNetworkFactory extends AbstractService implements L2Netw
 
             @Override
             public void run(FlowTrigger trigger, Map data) {
-                tagMgr.createNonInherentSystemTag(ctx.vo.getUuid(), SriovSystemTags.L2_ENABLE_SRIOV.getTagFormat(), L2NetworkVO.class.getSimpleName());
+                if (VSwitchType.valueOf(ctx.vo.getvSwitchType()).getSupVmNicTypes().stream().anyMatch(VmNicType::isUseSRIOV)) {
+                    tagMgr.createNonInherentSystemTag(ctx.vo.getUuid(), SriovSystemTags.L2_ENABLE_SRIOV.getTagFormat(), L2NetworkVO.class.getSimpleName());
+                }
                 trigger.next();
             }
         }).done(new FlowDoneHandler(completion) {

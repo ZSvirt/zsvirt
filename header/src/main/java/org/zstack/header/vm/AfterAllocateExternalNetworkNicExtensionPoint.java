@@ -8,6 +8,10 @@ import java.util.Collections;
 import java.util.List;
 
 public interface AfterAllocateExternalNetworkNicExtensionPoint {
+    default boolean requiresIpAllocationOnStart(VmNicInventory nic) {
+        return false;
+    }
+
     default Flow createNicCleanTrafficFlow(VmNicInventory nic, boolean enable) {
         return null;
     }

@@ -2,6 +2,8 @@ package org.zstack.network.l2.virtualSwitch;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.zstack.core.Platform;
+import org.zstack.core.cloudbus.CloudBus;
+import org.zstack.core.cloudbus.CloudBusCallBack;
 import org.zstack.core.componentloader.PluginRegistry;
 import org.zstack.core.db.Q;
 import org.zstack.core.thread.ChainTask;
@@ -9,11 +11,15 @@ import org.zstack.core.thread.SyncTaskChain;
 import org.zstack.core.thread.ThreadFacade;
 import org.zstack.core.workflow.FlowChainBuilder;
 import org.zstack.header.apimediator.ApiMessageInterceptionException;
+import org.zstack.header.core.Completion;
 import org.zstack.header.core.ReturnValueCompletion;
 import org.zstack.header.core.workflow.*;
 import org.zstack.header.errorcode.ErrorCode;
 import org.zstack.header.errorcode.SysErrors;
+import org.zstack.header.message.MessageReply;
 import org.zstack.header.network.NetworkException;
+import org.zstack.header.network.l2.DeleteL2NetworkMsg;
+import org.zstack.header.network.l2.L2NetworkConstant;
 import org.zstack.header.network.l2.L2NetworkCreateExtensionPoint;
 import org.zstack.header.network.l2.L2NetworkFactory;
 import org.zstack.header.network.l2.L2NetworkInventory;
@@ -42,6 +48,8 @@ public class PortGroupFactory extends L3BasicNetworkFactory {
     private PluginRegistry pluginRgty;
     @Autowired
     protected ThreadFacade thdf;
+    @Autowired
+    private CloudBus bus;
 
     @Override
     public L3NetworkType getType() {
@@ -136,8 +144,9 @@ public class PortGroupFactory extends L3BasicNetworkFactory {
                 pg.setL2NetworkUuid(l2Uuid);
                 trigger.next();
             }
-        }).then(new NoRollbackFlow() {
+        }).then(new Flow() {
             String __name__ = "create-l2-port-group-if-not-exist";
+            boolean created;
 
             @Override
             public void run(FlowTrigger trigger, Map data) {
@@ -200,6 +209,50 @@ public class PortGroupFactory extends L3BasicNetworkFactory {
                             }
                         }
                         pg.setL2NetworkUuid(returnValue.getUuid());
+                        created = true;
+                        trigger.next();
+                    }
+
+                    @Override
+                    public void fail(ErrorCode errorCode) {
+                        trigger.fail(errorCode);
+                    }
+                });
+            }
+
+            @Override
+            public void rollback(FlowRollback trigger, Map data) {
+                if (!created || findBackend(pluginRgty, msg.getvSwitchUuid()) == null) {
+                    trigger.rollback();
+                    return;
+                }
+                DeleteL2NetworkMsg delete = new DeleteL2NetworkMsg();
+                delete.setUuid(pg.getL2NetworkUuid());
+                delete.setForceDelete(false);
+                bus.makeTargetServiceIdByResourceUuid(delete, L2NetworkConstant.SERVICE_ID, delete.getUuid());
+                bus.send(delete, new CloudBusCallBack(trigger) {
+                    @Override
+                    public void run(MessageReply reply) {
+                        if (!reply.isSuccess()) {
+                            logger.warn(reply.getError().toString());
+                        }
+                        trigger.rollback();
+                    }
+                });
+            }
+        }).then(new NoRollbackFlow() {
+            String __name__ = "prepare-external-port-group";
+
+            @Override
+            public void run(FlowTrigger trigger, Map data) {
+                PortGroupBackend backend = findBackend(pluginRgty, msg.getvSwitchUuid());
+                if (backend == null) {
+                    trigger.next();
+                    return;
+                }
+                backend.prepareCreatePortGroup(L3NetworkInventory.valueOf(pg), msg, new Completion(trigger) {
+                    @Override
+                    public void success() {
                         trigger.next();
                     }
 

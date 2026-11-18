@@ -110,7 +110,13 @@ public class VirtualSwitchUtils {
 
     public static List<String> getPhysicalInterfaceNamesOfL2PortGroupOnHost(String pgUuid, String hostUuid) {
         L2PortGroupNetworkVO pg = Q.New(L2PortGroupNetworkVO.class).eq(L2PortGroupNetworkVO_.uuid, pgUuid).find();
+        if (pg == null) {
+            return Collections.emptyList();
+        }
         UplinkGroupVO ug = getUplinkGroup(pg.getvSwitchUuid(), hostUuid);
+        if (ug == null) {
+            return Collections.emptyList();
+        }
 
         if (UplinkGroupType.PhysicalInterface.equals(ug.getType())) {
             return Collections.singletonList(ug.getInterfaceName());

@@ -138,10 +138,10 @@ public class BlockDevicesParser {
             "/dev/vdb:msdos\r\n" +
             "/dev/vdc:unknown\r\n";
 
-    public static List<BlockDevice> parse(String blockDevices) {
+    public static List<BlockDevice> parse(String blockDevicesStdout) {
         List<BlockDevice> allBlockDevices = new ArrayList<>();
 
-        List<String> splits = Arrays.asList(blockDevices.split("===\\r\\n"));
+        List<String> splits = Arrays.asList(blockDevicesStdout.split("===\\r\\n"));
         LinkedHashMap blockDevicesMap = JSONObjectUtil.toObject(splits.get(0), LinkedHashMap.class);
         List<LinkedTreeMap> blockDeviceList = (List<LinkedTreeMap>) blockDevicesMap.get("blockdevices");
         blockDeviceList.forEach(blockDevice -> allBlockDevices.add(JSONObjectUtil.toObject(JSONObjectUtil.toJsonString(blockDevice), BlockDevice.class)));
@@ -159,6 +159,58 @@ public class BlockDevicesParser {
         return allBlockDevices;
     }
 
+    public static void collectBlockDeviceIdentifiers(String blockDevicesStdout, Map<String, String> wwids,
+                                                    Map<String, String> wwns) {
+        String[] sections = blockDevicesStdout.split("===\\r\\n", -1);
+        Map<String, Object> snapshot = JSONObjectUtil.toObject(sections[0], LinkedHashMap.class);
+        List<Map<String, Object>> devices = (List<Map<String, Object>>) snapshot.get("blockdevices");
+        if (sections.length > 2) {
+            for (String line : sections[2].split("\\r?\\n")) {
+                String[] entry = line.split(":", 2);
+                if (entry.length == 2) {
+                    wwids.put(entry[0], entry[1].trim());
+                }
+            }
+            recordMissingLunIdentities(devices, wwids);
+        }
+        collectWwns(devices, wwns);
+    }
+
+    private static void recordMissingLunIdentities(List<Map<String, Object>> devices, Map<String, String> wwids) {
+        for (Map<String, Object> device : devices) {
+            String name = (String) device.get("name");
+            boolean lun = "mpath".equals(device.get("type")) || "disk".equals(device.get("type")) &&
+                    (name.startsWith("/dev/nvme") || "fc".equals(device.get("tran")) || "iscsi".equals(device.get("tran")));
+            if (lun) {
+                wwids.putIfAbsent(name, "");
+            }
+            if (device.get("children") != null) {
+                recordMissingLunIdentities((List<Map<String, Object>>) device.get("children"), wwids);
+            }
+        }
+    }
+
+    private static void collectWwns(List<Map<String, Object>> devices, Map<String, String> wwns) {
+        for (Map<String, Object> device : devices) {
+            String wwn = (String) device.get("wwn");
+            if (wwn != null && !wwn.trim().isEmpty()) {
+                wwns.put((String) device.get("name"), wwn.trim());
+            }
+            if (device.get("children") != null) {
+                collectWwns((List<Map<String, Object>>) device.get("children"), wwns);
+            }
+        }
+    }
+
+    public static String normalizeIdentifier(String identifier) {
+        return identifier == null ? null : identifier.trim().toLowerCase(Locale.ROOT);
+    }
+
+    public static String normalizeWwn(String wwn) {
+        String normalized = normalizeIdentifier(wwn);
+        return normalized != null && normalized.startsWith("0x") ? normalized.substring(2) : normalized;
+    }
+
     public static List<BlockDevice> parse(List<String> blockDevices) {
         List<BlockDevice> allBlockDevices = new ArrayList<>();
         blockDevices.forEach(blockDevice -> {
@@ -169,9 +221,36 @@ public class BlockDevicesParser {
     }
 
     public static String getBlockDevicesCommand() {
-        String blockDevicesCommand = "lsblk -p -b -o NAME,TYPE,SIZE,PHY-SEC,LOG-SEC,MOUNTPOINT -J";
+        return getBlockDevicesCommand(false);
+    }
+
+    // Physical-machine disk queries use SSH without requiring a registered Host or kvmagent.
+    public static String getBlockDevicesCommandWithIdentifiers() {
+        return getBlockDevicesCommand(true);
+    }
+
+    private static String getBlockDevicesCommand(boolean collectIdentifiers) {
+        String blockDevicesCommand = "lsblk -p -b -o NAME,TYPE,SIZE,PHY-SEC,LOG-SEC,MOUNTPOINT" +
+                (collectIdentifiers ? ",WWN,TRAN" : "") + " -J";
         String partitionTableInfoCommand = "for disk in $(lsblk -d -p -n -o NAME,TYPE | awk '$2!~/loop|rom/ {print $1}'); do echo -n \"$disk:\"; " +
                 "parted -s $disk print 2>/dev/null | awk '/Partition Table/ {print $3} END{print \"\"}'; done";
-        return String.format("%s ; echo === ; %s", blockDevicesCommand, partitionTableInfoCommand);
+        String command = String.format("%s ; echo === ; %s", blockDevicesCommand, partitionTableInfoCommand);
+        if (!collectIdentifiers) {
+            return command;
+        }
+        String identities = "timeout -k 1 60 lsblk -p -n -r -o NAME,TYPE,TRAN | while read -r disk type transport; do " +
+                "dev=$(basename \"$disk\"); required=; wwid=; result=0; " +
+                "case \"$type:$dev:$transport\" in mpath:*|disk:nvme*|disk:*:fc|disk:*:iscsi) required=1 ;; esac; " +
+                "resolved=$(timeout -k 1 60 readlink -f \"$disk\") || result=$?; " +
+                "dev=$(basename \"$resolved\"); " +
+                "if [ \"$result\" -eq 0 ]; then case \"$type:$dev\" in " +
+                "disk:nvme*) wwid=$(timeout -k 1 60 cat \"/sys/class/block/$dev/wwid\" 2>/dev/null); result=$? ;; " +
+                "mpath:*) wwid=$(timeout -k 1 60 sed -n 's/^mpath-//p' \"/sys/class/block/$dev/dm/uuid\" 2>/dev/null); result=$? ;; " +
+                "disk:*) if [ -x /usr/lib/udev/scsi_id ]; then wwid=$(timeout -k 1 60 /usr/lib/udev/scsi_id -g -u -d \"$disk\" 2>/dev/null); result=$?; " +
+                "else scsi=$(timeout -k 1 60 lsscsi -i 2>/dev/null); result=$?; " +
+                "wwid=$(printf '%s\\n' \"$scsi\" | awk -v disk=\"$disk\" '$(NF-1)==disk {print $NF}'); fi ;; esac; fi; " +
+                "if [ \"$result\" -ne 0 ] || [ \"$wwid\" = - ]; then wwid=; fi; " +
+                "if [ -n \"$wwid\" ] || [ -n \"$required\" ]; then printf '%s:%s\\n' \"$disk\" \"$wwid\"; fi; done";
+        return command + " ; echo === ; " + identities;
     }
 }

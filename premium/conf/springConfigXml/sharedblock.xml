@@ -195,4 +195,10 @@
         </zstack:plugin>
     </bean>
 
+    <bean id="SharedBlockDeviceUsages" class="org.zstack.storage.primary.sharedblock.SharedBlockDeviceUsages">
+        <zstack:plugin>
+            <zstack:extension interface="org.zstack.header.host.HostBlockDeviceUsageExtensionPoint"/>
+        </zstack:plugin>
+    </bean>
+
 </beans>

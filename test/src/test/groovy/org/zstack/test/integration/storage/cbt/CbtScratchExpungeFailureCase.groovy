@@ -4,6 +4,13 @@ import org.springframework.http.HttpEntity
 import org.zstack.core.db.Q
 import org.zstack.core.db.DatabaseFacade
 import org.zstack.core.gc.GarbageCollector
+import org.zstack.core.gc.GarbageCollectorManagerImpl
+import org.zstack.compute.vm.VmGlobalConfig
+import org.zstack.core.gc.GCStatus
+import org.zstack.storage.cbt.CbtGlobalConfig
+import org.zstack.header.vm.VmInstanceVO
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.CopyOnWriteArrayList
 import org.zstack.core.gc.GarbageCollectorVO
 import org.zstack.core.gc.GarbageCollectorVO_
 import org.zstack.header.agent.AgentResponse
@@ -31,6 +38,7 @@ import org.zstack.storage.primary.local.LocalStorageKvmBackend
 import org.zstack.testlib.EnvSpec
 import org.zstack.testlib.SubCase
 import org.zstack.testlib.premium.PremiumEnv
+import org.zstack.utils.FieldUtils
 import org.zstack.utils.gson.JSONObjectUtil
 
 import static org.mockito.Mockito.*
@@ -38,7 +46,6 @@ import static org.mockito.Mockito.*
 /** Exercise CBT cleanup through the real volume service, including a failed physical-delete reply. */
 class CbtScratchExpungeFailureCase extends SubCase {
     EnvSpec env
-    String unexportGcName
 
     @Override
     void setup() {
@@ -121,12 +128,13 @@ class CbtScratchExpungeFailureCase extends SubCase {
         env.create {
             testUnexportGcVolumeFiltering()
             testPhysicalDeleteFailureRetainsOnlyTheFailedScratch()
+            testVmDeletionUnexport(false)
+            testVmDeletionUnexport(true)
         }
     }
 
     private void testUnexportGcVolumeFiltering() {
         VmInstanceInventory vm = env.inventoryByName("vm")
-        unexportGcName = "gc-unexport-nbd-volumes-for-vm-${vm.uuid}-on-host-${vm.hostUuid}"
         VolumeInventory pending = createDataVolume {
             name = "uninitialized-nbd-volume"
             diskOfferingUuid = env.inventoryByName("uninitialized-disk").uuid
@@ -249,6 +257,86 @@ class CbtScratchExpungeFailureCase extends SubCase {
         assert (queryCbtTask { conditions = ["uuid=${task.uuid}".toString()] } as List).empty
     }
 
+    private void testVmDeletionUnexport(boolean failUnexport) {
+        VmInstanceInventory vm = env.inventoryByName("vm")
+        if (failUnexport) {
+            vm = createVmInstance {
+                name = "nbd-unexport-failure"
+                cpuNum = 1
+                memorySize = 1024L * 1024 * 1024
+                imageUuid = env.inventoryByName("image").uuid
+                l3NetworkUuids = [env.inventoryByName("l3").uuid]
+                hostUuid = env.inventoryByName("host").uuid
+            }
+        }
+        String gcName = "gc-unexport-nbd-volumes-for-vm-${vm.uuid}-on-host-${vm.hostUuid}"
+        Map paths = Q.New(VolumeVO.class).eq(VolumeVO_.vmInstanceUuid, vm.uuid).list()
+                .collectEntries { [(it.uuid): it.installPath] }
+        def requests = new CopyOnWriteArrayList<CbtBackupKvmCommands.UnexportNbdVolumesCmd>()
+        Closure original = env.getSimulator(CbtBackupKvmCommands.REST_API_UNEXPORT_NDB_VOLUMES_PATH)
+        String interval = CbtGlobalConfig.CLEANUP_GC_INTERVAL.value(String.class)
+        String deletionPolicy = VmGlobalConfig.VM_DELETION_POLICY.value(String.class)
+        GarbageCollectorVO job
+        UnexportNbdVolumesGC reloaded
+        def reject = new AtomicBoolean(failUnexport)
+        try {
+            CbtGlobalConfig.CLEANUP_GC_INTERVAL.updateValue("3600")
+            VmGlobalConfig.VM_DELETION_POLICY.updateValue("Direct")
+            env.simulator(CbtBackupKvmCommands.REST_API_UNEXPORT_NDB_VOLUMES_PATH) { HttpEntity<String> entity ->
+                requests.add(JSONObjectUtil.toObject(entity.body, CbtBackupKvmCommands.UnexportNbdVolumesCmd.class))
+                def rsp = new AgentResponse()
+                if (reject.get()) {
+                    rsp.setError("Injected NBD unexport failure")
+                }
+                return rsp
+            }
+            destroyVmInstance { uuid = vm.uuid }
+            assert requests.size() == 1 : "VM deletion must send one NBD unexport request: ${requests.size()}"
+            assert requests[0].volumes.collectEntries { [(it.volumeUuid): it.installPath] } == paths :
+                    "Unexport must include every source volume with its backing path: ${paths}"
+            job = Q.New(GarbageCollectorVO.class).eq(GarbageCollectorVO_.name, gcName).find()
+            if (!failUnexport) {
+                assert job == null : "Successful NBD unexport must not register GC: ${job?.uuid}"
+                return
+            }
+            assert job != null : "Failed NBD unexport must automatically register GC"
+            retryInSecs {
+                assert dbFindByUuid(vm.uuid, VmInstanceVO.class) == null : "VM must be removed before GC reload"
+                assert dbFindByUuid(vm.rootVolumeUuid, VolumeVO.class) == null : "Root volume must be removed before GC reload"
+            }
+
+            Map managed = FieldUtils.getFieldValue("managedGarbageCollectors", bean(GarbageCollectorManagerImpl.class))
+            def runner = managed.get(job.uuid)
+            assert runner != null : "Automatically registered GC must have an in-memory runner"
+            (FieldUtils.getFieldValue("currentTimer", runner) as TimerTask)?.cancel()
+            managed.remove(job.uuid)
+            reject.set(false)
+            reloaded = new UnexportNbdVolumesGC()
+            reloaded.load(job)
+            (FieldUtils.getFieldValue("currentTimer", reloaded) as TimerTask)?.cancel()
+            assert reloaded.vmUuid == vm.uuid && reloaded.hostUuid == vm.hostUuid :
+                    "GC reload must preserve the cleanup VM and host"
+            triggerGCJob { uuid = job.uuid }
+            retryInSecs {
+                assert dbFindByUuid(job.uuid, GarbageCollectorVO.class).status == GCStatus.Done : "Reloaded GC must complete successfully"
+            }
+            assert requests.size() == 2 : "GC must actually retry NBD unexport after source removal: ${requests.size()}"
+            assert requests[1].volumes.collectEntries { [(it.volumeUuid): it.installPath] } == paths :
+                    "Reloaded GC must retry with persisted volume paths after source removal: ${paths}"
+        } finally {
+            CbtGlobalConfig.CLEANUP_GC_INTERVAL.updateValue(interval)
+            VmGlobalConfig.VM_DELETION_POLICY.updateValue(deletionPolicy)
+            env.simulator(CbtBackupKvmCommands.REST_API_UNEXPORT_NDB_VOLUMES_PATH, original)
+            if (reloaded != null) {
+                (FieldUtils.getFieldValue("currentTimer", reloaded) as TimerTask)?.cancel()
+            }
+            def remaining = Q.New(GarbageCollectorVO.class).eq(GarbageCollectorVO_.name, gcName).find()
+            if (remaining != null) {
+                deleteGCJob { uuid = remaining.uuid }
+            }
+        }
+    }
+
     private static long availableCapacity(String primaryStorageUuid) {
         return Q.New(PrimaryStorageCapacityVO.class)
                 .eq(PrimaryStorageCapacityVO_.uuid, primaryStorageUuid)
@@ -263,9 +351,5 @@ class CbtScratchExpungeFailureCase extends SubCase {
     @Override
     void clean() {
         env.delete()
-        if (unexportGcName != null) {
-            assert !Q.New(GarbageCollectorVO.class).eq(GarbageCollectorVO_.name, unexportGcName).isExists() :
-                    "Successful NBD unexport during cleanup must not leave a GC job: ${unexportGcName}"
-        }
     }
 }

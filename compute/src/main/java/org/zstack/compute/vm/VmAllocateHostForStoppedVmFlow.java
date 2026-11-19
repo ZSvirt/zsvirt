@@ -34,6 +34,8 @@ public class VmAllocateHostForStoppedVmFlow implements Flow {
     protected ErrorFacade errf;
     @Autowired
     protected VmInstanceExtensionPointEmitter extEmitter;
+    @Autowired(required = false)
+    protected AllocatorStrategyGetter allocatorStrategyGetter;
 
     private static final String SUCCESS = VmAllocateHostForStoppedVmFlow.class.getName();
 
@@ -60,6 +62,8 @@ public class VmAllocateHostForStoppedVmFlow implements Flow {
             String allocatorStrategy = spec.getVmInventory().getAllocatorStrategy();
             if (allocatorStrategy != null) {
                 msg.setAllocatorStrategy(allocatorStrategy);
+            } else if (allocatorStrategyGetter != null) {
+                msg.setAllocatorStrategy(allocatorStrategyGetter.findDefaultAllocatorStrategy());
             } else {
                 msg.setAllocatorStrategy(HostAllocatorConstant.LEAST_VM_PREFERRED_HOST_ALLOCATOR_STRATEGY_TYPE);
             }

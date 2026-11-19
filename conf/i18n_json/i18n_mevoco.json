@@ -2807,9 +2807,9 @@
     "fileName": "src/main/java/org/zstack/mevoco/MevocoManagerImpl.java"
   },
   {
-    "raw": "invalid value[%s], ZStack doesn\u0027t have such host allocator type",
-    "en_US": "invalid value[{0}], ZStack doesn\u0027t have such host allocator type",
-    "zh_CN": "错误值[{0}]，Zstack没有这样的分配器类型",
+    "raw": "invalid value[%s], ZSphere doesn\u0027t have such host allocator type",
+    "en_US": "invalid value[{0}], ZSphere doesn\u0027t have such host allocator type",
+    "zh_CN": "错误值[{0}]，ZSphere没有这样的分配器类型",
     "arguments": [
       "newValue"
     ],

@@ -69,6 +69,7 @@
             <zstack:extension interface="org.zstack.header.volume.CreateQcow2VolumeProvisioningStrategyExtensionPoint" />
             <zstack:extension interface="org.zstack.kvm.KVMPreUpdateNicExtensionPoint" />
             <zstack:extension interface="org.zstack.header.managementnode.ManagementNodeReadyExtensionPoint" />
+            <zstack:extension interface="org.zstack.header.allocator.AllocatorStrategyGetter" />
         </zstack:plugin>
 
         <property name="supportSharedVolumePrimaryStorage" ref="SupportSharedVolumePrimaryStorage"/>

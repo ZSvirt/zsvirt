@@ -34,6 +34,7 @@ import org.zstack.core.workflow.ShareFlow;
 import org.zstack.expon.ExponConstants;
 import org.zstack.ha.*;
 import org.zstack.header.AbstractService;
+import org.zstack.header.allocator.AllocatorStrategyGetter;
 import org.zstack.header.allocator.HostAllocatorConstant;
 import org.zstack.header.allocator.HostAllocatorStrategyType;
 import org.zstack.header.allocator.HostCapacityOverProvisioningManager;
@@ -129,7 +130,6 @@ import org.zstack.storage.volume.VolumeGlobalConfig;
 import org.zstack.storage.volume.VolumeSystemTags;
 import org.zstack.storage.volume.block.BlockVolumeFactory;
 import org.zstack.storage.volume.block.BlockVolumeMessage;
-import org.zstack.tag.PatternedSystemTag;
 import org.zstack.tag.SystemTag;
 import org.zstack.tag.SystemTagCreator;
 import org.zstack.tag.TagManager;
@@ -156,8 +156,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static org.zstack.compute.host.HostSystemTags.SYSTEM_SERIAL_NUMBER;
-import static org.zstack.compute.host.HostSystemTags.SYSTEM_SERIAL_NUMBER_TOKEN;
 import static org.zstack.core.Platform.*;
 import static org.zstack.kvm.KVMGlobalConfig.LIBVIRT_CACHE_MODE;
 import static org.zstack.utils.CollectionDSL.*;
@@ -175,7 +173,7 @@ public class MevocoManagerImpl extends AbstractService implements MevocoManager,
         KVMBeforeAsyncJsonPostExtensionPoint, KVMPreUpdateNicExtensionPoint,
         KVMHostAddSshFileMd5CheckerExtensionPoint, GetVmUuidFromShareableVolumeExtensionPoint,
         ForceLogoutSessionExtensionPoint, CreateQcow2VolumeProvisioningStrategyExtensionPoint,
-        ManagementNodeReadyExtensionPoint {
+        ManagementNodeReadyExtensionPoint, AllocatorStrategyGetter {
     private static final CLogger logger = Utils.getLogger(MevocoManagerImpl.class);
     @Autowired
     private CloudBus bus;
@@ -892,12 +890,9 @@ public class MevocoManagerImpl extends AbstractService implements MevocoManager,
     }
 
     private void configureRestConfig() {
-        MevocoGlobalConfig.HOST_ALLOCATOR_STRATEGY.installValidateExtension(new GlobalConfigValidatorExtensionPoint() {
-            @Override
-            public void validateGlobalConfig(String category, String name, String oldValue, String newValue) throws GlobalConfigException {
-                if (!HostAllocatorStrategyType.hasType(newValue)) {
-                    throw new OperationFailureException(argerr("invalid value[%s], ZStack doesn't have such host allocator type", newValue));
-                }
+        MevocoGlobalConfig.HOST_ALLOCATOR_STRATEGY.installValidateExtension((category, name, oldValue, newValue) -> {
+            if (!HostAllocatorStrategyType.hasType(newValue)) {
+                throw argerr("invalid value[%s], ZSphere doesn't have such host allocator type", newValue).toException();
             }
         });
 
@@ -954,6 +949,11 @@ public class MevocoManagerImpl extends AbstractService implements MevocoManager,
                 }
             }
         });
+    }
+
+    @Override
+    public String findDefaultAllocatorStrategy() {
+        return MevocoGlobalConfig.HOST_ALLOCATOR_STRATEGY.value();
     }
 
     @Override

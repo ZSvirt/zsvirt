@@ -20,6 +20,8 @@ import org.zstack.header.errorcode.ErrorCodeList;
 import org.zstack.header.message.MessageReply;
 import org.zstack.header.vm.TemplatedVmInstanceCacheVO;
 import org.zstack.header.vm.TemplatedVmInstanceCacheVO_;
+import org.zstack.header.vm.TemplatedVmInstanceVO;
+import org.zstack.header.vm.TemplatedVmInstanceVO_;
 import org.zstack.header.vm.VmDeletionStruct;
 import org.zstack.header.vm.VmInstanceState;
 import org.zstack.header.vm.VmInstanceVO;
@@ -237,9 +239,11 @@ public class CbtBackupCascadeExtension extends AbstractCascadeExtension {
                                 .isNull(VmInstanceVO_.hostUuid)
                                 .isNull(VmInstanceVO_.lastHostUuid)
                                 .isExists()
-                                && q(TemplatedVmInstanceCacheVO.class)
+                                && (q(TemplatedVmInstanceCacheVO.class)
                                 .eq(TemplatedVmInstanceCacheVO_.cacheVmInstanceUuid, vmInstanceUuid)
-                                .isExists()) {
+                                .isExists() || q(TemplatedVmInstanceVO.class)
+                                .eq(TemplatedVmInstanceVO_.uuid, vmInstanceUuid)
+                                .isExists())) {
                             continue;
                         }
 

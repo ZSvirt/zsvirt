@@ -1,5 +1,6 @@
 package org.zstack.storage.cbt;
 
+import org.apache.commons.lang.StringUtils;
 import org.zstack.core.cloudbus.CloudBusCallBack;
 import org.zstack.core.db.Q;
 import org.zstack.core.gc.GC;
@@ -13,6 +14,7 @@ import org.zstack.header.message.MessageReply;
 import org.zstack.header.vm.VmInstanceVO;
 import org.zstack.header.vm.VmInstanceVO_;
 import org.zstack.header.volume.VolumeInventory;
+import org.zstack.header.volume.VolumeStatus;
 import org.zstack.header.volume.VolumeVO;
 import org.zstack.kvm.KVMAgentCommands;
 import org.zstack.kvm.KVMHostAsyncHttpCallMsg;
@@ -43,6 +45,9 @@ public class UnexportNbdVolumesGC extends TimeBasedGarbageCollector {
         for (String volumeUuid : volumeUuids) {
             VolumeVO volume = dbf.findByUuid(volumeUuid, VolumeVO.class);
             if (volume != null && hostInventory != null) {
+                if (volume.getStatus() == VolumeStatus.NotInstantiated && StringUtils.isEmpty(volume.getInstallPath())) {
+                    continue;
+                }
                 volumes.add(VolumeTO.valueOf(VolumeInventory.valueOf(volume), hostInventory));
             }
         }

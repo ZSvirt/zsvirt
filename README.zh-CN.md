@@ -1,25 +1,25 @@
-# ZVirt 简介 [http://www.zstack.io](http://www.zstack.io)
+# ZSVirt 简介 [http://www.zstack.io](http://www.zstack.io)
 
-ZVirt是一款产品化的开源IaaS（基础架构即服务）软件。它面向智能数据中心，通过完善的API统一管理包括计算、存储和网络在内的数据中心资源，提供简单快捷的环境搭建。 5分钟完成安装和部署单台Linux机器上的POC环境；30分钟完成安装和部署多管理节点生产环境（可扩展至数万台物理服务器）。
+ZSVirt是一款产品化的开源IaaS（基础架构即服务）软件。它面向智能数据中心，通过完善的API统一管理包括计算、存储和网络在内的数据中心资源，提供简单快捷的环境搭建。 5分钟完成安装和部署单台Linux机器上的POC环境；30分钟完成安装和部署多管理节点生产环境（可扩展至数万台物理服务器）。
 
-ZVirt通过完善的API管理数据中心资源，构建软件定义数据中心。用户可选择UI界面或命令行工具管理云平台，与ZVirt管理节点进行友好交互。 ZVirt提供统一配置、统一安装、统一高可用（High Availability）和统一第三方监控的云服务解决方案，使云平台的管理更加便捷、稳定、持久。
+ZSVirt通过完善的API管理数据中心资源，构建软件定义数据中心。用户可选择UI界面或命令行工具管理云平台，与ZSVirt管理节点进行友好交互。 ZSVirt提供统一配置、统一安装、统一高可用（High Availability）和统一第三方监控的云服务解决方案，使云平台的管理更加便捷、稳定、持久。
 
-## 为什么选择ZVirt？
+## 为什么选择ZSVirt？
 
-ZVirt解决了长期困扰开源IaaS软件用户的两大痛点：复杂性和稳定性。
+ZSVirt解决了长期困扰开源IaaS软件用户的两大痛点：复杂性和稳定性。
 
-复杂性：ZVirt始终秉承安全可控、全自动化、自管服务、硬件无锁、用户友好查询API的设计理念，为用户提供一款便捷配置、持久运行的云计算软件。
+复杂性：ZSVirt始终秉承安全可控、全自动化、自管服务、硬件无锁、用户友好查询API的设计理念，为用户提供一款便捷配置、持久运行的云计算软件。
 
-稳定性：ZVirt功能架构具备以下特点：
+稳定性：ZSVirt功能架构具备以下特点：
 
 * 全插件系统：添加或移除功能不影响已有代码
 * 工作流引擎：出现错误时，任何变更均可回滚
 * 瀑布流架构：支持资源的级联操作
 * 3套严密的自动化测试系统：确保每个功能的代码质量，并从架构设计层面解决稳定性问题
 
-此外，ZVirt具有扩展性：单个管理节点可管理数万台物理服务器、数百万台虚拟机，处理数千条并发调用API请求，尤其适用于大型公有云平台的搭建。
+此外，ZSVirt具有扩展性：单个管理节点可管理数万台物理服务器、数百万台虚拟机，处理数千条并发调用API请求，尤其适用于大型公有云平台的搭建。
 
-> 在某些场合，ZVirt也被称为ZSphere
+> 在某些场合，ZSVirt也被称为ZSphere
 
 ## 主要优势
 
@@ -62,36 +62,36 @@ ZVirt解决了长期困扰开源IaaS软件用户的两大痛点：复杂性和�
 
 #### 网络功能虚拟化
 
-ZVirt默认网络模型基于网络功能虚拟化（**NFV**），为每位租户提供云路由专有网络节点。整个网络模型独立自主、安全可控，用户无需购买特定设备，也无须在计算服务器上部署网络服务器。
+ZSVirt默认网络模型基于网络功能虚拟化（**NFV**），为每位租户提供云路由专有网络节点。整个网络模型独立自主、安全可控，用户无需购买特定设备，也无须在计算服务器上部署网络服务器。
 
 #### 全API查询
 
-ZVirt支持超过**400万**个查询条件，以及400万阶乘的组合查询条件。用户无须编写临时脚本或登录数据库，直接通过API即可任意查询资源。
+ZSVirt支持超过**400万**个查询条件，以及400万阶乘的组合查询条件。用户无须编写临时脚本或登录数据库，直接通过API即可任意查询资源。
 
      >> QueryVmInstance vmNics.eip.guestIp=16.16.16.16 zone.name=west-coast
      >> QueryHost fields=name,uuid,managementIp hypervisorType=KVM vmInstance.allVolumes.size>=549755813888000 vmInstance.state=Running start=0 limit=10
 
 #### 便捷部署与升级
 
-ZVirt安装升级如同安装一个**Java WAR**文件一样简单。用户只需执行一个Bootstrap脚本，即可在**5分钟**内搭建一套POC环境；**30分钟**内搭建一套多管理节点生产环境（包括研读文档时间）。
+ZSVirt安装升级如同安装一个**Java WAR**文件一样简单。用户只需执行一个Bootstrap脚本，即可在**5分钟**内搭建一套POC环境；**30分钟**内搭建一套多管理节点生产环境（包括研读文档时间）。
 
      >> [root@localhost ~]# curl http://download.zstack.org/install.sh |  bash -s -- -a
 
 #### 全自动化
 
-ZVirt云平台由**API统一管理**，全自动化、统一配置。此外，通过无缝透明集成Ansible，可在大规模硬件设备上全自动安装/配置/升级代理程序，全过程无需用户干预。
+ZSVirt云平台由**API统一管理**，全自动化、统一配置。此外，通过无缝透明集成Ansible，可在大规模硬件设备上全自动安装/配置/升级代理程序，全过程无需用户干预。
 
 #### 通用插件系统
 
-ZVirt采用与OSGi和Eclipse类似的插件系统方式作为核心架构基础，添加或移除功能不会对核心架构产生任何影响，满足了用户对于开源IaaS软件的鲁棒性需求。
+ZSVirt采用与OSGi和Eclipse类似的插件系统方式作为核心架构基础，添加或移除功能不会对核心架构产生任何影响，满足了用户对于开源IaaS软件的鲁棒性需求。
 
 #### 严密的测试系统
 
-ZVirt提供**3套全自动化的严密测试系统**，确保每个功能的代码质量。
+ZSVirt提供**3套全自动化的严密测试系统**，确保每个功能的代码质量。
 
 ## 安装
 
-安装ZVirt极为便捷。用户可按需选择不同的安装模式安装首套ZVirt环境。
+安装ZSVirt极为便捷。用户可按需选择不同的安装模式安装首套ZSVirt环境。
 
 * 如需快速尝试，请参阅[快速安装手册](http://en.zstack.io/installation/index.html)。
 * 如需部署生产环境，请参阅[手动安装手册](http://en.zstack.io/installation/manual.html)。
@@ -105,7 +105,7 @@ ZVirt提供**3套全自动化的严密测试系统**，确保每个功能的代�
 
 ## 教程
 
-对于首次使用All in One方式在单台Linux机器上搭建使用ZVirt云平台的用户，ZVirt提供以下6本教程可供参阅：
+对于首次使用All in One方式在单台Linux机器上搭建使用ZSVirt云平台的用户，ZSVirt提供以下6本教程可供参阅：
 
 #### Amazon EC2经典弹性IP域：
 
@@ -139,13 +139,13 @@ ZVirt提供**3套全自动化的严密测试系统**，确保每个功能的代�
 
 #### 更多
 
-关于ZVirt架构设计的更多解读，请参阅以下文章：
+关于ZSVirt架构设计的更多解读，请参阅以下文章：
 
 #### 伸缩性
 
-* [ZVirt弹性架构揭秘 1：异构架构](http://en.zstack.io/blog/asynchronous-architecture.html)
-* [ZVirt弹性架构揭秘 2：无状态服务架构](http://en.zstack.io/blog/stateless-clustering.html)
-* [ZVirt弹性架构揭秘 3：无锁架构](http://en.zstack.io/blog/lock-free.html)
+* [ZSVirt弹性架构揭秘 1：异构架构](http://en.zstack.io/blog/asynchronous-architecture.html)
+* [ZSVirt弹性架构揭秘 2：无状态服务架构](http://en.zstack.io/blog/stateless-clustering.html)
+* [ZSVirt弹性架构揭秘 3：无锁架构](http://en.zstack.io/blog/lock-free.html)
 
 #### 插件架构
 
